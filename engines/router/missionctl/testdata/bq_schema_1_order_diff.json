@@ -1,0 +1,27 @@
+[
+    {
+        "mode": "REQUIRED",
+        "name": "ts",
+        "type": "TIMESTAMP"
+    },
+    {
+        "mode": "REQUIRED",
+        "type": "STRING",
+        "name": "turing_req_id"
+    },
+    {
+        "fields": [
+            {
+                "type": "STRING",
+                "name": "body"
+            },
+            {
+                "name": "header",
+                "type": "STRING"
+            }
+        ],
+        "mode": "REQUIRED",
+        "name": "request",
+        "type": "RECORD"
+    }
+]

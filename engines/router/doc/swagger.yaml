@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  description: Turing Service API Spec
+  version: 0.0.1
+  title: TURING API
+tags:
+  - name: Router
+    description: |
+      Router type is chosen at deployment and can either be a Default Router or an Ensembling Router.
+      
+      Both routers broadcast the request to all configured routes.
+      
+      The Default Router selects one response from an ordered list of preferred routes.
+      'Preferred Route' depends on two configurations.
+      Firstly, if an experiment runner is used, the segmentation unit is extracted from the request,
+      its treatment retrieved from the experiment engine, and the corresponding route is chosen.
+      Secondly, a default route may be configured for the router whose response will be selected if the treatment's route fails
+      or if there is no experiment.
+
+      The Ensembling Router collects responses from all configured routes, along with the experiment treatment, if a runner is used.
+      The combined response is returned. This is intended to be used as input to the Turing Service's Ensembler component.
+  - name: Internal
+    description: A set of internal APIs that are not intended for external users but may be used to get additional information about the app.
+
+paths:
+  "/predict":
+    post:
+      tags: ["Router"]
+      summary: Exercise the Turing Service workflow (Enricher -> Router -> Ensembler).
+      description: |
+        Both the Enricher and the Ensembler are optional.
+
+        Using an Experiment Planner (Litmus) is optional and has an impact on the input and the output.
+        When Litmus is used, a segmentation field is expected to be set, either in the header or in the request body.
+        The name of this field is configurable per router deployment. In the example below, 'customer_id' is used as the segmentation field.
+
+        The request and response schemas are defined by the Enricher / Route / Ensembler endpoints and the Turing Service has no control over these.
+        However, there are some components of the request / response body that are expected /
+        determined by the Turing Service.
+        This section only describes those components.
+
+        When the Default Router is used, the response from the Route Endpoint is returned as is, according to the chosen route.
+        When the Ensembling Router is used, the route responses, along with the experiment treatment, if used, are collected and returned.
+      parameters:
+        - in: header
+          name: customer_id
+          description: Segmentation Field
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: |
+          The request body schema is defined by the Enricher (if enabled) and endpoints configured for the Router.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JSONBodyWithSegField'
+      responses:
+        200:
+          description: "OK"
+          headers:
+            turing-req-id:
+              schema:
+                $ref: '#/components/schemas/TuringReqId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnsemblingRouterResponse'
+              examples:
+                EnsemblingRouterSuccess:
+                  value:
+                    request:
+                      customer_id: UW34n8Ds
+                    response:
+                      experiment:
+                        configuration:
+                          experiment_name: turing_experiment_001_pricing
+                          variant: surge-v2
+                          configuration:
+                            additive_weight: 0.2
+                            multiplicative_weight: 0.005
+                      route_responses:
+                        - route: surge-v2
+                          data:
+                            score: 25
+                          is_default: false
+                        - route: control
+                          data:
+                            score: 22
+                          is_default: true
+                EnsemblingRouterPartialFailure:
+                  value:
+                    request:
+                      customer_id: UW34n8Ds
+                    response:
+                      experiment:
+                          error: Could not retrieve experiment treatment - access denied
+                      route_responses:
+                        - route: surge-v2
+                          data:
+                            code: 500
+                            error: Cross domain request only supports POST
+                          is_default: false
+                        - route: control
+                          data:
+                            score: 22
+                          is_default: true
+                DefaultRouterSuccess:
+                  value:
+                    score: 25
+                  
+        
+        500:
+          description: |
+            Internal Server Error - this is returned by the Router when unexpected errors occur
+            (eg: the enricher / ensembler endpoints are not reachable)
+          headers:
+            turing-req-id:
+              schema:
+                $ref: '#/components/schemas/TuringReqId'
+
+        502:
+          description: |
+            Bad Gateway Error - this is returned by the Router on upstream failures
+            (eg: the model endpoint is not reachable or no response is received within the timeout)
+          headers:
+            turing-req-id:
+              schema:
+                $ref: '#/components/schemas/TuringReqId'
+        
+  "/internal/version":
+    get:
+      tags: ["Internal"]
+      summary: Display build and release information
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfoResponse'
+      
+components:
+  schemas:
+    VersionInfoResponse:
+      type: object
+      description: Build and Release Version info
+      properties:
+        version:
+          type: string
+          example: 0.0.4-build.4-c01d8fc
+        branch:
+          type: string
+          example: HEAD
+        build_user:
+          type: string
+          example: root@runner-9SUxwXaC-project-13869-concurrent-0
+        build_date:
+          type: string
+          example: 2020-04-01T03:09:30+0000
+        go_version:
+          type: string
+          example: go1.14
+
+    TuringReqId:
+      type: string
+      description: Unique per-request Id generated by the Turing Service
+      example: "11111111-2222-3333-aaaa-bbbbbbbbbbbb"
+    
+    LitmusTreatment:
+      type: object
+      description: Raw JSON treatment from Litmus
+      example:
+        experiment_name: turing_experiment_001_pricing
+        variant: surge-v2
+        configuration:
+          additive_weight: 0.2
+          multiplicative_weight: 0.005
+    
+    RouteResponse:
+      type: object
+      properties:
+        route:
+          type: string
+          description: Route name
+          example: control
+        data:
+          type: object
+          description: Raw JSON route response
+          example:
+            id: g0387mdk
+            score: 25
+        is_default:
+          type: boolean
+          description: If the route was specified as the default route in the deployment
+          example: true
+    
+    JSONBodyWithSegField:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          description: The field name must match the segmentation field configured in the deployment
+          example: UW34n8Ds
+    
+    EnsemblingRouterResponse:
+      type: object
+      properties:
+        request:
+          type: object
+          description: The original JSON request payload, unmodified
+        response:
+          type: object
+          description: The JSON response from the (default / ensembling) router, unmodified
+          properties:
+            experiment:
+              type: object
+              properties:
+                configuration:
+                  $ref: '#/components/schemas/LitmusTreatment'
+                error:
+                  type: string
+                  description: Error message from experiment engine
+            route_responses:
+              type: array
+              description: A list of responses from all configured routes
+              items:
+                $ref: '#/components/schemas/RouteResponse'

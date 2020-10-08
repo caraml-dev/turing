@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  fluentd:
+    image: asia.gcr.io/gcp-project-id/fluentd-bigquery:latest
+    environment:
+      - FLUENTD_LOG_LEVEL=info
+      - FLUENTD_LOG_PATH=/fluentd/log/bq_load_logs.*.buffer
+      - FLUENTD_BUFFER_LIMIT=3g
+      - FLUENTD_FLUSH_INTERVAL_SECONDS=60
+      - FLUENTD_TAG=${APP_FLUENTD_TAG}
+      - FLUENTD_GCP_JSON_KEY_PATH=/run/secrets/google_app_creds
+      - FLUENTD_GCP_PROJECT=${APP_GCP_PROJECT}
+      - FLUENTD_BQ_DATASET=${APP_BQ_DATASET}
+      - FLUENTD_BQ_TABLE=${APP_BQ_TABLE}
+    secrets:
+      - google_app_creds
+    volumes:
+      - ./fluentd_logs:/fluentd/log
+    ports:
+      - 9880:9880
+      - 24224:24224

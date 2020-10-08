@@ -1,0 +1,30 @@
+version: '3.1'
+
+services:
+  turing-router-app:
+    depends_on:
+      - kafka
+    deploy:
+      replicas: 2
+    image: turing-router:${IMAGE_VERSION}
+    env_file:
+      - ./.env.development
+    environment:
+      - ROUTER_CONFIG_FILE=/app/configs/default_router.yaml
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/google_app_creds
+      - LITMUS_PASSKEY=${LITMUS_PASSKEY}
+      - XP_PASSKEY=${XP_PASSKEY}
+      - APP_FLUENTD_HOST=turing_stack_fluentd
+      - APP_JAEGER_REPORTER_HOST=turing_stack_jaeger
+      - APP_JAEGER_START_NEW_SPANS=true
+      - APP_KAFKA_BROKERS=kafka:9092
+    secrets:
+      - google_app_creds
+    volumes:
+      - ./configs:/app/configs
+    ports:
+      - 8080:8080
+
+secrets:
+  google_app_creds:
+    external: true

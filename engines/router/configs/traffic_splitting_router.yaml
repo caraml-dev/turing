@@ -1,0 +1,48 @@
+id: traffic-splitting-router
+type: LAZY_ROUTER
+routes:
+  - id: &ID_TRAFFIC_SPLIT_A traffic-split-a
+    type: EAGER_ROUTER
+    routes:
+      - id: control
+        type: PROXY
+        endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
+        timeout: 5s
+      - id: route-a
+        type: PROXY
+        endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
+        timeout: 5s
+    strategy: &TURING_STRATEGY
+      type: fiber.DefaultTuringRoutingStrategy
+      properties:
+        default_route_id: control
+        experiment_engine: nop
+  - id: &ID_TRAFFIC_SPLIT_B traffic-split-b
+      type: EAGER_ROUTER
+      routes:
+        - id: control
+          type: PROXY
+          endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
+          timeout: 5s
+        - id: route-b
+          type: PROXY
+          endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
+          timeout: 5s
+      strategy:
+        <<: *TURING_STRATEGY
+strategy:
+  type: "fiber.TrafficSplittingStrategy"
+  properties:
+    rules:
+      - route_id: *ID_TRAFFIC_SPLIT_A
+        conditions:
+          - field_source: "header"
+            field: "X-Region"
+            operator: "in"
+            values: ["region-a"]
+      - route_id: *ID_TRAFFIC_SPLIT_B
+        conditions:
+          - field_source: "header"
+            field: "X-Region"
+            operator: "in"
+            values: [ "region-b"]

@@ -12,11 +12,11 @@ fmt:
 	@echo "Fmt code..."
 	gofmt -s -w ${SRC_ROOT}
 
-lint-install:
+dep-ci:
 	@echo "Installing golangci-lint..."
 	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 
-lint: lint-install
+lint:
 	@echo "Linting code..."
 	golangci-lint -v run
 

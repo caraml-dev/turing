@@ -1,6 +1,12 @@
 name: engines/experiment
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+    - "engines/experiment/**"
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -16,11 +22,9 @@ jobs:
         go-version: "1.14"
 
     - name: Run test 
-      run: |
-        cd engines/experiment
-        make test 
+      working-directory: engines/experiment
+      run: make test 
 
     - name: Lint codes
-      run: |
-        cd engines/experiment
-        make lint
+      working-directory: engines/experiment
+      run: make lint-ci

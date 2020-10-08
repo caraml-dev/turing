@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v3.23.5
+    ports:
+      - 5555:8080
+    volumes:
+      - ./doc:/app:ro
+    environment:
+      - LAYOUT=BaseLayout
+      - SWAGGER_JSON=/app/swagger.yaml

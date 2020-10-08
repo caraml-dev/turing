@@ -1,0 +1,16 @@
+type: EAGER_ROUTER
+id: eager-router
+routes:
+  - id: route_id_1
+    type: PROXY
+    endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
+    timeout: 5s
+  - id: control
+    type: PROXY
+    endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
+    timeout: 5s
+strategy:
+  type: fiber.DefaultTuringRoutingStrategy
+  properties:
+    default_route_id: route_id_1
+    experiment_engine: nop

@@ -1,0 +1,55 @@
+type: COMBINER
+id: combiner
+fan_in:
+  type: fiber.EnsemblingFanIn
+  properties:
+    default_route_id: route_id_1
+    experiment_engine: litmus
+    experiment_engine_properties:
+      endpoint: litmus.example.com
+      client_id: client_id
+      timeout: 200ms
+      user_data:
+        app_version:
+          field: "app_version"
+          field_source: "header"
+        platform:
+          field: "platform"
+          field_source: "header"
+        app_id:
+          field: "app_id"
+          field_source: "header"
+        os_version:
+          field: "os_version"
+          field_source: "header"
+        app_language_pref:
+          field: "app_language_pref"
+          field_source: "header"
+        user_locale:
+          field: "user_locale"
+          field_source: "header"
+        phone_model:
+          field: "phone_model"
+          field_source: "header"
+        lat_long:
+          field: "lat_long"
+          field_source: "header"
+        location_accuracy:
+          field: "location_accuracy"
+          field_source: "header"
+      experiments:
+        - experiment_name: exp_exp_test_experiment
+          segmentation_unit: customer
+          segmentation_field: customer_id
+          segmentation_field_source: header
+        - experiment_name: exp_exp_test_experiment
+          segmentation_unit: session
+          segmentation_field: session_id
+          segmentation_field_source: header
+routes:
+  - id: route_id_1
+    type: PROXY
+    endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
+  - id: control
+    type: PROXY
+    endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
