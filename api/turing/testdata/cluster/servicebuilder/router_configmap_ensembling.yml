@@ -1,0 +1,12 @@
+fan_in:
+  properties:
+    default_route_id: control
+    experiment_engine: nop
+  type: fiber.EnsemblingFanIn
+id: test-svc
+routes:
+- endpoint: http://www.mocky.io/v2/5e4caccc310000e2cad8c071
+  id: control
+  timeout: 2s
+  type: PROXY
+type: COMBINER

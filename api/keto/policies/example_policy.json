@@ -1,0 +1,15 @@
+[
+    {
+        "id": "admin-policy",
+        "subjects": [
+           "users:test-user@gojek.com"
+        ],
+        "resources": [
+            "resources:mlp:projects:**"
+        ],
+        "actions": [
+            "actions:**"
+        ],
+        "effect": "allow"
+    }
+]

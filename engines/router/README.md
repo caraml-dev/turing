@@ -31,7 +31,7 @@ curl -X POST \
 ### Running Tests
 1. `make test` runs all unit tests and integration tests with no additional dependencies
 2. `make testall` will run all tests. For these, the following env vars are required:
-    * `GOOGLE_APPLICATION_CREDENTIALS` - Path to Google Service Account .json key file. If user is authentication to gcloud, that will be used. Account must have BigQuery Data Editor permissions for `dataset-id` dataset in `gcp-project-id` project.
+    * `GOOGLE_APPLICATION_CREDENTIALS` - Path to Google Service Account .json key file. If user is authentication to gcloud, that will be used. Account must have BigQuery Data Editor permissions for `dataset_id` dataset in `gcp-project-id` project.
     * `LITMUS_PASSKEY` - Passkey for the Litmus `client_id` used in the .yaml config files. For the test cases.
     * `XP_PASSKEY` - Passkey for the XP `client_name` used in the .yaml config files.
 

@@ -103,7 +103,7 @@ func TestNewBigQueryLogger(t *testing.T) {
 	// Create test config with a random unique table name
 	cfg := &config.BQConfig{
 		Project: "gcp-project-id",
-		Dataset: "dataset-id",
+		Dataset: "dataset_id",
 		Table:   fmt.Sprintf("turing_test_%d", time.Now().UnixNano()),
 	}
 
@@ -137,7 +137,7 @@ func TestNewBigQueryLoggerAddColumns(t *testing.T) {
 	// Create test config with a random unique table name
 	cfg := &config.BQConfig{
 		Project: "gcp-project-id",
-		Dataset: "dataset-id",
+		Dataset: "dataset_id",
 		Table:   fmt.Sprintf("turing_test_%d", time.Now().UnixNano()),
 	}
 
@@ -265,7 +265,7 @@ func TestBigQueryLoggerWrite(t *testing.T) {
 	// Create test BQ config with a random unique table name
 	cfg := &config.BQConfig{
 		Project: "gcp-project-id",
-		Dataset: "dataset-id",
+		Dataset: "dataset_id",
 		Table:   fmt.Sprintf("turing_test_%d", time.Now().UnixNano()),
 	}
 

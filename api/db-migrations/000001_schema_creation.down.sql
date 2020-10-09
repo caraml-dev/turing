@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS routers CASCADE;
+DROP TABLE IF EXISTS router_versions CASCADE;
+DROP TABLE IF EXISTS enrichers;
+DROP TABLE IF EXISTS ensemblers;
+DROP TYPE IF EXISTS router_status;

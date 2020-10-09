@@ -1,0 +1,68 @@
+version: '3'
+services:
+  postgres:
+    image: bitnami/postgresql:11.6.0-debian-9-r0
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRESQL_USERNAME=turing
+      - POSTGRESQL_PASSWORD=turing
+      - POSTGRESQL_DATABASE=turing
+
+  migrations:
+    depends_on:
+      - postgres
+    image: migrate/migrate:v4.7.1
+    volumes:
+      - ./db-migrations:/migrations
+    environment:
+      - POSTGRESQL_USERNAME=turing
+      - POSTGRESQL_PASSWORD=turing
+      - POSTGRESQL_DATABASE=turing
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        export CONNECTION_URL=postgres://$$POSTGRESQL_USERNAME:$$POSTGRESQL_PASSWORD@postgres:5432/$$POSTGRESQL_DATABASE?sslmode=disable
+        echo "Waiting for database..."
+        until `/migrate  -path=/migrations/ -database $$CONNECTION_URL up`; do
+          sleep 0.5
+        done
+        echo "Done!"
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v3.24.3
+    ports:
+      - 8081:5555
+    volumes:
+      - ./swagger.yaml:/app/swagger.yaml:ro
+    environment:
+      - PORT=5555
+      - LAYOUT=BaseLayout
+      - SWAGGER_JSON=/app/swagger.yaml
+
+  postgres-auth:
+    image: bitnami/postgresql:11.6.0-debian-9-r0
+    container_name: postgres-auth
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRESQL_USERNAME=oryketo
+      - POSTGRESQL_PASSWORD=oryketo
+      - POSTGRESQL_DATABASE=oryketo
+  
+  keto-server:
+    image: oryd/keto:v0.4.3
+    container_name: keto-server
+    ports:
+      - 4466:4466
+    environment:
+      - DSN=postgres://oryketo:oryketo@postgres-auth:5432/oryketo?sslmode=disable
+      - LOG_LEVEL=debug
+
+  keto-server-bootstrap-policies:
+    image: oryd/keto:v0.4.3
+    volumes:
+      - ./keto/policies:/policies
+    environment:
+      - LOG_LEVEL=debug
+      - KETO_URL=http://keto-server:4466

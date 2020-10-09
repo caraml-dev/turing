@@ -1,0 +1,74 @@
+{
+    "router": {
+        "project_id": 10,
+        "environment_name": "id-dev",
+        "name": "test-svc"
+    },
+    "version": 1,
+    "status": "pending",
+    "image": "asia.gcr.io/gcp-project-id/turing-router:latest",
+    "routes": [
+        {
+            "id": "control",
+            "type": "PROXY",
+            "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
+            "timeout": "2s"
+        }
+    ],
+    "default_route_id": "control",
+    "experiment_engine": {
+        "type": "nop"
+    },
+    "resource_request": {
+        "min_replica": 1,
+        "max_replica": 2,
+        "cpu_request": "400m",
+        "memory_request": "512Mi"
+    },
+    "timeout": "5s",
+    "log_config": {
+        "log_level": "INFO",
+        "custom_metrics_enabled": false,
+        "fiber_debug_log_enabled": false,
+        "jaeger_enabled": false,
+        "result_logger_type": "bigquery"
+    },
+    "enricher": {
+        "id": 400,
+        "image": "asia.gcr.io/gcp-project-id/echo:1.0.2",
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 2,
+            "cpu_request": "400m",
+            "memory_request": "512Mi"
+        },
+        "endpoint": "echo?delay=10ms",
+        "timeout": "2s",
+        "port": 8080,
+        "env": [
+            {
+                "name": "TEST_ENV",
+                "value": "enricher"
+            }
+        ]
+    },
+    "ensembler": {
+        "id": 300,
+        "image": "asia.gcr.io/gcp-project-id/echo:1.0.2",
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 2,
+            "cpu_request": "200m",
+            "memory_request": "256Mi"
+        },
+        "endpoint": "echo?delay=10ms",
+        "timeout": "2s",
+        "port": 8080,
+        "env": [
+            {
+                "name": "TEST_ENV",
+                "value": "ensembler"
+            }
+        ]
+    }
+}
