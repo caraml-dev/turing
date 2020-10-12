@@ -1,6 +1,6 @@
 # Build application binary
 FROM golang:1.14-alpine as builder
-ARG BIN_NAME
+ARG BIN_NAME=turing-router
 ARG VERSION
 ARG USER
 ARG HOST
@@ -32,11 +32,12 @@ RUN go build \
 
 # Build the application image
 FROM alpine:latest
-ARG BIN_NAME
+ARG BIN_NAME=turing-router
 ENV BIN_NAME ${BIN_NAME}
 
 RUN addgroup -S app && adduser -S app -G app
-USER app
 WORKDIR /app
-COPY --from=builder /app/bin/* ./
+RUN chown -R app:app /app
+COPY --chown=app:app --from=builder /app/bin/* ./
+USER app
 ENTRYPOINT ./${BIN_NAME}

@@ -211,14 +211,6 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 
 	// Get deployment configs from the defaults
 	var endpoint, timeout string
-	switch engineType {
-	case models.ExperimentEngineTypeLitmus:
-		endpoint = defaults.LitmusGRPCEndpoint
-		timeout = defaults.LitmusTimeout
-	case models.ExperimentEngineTypeXp:
-		endpoint = defaults.XpHTTPEndpoint
-		timeout = defaults.XpTimeout
-	}
 
 	// Build Experiment engine config
 	return &manager.TuringExperimentConfig{

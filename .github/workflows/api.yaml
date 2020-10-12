@@ -44,6 +44,6 @@ jobs:
       working-directory: api
       run: make test-ci
 
-    - name: Lint codes
+    - name: Lint code
       working-directory: api
       run: make lint-ci

@@ -8,7 +8,6 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
-	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
@@ -58,7 +57,7 @@ type Experiment struct {
 }
 
 // NewExperimentsService creates a new experiment service from the given config
-func NewExperimentsService(litmusCfg *config.LitmusConfig, xpCfg *config.XPConfig) (ExperimentsService, error) {
+func NewExperimentsService() (ExperimentsService, error) {
 	experimentManagers := make(map[models.ExperimentEngineType]manager.ExperimentManager)
 
 	// Initialize the experimentsService with cache

@@ -53,7 +53,7 @@ func NewAppContext(
 	}
 
 	// Init Experiments Service
-	expSvc, err := service.NewExperimentsService(cfg.LitmusConfig, cfg.XPConfig)
+	expSvc, err := service.NewExperimentsService()
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing Experiments Service")
 	}

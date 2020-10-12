@@ -119,10 +119,6 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Tag:                  "turing-result.log",
 				FlushIntervalSeconds: 90,
 			},
-			LitmusGRPCEndpoint: "grpc://litmus",
-			LitmusTimeout:      "60ms",
-			XpHTTPEndpoint:     "http://xp",
-			XpTimeout:          "60ms",
 		},
 		Sentry: sentry.Config{
 			Enabled: false,
@@ -145,19 +141,6 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Branch:     "master",
 				PathPrefix: "turing",
 			},
-		},
-		LitmusConfig: &LitmusConfig{
-			ClientID: "client",
-			Passkey:  "pk",
-			CasToken: "cas",
-			BaseURL:  "test_url",
-		},
-		XPConfig: &XPConfig{
-			Enabled:     false,
-			UseMockData: false,
-			ClientID:    "xp-client",
-			Passkey:     "xp-passkey",
-			BaseURL:     "xp-host",
 		},
 		TuringUIConfig: &TuringUIConfig{
 			Homepage: "/turing",
@@ -202,10 +185,6 @@ func TestInitConfigEnv(t *testing.T) {
 				Tag:                  "turing-result2.log",
 				FlushIntervalSeconds: 10,
 			},
-			LitmusGRPCEndpoint: "grpc://litmus",
-			LitmusTimeout:      "50ms",
-			XpHTTPEndpoint:     "http://xp",
-			XpTimeout:          "70ms",
 		},
 		DeployConfig: &DeploymentConfig{
 			EnvironmentType: "dev",
@@ -242,19 +221,6 @@ func TestInitConfigEnv(t *testing.T) {
 				Branch:     "dev",
 				PathPrefix: "prefix",
 			},
-		},
-		LitmusConfig: &LitmusConfig{
-			ClientID: "client",
-			Passkey:  "pk",
-			CasToken: "cas",
-			BaseURL:  "test_url",
-		},
-		XPConfig: &XPConfig{
-			Enabled:     true,
-			UseMockData: false,
-			ClientID:    "xp-client",
-			Passkey:     "xp-passkey",
-			BaseURL:     "xp-host",
 		},
 		TuringUIConfig: &TuringUIConfig{
 			AppDirectory: "./build",

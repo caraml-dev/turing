@@ -155,8 +155,6 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Image: "fluentdimage",
 			Tag:   "fluentdtag",
 		},
-		LitmusGRPCEndpoint: "grpc://test",
-		LitmusTimeout:      "2s",
 	}
 	projectID := 1
 	router := createOrUpdateRequest.BuildRouter(projectID)
@@ -180,8 +178,8 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 					Endpoint string `json:"endpoint"`
 					Timeout  string `json:"timeout"`
 				}{
-					Endpoint: "grpc://test",
-					Timeout:  "2s",
+					Endpoint: "",
+					Timeout:  "",
 				},
 				Client: manager.Client{
 					ID:       "1",
@@ -296,8 +294,6 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	routerDefaults := &config.RouterDefaults{
-		XpHTTPEndpoint: "http://test",
-		XpTimeout:      "3s",
 	}
 	// Set up mock Crypto service
 	cs := &mocks.CryptoService{}
@@ -342,8 +338,6 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 					Endpoint string `json:"endpoint"`
 					Timeout  string `json:"timeout"`
 				}{
-					Endpoint: routerDefaults.XpHTTPEndpoint,
-					Timeout:  routerDefaults.XpTimeout,
 				},
 				Client: manager.Client{
 					Username: "client-name",
@@ -404,8 +398,6 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 					Endpoint string `json:"endpoint"`
 					Timeout  string `json:"timeout"`
 				}{
-					Endpoint: routerDefaults.XpHTTPEndpoint,
-					Timeout:  routerDefaults.XpTimeout,
 				},
 				Client: manager.Client{
 					Username: "client-name",

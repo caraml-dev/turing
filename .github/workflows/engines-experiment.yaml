@@ -25,6 +25,6 @@ jobs:
       working-directory: engines/experiment
       run: make test 
 
-    - name: Lint codes
+    - name: Lint code
       working-directory: engines/experiment
       run: make lint-ci

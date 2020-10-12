@@ -43,8 +43,6 @@ type Config struct {
 	VaultConfig         *VaultConfig         `envconfig:"vault"`
 	TuringEncryptionKey string               `split_words:"true" required:"true"`
 	AlertConfig         *AlertConfig         `envconfig:"alert"`
-	LitmusConfig        *LitmusConfig        `envconfig:"litmus"`
-	XPConfig            *XPConfig            `envconfig:"xp"`
 	MLPConfig           *MLPConfig
 	TuringUIConfig      *TuringUIConfig `envconfig:"turing_ui"`
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
@@ -103,14 +101,6 @@ type RouterDefaults struct {
 	LogLevel string `split_words:"true" default:"INFO"`
 	// Fluentd config for the router
 	FluentdConfig *FluentdConfig `envconfig:"fluentd"`
-	// LitmusGRPCEndpoint will be used by the Turing Router to run experiments
-	LitmusGRPCEndpoint string `envconfig:"litmus_grpc_endpoint" required:"true"`
-	// LitmusTimeout will be used by the Turing Router for requests to the Litmus GRPC endpoint
-	LitmusTimeout string `split_words:"true" default:"60ms"`
-	// XpHTTPEndpoint will be used by the Turing router to run experiments
-	XpHTTPEndpoint string `envconfig:"xp_http_endpoint" required:"true"`
-	// XpTimeout will be used by the Turing Router for requests to the XP HTTP endpoint
-	XpTimeout string `split_words:"true" default:"60ms"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -146,23 +136,6 @@ type GitlabConfig struct {
 	ProjectID  string
 	Branch     string `default:"master"`
 	PathPrefix string `default:"turing"`
-}
-
-// LitmusConfig captures the configuration used to initialize the Turing Litmus client
-type LitmusConfig struct {
-	ClientID string `split_words:"true" required:"true"`
-	Passkey  string `required:"true"`
-	CasToken string `split_words:"true" required:"true"`
-	BaseURL  string `split_words:"true" required:"true"`
-}
-
-// XPConfig captures the configuration used to initialize the Turing XP client
-type XPConfig struct {
-	Enabled     bool   // Temporary toggle, so it can be disabled in staging/prod
-	UseMockData bool   `split_words:"true" required:"true"` // Temporary toggle, until the XP APIs are stable
-	ClientID    string `split_words:"true" required:"true"`
-	Passkey     string `required:"true"`
-	BaseURL     string `split_words:"true" required:"true"`
 }
 
 // MLPConfig captures the configuration used to connect to the Merlin/MLP API servers

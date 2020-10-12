@@ -29,6 +29,6 @@ jobs:
       working-directory: engines/router
       run: make test-unit
 
-    - name: Lint codes
+    - name: Lint code
       working-directory: engines/router
       run: make lint-ci

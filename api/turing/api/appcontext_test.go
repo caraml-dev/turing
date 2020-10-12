@@ -66,8 +66,6 @@ func TestNewAppContext(t *testing.T) {
 				Tag:                  "turing-result.log",
 				FlushIntervalSeconds: 90,
 			},
-			LitmusGRPCEndpoint: "grpc://litmus",
-			LitmusTimeout:      "60ms",
 		},
 		Sentry: sentry.Config{
 			Enabled: false,
@@ -90,19 +88,6 @@ func TestNewAppContext(t *testing.T) {
 				Branch:     "master",
 				PathPrefix: "turing",
 			},
-		},
-		LitmusConfig: &config.LitmusConfig{
-			ClientID: "client",
-			Passkey:  "pk",
-			CasToken: "cas",
-			BaseURL:  "test_url",
-		},
-		XPConfig: &config.XPConfig{
-			Enabled:     true,
-			UseMockData: true,
-			ClientID:    "client",
-			Passkey:     "pk",
-			BaseURL:     "test_url",
 		},
 		SwaggerFile: "swagger.yaml",
 	}
@@ -138,9 +123,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewExperimentsService,
-		func(litmusCfg *config.LitmusConfig, xpCfg *config.XPConfig) (service.ExperimentsService, error) {
-			assert.Equal(t, testCfg.LitmusConfig, litmusCfg)
-			assert.Equal(t, testCfg.XPConfig, xpCfg)
+		func() (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -203,7 +186,7 @@ func TestNewAppContext(t *testing.T) {
 	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
 		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
 	assert.NoError(t, err)
-	experimentService, err := service.NewExperimentsService(testCfg.LitmusConfig, testCfg.XPConfig)
+	experimentService, err := service.NewExperimentsService()
 	assert.NoError(t, err)
 	gitlabClient, err := gitlab.NewClient(
 		testCfg.AlertConfig.GitLab.Token,
