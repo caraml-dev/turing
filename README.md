@@ -38,7 +38,7 @@ accessible from the Router endpoint after a sucessful deployment.
 ![Turing architecture](./docs/assets/turing_architecture.png)
 
 
-## Internal Migration Checklist
+## Internal Code Migration Checklist
 
 - [x] API Go module
 - [x] Engines/router Go module
@@ -50,3 +50,4 @@ accessible from the Router endpoint after a sucessful deployment.
 - [ ] Docs
 - [ ] Deployment with Helm charts
 - [ ] Replace call to Merlin API with MLP API
+- [ ] Clean up sql migration scripts
