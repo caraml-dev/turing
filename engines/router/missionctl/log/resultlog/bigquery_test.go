@@ -6,7 +6,8 @@ package resultlog
 Some tests in this file are integration tests that exercise the BigQuery client
 and will only run with go test --tags=integration. For these tests
 to work, a GCP service account key with the right access must be set in the
-environment where the tests are run.
+environment where the tests are run. The BigQuery dataset and project being tested
+must also exist.
 */
 
 import (
