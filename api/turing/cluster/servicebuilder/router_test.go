@@ -51,6 +51,8 @@ func TestNewRouterService(t *testing.T) {
 	tu.FailOnError(t, err)
 	cfgmapStandardEnsemble, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_standard_ensembler.yml"))
 	tu.FailOnError(t, err)
+	cfgmapTrafficSplitting, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_traffic_splitting.yml"))
+	tu.FailOnError(t, err)
 
 	// Define tests
 	tests := map[string]testSuiteNewService{
@@ -261,6 +263,103 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "test-svc-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapStandardEnsemble),
+					},
+					Envs: []corev1.EnvVar{
+						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
+						{Name: "APP_ENVIRONMENT", Value: "test-env"},
+						{Name: "ROUTER_TIMEOUT", Value: "5s"},
+						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
+						{Name: "APP_SENTRY_ENABLED", Value: "true"},
+						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "LITMUS_PASSKEY",
+							ValueFrom: &corev1.EnvVarSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "service-account",
+									},
+									Key: "experiment_passkey",
+								},
+							},
+						},
+						{Name: "APP_LOGLEVEL", Value: "INFO"},
+						{Name: "APP_CUSTOM_METRICS", Value: "false"},
+						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
+						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
+						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
+						{Name: "APP_BQ_DATASET", Value: "dataset_id"},
+						{Name: "APP_BQ_TABLE", Value: "turing_log_test"},
+						{Name: "APP_BQ_BATCH_LOAD", Value: "false"},
+						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router-service-account.json"},
+					},
+					Labels: map[string]string{
+						"gojek.com/app":          "test-svc",
+						"gojek.com/environment":  "test-env",
+						"gojek.com/orchestrator": "turing",
+						"gojek.com/stream":       "test-stream",
+						"gojek.com/team":         "test-team",
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: routerConfigMapVolume,
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "test-svc-turing-fiber-config-1",
+									},
+								},
+							},
+						},
+						{
+							Name: secretVolume,
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "service-account",
+									Items: []corev1.KeyToPath{
+										{
+											Key:  secretKeyNameRouter,
+											Path: secretKeyNameRouter,
+										},
+									},
+								},
+							},
+						},
+					},
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							Name:      routerConfigMapVolume,
+							MountPath: routerConfigMapMountPath,
+						},
+						{
+							Name:      secretVolume,
+							MountPath: secretMountPath,
+						},
+					},
+				},
+				ContainerPort: 8080,
+				MinReplicas:   2,
+				MaxReplicas:   4,
+			},
+			success: true,
+		},
+		"success | traffic-splitting": {
+			filePath:     filepath.Join(testDataBasePath, "router_version_success_traffic_splitting.json"),
+			expRawConfig: json.RawMessage(expRunnerConfig),
+			expected: cluster.KnativeService{
+				BaseService: &cluster.BaseService{
+					Name:                 "test-svc-turing-router-1",
+					Namespace:            "test-project",
+					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
+					CPURequests:          resource.MustParse("400m"),
+					MemoryRequests:       resource.MustParse("512Mi"),
+					LivenessHTTPGetPath:  "/v1/internal/live",
+					ReadinessHTTPGetPath: "/v1/internal/ready",
+					ConfigMap: &cluster.ConfigMap{
+						Name:     "test-svc-turing-fiber-config-1",
+						FileName: "fiber.yml",
+						Data:     string(cfgmapTrafficSplitting),
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},

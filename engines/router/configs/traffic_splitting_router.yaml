@@ -1,6 +1,18 @@
 id: traffic-splitting-router
 type: LAZY_ROUTER
 routes:
+  - id: &ID_TRAFFIC_SPLIT_DEFAULT traffic-split-default
+    type: EAGER_ROUTER
+    routes:
+      - id: control
+        type: PROXY
+        endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
+        timeout: 5s
+    strategy: &TURING_STRATEGY
+      type: fiber.DefaultTuringRoutingStrategy
+      properties:
+        default_route_id: control
+        experiment_engine: nop
   - id: &ID_TRAFFIC_SPLIT_A traffic-split-a
     type: EAGER_ROUTER
     routes:
@@ -12,11 +24,8 @@ routes:
         type: PROXY
         endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
         timeout: 5s
-    strategy: &TURING_STRATEGY
-      type: fiber.DefaultTuringRoutingStrategy
-      properties:
-        default_route_id: control
-        experiment_engine: nop
+    strategy:
+      <<: *TURING_STRATEGY
   - id: &ID_TRAFFIC_SPLIT_B traffic-split-b
       type: EAGER_ROUTER
       routes:
@@ -33,6 +42,7 @@ routes:
 strategy:
   type: "fiber.TrafficSplittingStrategy"
   properties:
+    default_route_id: *ID_TRAFFIC_SPLIT_DEFAULT
     rules:
       - route_id: *ID_TRAFFIC_SPLIT_A
         conditions:

@@ -66,7 +66,8 @@ test-e2e-local: deploy_docker_stack
 	@echo "Running e2e tests..."
 	go clean -testcache
 	API_BASE_PATH=${E2E_API_BASE_PATH} \
-		go test -v -parallel=1 ${E2E_TEST_ROOT}/... -tags e2e -timeout 15m -run TestEndToEnd || true
+		TEST_ID=$(if $(TEST_ID),$(TEST_ID),$(shell date +%Y%m%d%H%M)) \
+		go test -v -parallel=2 ${E2E_TEST_ROOT}/... -tags e2e -timeout 15m -run TestEndToEnd || true
 	make clean_docker_stack
 
 build: tidy

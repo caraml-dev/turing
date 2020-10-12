@@ -70,7 +70,8 @@ func (r *TrafficSplittingStrategyRule) TestRequest(reqHeader http.Header, bodyBy
 // TrafficSplittingStrategy selects the route based on the traffic splitting
 // conditions, configured on this strategy
 type TrafficSplittingStrategy struct {
-	Rules []*TrafficSplittingStrategyRule `json:"rules" validate:"required,notBlank,dive"`
+	DefaultRouteID string                          `json:"default_route_id"`
+	Rules          []*TrafficSplittingStrategyRule `json:"rules" validate:"required,notBlank,dive"`
 }
 
 // Initialize is invoked by the Fiber library to initialize this strategy
@@ -99,7 +100,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	defer close(doneCh)
 	defer close(errCh)
 
-	fallbacks := []fiber.Component{}
+	orderedRoutes := []fiber.Component{}
 	// array, that holds results of testing the request by each rule configured on the strategy
 	// `results[k]` – is `true` if the request satisfies `k`th rule of the strategy, and `false`
 	// otherwise
@@ -130,36 +131,34 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	case <-doneCh:
 	case err := <-errCh:
 		log.WithContext(ctx).Errorf(err.Error())
-		return nil, fallbacks, createFiberError(err)
+		return nil, nil, createFiberError(err)
 	}
 
 	// select primary route and fallbacks, based on the results of testing
 	// given request against traffic-splitting rules
-	var route fiber.Component
 	for i := 0; i < len(results); i++ {
 		routeID := s.Rules[i].RouteID
 		if results[i] {
 			if r, exists := routes[routeID]; exists {
-				if route == nil {
-					route = r
-				} else {
-					fallbacks = append(fallbacks, r)
-				}
+				orderedRoutes = append(orderedRoutes, r)
 			} else {
 				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 				log.WithContext(ctx).Errorf(err.Error())
-				return nil, fallbacks, createFiberError(err)
+				return nil, nil, createFiberError(err)
 			}
 		}
 	}
 
-	// if primary route is still nil, then it means that given request
-	// hasn't satisfied any of the rules configured on this routing strategy
-	if route == nil {
-		err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
-		log.WithContext(ctx).Errorf(err.Error())
-		return nil, fallbacks, createFiberError(err)
+	// given request hasn't satisfied any of the rules configured on this routing strategy
+	if len(orderedRoutes) == 0 {
+		if defaultRoute, exist := routes[s.DefaultRouteID]; exist {
+			orderedRoutes = append(orderedRoutes, defaultRoute)
+		} else {
+			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
+			log.WithContext(ctx).Errorf(err.Error())
+			return nil, nil, createFiberError(err)
+		}
 	}
 
-	return route, fallbacks, nil
+	return orderedRoutes[0], orderedRoutes[1:], nil
 }

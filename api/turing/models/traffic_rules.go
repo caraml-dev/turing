@@ -27,3 +27,14 @@ func (r *TrafficRules) Scan(value interface{}) error {
 
 	return json.Unmarshal(b, r)
 }
+
+func (r *TrafficRules) ConditionalRouteIds() map[string]bool {
+	distinctRouteIds := map[string]bool{}
+
+	for _, rule := range *r {
+		for _, rID := range rule.Routes {
+			distinctRouteIds[rID] = true
+		}
+	}
+	return distinctRouteIds
+}

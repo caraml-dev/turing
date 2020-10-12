@@ -253,6 +253,49 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			expected:  tfu.NewFiberCallerWithHTTPDispatcher(t, "route-a"),
 			fallbacks: []fiber.Component{},
 		},
+		"success | with default route": {
+			strategy: &fiberapi.TrafficSplittingStrategy{
+				DefaultRouteID: "control",
+				Rules: []*fiberapi.TrafficSplittingStrategyRule{
+					{
+						RouteID: "route-a",
+						Conditions: []*common.TrafficRuleCondition{
+							{
+								FieldSource: common.HeaderFieldSource,
+								Field:       "X-Region",
+								Operator:    common.InConditionOperator,
+								Values:      []string{"region-a", "region-b"},
+							},
+							{
+								FieldSource: common.PayloadFieldSource,
+								Field:       "service_type",
+								Operator:    common.InConditionOperator,
+								Values:      []string{"service-b"},
+							},
+						},
+					},
+					{
+						RouteID: "route-b",
+						Conditions: []*common.TrafficRuleCondition{
+							{
+								FieldSource: common.PayloadFieldSource,
+								Field:       "service_type",
+								Operator:    common.InConditionOperator,
+								Values:      []string{"service-a", "service-b"},
+							},
+						},
+					},
+				},
+			},
+			routes: map[string]fiber.Component{
+				"control": tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+				"route-a": tfu.NewFiberCallerWithHTTPDispatcher(t, "route-a"),
+				"route-b": tfu.NewFiberCallerWithHTTPDispatcher(t, "route-b"),
+			},
+			payload:   `{"service_type": "service-c"}`,
+			expected:  tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+			fallbacks: []fiber.Component{},
+		},
 		"success | with fallbacks": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{

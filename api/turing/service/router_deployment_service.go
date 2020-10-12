@@ -462,7 +462,7 @@ func deployKnServices(
 	}
 }
 
-// deleteKnServices simulateneously issues a delete call to all services and waits
+// deleteKnServices simultaneously issues a delete call to all services and waits
 // until deletion timeout, for a response
 func deleteKnServices(
 	ctx context.Context,
