@@ -48,4 +48,5 @@ accessible from the Router endpoint after a sucessful deployment.
 - [ ] End-to-end test
 - [ ] Load tests
 - [ ] Docs
-- [ ] Helm charts
+- [ ] Deployment with Helm charts
+- [ ] Replace call to Merlin API with MLP API
