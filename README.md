@@ -36,3 +36,18 @@ workloads and components to run Turing routers. The Turing router will be
 accessible from the Router endpoint after a sucessful deployment.
 
 ![Turing architecture](./docs/assets/turing_architecture.png)
+
+
+## Internal Code Migration Checklist
+
+- [x] API Go module
+- [x] Engines/router Go module
+- [x] Engines/experiment Go module
+- [ ] UI React app
+- [x] Unit tests with GitHub Actions
+- [ ] End-to-end test
+- [ ] Load tests
+- [ ] Docs
+- [ ] Deployment with Helm charts
+- [ ] Replace call to Merlin API with MLP API
+- [ ] Clean up sql migration scripts

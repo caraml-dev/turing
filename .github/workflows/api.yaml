@@ -1,0 +1,49 @@
+name: api
+
+on:
+  push:
+    paths:
+    - "api/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_DB: turing
+      POSTGRES_USER: turing-admin
+      POSTGRES_PASSWORD: secret
+
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Go 1.14
+      uses: actions/setup-go@v2
+      with:
+        go-version: "1.14"
+
+    # TODO: Remove this step once Turing and MLP repo becomes public
+    - name: Set up Git for reading Gojek private repo
+      run: git config --global url."https://${{ secrets.GOJEK_GITHUB_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
+    - name: Install Postgres required for testing
+      run: |
+        docker run --name postgres -d -p 5432:5432 \
+          -e POSTGRES_DB=$POSTGRES_DB \
+          -e POSTGRES_USER=$POSTGRES_USER \
+          -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+          postgres:13-alpine
+        timeout 30 bash -c "until docker exec postgres pg_isready; do sleep 2; done"
+
+    - name: Run test 
+      working-directory: api
+      run: make test-ci
+
+    - name: Lint code
+      working-directory: api
+      run: make lint-ci

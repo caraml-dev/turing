@@ -1,0 +1,87 @@
+[
+    {
+        "mode": "REQUIRED",
+        "name": "turing_req_id",
+        "type": "STRING"
+    },
+    {
+        "mode": "REQUIRED",
+        "name": "ts",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "router_version",
+        "type": "STRING"
+    },
+    {
+        "fields": [
+            {
+                "name": "header",
+                "type": "STRING"
+            },
+            {
+                "name": "body",
+                "type": "STRING"
+            }
+        ],
+        "mode": "REQUIRED",
+        "name": "request",
+        "type": "RECORD"
+    },
+    {
+        "fields": [
+            {
+                "name": "response",
+                "type": "STRING"
+            },
+            {
+                "name": "error",
+                "type": "STRING"
+            }
+        ],
+        "name": "experiment",
+        "type": "RECORD"
+    },
+    {
+        "fields": [
+            {
+                "name": "response",
+                "type": "STRING"
+            },
+            {
+                "name": "error",
+                "type": "STRING"
+            }
+        ],
+        "name": "enricher",
+        "type": "RECORD"
+    },
+    {
+        "fields": [
+            {
+                "name": "response",
+                "type": "STRING"
+            },
+            {
+                "name": "error",
+                "type": "STRING"
+            }
+        ],
+        "name": "router",
+        "type": "RECORD"
+    },
+    {
+        "fields": [
+            {
+                "name": "response",
+                "type": "STRING"
+            },
+            {
+                "name": "error",
+                "type": "STRING"
+            }
+        ],
+        "name": "ensembler",
+        "type": "RECORD"
+    }
+]

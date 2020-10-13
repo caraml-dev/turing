@@ -1,0 +1,25 @@
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - staticcheck
+    - structcheck
+    - unused
+    - varcheck
+
+linters-settings:
+  gocyclo:
+    # Min code complexity to report, 30 by default (recommended 10-20)
+    min-complexity: 25
+  lll:
+    line-length: 120

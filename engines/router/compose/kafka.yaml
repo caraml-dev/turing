@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3.4.14
+    ports:
+     - 2181:2181
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  
+  kafka:
+    image: bitnami/kafka:1.1.1
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+
+  kafka-ui:
+    image: obsidiandynamics/kafdrop:3.27.0
+    ports:
+      - 9001:9000
+    environment:
+      - KAFKA_BROKERCONNECT=kafka:9092

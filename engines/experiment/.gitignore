@@ -1,0 +1,5 @@
+# Test coverage
+cover.out
+
+# Go vendor
+vendor/

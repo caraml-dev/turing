@@ -1,0 +1,19 @@
+{
+    "experiment": {},
+    "route_responses": [
+        {
+            "route": "control",
+            "data": {
+                "version": 2
+            },
+            "is_default": false
+        },
+        {
+            "route": "route_id_1",
+            "data": {
+                "version": 1
+            },
+            "is_default": true
+        }
+    ]
+}
