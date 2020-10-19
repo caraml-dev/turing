@@ -209,6 +209,8 @@ github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7a
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gojek/fiber v0.0.0-20200928074910-233ab2f8ca2d h1:tcfvsm3jXLxnhGr9DBC/dtlZkzKU3yAAlD3GimADe2M=
 github.com/gojek/fiber v0.0.0-20200928074910-233ab2f8ca2d/go.mod h1:D6j5WEkTh10DR+w7bWlJ7ojboVctCCtqN04mlf2TWzE=
+github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84 h1:xJz8oB3jouEnftUCwg6wDXxbFM50Cx9LjYJlRPJ6jSc=
+github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84/go.mod h1:D6j5WEkTh10DR+w7bWlJ7ojboVctCCtqN04mlf2TWzE=
 github.com/gojek/mlp/api v0.0.0-20200916102056-00ec9dccd758 h1:Ikzx/Mx9opP4Qjyzz7SLpQTO23zGSP/ytWgN4FKYzxo=
 github.com/gojek/mlp/api v0.0.0-20200916102056-00ec9dccd758/go.mod h1:IjQCiAzap7TZRZVZ4r2RdzVTuAzoyR5el2GgEu2X1FM=
 github.com/golang-migrate/migrate/v4 v4.11.0/go.mod h1:nqbpDbckcYjsCD5I8q5+NI9Tkk7SVcmaF40Ax1eAWhg=
