@@ -87,9 +87,10 @@ var testValidKnSvc = KnativeService{
 			},
 		},
 	},
-	ContainerPort: 8080,
-	MinReplicas:   1,
-	MaxReplicas:   2,
+	ContainerPort:  8080,
+	MinReplicas:    1,
+	MaxReplicas:    2,
+	IsClusterLocal: true,
 }
 
 func TestBuildKnativeServiceConfig(t *testing.T) {
@@ -170,7 +171,8 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 			Name:      "test-svc",
 			Namespace: "test-namespace",
 			Labels: map[string]string{
-				"labelKey": "labelVal",
+				"labelKey":                       "labelVal",
+				"serving.knative.dev/visibility": "cluster-local",
 			},
 		},
 		Spec: knservingv1alpha1.ServiceSpec{

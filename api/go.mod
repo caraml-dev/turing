@@ -8,7 +8,7 @@ require (
 	github.com/getkin/kin-openapi v0.20.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.3.0
-	github.com/gojek/fiber v0.0.0-20200928074910-233ab2f8ca2d
+	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v0.0.0
 	github.com/gojek/turing/engines/experiment v0.0.0
