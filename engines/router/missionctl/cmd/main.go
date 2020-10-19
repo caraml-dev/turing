@@ -99,7 +99,13 @@ func main() {
 	}
 
 	// Register handlers
-	http.Handle("/v1/internal/", http.StripPrefix("/v1/internal", handlers.NewInternalAPIHandler()))
+	http.Handle("/v1/internal/", http.StripPrefix(
+		"/v1/internal",
+		handlers.NewInternalAPIHandler([]string{
+			cfg.EnsemblerConfig.Endpoint,
+			cfg.EnrichmentConfig.Endpoint,
+		}),
+	))
 	http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
 	// Register metrics handler
 	if cfg.AppConfig.CustomMetrics {
