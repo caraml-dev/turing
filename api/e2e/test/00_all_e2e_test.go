@@ -34,7 +34,7 @@ type testConfig struct {
 	// MockserverEndpoint will be used as the router endpoints in the e2e tests.
 	// This endpoint is expected to handle POST request and returns a JSON object
 	MockserverEndpoint                      string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
-	KServiceDomain                          string `envconfig:"KSERVICE_DOMAIN" default:"models.id.d.gods.golabs.io"`
+	KServiceDomain                          string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
 	APIBasePath                             string `envconfig:"API_BASE_PATH" required:"true"`
 	ClusterName                             string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
 	ProjectID                               int    `envconfig:"PROJECT_ID" required:"true"`
@@ -108,8 +108,6 @@ func setUp() {
 		os.Exit(1)
 	}
 
-	checkLitmusExperimentPrerequisites(*cfg)
-
 	// Init k8s clients
 	clients, err := newClusterClients(cfg)
 	if err != nil {
@@ -121,62 +119,6 @@ func setUp() {
 		testConfig:     cfg,
 		clusterClients: clients,
 		httpClient:     http.DefaultClient,
-	}
-}
-
-// checkLitmusExperimentPrerequisites ensures that the Litmus client and experiment required for e2e test have been
-// set up correctly in Litmus engine. These assumptions will be used when testing Turing router with standard ensembler
-// in e2e test.
-func checkLitmusExperimentPrerequisites(c testConfig) {
-	// makeLitmusRequest is a helper function to send HTTP requests to Litmus URL. It will return the text body
-	// for succesful request and fail immediately for failed requests.
-	sendLitmusRequest := func(url string) string {
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		req.Header.Set("x-client-id", c.TestLitmusClientID)
-		req.Header.Set("x-passkey", c.TestLitmusPasskey)
-		req.Header.Set("x-cas-token", c.TestLitmusCASToken)
-		httpClient := http.Client{Timeout: 3 * time.Second}
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if resp.StatusCode != http.StatusOK {
-			log.Fatalf("GET %s. Status code want: 200, got: %d", url, resp.StatusCode)
-		}
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		return string(data)
-	}
-
-	log.Println("Ensure client 'data_science_platform' has been created")
-	body := sendLitmusRequest("http://integration-litmus-internal.golabs.io/internal/clients")
-	if !strings.Contains(body, `"name":"data_science_platform"`) {
-		log.Fatal("client 'data_science_platform' is not yet registered in Litmus")
-	}
-
-	log.Println("Ensure experiment 'exp_exp_test_experiment_dsp_1' has been created and the status is 'running'")
-	body = sendLitmusRequest("http://integration-litmus-internal.golabs.io/internal/experiment/" + c.TestLitmusExperimentID)
-	if !strings.Contains(body, `"status":"running"`) {
-		log.Fatal("experiment 'exp_exp_test_experiment_dsp_1' is not yet registered and/or not running in Litmus")
-	}
-
-	log.Println("Ensure variant 'control' is returned from 'run experiment' request for " + c.TestLitmusExperimentUnitType + ":" + c.TestLitmusExperimentUnitIDForControl)
-	url := fmt.Sprintf("http://integration-litmus-internal.golabs.io/internal/v2/run/experiment/%s?unit-type=%s&unit-id=%s", c.TestLitmusExperimentName, c.TestLitmusExperimentUnitType, c.TestLitmusExperimentUnitIDForControl)
-	body = sendLitmusRequest(url)
-	if !strings.Contains(body, `"variant":"control"`) {
-		log.Fatal("run experiment does not return the expected variant")
-	}
-
-	log.Println("Ensure variant 'treatment-1' is returned from 'run experiment' request for " + c.TestLitmusExperimentUnitType + ":" + c.TestLitmusExperimentUnitIDForTreatment1)
-	url = fmt.Sprintf("http://integration-litmus-internal.golabs.io/internal/v2/run/experiment/%s?unit-type=%s&unit-id=%s", c.TestLitmusExperimentName, c.TestLitmusExperimentUnitType, c.TestLitmusExperimentUnitIDForTreatment1)
-	body = sendLitmusRequest(url)
-	if !strings.Contains(body, `"variant":"treatment-1"`) {
-		log.Fatal("run experiment does not return the expected variant")
 	}
 }
 
