@@ -4,15 +4,10 @@ package e2e
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
+	"github.com/kelseyhightower/envconfig"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
-	"time"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 // These constants are set according to the values used by the app,
@@ -33,23 +28,18 @@ type testConfig struct {
 	TestID string `envconfig:"TEST_ID" required:"true"`
 	// MockserverEndpoint will be used as the router endpoints in the e2e tests.
 	// This endpoint is expected to handle POST request and returns a JSON object
-	MockserverEndpoint                      string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
-	KServiceDomain                          string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
-	APIBasePath                             string `envconfig:"API_BASE_PATH" required:"true"`
-	ClusterName                             string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
-	ProjectID                               int    `envconfig:"PROJECT_ID" required:"true"`
-	ProjectName                             string `envconfig:"PROJECT_NAME" required:"true"`
-	TestLitmusPasskey                       string `envconfig:"TEST_LITMUS_PASSKEY" required:"true"`
-	TestLitmusClientID                      string `envconfig:"TEST_LITMUS_CLIENT_ID" required:"true"`
-	TestLitmusCASToken                      string `envconfig:"TEST_LITMUS_CAS_TOKEN" required:"true"`
-	TestLitmusExperimentName                string `envconfig:"TEST_LITMUS_EXPERIMENT_NAME" required:"true"`
-	TestLitmusExperimentID                  string `envconfig:"TEST_LITMUS_EXPERIMENT_ID" required:"true"`
-	TestLitmusExperimentUnitType            string `envconfig:"TEST_LITMUS_EXPERIMENT_UNIT_TYPE" required:"true"`
-	TestLitmusExperimentUnitIDForControl    string `envconfig:"TEST_LITMUS_EXPERIMENT_UNIT_ID_FOR_CONTROL" required:"true"`
-	TestLitmusExperimentUnitIDForTreatment1 string `envconfig:"TEST_LITMUS_EXPERIMENT_UNIT_ID_FOR_TREATMENT_1" required:"true"`
-	TestXpPasskey                           string `envconfig:"TEST_XP_PASSKEY" required:"true"`
-	VaultAddress                            string `envconfig:"VAULT_ADDRESS" required:"true"`
-	VaultToken                              string `envconfig:"VAULT_TOKEN" required:"true"`
+	MockserverEndpoint string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
+	KServiceDomain     string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
+	APIBasePath        string `envconfig:"API_BASE_PATH" required:"true"`
+	ClusterName        string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
+	ProjectID          int    `envconfig:"PROJECT_ID" required:"true"`
+	ProjectName        string `envconfig:"PROJECT_NAME" required:"true"`
+	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
+	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
+	// If false, the helper will use the cluster credentials from the configured Vault environment.
+	KubeconfigUseLocal bool   `envconfig:"KUBECONFIG_USE_LOCAL" default:"false"`
+	VaultAddress       string `envconfig:"VAULT_ADDRESS"`
+	VaultToken         string `envconfig:"VAULT_TOKEN"`
 }
 
 func fromEnv() (*testConfig, error) {

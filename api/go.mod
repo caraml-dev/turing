@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	bou.ke/monkey v1.0.2
+	cloud.google.com/go/bigquery v1.9.0
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/getkin/kin-openapi v0.20.0
 	github.com/ghodss/yaml v1.0.0
@@ -23,9 +24,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.6.1
+	github.com/tidwall/gjson v1.6.1
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	google.golang.org/api v0.28.0
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible
 	gotest.tools/v3 v3.0.2

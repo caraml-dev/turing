@@ -4,6 +4,9 @@ package e2e
 
 import (
 	"fmt"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	"path/filepath"
 
 	"github.com/gojek/mlp/pkg/vault"
 	"github.com/pkg/errors"
@@ -28,33 +31,42 @@ type TestClusterClients struct {
 
 // newClusterClients is a creator for the TestClusterClients
 func newClusterClients(cfg *testConfig) (*TestClusterClients, error) {
-	// Init Vault client
-	vaultConfig := &vault.Config{
-		Address: cfg.VaultAddress,
-		Token:   cfg.VaultToken,
-	}
-	vaultClient, err := vault.NewVaultClient(vaultConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to initialize vault")
+	var clusterCfg *rest.Config
+
+	if cfg.KubeconfigUseLocal {
+		// Authenticate to Kube with local kubeconfig in $HOME/.kube/config
+		p := filepath.Join(homedir.HomeDir(), ".kube", "config")
+		cfg, err := clientcmd.BuildConfigFromFlags("", p)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to initialize Kube config from: "+p)
+		}
+		clusterCfg = cfg
+	} else {
+		// Authenticate to Kube with cluster credentials in Vault
+		vaultConfig := &vault.Config{
+			Address: cfg.VaultAddress,
+			Token:   cfg.VaultToken,
+		}
+		vaultClient, err := vault.NewVaultClient(vaultConfig)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to initialize vault")
+		}
+		clusterSecret, err := vaultClient.GetClusterSecret(cfg.ClusterName)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"unable to get cluster secret for cluster: %s", cfg.ClusterName)
+		}
+		clusterCfg = &rest.Config{
+			Host: clusterSecret.Endpoint,
+			TLSClientConfig: rest.TLSClientConfig{
+				Insecure: false,
+				CAData:   []byte(clusterSecret.CaCert),
+				CertData: []byte(clusterSecret.ClientCert),
+				KeyData:  []byte(clusterSecret.ClientKey),
+			},
+		}
 	}
 
-	// Get cluster secret
-	clusterSecret, err := vaultClient.GetClusterSecret(cfg.ClusterName)
-	if err != nil {
-		return nil, errors.Wrapf(err,
-			"unable to get cluster secret for cluster: %s", cfg.ClusterName)
-	}
-
-	// Init cluster client
-	clusterCfg := &rest.Config{
-		Host: clusterSecret.Endpoint,
-		TLSClientConfig: rest.TLSClientConfig{
-			Insecure: false,
-			CAData:   []byte(clusterSecret.CaCert),
-			CertData: []byte(clusterSecret.ClientCert),
-			KeyData:  []byte(clusterSecret.ClientKey),
-		},
-	}
 	knsClientSet, err := knservingclientset.NewForConfig(clusterCfg)
 	if err != nil {
 		return nil, err
