@@ -31,6 +31,7 @@ jobs:
       env:
         CONCURRENT_NONINTERACTIVE: "1"
       run: |
+        set -e
         source setup-infra.sh
 
         concurrent \
