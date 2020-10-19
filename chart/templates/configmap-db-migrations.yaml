@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-db-migrations
+data:
+  {{- $root := . }}
+  {{- range $path, $_ := .Files.Glob "db-migrations/*.sql" }}
+{{ base $path | indent 2  }}: |-
+{{ $root.Files.Get $path | indent 4}}
+  {{- end }}
+
