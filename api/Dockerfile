@@ -1,10 +1,38 @@
-FROM debian:buster-slim
+# Build turing-api binary
+FROM golang:1.14-alpine as api-builder
+ARG API_BIN_NAME=turing-api
 
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+ENV GO111MODULE=on \
+    GOOS=linux \
+    GOARCH=amd64
 
-RUN mkdir -p /opt/turing_api
+ENV PROJECT_ROOT=github.com/gojek/turing/api/turing
 
-COPY . /opt/turing_api
-COPY ./bin/turing-api /opt/turing_api
+WORKDIR /app
+COPY . .
 
-WORKDIR /opt/turing_api
+RUN go build \
+    -mod=vendor \
+    -o ./bin/${API_BIN_NAME} \
+    -v ${PROJECT_ROOT}/cmd
+
+# Clean image with turing-api binary and production build of turing-ui
+FROM alpine:3.12
+
+ARG API_BIN_NAME=turing-api
+ENV API_BIN_NAME ${API_BIN_NAME}
+
+ENV TURING_PORT "8080"
+
+EXPOSE ${TURING_PORT}
+
+RUN addgroup -S app && adduser -S app -G app && mkdir /app && chown -R app:app /app
+
+COPY --chown=app:app --from=api-builder /app/bin/* /app
+COPY --chown=app:app --from=api-builder /app/swagger.yaml /app
+
+USER app
+WORKDIR /app
+
+ENTRYPOINT ["sh", "-c"]
+CMD ["./${API_BIN_NAME}"]
