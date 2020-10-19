@@ -75,4 +75,3 @@ func checkURLResolvable(rawURL string) healthcheck.Check {
 		return nil
 	}
 }
-
