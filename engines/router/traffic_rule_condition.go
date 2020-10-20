@@ -1,21 +1,22 @@
-package common
+package router
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gojek/turing/engines/experiment/common"
 	"net/http"
 	"reflect"
 )
 
 type TrafficRuleCondition struct {
-	FieldSource FieldSource           `json:"field_source" validate:"required,oneof=header payload"`
+	FieldSource common.FieldSource    `json:"field_source" validate:"required,oneof=header payload"`
 	Field       string                `json:"field" validate:"required"`
 	Operator    RuleConditionOperator `json:"operator" validate:"required,oneof=in"`
 	Values      []string              `json:"values" validate:"required,notBlank"`
 }
 
 func (c *TrafficRuleCondition) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
-	fieldValue, err := GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
+	fieldValue, err := common.GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
 	if err != nil {
 		return false, err
 	}

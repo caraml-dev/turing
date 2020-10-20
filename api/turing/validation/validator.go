@@ -2,11 +2,10 @@ package validation
 
 import (
 	"fmt"
+	"github.com/gojek/turing/engines/router"
 	"reflect"
 	"regexp"
 	"strings"
-
-	"github.com/gojek/turing/engines/experiment/common"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
@@ -34,11 +33,11 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 
 	// register common.RuleConditionOperator type to use its String representation for validation
 	instance.RegisterCustomTypeFunc(func(field reflect.Value) interface{} {
-		if val, ok := field.Interface().(common.RuleConditionOperator); ok {
+		if val, ok := field.Interface().(router.RuleConditionOperator); ok {
 			return val.String()
 		}
 		return nil
-	}, common.RuleConditionOperator{})
+	}, router.RuleConditionOperator{})
 
 	return instance, nil
 }

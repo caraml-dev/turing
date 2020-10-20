@@ -33,6 +33,24 @@ func TestGetValueFromRequest(t *testing.T) {
 			body:     []byte(`{"customer": {"id": "test_customer"}}`),
 			expected: "test_customer",
 		},
+		"success | payload integer field": {
+			field:    "customer.id",
+			fieldSrc: common.PayloadFieldSource,
+			body:     []byte(`{"customer": {"id": 42}}`),
+			expected: "42",
+		},
+		"success | payload bool field": {
+			field:    "is_premium_customer",
+			fieldSrc: common.PayloadFieldSource,
+			body:     []byte(`{"is_premium_customer": true}`),
+			expected: "true",
+		},
+		"success | payload null field": {
+			field:    "session_id",
+			fieldSrc: common.PayloadFieldSource,
+			body:     []byte(`{"session_id": null}`),
+			expected: "",
+		},
 		"failure | header": {
 			field:    "CustomerID",
 			fieldSrc: common.HeaderFieldSource,
@@ -49,10 +67,22 @@ func TestGetValueFromRequest(t *testing.T) {
 			body:     []byte(`{"customer": {"id": "test_customer"}}`),
 			err:      "Field customer_id not found in the request payload: Key path not found",
 		},
+		"failure | payload unsupported type": {
+			field:    "customer",
+			fieldSrc: common.PayloadFieldSource,
+			body:     []byte(`{"customer": {"id": 42, "email": "test@test.com"}`),
+			err:      "Field customer can not be parsed as string value, unsupported type: object",
+		},
 		"failure | unknown source": {
 			field:    "CustomerID",
 			fieldSrc: common.FieldSource("unknown"),
 			err:      "Unrecognized field source unknown",
+		},
+		"failure | malformed JSON": {
+			field:    "customer.id",
+			fieldSrc: common.PayloadFieldSource,
+			body:     []byte(`{"customer: {}"id"`),
+			err:      "Field customer.id not found in the request payload: Key path not found",
 		},
 	}
 

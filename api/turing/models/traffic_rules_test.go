@@ -3,9 +3,8 @@ package models_test
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/common"
-
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/engines/router"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,11 +19,11 @@ func TestTrafficRules_Value(t *testing.T) {
 		"success": {
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "header",
 							Field:       "X-Region",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values: []string{
 								"region-a", "region-b",
 							},
@@ -73,11 +72,11 @@ func TestTrafficRules_Scan(t *testing.T) {
 		"success": {
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "header",
 							Field:       "X-Region",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values: []string{
 								"region-a", "region-b",
 							},

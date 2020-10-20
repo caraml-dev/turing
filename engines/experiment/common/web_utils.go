@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"unsafe"
 
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
@@ -25,30 +26,36 @@ func GetValueFromRequest(
 	fieldSrc FieldSource,
 	field string,
 ) (string, error) {
-	var value string
-	var err error
-
 	switch fieldSrc {
 	case PayloadFieldSource:
-		value, err = getValueFromJSONPayload(bodyBytes, field)
+		return getValueFromJSONPayload(bodyBytes, field)
 	case HeaderFieldSource:
-		value = reqHeader.Get(field)
+		value := reqHeader.Get(field)
 		if value == "" {
-			// key not found in header, set error
-			err = fmt.Errorf("Field %s not found in the request header", field)
+			// key not found in header
+			return "", fmt.Errorf("Field %s not found in the request header", field)
 		}
+		return value, nil
 	default:
-		err = fmt.Errorf("Unrecognized field source %s", fieldSrc)
+		return "", fmt.Errorf("Unrecognized field source %s", fieldSrc)
 	}
-
-	return value, err
 }
 
 func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	// Retrieve value using JSON path
-	value, err := jsonparser.GetString(body, strings.Split(key, ".")...)
-	if err != nil {
-		return value, errors.Wrapf(err, "Field %s not found in the request payload", key)
+	value, typez, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
+
+	switch typez {
+	case jsonparser.String, jsonparser.Number, jsonparser.Boolean:
+		// See: https://github.com/buger/jsonparser/blob/master/bytes_unsafe.go#L31
+		return *(*string)(unsafe.Pointer(&value)), nil
+	case jsonparser.Null:
+		return "", nil
+	case jsonparser.NotExist:
+		return "", errors.Errorf("Field %s not found in the request payload: Key path not found", key)
+	default:
+		return "", errors.Errorf(
+			"Field %s can not be parsed as string value, unsupported type: %s", key, typez.String())
 	}
-	return value, nil
 }
+

@@ -6,13 +6,13 @@ VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertage
 ALL_PACKAGES=$(shell go list ./...)
 # TODO: Remove this step once Turing repo becomes public
 GOPRIVATE=github.com/gojek/*
-SRC_ROOT=./missionctl
+SRC_ROOT=./
 
 USER=$(shell whoami)
 HOST=$(shell hostname)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 NOW=$(shell date +'%FT%T%z')
-PROJECT_ROOT=github.com/gojek/turing/engines/router/missionctl
+PROJECT_ROOT=github.com/gojek/turing/engines/router
 
 .PHONY: default clean setup fmt dep-ci lint lint-ci tidy vendor test test-unit test-all build_image build build_docker run
 
@@ -72,10 +72,10 @@ build: tidy fmt
 	go build \
 		-o ./bin/${BIN_NAME} \
 		-ldflags " \
-			-X ${PROJECT_ROOT}/internal.Version=${VERSION_NUMBER} \
-			-X ${PROJECT_ROOT}/internal.Branch=${BRANCH} \
-			-X ${PROJECT_ROOT}/internal.BuildUser=${USER}@${HOST} \
-			-X ${PROJECT_ROOT}/internal.BuildDate=${NOW}" \
+			-X ${PROJECT_ROOT}/missionctl/internal.Version=${VERSION_NUMBER} \
+			-X ${PROJECT_ROOT}/missionctl/internal.Branch=${BRANCH} \
+			-X ${PROJECT_ROOT}/missionctl/internal.BuildUser=${USER}@${HOST} \
+			-X ${PROJECT_ROOT}/missionctl/internal.BuildDate=${NOW}" \
 		${SRC_ROOT}/cmd/main.go
 
 run: build
