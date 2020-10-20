@@ -2,10 +2,11 @@ package validation
 
 import (
 	"fmt"
-	"github.com/gojek/turing/engines/router"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/gojek/turing/engines/router"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"

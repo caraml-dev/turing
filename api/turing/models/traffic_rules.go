@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+
 	"github.com/gojek/turing/engines/router"
 )
 
