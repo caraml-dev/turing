@@ -28,8 +28,8 @@ var ResultLogKeys = struct {
 }
 
 type requestLogEntry struct {
-	Header *http.Header    `json:"header"`
-	Body   json.RawMessage `json:"body"`
+	Header *http.Header    `json:"header,omitempty"`
+	Body   json.RawMessage `json:"body,omitempty"`
 }
 
 type responseLogEntry struct {

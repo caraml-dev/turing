@@ -3,9 +3,10 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/common"
 	"net/http"
 	"reflect"
+
+	"github.com/gojek/turing/engines/experiment/common"
 )
 
 type TrafficRuleCondition struct {

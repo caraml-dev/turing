@@ -2,6 +2,7 @@ package resultlog
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -150,6 +151,12 @@ func TestGlobalLoggerLog(t *testing.T) {
 
 	// Test that the global logger's write was called
 	logger.AssertCalled(t, "write")
+}
+
+func TestMarshalEmptyRequestLogEntry(t *testing.T) {
+	bytes, err := json.Marshal(requestLogEntry{})
+	assert.JSONEq(t, `{}`, string(bytes))
+	assert.NoError(t, err)
 }
 
 func setGlobalLogger(l TuringResultLogger) {
