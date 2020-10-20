@@ -16,14 +16,18 @@ function install_yq() {
 }
 
 function install_vault_cli() {
-    wget https://releases.hashicorp.com/vault/1.5.4/vault_1.5.4_linux_amd64.zip && \
-        unzip vault_1.5.4_linux_amd64.zip && \
+    vault_version=${vault_version:-1.5.4}
+
+    wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_version}_linux_amd64.zip && \
+        unzip vault_${vault_version}_linux_amd64.zip && \
         sudo install vault /usr/local/bin/vault && \
-        rm vault_1.5.4_linux_amd64.zip vault 
+        rm vault_${vault_version}_linux_amd64.zip vault 
 }
 
 function install_kind_cli() {
-    wget https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-linux-amd64 && \
+    kind_version=${kind_version:-0.9.0}
+
+    wget https://github.com/kubernetes-sigs/kind/releases/download/v${kind_version}/kind-linux-amd64 && \
         sudo install kind-linux-amd64 /usr/local/bin/kind && \
         rm kind-linux-amd64
 }
@@ -45,24 +49,28 @@ function install_local_docker_registry() {
 }
 
 function install_istio() {
+    istio_version=${istio_version:-1.7.3}
+
     workdir=$(pwd)
     cd $script_dir
 
-    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 TARGET_ARCH=x86_64 sh -
-    export PATH=$PWD/istio-1.7.3/bin:$PATH
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${istio_version} TARGET_ARCH=x86_64 sh -
+    export PATH=$PWD/istio-${istio_version}/bin:$PATH
     istioctl install -f istio.minimal-operator.yaml
 
-    rm -rf istio-1.7.3
+    rm -rf istio-${istio_version}
     cd $workdir
 }
 
 function install_knative_serving_with_istio_controller() {
+    knative_version=${knative_version:-0.18.0}
+
     workdir=$(pwd)
     cd $script_dir
 
     # Install Knative CRD and Serving core components
-    kubectl apply -f https://github.com/knative/serving/releases/download/v0.18.0/serving-crds.yaml
-    kubectl apply -f https://github.com/knative/serving/releases/download/v0.18.0/serving-core.yaml
+    kubectl apply -f https://github.com/knative/serving/releases/download/v${knative_version}/serving-crds.yaml
+    kubectl apply -f https://github.com/knative/serving/releases/download/v${knative_version}/serving-core.yaml
 
     # Ignore resolving tags for local Docker registry
     kubectl -n knative-serving patch configmap/config-deployment \
@@ -74,19 +82,21 @@ function install_knative_serving_with_istio_controller() {
       --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
 
     # Install Knative Istio controller
-    kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.18.0/release.yaml
+    kubectl apply -f https://github.com/knative/net-istio/releases/download/v${knative_version}/release.yaml
 
     kubectl -n knative-serving wait --for=condition=Ready --timeout=90s \
-      pod -l serving.knative.dev/release=v0.18.0
+      pod -l serving.knative.dev/release=v${knative_version}
 
     cd $workdir
 }
 
 function install_mlp() {
+    mlp_version=${mlp_version:-1.1.0-alpha}
+
     workdir=$(pwd)
     cd $script_dir
 
-    git clone --single-branch --branch v1.1.0-alpha https://github.com/gojek/mlp
+    git clone --single-branch --branch v${mlp_version} https://github.com/gojek/mlp
     helm install mlp ./mlp/chart -f mlp.helm-values.yaml --wait
     kubectl apply -f mlp.ingress.yaml
 
@@ -103,11 +113,13 @@ function install_mlp() {
 }
 
 function install_vault() {
+    vault_helm_chart_version=${vault_helm_chart_version:-0.7.0}
+
     workdir=$(pwd)
     cd $script_dir
 
     helm repo add hashicorp https://helm.releases.hashicorp.com
-    helm install vault hashicorp/vault -f vault.helm-values.yaml --version=0.7.0 --wait
+    helm install vault hashicorp/vault -f vault.helm-values.yaml --version=${vault_helm_chart_version} --wait
     kubectl apply -f vault.ingress.yaml
 
     # Wait until Istio Ingress controller is ready to serve the new rule
@@ -129,10 +141,12 @@ EOF
 }
 
 function install_merlin() {
+    merlin_version=${merlin_version:-0.7.0-alpha}
+
     workdir=$(pwd)
     cd $script_dir
 
-    git clone --single-branch --branch v0.7.0-alpha https://github.com/gojek/merlin
+    git clone --single-branch --branch v${merlin_version} https://github.com/gojek/merlin
 
     kubectl create secret generic vault-secret \
         --from-literal=address=http://vault:8200 \
