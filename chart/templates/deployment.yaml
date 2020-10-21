@@ -1,0 +1,260 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "turing.fullname" .}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "turing.fullname" .}}
+    chart: {{ template "turing.chart" .}}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 4 -}}
+{{- end }}
+spec:
+  replicas: {{ .Values.turing.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "turing.fullname" .}}
+      release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "turing.fullname" .}}
+        release: {{ .Release.Name }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 8 -}}
+{{- end }}
+    spec:
+      initContainers:
+      - name: migrations
+        image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
+        command: ['/bin/sh', '-c']
+        args:
+          - |
+            /migrate \
+            -path /migrations \
+            -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "postgresql.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+            up
+        env:
+          - name: PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-postgresql
+                key: postgresql-password
+        volumeMounts:
+          - mountPath: /migrations
+            name: db-migrations
+      containers:
+        - name: api
+          image: {{ .Values.turing.image.registry }}{{ .Values.turing.image.repository }}:{{ .Values.turing.image.tag }}
+          imagePullPolicy: {{ .Values.turing.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.turing.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.turing.livenessProbe.path }}
+              port: {{ .Values.turing.service.internalPort }}
+              scheme: HTTP
+            initialDelaySeconds: {{ default "60" .Values.turing.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default "10" .Values.turing.livenessProbe.periodSeconds }}
+            successThreshold: {{ default "1" .Values.turing.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ default "5" .Values.turing.livenessProbe.timeoutSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.turing.readinessProbe.path }}
+              port: {{ .Values.turing.service.internalPort }}
+              scheme: HTTP
+            initialDelaySeconds: {{ default "60" .Values.turing.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default "10" .Values.turing.readinessProbe.periodSeconds }}
+            successThreshold: {{ default "1" .Values.turing.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.turing.resources.requests.cpu }}
+              memory: {{ .Values.turing.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.turing.resources.limits.cpu }}
+              memory: {{ .Values.turing.resources.limits.memory }}
+{{- if .Values.turing.args }}
+          args:
+{{ toYaml .Values.turing.args | indent 10 -}}
+{{ end }}
+{{- if .Values.turing.command }}
+          command:
+{{ toYaml .Values.turing.command | indent 10 -}}
+{{ end }}
+          env:
+            - name: TURING_PORT
+              value: "{{ .Values.turing.service.internalPort }}"
+            - name: TURING_DATABASE_HOST
+              value: {{ template "postgresql.host" . }}
+            - name: TURING_DATABASE_USER
+              value: "{{ .Values.postgresql.postgresqlUsername }}"
+            - name: TURING_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: postgresql-password
+            - name: TURING_DATABASE_NAME
+              value: "{{ .Values.postgresql.postgresqlDatabase }}"
+            - name: DEPLOYMENT_ENVIRONMENT_TYPE
+              value: "{{ .Values.turing.config.deployment.environmentType }}"
+            - name: DEPLOYMENT_GCP_PROJECT
+              value: "{{ .Values.turing.config.deployment.gcpProject }}"
+            - name: DEPLOYMENT_TIMEOUT
+              value: "{{ .Values.turing.config.deployment.timeout }}"
+            - name: DEPLOYMENT_DELETION_TIMEOUT
+              value: "{{ .Values.turing.config.deployment.deletionTimeout }}"
+            - name: DEPLOYMENT_MAX_CPU
+              value: "{{ .Values.turing.config.deployment.maxCPU }}"
+            - name: DEPLOYMENT_MAX_MEMORY
+              value: "{{ .Values.turing.config.deployment.maxMemory }}"
+            - name: TURING_ROUTER_IMAGE
+              value: "{{ .Values.turing.config.router.image.registry }}{{ .Values.turing.config.router.image.repository }}:{{ .Values.turing.config.router.image.tag }}"
+            - name: TURING_ROUTER_LOG_LEVEL
+              value: "{{ .Values.turing.config.router.logLevel }}"
+            - name: TURING_ROUTER_FIBER_DEBUG_LOG_ENABLED
+              value: !!str {{ .Values.turing.config.router.fiberDebugLog }}
+            - name: TURING_ROUTER_CUSTOM_METRICS_ENABLED
+              value: !!str {{ .Values.turing.config.router.customMetrics }}
+            - name: TURING_ROUTER_JAEGER_ENABLED
+              value: !!str {{ .Values.turing.config.router.jaeger.enabled }}
+            - name: TURING_ROUTER_JAEGER_COLLECTOR_ENDPOINT
+              value: "{{ .Values.turing.config.router.jaeger.collectorEndpoint }}"
+            - name: TURING_ROUTER_FLUENTD_IMAGE
+              value: "{{ .Values.turing.config.router.fluentd.image }}"
+            - name: TURING_ROUTER_FLUENTD_FLUSH_INTERVAL_SECONDS
+              value: !!str "{{ .Values.turing.config.router.fluentd.flushIntervalSeconds }}"
+            - name: AUTHORIZATION_ENABLED
+              value: !!str {{ .Values.turing.config.authorization.enabled }}
+            {{- if .Values.turing.config.authorization.enabled }}
+            - name: AUTHORIZATION_URL
+              value: "{{ .Values.turing.config.authorization.serverUrl }}"
+            {{- end }}
+            {{- if .Values.turing.config.sentry.enabled }}
+            - name: SENTRY_ENABLED
+              value: "{{ .Values.turing.config.sentry.enabled }}"
+            - name: SENTRY_DSN
+              value: "{{ .Values.turing.config.sentry.dsn }}"
+            {{- end }}
+            - name: NEWRELIC_ENABLED
+              value: "{{ .Values.turing.config.newrelic.enabled }}"
+            {{- if .Values.turing.config.newrelic.enabled }}
+            - name: NEWRELIC_APPNAME
+              value: "{{ .Values.turing.config.newrelic.appname }}"
+            - name: NEWRELIC_LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.turing.config.newrelic.licenseSecretName }}"
+                  key: key
+            {{- end }}
+            - name: VAULT_ADDRESS
+              value: "{{ .Values.turing.config.vault.address }}"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: vault_token
+                  name: {{ template "turing.fullname" .}}-svc-secret
+            - name: TURING_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: turing_encryption_key
+                  name: {{ template "turing.fullname" .}}-svc-secret
+            - name: MERLIN_URL
+              value: {{ .Values.turing.config.merlin.endpoint }}
+            - name: MLP_URL
+              value: {{ .Values.turing.config.mlp.endpoint }}
+            - name: MLP_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: mlp_encryption_key
+                  name: {{ template "turing.fullname" .}}-svc-secret
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/gcp_service_account/service-account.json
+            {{- if .Values.turing.config.alert.enabled }}
+            - name: ALERT_ENABLED
+              value: "true"
+            - name: ALERT_GITLAB_BASEURL
+              value: {{ .Values.turing.config.alert.gitlabBaseurl }}
+            - name: ALERT_GITLAB_PROJECTID
+              value: !!str {{ .Values.turing.config.alert.gitlabProjectid }}
+            - name: ALERT_GITLAB_BRANCH
+              value: {{ .Values.turing.config.alert.gitlabBranch }}
+            - name: ALERT_GITLAB_PATHPREFIX
+              value: {{ .Values.turing.config.alert.gitlabPathprefix }}
+            - name: ALERT_GITLAB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "turing.fullname" .}}-svc-secret
+                  key: gitlab_token
+            {{- end }}
+{{- if .Values.turing.env }}
+{{ toYaml .Values.turing.env | indent 12 -}}
+{{ end }}
+          volumeMounts:
+          {{- if .Values.turing.config.serviceAccount.enabled }}  
+          - name: service-account
+            mountPath: "/etc/gcp_service_account"
+            readOnly: true
+          {{- end }}
+        - name: swagger-ui
+          image: "swaggerapi/swagger-ui:{{ .Values.swaggerUi.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.swaggerUi.service.internalPort }}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+          env:
+            - name: LAYOUT
+              value: "BaseLayout"
+            - name: SWAGGER_JSON
+              value: "/app/swagger.yaml"
+            - name: PORT
+              value: "{{ .Values.swaggerUi.service.internalPort }}"
+            - name: API_HOST
+              value: "{{ .Values.swaggerUi.apiHost }}"
+            - name: BASE_PATH
+              value: "{{ .Values.swaggerUi.basePath }}"
+          command: ['sh', '-c']
+          args:
+            - |
+              mkdir /app
+              echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml..."
+              until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml); do
+                printf '.'
+                sleep 10
+              done
+              echo "Update Swagger config..."
+              sed -r -i 's/^(\s*)(host\s*:.*$$)/\host: "'$${API_HOST}'"/' $${SWAGGER_JSON}
+              sed -r -i 's#^(\s*)(basePath\s*:.*$$)#\basePath: "'$${BASE_PATH}'"#' $${SWAGGER_JSON}
+              echo "Running Swagger UI..."
+              /usr/share/nginx/run.sh
+      volumes:
+      {{- if .Values.turing.config.serviceAccount.enabled }}
+      - name: service-account
+        secret:
+          secretName: {{ .Values.turing.config.serviceAccount.secretName }}
+          items:
+            - key: {{ .Values.turing.config.serviceAccount.secretKey }}
+              path: service-account.json
+      {{- end }}
+      - name: db-migrations
+        configMap:
+          name: {{ .Release.Name }}-db-migrations
+
+{{- if (not .Values.turing.nodeSelectorDisabled) }}
+{{- if .Values.turing.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.turing.nodeSelector | indent 8 }}
+{{ end -}}
+{{ end -}}

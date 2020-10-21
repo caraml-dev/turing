@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -74,14 +75,21 @@ func NewMLPService(
 	mlpEncryptionkey string,
 	merlinBasePath string,
 ) (MLPService, error) {
+	// Create an HTTP client with Google default credential.
+	// Following this approach:
+	// https://github.com/gojek/merlin/blob/7fb3bcd28de9c8007e14da40f0dd84be19cebe3b/api/cmd/main.go#L115
+	httpClient := http.DefaultClient
+
 	googleClient, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
-	if err != nil {
-		return nil, err
+	if err == nil {
+		httpClient = googleClient
+	} else {
+		log.Println("Google default credential not found. Fallback to HTTP default client")
 	}
 
 	svc := &mlpService{
-		merlinClient: newMerlinClient(googleClient, merlinBasePath),
-		mlpClient:    newMLPClient(googleClient, mlpBasePath, mlpEncryptionkey),
+		merlinClient: newMerlinClient(httpClient, merlinBasePath),
+		mlpClient:    newMLPClient(httpClient, mlpBasePath, mlpEncryptionkey),
 		cache:        cache.New(mlpCacheExpirySeconds*time.Second, mlpCacheCleanUpSeconds*time.Second),
 	}
 

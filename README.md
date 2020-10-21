@@ -45,9 +45,10 @@ accessible from the Router endpoint after a sucessful deployment.
 - [x] Engines/experiment Go module
 - [ ] UI React app
 - [x] Unit tests with GitHub Actions
-- [ ] End-to-end test
+- [x] End-to-end test
 - [ ] Load tests
 - [ ] Docs
 - [ ] Deployment with Helm charts
 - [ ] Replace call to Merlin API with MLP API
 - [ ] Clean up sql migration scripts
+- [ ] Add Code License and automated check for its existence

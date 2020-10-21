@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mockserver
+  labels:
+    mockserver-name: mockserver
+data:
+  http_request_response_mocks.json: |
+    [
+      {
+        "httpRequest": {
+          "path": "/control"
+        },
+        "httpResponse": {
+          "body": {
+            "version": "control"
+          }
+        }
+      },
+      {
+        "httpRequest": {
+          "path": "/treatment-a"
+        },
+        "httpResponse": {
+          "body": {
+            "version": "treatment-a"
+          }
+        }
+      },
+      {
+          "httpRequest": {
+            "path": "/treatment-b"
+          },
+          "httpResponse": {
+            "body": {
+              "version": "treatment-b"
+            }
+          }
+        }
+    ]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mockserver
+  labels:
+    mockserver-name: mockserver
+spec:
+  containers:
+  - name: mockserver
+    image: mockserver/mockserver:mockserver-5.11.0
+    env:
+    - name: MOCKSERVER_INITIALIZATION_JSON_PATH
+      value: /etc/initialization-json/http_request_response_mocks.json
+    volumeMounts:
+    - name: initialization-json
+      mountPath: /etc/initialization-json
+    ports:
+    - containerPort: 1080
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "384Mi"
+  volumes:
+  - name: initialization-json
+    configMap:
+      name: mockserver
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockserver
+  labels:
+    mockserver-name: mockserver
+spec:
+  selector:
+    mockserver-name: mockserver
+  ports:
+  - port: 80
+    targetPort: 1080

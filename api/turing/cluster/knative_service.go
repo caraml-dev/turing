@@ -46,23 +46,31 @@ type KnativeService struct {
 // Creates a new config object compatible with the knative serving API, from
 // the given config
 func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1alpha1.Service {
-	// Build labels
-	labels := cfg.Labels
+	// clone creates a copy of a map object
+	clone := func(l map[string]string) map[string]string {
+		ll := map[string]string{}
+		for k, v := range l {
+			ll[k] = v
+		}
+		return ll
+	}
+
+	kserviceLabels := clone(cfg.Labels)
 	if cfg.IsClusterLocal {
-		labels["serving.knative.dev/visibility"] = "cluster-local"
+		// Kservice should only be accessible from within the cluster
+		// https://knative.dev/docs/serving/cluster-local-route/
+		kserviceLabels["serving.knative.dev/visibility"] = "cluster-local"
 	}
+	kserviceObjectMeta := cfg.buildSvcObjectMeta(kserviceLabels)
 
-	// Build object meta data
-	objMeta := cfg.buildSvcObjectMeta(labels)
+	revisionLabels := clone(cfg.Labels)
+	kserviceSpec := cfg.buildSvcSpec(revisionLabels)
 
-	// Build service spec
-	svcSpec := cfg.buildSvcSpec(labels)
-
-	// Return the knative service object
 	return &knservingv1alpha1.Service{
-		ObjectMeta: *objMeta,
-		Spec:       *svcSpec,
+		ObjectMeta: *kserviceObjectMeta,
+		Spec:       *kserviceSpec,
 	}
+
 }
 
 func (cfg *KnativeService) buildSvcObjectMeta(labels map[string]string) *metav1.ObjectMeta {

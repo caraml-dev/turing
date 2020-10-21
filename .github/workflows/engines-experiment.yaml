@@ -6,7 +6,7 @@ on:
     - "engines/experiment/**"
   pull_request:
     branches:
-      - main
+    - main
 
 jobs:
   test:

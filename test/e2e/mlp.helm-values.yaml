@@ -1,0 +1,28 @@
+mlp:
+  image:
+    registry: ghcr.io
+    repository: gojek/mlp
+    tag: v1.1.0-alpha
+  environment: dev
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  encryption:
+    key: password
+
+postgresql:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+  persistence:
+    enabled: false
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  replication:
+    enabled: false

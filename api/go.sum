@@ -219,6 +219,7 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/cockroachdb/cockroach-go v0.0.0-20190925194419-606b3d062051/go.mod h1:XGLbWH/ujMcbPbhZq52Nv6UrCghb1yGn//133kEsvDk=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
+github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd h1:qMd81Ts1T2OTKmB4acZcyKaMtRnY5Y44NuXGX2GFJ1w=
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=
 github.com/confluentinc/confluent-kafka-go v1.4.2/go.mod h1:u2zNLny2xq+5rWeTQjFHbDzzNuba4P1vo31r9r4uAdg=
 github.com/containerd/cgroups v0.0.0-20190919134610-bf292b21730f/go.mod h1:OApqhQ4XNSNC13gXIwDjhOQxjWa/NxkwZXJ1EvqT0ko=
@@ -486,8 +487,8 @@ github.com/gogo/protobuf v1.2.2-0.20190730201129-28a6bbf47e48/go.mod h1:SlYgWuQ5
 github.com/gogo/protobuf v1.3.0/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
-github.com/gojek/fiber v0.0.0-20200928074910-233ab2f8ca2d h1:tcfvsm3jXLxnhGr9DBC/dtlZkzKU3yAAlD3GimADe2M=
-github.com/gojek/fiber v0.0.0-20200928074910-233ab2f8ca2d/go.mod h1:D6j5WEkTh10DR+w7bWlJ7ojboVctCCtqN04mlf2TWzE=
+github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84 h1:xJz8oB3jouEnftUCwg6wDXxbFM50Cx9LjYJlRPJ6jSc=
+github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84/go.mod h1:D6j5WEkTh10DR+w7bWlJ7ojboVctCCtqN04mlf2TWzE=
 github.com/gojek/merlin/api v0.0.0-20200928080507-5e2221e40627 h1:VHjnVJdUiDAYu85W2KaV4PmHoL8XO34Bl/r1ygX1lg0=
 github.com/gojek/merlin/api v0.0.0-20200928080507-5e2221e40627/go.mod h1:voipV24vKSOGv82QdYAU2T6JJMEhg2u7N8Ohjp+NKHo=
 github.com/gojek/merlin/python/batch-predictor v0.0.0-20200928080507-5e2221e40627/go.mod h1:TgO2pONyOOmy5zKnURBnni3cqCfYTpm5srrOR7RwDy0=
@@ -1091,9 +1092,15 @@ github.com/tektoncd/pipeline v0.8.0/go.mod h1:IZzJdiX9EqEMuUcgdnElozdYYRh0/ZRC+N
 github.com/tektoncd/pipeline v0.10.1/go.mod h1:D2X0exT46zYx95BU7ByM8+erpjoN7thmUBvlKThOszU=
 github.com/tektoncd/plumbing v0.0.0-20191216083742-847dcf196de9/go.mod h1:QZHgU07PRBTRF6N57w4+ApRu8OgfYLFNqCDlfEZaD9Y=
 github.com/tektoncd/plumbing/pipelinerun-logs v0.0.0-20191206114338-712d544c2c21/go.mod h1:S62EUWtqmejjJgUMOGB1CCCHRp6C706laH06BoALkzU=
+github.com/tidwall/gjson v1.6.1 h1:LRbvNuNuvAiISWg6gxLEFuCe72UKy5hDqhxW/8183ws=
+github.com/tidwall/gjson v1.6.1/go.mod h1:BaHyNc5bjzYkPqgLq7mdVzeiRtULKULXLgZFKsxEHI0=
+github.com/tidwall/match v1.0.1 h1:PnKP62LPNxHKTwvHHZZzdOAOCtsJTjo6dZLCwpKm5xc=
+github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
+github.com/tidwall/pretty v1.0.2 h1:Z7S3cePv9Jwm1KwS0513MRaoUe3S01WPbLNV40pwWZU=
+github.com/tidwall/pretty v1.0.2/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tinylib/msgp v1.1.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=

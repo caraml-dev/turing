@@ -25,7 +25,7 @@ func TestVersionAPI(t *testing.T) {
 		internal.VersionInfo = currentVersionInfo
 	}()
 
-	handler := NewInternalAPIHandler()
+	handler := NewInternalAPIHandler(nil)
 	// Request the version API
 	req, err := http.NewRequest(http.MethodGet, "/version", nil)
 	tu.FailOnError(t, err)
@@ -43,4 +43,64 @@ func TestVersionAPI(t *testing.T) {
 			"go_version": "1.12"
 		}
 	`, rr.Body.String())
+}
+
+func TestNewHealthcheckHandler(t *testing.T) {
+	tests := []struct {
+		name        string
+		serviceURLs []string
+		wantCode    int
+	}{
+		{
+			name:        "Nil seviceURLs",
+			serviceURLs: nil,
+			wantCode:    http.StatusOK,
+		},
+		{
+			name:        "Empty seviceURLs",
+			serviceURLs: []string{},
+			wantCode:    http.StatusOK,
+		},
+		{
+			name:        "Empty string seviceURLs",
+			serviceURLs: []string{""},
+			wantCode:    http.StatusOK,
+		},
+		{
+			name:        "Resolvable seviceURLs",
+			serviceURLs: []string{"http://example.com", "http://google.com"},
+			wantCode:    http.StatusOK,
+		},
+		{
+			name:        "All non-resolvable seviceURLs",
+			serviceURLs: []string{"http://ttthis-host-should-not-exist.com"},
+			wantCode:    http.StatusServiceUnavailable,
+		},
+		{
+			name:        "Some non-resolvable seviceURLs",
+			serviceURLs: []string{"http://ttthis-host-should-not-exist.com", "http://google.com"},
+			wantCode:    http.StatusServiceUnavailable,
+		},
+		{
+			name:        "Invalid seviceURLs",
+			serviceURLs: []string{"invalid-url"},
+			wantCode:    http.StatusServiceUnavailable,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := newHealthcheckHandler(tt.serviceURLs).(http.Handler)
+			req, err := http.NewRequest("GET", "/ready", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			if rr.Code != tt.wantCode {
+				t.Errorf("newHealthcheckHandler() = %v, want %v", rr.Code, tt.wantCode)
+			}
+		})
+	}
 }

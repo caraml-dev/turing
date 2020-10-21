@@ -1,0 +1,65 @@
+name: e2e
+
+on:
+  push:
+    branches:
+    - "*"
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Go 1.14
+      uses: actions/setup-go@v2
+      with:
+        go-version: "1.14"
+
+    # TODO: Remove this step once Turing and MLP repo becomes public
+    - name: Set up Git for reading Gojek private repo
+      run: git config --global url."https://${{ secrets.GOJEK_GITHUB_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
+    - name: Setup test infra
+      working-directory: test/e2e
+      env:
+        CONCURRENT_NONINTERACTIVE: "1"
+      run: |
+        set -e
+        source setup-infra.sh
+
+        concurrent \
+          - "install_e2e_tools" install_e2e_tools \
+          --and-then \
+          - "install_kubernetes_kind_cluster" install_kubernetes_kind_cluster \
+          --and-then \
+          - "install_local_docker_registry" install_local_docker_registry \
+          - "install_istio" install_istio \
+          --and-then \
+          - "install_knative_serving_with_istio_controller" install_knative_serving_with_istio_controller \
+          - "install_mlp" install_mlp \
+          - "install_vault" install_vault \
+          --and-then \
+          - "install_merlin" install_merlin \
+          - "build_turing_router_docker_image" build_turing_router_docker_image \
+          - "build_turing_apiserver_docker_image" build_turing_apiserver_docker_image \
+          --and-then \
+          - "install_turing" install_turing
+
+    - name: Run test 
+      working-directory: api 
+      env:
+        TEST_ID: "1"
+        MOCKSERVER_ENDPOINT: http://mockserver
+        API_BASE_PATH: http://turing.127.0.0.1.nip.io/v1
+        MODEL_CLUSTER_NAME: kind
+        PROJECT_ID: "1"
+        PROJECT_NAME: default
+        KUBECONFIG_USE_LOCAL: "true" 
+      run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd

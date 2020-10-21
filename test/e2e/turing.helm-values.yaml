@@ -1,0 +1,87 @@
+turing:
+  image:
+    registry: localhost:5000/
+    repository: turing
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  livenessProbe:
+    path: "/v1/internal/live"
+  readinessProbe:
+    path: "/v1/internal/ready"
+  service:
+    externalPort: 8080
+    internalPort: 8080
+  config:
+    deployment:
+      timeout: 3m
+      deletionTimeout: 30s
+      gcpProject: ""
+      environmentType: id-dev
+      maxCPU: "8"
+      maxMemory: "8Gi"
+    router:
+      image:
+        registry: localhost:5000/
+        repository: turing-router
+        tag: latest
+      logLevel: DEBUG
+      fiberDebugLog: true
+      customMetrics: true
+      jaeger:
+        enabled: false
+      fluentd:
+        image: ""
+        flushIntervalSeconds: 90
+    authorization:
+      enabled: false
+    sentry:
+      enabled: false
+    newrelic:
+      enabled: false
+    vault:
+      address: http://vault:8200
+      token: root
+    encryption:
+      key: secret
+    merlin:
+      endpoint: http://merlin:8080/v1
+    mlp:
+      endpoint: http://mlp:8080/v1
+      encryption:
+        key: secret
+    alert:
+      enabled: false
+    serviceAccount:
+      enabled: false
+    ingress:
+      enabled: false
+
+dbMigrations:
+  image:
+    tag: v4.7.1
+
+swaggerUi:
+  image:
+    tag: v3.24.3
+  apiHost: "127.0.0.1"
+  basePath: "/v1"
+  service:
+    internalPort: 8081
+    externalPort: 8080
+
+postgresql:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  persistence:
+    enabled: false
+  postgresqlUsername: turing
+  postgresqlDatabase: turing
+  postgresqlPassword: secret

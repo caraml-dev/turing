@@ -293,8 +293,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 }
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
-	routerDefaults := &config.RouterDefaults{
-	}
+	routerDefaults := &config.RouterDefaults{}
 	// Set up mock Crypto service
 	cs := &mocks.CryptoService{}
 	cs.On("Encrypt", "xp-passkey-bad").Return("", errors.New("test-encrypt-error"))
@@ -337,8 +336,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				Deployment: struct {
 					Endpoint string `json:"endpoint"`
 					Timeout  string `json:"timeout"`
-				}{
-				},
+				}{},
 				Client: manager.Client{
 					Username: "client-name",
 					Passkey:  "xp-passkey",
@@ -397,8 +395,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				Deployment: struct {
 					Endpoint string `json:"endpoint"`
 					Timeout  string `json:"timeout"`
-				}{
-				},
+				}{},
 				Client: manager.Client{
 					Username: "client-name",
 					Passkey:  "xp-passkey-enc",
