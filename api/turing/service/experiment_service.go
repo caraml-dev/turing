@@ -418,8 +418,6 @@ func (es *experimentsService) getExperimentsWithCache(
 	for _, eID := range experimentIDs {
 		if e, found := expIDMap[eID]; found {
 			filteredExperiments = append(filteredExperiments, e)
-		} else {
-			return []manager.Experiment{}, fmt.Errorf("Could not find experiment %s", eID)
 		}
 	}
 	return filteredExperiments, nil
