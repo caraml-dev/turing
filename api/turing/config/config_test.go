@@ -21,8 +21,6 @@ var requiredEnvs = map[string]string{
 	"TURING_ROUTER_IMAGE":                     "asia.gcr.io/gcp-project-id/turing-router:1.0.0",
 	"TURING_ROUTER_JAEGER_COLLECTOR_ENDPOINT": "lala",
 	"TURING_ROUTER_FLUENTD_IMAGE":             "image",
-	"TURING_ROUTER_LITMUS_GRPC_ENDPOINT":      "grpc://litmus",
-	"TURING_ROUTER_XP_HTTP_ENDPOINT":          "http://xp",
 	"DEPLOYMENT_ENVIRONMENTS":                 "env1,env2",
 	"DEPLOYMENT_ENVIRONMENT_TYPE":             "dev",
 	"DEPLOYMENT_GCP_PROJECT":                  "gcp-project",
@@ -37,14 +35,6 @@ var requiredEnvs = map[string]string{
 	"MLP_URL":                                 "http://mlp.example.com/api/mlp/v1",
 	"MLP_ENCRYPTION_KEY":                      "key",
 	"TURING_ENCRYPTION_KEY":                   "turing-key",
-	"LITMUS_CLIENT_ID":                        "client",
-	"LITMUS_PASSKEY":                          "pk",
-	"LITMUS_CAS_TOKEN":                        "cas",
-	"LITMUS_BASE_URL":                         "test_url",
-	"XP_CLIENT_ID":                            "xp-client",
-	"XP_PASSKEY":                              "xp-passkey",
-	"XP_BASE_URL":                             "xp-host",
-	"XP_USE_MOCK_DATA":                        "false",
 }
 
 var optionalEnvs = map[string]string{
@@ -56,8 +46,6 @@ var optionalEnvs = map[string]string{
 	"TURING_ROUTER_JAEGER_ENABLED":                 "false",
 	"TURING_ROUTER_LOG_LEVEL":                      "DEBUG",
 	"TURING_ROUTER_FLUENTD_TAG":                    "turing-result2.log",
-	"TURING_ROUTER_LITMUS_TIMEOUT":                 "50ms",
-	"TURING_ROUTER_XP_TIMEOUT":                     "70ms",
 	"AUTHORIZATION_ENABLED":                        "false",
 	"ALERT_ENABLED":                                "true",
 	"ALERT_GITLAB_BASEURL":                         "https://gitlab.com",
@@ -71,7 +59,6 @@ var optionalEnvs = map[string]string{
 	"TURING_UI_APP_DIRECTORY":                      "./build",
 	"TURING_UI_HOMEPAGE":                           "/turing-ui",
 	"SWAGGER_FILE":                                 "/custom/path/swagger.yaml",
-	"XP_ENABLED":                                   "true",
 }
 
 func TestMissingRequiredEnvs(t *testing.T) {
