@@ -1,4 +1,4 @@
-package common_test
+package router_test
 
 import (
 	"encoding/json"
@@ -8,11 +8,12 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/router"
 	"github.com/stretchr/testify/require"
 )
 
 type operatorSerializationTestCase struct {
-	operator      common.RuleConditionOperator
+	operator      router.RuleConditionOperator
 	serialized    string
 	expectedError string
 }
@@ -20,7 +21,7 @@ type operatorSerializationTestCase struct {
 func TestRuleConditionOperator_UnmarshalJSON(t *testing.T) {
 	suite := map[string]operatorSerializationTestCase{
 		"success": {
-			operator:   common.InConditionOperator,
+			operator:   router.InConditionOperator,
 			serialized: `"in"`,
 		},
 		"failure | unknown operator": {
@@ -35,7 +36,7 @@ func TestRuleConditionOperator_UnmarshalJSON(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			var actual common.RuleConditionOperator
+			var actual router.RuleConditionOperator
 			err := json.Unmarshal([]byte(tt.serialized), &actual)
 
 			if tt.expectedError == "" {
@@ -51,7 +52,7 @@ func TestRuleConditionOperator_UnmarshalJSON(t *testing.T) {
 func TestRuleConditionOperator_MarshalJSON(t *testing.T) {
 	suite := map[string]operatorSerializationTestCase{
 		"success": {
-			operator:   common.InConditionOperator,
+			operator:   router.InConditionOperator,
 			serialized: `"in"`,
 		},
 	}
@@ -108,7 +109,7 @@ func TestInConditionOperator_Test(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			actual, err := common.InConditionOperator.Test(tt.left, tt.right)
+			actual, err := router.InConditionOperator.Test(tt.left, tt.right)
 
 			if tt.expectedError == "" {
 				require.NoError(t, err)
@@ -133,17 +134,17 @@ func (o *mockOperator) Test(left interface{}, right interface{}) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func makeMockOperator(left, right interface{}, result bool, err error) common.RuleConditionOperator {
+func makeMockOperator(left, right interface{}, result bool, err error) router.RuleConditionOperator {
 	operator := new(mockOperator)
 	operator.
 		On("Test", left, right).
 		Return(result, err)
 
-	return common.RuleConditionOperator{Operator: operator}
+	return router.RuleConditionOperator{Operator: operator}
 }
 
 type trafficRuleConditionTestCase struct {
-	condition     *common.TrafficRuleCondition
+	condition     *router.TrafficRuleCondition
 	header        http.Header
 	payload       string
 	expected      bool
@@ -153,7 +154,7 @@ type trafficRuleConditionTestCase struct {
 func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 	suite := map[string]trafficRuleConditionTestCase{
 		"success | header": {
-			condition: &common.TrafficRuleCondition{
+			condition: &router.TrafficRuleCondition{
 				FieldSource: common.HeaderFieldSource,
 				Field:       "Content-Type",
 				Operator: makeMockOperator(
@@ -166,7 +167,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 			expected: true,
 		},
 		"success | header not in": {
-			condition: &common.TrafficRuleCondition{
+			condition: &router.TrafficRuleCondition{
 				FieldSource: common.HeaderFieldSource,
 				Field:       "Content-Type",
 				Operator: makeMockOperator(
@@ -179,7 +180,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 			expected: false,
 		},
 		"success | payload": {
-			condition: &common.TrafficRuleCondition{
+			condition: &router.TrafficRuleCondition{
 				FieldSource: common.PayloadFieldSource,
 				Field:       "parent_field.nested",
 				Operator: makeMockOperator(
@@ -190,7 +191,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 			expected: true,
 		},
 		"failure | header not found": {
-			condition: &common.TrafficRuleCondition{
+			condition: &router.TrafficRuleCondition{
 				FieldSource: common.HeaderFieldSource,
 				Field:       "Session-ID",
 				Operator:    makeMockOperator(nil, nil, true, nil),
@@ -202,7 +203,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 			expectedError: "Field Session-ID not found in the request header",
 		},
 		"failure | key not found": {
-			condition: &common.TrafficRuleCondition{
+			condition: &router.TrafficRuleCondition{
 				FieldSource: common.PayloadFieldSource,
 				Field:       "parent_field.bar",
 				Operator:    makeMockOperator(nil, nil, true, nil),

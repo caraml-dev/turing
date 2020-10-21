@@ -4,6 +4,7 @@ package validation_test
 
 import (
 	"errors"
+	"github.com/gojek/turing/engines/router"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -224,11 +225,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.HeaderFieldSource,
 							Field:       "X-Region",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
@@ -254,7 +255,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{},
+					Conditions: []*router.TrafficRuleCondition{},
 					Routes:     []string{"route-b"},
 				},
 			},
@@ -273,11 +274,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.HeaderFieldSource,
 							Field:       "X-Region",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{"region-b"},
 						},
 					},
@@ -305,11 +306,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.HeaderFieldSource,
 							Field:       "X-Region",
-							Operator:    common.RuleConditionOperator{},
+							Operator:    router.RuleConditionOperator{},
 							Values:      []string{"region-b"},
 						},
 					},
@@ -337,11 +338,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "unknown",
 							Field:       "X-Region",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{"region-b"},
 						},
 					},
@@ -369,11 +370,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.HeaderFieldSource,
 							Field:       "",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{},
 						},
 					},
@@ -397,11 +398,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.PayloadFieldSource,
 							Field:       "some_property",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},
 						},
 					},
@@ -423,11 +424,11 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: "route-a",
 			trafficRules: models.TrafficRules{
 				{
-					Conditions: []*common.TrafficRuleCondition{
+					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: common.PayloadFieldSource,
 							Field:       "some_property",
-							Operator:    common.InConditionOperator,
+							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},
 						},
 					},

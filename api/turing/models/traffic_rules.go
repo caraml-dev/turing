@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/router"
 )
 
 type TrafficRule struct {
-	Conditions []*common.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
+	Conditions []*router.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
 	Routes     []string                       `json:"routes" validate:"required,notBlank"`
 }
 

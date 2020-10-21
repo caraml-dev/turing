@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
-	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/router"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/internal"
 	"github.com/gojek/turing/engines/router/missionctl/log"
@@ -28,7 +28,7 @@ var (
 // Each rule maps set of conditions to one route configured on fiber router
 type TrafficSplittingStrategyRule struct {
 	RouteID    string                         `json:"route_id" validate:"required,notBlank"`
-	Conditions []*common.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
+	Conditions []*router.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
 }
 
 // TestRequest checks if the request satisfies all conditions of this rule
@@ -41,7 +41,7 @@ func (r *TrafficSplittingStrategyRule) TestRequest(reqHeader http.Header, bodyBy
 
 	// test each condition asynchronously
 	for _, condition := range r.Conditions {
-		go func(condition *common.TrafficRuleCondition) {
+		go func(condition *router.TrafficRuleCondition) {
 			res, err := condition.TestRequest(reqHeader, bodyBytes)
 			if err != nil {
 				log.Glob().Infof(
