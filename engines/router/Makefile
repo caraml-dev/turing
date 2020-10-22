@@ -4,9 +4,7 @@ export
 BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-router)
 VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker))
 ALL_PACKAGES=$(shell go list ./...)
-# TODO: Remove this step once Turing repo becomes public
-GOPRIVATE=github.com/gojek/*
-SRC_ROOT=./
+SRC_ROOT=.
 
 USER=$(shell whoami)
 HOST=$(shell hostname)
@@ -76,7 +74,7 @@ build: tidy fmt
 			-X ${PROJECT_ROOT}/missionctl/internal.Branch=${BRANCH} \
 			-X ${PROJECT_ROOT}/missionctl/internal.BuildUser=${USER}@${HOST} \
 			-X ${PROJECT_ROOT}/missionctl/internal.BuildDate=${NOW}" \
-		${SRC_ROOT}/cmd/main.go
+		${SRC_ROOT}/missionctl/cmd/main.go
 
 run: build
 	./bin/${BIN_NAME}
