@@ -1,6 +1,7 @@
 package request
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -210,7 +211,16 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 	}
 
 	// Get deployment configs from the defaults
-	var endpoint, timeout string
+	experimentConfigJSON, ok := defaults.Experiment[string(engineType)]
+	if !ok {
+		return nil, fmt.Errorf("experiment engine '%s' not found in router defaults experiment config", engineType)
+	}
+
+	var experimentConfig map[string]string
+	err := json.Unmarshal([]byte(experimentConfigJSON), &experimentConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal router defaults experiment config for engine '%s': %s", engineType, err)
+	}
 
 	// Build Experiment engine config
 	return &manager.TuringExperimentConfig{
@@ -218,8 +228,8 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 			Endpoint string `json:"endpoint"`
 			Timeout  string `json:"timeout"`
 		}{
-			Endpoint: endpoint,
-			Timeout:  timeout,
+			Endpoint: experimentConfig["endpoint"],
+			Timeout:  experimentConfig["timeout"],
 		},
 		Client: manager.Client{
 			ID:       r.Config.ExperimentEngine.Config.Client.ID,
