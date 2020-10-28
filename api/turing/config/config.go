@@ -48,6 +48,15 @@ type Config struct {
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
 	SwaggerFile string `envconfig:"swagger_file" default:"swagger.yaml"`
+	// Experiment specifies the JSON configuration to set up experiment managers and runners.
+	//
+	// The configuration follows the following format to support different experiment engines
+	// and to allow custom configuration for different engines:
+	// { "<experiment_engine>": <experiment_engine_config>, ... }
+	//
+	// For example:
+	// { "experiment_engine_a": `{"client": "foo"}`, "experiment_engine_b": `{"apikey": 12}` }
+	Experiment map[string]string `envconfig:"experiment"`
 }
 
 // ListenAddress returns the Turing Api app's port
@@ -101,6 +110,20 @@ type RouterDefaults struct {
 	LogLevel string `split_words:"true" default:"INFO"`
 	// Fluentd config for the router
 	FluentdConfig *FluentdConfig `envconfig:"fluentd"`
+	// Experiment specifies the default experiment JSON configuration for different experiment
+	// engines that Turing router supports.
+	//
+	// The JSON configuration follows the following format to support different experiment engines.
+	// { "<experiment_engine>": <experiment_engine_config>, ... }
+	//
+	// Currently the router defaults configuration for each experiment engine is expected to have
+	// "endpoint" and "timeout" fields with string value, in order to follow the configuration
+	// specification for routers.
+	//
+	// For example:
+	// {"experiment_engine_a": `{"endpoint": "http://engine-a.com", "timeout": "500ms"}`,
+	//  "experiment_engine_b": `{"endpoint": "http://engine-b.com", "timeout": "250ms"}`}
+	Experiment map[string]string `envconfig:"experiment"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
