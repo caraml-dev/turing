@@ -12,6 +12,7 @@ type Engine struct {
 	Name                       string `json:"name"`
 	ClientSelectionEnabled     bool   `json:"client_selection_enabled"`
 	ExperimentSelectionEnabled bool   `json:"experiment_selection_enabled"`
+	HomePageURL                string `json:"home_page_url"`
 }
 
 // Client describes the properties of a client registered on an experiment engine
