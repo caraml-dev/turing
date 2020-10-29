@@ -9,10 +9,18 @@ import (
 
 // Engine describes the properties of an experiment engine
 type Engine struct {
-	Name                       string `json:"name"`
-	ClientSelectionEnabled     bool   `json:"client_selection_enabled"`
-	ExperimentSelectionEnabled bool   `json:"experiment_selection_enabled"`
-	HomePageURL                string `json:"home_page_url"`
+	// Name is the display name used for the experiment engine.
+	Name string `json:"name"`
+	// ClientSelectionEnabled is set to true if the experiment engine has the concept of
+	// clients, that can be used to authenticate the experiment run requests.
+	ClientSelectionEnabled bool `json:"client_selection_enabled"`
+	// ExperimentSelectionEnabled is set to true if the experiment engine allows selecting
+	// individual experiments configured elsewhere
+	ExperimentSelectionEnabled bool `json:"experiment_selection_enabled"`
+	// HomePageURL is an optional string which, if set, will be used by the UI to redirect
+	// to the experiment engine's home page, to view more details on the experiment
+	// configured in Turing.
+	HomePageURL string `json:"home_page_url"`
 }
 
 // Client describes the properties of a client registered on an experiment engine
