@@ -15,10 +15,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"sort"
-	"sync"
 	"testing"
 	"time"
 
@@ -31,11 +32,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// testHTTPServerAddr is the address of the test HTTP server assumed to be running and
+// serving various endpoints required by the router during testing.
+var testHTTPServerAddr = "127.0.0.1:9000"
+
 // Test config
 var testCfg *config.Config = &config.Config{
 	Port: 80,
 	EnrichmentConfig: &config.EnrichmentConfig{
-		Endpoint: "http://localhost:9000/enrich/",
+		Endpoint: fmt.Sprintf("http://%s/enrich/", testHTTPServerAddr),
 		Timeout:  5 * time.Second,
 	},
 	RouterConfig: &config.RouterConfig{
@@ -43,7 +48,7 @@ var testCfg *config.Config = &config.Config{
 		Timeout:    5 * time.Second,
 	},
 	EnsemblerConfig: &config.EnsemblerConfig{
-		Endpoint: "http://localhost:9000/ensemble/",
+		Endpoint: fmt.Sprintf("http://%s/ensemble", testHTTPServerAddr),
 		Timeout:  5 * time.Second,
 	},
 	AppConfig: &config.AppConfig{
@@ -86,17 +91,16 @@ func TestMissionControlEnrich(t *testing.T) {
 	tu.FailOnError(t, err)
 
 	// Set up Test HTTP Server
-	srv := startTestHTTPServer()
-	defer func() {
-		_ = srv.Shutdown(context.Background())
-	}()
+	stopServer := startTestHTTPServer(t, testHTTPServerAddr)
+	defer stopServer()
 
 	// Enrich
 	resp, httpErr := missionCtl.Enrich(context.Background(),
 		http.Header{}, []byte(``))
 
 	// Check that the error is nil
-	assert.True(t, httpErr == nil)
+	assert.Nil(t, httpErr)
+	assert.NotNil(t, resp)
 
 	// Check that the response body is expected
 	data, err := tu.ReadFile(filepath.Join("testdata", "enricher_response.json"))
@@ -130,17 +134,16 @@ func TestMissionControlEnsemble(t *testing.T) {
 	tu.FailOnError(t, err)
 
 	// Set up Test HTTP Server
-	srv := startTestHTTPServer()
-	defer func() {
-		_ = srv.Shutdown(context.Background())
-	}()
+	stopServer := startTestHTTPServer(t, testHTTPServerAddr)
+	defer stopServer()
 
 	// Ensemble
 	resp, httpErr := missionCtl.Ensemble(context.Background(),
 		http.Header{}, []byte(``), []byte(``))
 
 	// Check that the error is nil
-	assert.Equal(t, true, httpErr == nil)
+	assert.Nil(t, httpErr)
+	assert.NotNil(t, resp)
 
 	// Check that the response body is expected
 	data, err := tu.ReadFile(filepath.Join("testdata", "ensembler_response.json"))
@@ -170,10 +173,8 @@ func TestMissionControlRoute(t *testing.T) {
 	}
 
 	// Set up Test HTTP Server
-	srv := startTestHTTPServer()
-	defer func() {
-		_ = srv.Shutdown(context.Background())
-	}()
+	stopServer := startTestHTTPServer(t, testHTTPServerAddr)
+	defer stopServer()
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -209,7 +210,9 @@ func TestMissionControlRoute(t *testing.T) {
 				http.Header{}, []byte(`{"customer_id": "2", "country_id": "TH"}`))
 
 			// Check that the error is nil
-			assert.Equal(t, true, httpErr == nil)
+			assert.Nil(t, httpErr)
+			assert.NotNil(t, resp)
+
 			// Check that the response header has application/json content type
 			assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 			// Check that the response body is not empty
@@ -272,10 +275,8 @@ func benchmarkEnrich(payloadFileName string, b *testing.B) {
 	)
 
 	// Set up Test HTTP Server
-	srv := startTestHTTPServer()
-	defer func() {
-		_ = srv.Shutdown(context.Background())
-	}()
+	stopServer := startTestHTTPServer(b, testHTTPServerAddr)
+	defer stopServer()
 
 	// Read payload
 	payload, err := tu.ReadFile(filepath.Join("testdata", payloadFileName))
@@ -329,10 +330,8 @@ func benchmarkRoute(cfgFileName string, payloadFileName string, b *testing.B) {
 	)
 
 	// Set up Test HTTP Server
-	srv := startTestHTTPServer()
-	defer func() {
-		_ = srv.Shutdown(context.Background())
-	}()
+	stopServer := startTestHTTPServer(b, testHTTPServerAddr)
+	defer stopServer()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
@@ -355,25 +354,38 @@ func BenchmarkMissionControlEnsemblingRouteLargePayload(b *testing.B) {
 }
 
 //////////////////////// Test HTTP Server Methods /////////////////////////////
-// Register HTTP handlers once
-var once sync.Once
 
-func registerHTTPHandlers() {
-	http.HandleFunc("/enrich/", enricherHandler)
-	http.HandleFunc("/ensemble/", ensemblerHandler)
-	http.HandleFunc("/route1/", route1Handler)
-	http.HandleFunc("/control/", controlHandler)
-}
+// startTestHTTPServer starts an HTTP server at the configured address. It returns
+// a stopServer function that the caller should call to stop the server after each
+// test completes, so that the TCP socket can be reused.
+//
+// The server handles requests with the following paths:
+// - /enrich/
+// - /ensemble/
+// - /route1/
+// - /control/
+//
+// This test server can be used to test sending requests to various endpoints configured
+// in the router.
+func startTestHTTPServer(t testing.TB, addr string) (stopServer func()) {
+	handler := http.NewServeMux()
+	handler.HandleFunc("/enrich/", enricherHandler)
+	handler.HandleFunc("/ensemble/", ensemblerHandler)
+	handler.HandleFunc("/route1/", route1Handler)
+	handler.HandleFunc("/control/", controlHandler)
+	server := httptest.NewUnstartedServer(handler)
 
-func startTestHTTPServer() *http.Server {
-	srv := &http.Server{}
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		t.Fatal("Failed to start test http server: " + err.Error())
+	}
 
-	go func() {
-		once.Do(registerHTTPHandlers)
-		_ = http.ListenAndServe(":9000", nil)
-	}()
+	server.Listener = listener
+	server.Start()
 
-	return srv
+	return func() {
+		server.Close()
+	}
 }
 
 // Define HTTP Server handlers for the enricher, ensembler and route endpoints
