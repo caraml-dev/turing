@@ -82,7 +82,7 @@ func upsertExperimentEnginesListAllPolicy(authEnforcer enforcer.Enforcer) error 
 		policyName,
 		[]string{},
 		[]string{"**"},
-		[]string{subresource},
+		[]string{resourceExperimentEngines, subresource},
 		[]string{enforcer.ActionRead},
 	)
 	return err
