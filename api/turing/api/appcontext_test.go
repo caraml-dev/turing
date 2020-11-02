@@ -123,7 +123,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewExperimentsService,
-		func() (service.ExperimentsService, error) {
+		func(experimentConfig map[string]string) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -186,7 +186,7 @@ func TestNewAppContext(t *testing.T) {
 	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
 		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
 	assert.NoError(t, err)
-	experimentService, err := service.NewExperimentsService()
+	experimentService, err := service.NewExperimentsService(testCfg.Experiment)
 	assert.NoError(t, err)
 	gitlabClient, err := gitlab.NewClient(
 		testCfg.AlertConfig.GitLab.Token,
