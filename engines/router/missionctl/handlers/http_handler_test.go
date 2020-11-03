@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -140,7 +141,9 @@ func (mc *MockMissionControlBadEnsemble) Ensemble(
 // testLogUtils provides some test methods to verify the request summary logging
 type testLogUtils struct {
 	mock.Mock
-	logTuringRouterRequestSummaryCalls int
+	// logTuringRouterRequestSummaryCalls counts the calls to logTuringRouterRequestSummary,
+	// so it can be polled until timeout instead of using mock.Mock's AssertCalled.
+	logTuringRouterRequestSummaryCalls int32
 }
 
 func (l *testLogUtils) copyResponseToLogChannel(
@@ -148,19 +151,18 @@ func (l *testLogUtils) copyResponseToLogChannel(
 	r mchttp.Response,
 	httpErr *errors.HTTPError,
 ) {
-	var errorString string
+	var requestBody, errorString string
 	if httpErr != nil {
 		errorString = httpErr.Error()
 	}
-	if r == nil {
-		l.Called(key, nil, errorString)
-	} else {
-		l.Called(key, string(r.Body()), errorString)
+	if r != nil {
+		requestBody = string(r.Body())
 	}
+	l.Called(key, requestBody, errorString)
 }
 
 func (l *testLogUtils) logTuringRouterRequestSummary() {
-	l.logTuringRouterRequestSummaryCalls = 1
+	atomic.AddInt32(&l.logTuringRouterRequestSummaryCalls, 1)
 }
 
 // Tests //////////////////////////////////////////////////////////////////////
@@ -271,7 +273,7 @@ func TestLogRequestSummary(t *testing.T) {
 				t.Log("logTuringRouterRequestSummary not called")
 				t.Fail()
 			case <-ticker.C:
-				if l.logTuringRouterRequestSummaryCalls == 1 {
+				if atomic.LoadInt32(&l.logTuringRouterRequestSummaryCalls) == 1 {
 					break wait
 				}
 			}
@@ -303,7 +305,7 @@ func TestLogRequestSummary(t *testing.T) {
 			logutils: logUtilsBadEnricher,
 			checks: func() {
 				logUtilsBadEnricher.AssertCalled(t, "copyResponseToLogChannel", "enricher",
-					nil, "Bad Enrich Called")
+					"", "Bad Enrich Called")
 				checkLogRequestSummaryCalled(t, logUtilsBadEnricher)
 			},
 		},
