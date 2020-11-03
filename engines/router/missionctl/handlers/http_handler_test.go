@@ -8,8 +8,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -18,6 +21,7 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	"github.com/gojek/turing/engines/router/missionctl/log"
 )
 
 // testBody is a simple struct with a string, for testing json payload in requests
@@ -134,6 +138,33 @@ func (mc *MockMissionControlBadEnsemble) Ensemble(
 	return nil, errors.NewHTTPError(fmt.Errorf("Bad Ensemble Called"))
 }
 
+// testLogUtils provides some test methods to verify the request summary logging
+type testLogUtils struct {
+	mock.Mock
+	// logTuringRouterRequestSummaryCalls counts the calls to logTuringRouterRequestSummary,
+	// so it can be polled until timeout instead of using mock.Mock's AssertCalled.
+	logTuringRouterRequestSummaryCalls int32
+}
+
+func (l *testLogUtils) copyResponseToLogChannel(
+	key string,
+	r mchttp.Response,
+	httpErr *errors.HTTPError,
+) {
+	var requestBody, errorString string
+	if httpErr != nil {
+		errorString = httpErr.Error()
+	}
+	if r != nil {
+		requestBody = string(r.Body())
+	}
+	l.Called(key, requestBody, errorString)
+}
+
+func (l *testLogUtils) logTuringRouterRequestSummary() {
+	atomic.AddInt32(&l.logTuringRouterRequestSummaryCalls, 1)
+}
+
 // Tests //////////////////////////////////////////////////////////////////////
 
 // TestHTTPService tests the successful sequence of Enrich -> Route -> Ensemble
@@ -219,6 +250,97 @@ func TestHTTPServiceBadRequest(t *testing.T) {
 			}
 
 			// Assert that the expected function calls occurred
+			data.checks()
+		})
+	}
+}
+
+// TestLogRequestSummary checks that copyResponseToLogChannel is called with each piece of
+// info to be logged and finally, logTuringRouterRequestSummary is called.
+func TestLogRequestSummary(t *testing.T) {
+	logUtilsAllComponents := &testLogUtils{}
+	logUtilsBadEnricher := &testLogUtils{}
+
+	// Define check for goroutine called
+	checkLogRequestSummaryCalled := func(t *testing.T, l *testLogUtils) {
+		timeout := time.After(3 * time.Second)           // Wait for a maximum of 3 seconds
+		ticker := time.NewTicker(500 * time.Millisecond) // Check every 500ms
+
+	wait:
+		for {
+			select {
+			case <-timeout:
+				t.Log("logTuringRouterRequestSummary not called")
+				t.Fail()
+			case <-ticker.C:
+				if atomic.LoadInt32(&l.logTuringRouterRequestSummaryCalls) == 1 {
+					break wait
+				}
+			}
+		}
+	}
+
+	tests := map[string]struct {
+		mc       missionctl.MissionControl
+		logutils *testLogUtils
+		checks   func()
+	}{
+		"log all components": {
+			mc:       &MockMissionControl{BaseMockMissionControl: *createTestBaseMissionControl()},
+			logutils: logUtilsAllComponents,
+			checks: func() {
+				logUtilsAllComponents.AssertCalled(t, "copyResponseToLogChannel", "enricher",
+					`{"value":"Init:Enrich"}`, "")
+				logUtilsAllComponents.AssertCalled(t, "copyResponseToLogChannel", "router",
+					`{"value":"Init:Enrich:Route"}`, "")
+				logUtilsAllComponents.AssertCalled(t, "copyResponseToLogChannel", "ensembler",
+					`{"value":"Init:Enrich:Route:Ensemble"}`, "")
+				checkLogRequestSummaryCalled(t, logUtilsAllComponents)
+			},
+		},
+		"log enricher error": {
+			mc: &MockMissionControlBadEnrich{
+				BaseMockMissionControl: *createTestBaseMissionControl(),
+			},
+			logutils: logUtilsBadEnricher,
+			checks: func() {
+				logUtilsBadEnricher.AssertCalled(t, "copyResponseToLogChannel", "enricher",
+					"", "Bad Enrich Called")
+				checkLogRequestSummaryCalled(t, logUtilsBadEnricher)
+			},
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Set up mock logging methods
+			data.logutils.On("copyResponseToLogChannel", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			data.logutils.On("logTuringRouterRequestSummary").Return(nil)
+
+			requestPayload, err := json.Marshal(testBody{Value: "Init"})
+			tu.FailOnError(t, err)
+
+			// Create new response recorder
+			rr := httptest.NewRecorder()
+			// Create request
+			req := createTestRequest([]byte(requestPayload), t)
+
+			// Patch the logging methods
+			monkey.Patch(copyResponseToLogChannel, func(_ context.Context, _ chan<- routerResponse,
+				key string, r mchttp.Response, httpErr *errors.HTTPError,
+			) {
+				data.logutils.copyResponseToLogChannel(key, r, httpErr)
+			})
+			monkey.Patch(logTuringRouterRequestSummary, func(context.Context, log.Logger, time.Time,
+				http.Header, []byte, <-chan routerResponse) {
+				data.logutils.logTuringRouterRequestSummary()
+			})
+			defer monkey.UnpatchAll()
+
+			// Make request
+			doTestRequest(data.mc, req, rr)
+
+			// Verify
 			data.checks()
 		})
 	}
