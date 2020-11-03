@@ -78,7 +78,7 @@ func TestRegisterAndGet(t *testing.T) {
 		},
 		{
 			name:         "failed retrieval of non-registered manager",
-			managerName:  "nonRegisteredRunner",
+			managerName:  "nonRegisteredManager",
 			skipRegister: true,
 			wantGetErr:   true,
 		},
