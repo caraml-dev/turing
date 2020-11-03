@@ -253,6 +253,8 @@ func TestHTTPServiceBadRequest(t *testing.T) {
 	}
 }
 
+// TestLogRequestSummary checks that copyResponseToLogChannel is called with each piece of
+// info to be logged and finally, logTuringRouterRequestSummary is called.
 func TestLogRequestSummary(t *testing.T) {
 	logUtilsAllComponents := &testLogUtils{}
 	logUtilsBadEnricher := &testLogUtils{}
