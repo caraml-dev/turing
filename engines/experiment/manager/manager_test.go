@@ -2,10 +2,11 @@ package manager_test
 
 import (
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
 	"reflect"
 	"testing"
+
+	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
 
 type fakeManager struct {

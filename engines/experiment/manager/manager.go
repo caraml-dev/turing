@@ -37,6 +37,7 @@ type ExperimentManager interface {
 }
 
 var managersLock sync.Mutex
+
 // managers contain all the registered experiment managers by name.
 var managers = make(map[string]Factory)
 
