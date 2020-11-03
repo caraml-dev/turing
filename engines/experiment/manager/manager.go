@@ -37,6 +37,7 @@ type ExperimentManager interface {
 }
 
 var managersLock sync.Mutex
+// managers contain all the registered experiment managers by name.
 var managers = make(map[string]Factory)
 
 // Factory creates an experiment manager from the provided config.
@@ -68,8 +69,8 @@ func Register(name string, factory Factory) error {
 
 // Get an experiment manager that has been registered.
 //
-// The manager will be initialized with the provided config using the registered factory function.
-// Retrieving an experiment manager that is not registered will return an error.
+// The manager will be initialized using the registered factory function with the provided config.
+// Retrieving an experiment manager that is not yet registered will return an error.
 func Get(name string, config json.RawMessage) (ExperimentManager, error) {
 	managersLock.Lock()
 	defer managersLock.Unlock()
