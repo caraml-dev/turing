@@ -263,7 +263,7 @@ func TestLogRequestSummary(t *testing.T) {
 
 	// Define check for goroutine called
 	checkLogRequestSummaryCalled := func(t *testing.T, l *testLogUtils) {
-		timeout := time.After(3 * time.Second)           // Wait for a maximum of 3 mins
+		timeout := time.After(3 * time.Second)           // Wait for a maximum of 3 seconds
 		ticker := time.NewTicker(500 * time.Millisecond) // Check every 500ms
 
 	wait:
