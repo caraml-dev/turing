@@ -8,7 +8,6 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
 )
@@ -40,7 +39,7 @@ type ExperimentsService interface {
 
 type experimentsService struct {
 	// map of engine name -> Experiment Manager
-	experimentManagers map[models.ExperimentEngineType]manager.ExperimentManager
+	experimentManagers map[string]manager.ExperimentManager
 	cache              *cache.Cache
 }
 
@@ -56,9 +55,18 @@ type Experiment struct {
 	Treatments []string `json:"treatments"` // List of treatment names (i.e variations) in the experiment.
 }
 
-// NewExperimentsService creates a new experiment service from the given config
-func NewExperimentsService() (ExperimentsService, error) {
-	experimentManagers := make(map[models.ExperimentEngineType]manager.ExperimentManager)
+// NewExperimentsService creates a new experiment service from managerConfig.
+// managerConfig is a map of experiment manager name to the JSON string configuration.
+func NewExperimentsService(managerConfig map[string]string) (ExperimentsService, error) {
+	experimentManagers := make(map[string]manager.ExperimentManager)
+
+	for name, config := range managerConfig {
+		m, err := manager.Get(name, []byte(config))
+		if err != nil {
+			return nil, err
+		}
+		experimentManagers[name] = m
+	}
 
 	// Initialize the experimentsService with cache
 	svc := &experimentsService{
@@ -69,12 +77,12 @@ func NewExperimentsService() (ExperimentsService, error) {
 	// Populate the cache with the Clients / Experiments info
 	for expEngine, expManager := range svc.experimentManagers {
 		if expManager.GetEngineInfo().ClientSelectionEnabled {
-			_, err := svc.ListClients(string(expEngine))
+			_, err := svc.ListClients(expEngine)
 			if err != nil {
 				return nil, err
 			}
 		} else if expManager.GetEngineInfo().ExperimentSelectionEnabled {
-			_, err := svc.ListExperiments(string(expEngine), "")
+			_, err := svc.ListExperiments(expEngine, "")
 			if err != nil {
 				return nil, err
 			}
@@ -187,7 +195,7 @@ func (es *experimentsService) GetExperimentRunnerConfig(
 func (es *experimentsService) getExperimentManager(
 	engine string,
 ) (manager.ExperimentManager, error) {
-	expManager, ok := es.experimentManagers[models.ExperimentEngineType(engine)]
+	expManager, ok := es.experimentManagers[engine]
 	if !ok {
 		return nil, fmt.Errorf("Unknown experiment engine %s", engine)
 	}

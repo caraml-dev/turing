@@ -53,7 +53,7 @@ func NewAppContext(
 	}
 
 	// Init Experiments Service
-	expSvc, err := service.NewExperimentsService()
+	expSvc, err := service.NewExperimentsService(cfg.Experiment)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing Experiments Service")
 	}
