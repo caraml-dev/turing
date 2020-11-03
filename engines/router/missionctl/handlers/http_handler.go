@@ -85,17 +85,23 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			err.Error())
 	}
 
-	// Read the request body
-	requestBody, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
-		return
-	}
-
 	// Create response channel to store the response from each step. Allocate buffer size = 4
 	// (max responses possible, from enricher, experiment engine, router and ensembler respectively).
 	respCh := make(chan routerResponse, 4)
 	defer close(respCh)
+
+	// Defer logging request summary
+	var requestBody []byte
+	defer func() {
+		go logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
+	}()
+
+	// Read the request body
+	requestBody, err = ioutil.ReadAll(req.Body)
+	if err != nil {
+		h.error(ctx, rw, errors.NewHTTPError(err))
+		return
+	}
 
 	// Enrich
 	var resp mchttp.Response
@@ -142,9 +148,6 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		}
 		payload = resp.Body()
 	}
-
-	// Write the result log
-	go logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
 
 	// Write the json response to the writer
 	rw.Header().Set("Content-Type", resp.Header().Get("Content-Type"))
