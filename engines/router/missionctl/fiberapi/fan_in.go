@@ -18,7 +18,8 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
-const FanInID = "fanin"
+// FanInID is used to indendify the fan in component when capturing a request span
+const FanInID = "fan_in"
 
 // EnsemblingFanIn combines the results from the fanout with the experiment parameters
 // and forwards to the configured ensembling endpoint
