@@ -12,9 +12,13 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/gojek/turing/engines/router/missionctl/log"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/opentracing/opentracing-go"
 )
+
+const FanInID = "fanin"
 
 // EnsemblingFanIn combines the results from the fanout with the experiment parameters
 // and forwards to the configured ensembling endpoint
@@ -97,6 +101,14 @@ func (fanIn *EnsemblingFanIn) Aggregate(
 		}
 	}
 
+	// Associate span to context to trace response ensembling, if tracing enabled
+	if tracing.Glob().IsEnabled() {
+		var sp opentracing.Span
+		sp, _ = tracing.Glob().StartSpanFromContext(ctx, FanInID)
+		if sp != nil {
+			defer sp.Finish()
+		}
+	}
 	return fanIn.collectResponses(responses, experimentResponse)
 }
 
