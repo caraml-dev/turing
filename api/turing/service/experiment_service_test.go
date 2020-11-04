@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
@@ -35,9 +34,9 @@ func TestListEngines(t *testing.T) {
 	expMgr2.On("GetEngineInfo").Return(xpEngineInfo)
 
 	// Create the experiment managers map and the experiment service
-	experimentManagers := make(map[models.ExperimentEngineType]manager.ExperimentManager)
-	experimentManagers[models.ExperimentEngineTypeLitmus] = expMgr1
-	experimentManagers[models.ExperimentEngineTypeXp] = expMgr2
+	experimentManagers := make(map[string]manager.ExperimentManager)
+	experimentManagers["litmus"] = expMgr1
+	experimentManagers["xp"] = expMgr2
 	svc := &experimentsService{
 		experimentManagers: experimentManagers,
 		cache:              cache.New(time.Second, time.Second),
@@ -103,8 +102,8 @@ func TestListClients(t *testing.T) {
 				cacheObj.Set("engine:litmus:clients", "test", cache.DefaultExpiration)
 			}
 			svc := &experimentsService{
-				experimentManagers: map[models.ExperimentEngineType]manager.ExperimentManager{
-					models.ExperimentEngineTypeLitmus: data.expMgr,
+				experimentManagers: map[string]manager.ExperimentManager{
+					"litmus": data.expMgr,
 				},
 				cache: cacheObj,
 			}
@@ -208,8 +207,8 @@ func TestListExperiments(t *testing.T) {
 				cacheObj.Set("engine:litmus:clients:1:experiments", "test", cache.DefaultExpiration)
 			}
 			svc := &experimentsService{
-				experimentManagers: map[models.ExperimentEngineType]manager.ExperimentManager{
-					models.ExperimentEngineTypeLitmus: data.expMgr,
+				experimentManagers: map[string]manager.ExperimentManager{
+					"litmus": data.expMgr,
 				},
 				cache: cacheObj,
 			}
@@ -379,8 +378,8 @@ func TestListVariables(t *testing.T) {
 				cacheObj.Set(data.badCacheKey, "test", cache.DefaultExpiration)
 			}
 			svc := &experimentsService{
-				experimentManagers: map[models.ExperimentEngineType]manager.ExperimentManager{
-					models.ExperimentEngineTypeLitmus: data.expMgr,
+				experimentManagers: map[string]manager.ExperimentManager{
+					"litmus": data.expMgr,
 				},
 				cache: cacheObj,
 			}
@@ -418,8 +417,8 @@ func TestValidateExperimentConfig(t *testing.T) {
 	expMgr.On("ValidateExperimentConfig", manager.Engine{Name: "Litmus"}, manager.TuringExperimentConfig{}).Return(nil)
 	// Create test experiment service
 	expSvc := &experimentsService{
-		experimentManagers: map[models.ExperimentEngineType]manager.ExperimentManager{
-			models.ExperimentEngineTypeLitmus: expMgr,
+		experimentManagers: map[string]manager.ExperimentManager{
+			"litmus": expMgr,
 		},
 	}
 
@@ -463,8 +462,8 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 	expMgr.On("GetExperimentRunnerConfig", *testCfg).Return(expectedResult, nil)
 	// Create test experiment service
 	expSvc := &experimentsService{
-		experimentManagers: map[models.ExperimentEngineType]manager.ExperimentManager{
-			models.ExperimentEngineTypeLitmus: expMgr,
+		experimentManagers: map[string]manager.ExperimentManager{
+			"litmus": expMgr,
 		},
 	}
 

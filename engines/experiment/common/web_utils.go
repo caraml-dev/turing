@@ -58,4 +58,3 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 			"Field %s can not be parsed as string value, unsupported type: %s", key, typez.String())
 	}
 }
-

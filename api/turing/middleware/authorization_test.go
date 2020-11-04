@@ -22,7 +22,7 @@ func TestBootstrapTuringPolicies(t *testing.T) {
 	authzEnforcer.AssertCalled(t, "UpsertPolicy", "allow-all-list-experiment-engines",
 		[]string{},
 		[]string{"**"},
-		[]string{"experiment-engines:**"},
+		[]string{"experiment-engines", "experiment-engines:**"},
 		[]string{enforcer.ActionRead},
 	)
 }
