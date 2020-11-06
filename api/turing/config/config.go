@@ -35,6 +35,7 @@ func (qty *Quantity) Decode(value string) (err error) {
 // Config is used to parse and store the environment configs
 type Config struct {
 	Port                int                  `envconfig:"turing_port" default:"8080"`
+	AllowedOrigins      []string             `split_words:"true" default:"*"`
 	AuthConfig          *AuthorizationConfig `envconfig:"authorization" validate:"required"`
 	DbConfig            *DatabaseConfig      `envconfig:"turing_database"`
 	DeployConfig        *DeploymentConfig    `envconfig:"deployment"`
