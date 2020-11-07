@@ -93,11 +93,11 @@ func main() {
 		web.ServeReactApp(mux, cfg.TuringUIConfig.Homepage, cfg.TuringUIConfig.AppDirectory)
 	}
 
-	c := cors.New(cors.Options{
+	log.Infof("Listening on port %d", cfg.Port)
+	corsHandler := cors.New(cors.Options{
 		AllowedOrigins: cfg.AllowedOrigins,
 	})
-	log.Infof("Listening on port %d", cfg.Port)
-	if err := http.ListenAndServe(cfg.ListenAddress(), c.Handler(mux)); err != nil {
+	if err := http.ListenAndServe(cfg.ListenAddress(), corsHandler.Handler(mux)); err != nil {
 		log.Errorf("Failed to start turing-api: %s", err)
 	}
 }
