@@ -1,0 +1,32 @@
+.euiBasicTable--inMemoryFormTable {
+  .euiTableCellContent {
+    display: grid;
+
+    .cell-first-column,
+    svg {
+      margin-right: inherit;
+    }
+  }
+
+  input[type="text"].inlineTableInput {
+    float: left;
+    padding: 0;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-family: inherit !important;
+    height: inherit !important;
+    transition: inherit !important;
+    background-color: inherit !important;
+    box-shadow: none !important;
+    min-width: 90px;
+
+    &:focus {
+      background-size: 0 100%;
+    }
+  }
+
+  .euiTableRow--isInvalid {
+    border-left: 2px solid #bd271e;
+    background-color: #f8e9e98c;
+  }
+}

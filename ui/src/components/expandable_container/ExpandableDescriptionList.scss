@@ -1,0 +1,14 @@
+@import "~@elastic/eui/src/global_styling/variables/animations";
+
+.expandableContainer__childWrapper {
+  height: 0;
+  overflow-y: auto;
+  transform: translatez(0);
+  transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.expandableContainer.expandableContainer-isOpen {
+  .expandableContainer__childWrapper {
+    height: auto;
+  }
+}

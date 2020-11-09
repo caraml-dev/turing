@@ -1,0 +1,27 @@
+.euiFlexGroup--trafficRulesRow {
+  .euiFlexItem--content {
+    max-width: calc(100% - 56px);
+  }
+
+  &:hover {
+    .euiFlexItem--hasActions {
+      opacity: 1;
+      filter: grayscale(0);
+      -webkit-filter: grayscale(0);
+    }
+  }
+
+  .euiFlexItem--hasActions {
+    opacity: 0.7;
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+
+    &.conditions {
+      margin-top: 12px;
+    }
+
+    &.routes {
+      margin-top: 16px;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+.durationRow {
+  max-width: 700px;
+
+  .euiFormControlLayout {
+    max-width: 700px;
+    height: 42px;
+  }
+
+  .euiFormRow__fieldWrapper .euiFormControlLayout .euiFormControlLayout {
+    min-width: 120px;
+    max-width: 200px;
+  }
+
+  .euiFieldNumber {
+    max-width: 500px;
+  }
+}
