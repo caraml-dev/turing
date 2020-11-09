@@ -23,7 +23,9 @@ jobs:
         node-version: '14.x'
     
     - name: Install
+      working-directory: ui
       run: npm config set unsafe-perm true && npm install --no-optional --verbose
 
     - name: Lint code
+      working-directory: ui
       run: npm run lint
