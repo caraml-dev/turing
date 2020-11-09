@@ -94,7 +94,10 @@ func main() {
 	}
 
 	log.Infof("Listening on port %d", cfg.Port)
-	if err := http.ListenAndServe(cfg.ListenAddress(), cors.AllowAll().Handler(mux)); err != nil {
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: cfg.AllowedOrigins,
+	})
+	if err := http.ListenAndServe(cfg.ListenAddress(), corsHandler.Handler(mux)); err != nil {
 		log.Errorf("Failed to start turing-api: %s", err)
 	}
 }

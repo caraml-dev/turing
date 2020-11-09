@@ -38,6 +38,7 @@ var requiredEnvs = map[string]string{
 }
 
 var optionalEnvs = map[string]string{
+	"ALLOWED_ORIGINS":                              "http://foo.com,http://bar.com",
 	"TURING_PORT":                                  "5000",
 	"TURING_DATABASE_PORT":                         "5433",
 	"TURING_ROUTER_FIBER_DEBUG_LOG_ENABLED":        "false",
@@ -74,7 +75,8 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
 	expected := Config{
-		Port: 8080,
+		Port:           8080,
+		AllowedOrigins: []string{"*"},
 		AuthConfig: &AuthorizationConfig{
 			Enabled: true,
 			URL:     "test-auth-url",
@@ -148,7 +150,8 @@ func TestInitConfigEnv(t *testing.T) {
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
 	expected := Config{
-		Port: 5000,
+		Port:           5000,
+		AllowedOrigins: []string{"http://foo.com", "http://bar.com"},
 		AuthConfig: &AuthorizationConfig{
 			Enabled: false,
 			URL:     "test-auth-url",
