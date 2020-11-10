@@ -74,12 +74,7 @@ spec:
             successThreshold: {{ default "1" .Values.turing.readinessProbe.successThreshold }}
             timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
           resources:
-            requests:
-              cpu: {{ .Values.turing.resources.requests.cpu }}
-              memory: {{ .Values.turing.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.turing.resources.limits.cpu }}
-              memory: {{ .Values.turing.resources.limits.memory }}
+            {{- toYaml .Values.turing.resources | nindent 12 }}
 {{- if .Values.turing.args }}
           args:
 {{ toYaml .Values.turing.args | indent 10 -}}
@@ -154,7 +149,7 @@ spec:
                   key: key
             {{- end }}
             - name: VAULT_ADDRESS
-              value: "{{ .Values.turing.config.vault.address }}"
+              value: {{ required "turing.config.vault.address is required" .Values.turing.config.vault.address }}
             - name: VAULT_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -166,9 +161,9 @@ spec:
                   key: turing_encryption_key
                   name: {{ template "turing.fullname" .}}-svc-secret
             - name: MERLIN_URL
-              value: {{ .Values.turing.config.merlin.endpoint }}
+              value: {{ required "turing.config.merlin.endpoint is required" .Values.turing.config.merlin.endpoint }}
             - name: MLP_URL
-              value: {{ .Values.turing.config.mlp.endpoint }}
+              value: {{ required "turing.config.mlp.endpoint is required" .Values.turing.config.mlp.endpoint }}
             - name: MLP_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
