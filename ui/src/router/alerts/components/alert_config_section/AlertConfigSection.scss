@@ -1,0 +1,16 @@
+.euiDescriptionList--alertConfigSection {
+  .euiDescriptionList__title {
+    margin-top: 0 !important;
+    padding-top: 8px;
+  }
+  .euiDescriptionList__description {
+    padding-bottom: 8px;
+  }
+
+  *:nth-child(4n) {
+    background: #f5f7fa;
+  }
+  *:nth-child(4n-1) {
+    background: #f5f7fa;
+  }
+}

@@ -1,0 +1,13 @@
+.euiPanel--configSection.variables {
+  .euiDescriptionList {
+    margin-left: 10px;
+
+    .euiDescriptionList__title {
+      width: 95px;
+    }
+
+    .euiDescriptionList__description {
+      width: calc(100% - 95px);
+    }
+  }
+}

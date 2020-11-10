@@ -1,0 +1,10 @@
+@import "~@elastic/eui/src/global_styling/variables";
+
+.euiPanel--subHeader {
+  padding: $euiSize $euiSizeL;
+
+  .euiDescriptionList__title,
+  .euiDescriptionList__description {
+    line-height: 1.7rem !important;
+  }
+}

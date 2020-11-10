@@ -1,0 +1,9 @@
+.euiFlexGroup--experimentVariableConfigRow {
+  &:not(:hover) {
+    .euiFlexItem--hasActions {
+      opacity: 1;
+      filter: grayscale(1);
+      -webkit-filter: grayscale(1);
+    }
+  }
+}

@@ -1,0 +1,9 @@
+.euiCard.euiCard--routeCard {
+  .euiCard__description {
+    display: none;
+  }
+
+  .euiFlexGroup--removeButton {
+    margin-bottom: -12px;
+  }
+}

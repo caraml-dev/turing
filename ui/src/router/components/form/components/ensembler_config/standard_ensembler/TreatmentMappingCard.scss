@@ -1,0 +1,11 @@
+@import "~@elastic/eui/src/global_styling/variables/index";
+
+.euiCard--treatmentMappingCard {
+  .euiCard__image {
+    background-color: $euiPageBackgroundColor;
+  }
+  .euiCard__content {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+}

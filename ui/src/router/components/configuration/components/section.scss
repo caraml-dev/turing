@@ -1,0 +1,24 @@
+@import "~@elastic/eui/src/global_styling/mixins/typography";
+
+.euiPanel--configSection {
+  .euiDescriptionList.euiDescriptionList--responsiveColumn {
+    > * {
+      @include euiTextTruncate;
+
+      line-height: 2.1 !important;
+      margin-top: 2px !important;
+    }
+
+    *:nth-child(4n-1) {
+      background: #f5f7fa;
+    }
+
+    *:nth-child(4n) {
+      background: #f5f7fa;
+    }
+  }
+}
+
+.euiFlexItem.euiFlexItem--smallPanel {
+  min-width: 265px;
+}

@@ -1,0 +1,6 @@
+@import "~@elastic/eui/src/global_styling/variables/index";
+@import "~@elastic/eui/src/components/context_menu/context_menu";
+
+.euiContextPanel--moreActions {
+  min-width: $euiContextMenuWidth;
+}

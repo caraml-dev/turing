@@ -1,0 +1,31 @@
+name: ui
+
+on:
+  push:
+    paths:
+    - "ui/**"
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Node 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    
+    - name: Install
+      working-directory: ui
+      run: npm config set unsafe-perm true && npm install --no-optional --verbose
+
+    - name: Lint code
+      working-directory: ui
+      run: npm run lint

@@ -1,0 +1,51 @@
+import React, { useEffect } from "react";
+import { addToast, replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { FormContextProvider } from "../../../components/form/context";
+import { EditAlertsForm } from "../components/edit_alerts_form/components/EditAlertsForm";
+import { TuringAlerts } from "../../../services/alerts/TuringAlerts";
+
+export const EditAlertsView = ({ router, alerts, ...props }) => {
+  useEffect(() => {
+    replaceBreadcrumbs([
+      {
+        text: "Routers",
+        href: `../../../`
+      },
+      {
+        text: router.name,
+        href: `../`
+      },
+      {
+        text: "Alerts",
+        href: "./"
+      },
+      {
+        text: "Edit"
+      }
+    ]);
+  }, [router]);
+
+  const onSuccess = isSubmitSuccess => {
+    if (isSubmitSuccess) {
+      addToast({
+        id: `submit-success-alerts`,
+        title: `Alerts have been updated!`,
+        color: "success",
+        iconType: "check"
+      });
+    }
+    props.navigate("../", { state: { refresh: true } });
+  };
+
+  return (
+    <FormContextProvider data={TuringAlerts.fromJson(alerts)}>
+      <EditAlertsForm
+        existingData={alerts}
+        onCancel={() => props.navigate("../")}
+        onSuccess={onSuccess}
+        environment={router.environment_name}
+        {...props}
+      />
+    </FormContextProvider>
+  );
+};
