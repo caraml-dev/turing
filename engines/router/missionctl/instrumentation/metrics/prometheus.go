@@ -23,6 +23,14 @@ type PrometheusHistogramVec interface {
 	GetMetricWith(prometheus.Labels) (prometheus.Observer, error)
 }
 
+// requestLatencyBuckets defines the buckets used in the custom Histogram metrics defined by Turing
+var requestLatencyBuckets = append(
+	append(
+		[]float64{2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200},
+		prometheus.LinearBuckets(250, 50, 15)...,
+	), []float64{1000, 2000, 5000, 10000, 20000, 50000, 100000}...,
+)
+
 // histogramMap maintains a mapping between the metric name and the corresponding
 // histogram vector
 var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prometheus.HistogramVec{
@@ -31,7 +39,7 @@ var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prome
 		Subsystem: Subsystem,
 		Name:      string(ExperimentEngineRequestMs),
 		Help:      "Histogram for the runtime (in milliseconds) of Litmus requests.",
-		Buckets:   prometheus.LinearBuckets(2, 2, 20),
+		Buckets:   requestLatencyBuckets,
 	},
 		[]string{"status"},
 	),
@@ -40,7 +48,7 @@ var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prome
 		Subsystem: Subsystem,
 		Name:      string(RouteRequestDurationMs),
 		Help:      "Histogram for the runtime (in milliseconds) of Fiber route requests.",
-		Buckets:   prometheus.LinearBuckets(5, 5, 25),
+		Buckets:   requestLatencyBuckets,
 	},
 		[]string{"status", "route"},
 	),
@@ -49,7 +57,7 @@ var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prome
 		Subsystem: Subsystem,
 		Name:      string(TuringComponentRequestDurationMs),
 		Help:      "Histogram for time spent (in milliseconds) at each Turing component.",
-		Buckets:   append([]float64{0.5, 1, 2, 3, 4}, prometheus.LinearBuckets(5, 5, 25)...),
+		Buckets:   requestLatencyBuckets,
 	},
 		[]string{"status", "component"},
 	),
