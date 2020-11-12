@@ -24,12 +24,11 @@ type PrometheusHistogramVec interface {
 }
 
 // requestLatencyBuckets defines the buckets used in the custom Histogram metrics defined by Turing
-var requestLatencyBuckets = append(
-	append(
-		[]float64{2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200},
-		prometheus.LinearBuckets(250, 50, 15)...,
-	), []float64{1000, 2000, 5000, 10000, 20000, 50000, 100000}...,
-)
+var requestLatencyBuckets = []float64{
+	2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200,
+	250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,
+	2000, 5000, 10000, 20000, 50000, 100000,
+}
 
 // histogramMap maintains a mapping between the metric name and the corresponding
 // histogram vector
