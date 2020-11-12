@@ -8,9 +8,9 @@ import { ResourcesConfigTable } from "../ResourcesConfigTable";
 export const DockerConfigViewGroup = ({ componentName, dockerConfig }) => {
   return (
     <EuiFlexGroup direction="row" wrap>
-      <EuiFlexItem grow={3}>
+      <EuiFlexItem grow={3} className="euiFlexItem--childFlexPanel">
         <EuiFlexGroup direction="row" wrap>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={2} className="euiFlexItem--childFlexPanel">
             <ConfigSectionPanel>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
