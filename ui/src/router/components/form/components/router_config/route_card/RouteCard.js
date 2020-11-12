@@ -61,7 +61,7 @@ export const RouteCard = ({
           fullWidth>
           <SelectEndpointComboBox
             fullWidth
-            placeholder="http://integration-cartorank-control-internal.golabs.io/rank"
+            placeholder="http://models.internal/predict"
             value={route.endpoint}
             options={endpointOptions}
             onChange={endpoint => {
