@@ -1,11 +1,11 @@
-{{- if .Values.turing.config.ingress.enabled }}
+{{- if .Values.turing.ingress.enabled }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "turing.fullname" .}}
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.class: {{ .Values.turing.config.ingress.class }}
+    ingress.class: {{ .Values.turing.ingress.class }}
   labels:
     app: {{ include "turing.fullname" . }}
     release: {{ .Release.Name }}
@@ -21,7 +21,7 @@ metadata:
     gojek.com/environment: {{ .Values.turing.config.deployment.environmentType }}
 spec:
   rules:
-    - host: {{ .Values.turing.config.ingress.host }}
+    - host: {{ .Values.turing.ingress.host }}
       http:
         paths:
           - path: /

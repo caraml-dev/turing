@@ -75,128 +75,25 @@ spec:
             timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
           resources:
             {{- toYaml .Values.turing.resources | nindent 12 }}
-{{- if .Values.turing.args }}
-          args:
-{{ toYaml .Values.turing.args | indent 10 -}}
-{{ end }}
-{{- if .Values.turing.command }}
           command:
-{{ toYaml .Values.turing.command | indent 10 -}}
-{{ end }}
+            - /app/turing-api
+          args:
+            - -config=/etc/turing/config.yaml
           env:
-            - name: TURING_PORT
-              value: "{{ .Values.turing.service.internalPort }}"
-            - name: TURING_DATABASE_HOST
+            - name: DBCONFIG_HOST
               value: {{ template "postgresql.host" . }}
-            - name: TURING_DATABASE_USER
-              value: "{{ .Values.postgresql.postgresqlUsername }}"
-            - name: TURING_DATABASE_PASSWORD
+            - name: DBCONFIG_DATABASE
+              value: {{ .Values.postgresql.postgresqlDatabase }}
+            - name: DBCONFIG_USER
+              value: {{ .Values.postgresql.postgresqlUsername }}
+            - name: DBCONFIG_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-postgresql
                   key: postgresql-password
-            - name: TURING_DATABASE_NAME
-              value: "{{ .Values.postgresql.postgresqlDatabase }}"
-            - name: DEPLOYMENT_ENVIRONMENT_TYPE
-              value: "{{ .Values.turing.config.deployment.environmentType }}"
-            - name: DEPLOYMENT_GCP_PROJECT
-              value: "{{ .Values.turing.config.deployment.gcpProject }}"
-            - name: DEPLOYMENT_TIMEOUT
-              value: "{{ .Values.turing.config.deployment.timeout }}"
-            - name: DEPLOYMENT_DELETION_TIMEOUT
-              value: "{{ .Values.turing.config.deployment.deletionTimeout }}"
-            - name: DEPLOYMENT_MAX_CPU
-              value: "{{ .Values.turing.config.deployment.maxCPU }}"
-            - name: DEPLOYMENT_MAX_MEMORY
-              value: "{{ .Values.turing.config.deployment.maxMemory }}"
-            - name: TURING_ROUTER_IMAGE
-              value: "{{ .Values.turing.config.router.image.registry }}{{ .Values.turing.config.router.image.repository }}:{{ .Values.turing.config.router.image.tag }}"
-            - name: TURING_ROUTER_LOG_LEVEL
-              value: "{{ .Values.turing.config.router.logLevel }}"
-            - name: TURING_ROUTER_FIBER_DEBUG_LOG_ENABLED
-              value: !!str {{ .Values.turing.config.router.fiberDebugLog }}
-            - name: TURING_ROUTER_CUSTOM_METRICS_ENABLED
-              value: !!str {{ .Values.turing.config.router.customMetrics }}
-            - name: TURING_ROUTER_JAEGER_ENABLED
-              value: !!str {{ .Values.turing.config.router.jaeger.enabled }}
-            - name: TURING_ROUTER_JAEGER_COLLECTOR_ENDPOINT
-              value: "{{ .Values.turing.config.router.jaeger.collectorEndpoint }}"
-            - name: TURING_ROUTER_FLUENTD_IMAGE
-              value: "{{ .Values.turing.config.router.fluentd.image }}"
-            - name: TURING_ROUTER_FLUENTD_FLUSH_INTERVAL_SECONDS
-              value: !!str "{{ .Values.turing.config.router.fluentd.flushIntervalSeconds }}"
-            - name: AUTHORIZATION_ENABLED
-              value: !!str {{ .Values.turing.config.authorization.enabled }}
-            {{- if .Values.turing.config.authorization.enabled }}
-            - name: AUTHORIZATION_URL
-              value: "{{ .Values.turing.config.authorization.serverUrl }}"
-            {{- end }}
-            {{- if .Values.turing.config.sentry.enabled }}
-            - name: SENTRY_ENABLED
-              value: "{{ .Values.turing.config.sentry.enabled }}"
-            - name: SENTRY_DSN
-              value: "{{ .Values.turing.config.sentry.dsn }}"
-            {{- end }}
-            - name: NEWRELIC_ENABLED
-              value: "{{ .Values.turing.config.newrelic.enabled }}"
-            {{- if .Values.turing.config.newrelic.enabled }}
-            - name: NEWRELIC_APPNAME
-              value: "{{ .Values.turing.config.newrelic.appname }}"
-            - name: NEWRELIC_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.turing.config.newrelic.licenseSecretName }}"
-                  key: key
-            {{- end }}
-            - name: VAULT_ADDRESS
-              value: {{ required "turing.config.vault.address is required" .Values.turing.config.vault.address }}
-            - name: VAULT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: vault_token
-                  name: {{ template "turing.fullname" .}}-svc-secret
-            - name: TURING_ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: turing_encryption_key
-                  name: {{ template "turing.fullname" .}}-svc-secret
-            - name: MERLIN_URL
-              value: {{ required "turing.config.merlin.endpoint is required" .Values.turing.config.merlin.endpoint }}
-            - name: MLP_URL
-              value: {{ required "turing.config.mlp.endpoint is required" .Values.turing.config.mlp.endpoint }}
-            - name: MLP_ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: mlp_encryption_key
-                  name: {{ template "turing.fullname" .}}-svc-secret
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /etc/gcp_service_account/service-account.json
-            {{- if .Values.turing.config.alert.enabled }}
-            - name: ALERT_ENABLED
-              value: "true"
-            - name: ALERT_GITLAB_BASEURL
-              value: {{ .Values.turing.config.alert.gitlabBaseurl }}
-            - name: ALERT_GITLAB_PROJECTID
-              value: !!str {{ .Values.turing.config.alert.gitlabProjectid }}
-            - name: ALERT_GITLAB_BRANCH
-              value: {{ .Values.turing.config.alert.gitlabBranch }}
-            - name: ALERT_GITLAB_PATHPREFIX
-              value: {{ .Values.turing.config.alert.gitlabPathprefix }}
-            - name: ALERT_GITLAB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "turing.fullname" .}}-svc-secret
-                  key: gitlab_token
-            {{- end }}
-{{- if .Values.turing.env }}
-{{ toYaml .Values.turing.env | indent 12 -}}
-{{ end }}
           volumeMounts:
-          {{- if .Values.turing.config.serviceAccount.enabled }}  
-          - name: service-account
-            mountPath: "/etc/gcp_service_account"
-            readOnly: true
-          {{- end }}
+            - name: config
+              mountPath: /etc/turing
         - name: swagger-ui
           image: "swaggerapi/swagger-ui:{{ .Values.swaggerUi.image.tag }}"
           imagePullPolicy: IfNotPresent
@@ -235,17 +132,12 @@ spec:
               echo "Running Swagger UI..."
               /usr/share/nginx/run.sh
       volumes:
-      {{- if .Values.turing.config.serviceAccount.enabled }}
-      - name: service-account
-        secret:
-          secretName: {{ .Values.turing.config.serviceAccount.secretName }}
-          items:
-            - key: {{ .Values.turing.config.serviceAccount.secretKey }}
-              path: service-account.json
-      {{- end }}
-      - name: db-migrations
-        configMap:
-          name: {{ .Release.Name }}-db-migrations
+        - name: config 
+          secret:
+            secretName: {{ template "turing.fullname" .}}-api-secret
+        - name: db-migrations
+          configMap:
+            name: {{ .Release.Name }}-db-migrations
 
 {{- if (not .Values.turing.nodeSelectorDisabled) }}
 {{- if .Values.turing.nodeSelector }}

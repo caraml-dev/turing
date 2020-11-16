@@ -10,23 +10,19 @@ turing:
     limits:
       cpu: 100m
       memory: 128Mi
-  config:
-    router:
-      image:
-        registry: localhost:5000/
-        repository: turing-router
-        tag: latest
-    vault:
-      address: http://vault:8200
-      token: root
-    encryption:
-      key: secret
-    merlin:
-      endpoint: http://merlin:8080/v1
-    mlp:
-      endpoint: http://mlp:8080/v1
-      encryption:
-        key: secret
+  config: 
+    DeployConfig:
+      EnvironmentType: id-dev
+    RouterDefaults:
+      Image: localhost:5000/turing-router:latest
+    VaultConfig:
+      Address: http://vault:8200
+      Token: root
+    TuringEncryptionKey: secret
+    MLPConfig:
+      MerlinURL: http://merlin:8080/v1
+      MLPURL: http://mlp:8080/v1
+      MLPEncryptionKey: secret
 
 postgresql:
   resources:

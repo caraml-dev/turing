@@ -142,11 +142,11 @@ type RouterDefaults struct {
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
 type FluentdConfig struct {
 	// Image to use for fluentd deployments, in the format registry/repository:version.
-	Image string `validate:"required"`
+	Image string
 	// Fluentd tag for logs
-	Tag string `validate:"required"`
+	Tag string
 	// Flush interval seconds - value determined by load job frequency to BQ
-	FlushIntervalSeconds int `validate:"required"`
+	FlushIntervalSeconds int
 }
 
 // AuthorizationConfig captures the config for auth using mlp authz
