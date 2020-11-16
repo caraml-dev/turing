@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rs/cors"
@@ -19,11 +21,34 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+type configFlags []string
+
+func (c *configFlags) String() string {
+	return strings.Join(*c, ",")
+}
+
+func (c *configFlags) Set(value string) error {
+	*c = append(*c, value)
+	return nil
+}
+
 func main() {
-	// Init config
-	cfg, err := config.FromEnv()
+	var configFlags configFlags
+	flag.Var(&configFlags, "config", "Path to a configuration file. This flag can be specified multiple "+
+		"times to load multiple configurations.")
+	flag.Parse()
+
+	if len(configFlags) < 1 {
+		log.Panicf("Must specify at least one config path using -config")
+	}
+
+	cfg, err := config.FromFiles(configFlags...)
 	if err != nil {
-		log.Panicf("Failed initializing config: %v", err)
+		log.Panicf("%s", err)
+	}
+	err = cfg.Validate()
+	if err != nil {
+		log.Panicf("Failed validating config: %s", err)
 	}
 
 	// Init db

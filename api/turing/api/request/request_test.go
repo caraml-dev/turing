@@ -155,7 +155,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Image: "fluentdimage",
 			Tag:   "fluentdtag",
 		},
-		Experiment: map[string]string{
+		Experiment: map[string]interface{}{
 			"litmus": `{"endpoint":"grpc://test","timeout":"2s"}`,
 		},
 	}
@@ -297,7 +297,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	routerDefaults := &config.RouterDefaults{
-		Experiment: map[string]string{
+		Experiment: map[string]interface{}{
 			"xp": `{"endpoint":"http://test","timeout":"3s"}`,
 		},
 	}

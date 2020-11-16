@@ -123,7 +123,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewExperimentsService,
-		func(experimentConfig map[string]string) (service.ExperimentsService, error) {
+		func(experimentConfig map[string]interface{}) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)

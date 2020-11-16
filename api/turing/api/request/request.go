@@ -210,14 +210,13 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 		}
 	}
 
-	// Get deployment configs from the defaults
 	experimentConfigJSON, ok := defaults.Experiment[string(engineType)]
 	if !ok {
 		return nil, fmt.Errorf("experiment engine '%s' not found in router defaults experiment config", engineType)
 	}
 
 	var experimentConfig map[string]string
-	err := json.Unmarshal([]byte(experimentConfigJSON), &experimentConfig)
+	err := json.Unmarshal(experimentConfigJSON.([]byte), &experimentConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal router defaults experiment config for engine '%s': %s", engineType, err)
 	}

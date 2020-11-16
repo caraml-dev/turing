@@ -3,11 +3,12 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/spf13/viper"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
@@ -185,7 +186,7 @@ type MLPConfig struct {
 // If multiple config files are provided, the subsequent config files will override the
 // values from the config files loaded earlier.
 //
-// These config files will override the default config values and can be overriden by
+// These config files will override the default config values and can be overridden by
 // the values from environment variables.
 func FromFiles(filepaths ...string) (*Config, error) {
 	v := viper.New()
@@ -196,7 +197,7 @@ func FromFiles(filepaths ...string) (*Config, error) {
 		v.SetConfigFile(f)
 		err := v.MergeInConfig()
 		if err != nil {
-			return nil, fmt.Errorf("failed to read config from file %s: %s", f, err)
+			return nil, fmt.Errorf("failed to read config from file '%s': %s", f, err)
 		}
 	}
 
@@ -319,5 +320,3 @@ func StringToQuantityHookFunc() mapstructure.DecodeHookFunc {
 		return Quantity(q), nil
 	}
 }
-
-
