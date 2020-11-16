@@ -1,0 +1,28 @@
+Port: 10000
+AllowedOrigins:
+- http://foo2.com
+AuthConfig:
+  Enabled: false
+DbConfig:
+  Password: newpassword
+DeployConfig:
+  MaxMemory: 12Gi
+RouterDefaults:
+  FluentdConfig:
+    FlushIntervalSeconds: 90
+  Experiment:
+    foo:
+      fookey1: ""
+      fookey2: 
+        fookey2-1: fooval2-1
+        fookey2-2: fooval2-2-override
+    qux: 
+      quux: quuxval
+Experiment:
+    qux:
+      quxkey1: quxval1-override
+      quxkey2: 
+        quxkey2-1: quxval2-1-override
+        quxkey2-3: quxval2-3-add
+    quux: 
+      quuxkey1: quuxval1
