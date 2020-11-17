@@ -25,7 +25,7 @@
             "result_logger_type": "nop"
         },
         "enricher": {
-            "image": "kennethreitz/httpbin",
+            "image": "{{.TestEchoImage}}",
             "resource_request": {
                 "min_replica": 1,
                 "max_replica": 1,
@@ -45,7 +45,7 @@
         "ensembler": {
             "type": "docker",
             "docker_config": {
-                "image": "kennethreitz/httpbin",
+                "image": "{{.TestEchoImage}}",
                 "resource_request": {
                     "min_replica": 2,
                     "max_replica": 2,
