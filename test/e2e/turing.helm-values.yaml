@@ -11,6 +11,10 @@ turing:
       cpu: 100m
       memory: 128Mi
   config: 
+    DbConfig:
+      Host: turing-postgresql
+      User: turing 
+      Password: secret
     DeployConfig:
       EnvironmentType: id-dev
     RouterDefaults:
