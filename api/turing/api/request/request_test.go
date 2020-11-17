@@ -301,7 +301,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	routerDefaults := &config.RouterDefaults{
 		Experiment: map[string]interface{}{
-			"xp": `{"endpoint":"http://test","timeout":"3s"}`,
+			"xp": map[string]interface{}{
+				"endpoint": "http://test",
+				"timeout": "3s",
+			},
 		},
 	}
 	// Set up mock Crypto service
