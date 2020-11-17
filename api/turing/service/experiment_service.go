@@ -61,7 +61,13 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
 	for name, config := range managerConfig {
-		m, err := manager.Get(name, config.([]byte))
+		configMap := config.(map[string]interface{})
+		configJSON, err := json.Marshal(configMap)
+		if err != nil {
+			return nil, err
+		}
+
+		m, err := manager.Get(name, configJSON)
 		if err != nil {
 			return nil, err
 		}

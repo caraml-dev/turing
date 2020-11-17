@@ -156,7 +156,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Tag:   "fluentdtag",
 		},
 		Experiment: map[string]interface{}{
-			"litmus": `{"endpoint":"grpc://test","timeout":"2s"}`,
+			"litmus": map[string]interface{}{
+				"endpoint": "grpc://test",
+				"timeout": "2s",
+			},
 		},
 	}
 	projectID := 1
