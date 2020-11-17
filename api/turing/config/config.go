@@ -36,6 +36,13 @@ func (qty *Quantity) Decode(value string) (err error) {
 	return nil
 }
 
+// MarshalJSON implements the json.Marshaller interface so that we will get the expected
+// JSON string representation when marshalling a quantity object.
+func (qty *Quantity)MarshalJSON() ([]byte, error) {
+	q := resource.Quantity(*qty)
+	return q.MarshalJSON()
+}
+
 // Config is used to parse and store the environment configs
 type Config struct {
 	Port                int `validate:"required"`
