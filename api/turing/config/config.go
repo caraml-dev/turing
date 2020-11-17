@@ -210,8 +210,8 @@ func FromFiles(filepaths ...string) (*Config, error) {
 	config := &Config{}
 
 	// Unmarshal config values into the config object.
-	// Update DecodeHook with StringToQuantityHookFunc() in order to parse quantity string into
-	// quantity object. Refs:
+	// Add StringToQuantityHookFunc() to the default DecodeHook in order to parse quantity string
+	// into quantity object. Refs:
 	// https://github.com/spf13/viper/blob/493643fd5e4b44796124c05d59ee04ba5f809e19/viper.go#L1003-L1005
 	// https://github.com/mitchellh/mapstructure/blob/9e1e4717f8567d7ead72d070d064ad17d444a67e/decode_hooks_test.go#L128
 	err := v.Unmarshal(config, func(c *mapstructure.DecoderConfig) {
@@ -297,7 +297,10 @@ func newConfigValidator() (*validator.Validate, error) {
 	return v, nil
 }
 
-// StringToQuantityHookFunc converts string to quantity type
+// StringToQuantityHookFunc converts string to quantity type. This function is required since
+// viper uses mapstructure to unmarshal values.
+// https://github.com/spf13/viper#unmarshaling
+// https://pkg.go.dev/github.com/mitchellh/mapstructure#DecodeHookFunc
 func StringToQuantityHookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
