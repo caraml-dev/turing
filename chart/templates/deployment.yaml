@@ -35,109 +35,116 @@ spec:
         image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
         command: ['/bin/sh', '-c']
         args:
-          - |
-            /migrate \
-            -path /migrations \
-            -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "postgresql.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
-            up
+        - |
+          /migrate \
+          -path /migrations \
+          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "postgresql.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+          up
         env:
-          - name: PG_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Release.Name }}-postgresql
-                key: postgresql-password
+        - name: PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql
+              key: postgresql-password
         volumeMounts:
           - mountPath: /migrations
             name: db-migrations
+      {{- with .Values.turing.extraInitContainers }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       containers:
-        - name: api
-          image: {{ .Values.turing.image.registry }}{{ .Values.turing.image.repository }}:{{ .Values.turing.image.tag }}
-          imagePullPolicy: {{ .Values.turing.image.pullPolicy }}
-          ports:
-            - containerPort: {{ .Values.turing.service.internalPort }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.turing.livenessProbe.path }}
-              port: {{ .Values.turing.service.internalPort }}
-              scheme: HTTP
-            initialDelaySeconds: {{ default "60" .Values.turing.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ default "10" .Values.turing.livenessProbe.periodSeconds }}
-            successThreshold: {{ default "1" .Values.turing.livenessProbe.successThreshold }}
-            timeoutSeconds: {{ default "5" .Values.turing.livenessProbe.timeoutSeconds }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.turing.readinessProbe.path }}
-              port: {{ .Values.turing.service.internalPort }}
-              scheme: HTTP
-            initialDelaySeconds: {{ default "60" .Values.turing.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ default "10" .Values.turing.readinessProbe.periodSeconds }}
-            successThreshold: {{ default "1" .Values.turing.readinessProbe.successThreshold }}
-            timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
-          resources:
-            {{- toYaml .Values.turing.resources | nindent 12 }}
-          command:
-            - /app/turing-api
-          args:
-            - -config=/etc/turing/config.yaml
-          env:
-            - name: DBCONFIG_HOST
-              value: {{ template "postgresql.host" . }}
-            - name: DBCONFIG_DATABASE
-              value: {{ .Values.postgresql.postgresqlDatabase }}
-            - name: DBCONFIG_USER
-              value: {{ .Values.postgresql.postgresqlUsername }}
-            - name: DBCONFIG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: postgresql-password
-          volumeMounts:
-            - name: config
-              mountPath: /etc/turing
-        - name: swagger-ui
-          image: "swaggerapi/swagger-ui:{{ .Values.swaggerUi.image.tag }}"
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: {{ .Values.swaggerUi.service.internalPort }}
-          resources:
-            requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
-              cpu: 500m
-              memory: 128Mi
-          env:
-            - name: LAYOUT
-              value: "BaseLayout"
-            - name: SWAGGER_JSON
-              value: "/app/swagger.yaml"
-            - name: PORT
-              value: "{{ .Values.swaggerUi.service.internalPort }}"
-            - name: API_HOST
-              value: "{{ .Values.swaggerUi.apiHost }}"
-            - name: BASE_PATH
-              value: "{{ .Values.swaggerUi.basePath }}"
-          command: ['sh', '-c']
-          args:
-            - |
-              mkdir /app
-              echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml..."
-              until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml); do
-                printf '.'
-                sleep 10
-              done
-              echo "Update Swagger config..."
-              sed -r -i 's/^(\s*)(host\s*:.*$$)/\host: "'$${API_HOST}'"/' $${SWAGGER_JSON}
-              sed -r -i 's#^(\s*)(basePath\s*:.*$$)#\basePath: "'$${BASE_PATH}'"#' $${SWAGGER_JSON}
-              echo "Running Swagger UI..."
-              /usr/share/nginx/run.sh
+      - name: api
+        image: {{ .Values.turing.image.registry }}{{ .Values.turing.image.repository }}:{{ .Values.turing.image.tag }}
+        imagePullPolicy: {{ .Values.turing.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.turing.service.internalPort }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.turing.livenessProbe.path }}
+            port: {{ .Values.turing.service.internalPort }}
+            scheme: HTTP
+          initialDelaySeconds: {{ default "60" .Values.turing.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ default "10" .Values.turing.livenessProbe.periodSeconds }}
+          successThreshold: {{ default "1" .Values.turing.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ default "5" .Values.turing.livenessProbe.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.turing.readinessProbe.path }}
+            port: {{ .Values.turing.service.internalPort }}
+            scheme: HTTP
+          initialDelaySeconds: {{ default "60" .Values.turing.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ default "10" .Values.turing.readinessProbe.periodSeconds }}
+          successThreshold: {{ default "1" .Values.turing.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
+        resources:
+          {{- toYaml .Values.turing.resources | nindent 12 }}
+        command:
+        - /app/turing-api
+        args:
+        - -config=/etc/turing/config.yaml
+        {{- with .Values.turing.extraArgs }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        env:
+        {{- with .Values.turing.extraEnvs }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/turing
+        {{- with .Values.turing.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      - name: swagger-ui
+        image: "swaggerapi/swagger-ui:{{ .Values.swaggerUi.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: {{ .Values.swaggerUi.service.internalPort }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        env:
+        - name: LAYOUT
+          value: "BaseLayout"
+        - name: SWAGGER_JSON
+          value: "/app/swagger.yaml"
+        - name: PORT
+          value: "{{ .Values.swaggerUi.service.internalPort }}"
+        - name: API_HOST
+          value: "{{ .Values.swaggerUi.apiHost }}"
+        - name: BASE_PATH
+          value: "{{ .Values.swaggerUi.basePath }}"
+        command: ['sh', '-c']
+        args:
+        - |
+          mkdir /app
+          echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml..."
+          until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml); do
+            printf '.'
+            sleep 10
+          done
+          echo "Update Swagger config..."
+          sed -r -i 's/^(\s*)(host\s*:.*$$)/\host: "'$${API_HOST}'"/' $${SWAGGER_JSON}
+          sed -r -i 's#^(\s*)(basePath\s*:.*$$)#\basePath: "'$${BASE_PATH}'"#' $${SWAGGER_JSON}
+          echo "Running Swagger UI..."
+          /usr/share/nginx/run.sh
+      {{- with .Values.turing.extraContainers }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       volumes:
-        - name: config 
-          secret:
-            secretName: {{ template "turing.fullname" .}}-api-secret
-        - name: db-migrations
-          configMap:
-            name: {{ .Release.Name }}-db-migrations
+      - name: config 
+        secret:
+          secretName: {{ template "turing.fullname" .}}-api-secret
+      - name: db-migrations
+        configMap:
+          name: {{ .Release.Name }}-db-migrations
+      {{- with .Values.turing.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
 
 {{- if (not .Values.turing.nodeSelectorDisabled) }}
 {{- if .Values.turing.nodeSelector }}

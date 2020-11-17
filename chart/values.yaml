@@ -27,8 +27,73 @@ turing:
     # -- Turing API container port number
     internalPort: 8080
   ingress:
+    # -- Enable ingress to provision Ingress resource for external access to Turing API
     enabled: false
+    # -- Set host value to enable name based virtual hosting. This allows routing
+    # HTTP traffic to multiple host names at the same IP address. If no host is
+    # specified all inbound HTTP traffic through the ingress IP address.
+    # https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting
+    host: ""
+    # -- Ingress class annotation to add to this Ingress rule, 
+    # useful when there are multiple ingress controllers installed
+    class: ""
+
+  # -- Turing API server configuration. 
+  # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
   config: {}
+
+  # -- List of string containing additional Turing API server arguments. For
+  # example, multiple "-config" can be specified to use multiple config files
+  extraArgs: []
+  # Example
+  # - -config=/etc/secrets/experiment.yaml
+  # - -config=/etc/secrets/database.yaml
+
+  # -- List of extra environment variables to add to Turing API server container
+  extraEnvs: []
+  # # Example
+  # - name: DEMO_GREETING
+  #   value: "Hello from the environment"
+  # - name: DEMO_FAREWELL
+  #   value: "Such a sweet sorrow"
+
+  # -- List of extra initContainers to add to the Pod. For example, you
+  # need to run some init scripts to fetch credentials from a remote server
+  extraInitContainers: []
+  # # Example
+  # - name: init-myservice
+  #   image: busybox:1.28
+  #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+
+  # -- List of sidecar containers to attach to the Pod. For example, you can
+  # attach sidecar container that forward logs or dynamically update some 
+  # configuration files.
+  extraContainers: []
+  # Example
+  # - name: count-agent
+  #   image: k8s.gcr.io/fluentd-gcp:1.30
+  #   env:
+  #   - name: FLUENTD_ARGS
+  #     value: -c /etc/fluentd-config/fluentd.conf
+  #   volumeMounts:
+  #   - name: varlog
+  #     mountPath: /var/log
+  #   - name: config-volume
+  #     mountPath: /etc/fluentd-config
+
+  # -- Extra volumes to attach to the Pod. For example, you can mount 
+  # additional secrets to these volumes
+  extraVolumes: []
+  # # Example
+  # - name: varlog
+  #   emptyDir: {}
+
+  # -- Extra volume mounts to attach to Turing API server container. For example
+  # to mount the extra volume containing secrets
+  extraVolumeMounts: []
+  # # Example
+  # - name: varlog
+  #   mountPath: /var/log
 
 dbMigrations:
   image:

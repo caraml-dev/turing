@@ -5,7 +5,9 @@ metadata:
   name: {{ template "turing.fullname" .}}
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.class: {{ .Values.turing.ingress.class }}
+    {{- with .Values.turing.ingress.class }}
+    ingress.class: {{ . }}
+    {{- end }}
   labels:
     app: {{ include "turing.fullname" . }}
     release: {{ .Release.Name }}
@@ -14,18 +16,15 @@ metadata:
     app.kubernetes.io/name: {{ include "turing.fullname" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    gojek.com/app: turing
-    gojek.com/team: dsp
-    gojek.com/stream: dsp
-    gojek.com/orchestrator: gitlab
-    gojek.com/environment: {{ .Values.turing.config.deployment.environmentType }}
 spec:
   rules:
-    - host: {{ .Values.turing.ingress.host }}
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: {{ template "turing.fullname" .}}
-              servicePort: {{ .Values.turing.service.externalPort }}
+  - {{- with .Values.turing.ingress.host }}
+    host: {{ . }}
+    {{- end }} 
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: {{ template "turing.fullname" .}}
+            servicePort: {{ .Values.turing.service.externalPort }}
 {{- end }}
