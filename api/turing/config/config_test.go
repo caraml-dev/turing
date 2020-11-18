@@ -3,6 +3,7 @@
 package config
 
 import (
+	"github.com/mitchellh/copystructure"
 	"github.com/mitchellh/mapstructure"
 	"os"
 	"reflect"
@@ -14,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
-
 
 func TestDecodeQuantity(t *testing.T) {
 	var tests = map[string]struct {
@@ -416,19 +416,19 @@ func TestFromFiles(t *testing.T) {
 		},
 		"missing file": {
 			filepaths: []string{"this-file-should-not-exists.yaml"},
-			wantErr: true,
+			wantErr:   true,
 		},
 		"invalid duration format": {
 			filepaths: []string{"invalid-duration-format.yaml"},
-			wantErr: true,
+			wantErr:   true,
 		},
 		"invalid quantity format": {
 			filepaths: []string{"invalid-quantity-format.yaml"},
-			wantErr: true,
+			wantErr:   true,
 		},
 		"invalid type": {
 			filepaths: []string{"invalid-type.yaml"},
-			wantErr: true,
+			wantErr:   true,
 		},
 	}
 
@@ -496,6 +496,114 @@ func TestStringToQuantityHookFunc(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestConfigValidate(t *testing.T) {
+	validConfig := Config{
+		Port: 5000,
+		DbConfig: &DatabaseConfig{
+			Host:     "localhost",
+			Port:     5432,
+			User:     "user",
+			Password: "password",
+			Database: "postgres",
+		},
+		DeployConfig: &DeploymentConfig{
+			EnvironmentType: "dev",
+			Timeout:         1 * time.Minute,
+			DeletionTimeout: 1 * time.Minute,
+			MaxCPU:          Quantity(resource.MustParse("2")),
+			MaxMemory:       Quantity(resource.MustParse("8Gi")),
+		},
+		RouterDefaults: &RouterDefaults{
+			Image:    "turing-router:latest",
+			LogLevel: "DEBUG",
+		},
+		Sentry: sentry.Config{},
+		VaultConfig: &VaultConfig{
+			Address: "http://localhost:8200",
+			Token:   "root",
+		},
+		TuringEncryptionKey: "secret",
+		AlertConfig:         nil,
+		MLPConfig: &MLPConfig{
+			MerlinURL:        "http://merlin.example.com",
+			MLPURL:           "http://mlp.example.com",
+			MLPEncryptionKey: "secret",
+		},
+	}
+
+	// validConfigUpdate returns an updated config from a valid one
+	type validConfigUpdate func(validConfig Config) Config
+
+	tests := map[string]struct {
+		validConfigUpdate validConfigUpdate
+		wantErr           bool
+	}{
+		"valid": {
+			validConfigUpdate: func(validConfig Config) Config {
+				return validConfig
+			},
+		},
+		"missing port": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.Port = 0
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing database password": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.DbConfig.Password = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing deployment timeout": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.DeployConfig.Timeout = 0
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing vault address": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.VaultConfig.Address = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing turing encryption key": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.TuringEncryptionKey = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing MLP URL": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.MLPConfig.MLPURL = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing Merlin URL": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.MLPConfig.MerlinURL = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			validConfigCopy := copystructure.Must(copystructure.Copy(validConfig))
+			c := tt.validConfigUpdate(validConfigCopy.(Config))
+			if err := c.Validate(); (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }

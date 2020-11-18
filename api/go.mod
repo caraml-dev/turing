@@ -20,6 +20,7 @@ require (
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/ory/viper v1.7.5
 	github.com/patrickmn/go-cache v2.1.0+incompatible

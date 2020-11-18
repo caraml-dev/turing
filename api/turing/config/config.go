@@ -38,7 +38,7 @@ func (qty *Quantity) Decode(value string) (err error) {
 
 // MarshalJSON implements the json.Marshaller interface so that we will get the expected
 // JSON string representation when marshalling a quantity object.
-func (qty *Quantity)MarshalJSON() ([]byte, error) {
+func (qty *Quantity) MarshalJSON() ([]byte, error) {
 	q := resource.Quantity(*qty)
 	return q.MarshalJSON()
 }
@@ -48,14 +48,14 @@ type Config struct {
 	Port                int `validate:"required"`
 	AllowedOrigins      []string
 	AuthConfig          *AuthorizationConfig
-	DbConfig            *DatabaseConfig
-	DeployConfig        *DeploymentConfig
-	RouterDefaults      *RouterDefaults
+	DbConfig            *DatabaseConfig   `validate:"required"`
+	DeployConfig        *DeploymentConfig `validate:"required"`
+	RouterDefaults      *RouterDefaults   `validate:"required"`
 	Sentry              sentry.Config
-	VaultConfig         *VaultConfig
-	TuringEncryptionKey string `validate:"required"`
+	VaultConfig         *VaultConfig `validate:"required"`
+	TuringEncryptionKey string       `validate:"required"`
 	AlertConfig         *AlertConfig
-	MLPConfig           *MLPConfig
+	MLPConfig           *MLPConfig `validate:"required"`
 	TuringUIConfig      *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
