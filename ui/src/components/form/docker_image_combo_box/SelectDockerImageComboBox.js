@@ -41,7 +41,6 @@ export const SelectDockerImageComboBox = ({
       placeholder={props.placeholder}
       isInvalid={props.isInvalid}
       options={imageOptions}
-      noSuggestions={true}
       value={image}
       onChange={value => onImageChange(value || "")}
       onCreateOption={onImageChange}

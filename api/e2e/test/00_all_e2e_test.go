@@ -4,10 +4,11 @@ package e2e
 
 import (
 	"fmt"
-	"github.com/kelseyhightower/envconfig"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 // These constants are set according to the values used by the app,
@@ -34,6 +35,7 @@ type testConfig struct {
 	ClusterName        string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
 	ProjectID          int    `envconfig:"PROJECT_ID" required:"true"`
 	ProjectName        string `envconfig:"PROJECT_NAME" required:"true"`
+	TestEchoImage      string `envconfig:"TEST_ECHO_IMAGE" default:"kennethreitz/httpbin"`
 	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
 	// If false, the helper will use the cluster credentials from the configured Vault environment.

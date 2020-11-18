@@ -42,7 +42,7 @@ export const DockerDeploymentPanel = ({
           display="row">
           <SelectDockerImageComboBox
             fullWidth
-            value={image || registries[0].value}
+            value={image || ""}
             placeholder="echo:1.0.2"
             registryOptions={registries}
             imageOptions={imageOptions}

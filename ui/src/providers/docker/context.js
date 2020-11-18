@@ -5,10 +5,10 @@ const DockerRegistriesContext = React.createContext([]);
 
 export const DockerRegistriesContextProvider = ({ children }) => {
   const registries = [
-    {
-      value: `asia.gcr.io/gods-${appConfig.environment}`,
-      inputDisplay: `asia.gcr.io/gods-${appConfig.environment}`
-    },
+    ...appConfig.privateDockerRegistries.map(registry => ({
+      value: registry,
+      inputDisplay: registry
+    })),
     {
       value: "",
       inputDisplay: "Docker Hub"

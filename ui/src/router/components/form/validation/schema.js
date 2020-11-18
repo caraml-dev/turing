@@ -147,7 +147,7 @@ const dockerImageSchema = yup
   .string()
   .matches(
     dockerImageRegex,
-    "Valid Docker Image value should be provided, e.g. asia.gcr.io/gods-production/echo:1.0.0"
+    "Valid Docker Image value should be provided, e.g. kennethreitz/httpbin:latest"
   );
 
 const dockerDeploymentSchema = yup.object().shape({

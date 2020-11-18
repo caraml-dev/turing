@@ -63,7 +63,7 @@
         "ensembler": {
             "type": "docker",
             "docker_config": {
-                "image": "kennethreitz/httpbin",
+                "image": "{{.TestEchoImage}}",
                 "resource_request": {
                     "min_replica": 2,
                     "max_replica": 2,

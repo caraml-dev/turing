@@ -32,8 +32,10 @@ export const appConfig = {
   environment: process.env.REACT_APP_ENVIRONMENT || "dev",
   homepage: process.env.REACT_APP_HOMEPAGE || process.env.PUBLIC_URL,
   appIcon: "graphApp",
-  docsUrl:
-    "https://go-jek.atlassian.net/wiki/spaces/DSP/pages/1757883181/Turing+User+Documentation",
+  docsUrl: process.env.REACT_APP_USER_DOCS_URL,
+  privateDockerRegistries: process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES
+    ? process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES.split(",")
+    : [],
   scaling: {
     maxAllowedReplica: 10
   }
