@@ -158,7 +158,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 		Experiment: map[string]interface{}{
 			"litmus": map[string]interface{}{
 				"endpoint": "grpc://test",
-				"timeout": "2s",
+				"timeout":  "2s",
 			},
 		},
 	}
@@ -303,7 +303,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 		Experiment: map[string]interface{}{
 			"xp": map[string]interface{}{
 				"endpoint": "http://test",
-				"timeout": "3s",
+				"timeout":  "3s",
 			},
 		},
 	}

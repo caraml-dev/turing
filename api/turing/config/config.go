@@ -3,10 +3,11 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/ory/viper"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/ory/viper"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -196,7 +197,7 @@ type MLPConfig struct {
 // These config files will override the default (refer to setDefaultValues function) config values
 // and can be overridden by the values from environment variables. Nested keys in the config
 // can be set from environment variable name separed by "_". For instance the config value for
-// "DbConfig.Port" can be overriden by environment variable name "DBCONFIG_PORT". Note that
+// "DbConfig.Port" can be overridden by environment variable name "DBCONFIG_PORT". Note that
 // all environment variable names must be upper case.
 //
 // Refer to example.yaml for an example of config file.
@@ -242,6 +243,12 @@ func FromFiles(filepaths ...string) (*Config, error) {
 	return config, nil
 }
 
+// setDefaultValues for all keys in Viper config. We need to set values for all keys so that
+// we can always use environment variables to override the config keys. In Viper v1, if the
+// keys do not have default values, and the key does not appear in the config file, it cannot
+// be overridden by environment variables, unless each key is called with BindEnv.
+// https://github.com/spf13/viper/issues/188
+// https://github.com/spf13/viper/issues/761
 func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("Port", "8080")
 
@@ -272,6 +279,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults.FluentdConfig.Image", "")
 	v.SetDefault("RouterDefaults.FluentdConfig.Tag", "turing-result.log")
 	v.SetDefault("RouterDefaults.FluentdConfig.FlushIntervalSeconds", "90")
+	v.SetDefault("RouterDefaults.Experiment", map[string]interface{}{})
 
 	v.SetDefault("Sentry.Enabled", "false")
 	v.SetDefault("Sentry.DSN", "")
@@ -296,6 +304,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
 	v.SetDefault("SwaggerFile", "swagger.yaml")
+	v.SetDefault("Experiment", map[string]interface{}{})
 }
 
 func newConfigValidator() (*validator.Validate, error) {
