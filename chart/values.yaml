@@ -31,7 +31,8 @@ turing:
     enabled: false
     # -- Set host value to enable name based virtual hosting. This allows routing
     # HTTP traffic to multiple host names at the same IP address. If no host is
-    # specified all inbound HTTP traffic through the ingress IP address.
+    # specified, the ingress rule applies to all inbound HTTP traffic through 
+    # the IP address specified.
     # https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting
     host: ""
     # -- Ingress class annotation to add to this Ingress rule, 
