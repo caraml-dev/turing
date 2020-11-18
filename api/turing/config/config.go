@@ -3,12 +3,12 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/ory/viper"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/spf13/viper"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
@@ -67,7 +67,7 @@ type Config struct {
 	// { "<experiment_engine>": <experiment_engine_config>, ... }
 	//
 	// For example:
-	// { "experiment_engine_a": `{"client": "foo"}`, "experiment_engine_b": `{"apikey": 12}` }
+	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
 	Experiment map[string]interface{}
 }
 
@@ -141,8 +141,8 @@ type RouterDefaults struct {
 	// specification for routers.
 	//
 	// For example:
-	// {"experiment_engine_a": `{"endpoint": "http://engine-a.com", "timeout": "500ms"}`,
-	//  "experiment_engine_b": `{"endpoint": "http://engine-b.com", "timeout": "250ms"}`}
+	// {"experiment_engine_a": {"endpoint": "http://engine-a.com", "timeout": "500ms"},
+	//  "experiment_engine_b": {"endpoint": "http://engine-b.com", "timeout": "250ms"} }
 	Experiment map[string]interface{}
 }
 
@@ -188,15 +188,22 @@ type MLPConfig struct {
 	MLPEncryptionKey string `validate:"required"`
 }
 
-// FromFiles creates a Config object from config files.
+// FromFiles creates a Config object from config files. JSON and YAML format are supported.
 //
-// If multiple config files are provided, the subsequent config files will override the
+// If multiple config files are provided, the subsequent config files will override the config
 // values from the config files loaded earlier.
 //
-// These config files will override the default config values and can be overridden by
-// the values from environment variables.
+// These config files will override the default (refer to setDefaultValues function) config values
+// and can be overridden by the values from environment variables. Nested keys in the config
+// can be set from environment variable name separed by "_". For instance the config value for
+// "DbConfig.Port" can be overriden by environment variable name "DBCONFIG_PORT". Note that
+// all environment variable names must be upper case.
+//
+// Refer to example.yaml for an example of config file.
 func FromFiles(filepaths ...string) (*Config, error) {
 	v := viper.New()
+
+	// Load default config values
 	setDefaultValues(v)
 
 	// Load config values from the provided config files

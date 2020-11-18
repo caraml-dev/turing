@@ -3,6 +3,7 @@ package request
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
@@ -209,7 +210,11 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 		}
 	}
 
-	experimentConfig, ok := defaults.Experiment[string(engineType)]
+	engineTypeLowerCase := strings.ToLower(string(engineType))
+	// The engine name (key in RouterDefaults.Experiment) is always lowercased due to our config
+	// loader implementation. Being always lowercased also helps with problem of not finding
+	// experiment engine due to case sensitivity.
+	experimentConfig, ok := defaults.Experiment[engineTypeLowerCase]
 	if !ok {
 		return nil, fmt.Errorf("experiment engine '%s' not found in router defaults experiment config", engineType)
 	}

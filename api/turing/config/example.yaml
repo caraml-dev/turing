@@ -45,13 +45,13 @@ RouterDefaults:
 
   # Experiment is a map of experiment engine name to configuration object
   # Note: the following config just an example and will not work as of Nov 2020
-  Experiment: 
-    PlanOut:
-      Endpoint: http://planout.example.com
-      Timeout: 3s
-    Optimizely:
-      Endpoint: https://api.optimizely.com/v2
-      Timeout: 5s
+  Experiment:
+    planout:
+      endpoint: http://planout.example.com
+      timeout: 3s
+    optimizely:
+      endpoint: https://api.optimizely.com/v2
+      timeout: 5s
 
 # Sentry application monitoring service configuration
 # https://docs.sentry.io/product/sentry-basics/dsn-explainer/
@@ -103,11 +103,11 @@ SwaggerFile: swagger.yaml
 # Experiment is a map of experiment engine name to configuration object.
 # This will be used to configure the corresponding experiment engines.
 # Note: the following config just an example and will not work as of Nov 2020
-Experiment: 
-  Optimizely:
-    Token: mytoken
-  PlanOut:
-    Config: 
+Experiment:
+  optimizely:
+    token: mytoken
+  planOut:
+    config:
       op: seq
       seq:
       - op: set
