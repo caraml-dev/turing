@@ -16,6 +16,9 @@ metadata:
     app.kubernetes.io/name: {{ include "turing.fullname" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 4 }}
+{{- end }}
 spec:
   rules:
   - {{- with .Values.turing.ingress.host }}
