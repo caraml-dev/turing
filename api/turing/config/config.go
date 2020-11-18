@@ -7,6 +7,9 @@ import (
 	"strings"
 	"time"
 
+	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
+	// always returns map[string]interface{}. Without this, config for experiment cannot be
+	// easily marshalled into JSON, which is currently the format required for experiment config.
 	"github.com/ory/viper"
 
 	"github.com/mitchellh/mapstructure"
