@@ -138,7 +138,7 @@ spec:
       volumes:
       - name: config 
         secret:
-          secretName: {{ template "turing.fullname" .}}-api-secret
+          secretName: {{ template "turing.fullname" .}}-api-config
       - name: db-migrations
         configMap:
           name: {{ .Release.Name }}-db-migrations
