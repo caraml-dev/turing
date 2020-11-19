@@ -192,19 +192,23 @@ type MLPConfig struct {
 	MLPEncryptionKey string `validate:"required"`
 }
 
-// FromFiles creates a Config object from config files. JSON and YAML format are supported.
+// Load creates a Config object from default config values, config files and environment variables.
+// Load accepts config files as the argument. JSON and YAML format are both supported.
 //
 // If multiple config files are provided, the subsequent config files will override the config
 // values from the config files loaded earlier.
 //
-// These config files will override the default (refer to setDefaultValues function) config values
+// These config files will override the default config values (refer to setDefaultValues function)
 // and can be overridden by the values from environment variables. Nested keys in the config
 // can be set from environment variable name separed by "_". For instance the config value for
 // "DbConfig.Port" can be overridden by environment variable name "DBCONFIG_PORT". Note that
 // all environment variable names must be upper case.
 //
+// If no config file is provided, only the default config values and config values from environment
+// varibales will be loaded.
+//
 // Refer to example.yaml for an example of config file.
-func FromFiles(filepaths ...string) (*Config, error) {
+func Load(filepaths ...string) (*Config, error) {
 	v := viper.New()
 
 	// Load default config values

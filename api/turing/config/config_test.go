@@ -110,7 +110,7 @@ func setupNewEnv(envMaps ...map[string]string) {
 	}
 }
 
-func TestFromFiles(t *testing.T) {
+func TestLoad(t *testing.T) {
 	tests := map[string]struct {
 		filepaths []string
 		env       map[string]string
@@ -316,7 +316,7 @@ func TestFromFiles(t *testing.T) {
 				},
 			},
 		},
-		"environment variables": {
+		"multiple files and environment variables": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			env: map[string]string{
 				"PORT":                                  "5000",
@@ -435,7 +435,7 @@ func TestFromFiles(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			setupNewEnv(tt.env)
-			got, err := FromFiles(tt.filepaths...)
+			got, err := Load(tt.filepaths...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FromFiles() error = %v, wantErr %v", err, tt.wantErr)
 				return
