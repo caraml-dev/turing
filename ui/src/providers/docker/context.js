@@ -10,7 +10,7 @@ export const DockerRegistriesContextProvider = ({ children }) => {
       inputDisplay: registry
     })),
     {
-      value: "",
+      value: "docker.io",
       inputDisplay: "Docker Hub"
     }
   ];
