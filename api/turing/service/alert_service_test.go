@@ -63,7 +63,7 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	expectedReq := "POST /api/v4/projects/project/repository/files/prefix/env/team/service/throughput.yaml"
 	expectedContent := strings.Join([]string{
 		`groups:`,
-		`- name: env_team`,
+		`- name: env_team_service_throughput`,
 		`  rules:`,
 		`  - alert: service_throughput_violation_env`,
 		`    expr: |`,
