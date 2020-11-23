@@ -49,3 +49,8 @@ export const sentryConfig = {
 export const monitoringConfig = {
   dashboardUrl: process.env.REACT_APP_ROUTER_MONITORING_URL || ""
 };
+
+export const alertConfig = {
+  environment:
+    appConfig.environment === "dev" ? "development" : appConfig.environment
+};
