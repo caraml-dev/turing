@@ -1,0 +1,124 @@
+# Port number Turing API server listens to
+Port: 8080
+
+# Enable Cross-Origin Requests (CORS) for the following origins
+AllowedOrigins:
+- "*"
+
+# Configuration to enable authorization using ORY Keto server
+AuthConfig:
+  Enabled: false
+  # ORY Keto auth server URL: https://github.com/ory/keto
+  URL: http://example.com/auth
+
+# Postgresql connection and credentials
+DbConfig:
+  Host: localhost
+  Port: 5432
+  Database: turing
+  User: dbuser
+  Password: dbpassword
+
+# Turing router deployment context
+DeployConfig:
+  EnvironmentType: dev
+  GcpProject: gcp-project-001
+  Timeout: "3m"
+  DeletionTimeout: "1m"
+  MaxCPU: "4"
+  MaxMemory: "8Gi"
+
+# Turing router configuration
+RouterDefaults:
+  Image: ghcr.io/gojek/turing:latest
+  FiberDebugLogEnabled: false
+  CustomMetricsEnabled: false
+  JaegerEnabled: false
+  JaegerCollectorEndpoint: http://jaeger-tracing-collector.example.com:14268/api/traces
+  LogLevel: INFO
+
+  # Fluentd log forwarder configuration that can be used in Turing router
+  FluentdConfig:
+    FlushIntervalSeconds: 90
+    Image: ghcr.io/gojek/fluentd:latest
+    Tag: turing-result.log
+
+  # Experiment is a map of experiment engine name to configuration object
+  # Note: the following config just an example and will not work as of Nov 2020
+  Experiment:
+    planout:
+      endpoint: http://planout.example.com
+      timeout: 3s
+    optimizely:
+      endpoint: https://api.optimizely.com/v2
+      timeout: 5s
+
+# Sentry application monitoring service configuration
+# https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+Sentry:
+  Enabled: false
+  DSN: https://public@sentry.example.com/1
+  Labels: 
+    labelkey1: labelvalue1
+    labelkey2: labelvalue2
+
+# Vault server configuration. Vault is required by Turing API to retrieve
+# Kubernetes cluster credentials where the Turing router will be deployed.
+VaultConfig:
+  Address: http://localhost:8200
+  Token: root
+
+# Encryption key used by Turing API server when saving user-sensitive info
+# such as user provided service account keys
+TuringEncryptionKey: secret
+
+# Alert configuration for Turing router 
+AlertConfig:
+  Enabled: false
+  # Persist alert configuration in a GitLab repo with pre-configured 
+  # continuous integration jobs that will register and activate the alerts
+  # to a backend alert server
+  GitLab:
+    BaseURL: https://gitlab.com
+    Branch: master
+    PathPrefix: turing
+    ProjectID: "1"
+    Token: gitlabtoken
+
+# MLP API access configuration. Turing uses MLP API to get projects
+# and environments associated with the Turing router: https://github.com/gojek/mlp
+MLPConfig:
+  MLPURL: http://api.mlp.example.com
+  MerlinURL: http://api.merlin.example.com
+  MLPEncryptionKey: secret
+
+# Turing UI configuration to set how the UI assets will be served
+TuringUIConfig:
+  AppDirectory: /ui
+  Homepage: /turing
+ 
+# File path to find OpenAPI v2 specfication file
+SwaggerFile: swagger.yaml
+
+# Experiment is a map of experiment engine name to configuration object.
+# This will be used to configure the corresponding experiment engines.
+# Note: the following config just an example and will not work as of Nov 2020
+Experiment:
+  optimizely:
+    token: mytoken
+  planOut:
+    config:
+      op: seq
+      seq:
+      - op: set
+        var: variant
+        value:
+          choices:
+            op: array
+            values:
+            - control
+            - treatment-1
+          unit:
+            op: get
+            var: customer
+          op: uniformChoice
