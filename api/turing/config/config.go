@@ -3,11 +3,19 @@ package config
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
+
+	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
+	// always returns map[string]interface{}. Without this, config for experiment cannot be
+	// easily marshalled into JSON, which is currently the format required for experiment config.
+	"github.com/ory/viper"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
-	"github.com/kelseyhightower/envconfig"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -18,7 +26,7 @@ type Quantity resource.Quantity
 // a valid resource.Quantity.
 func (qty *Quantity) Decode(value string) (err error) {
 	if value == "" {
-		return errors.New("Value is empty")
+		return errors.New("value is empty")
 	}
 
 	// MustParse panics if the supplied value cannot be parsed
@@ -32,23 +40,30 @@ func (qty *Quantity) Decode(value string) (err error) {
 	return nil
 }
 
+// MarshalJSON implements the json.Marshaller interface so that we will get the expected
+// JSON string representation when marshalling a quantity object.
+func (qty *Quantity) MarshalJSON() ([]byte, error) {
+	q := resource.Quantity(*qty)
+	return q.MarshalJSON()
+}
+
 // Config is used to parse and store the environment configs
 type Config struct {
-	Port                int                  `envconfig:"turing_port" default:"8080"`
-	AllowedOrigins      []string             `split_words:"true" default:"*"`
-	AuthConfig          *AuthorizationConfig `envconfig:"authorization" validate:"required"`
-	DbConfig            *DatabaseConfig      `envconfig:"turing_database"`
-	DeployConfig        *DeploymentConfig    `envconfig:"deployment"`
-	RouterDefaults      *RouterDefaults      `envconfig:"turing_router"`
-	Sentry              sentry.Config        `split_words:"false" envconfig:"SENTRY"`
-	VaultConfig         *VaultConfig         `envconfig:"vault"`
-	TuringEncryptionKey string               `split_words:"true" required:"true"`
-	AlertConfig         *AlertConfig         `envconfig:"alert"`
-	MLPConfig           *MLPConfig
-	TuringUIConfig      *TuringUIConfig `envconfig:"turing_ui"`
+	Port                int `validate:"required"`
+	AllowedOrigins      []string
+	AuthConfig          *AuthorizationConfig
+	DbConfig            *DatabaseConfig   `validate:"required"`
+	DeployConfig        *DeploymentConfig `validate:"required"`
+	RouterDefaults      *RouterDefaults   `validate:"required"`
+	Sentry              sentry.Config
+	VaultConfig         *VaultConfig `validate:"required"`
+	TuringEncryptionKey string       `validate:"required"`
+	AlertConfig         *AlertConfig
+	MLPConfig           *MLPConfig `validate:"required"`
+	TuringUIConfig      *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerFile string `envconfig:"swagger_file" default:"swagger.yaml"`
+	SwaggerFile string
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -56,8 +71,8 @@ type Config struct {
 	// { "<experiment_engine>": <experiment_engine_config>, ... }
 	//
 	// For example:
-	// { "experiment_engine_a": `{"client": "foo"}`, "experiment_engine_b": `{"apikey": 12}` }
-	Experiment map[string]string `envconfig:"experiment"`
+	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
+	Experiment map[string]interface{}
 }
 
 // ListenAddress returns the Turing Api app's port
@@ -65,52 +80,60 @@ func (c *Config) ListenAddress() string {
 	return fmt.Sprintf(":%d", c.Port)
 }
 
+func (c *Config) Validate() error {
+	validate, err := newConfigValidator()
+	if err != nil {
+		return err
+	}
+	return validate.Struct(c)
+}
+
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
-	EnvironmentType string        `envconfig:"environment_type" required:"true"`
-	GcpProject      string        `envconfig:"gcp_project" required:"true"`
-	Timeout         time.Duration `required:"true"`
-	DeletionTimeout time.Duration `envconfig:"deletion_timeout" required:"true"`
-	MaxCPU          Quantity      `envconfig:"max_cpu" required:"true"`
-	MaxMemory       Quantity      `envconfig:"max_memory" required:"true"`
+	EnvironmentType string `validate:"required"`
+	GcpProject      string
+	Timeout         time.Duration `validate:"required"`
+	DeletionTimeout time.Duration `validate:"required"`
+	MaxCPU          Quantity      `validate:"required"`
+	MaxMemory       Quantity      `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files
 type TuringUIConfig struct {
 	// Optional. If configured, turing-api will serve static files of the turing-ui React app
-	AppDirectory string `envconfig:"app_directory"`
+	AppDirectory string
 	// Optional. Defines the relative path under which the app will be accessible.
 	// This should match `homepage` value from the `package.json` file of the CRA app
-	Homepage string `default:"/turing"`
+	Homepage string
 }
 
 // DatabaseConfig config captures the Turing database config
 type DatabaseConfig struct {
-	Host     string `required:"true"`
-	Port     int    `default:"5432"`
-	User     string `required:"true"`
-	Password string `required:"true"`
-	Database string `envconfig:"name" required:"true"`
+	Host     string `validate:"required"`
+	Port     int    `validate:"required"`
+	User     string `validate:"required"`
+	Password string `validate:"required"`
+	Database string `validate:"required"`
 }
 
 // RouterDefaults contains default configuration for routers deployed
 // by this isntance of the Turing API.
 type RouterDefaults struct {
 	// Turing router image, in the format registry/repository:version.
-	Image string `required:"true"`
+	Image string `validate:"required"`
 	// Enable Fiber debug logging
-	FiberDebugLogEnabled bool `split_words:"true" default:"true"`
+	FiberDebugLogEnabled bool
 	// Enable router custom metrics
-	CustomMetricsEnabled bool `split_words:"true" default:"true"`
+	CustomMetricsEnabled bool
 	// Enable Jaeger Tracing
-	JaegerEnabled bool `split_words:"true" default:"true"`
+	JaegerEnabled bool
 	// Jaeger collector endpoint. If JaegerEnabled is true, this value
 	// must be set.
-	JaegerCollectorEndpoint string `split_words:"true" required:"true"`
+	JaegerCollectorEndpoint string
 	// Router log level
-	LogLevel string `split_words:"true" default:"INFO"`
+	LogLevel string `validate:"required"`
 	// Fluentd config for the router
-	FluentdConfig *FluentdConfig `envconfig:"fluentd"`
+	FluentdConfig *FluentdConfig
 	// Experiment specifies the default experiment JSON configuration for different experiment
 	// engines that Turing router supports.
 	//
@@ -122,72 +145,173 @@ type RouterDefaults struct {
 	// specification for routers.
 	//
 	// For example:
-	// {"experiment_engine_a": `{"endpoint": "http://engine-a.com", "timeout": "500ms"}`,
-	//  "experiment_engine_b": `{"endpoint": "http://engine-b.com", "timeout": "250ms"}`}
-	Experiment map[string]string `envconfig:"experiment"`
+	// {"experiment_engine_a": {"endpoint": "http://engine-a.com", "timeout": "500ms"},
+	//  "experiment_engine_b": {"endpoint": "http://engine-b.com", "timeout": "250ms"} }
+	Experiment map[string]interface{}
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
 type FluentdConfig struct {
 	// Image to use for fluentd deployments, in the format registry/repository:version.
-	Image string `split_words:"true" required:"true"`
+	Image string
 	// Fluentd tag for logs
-	Tag string `split_words:"true" default:"turing-result.log"`
+	Tag string
 	// Flush interval seconds - value determined by load job frequency to BQ
-	FlushIntervalSeconds int `split_words:"true" default:"90"`
+	FlushIntervalSeconds int
 }
 
 // AuthorizationConfig captures the config for auth using mlp authz
 type AuthorizationConfig struct {
-	Enabled bool `default:"true"`
+	Enabled bool
 	URL     string
 }
 
 // VaultConfig captures the config for connecting to the Vault server
 type VaultConfig struct {
-	Address string `required:"true"`
-	Token   string `required:"true"`
+	Address string `validate:"required"`
+	Token   string `validate:"required"`
 }
 
 type AlertConfig struct {
-	Enabled bool          `default:"false"`
-	GitLab  *GitlabConfig `envconfig:"gitlab"`
+	Enabled bool
+	GitLab  *GitlabConfig
 }
 
 type GitlabConfig struct {
 	BaseURL    string
 	Token      string
 	ProjectID  string
-	Branch     string `default:"master"`
-	PathPrefix string `default:"turing"`
+	Branch     string
+	PathPrefix string
 }
 
 // MLPConfig captures the configuration used to connect to the Merlin/MLP API servers
 type MLPConfig struct {
-	MerlinURL        string `envconfig:"merlin_url" required:"true"`
-	MLPURL           string `envconfig:"mlp_url" required:"true"`
-	MLPEncryptionKey string `envconfig:"mlp_encryption_key" required:"true"`
+	MerlinURL        string `validate:"required"`
+	MLPURL           string `validate:"required"`
+	MLPEncryptionKey string `validate:"required"`
 }
 
-// FromEnv loads the configs from the supplied environment
-func FromEnv() (*Config, error) {
-	var cfg Config
-	err := envconfig.Process("", &cfg)
-	if err != nil {
-		return nil, err
+// Load creates a Config object from default config values, config files and environment variables.
+// Load accepts config files as the argument. JSON and YAML format are both supported.
+//
+// If multiple config files are provided, the subsequent config files will override the config
+// values from the config files loaded earlier.
+//
+// These config files will override the default config values (refer to setDefaultValues function)
+// and can be overridden by the values from environment variables. Nested keys in the config
+// can be set from environment variable name separed by "_". For instance the config value for
+// "DbConfig.Port" can be overridden by environment variable name "DBCONFIG_PORT". Note that
+// all environment variable names must be upper case.
+//
+// If no config file is provided, only the default config values and config values from environment
+// varibales will be loaded.
+//
+// Refer to example.yaml for an example of config file.
+func Load(filepaths ...string) (*Config, error) {
+	v := viper.New()
+
+	// Load default config values
+	setDefaultValues(v)
+
+	// Load config values from the provided config files
+	for _, f := range filepaths {
+		v.SetConfigFile(f)
+		err := v.MergeInConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read config from file '%s': %s", f, err)
+		}
 	}
 
-	// Run config validator
-	validate, err := newConfigValidator()
+	// Load config values from environment variables.
+	// Nested keys in the config is represented by variable name separated by '_'.
+	// For example, DbConfig.Host can be set from environment variable DBCONFIG_HOST.
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
+
+	config := &Config{}
+
+	// Unmarshal config values into the config object.
+	// Add StringToQuantityHookFunc() to the default DecodeHook in order to parse quantity string
+	// into quantity object. Refs:
+	// https://github.com/spf13/viper/blob/493643fd5e4b44796124c05d59ee04ba5f809e19/viper.go#L1003-L1005
+	// https://github.com/mitchellh/mapstructure/blob/9e1e4717f8567d7ead72d070d064ad17d444a67e/decode_hooks_test.go#L128
+	err := v.Unmarshal(config, func(c *mapstructure.DecoderConfig) {
+		c.DecodeHook = mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(","),
+			StringToQuantityHookFunc(),
+		)
+	})
 	if err != nil {
-		return nil, fmt.Errorf("Unable to init Config validator: %v", err)
-	}
-	err = validate.Struct(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("Config validation failed: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
 	}
 
-	return &cfg, nil
+	return config, nil
+}
+
+// setDefaultValues for all keys in Viper config. We need to set values for all keys so that
+// we can always use environment variables to override the config keys. In Viper v1, if the
+// keys do not have default values, and the key does not appear in the config file, it cannot
+// be overridden by environment variables, unless each key is called with BindEnv.
+// https://github.com/spf13/viper/issues/188
+// https://github.com/spf13/viper/issues/761
+func setDefaultValues(v *viper.Viper) {
+	v.SetDefault("Port", "8080")
+
+	v.SetDefault("AllowedOrigins", "*")
+
+	v.SetDefault("AuthConfig.Enabled", "false")
+	v.SetDefault("AuthConfig.URL", "")
+
+	v.SetDefault("DbConfig.Host", "localhost")
+	v.SetDefault("DbConfig.Port", "5432")
+	v.SetDefault("DbConfig.User", "")
+	v.SetDefault("DbConfig.Password", "")
+	v.SetDefault("DbConfig.Database", "turing")
+
+	v.SetDefault("DeployConfig.EnvironmentType", "")
+	v.SetDefault("DeployConfig.GcpProject", "")
+	v.SetDefault("DeployConfig.Timeout", "3m")
+	v.SetDefault("DeployConfig.DeletionTimeout", "1m")
+	v.SetDefault("DeployConfig.MaxCPU", "4")
+	v.SetDefault("DeployConfig.MaxMemory", "8Gi")
+
+	v.SetDefault("RouterDefaults.Image", "")
+	v.SetDefault("RouterDefaults.FiberDebugLogEnabled", "false")
+	v.SetDefault("RouterDefaults.CustomMetricsEnabled", "false")
+	v.SetDefault("RouterDefaults.JaegerEnabled", "false")
+	v.SetDefault("RouterDefaults.JaegerCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults.LogLevel", "INFO")
+	v.SetDefault("RouterDefaults.FluentdConfig.Image", "")
+	v.SetDefault("RouterDefaults.FluentdConfig.Tag", "turing-result.log")
+	v.SetDefault("RouterDefaults.FluentdConfig.FlushIntervalSeconds", "90")
+	v.SetDefault("RouterDefaults.Experiment", map[string]interface{}{})
+
+	v.SetDefault("Sentry.Enabled", "false")
+	v.SetDefault("Sentry.DSN", "")
+
+	v.SetDefault("VaultConfig.Address", "http://localhost:8200")
+	v.SetDefault("VaultConfig.Token", "")
+
+	v.SetDefault("TuringEncryptionKey", "")
+
+	v.SetDefault("AlertConfig.Enabled", "false")
+	v.SetDefault("AlertConfig.GitLab.BaseURL", "https://gitlab.com")
+	v.SetDefault("AlertConfig.GitLab.Token", "")
+	v.SetDefault("AlertConfig.GitLab.ProjectID", "")
+	v.SetDefault("AlertConfig.GitLab.Branch", "master")
+	v.SetDefault("AlertConfig.GitLab.PathPrefix", "turing")
+
+	v.SetDefault("MLPConfig.MerlinURL", "")
+	v.SetDefault("MLPConfig.MLPURL", "")
+	v.SetDefault("MLPConfig.MLPEncryptionKey", "")
+
+	v.SetDefault("TuringUIConfig.AppDirectory", "")
+	v.SetDefault("TuringUIConfig.Homepage", "/turing")
+
+	v.SetDefault("SwaggerFile", "swagger.yaml")
+	v.SetDefault("Experiment", map[string]interface{}{})
 }
 
 func newConfigValidator() (*validator.Validate, error) {
@@ -201,4 +325,31 @@ func newConfigValidator() (*validator.Validate, error) {
 		}
 	}, AuthorizationConfig{})
 	return v, nil
+}
+
+// StringToQuantityHookFunc converts string to quantity type. This function is required since
+// viper uses mapstructure to unmarshal values.
+// https://github.com/spf13/viper#unmarshaling
+// https://pkg.go.dev/github.com/mitchellh/mapstructure#DecodeHookFunc
+func StringToQuantityHookFunc() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t != reflect.TypeOf(Quantity{}) {
+			return data, nil
+		}
+
+		// Convert it by parsing
+		q, err := resource.ParseQuantity(data.(string))
+		if err != nil {
+			return nil, err
+		}
+
+		return Quantity(q), nil
+	}
 }

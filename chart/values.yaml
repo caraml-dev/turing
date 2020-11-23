@@ -26,104 +26,75 @@ turing:
     externalPort: 8080
     # -- Turing API container port number
     internalPort: 8080
-  config:
-    deployment:
-      # -- Maximum wait duration to create or update Turing router
-      timeout: 3m
-      # -- Maximum wait duration to delete Turing router
-      deletionTimeout: 30s
-      # -- Google Cloud Project ID associcated with Turing router
-      gcpProject: ""
-      # -- Environment name associated with Turing router
-      environmentType: id-dev
-      # -- Hard limit on the maximum CPU Turing router can request
-      maxCPU: "8"
-      # -- Hard limit on the maximum memory Turing router can request
-      maxMemory: "8Gi"
-    router:
-      image:
-        # -- Docker registry for Turing router image. User is expected to override
-        # the registry for now as there is no publicly available Turing image
-        registry: docker.io/
-        # -- Docker image repository for Turing router
-        repository: turing-router
-        # -- Docker image tag for Turing router
-        tag: latest
-      # -- Log level for Turing router
-      logLevel: DEBUG
-      # -- Enable debugging for Fiber library used by Turing router
-      fiberDebugLog: true
-      # -- Enable custom metrics
-      customMetrics: true
-      jaeger:
-        # -- Enable Jaeger tracing
-        enabled: false
-        # -- Jaeger tracing collector endpoint 
-        collectorEndpoint: 
-      fluentd:
-        # -- Docker image for Fluentd log forwarder. User is expected to specify
-        # the Fluentd image for now as there is no publicly available image. 
-        # Currently this is required only if users needs to save Turing logs
-        # in BigQuery.
-        image:
-        # -- How often should Fluentd flush the buffered log
-        flushIntervalSeconds: 90
-    authorization:
-      # -- Enable authorization middleware in Turing API
-      enabled: false
-      # -- Authorization server URL
-      serverURL: 
-    sentry:
-      # -- Enable integration with Sentry application monitoring https://sentry.io
-      enabled: false
-      # -- Data source name for the Sentry project 
-      dsn:
-    newrelic:
-      # -- Enable integrarion with New Relic application monitoring https://newrelic.com
-      enabled: false
-      # -- Application name monitored in New Relic
-      appname: 
-    vault:
-      # -- Vault server address (required)
-      address: 
-      # -- Vault authentication token (required)
-      token: 
-    encryption:
-      # -- Encryption key used by Turing to secure sensitive values (required)
-      key:
-    merlin:
-      # -- Merlin API endpoint (required). Reference: https://github.com/gojek/merlin
-      endpoint:
-    mlp:
-      # -- MLP API endpoint(required). Reference: https://github.com/gojek/mlp
-      endpoint:
-      encryption:
-        # -- Encryption key used by MLP to secure sensitive values (required)
-        key: 
-    alert:
-      # -- Enable alerting in Turing
-      enabled: false
-      # -- GitLab server URL for GitOps based alerting
-      gitlabBaseurl:
-      # -- GitLab project ID
-      gitlabProjectid:
-      # -- GitLab branch to commit the alert configuration file
-      gitlabBranch:
-      # -- GitLab path prefix within the project to save the alert configuration file
-      gitlabPathprefix:
-      # -- GitLab token to authentication API request to GitLab
-      gitlabToken:
-    serviceAccount:
-      # -- Enable usage of Google Cloud service account JSON key
-      enabled: false
-      # -- Secret name for Google Cloud service account JSON key
-      secretName: 
-      # -- Secret key for Google Cloud service account JSON key
-      secretKey:
-    ingress:
-      # -- Enable ingress to provision Ingress resource for external access
-      # to Turing API 
-      enabled: false
+  ingress:
+    # -- Enable ingress to provision Ingress resource for external access to Turing API
+    enabled: false
+    # -- Set host value to enable name based virtual hosting. This allows routing
+    # HTTP traffic to multiple host names at the same IP address. If no host is
+    # specified, the ingress rule applies to all inbound HTTP traffic through 
+    # the IP address specified.
+    # https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting
+    host: ""
+    # -- Ingress class annotation to add to this Ingress rule, 
+    # useful when there are multiple ingress controllers installed
+    class: ""
+
+  # -- Turing API server configuration. 
+  # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
+  config: {}
+
+  # -- List of string containing additional Turing API server arguments. For
+  # example, multiple "-config" can be specified to use multiple config files
+  extraArgs: []
+  # Example
+  # - -config=/etc/secrets/experiment.yaml
+  # - -config=/etc/secrets/database.yaml
+
+  # -- List of extra environment variables to add to Turing API server container
+  extraEnvs: []
+  # # Example
+  # - name: DEMO_GREETING
+  #   value: "Hello from the environment"
+  # - name: DEMO_FAREWELL
+  #   value: "Such a sweet sorrow"
+
+  # -- List of extra initContainers to add to the Pod. For example, you
+  # need to run some init scripts to fetch credentials from a remote server
+  extraInitContainers: []
+  # # Example
+  # - name: init-myservice
+  #   image: busybox:1.28
+  #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+
+  # -- List of sidecar containers to attach to the Pod. For example, you can
+  # attach sidecar container that forward logs or dynamically update some 
+  # configuration files.
+  extraContainers: []
+  # Example
+  # - name: count-agent
+  #   image: k8s.gcr.io/fluentd-gcp:1.30
+  #   env:
+  #   - name: FLUENTD_ARGS
+  #     value: -c /etc/fluentd-config/fluentd.conf
+  #   volumeMounts:
+  #   - name: varlog
+  #     mountPath: /var/log
+  #   - name: config-volume
+  #     mountPath: /etc/fluentd-config
+
+  # -- Extra volumes to attach to the Pod. For example, you can mount 
+  # additional secrets to these volumes
+  extraVolumes: []
+  # # Example
+  # - name: varlog
+  #   emptyDir: {}
+
+  # -- Extra volume mounts to attach to Turing API server container. For example
+  # to mount the extra volume containing secrets
+  extraVolumeMounts: []
+  # # Example
+  # - name: varlog
+  #   mountPath: /var/log
 
 dbMigrations:
   image:

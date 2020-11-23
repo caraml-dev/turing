@@ -155,8 +155,11 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Image: "fluentdimage",
 			Tag:   "fluentdtag",
 		},
-		Experiment: map[string]string{
-			"litmus": `{"endpoint":"grpc://test","timeout":"2s"}`,
+		Experiment: map[string]interface{}{
+			"litmus": map[string]interface{}{
+				"endpoint": "grpc://test",
+				"timeout":  "2s",
+			},
 		},
 	}
 	projectID := 1
@@ -297,8 +300,11 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	routerDefaults := &config.RouterDefaults{
-		Experiment: map[string]string{
-			"xp": `{"endpoint":"http://test","timeout":"3s"}`,
+		Experiment: map[string]interface{}{
+			"xp": map[string]interface{}{
+				"endpoint": "http://test",
+				"timeout":  "3s",
+			},
 		},
 	}
 	// Set up mock Crypto service

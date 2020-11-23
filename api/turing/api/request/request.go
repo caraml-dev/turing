@@ -1,9 +1,9 @@
 package request
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
@@ -210,17 +210,15 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 		}
 	}
 
-	// Get deployment configs from the defaults
-	experimentConfigJSON, ok := defaults.Experiment[string(engineType)]
+	engineTypeLowerCase := strings.ToLower(string(engineType))
+	// The engine name (key in RouterDefaults.Experiment) is always lowercased due to our config
+	// loader implementation. Being always lowercased also helps with problem of not finding
+	// experiment engine due to case sensitivity.
+	experimentConfig, ok := defaults.Experiment[engineTypeLowerCase]
 	if !ok {
 		return nil, fmt.Errorf("experiment engine '%s' not found in router defaults experiment config", engineType)
 	}
-
-	var experimentConfig map[string]string
-	err := json.Unmarshal([]byte(experimentConfigJSON), &experimentConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal router defaults experiment config for engine '%s': %s", engineType, err)
-	}
+	experimentConfigMap := experimentConfig.(map[string]interface{})
 
 	// Build Experiment engine config
 	return &manager.TuringExperimentConfig{
@@ -228,8 +226,8 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 			Endpoint string `json:"endpoint"`
 			Timeout  string `json:"timeout"`
 		}{
-			Endpoint: experimentConfig["endpoint"],
-			Timeout:  experimentConfig["timeout"],
+			Endpoint: experimentConfigMap["endpoint"].(string),
+			Timeout:  experimentConfigMap["timeout"].(string),
 		},
 		Client: manager.Client{
 			ID:       r.Config.ExperimentEngine.Config.Client.ID,

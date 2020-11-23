@@ -57,11 +57,16 @@ type Experiment struct {
 
 // NewExperimentsService creates a new experiment service from managerConfig.
 // managerConfig is a map of experiment manager name to the JSON string configuration.
-func NewExperimentsService(managerConfig map[string]string) (ExperimentsService, error) {
+func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsService, error) {
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
 	for name, config := range managerConfig {
-		m, err := manager.Get(name, []byte(config))
+		configJSON, err := json.Marshal(config)
+		if err != nil {
+			return nil, err
+		}
+
+		m, err := manager.Get(name, configJSON)
 		if err != nil {
 			return nil, err
 		}
