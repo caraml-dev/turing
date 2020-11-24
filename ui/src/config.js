@@ -36,6 +36,8 @@ export const appConfig = {
   privateDockerRegistries: process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES
     ? process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES.split(",")
     : [],
+  defaultDockerRegistry:
+      process.env.REACT_APP_DEFAULT_DOCKER_REGISTRY || "docker.io", // User Docker Hub as the default
   scaling: {
     maxAllowedReplica: 10
   }
