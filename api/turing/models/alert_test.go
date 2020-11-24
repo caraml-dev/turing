@@ -85,7 +85,7 @@ func TestAlertGroup(t *testing.T) {
 	}
 
 	expected := schema.AlertGroup{
-		Name: "test-env_test-team",
+		Name: "test-env_test-team_test-svc_cpu_util",
 		Alerts: []schema.Alert{
 			{
 				AlertName: "test-svc_cpu_util_violation_test-env",

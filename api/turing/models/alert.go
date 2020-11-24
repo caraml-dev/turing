@@ -66,7 +66,7 @@ func (alert Alert) Validate() error {
 // Group creates an AlertGroup from the Alert specification. An alert group follows the alerting rule format
 // in prometheus: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
 func (alert Alert) Group() schema.AlertGroup {
-	groupName := fmt.Sprintf("%s_%s", alert.Environment, alert.Team)
+	groupName := fmt.Sprintf("%s_%s_%s_%s", alert.Environment, alert.Team, alert.Service, alert.Metric)
 	alerts := make([]schema.Alert, 0)
 
 	if alert.WarningThreshold > 0 {

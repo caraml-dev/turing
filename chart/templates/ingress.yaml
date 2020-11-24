@@ -1,11 +1,13 @@
-{{- if .Values.turing.config.ingress.enabled }}
+{{- if .Values.turing.ingress.enabled }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "turing.fullname" .}}
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.class: {{ .Values.turing.config.ingress.class }}
+    {{- with .Values.turing.ingress.class }}
+    ingress.class: {{ . }}
+    {{- end }}
   labels:
     app: {{ include "turing.fullname" . }}
     release: {{ .Release.Name }}
@@ -14,18 +16,18 @@ metadata:
     app.kubernetes.io/name: {{ include "turing.fullname" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    gojek.com/app: turing
-    gojek.com/team: dsp
-    gojek.com/stream: dsp
-    gojek.com/orchestrator: gitlab
-    gojek.com/environment: {{ .Values.turing.config.deployment.environmentType }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 4 }}
+{{- end }}
 spec:
   rules:
-    - host: {{ .Values.turing.config.ingress.host }}
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: {{ template "turing.fullname" .}}
-              servicePort: {{ .Values.turing.service.externalPort }}
+  - {{- with .Values.turing.ingress.host }}
+    host: {{ . }}
+    {{- end }} 
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: {{ template "turing.fullname" .}}
+            servicePort: {{ .Values.turing.service.externalPort }}
 {{- end }}
