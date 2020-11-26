@@ -21,9 +21,9 @@ import (
 	rest "k8s.io/client-go/rest"
 
 	"knative.dev/pkg/kmp"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
-	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 
 	"github.com/gojek/mlp/pkg/vault"
 	"github.com/gojek/turing/api/turing/config"
@@ -75,7 +75,7 @@ type Controller interface {
 
 // controller implements the Controller interface
 type controller struct {
-	knServingClient knservingclient.ServingV1alpha1Interface
+	knServingClient knservingclient.ServingV1Interface
 	k8sCoreClient   corev1.CoreV1Interface
 	k8sAppsClient   appsv1.AppsV1Interface
 	istioClient     networkingv1alpha3.NetworkingV1alpha3Interface
@@ -111,7 +111,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 	}
 
 	return &controller{
-		knServingClient: knsClientSet.ServingV1alpha1(),
+		knServingClient: knsClientSet.ServingV1(),
 		k8sCoreClient:   k8sClientset.CoreV1(),
 		k8sAppsClient:   k8sClientset.AppsV1(),
 		istioClient:     istioClientSet,
@@ -203,7 +203,7 @@ func (c *controller) DeleteConfigMap(name, namespace string) error {
 
 // Deploy creates / updates a Kubernetes/Knative service with the given specs
 func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeService) error {
-	var existingSvc *knservingv1alpha1.Service
+	var existingSvc *knservingv1.Service
 	var err error
 
 	// Build the deployment specs
@@ -549,7 +549,7 @@ func deploymentReady(deployment *apiappsv1.Deployment) bool {
 	return false
 }
 
-func knServiceSemanticEquals(desiredService, service *knservingv1alpha1.Service) bool {
+func knServiceSemanticEquals(desiredService, service *knservingv1.Service) bool {
 	return equality.Semantic.DeepEqual(
 		desiredService.Spec.ConfigurationSpec,
 		service.Spec.ConfigurationSpec) &&
