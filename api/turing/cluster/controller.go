@@ -488,7 +488,8 @@ func (c *controller) waitKnativeServiceReady(
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for service %s to be ready", svcName)
+			terminationMessage := c.getKnativePodTerminationMessage(svcName, namespace)
+			return fmt.Errorf("timeout waiting for service %s to be ready: %s", svcName, terminationMessage)
 		case <-ticker.C:
 			svc, err := services.Get(svcName, metav1.GetOptions{})
 			if err != nil {
@@ -501,6 +502,30 @@ func (c *controller) waitKnativeServiceReady(
 			}
 		}
 	}
+}
+
+// getKnativePodTerminationMessage retrieves the termination message of the user container
+// in the pod, which will be returned for logging as a part of the deployment failure error.
+func (c *controller) getKnativePodTerminationMessage(svcName string, namespace string) string {
+	labelSelector := KnativeServiceLabelKey + "=" + svcName
+	podList, err := c.ListPods(namespace, labelSelector)
+	if err != nil {
+		return err.Error()
+	}
+
+	var terminationMessage string
+	for _, pod := range podList.Items {
+		for _, containerStatus := range pod.Status.ContainerStatuses {
+			if containerStatus.Name == KnativeUserContainerName {
+				if containerStatus.LastTerminationState.Terminated != nil {
+					terminationMessage = containerStatus.LastTerminationState.Terminated.Message
+					break
+				}
+			}
+
+		}
+	}
+	return terminationMessage
 }
 
 // waitDeploymentReady waits for the given k8s deployment to become ready, until the

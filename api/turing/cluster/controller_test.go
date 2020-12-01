@@ -5,6 +5,7 @@ package cluster
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -1106,6 +1107,50 @@ func TestDeleteIstioVirtualService(t *testing.T) {
 	err := c.DeleteIstioVirtualService(vsConf.Name, testNamespace, time.Second*5)
 	// Validate no error
 	assert.NoError(t, err)
+}
+
+func TestGetKnativePodTerminationMessage(t *testing.T) {
+	testNamespace := "test-ns"
+	testName := "test-name"
+
+	// Create test controller
+	c := createTestK8sController(fake.NewSimpleClientset(&corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("pod-%s", testName),
+			Namespace: testNamespace,
+			Labels: map[string]string{
+				"serving.knative.dev/service": "test-name",
+			},
+		},
+		Status: corev1.PodStatus{
+			ContainerStatuses: []corev1.ContainerStatus{
+				{
+					Name: "dummy-container",
+					LastTerminationState: corev1.ContainerState{
+						Terminated: &corev1.ContainerStateTerminated{
+							Message: "Test Dummy Message",
+						},
+					},
+				},
+				{
+					Name: "user-container",
+					LastTerminationState: corev1.ContainerState{
+						Terminated: &corev1.ContainerStateTerminated{
+							Message: "Test Termination Message",
+						},
+					},
+				},
+			},
+		},
+	}), []reactor{})
+
+	// Run test
+	msg := c.getKnativePodTerminationMessage(testName, testNamespace)
+	assert.Equal(t, "Test Termination Message", msg)
 }
 
 func createTestKnController(cs *knservingclientset.Clientset, reactors []reactor) *controller {
