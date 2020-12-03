@@ -20,6 +20,7 @@ import (
 
 	rest "k8s.io/client-go/rest"
 
+	knativeapis "knative.dev/pkg/apis"
 	"knative.dev/pkg/kmp"
 	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
@@ -489,6 +490,21 @@ func (c *controller) waitKnativeServiceReady(
 		select {
 		case <-ctx.Done():
 			terminationMessage := c.getKnativePodTerminationMessage(svcName, namespace)
+			if terminationMessage == "" {
+				// Pod was not created (as with invalid image names), get most recent status message
+				// from the knative service
+				svc, err := services.Get(svcName, metav1.GetOptions{})
+				if err != nil {
+					terminationMessage = err.Error()
+				} else {
+					failedCondition := svc.Status.GetCondition(knativeapis.ConditionType("ConfigurationsReady"))
+					if failedCondition != nil && failedCondition.IsFalse() {
+						terminationMessage = failedCondition.GetMessage()
+					} else {
+						terminationMessage = "cause unknown"
+					}
+				}
+			}
 			return fmt.Errorf("timeout waiting for service %s to be ready: %s", svcName, terminationMessage)
 		case <-ticker.C:
 			svc, err := services.Get(svcName, metav1.GetOptions{})
