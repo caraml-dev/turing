@@ -1153,6 +1153,31 @@ func TestGetKnativePodTerminationMessage(t *testing.T) {
 	assert.Equal(t, "Test Termination Message", msg)
 }
 
+func TestGetKnServiceStatusSummary(t *testing.T) {
+	svc := &knservingv1alpha1.Service{
+		Status: knservingv1alpha1.ServiceStatus{
+			Status: duckv1.Status{
+				ObservedGeneration: 1,
+				Conditions: duckv1.Conditions{
+					apis.Condition{
+						Type:   apis.ConditionReady,
+						Status: corev1.ConditionTrue,
+					},
+					apis.Condition{
+						Type:    apis.ConditionSucceeded,
+						Status:  corev1.ConditionFalse,
+						Message: "Test Message",
+					},
+				},
+			},
+		},
+	}
+
+	expectedSummary := "Type: Ready, Status: true. \nType: Succeeded, Status: false. Test Message"
+	summary := getKnServiceStatusMessages(svc)
+	assert.Equal(t, expectedSummary, summary)
+}
+
 func createTestKnController(cs *knservingclientset.Clientset, reactors []reactor) *controller {
 	// Add reactors
 	for _, reactor := range reactors {

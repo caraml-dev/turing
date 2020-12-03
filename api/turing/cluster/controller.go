@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -20,7 +21,6 @@ import (
 
 	rest "k8s.io/client-go/rest"
 
-	knapis "knative.dev/pkg/apis"
 	"knative.dev/pkg/kmp"
 	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
@@ -491,21 +491,15 @@ func (c *controller) waitKnativeServiceReady(
 		case <-ctx.Done():
 			terminationMessage := c.getKnativePodTerminationMessage(svcName, namespace)
 			if terminationMessage == "" {
-				// Pod was not created (as with invalid image names), get status message from the knative service.
-				// We expect a condition of type ConfigurationsReady that is not met (IsFalse).
+				// Pod was not created (as with invalid image names), get status messages from the knative service.
 				svc, err := services.Get(svcName, metav1.GetOptions{})
 				if err != nil {
 					terminationMessage = err.Error()
 				} else {
-					failedCondition := svc.Status.GetCondition(knapis.ConditionType("ConfigurationsReady"))
-					if failedCondition != nil && failedCondition.IsFalse() {
-						terminationMessage = failedCondition.GetMessage()
-					} else {
-						terminationMessage = "cause unknown"
-					}
+					terminationMessage = getKnServiceStatusMessages(svc)
 				}
 			}
-			return fmt.Errorf("timeout waiting for service %s to be ready: %s", svcName, terminationMessage)
+			return fmt.Errorf("timeout waiting for service %s to be ready:\n%s", svcName, terminationMessage)
 		case <-ticker.C:
 			svc, err := services.Get(svcName, metav1.GetOptions{})
 			if err != nil {
@@ -588,6 +582,15 @@ func deploymentReady(deployment *apiappsv1.Deployment) bool {
 		return ready
 	}
 	return false
+}
+
+func getKnServiceStatusMessages(svc *knservingv1alpha1.Service) string {
+	logs := []string{}
+	conditions := svc.Status.GetConditions()
+	for _, cond := range conditions {
+		logs = append(logs, fmt.Sprintf("Type: %s, Status: %t. %s", cond.Type, cond.IsTrue(), cond.GetMessage()))
+	}
+	return strings.Join(logs, "\n")
 }
 
 func knServiceSemanticEquals(desiredService, service *knservingv1alpha1.Service) bool {
