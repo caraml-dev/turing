@@ -2,7 +2,7 @@
 
 .expandableContainer__childWrapper {
   height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   transform: translatez(0);
   transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
