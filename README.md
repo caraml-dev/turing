@@ -203,8 +203,7 @@ curl --request POST 'localhost:8080/v1/projects/1/routers' \
         "timeout": "5s",
         "log_config": {"result_logger_type": "nop"}
     }
-}
-'
+}'
 ```
 
 After a few minutes, check the status of the new Turing router deployed. Make 
