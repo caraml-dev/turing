@@ -35,10 +35,6 @@ curl -X POST \
 ### API Docs
 Run `make swagger-ui` to build the Swagger doc. This can then be acccessed at <http://localhost:5555/>
 
-### Turing Router Components
-
-
-
 ### Running all Services
 
 __Notes:__
