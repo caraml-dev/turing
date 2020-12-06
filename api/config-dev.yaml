@@ -1,0 +1,18 @@
+DbConfig:
+  User: turing
+  Password: turing
+DeployConfig:
+  EnvironmentType: dev 
+RouterDefaults:
+  Image: localhost:5000/turing-router
+VaultConfig:
+  Address: http://localhost:8200
+  Token: root
+TuringEncryptionKey: password
+MLPConfig:
+  MerlinURL: http://localhost:8082/v1
+  MLPURL: http://localhost:8081/v1
+  MLPEncryptionKey: password
+TuringUIConfig:
+  AppDirectory: ../ui
+  Homepage: /turing
