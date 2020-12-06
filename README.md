@@ -178,9 +178,9 @@ Now, start Turing API server with `go run` command,
 go run turing/cmd/main.go -config=config-dev.yaml
 ```
 
-We will create a new router with name `router1`. This router specifies a route that will reverse
-proxy a request to [httpbin](http://httpbin.org/). Run the following in a new terminal
-to send a create router request.
+We will create a new router with name `router1`. This router specifies [httpbin](http://httpbin.org/) as
+the router endpoint with no enricher and ensembler. Run the following in a new terminal
+to create a new router.
 ```bash
 curl --request POST 'localhost:8080/v1/projects/1/routers' \
 --header 'Content-Type: application/json' \
@@ -271,6 +271,16 @@ The web UI allows you list, create, edit and delete your routers from the
 web browser.
 
 ![turing ui list router](./docs/assets/turing_ui_router_list.png)
+
+## Turing Router Components
+
+Turing router can optionally be configured with **enrichers** and **ensemblers**.
+Enrichers can process and update the request body before they reach the configured router
+endpoints. Ensemblers can process and update the response body from the router endpoints, 
+before the response is sent to the Turing router client. These allows users to customize
+the behaviour of Turing routers.
+
+![turing router components](./docs/assets/turing_router_components.png)
 
 ## Contributing
 

@@ -2,9 +2,6 @@
 
 Turing enables DS teams to run ML experiments in the production environment.
 
-## Getting Started
-Docs: [Google Drive](https://drive.google.com/drive/folders/1SJv7gIFhWhUQJ-8OlYge169IBMgVCDbO)
-
 ## Local Development
 Requirements:
 * Golang 1.14
@@ -37,6 +34,10 @@ curl -X POST \
 
 ### API Docs
 Run `make swagger-ui` to build the Swagger doc. This can then be acccessed at <http://localhost:5555/>
+
+### Turing Router Components
+
+
 
 ### Running all Services
 
