@@ -1,4 +1,4 @@
-version: "3"
+version: "3.0"
 
 volumes:
   # Named volume containing kubeconfig, shared by different containers 
@@ -118,9 +118,10 @@ services:
     command:
     - |
       curl \
-        --fail -X POST 'http://mlp:8080/v1/projects' \
+        -X POST 'http://mlp:8080/v1/projects' \
         --header 'Content-Type: application/json' \
         --data-raw '{"name": "default","team": "default","stream": "default"}'
+      curl 'http://mlp:8080/v1/projects' | grep '"id":1' 
 
   vault:
     image: vault:1.6.0

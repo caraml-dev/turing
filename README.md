@@ -73,7 +73,7 @@ cd $TURING/infra/docker-compose/dev
 docker-compose up -d
 ```
 
-Make sure that all the services in Docker compose are in state "Up" or "Exit 0"
+Make sure that all the services in Docker compose are in state **Up** or **Exit 0**
 as shown below. It may take a few minutes for all services to start sucessfully,
 depending how fast all the dependencies are downloaded.
 
@@ -105,7 +105,7 @@ dev_vault_1
 ```
 
 If the service does not start/complete succesfully (for example if the state is stuck
-at "Restarting"), check the logs to debug it.
+at **Restarting**), check the logs to debug it.
 ```bash
 # For example, to check the logs for the Vault service in Docker compose
 docker-compose logs vault
@@ -178,9 +178,10 @@ Now, start Turing API server with `go run` command,
 go run turing/cmd/main.go -config=config-dev.yaml
 ```
 
-We will create a new router with name `router1`. This router specifies [httpbin](http://httpbin.org/) as
-the router endpoint with no enricher and ensembler. Run the following in a new terminal
-to create a new router.
+We will create a new router with name `router1`. This router specifies [httpbin](http://httpbin.org/anything) as
+the router endpoint. No enricher and ensembler are configured in the router. 
+
+Run the following in a new terminal to create a new router.
 ```bash
 curl --request POST 'localhost:8080/v1/projects/1/routers' \
 --header 'Content-Type: application/json' \
@@ -248,7 +249,8 @@ touch .env.development.local
 ```
 
 Then, update the config file `.env.development.local` as shown below. 
-Replace `xxxxxxx.apps.googleusercontent.com` with your respective Google OAuth2 client ID.
+
+> Replace `xxxxxxx.apps.googleusercontent.com` with your respective Google OAuth2 client ID.
 
 ```
 REACT_APP_HOMEPAGE=/turing
