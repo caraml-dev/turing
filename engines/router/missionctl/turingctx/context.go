@@ -23,6 +23,12 @@ func NewTuringContext(parent context.Context) context.Context {
 	return context.WithValue(parent, turingReqIDKey, reqID.String())
 }
 
+// NewTestTuringContext returns a context for testing, with the Turing Request ID set to
+// the given value
+func NewTestTuringContext(parent context.Context, turingReqID string) context.Context {
+	return context.WithValue(parent, turingReqIDKey, turingReqID)
+}
+
 // GetRequestID returns the request id from the input context
 func GetRequestID(ctx context.Context) (string, error) {
 	if ctxValue, ok := ctx.Value(turingReqIDKey).(string); ok {
