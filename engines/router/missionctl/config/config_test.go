@@ -22,6 +22,12 @@ type testSuiteResultLogger struct {
 	success bool
 }
 
+type testSuiteSerializationFormat struct {
+	value   string
+	result  SerializationFormat
+	success bool
+}
+
 var requiredEnvs = map[string]string{
 	"PORT":               "8080",
 	"ROUTER_CONFIG_FILE": "/var/test.yaml",
@@ -48,6 +54,7 @@ var optionalEnvs = map[string]string{
 	"APP_FLUENTD_TAG":               "response.log",
 	"APP_KAFKA_BROKERS":             "localhost:9000",
 	"APP_KAFKA_TOPIC":               "kafka_topic",
+	"APP_KAFKA_SERIALIZATION":       "json",
 	"APP_JAEGER_ENABLED":            "true",
 	"APP_JAEGER_COLLECTOR_ENDPOINT": "http://localhost:5000",
 	"APP_JAEGER_REPORTER_HOST":      "localhost",
@@ -100,8 +107,9 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Tag:  "",
 			},
 			Kafka: &KafkaConfig{
-				Brokers: "",
-				Topic:   "",
+				Brokers:       "",
+				Topic:         "",
+				Serialization: "",
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
@@ -161,8 +169,9 @@ func TestInitConfigEnv(t *testing.T) {
 				Tag:  "response.log",
 			},
 			Kafka: &KafkaConfig{
-				Brokers: "localhost:9000",
-				Topic:   "kafka_topic",
+				Brokers:       "localhost:9000",
+				Topic:         "kafka_topic",
+				Serialization: JsonSerializationFormat,
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
@@ -288,6 +297,39 @@ func TestResultLoggerDecode(t *testing.T) {
 
 			// Validate
 			assert.Equal(t, data.result, resLogger)
+			assert.Equal(t, data.success, err == nil)
+		})
+	}
+}
+
+func TestSerializationFormatDecode(t *testing.T) {
+	// Make test cases
+	tests := map[string]testSuiteSerializationFormat{
+		"json": {
+			value:   "json",
+			result:  JsonSerializationFormat,
+			success: true,
+		},
+		"protobuf": {
+			value:   "protobuf",
+			result:  ProtobufSerializationFormat,
+			success: true,
+		},
+		"unknown_serialization": {
+			value:   "serialization",
+			result:  SerializationFormat(""),
+			success: false,
+		},
+	}
+
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			var serialization SerializationFormat
+			err := serialization.Decode(data.value)
+
+			// Validate
+			assert.Equal(t, data.result, serialization)
 			assert.Equal(t, data.success, err == nil)
 		})
 	}

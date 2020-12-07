@@ -39,6 +39,16 @@ const (
 	NopLogger ResultLogger = "NOP"
 )
 
+// SerializationFormat represents the message serialization format to be used by the ResultLogger
+type SerializationFormat string
+
+const (
+	// JsonSerializationFormat formats the message as json, for logging
+	JsonSerializationFormat SerializationFormat = "json"
+	// ProtobufSerializationFormat formats the message using protobuf, for logging
+	ProtobufSerializationFormat SerializationFormat = "protobuf"
+)
+
 // Config is the structure used to parse the environment configs
 type Config struct {
 	Port int `envconfig:"PORT" required:"true"`
@@ -82,8 +92,9 @@ type FluentdConfig struct {
 // KafkaConfig captures the minimal configuration for writing result logs to
 // Kafka topics
 type KafkaConfig struct {
-	Brokers string
-	Topic   string
+	Brokers       string
+	Topic         string
+	Serialization SerializationFormat
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client
@@ -140,6 +151,19 @@ func (resLogger *ResultLogger) Decode(value string) error {
 		return nil
 	}
 	return errors.Newf(errors.BadConfig, "Response logger value %s not supported", value)
+}
+
+// Decode parses the SerializationFormat config and validates if it is one of the
+// supported values.
+func (serialization *SerializationFormat) Decode(value string) error {
+	value = strings.ToLower(value)
+	switch SerializationFormat(value) {
+	case JsonSerializationFormat,
+		ProtobufSerializationFormat:
+		*serialization = SerializationFormat(value)
+		return nil
+	}
+	return errors.Newf(errors.BadConfig, "Serialization format value %s not supported", value)
 }
 
 // EnrichmentConfig is the structure used to parse the Enricher's environment configs

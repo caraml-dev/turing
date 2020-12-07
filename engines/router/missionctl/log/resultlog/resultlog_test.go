@@ -94,8 +94,9 @@ func TestInitTuringResultLogger(t *testing.T) {
 			cfg: &config.AppConfig{
 				ResultLogger: config.KafkaLogger,
 				Kafka: &config.KafkaConfig{
-					Brokers: "brokers",
-					Topic:   "topic",
+					Brokers:       "brokers",
+					Topic:         "topic",
+					Serialization: config.JsonSerializationFormat,
 				},
 			},
 			patch:   true,
