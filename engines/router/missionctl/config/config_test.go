@@ -171,7 +171,7 @@ func TestInitConfigEnv(t *testing.T) {
 			Kafka: &KafkaConfig{
 				Brokers:       "localhost:9000",
 				Topic:         "kafka_topic",
-				Serialization: JsonSerializationFormat,
+				Serialization: JSONSerializationFormat,
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
@@ -307,7 +307,7 @@ func TestSerializationFormatDecode(t *testing.T) {
 	tests := map[string]testSuiteSerializationFormat{
 		"json": {
 			value:   "json",
-			result:  JsonSerializationFormat,
+			result:  JSONSerializationFormat,
 			success: true,
 		},
 		"protobuf": {

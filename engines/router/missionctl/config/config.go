@@ -43,8 +43,8 @@ const (
 type SerializationFormat string
 
 const (
-	// JsonSerializationFormat formats the message as json, for logging
-	JsonSerializationFormat SerializationFormat = "json"
+	// JSONSerializationFormat formats the message as json, for logging
+	JSONSerializationFormat SerializationFormat = "json"
 	// ProtobufSerializationFormat formats the message using protobuf, for logging
 	ProtobufSerializationFormat SerializationFormat = "protobuf"
 )
@@ -158,7 +158,7 @@ func (resLogger *ResultLogger) Decode(value string) error {
 func (serialization *SerializationFormat) Decode(value string) error {
 	value = strings.ToLower(value)
 	switch SerializationFormat(value) {
-	case JsonSerializationFormat,
+	case JSONSerializationFormat,
 		ProtobufSerializationFormat:
 		*serialization = SerializationFormat(value)
 		return nil

@@ -86,10 +86,14 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 
 	// Format Kafka Message
 	var keyBytes, valueBytes []byte
-	if l.serialization == config.JsonSerializationFormat {
+	if l.serialization == config.JSONSerializationFormat {
 		valueBytes, err = newJSONKafkaLogEntry(l.appName, turLogEntry)
 	} else if l.serialization == config.ProtobufSerializationFormat {
 		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(l.appName, turLogEntry)
+	} else {
+		// Unknown format, we wouldn't hit this since the config is checked at initialization,
+		// but handle it.
+		return errors.Newf(errors.BadConfig, "Unknown Serialization format %s", l.serialization)
 	}
 	if err != nil {
 		return err
