@@ -1,11 +1,5 @@
 import React, { Fragment, useRef } from "react";
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer
-} from "@elastic/eui";
+import { EuiButton, EuiFlexItem, EuiLink, EuiSpacer } from "@elastic/eui";
 import classNames from "classnames";
 import { useToggle } from "@gojek/mlp-ui";
 
@@ -27,21 +21,19 @@ export const ExpandableContainer = ({
       className={classNames("expandableContainer", {
         "expandableContainer-isOpen": isExpanded
       })}>
-      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="left">
-        <EuiFlexItem grow={true} className="euiFlexItem--childFlexPanel">
-          <div
-            className={classNames("expandableContainer__childWrapper", {
-              scrollableContainer: isScrollable
-            })}
-            style={{
-              height: isExpanded
-                ? contentHeight
-                : Math.min(contentHeight, maxHeight)
-            }}>
-            <div ref={contentRef}>{children}</div>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={true} className="euiFlexItem--childFlexPanel">
+        <div
+          className={classNames("expandableContainer__childWrapper", {
+            scrollableContainer: isScrollable
+          })}
+          style={{
+            height: isExpanded
+              ? contentHeight
+              : Math.min(contentHeight, maxHeight)
+          }}>
+          <div ref={contentRef}>{children}</div>
+        </div>
+      </EuiFlexItem>
 
       {contentHeight > maxHeight && (
         <Fragment>
