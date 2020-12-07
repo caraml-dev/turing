@@ -18,12 +18,12 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
-	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
 
 // TestClusterClients holds the Clients for K8s / KNative resource groups
 type TestClusterClients struct {
-	KnServingClient       knservingclient.ServingV1alpha1Interface
+	KnServingClient       knservingclient.ServingV1Interface
 	K8sCoreClient         corev1.CoreV1Interface
 	K8sAppsClient         appsv1.AppsV1Interface
 	IstioNetworkingClient networkingv1alpha3.NetworkingV1alpha3Interface
@@ -80,7 +80,7 @@ func newClusterClients(cfg *testConfig) (*TestClusterClients, error) {
 		return nil, err
 	}
 	return &TestClusterClients{
-		KnServingClient:       knsClientSet.ServingV1alpha1(),
+		KnServingClient:       knsClientSet.ServingV1(),
 		K8sCoreClient:         k8sClientset.CoreV1(),
 		K8sAppsClient:         k8sClientset.AppsV1(),
 		IstioNetworkingClient: istioClientset,

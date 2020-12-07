@@ -26,7 +26,7 @@ import (
 	k8stesting "k8s.io/client-go/testing"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
 )
 
@@ -50,7 +50,7 @@ var reactorVerbs = struct {
 
 const (
 	knativeGroup    = "serving.knative.dev"
-	knativeVersion  = "v1alpha1"
+	knativeVersion  = "v1"
 	knativeResource = "services"
 )
 
@@ -61,7 +61,7 @@ func TestDeployKnativeService(t *testing.T) {
 		Version:  knativeVersion,
 		Resource: knativeResource,
 	}
-	testKnSvc := &knservingv1alpha1.Service{
+	testKnSvc := &knservingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: testName,
 		},
@@ -75,11 +75,11 @@ func TestDeployKnativeService(t *testing.T) {
 
 	// Define reactor for a successful get
 	getSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
-		return true, &knservingv1alpha1.Service{
+		return true, &knservingv1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: testName,
 			},
-			Status: knservingv1alpha1.ServiceStatus{
+			Status: knservingv1.ServiceStatus{
 				Status: duckv1.Status{
 					ObservedGeneration: 1,
 					Conditions: duckv1.Conditions{
@@ -156,11 +156,11 @@ func TestDeployKnativeService(t *testing.T) {
 			monkey.PatchInstanceMethod(
 				reflect.TypeOf(svcConf),
 				"BuildKnativeServiceConfig",
-				func(*KnativeService) *knservingv1alpha1.Service {
+				func(*KnativeService) *knservingv1.Service {
 					return testKnSvc
 				})
 			monkey.Patch(knServiceSemanticEquals,
-				func(*knservingv1alpha1.Service, *knservingv1alpha1.Service) bool {
+				func(*knservingv1.Service, *knservingv1.Service) bool {
 					// Make method return false always, so that an update will be triggered
 					return false
 				})
@@ -1154,8 +1154,8 @@ func TestGetKnativePodTerminationMessage(t *testing.T) {
 }
 
 func TestGetKnServiceStatusSummary(t *testing.T) {
-	svc := &knservingv1alpha1.Service{
-		Status: knservingv1alpha1.ServiceStatus{
+	svc := &knservingv1.Service{
+		Status: knservingv1.ServiceStatus{
 			Status: duckv1.Status{
 				ObservedGeneration: 1,
 				Conditions: duckv1.Conditions{
@@ -1184,7 +1184,7 @@ func createTestKnController(cs *knservingclientset.Clientset, reactors []reactor
 		cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
 	}
 	// Create clientset
-	client := cs.ServingV1alpha1()
+	client := cs.ServingV1()
 	// Return test controller with a fake knative serving client
 	return &controller{knServingClient: client}
 }
