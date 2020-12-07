@@ -1,10 +1,19 @@
 @import "~@elastic/eui/src/global_styling/variables/animations";
 
-.expandableContainer__childWrapper {
-  height: 0;
+@mixin expandable-container-closed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   overflow: hidden;
-  transform: translatez(0);
-  transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.expandableContainer__childWrapper {
+  @include expandable-container-closed;
+}
+
+.expandableContainer__childWrapper.scrollableContainer {
+  @include expandable-container-closed;
+  overflow-y: auto;
 }
 
 .expandableContainer.expandableContainer-isOpen {

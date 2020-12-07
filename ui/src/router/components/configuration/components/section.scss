@@ -4,7 +4,7 @@
 // its parent container which can break the layout. To prevent this, the min-width attribute
 // is expected to be set to a fixed value.
 // Ref: https://css-tricks.com/flexbox-truncated-text/
-.euiFlexItem--childFlexPanel {
+.euiFlexItem.euiFlexItem--childFlexPanel {
   min-width: 0;
 }
 

@@ -1,9 +1,9 @@
 import React, { Fragment, useRef } from "react";
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer
 } from "@elastic/eui";
 import classNames from "classnames";
@@ -14,7 +14,8 @@ import useDimension from "../../hooks/useDimension";
 
 export const ExpandableContainer = ({
   maxHeight = 300,
-  buttonSize = "l",
+  isScrollable = true,
+  toggleKind = "button", // "button" | "text"
   children
 }) => {
   const contentRef = useRef();
@@ -29,7 +30,9 @@ export const ExpandableContainer = ({
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="left">
         <EuiFlexItem grow={true} className="euiFlexItem--childFlexPanel">
           <div
-            className="expandableContainer__childWrapper"
+            className={classNames("expandableContainer__childWrapper", {
+              scrollableContainer: isScrollable
+            })}
             style={{
               height: isExpanded
                 ? contentHeight
@@ -38,28 +41,24 @@ export const ExpandableContainer = ({
             <div ref={contentRef}>{children}</div>
           </div>
         </EuiFlexItem>
-
-        {contentHeight > maxHeight && buttonSize === "s" && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={toggle}
-              iconType={`arrow${isExpanded ? "Up" : "Right"}`}
-              aria-label="Next"
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
 
-      {contentHeight > maxHeight && buttonSize === "l" && (
+      {contentHeight > maxHeight && (
         <Fragment>
           <EuiSpacer size="s" />
           <div className="expandableContainer__triggerWrapper">
-            <EuiButton
-              fullWidth
-              onClick={toggle}
-              iconType={`arrow${isExpanded ? "Up" : "Right"}`}>
-              {isExpanded ? "Collapse" : "Expand"}
-            </EuiButton>
+            {toggleKind === "button" ? (
+              <EuiButton
+                fullWidth
+                onClick={toggle}
+                iconType={`arrow${isExpanded ? "Up" : "Right"}`}>
+                {isExpanded ? "Collapse" : "Expand"}
+              </EuiButton>
+            ) : (
+              <EuiLink type="button" onClick={toggle}>
+                {isExpanded ? "Show less" : "Show more"}
+              </EuiLink>
+            )}
           </div>
         </Fragment>
       )}
