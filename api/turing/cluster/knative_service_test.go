@@ -14,7 +14,6 @@ import (
 	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 // Define a valid Service configuration for tests
@@ -166,7 +165,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 		Volumes: testValidKnSvc.Volumes,
 	}
-	expected := &knservingv1alpha1.Service{
+	expected := &knservingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-svc",
 			Namespace: "test-namespace",
@@ -175,9 +174,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				"serving.knative.dev/visibility": "cluster-local",
 			},
 		},
-		Spec: knservingv1alpha1.ServiceSpec{
-			ConfigurationSpec: knservingv1alpha1.ConfigurationSpec{
-				Template: &knservingv1alpha1.RevisionTemplateSpec{
+		Spec: knservingv1.ServiceSpec{
+			ConfigurationSpec: knservingv1.ConfigurationSpec{
+				Template: knservingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-svc-0",
 						Labels: map[string]string{
@@ -185,11 +184,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 						},
 						Annotations: annotations,
 					},
-					Spec: knservingv1alpha1.RevisionSpec{
-						RevisionSpec: knservingv1.RevisionSpec{
-							TimeoutSeconds: &timeout,
-							PodSpec:        podSpec,
-						},
+					Spec:       knservingv1.RevisionSpec{
+						PodSpec:        podSpec,
+						TimeoutSeconds: &timeout,
 					},
 				},
 			},
