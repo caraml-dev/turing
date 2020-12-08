@@ -28,10 +28,10 @@ type kafkaProducer interface {
 
 // KafkaLogger logs the result log data to the configured Kafka topic
 type KafkaLogger struct {
-	appName       string
-	serialization config.SerializationFormat
-	topic         string
-	producer      kafkaProducer
+	appName             string
+	serializationFormat config.SerializationFormat
+	topic               string
+	producer            kafkaProducer
 }
 
 // newKafkaLogger creates a new KafkaLogger
@@ -53,10 +53,10 @@ func newKafkaLogger(
 	}
 	// Create Kafka Logger
 	return &KafkaLogger{
-		appName:       appName,
-		serialization: cfg.Serialization,
-		topic:         cfg.Topic,
-		producer:      producer,
+		appName:             appName,
+		serializationFormat: cfg.SerializationFormat,
+		topic:               cfg.Topic,
+		producer:            producer,
 	}, nil
 }
 
@@ -86,14 +86,14 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 
 	// Format Kafka Message
 	var keyBytes, valueBytes []byte
-	if l.serialization == config.JSONSerializationFormat {
+	if l.serializationFormat == config.JSONSerializationFormat {
 		valueBytes, err = newJSONKafkaLogEntry(l.appName, turLogEntry)
-	} else if l.serialization == config.ProtobufSerializationFormat {
+	} else if l.serializationFormat == config.ProtobufSerializationFormat {
 		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(l.appName, turLogEntry)
 	} else {
 		// Unknown format, we wouldn't hit this since the config is checked at initialization,
 		// but handle it.
-		return errors.Newf(errors.BadConfig, "Unknown Serialization format %s", l.serialization)
+		return errors.Newf(errors.BadConfig, "Unknown Serialization format %s", l.serializationFormat)
 	}
 	if err != nil {
 		return err

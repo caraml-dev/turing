@@ -92,9 +92,9 @@ type FluentdConfig struct {
 // KafkaConfig captures the minimal configuration for writing result logs to
 // Kafka topics
 type KafkaConfig struct {
-	Brokers       string
-	Topic         string
-	Serialization SerializationFormat
+	Brokers             string
+	Topic               string
+	SerializationFormat SerializationFormat
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client

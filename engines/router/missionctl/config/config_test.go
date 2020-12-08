@@ -107,9 +107,9 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Tag:  "",
 			},
 			Kafka: &KafkaConfig{
-				Brokers:       "",
-				Topic:         "",
-				Serialization: "",
+				Brokers:             "",
+				Topic:               "",
+				SerializationFormat: "",
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
@@ -169,9 +169,9 @@ func TestInitConfigEnv(t *testing.T) {
 				Tag:  "response.log",
 			},
 			Kafka: &KafkaConfig{
-				Brokers:       "localhost:9000",
-				Topic:         "kafka_topic",
-				Serialization: JSONSerializationFormat,
+				Brokers:             "localhost:9000",
+				Topic:               "kafka_topic",
+				SerializationFormat: JSONSerializationFormat,
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{

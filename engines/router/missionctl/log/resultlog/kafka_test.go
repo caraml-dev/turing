@@ -141,10 +141,10 @@ func TestKafkaLoggerWrite(t *testing.T) {
 	// Create test logger and log entry
 	mp := &mockKafkaProducer{}
 	logger := &KafkaLogger{
-		appName:       "test-app-name",
-		serialization: "json",
-		topic:         "test-topic",
-		producer:      mp,
+		appName:             "test-app-name",
+		serializationFormat: "json",
+		topic:               "test-topic",
+		producer:            mp,
 	}
 	testKafkaLogEntry := []byte(`{"key": "value"}`)
 	turingResLogEntry := &TuringResultLogEntry{}
