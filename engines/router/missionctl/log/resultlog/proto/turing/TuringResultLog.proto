@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package turing;
+
+option java_outer_classname = "TuringResultLogProto";
+option go_package = "github.com/gojek/turing";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message Request {
+    map<string, google.protobuf.ListValue> header = 1;
+    google.protobuf.Struct body = 2;
+}
+
+message Response {
+    google.protobuf.Struct response = 1;
+    string error = 2;
+}
+
+// key
+message TuringResultLogKey {
+    string turing_req_id = 1;
+    google.protobuf.Timestamp event_timestamp = 2;
+}
+
+// message
+message TuringResultLogMessage {
+    string turing_req_id = 1;
+    google.protobuf.Timestamp event_timestamp = 2;
+    string router_version = 3;
+    Request request = 4;
+    Response experiment = 5;
+    Response enricher = 6;
+    Response router = 7;
+    Response ensembler = 8;
+}
