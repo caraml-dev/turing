@@ -1,10 +1,9 @@
 package resultlog
 
 import (
-	"bytes"
 	"encoding/json"
 
-	"github.com/golang/protobuf/jsonpb"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -148,15 +147,13 @@ func newJSONKafkaLogEntry(
 	}
 
 	// Marshal to JSON
-	var buf bytes.Buffer
-	m := &jsonpb.Marshaler{
-		OrigName: true, // Use the json field name instead of the camel case struct field name
+	m := &protojson.MarshalOptions{
+		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
 	}
-	err = m.Marshal(&buf, kafkaMessage)
+	messageBytes, err = m.Marshal(kafkaMessage)
 	if err != nil {
 		return nil, err
 	}
-	messageBytes = buf.Bytes()
 	return
 }
 
