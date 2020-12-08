@@ -50,8 +50,8 @@ type KafkaConfig struct {
 	Brokers string `json:"brokers"`
 	// Topic to write logs to
 	Topic string `json:"topic"`
-	// Serialization used for the messages
-	Serialization SerializationFormat `json:"serialization"`
+	// Serialization Format used for the messages
+	SerializationFormat SerializationFormat `json:"serialization_format"`
 }
 
 // LogConfig contains all log configuration necessary for a deployment

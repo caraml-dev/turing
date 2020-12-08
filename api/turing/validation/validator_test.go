@@ -84,9 +84,9 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Brokers:       "broker1,broker2",
-					Topic:         "topic",
-					Serialization: "json",
+					Brokers:             "broker1,broker2",
+					Topic:               "topic",
+					SerializationFormat: "json",
 				},
 			},
 			hasErr: false,
@@ -103,8 +103,8 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Topic:         "topic",
-					Serialization: "json",
+					Topic:               "topic",
+					SerializationFormat: "json",
 				},
 			},
 			hasErr: true,
@@ -114,8 +114,8 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Brokers:       "broker1,broker2",
-					Serialization: "json",
+					Brokers:             "broker1,broker2",
+					SerializationFormat: "json",
 				},
 			},
 			hasErr: true,
@@ -125,9 +125,9 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Brokers:       "broker1,broker2",
-					Topic:         "topic",
-					Serialization: "test",
+					Brokers:             "broker1,broker2",
+					Topic:               "topic",
+					SerializationFormat: "test",
 				},
 			},
 			hasErr: true,

@@ -79,10 +79,11 @@ func validateLogConfig(sl validator.StructLevel) {
 				sl.ReportError(field.KafkaConfig,
 					"kafka_config", "KafkaConfig", "kafka-config-topic-missing", "")
 			}
-			if kafkaConf.Serialization != models.JSONSerializationFormat &&
-				kafkaConf.Serialization != models.ProtobufSerializationFormat {
+			if kafkaConf.SerializationFormat != models.JSONSerializationFormat &&
+				kafkaConf.SerializationFormat != models.ProtobufSerializationFormat {
 				sl.ReportError(field.KafkaConfig,
-					"kafka_config", "KafkaConfig", "kafka-serialization-oneOf", string(kafkaConf.Serialization))
+					"kafka_config", "KafkaConfig", "kafka-serialization-format-oneOf",
+					string(kafkaConf.SerializationFormat))
 			}
 		}
 		return
