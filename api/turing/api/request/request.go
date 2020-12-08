@@ -63,8 +63,9 @@ type BigQueryConfig struct {
 
 // KafkaConfig defines the configs for logging to Kafka
 type KafkaConfig struct {
-	Brokers string `json:"brokers"`
-	Topic   string `json:"topic"`
+	Brokers       string                     `json:"brokers"`
+	Topic         string                     `json:"topic"`
+	Serialization models.SerializationFormat `json:"serialization"`
 }
 
 // EnricherEnsemblerConfig defines the configs for the enricher / ensembler,
@@ -164,8 +165,9 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		}
 	case models.KafkaLogger:
 		rv.LogConfig.KafkaConfig = &models.KafkaConfig{
-			Brokers: r.Config.LogConfig.KafkaConfig.Brokers,
-			Topic:   r.Config.LogConfig.KafkaConfig.Topic,
+			Brokers:       r.Config.LogConfig.KafkaConfig.Brokers,
+			Topic:         r.Config.LogConfig.KafkaConfig.Topic,
+			Serialization: r.Config.LogConfig.KafkaConfig.Serialization,
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {

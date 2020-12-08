@@ -47,6 +47,7 @@ const (
 	envFluentdTag                   = "APP_FLUENTD_TAG"
 	envKafkaBrokers                 = "APP_KAFKA_BROKERS"
 	envKafkaTopic                   = "APP_KAFKA_TOPIC"
+	envKafkaSerialization           = "APP_KAFKA_SERIALIZATION"
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
 )
@@ -267,6 +268,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		envs = append(envs, []corev1.EnvVar{
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
+			{Name: envKafkaSerialization, Value: string(logConfig.KafkaConfig.Serialization)},
 		}...)
 	}
 
