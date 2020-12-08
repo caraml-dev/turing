@@ -49,7 +49,8 @@ export class TuringRouter {
         },
         kafka_config: {
           brokers: "",
-          topic: ""
+          topic: "",
+          serialization_format: ""
         }
       }
     };
