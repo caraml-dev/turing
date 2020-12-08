@@ -94,7 +94,7 @@ type FluentdConfig struct {
 type KafkaConfig struct {
 	Brokers             string
 	Topic               string
-	SerializationFormat SerializationFormat
+	SerializationFormat SerializationFormat `split_words:"true"`
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client

@@ -109,7 +109,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 			Kafka: &KafkaConfig{
 				Brokers:             "",
 				Topic:               "",
-				SerializationFormat: "",
+				SerializationFormat: SerializationFormat(""),
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
