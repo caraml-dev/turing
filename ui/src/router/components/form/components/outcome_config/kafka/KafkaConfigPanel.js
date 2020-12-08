@@ -4,11 +4,13 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiSuperSelect
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
+import { resultLoggingConfig } from "../../../../../../config.js";
 
 const logSerializationFormatOptions = [
   {
@@ -17,7 +19,9 @@ const logSerializationFormatOptions = [
   },
   {
     value: "protobuf",
-    inputDisplay: "Protobuf"
+    inputDisplay: "Protobuf",
+    helpText: "TuringResultLog.proto",
+    helpUrl: resultLoggingConfig.protoUrl
   }
 ];
 
@@ -72,6 +76,8 @@ export const KafkaConfigPanel = ({
           />
         </EuiFormRow>
 
+        <EuiSpacer size="m" />
+
         <EuiFormRow
           fullWidth
           label={
@@ -82,6 +88,19 @@ export const KafkaConfigPanel = ({
           }
           isInvalid={!!errors.serialization_format}
           error={errors.serialization_format}
+          helpText={
+            selectedFormat && !!selectedFormat.helpText ? (
+              !!selectedFormat.helpUrl ? (
+                <EuiLink href={selectedFormat.helpUrl} target="_blank" external>
+                  {selectedFormat.helpText}
+                </EuiLink>
+              ) : (
+                selectedFormat.helpText
+              )
+            ) : (
+              ""
+            )
+          }
           display="row">
           <EuiSuperSelect
             fullWidth
