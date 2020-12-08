@@ -80,7 +80,7 @@ func validateLogConfig(sl validator.StructLevel) {
 					"kafka_config", "KafkaConfig", "kafka-config-topic-missing", "")
 			}
 			if kafkaConf.Serialization != models.JSONSerializationFormat &&
-				kafkaConf.Serialization != models.JSONSerializationFormat {
+				kafkaConf.Serialization != models.ProtobufSerializationFormat {
 				sl.ReportError(field.KafkaConfig,
 					"kafka_config", "KafkaConfig", "kafka-serialization-oneOf", string(kafkaConf.Serialization))
 			}
