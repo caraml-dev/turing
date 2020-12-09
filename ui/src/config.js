@@ -37,7 +37,7 @@ export const appConfig = {
     ? process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES.split(",")
     : [],
   defaultDockerRegistry:
-      process.env.REACT_APP_DEFAULT_DOCKER_REGISTRY || "docker.io", // User Docker Hub as the default
+    process.env.REACT_APP_DEFAULT_DOCKER_REGISTRY || "docker.io", // User Docker Hub as the default
   scaling: {
     maxAllowedReplica: 10
   }
@@ -46,6 +46,10 @@ export const appConfig = {
 export const sentryConfig = {
   dsn: process.env.REACT_APP_SENTRY_DSN,
   environment: appConfig.environment
+};
+
+export const resultLoggingConfig = {
+  protoUrl: process.env.REACT_APP_RESULT_LOG_PROTO_URL
 };
 
 export const monitoringConfig = {

@@ -198,7 +198,11 @@ const kafkaConfigSchema = yup.object().shape({
     .matches(
       kafkaTopicRegex,
       "A valid Kafka topic name may only contain letters, numbers, dot, hyphen or underscore"
-    )
+    ),
+  serialization_format: yup
+    .mixed()
+    .required("Serialzation format should be selected")
+    .oneOf(["json", "protobuf"], "Valid serialzation format should be selected")
 });
 
 export default [
