@@ -2,13 +2,17 @@ package resultlog
 
 import (
 	"encoding/json"
-	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
@@ -25,22 +29,10 @@ type kafkaProducer interface {
 
 // KafkaLogger logs the result log data to the configured Kafka topic
 type KafkaLogger struct {
-	appName  string
-	topic    string
-	producer kafkaProducer
-}
-
-// kafkaLogEntry is used to parse the TuringResultLogEntry and convert it into
-// a loggable structure
-type kafkaLogEntry struct {
-	RouterVersion string            `json:"router_version"`
-	TuringReqID   string            `json:"turing_req_id"`
-	Timestamp     string            `json:"ts"`
-	Request       requestLogEntry   `json:"request"`
-	Experiment    *responseLogEntry `json:"experiment,omitempty"`
-	Enricher      *responseLogEntry `json:"enricher,omitempty"`
-	Router        *responseLogEntry `json:"router,omitempty"`
-	Ensembler     *responseLogEntry `json:"ensembler,omitempty"`
+	appName             string
+	serializationFormat config.SerializationFormat
+	topic               string
+	producer            kafkaProducer
 }
 
 // newKafkaLogger creates a new KafkaLogger
@@ -62,9 +54,10 @@ func newKafkaLogger(
 	}
 	// Create Kafka Logger
 	return &KafkaLogger{
-		appName:  appName,
-		topic:    cfg.Topic,
-		producer: producer,
+		appName:             appName,
+		serializationFormat: cfg.SerializationFormat,
+		topic:               cfg.Topic,
+		producer:            producer,
 	}, nil
 }
 
@@ -92,28 +85,32 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 		},
 	)()
 
-	// Make the kafkaLogEntry
-	var logEntry *kafkaLogEntry
-	logEntry, err = newKafkaLogEntry(l.appName, turLogEntry)
-	if err != nil {
-		return err
+	// Format Kafka Message
+	var keyBytes, valueBytes []byte
+	if l.serializationFormat == config.JSONSerializationFormat {
+		valueBytes, err = newJSONKafkaLogEntry(l.appName, turLogEntry)
+	} else if l.serializationFormat == config.ProtobufSerializationFormat {
+		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(l.appName, turLogEntry)
+	} else {
+		// Unknown format, we wouldn't hit this since the config is checked at initialization,
+		// but handle it.
+		return errors.Newf(errors.BadConfig, "Unknown Serialization format %s", l.serializationFormat)
 	}
-	// Marshal data
-	var bytes []byte
-	bytes, err = json.Marshal(logEntry)
 	if err != nil {
 		return err
 	}
 
-	// Produce message
+	// Produce Message
 	deliveryChan := make(chan kafka.Event, 1)
 	defer close(deliveryChan)
 	err = l.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &l.topic,
 			Partition: kafka.PartitionAny},
-		Value: bytes,
+		Value: valueBytes,
+		Key:   keyBytes,
 	}, deliveryChan)
+
 	if err != nil {
 		return err
 	}
@@ -130,25 +127,135 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 	return nil
 }
 
-// newKafkaLogEntry converts a given TuringResultLogEntry to a kafkaLogEntry, to
-// be written to a Kafka topic
-func newKafkaLogEntry(routerVersion string, e *TuringResultLogEntry) (*kafkaLogEntry, error) {
-	// Get Turing request id
-	turingReqID, err := turingctx.GetRequestID(*e.ctx)
+// newJSONKafkaLogEntry converts a given TuringResultLogEntry to a JSON message of the
+// TuringResultLogMessage type, for writing to a Kafka topic
+func newJSONKafkaLogEntry(
+	routerVersion string,
+	resultLogEntry *TuringResultLogEntry,
+) (messageBytes []byte, err error) {
+	// Get Turing request ID
+	var turingReqID string
+	turingReqID, err = turingctx.GetRequestID(*resultLogEntry.ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	logEntry := &kafkaLogEntry{
-		RouterVersion: routerVersion,
-		TuringReqID:   turingReqID,
-		Timestamp:     e.timestamp.Format(time.RFC3339Nano),
-		Request:       e.request,
-		Experiment:    getTuringResponseOrNil(e.responses, ResultLogKeys.Experiment),
-		Enricher:      getTuringResponseOrNil(e.responses, ResultLogKeys.Enricher),
-		Router:        getTuringResponseOrNil(e.responses, ResultLogKeys.Router),
-		Ensembler:     getTuringResponseOrNil(e.responses, ResultLogKeys.Ensembler),
+	// Create the Kafka message
+	kafkaMessage, err := newTuringResultLogMessage(routerVersion, resultLogEntry, turingReqID)
+	if err != nil {
+		return nil, err
 	}
-	// Add optional fields
-	return logEntry, nil
+
+	// Marshal to JSON
+	m := &protojson.MarshalOptions{
+		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
+	}
+	messageBytes, err = m.Marshal(kafkaMessage)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+// newProtobufKafkaLogEntry converts a given TuringResultLogEntry to the Protbuf format and marshals it,
+// for writing to a Kafka topic
+func newProtobufKafkaLogEntry(
+	routerVersion string,
+	resultLogEntry *TuringResultLogEntry,
+) (keyBytes []byte, valueBytes []byte, err error) {
+	// Get Turing request ID
+	var turingReqID string
+	turingReqID, err = turingctx.GetRequestID(*resultLogEntry.ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create the Kafka key and message
+	key := &turing.TuringResultLogKey{
+		TuringReqId:    turingReqID,
+		EventTimestamp: timestamppb.New(resultLogEntry.timestamp),
+	}
+	message, err := newTuringResultLogMessage(routerVersion, resultLogEntry, turingReqID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Marshal the key and the message
+	keyBytes, err = proto.Marshal(key)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry key")
+	}
+	valueBytes, err = proto.Marshal(message)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry value")
+	}
+	return
+}
+
+func newTuringResultLogMessage(
+	routerVersion string,
+	resultLogEntry *TuringResultLogEntry,
+	turingReqID string,
+) (*turing.TuringResultLogMessage, error) {
+	// Format the Turing request header per the proto definition
+	reqHeader := map[string]*structpb.ListValue{}
+	for key, strings := range *resultLogEntry.request.Header {
+		values := []*structpb.Value{}
+		for _, str := range strings {
+			values = append(values, structpb.NewStringValue(str))
+		}
+		reqHeader[key] = &structpb.ListValue{
+			Values: values,
+		}
+	}
+
+	// Unmarshal the Turing request body into Protobuf Struct
+	reqBody := &structpb.Struct{}
+	if resultLogEntry.request.Body != nil {
+		err := json.Unmarshal(resultLogEntry.request.Body, reqBody)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Create the Kafka Message
+	newProtobufResponse := func(e *responseLogEntry) *turing.Response {
+		if e == nil {
+			return nil
+		}
+		if e.Response == nil {
+			return &turing.Response{
+				Response: nil,
+				Error:    e.Error,
+			}
+		}
+		// Unmarshal response body into Protobuf Struct
+		responseStruct := &structpb.Struct{}
+		err := json.Unmarshal(e.Response, responseStruct)
+		if err != nil {
+			return &turing.Response{
+				Response: nil,
+				Error:    err.Error(),
+			}
+		}
+		return &turing.Response{
+			Response: responseStruct,
+			Error:    e.Error,
+		}
+	}
+	message := &turing.TuringResultLogMessage{
+		RouterVersion:  routerVersion,
+		TuringReqId:    turingReqID,
+		EventTimestamp: timestamppb.New(resultLogEntry.timestamp),
+		Request: &turing.Request{
+			Header: reqHeader,
+			Body:   reqBody,
+		},
+		Experiment: newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Experiment)),
+		Enricher:   newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Enricher)),
+		Router:     newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Router)),
+		Ensembler:  newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Ensembler)),
+	}
+
+	return message, nil
 }

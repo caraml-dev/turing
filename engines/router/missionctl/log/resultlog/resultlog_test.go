@@ -94,8 +94,9 @@ func TestInitTuringResultLogger(t *testing.T) {
 			cfg: &config.AppConfig{
 				ResultLogger: config.KafkaLogger,
 				Kafka: &config.KafkaConfig{
-					Brokers: "brokers",
-					Topic:   "topic",
+					Brokers:             "brokers",
+					Topic:               "topic",
+					SerializationFormat: config.JSONSerializationFormat,
 				},
 			},
 			patch:   true,
@@ -176,7 +177,7 @@ func makeTestTuringResultLogEntry(t *testing.T) (context.Context, *TuringResultL
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("experiment", []byte(`{"key": "experiment_data"}`), "")
+	entry.AddResponse("experiment", nil, "Error received")
 	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "")
 	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "")
 

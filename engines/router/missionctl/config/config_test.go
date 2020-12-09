@@ -22,6 +22,12 @@ type testSuiteResultLogger struct {
 	success bool
 }
 
+type testSuiteSerializationFormat struct {
+	value   string
+	result  SerializationFormat
+	success bool
+}
+
 var requiredEnvs = map[string]string{
 	"PORT":               "8080",
 	"ROUTER_CONFIG_FILE": "/var/test.yaml",
@@ -30,32 +36,33 @@ var requiredEnvs = map[string]string{
 }
 
 var optionalEnvs = map[string]string{
-	"ENRICHER_ENDPOINT":             "http://localhost:8081",
-	"ENRICHER_TIMEOUT":              "5ms",
-	"ENSEMBLER_ENDPOINT":            "http://localhost:8082",
-	"ENSEMBLER_TIMEOUT":             "2ms",
-	"ROUTER_TIMEOUT":                "10ms",
-	"APP_LOGLEVEL":                  "DEBUG",
-	"APP_FIBER_DEBUG_LOG":           "true",
-	"APP_RESULT_LOGGER":             "CONSOLE",
-	"APP_GCP_PROJECT":               "gcp-project-id",
-	"APP_BQ_DATASET":                "turing",
-	"APP_BQ_TABLE":                  "turing-test",
-	"APP_BQ_BATCH_LOAD":             "true",
-	"APP_CUSTOM_METRICS":            "true",
-	"APP_FLUENTD_HOST":              "localhost",
-	"APP_FLUENTD_PORT":              "24224",
-	"APP_FLUENTD_TAG":               "response.log",
-	"APP_KAFKA_BROKERS":             "localhost:9000",
-	"APP_KAFKA_TOPIC":               "kafka_topic",
-	"APP_JAEGER_ENABLED":            "true",
-	"APP_JAEGER_COLLECTOR_ENDPOINT": "http://localhost:5000",
-	"APP_JAEGER_REPORTER_HOST":      "localhost",
-	"APP_JAEGER_REPORTER_PORT":      "5001",
-	"APP_JAEGER_START_NEW_SPANS":    "true",
-	"APP_SENTRY_ENABLED":            "true",
-	"APP_SENTRY_DSN":                "test:dsn",
-	"APP_SENTRY_LABELS":             "sentry_key1:value1,sentry_key2:value2",
+	"ENRICHER_ENDPOINT":              "http://localhost:8081",
+	"ENRICHER_TIMEOUT":               "5ms",
+	"ENSEMBLER_ENDPOINT":             "http://localhost:8082",
+	"ENSEMBLER_TIMEOUT":              "2ms",
+	"ROUTER_TIMEOUT":                 "10ms",
+	"APP_LOGLEVEL":                   "DEBUG",
+	"APP_FIBER_DEBUG_LOG":            "true",
+	"APP_RESULT_LOGGER":              "CONSOLE",
+	"APP_GCP_PROJECT":                "gcp-project-id",
+	"APP_BQ_DATASET":                 "turing",
+	"APP_BQ_TABLE":                   "turing-test",
+	"APP_BQ_BATCH_LOAD":              "true",
+	"APP_CUSTOM_METRICS":             "true",
+	"APP_FLUENTD_HOST":               "localhost",
+	"APP_FLUENTD_PORT":               "24224",
+	"APP_FLUENTD_TAG":                "response.log",
+	"APP_KAFKA_BROKERS":              "localhost:9000",
+	"APP_KAFKA_TOPIC":                "kafka_topic",
+	"APP_KAFKA_SERIALIZATION_FORMAT": "json",
+	"APP_JAEGER_ENABLED":             "true",
+	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:5000",
+	"APP_JAEGER_REPORTER_HOST":       "localhost",
+	"APP_JAEGER_REPORTER_PORT":       "5001",
+	"APP_JAEGER_START_NEW_SPANS":     "true",
+	"APP_SENTRY_ENABLED":             "true",
+	"APP_SENTRY_DSN":                 "test:dsn",
+	"APP_SENTRY_LABELS":              "sentry_key1:value1,sentry_key2:value2",
 }
 
 func TestMissingRequiredEnvs(t *testing.T) {
@@ -100,8 +107,9 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Tag:  "",
 			},
 			Kafka: &KafkaConfig{
-				Brokers: "",
-				Topic:   "",
+				Brokers:             "",
+				Topic:               "",
+				SerializationFormat: SerializationFormat(""),
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
@@ -161,8 +169,9 @@ func TestInitConfigEnv(t *testing.T) {
 				Tag:  "response.log",
 			},
 			Kafka: &KafkaConfig{
-				Brokers: "localhost:9000",
-				Topic:   "kafka_topic",
+				Brokers:             "localhost:9000",
+				Topic:               "kafka_topic",
+				SerializationFormat: JSONSerializationFormat,
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
@@ -288,6 +297,39 @@ func TestResultLoggerDecode(t *testing.T) {
 
 			// Validate
 			assert.Equal(t, data.result, resLogger)
+			assert.Equal(t, data.success, err == nil)
+		})
+	}
+}
+
+func TestSerializationFormatDecode(t *testing.T) {
+	// Make test cases
+	tests := map[string]testSuiteSerializationFormat{
+		"json": {
+			value:   "json",
+			result:  JSONSerializationFormat,
+			success: true,
+		},
+		"protobuf": {
+			value:   "protobuf",
+			result:  ProtobufSerializationFormat,
+			success: true,
+		},
+		"unknown_serialization": {
+			value:   "serialization",
+			result:  SerializationFormat(""),
+			success: false,
+		},
+	}
+
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			var serialization SerializationFormat
+			err := serialization.Decode(data.value)
+
+			// Validate
+			assert.Equal(t, data.result, serialization)
 			assert.Equal(t, data.success, err == nil)
 		})
 	}
