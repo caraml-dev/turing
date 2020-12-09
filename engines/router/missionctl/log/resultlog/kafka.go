@@ -211,9 +211,11 @@ func newTuringResultLogMessage(
 
 	// Unmarshal the Turing request body into Protobuf Struct
 	reqBody := &structpb.Struct{}
-	err := json.Unmarshal(resultLogEntry.request.Body, reqBody)
-	if err != nil {
-		return nil, err
+	if resultLogEntry.request.Body != nil {
+		err := json.Unmarshal(resultLogEntry.request.Body, reqBody)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Create the Kafka Message
@@ -221,12 +223,18 @@ func newTuringResultLogMessage(
 		if e == nil {
 			return nil
 		}
+		if e.Response == nil {
+			return &turing.Response{
+				Response: nil,
+				Error:    e.Error,
+			}
+		}
 		// Unmarshal response body into Protobuf Struct
 		responseStruct := &structpb.Struct{}
 		err := json.Unmarshal(e.Response, responseStruct)
 		if err != nil {
 			return &turing.Response{
-				Response: responseStruct,
+				Response: nil,
 				Error:    err.Error(),
 			}
 		}

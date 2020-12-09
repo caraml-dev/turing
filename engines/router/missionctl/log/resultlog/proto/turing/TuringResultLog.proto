@@ -11,16 +11,16 @@ import "google/protobuf/timestamp.proto";
 message Request {
     // The header from the incoming request to the Turing router
     map<string, google.protobuf.ListValue> header = 1;
+
     // The JSON body of the request to the Turing router
     google.protobuf.Struct body = 2;
 }
 
 message Response {
-    // The response from a Turing component. This will be an empty {} object if
-    // the error field is set.
+    // The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler).
     google.protobuf.Struct response = 1;
     
-    // The error from a Turing component, when a successful response cannot be received.
+    // The error from a Turing component, when a successful response is not received.
     string error = 2;
 }
 

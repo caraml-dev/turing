@@ -106,7 +106,7 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 				"body": {"customer_id": "test_customer"}
 			},
 			"experiment": {
-				"response": {"key": "experiment_data"}
+				"error": "Error received"
 			},
 			"enricher": {
 				"response": {"key": "enricher_data"}
@@ -132,8 +132,8 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	assert.Equal(t, strings.Join([]string{
 		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"=\n\x19\n\x06",
 		"Req_id\x12\x0f\n\r\x1a\vtest_req_id\x12 \n\x1e\n\vcustomer_id\x12\x0f\x1a\r",
-		"test_customer*\x1c\n\x1a\n\x18\n\x03key\x12\x11\x1a\x0fexperiment_data2\x1a\n\x18\n\x16\n\x03",
-		"key\x12\x0f\x1a\renricher_data:\x18\n\x16\n\x14\n\x03key\x12\r\x1a\vrouter_data",
+		"test_customer*\x10\x12\x0eError received2\x1a\n\x18\n\x16\n\x03key\x12\x0f\x1a\r",
+		"enricher_data:\x18\n\x16\n\x14\n\x03key\x12\r\x1a\vrouter_data",
 	}, ""), string(message))
 }
 

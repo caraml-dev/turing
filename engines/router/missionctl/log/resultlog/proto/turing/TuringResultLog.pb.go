@@ -89,10 +89,9 @@ type Response struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The response from a Turing component. This will be an empty {} object if
-	// the error field is set.
+	// The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler).
 	Response *structpb.Struct `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
-	// The error from a Turing component, when a successful response cannot be received.
+	// The error from a Turing component, when a successful response is not received.
 	Error string `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
 }
 
