@@ -4,8 +4,9 @@ package validation_test
 
 import (
 	"errors"
-	"github.com/gojek/turing/engines/router"
 	"testing"
+
+	"github.com/gojek/turing/engines/router"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,8 +84,9 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Brokers: "broker1,broker2",
-					Topic:   "topic",
+					Brokers:             "broker1,broker2",
+					Topic:               "topic",
+					SerializationFormat: "json",
 				},
 			},
 			hasErr: false,
@@ -101,7 +103,8 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Topic: "topic",
+					Topic:               "topic",
+					SerializationFormat: "json",
 				},
 			},
 			hasErr: true,
@@ -111,7 +114,20 @@ func TestValidateLogConfig(t *testing.T) {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
-					Brokers: "broker1,broker2",
+					Brokers:             "broker1,broker2",
+					SerializationFormat: "json",
+				},
+			},
+			hasErr: true,
+		},
+		{
+			name: "kafka_invalid_config_invalid_serialization",
+			input: request.LogConfig{
+				ResultLoggerType: "kafka",
+				KafkaConfig: &request.KafkaConfig{
+					Brokers:             "broker1,broker2",
+					Topic:               "topic",
+					SerializationFormat: "test",
 				},
 			},
 			hasErr: true,
