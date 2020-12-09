@@ -50,7 +50,7 @@ export class TuringRouter {
         kafka_config: {
           brokers: "",
           topic: "",
-          serialization_format: ""
+          serialization_format: "protobuf"
         }
       }
     };

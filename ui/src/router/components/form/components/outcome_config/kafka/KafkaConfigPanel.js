@@ -20,8 +20,13 @@ const logSerializationFormatOptions = [
   {
     value: "protobuf",
     inputDisplay: "Protobuf",
-    helpText: "TuringResultLog.proto",
-    helpUrl: resultLoggingConfig.protoUrl
+    helpText: !!resultLoggingConfig.protoUrl ? (
+      <EuiLink href={resultLoggingConfig.protoUrl} target="_blank" external>
+        TuringResultLog.proto
+      </EuiLink>
+    ) : (
+      ""
+    )
   }
 ];
 
@@ -88,19 +93,7 @@ export const KafkaConfigPanel = ({
           }
           isInvalid={!!errors.serialization_format}
           error={errors.serialization_format}
-          helpText={
-            selectedFormat && !!selectedFormat.helpText ? (
-              !!selectedFormat.helpUrl ? (
-                <EuiLink href={selectedFormat.helpUrl} target="_blank" external>
-                  {selectedFormat.helpText}
-                </EuiLink>
-              ) : (
-                selectedFormat.helpText
-              )
-            ) : (
-              ""
-            )
-          }
+          helpText={(selectedFormat || {}).helpText || ""}
           display="row">
           <EuiSuperSelect
             fullWidth
