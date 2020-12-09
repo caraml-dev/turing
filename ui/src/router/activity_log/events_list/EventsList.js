@@ -3,6 +3,8 @@ import { EuiBadge, EuiComment } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { Status } from "../../../services/status/Status";
 import PulseLoader from "react-spinners/PulseLoader";
+import { ExpandableContainer } from "../../../components/expandable_container/ExpandableContainer";
+import "./EventsList.scss";
 
 const infoColor = "#abe095";
 
@@ -30,7 +32,12 @@ export const EventsList = ({ events, status }) => {
           timelineIcon={timelineIcon(event)}
           type="update"
           timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
-          {event.message}
+          <ExpandableContainer
+            maxHeight={43}
+            toggleKind="text"
+            isScrollable={false}>
+            <span className="activityLogEvent">{event.message}</span>
+          </ExpandableContainer>
         </EuiComment>
       ))}
       {status === Status.PENDING && (

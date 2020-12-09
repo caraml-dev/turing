@@ -1095,12 +1095,18 @@ definitions:
     required:
     - brokers
     - topic
+    - serialization_format
     properties:
       brokers:
         type: "string"
         description: Comma-separated list of host and port pairs that are the addresses of the Kafka brokers.
       topic:
         type: "string"
+      serialization_format:
+        type: "string"
+        enum:
+        - "json"
+        - "protobuf"
 
   Alert:
     type: "object"

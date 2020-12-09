@@ -1,0 +1,7 @@
+.activityLogEvent {
+  // white-space: pre-wrap renders \n in the text as a new line
+  white-space: pre-wrap;
+  // word-break: break-word will prevent the possibility of horizontal scroll
+  // on the text by always breaking when the text overflows
+  word-break: break-word;
+}

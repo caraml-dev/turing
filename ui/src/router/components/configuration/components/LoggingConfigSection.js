@@ -39,7 +39,9 @@ const BigQueryConfigTable = ({
   );
 };
 
-const KafkaConfigTable = ({ kafka_config: { brokers, topic } }) => {
+const KafkaConfigTable = ({
+  kafka_config: { brokers, topic, serialization_format }
+}) => {
   const items = [
     {
       title: "Broker(s)",
@@ -48,6 +50,10 @@ const KafkaConfigTable = ({ kafka_config: { brokers, topic } }) => {
     {
       title: "Topic",
       description: topic
+    },
+    {
+      title: "Serialization Format",
+      description: serialization_format
     }
   ];
 

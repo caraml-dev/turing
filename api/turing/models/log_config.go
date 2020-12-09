@@ -23,7 +23,17 @@ const (
 	NopLogger ResultLogger = "nop"
 )
 
-// BigQueryConfig contains the configuration to log results to  BigQuery.
+// SerializationFormat is the type used to capture the supported message serialization formats
+type SerializationFormat string
+
+const (
+	// JSONSerializationFormat formats the message as json, for logging
+	JSONSerializationFormat SerializationFormat = "json"
+	// ProtobufSerializationFormat formats the message using protobuf, for logging
+	ProtobufSerializationFormat SerializationFormat = "protobuf"
+)
+
+// BigQueryConfig contains the configuration to log results to BigQuery.
 type BigQueryConfig struct {
 	// BigQuery table to write to, as a fully qualified BQ Table string.
 	// e.g. project.dataset.table
@@ -34,11 +44,14 @@ type BigQueryConfig struct {
 	BatchLoad bool `json:"batch_load"`
 }
 
+// KafkaConfig contains the configuration to log results to Kafka.
 type KafkaConfig struct {
 	// List of brokers for the kafka to write logs to
 	Brokers string `json:"brokers"`
 	// Topic to write logs to
 	Topic string `json:"topic"`
+	// Serialization Format used for the messages
+	SerializationFormat SerializationFormat `json:"serialization_format"`
 }
 
 // LogConfig contains all log configuration necessary for a deployment

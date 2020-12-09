@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -488,7 +489,17 @@ func (c *controller) waitKnativeServiceReady(
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for service %s to be ready", svcName)
+			terminationMessage := c.getKnativePodTerminationMessage(svcName, namespace)
+			if terminationMessage == "" {
+				// Pod was not created (as with invalid image names), get status messages from the knative service.
+				svc, err := services.Get(svcName, metav1.GetOptions{})
+				if err != nil {
+					terminationMessage = err.Error()
+				} else {
+					terminationMessage = getKnServiceStatusMessages(svc)
+				}
+			}
+			return fmt.Errorf("timeout waiting for service %s to be ready:\n%s", svcName, terminationMessage)
 		case <-ticker.C:
 			svc, err := services.Get(svcName, metav1.GetOptions{})
 			if err != nil {
@@ -501,6 +512,30 @@ func (c *controller) waitKnativeServiceReady(
 			}
 		}
 	}
+}
+
+// getKnativePodTerminationMessage retrieves the termination message of the user container
+// in the pod, which will be returned for logging as a part of the deployment failure error.
+func (c *controller) getKnativePodTerminationMessage(svcName string, namespace string) string {
+	labelSelector := KnativeServiceLabelKey + "=" + svcName
+	podList, err := c.ListPods(namespace, labelSelector)
+	if err != nil {
+		return err.Error()
+	}
+
+	var terminationMessage string
+	for _, pod := range podList.Items {
+		for _, containerStatus := range pod.Status.ContainerStatuses {
+			if containerStatus.Name == KnativeUserContainerName {
+				if containerStatus.LastTerminationState.Terminated != nil {
+					terminationMessage = containerStatus.LastTerminationState.Terminated.Message
+					break
+				}
+			}
+
+		}
+	}
+	return terminationMessage
 }
 
 // waitDeploymentReady waits for the given k8s deployment to become ready, until the
@@ -547,6 +582,15 @@ func deploymentReady(deployment *apiappsv1.Deployment) bool {
 		return ready
 	}
 	return false
+}
+
+func getKnServiceStatusMessages(svc *knservingv1.Service) string {
+	logs := []string{}
+	conditions := svc.Status.GetConditions()
+	for _, cond := range conditions {
+		logs = append(logs, fmt.Sprintf("Type: %s, Status: %t. %s", cond.Type, cond.IsTrue(), cond.GetMessage()))
+	}
+	return strings.Join(logs, "\n")
 }
 
 func knServiceSemanticEquals(desiredService, service *knservingv1.Service) bool {
