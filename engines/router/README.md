@@ -2,9 +2,6 @@
 
 Turing enables DS teams to run ML experiments in the production environment.
 
-## Getting Started
-Docs: [Google Drive](https://drive.google.com/drive/folders/1SJv7gIFhWhUQJ-8OlYge169IBMgVCDbO)
-
 ## Local Development
 Requirements:
 * Golang 1.14
