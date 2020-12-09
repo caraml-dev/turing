@@ -56,8 +56,9 @@ func TestLogConfigValue(t *testing.T) {
 				LogLevel:         routercfg.WarnLevel,
 				ResultLoggerType: KafkaLogger,
 				KafkaConfig: &KafkaConfig{
-					Brokers: "test-brokers",
-					Topic:   "test-topic",
+					Brokers:             "test-brokers",
+					Topic:               "test-topic",
+					SerializationFormat: "test-serialization",
 				},
 			},
 			expected: string(`{
@@ -68,7 +69,8 @@ func TestLogConfigValue(t *testing.T) {
 				"result_logger_type": "kafka",
 				"kafka_config": {
 					"brokers": "test-brokers",
-					"topic": "test-topic"
+					"topic": "test-topic",
+					"serialization_format": "test-serialization"
 				}
 			}`),
 		},
