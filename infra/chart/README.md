@@ -4,12 +4,6 @@
 
 Turing: ML Experimentation System
 
-## Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://charts.bitnami.com/bitnami | postgresql | 8.9.8 |
-
 ## Values
 
 | Key | Type | Default | Description |
@@ -37,7 +31,7 @@ Turing: ML Experimentation System
 | turing.image.tag | string | `"latest"` | Docker image tag for Turing API |
 | turing.ingress.class | string | `""` | Ingress class annotation to add to this Ingress rule,  useful when there are multiple ingress controllers installed |
 | turing.ingress.enabled | bool | `false` | Enable ingress to provision Ingress resource for external access to Turing API |
-| turing.ingress.host | string | `""` | Set host value to enable name based virtual hosting. This allows routing HTTP traffic to multiple host names at the same IP address. If no host is specified all inbound HTTP traffic through the ingress IP address. https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting |
+| turing.ingress.host | string | `""` | Set host value to enable name based virtual hosting. This allows routing HTTP traffic to multiple host names at the same IP address. If no host is specified, the ingress rule applies to all inbound HTTP traffic through  the IP address specified. https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting |
 | turing.livenessProbe.path | string | `"/v1/internal/live"` | HTTP path for liveness check |
 | turing.readinessProbe.path | string | `"/v1/internal/ready"` | HTTP path for readiness check |
 | turing.resources | object | `{}` | Resources requests and limits for Turing API. This should be set  according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
