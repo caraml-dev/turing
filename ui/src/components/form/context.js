@@ -19,7 +19,7 @@ export const FormContextProvider = ({ data: initData, ...props }) => {
     [setData]
   );
 
-  const rootHandler = useCallback(new StackableFunction([], handleChanges), [
+  const rootHandler = useCallback(() => new StackableFunction([], handleChanges), [
     handleChanges
   ]);
 

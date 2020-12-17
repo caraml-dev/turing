@@ -205,7 +205,7 @@ const kafkaConfigSchema = yup.object().shape({
     .oneOf(["json", "protobuf"], "Valid serialzation format should be selected")
 });
 
-export default [
+const schema = [
   yup.object().shape({
     name: yup
       .string()
@@ -302,3 +302,5 @@ export default [
     })
   })
 ];
+
+export default schema;
