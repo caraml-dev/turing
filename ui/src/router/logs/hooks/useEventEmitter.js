@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import mitt from "mitt";
 
-export default () => {
+const useEventEmitter = () => {
   const [doPoll, setDoPoll] = useState(false);
 
   const emitter = useMemo(() => {
@@ -25,3 +25,5 @@ export default () => {
 
   return { emitter, isActive: doPoll };
 };
+
+export default useEventEmitter;

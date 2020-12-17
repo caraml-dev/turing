@@ -5,7 +5,7 @@ import useEventEmitter from "./useEventEmitter";
 const POLLING_INTERVAL = 5000;
 const BATCH_SIZE = 500;
 
-export default (projectId, routerId, params, formatMessage) => {
+const useEventEmitterLogsApi = (projectId, routerId, params, formatMessage) => {
   const { emitter, isActive } = useEventEmitter();
 
   const [query, setQuery] = useState();
@@ -71,3 +71,5 @@ export default (projectId, routerId, params, formatMessage) => {
 
   return { emitter };
 };
+
+export default useEventEmitterLogsApi;

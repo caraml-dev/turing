@@ -17,7 +17,7 @@ import { RouterDetailsView } from "./router/details/RouterDetailsView";
 import { RouterVersionDetailsView } from "./router/versions/details/RouterVersionDetailsView";
 import { PrivateLayout } from "./PrivateLayout";
 
-export default () => (
+const App = () => (
   <ErrorBoundary>
     <MlpApiContextProvider
       mlpApiUrl={apiConfig.mlpApiUrl}
@@ -73,3 +73,5 @@ export default () => (
     </MlpApiContextProvider>
   </ErrorBoundary>
 );
+
+export default App;

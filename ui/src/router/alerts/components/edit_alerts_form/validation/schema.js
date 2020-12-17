@@ -58,7 +58,7 @@ const percentageMetricSchema = yup
     }
   });
 
-export default {
+const schema = {
   team: yup.object().shape({
     team: yup.string().required("Team name is required.")
   }),
@@ -88,3 +88,5 @@ export default {
     })
   })
 };
+
+export default schema;
