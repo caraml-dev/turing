@@ -17,9 +17,6 @@ const getMonitoringLink = (
   routerVersion
 ) => {
   templateSettings.interpolate = /{{([\s\S]+?)}}/g;
-  // If current page is at router details (not viewing a specific router version), the monitoring link will show
-  // metrics for all revisions. Else, the monitoring link will show metrics only for a "specific" revision.
-  routerVersion = /routers\/\d+\/details/.test(window.location.pathname) ? "$__all" : routerVersion
   return template(monitoringConfig.dashboardUrl)({
     cluster: clusterName,
     project: projectName,
@@ -36,7 +33,7 @@ export const useMonitoring = () => {
     (envName, routerName, revision) => {
       const clusterName = getEnvironmentCluster(envName, environments);
       const projectName = !!project ? project.name : undefined;
-
+      revision = !revision ? "$_all" : revision
       return getMonitoringLink(clusterName, projectName, routerName, revision);
     },
     [project, environments]

@@ -124,8 +124,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
         const monitoringLink = item.config
           ? getMonitoringDashboardUrl(
               item.environment_name,
-              item.name,
-              item.config.version
+              item.name
             )
           : undefined;
 
