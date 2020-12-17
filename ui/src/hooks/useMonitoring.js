@@ -30,10 +30,9 @@ export const useMonitoring = () => {
   const { project } = useContext(CurrentProjectContext);
 
   const getMonitoringDashboardUrl = useCallback(
-    (envName, routerName, revision) => {
+    (envName, routerName, revision="$_all") => {
       const clusterName = getEnvironmentCluster(envName, environments);
       const projectName = !!project ? project.name : undefined;
-
       return getMonitoringLink(clusterName, projectName, routerName, revision);
     },
     [project, environments]

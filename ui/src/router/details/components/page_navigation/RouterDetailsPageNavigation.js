@@ -39,8 +39,7 @@ export const RouterDetailsPageNavigation = ({
       ),
       href: getMonitoringDashboardUrl(
         router.environment_name,
-        router.name,
-        config.version
+        router.name
       ),
       disabled: !config.version
     }
