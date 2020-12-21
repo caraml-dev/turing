@@ -11,6 +11,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// AlertPlaybookURL contains URL that documents how to resolve triggered alerts
+var AlertPlaybookURL string
+
 type Metric string
 
 type AlertService interface {
@@ -143,7 +146,7 @@ func (service *gitlabOpsAlertService) createInGitLab(alert models.Alert, authorE
 	alertGroups, err := yaml.Marshal(struct {
 		Groups []interface{} `yaml:"groups"`
 	}{
-		Groups: []interface{}{alert.Group()},
+		Groups: []interface{}{alert.Group(AlertPlaybookURL)},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal AlertGroup into yaml: %s", err)
@@ -175,7 +178,7 @@ func (service *gitlabOpsAlertService) updateInGitLab(alert models.Alert, authorE
 	alertGroups, err := yaml.Marshal(struct {
 		Groups []interface{} `yaml:"groups"`
 	}{
-		Groups: []interface{}{alert.Group()},
+		Groups: []interface{}{alert.Group(AlertPlaybookURL)},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal AlertGroup into yaml: %s", err)
