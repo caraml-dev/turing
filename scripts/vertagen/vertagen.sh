@@ -17,25 +17,30 @@ set -e
 format=
 version_prefix=
 commit_count=
-version_candidate=
-version_tag=
+version_candidate="0.0.0"
+version_tag=""
 vsn=
 
 function getVersionCandidate() {
-    local ver_regex='tag: (v([^,\)]+)|([0-9]+(\.[0-9]+)*))'
-    local tag_lines=`git log --oneline --decorate  |  fgrep "tag: "`
+    local commit_hash_regex='^([0-9a-f]+)'
+    local latest_tag_line=`git log --oneline --decorate  |  fgrep "tag: " | head -n 1`
 
-    if [[ $tag_lines =~ $ver_regex ]]; then
-        if [[ ${BASH_REMATCH[1]:0:1} = "v" ]]; then
-            version_tag=${BASH_REMATCH[1]}
-            version_candidate=${BASH_REMATCH[2]}
-        else
-            version_tag=${BASH_REMATCH[3]}
-            version_candidate=${BASH_REMATCH[3]}
+    if [[ $latest_tag_line =~ $commit_hash_regex ]]; then
+        local tagged_commit_hash=${BASH_REMATCH[1]}
+        # For annotated tags, --sort=-taggerdate will ensure that if, as an example, v0.0.5 and
+        # v0.0.5-rc1 point to the same commit, the newer tag (v0.0.5) is used for the version number
+        # generation instead of the alphabetically latest version (v0.0.5-rc1).
+        local latest_tag=`git tag --sort=-taggerdate --points-at ${tagged_commit_hash} | head -n 1`
+        local version_regex='(v(.+)|([0-9]+(\.[0-9]+)*))'
+        if [[ $latest_tag =~ $version_regex ]]; then
+            if [[ ${BASH_REMATCH[1]:0:1} = "v" ]]; then
+                version_tag=${BASH_REMATCH[1]}
+                version_candidate=${BASH_REMATCH[2]}
+            else
+                version_tag=${BASH_REMATCH[3]}
+                version_candidate=${BASH_REMATCH[3]}
+            fi
         fi
-    else
-        version_tag=""
-        version_candidate="0.0.0"
     fi
 }
 
@@ -68,7 +73,7 @@ function usage() {
 
 while [ "$1" != "" ]; do
     case $1 in
-        -p | --prefix )             shift
+        -p | --prefix )         shift
                                 version_prefix=$1
                                 ;;
         -f | --format )         shift
