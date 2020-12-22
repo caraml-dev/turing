@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { set } from "./utils";
 import { StackableFunction } from "./functions/stackable_function";
 import { useOnChangeHandler } from "./hooks/useOnChangeHandler";
@@ -19,10 +19,7 @@ export const FormContextProvider = ({ data: initData, ...props }) => {
     [setData]
   );
 
-  const rootHandler = useCallback(() => new StackableFunction([], handleChanges), [
-    handleChanges
-  ]);
-
+  const rootHandler = useMemo(() => new StackableFunction([], handleChanges), [handleChanges])
   const { onChangeHandler, onChange } = useOnChangeHandler(rootHandler);
 
   return (
