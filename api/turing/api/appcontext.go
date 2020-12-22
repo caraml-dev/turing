@@ -11,7 +11,6 @@ import (
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/jinzhu/gorm"
-	"github.com/xanzy/go-gitlab"
 )
 
 // AppContext stores the entities relating to the application's context
@@ -93,18 +92,11 @@ func NewAppContext(
 		PodLogService:         service.NewPodLogService(clusterControllers),
 	}
 
-	if cfg.AlertConfig.Enabled {
-		gitlabClient, err := gitlab.NewClient(
-			cfg.AlertConfig.GitLab.Token,
-			gitlab.WithBaseURL(cfg.AlertConfig.GitLab.BaseURL),
-		)
+	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
+		appContext.AlertService, err = service.NewGitlabOpsAlertService(db, *cfg.AlertConfig)
 		if err != nil {
-			return nil, errors.Wrapf(err, "Failed initializing GitLab client. GitLab config: %v",
-				cfg.AlertConfig.GitLab)
+			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}
-		appContext.AlertService = service.NewGitlabOpsAlertService(db, gitlabClient, cfg.AlertConfig.GitLab.ProjectID,
-			cfg.AlertConfig.GitLab.Branch, cfg.AlertConfig.GitLab.PathPrefix)
-		service.AlertPlaybookURL = cfg.AlertConfig.PlaybookURL
 	}
 
 	// Initialize OpenAPI validation middleware
