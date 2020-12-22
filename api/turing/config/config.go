@@ -173,9 +173,10 @@ type VaultConfig struct {
 }
 
 type AlertConfig struct {
-	Enabled     bool
-	GitLab      *GitlabConfig
-	PlaybookURL string // URL that contains documentation on how to resolve triggered alerts
+	Enabled              bool
+	GitLab               *GitlabConfig
+	PlaybookURL          string // PlaybookURL is the URL that contains documentation on how to resolve triggered alerts
+	DashboardURLTemplate string // DashboardURLTemplate is a template for grafana dashboard URL that shows router metrics
 }
 
 type GitlabConfig struct {
