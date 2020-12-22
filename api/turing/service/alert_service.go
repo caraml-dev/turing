@@ -1,9 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"path"
+	"text/template"
 
 	"github.com/gojek/turing/api/turing/config"
 
@@ -25,10 +27,20 @@ type AlertService interface {
 }
 
 type gitlabOpsAlertService struct {
-	db         *gorm.DB       // database client
-	gitlab     *gitlab.Client // GitLab client
-	mlpService MLPService     // mlpService is used to get cluster name and project name for the router that corresponds to the alert
-	config     config.AlertConfig
+	db                   *gorm.DB          // database client
+	gitlab               *gitlab.Client    // GitLab client
+	mlpService           MLPService        // mlpService is used to get cluster name and project name for the router that corresponds to the alert
+	dashboardURLTemplate template.Template // dashboardURLTemplate is a template for grafana dashboard URL that shows router metric. The template will be executed with dashboardURLValue.
+	config               config.AlertConfig
+}
+
+// dashboardURLValue will be passed in as argument to execute dashboardURLTemplate.
+type dashboardURLValue struct {
+	Environment string // environment name where the router is deployed
+	Cluster     string // Kubernetes cluster name where the router name is deployed
+	Project     string // MLP project name where the router is deployed
+	Router      string // router name for the alert
+	Service     string // service name for the alert
 }
 
 // Create a new AlertService that can be used with GitOps based on GitLab. It is assumed
@@ -54,11 +66,17 @@ func NewGitlabOpsAlertService(db *gorm.DB, mlpService MLPService, config config.
 		return nil, fmt.Errorf("failed to create GitLab client required for alerting: %v", err)
 	}
 
+	tmpl, err := template.New("dashboardURLTemplate").Parse(config.DashboardURLTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse dashboardUrlTemplate: %v", err)
+	}
+
 	return &gitlabOpsAlertService{
-		db:         db,
-		gitlab:     gitlabClient,
-		mlpService: mlpService,
-		config:     config,
+		db:                   db,
+		gitlab:               gitlabClient,
+		mlpService:           mlpService,
+		dashboardURLTemplate: *tmpl,
+		config:               config,
 	}, nil
 }
 
@@ -231,6 +249,34 @@ func (service *gitlabOpsAlertService) deleteInGitLab(alert models.Alert, authorE
 	}
 
 	return nil
+}
+
+func (service *gitlabOpsAlertService) getDashboardURL(alert models.Alert, router models.Router) (string, error) {
+	environment, err := service.mlpService.GetEnvironment(router.EnvironmentName)
+	if err != nil {
+		return "", err
+	}
+
+	project, err := service.mlpService.GetProject(router.ProjectID)
+	if err != nil {
+		return "", err
+	}
+
+	value := dashboardURLValue{
+		Environment: router.EnvironmentName,
+		Cluster:     environment.Cluster,
+		Project:     project.Name,
+		Router:      router.Name,
+		Service:     alert.Service,
+	}
+
+	var buf bytes.Buffer
+	err = service.dashboardURLTemplate.Execute(&buf, value)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
 
 func getGitLabFilePath(prefix string, alert models.Alert) string {
