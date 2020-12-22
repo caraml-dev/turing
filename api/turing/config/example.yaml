@@ -84,6 +84,8 @@ AlertConfig:
     PathPrefix: turing
     ProjectID: "1"
     Token: gitlabtoken
+  # URL that contains documentation on how to resolve triggered alerts
+  PlaybookURL: https://example.com
 
 # MLP API access configuration. Turing uses MLP API to get projects
 # and environments associated with the Turing router: https://github.com/gojek/mlp
