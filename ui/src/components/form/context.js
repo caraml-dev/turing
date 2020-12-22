@@ -19,7 +19,9 @@ export const FormContextProvider = ({ data: initData, ...props }) => {
     [setData]
   );
 
-  const rootHandler = useCallback(() => new StackableFunction([], handleChanges), [
+  // TODO: The eslint rule below is disabled. Consider refactoring to conform to the rule.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rootHandler = useCallback(new StackableFunction([], handleChanges), [
     handleChanges
   ]);
 
