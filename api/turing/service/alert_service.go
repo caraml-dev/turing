@@ -25,9 +25,10 @@ type AlertService interface {
 }
 
 type gitlabOpsAlertService struct {
-	db     *gorm.DB       // database client
-	gitlab *gitlab.Client // GitLab client
-	config config.AlertConfig
+	db         *gorm.DB       // database client
+	gitlab     *gitlab.Client // GitLab client
+	mlpService MLPService     // mlpService is used to get cluster name and project name for the router that corresponds to the alert
+	config     config.AlertConfig
 }
 
 // Create a new AlertService that can be used with GitOps based on GitLab. It is assumed
@@ -43,7 +44,7 @@ type gitlabOpsAlertService struct {
 // with the alert files in GitLab (as long as the Git files are not manually modified i.e.
 // the alert files are only updated by calling this service).
 //
-func NewGitlabOpsAlertService(db *gorm.DB, config config.AlertConfig) (AlertService, error) {
+func NewGitlabOpsAlertService(db *gorm.DB, mlpService MLPService, config config.AlertConfig) (AlertService, error) {
 	if config.GitLab == nil {
 		return nil, errors.New("missing GitLab AlertConfig")
 	}
@@ -54,9 +55,10 @@ func NewGitlabOpsAlertService(db *gorm.DB, config config.AlertConfig) (AlertServ
 	}
 
 	return &gitlabOpsAlertService{
-		db:     db,
-		gitlab: gitlabClient,
-		config: config,
+		db:         db,
+		gitlab:     gitlabClient,
+		mlpService: mlpService,
+		config:     config,
 	}, nil
 }
 

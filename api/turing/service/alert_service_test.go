@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/gojek/turing/api/turing/service/mocks"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -60,6 +61,8 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -75,17 +78,20 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 	alert := models.Alert{
 		Model: models.Model{
@@ -121,6 +127,8 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -129,17 +137,20 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 		ExpectQuery(`INSERT INTO "alerts"`).
 		WillReturnError(errors.New("insertion error"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert := models.Alert{
@@ -162,22 +173,27 @@ func TestGitlabOpsAlertServiceList(t *testing.T) {
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
 		WithArgs("service").
 		WillReturnRows(sqlmock.NewRows(columns).AddRow("env", "team", "service", "throughput", "5m"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alerts, err := service.List("service")
@@ -201,22 +217,27 @@ func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
 		WithArgs(5).
 		WillReturnRows(sqlmock.NewRows(columns).AddRow("env", "team", "service", "throughput", "5m"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert, err := service.FindByID(5)
@@ -239,21 +260,26 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
 		WithArgs(1).
 		WillReturnError(errors.New("select not found"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	_, err = service.FindByID(1)
@@ -263,6 +289,8 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
+
+	mockMLPService := &mocks.MLPService{}
 
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
@@ -278,17 +306,20 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mockSQL.ExpectCommit()
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert := models.Alert{
@@ -322,6 +353,8 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -338,17 +371,20 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 		ExpectExec(`UPDATE "alerts"`).
 		WillReturnError(errors.New("update error"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert := models.Alert{
@@ -376,6 +412,8 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -390,17 +428,20 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mockSQL.ExpectCommit()
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert := models.Alert{
@@ -429,6 +470,8 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
+	mockMLPService := &mocks.MLPService{}
+
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -445,17 +488,20 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 		ExpectExec(`DELETE FROM "alerts"`).
 		WillReturnError(errors.New("delete error"))
 
-	service, err := NewGitlabOpsAlertService(mockDb, config.AlertConfig{
-		Enabled: true,
-		GitLab: &config.GitlabConfig{
-			BaseURL:    mockGitlab.URL,
-			Token:      "token",
-			ProjectID:  "project",
-			Branch:     "master",
-			PathPrefix: "prefix",
-		},
-		PlaybookURL: "https://example.com",
-	})
+	service, err := NewGitlabOpsAlertService(
+		mockDb,
+		mockMLPService,
+		config.AlertConfig{
+			Enabled: true,
+			GitLab: &config.GitlabConfig{
+				BaseURL:    mockGitlab.URL,
+				Token:      "token",
+				ProjectID:  "project",
+				Branch:     "master",
+				PathPrefix: "prefix",
+			},
+			PlaybookURL: "https://example.com",
+		})
 	assert.NilError(t, err)
 
 	alert := models.Alert{
