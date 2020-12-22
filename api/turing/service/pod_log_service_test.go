@@ -113,12 +113,12 @@ invalidtimestamp line3
 		router        *models.Router
 		routerVersion *models.RouterVersion
 		componentType string
-		opts          *PodLogOptions
+		opts          *models.PodLogOptions
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    []*PodLog
+		want    []*models.PodLog
 		wantErr bool
 	}{
 		{
@@ -128,9 +128,9 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+				opts:          &models.PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
 			},
-			want: []*PodLog{
+			want: []*models.PodLog{
 				{
 					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
 					Environment:   "environment",
@@ -177,9 +177,9 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{TailLines: &tailLines},
+				opts:          &models.PodLogOptions{TailLines: &tailLines},
 			},
-			want: []*PodLog{
+			want: []*models.PodLog{
 				{
 					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
 					Environment:   "environment",
@@ -208,9 +208,9 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{},
+				opts:          &models.PodLogOptions{},
 			},
-			want: []*PodLog{
+			want: []*models.PodLog{
 				{
 					Timestamp:     time.Date(2020, 7, 7, 6, 59, 59, 0, time.UTC),
 					Environment:   "environment",
@@ -266,7 +266,7 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{},
+				opts:          &models.PodLogOptions{},
 			},
 			want:    nil,
 			wantErr: true,
@@ -278,9 +278,9 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{},
+				opts:          &models.PodLogOptions{},
 			},
-			want:    []*PodLog{},
+			want:    []*models.PodLog{},
 			wantErr: false,
 		},
 		{
@@ -290,7 +290,7 @@ invalidtimestamp line3
 				router:        &models.Router{Name: "router1", EnvironmentName: "environment-not-found"},
 				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
 				componentType: "router",
-				opts:          &PodLogOptions{},
+				opts:          &models.PodLogOptions{},
 			},
 			want:    nil,
 			wantErr: true,

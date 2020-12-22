@@ -10,7 +10,6 @@ import (
 
 	"github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
 )
 
@@ -32,7 +31,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 	sinceTime := time.Date(2020, 12, 5, 8, 0, 0, 0, time.UTC)
 	tailLines := int64(5)
 	headLines := int64(3)
-	podLogOptions := &service.PodLogOptions{
+	podLogOptions := &models.PodLogOptions{
 		Container: "mycontainer",
 		Previous:  true,
 		SinceTime: &sinceTime,
@@ -54,18 +53,18 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 	// Simulate error when router with id 1 and version 3 is requested
 	routerVersionsService.On("FindByRouterIDAndVersion", uint(1), uint(3)).Return(nil, errors.New(""))
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion1, "router", &service.PodLogOptions{}).
-		Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
+		On("ListPodLogs", project, router1, routerVersion1, "router", &models.PodLogOptions{}).
+		Return([]*models.PodLog{{TextPayload: "routerVersion1"}}, nil)
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion2, "router", &service.PodLogOptions{}).
-		Return([]*service.PodLog{{TextPayload: "routerVersion2"}}, nil)
+		On("ListPodLogs", project, router1, routerVersion2, "router", &models.PodLogOptions{}).
+		Return([]*models.PodLog{{TextPayload: "routerVersion2"}}, nil)
 	podLogService.
 		On("ListPodLogs", project, router1, routerVersion1, "enricher", podLogOptions).
-		Return([]*service.PodLog{{TextPayload: "valid optional args"}}, nil)
+		Return([]*models.PodLog{{TextPayload: "valid optional args"}}, nil)
 	// Simulate error when logs for router with component 'ensembler' is requested
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion2, "ensembler", &service.PodLogOptions{}).
-		Return([]*service.PodLog{}, errors.New("Test Pod Log error"))
+		On("ListPodLogs", project, router1, routerVersion2, "ensembler", &models.PodLogOptions{}).
+		Return([]*models.PodLog{}, errors.New("Test Pod Log error"))
 
 	type args struct {
 		r    *http.Request
@@ -101,7 +100,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					"router_id":  "1",
 				},
 			},
-			want: Ok([]*service.PodLog{{TextPayload: "routerVersion1"}}),
+			want: Ok([]*models.PodLog{{TextPayload: "routerVersion1"}}),
 		},
 		{
 			name: "specific router version id",
@@ -112,7 +111,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					"version":    "2",
 				},
 			},
-			want: Ok([]*service.PodLog{{TextPayload: "routerVersion2"}}),
+			want: Ok([]*models.PodLog{{TextPayload: "routerVersion2"}}),
 		},
 		{
 			name: "invalid router version id",
@@ -160,7 +159,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					"head_lines":     "3",
 				},
 			},
-			want: Ok([]*service.PodLog{{TextPayload: "valid optional args"}}),
+			want: Ok([]*models.PodLog{{TextPayload: "valid optional args"}}),
 		},
 		{
 			name: "invalid component_type",

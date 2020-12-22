@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -138,12 +137,12 @@ func waitDeployVersion(
 	}
 }
 
-func getPodLogs(t *testing.T, resp *http.Response) []service.PodLog {
+func getPodLogs(t *testing.T, resp *http.Response) []models.PodLog {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		t.Error(err)
 	}
-	var podLogs []service.PodLog
+	var podLogs []models.PodLog
 	if err = json.Unmarshal(data, &podLogs); err != nil {
 		t.Error(err)
 	}

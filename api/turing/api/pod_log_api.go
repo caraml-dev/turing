@@ -9,7 +9,6 @@ import (
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 type PodLogController struct {
@@ -60,7 +59,7 @@ func (c *PodLogController) ListPodLogs(r *http.Request, vars map[string]string, 
 			"must be one of router, enricher or ensembler")
 	}
 
-	opts := &service.PodLogOptions{}
+	opts := &models.PodLogOptions{}
 	if vars["container"] != "" {
 		opts.Container = vars["container"]
 	}
