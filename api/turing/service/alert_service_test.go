@@ -35,7 +35,7 @@ var expectedAlertContent string = strings.Join([]string{
 	`    annotations:`,
 	`      dashboard: TODO`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
-	`      playbook: TODO`,
+	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 50rps'`,
 	`  - alert: service_throughput_violation_env`,
 	`    expr: |`,
@@ -51,7 +51,7 @@ var expectedAlertContent string = strings.Join([]string{
 	`    annotations:`,
 	`      dashboard: TODO`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
-	`      playbook: TODO`,
+	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 25rps'\n`,
 }, "\\n")
 
@@ -92,8 +92,10 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 		Duration:          "5m",
 	}
 
+	AlertPlaybookURL = "https://example.com"
 	_, err = service.Save(alert, "user@gojek.com")
 	assert.NilError(t, err)
+	AlertPlaybookURL = ""
 
 	err = mockSQL.ExpectationsWereMet()
 	assert.NilError(t, err)
@@ -245,8 +247,10 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 		Duration:          "5m",
 	}
 
+	AlertPlaybookURL = "https://example.com"
 	err = service.Update(alert, "user@gojek.com")
 	assert.NilError(t, err)
+	AlertPlaybookURL = ""
 
 	err = mockSQL.ExpectationsWereMet()
 	assert.NilError(t, err)

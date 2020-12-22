@@ -173,8 +173,9 @@ type VaultConfig struct {
 }
 
 type AlertConfig struct {
-	Enabled bool
-	GitLab  *GitlabConfig
+	Enabled     bool
+	GitLab      *GitlabConfig
+	PlaybookURL string // URL that contains documentation on how to resolve triggered alerts
 }
 
 type GitlabConfig struct {

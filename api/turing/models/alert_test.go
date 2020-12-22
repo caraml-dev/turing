@@ -104,7 +104,7 @@ func TestAlertGroup(t *testing.T) {
 				Annotations: map[string]string{
 					"dashboard":   "TODO",
 					"description": "cpu_util for the past 1m: {{ $value }}%",
-					"playbook":    "TODO",
+					"playbook":    "https://example.com",
 					"summary":     "cpu_util is higher than the threshold: 1%",
 				},
 			},
@@ -125,14 +125,14 @@ func TestAlertGroup(t *testing.T) {
 				Annotations: map[string]string{
 					"dashboard":   "TODO",
 					"description": "cpu_util for the past 1m: {{ $value }}%",
-					"playbook":    "TODO",
+					"playbook":    "https://example.com",
 					"summary":     "cpu_util is higher than the threshold: 1%",
 				},
 			},
 		},
 	}
 
-	assert.Equal(t, expected, alert.Group())
+	assert.Equal(t, expected, alert.Group("https://example.com"))
 }
 
 func TestGetAlertExpr(t *testing.T) {
