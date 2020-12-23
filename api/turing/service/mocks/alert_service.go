@@ -12,13 +12,13 @@ type AlertService struct {
 	mock.Mock
 }
 
-// Delete provides a mock function with given fields: alert, authorEmail
-func (_m *AlertService) Delete(alert models.Alert, authorEmail string) error {
-	ret := _m.Called(alert, authorEmail)
+// Delete provides a mock function with given fields: alert, router, authorEmail
+func (_m *AlertService) Delete(alert models.Alert, router models.Router, authorEmail string) error {
+	ret := _m.Called(alert, router, authorEmail)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(models.Alert, string) error); ok {
-		r0 = rf(alert, authorEmail)
+	if rf, ok := ret.Get(0).(func(models.Alert, models.Router, string) error); ok {
+		r0 = rf(alert, router, authorEmail)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -72,13 +72,13 @@ func (_m *AlertService) List(_a0 string) ([]*models.Alert, error) {
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: alert, authorEmail
-func (_m *AlertService) Save(alert models.Alert, authorEmail string) (*models.Alert, error) {
-	ret := _m.Called(alert, authorEmail)
+// Save provides a mock function with given fields: alert, router, authorEmail
+func (_m *AlertService) Save(alert models.Alert, router models.Router, authorEmail string) (*models.Alert, error) {
+	ret := _m.Called(alert, router, authorEmail)
 
 	var r0 *models.Alert
-	if rf, ok := ret.Get(0).(func(models.Alert, string) *models.Alert); ok {
-		r0 = rf(alert, authorEmail)
+	if rf, ok := ret.Get(0).(func(models.Alert, models.Router, string) *models.Alert); ok {
+		r0 = rf(alert, router, authorEmail)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.Alert)
@@ -86,8 +86,8 @@ func (_m *AlertService) Save(alert models.Alert, authorEmail string) (*models.Al
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.Alert, string) error); ok {
-		r1 = rf(alert, authorEmail)
+	if rf, ok := ret.Get(1).(func(models.Alert, models.Router, string) error); ok {
+		r1 = rf(alert, router, authorEmail)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -95,13 +95,13 @@ func (_m *AlertService) Save(alert models.Alert, authorEmail string) (*models.Al
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: alert, authorEmail
-func (_m *AlertService) Update(alert models.Alert, authorEmail string) error {
-	ret := _m.Called(alert, authorEmail)
+// Update provides a mock function with given fields: alert, router, authorEmail
+func (_m *AlertService) Update(alert models.Alert, router models.Router, authorEmail string) error {
+	ret := _m.Called(alert, router, authorEmail)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(models.Alert, string) error); ok {
-		r0 = rf(alert, authorEmail)
+	if rf, ok := ret.Get(0).(func(models.Alert, models.Router, string) error); ok {
+		r0 = rf(alert, router, authorEmail)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"io/ioutil"
 	"net/http"
@@ -35,7 +37,7 @@ var expectedAlertContent = strings.Join([]string{
 	`      service_name: service`,
 	`      severity: warning`,
 	`    annotations:`,
-	`      dashboard: TODO`,
+	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
 	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 50rps'`,
@@ -51,7 +53,7 @@ var expectedAlertContent = strings.Join([]string{
 	`      service_name: service`,
 	`      severity: critical`,
 	`    annotations:`,
-	`      dashboard: TODO`,
+	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
 	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 25rps'\n`,
@@ -90,9 +92,11 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 				Branch:     "master",
 				PathPrefix: "prefix",
 			},
-			PlaybookURL: "https://example.com",
+			PlaybookURL:          "https://example.com",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
+
 	alert := models.Alert{
 		Model: models.Model{
 			CreatedAt: time.Unix(1593647218, 0),
@@ -107,7 +111,16 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 		Duration:          "5m",
 	}
 
-	_, err = service.Save(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+	}
+
+	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
+	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
+
+	_, err = service.Save(alert, router, "user@gojek.com")
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -161,7 +174,16 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	_, err = service.Save(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+	}
+
+	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
+	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
+
+	_, err = service.Save(alert, router, "user@gojek.com")
 	assert.ErrorContains(t, err, "insertion error")
 
 	expected := "DELETE /api/v4/projects/project/repository/files/prefix/env/team/service/throughput.yaml"
@@ -319,6 +341,7 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 				PathPrefix: "prefix",
 			},
 			PlaybookURL: "https://example.com",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 
@@ -333,7 +356,16 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 		Duration:          "5m",
 	}
 
-	err = service.Update(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+	}
+
+	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
+	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
+
+	err = service.Update(alert, router, "user@gojek.com")
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -384,6 +416,7 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 				PathPrefix: "prefix",
 			},
 			PlaybookURL: "https://example.com",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 
@@ -396,7 +429,19 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	err = service.Update(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+		CurrRouterVersion: &models.RouterVersion{
+			Version: 2,
+		},
+	}
+
+	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
+	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
+
+	err = service.Update(alert, router, "user@gojek.com")
 	assert.ErrorContains(t, err, "update error")
 
 	expected := "PUT /api/v4/projects/project/repository/files/prefix/env/team/service/throughput.yaml"
@@ -455,7 +500,16 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	err = service.Delete(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+		CurrRouterVersion: &models.RouterVersion{
+			Version: 2,
+		},
+	}
+
+	err = service.Delete(alert, router, "user@gojek.com")
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -513,7 +567,19 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	err = service.Delete(alert, "user@gojek.com")
+	router := models.Router{
+		ProjectID:       1,
+		EnvironmentName: "test-environment",
+		Name:            "test-router",
+		CurrRouterVersion: &models.RouterVersion{
+			Version: 2,
+		},
+	}
+
+	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
+	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
+
+	err = service.Delete(alert, router, "user@gojek.com")
 	assert.ErrorContains(t, err, "delete error")
 
 	expected := "DELETE /api/v4/projects/project/repository/files/prefix/env/team/service/latency95p.yaml"

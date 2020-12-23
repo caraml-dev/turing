@@ -164,7 +164,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewGitlabOpsAlertService,
-		func(db *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
+		func(db *gorm.DB, mlpService service.MLPService, config config.AlertConfig) (service.AlertService, error) {
 			assert.Equal(t, *testCfg.AlertConfig, config)
 			return nil, nil
 		},
@@ -190,7 +190,7 @@ func TestNewAppContext(t *testing.T) {
 	appCtx, err := NewAppContext(nil, testCfg, &testEnforcer, testVaultClient)
 	assert.NoError(t, err)
 
-	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
+	alertService, err := service.NewGitlabOpsAlertService(nil, mlpService, *testCfg.AlertConfig)
 	assert.NoError(t, err)
 
 	assert.Equal(t, &AppContext{
