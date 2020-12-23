@@ -3,10 +3,11 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
@@ -57,8 +58,10 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 	}
 
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("Save", *alert, mock.AnythingOfType("models.Router"), "user@gojek.com").Return(nil, errors.New("Test alert error"))
-	mockAlertService.On("Save", *alert, mock.AnythingOfType("models.Router"), "user2@gojek.com").Return(alert, nil)
+	mockAlertService.On("Save", *alert, mock.AnythingOfType("models.Router"), "user@gojek.com").
+		Return(nil, errors.New("Test alert error"))
+	mockAlertService.On("Save", *alert, mock.AnythingOfType("models.Router"), "user2@gojek.com").
+		Return(alert, nil)
 
 	// Define tests
 	inputAlert := &models.Alert{
@@ -329,8 +332,10 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	mockAlertService.On("FindByID", uint(1)).Return(oldAlert1, nil)
 	mockAlertService.On("FindByID", uint(2)).Return(oldAlert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
-	mockAlertService.On("Update", *alert1, mock.AnythingOfType("models.Router"), "user@gojek.com").Return(errors.New("Test alert error"))
-	mockAlertService.On("Update", *alert2, mock.AnythingOfType("models.Router"), "user@gojek.com").Return(nil)
+	mockAlertService.On("Update", *alert1, mock.AnythingOfType("models.Router"), "user@gojek.com").
+		Return(errors.New("Test alert error"))
+	mockAlertService.On("Update", *alert2, mock.AnythingOfType("models.Router"), "user@gojek.com").
+		Return(nil)
 
 	// Define tests
 	body := &models.Alert{
@@ -418,15 +423,16 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "test"}, nil)
 	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "test"}, nil)
 
-
 	alert1 := &models.Alert{Model: models.Model{ID: 1}}
 	alert2 := &models.Alert{Model: models.Model{ID: 2}}
 	mockAlertService := &mocks.AlertService{}
 	mockAlertService.On("FindByID", uint(1)).Return(alert1, nil)
 	mockAlertService.On("FindByID", uint(2)).Return(alert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
-	mockAlertService.On("Delete", *alert1, mock.AnythingOfType("models.Router"), "user@gojek.com").Return(errors.New("Test alert error"))
-	mockAlertService.On("Delete", *alert2, mock.AnythingOfType("models.Router"), "user@gojek.com").Return(nil)
+	mockAlertService.On("Delete", *alert1, mock.AnythingOfType("models.Router"), "user@gojek.com").
+		Return(errors.New("Test alert error"))
+	mockAlertService.On("Delete", *alert2, mock.AnythingOfType("models.Router"), "user@gojek.com").
+		Return(nil)
 
 	// Delete tests
 	tests := map[string]struct {
@@ -438,28 +444,28 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "10",  "router_id": "1"},
+			vars: map[string]string{"alert_id": "10", "router_id": "1"},
 			want: NotFound("alert not found", "Test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
 				Header: map[string][]string{},
 			},
-			vars: map[string]string{"alert_id": "1",  "router_id": "1"},
+			vars: map[string]string{"alert_id": "1", "router_id": "1"},
 			want: BadRequest("missing User-Email in header", ""),
 		},
 		"failure | delete alert": {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "1",  "router_id": "1"},
+			vars: map[string]string{"alert_id": "1", "router_id": "1"},
 			want: InternalServerError("unable to delete alert", "Test alert error"),
 		},
 		"success": {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "2",  "router_id": "1"},
+			vars: map[string]string{"alert_id": "2", "router_id": "1"},
 			want: Ok("Alert with id '2' deleted"),
 		},
 	}

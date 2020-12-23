@@ -3,15 +3,16 @@ package service
 import (
 	"errors"
 	"fmt"
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
-	"github.com/gojek/turing/api/turing/service/mocks"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/client"
+	"github.com/gojek/turing/api/turing/service/mocks"
 
 	"github.com/gojek/turing/api/turing/config"
 
@@ -37,7 +38,7 @@ var expectedAlertContent = strings.Join([]string{
 	`      service_name: service`,
 	`      severity: warning`,
 	`    annotations:`,
-	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`,
+	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`, // nolint: lll
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
 	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 50rps'`,
@@ -53,7 +54,7 @@ var expectedAlertContent = strings.Join([]string{
 	`      service_name: service`,
 	`      severity: critical`,
 	`    annotations:`,
-	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`,
+	`      dashboard: https://example.com/dashboard?var-environment=test-environment\u0026var-cluster=test-cluster\u0026var-project=test-project\u0026var-router=test-router\u0026var-revision=$__all`, // nolint: lll
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
 	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 25rps'\n`,
@@ -92,8 +93,9 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 				Branch:     "master",
 				PathPrefix: "prefix",
 			},
-			PlaybookURL:          "https://example.com",
-			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+			PlaybookURL: "https://example.com",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
+				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 
@@ -341,7 +343,8 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 				PathPrefix: "prefix",
 			},
 			PlaybookURL: "https://example.com",
-			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
+				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 
@@ -416,7 +419,8 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 				PathPrefix: "prefix",
 			},
 			PlaybookURL: "https://example.com",
-			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
+				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 

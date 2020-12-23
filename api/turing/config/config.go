@@ -173,10 +173,10 @@ type VaultConfig struct {
 }
 
 type AlertConfig struct {
-	Enabled              bool
-	GitLab               *GitlabConfig
+	Enabled bool
+	GitLab  *GitlabConfig
 	// PlaybookURL is the URL that contains documentation on how to resolve triggered alerts
-	PlaybookURL          string
+	PlaybookURL string
 	// DashboardURLTemplate is a template for grafana dashboard URL that shows router metrics.
 	// The template accepts go-template format and will be executed with dashboardURLValue which has
 	// the following fields: Environment, Cluster, Project, Router, Revision.

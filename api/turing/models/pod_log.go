@@ -37,4 +37,3 @@ type PodLogOptions struct {
 	// If both TailLines and Headlines are provided, TailLines will be ignored.
 	HeadLines *int64
 }
-

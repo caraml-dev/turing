@@ -27,10 +27,13 @@ type AlertService interface {
 }
 
 type gitlabOpsAlertService struct {
-	db                   *gorm.DB          // database client
-	gitlab               *gitlab.Client    // GitLab client
-	mlpService           MLPService        // mlpService is used to get cluster name and project name for the router that corresponds to the alert
-	dashboardURLTemplate template.Template // dashboardURLTemplate is a template for grafana dashboard URL that shows router metric. The template will be executed with dashboardURLValue.
+	db     *gorm.DB       // database client
+	gitlab *gitlab.Client // GitLab client
+	// mlpService is used to get cluster name and project name for the router that corresponds to the alert
+	mlpService MLPService
+	// dashboardURLTemplate is a template for grafana dashboard URL that shows router metric.
+	// The template will be executed with dashboardURLValue.
+	dashboardURLTemplate template.Template
 	config               config.AlertConfig
 }
 
@@ -83,7 +86,10 @@ func NewGitlabOpsAlertService(db *gorm.DB, mlpService MLPService, config config.
 // Save will persist the alert in the database and the configured GitLab alert repository.
 // The Git file creation will be committed by "authorEmail". Save will fail if either GitLab
 // or the database is down.
-func (service *gitlabOpsAlertService) Save(alert models.Alert, router models.Router, authorEmail string) (*models.Alert, error) {
+func (service *gitlabOpsAlertService) Save(
+	alert models.Alert,
+	router models.Router,
+	authorEmail string) (*models.Alert, error) {
 	if err := alert.Validate(); err != nil {
 		return nil, fmt.Errorf("alert is invalid: %s", err)
 	}
@@ -166,7 +172,10 @@ func (service *gitlabOpsAlertService) Delete(alert models.Alert, router models.R
 	return nil
 }
 
-func (service *gitlabOpsAlertService) createInGitLab(alert models.Alert, router models.Router, authorEmail string) error {
+func (service *gitlabOpsAlertService) createInGitLab(
+	alert models.Alert,
+	router models.Router,
+	authorEmail string) error {
 	dashboardURL, err := service.getDashboardURL(&router, nil)
 	if err != nil {
 		return err
@@ -203,7 +212,10 @@ func (service *gitlabOpsAlertService) createInGitLab(alert models.Alert, router 
 	return nil
 }
 
-func (service *gitlabOpsAlertService) updateInGitLab(alert models.Alert, router models.Router, authorEmail string) error {
+func (service *gitlabOpsAlertService) updateInGitLab(
+	alert models.Alert,
+	router models.Router,
+	authorEmail string) error {
 	dashboardURL, err := service.getDashboardURL(&router, nil)
 	if err != nil {
 		return err
@@ -261,7 +273,9 @@ func (service *gitlabOpsAlertService) deleteInGitLab(alert models.Alert, authorE
 	return nil
 }
 
-func (service *gitlabOpsAlertService) getDashboardURL(router *models.Router, routerVersion *models.RouterVersion) (string, error) {
+func (service *gitlabOpsAlertService) getDashboardURL(
+	router *models.Router,
+	routerVersion *models.RouterVersion) (string, error) {
 	environment, err := service.mlpService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
 		return "", err
