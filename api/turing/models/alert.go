@@ -137,14 +137,14 @@ func getAlertExpr(metric Metric, env string, rev string, threshold float64) stri
 		return fmt.Sprintf(`sum(rate(revision_request_count{
   environment="%s",
   service_name=~"%s-[0-9]*"
-}[5m])) %s %f
+}[1m])) %s %f
 `, env, rev, getAlertOperator(metric), threshold)
 
 	case MetricLatency95p:
 		return fmt.Sprintf(`histogram_quantile(0.95, sum(rate(revision_request_latencies_bucket{
   environment="%s",
   service_name=~"%s-[0-9]*"
-}[5m])) by (le)) %s %f
+}[1m])) by (le)) %s %f
 `, env, rev, getAlertOperator(metric), threshold)
 
 	case MetricErrorRate:
@@ -152,19 +152,19 @@ func getAlertExpr(metric Metric, env string, rev string, threshold float64) stri
   environment="%s",
   service_name=~"%s-[0-9]*",
   response_code_class!="2xx"
-}[5m]))
+}[1m]))
 /
 sum(rate(revision_request_count{
   environment="%s",
   service_name=~"%s-[0-9]*"
-}[5m])) * 100.0 %s %f
+}[1m])) * 100.0 %s %f
 `, env, rev, env, rev, getAlertOperator(metric), threshold)
 
 	case MetricCPUUtil:
 		return fmt.Sprintf(`sum(rate(container_cpu_usage_seconds_total{
   environment="%s",
   pod=~"%s-[0-9]*.*"
-}[5m]))
+}[1m]))
 /
 sum(kube_pod_container_resource_requests_cpu_cores{
   environment="%s",
