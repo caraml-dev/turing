@@ -49,6 +49,27 @@ func (_m *AlertService) FindByID(id uint) (*models.Alert, error) {
 	return r0, r1
 }
 
+// GetDashboardURL provides a mock function with given fields: router, routerVersion
+func (_m *AlertService) GetDashboardURL(router *models.Router, routerVersion *models.RouterVersion) (string, error) {
+	ret := _m.Called(router, routerVersion)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(*models.Router, *models.RouterVersion) string); ok {
+		r0 = rf(router, routerVersion)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*models.Router, *models.RouterVersion) error); ok {
+		r1 = rf(router, routerVersion)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields: _a0
 func (_m *AlertService) List(_a0 string) ([]*models.Alert, error) {
 	ret := _m.Called(_a0)

@@ -24,6 +24,10 @@ type AlertService interface {
 	FindByID(id uint) (*models.Alert, error)
 	Update(alert models.Alert, router models.Router, authorEmail string) error
 	Delete(alert models.Alert, router models.Router, authorEmail string) error
+	// GetDashboardURL returns the Grafana dashboard URL with router metrics that can be used to debug alerts.
+	// If routerVersion is nil, the dashboard should show router metrics for all versions, else
+	// the dashboard should show metrics for a particular router version.
+	GetDashboardURL(router *models.Router, routerVersion *models.RouterVersion) (string, error)
 }
 
 type gitlabOpsAlertService struct {
@@ -172,11 +176,48 @@ func (service *gitlabOpsAlertService) Delete(alert models.Alert, router models.R
 	return nil
 }
 
+func (service *gitlabOpsAlertService) GetDashboardURL(
+	router *models.Router,
+	routerVersion *models.RouterVersion) (string, error) {
+	environment, err := service.mlpService.GetEnvironment(router.EnvironmentName)
+	if err != nil {
+		return "", err
+	}
+
+	project, err := service.mlpService.GetProject(router.ProjectID)
+	if err != nil {
+		return "", err
+	}
+
+	var revision string
+	if routerVersion != nil {
+		revision = fmt.Sprintf("%d", routerVersion.Version)
+	} else {
+		revision = "$__all"
+	}
+
+	value := dashboardURLValue{
+		Environment: router.EnvironmentName,
+		Cluster:     environment.Cluster,
+		Project:     project.Name,
+		Router:      router.Name,
+		Revision:    revision,
+	}
+
+	var buf bytes.Buffer
+	err = service.dashboardURLTemplate.Execute(&buf, value)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
 func (service *gitlabOpsAlertService) createInGitLab(
 	alert models.Alert,
 	router models.Router,
 	authorEmail string) error {
-	dashboardURL, err := service.getDashboardURL(&router, nil)
+	dashboardURL, err := service.GetDashboardURL(&router, nil)
 	if err != nil {
 		return err
 	}
@@ -216,7 +257,7 @@ func (service *gitlabOpsAlertService) updateInGitLab(
 	alert models.Alert,
 	router models.Router,
 	authorEmail string) error {
-	dashboardURL, err := service.getDashboardURL(&router, nil)
+	dashboardURL, err := service.GetDashboardURL(&router, nil)
 	if err != nil {
 		return err
 	}
@@ -271,43 +312,6 @@ func (service *gitlabOpsAlertService) deleteInGitLab(alert models.Alert, authorE
 	}
 
 	return nil
-}
-
-func (service *gitlabOpsAlertService) getDashboardURL(
-	router *models.Router,
-	routerVersion *models.RouterVersion) (string, error) {
-	environment, err := service.mlpService.GetEnvironment(router.EnvironmentName)
-	if err != nil {
-		return "", err
-	}
-
-	project, err := service.mlpService.GetProject(router.ProjectID)
-	if err != nil {
-		return "", err
-	}
-
-	var revision string
-	if routerVersion != nil {
-		revision = fmt.Sprintf("%d", routerVersion.Version)
-	} else {
-		revision = "$__all"
-	}
-
-	value := dashboardURLValue{
-		Environment: router.EnvironmentName,
-		Cluster:     environment.Cluster,
-		Project:     project.Name,
-		Router:      router.Name,
-		Revision:    revision,
-	}
-
-	var buf bytes.Buffer
-	err = service.dashboardURLTemplate.Execute(&buf, value)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
 }
 
 func getGitLabFilePath(prefix string, alert models.Alert) string {
