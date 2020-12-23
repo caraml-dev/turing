@@ -65,7 +65,7 @@ func (alert Alert) Validate() error {
 
 // Group creates an AlertGroup from the Alert specification. An alert group follows the alerting rule format
 // in prometheus: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-func (alert Alert) Group(playbookURL string) schema.AlertGroup {
+func (alert Alert) Group(playbookURL string, dashboardURL string) schema.AlertGroup {
 	groupName := fmt.Sprintf("%s_%s_%s_%s", alert.Environment, alert.Team, alert.Service, alert.Metric)
 	alerts := make([]schema.Alert, 0)
 
@@ -91,7 +91,7 @@ func (alert Alert) Group(playbookURL string) schema.AlertGroup {
 					alert.Duration,
 					getAlertUnit(alert.Metric),
 				),
-				"dashboard": "TODO",
+				"dashboard": dashboardURL,
 				"playbook":  playbookURL,
 			},
 		})
@@ -119,7 +119,7 @@ func (alert Alert) Group(playbookURL string) schema.AlertGroup {
 					alert.Duration,
 					getAlertUnit(alert.Metric),
 				),
-				"dashboard": "TODO",
+				"dashboard": dashboardURL,
 				"playbook":  playbookURL,
 			},
 		})
