@@ -98,7 +98,6 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
-
 	alert := models.Alert{
 		Model: models.Model{
 			CreatedAt: time.Unix(1593647218, 0),

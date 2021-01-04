@@ -9,6 +9,8 @@ import (
 
 	"github.com/gojek/turing/api/turing/config"
 
+	"github.com/gojek/turing/api/turing/config"
+
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
