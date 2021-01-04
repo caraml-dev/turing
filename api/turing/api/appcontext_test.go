@@ -164,12 +164,9 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewGitlabOpsAlertService,
-		func(db *gorm.DB, gitlab *gitlab.Client, gitlabProjectID string, gitlabBranch string,
-			gitlabPathPrefix string) service.AlertService {
-			assert.Equal(t, testCfg.AlertConfig.GitLab.ProjectID, gitlabProjectID)
-			assert.Equal(t, testCfg.AlertConfig.GitLab.Branch, gitlabBranch)
-			assert.Equal(t, testCfg.AlertConfig.GitLab.PathPrefix, gitlabPathPrefix)
-			return nil
+		func(db *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
+			assert.Equal(t, *testCfg.AlertConfig, config)
+			return nil, nil
 		},
 	)
 	monkey.Patch(
@@ -188,15 +185,14 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 	experimentService, err := service.NewExperimentsService(testCfg.Experiment)
 	assert.NoError(t, err)
-	gitlabClient, err := gitlab.NewClient(
-		testCfg.AlertConfig.GitLab.Token,
-		gitlab.WithBaseURL(testCfg.AlertConfig.GitLab.BaseURL),
-	)
-	assert.NoError(t, err)
 
 	// Validate
 	appCtx, err := NewAppContext(nil, testCfg, &testEnforcer, testVaultClient)
 	assert.NoError(t, err)
+
+	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
+	assert.NoError(t, err)
+
 	assert.Equal(t, &AppContext{
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
@@ -208,11 +204,7 @@ func TestNewAppContext(t *testing.T) {
 		MLPService:            mlpService,
 		ExperimentsService:    experimentService,
 		PodLogService:         service.NewPodLogService(map[string]cluster.Controller{}),
-		AlertService: service.NewGitlabOpsAlertService(nil, gitlabClient,
-			testCfg.AlertConfig.GitLab.ProjectID,
-			testCfg.AlertConfig.GitLab.Branch,
-			testCfg.AlertConfig.GitLab.PathPrefix,
-		),
-		OpenAPIValidation: &middleware.OpenAPIValidation{},
+		AlertService:          alertService,
+		OpenAPIValidation:     &middleware.OpenAPIValidation{},
 	}, appCtx)
 }
