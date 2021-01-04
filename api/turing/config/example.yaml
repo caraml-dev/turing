@@ -89,7 +89,7 @@ AlertConfig:
   # DashboardURLTemplate is a template for grafana dashboard URL that shows router metrics.
   # The template accepts go-template format and will be executed with dashboardURLValue which has
   # the following fields: Environment, Cluster, Project, Router, Revision.
-  DashboardURLTemplate: https://grafana.example.com/graph/d/hash/dashboard?var-cluster={{ .Cluster }}&project={{ .Project }}&experiment={{ .Router }}
+  DashboardURLTemplate: https://grafana.example.com/graph/d/hash/dashboard?var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-experiment={{ .Router }}
 
 # MLP API access configuration. Turing uses MLP API to get projects
 # and environments associated with the Turing router: https://github.com/gojek/mlp
