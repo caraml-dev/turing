@@ -7,7 +7,7 @@ import (
 
 func FileHandler(path string, disableCaching bool) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if disableCaching == true {
+		if disableCaching {
 			// Ref: https://create-react-app.dev/docs/production-build/#static-file-caching
 			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			w.Header().Set("Expires", "0") // For proxies
