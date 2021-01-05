@@ -31,8 +31,8 @@ func TestFileHandler(t *testing.T) {
 	mux := http.NewServeMux()
 
 	filePath := filepath.Join("..", "testdata", "cluster", "servicebuilder", "router_version_basic.json")
-	mux.Handle("/path", web.FileHandler(filePath))
-	mux.Handle("/not-found", web.FileHandler(fmt.Sprintf("%d.file", time.Now().Unix())))
+	mux.Handle("/path", web.FileHandler(filePath, true))
+	mux.Handle("/not-found", web.FileHandler(fmt.Sprintf("%d.file", time.Now().Unix()), false))
 
 	srv := startTestHTTPServer(mux, ":9999")
 	defer func() {

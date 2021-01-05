@@ -5,11 +5,13 @@ import (
 	"path"
 )
 
-func FileHandler(path string) http.Handler {
+func FileHandler(path string, disableCaching bool) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		// Ref: https://create-react-app.dev/docs/production-build/#static-file-caching
-		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		w.Header().Set("Expires", "0") // For proxies
+		if disableCaching == true {
+			// Ref: https://create-react-app.dev/docs/production-build/#static-file-caching
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Expires", "0") // For proxies
+		}
 		http.ServeFile(w, r, path)
 	}
 
@@ -22,7 +24,7 @@ func ServeReactApp(
 	appDir string,
 ) {
 	appDirFs := http.FileServer(http.Dir(appDir))
-	reactEntryHandler := FileHandler(path.Join(appDir, "index.html"))
+	reactEntryHandler := FileHandler(path.Join(appDir, "index.html"), true)
 
 	mux.Handle(
 		homepage+"/",
