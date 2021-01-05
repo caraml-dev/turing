@@ -1,10 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
+
+	"github.com/gojek/turing/api/turing/service"
 
 	"github.com/gojek/turing/api/turing/models"
 )
@@ -37,7 +41,11 @@ func (c *AlertsController) CreateAlert(r *http.Request, vars map[string]string, 
 	// Create alert
 	alert := body.(*models.Alert)
 	alert.Service = c.getService(*router)
-	created, err := c.AlertService.Save(*alert, *router, email)
+	dashboardURL, err := c.getDashboardURL(c.AlertService.GetDashboardURLTemplate(), alert, router, nil)
+	if err != nil {
+		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
+	}
+	created, err := c.AlertService.Save(*alert, email, dashboardURL)
 	if err != nil {
 		return InternalServerError("unable to create alert", err.Error())
 	}
@@ -104,7 +112,11 @@ func (c *AlertsController) UpdateAlert(r *http.Request, vars map[string]string, 
 	updateAlert := body.(*models.Alert)
 	updateAlert.ID = alert.ID
 	updateAlert.Service = c.getService(*router)
-	if err := c.AlertService.Update(*updateAlert, *router, email); err != nil {
+	dashboardURL, err := c.getDashboardURL(c.AlertService.GetDashboardURLTemplate(), alert, router, nil)
+	if err != nil {
+		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
+	}
+	if err := c.AlertService.Update(*updateAlert, email, dashboardURL); err != nil {
 		return InternalServerError("unable to update alert", err.Error())
 	}
 	return Ok(updateAlert)
@@ -130,8 +142,13 @@ func (c *AlertsController) DeleteAlert(r *http.Request, vars map[string]string, 
 		return errResp
 	}
 
+	dashboardURL, err := c.getDashboardURL(c.AlertService.GetDashboardURLTemplate(), alert, router, nil)
+	if err != nil {
+		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
+	}
+
 	// Delete Alert
-	if err := c.AlertService.Delete(*alert, *router, email); err != nil {
+	if err := c.AlertService.Delete(*alert, email, dashboardURL); err != nil {
 		return InternalServerError("unable to delete alert", err.Error())
 	}
 	return Ok(fmt.Sprintf("Alert with id '%d' deleted", alert.ID))
@@ -162,4 +179,56 @@ func (c *AlertsController) getAlertFromRequestVars(vars map[string]string) (*mod
 // The service name is assumed to be <router_name>-turing-router
 func (c *AlertsController) getService(r models.Router) string {
 	return r.Name + "-turing-router"
+}
+
+// getDashboardURL returns the dashboard URL for the router alert given a dashboardURL template
+// from the alertService. The template will be executed with DashboardURLValue.
+//
+// If routerVersion is nil, the dashboard URL should return the dashboard showing metrics
+// for the router across all revisions. Else, the dashboard should show metrics for a specific
+// router version.
+//
+// If the MLPService fails to resolve the MLP environment and project for the router,
+// an error will be returned.
+func (c *AlertsController) getDashboardURL(
+	template template.Template,
+	alert *models.Alert,
+	router *models.Router,
+	routerVersion *models.RouterVersion) (string, error) {
+	if alert == nil || router == nil {
+		return "", nil
+	}
+
+	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
+	if err != nil {
+		return "", err
+	}
+
+	project, err := c.MLPService.GetProject(router.ProjectID)
+	if err != nil {
+		return "", err
+	}
+
+	var revision string
+	if routerVersion != nil {
+		revision = fmt.Sprintf("%d", routerVersion.Version)
+	} else {
+		revision = "$__all"
+	}
+
+	value := service.DashboardURLValue{
+		Environment: alert.Environment,
+		Cluster:     environment.Cluster,
+		Project:     project.Name,
+		Router:      router.Name,
+		Revision:    revision,
+	}
+
+	var buf bytes.Buffer
+	err = template.Execute(&buf, value)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }

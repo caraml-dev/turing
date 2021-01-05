@@ -93,7 +93,7 @@ func NewAppContext(
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
-		appContext.AlertService, err = service.NewGitlabOpsAlertService(db, mlpSvc, *cfg.AlertConfig)
+		appContext.AlertService, err = service.NewGitlabOpsAlertService(db, *cfg.AlertConfig)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}

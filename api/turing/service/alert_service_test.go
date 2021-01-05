@@ -10,10 +10,6 @@ import (
 	"testing"
 	"time"
 
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
-	"github.com/gojek/turing/api/turing/service/mocks"
-
 	"github.com/gojek/turing/api/turing/config"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -64,8 +60,6 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -83,7 +77,6 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -112,16 +105,12 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 		Duration:          "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-	}
-
-	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
-
-	_, err = service.Save(alert, router, "user@gojek.com")
+	_, err = service.Save(
+		alert,
+		"user@gojek.com",
+		"https://example.com/dashboard?var-environment=test-environment&var-cluster=test-cluster"+
+			"&var-project=test-project&var-router=test-router&var-revision=$__all",
+	)
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -141,8 +130,6 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -153,7 +140,6 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -175,16 +161,7 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-	}
-
-	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
-
-	_, err = service.Save(alert, router, "user@gojek.com")
+	_, err = service.Save(alert, "user@gojek.com", "dashboardURL")
 	assert.ErrorContains(t, err, "insertion error")
 
 	expected := "DELETE /api/v4/projects/project/repository/files/prefix/env/team/service/throughput.yaml"
@@ -196,8 +173,6 @@ func TestGitlabOpsAlertServiceList(t *testing.T) {
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -206,7 +181,6 @@ func TestGitlabOpsAlertServiceList(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -240,8 +214,6 @@ func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -250,7 +222,6 @@ func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -283,8 +254,6 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
 		WithArgs(1).
@@ -292,7 +261,6 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -313,8 +281,6 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -331,7 +297,6 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -358,16 +323,11 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 		Duration:          "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-	}
-
-	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
-
-	err = service.Update(alert, router, "user@gojek.com")
+	err = service.Update(
+		alert,
+		"user@gojek.com",
+		"https://example.com/dashboard?var-environment=test-environment&var-cluster=test-cluster"+
+			"&var-project=test-project&var-router=test-router&var-revision=$__all")
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -387,8 +347,6 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockMLPService := &mocks.MLPService{}
-
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
 
@@ -407,7 +365,6 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -418,8 +375,8 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 				PathPrefix: "prefix",
 			},
 			PlaybookURL: "https://example.com",
-			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
-				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster" +
+				"={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
 		})
 	assert.NilError(t, err)
 
@@ -432,19 +389,7 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-		CurrRouterVersion: &models.RouterVersion{
-			Version: 2,
-		},
-	}
-
-	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
-
-	err = service.Update(alert, router, "user@gojek.com")
+	err = service.Update(alert, "user@gojek.com", "dashboardURL")
 	assert.ErrorContains(t, err, "update error")
 
 	expected := "PUT /api/v4/projects/project/repository/files/prefix/env/team/service/throughput.yaml"
@@ -459,8 +404,6 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
-
-	mockMLPService := &mocks.MLPService{}
 
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
@@ -478,7 +421,6 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -503,16 +445,7 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-		CurrRouterVersion: &models.RouterVersion{
-			Version: 2,
-		},
-	}
-
-	err = service.Delete(alert, router, "user@gojek.com")
+	err = service.Delete(alert, "user@gojek.com", "dashboardURL")
 	assert.NilError(t, err)
 
 	err = mockSQL.ExpectationsWereMet()
@@ -526,8 +459,6 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
-
-	mockMLPService := &mocks.MLPService{}
 
 	mockDb, mockSQL := newMockSQL(t)
 	defer mockDb.Close()
@@ -547,7 +478,6 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
-		mockMLPService,
 		config.AlertConfig{
 			Enabled: true,
 			GitLab: &config.GitlabConfig{
@@ -570,19 +500,7 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 		Duration:    "5m",
 	}
 
-	router := models.Router{
-		ProjectID:       1,
-		EnvironmentName: "test-environment",
-		Name:            "test-router",
-		CurrRouterVersion: &models.RouterVersion{
-			Version: 2,
-		},
-	}
-
-	mockMLPService.On("GetEnvironment", "test-environment").Return(&merlin.Environment{Cluster: "test-cluster"}, nil)
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{Name: "test-project"}, nil)
-
-	err = service.Delete(alert, router, "user@gojek.com")
+	err = service.Delete(alert, "user@gojek.com", "dashboardURL")
 	assert.ErrorContains(t, err, "delete error")
 
 	expected := "DELETE /api/v4/projects/project/repository/files/prefix/env/team/service/latency95p.yaml"
