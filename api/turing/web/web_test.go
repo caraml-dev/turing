@@ -42,6 +42,8 @@ func TestFileHandler(t *testing.T) {
 	resp, httpErr := http.DefaultClient.Get("http://localhost:9999/path")
 	require.NoError(t, httpErr)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.Equal(t, "no-cache, no-store, must-revalidate", resp.Header.Get("Cache-Control"))
+	require.Equal(t, "0", resp.Header.Get("Expires"))
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	_ = resp.Body.Close()

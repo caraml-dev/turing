@@ -7,6 +7,9 @@ import (
 
 func FileHandler(path string) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		// Ref: https://create-react-app.dev/docs/production-build/#static-file-caching
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Expires", "0") // For proxies
 		http.ServeFile(w, r, path)
 	}
 
