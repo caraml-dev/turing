@@ -62,7 +62,7 @@ func TestCreateRouter(t *testing.T) {
 			baseUrl, projectID, routerID := globalTestContext.APIBasePath, globalTestContext.ProjectID, router.ID
 			url := fmt.Sprintf("%s/projects/%d/routers/%d/logs", baseUrl, projectID, routerID)
 			componentTypes := []string{"", "router", "ensembler", "enricher"}
-			var podLogs []models.PodLog
+			var podLogs []service.PodLog
 
 			for _, c := range componentTypes {
 				queryString := ""

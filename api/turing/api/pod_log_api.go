@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gojek/turing/api/turing/service"
+
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
@@ -59,7 +61,7 @@ func (c *PodLogController) ListPodLogs(r *http.Request, vars map[string]string, 
 			"must be one of router, enricher or ensembler")
 	}
 
-	opts := &models.PodLogOptions{}
+	opts := &service.PodLogOptions{}
 	if vars["container"] != "" {
 		opts.Container = vars["container"]
 	}

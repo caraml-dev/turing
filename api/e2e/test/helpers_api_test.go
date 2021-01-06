@@ -137,12 +137,12 @@ func waitDeployVersion(
 	}
 }
 
-func getPodLogs(t *testing.T, resp *http.Response) []models.PodLog {
+func getPodLogs(t *testing.T, resp *http.Response) []service.PodLog {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		t.Error(err)
 	}
-	var podLogs []models.PodLog
+	var podLogs []service.PodLog
 	if err = json.Unmarshal(data, &podLogs); err != nil {
 		t.Error(err)
 	}
