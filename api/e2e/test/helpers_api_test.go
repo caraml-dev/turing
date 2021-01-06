@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gojek/turing/api/turing/service"
 	"io/ioutil"
 	"net/http"
 	"testing"

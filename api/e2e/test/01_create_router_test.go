@@ -4,6 +4,7 @@ package e2e
 
 import (
 	"fmt"
+	"github.com/gojek/turing/api/turing/service"
 	"net/http"
 	"path/filepath"
 	"testing"
