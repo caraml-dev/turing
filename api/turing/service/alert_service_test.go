@@ -10,6 +10,9 @@ import (
 	"testing"
 	"time"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/client"
+
 	"github.com/gojek/turing/api/turing/config"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -542,4 +545,61 @@ func newMockSQL(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
 		t.Fatalf("failed to open go-orm database connection: %s", err)
 	}
 	return gormDb, mocksql
+}
+
+func TestGitlabOpsAlertServiceGetDashboardURL(t *testing.T) {
+	tests := map[string]struct {
+		template      string
+		alert         *models.Alert
+		project       *mlp.Project
+		environment   *merlin.Environment
+		router        *models.Router
+		routerVersion *models.RouterVersion
+		want          string
+	}{
+		"specific router version": {
+			template: "http://dashboard?var-environment={{.Environment}}&var-project={{.Project}}" +
+				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Revision}}",
+			alert:         &models.Alert{Environment: "environment"},
+			project:       &mlp.Project{Name: "project"},
+			environment:   &merlin.Environment{Cluster: "cluster"},
+			router:        &models.Router{Name: "router"},
+			routerVersion: &models.RouterVersion{Version: 1},
+			want: "http://dashboard?var-environment=environment&var-project=project" +
+				"&var-cluster=cluster&var-router=router&var-revision=1",
+		},
+		"no router version": {
+			template: "http://dashboard?var-environment={{.Environment}}&var-project={{.Project}}" +
+				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Revision}}",
+			alert:         &models.Alert{Environment: "environment"},
+			project:       &mlp.Project{Name: "project"},
+			environment:   &merlin.Environment{Cluster: "cluster"},
+			router:        &models.Router{Name: "router"},
+			routerVersion: nil,
+			want: "http://dashboard?var-environment=environment&var-project=project" +
+				"&var-cluster=cluster&var-router=router&var-revision=$__all",
+		},
+		"empty template in alert config": {
+			template:    "",
+			alert:       &models.Alert{Environment: "environment"},
+			project:     &mlp.Project{Name: "project"},
+			environment: &merlin.Environment{Cluster: "cluster"},
+			router:      &models.Router{Name: "router"},
+			want:        "",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			service, err := NewGitlabOpsAlertService(nil, config.AlertConfig{
+				GitLab:               &config.GitlabConfig{},
+				DashboardURLTemplate: tt.template,
+			})
+			assert.NilError(t, err)
+			got, err := service.GetDashboardURL(tt.alert, tt.project, tt.environment, tt.router, tt.routerVersion)
+			assert.NilError(t, err)
+			if got != tt.want {
+				t.Errorf("GetDashboardURL() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

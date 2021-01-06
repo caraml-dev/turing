@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/stretchr/testify/mock"
 
@@ -42,17 +41,22 @@ func TestAlertsContollerWhenAlertIsDisabled(t *testing.T) {
 
 func TestAlertsControllerCreateAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "router"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
 	mockMLPService.
 		On("GetProject", mock.AnythingOfType("int")).
-		Return(&mlp.Project{Name: "testproject"}, nil)
+		Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
-		Return(&merlin.Environment{Cluster: "testcluster"}, nil)
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
 	mockRouterService.On("FindByID", uint(1)).Return(nil, errors.New("test router error"))
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "router"}, nil)
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	alert := &models.Alert{
 		Environment:       "env",
@@ -66,10 +70,16 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 
 	mockAlertService := &mocks.AlertService{}
 	mockAlertService.
-		On("GetDashboardURLTemplate").
-		Return(*template.Must(template.New("").
-			Parse("https://grafana.example.com/dashboard?var-cluster={{ .Cluster }}" +
-				"&var-project={{ .Project }}&var-experiment={{ .Router }}&var-revision={{ .Revision }}")))
+		On(
+			"GetDashboardURL",
+			alert,
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=router&var-revision=$__all", nil)
 	mockAlertService.
 		On(
 			"Save",
@@ -307,15 +317,20 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 
 func TestAlertsControllerUpdateAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "test"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(&mlp.Project{Name: "testproject"}, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
-		Return(&merlin.Environment{Cluster: "testcluster"}, nil)
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "test"}, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "test"}, nil)
+	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	oldAlert1 := &models.Alert{
 		Model:             models.Model{ID: 1},
@@ -360,10 +375,16 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	mockAlertService.On("FindByID", uint(2)).Return(oldAlert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
 	mockAlertService.
-		On("GetDashboardURLTemplate").
-		Return(*template.Must(template.New("").
-			Parse("https://grafana.example.com/dashboard?var-cluster={{ .Cluster }}&" +
-				"var-project={{ .Project }}&var-experiment={{ .Router }}")))
+		On(
+			"GetDashboardURL",
+			mock.AnythingOfType("*models.Alert"),
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test", nil)
 	mockAlertService.
 		On("Update", *alert1, "user@gojek.com", "https://grafana.example.com/dashboard?var-cluster=testcluster"+
 			"&var-project=testproject&var-experiment=test").
@@ -452,15 +473,20 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 
 func TestAlertsControllerDeleteAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "test"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(&mlp.Project{Name: "testproject"}, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
-		Return(&merlin.Environment{Cluster: "testcluster"}, nil)
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "test"}, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "test"}, nil)
+	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	alert1 := &models.Alert{Model: models.Model{ID: 1}}
 	alert2 := &models.Alert{Model: models.Model{ID: 2}}
@@ -468,9 +494,17 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	mockAlertService.On("FindByID", uint(1)).Return(alert1, nil)
 	mockAlertService.On("FindByID", uint(2)).Return(alert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
-	mockAlertService.On("GetDashboardURLTemplate").Return(*template.Must(template.New("").
-		Parse("https://grafana.example.com/dashboard?var-cluster={{ .Cluster }}" +
-			"&var-project={{ .Project }}&var-experiment={{ .Router }}")))
+	mockAlertService.
+		On(
+			"GetDashboardURL",
+			mock.AnythingOfType("*models.Alert"),
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test", nil)
 	mockAlertService.On(
 		"Delete",
 		*alert1,

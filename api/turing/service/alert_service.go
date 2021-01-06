@@ -1,10 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"path"
 	"text/template"
+
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/client"
 
 	"github.com/gojek/turing/api/turing/config"
 
@@ -23,7 +27,17 @@ type AlertService interface {
 	FindByID(id uint) (*models.Alert, error)
 	Update(alert models.Alert, authorEmail string, dashboardURL string) error
 	Delete(alert models.Alert, authorEmail string, dashboardURL string) error
-	GetDashboardURLTemplate() template.Template
+	// GetDashboardURL returns the dashboard URL for the router alert.
+	//
+	// If routerVersion is nil, the dashboard URL should return the dashboard showing metrics
+	// for the router across all revisions. Else, the dashboard should show metrics for a specific
+	// router version.
+	GetDashboardURL(
+		alert *models.Alert,
+		project *mlp.Project,
+		environment *merlin.Environment,
+		router *models.Router,
+		routerVersion *models.RouterVersion) (string, error)
 }
 
 type gitlabOpsAlertService struct {
@@ -167,8 +181,34 @@ func (service *gitlabOpsAlertService) Delete(alert models.Alert, authorEmail str
 	return nil
 }
 
-func (service *gitlabOpsAlertService) GetDashboardURLTemplate() template.Template {
-	return service.dashboardURLTemplate
+func (service *gitlabOpsAlertService) GetDashboardURL(
+	alert *models.Alert,
+	project *mlp.Project,
+	environment *merlin.Environment,
+	router *models.Router,
+	routerVersion *models.RouterVersion) (string, error) {
+	var revision string
+	if routerVersion != nil {
+		revision = fmt.Sprintf("%d", routerVersion.Version)
+	} else {
+		revision = "$__all"
+	}
+
+	value := DashboardURLValue{
+		Environment: alert.Environment,
+		Cluster:     environment.Cluster,
+		Project:     project.Name,
+		Router:      router.Name,
+		Revision:    revision,
+	}
+
+	var buf bytes.Buffer
+	err := service.dashboardURLTemplate.Execute(&buf, value)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
 
 func (service *gitlabOpsAlertService) createInGitLab(
