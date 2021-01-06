@@ -4,10 +4,11 @@ package e2e
 
 import (
 	"fmt"
-	"github.com/gojek/turing/api/turing/service"
 	"net/http"
 	"path/filepath"
 	"testing"
+
+	"github.com/gojek/turing/api/turing/service"
 
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
@@ -60,8 +61,8 @@ func TestCreateRouter(t *testing.T) {
 				})
 
 			t.Log("Test endpoints for router logs")
-			baseUrl, projectID, routerID := globalTestContext.APIBasePath, globalTestContext.ProjectID, router.ID
-			url := fmt.Sprintf("%s/projects/%d/routers/%d/logs", baseUrl, projectID, routerID)
+			baseURL, projectID, routerID := globalTestContext.APIBasePath, globalTestContext.ProjectID, router.ID
+			url := fmt.Sprintf("%s/projects/%d/routers/%d/logs", baseURL, projectID, routerID)
 			componentTypes := []string{"", "router", "ensembler", "enricher"}
 			var podLogs []service.PodLog
 

@@ -16,9 +16,9 @@ import (
 const (
 	deploymentWaitTimeoutSeconds = 200
 	deleteTimeoutSeconds         = 20
-	fluentdSyncIntervalSeconds   = 10
+	fluentdSyncIntervalSeconds   = 10 // nolint:deadcode,varcheck,unused
 	// fluentdSyncMaxWaitSeconds is the max expected wait time for log entries to be written to BigQuery from FluentD
-	fluentdSyncMaxWaitSeconds = 120
+	fluentdSyncMaxWaitSeconds = 120 // nolint:deadcode,varcheck,unused
 )
 
 // Test configs

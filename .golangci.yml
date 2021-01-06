@@ -1,3 +1,7 @@
+run:
+  build-tags:
+    - e2e
+
 linters:
   enable:
     - bodyclose

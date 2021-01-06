@@ -29,7 +29,8 @@ func TestUndeployRouter(t *testing.T) {
 	// Router name is assumed to follow this format: e2e-experiment-{{.TestID}}
 	routerName := "e2e-experiment-" + globalTestContext.TestID
 	t.Log(fmt.Sprintf("Retrieving router with name '%s' created from previous test step", routerName))
-	existingRouter, err := getRouterByName(globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
+	existingRouter, err := getRouterByName(
+		globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
 	require.NoError(t, err)
 
 	// Undeploy router
@@ -42,6 +43,7 @@ func TestUndeployRouter(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	responseBody, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
 	require.NoError(t, err)
 	t.Log("Undeploy Response:", string(responseBody))
 

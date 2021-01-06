@@ -17,6 +17,8 @@ import (
 //
 // If at least <minRowCount> rows is returned, the no of rows retrieved will be returned.
 // Else if timeout is reached, error will be non nil.
+//
+// nolint:deadcode,unused
 func waitForLogEntriesInBigQuery(
 	table string,
 	turingReqID string,

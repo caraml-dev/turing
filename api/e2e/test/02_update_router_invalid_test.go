@@ -6,11 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"testing"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,8 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 	// Router name is assumed to follow this format: e2e-experiment-{{.TestID}}
 	routerName := "e2e-experiment-" + globalTestContext.TestID
 	t.Log(fmt.Sprintf("Retrieving router with name '%s' created from previous test step", routerName))
-	existingRouter, err := getRouterByName(globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
+	existingRouter, err := getRouterByName(
+		globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
 	require.NoError(t, err)
 
 	// Read router config test data
@@ -139,6 +141,7 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 	resp, err = globalTestContext.httpClient.Do(req)
 	require.NoError(t, err)
 	responseBytes, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	require.NoError(t, err)
 	actualResponse := gjson.GetBytes(responseBytes, "json.response").String()
 	expectedResponse := `{
