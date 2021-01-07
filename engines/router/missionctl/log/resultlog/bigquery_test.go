@@ -19,10 +19,13 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
-	"github.com/stretchr/testify/assert"
 )
 
 type testSuiteBQSchema struct {
@@ -42,8 +45,19 @@ func TestGetTuringResultTableSchema(t *testing.T) {
 	// Actual schema
 	schema := getTuringResultTableSchema()
 
-	// Compare
-	assert.Equal(t, expectedSchema, schema)
+	// Enclose schema in a struct for go-cmp
+	type bqSchema struct {
+		Schema bigquery.Schema
+	}
+	wantSchema := &bqSchema{Schema: expectedSchema}
+	gotSchema := &bqSchema{Schema: schema}
+
+	// Compare all fields except Description
+	opt := cmpopts.IgnoreFields(bigquery.FieldSchema{}, "Description")
+	if !cmp.Equal(wantSchema, gotSchema, opt) {
+		t.Log(cmp.Diff(wantSchema, gotSchema, opt))
+		t.Fail()
+	}
 }
 
 func TestCheckTableSchema(t *testing.T) {
@@ -144,11 +158,11 @@ func TestNewBigQueryLoggerAddColumns(t *testing.T) {
 
 	// Create the BQ table with reduced columns
 	initialSchema := &bigquery.Schema{
-		{Name: "turing_req_id", Type: bigquery.StringFieldType, Required: true},
-		{Name: "ts", Type: bigquery.TimestampFieldType, Required: true},
+		{Name: "turing_req_id", Type: bigquery.StringFieldType, Required: false},
+		{Name: "ts", Type: bigquery.TimestampFieldType, Required: false},
 		{Name: "router_version", Type: bigquery.StringFieldType, Required: false},
 		{Name: "request", Type: bigquery.RecordFieldType,
-			Required: true,
+			Required: false,
 			Repeated: false,
 			Schema: bigquery.Schema{
 				{Name: "header", Type: bigquery.StringFieldType},

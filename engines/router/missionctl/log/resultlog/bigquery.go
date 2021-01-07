@@ -17,8 +17,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	"go.einride.tech/protobuf-bigquery/encoding/protobq"
+
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
@@ -155,6 +158,9 @@ func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface
 func (l *bigQueryLogger) setUpTuringTable() error {
 	ctx := context.Background()
 
+	// Get Turing Result Log table schema
+	schema := getTuringResultTableSchema()
+
 	// Check that the dataset exists
 	dataset := l.bqClient.Dataset(l.dataset)
 	_, err := dataset.Metadata(ctx)
@@ -164,7 +170,6 @@ func (l *bigQueryLogger) setUpTuringTable() error {
 
 	// Check if the table exists
 	table := dataset.Table(l.table)
-	schema := getTuringResultTableSchema()
 	metadata, err := table.Metadata(ctx)
 
 	// If not, create
@@ -230,7 +235,7 @@ func createTuringResultTable(
 	metaData := &bigquery.TableMetadata{
 		Schema: *schema,
 		TimePartitioning: &bigquery.TimePartitioning{
-			Field:                  "ts",
+			Field:                  "event_timestamp",
 			RequirePartitionFilter: false,
 		},
 	}
@@ -305,50 +310,5 @@ func compareTableSchema(
 // getTuringResultTableSchema returns the expected schema defined for logging results
 // to BigQuery
 func getTuringResultTableSchema() bigquery.Schema {
-	schema := bigquery.Schema{
-		{Name: "turing_req_id", Type: bigquery.StringFieldType, Required: true},
-		{Name: "ts", Type: bigquery.TimestampFieldType, Required: true},
-		{Name: "router_version", Type: bigquery.StringFieldType, Required: false},
-		{Name: "request", Type: bigquery.RecordFieldType,
-			Required: true,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "header", Type: bigquery.StringFieldType},
-				{Name: "body", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "experiment", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "enricher", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "router", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "ensembler", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-	}
-	return schema
+	return protobq.InferSchema(&turing.TuringResultLogMessage{})
 }
