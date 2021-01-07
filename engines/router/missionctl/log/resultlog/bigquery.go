@@ -4,17 +4,14 @@ package resultlog
 This file defines the BigQuery result logger. There are 2 parts:
 1. The bigQueryLogger.write() which satisfies the TuringResultLogger interface defined in
    missionctl/log/resultlog/resultlog.go, saving the log entry to BigQuery using the streaming
-   insert API, and the bigQueryLogger.getLogData() which is used by the fluentd logger -
-   this is the part used for logging.
+   insert API.
 2. bigQueryLogger.setUpTuringTable() and supporting methods to check that the required dataset
    exists and the table exists (if so, validate the schema and if not, create the table).
 */
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/bigquery"
 	"go.einride.tech/protobuf-bigquery/encoding/protobq"
@@ -22,87 +19,24 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
-
-// bqResponseKeys captures the response keys that are applicable to the defined table schema.
-// Keys not belonging to this list will be dropped when saving the log entry to BQ.
-var bqResponseKeys = []string{
-	ResultLogKeys.Experiment,
-	ResultLogKeys.Enricher,
-	ResultLogKeys.Router,
-	ResultLogKeys.Ensembler,
-}
-
-// bqLogEntry wraps a TuringResultLogEntry and implements the bigquery.ValueSaver interface
-type bqLogEntry struct {
-	appName string
-	*TuringResultLogEntry
-}
-
-// newBqLogEntry creates a new bqLogEntry from the given TuringResultLogEntry
-func newBqLogEntry(appName string, turLogEntry *TuringResultLogEntry) *bqLogEntry {
-	return &bqLogEntry{
-		appName,
-		turLogEntry,
-	}
-}
-
-// Save implements the ValueSaver interface on bqLogEntry, for saving the data to BigQuery
-func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
-	// Get Turing Request Id
-	turingReqID, err := turingctx.GetRequestID(*e.ctx)
-	if err != nil {
-		return map[string]bigquery.Value{}, "", err
-	}
-
-	// Convert the request header to json
-	requestHeader, err := json.Marshal(e.request.Header)
-	if err != nil {
-		return map[string]bigquery.Value{}, "", err
-	}
-
-	// Create the record for saving the data to BQ
-	record := map[string]bigquery.Value{
-		"turing_req_id":  turingReqID,
-		"ts":             e.timestamp.Format(time.RFC3339Nano),
-		"router_version": e.appName,
-		"request": map[string]string{
-			"header": string(requestHeader),
-			"body":   string(e.request.Body),
-		},
-	}
-	// Add optional fields defined in bqResponseKeys, if they exist
-	for _, key := range bqResponseKeys {
-		if v, exist := e.responses[key]; exist {
-			record[key] = map[string]string{
-				"response": string(v.Response),
-				"error":    v.Error,
-			}
-		}
-	}
-
-	return record, "", nil
-}
 
 // BigQueryLogger extends the TuringResultLogger interface and defines additional
 // methods on the logger
 type BigQueryLogger interface {
 	TuringResultLogger
-	getLogData(*TuringResultLogEntry) interface{}
 }
 
 // bigQueryLogger implements the BigQueryLogger interface and wraps the bigquery.Client
 // and other necessary information to save the data to BigQuery
 type bigQueryLogger struct {
-	appName  string
 	dataset  string
 	table    string
 	bqClient *bigquery.Client
 }
 
 // newBigQueryLogger creates a new BigQueryLogger
-func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, error) {
+func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 	ctx := context.Background()
 	bqClient, err := bigquery.NewClient(ctx, cfg.Project)
 	if err != nil {
@@ -110,7 +44,6 @@ func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, er
 	}
 	// Create the BigQuery logger
 	bqLogger := &bigQueryLogger{
-		appName:  appName,
 		dataset:  cfg.Dataset,
 		table:    cfg.Table,
 		bqClient: bqClient,
@@ -125,29 +58,16 @@ func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, er
 
 // write satisfies the TuringResultLogger interface
 func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
-	entry := newBqLogEntry(l.appName, t)
 	// Create an inserter
 	ins := l.bqClient.Dataset(l.dataset).Table(l.table).Inserter()
 	// Each request has a 10MB limit, and each record has a 1MB limit.
-	// Insert one at a time.
-	items := []*bqLogEntry{
-		entry,
-	}
+	// Currently inserting one at a time.
+	items := []*TuringResultLogEntry{t}
 	// Write the data and return any errors
 	if err := ins.Put(context.Background(), items); err != nil {
 		return errors.Wrapf(err, "Error during streaming insert")
 	}
 	return nil
-}
-
-// getLogData returns the log information as a generic interface{} object. Internally, it calls
-// the Save method defined on the bqLogEntry structure which implements the
-// bigquery.ValueSaver interface and returns the log data as a map. This can be returned
-// as is for logging by other loggers.
-func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface{} {
-	entry := newBqLogEntry(l.appName, turLogEntry)
-	record, _, _ := entry.Save()
-	return record
 }
 
 // setUpTuringTable checks that the logging table is set up in BQ as expected.

@@ -4,15 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
+	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.
 var globalLogger TuringResultLogger = newNopLogger()
+
+// appName stores the configured app name, to be applied to each log entry
+var appName string
 
 // ResultLogKeys defines the individual components for which the result log must be created
 var ResultLogKeys = struct {
@@ -27,24 +35,8 @@ var ResultLogKeys = struct {
 	Ensembler:  "ensembler",
 }
 
-type requestLogEntry struct {
-	Header *http.Header    `json:"header,omitempty"`
-	Body   json.RawMessage `json:"body,omitempty"`
-}
-
-type responseLogEntry struct {
-	Response json.RawMessage `json:"response,omitempty"`
-	Error    string          `json:"error,omitempty"`
-}
-
-// TuringResultLogEntry is used to capture the required information to be saved by
-// the configured result logger
-type TuringResultLogEntry struct {
-	ctx       *context.Context
-	timestamp time.Time
-	request   requestLogEntry
-	responses map[string]responseLogEntry
-}
+// TuringResultLogEntry represents the information logged by the result logger
+type TuringResultLogEntry turing.TuringResultLogMessage
 
 // NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
 // and request
@@ -54,28 +46,41 @@ func NewTuringResultLogEntry(
 	header *http.Header,
 	body []byte,
 ) *TuringResultLogEntry {
+	// Get Turing Request Id
+	turingReqID, _ := turingctx.GetRequestID(ctx)
+
+	// Format Request Header
+	reqHeader := map[string]string{}
+	for key, values := range *header {
+		reqHeader[key] = strings.Join(values, ",")
+	}
+
 	return &TuringResultLogEntry{
-		ctx:       &ctx,
-		timestamp: timestamp,
-		request: requestLogEntry{
-			Header: header,
-			Body:   json.RawMessage(body),
+		TuringReqId:    turingReqID,
+		EventTimestamp: timestamppb.New(timestamp),
+		RouterVersion:  appName,
+		Request: &turing.Request{
+			Header: reqHeader,
+			Body:   string(json.RawMessage(body)),
 		},
-		responses: map[string]responseLogEntry{},
 	}
 }
 
 // AddResponse adds the per-component response/error info to the TuringResultLogEntry
 func (e *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
-	// Check if the key supplied is valid
-	if key == ResultLogKeys.Experiment ||
-		key == ResultLogKeys.Enricher ||
-		key == ResultLogKeys.Router ||
-		key == ResultLogKeys.Ensembler {
-		e.responses[key] = responseLogEntry{
-			Response: json.RawMessage(response),
-			Error:    err,
-		}
+	responseRecord := &turing.Response{
+		Response: string(json.RawMessage(response)),
+		Error:    err,
+	}
+	switch key {
+	case ResultLogKeys.Experiment:
+		e.Experiment = responseRecord
+	case ResultLogKeys.Enricher:
+		e.Enricher = responseRecord
+	case ResultLogKeys.Router:
+		e.Router = responseRecord
+	case ResultLogKeys.Ensembler:
+		e.Ensembler = responseRecord
 	}
 }
 
@@ -89,11 +94,14 @@ type TuringResultLogger interface {
 func InitTuringResultLogger(cfg *config.AppConfig) error {
 	var err error
 
+	// Save the configured app name to the package var
+	appName = cfg.Name
+
 	switch cfg.ResultLogger {
 	case config.BigqueryLogger:
 		var bqLogger BigQueryLogger
 		log.Glob().Info("Initializing BigQuery Result Logger")
-		bqLogger, err = newBigQueryLogger(cfg.Name, cfg.BigQuery)
+		bqLogger, err = newBigQueryLogger(cfg.BigQuery)
 		if err != nil {
 			return err
 		}
@@ -101,7 +109,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		// Check if streaming insert or batch logging
 		if cfg.BigQuery.BatchLoad {
 			// Init fluentd logger for batch logging
-			globalLogger, err = newFluentdLogger(cfg.Fluentd, bqLogger)
+			globalLogger, err = newFluentdLogger(cfg.Fluentd)
 		} else {
 			// Use BigQueryLogger for streaming insert
 			globalLogger = bqLogger
@@ -111,7 +119,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		globalLogger = newConsoleLogger()
 	case config.KafkaLogger:
 		log.Glob().Info("Initializing Kafka Result Logger")
-		globalLogger, err = newKafkaLogger(cfg.Name, cfg.Kafka)
+		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
 		globalLogger = newNopLogger()
@@ -125,14 +133,4 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 // LogEntry sends the input TuringResultLogEntry to the appropriate logger
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
 	return globalLogger.write(turLogEntry)
-}
-
-func getTuringResponseOrNil(
-	responseMap map[string]responseLogEntry,
-	key string,
-) *responseLogEntry {
-	if value, ok := responseMap[key]; ok {
-		return &value
-	}
-	return nil
 }

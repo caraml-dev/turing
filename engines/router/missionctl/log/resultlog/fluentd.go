@@ -17,15 +17,11 @@ type fluentdClient interface {
 // fluentd backend.
 type FluentdLogger struct {
 	tag          string
-	bqLogger     BigQueryLogger
 	fluentLogger fluentdClient
 }
 
 // newFluentdLogger creates a new FluentdLogger
-func newFluentdLogger(
-	cfg *config.FluentdConfig,
-	bqLogger BigQueryLogger,
-) (*FluentdLogger, error) {
+func newFluentdLogger(cfg *config.FluentdConfig) (*FluentdLogger, error) {
 	fClient, err := fluent.New(fluent.Config{
 		FluentHost: cfg.Host,
 		FluentPort: cfg.Port,
@@ -40,14 +36,12 @@ func newFluentdLogger(
 	// Create FluentdLogger
 	return &FluentdLogger{
 		tag:          cfg.Tag,
-		bqLogger:     bqLogger,
 		fluentLogger: fClient,
 	}, nil
 }
 
 // write satisfies the TuringResultLogger interface. Fluentd logs are synced to a BigQuery
-// output destination and hence, calling write() uses the BigQueryLogger to generate a
-// loggable record, of the required schema, that is posted to a Fluentd server.
+// output destination.
 func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 	// Measure time taken to post the log to fluentd
 	var err error
@@ -62,6 +56,6 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 			},
 		},
 	)()
-	err = l.fluentLogger.Post(l.tag, l.bqLogger.getLogData(turLogEntry))
+	err = l.fluentLogger.Post(l.tag, turLogEntry)
 	return err
 }
