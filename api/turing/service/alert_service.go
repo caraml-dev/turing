@@ -30,7 +30,7 @@ type AlertService interface {
 	// GetDashboardURL returns the dashboard URL for the router alert.
 	//
 	// If routerVersion is nil, the dashboard URL should return the dashboard showing metrics
-	// for the router across all revisions. Else, the dashboard should show metrics for a specific
+	// for the router across all versions. Else, the dashboard should show metrics for a specific
 	// router version.
 	GetDashboardURL(
 		alert *models.Alert,
@@ -55,7 +55,7 @@ type DashboardURLValue struct {
 	Cluster     string // Kubernetes cluster name where the router name is deployed
 	Project     string // MLP project name where the router is deployed
 	Router      string // router name for the alert
-	Revision    string // router revision number
+	Version     string // router version number
 }
 
 // Create a new AlertService that can be used with GitOps based on GitLab. It is assumed
@@ -187,11 +187,11 @@ func (service *gitlabOpsAlertService) GetDashboardURL(
 	environment *merlin.Environment,
 	router *models.Router,
 	routerVersion *models.RouterVersion) (string, error) {
-	var revision string
+	var version string
 	if routerVersion != nil {
-		revision = fmt.Sprintf("%d", routerVersion.Version)
+		version = fmt.Sprintf("%d", routerVersion.Version)
 	} else {
-		revision = "$__all"
+		version = "$__all"
 	}
 
 	value := DashboardURLValue{
@@ -199,7 +199,7 @@ func (service *gitlabOpsAlertService) GetDashboardURL(
 		Cluster:     environment.Cluster,
 		Project:     project.Name,
 		Router:      router.Name,
-		Revision:    revision,
+		Version:     version,
 	}
 
 	var buf bytes.Buffer

@@ -179,7 +179,7 @@ type AlertConfig struct {
 	PlaybookURL string
 	// DashboardURLTemplate is a template for grafana dashboard URL that shows router metrics.
 	// The template accepts go-template format and will be executed with dashboardURLValue which has
-	// the following fields: Environment, Cluster, Project, Router, Revision.
+	// the following fields: Environment, Cluster, Project, Router, Version.
 	DashboardURLTemplate string
 }
 

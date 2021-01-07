@@ -91,7 +91,7 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 			},
 			PlaybookURL: "https://example.com",
 			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
-				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Version }}",
 		})
 	assert.NilError(t, err)
 	alert := models.Alert{
@@ -311,7 +311,7 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 			},
 			PlaybookURL: "https://example.com",
 			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}" +
-				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+				"&var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Version }}",
 		})
 	assert.NilError(t, err)
 
@@ -379,7 +379,7 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 			},
 			PlaybookURL: "https://example.com",
 			DashboardURLTemplate: "https://example.com/dashboard?var-environment={{ .Environment }}&var-cluster" +
-				"={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Revision }}",
+				"={{ .Cluster }}&var-project={{ .Project }}&var-router={{ .Router }}&var-revision={{ .Version }}",
 		})
 	assert.NilError(t, err)
 
@@ -559,7 +559,7 @@ func TestGitlabOpsAlertServiceGetDashboardURL(t *testing.T) {
 	}{
 		"specific router version": {
 			template: "http://dashboard?var-environment={{.Environment}}&var-project={{.Project}}" +
-				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Revision}}",
+				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Version}}",
 			alert:         &models.Alert{Environment: "environment"},
 			project:       &mlp.Project{Name: "project"},
 			environment:   &merlin.Environment{Cluster: "cluster"},
@@ -570,7 +570,7 @@ func TestGitlabOpsAlertServiceGetDashboardURL(t *testing.T) {
 		},
 		"no router version": {
 			template: "http://dashboard?var-environment={{.Environment}}&var-project={{.Project}}" +
-				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Revision}}",
+				"&var-cluster={{.Cluster}}&var-router={{.Router}}&var-revision={{.Version}}",
 			alert:         &models.Alert{Environment: "environment"},
 			project:       &mlp.Project{Name: "project"},
 			environment:   &merlin.Environment{Cluster: "cluster"},
