@@ -1,7 +1,7 @@
 package resultlog
 
 import (
-	"strings"
+	"encoding/json"
 
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -197,9 +197,9 @@ func newTuringResultLogMessage(
 	turingReqID string,
 ) (*turing.TuringResultLogMessage, error) {
 	// Format the Turing request header per the proto definition
-	reqHeader := map[string]string{}
-	for key, values := range *resultLogEntry.request.Header {
-		reqHeader[key] = strings.Join(values, ",")
+	reqHeader, err := json.Marshal(resultLogEntry.request.Header)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error marshalling request header")
 	}
 
 	// Create the Kafka Message
@@ -223,7 +223,7 @@ func newTuringResultLogMessage(
 		TuringReqId:    turingReqID,
 		EventTimestamp: timestamppb.New(resultLogEntry.timestamp),
 		Request: &turing.Request{
-			Header: reqHeader,
+			Header: string(reqHeader),
 			Body:   string(resultLogEntry.request.Body),
 		},
 		Experiment: newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Experiment)),
