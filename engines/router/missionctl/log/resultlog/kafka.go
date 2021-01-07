@@ -1,11 +1,10 @@
 package resultlog
 
 import (
-	"encoding/json"
+	"strings"
 
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
@@ -198,24 +197,9 @@ func newTuringResultLogMessage(
 	turingReqID string,
 ) (*turing.TuringResultLogMessage, error) {
 	// Format the Turing request header per the proto definition
-	reqHeader := map[string]*structpb.ListValue{}
-	for key, strings := range *resultLogEntry.request.Header {
-		values := []*structpb.Value{}
-		for _, str := range strings {
-			values = append(values, structpb.NewStringValue(str))
-		}
-		reqHeader[key] = &structpb.ListValue{
-			Values: values,
-		}
-	}
-
-	// Unmarshal the Turing request body into Protobuf Struct
-	reqBody := &structpb.Struct{}
-	if resultLogEntry.request.Body != nil {
-		err := json.Unmarshal(resultLogEntry.request.Body, reqBody)
-		if err != nil {
-			return nil, err
-		}
+	reqHeader := map[string]string{}
+	for key, values := range *resultLogEntry.request.Header {
+		reqHeader[key] = strings.Join(values, ",")
 	}
 
 	// Create the Kafka Message
@@ -225,21 +209,12 @@ func newTuringResultLogMessage(
 		}
 		if e.Response == nil {
 			return &turing.Response{
-				Response: nil,
-				Error:    e.Error,
+				Error: e.Error,
 			}
 		}
-		// Unmarshal response body into Protobuf Struct
-		responseStruct := &structpb.Struct{}
-		err := json.Unmarshal(e.Response, responseStruct)
-		if err != nil {
-			return &turing.Response{
-				Response: nil,
-				Error:    err.Error(),
-			}
-		}
+		// Format response body as string
 		return &turing.Response{
-			Response: responseStruct,
+			Response: string(e.Response),
 			Error:    e.Error,
 		}
 	}
@@ -249,7 +224,7 @@ func newTuringResultLogMessage(
 		EventTimestamp: timestamppb.New(resultLogEntry.timestamp),
 		Request: &turing.Request{
 			Header: reqHeader,
-			Body:   reqBody,
+			Body:   string(resultLogEntry.request.Body),
 		},
 		Experiment: newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Experiment)),
 		Enricher:   newProtobufResponse(getTuringResponseOrNil(resultLogEntry.responses, ResultLogKeys.Enricher)),
