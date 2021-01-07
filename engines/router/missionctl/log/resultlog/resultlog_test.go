@@ -114,7 +114,7 @@ func TestInitTuringResultLogger(t *testing.T) {
 			if data.patch {
 				// Patch init BQ Client
 				monkey.Patch(newBigQueryLogger,
-					func(_ string, _ *config.BQConfig) (BigQueryLogger, error) {
+					func(_ *config.BQConfig) (BigQueryLogger, error) {
 						return nil, nil
 					})
 				// Patch init Fluentd Client
@@ -122,7 +122,7 @@ func TestInitTuringResultLogger(t *testing.T) {
 					func(_ fluent.Config) (*fluent.Fluent, error) { return nil, nil })
 				// Patch init Kafka Client
 				monkey.Patch(newKafkaLogger,
-					func(_ string, _ *config.KafkaConfig) (*KafkaLogger, error) {
+					func(_ *config.KafkaConfig) (*KafkaLogger, error) {
 						return nil, nil
 					})
 			}
@@ -154,8 +154,8 @@ func TestGlobalLoggerLog(t *testing.T) {
 	logger.AssertCalled(t, "write")
 }
 
-func TestMarshalEmptyRequestLogEntry(t *testing.T) {
-	bytes, err := json.Marshal(requestLogEntry{})
+func TestMarshalEmptyLogEntry(t *testing.T) {
+	bytes, err := json.Marshal(&TuringResultLogEntry{})
 	assert.JSONEq(t, `{}`, string(bytes))
 	assert.NoError(t, err)
 }

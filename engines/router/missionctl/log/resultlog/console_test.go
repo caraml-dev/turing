@@ -16,7 +16,7 @@ import (
 // consoleLog is used to Unmarshal the log data
 type consoleLog struct {
 	Level          string          `json:"level"`
-	EventTimestamp float64         `json:"event_timestamp"`
+	EventTimestamp string          `json:"event_timestamp"`
 	Caller         string          `json:"caller"`
 	Msg            string          `json:"msg"`
 	TuringReqID    string          `json:"turing_req_id"`
@@ -67,24 +67,25 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	// Unmarshal the result
 	var logObj consoleLog
 	err = json.Unmarshal(logData, &logObj)
+	t.Log(string(logData))
 	tu.FailOnError(t, err)
 
 	// Validate relevant fields
 	assert.Equal(t, "info", logObj.Level)
 	assert.Equal(t, "Turing Request Summary", logObj.Msg)
 	assert.Equal(t, turingReqID, logObj.TuringReqID)
-	assert.Equal(t, 9.49377906e+08, logObj.EventTimestamp)
+	assert.Equal(t, "2000-02-01T04:05:06.000000007Z", logObj.EventTimestamp)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			`{"header":{"Req_id":["test_req_id"]},"body":{"customer_id":"test_customer"}}`)),
+			`{"body":"{\"customer_id\": \"test_customer\"}","header":{"Req_id":"test_req_id"}}`)),
 		logObj.Request,
 	)
 	assert.Equal(t,
-		json.RawMessage([]byte(`{"response":{"key":"enricher_data"}}`)),
+		json.RawMessage([]byte(`{"response":"{\"key\": \"enricher_data\"}"}`)),
 		logObj.Enricher,
 	)
 	assert.Equal(t,
-		json.RawMessage([]byte(`{"response":{"key":"router_data"},"error":"Error Response"}`)),
+		json.RawMessage([]byte(`{"error":"Error Response","response":"{\"key\": \"router_data\"}"}`)),
 		logObj.Router,
 	)
 }
