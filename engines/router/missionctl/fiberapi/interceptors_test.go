@@ -28,25 +28,25 @@ import (
 
 // timeInterceptorLog is used to Unmarshal the time log data
 type timeInterceptorLog struct {
-	Level       string  `json:"level"`
-	Ts          float64 `json:"ts"`
-	Caller      string  `json:"caller"`
-	Msg         string  `json:"msg"`
-	Component   string
-	TuringReqID string `json:"Turing Request"`
-	Duration    string
+	Level          string  `json:"level"`
+	EventTimestamp float64 `json:"event_timestamp"`
+	Caller         string  `json:"caller"`
+	Msg            string  `json:"msg"`
+	Component      string
+	TuringReqID    string `json:"Turing Request"`
+	Duration       string
 }
 
 // errorInterceptorLog is used to Unmarshal the error log data
 type errorInterceptorLog struct {
-	Level       string  `json:"level"`
-	Ts          float64 `json:"ts"`
-	Caller      string  `json:"caller"`
-	Msg         string  `json:"msg"`
-	Component   string
-	TuringReqID string `json:"Turing Request"`
-	Status      int
-	Response    string
+	Level          string  `json:"level"`
+	EventTimestamp float64 `json:"event_timestamp"`
+	Caller         string  `json:"caller"`
+	Msg            string  `json:"msg"`
+	Component      string
+	TuringReqID    string `json:"Turing Request"`
+	Status         int
+	Response       string
 }
 
 // Test suite type for error logging interceptor tests

@@ -19,7 +19,7 @@ func (*ConsoleLogger) write(turLogEntry *TuringResultLogEntry) error {
 	// Add request and responses
 	data := []interface{}{}
 	// Use the timestamp in the log record
-	data = append(data, "ts", turLogEntry.timestamp)
+	data = append(data, "event_timestamp", turLogEntry.timestamp)
 	// Add the request and responses
 	data = append(data, "request", turLogEntry.request)
 	for k, v := range turLogEntry.responses {
