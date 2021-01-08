@@ -29,9 +29,10 @@ export const RouterVersionActions = ({
         label: "Deploy",
         name: "Deploy this version",
         icon: "importAction",
-        available: config =>
-          !(isActiveConfig(config) && routerStatus !== Status.UNDEPLOYED),
-        enabled: () => routerStatus !== Status.PENDING,
+        available: () => true,
+        enabled: config =>
+          !(isActiveConfig(config) && routerStatus !== Status.UNDEPLOYED) &&
+          routerStatus !== Status.PENDING,
         onClick: config => deployVersionRef.current(config.version)
       },
       {
