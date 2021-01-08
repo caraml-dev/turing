@@ -2,8 +2,6 @@ import yaml from "js-yaml";
 import objectAssignDeep from "object-assign-deep";
 
 export class RouterVersion {
-  constructor() {}
-
   static fromJson(json) {
     return objectAssignDeep(new RouterVersion(), json);
   }
