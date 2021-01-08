@@ -56,6 +56,14 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 			},
 		},
 	)()
-	err = l.fluentLogger.Post(l.tag, turLogEntry)
+
+	// Convert to a generic map of key-value pairs for logging
+	var kvPairs map[string]interface{}
+	kvPairs, err = turLogEntry.Value()
+	if err != nil {
+		return err
+	}
+
+	err = l.fluentLogger.Post(l.tag, kvPairs)
 	return err
 }

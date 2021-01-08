@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/gojek/turing/engines/router/missionctl/config"
@@ -38,6 +38,31 @@ var ResultLogKeys = struct {
 // TuringResultLogEntry represents the information logged by the result logger
 type TuringResultLogEntry turing.TuringResultLogMessage
 
+// MarshalJSON implements custom Marshaling for TuringResultLogEntry, using the underlying proto def
+func (logEntry TuringResultLogEntry) MarshalJSON() ([]byte, error) {
+	m := &protojson.MarshalOptions{
+		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
+	}
+	message := turing.TuringResultLogMessage(logEntry)
+	return m.Marshal(&message)
+}
+
+// Value returns the TuringResultLogEntry in a loggable format
+func (logEntry TuringResultLogEntry) Value() (map[string]interface{}, error) {
+	var kvPairs map[string]interface{}
+	// Marshal into bytes
+	bytes, err := json.Marshal(logEntry)
+	if err != nil {
+		return kvPairs, errors.Wrapf(err, "Error marshaling the result log")
+	}
+	// Unmarshal into map[string]interface{}
+	err = json.Unmarshal(bytes, &kvPairs)
+	if err != nil {
+		return kvPairs, errors.Wrapf(err, "Error unmarshaling the result log")
+	}
+	return kvPairs, nil
+}
+
 // NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
 // and request
 func NewTuringResultLogEntry(
@@ -50,17 +75,14 @@ func NewTuringResultLogEntry(
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Format Request Header
-	reqHeader := map[string]string{}
-	for key, values := range *header {
-		reqHeader[key] = strings.Join(values, ",")
-	}
+	reqHeader, _ := json.Marshal(header)
 
 	return &TuringResultLogEntry{
 		TuringReqId:    turingReqID,
 		EventTimestamp: timestamppb.New(timestamp),
 		RouterVersion:  appName,
 		Request: &turing.Request{
-			Header: reqHeader,
+			Header: string(reqHeader),
 			Body:   string(json.RawMessage(body)),
 		},
 	}

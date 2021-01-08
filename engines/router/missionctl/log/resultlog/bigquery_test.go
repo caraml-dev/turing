@@ -50,7 +50,7 @@ func TestGetTuringResultTableSchema(t *testing.T) {
 		Schema bigquery.Schema
 	}
 	wantSchema := &bqSchema{Schema: expectedSchema}
-	gotSchema := &bqSchema{Schema: schema}
+	gotSchema := &bqSchema{Schema: *schema}
 
 	// Compare all fields except Description
 	opt := cmpopts.IgnoreFields(bigquery.FieldSchema{}, "Description")
@@ -137,7 +137,7 @@ func TestNewBigQueryLogger(t *testing.T) {
 	// Test that the newly created table has the expected schema
 	expectedSchema := getTuringResultTableSchema()
 	schema := getTableSchema(bqLogger.bqClient, cfg.Dataset, cfg.Table, t)
-	_, isUpdated, err := compareTableSchema(&schema, &expectedSchema)
+	_, isUpdated, err := compareTableSchema(&schema, expectedSchema)
 	tu.FailOnError(t, err)
 	assert.False(t, isUpdated)
 
@@ -186,7 +186,7 @@ func TestNewBigQueryLoggerAddColumns(t *testing.T) {
 	// Test that the newly created table has the expected schema
 	expectedSchema := getTuringResultTableSchema()
 	schema := getTableSchema(bqLogger.bqClient, cfg.Dataset, cfg.Table, t)
-	_, isUpdated, err := compareTableSchema(&schema, &expectedSchema)
+	_, isUpdated, err := compareTableSchema(&schema, expectedSchema)
 	tu.FailOnError(t, err)
 	assert.False(t, isUpdated)
 

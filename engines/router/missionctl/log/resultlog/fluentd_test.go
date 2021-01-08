@@ -92,5 +92,7 @@ func TestFuentdLoggerWrite(t *testing.T) {
 	assert.NoError(t, testLogger.write(entry))
 
 	// Check that the expected function call occurred
-	fluentClient.AssertCalled(t, "Post", "test-tag", entry)
+	record, err := entry.Value()
+	tu.FailOnError(t, err)
+	fluentClient.AssertCalled(t, "Post", "test-tag", record)
 }

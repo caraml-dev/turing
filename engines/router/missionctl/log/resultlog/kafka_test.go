@@ -100,7 +100,7 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 			"turing_req_id": "%s",
 			"event_timestamp": "2000-02-01T04:05:06.000000007Z",
 			"request": {
-				"header": {"Req_id": "test_req_id"},
+				"header": "{\"Req_id\":[\"test_req_id\"]}",
 				"body": "{\"customer_id\": \"test_customer\"}"
 			},
 			"experiment": {
@@ -128,8 +128,8 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	// Compare logEntry data
 	assert.Equal(t, "\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a", string(key))
 	assert.Equal(t, strings.Join([]string{
-		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
-		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
+		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\">\n\x1a{\"",
+		"Req_id\":[\"test_req_id\"]}\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
 		"Error received2\x1a\n\x18{\"key\": \"enricher_data\"}:\x18\n\x16{\"key\": \"router_data\"}",
 	}, ""), string(message))
 }

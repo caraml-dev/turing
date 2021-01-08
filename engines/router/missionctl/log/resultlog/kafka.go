@@ -1,7 +1,8 @@
 package resultlog
 
 import (
-	"google.golang.org/protobuf/encoding/protojson"
+	"encoding/json"
+
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
@@ -120,12 +121,7 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 // newJSONKafkaLogEntry converts a given TuringResultLogEntry to  bytes, for writing to a Kafka topic
 // in JSON format
 func newJSONKafkaLogEntry(resultLogEntry *TuringResultLogEntry) (messageBytes []byte, err error) {
-	// Marshal to JSON
-	m := &protojson.MarshalOptions{
-		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
-	}
-	message := (*turing.TuringResultLogMessage)(resultLogEntry)
-	messageBytes, err = m.Marshal(message)
+	messageBytes, err = json.Marshal(resultLogEntry)
 	if err != nil {
 		return nil, err
 	}

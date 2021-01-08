@@ -8,8 +8,8 @@ option go_package = "github.com/gojek/turing";
 import "google/protobuf/timestamp.proto";
 
 message Request {
-    // The header from the incoming request to the Turing router
-    map<string, string> header = 1;
+    // The header from the incoming request to the Turing router, in JSON format
+    string header = 1;
 
     // The JSON body of the request to the Turing router
     string body = 2;

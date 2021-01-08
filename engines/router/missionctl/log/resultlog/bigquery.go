@@ -11,6 +11,7 @@ This file defines the BigQuery result logger. There are 2 parts:
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"cloud.google.com/go/bigquery"
@@ -20,6 +21,28 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
 )
+
+// bqLogEntry wraps a TuringResultLogEntry and implements the bigquery.ValueSaver interface
+type bqLogEntry struct {
+	*TuringResultLogEntry
+}
+
+// Save implements the ValueSaver interface on bqLogEntry, for saving the data to BigQuery
+func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
+	var kvPairs map[string]bigquery.Value
+	bytes, err := json.Marshal(e)
+	if err != nil {
+		return kvPairs, "", err
+	}
+
+	// Unmarshal into map[string]bigquery.Value
+	err = json.Unmarshal(bytes, &kvPairs)
+	if err != nil {
+		return kvPairs, "", errors.Wrapf(err, "Error unmarshaling the result log for save to BQ")
+	}
+
+	return kvPairs, "", nil
+}
 
 // BigQueryLogger extends the TuringResultLogger interface and defines additional
 // methods on the logger
@@ -33,6 +56,7 @@ type bigQueryLogger struct {
 	dataset  string
 	table    string
 	bqClient *bigquery.Client
+	schema   *bigquery.Schema
 }
 
 // newBigQueryLogger creates a new BigQueryLogger
@@ -47,6 +71,7 @@ func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 		dataset:  cfg.Dataset,
 		table:    cfg.Table,
 		bqClient: bqClient,
+		schema:   getTuringResultTableSchema(),
 	}
 	// Set up Turing Result table
 	err = bqLogger.setUpTuringTable()
@@ -60,9 +85,11 @@ func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 	// Create an inserter
 	ins := l.bqClient.Dataset(l.dataset).Table(l.table).Inserter()
+
 	// Each request has a 10MB limit, and each record has a 1MB limit.
 	// Currently inserting one at a time.
-	items := []*TuringResultLogEntry{t}
+	items := []*bqLogEntry{{t}}
+
 	// Write the data and return any errors
 	if err := ins.Put(context.Background(), items); err != nil {
 		return errors.Wrapf(err, "Error during streaming insert")
@@ -78,9 +105,6 @@ func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 func (l *bigQueryLogger) setUpTuringTable() error {
 	ctx := context.Background()
 
-	// Get Turing Result Log table schema
-	schema := getTuringResultTableSchema()
-
 	// Check that the dataset exists
 	dataset := l.bqClient.Dataset(l.dataset)
 	_, err := dataset.Metadata(ctx)
@@ -94,13 +118,13 @@ func (l *bigQueryLogger) setUpTuringTable() error {
 
 	// If not, create
 	if err != nil {
-		err = createTuringResultTable(&ctx, table, &schema)
+		err = createTuringResultTable(&ctx, table, l.schema)
 		if err != nil {
 			return errors.Wrapf(err, "Failed creating BigQuery table %s", l.table)
 		}
 	} else {
 		// Table exists, compare schema
-		schema, isUpdated, err := compareTableSchema(&metadata.Schema, &schema)
+		schema, isUpdated, err := compareTableSchema(&metadata.Schema, l.schema)
 		if err != nil {
 			return errors.Wrapf(err, "Unexpected schema for BigQuery table %s", l.table)
 		}
@@ -229,6 +253,7 @@ func compareTableSchema(
 
 // getTuringResultTableSchema returns the expected schema defined for logging results
 // to BigQuery
-func getTuringResultTableSchema() bigquery.Schema {
-	return protobq.InferSchema(&turing.TuringResultLogMessage{})
+func getTuringResultTableSchema() *bigquery.Schema {
+	schema := protobq.InferSchema(&turing.TuringResultLogMessage{})
+	return &schema
 }
