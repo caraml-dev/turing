@@ -39,19 +39,19 @@ var ResultLogKeys = struct {
 type TuringResultLogEntry turing.TuringResultLogMessage
 
 // MarshalJSON implements custom Marshaling for TuringResultLogEntry, using the underlying proto def
-func (logEntry TuringResultLogEntry) MarshalJSON() ([]byte, error) {
+func (logEntry *TuringResultLogEntry) MarshalJSON() ([]byte, error) {
 	m := &protojson.MarshalOptions{
 		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
 	}
-	message := turing.TuringResultLogMessage(logEntry)
-	return m.Marshal(&message)
+	message := (*turing.TuringResultLogMessage)(logEntry)
+	return m.Marshal(message)
 }
 
 // Value returns the TuringResultLogEntry in a loggable format
-func (logEntry TuringResultLogEntry) Value() (map[string]interface{}, error) {
+func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
 	var kvPairs map[string]interface{}
 	// Marshal into bytes
-	bytes, err := json.Marshal(logEntry)
+	bytes, err := json.Marshal(&logEntry)
 	if err != nil {
 		return kvPairs, errors.Wrapf(err, "Error marshaling the result log")
 	}
@@ -61,6 +61,24 @@ func (logEntry TuringResultLogEntry) Value() (map[string]interface{}, error) {
 		return kvPairs, errors.Wrapf(err, "Error unmarshaling the result log")
 	}
 	return kvPairs, nil
+}
+
+// AddResponse adds the per-component response/error info to the TuringResultLogEntry
+func (logEntry *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
+	responseRecord := &turing.Response{
+		Response: string(json.RawMessage(response)),
+		Error:    err,
+	}
+	switch key {
+	case ResultLogKeys.Experiment:
+		logEntry.Experiment = responseRecord
+	case ResultLogKeys.Enricher:
+		logEntry.Enricher = responseRecord
+	case ResultLogKeys.Router:
+		logEntry.Router = responseRecord
+	case ResultLogKeys.Ensembler:
+		logEntry.Ensembler = responseRecord
+	}
 }
 
 // NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
@@ -85,24 +103,6 @@ func NewTuringResultLogEntry(
 			Header: string(reqHeader),
 			Body:   string(json.RawMessage(body)),
 		},
-	}
-}
-
-// AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (e *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
-	responseRecord := &turing.Response{
-		Response: string(json.RawMessage(response)),
-		Error:    err,
-	}
-	switch key {
-	case ResultLogKeys.Experiment:
-		e.Experiment = responseRecord
-	case ResultLogKeys.Enricher:
-		e.Enricher = responseRecord
-	case ResultLogKeys.Router:
-		e.Router = responseRecord
-	case ResultLogKeys.Ensembler:
-		e.Ensembler = responseRecord
 	}
 }
 

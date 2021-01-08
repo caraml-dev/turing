@@ -14,6 +14,7 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type testSuiteResultLogger struct {
@@ -34,6 +35,31 @@ func (l *mockResultLogger) write(*TuringResultLogEntry) error {
 }
 
 // Tests
+func TestMarshalEmptyLogEntry(t *testing.T) {
+	bytes, err := json.Marshal(&TuringResultLogEntry{})
+	assert.JSONEq(t, `{}`, string(bytes))
+	assert.NoError(t, err)
+}
+
+func TestMarshalJSONLogEntry(t *testing.T) {
+	_, logEntry := makeTestTuringResultLogEntry(t)
+	// Set the Turing Request Id to a known value
+	logEntry.TuringReqId = "test-req-id"
+
+	// Marshal and validate
+	bytes, err := json.Marshal(logEntry)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"turing_req_id":"test-req-id",
+		"event_timestamp":"2000-02-01T04:05:06.000000007Z",
+		"router_version":"test-app-name",
+		"request":{"header":"{\"Req_id\":[\"test_req_id\"]}","body":"{\"customer_id\": \"test_customer\"}"},
+		"experiment":{"error":"Error received"},
+		"enricher":{"response":"{\"key\": \"enricher_data\"}"},
+		"router":{"response":"{\"key\": \"router_data\"}"}
+		}`, string(bytes))
+}
+
 func TestInitTuringResultLogger(t *testing.T) {
 	// Define test cases
 	tests := map[string]testSuiteResultLogger{
@@ -154,10 +180,32 @@ func TestGlobalLoggerLog(t *testing.T) {
 	logger.AssertCalled(t, "write")
 }
 
-func TestMarshalEmptyLogEntry(t *testing.T) {
-	bytes, err := json.Marshal(&TuringResultLogEntry{})
-	assert.JSONEq(t, `{}`, string(bytes))
-	assert.NoError(t, err)
+func TestTuringResultLogEntryValue(t *testing.T) {
+	_, logEntry := makeTestTuringResultLogEntry(t)
+	// Set the Turing Request Id to a known value
+	logEntry.TuringReqId = "test-req-id"
+
+	// Get loggable data and validate
+	kvPairs, err := logEntry.Value()
+	require.NoError(t, err)
+	assert.Equal(t, map[string]interface{}{
+		"turing_req_id":   "test-req-id",
+		"event_timestamp": "2000-02-01T04:05:06.000000007Z",
+		"router_version":  "test-app-name",
+		"request": map[string]interface{}{
+			"header": "{\"Req_id\":[\"test_req_id\"]}",
+			"body":   "{\"customer_id\": \"test_customer\"}",
+		},
+		"experiment": map[string]interface{}{
+			"error": "Error received",
+		},
+		"enricher": map[string]interface{}{
+			"response": "{\"key\": \"enricher_data\"}",
+		},
+		"router": map[string]interface{}{
+			"response": "{\"key\": \"router_data\"}",
+		},
+	}, kvPairs)
 }
 
 func setGlobalLogger(l TuringResultLogger) {
