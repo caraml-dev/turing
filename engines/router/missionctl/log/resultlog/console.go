@@ -26,8 +26,8 @@ func (*ConsoleLogger) write(turLogEntry *TuringResultLogEntry) error {
 	m := &protojson.MarshalOptions{
 		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
 	}
-	message := turing.TuringResultLogMessage(*turLogEntry)
-	bytes, err := m.Marshal(&message)
+	message := (*turing.TuringResultLogMessage)(turLogEntry)
+	bytes, err := m.Marshal(message)
 	if err != nil {
 		return err
 	}

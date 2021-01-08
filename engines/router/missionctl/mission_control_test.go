@@ -3,12 +3,6 @@ package missionctl
 /*
 Most tests in this package may be considered integration tests that exercise the full
 mission control workflow, which covers the fiber stack and the experimentation engine.
-Some tests work with Litmus/XP which requires the respective passkeys
-to be specified - these tests are skipped when running `make test` as it uses the -short
-flag. They may instead be run with `make testall`.
-If any of the endpoints need to be changed, the values in the testdata/ folder must be
-updated accordingly. For the Litmus tests, the LITMUS_PASSKEY env var must be supplied.
-Similarly, for the XP tests, the XP_PASSKEY env var must be specified.
 */
 
 import (

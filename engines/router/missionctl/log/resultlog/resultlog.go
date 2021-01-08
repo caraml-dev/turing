@@ -101,6 +101,8 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 	case config.BigqueryLogger:
 		var bqLogger BigQueryLogger
 		log.Glob().Info("Initializing BigQuery Result Logger")
+		// Init BQ logger. This will also run the necessary checks on the table schema /
+		// create it if not exists.
 		bqLogger, err = newBigQueryLogger(cfg.BigQuery)
 		if err != nil {
 			return err

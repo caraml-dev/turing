@@ -124,8 +124,8 @@ func newJSONKafkaLogEntry(resultLogEntry *TuringResultLogEntry) (messageBytes []
 	m := &protojson.MarshalOptions{
 		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
 	}
-	message := turing.TuringResultLogMessage(*resultLogEntry)
-	messageBytes, err = m.Marshal(&message)
+	message := (*turing.TuringResultLogMessage)(resultLogEntry)
+	messageBytes, err = m.Marshal(message)
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +148,8 @@ func newProtobufKafkaLogEntry(
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry key")
 	}
-	message := turing.TuringResultLogMessage(*resultLogEntry)
-	valueBytes, err = proto.Marshal(&message)
+	message := (*turing.TuringResultLogMessage)(resultLogEntry)
+	valueBytes, err = proto.Marshal(message)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry value")
 	}
