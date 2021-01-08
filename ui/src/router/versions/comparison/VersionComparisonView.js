@@ -14,7 +14,7 @@ import {
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
-import yaml from "js-yaml";
+import { RouterVersion } from "../../../services/version/RouterVersion";
 
 export const VersionComparisonView = ({
   router,
@@ -108,12 +108,12 @@ export const VersionComparisonView = ({
           <ReactDiffViewer
             leftTitle={`Version ${leftVersionNumber}`}
             rightTitle={`Version ${rightVersionNumber}`}
-            oldValue={yaml.dump(leftVersion.data)}
-            newValue={yaml.dump(rightVersion.data)}
+            oldValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml()}
+            newValue={RouterVersion.fromJson(rightVersion.data).toPrettyYaml()}
             styles={{
               line: {
                 wordBreak: "break-word",
-                fontSize: "0.875rem"
+                fontSize: "0.775rem"
               }
             }}
             compareMethod={DiffMethod.WORDS_WITH_SPACE}
