@@ -67,7 +67,6 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	// Unmarshal the result
 	var logObj consoleLog
 	err = json.Unmarshal(logData, &logObj)
-	t.Log(string(logData))
 	tu.FailOnError(t, err)
 
 	// Validate relevant fields
