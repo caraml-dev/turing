@@ -16,9 +16,6 @@ import (
 const (
 	deploymentWaitTimeoutSeconds = 200
 	deleteTimeoutSeconds         = 20
-	fluentdSyncIntervalSeconds   = 10
-	// fluentdSyncMaxWaitSeconds is the max expected wait time for log entries to be written to BigQuery from FluentD
-	fluentdSyncMaxWaitSeconds = 120
 )
 
 // Test configs

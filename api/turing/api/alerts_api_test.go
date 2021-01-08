@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
-	"strings"
+	"github.com/stretchr/testify/mock"
 
+	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
@@ -39,12 +41,22 @@ func TestAlertsContollerWhenAlertIsDisabled(t *testing.T) {
 
 func TestAlertsControllerCreateAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "router"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{}, nil)
+	mockMLPService.
+		On("GetProject", mock.AnythingOfType("int")).
+		Return(project, nil)
+	mockMLPService.
+		On("GetEnvironment", mock.AnythingOfType("string")).
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(nil, errors.New("Test router error"))
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "router"}, nil)
+	mockRouterService.On("FindByID", uint(1)).Return(nil, errors.New("test router error"))
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	alert := &models.Alert{
 		Environment:       "env",
@@ -55,9 +67,35 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 		CriticalThreshold: 10,
 		Duration:          "5m",
 	}
+
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("Save", *alert, "user@gojek.com").Return(nil, errors.New("Test alert error"))
-	mockAlertService.On("Save", *alert, "user2@gojek.com").Return(alert, nil)
+	mockAlertService.
+		On(
+			"GetDashboardURL",
+			alert,
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=router&var-revision=$__all", nil)
+	mockAlertService.
+		On(
+			"Save",
+			*alert,
+			"user@gojek.com",
+			"https://grafana.example.com/dashboard?var-cluster=testcluster&var-project=testproject"+
+				"&var-experiment=router&var-revision=$__all").
+		Return(nil, errors.New("test alert error"))
+	mockAlertService.
+		On(
+			"Save",
+			*alert,
+			"user2@gojek.com",
+			"https://grafana.example.com/dashboard?var-cluster=testcluster&var-project=testproject"+
+				"&var-experiment=router&var-revision=$__all").
+		Return(alert, nil)
 
 	// Define tests
 	inputAlert := &models.Alert{
@@ -88,7 +126,7 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 			},
 			vars: map[string]string{"project_id": "1", "router_id": "1"},
 			body: inputAlert,
-			want: NotFound("router not found", "Test router error"),
+			want: NotFound("router not found", "test router error"),
 		},
 		"failure | email not found": {
 			req: &http.Request{
@@ -104,7 +142,7 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 			},
 			vars: map[string]string{"project_id": "1", "router_id": "2"},
 			body: inputAlert,
-			want: InternalServerError("unable to create alert", "Test alert error"),
+			want: InternalServerError("unable to create alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
@@ -279,12 +317,20 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 
 func TestAlertsControllerUpdateAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "test"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{}, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
+	mockMLPService.
+		On("GetEnvironment", mock.AnythingOfType("string")).
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "test"}, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "test"}, nil)
+	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	oldAlert1 := &models.Alert{
 		Model:             models.Model{ID: 1},
@@ -328,8 +374,25 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	mockAlertService.On("FindByID", uint(1)).Return(oldAlert1, nil)
 	mockAlertService.On("FindByID", uint(2)).Return(oldAlert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
-	mockAlertService.On("Update", *alert1, "user@gojek.com").Return(errors.New("Test alert error"))
-	mockAlertService.On("Update", *alert2, "user@gojek.com").Return(nil)
+	mockAlertService.
+		On(
+			"GetDashboardURL",
+			mock.AnythingOfType("*models.Alert"),
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test", nil)
+	mockAlertService.
+		On("Update", *alert1, "user@gojek.com", "https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test").
+		Return(errors.New("Test alert error"))
+	mockAlertService.
+		On("Update", *alert2, "user@gojek.com", "https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test").
+		Return(nil)
 
 	// Define tests
 	body := &models.Alert{
@@ -410,12 +473,20 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 
 func TestAlertsControllerDeleteAlert(t *testing.T) {
 	// Set up mock services
+	project := &mlp.Project{Name: "testproject"}
+	environment := &merlin.Environment{Cluster: "testcluster"}
+	router := &models.Router{Name: "test"}
+	var routerVersion *models.RouterVersion
+
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{}, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
+	mockMLPService.
+		On("GetEnvironment", mock.AnythingOfType("string")).
+		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "test"}, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "test"}, nil)
+	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
+	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
 
 	alert1 := &models.Alert{Model: models.Model{ID: 1}}
 	alert2 := &models.Alert{Model: models.Model{ID: 2}}
@@ -423,8 +494,29 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	mockAlertService.On("FindByID", uint(1)).Return(alert1, nil)
 	mockAlertService.On("FindByID", uint(2)).Return(alert2, nil)
 	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
-	mockAlertService.On("Delete", *alert1, "user@gojek.com").Return(errors.New("Test alert error"))
-	mockAlertService.On("Delete", *alert2, "user@gojek.com").Return(nil)
+	mockAlertService.
+		On(
+			"GetDashboardURL",
+			mock.AnythingOfType("*models.Alert"),
+			project,
+			environment,
+			router,
+			routerVersion,
+		).
+		Return("https://grafana.example.com/dashboard?var-cluster=testcluster"+
+			"&var-project=testproject&var-experiment=test", nil)
+	mockAlertService.On(
+		"Delete",
+		*alert1,
+		"user@gojek.com",
+		"https://grafana.example.com/dashboard?var-cluster=testcluster&var-project=testproject&var-experiment=test").
+		Return(errors.New("Test alert error"))
+	mockAlertService.On(
+		"Delete",
+		*alert2,
+		"user@gojek.com",
+		"https://grafana.example.com/dashboard?var-cluster=testcluster&var-project=testproject&var-experiment=test").
+		Return(nil)
 
 	// Delete tests
 	tests := map[string]struct {
@@ -436,28 +528,28 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "10"},
+			vars: map[string]string{"alert_id": "10", "router_id": "1"},
 			want: NotFound("alert not found", "Test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
 				Header: map[string][]string{},
 			},
-			vars: map[string]string{"alert_id": "1"},
+			vars: map[string]string{"alert_id": "1", "router_id": "1"},
 			want: BadRequest("missing User-Email in header", ""),
 		},
 		"failure | delete alert": {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "1"},
+			vars: map[string]string{"alert_id": "1", "router_id": "1"},
 			want: InternalServerError("unable to delete alert", "Test alert error"),
 		},
 		"success": {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "2"},
+			vars: map[string]string{"alert_id": "2", "router_id": "1"},
 			want: Ok("Alert with id '2' deleted"),
 		},
 	}

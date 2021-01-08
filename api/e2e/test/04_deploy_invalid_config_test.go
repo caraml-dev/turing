@@ -27,7 +27,8 @@ func TestDeployRouterInvalidConfig(t *testing.T) {
 	// Router name is assumed to follow this format: e2e-experiment-{{.TestID}}
 	routerName := "e2e-experiment-" + globalTestContext.TestID
 	t.Log(fmt.Sprintf("Retrieving router with name '%s' created from previous test step", routerName))
-	existingRouter, err := getRouterByName(globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
+	existingRouter, err := getRouterByName(
+		globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
 	require.NoError(t, err)
 
 	// Deploy router version
@@ -41,6 +42,7 @@ func TestDeployRouterInvalidConfig(t *testing.T) {
 	require.NoError(t, err)
 	response, err := globalTestContext.httpClient.Do(req)
 	require.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusAccepted, response.StatusCode)
 
 	// Wait for the version status to to change to success/failed deployment
