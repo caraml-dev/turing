@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gojek/turing/api/turing/service"
+
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 type PodLogController struct {

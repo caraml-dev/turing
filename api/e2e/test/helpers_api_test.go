@@ -11,8 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
+
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,6 +32,7 @@ func getRouter(
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -56,6 +58,7 @@ func getRouterByName(
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	routers := make([]*models.Router, 0)
 	data, err := ioutil.ReadAll(resp.Body)
@@ -91,6 +94,7 @@ func getRouterVersion(
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -168,6 +172,7 @@ func withDeployedRouter(
 		globalTestContext.ProjectID)
 	resp, err := http.Post(createRouterAPI, "application/json", bytes.NewReader(routerPayload))
 	require.NoError(t, err)
+	defer resp.Body.Close()
 
 	responsePayload, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)

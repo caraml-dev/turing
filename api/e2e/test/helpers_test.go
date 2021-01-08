@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"testing"
 	"text/template"
 
@@ -22,21 +21,6 @@ func readBody(t *testing.T, resp *http.Response) string {
 		t.Fatal(err)
 	}
 	return string(data)
-}
-
-func readFile(filepath string) ([]byte, error) {
-	// Open file
-	fileObj, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer fileObj.Close()
-	// Read contents
-	byteValue, err := ioutil.ReadAll(fileObj)
-	if err != nil {
-		return nil, err
-	}
-	return byteValue, nil
 }
 
 // make payload to create new router from a template file
@@ -75,6 +59,7 @@ func withRouterResponse(
 
 	resp, err := globalTestContext.httpClient.Do(req)
 	require.NoError(t, err)
+	defer resp.Body.Close()
 
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)

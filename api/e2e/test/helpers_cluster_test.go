@@ -4,9 +4,10 @@ package e2e
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	"path/filepath"
 
 	"github.com/gojek/mlp/pkg/vault"
 	"github.com/pkg/errors"
@@ -95,10 +96,7 @@ func isConfigMapExists(
 	_, err := clusterClients.K8sCoreClient.
 		ConfigMaps(projectName).
 		Get(name, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func isPersistentVolumeClaimExists(clusterClients *TestClusterClients,
@@ -108,10 +106,7 @@ func isPersistentVolumeClaimExists(clusterClients *TestClusterClients,
 	_, err := clusterClients.K8sCoreClient.
 		PersistentVolumeClaims(projectName).
 		Get(name, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func isDeploymentExists(
@@ -122,10 +117,7 @@ func isDeploymentExists(
 	_, err := clusterClients.K8sAppsClient.
 		Deployments(projectName).
 		Get(name, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func getRouterDownstream(clusterClients *TestClusterClients, projectName string, routerName string) (string, error) {

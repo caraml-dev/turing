@@ -5,10 +5,11 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"path/filepath"
 	"testing"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +30,8 @@ func assertRouterResponse(t *testing.T, expected, actual string) {
 	var expectedJSONAsInterface, actualJSONAsInterface response
 
 	err := json.Unmarshal([]byte(expected), &expectedJSONAsInterface)
-	require.NoError(t, err, fmt.Sprintf("Expected value ('%s') is not valid json.\nJSON parsing error: '%v'", expected, err))
+	require.NoError(t, err, fmt.Sprintf(
+		"Expected value ('%s') is not valid json.\nJSON parsing error: '%v'", expected, err))
 
 	err = json.Unmarshal([]byte(actual), &actualJSONAsInterface)
 	require.NoError(t, err, fmt.Sprintf("Input ('%s') needs to be valid json.\nJSON parsing error: '%v'", actual, err))
@@ -37,7 +39,8 @@ func assertRouterResponse(t *testing.T, expected, actual string) {
 	assert.Equal(t, expectedJSONAsInterface.Request, actualJSONAsInterface.Request)
 	if expectedJSONAsInterface.Response != nil && actualJSONAsInterface.Response != nil {
 		assert.Equal(t, expectedJSONAsInterface.Response.Experiment, actualJSONAsInterface.Response.Experiment)
-		assert.ElementsMatch(t, expectedJSONAsInterface.Response.RouteResponses, actualJSONAsInterface.Response.RouteResponses)
+		assert.ElementsMatch(t,
+			expectedJSONAsInterface.Response.RouteResponses, actualJSONAsInterface.Response.RouteResponses)
 	} else {
 		assert.Equal(t, expectedJSONAsInterface.Response, actualJSONAsInterface.Response)
 	}
