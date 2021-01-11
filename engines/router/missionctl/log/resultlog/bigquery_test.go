@@ -12,6 +12,7 @@ must also exist.
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -110,47 +111,6 @@ func TestCheckTableSchema(t *testing.T) {
 	}
 }
 
-func TestBigQueryLogSave(t *testing.T) {
-	// Create test Turing log entry
-	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
-	// Create BQ Log Entry
-	logEntry := &bqLogEntry{turingLogEntry}
-	// Exercise BQ Log Entry's Save method
-	message, _, err := logEntry.Save()
-	assert.NoError(t, err)
-	// Get Turing request id
-	turingReqID, err := turingctx.GetRequestID(ctx)
-	tu.FailOnError(t, err)
-	// Compare logEntry data
-	assert.Equal(t, map[string]bigquery.Value{
-		"router_version":  "test-app-name",
-		"turing_req_id":   turingReqID,
-		"event_timestamp": "2000-02-01T04:05:06.000000007Z",
-		"request": bigquery.Value(struct {
-			Header []bigquery.Value
-			Body   bigquery.Value
-		}{
-			Header: []bigquery.Value{bigquery.Value(struct {
-				Key   string
-				Value string
-			}{
-				Key:   "Req_id",
-				Value: "test_req_id",
-			})},
-			Body: bigquery.Value("{\"customer_id\": \"test_customer\"}"),
-		}),
-		"experiment": bigquery.Value(map[string]interface{}{
-			"error": "Error received",
-		}),
-		"enricher": bigquery.Value(map[string]interface{}{
-			"response": "{\"key\": \"enricher_data\"}",
-		}),
-		"router": bigquery.Value(map[string]interface{}{
-			"response": "{\"key\": \"router_data\"}",
-		}),
-	}, message)
-}
-
 // This test case initializes the BQ client to connect to the specified
 // project and dataset, where a turing result table of the given name
 // does not exist. It is assumed that the environment that the test
@@ -234,6 +194,86 @@ func TestNewBigQueryLoggerAddColumns(t *testing.T) {
 	// Remove the newly created table
 	err = deleteBigQueryTable(bqLogger.bqClient, cfg.Dataset, cfg.Table)
 	assert.NoError(t, err)
+}
+
+func TestBigQueryLoggerGetData(t *testing.T) {
+	// Make test request
+	req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
+	reqBody, err := ioutil.ReadAll(req.Body)
+	tu.FailOnError(t, err)
+
+	// Make test context
+	ctx := turingctx.NewTuringContext(context.Background())
+	turingReqID, err := turingctx.GetRequestID(ctx)
+	tu.FailOnError(t, err)
+
+	// Create new logger
+	testLogger := &bigQueryLogger{}
+
+	// Create a TuringResultLogEntry record and add the data
+	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
+	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
+	entry.RouterVersion = "turing-router-1"
+	entry.AddResponse("experiment", []byte(`{"key": "experiment_data"}`), "")
+	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "")
+	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "")
+	entry.AddResponse("ensembler", nil, "Error Response")
+
+	// Get the log data and validate
+	logData := testLogger.getLogData(entry)
+	// Cast to map[string]bigquery.Value
+	if logMap, ok := logData.(map[string]bigquery.Value); ok {
+		// Turing Request ID
+		assert.Equal(t, turingReqID, logMap["turing_req_id"])
+
+		// Router Version
+		assert.Equal(t, "turing-router-1", logMap["router_version"])
+
+		// Timestamp
+		assert.Equal(t, "2000-02-01T04:05:06.000000007Z", logMap["event_timestamp"])
+
+		// Request
+		requestData, err := json.Marshal(logMap["request"])
+		tu.FailOnError(t, err)
+		assert.JSONEq(t, `{
+			"Header":[{"Key":"Req_id","Value":"test_req_id"}],
+			"Body":"{\"customer_id\": \"test_customer\"}"
+			}`, string(requestData))
+
+		// Experiment
+		if respObj, ok := logMap["experiment"].(map[string]interface{}); ok {
+			assert.Equal(t, `{"key": "experiment_data"}`, respObj["response"])
+			assert.Equal(t, nil, respObj["error"])
+		} else {
+			tu.FailOnError(t, fmt.Errorf("Cannot cast experiment log to expected type"))
+		}
+
+		// Enricher
+		if respObj, ok := logMap["enricher"].(map[string]interface{}); ok {
+			assert.Equal(t, `{"key": "enricher_data"}`, respObj["response"])
+			assert.Equal(t, nil, respObj["error"])
+		} else {
+			tu.FailOnError(t, fmt.Errorf("Cannot cast enricher log to expected type"))
+		}
+
+		// Router
+		if respObj, ok := logMap["router"].(map[string]interface{}); ok {
+			assert.Equal(t, `{"key": "router_data"}`, respObj["response"])
+			assert.Equal(t, nil, respObj["error"])
+		} else {
+			tu.FailOnError(t, fmt.Errorf("Cannot cast router log to expected type"))
+		}
+
+		// Ensembler
+		if requestObj, ok := logMap["ensembler"].(map[string]interface{}); ok {
+			assert.Equal(t, nil, requestObj["response"])
+			assert.Equal(t, "Error Response", requestObj["error"])
+		} else {
+			tu.FailOnError(t, fmt.Errorf("Cannot cast ensembler log to expected type"))
+		}
+	} else {
+		tu.FailOnError(t, fmt.Errorf("Cannot cast log result to expected type"))
+	}
 }
 
 func TestBigQueryLoggerWrite(t *testing.T) {

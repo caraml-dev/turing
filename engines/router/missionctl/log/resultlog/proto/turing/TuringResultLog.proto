@@ -11,12 +11,12 @@ message Request {
     // The header from the incoming request to the Turing router. The map value is a comma-delimited string.
     map<string,string> header = 1;
 
-    // The JSON body of the request to the Turing router
+    // The JSON body of the request to the Turing router, UTF-8-encoded
     string body = 2;
 }
 
 message Response {
-    // The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler).
+    // The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded.
     string response = 1;
 
     // The error from a Turing component, when a successful response is not received.

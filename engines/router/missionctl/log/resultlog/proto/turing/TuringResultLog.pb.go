@@ -33,7 +33,7 @@ type Request struct {
 
 	// The header from the incoming request to the Turing router. The map value is a comma-delimited string.
 	Header map[string]string `protobuf:"bytes,1,rep,name=header,proto3" json:"header,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// The JSON body of the request to the Turing router
+	// The JSON body of the request to the Turing router, UTF-8-encoded
 	Body string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 }
 
@@ -88,7 +88,7 @@ type Response struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler).
+	// The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded.
 	Response string `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
 	// The error from a Turing component, when a successful response is not received.
 	Error string `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`

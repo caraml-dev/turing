@@ -45,7 +45,7 @@
                 "name": "body",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The JSON body of the request to the Turing router"
+                "description": "The JSON body of the request to the Turing router, UTF-8-encoded"
             }
         ]
     },
@@ -59,7 +59,7 @@
                 "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler)."
+                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
@@ -79,7 +79,7 @@
                 "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler)."
+                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
@@ -99,7 +99,7 @@
                 "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler)."
+                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
@@ -119,7 +119,7 @@
                 "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The response from a Turing component (Enricher / Experiment Engine / Router / Ensembler)."
+                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",

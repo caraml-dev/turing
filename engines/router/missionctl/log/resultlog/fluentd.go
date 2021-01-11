@@ -62,8 +62,6 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 			},
 		},
 	)()
-
-	// Get the loggable data from the BQ logger
 	err = l.fluentLogger.Post(l.tag, l.bqLogger.getLogData(turLogEntry))
 	return err
 }
