@@ -4,7 +4,8 @@ package resultlog
 This file defines the BigQuery result logger. There are 2 parts:
 1. The bigQueryLogger.write() which satisfies the TuringResultLogger interface defined in
    missionctl/log/resultlog/resultlog.go, saving the log entry to BigQuery using the streaming
-   insert API.
+   insert API, and the bigQueryLogger.getLogData() which is used by the fluentd logger -
+   this is the part used for logging.
 2. bigQueryLogger.setUpTuringTable() and supporting methods to check that the required dataset
    exists and the table exists (if so, validate the schema and if not, create the table).
 */
