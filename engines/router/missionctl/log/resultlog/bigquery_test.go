@@ -14,7 +14,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
@@ -179,41 +178,4 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 	} else {
 		tu.FailOnError(t, fmt.Errorf("Cannot cast log result to expected type"))
 	}
-}
-
-// deleteBigQueryTable assumes that the table exists
-func deleteBigQueryTable(b *bigquery.Client, datasetID, tableID string) error {
-	table := b.Dataset(datasetID).Table(tableID)
-	return table.Delete(context.Background())
-}
-
-// getTableSchema assumes that the table exists
-func getTableSchema(b *bigquery.Client, datasetID, tableID string, t *testing.T) bigquery.Schema {
-	table := b.Dataset(datasetID).Table(tableID)
-	metadata, err := table.Metadata(context.Background())
-	tu.FailOnError(t, err)
-
-	return metadata.Schema
-}
-
-// createBQTable assumes that a table does not already exist and creates it with
-// the given schema
-func createBQTable(t *testing.T, cfg *config.BQConfig, schema *bigquery.Schema) {
-	// Init BQ Client
-	ctx := context.Background()
-	bqClient, err := bigquery.NewClient(ctx, cfg.Project)
-	tu.FailOnError(t, err)
-
-	// Init Dataset
-	dataset := bqClient.Dataset(cfg.Dataset)
-	_, err = dataset.Metadata(ctx)
-	tu.FailOnError(t, err)
-
-	// Create Table
-	table := dataset.Table(cfg.Table)
-	metaData := &bigquery.TableMetadata{
-		Schema: *schema,
-	}
-	err = table.Create(ctx, metaData)
-	tu.FailOnError(t, err)
 }
