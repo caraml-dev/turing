@@ -69,6 +69,7 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 // methods on the logger
 type BigQueryLogger interface {
 	TuringResultLogger
+	getLogData(*TuringResultLogEntry) interface{}
 }
 
 // bigQueryLogger implements the BigQueryLogger interface and wraps the bigquery.Client
@@ -116,6 +117,16 @@ func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 		return errors.Wrapf(err, "Error during streaming insert")
 	}
 	return nil
+}
+
+// getLogData returns the log information as a generic interface{} object. Internally, it calls
+// the Save method defined on the bqLogEntry structure which implements the
+// bigquery.ValueSaver interface and returns the log data as a map. This can be returned
+// as is for logging by other loggers whose destination is a BQ table.
+func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface{} {
+	entry := &bqLogEntry{turLogEntry}
+	record, _, _ := entry.Save()
+	return record
 }
 
 // setUpTuringTable checks that the logging table is set up in BQ as expected.

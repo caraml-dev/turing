@@ -21,8 +21,27 @@ func (mf *MockFluentClient) Post(tag string, msg interface{}) error {
 	return nil
 }
 
+// MockBqLogger implements the BigQueryLogger interface
+type MockBqLogger struct {
+	mock.Mock
+}
+
+func (bq *MockBqLogger) write(*TuringResultLogEntry) error {
+	return nil
+}
+
+func (bq *MockBqLogger) getLogData(t *TuringResultLogEntry) interface{} {
+	bq.Called(t)
+	return t
+}
+
 func TestNewFluentdLogger(t *testing.T) {
-	// Create a fluentd client
+	// Create test BQ logger and fluent client
+	bqLogger := bigQueryLogger{
+		dataset:  "test-dataset",
+		table:    "test-table",
+		bqClient: nil,
+	}
 	fc := &fluent.Fluent{}
 
 	tests := map[string]struct {
@@ -39,6 +58,7 @@ func TestNewFluentdLogger(t *testing.T) {
 			},
 			expected: FluentdLogger{
 				tag:          "test-tag",
+				bqLogger:     &bqLogger,
 				fluentLogger: fc,
 			},
 			success: true,
@@ -61,7 +81,7 @@ func TestNewFluentdLogger(t *testing.T) {
 				func(_ fluent.Config) (*fluent.Fluent, error) { return fc, nil })
 			defer monkey.Unpatch(fluent.New)
 			// Create the new logger and validate
-			testLogger, err := newFluentdLogger(&data.cfg)
+			testLogger, err := newFluentdLogger(&data.cfg, &bqLogger)
 			assert.Equal(t, data.success, err == nil)
 			if data.success {
 				tu.FailOnNil(t, testLogger)
@@ -78,6 +98,9 @@ func TestFuentdLoggerWrite(t *testing.T) {
 	// Create test log object
 	_, entry := makeTestTuringResultLogEntry(t)
 
+	// Create mock BQ Logger
+	bqLogger := &MockBqLogger{}
+	bqLogger.On("getLogData", mock.Anything).Return(entry)
 	// Create mock Fluentd client
 	fluentClient := &MockFluentClient{}
 	fluentClient.On("Post", mock.Anything, mock.Anything).Return(nil)
@@ -85,14 +108,13 @@ func TestFuentdLoggerWrite(t *testing.T) {
 	// Create new fluentd logger
 	testLogger := &FluentdLogger{
 		tag:          "test-tag",
+		bqLogger:     bqLogger,
 		fluentLogger: fluentClient,
 	}
 
 	// Validate
 	assert.NoError(t, testLogger.write(entry))
-
-	// Check that the expected function call occurred
-	record, err := entry.Value()
-	tu.FailOnError(t, err)
-	fluentClient.AssertCalled(t, "Post", "test-tag", record)
+	// Check that the expected function calls occurred
+	bqLogger.AssertCalled(t, "getLogData", entry)
+	fluentClient.AssertCalled(t, "Post", "test-tag", entry)
 }

@@ -137,7 +137,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		// Check if streaming insert or batch logging
 		if cfg.BigQuery.BatchLoad {
 			// Init fluentd logger for batch logging
-			globalLogger, err = newFluentdLogger(cfg.Fluentd)
+			globalLogger, err = newFluentdLogger(cfg.Fluentd, bqLogger)
 		} else {
 			// Use BigQueryLogger for streaming insert
 			globalLogger = bqLogger
