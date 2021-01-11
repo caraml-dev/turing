@@ -25,9 +25,21 @@
         "fields": [
             {
                 "name": "header",
-                "type": "STRING",
-                "mode": "NULLABLE",
-                "description": "The header from the incoming request to the Turing router, in JSON format"
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "description": "The header from the incoming request to the Turing router. The map value is a comma-delimited string.",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    },
+                    {
+                        "name": "value",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
             },
             {
                 "name": "body",

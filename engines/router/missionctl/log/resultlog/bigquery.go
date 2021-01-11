@@ -41,6 +41,27 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 		return kvPairs, "", errors.Wrapf(err, "Error unmarshaling the result log for save to BQ")
 	}
 
+	// Special handling: Update request.Header to a list of records, expected by BQ.
+	// It seems protobq.Marshal will be adding support for map[string]string that would help simplify the
+	// implementation of Save().
+	headers := []bigquery.Value{}
+	for key, value := range e.TuringResultLogEntry.Request.Header {
+		headers = append(headers, bigquery.Value(struct {
+			Key   string
+			Value string
+		}{
+			Key:   key,
+			Value: value,
+		}))
+	}
+	kvPairs["request"] = bigquery.Value(struct {
+		Header []bigquery.Value
+		Body   bigquery.Value
+	}{
+		Header: headers,
+		Body:   bigquery.Value(e.TuringResultLogEntry.Request.Body),
+	})
+
 	return kvPairs, "", nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -93,14 +94,17 @@ func NewTuringResultLogEntry(
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Format Request Header
-	reqHeader, _ := json.Marshal(header)
+	reqHeader := map[string]string{}
+	for k, v := range *header {
+		reqHeader[k] = strings.Join(v, ",")
+	}
 
 	return &TuringResultLogEntry{
 		TuringReqId:    turingReqID,
 		EventTimestamp: timestamppb.New(timestamp),
 		RouterVersion:  appName,
 		Request: &turing.Request{
-			Header: string(reqHeader),
+			Header: reqHeader,
 			Body:   string(json.RawMessage(body)),
 		},
 	}

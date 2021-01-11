@@ -53,7 +53,7 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 		"turing_req_id":"test-req-id",
 		"event_timestamp":"2000-02-01T04:05:06.000000007Z",
 		"router_version":"test-app-name",
-		"request":{"header":"{\"Req_id\":[\"test_req_id\"]}","body":"{\"customer_id\": \"test_customer\"}"},
+		"request":{"header":{"Req_id":"test_req_id"},"body":"{\"customer_id\": \"test_customer\"}"},
 		"experiment":{"error":"Error received"},
 		"enricher":{"response":"{\"key\": \"enricher_data\"}"},
 		"router":{"response":"{\"key\": \"router_data\"}"}
@@ -193,8 +193,10 @@ func TestTuringResultLogEntryValue(t *testing.T) {
 		"event_timestamp": "2000-02-01T04:05:06.000000007Z",
 		"router_version":  "test-app-name",
 		"request": map[string]interface{}{
-			"header": "{\"Req_id\":[\"test_req_id\"]}",
-			"body":   "{\"customer_id\": \"test_customer\"}",
+			"header": map[string]interface{}{
+				"Req_id": "test_req_id",
+			},
+			"body": "{\"customer_id\": \"test_customer\"}",
 		},
 		"experiment": map[string]interface{}{
 			"error": "Error received",

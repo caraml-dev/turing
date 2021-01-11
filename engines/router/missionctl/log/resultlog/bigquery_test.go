@@ -110,6 +110,47 @@ func TestCheckTableSchema(t *testing.T) {
 	}
 }
 
+func TestBigQueryLogSave(t *testing.T) {
+	// Create test Turing log entry
+	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
+	// Create BQ Log Entry
+	logEntry := &bqLogEntry{turingLogEntry}
+	// Exercise BQ Log Entry's Save method
+	message, _, err := logEntry.Save()
+	assert.NoError(t, err)
+	// Get Turing request id
+	turingReqID, err := turingctx.GetRequestID(ctx)
+	tu.FailOnError(t, err)
+	// Compare logEntry data
+	assert.Equal(t, map[string]bigquery.Value{
+		"router_version":  "test-app-name",
+		"turing_req_id":   turingReqID,
+		"event_timestamp": "2000-02-01T04:05:06.000000007Z",
+		"request": bigquery.Value(struct {
+			Header []bigquery.Value
+			Body   bigquery.Value
+		}{
+			Header: []bigquery.Value{bigquery.Value(struct {
+				Key   string
+				Value string
+			}{
+				Key:   "Req_id",
+				Value: "test_req_id",
+			})},
+			Body: bigquery.Value("{\"customer_id\": \"test_customer\"}"),
+		}),
+		"experiment": bigquery.Value(map[string]interface{}{
+			"error": "Error received",
+		}),
+		"enricher": bigquery.Value(map[string]interface{}{
+			"response": "{\"key\": \"enricher_data\"}",
+		}),
+		"router": bigquery.Value(map[string]interface{}{
+			"response": "{\"key\": \"router_data\"}",
+		}),
+	}, message)
+}
+
 // This test case initializes the BQ client to connect to the specified
 // project and dataset, where a turing result table of the given name
 // does not exist. It is assumed that the environment that the test
