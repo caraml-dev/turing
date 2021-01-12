@@ -31,7 +31,7 @@ export const RouterVersionActions = ({
         icon: "importAction",
         available: () => true,
         enabled: config =>
-          !(isActiveConfig(config) && routerStatus !== Status.DEPLOYED) &&
+          !(isActiveConfig(config) && routerStatus === Status.DEPLOYED) &&
           routerStatus !== Status.PENDING,
         onClick: config => deployVersionRef.current(config.version)
       },
