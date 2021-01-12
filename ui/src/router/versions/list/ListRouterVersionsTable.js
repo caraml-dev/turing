@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo, useState } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import {
   EuiBadge,
   EuiCallOut,
@@ -24,40 +24,46 @@ export const ListRouterVersionsTable = ({
   onRowClick,
   ...props
 }) => {
-  const [selection, setSelection] = useState({});
+  // Map that holds a mapping between selected version number
+  // and it's position in the `selection` array
+  const [selectedIds, setSelectedIds] = useState({});
+  const [selection, setSelection] = useState([]);
 
-  const isSelected = useCallback(item => !!selection[item.version], [
-    selection
-  ]);
-
-  const readyForDiff = useMemo(() => Object.entries(selection).length === 2, [
-    selection
-  ]);
+  const isSelected = useCallback(
+    item => selectedIds.hasOwnProperty(item.version),
+    [selectedIds]
+  );
 
   const selectForComparison = useCallback(
     item => {
-      setSelection(items => ({
-        ...items,
-        [item.version]: item
+      setSelectedIds(ids => ({
+        ...ids,
+        [item.version]: selection.length
       }));
+
+      setSelection(items => [...items, item]);
     },
-    [setSelection]
+    [selection.length, setSelection, setSelectedIds]
   );
 
   const unselectFromComparison = useCallback(
     item => {
-      setSelection(items => {
+      setSelectedIds(items => {
         delete items[item.version];
         return { ...items };
       });
+
+      setSelection(items => {
+        items.splice(selectedIds[item.version], 1);
+        return [...items];
+      });
     },
-    [setSelection]
+    [selectedIds, setSelection, setSelectedIds]
   );
 
   const onShowDiff = useCallback(() => {
-    const selected = Object.values(selection);
-    if (selected.length === 2) {
-      const [leftSelection, rightSelection] = selected;
+    if (selection.length === 2) {
+      const [leftSelection, rightSelection] = selection;
       props.navigate(
         `./compare/${leftSelection.version}/${rightSelection.version}`,
         {
@@ -138,6 +144,7 @@ export const ListRouterVersionsTable = ({
       hasActions: true,
       render: item => {
         const isItemSelected = isSelected(item);
+        const twoSelected = selection.length === 2;
 
         const actions = [
           {
@@ -146,13 +153,13 @@ export const ListRouterVersionsTable = ({
             description: !isItemSelected ? "Compare versions" : "",
             icon: isItemSelected ? "check" : "merge",
             available: () => true,
-            enabled: () => isItemSelected || !readyForDiff,
+            enabled: () => isItemSelected || !twoSelected,
             onClick: () =>
               isItemSelected
                 ? unselectFromComparison(item)
                 : selectForComparison(item)
           },
-          ...(readyForDiff && isItemSelected
+          ...(twoSelected && isItemSelected
             ? [
                 {
                   type: "button",
