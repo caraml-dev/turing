@@ -12,7 +12,12 @@ import {
 
 import "./PageNavigation.scss";
 
-export const PageNavigation = ({ tabs, actions, selectedTab, ...props }) => (
+export const PageNavigation = ({
+  tabs,
+  actions,
+  selectedTab = "",
+  ...props
+}) => (
   <EuiFlexGroup direction="row" gutterSize="none">
     <EuiFlexItem grow={true}>
       <EuiTabs>
@@ -21,7 +26,7 @@ export const PageNavigation = ({ tabs, actions, selectedTab, ...props }) => (
             {...(tab.href
               ? { href: tab.href, target: "_blank" }
               : { onClick: () => props.navigate(`./${tab.id}`) })}
-            isSelected={tab.id === selectedTab}
+            isSelected={selectedTab.startsWith(tab.id)}
             disabled={tab.disabled}
             key={index}>
             {tab.name}

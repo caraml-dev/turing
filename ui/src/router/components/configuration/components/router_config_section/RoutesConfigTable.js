@@ -90,7 +90,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
               <EuiToolTip content="Show traffic rules">
                 <EuiButtonIcon
                   size="s"
-                  className="euiButton--trafficRules"
+                  className="euiIconButton--action"
                   iconType="logstashIf"
                   onClick={toggleDetails(item)}
                   aria-label="Remove data field"
