@@ -2,7 +2,6 @@ package resultlog
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -137,12 +136,17 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 		assert.Equal(t, "2000-02-01T04:05:06.000000007Z", logMap["event_timestamp"])
 
 		// Request
-		requestData, err := json.Marshal(logMap["request"])
-		tu.FailOnError(t, err)
-		assert.JSONEq(t, `{
-			"Header":[{"Key":"Req_id","Value":"test_req_id"}],
-			"Body":"{\"customer_id\": \"test_customer\"}"
-			}`, string(requestData))
+		if requestData, ok := logMap["request"].(map[string]interface{}); ok {
+			assert.Equal(t, []map[string]interface{}{
+				{
+					"key":   "Req_id",
+					"value": "test_req_id",
+				},
+			}, requestData["header"])
+			assert.Equal(t, `{"customer_id": "test_customer"}`, requestData["body"])
+		} else {
+			tu.FailOnError(t, fmt.Errorf("Cannot cast request log to expected type"))
+		}
 
 		// Experiment
 		if respObj, ok := logMap["experiment"].(map[string]interface{}); ok {
