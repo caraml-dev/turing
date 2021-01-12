@@ -27,7 +27,7 @@ export class RouterVersion {
               config: {
                 client: {
                   id: this.experiment_engine.config.client.username,
-                  passkey: "[hidden]"
+                  encrypted_passkey: this.experiment_engine.config.client.passkey
                 },
                 experiments: this.experiment_engine.config.experiments,
                 variables: this.experiment_engine.config.variables
