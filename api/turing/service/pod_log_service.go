@@ -17,17 +17,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type PodLogService interface {
-	// ListPodLogs retrieves logs from user-container (default) container from all pods running the router.
-	ListPodLogs(
-		project *mlp.Project,
-		router *models.Router,
-		routerVersion *models.RouterVersion,
-		componentType string,
-		opts *PodLogOptions,
-	) ([]*PodLog, error)
-}
-
 // PodLog represents a single log line from a container running in Kubernetes.
 // If the log message is in JSON format, JSONPayload must be populated with the
 // structured JSON log message. Else, TextPayload must be populated with log text.
@@ -62,6 +51,17 @@ type PodLogOptions struct {
 	// (Optional) Number of lines from the start of the logs to retrieve.  Should not be used together with TailLines.
 	// If both TailLines and Headlines are provided, TailLines will be ignored.
 	HeadLines *int64
+}
+
+type PodLogService interface {
+	// ListPodLogs retrieves logs from user-container (default) container from all pods running the router.
+	ListPodLogs(
+		project *mlp.Project,
+		router *models.Router,
+		routerVersion *models.RouterVersion,
+		componentType string,
+		opts *PodLogOptions,
+	) ([]*PodLog, error)
 }
 
 type podLogService struct {
