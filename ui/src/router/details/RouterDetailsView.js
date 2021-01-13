@@ -24,6 +24,7 @@ import { Status } from "../../services/status/Status";
 import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { HistoryView } from "../history/HistoryView";
 import { ContainerLogsView } from "../logs/ContainerLogsView";
+import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
 
 export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   const [{ data: router, isLoaded, error }, fetchRouterDetails] = useTuringApi(
@@ -107,6 +108,11 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
 
               <Redirect from="versions" to="../history" noThrow />
               <HistoryView path="history" router={router} />
+
+              <VersionComparisonView
+                path="history/compare/:leftVersionNumber/:rightVersionNumber"
+                router={router}
+              />
 
               <RouterAlertsView path="alerts/*" router={router} />
 

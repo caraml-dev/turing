@@ -58,13 +58,14 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
               deployedVersion={deployedVersion}
               onRowClick={onRowClick}
               renderActions={() =>
-                actions.map((action, idx) => ({
+                actions.map(action => ({
                   ...action,
                   type: "icon",
                   name: action.label,
                   description: action.name
                 }))
               }
+              {...props}
             />
           )}
         </RouterVersionActions>

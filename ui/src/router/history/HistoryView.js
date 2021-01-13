@@ -6,11 +6,11 @@ import { ListRouterVersionsView } from "../versions/list/ListRouterVersionsView"
 export const HistoryView = ({ router, ...props }) => {
   return (
     <EuiFlexGroup direction="row">
-      <EuiFlexItem grow={1} className="euiFlexItem--mediumPanel">
+      <EuiFlexItem grow={4} className="euiFlexItem--mediumPanel">
         <ListRouterVersionsView router={router} {...props} />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={1} className="euiFlexItem--mediumPanel">
+      <EuiFlexItem grow={3} className="euiFlexItem--mediumPanel">
         <RouterActivityLogView router={router} {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
