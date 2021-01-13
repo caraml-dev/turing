@@ -4,15 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
+
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
+	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.
 var globalLogger TuringResultLogger = newNopLogger()
+
+// appName stores the configured app name, to be applied to each log entry
+var appName string
 
 // ResultLogKeys defines the individual components for which the result log must be created
 var ResultLogKeys = struct {
@@ -27,23 +36,50 @@ var ResultLogKeys = struct {
 	Ensembler:  "ensembler",
 }
 
-type requestLogEntry struct {
-	Header *http.Header    `json:"header,omitempty"`
-	Body   json.RawMessage `json:"body,omitempty"`
+// TuringResultLogEntry represents the information logged by the result logger
+type TuringResultLogEntry turing.TuringResultLogMessage
+
+// MarshalJSON implements custom Marshaling for TuringResultLogEntry, using the underlying proto def
+func (logEntry *TuringResultLogEntry) MarshalJSON() ([]byte, error) {
+	m := &protojson.MarshalOptions{
+		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
+	}
+	message := (*turing.TuringResultLogMessage)(logEntry)
+	return m.Marshal(message)
 }
 
-type responseLogEntry struct {
-	Response json.RawMessage `json:"response,omitempty"`
-	Error    string          `json:"error,omitempty"`
+// Value returns the TuringResultLogEntry in a loggable format
+func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
+	var kvPairs map[string]interface{}
+	// Marshal into bytes
+	bytes, err := json.Marshal(&logEntry)
+	if err != nil {
+		return kvPairs, errors.Wrapf(err, "Error marshaling the result log")
+	}
+	// Unmarshal into map[string]interface{}
+	err = json.Unmarshal(bytes, &kvPairs)
+	if err != nil {
+		return kvPairs, errors.Wrapf(err, "Error unmarshaling the result log")
+	}
+	return kvPairs, nil
 }
 
-// TuringResultLogEntry is used to capture the required information to be saved by
-// the configured result logger
-type TuringResultLogEntry struct {
-	ctx       *context.Context
-	timestamp time.Time
-	request   requestLogEntry
-	responses map[string]responseLogEntry
+// AddResponse adds the per-component response/error info to the TuringResultLogEntry
+func (logEntry *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
+	responseRecord := &turing.Response{
+		Response: string(json.RawMessage(response)),
+		Error:    err,
+	}
+	switch key {
+	case ResultLogKeys.Experiment:
+		logEntry.Experiment = responseRecord
+	case ResultLogKeys.Enricher:
+		logEntry.Enricher = responseRecord
+	case ResultLogKeys.Router:
+		logEntry.Router = responseRecord
+	case ResultLogKeys.Ensembler:
+		logEntry.Ensembler = responseRecord
+	}
 }
 
 // NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
@@ -54,28 +90,23 @@ func NewTuringResultLogEntry(
 	header *http.Header,
 	body []byte,
 ) *TuringResultLogEntry {
-	return &TuringResultLogEntry{
-		ctx:       &ctx,
-		timestamp: timestamp,
-		request: requestLogEntry{
-			Header: header,
-			Body:   json.RawMessage(body),
-		},
-		responses: map[string]responseLogEntry{},
-	}
-}
+	// Get Turing Request Id
+	turingReqID, _ := turingctx.GetRequestID(ctx)
 
-// AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (e *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
-	// Check if the key supplied is valid
-	if key == ResultLogKeys.Experiment ||
-		key == ResultLogKeys.Enricher ||
-		key == ResultLogKeys.Router ||
-		key == ResultLogKeys.Ensembler {
-		e.responses[key] = responseLogEntry{
-			Response: json.RawMessage(response),
-			Error:    err,
-		}
+	// Format Request Header
+	reqHeader := map[string]string{}
+	for k, v := range *header {
+		reqHeader[k] = strings.Join(v, ",")
+	}
+
+	return &TuringResultLogEntry{
+		TuringReqId:    turingReqID,
+		EventTimestamp: timestamppb.New(timestamp),
+		RouterVersion:  appName,
+		Request: &turing.Request{
+			Header: reqHeader,
+			Body:   string(json.RawMessage(body)),
+		},
 	}
 }
 
@@ -89,11 +120,16 @@ type TuringResultLogger interface {
 func InitTuringResultLogger(cfg *config.AppConfig) error {
 	var err error
 
+	// Save the configured app name to the package var
+	appName = cfg.Name
+
 	switch cfg.ResultLogger {
 	case config.BigqueryLogger:
 		var bqLogger BigQueryLogger
 		log.Glob().Info("Initializing BigQuery Result Logger")
-		bqLogger, err = newBigQueryLogger(cfg.Name, cfg.BigQuery)
+		// Init BQ logger. This will also run the necessary checks on the table schema /
+		// create it if not exists.
+		bqLogger, err = newBigQueryLogger(cfg.BigQuery)
 		if err != nil {
 			return err
 		}
@@ -111,7 +147,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		globalLogger = newConsoleLogger()
 	case config.KafkaLogger:
 		log.Glob().Info("Initializing Kafka Result Logger")
-		globalLogger, err = newKafkaLogger(cfg.Name, cfg.Kafka)
+		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
 		globalLogger = newNopLogger()
@@ -125,14 +161,4 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 // LogEntry sends the input TuringResultLogEntry to the appropriate logger
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
 	return globalLogger.write(turLogEntry)
-}
-
-func getTuringResponseOrNil(
-	responseMap map[string]responseLogEntry,
-	key string,
-) *responseLogEntry {
-	if value, ok := responseMap[key]; ok {
-		return &value
-	}
-	return nil
 }
