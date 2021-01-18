@@ -10,10 +10,11 @@ import (
 
 var testRoutes Routes = Routes{
 	{
-		ID:       "test-id",
-		Type:     "PROXY",
-		Endpoint: "test-endpoint",
-		Timeout:  "2s",
+		ID:              "test-id",
+		Type:            "PROXY",
+		Endpoint:        "test-endpoint",
+		EndpointInfoURL: "/info?test=true",
+		Timeout:         "2s",
 	},
 }
 
@@ -29,6 +30,7 @@ func TestRoutesValue(t *testing.T) {
 			"id": "test-id",
 			"type": "PROXY",
 			"endpoint": "test-endpoint",
+			"endpoint_info_url": "/info?test=true",
 			"timeout": "2s"
 		}]
 	`, string(byteValue))
@@ -47,6 +49,7 @@ func TestRoutesScan(t *testing.T) {
 					"id": "test-id",
 					"type": "PROXY",
 					"endpoint": "test-endpoint",
+					"endpoint_info_url": "/info?test=true",
 					"timeout": "2s"
 				}]
 			`),

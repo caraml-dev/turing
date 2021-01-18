@@ -17,8 +17,8 @@ type Route struct {
 	Type string `json:"type"`
 	// Endpoint to query
 	Endpoint string `json:"endpoint"`
-	// EndpointInfoUrl (optional) holds URL to endpoint details page
-	EndpointInfoUrl string `json:"endpoint_info_url"`
+	// EndpointInfoURL (optional) holds URL to endpoint details page
+	EndpointInfoURL string `json:"endpoint_info_url"`
 	// Request timeout as a valid quantity string.
 	Timeout string `json:"timeout"`
 }
