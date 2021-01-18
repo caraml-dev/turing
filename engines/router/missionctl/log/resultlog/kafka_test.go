@@ -1,7 +1,6 @@
 package resultlog
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -75,10 +74,9 @@ func TestNewKafkaLogger(t *testing.T) {
 	mockProducer.On("GetMetadata", &cfg.Topic, false, 1000).Return(nil, nil)
 
 	// Create the new logger and validate
-	testLogger, err := newKafkaLogger("test-app-name", &cfg)
+	testLogger, err := newKafkaLogger(&cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, *testLogger, KafkaLogger{
-		appName:  "test-app-name",
 		topic:    cfg.Topic,
 		producer: mockProducer,
 	})
@@ -90,7 +88,7 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
 
 	// Run newJSONKafkaLogEntry and validate
-	message, err := newJSONKafkaLogEntry("test-app-name", turingLogEntry)
+	message, err := newJSONKafkaLogEntry(turingLogEntry)
 	assert.NoError(t, err)
 	// Get Turing request id
 	turingReqID, err := turingctx.GetRequestID(ctx)
@@ -102,17 +100,19 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 			"turing_req_id": "%s",
 			"event_timestamp": "2000-02-01T04:05:06.000000007Z",
 			"request": {
-				"header": {"Req_id": ["test_req_id"]},
-				"body": {"customer_id": "test_customer"}
+				"header": {
+					"Req_id": "test_req_id"
+				},
+				"body": "{\"customer_id\": \"test_customer\"}"
 			},
 			"experiment": {
 				"error": "Error received"
 			},
 			"enricher": {
-				"response": {"key": "enricher_data"}
+				"response": "{\"key\": \"enricher_data\"}"
 			},
 			"router": {
-				"response": {"key": "router_data"}
+				"response": "{\"key\": \"router_data\"}"
 			}
 		}`, turingReqID),
 		string(message),
@@ -122,18 +122,17 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	// Create test Turing log entry
 	_, turingLogEntry := makeTestTuringResultLogEntry(t)
-	// Overwrite context field with turing request id value
-	*turingLogEntry.ctx = turingctx.NewTestTuringContext(context.Background(), "testID")
+	// Overwrite the turing request id value
+	turingLogEntry.TuringReqId = "testID"
 	// Run newProtobufKafkaLogEntry and validate
-	key, message, err := newProtobufKafkaLogEntry("test-app-name", turingLogEntry)
+	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
 	assert.NoError(t, err)
 	// Compare logEntry data
 	assert.Equal(t, "\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a", string(key))
 	assert.Equal(t, strings.Join([]string{
-		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"=\n\x19\n\x06",
-		"Req_id\x12\x0f\n\r\x1a\vtest_req_id\x12 \n\x1e\n\vcustomer_id\x12\x0f\x1a\r",
-		"test_customer*\x10\x12\x0eError received2\x1a\n\x18\n\x16\n\x03key\x12\x0f\x1a\r",
-		"enricher_data:\x18\n\x16\n\x14\n\x03key\x12\r\x1a\vrouter_data",
+		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
+		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
+		"Error received2\x1a\n\x18{\"key\": \"enricher_data\"}:\x18\n\x16{\"key\": \"router_data\"}",
 	}, ""), string(message))
 }
 
@@ -141,7 +140,6 @@ func TestKafkaLoggerWrite(t *testing.T) {
 	// Create test logger and log entry
 	mp := &mockKafkaProducer{}
 	logger := &KafkaLogger{
-		appName:             "test-app-name",
 		serializationFormat: "json",
 		topic:               "test-topic",
 		producer:            mp,
@@ -152,9 +150,8 @@ func TestKafkaLoggerWrite(t *testing.T) {
 	// Patch newKafkaLogEntry
 	monkey.Patch(
 		newJSONKafkaLogEntry,
-		func(routerVersion string, entry *TuringResultLogEntry) ([]byte, error) {
-			// Test that the function is called with the expected args
-			assert.Equal(t, "test-app-name", routerVersion)
+		func(entry *TuringResultLogEntry) ([]byte, error) {
+			// Test that the function is called with the expected arg
 			assert.Equal(t, turingResLogEntry, entry)
 			return testKafkaLogEntry, nil
 		},

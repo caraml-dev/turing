@@ -26,11 +26,7 @@ curl -X POST \
 ```
 
 ### Running Tests
-1. `make test` runs all unit tests and integration tests with no additional dependencies
-2. `make testall` will run all tests. For these, the following env vars are required:
-    * `GOOGLE_APPLICATION_CREDENTIALS` - Path to Google Service Account .json key file. If user is authentication to gcloud, that will be used. Account must have BigQuery Data Editor permissions for `dataset_id` dataset in `gcp-project-id` project.
-    * `LITMUS_PASSKEY` - Passkey for the Litmus `client_id` used in the .yaml config files. For the test cases.
-    * `XP_PASSKEY` - Passkey for the XP `client_name` used in the .yaml config files.
+Run `make test` to run all unit tests and integration tests.
 
 ### API Docs
 Run `make swagger-ui` to build the Swagger doc. This can then be acccessed at <http://localhost:5555/>
@@ -43,7 +39,7 @@ __Notes:__
 
 Compose files under `compose/` define various services for the Turing Router app, Fleuntd, Prometheus monitoring tool, Jaeger tracing backend, a Kafka broker / UI and the Swagger docs. This can be used as follows:
 
-1. Set env vars `LITMUS_PASSKEY`, `XP_PASSKEY`, and `GOOGLE_APPLICATION_CREDENTIALS` on the terminal. (See the section on Running Tests for details on what these env vars are. They need not be set if the relevant functionality is not used.). For using Fluentd, the `GOOGLE_APPLICATION_CREDENTIALS` MUST belong to a service account.
+1. Set env var `GOOGLE_APPLICATION_CREDENTIALS` on the terminal if using BQ logging. For using Fluentd, the `GOOGLE_APPLICATION_CREDENTIALS` MUST belong to a service account.
 2. Run `make build_docker` to build the Turing app's image. This is a time consuming step and may be skipped on subsequent runs if the Golang app does not need to be re-built for its code changes and there are no new commits in the branch since the last time the image was built.
 3. Run `make deploy_docker_stack` to create the services. __Note:__ If not all services are required, simply remove the corresponding `-c <filename>` from the make target.
 4. Access the Swagger Docs at <http://localhost:5555/>

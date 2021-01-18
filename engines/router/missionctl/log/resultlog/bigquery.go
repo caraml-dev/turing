@@ -14,72 +14,50 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/bigquery"
+	"go.einride.tech/protobuf-bigquery/encoding/protobq"
+
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
 )
-
-// bqResponseKeys captures the response keys that are applicable to the defined table schema.
-// Keys not belonging to this list will be dropped when saving the log entry to BQ.
-var bqResponseKeys = []string{
-	ResultLogKeys.Experiment,
-	ResultLogKeys.Enricher,
-	ResultLogKeys.Router,
-	ResultLogKeys.Ensembler,
-}
 
 // bqLogEntry wraps a TuringResultLogEntry and implements the bigquery.ValueSaver interface
 type bqLogEntry struct {
-	appName string
 	*TuringResultLogEntry
-}
-
-// newBqLogEntry creates a new bqLogEntry from the given TuringResultLogEntry
-func newBqLogEntry(appName string, turLogEntry *TuringResultLogEntry) *bqLogEntry {
-	return &bqLogEntry{
-		appName,
-		turLogEntry,
-	}
 }
 
 // Save implements the ValueSaver interface on bqLogEntry, for saving the data to BigQuery
 func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
-	// Get Turing Request Id
-	turingReqID, err := turingctx.GetRequestID(*e.ctx)
+	var kvPairs map[string]bigquery.Value
+	bytes, err := json.Marshal(e)
 	if err != nil {
-		return map[string]bigquery.Value{}, "", err
+		return kvPairs, "", err
 	}
 
-	// Convert the request header to json
-	requestHeader, err := json.Marshal(e.request.Header)
+	// Unmarshal into map[string]bigquery.Value
+	err = json.Unmarshal(bytes, &kvPairs)
 	if err != nil {
-		return map[string]bigquery.Value{}, "", err
+		return kvPairs, "", errors.Wrapf(err, "Error unmarshaling the result log for save to BQ")
 	}
 
-	// Create the record for saving the data to BQ
-	record := map[string]bigquery.Value{
-		"turing_req_id":  turingReqID,
-		"ts":             e.timestamp.Format(time.RFC3339Nano),
-		"router_version": e.appName,
-		"request": map[string]string{
-			"header": string(requestHeader),
-			"body":   string(e.request.Body),
-		},
+	// Special handling: Update request.Header to a list of records, expected by BQ.
+	// It seems protobq.Marshal will be adding support for map[string]string that would help simplify the
+	// implementation of Save().
+	headers := []map[string]interface{}{}
+	for key, value := range e.TuringResultLogEntry.Request.Header {
+		headers = append(headers, map[string]interface{}{
+			"key":   key,
+			"value": value,
+		})
 	}
-	// Add optional fields defined in bqResponseKeys, if they exist
-	for _, key := range bqResponseKeys {
-		if v, exist := e.responses[key]; exist {
-			record[key] = map[string]string{
-				"response": string(v.Response),
-				"error":    v.Error,
-			}
-		}
-	}
+	kvPairs["request"] = bigquery.Value(map[string]interface{}{
+		"header": headers,
+		"body":   e.TuringResultLogEntry.Request.Body,
+	})
 
-	return record, "", nil
+	return kvPairs, "", nil
 }
 
 // BigQueryLogger extends the TuringResultLogger interface and defines additional
@@ -92,14 +70,14 @@ type BigQueryLogger interface {
 // bigQueryLogger implements the BigQueryLogger interface and wraps the bigquery.Client
 // and other necessary information to save the data to BigQuery
 type bigQueryLogger struct {
-	appName  string
 	dataset  string
 	table    string
 	bqClient *bigquery.Client
+	schema   *bigquery.Schema
 }
 
 // newBigQueryLogger creates a new BigQueryLogger
-func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, error) {
+func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 	ctx := context.Background()
 	bqClient, err := bigquery.NewClient(ctx, cfg.Project)
 	if err != nil {
@@ -107,10 +85,10 @@ func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, er
 	}
 	// Create the BigQuery logger
 	bqLogger := &bigQueryLogger{
-		appName:  appName,
 		dataset:  cfg.Dataset,
 		table:    cfg.Table,
 		bqClient: bqClient,
+		schema:   getTuringResultTableSchema(),
 	}
 	// Set up Turing Result table
 	err = bqLogger.setUpTuringTable()
@@ -122,14 +100,13 @@ func newBigQueryLogger(appName string, cfg *config.BQConfig) (BigQueryLogger, er
 
 // write satisfies the TuringResultLogger interface
 func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
-	entry := newBqLogEntry(l.appName, t)
 	// Create an inserter
 	ins := l.bqClient.Dataset(l.dataset).Table(l.table).Inserter()
+
 	// Each request has a 10MB limit, and each record has a 1MB limit.
-	// Insert one at a time.
-	items := []*bqLogEntry{
-		entry,
-	}
+	// Currently inserting one at a time.
+	items := []*bqLogEntry{{t}}
+
 	// Write the data and return any errors
 	if err := ins.Put(context.Background(), items); err != nil {
 		return errors.Wrapf(err, "Error during streaming insert")
@@ -140,9 +117,9 @@ func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 // getLogData returns the log information as a generic interface{} object. Internally, it calls
 // the Save method defined on the bqLogEntry structure which implements the
 // bigquery.ValueSaver interface and returns the log data as a map. This can be returned
-// as is for logging by other loggers.
+// as is for logging by other loggers whose destination is a BQ table.
 func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface{} {
-	entry := newBqLogEntry(l.appName, turLogEntry)
+	entry := &bqLogEntry{turLogEntry}
 	record, _, _ := entry.Save()
 	return record
 }
@@ -164,18 +141,17 @@ func (l *bigQueryLogger) setUpTuringTable() error {
 
 	// Check if the table exists
 	table := dataset.Table(l.table)
-	schema := getTuringResultTableSchema()
 	metadata, err := table.Metadata(ctx)
 
 	// If not, create
 	if err != nil {
-		err = createTuringResultTable(&ctx, table, &schema)
+		err = createTuringResultTable(&ctx, table, l.schema)
 		if err != nil {
 			return errors.Wrapf(err, "Failed creating BigQuery table %s", l.table)
 		}
 	} else {
 		// Table exists, compare schema
-		schema, isUpdated, err := compareTableSchema(&metadata.Schema, &schema)
+		schema, isUpdated, err := compareTableSchema(&metadata.Schema, l.schema)
 		if err != nil {
 			return errors.Wrapf(err, "Unexpected schema for BigQuery table %s", l.table)
 		}
@@ -230,7 +206,7 @@ func createTuringResultTable(
 	metaData := &bigquery.TableMetadata{
 		Schema: *schema,
 		TimePartitioning: &bigquery.TimePartitioning{
-			Field:                  "ts",
+			Field:                  "event_timestamp",
 			RequirePartitionFilter: false,
 		},
 	}
@@ -304,51 +280,7 @@ func compareTableSchema(
 
 // getTuringResultTableSchema returns the expected schema defined for logging results
 // to BigQuery
-func getTuringResultTableSchema() bigquery.Schema {
-	schema := bigquery.Schema{
-		{Name: "turing_req_id", Type: bigquery.StringFieldType, Required: true},
-		{Name: "ts", Type: bigquery.TimestampFieldType, Required: true},
-		{Name: "router_version", Type: bigquery.StringFieldType, Required: false},
-		{Name: "request", Type: bigquery.RecordFieldType,
-			Required: true,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "header", Type: bigquery.StringFieldType},
-				{Name: "body", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "experiment", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "enricher", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "router", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-		{Name: "ensembler", Type: bigquery.RecordFieldType,
-			Required: false,
-			Repeated: false,
-			Schema: bigquery.Schema{
-				{Name: "response", Type: bigquery.StringFieldType},
-				{Name: "error", Type: bigquery.StringFieldType},
-			},
-		},
-	}
-	return schema
+func getTuringResultTableSchema() *bigquery.Schema {
+	schema := protobq.InferSchema(&turing.TuringResultLogMessage{})
+	return &schema
 }
