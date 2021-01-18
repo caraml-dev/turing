@@ -56,7 +56,15 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
     {
       field: "id",
       width: "15%",
-      name: "Id"
+      name: "Id",
+      render: (id, item) =>
+        item.endpoint_info_url ? (
+          <EuiToolTip content="Open Endpoint Details Page">
+            <EuiLink href={item.endpoint_info_url}>{id}</EuiLink>
+          </EuiToolTip>
+        ) : (
+          id
+        )
     },
     {
       field: "endpoint",

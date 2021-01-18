@@ -34,7 +34,19 @@ export const MerlinEndpointsProvider = ({
   }, [region, fetchMerlinEndpoints]);
 
   useEffect(() => {
-    setEndpoints(data);
+    setEndpoints([
+      {
+        label: "Merlin Model Endpoints",
+        options: data
+          // To only show currently deployed endpoints
+          .filter(modelEndpoint => modelEndpoint.status === "serving")
+          .map(modelEndpoint => ({
+            icon: "machineLearningApp",
+            label: `http://${modelEndpoint.url}/v1/predict`,
+            endpoint_info_url: `/merlin/projects/${modelEndpoint.model.project_id}/models/${modelEndpoint.model.id}/`
+          }))
+      }
+    ]);
   }, [data, setEndpoints]);
 
   return (

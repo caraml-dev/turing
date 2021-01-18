@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   EuiButtonIcon,
   EuiCard,
@@ -24,6 +24,19 @@ export const RouteCard = ({
   onDelete,
   errors
 }) => {
+  const [endpointsMap, setEndpointsMap] = useState({});
+
+  useEffect(() => {
+    setEndpointsMap(
+      endpointOptions
+        .flatMap(option => option.options || [option])
+        .reduce((dict, option) => {
+          dict[option.label] = option;
+          return dict;
+        }, {})
+    );
+  }, [endpointOptions, setEndpointsMap]);
+
   return (
     <EuiCard
       className="euiCard--routeCard"
@@ -65,7 +78,12 @@ export const RouteCard = ({
             value={route.endpoint}
             options={endpointOptions}
             onChange={endpoint => {
-              onChange({ ...route, endpoint });
+              onChange({
+                ...route,
+                endpoint,
+                endpoint_info_url: (endpointsMap[endpoint] || {})
+                  .endpoint_info_url
+              });
             }}
             isInvalid={!!get(errors, "endpoint")}
           />

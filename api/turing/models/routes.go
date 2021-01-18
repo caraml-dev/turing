@@ -11,12 +11,14 @@ import (
 
 // Route maps onto the fiber.Component.
 type Route struct {
-	// Id of the route
+	// ID of the route
 	ID string `json:"id"`
 	// Type of the route
 	Type string `json:"type"`
 	// Endpoint to query
 	Endpoint string `json:"endpoint"`
+	// EndpointInfoUrl (optional) holds URL to endpoint details page
+	EndpointInfoUrl string `json:"endpoint_info_url"`
 	// Request timeout as a valid quantity string.
 	Timeout string `json:"timeout"`
 }

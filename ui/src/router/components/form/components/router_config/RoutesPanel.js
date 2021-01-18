@@ -27,11 +27,6 @@ export const RoutesPanel = ({
 
   const endpoints = useContext(EndpointsContext);
 
-  const endpointOptions = endpoints.map(endpoint => ({
-    icon: "machineLearningApp",
-    label: `http://${endpoint.url}/v1/predict`
-  }));
-
   const onAddRoute = () => {
     onChange("routes")([...routes, newRoute()]);
   };
@@ -56,7 +51,7 @@ export const RoutesPanel = ({
             <RouteCard
               route={route}
               isDefault={idx === defaultRouteIndex}
-              endpointOptions={endpointOptions}
+              endpointOptions={endpoints}
               onChange={onChange(`routes.${idx}`)}
               onSelect={() => setDefaultRouteIndex(idx)}
               onDelete={onDeleteRoute(idx)}
