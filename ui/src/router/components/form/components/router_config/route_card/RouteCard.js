@@ -81,8 +81,7 @@ export const RouteCard = ({
               onChange({
                 ...route,
                 endpoint,
-                endpoint_info_url: (endpointsMap[endpoint] || {})
-                  .endpoint_info_url
+                annotations: (endpointsMap[endpoint] || {}).annotations
               });
             }}
             isInvalid={!!get(errors, "endpoint")}
