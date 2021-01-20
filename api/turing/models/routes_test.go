@@ -13,7 +13,10 @@ var testRoutes Routes = Routes{
 		ID:       "test-id",
 		Type:     "PROXY",
 		Endpoint: "test-endpoint",
-		Timeout:  "2s",
+		Annotations: map[string]string{
+			"merlin.gojek.com/model-id": "10",
+		},
+		Timeout: "2s",
 	},
 }
 
@@ -29,6 +32,9 @@ func TestRoutesValue(t *testing.T) {
 			"id": "test-id",
 			"type": "PROXY",
 			"endpoint": "test-endpoint",
+			"annotations": {
+				"merlin.gojek.com/model-id": "10"
+			},
 			"timeout": "2s"
 		}]
 	`, string(byteValue))
@@ -47,6 +53,9 @@ func TestRoutesScan(t *testing.T) {
 					"id": "test-id",
 					"type": "PROXY",
 					"endpoint": "test-endpoint",
+					"annotations": {
+						"merlin.gojek.com/model-id": "10"
+					},
 					"timeout": "2s"
 				}]
 			`),

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -7,9 +7,33 @@ import {
   EuiLink,
   EuiToolTip
 } from "@elastic/eui";
+import { CurrentProjectContext } from "@gojek/mlp-ui";
 import { RoutesTableExpandedRow } from "./RoutesTableExpandedRow";
-
+import { ANNOTATIONS_MERLIN_MODEL_ID } from "../../../../../providers/endpoints/MerlinEndpointsProvider";
 import "./RoutesConfigTable.scss";
+
+const MerlinRouteId = ({ modelId, routeId }) => {
+  const { projectId } = useContext(CurrentProjectContext);
+
+  return (
+    <EuiToolTip content="Open endpoint details page">
+      <EuiLink href={`/merlin/projects/${projectId}/models/${modelId}/`}>
+        {routeId}
+      </EuiLink>
+    </EuiToolTip>
+  );
+};
+
+const RouteId = ({ route }) => {
+  return route.annotations && route.annotations[ANNOTATIONS_MERLIN_MODEL_ID] ? (
+    <MerlinRouteId
+      routeId={route.id}
+      modelId={route.annotations[ANNOTATIONS_MERLIN_MODEL_ID]}
+    />
+  ) : (
+    route.id
+  );
+};
 
 export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
@@ -56,7 +80,8 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
     {
       field: "id",
       width: "15%",
-      name: "Id"
+      name: "Id",
+      render: (_, item) => <RouteId route={item} />
     },
     {
       field: "endpoint",

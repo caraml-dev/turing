@@ -8,6 +8,8 @@ const getEnvironmentRegion = (envName, environments) => {
   return env ? env.region : undefined;
 };
 
+export const ANNOTATIONS_MERLIN_MODEL_ID = "merlin.gojek.com/model-id";
+
 export const MerlinEndpointsProvider = ({
   projectId,
   environmentName,
@@ -34,7 +36,21 @@ export const MerlinEndpointsProvider = ({
   }, [region, fetchMerlinEndpoints]);
 
   useEffect(() => {
-    setEndpoints(data);
+    setEndpoints([
+      {
+        label: "Merlin Model Endpoints",
+        options: data
+          // To only show currently deployed endpoints
+          .filter(modelEndpoint => modelEndpoint.status === "serving")
+          .map(modelEndpoint => ({
+            icon: "machineLearningApp",
+            label: `http://${modelEndpoint.url}/v1/predict`,
+            annotations: {
+              [ANNOTATIONS_MERLIN_MODEL_ID]: `${modelEndpoint.model.id}`
+            }
+          }))
+      }
+    ]);
   }, [data, setEndpoints]);
 
   return (
