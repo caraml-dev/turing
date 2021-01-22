@@ -36,15 +36,30 @@ func (i *MetricsInterceptor) AfterCompletion(
 	ctx context.Context,
 	err error,
 ) {
+	labels := map[string]string{
+		"status":     metrics.GetStatusString(err == nil),
+		"engine":     "",
+		"experiment": "",
+		"treatment":  "",
+	}
+
+	if engine, ok := ctx.Value(runner.ExperimentEngineKey).(string); ok {
+		labels["engine"] = engine
+	}
+	if experiment, ok := ctx.Value(runner.ExperimentNameKey).(string); ok {
+		labels["experiment"] = experiment
+	}
+	if treatment, ok := ctx.Value(runner.TreatmentNameKey).(string); ok {
+		labels["treatment"] = treatment
+	}
+
 	// Get start time
 	if startTime, ok := ctx.Value(startTimeKey).(time.Time); ok {
 		// Measure the time taken for the experiment run
 		metrics.Glob().MeasureDurationMsSince(
 			metrics.ExperimentEngineRequestMs,
 			startTime,
-			map[string]string{
-				"status": metrics.GetStatusString(err == nil),
-			},
+			labels,
 		)
 	}
 }
