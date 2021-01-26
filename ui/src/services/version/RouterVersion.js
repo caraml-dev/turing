@@ -27,7 +27,8 @@ export class RouterVersion {
               config: {
                 client: {
                   id: this.experiment_engine.config.client.username,
-                  encrypted_passkey: this.experiment_engine.config.client.passkey
+                  encrypted_passkey: this.experiment_engine.config.client
+                    .passkey
                 },
                 experiments: this.experiment_engine.config.experiments,
                 variables: this.experiment_engine.config.variables
@@ -57,12 +58,7 @@ export class RouterVersion {
                 }
               : this.ensembler.type === "docker"
               ? {
-                  image: this.ensembler.image,
-                  endpoint: this.ensembler.endpoint,
-                  port: this.ensembler.port,
-                  env: this.ensembler.env,
-                  service_account: this.ensembler.service_account,
-                  resource_request: this.ensembler.resource_request
+                  docker_config: this.ensembler.docker_config
                 }
               : undefined)
           }
