@@ -1,0 +1,5 @@
+mypy
+mypy-protobuf>=1.19
+pytest
+pytest-cov
+hypothesis
