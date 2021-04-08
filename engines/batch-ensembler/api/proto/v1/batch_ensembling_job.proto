@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package turing.batch.spec;
+option go_package = "github.com/turing/batch-ensembler/pkg/spec";
+
+message BatchEnsemblingJob {
+  string version = 1;
+
+  enum JobKind {
+    BatchEnsemblingJob = 0;
+  }
+  JobKind kind = 2;
+  BatchEnsemblingJobMetadata metadata = 3;
+  BatchEnsemblingJobSpec spec = 4;
+}
+
+message BatchEnsemblingJobMetadata {
+  string name = 1;
+  map<string, string> annotations = 2;
+}
+
+message BatchEnsemblingJobSpec {
+  Source source = 1;
+  map<string, PredictionSource> predictions = 2;
+
+  Ensembler ensembler = 3;
+
+  Sink sink = 4;
+}
+
+message Source {
+  Dataset dataset = 1;
+  repeated string join_on = 2;
+}
+
+message Dataset {
+  enum DatasetType {
+    BQ = 0;
+  }
+
+  message BigQueryDatasetConfig {
+    string table = 1;
+    repeated string features = 2;
+    string query = 3;
+    map<string, string> options = 4;
+  }
+
+  DatasetType type = 1;
+
+  oneof config {
+    BigQueryDatasetConfig bq_config = 2;
+  }
+}
+
+
+message PredictionSource {
+  Dataset dataset = 1;
+  repeated string join_on = 2;
+  repeated string columns = 3;
+}
+
+message Ensembler {
+  enum ResultType {
+    DOUBLE = 0;
+    FLOAT = 1;
+    INTEGER = 2;
+    LONG = 3;
+    STRING = 4;
+
+    ARRAY = 10;
+  }
+
+  message Result {
+    string column_name = 1;
+
+    ResultType type = 2;
+    // only if type is array
+    ResultType item_type = 3;
+  }
+
+  string uri = 1;
+  Result result = 2;
+
+}
+
+message Sink {
+  enum SinkType {
+    CONSOLE = 0;
+    BQ = 1;
+  }
+
+  enum SaveMode {
+    ERRORIFEXISTS = 0;
+    OVERWRITE = 1;
+    APPEND = 2;
+    IGNORE = 3;
+    ERROR = 4;
+  }
+
+  SinkType type = 1;
+  repeated string columns = 2;
+  SaveMode save_mode = 3;
+
+  oneof config {
+    BigQuerySinkConfig bq_config = 10;
+  }
+}
+
+message BigQuerySinkConfig {
+  string table = 1;
+  string staging_bucket = 2;
+  map<string, string> options = 3;
+}

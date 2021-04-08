@@ -1,0 +1,9 @@
+SELECT
+{%- if columns | length > 0 -%}
+{%- for col in columns %}
+    {{ col }}{% if not loop.last %},{% endif -%}
+{% endfor -%}
+{% else %}
+    *
+{%- endif %}
+FROM `{{ table }}`
