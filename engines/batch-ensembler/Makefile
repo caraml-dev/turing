@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 CONDA_ENV_NAME ?= batch-ensembler
+VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker))
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./env/$(CONDA_ENV_NAME)
 
 .PHONY: setup
@@ -16,8 +17,8 @@ type-check:
 		--allow-untyped-globals \
 		ensembler
 
-.PHONY: unit-test
-unit-test:
+.PHONY: test-unit
+test-unit: type-check
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
 		--cov=ensembler \
@@ -32,3 +33,9 @@ proto:
 		--go_out=pkg \
 		--go_opt=paths=source_relative \
 		api/proto/v1/*.proto
+
+.PHONY: build-image
+build-image:
+	@docker build \
+		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER} \
+		.

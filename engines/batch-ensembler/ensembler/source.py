@@ -1,12 +1,11 @@
 import os
-from abc import abstractmethod
-from typing import List, TypeVar, Generic, SupportsAbs
+from typing import List, TypeVar, Generic
 from pyspark.sql import DataFrame, SparkSession
 import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
 from ensembler.components.experimentation import PREDICTION_COLUMN_PREFIX
 from ensembler.dataset import DataSet, BigQueryDataSet, jinja
 
-T = TypeVar('T', bound=SupportsAbs['DataSet'])
+T = TypeVar('T', bound='DataSet')
 
 
 class Source(Generic[T]):
@@ -23,9 +22,8 @@ class Source(Generic[T]):
     def load(self, spark: SparkSession) -> DataFrame:
         return self.dataset().load(spark)
 
-    @abstractmethod
-    def join(self, **predictions: 'PredictionSource') -> 'Source':
-        pass
+    def join(self, **predictions: 'PredictionSource') -> 'Source[T]':
+        raise NotImplemented
 
     @classmethod
     def from_config(cls, config: pb2.Source) -> 'Source':
@@ -33,12 +31,12 @@ class Source(Generic[T]):
 
         if isinstance(dataset, BigQueryDataSet):
             return BigQuerySource(dataset, config.join_on)
-        return Source[type(dataset)](dataset, config.join_on)
+        return Source(dataset, config.join_on)
 
 
 class BigQuerySource(Source['BigQueryDataSet']):
-    with open(os.path.join(os.path.dirname(__file__), 'sql', 'bq_join.sql.jinja2'), 'r') as template:
-        _SQL_TEMPLATE = template.read()
+    with open(os.path.join(os.path.dirname(__file__), 'sql', 'bq_join.sql.jinja2'), 'r') as _t:
+        _SQL_TEMPLATE = _t.read()
 
     def __init__(self,
                  dataset: 'BigQueryDataSet',
@@ -78,7 +76,7 @@ class PredictionSource(Source[T]):
         return super(PredictionSource, self).join(**predictions)
 
     @classmethod
-    def from_config(cls, config: pb2.PredictionSource) -> 'PredictionSource[T]':
+    def from_config(cls, config: pb2.PredictionSource) -> 'PredictionSource':
         dataset = DataSet.from_config(config.dataset)
         return PredictionSource(dataset, config.join_on, config.columns)
 

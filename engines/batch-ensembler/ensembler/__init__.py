@@ -4,15 +4,12 @@ from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 from ensembler.job import BatchEnsemblingJob
 from ensembler.ensembler import Ensembler
-from ensembler.sink import Sink
 
 
 def build_spark_session(
         app_name: str,
         spark_config: DefaultDict[str, str] = None,
         hadoop_config: DefaultDict[str, str] = None) -> SparkSession:
-    if hadoop_config is None:
-        hadoop_config = {}
     conf = SparkConf()
     if spark_config:
         conf.setAll(spark_config.items())

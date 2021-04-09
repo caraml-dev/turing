@@ -1,4 +1,4 @@
-from typing import Any, Dict, MutableMapping
+from typing import Any, Dict, MutableMapping, Tuple
 import yaml
 from pyspark.sql import SparkSession
 import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
@@ -36,7 +36,7 @@ class BatchEnsemblingJob(object):
         self.sink.save(result_df)
 
     @classmethod
-    def from_yaml(cls, spec_path: str) -> ('BatchEnsemblingJob', Dict[str, Any]):
+    def from_yaml(cls, spec_path: str) -> Tuple['BatchEnsemblingJob', Dict[str, Any]]:
         with open(spec_path, 'r') as f:
             job_spec_dict = yaml.safe_load(f)
 
@@ -47,7 +47,8 @@ class BatchEnsemblingJob(object):
     def from_config(cls, config: pb2.BatchEnsemblingJob) -> 'BatchEnsemblingJob':
         metadata = config.metadata
         source = Source.from_config(config.spec.source)
-        predictions = {k: PredictionSource.from_config(v) for k, v in config.spec.predictions.items()}
+        predictions: Dict[str, 'PredictionSource'] = \
+            {k: PredictionSource.from_config(v) for k, v in config.spec.predictions.items()}
         ensembler = Ensembler.from_config(config.spec.ensembler)
         sink = Sink.from_config(config.spec.sink)
 
