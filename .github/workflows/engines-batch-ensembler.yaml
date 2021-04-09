@@ -11,6 +11,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./engines/batch-ensembler
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -22,9 +25,16 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
+      - name: Cache Conda environment
+        uses: actions/cache@v2
+        with:
+          path: ./env
+          key: conda-${{ hashFiles('environment.yaml') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements.dev.txt') }}
+          restore-keys: |
+            conda-
       - name: Install dependencies
-        working-directory: ./engines/batch-ensembler
+#        working-directory: ./engines/batch-ensembler
         run: make setup
       - name: Run unit tests
-        working-directory: ./engines/batch-ensembler
+#        working-directory: ./engines/batch-ensembler
         run: make unit-test
