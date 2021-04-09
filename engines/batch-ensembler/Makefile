@@ -16,8 +16,8 @@ type-check:
 		--allow-untyped-globals \
 		ensembler
 
-.PHONY: test
-test:
+.PHONY: unit-test
+unit-test:
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
 		--cov=ensembler \

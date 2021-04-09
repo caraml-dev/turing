@@ -1,0 +1,30 @@
+name: engines/batch-ensembler
+
+on:
+  push:
+    paths:
+      - "engines/batch-ensembler/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+      - name: Install dependencies
+        working-directory: ./engines/batch-ensembler
+        run: make setup
+      - name: Run unit tests
+        working-directory: ./engines/batch-ensembler
+        run: make unit-test
