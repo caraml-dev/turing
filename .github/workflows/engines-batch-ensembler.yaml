@@ -44,7 +44,19 @@ jobs:
         run: make test-unit
 
   publish-docker:
+    if: >-
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      ) || (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.head.repo.full_name != github.repository
+      ) || (
+        github.event_name == 'push' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      )
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -62,3 +74,4 @@ jobs:
           path: engines/batch-ensembler
           dockerfile: engines/batch-ensembler/Dockerfile
           tags: ${{ env.branch_name }}
+          push: true
