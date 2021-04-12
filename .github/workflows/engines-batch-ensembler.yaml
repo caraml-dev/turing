@@ -42,3 +42,23 @@ jobs:
 
       - name: Run unit tests
         run: make test-unit
+
+  publish-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Get branch name
+        run: echo "branch_name=$(echo ${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}} | tr / -)" >> $GITHUB_ENV
+
+      - name: Build and publish base batch ensembler Docker image
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          registry: ghcr.io
+          repository: gojek/turing-
+          path: engines/batch-ensembler
+          dockerfile: engines/batch-ensembler/Dockerfile
+          tags: ${{ env.branch_name }}
