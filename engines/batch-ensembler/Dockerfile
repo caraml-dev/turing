@@ -9,10 +9,14 @@ ARG SPARK_BQ_CONNECTOR_VERSION=0.19.1
 USER 0
 # Setup dependencies for Google Cloud Storage access.
 RUN rm $SPARK_HOME/jars/guava-14.0.1.jar
-ADD https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar $SPARK_HOME/jars
+ADD https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar \
+    $SPARK_HOME/jars
 # Add the connector jar needed to access Google Cloud Storage using the Hadoop FileSystem API.
-ADD https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar $SPARK_HOME/jars
-ADD https://repo1.maven.org/maven2/com/google/cloud/spark/spark-bigquery-with-dependencies_2.12/${SPARK_BQ_CONNECTOR_VERSION}/spark-bigquery-with-dependencies_2.12-${SPARK_BQ_CONNECTOR_VERSION}.jar $SPARK_HOME/jars
+ADD https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar \
+    $SPARK_HOME/jars
+ADD https://repo1.maven.org/maven2/com/google/cloud/spark/spark-bigquery-with-dependencies_2.12/${SPARK_BQ_CONNECTOR_VERSION}/spark-bigquery-with-dependencies_2.12-${SPARK_BQ_CONNECTOR_VERSION}.jar \
+    $SPARK_HOME/jars
+RUN chmod 644 -R $SPARK_HOME/jars/*
 
 # Setup for the Prometheus JMX exporter.
 RUN mkdir -p /etc/metrics/conf
@@ -51,11 +55,7 @@ ENV USER $username
 ENV UID $spark_uid
 ENV GID $spark_gid
 ENV HOME /home/$USER
-RUN adduser --disabled-password \
-    --uid $UID \
-    --gid $GID \
-    --home $HOME \
-    $USER
+RUN adduser --disabled-password --uid $UID --gid $GID --home $HOME $USER
 
 # Switch to Spark user
 USER ${USER}
@@ -78,12 +78,13 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
 # Copy PySpark application
 ENV PROJECT_DIR $HOME/batch-ensembler
 RUN mkdir -p $PROJECT_DIR
-COPY --chown=$USER:$USER . $PROJECT_DIR/
+COPY --chown=$UID:$GID . $PROJECT_DIR/
 
 # Setup base conda environment
 ENV CONDA_ENVIRONMENT turing-batch-ensembler
-RUN conda env create -f $PROJECT_DIR/environment.yaml -n $CONDA_ENVIRONMENT
+RUN conda env create -f $PROJECT_DIR/environment.yaml -n $CONDA_ENVIRONMENT && \
+    rm -rf $HOME/.cache
 
-RUN echo "conda activate $CONDA_ENVIRONMENT" > $HOME/.bashrc
+RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc
 
 ENV PATH $CONDA_DIR/envs/$CONDA_ENVIRONMENT/bin:$PATH

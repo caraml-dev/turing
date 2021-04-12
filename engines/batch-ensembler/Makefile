@@ -36,6 +36,5 @@ proto:
 
 .PHONY: build-image
 build-image:
-	@docker build \
-		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER} \
-		.
+	@docker build . \
+		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}

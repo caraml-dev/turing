@@ -10,7 +10,7 @@ def config():
     return from_yaml("""\
     type: BQ
     bqConfig:
-      table: "project:dataset.table"
+      table: "project.dataset.table"
       features:
         - customer_id
         - target_date
