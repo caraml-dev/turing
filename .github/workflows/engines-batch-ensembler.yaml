@@ -57,12 +57,25 @@ jobs:
 #      )
     runs-on: ubuntu-latest
     needs: test
+    env:
+      DOCKER_REGISTRY: ghcr.io/gojek
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
       - name: Get branch name
         run: echo "branch_name=$(echo ${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}} | tr / -)" >> $GITHUB_ENV
+
+      - name: Build image
+        working-directory: ./engines/batch-ensembler
+
+        run: make build-image
+
+      - name: Setup GitHub Container Registry
+        run: echo ${{ secrets.GHCR_TOKEN }} | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Publish image
+        run: docker push ${{ env.DOCKER_REGISTRY }}/turing/batch-ensembler:$(make version)
 
       - name: Build and publish base batch ensembler Docker image
         uses: docker/build-push-action@v1

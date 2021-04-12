@@ -38,3 +38,7 @@ proto:
 build-image:
 	@docker build . \
 		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}
+
+.PHONY: version
+version:
+	@echo $(VERSION_NUMBER)

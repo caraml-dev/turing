@@ -31,14 +31,14 @@ function getVersionCandidate() {
         # v0.0.5-rc1 point to the same commit, the newer tag (v0.0.5) is used for the version number
         # generation instead of the alphabetically latest version (v0.0.5-rc1).
         local latest_tag=`git tag --sort=-taggerdate --points-at ${tagged_commit_hash} | head -n 1`
-        local version_regex='(v(.+)|([0-9]+(\.[0-9]+)*))'
+        local version_regex='((.+/)?(v([^/]+)|([0-9]+(\.[0-9]+)*)))'
         if [[ $latest_tag =~ $version_regex ]]; then
-            if [[ ${BASH_REMATCH[1]:0:1} = "v" ]]; then
+            if [[ ${BASH_REMATCH[3]:0:1} = "v" ]]; then
                 version_tag=${BASH_REMATCH[1]}
-                version_candidate=${BASH_REMATCH[2]}
+                version_candidate=${BASH_REMATCH[4]}
             else
-                version_tag=${BASH_REMATCH[3]}
-                version_candidate=${BASH_REMATCH[3]}
+                version_tag=${BASH_REMATCH[1]}
+                version_candidate=${BASH_REMATCH[5]}
             fi
         fi
     fi
