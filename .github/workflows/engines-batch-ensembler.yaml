@@ -24,6 +24,12 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -66,9 +72,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Get branch name
-        run: echo "branch_name=$(echo ${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}} | tr / -)" >> $GITHUB_ENV
 
       - name: Build image
         run: make build-image
