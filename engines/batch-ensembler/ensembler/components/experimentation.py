@@ -32,7 +32,7 @@ class Ensembler(mlflow.pyfunc.PythonModel):
                        features=row.drop(prediction_columns.values()),
                        predictions=row[prediction_columns.values()],
                        treatment_config=None
-                   ), axis=1)
+                   ), axis=1, result_type='expand')
 
     @abstractmethod
     def ensemble(

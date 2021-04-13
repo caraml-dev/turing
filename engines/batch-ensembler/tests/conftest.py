@@ -1,8 +1,10 @@
 import os
 import pytest
+import shutil
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 
+shutil.rmtree("mlruns", ignore_errors=True)
 
 @pytest.fixture(scope="session")
 def spark(request):
