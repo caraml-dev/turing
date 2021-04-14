@@ -52,7 +52,6 @@ message Dataset {
   }
 }
 
-
 message PredictionSource {
   Dataset dataset = 1;
   repeated string join_on = 2;
