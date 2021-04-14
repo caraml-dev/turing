@@ -38,8 +38,9 @@ jobs:
       - name: Cache Conda environment
         uses: actions/cache@v2
         with:
-          path: ./env
-          key: conda-${{ hashFiles('environment.yaml') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements.dev.txt') }}
+          path: engines/batch-ensembler/env
+          key: |
+            conda-${{ hashFiles('engines/batch-ensembler/environment.yaml') }}-${{ hashFiles('engines/batch-ensembler/requirements.txt') }}-${{ hashFiles('engines/batch-ensembler/requirements.dev.txt') }}
           restore-keys: |
             conda-
 
