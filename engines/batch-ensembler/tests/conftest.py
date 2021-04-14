@@ -6,6 +6,7 @@ from pyspark.sql import SparkSession
 
 shutil.rmtree("mlruns", ignore_errors=True)
 
+
 @pytest.fixture(scope="session")
 def spark(request):
     conf = SparkConf()
@@ -14,7 +15,8 @@ def spark(request):
              "-hadoop2-2.0.1.jar")
     conf.set("spark.jars.packages",
              "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1")
-    sc = SparkContext(conf=conf)
+    conf.set('spark.driver.host', '127.0.0.1')
+    sc = SparkContext(master='local', conf=conf)
 
     sc._jsc.hadoopConfiguration().set("fs.gs.impl",
                                       "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
