@@ -43,7 +43,7 @@ class SparkApplication:
             group, *keys = name.split('/', 1)
             annotations[group] = {
                 **annotations.get(group, {}),
-                "".join(keys): value
+                ''.join(keys): value
             }
         annotations.update()
         spark = build_spark_session(

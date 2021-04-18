@@ -70,11 +70,11 @@ def config_simple(request):
     import mlflow
     from mlflow.pyfunc import log_model
     log_model(
-        artifact_path="ensembler",
+        artifact_path='ensembler',
         python_model=TestEnsembler(result_type=request.param),
-        code_path=[os.path.join(os.path.dirname(__file__), "../ensembler")])
+        code_path=[os.path.join(os.path.dirname(__file__), '../ensembler')])
 
-    ensembler_path = os.path.join(mlflow.get_artifact_uri(), "ensembler")
+    ensembler_path = os.path.join(mlflow.get_artifact_uri(), 'ensembler')
 
     yield from_yaml(f"""\
     uri: {ensembler_path}
@@ -100,11 +100,11 @@ def config_array():
     import mlflow
     from mlflow.pyfunc import log_model
     log_model(
-        artifact_path="ensembler_v2",
+        artifact_path='ensembler_v2',
         python_model=ArrayEnsembler(),
-        code_path=[os.path.join(os.path.dirname(__file__), "../ensembler")])
+        code_path=[os.path.join(os.path.dirname(__file__), '../ensembler')])
 
-    ensembler_path = os.path.join(mlflow.get_artifact_uri(), "ensembler_v2")
+    ensembler_path = os.path.join(mlflow.get_artifact_uri(), 'ensembler_v2')
 
     yield from_yaml(f"""\
     uri: {ensembler_path}
