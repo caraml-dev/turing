@@ -56,10 +56,11 @@ class Ensembler:
                     )
             else:
                 raise ValueError(f'unknown item type for array: {config.result.item_type}')
-        elif config.result.type in cls._PRIMITIVE_TYPE_MAP:
+        else:
             result_type = cls._PRIMITIVE_TYPE_MAP.get(config.result.type)
             cast_type = cls._CAST_TYPE_MAP.get(config.result.type)
-        else:
+
+        if result_type is None:
             raise ValueError(f'unknown result type: {config.result.type}')
 
         return Ensembler(config.uri, config.result.column_name, result_type, cast_type)
