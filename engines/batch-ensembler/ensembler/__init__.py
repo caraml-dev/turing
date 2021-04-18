@@ -26,7 +26,7 @@ def build_spark_session(
         .getOrCreate()
 
 
-class SparkApplication(object):
+class SparkApplication:
     _ANNOTATION_GROUP_SPARK = 'spark'
     _ANNOTATION_GROUP_HADOOP = 'hadoopConfiguration'
 

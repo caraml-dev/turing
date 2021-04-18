@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from pyspark.sql import DataFrame
-import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
+from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
 
 class Sink(ABC):
@@ -22,7 +22,7 @@ class Sink(ABC):
     def from_config(cls, config: pb2.Sink):
         if config.type == pb2.Sink.SinkType.CONSOLE:
             return ConsoleSink(config.columns)
-        elif config.type == pb2.Sink.SinkType.BQ:
+        if config.type == pb2.Sink.SinkType.BQ:
             return BigQuerySink(config.save_mode, config.columns, config.bq_config)
         raise ValueError(f'Sink not implemented: {config.type}')
 

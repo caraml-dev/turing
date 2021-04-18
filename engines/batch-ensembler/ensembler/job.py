@@ -1,14 +1,14 @@
 from typing import Any, Dict, MutableMapping, Tuple
-import yaml
-from pyspark.sql import SparkSession
-import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
-from ensembler.source import Source, PredictionSource
-from ensembler.ensembler import Ensembler
-from ensembler.sink import Sink
 from google.protobuf import json_format
+from pyspark.sql import SparkSession
+import yaml
+from .source import Source, PredictionSource
+from .ensembler import Ensembler
+from .sink import Sink
+from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
 
-class BatchEnsemblingJob(object):
+class BatchEnsemblingJob:
     def __init__(
             self,
             metadata: pb2.BatchEnsemblingJobMetadata,
@@ -37,8 +37,8 @@ class BatchEnsemblingJob(object):
 
     @classmethod
     def from_yaml(cls, spec_path: str) -> Tuple['BatchEnsemblingJob', Dict[str, Any]]:
-        with open(spec_path, 'r') as f:
-            job_spec_dict = yaml.safe_load(f)
+        with open(spec_path, 'r') as file:
+            job_spec_dict = yaml.safe_load(file)
 
         job_config = json_format.ParseDict(job_spec_dict, pb2.BatchEnsemblingJob())
         return BatchEnsemblingJob.from_config(job_config), job_spec_dict

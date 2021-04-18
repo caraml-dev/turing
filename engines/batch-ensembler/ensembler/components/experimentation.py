@@ -19,12 +19,14 @@ class Ensembler(mlflow.pyfunc.PythonModel):
         will be called one time during model initialization.
         :param artifacts: dictionary of artifacts passed to log_component method
         """
-        pass
 
     def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
-        prediction_columns = {col: col[len(PREDICTION_COLUMN_PREFIX):]
-                              for col in model_input.columns if col.startswith(PREDICTION_COLUMN_PREFIX)}
+        prediction_columns = {
+            col: col[len(PREDICTION_COLUMN_PREFIX):]
+            for col in model_input.columns if col.startswith(PREDICTION_COLUMN_PREFIX)
+        }
+
         return model_input \
             .rename(columns=prediction_columns) \
             .apply(lambda row:
@@ -52,6 +54,5 @@ class Ensembler(mlflow.pyfunc.PythonModel):
                 that should be applied to a given record. If the experiment engine is not configured
                 for this Batch experiment, then `treatment_config` will be `None`
 
-        :returns ensembling result (one of str, int, float, bool or array)
+        :returns ensembling result (one of str, int, float, double or array)
         """
-        pass

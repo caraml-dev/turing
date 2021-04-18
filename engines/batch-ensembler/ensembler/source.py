@@ -1,9 +1,9 @@
 import os
 from typing import List, TypeVar, Generic
 from pyspark.sql import DataFrame, SparkSession
-import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
-from ensembler.components.experimentation import PREDICTION_COLUMN_PREFIX
-from ensembler.dataset import DataSet, BigQueryDataSet, jinja
+from .components.experimentation import PREDICTION_COLUMN_PREFIX
+from .dataset import DataSet, BigQueryDataSet, jinja
+from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
 T = TypeVar('T', bound='DataSet')
 
@@ -23,7 +23,7 @@ class Source(Generic[T]):
         return self.dataset().load(spark)
 
     def join(self, **predictions: 'PredictionSource') -> 'Source[T]':
-        raise NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def from_config(cls, config: pb2.Source) -> 'Source':
@@ -66,17 +66,13 @@ class BigQuerySource(Source['BigQueryDataSet']):
 class PredictionSource(Source[T]):
 
     def __init__(self, dataset: T, join_on_columns, prediction_columns: List[str]):
-        super(PredictionSource, self).__init__(dataset, join_on_columns)
+        super().__init__(dataset, join_on_columns)
         self._prediction_columns = prediction_columns
 
     def prediction_columns(self):
         return self._prediction_columns
 
-    def join(self, **predictions: 'PredictionSource') -> 'Source[T]':
-        return super(PredictionSource, self).join(**predictions)
-
     @classmethod
     def from_config(cls, config: pb2.PredictionSource) -> 'PredictionSource':
         dataset = DataSet.from_config(config.dataset)
         return PredictionSource(dataset, config.join_on, config.columns)
-

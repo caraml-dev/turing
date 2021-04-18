@@ -1,53 +1,77 @@
 from abc import ABC
-from typing import Optional, Any, List
+from typing import Optional, Any
 import pandas
 import pytest
 from chispa.dataframe_comparer import assert_df_equality
 import ensembler.components.experimentation as experimentation
 from ensembler.ensembler import Ensembler
 from ensembler.api.proto.v1 import batch_ensembling_job_pb2 as pb2
-from pyspark.sql import types as T
+from pyspark.sql import functions as F
+
 from tests.utils.proto_utils import from_yaml
 
+NUM_CUSTOMERS = 3
 
-@pytest.fixture()
+
+@pytest.fixture
 def input_df(spark):
     return spark.createDataFrame(
         [
-            (1, "customer_1", 0.01, 0.02),
-            (2, "customer_2", 0.02, 0.04),
-            (3, "customer_3", 0.03, 0.06),
+            (
+                c_id, f'customer_{c_id}', c_id, c_id * 2, c_id / 100,
+                c_id / 100, c_id, c_id, str(c_id)
+            ) for c_id in range(1, NUM_CUSTOMERS + 1)
         ],
-        f"customer_id int,"
-        f"name string,"
-        f"{experimentation.PREDICTION_COLUMN_PREFIX}model_a double,"
-        f"{experimentation.PREDICTION_COLUMN_PREFIX}model_b double"
+        f'customer_id int,'
+        f'name string,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_a int,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_b int,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_double double,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_float float,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_integer int,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_long long,'
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_string string'
+    )
+
+
+@pytest.fixture
+def expected_result_df(input_df, request):
+    if request.param == pb2.Ensembler.ResultType.ARRAY:
+        input_df = input_df.withColumn(
+            f'{experimentation.PREDICTION_COLUMN_PREFIX}model_array',
+            F.when(F.lit(True), F.array(
+                F.col(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_a') * 2,
+                F.col(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_b') * 2,
+            ))
+        )
+    return input_df.select(
+        'customer_id',
+        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_{pb2.Ensembler.ResultType.Name(request.param).lower()}'
     )
 
 
 class TestEnsembler(experimentation.Ensembler, ABC):
 
+    def __init__(self, result_type: pb2.Ensembler.ResultType) -> None:
+        super().__init__()
+        self.result_type = result_type
+
     def ensemble(
             self,
             features: pandas.Series,
             predictions: pandas.Series,
-            treatment_config: Optional[dict]) -> Any:
-        customer_id = features['customer_id']
-        if customer_id % 2 == 0:
-            result = predictions['model_a']
-        else:
-            result = predictions['model_b']
-        return str(result)
+            treatment_config: Optional[dict]):
+        return predictions[f'model_{pb2.Ensembler.ResultType.Name(self.result_type).lower()}']
 
 
-@pytest.fixture()
-def config_simple():
+@pytest.fixture
+def config_simple(request):
     import os
     import mlflow
     from mlflow.pyfunc import log_model
     log_model(
         artifact_path="ensembler",
-        python_model=TestEnsembler(),
+        python_model=TestEnsembler(result_type=request.param),
         code_path=[os.path.join(os.path.dirname(__file__), "../ensembler")])
 
     ensembler_path = os.path.join(mlflow.get_artifact_uri(), "ensembler")
@@ -56,7 +80,7 @@ def config_simple():
     uri: {ensembler_path}
     result: 
         columnName: test_results
-        type: STRING
+        type: {pb2.Ensembler.ResultType.Name(request.param)}
     """, pb2.Ensembler())
 
 
@@ -67,10 +91,10 @@ class ArrayEnsembler(experimentation.Ensembler, ABC):
             features: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]) -> Any:
-        return predictions.to_numpy() * 2
+        return predictions[['model_a', 'model_b']].to_numpy() * 2
 
 
-@pytest.fixture()
+@pytest.fixture
 def config_array():
     import os
     import mlflow
@@ -87,47 +111,44 @@ def config_array():
     result: 
         columnName: test_results
         type: ARRAY
-        itemType: DOUBLE
+        itemType: INTEGER
     """, pb2.Ensembler())
 
 
-def test_ensemble_simple(spark, input_df, config_simple: pb2.Ensembler):
+@pytest.mark.parametrize(
+    'config_simple,expected_result_df',
+    (
+            (pb2.Ensembler.ResultType.DOUBLE, pb2.Ensembler.ResultType.DOUBLE),
+            (pb2.Ensembler.ResultType.FLOAT, pb2.Ensembler.ResultType.FLOAT),
+            (pb2.Ensembler.ResultType.INTEGER, pb2.Ensembler.ResultType.INTEGER),
+            (pb2.Ensembler.ResultType.LONG, pb2.Ensembler.ResultType.LONG),
+            (pb2.Ensembler.ResultType.STRING, pb2.Ensembler.ResultType.STRING),
+    ),
+    indirect=True
+)
+def test_ensemble_simple(spark, input_df, config_simple, expected_result_df):
     ensembler = Ensembler.from_config(config_simple)
 
+    expected_result_df.show()
+
     result_df = ensembler.ensemble(input_df, spark)
-    expected_df = spark.createDataFrame(
-        [
-            (1, "customer_1", 0.01, 0.02, '0.02'),
-            (2, "customer_2", 0.02, 0.04, '0.02'),
-            (3, "customer_3", 0.03, 0.06, '0.06'),
-        ],
-        f"customer_id int,"
-        f"name string,"
-        f"{experimentation.PREDICTION_COLUMN_PREFIX}model_a double,"
-        f"{experimentation.PREDICTION_COLUMN_PREFIX}model_b double,"
-        f"{config_simple.result.column_name} string"
-    )
-    assert_df_equality(result_df, expected_df)
+
+    expected_df = input_df.join(
+        expected_result_df.toDF('customer_id', config_simple.result.column_name),
+        on='customer_id')
+    assert_df_equality(result_df, expected_df, ignore_row_order=True)
 
 
-def test_ensemble_array(spark, input_df, config_array: pb2.Ensembler):
+@pytest.mark.parametrize(
+    'expected_result_df',
+    [pb2.Ensembler.ResultType.ARRAY],
+    indirect=True
+)
+def test_ensemble_array(spark, input_df, config_array, expected_result_df):
     ensembler = Ensembler.from_config(config_array)
     result_df = ensembler.ensemble(input_df, spark)
 
-    expected_df = spark.createDataFrame(
-        [
-            (1, "customer_1", 0.01, 0.02, [0.02, 0.04]),
-            (2, "customer_2", 0.02, 0.04, [0.04, 0.08]),
-            (3, "customer_3", 0.03, 0.06, [0.06, 0.12]),
-        ],
-        T.StructType(
-            [
-                T.StructField('customer_id', T.IntegerType()),
-                T.StructField('name', T.StringType()),
-                T.StructField(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_a', T.DoubleType()),
-                T.StructField(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_b', T.DoubleType()),
-                T.StructField(config_array.result.column_name, T.ArrayType(T.DoubleType()))
-            ]
-        )
-    )
-    assert_df_equality(result_df, expected_df)
+    expected_df = input_df.join(
+        expected_result_df.toDF('customer_id', config_array.result.column_name),
+        on='customer_id')
+    assert_df_equality(result_df, expected_df, ignore_row_order=True)

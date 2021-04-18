@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
 import os
+from abc import ABC, abstractmethod
 from typing import MutableMapping
 from pyspark.sql import DataFrame, SparkSession
-import ensembler.api.proto.v1.batch_ensembling_job_pb2 as pb2
+from jinjasql import JinjaSql
+from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
 __all__ = ['DataSet', 'BigQueryDataSet', 'jinja']
 
-from jinjasql import JinjaSql
 jinja = JinjaSql(param_style='pyformat')
 jinja.env.filters['zip'] = zip
 
@@ -25,8 +25,7 @@ class DataSet(ABC):
     def from_config(cls, config: pb2.Dataset) -> 'DataSet':
         if config.type == pb2.Dataset.DatasetType.BQ:
             return BigQueryDataSet.from_config(config.bq_config)
-        else:
-            raise ValueError(f'Unknown dataset type: {config.type} is not implemented')
+        raise ValueError(f'Unknown dataset type: {config.type} is not implemented')
 
 
 class BigQueryDataSet(DataSet):
@@ -61,5 +60,8 @@ class BigQueryDataSet(DataSet):
             )
             query = template % bind_params
         else:
-            raise ValueError('Dataset initialization failed: either "query" or "table" should be provided')
+            raise ValueError(
+                'Dataset initialization failed: '
+                'either "query" or "table" should be provided'
+            )
         return BigQueryDataSet(query, config.options)
