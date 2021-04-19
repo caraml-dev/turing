@@ -1,5 +1,5 @@
 from typing import DefaultDict
-import yaml
+import logging
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 from ensembler.job import BatchEnsemblingJob
@@ -32,9 +32,13 @@ class SparkApplication:
 
     def __init__(self, args):
         self.job, raw_config = BatchEnsemblingJob.from_yaml(args.job_spec)
-        print(
-            'Job Configuration: \n'
-            f'{yaml.dump(raw_config)}'
+        self._logger = logging.getLogger('SparkApplication')
+        self._logger.debug(
+            'Job Specification:\n'
+            '===============================================================\n'
+            '%s\n'
+            '===============================================================\n',
+            raw_config
         )
 
     def run(self):

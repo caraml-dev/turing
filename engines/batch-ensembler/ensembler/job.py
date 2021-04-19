@@ -36,12 +36,12 @@ class BatchEnsemblingJob:
         self.sink.save(result_df)
 
     @classmethod
-    def from_yaml(cls, spec_path: str) -> Tuple['BatchEnsemblingJob', Dict[str, Any]]:
+    def from_yaml(cls, spec_path: str) -> Tuple['BatchEnsemblingJob', str]:
         with open(spec_path, 'r') as file:
-            job_spec_dict = yaml.safe_load(file)
+            job_spec_raw = file.read()
 
-        job_config = json_format.ParseDict(job_spec_dict, pb2.BatchEnsemblingJob())
-        return BatchEnsemblingJob.from_config(job_config), job_spec_dict
+        job_config = json_format.ParseDict(yaml.safe_load(job_spec_raw), pb2.BatchEnsemblingJob())
+        return BatchEnsemblingJob.from_config(job_config), job_spec_raw
 
     @classmethod
     def from_config(cls, config: pb2.BatchEnsemblingJob) -> 'BatchEnsemblingJob':

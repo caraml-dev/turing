@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import List, TypeVar, Generic
 from pyspark.sql import DataFrame, SparkSession
 from .components.experimentation import PREDICTION_COLUMN_PREFIX
@@ -12,6 +13,7 @@ class Source(Generic[T]):
     def __init__(self, dataset: T, join_on_columns: List[str]):
         self._dataset = dataset
         self._join_columns = join_on_columns
+        self._logger = logging.getLogger('ensembler.Source')
 
     def dataset(self) -> T:
         return self._dataset
@@ -55,7 +57,10 @@ class BigQuerySource(Source['BigQueryDataSet']):
         )
 
         query = template % bind_params
-        print(query)
+        self._logger.debug(
+            f'Query to fetch data and predictions:\n'
+            f'{query}\n'
+        )
 
         return BigQuerySource(
             BigQueryDataSet(query, self.dataset().options),
