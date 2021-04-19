@@ -293,14 +293,45 @@ class Sink(google.protobuf.message.Message):
         OVERWRITE = Sink.SaveMode.V(1)
         APPEND = Sink.SaveMode.V(2)
         IGNORE = Sink.SaveMode.V(3)
-        ERROR = Sink.SaveMode.V(4)
     class SaveMode(metaclass=_SaveMode):
         V = typing.NewType('V', builtins.int)
     ERRORIFEXISTS = Sink.SaveMode.V(0)
     OVERWRITE = Sink.SaveMode.V(1)
     APPEND = Sink.SaveMode.V(2)
     IGNORE = Sink.SaveMode.V(3)
-    ERROR = Sink.SaveMode.V(4)
+
+    class BigQuerySinkConfig(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        class OptionsEntry(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            KEY_FIELD_NUMBER: builtins.int
+            VALUE_FIELD_NUMBER: builtins.int
+            key: typing.Text = ...
+            value: typing.Text = ...
+
+            def __init__(self,
+                *,
+                key : typing.Text = ...,
+                value : typing.Text = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+
+        TABLE_FIELD_NUMBER: builtins.int
+        STAGING_BUCKET_FIELD_NUMBER: builtins.int
+        OPTIONS_FIELD_NUMBER: builtins.int
+        table: typing.Text = ...
+        staging_bucket: typing.Text = ...
+
+        @property
+        def options(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+
+        def __init__(self,
+            *,
+            table : typing.Text = ...,
+            staging_bucket : typing.Text = ...,
+            options : typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal[u"options",b"options",u"staging_bucket",b"staging_bucket",u"table",b"table"]) -> None: ...
 
     TYPE_FIELD_NUMBER: builtins.int
     COLUMNS_FIELD_NUMBER: builtins.int
@@ -311,50 +342,16 @@ class Sink(google.protobuf.message.Message):
     save_mode: global___Sink.SaveMode.V = ...
 
     @property
-    def bq_config(self) -> global___BigQuerySinkConfig: ...
+    def bq_config(self) -> global___Sink.BigQuerySinkConfig: ...
 
     def __init__(self,
         *,
         type : global___Sink.SinkType.V = ...,
         columns : typing.Optional[typing.Iterable[typing.Text]] = ...,
         save_mode : global___Sink.SaveMode.V = ...,
-        bq_config : typing.Optional[global___BigQuerySinkConfig] = ...,
+        bq_config : typing.Optional[global___Sink.BigQuerySinkConfig] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal[u"bq_config",b"bq_config",u"config",b"config"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal[u"bq_config",b"bq_config",u"columns",b"columns",u"config",b"config",u"save_mode",b"save_mode",u"type",b"type"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal[u"config",b"config"]) -> typing_extensions.Literal["bq_config"]: ...
 global___Sink = Sink
-
-class BigQuerySinkConfig(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class OptionsEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text = ...
-        value: typing.Text = ...
-
-        def __init__(self,
-            *,
-            key : typing.Text = ...,
-            value : typing.Text = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
-
-    TABLE_FIELD_NUMBER: builtins.int
-    STAGING_BUCKET_FIELD_NUMBER: builtins.int
-    OPTIONS_FIELD_NUMBER: builtins.int
-    table: typing.Text = ...
-    staging_bucket: typing.Text = ...
-
-    @property
-    def options(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
-
-    def __init__(self,
-        *,
-        table : typing.Text = ...,
-        staging_bucket : typing.Text = ...,
-        options : typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"options",b"options",u"staging_bucket",b"staging_bucket",u"table",b"table"]) -> None: ...
-global___BigQuerySinkConfig = BigQuerySinkConfig

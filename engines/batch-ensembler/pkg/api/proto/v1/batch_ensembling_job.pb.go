@@ -20,6 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Represents a kind of the batch job
 type BatchEnsemblingJob_JobKind int32
 
 const (
@@ -106,6 +107,9 @@ func (Dataset_DatasetType) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_v1_batch_ensembling_job_proto_rawDescGZIP(), []int{4, 0}
 }
 
+// Data type of the expected ensembling results. Can be either
+// a primitive type (one of double, float, int, long or string)
+// or an array of primitives
 type Ensembler_ResultType int32
 
 const (
@@ -167,8 +171,10 @@ func (Ensembler_ResultType) EnumDescriptor() ([]byte, []int) {
 type Sink_SinkType int32
 
 const (
+	// Output results to stdout. For testing only
 	Sink_CONSOLE Sink_SinkType = 0
-	Sink_BQ      Sink_SinkType = 1
+	// Writes results into a Google BQ table
+	Sink_BQ Sink_SinkType = 1
 )
 
 // Enum value maps for Sink_SinkType.
@@ -210,6 +216,7 @@ func (Sink_SinkType) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_v1_batch_ensembling_job_proto_rawDescGZIP(), []int{7, 0}
 }
 
+// See: https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/SaveMode.html
 type Sink_SaveMode int32
 
 const (
@@ -217,7 +224,6 @@ const (
 	Sink_OVERWRITE     Sink_SaveMode = 1
 	Sink_APPEND        Sink_SaveMode = 2
 	Sink_IGNORE        Sink_SaveMode = 3
-	Sink_ERROR         Sink_SaveMode = 4
 )
 
 // Enum value maps for Sink_SaveMode.
@@ -227,14 +233,12 @@ var (
 		1: "OVERWRITE",
 		2: "APPEND",
 		3: "IGNORE",
-		4: "ERROR",
 	}
 	Sink_SaveMode_value = map[string]int32{
 		"ERRORIFEXISTS": 0,
 		"OVERWRITE":     1,
 		"APPEND":        2,
 		"IGNORE":        3,
-		"ERROR":         4,
 	}
 )
 
@@ -265,15 +269,20 @@ func (Sink_SaveMode) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_v1_batch_ensembling_job_proto_rawDescGZIP(), []int{7, 1}
 }
 
+// Represents a specification of the batch ensembling job
 type BatchEnsemblingJob struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Version  string                      `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
-	Kind     BatchEnsemblingJob_JobKind  `protobuf:"varint,2,opt,name=kind,proto3,enum=turing.batch.spec.BatchEnsemblingJob_JobKind" json:"kind,omitempty"`
+	// Version of the job specification
+	// NOTE: currently not in use
+	Version string                     `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Kind    BatchEnsemblingJob_JobKind `protobuf:"varint,2,opt,name=kind,proto3,enum=turing.batch.spec.BatchEnsemblingJob_JobKind" json:"kind,omitempty"`
+	// Job's metadata
 	Metadata *BatchEnsemblingJobMetadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec     *BatchEnsemblingJobSpec     `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Job's configuration
+	Spec *BatchEnsemblingJobSpec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
 }
 
 func (x *BatchEnsemblingJob) Reset() {
@@ -336,12 +345,32 @@ func (x *BatchEnsemblingJob) GetSpec() *BatchEnsemblingJobSpec {
 	return nil
 }
 
+// Holds necessary metadata of the job
 type BatchEnsemblingJobMetadata struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name        string            `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Job's name
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Unstructured key-value map to store an arbitrary job metadata
+	//
+	// The primary use of the annotations is to tweak Spark context
+	// and Hadoop configuration.
+	//
+	// Annotations with keys that start with `spark/` prefix are
+	// passed into spark context configuration.
+	// Example:
+	//    spark/spark.jars:          "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
+	//    spark/spark.jars.packages: "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
+	//
+	// Annotations with keys that start with `hadoopConfiguration/`
+	// prefix are passed into Hadoop configuration of the Spark context
+	// Example:
+	//    hadoopConfiguration/fs.gs.impl: "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
+	//
+	// The full list of Spark and Hadoop config keys can be found at
+	// https://spark.apache.org/docs/latest/configuration.html#available-properties
 	Annotations map[string]string `protobuf:"bytes,2,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
@@ -391,15 +420,23 @@ func (x *BatchEnsemblingJobMetadata) GetAnnotations() map[string]string {
 	return nil
 }
 
+// Represents a Ensembling job configuration
 type BatchEnsemblingJobSpec struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Source      *Source                      `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	// Holds the information about the source of the input features.
+	// Input features could be any arbitrary properties of the input
+	// dataset, e.g. user_id, transaction_datetime etc.
+	Source *Source `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	// Holds the key-value mapping between the ID of the model and
+	// the source of the predictions, produced by this model
 	Predictions map[string]*PredictionSource `protobuf:"bytes,2,rep,name=predictions,proto3" json:"predictions,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Ensembler   *Ensembler                   `protobuf:"bytes,3,opt,name=ensembler,proto3" json:"ensembler,omitempty"`
-	Sink        *Sink                        `protobuf:"bytes,4,opt,name=sink,proto3" json:"sink,omitempty"`
+	// Holds the configuration of the user-defined ensembler
+	Ensembler *Ensembler `protobuf:"bytes,3,opt,name=ensembler,proto3" json:"ensembler,omitempty"`
+	// Holds the configuration of the ensembling results sink
+	Sink *Sink `protobuf:"bytes,4,opt,name=sink,proto3" json:"sink,omitempty"`
 }
 
 func (x *BatchEnsemblingJobSpec) Reset() {
@@ -462,13 +499,22 @@ func (x *BatchEnsemblingJobSpec) GetSink() *Sink {
 	return nil
 }
 
+// Represents a configuration of a data source, together with
+// the information about how this data can be joined with other
+// data sources
 type Source struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Holds a configuration of the dataset
 	Dataset *Dataset `protobuf:"bytes,1,opt,name=dataset,proto3" json:"dataset,omitempty"`
-	JoinOn  []string `protobuf:"bytes,2,rep,name=join_on,json=joinOn,proto3" json:"join_on,omitempty"`
+	// List of columns, to be used to join this data source with
+	// prediction data sources.
+	//
+	// NOTE: The cardinality of `join_on` list should match the
+	// cardinality of `join_on` lists in all sources with predictions
+	JoinOn []string `protobuf:"bytes,2,rep,name=join_on,json=joinOn,proto3" json:"join_on,omitempty"`
 }
 
 func (x *Source) Reset() {
@@ -517,12 +563,16 @@ func (x *Source) GetJoinOn() []string {
 	return nil
 }
 
+// Represents a configuration of a dataset
 type Dataset struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Type of the dataset
 	Type Dataset_DatasetType `protobuf:"varint,1,opt,name=type,proto3,enum=turing.batch.spec.Dataset_DatasetType" json:"type,omitempty"`
+	// One of the dataset type-specific configurations should be provided
+	//
 	// Types that are assignable to Config:
 	//	*Dataset_BqConfig
 	Config isDataset_Config `protobuf_oneof:"config"`
@@ -586,18 +636,34 @@ type isDataset_Config interface {
 }
 
 type Dataset_BqConfig struct {
+	// If `type` == DatasetType.BQ
 	BqConfig *Dataset_BigQueryDatasetConfig `protobuf:"bytes,2,opt,name=bq_config,json=bqConfig,proto3,oneof"`
 }
 
 func (*Dataset_BqConfig) isDataset_Config() {}
 
+// Represents a configuration of the data source, that holds
+// prediction results of a single model.
+//
+// It is similar to `Source`, with the only difference, that
+// `PredictionSource` also has `columns` property, that holds
+// an information about what column(s) in this data source contain
+// model predictions
 type PredictionSource struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Holds a configuration of the dataset
 	Dataset *Dataset `protobuf:"bytes,1,opt,name=dataset,proto3" json:"dataset,omitempty"`
-	JoinOn  []string `protobuf:"bytes,2,rep,name=join_on,json=joinOn,proto3" json:"join_on,omitempty"`
+	// List of columns, to be used to join this predictions data
+	// with the `Source`, that contains input features
+	//
+	// NOTE: The cardinality of `join_on` list should match the
+	// cardinality of `join_on` list of the `Source`
+	JoinOn []string `protobuf:"bytes,2,rep,name=join_on,json=joinOn,proto3" json:"join_on,omitempty"`
+	// List of columns from this data source, that contain
+	// results of the model inference
 	Columns []string `protobuf:"bytes,3,rep,name=columns,proto3" json:"columns,omitempty"`
 }
 
@@ -654,12 +720,18 @@ func (x *PredictionSource) GetColumns() []string {
 	return nil
 }
 
+// Represents a configuration of a user-defined ensembler
 type Ensembler struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Uri    string            `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	// URI of the user-defined ensembler, stored as an MLFlow PyFunc model
+	// URI can be either local (such as path to a local folder) or remote
+	// (Google Storage, AWS S3 location or any other MLFlow-supported artifact locations)
+	// More info: https://www.mlflow.org/docs/latest/concepts.html#artifact-locations
+	Uri string `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	// Ensembling results configuration
 	Result *Ensembler_Result `protobuf:"bytes,2,opt,name=result,proto3" json:"result,omitempty"`
 }
 
@@ -709,14 +781,21 @@ func (x *Ensembler) GetResult() *Ensembler_Result {
 	return nil
 }
 
+// Represents a configuration of the ensembling results sink
 type Sink struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type     Sink_SinkType `protobuf:"varint,1,opt,name=type,proto3,enum=turing.batch.spec.Sink_SinkType" json:"type,omitempty"`
-	Columns  []string      `protobuf:"bytes,2,rep,name=columns,proto3" json:"columns,omitempty"`
+	// Type of the results sink
+	Type Sink_SinkType `protobuf:"varint,1,opt,name=type,proto3,enum=turing.batch.spec.Sink_SinkType" json:"type,omitempty"`
+	// List of columns (from the input source and ensembling results)
+	// that need to be saved in this sink
+	Columns []string `protobuf:"bytes,2,rep,name=columns,proto3" json:"columns,omitempty"`
+	// Save mode to be used with this sink
 	SaveMode Sink_SaveMode `protobuf:"varint,3,opt,name=save_mode,json=saveMode,proto3,enum=turing.batch.spec.Sink_SaveMode" json:"save_mode,omitempty"`
+	// One of the type-specific sink configurations
+	//
 	// Types that are assignable to Config:
 	//	*Sink_BqConfig
 	Config isSink_Config `protobuf_oneof:"config"`
@@ -782,7 +861,7 @@ func (m *Sink) GetConfig() isSink_Config {
 	return nil
 }
 
-func (x *Sink) GetBqConfig() *BigQuerySinkConfig {
+func (x *Sink) GetBqConfig() *Sink_BigQuerySinkConfig {
 	if x, ok := x.GetConfig().(*Sink_BqConfig); ok {
 		return x.BqConfig
 	}
@@ -794,89 +873,50 @@ type isSink_Config interface {
 }
 
 type Sink_BqConfig struct {
-	BqConfig *BigQuerySinkConfig `protobuf:"bytes,10,opt,name=bq_config,json=bqConfig,proto3,oneof"`
+	// If `type` == SinkType.BQ
+	BqConfig *Sink_BigQuerySinkConfig `protobuf:"bytes,10,opt,name=bq_config,json=bqConfig,proto3,oneof"`
 }
 
 func (*Sink_BqConfig) isSink_Config() {}
 
-type BigQuerySinkConfig struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Table         string            `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
-	StagingBucket string            `protobuf:"bytes,2,opt,name=staging_bucket,json=stagingBucket,proto3" json:"staging_bucket,omitempty"`
-	Options       map[string]string `protobuf:"bytes,3,rep,name=options,proto3" json:"options,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-}
-
-func (x *BigQuerySinkConfig) Reset() {
-	*x = BigQuerySinkConfig{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *BigQuerySinkConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BigQuerySinkConfig) ProtoMessage() {}
-
-func (x *BigQuerySinkConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BigQuerySinkConfig.ProtoReflect.Descriptor instead.
-func (*BigQuerySinkConfig) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_batch_ensembling_job_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *BigQuerySinkConfig) GetTable() string {
-	if x != nil {
-		return x.Table
-	}
-	return ""
-}
-
-func (x *BigQuerySinkConfig) GetStagingBucket() string {
-	if x != nil {
-		return x.StagingBucket
-	}
-	return ""
-}
-
-func (x *BigQuerySinkConfig) GetOptions() map[string]string {
-	if x != nil {
-		return x.Options
-	}
-	return nil
-}
-
+// Represents a configuration of a BigQuery dataset
 type Dataset_BigQueryDatasetConfig struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Table    string            `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
-	Features []string          `protobuf:"bytes,2,rep,name=features,proto3" json:"features,omitempty"`
-	Query    string            `protobuf:"bytes,3,opt,name=query,proto3" json:"query,omitempty"`
-	Options  map[string]string `protobuf:"bytes,4,rep,name=options,proto3" json:"options,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Fully-qualified BQ table name,
+	// e.g `project_name.dataset_name.table_name`
+	//
+	// NOTE: Either `table` or `query` should be configured
+	// If both `table` and `query` are configured, then `query`
+	// will take a higher priority
+	Table string `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	// List of columns to be selected and used from the `table`.
+	// If not provided, then all columns will be used.
+	Features []string `protobuf:"bytes,2,rep,name=features,proto3" json:"features,omitempty"`
+	// BQ's Standard SQL SELECT query to fetch the data to be
+	// used as a dataset.
+	//
+	// If `query` is configured, then these two `options` MUST be set:
+	//  – viewsEnabled: "true"
+	//  - materializationDataset: <dataset name, where this view will be materialized>
+	//
+	// NOTE: Either `table` or `query` should be configured
+	// If both `table` and `query` are configured, then `query`
+	// will take a higher priority
+	Query string `protobuf:"bytes,3,opt,name=query,proto3" json:"query,omitempty"`
+	// List of an extra key-value config options, that is passed
+	// into Spark-BQ connector.
+	// The full list of supported options can be found here:
+	// https://github.com/GoogleCloudDataproc/spark-bigquery-connector#properties
+	Options map[string]string `protobuf:"bytes,4,rep,name=options,proto3" json:"options,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *Dataset_BigQueryDatasetConfig) Reset() {
 	*x = Dataset_BigQueryDatasetConfig{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[11]
+		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -889,7 +929,7 @@ func (x *Dataset_BigQueryDatasetConfig) String() string {
 func (*Dataset_BigQueryDatasetConfig) ProtoMessage() {}
 
 func (x *Dataset_BigQueryDatasetConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[11]
+	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -933,13 +973,16 @@ func (x *Dataset_BigQueryDatasetConfig) GetOptions() map[string]string {
 	return nil
 }
 
+// Represents a configuration of the ensembling result
 type Ensembler_Result struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ColumnName string               `protobuf:"bytes,1,opt,name=column_name,json=columnName,proto3" json:"column_name,omitempty"`
-	Type       Ensembler_ResultType `protobuf:"varint,2,opt,name=type,proto3,enum=turing.batch.spec.Ensembler_ResultType" json:"type,omitempty"`
+	// Name of the column, that will store the results of ensembling
+	ColumnName string `protobuf:"bytes,1,opt,name=column_name,json=columnName,proto3" json:"column_name,omitempty"`
+	// Expected type of ensembling
+	Type Ensembler_ResultType `protobuf:"varint,2,opt,name=type,proto3,enum=turing.batch.spec.Ensembler_ResultType" json:"type,omitempty"`
 	// only if type is array
 	ItemType Ensembler_ResultType `protobuf:"varint,3,opt,name=item_type,json=itemType,proto3,enum=turing.batch.spec.Ensembler_ResultType" json:"item_type,omitempty"`
 }
@@ -947,7 +990,7 @@ type Ensembler_Result struct {
 func (x *Ensembler_Result) Reset() {
 	*x = Ensembler_Result{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13]
+		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -960,7 +1003,7 @@ func (x *Ensembler_Result) String() string {
 func (*Ensembler_Result) ProtoMessage() {}
 
 func (x *Ensembler_Result) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13]
+	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -995,6 +1038,78 @@ func (x *Ensembler_Result) GetItemType() Ensembler_ResultType {
 		return x.ItemType
 	}
 	return Ensembler_DOUBLE
+}
+
+// Represents a configuration of a BQ sink
+type Sink_BigQuerySinkConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Fully-qualified BQ table name
+	Table string `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	// Spark BQ connector writes data to GCS first, before loading it into BQ
+	// `staging_bucket` should contain the name of a GCS bucket, where the
+	// data will be temporarily stored at
+	StagingBucket string `protobuf:"bytes,2,opt,name=staging_bucket,json=stagingBucket,proto3" json:"staging_bucket,omitempty"`
+	// List of an extra key-value config options, that is passed
+	// into Spark-BQ connector.
+	// The full list of supported options can be found here:
+	// https://github.com/GoogleCloudDataproc/spark-bigquery-connector#properties
+	Options map[string]string `protobuf:"bytes,3,rep,name=options,proto3" json:"options,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *Sink_BigQuerySinkConfig) Reset() {
+	*x = Sink_BigQuerySinkConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Sink_BigQuerySinkConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Sink_BigQuerySinkConfig) ProtoMessage() {}
+
+func (x *Sink_BigQuerySinkConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Sink_BigQuerySinkConfig.ProtoReflect.Descriptor instead.
+func (*Sink_BigQuerySinkConfig) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_batch_ensembling_job_proto_rawDescGZIP(), []int{7, 0}
+}
+
+func (x *Sink_BigQuerySinkConfig) GetTable() string {
+	if x != nil {
+		return x.Table
+	}
+	return ""
+}
+
+func (x *Sink_BigQuerySinkConfig) GetStagingBucket() string {
+	if x != nil {
+		return x.StagingBucket
+	}
+	return ""
+}
+
+func (x *Sink_BigQuerySinkConfig) GetOptions() map[string]string {
+	if x != nil {
+		return x.Options
+	}
+	return nil
 }
 
 var File_api_proto_v1_batch_ensembling_job_proto protoreflect.FileDescriptor
@@ -1121,7 +1236,7 @@ var file_api_proto_v1_batch_ensembling_job_proto_rawDesc = []byte{
 	0x41, 0x54, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x49, 0x4e, 0x54, 0x45, 0x47, 0x45, 0x52, 0x10,
 	0x02, 0x12, 0x08, 0x0a, 0x04, 0x4c, 0x4f, 0x4e, 0x47, 0x10, 0x03, 0x12, 0x0a, 0x0a, 0x06, 0x53,
 	0x54, 0x52, 0x49, 0x4e, 0x47, 0x10, 0x04, 0x12, 0x09, 0x0a, 0x05, 0x41, 0x52, 0x52, 0x41, 0x59,
-	0x10, 0x0a, 0x22, 0xd7, 0x02, 0x0a, 0x04, 0x53, 0x69, 0x6e, 0x6b, 0x12, 0x34, 0x0a, 0x04, 0x74,
+	0x10, 0x0a, 0x22, 0xb4, 0x04, 0x0a, 0x04, 0x53, 0x69, 0x6e, 0x6b, 0x12, 0x34, 0x0a, 0x04, 0x74,
 	0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x20, 0x2e, 0x74, 0x75, 0x72, 0x69,
 	0x6e, 0x67, 0x2e, 0x62, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x73, 0x70, 0x65, 0x63, 0x2e, 0x53, 0x69,
 	0x6e, 0x6b, 0x2e, 0x53, 0x69, 0x6e, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
@@ -1130,36 +1245,36 @@ var file_api_proto_v1_batch_ensembling_job_proto_rawDesc = []byte{
 	0x61, 0x76, 0x65, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x20,
 	0x2e, 0x74, 0x75, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x62, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x73, 0x70,
 	0x65, 0x63, 0x2e, 0x53, 0x69, 0x6e, 0x6b, 0x2e, 0x53, 0x61, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x65,
-	0x52, 0x08, 0x73, 0x61, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x44, 0x0a, 0x09, 0x62, 0x71,
-	0x5f, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e,
+	0x52, 0x08, 0x73, 0x61, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x49, 0x0a, 0x09, 0x62, 0x71,
+	0x5f, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e,
 	0x74, 0x75, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x62, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x73, 0x70, 0x65,
-	0x63, 0x2e, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x69, 0x6e, 0x6b, 0x43, 0x6f,
-	0x6e, 0x66, 0x69, 0x67, 0x48, 0x00, 0x52, 0x08, 0x62, 0x71, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x22, 0x1f, 0x0a, 0x08, 0x53, 0x69, 0x6e, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0b, 0x0a, 0x07,
-	0x43, 0x4f, 0x4e, 0x53, 0x4f, 0x4c, 0x45, 0x10, 0x00, 0x12, 0x06, 0x0a, 0x02, 0x42, 0x51, 0x10,
-	0x01, 0x22, 0x4f, 0x0a, 0x08, 0x53, 0x61, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x11, 0x0a,
-	0x0d, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x49, 0x46, 0x45, 0x58, 0x49, 0x53, 0x54, 0x53, 0x10, 0x00,
-	0x12, 0x0d, 0x0a, 0x09, 0x4f, 0x56, 0x45, 0x52, 0x57, 0x52, 0x49, 0x54, 0x45, 0x10, 0x01, 0x12,
-	0x0a, 0x0a, 0x06, 0x41, 0x50, 0x50, 0x45, 0x4e, 0x44, 0x10, 0x02, 0x12, 0x0a, 0x0a, 0x06, 0x49,
-	0x47, 0x4e, 0x4f, 0x52, 0x45, 0x10, 0x03, 0x12, 0x09, 0x0a, 0x05, 0x45, 0x52, 0x52, 0x4f, 0x52,
-	0x10, 0x04, 0x42, 0x08, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0xdb, 0x01, 0x0a,
-	0x12, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x69, 0x6e, 0x6b, 0x43, 0x6f, 0x6e,
-	0x66, 0x69, 0x67, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x05, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x73, 0x74, 0x61,
-	0x67, 0x69, 0x6e, 0x67, 0x5f, 0x62, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0d, 0x73, 0x74, 0x61, 0x67, 0x69, 0x6e, 0x67, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74,
-	0x12, 0x4c, 0x0a, 0x07, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28,
-	0x0b, 0x32, 0x32, 0x2e, 0x74, 0x75, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x62, 0x61, 0x74, 0x63, 0x68,
-	0x2e, 0x73, 0x70, 0x65, 0x63, 0x2e, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x69,
-	0x6e, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x3a,
-	0x0a, 0x0c, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10,
-	0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79,
-	0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x2c, 0x5a, 0x2a, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x75, 0x72, 0x69, 0x6e, 0x67, 0x2f,
-	0x62, 0x61, 0x74, 0x63, 0x68, 0x2d, 0x65, 0x6e, 0x73, 0x65, 0x6d, 0x62, 0x6c, 0x65, 0x72, 0x2f,
-	0x70, 0x6b, 0x67, 0x2f, 0x73, 0x70, 0x65, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x63, 0x2e, 0x53, 0x69, 0x6e, 0x6b, 0x2e, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53,
+	0x69, 0x6e, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x48, 0x00, 0x52, 0x08, 0x62, 0x71, 0x43,
+	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0xe0, 0x01, 0x0a, 0x12, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65,
+	0x72, 0x79, 0x53, 0x69, 0x6e, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x14, 0x0a, 0x05,
+	0x74, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x61, 0x62,
+	0x6c, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x73, 0x74, 0x61, 0x67, 0x69, 0x6e, 0x67, 0x5f, 0x62, 0x75,
+	0x63, 0x6b, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x73, 0x74, 0x61, 0x67,
+	0x69, 0x6e, 0x67, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x12, 0x51, 0x0a, 0x07, 0x6f, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x37, 0x2e, 0x74, 0x75, 0x72,
+	0x69, 0x6e, 0x67, 0x2e, 0x62, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x73, 0x70, 0x65, 0x63, 0x2e, 0x53,
+	0x69, 0x6e, 0x6b, 0x2e, 0x42, 0x69, 0x67, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x69, 0x6e, 0x6b,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x45, 0x6e,
+	0x74, 0x72, 0x79, 0x52, 0x07, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x3a, 0x0a, 0x0c,
+	0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03,
+	0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14,
+	0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x1f, 0x0a, 0x08, 0x53, 0x69, 0x6e, 0x6b,
+	0x54, 0x79, 0x70, 0x65, 0x12, 0x0b, 0x0a, 0x07, 0x43, 0x4f, 0x4e, 0x53, 0x4f, 0x4c, 0x45, 0x10,
+	0x00, 0x12, 0x06, 0x0a, 0x02, 0x42, 0x51, 0x10, 0x01, 0x22, 0x44, 0x0a, 0x08, 0x53, 0x61, 0x76,
+	0x65, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x11, 0x0a, 0x0d, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x49, 0x46,
+	0x45, 0x58, 0x49, 0x53, 0x54, 0x53, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4f, 0x56, 0x45, 0x52,
+	0x57, 0x52, 0x49, 0x54, 0x45, 0x10, 0x01, 0x12, 0x0a, 0x0a, 0x06, 0x41, 0x50, 0x50, 0x45, 0x4e,
+	0x44, 0x10, 0x02, 0x12, 0x0a, 0x0a, 0x06, 0x49, 0x47, 0x4e, 0x4f, 0x52, 0x45, 0x10, 0x03, 0x42,
+	0x08, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x42, 0x2c, 0x5a, 0x2a, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x75, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x62,
+	0x61, 0x74, 0x63, 0x68, 0x2d, 0x65, 0x6e, 0x73, 0x65, 0x6d, 0x62, 0x6c, 0x65, 0x72, 0x2f, 0x70,
+	0x6b, 0x67, 0x2f, 0x73, 0x70, 0x65, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1190,36 +1305,36 @@ var file_api_proto_v1_batch_ensembling_job_proto_goTypes = []interface{}{
 	(*PredictionSource)(nil),              // 10: turing.batch.spec.PredictionSource
 	(*Ensembler)(nil),                     // 11: turing.batch.spec.Ensembler
 	(*Sink)(nil),                          // 12: turing.batch.spec.Sink
-	(*BigQuerySinkConfig)(nil),            // 13: turing.batch.spec.BigQuerySinkConfig
-	nil,                                   // 14: turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry
-	nil,                                   // 15: turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry
-	(*Dataset_BigQueryDatasetConfig)(nil), // 16: turing.batch.spec.Dataset.BigQueryDatasetConfig
-	nil,                                   // 17: turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry
-	(*Ensembler_Result)(nil),              // 18: turing.batch.spec.Ensembler.Result
-	nil,                                   // 19: turing.batch.spec.BigQuerySinkConfig.OptionsEntry
+	nil,                                   // 13: turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry
+	nil,                                   // 14: turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry
+	(*Dataset_BigQueryDatasetConfig)(nil), // 15: turing.batch.spec.Dataset.BigQueryDatasetConfig
+	nil,                                   // 16: turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry
+	(*Ensembler_Result)(nil),              // 17: turing.batch.spec.Ensembler.Result
+	(*Sink_BigQuerySinkConfig)(nil),       // 18: turing.batch.spec.Sink.BigQuerySinkConfig
+	nil,                                   // 19: turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry
 }
 var file_api_proto_v1_batch_ensembling_job_proto_depIdxs = []int32{
 	0,  // 0: turing.batch.spec.BatchEnsemblingJob.kind:type_name -> turing.batch.spec.BatchEnsemblingJob.JobKind
 	6,  // 1: turing.batch.spec.BatchEnsemblingJob.metadata:type_name -> turing.batch.spec.BatchEnsemblingJobMetadata
 	7,  // 2: turing.batch.spec.BatchEnsemblingJob.spec:type_name -> turing.batch.spec.BatchEnsemblingJobSpec
-	14, // 3: turing.batch.spec.BatchEnsemblingJobMetadata.annotations:type_name -> turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry
+	13, // 3: turing.batch.spec.BatchEnsemblingJobMetadata.annotations:type_name -> turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry
 	8,  // 4: turing.batch.spec.BatchEnsemblingJobSpec.source:type_name -> turing.batch.spec.Source
-	15, // 5: turing.batch.spec.BatchEnsemblingJobSpec.predictions:type_name -> turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry
+	14, // 5: turing.batch.spec.BatchEnsemblingJobSpec.predictions:type_name -> turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry
 	11, // 6: turing.batch.spec.BatchEnsemblingJobSpec.ensembler:type_name -> turing.batch.spec.Ensembler
 	12, // 7: turing.batch.spec.BatchEnsemblingJobSpec.sink:type_name -> turing.batch.spec.Sink
 	9,  // 8: turing.batch.spec.Source.dataset:type_name -> turing.batch.spec.Dataset
 	1,  // 9: turing.batch.spec.Dataset.type:type_name -> turing.batch.spec.Dataset.DatasetType
-	16, // 10: turing.batch.spec.Dataset.bq_config:type_name -> turing.batch.spec.Dataset.BigQueryDatasetConfig
+	15, // 10: turing.batch.spec.Dataset.bq_config:type_name -> turing.batch.spec.Dataset.BigQueryDatasetConfig
 	9,  // 11: turing.batch.spec.PredictionSource.dataset:type_name -> turing.batch.spec.Dataset
-	18, // 12: turing.batch.spec.Ensembler.result:type_name -> turing.batch.spec.Ensembler.Result
+	17, // 12: turing.batch.spec.Ensembler.result:type_name -> turing.batch.spec.Ensembler.Result
 	3,  // 13: turing.batch.spec.Sink.type:type_name -> turing.batch.spec.Sink.SinkType
 	4,  // 14: turing.batch.spec.Sink.save_mode:type_name -> turing.batch.spec.Sink.SaveMode
-	13, // 15: turing.batch.spec.Sink.bq_config:type_name -> turing.batch.spec.BigQuerySinkConfig
-	19, // 16: turing.batch.spec.BigQuerySinkConfig.options:type_name -> turing.batch.spec.BigQuerySinkConfig.OptionsEntry
-	10, // 17: turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry.value:type_name -> turing.batch.spec.PredictionSource
-	17, // 18: turing.batch.spec.Dataset.BigQueryDatasetConfig.options:type_name -> turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry
-	2,  // 19: turing.batch.spec.Ensembler.Result.type:type_name -> turing.batch.spec.Ensembler.ResultType
-	2,  // 20: turing.batch.spec.Ensembler.Result.item_type:type_name -> turing.batch.spec.Ensembler.ResultType
+	18, // 15: turing.batch.spec.Sink.bq_config:type_name -> turing.batch.spec.Sink.BigQuerySinkConfig
+	10, // 16: turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry.value:type_name -> turing.batch.spec.PredictionSource
+	16, // 17: turing.batch.spec.Dataset.BigQueryDatasetConfig.options:type_name -> turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry
+	2,  // 18: turing.batch.spec.Ensembler.Result.type:type_name -> turing.batch.spec.Ensembler.ResultType
+	2,  // 19: turing.batch.spec.Ensembler.Result.item_type:type_name -> turing.batch.spec.Ensembler.ResultType
+	19, // 20: turing.batch.spec.Sink.BigQuerySinkConfig.options:type_name -> turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry
 	21, // [21:21] is the sub-list for method output_type
 	21, // [21:21] is the sub-list for method input_type
 	21, // [21:21] is the sub-list for extension type_name
@@ -1329,19 +1444,7 @@ func file_api_proto_v1_batch_ensembling_job_proto_init() {
 				return nil
 			}
 		}
-		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BigQuerySinkConfig); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Dataset_BigQueryDatasetConfig); i {
 			case 0:
 				return &v.state
@@ -1353,8 +1456,20 @@ func file_api_proto_v1_batch_ensembling_job_proto_init() {
 				return nil
 			}
 		}
-		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Ensembler_Result); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_v1_batch_ensembling_job_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Sink_BigQuerySinkConfig); i {
 			case 0:
 				return &v.state
 			case 1:

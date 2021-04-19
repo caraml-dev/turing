@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z*github.com/turing/batch-ensembler/pkg/spec',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\'api/proto/v1/batch_ensembling_job.proto\x12\x11turing.batch.spec\"\xff\x01\n\x12\x42\x61tchEnsemblingJob\x12\x0f\n\x07version\x18\x01 \x01(\t\x12;\n\x04kind\x18\x02 \x01(\x0e\x32-.turing.batch.spec.BatchEnsemblingJob.JobKind\x12?\n\x08metadata\x18\x03 \x01(\x0b\x32-.turing.batch.spec.BatchEnsemblingJobMetadata\x12\x37\n\x04spec\x18\x04 \x01(\x0b\x32).turing.batch.spec.BatchEnsemblingJobSpec\"!\n\x07JobKind\x12\x16\n\x12\x42\x61tchEnsemblingJob\x10\x00\"\xb3\x01\n\x1a\x42\x61tchEnsemblingJobMetadata\x12\x0c\n\x04name\x18\x01 \x01(\t\x12S\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32>.turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xc5\x02\n\x16\x42\x61tchEnsemblingJobSpec\x12)\n\x06source\x18\x01 \x01(\x0b\x32\x19.turing.batch.spec.Source\x12O\n\x0bpredictions\x18\x02 \x03(\x0b\x32:.turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry\x12/\n\tensembler\x18\x03 \x01(\x0b\x32\x1c.turing.batch.spec.Ensembler\x12%\n\x04sink\x18\x04 \x01(\x0b\x32\x17.turing.batch.spec.Sink\x1aW\n\x10PredictionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x32\n\x05value\x18\x02 \x01(\x0b\x32#.turing.batch.spec.PredictionSource:\x02\x38\x01\"F\n\x06Source\x12+\n\x07\x64\x61taset\x18\x01 \x01(\x0b\x32\x1a.turing.batch.spec.Dataset\x12\x0f\n\x07join_on\x18\x02 \x03(\t\"\xf1\x02\n\x07\x44\x61taset\x12\x34\n\x04type\x18\x01 \x01(\x0e\x32&.turing.batch.spec.Dataset.DatasetType\x12\x45\n\tbq_config\x18\x02 \x01(\x0b\x32\x30.turing.batch.spec.Dataset.BigQueryDatasetConfigH\x00\x1a\xc7\x01\n\x15\x42igQueryDatasetConfig\x12\r\n\x05table\x18\x01 \x01(\t\x12\x10\n\x08\x66\x65\x61tures\x18\x02 \x03(\t\x12\r\n\x05query\x18\x03 \x01(\t\x12N\n\x07options\x18\x04 \x03(\x0b\x32=.turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry\x1a.\n\x0cOptionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x15\n\x0b\x44\x61tasetType\x12\x06\n\x02\x42Q\x10\x00\x42\x08\n\x06\x63onfig\"a\n\x10PredictionSource\x12+\n\x07\x64\x61taset\x18\x01 \x01(\x0b\x32\x1a.turing.batch.spec.Dataset\x12\x0f\n\x07join_on\x18\x02 \x03(\t\x12\x0f\n\x07\x63olumns\x18\x03 \x03(\t\"\xb3\x02\n\tEnsembler\x12\x0b\n\x03uri\x18\x01 \x01(\t\x12\x33\n\x06result\x18\x02 \x01(\x0b\x32#.turing.batch.spec.Ensembler.Result\x1a\x90\x01\n\x06Result\x12\x13\n\x0b\x63olumn_name\x18\x01 \x01(\t\x12\x35\n\x04type\x18\x02 \x01(\x0e\x32\'.turing.batch.spec.Ensembler.ResultType\x12:\n\titem_type\x18\x03 \x01(\x0e\x32\'.turing.batch.spec.Ensembler.ResultType\"Q\n\nResultType\x12\n\n\x06\x44OUBLE\x10\x00\x12\t\n\x05\x46LOAT\x10\x01\x12\x0b\n\x07INTEGER\x10\x02\x12\x08\n\x04LONG\x10\x03\x12\n\n\x06STRING\x10\x04\x12\t\n\x05\x41RRAY\x10\n\"\xb4\x02\n\x04Sink\x12.\n\x04type\x18\x01 \x01(\x0e\x32 .turing.batch.spec.Sink.SinkType\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x33\n\tsave_mode\x18\x03 \x01(\x0e\x32 .turing.batch.spec.Sink.SaveMode\x12:\n\tbq_config\x18\n \x01(\x0b\x32%.turing.batch.spec.BigQuerySinkConfigH\x00\"\x1f\n\x08SinkType\x12\x0b\n\x07\x43ONSOLE\x10\x00\x12\x06\n\x02\x42Q\x10\x01\"O\n\x08SaveMode\x12\x11\n\rERRORIFEXISTS\x10\x00\x12\r\n\tOVERWRITE\x10\x01\x12\n\n\x06\x41PPEND\x10\x02\x12\n\n\x06IGNORE\x10\x03\x12\t\n\x05\x45RROR\x10\x04\x42\x08\n\x06\x63onfig\"\xb0\x01\n\x12\x42igQuerySinkConfig\x12\r\n\x05table\x18\x01 \x01(\t\x12\x16\n\x0estaging_bucket\x18\x02 \x01(\t\x12\x43\n\x07options\x18\x03 \x03(\x0b\x32\x32.turing.batch.spec.BigQuerySinkConfig.OptionsEntry\x1a.\n\x0cOptionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42,Z*github.com/turing/batch-ensembler/pkg/specb\x06proto3'
+  serialized_pb=b'\n\'api/proto/v1/batch_ensembling_job.proto\x12\x11turing.batch.spec\"\xff\x01\n\x12\x42\x61tchEnsemblingJob\x12\x0f\n\x07version\x18\x01 \x01(\t\x12;\n\x04kind\x18\x02 \x01(\x0e\x32-.turing.batch.spec.BatchEnsemblingJob.JobKind\x12?\n\x08metadata\x18\x03 \x01(\x0b\x32-.turing.batch.spec.BatchEnsemblingJobMetadata\x12\x37\n\x04spec\x18\x04 \x01(\x0b\x32).turing.batch.spec.BatchEnsemblingJobSpec\"!\n\x07JobKind\x12\x16\n\x12\x42\x61tchEnsemblingJob\x10\x00\"\xb3\x01\n\x1a\x42\x61tchEnsemblingJobMetadata\x12\x0c\n\x04name\x18\x01 \x01(\t\x12S\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32>.turing.batch.spec.BatchEnsemblingJobMetadata.AnnotationsEntry\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xc5\x02\n\x16\x42\x61tchEnsemblingJobSpec\x12)\n\x06source\x18\x01 \x01(\x0b\x32\x19.turing.batch.spec.Source\x12O\n\x0bpredictions\x18\x02 \x03(\x0b\x32:.turing.batch.spec.BatchEnsemblingJobSpec.PredictionsEntry\x12/\n\tensembler\x18\x03 \x01(\x0b\x32\x1c.turing.batch.spec.Ensembler\x12%\n\x04sink\x18\x04 \x01(\x0b\x32\x17.turing.batch.spec.Sink\x1aW\n\x10PredictionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x32\n\x05value\x18\x02 \x01(\x0b\x32#.turing.batch.spec.PredictionSource:\x02\x38\x01\"F\n\x06Source\x12+\n\x07\x64\x61taset\x18\x01 \x01(\x0b\x32\x1a.turing.batch.spec.Dataset\x12\x0f\n\x07join_on\x18\x02 \x03(\t\"\xf1\x02\n\x07\x44\x61taset\x12\x34\n\x04type\x18\x01 \x01(\x0e\x32&.turing.batch.spec.Dataset.DatasetType\x12\x45\n\tbq_config\x18\x02 \x01(\x0b\x32\x30.turing.batch.spec.Dataset.BigQueryDatasetConfigH\x00\x1a\xc7\x01\n\x15\x42igQueryDatasetConfig\x12\r\n\x05table\x18\x01 \x01(\t\x12\x10\n\x08\x66\x65\x61tures\x18\x02 \x03(\t\x12\r\n\x05query\x18\x03 \x01(\t\x12N\n\x07options\x18\x04 \x03(\x0b\x32=.turing.batch.spec.Dataset.BigQueryDatasetConfig.OptionsEntry\x1a.\n\x0cOptionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x15\n\x0b\x44\x61tasetType\x12\x06\n\x02\x42Q\x10\x00\x42\x08\n\x06\x63onfig\"a\n\x10PredictionSource\x12+\n\x07\x64\x61taset\x18\x01 \x01(\x0b\x32\x1a.turing.batch.spec.Dataset\x12\x0f\n\x07join_on\x18\x02 \x03(\t\x12\x0f\n\x07\x63olumns\x18\x03 \x03(\t\"\xb3\x02\n\tEnsembler\x12\x0b\n\x03uri\x18\x01 \x01(\t\x12\x33\n\x06result\x18\x02 \x01(\x0b\x32#.turing.batch.spec.Ensembler.Result\x1a\x90\x01\n\x06Result\x12\x13\n\x0b\x63olumn_name\x18\x01 \x01(\t\x12\x35\n\x04type\x18\x02 \x01(\x0e\x32\'.turing.batch.spec.Ensembler.ResultType\x12:\n\titem_type\x18\x03 \x01(\x0e\x32\'.turing.batch.spec.Ensembler.ResultType\"Q\n\nResultType\x12\n\n\x06\x44OUBLE\x10\x00\x12\t\n\x05\x46LOAT\x10\x01\x12\x0b\n\x07INTEGER\x10\x02\x12\x08\n\x04LONG\x10\x03\x12\n\n\x06STRING\x10\x04\x12\t\n\x05\x41RRAY\x10\n\"\xe6\x03\n\x04Sink\x12.\n\x04type\x18\x01 \x01(\x0e\x32 .turing.batch.spec.Sink.SinkType\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x33\n\tsave_mode\x18\x03 \x01(\x0e\x32 .turing.batch.spec.Sink.SaveMode\x12?\n\tbq_config\x18\n \x01(\x0b\x32*.turing.batch.spec.Sink.BigQuerySinkConfigH\x00\x1a\xb5\x01\n\x12\x42igQuerySinkConfig\x12\r\n\x05table\x18\x01 \x01(\t\x12\x16\n\x0estaging_bucket\x18\x02 \x01(\t\x12H\n\x07options\x18\x03 \x03(\x0b\x32\x37.turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry\x1a.\n\x0cOptionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1f\n\x08SinkType\x12\x0b\n\x07\x43ONSOLE\x10\x00\x12\x06\n\x02\x42Q\x10\x01\"D\n\x08SaveMode\x12\x11\n\rERRORIFEXISTS\x10\x00\x12\r\n\tOVERWRITE\x10\x01\x12\n\n\x06\x41PPEND\x10\x02\x12\n\n\x06IGNORE\x10\x03\x42\x08\n\x06\x63onfigB,Z*github.com/turing/batch-ensembler/pkg/specb\x06proto3'
 )
 
 
@@ -129,8 +129,8 @@ _SINK_SINKTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1870,
-  serialized_end=1901,
+  serialized_start=2059,
+  serialized_end=2090,
 )
 _sym_db.RegisterEnumDescriptor(_SINK_SINKTYPE)
 
@@ -161,16 +161,11 @@ _SINK_SAVEMODE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ERROR', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1903,
-  serialized_end=1982,
+  serialized_start=2092,
+  serialized_end=2160,
 )
 _sym_db.RegisterEnumDescriptor(_SINK_SAVEMODE)
 
@@ -702,6 +697,89 @@ _ENSEMBLER = _descriptor.Descriptor(
 )
 
 
+_SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY = _descriptor.Descriptor(
+  name='OptionsEntry',
+  full_name='turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1193,
+  serialized_end=1239,
+)
+
+_SINK_BIGQUERYSINKCONFIG = _descriptor.Descriptor(
+  name='BigQuerySinkConfig',
+  full_name='turing.batch.spec.Sink.BigQuerySinkConfig',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='table', full_name='turing.batch.spec.Sink.BigQuerySinkConfig.table', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='staging_bucket', full_name='turing.batch.spec.Sink.BigQuerySinkConfig.staging_bucket', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='options', full_name='turing.batch.spec.Sink.BigQuerySinkConfig.options', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1876,
+  serialized_end=2057,
+)
+
 _SINK = _descriptor.Descriptor(
   name='Sink',
   full_name='turing.batch.spec.Sink',
@@ -741,7 +819,7 @@ _SINK = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_SINK_BIGQUERYSINKCONFIG, ],
   enum_types=[
     _SINK_SINKTYPE,
     _SINK_SAVEMODE,
@@ -758,91 +836,7 @@ _SINK = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=1684,
-  serialized_end=1992,
-)
-
-
-_BIGQUERYSINKCONFIG_OPTIONSENTRY = _descriptor.Descriptor(
-  name='OptionsEntry',
-  full_name='turing.batch.spec.BigQuerySinkConfig.OptionsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='turing.batch.spec.BigQuerySinkConfig.OptionsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='turing.batch.spec.BigQuerySinkConfig.OptionsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1193,
-  serialized_end=1239,
-)
-
-_BIGQUERYSINKCONFIG = _descriptor.Descriptor(
-  name='BigQuerySinkConfig',
-  full_name='turing.batch.spec.BigQuerySinkConfig',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='table', full_name='turing.batch.spec.BigQuerySinkConfig.table', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='staging_bucket', full_name='turing.batch.spec.BigQuerySinkConfig.staging_bucket', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='options', full_name='turing.batch.spec.BigQuerySinkConfig.options', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_BIGQUERYSINKCONFIG_OPTIONSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1995,
-  serialized_end=2171,
+  serialized_end=2170,
 )
 
 _BATCHENSEMBLINGJOB.fields_by_name['kind'].enum_type = _BATCHENSEMBLINGJOB_JOBKIND
@@ -873,16 +867,17 @@ _ENSEMBLER_RESULT.fields_by_name['item_type'].enum_type = _ENSEMBLER_RESULTTYPE
 _ENSEMBLER_RESULT.containing_type = _ENSEMBLER
 _ENSEMBLER.fields_by_name['result'].message_type = _ENSEMBLER_RESULT
 _ENSEMBLER_RESULTTYPE.containing_type = _ENSEMBLER
+_SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY.containing_type = _SINK_BIGQUERYSINKCONFIG
+_SINK_BIGQUERYSINKCONFIG.fields_by_name['options'].message_type = _SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY
+_SINK_BIGQUERYSINKCONFIG.containing_type = _SINK
 _SINK.fields_by_name['type'].enum_type = _SINK_SINKTYPE
 _SINK.fields_by_name['save_mode'].enum_type = _SINK_SAVEMODE
-_SINK.fields_by_name['bq_config'].message_type = _BIGQUERYSINKCONFIG
+_SINK.fields_by_name['bq_config'].message_type = _SINK_BIGQUERYSINKCONFIG
 _SINK_SINKTYPE.containing_type = _SINK
 _SINK_SAVEMODE.containing_type = _SINK
 _SINK.oneofs_by_name['config'].fields.append(
   _SINK.fields_by_name['bq_config'])
 _SINK.fields_by_name['bq_config'].containing_oneof = _SINK.oneofs_by_name['config']
-_BIGQUERYSINKCONFIG_OPTIONSENTRY.containing_type = _BIGQUERYSINKCONFIG
-_BIGQUERYSINKCONFIG.fields_by_name['options'].message_type = _BIGQUERYSINKCONFIG_OPTIONSENTRY
 DESCRIPTOR.message_types_by_name['BatchEnsemblingJob'] = _BATCHENSEMBLINGJOB
 DESCRIPTOR.message_types_by_name['BatchEnsemblingJobMetadata'] = _BATCHENSEMBLINGJOBMETADATA
 DESCRIPTOR.message_types_by_name['BatchEnsemblingJobSpec'] = _BATCHENSEMBLINGJOBSPEC
@@ -891,7 +886,6 @@ DESCRIPTOR.message_types_by_name['Dataset'] = _DATASET
 DESCRIPTOR.message_types_by_name['PredictionSource'] = _PREDICTIONSOURCE
 DESCRIPTOR.message_types_by_name['Ensembler'] = _ENSEMBLER
 DESCRIPTOR.message_types_by_name['Sink'] = _SINK
-DESCRIPTOR.message_types_by_name['BigQuerySinkConfig'] = _BIGQUERYSINKCONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 BatchEnsemblingJob = _reflection.GeneratedProtocolMessageType('BatchEnsemblingJob', (_message.Message,), {
@@ -984,31 +978,32 @@ _sym_db.RegisterMessage(Ensembler)
 _sym_db.RegisterMessage(Ensembler.Result)
 
 Sink = _reflection.GeneratedProtocolMessageType('Sink', (_message.Message,), {
+
+  'BigQuerySinkConfig' : _reflection.GeneratedProtocolMessageType('BigQuerySinkConfig', (_message.Message,), {
+
+    'OptionsEntry' : _reflection.GeneratedProtocolMessageType('OptionsEntry', (_message.Message,), {
+      'DESCRIPTOR' : _SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY,
+      '__module__' : 'api.proto.v1.batch_ensembling_job_pb2'
+      # @@protoc_insertion_point(class_scope:turing.batch.spec.Sink.BigQuerySinkConfig.OptionsEntry)
+      })
+    ,
+    'DESCRIPTOR' : _SINK_BIGQUERYSINKCONFIG,
+    '__module__' : 'api.proto.v1.batch_ensembling_job_pb2'
+    # @@protoc_insertion_point(class_scope:turing.batch.spec.Sink.BigQuerySinkConfig)
+    })
+  ,
   'DESCRIPTOR' : _SINK,
   '__module__' : 'api.proto.v1.batch_ensembling_job_pb2'
   # @@protoc_insertion_point(class_scope:turing.batch.spec.Sink)
   })
 _sym_db.RegisterMessage(Sink)
-
-BigQuerySinkConfig = _reflection.GeneratedProtocolMessageType('BigQuerySinkConfig', (_message.Message,), {
-
-  'OptionsEntry' : _reflection.GeneratedProtocolMessageType('OptionsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _BIGQUERYSINKCONFIG_OPTIONSENTRY,
-    '__module__' : 'api.proto.v1.batch_ensembling_job_pb2'
-    # @@protoc_insertion_point(class_scope:turing.batch.spec.BigQuerySinkConfig.OptionsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _BIGQUERYSINKCONFIG,
-  '__module__' : 'api.proto.v1.batch_ensembling_job_pb2'
-  # @@protoc_insertion_point(class_scope:turing.batch.spec.BigQuerySinkConfig)
-  })
-_sym_db.RegisterMessage(BigQuerySinkConfig)
-_sym_db.RegisterMessage(BigQuerySinkConfig.OptionsEntry)
+_sym_db.RegisterMessage(Sink.BigQuerySinkConfig)
+_sym_db.RegisterMessage(Sink.BigQuerySinkConfig.OptionsEntry)
 
 
 DESCRIPTOR._options = None
 _BATCHENSEMBLINGJOBMETADATA_ANNOTATIONSENTRY._options = None
 _BATCHENSEMBLINGJOBSPEC_PREDICTIONSENTRY._options = None
 _DATASET_BIGQUERYDATASETCONFIG_OPTIONSENTRY._options = None
-_BIGQUERYSINKCONFIG_OPTIONSENTRY._options = None
+_SINK_BIGQUERYSINKCONFIG_OPTIONSENTRY._options = None
 # @@protoc_insertion_point(module_scope)

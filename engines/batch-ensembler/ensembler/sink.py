@@ -44,7 +44,7 @@ class BigQuerySink(Sink):
             self,
             save_mode: pb2.Sink.SaveMode,
             columns: List[str],
-            config: pb2.BigQuerySinkConfig):
+            config: pb2.Sink.BigQuerySinkConfig):
         super().__init__(save_mode=save_mode, columns=columns)
 
         self._options = {
