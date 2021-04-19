@@ -1,0 +1,241 @@
+syntax = "proto3";
+
+package turing.batch.spec;
+option go_package = "github.com/turing/batch-ensembler/pkg/spec";
+
+// Represents a specification of the batch ensembling job
+message BatchEnsemblingJob {
+  // Version of the job specification
+  // NOTE: currently not in use
+  string version = 1;
+
+  // Represents a kind of the batch job
+  enum JobKind {
+    BatchEnsemblingJob = 0;
+  }
+  JobKind kind = 2;
+
+  // Job's metadata
+  BatchEnsemblingJobMetadata metadata = 3;
+  // Job's configuration
+  BatchEnsemblingJobSpec spec = 4;
+}
+
+// Holds necessary metadata of the job
+message BatchEnsemblingJobMetadata {
+  // Job's name
+  string name = 1;
+
+  // Unstructured key-value map to store an arbitrary job metadata
+  //
+  // The primary use of the annotations is to tweak Spark context
+  // and Hadoop configuration.
+  //
+  // Annotations with keys that start with `spark/` prefix are
+  // passed into spark context configuration.
+  // Example:
+  //    spark/spark.jars:          "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
+  //    spark/spark.jars.packages: "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
+  //
+  // Annotations with keys that start with `hadoopConfiguration/`
+  // prefix are passed into Hadoop configuration of the Spark context
+  // Example:
+  //    hadoopConfiguration/fs.gs.impl: "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
+  //
+  // The full list of Spark and Hadoop config keys can be found at
+  // https://spark.apache.org/docs/latest/configuration.html#available-properties
+  map<string, string> annotations = 2;
+}
+
+// Represents a Ensembling job configuration
+message BatchEnsemblingJobSpec {
+  // Holds the information about the source of the input features.
+  // Input features could be any arbitrary properties of the input
+  // dataset, e.g. user_id, transaction_datetime etc.
+  Source source = 1;
+
+  // Holds the key-value mapping between the ID of the model and
+  // the source of the predictions, produced by this model
+  map<string, PredictionSource> predictions = 2;
+
+  // Holds the configuration of the user-defined ensembler
+  Ensembler ensembler = 3;
+
+  // Holds the configuration of the ensembling results sink
+  Sink sink = 4;
+}
+
+// Represents a configuration of a data source, together with
+// the information about how this data can be joined with other
+// data sources
+message Source {
+  // Holds a configuration of the dataset
+  Dataset dataset = 1;
+
+  // List of columns, to be used to join this data source with
+  // prediction data sources.
+  //
+  // NOTE: The cardinality of `join_on` list should match the
+  // cardinality of `join_on` lists in all sources with predictions
+  repeated string join_on = 2;
+}
+
+// Represents a configuration of a dataset
+message Dataset {
+  enum DatasetType {
+    BQ = 0;
+  }
+
+  // Represents a configuration of a BigQuery dataset
+  message BigQueryDatasetConfig {
+    // Fully-qualified BQ table name,
+    // e.g `project_name.dataset_name.table_name`
+    //
+    // NOTE: Either `table` or `query` should be configured
+    // If both `table` and `query` are configured, then `query`
+    // will take a higher priority
+    string table = 1;
+
+    // List of columns to be selected and used from the `table`.
+    // If not provided, then all columns will be used.
+    repeated string features = 2;
+
+    // BQ's Standard SQL SELECT query to fetch the data to be
+    // used as a dataset.
+    //
+    // If `query` is configured, then these two `options` MUST be set:
+    //  – viewsEnabled: "true"
+    //  - materializationDataset: <dataset name, where this view will be materialized>
+    //
+    // NOTE: Either `table` or `query` should be configured
+    // If both `table` and `query` are configured, then `query`
+    // will take a higher priority
+    string query = 3;
+
+    // List of an extra key-value config options, that is passed
+    // into Spark-BQ connector.
+    // The full list of supported options can be found here:
+    // https://github.com/GoogleCloudDataproc/spark-bigquery-connector#properties
+    map<string, string> options = 4;
+  }
+
+  // Type of the dataset
+  DatasetType type = 1;
+
+  // One of the dataset type-specific configurations should be provided
+  oneof config {
+    // If `type` == DatasetType.BQ
+    BigQueryDatasetConfig bq_config = 2;
+  }
+}
+
+// Represents a configuration of the data source, that holds
+// prediction results of a single model.
+//
+// It is similar to `Source`, with the only difference, that
+// `PredictionSource` also has `columns` property, that holds
+// an information about what column(s) in this data source contain
+// model predictions
+message PredictionSource {
+  // Holds a configuration of the dataset
+  Dataset dataset = 1;
+
+  // List of columns, to be used to join this predictions data
+  // with the `Source`, that contains input features
+  //
+  // NOTE: The cardinality of `join_on` list should match the
+  // cardinality of `join_on` list of the `Source`
+  repeated string join_on = 2;
+
+  // List of columns from this data source, that contain
+  // results of the model inference
+  repeated string columns = 3;
+}
+
+// Represents a configuration of a user-defined ensembler
+message Ensembler {
+  // Data type of the expected ensembling results. Can be either
+  // a primitive type (one of double, float, int, long or string)
+  // or an array of primitives
+  enum ResultType {
+    DOUBLE = 0;
+    FLOAT = 1;
+    INTEGER = 2;
+    LONG = 3;
+    STRING = 4;
+
+    ARRAY = 10;
+  }
+
+  // Represents a configuration of the ensembling result
+  message Result {
+    // Name of the column, that will store the results of ensembling
+    string column_name = 1;
+
+    // Expected type of ensembling
+    ResultType type = 2;
+    // only if type is array
+    ResultType item_type = 3;
+  }
+
+  // URI of the user-defined ensembler, stored as an MLFlow PyFunc model
+  // URI can be either local (such as path to a local folder) or remote
+  // (Google Storage, AWS S3 location or any other MLFlow-supported artifact locations)
+  // More info: https://www.mlflow.org/docs/latest/concepts.html#artifact-locations
+  string uri = 1;
+
+  // Ensembling results configuration
+  Result result = 2;
+}
+
+// Represents a configuration of the ensembling results sink
+message Sink {
+
+  enum SinkType {
+    // Output results to stdout. For testing only
+    CONSOLE = 0;
+    // Writes results into a Google BQ table
+    BQ = 1;
+  }
+
+  // See: https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/SaveMode.html
+  enum SaveMode {
+    ERRORIFEXISTS = 0;
+    OVERWRITE = 1;
+    APPEND = 2;
+    IGNORE = 3;
+  }
+
+  // Represents a configuration of a BQ sink
+  message BigQuerySinkConfig {
+    // Fully-qualified BQ table name
+    string table = 1;
+
+    // Spark BQ connector writes data to GCS first, before loading it into BQ
+    // `staging_bucket` should contain the name of a GCS bucket, where the
+    // data will be temporarily stored at
+    string staging_bucket = 2;
+
+    // List of an extra key-value config options, that is passed
+    // into Spark-BQ connector.
+    // The full list of supported options can be found here:
+    // https://github.com/GoogleCloudDataproc/spark-bigquery-connector#properties
+    map<string, string> options = 3;
+  }
+
+  // Type of the results sink
+  SinkType type = 1;
+
+  // List of columns (from the input source and ensembling results)
+  // that need to be saved in this sink
+  repeated string columns = 2;
+
+  // Save mode to be used with this sink
+  SaveMode save_mode = 3;
+
+  // One of the type-specific sink configurations
+  oneof config {
+    // If `type` == SinkType.BQ
+    BigQuerySinkConfig bq_config = 10;
+  }
+}
