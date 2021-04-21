@@ -17,7 +17,7 @@ type PodLogController struct {
 	*baseController
 }
 
-func (c *PodLogController) ListPodLogs(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, body interface{}) *Response {
 	// Parse input
 	var errResp *Response
 	var project *mlp.Project
@@ -42,7 +42,7 @@ func (c *PodLogController) ListPodLogs(r *http.Request, vars map[string]string, 
 		if !router.CurrRouterVersionID.Valid {
 			return BadRequest("Current router version id is invalid", "Make sure current router is deployed")
 		}
-		routerVersion, err = c.RouterVersionsService.FindByID(uint(router.CurrRouterVersionID.Int32))
+		routerVersion, err = c.RouterVersionsService.FindByID(models.ID(router.CurrRouterVersionID.Int32))
 		if err != nil {
 			return InternalServerError("Failed to find current router version", err.Error())
 		}
@@ -110,4 +110,21 @@ func (c *PodLogController) ListPodLogs(r *http.Request, vars map[string]string, 
 	}
 
 	return Ok(logs)
+}
+
+func (c PodLogController) Routes() []Route {
+	return []Route{
+		{
+			name:    "ListPodLogs",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/logs",
+			handler: c.ListPodLogs,
+		},
+		{
+			name:    "ListPodLogs",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/logs",
+			handler: c.ListPodLogs,
+		},
+	}
 }

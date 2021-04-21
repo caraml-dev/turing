@@ -119,7 +119,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 	// Set up common mock services
 	mlps := &mocks.MLPService{}
 	mlps.On("GetEnvironment", testEnv).Return(environment, nil)
-	mlps.On("GetSecret", int(project.Id), "svc-acct-secret").Return("service-acct", nil)
+	mlps.On("GetSecret", models.ID(project.Id), "svc-acct-secret").Return("service-acct", nil)
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", router).Return(nil, nil)
@@ -249,14 +249,14 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// Set up mock services
 	mlps := &mocks.MLPService{}
 	mlps.On("GetEnvironment", testEnv).Return(environment, nil)
-	mlps.On("GetSecret", int(project.Id), "svc-acct-secret").Return(testSvcAcct, nil)
+	mlps.On("GetSecret", models.ID(project.Id), "svc-acct-secret").Return(testSvcAcct, nil)
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", mock.Anything).Return(nil, nil)
-	rs.On("FindByID", uint(100)).Return(router, nil)
+	rs.On("FindByID", models.ID(100)).Return(router, nil)
 
 	rvs := &mocks.RouterVersionsService{}
-	rvs.On("FindByID", uint(200)).Return(currVer, nil)
+	rvs.On("FindByID", models.ID(200)).Return(currVer, nil)
 	rvs.On("Save", currVer).Return(currVer, nil)
 	rvs.On("Save", newVerFailed).Return(newVerFailed, nil)
 
@@ -291,7 +291,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// the new vers's deployment status should be failed and the router and the current
 	// ver should be deployed.
 	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, newVer, mock.Anything)
-	assert.Equal(t, uint(200), router.CurrRouterVersion.ID)
+	assert.Equal(t, models.ID(200), router.CurrRouterVersion.ID)
 	assert.Equal(t, "current-endpoint", router.Endpoint)
 	assert.Equal(t, models.RouterVersionStatusDeployed, router.CurrRouterVersion.Status)
 	assert.Equal(t, models.RouterStatusDeployed, router.Status)
@@ -353,9 +353,9 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	rs.On("Save", modifiedRouter).Return(modifiedRouter, nil)
 
 	rvs := &mocks.RouterVersionsService{}
-	rvs.On("FindByID", uint(1)).Return(routerVersion, nil)
+	rvs.On("FindByID", models.ID(1)).Return(routerVersion, nil)
 	rvs.On("Save", undeployedRouterVersion).Return(undeployedRouterVersion, nil)
-	rvs.On("ListRouterVersions", uint(1)).
+	rvs.On("ListRouterVersions", models.ID(1)).
 		Return([]*models.RouterVersion{routerVersion, pendingRouterVersion}, nil)
 
 	ds := &mocks.DeploymentService{}

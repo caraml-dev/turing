@@ -24,8 +24,10 @@ func TestListExperimentEngines(t *testing.T) {
 
 	// Create controller
 	ctrl := ExperimentsController{
-		&AppContext{
-			ExperimentsService: svc,
+		&baseController{
+			&AppContext{
+				ExperimentsService: svc,
+			},
 		},
 	}
 
@@ -62,15 +64,19 @@ func TestListExperimentEngineClients(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&AppContext{},
+				&baseController{
+					&AppContext{},
+				},
 			},
 			vars:     map[string]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: failureSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: failureSvc,
+					},
 				},
 			},
 			vars:     map[string]string{"engine": "test-engine"},
@@ -78,8 +84,10 @@ func TestListExperimentEngineClients(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: successSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: successSvc,
+					},
 				},
 			},
 			vars: map[string]string{"engine": "test-engine"},
@@ -128,15 +136,19 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&AppContext{},
+				&baseController{
+					&AppContext{},
+				},
 			},
 			vars:     map[string]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: failureSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: failureSvc,
+					},
 				},
 			},
 			vars: map[string]string{
@@ -147,8 +159,10 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: successSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: successSvc,
+					},
 				},
 			},
 			vars: map[string]string{
@@ -201,15 +215,19 @@ func TestListExperimentEngineVariables(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&AppContext{},
+				&baseController{
+					&AppContext{},
+				},
 			},
 			vars:     map[string]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: failureSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: failureSvc,
+					},
 				},
 			},
 			vars: map[string]string{
@@ -220,8 +238,10 @@ func TestListExperimentEngineVariables(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&AppContext{
-					ExperimentsService: successSvc,
+				&baseController{
+					&AppContext{
+						ExperimentsService: successSvc,
+					},
 				},
 			},
 			vars: map[string]string{

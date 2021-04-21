@@ -27,11 +27,11 @@ func (_m *RoutersService) Delete(router *models.Router) error {
 }
 
 // FindByID provides a mock function with given fields: routerID
-func (_m *RoutersService) FindByID(routerID uint) (*models.Router, error) {
+func (_m *RoutersService) FindByID(routerID models.ID) (*models.Router, error) {
 	ret := _m.Called(routerID)
 
 	var r0 *models.Router
-	if rf, ok := ret.Get(0).(func(uint) *models.Router); ok {
+	if rf, ok := ret.Get(0).(func(models.ID) *models.Router); ok {
 		r0 = rf(routerID)
 	} else {
 		if ret.Get(0) != nil {
@@ -40,7 +40,7 @@ func (_m *RoutersService) FindByID(routerID uint) (*models.Router, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerID)
 	} else {
 		r1 = ret.Error(1)
@@ -50,11 +50,11 @@ func (_m *RoutersService) FindByID(routerID uint) (*models.Router, error) {
 }
 
 // FindByProjectAndEnvironmentAndName provides a mock function with given fields: projectID, environmentName, routerName
-func (_m *RoutersService) FindByProjectAndEnvironmentAndName(projectID int, environmentName string, routerName string) (*models.Router, error) {
+func (_m *RoutersService) FindByProjectAndEnvironmentAndName(projectID models.ID, environmentName string, routerName string) (*models.Router, error) {
 	ret := _m.Called(projectID, environmentName, routerName)
 
 	var r0 *models.Router
-	if rf, ok := ret.Get(0).(func(int, string, string) *models.Router); ok {
+	if rf, ok := ret.Get(0).(func(models.ID, string, string) *models.Router); ok {
 		r0 = rf(projectID, environmentName, routerName)
 	} else {
 		if ret.Get(0) != nil {
@@ -63,7 +63,7 @@ func (_m *RoutersService) FindByProjectAndEnvironmentAndName(projectID int, envi
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID, string, string) error); ok {
 		r1 = rf(projectID, environmentName, routerName)
 	} else {
 		r1 = ret.Error(1)
@@ -73,11 +73,11 @@ func (_m *RoutersService) FindByProjectAndEnvironmentAndName(projectID int, envi
 }
 
 // FindByProjectAndName provides a mock function with given fields: projectID, routerName
-func (_m *RoutersService) FindByProjectAndName(projectID int, routerName string) (*models.Router, error) {
+func (_m *RoutersService) FindByProjectAndName(projectID models.ID, routerName string) (*models.Router, error) {
 	ret := _m.Called(projectID, routerName)
 
 	var r0 *models.Router
-	if rf, ok := ret.Get(0).(func(int, string) *models.Router); ok {
+	if rf, ok := ret.Get(0).(func(models.ID, string) *models.Router); ok {
 		r0 = rf(projectID, routerName)
 	} else {
 		if ret.Get(0) != nil {
@@ -86,7 +86,7 @@ func (_m *RoutersService) FindByProjectAndName(projectID int, routerName string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID, string) error); ok {
 		r1 = rf(projectID, routerName)
 	} else {
 		r1 = ret.Error(1)
@@ -96,11 +96,11 @@ func (_m *RoutersService) FindByProjectAndName(projectID int, routerName string)
 }
 
 // ListRouters provides a mock function with given fields: projectID, environmentName
-func (_m *RoutersService) ListRouters(projectID int, environmentName string) ([]*models.Router, error) {
+func (_m *RoutersService) ListRouters(projectID models.ID, environmentName string) ([]*models.Router, error) {
 	ret := _m.Called(projectID, environmentName)
 
 	var r0 []*models.Router
-	if rf, ok := ret.Get(0).(func(int, string) []*models.Router); ok {
+	if rf, ok := ret.Get(0).(func(models.ID, string) []*models.Router); ok {
 		r0 = rf(projectID, environmentName)
 	} else {
 		if ret.Get(0) != nil {
@@ -109,7 +109,7 @@ func (_m *RoutersService) ListRouters(projectID int, environmentName string) ([]
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID, string) error); ok {
 		r1 = rf(projectID, environmentName)
 	} else {
 		r1 = ret.Error(1)

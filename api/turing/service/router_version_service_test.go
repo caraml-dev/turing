@@ -111,7 +111,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		}
 		saved, err := svc.Save(routerVersion)
 		assert.NoError(t, err)
-		assert.Equal(t, uint(1), saved.ID)
+		assert.Equal(t, models.ID(1), saved.ID)
 		assert.NotNil(t, saved.CreatedAt)
 		assert.NotNil(t, saved.UpdatedAt)
 		assert.Equal(t, 1, int(saved.EnsemblerID.Int32))
@@ -155,7 +155,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		found.Status = models.RouterVersionStatusDeployed
 		saved, err = svc.Save(found)
 		assert.NoError(t, err)
-		assert.Equal(t, uint(1), saved.ID)
+		assert.Equal(t, models.ID(1), saved.ID)
 		assert.Equal(t, models.RouterVersionStatusDeployed, saved.Status)
 
 		// list with versions

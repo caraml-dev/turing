@@ -27,11 +27,11 @@ func (_m *RouterVersionsService) Delete(routerVersion *models.RouterVersion) err
 }
 
 // FindByID provides a mock function with given fields: routerVersionID
-func (_m *RouterVersionsService) FindByID(routerVersionID uint) (*models.RouterVersion, error) {
+func (_m *RouterVersionsService) FindByID(routerVersionID models.ID) (*models.RouterVersion, error) {
 	ret := _m.Called(routerVersionID)
 
 	var r0 *models.RouterVersion
-	if rf, ok := ret.Get(0).(func(uint) *models.RouterVersion); ok {
+	if rf, ok := ret.Get(0).(func(models.ID) *models.RouterVersion); ok {
 		r0 = rf(routerVersionID)
 	} else {
 		if ret.Get(0) != nil {
@@ -40,7 +40,7 @@ func (_m *RouterVersionsService) FindByID(routerVersionID uint) (*models.RouterV
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerVersionID)
 	} else {
 		r1 = ret.Error(1)
@@ -50,11 +50,11 @@ func (_m *RouterVersionsService) FindByID(routerVersionID uint) (*models.RouterV
 }
 
 // FindByRouterIDAndVersion provides a mock function with given fields: routerID, version
-func (_m *RouterVersionsService) FindByRouterIDAndVersion(routerID uint, version uint) (*models.RouterVersion, error) {
+func (_m *RouterVersionsService) FindByRouterIDAndVersion(routerID models.ID, version uint) (*models.RouterVersion, error) {
 	ret := _m.Called(routerID, version)
 
 	var r0 *models.RouterVersion
-	if rf, ok := ret.Get(0).(func(uint, uint) *models.RouterVersion); ok {
+	if rf, ok := ret.Get(0).(func(models.ID, uint) *models.RouterVersion); ok {
 		r0 = rf(routerID, version)
 	} else {
 		if ret.Get(0) != nil {
@@ -63,7 +63,7 @@ func (_m *RouterVersionsService) FindByRouterIDAndVersion(routerID uint, version
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID, uint) error); ok {
 		r1 = rf(routerID, version)
 	} else {
 		r1 = ret.Error(1)
@@ -73,11 +73,11 @@ func (_m *RouterVersionsService) FindByRouterIDAndVersion(routerID uint, version
 }
 
 // FindLatestVersionbyRouterID provides a mock function with given fields: routerID
-func (_m *RouterVersionsService) FindLatestVersionbyRouterID(routerID uint) (*models.RouterVersion, error) {
+func (_m *RouterVersionsService) FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error) {
 	ret := _m.Called(routerID)
 
 	var r0 *models.RouterVersion
-	if rf, ok := ret.Get(0).(func(uint) *models.RouterVersion); ok {
+	if rf, ok := ret.Get(0).(func(models.ID) *models.RouterVersion); ok {
 		r0 = rf(routerID)
 	} else {
 		if ret.Get(0) != nil {
@@ -86,7 +86,7 @@ func (_m *RouterVersionsService) FindLatestVersionbyRouterID(routerID uint) (*mo
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerID)
 	} else {
 		r1 = ret.Error(1)
@@ -96,11 +96,11 @@ func (_m *RouterVersionsService) FindLatestVersionbyRouterID(routerID uint) (*mo
 }
 
 // ListRouterVersions provides a mock function with given fields: routerID
-func (_m *RouterVersionsService) ListRouterVersions(routerID uint) ([]*models.RouterVersion, error) {
+func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID)
 
 	var r0 []*models.RouterVersion
-	if rf, ok := ret.Get(0).(func(uint) []*models.RouterVersion); ok {
+	if rf, ok := ret.Get(0).(func(models.ID) []*models.RouterVersion); ok {
 		r0 = rf(routerID)
 	} else {
 		if ret.Get(0) != nil {
@@ -109,7 +109,7 @@ func (_m *RouterVersionsService) ListRouterVersions(routerID uint) ([]*models.Ro
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerID)
 	} else {
 		r1 = ret.Error(1)
@@ -119,11 +119,11 @@ func (_m *RouterVersionsService) ListRouterVersions(routerID uint) ([]*models.Ro
 }
 
 // ListRouterVersionsWithStatus provides a mock function with given fields: routerID, status
-func (_m *RouterVersionsService) ListRouterVersionsWithStatus(routerID uint, status models.RouterVersionStatus) ([]*models.RouterVersion, error) {
+func (_m *RouterVersionsService) ListRouterVersionsWithStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID, status)
 
 	var r0 []*models.RouterVersion
-	if rf, ok := ret.Get(0).(func(uint, models.RouterVersionStatus) []*models.RouterVersion); ok {
+	if rf, ok := ret.Get(0).(func(models.ID, models.RouterVersionStatus) []*models.RouterVersion); ok {
 		r0 = rf(routerID, status)
 	} else {
 		if ret.Get(0) != nil {
@@ -132,7 +132,7 @@ func (_m *RouterVersionsService) ListRouterVersionsWithStatus(routerID uint, sta
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint, models.RouterVersionStatus) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID, models.RouterVersionStatus) error); ok {
 		r1 = rf(routerID, status)
 	} else {
 		r1 = ret.Error(1)

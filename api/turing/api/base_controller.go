@@ -5,6 +5,10 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 )
 
+type Controller interface {
+	Routes() []Route
+}
+
 // baseController implements common methods that may be shared by all API controllers
 type baseController struct {
 	*AppContext
@@ -15,7 +19,7 @@ func (c *baseController) getProjectFromRequestVars(vars map[string]string) (proj
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
 	}
-	project, err = c.MLPService.GetProject(id)
+	project, err = c.MLPService.GetProject(models.ID(id))
 	if err != nil {
 		return nil, NotFound("project not found", err.Error())
 	}
@@ -27,7 +31,7 @@ func (c *baseController) getRouterFromRequestVars(vars map[string]string) (route
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
 	}
-	router, err = c.RoutersService.FindByID(uint(id))
+	router, err = c.RoutersService.FindByID(models.ID(id))
 	if err != nil {
 		return nil, NotFound("router not found", err.Error())
 	}
@@ -45,9 +49,13 @@ func (c *baseController) getRouterVersionFromRequestVars(
 	if err != nil {
 		return nil, BadRequest("invalid router version value", err.Error())
 	}
-	routerVersion, err = c.RouterVersionsService.FindByRouterIDAndVersion(uint(routerID), uint(versionNum))
+	routerVersion, err = c.RouterVersionsService.FindByRouterIDAndVersion(models.ID(routerID), uint(versionNum))
 	if err != nil {
 		return nil, NotFound("router version not found", err.Error())
 	}
 	return routerVersion, nil
+}
+
+func (c *baseController) Routes() []Route {
+	return []Route{}
 }

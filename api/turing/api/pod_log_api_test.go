@@ -41,19 +41,25 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		HeadLines: &headLines,
 	}
 
-	mlpService.On("GetProject", 1).Return(project, nil)
-	routersService.On("FindByID", uint(1)).Return(router1, nil)
-	routersService.On("FindByID", uint(2)).Return(router2, nil)
-	routersService.On("FindByID", uint(3)).Return(router3, nil)
-	routerVersionsService.On("FindByID", uint(1)).Return(routerVersion1, nil)
-	routerVersionsService.On("FindByID", uint(2)).Return(routerVersion2, nil)
-	routerVersionsService.On("FindByID", uint(3)).Return(nil, errors.New("Test router version error"))
+	mlpService.On("GetProject", models.ID(1)).Return(project, nil)
+	routersService.On("FindByID", models.ID(1)).Return(router1, nil)
+	routersService.On("FindByID", models.ID(2)).Return(router2, nil)
+	routersService.On("FindByID", models.ID(3)).Return(router3, nil)
+	routerVersionsService.On("FindByID", models.ID(1)).Return(routerVersion1, nil)
+	routerVersionsService.On("FindByID", models.ID(2)).Return(routerVersion2, nil)
+	routerVersionsService.On("FindByID", models.ID(3)).
+		Return(nil, errors.New("test router version error"))
 	// Simulate error when router with id 3 is requested
-	routerVersionsService.On("FindByID", uint(3)).Return(nil, errors.New(""))
-	routerVersionsService.On("FindByRouterIDAndVersion", uint(1), uint(1)).Return(routerVersion1, nil)
-	routerVersionsService.On("FindByRouterIDAndVersion", uint(1), uint(2)).Return(routerVersion2, nil)
+	routerVersionsService.On("FindByID", models.ID(3)).
+		Return(nil, errors.New(""))
+	routerVersionsService.
+		On("FindByRouterIDAndVersion", models.ID(1), uint(1)).Return(routerVersion1, nil)
+	routerVersionsService.
+		On("FindByRouterIDAndVersion", models.ID(1), uint(2)).Return(routerVersion2, nil)
 	// Simulate error when router with id 1 and version 3 is requested
-	routerVersionsService.On("FindByRouterIDAndVersion", uint(1), uint(3)).Return(nil, errors.New(""))
+	routerVersionsService.
+		On("FindByRouterIDAndVersion", models.ID(1), uint(3)).
+		Return(nil, errors.New(""))
 	podLogService.
 		On("ListPodLogs", project, router1, routerVersion1, "router", &service.PodLogOptions{}).
 		Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
@@ -66,7 +72,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 	// Simulate error when logs for router with component 'ensembler' is requested
 	podLogService.
 		On("ListPodLogs", project, router1, routerVersion2, "ensembler", &service.PodLogOptions{}).
-		Return([]*service.PodLog{}, errors.New("Test Pod Log error"))
+		Return([]*service.PodLog{}, errors.New("test pod log error"))
 
 	type args struct {
 		r    *http.Request
@@ -144,7 +150,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					"router_id":  "3",
 				},
 			},
-			want: InternalServerError("Failed to find current router version", "Test router version error"),
+			want: InternalServerError("Failed to find current router version", "test router version error"),
 		},
 		{
 			name: "valid optional args",
@@ -266,7 +272,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					"component_type": "ensembler",
 				},
 			},
-			want: InternalServerError("Failed to list logs", "Test Pod Log error"),
+			want: InternalServerError("Failed to list logs", "test pod log error"),
 		},
 	}
 	for _, tt := range tests {

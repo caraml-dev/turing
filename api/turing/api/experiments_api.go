@@ -8,7 +8,7 @@ import (
 
 // ExperimentsController implements the handlers for experiment related APIs
 type ExperimentsController struct {
-	*AppContext
+	*baseController
 }
 
 // ListExperimentEngines returns a list of available experiment engines
@@ -87,4 +87,33 @@ func (c ExperimentsController) ListExperimentEngineVariables(
 	}
 
 	return Ok(variables)
+}
+
+func (c ExperimentsController) Routes() []Route {
+	return []Route{
+		{
+			name:    "ListExperimentEngines",
+			method:  http.MethodGet,
+			path:    "/experiment-engines",
+			handler: c.ListExperimentEngines,
+		},
+		{
+			name:    "ListExperimentEngineClients",
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/clients",
+			handler: c.ListExperimentEngineClients,
+		},
+		{
+			name:    "ListExperimentEngineExperiments",
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/experiments",
+			handler: c.ListExperimentEngineExperiments,
+		},
+		{
+			name:    "ListExperimentEngineVariables",
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/variables",
+			handler: c.ListExperimentEngineVariables,
+		},
+	}
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/gojek/turing/api/turing/models"
 	"log"
 	"net/http"
 	"time"
@@ -27,9 +28,9 @@ type MLPService interface {
 	// GetEnvironment gets the environment matching the provided name.
 	GetEnvironment(name string) (*merlin.Environment, error)
 	// GetProject gets the project matching the provided id.
-	GetProject(id int) (*mlp.Project, error)
+	GetProject(id models.ID) (*mlp.Project, error)
 	// GetSecret gets a secret by project and name.
-	GetSecret(projectID int, name string) (string, error)
+	GetSecret(projectID models.ID, name string) (string, error)
 }
 
 type mlpService struct {
@@ -138,7 +139,7 @@ func (service mlpService) getEnvironment(name string) (*merlin.Environment, erro
 // This method will hit the cache first, and if not found, will call Merlin once to get
 // the updated list of projects and refresh the cache, then try to get the value again.
 // If still not found, will return a freecache NotFound error.
-func (service mlpService) GetProject(id int) (*mlp.Project, error) {
+func (service mlpService) GetProject(id models.ID) (*mlp.Project, error) {
 	project, err := service.getProject(id)
 	if err != nil {
 		err = service.refreshProjects()
@@ -150,7 +151,7 @@ func (service mlpService) GetProject(id int) (*mlp.Project, error) {
 	return project, nil
 }
 
-func (service mlpService) getProject(id int) (*mlp.Project, error) {
+func (service mlpService) getProject(id models.ID) (*mlp.Project, error) {
 	key := buildProjectKey(int32(id))
 	cachedValue, found := service.cache.Get(key)
 	if !found {
@@ -165,7 +166,7 @@ func (service mlpService) getProject(id int) (*mlp.Project, error) {
 }
 
 // GetSecret gets a secret attached to a project by name.
-func (service mlpService) GetSecret(projectID int, name string) (string, error) {
+func (service mlpService) GetSecret(projectID models.ID, name string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 

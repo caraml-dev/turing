@@ -24,7 +24,7 @@ type Metric string
 type AlertService interface {
 	Save(alert models.Alert, authorEmail string, dashboardURL string) (*models.Alert, error)
 	List(service string) ([]*models.Alert, error)
-	FindByID(id uint) (*models.Alert, error)
+	FindByID(id models.ID) (*models.Alert, error)
 	Update(alert models.Alert, authorEmail string, dashboardURL string) error
 	Delete(alert models.Alert, authorEmail string, dashboardURL string) error
 	// GetDashboardURL returns the dashboard URL for the router alert.
@@ -49,7 +49,7 @@ type gitlabOpsAlertService struct {
 	config               config.AlertConfig
 }
 
-// dashboardURLValue will be passed in as argument to execute dashboardURLTemplate.
+// DashboardURLValue dashboardURLValue will be passed in as argument to execute dashboardURLTemplate.
 type DashboardURLValue struct {
 	Environment string // environment name where the router is deployed
 	Cluster     string // Kubernetes cluster name where the router name is deployed
@@ -58,7 +58,7 @@ type DashboardURLValue struct {
 	Version     string // router version number
 }
 
-// Create a new AlertService that can be used with GitOps based on GitLab. It is assumed
+// NewGitlabOpsAlertService Creates a new AlertService that can be used with GitOps based on GitLab. It is assumed
 // that the continuous integration (CI) jobs configured in GitLab can process the committed alert
 // files to register the alerts to the corresponding external alert manager. This CI process
 // is out of scope of Turing.
@@ -126,8 +126,8 @@ func (service *gitlabOpsAlertService) List(svc string) ([]*models.Alert, error) 
 	return alerts, nil
 }
 
-// Find an alert by its ID. An error will be returned if no alert is found.
-func (service *gitlabOpsAlertService) FindByID(id uint) (*models.Alert, error) {
+// FindByID Find an alert by its ID. An error will be returned if no alert is found.
+func (service *gitlabOpsAlertService) FindByID(id models.ID) (*models.Alert, error) {
 	var alert models.Alert
 	if err := service.db.Where("id = ?", id).First(&alert).Error; err != nil {
 		return nil, fmt.Errorf("failed to find alert with id '%d' in the database: %s", id, err)

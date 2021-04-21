@@ -30,7 +30,7 @@ func (c RoutersController) ListRouters(
 	}
 
 	// List routers
-	routers, err := c.RoutersService.ListRouters(int(project.Id), "")
+	routers, err := c.RoutersService.ListRouters(models.ID(project.Id), "")
 	if err != nil {
 		return InternalServerError("unable to list routers", err.Error())
 	}
@@ -72,7 +72,7 @@ func (c RoutersController) CreateRouter(
 	request := body.(*request.CreateOrUpdateRouterRequest)
 
 	// check if router already exists
-	router, _ := c.RoutersService.FindByProjectAndName(int(project.Id), request.Name)
+	router, _ := c.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
 	if router != nil {
 		return BadRequest("invalid router name",
 			fmt.Sprintf("router with name %s already exists in project %d", request.Name, project.Id))
@@ -84,7 +84,7 @@ func (c RoutersController) CreateRouter(
 	}
 
 	// if not, create
-	router, err = c.RoutersService.Save(request.BuildRouter(int(project.Id)))
+	router, err = c.RoutersService.Save(request.BuildRouter(models.ID(project.Id)))
 	if err != nil {
 		return InternalServerError("unable to create router", err.Error())
 	}
@@ -237,11 +237,11 @@ func (c RoutersController) DeployRouter(
 	// Get the current router version. If nil, it means there is no version of the
 	// router to deploy.
 	if router.CurrRouterVersion == nil {
-		return BadRequest("invalid deploy request", "Router has no current configuration")
+		return BadRequest("invalid deploy request", "router has no current configuration")
 	}
 
 	// Query router version to load all relationships
-	routerVersion, err := c.RouterVersionsService.FindByID(uint(router.CurrRouterVersion.ID))
+	routerVersion, err := c.RouterVersionsService.FindByID(router.CurrRouterVersion.ID)
 	if err != nil {
 		return NotFound("router version not found", err.Error())
 	}
@@ -304,4 +304,61 @@ func (c RoutersController) ListRouterEvents(r *http.Request,
 		return NotFound("events not found", err.Error())
 	}
 	return Ok(map[string][]*models.Event{"events": events})
+}
+
+func (c RoutersController) Routes() []Route {
+	return []Route{
+		{
+			name:    "ListRouters",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers",
+			handler: c.ListRouters,
+		},
+		{
+			name:    "GetRouter",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			handler: c.GetRouter,
+		},
+		{
+			name:    "CreateRouter",
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers",
+			body:    request.CreateOrUpdateRouterRequest{},
+			handler: c.CreateRouter,
+		},
+		{
+			name:    "UpdateRouter",
+			method:  http.MethodPut,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			body:    request.CreateOrUpdateRouterRequest{},
+			handler: c.UpdateRouter,
+		},
+		{
+			name:    "DeleteRouter",
+			method:  http.MethodDelete,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			handler: c.DeleteRouter,
+		},
+		// Deploy / Undeploy router version
+		{
+			name:    "DeployRouter",
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/deploy",
+			handler: c.DeployRouter,
+		},
+		{
+			name:    "UndeployRouter",
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
+			handler: c.UndeployRouter,
+		},
+		// Router Events
+		{
+			name:    "ListRouterEvents",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/events",
+			handler: c.ListRouterEvents,
+		},
+	}
 }

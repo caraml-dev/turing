@@ -9,19 +9,19 @@ import (
 
 // RouterVersionsService is the data access object for RouterVersions from the db.
 type RouterVersionsService interface {
-	// List all RouterVersions associated with the given routerID
-	ListRouterVersions(routerID uint) ([]*models.RouterVersion, error)
-	// Lists the RouterVersions for the given Router matching the given status.
-	ListRouterVersionsWithStatus(routerID uint, status models.RouterVersionStatus) ([]*models.RouterVersion, error)
+	// ListRouterVersions List all RouterVersions associated with the given routerID
+	ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error)
+	// ListRouterVersionsWithStatus Lists the RouterVersions for the given Router matching the given status.
+	ListRouterVersionsWithStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error)
 	// Save the given RouterVersion to the db. Updates the existing record if already exists.
 	Save(routerVersion *models.RouterVersion) (*models.RouterVersion, error)
-	// Finds the RouterVersion matching the given id.
-	FindByID(routerVersionID uint) (*models.RouterVersion, error)
-	// Finds the RouterVersion for the given Router matching the given version.
-	FindByRouterIDAndVersion(routerID uint, version uint) (*models.RouterVersion, error)
-	// Finds the latest RouterVersion for the given Router matching the given version.
-	FindLatestVersionbyRouterID(routerID uint) (*models.RouterVersion, error)
-	// Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
+	// FindByID Finds the RouterVersion matching the given id.
+	FindByID(routerVersionID models.ID) (*models.RouterVersion, error)
+	// FindByRouterIDAndVersion Finds the RouterVersion for the given Router matching the given version.
+	FindByRouterIDAndVersion(routerID models.ID, version uint) (*models.RouterVersion, error)
+	// FindLatestVersionByRouterID Finds the latest RouterVersion for the given Router matching the given version.
+	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
+	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
 }
 
@@ -43,14 +43,14 @@ func (service *routerVersionsService) query() *gorm.DB {
 		Select("router_versions.*")
 }
 
-func (service *routerVersionsService) ListRouterVersions(routerID uint) ([]*models.RouterVersion, error) {
+func (service *routerVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := service.query().Where("router_id = ?", routerID).Find(&routerVersions)
 	return routerVersions, query.Error
 }
 
 func (service *routerVersionsService) ListRouterVersionsWithStatus(
-	routerID uint,
+	routerID models.ID,
 	status models.RouterVersionStatus,
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
@@ -92,7 +92,7 @@ func (service *routerVersionsService) Save(routerVersion *models.RouterVersion) 
 }
 
 func (service *routerVersionsService) FindByID(
-	routerVersionID uint,
+	routerVersionID models.ID,
 ) (*models.RouterVersion, error) {
 	var routerVersion models.RouterVersion
 	query := service.query().
@@ -105,7 +105,7 @@ func (service *routerVersionsService) FindByID(
 }
 
 func (service *routerVersionsService) FindByRouterIDAndVersion(
-	routerID uint,
+	routerID models.ID,
 	version uint,
 ) (*models.RouterVersion, error) {
 	var routerVersion models.RouterVersion
@@ -119,8 +119,8 @@ func (service *routerVersionsService) FindByRouterIDAndVersion(
 	return &routerVersion, nil
 }
 
-func (service *routerVersionsService) FindLatestVersionbyRouterID(
-	routerID uint,
+func (service *routerVersionsService) FindLatestVersionByRouterID(
+	routerID models.ID,
 ) (*models.RouterVersion, error) {
 	var routerVersion models.RouterVersion
 	query := service.query().

@@ -17,7 +17,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func TestAlertsContollerWhenAlertIsDisabled(t *testing.T) {
+func TestAlertsControllerWhenAlertIsDisabled(t *testing.T) {
 	controller := &AlertsController{
 		&baseController{
 			&AppContext{
@@ -48,15 +48,16 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 
 	mockMLPService := &mocks.MLPService{}
 	mockMLPService.
-		On("GetProject", mock.AnythingOfType("int")).
+		On("GetProject", mock.AnythingOfType("models.ID")).
 		Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
 		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(nil, errors.New("test router error"))
-	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
+	mockRouterService.On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router error"))
+	mockRouterService.On("FindByID", models.ID(2)).Return(router, nil)
 
 	alert := &models.Alert{
 		Environment:       "env",
@@ -181,9 +182,10 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 	mockMLPService.On("GetProject", 1).Return(&mlp.Project{}, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(nil, errors.New("Test router error"))
-	mockRouterService.On("FindByID", uint(2)).Return(&models.Router{Name: "router2"}, nil)
-	mockRouterService.On("FindByID", uint(3)).Return(&models.Router{Name: "router3"}, nil)
+	mockRouterService.On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router error"))
+	mockRouterService.On("FindByID", models.ID(2)).Return(&models.Router{Name: "router2"}, nil)
+	mockRouterService.On("FindByID", models.ID(3)).Return(&models.Router{Name: "router3"}, nil)
 
 	alerts := []*models.Alert{
 		{
@@ -197,7 +199,8 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 		},
 	}
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("List", "router2-turing-router").Return(nil, errors.New("Test alert error"))
+	mockAlertService.On("List", "router2-turing-router").
+		Return(nil, errors.New("test alert error"))
 	mockAlertService.On("List", "router3-turing-router").Return(alerts, nil)
 
 	// Define tests
@@ -211,14 +214,14 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
 			vars: map[string]string{"router_id": "1"},
-			want: NotFound("router not found", "Test router error"),
+			want: NotFound("router not found", "test router error"),
 		},
 		"failure | save alert": {
 			req: &http.Request{
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
 			vars: map[string]string{"router_id": "2"},
-			want: InternalServerError("failed to list alerts", "Test alert error"),
+			want: InternalServerError("failed to list alerts", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
@@ -253,10 +256,10 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 func TestAlertsControllerGetAlert(t *testing.T) {
 	// Set up mock services
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", 1).Return(&mlp.Project{}, nil)
+	mockMLPService.On("GetProject", models.ID(1)).Return(&mlp.Project{}, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(&models.Router{Name: "router"}, nil)
+	mockRouterService.On("FindByID", models.ID(1)).Return(&models.Router{Name: "router"}, nil)
 
 	alert := &models.Alert{
 		Model:             models.Model{ID: 2},
@@ -269,8 +272,9 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 		Duration:          "5m",
 	}
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("FindByID", uint(1)).Return(nil, errors.New("Test alert error"))
-	mockAlertService.On("FindByID", uint(2)).Return(alert, nil)
+	mockAlertService.On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test alert error"))
+	mockAlertService.On("FindByID", models.ID(2)).Return(alert, nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -283,7 +287,7 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
 			vars: map[string]string{"alert_id": "1"},
-			want: NotFound("alert not found", "Test alert error"),
+			want: NotFound("alert not found", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
@@ -323,14 +327,14 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	var routerVersion *models.RouterVersion
 
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("models.ID")).Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
 		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
+	mockRouterService.On("FindByID", models.ID(1)).Return(router, nil)
+	mockRouterService.On("FindByID", models.ID(2)).Return(router, nil)
 
 	oldAlert1 := &models.Alert{
 		Model:             models.Model{ID: 1},
@@ -371,9 +375,10 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 		Service:           "test-turing-router",
 	}
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("FindByID", uint(1)).Return(oldAlert1, nil)
-	mockAlertService.On("FindByID", uint(2)).Return(oldAlert2, nil)
-	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
+	mockAlertService.On("FindByID", models.ID(1)).Return(oldAlert1, nil)
+	mockAlertService.On("FindByID", models.ID(2)).Return(oldAlert2, nil)
+	mockAlertService.On("FindByID", models.ID(10)).
+		Return(nil, errors.New("test alert find error"))
 	mockAlertService.
 		On(
 			"GetDashboardURL",
@@ -388,7 +393,7 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	mockAlertService.
 		On("Update", *alert1, "user@gojek.com", "https://grafana.example.com/dashboard?var-cluster=testcluster"+
 			"&var-project=testproject&var-experiment=test").
-		Return(errors.New("Test alert error"))
+		Return(errors.New("test alert error"))
 	mockAlertService.
 		On("Update", *alert2, "user@gojek.com", "https://grafana.example.com/dashboard?var-cluster=testcluster"+
 			"&var-project=testproject&var-experiment=test").
@@ -423,7 +428,7 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 			},
 			vars: map[string]string{"router_id": "1", "alert_id": "10"},
 			body: body,
-			want: NotFound("alert not found", "Test alert find error"),
+			want: NotFound("alert not found", "test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
@@ -438,7 +443,7 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 			},
 			vars: map[string]string{"router_id": "2", "alert_id": "1"},
 			body: body,
-			want: InternalServerError("unable to update alert", "Test alert error"),
+			want: InternalServerError("unable to update alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
@@ -479,21 +484,22 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	var routerVersion *models.RouterVersion
 
 	mockMLPService := &mocks.MLPService{}
-	mockMLPService.On("GetProject", mock.AnythingOfType("int")).Return(project, nil)
+	mockMLPService.On("GetProject", mock.AnythingOfType("models.ID")).Return(project, nil)
 	mockMLPService.
 		On("GetEnvironment", mock.AnythingOfType("string")).
 		Return(environment, nil)
 
 	mockRouterService := &mocks.RoutersService{}
-	mockRouterService.On("FindByID", uint(1)).Return(router, nil)
-	mockRouterService.On("FindByID", uint(2)).Return(router, nil)
+	mockRouterService.On("FindByID", models.ID(1)).Return(router, nil)
+	mockRouterService.On("FindByID", models.ID(2)).Return(router, nil)
 
 	alert1 := &models.Alert{Model: models.Model{ID: 1}}
 	alert2 := &models.Alert{Model: models.Model{ID: 2}}
 	mockAlertService := &mocks.AlertService{}
-	mockAlertService.On("FindByID", uint(1)).Return(alert1, nil)
-	mockAlertService.On("FindByID", uint(2)).Return(alert2, nil)
-	mockAlertService.On("FindByID", uint(10)).Return(nil, errors.New("Test alert find error"))
+	mockAlertService.On("FindByID", models.ID(1)).Return(alert1, nil)
+	mockAlertService.On("FindByID", models.ID(2)).Return(alert2, nil)
+	mockAlertService.On("FindByID", models.ID(10)).
+		Return(nil, errors.New("test alert find error"))
 	mockAlertService.
 		On(
 			"GetDashboardURL",
@@ -510,7 +516,7 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 		*alert1,
 		"user@gojek.com",
 		"https://grafana.example.com/dashboard?var-cluster=testcluster&var-project=testproject&var-experiment=test").
-		Return(errors.New("Test alert error"))
+		Return(errors.New("test alert error"))
 	mockAlertService.On(
 		"Delete",
 		*alert2,
@@ -529,7 +535,7 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
 			vars: map[string]string{"alert_id": "10", "router_id": "1"},
-			want: NotFound("alert not found", "Test alert find error"),
+			want: NotFound("alert not found", "test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
@@ -543,7 +549,7 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
 			},
 			vars: map[string]string{"alert_id": "1", "router_id": "1"},
-			want: InternalServerError("unable to delete alert", "Test alert error"),
+			want: InternalServerError("unable to delete alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
@@ -620,8 +626,9 @@ func TestAlertsControllerGetEmailFromRequestHeader(t *testing.T) {
 func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 	// Create mock services
 	alertSvc := &mocks.AlertService{}
-	alertSvc.On("FindByID", uint(1)).Return(nil, errors.New("Test alert error"))
-	alertSvc.On("FindByID", uint(2)).Return(&models.Alert{}, nil)
+	alertSvc.On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test alert error"))
+	alertSvc.On("FindByID", models.ID(2)).Return(&models.Alert{}, nil)
 
 	// Define test cases
 	tests := map[string]struct {
@@ -634,7 +641,7 @@ func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 		},
 		"failure | alert not found": {
 			vars:     map[string]string{"alert_id": "1"},
-			expected: NotFound("alert not found", "Test alert error"),
+			expected: NotFound("alert not found", "test alert error"),
 		},
 		"success": {
 			vars:     map[string]string{"alert_id": "2"},

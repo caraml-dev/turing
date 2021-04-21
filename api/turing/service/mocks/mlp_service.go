@@ -3,6 +3,7 @@ package mocks
 import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -34,7 +35,7 @@ func (m *MLPService) GetEnvironment(name string) (*merlin.Environment, error) {
 }
 
 // GetProject satisfies the MLPService interface
-func (m *MLPService) GetProject(id int) (*mlp.Project, error) {
+func (m *MLPService) GetProject(id models.ID) (*mlp.Project, error) {
 	ret := m.Called(id)
 
 	if ret[1] != nil {
@@ -45,7 +46,7 @@ func (m *MLPService) GetProject(id int) (*mlp.Project, error) {
 }
 
 // GetSecret satisfies the MLPService interface
-func (m *MLPService) GetSecret(projectID int, name string) (string, error) {
+func (m *MLPService) GetSecret(projectID models.ID, name string) (string, error) {
 	ret := m.Called(projectID, name)
 
 	if ret[1] != nil {

@@ -31,11 +31,11 @@ func (_m *AlertService) Delete(alert models.Alert, authorEmail string, dashboard
 }
 
 // FindByID provides a mock function with given fields: id
-func (_m *AlertService) FindByID(id uint) (*models.Alert, error) {
+func (_m *AlertService) FindByID(id models.ID) (*models.Alert, error) {
 	ret := _m.Called(id)
 
 	var r0 *models.Alert
-	if rf, ok := ret.Get(0).(func(uint) *models.Alert); ok {
+	if rf, ok := ret.Get(0).(func(models.ID) *models.Alert); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -44,7 +44,7 @@ func (_m *AlertService) FindByID(id uint) (*models.Alert, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
+	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)

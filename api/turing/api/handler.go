@@ -7,9 +7,6 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/gojek/turing/api/turing/api/request"
-	"github.com/gojek/turing/api/turing/models"
-
 	val "github.com/go-playground/validator/v10"
 	"github.com/gojek/turing/api/turing/validation"
 	"github.com/gorilla/mux"
@@ -79,160 +76,18 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
 	baseController := &baseController{appCtx}
 	deploymentController := &routerDeploymentController{baseController}
-	routersController := RoutersController{deploymentController}
-	routerVersionsController := RouterVersionsController{deploymentController}
-	alertsController := &AlertsController{baseController}
-	podLogController := PodLogController{baseController}
-	experimentsController := &ExperimentsController{appCtx}
+	controllers := []Controller{
+		RoutersController{deploymentController},
+		RouterVersionsController{deploymentController},
+		EnsemblersControler{baseController},
+		AlertsController{baseController},
+		PodLogController{baseController},
+		ExperimentsController{baseController},
+	}
 
-	routes := []Route{
-		{
-			name:    "ListRouters",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers",
-			handler: routersController.ListRouters,
-		},
-		{
-			name:    "GetRouter",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			handler: routersController.GetRouter,
-		},
-		{
-			name:    "CreateRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers",
-			body:    request.CreateOrUpdateRouterRequest{},
-			handler: routersController.CreateRouter,
-		},
-		{
-			name:    "UpdateRouter",
-			method:  http.MethodPut,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			body:    request.CreateOrUpdateRouterRequest{},
-			handler: routersController.UpdateRouter,
-		},
-		{
-			name:    "DeleteRouter",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			handler: routersController.DeleteRouter,
-		},
-		{
-			name:    "ListRouterVersions",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions",
-			handler: routerVersionsController.ListRouterVersions,
-		},
-		{
-			name:    "GetRouterVersion",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
-			handler: routerVersionsController.GetRouterVersion,
-		},
-		{
-			name:    "DeleteRouterVersion",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
-			handler: routerVersionsController.DeleteRouterVersion,
-		},
-		// Deploy / Undeploy router version
-		{
-			name:    "DeployRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/deploy",
-			handler: routersController.DeployRouter,
-		},
-		{
-			name:    "DeployRouterVersion",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy",
-			handler: routerVersionsController.DeployRouterVersion,
-		},
-		{
-			name:    "DeployRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
-			handler: routersController.UndeployRouter,
-		},
-		// Router Events
-		{
-			name:    "ListRouterEvents",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/events",
-			handler: routersController.ListRouterEvents,
-		},
-		// CRUD operations router alerts
-		{
-			name:    "CreateAlert",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts",
-			body:    models.Alert{},
-			handler: alertsController.CreateAlert,
-		},
-		{
-			name:    "ListAlerts",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts",
-			handler: alertsController.ListAlerts,
-		},
-		{
-			name:    "UpdateAlert",
-			method:  http.MethodPut,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			body:    models.Alert{},
-			handler: alertsController.UpdateAlert,
-		},
-		{
-			name:    "GetAlert",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			body:    models.Alert{},
-			handler: alertsController.GetAlert,
-		},
-		{
-			name:    "DeleteAlert",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			handler: alertsController.DeleteAlert,
-		},
-		{
-			name:    "ListPodLogs",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/logs",
-			handler: podLogController.ListPodLogs,
-		},
-		{
-			name:    "ListPodLogs",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/logs",
-			handler: podLogController.ListPodLogs,
-		},
-		// Experiments APIs
-		{
-			name:    "ListExperimentEngines",
-			method:  http.MethodGet,
-			path:    "/experiment-engines",
-			handler: experimentsController.ListExperimentEngines,
-		},
-		{
-			name:    "ListExperimentEngineClients",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/clients",
-			handler: experimentsController.ListExperimentEngineClients,
-		},
-		{
-			name:    "ListExperimentEngineExperiments",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/experiments",
-			handler: experimentsController.ListExperimentEngineExperiments,
-		},
-		{
-			name:    "ListExperimentEngineVariables",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/variables",
-			handler: experimentsController.ListExperimentEngineVariables,
-		},
+	var routes []Route
+	for _, c := range controllers {
+		routes = append(routes, c.Routes()...)
 	}
 
 	router := mux.NewRouter().StrictSlash(true)

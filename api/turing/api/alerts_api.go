@@ -15,7 +15,7 @@ type AlertsController struct {
 
 var ErrAlertDisabled = errors.New("alert is disabled in turing-api")
 
-func (c *AlertsController) CreateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c AlertsController) CreateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -59,7 +59,7 @@ func (c *AlertsController) CreateAlert(r *http.Request, vars map[string]string, 
 	return Ok(created)
 }
 
-func (c *AlertsController) ListAlerts(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) ListAlerts(r *http.Request, vars map[string]string, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -79,7 +79,7 @@ func (c *AlertsController) ListAlerts(r *http.Request, vars map[string]string, _
 	return Ok(alerts)
 }
 
-func (c *AlertsController) GetAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) GetAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -95,7 +95,7 @@ func (c *AlertsController) GetAlert(r *http.Request, vars map[string]string, _ i
 	return Ok(alert)
 }
 
-func (c *AlertsController) UpdateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c AlertsController) UpdateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -140,7 +140,7 @@ func (c *AlertsController) UpdateAlert(r *http.Request, vars map[string]string, 
 	return Ok(updateAlert)
 }
 
-func (c *AlertsController) DeleteAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) DeleteAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -183,7 +183,7 @@ func (c *AlertsController) DeleteAlert(r *http.Request, vars map[string]string, 
 }
 
 // getEmailFromRequestHeader ensures the request has a User-Email header (the account that sends the request)
-func (c *AlertsController) getEmailFromRequestHeader(r *http.Request) (string, *Response) {
+func (c AlertsController) getEmailFromRequestHeader(r *http.Request) (string, *Response) {
 	email := r.Header.Get("User-Email")
 	if email == "" || !strings.Contains(email, "@") {
 		return email, BadRequest("missing User-Email in header", "")
@@ -191,12 +191,12 @@ func (c *AlertsController) getEmailFromRequestHeader(r *http.Request) (string, *
 	return email, nil
 }
 
-func (c *AlertsController) getAlertFromRequestVars(vars map[string]string) (*models.Alert, *Response) {
+func (c AlertsController) getAlertFromRequestVars(vars map[string]string) (*models.Alert, *Response) {
 	id, err := getIntFromVars(vars, "alert_id")
 	if err != nil {
 		return nil, BadRequest("invalid alert id", err.Error())
 	}
-	alert, err := c.AlertService.FindByID(uint(id))
+	alert, err := c.AlertService.FindByID(models.ID(id))
 	if err != nil {
 		return nil, NotFound("alert not found", err.Error())
 	}
@@ -205,6 +205,44 @@ func (c *AlertsController) getAlertFromRequestVars(vars map[string]string) (*mod
 
 // getService returns service name from router name.
 // The service name is assumed to be <router_name>-turing-router
-func (c *AlertsController) getService(r models.Router) string {
+func (c AlertsController) getService(r models.Router) string {
 	return r.Name + "-turing-router"
+}
+
+func (c AlertsController) Routes() []Route {
+	return []Route{
+		{
+			name:    "CreateAlert",
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/alerts",
+			body:    models.Alert{},
+			handler: c.CreateAlert,
+		},
+		{
+			name:    "ListAlerts",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/alerts",
+			handler: c.ListAlerts,
+		},
+		{
+			name:    "UpdateAlert",
+			method:  http.MethodPut,
+			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
+			body:    models.Alert{},
+			handler: c.UpdateAlert,
+		},
+		{
+			name:    "GetAlert",
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
+			body:    models.Alert{},
+			handler: c.GetAlert,
+		},
+		{
+			name:    "DeleteAlert",
+			method:  http.MethodDelete,
+			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
+			handler: c.DeleteAlert,
+		},
+	}
 }

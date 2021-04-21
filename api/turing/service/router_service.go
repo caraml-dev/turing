@@ -9,16 +9,17 @@ import (
 
 // RoutersService is the data access object for the Routers from the db.
 type RoutersService interface {
-	// List routers within the given project and environment.
-	ListRouters(projectID int, environmentName string) ([]*models.Router, error)
+	//ListRouters List routers within the given project and environment.
+	ListRouters(projectID models.ID, environmentName string) ([]*models.Router, error)
 	// Save the given router to the db. Updates the existing record if already exists.
 	Save(router *models.Router) (*models.Router, error)
-	// Find a router matching the given router id.
-	FindByID(routerID uint) (*models.Router, error)
-	// Find a router within the given project that matches the given name.
-	FindByProjectAndName(projectID int, routerName string) (*models.Router, error)
-	// Find a router within the given project and environment that matches the given name.
-	FindByProjectAndEnvironmentAndName(projectID int, environmentName string, routerName string) (*models.Router, error)
+	//FindByID Find a router matching the given router id.
+	FindByID(routerID models.ID) (*models.Router, error)
+	//FindByProjectAndName Find a router within the given project that matches the given name.
+	FindByProjectAndName(projectID models.ID, routerName string) (*models.Router, error)
+	//FindByProjectAndEnvironmentAndName Find a router within the given project and environment
+	// that matches the given name.
+	FindByProjectAndEnvironmentAndName(projectID models.ID, environmentName string, routerName string) (*models.Router, error)
 	// Delete a router. This deletes all child objects of the router (router versions, ensemblers and enrichers)
 	// (Transactional).
 	Delete(router *models.Router) error
@@ -41,7 +42,7 @@ func (service *routersService) query() *gorm.DB {
 		Select("routers.*")
 }
 
-func (service *routersService) ListRouters(projectID int, environmentName string) ([]*models.Router, error) {
+func (service *routersService) ListRouters(projectID models.ID, environmentName string) ([]*models.Router, error) {
 	var routers []*models.Router
 	query := service.query()
 	if projectID > 0 {
@@ -67,7 +68,7 @@ func (service *routersService) Save(router *models.Router) (*models.Router, erro
 	return service.FindByID(router.ID)
 }
 
-func (service *routersService) FindByID(routerID uint) (*models.Router, error) {
+func (service *routersService) FindByID(routerID models.ID) (*models.Router, error) {
 	var router models.Router
 	query := service.query().
 		Where("routers.id = ?", routerID).
@@ -79,7 +80,7 @@ func (service *routersService) FindByID(routerID uint) (*models.Router, error) {
 }
 
 func (service *routersService) FindByProjectAndEnvironmentAndName(
-	projectID int,
+	projectID models.ID,
 	environmentName string,
 	name string,
 ) (*models.Router, error) {
@@ -95,7 +96,7 @@ func (service *routersService) FindByProjectAndEnvironmentAndName(
 	return &router, nil
 }
 
-func (service *routersService) FindByProjectAndName(projectID int, name string) (*models.Router, error) {
+func (service *routersService) FindByProjectAndName(projectID models.ID, name string) (*models.Router, error) {
 	var router models.Router
 	query := service.query().
 		Where("routers.project_id = ?", projectID).

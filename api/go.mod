@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	bou.ke/monkey v1.0.2
-	cloud.google.com/go/bigquery v1.9.0
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/getkin/kin-openapi v0.20.0
 	github.com/ghodss/yaml v1.0.0
@@ -15,7 +14,7 @@ require (
 	github.com/gojek/turing/engines/experiment v0.0.0
 	github.com/gojek/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
-	github.com/google/go-cmp v0.5.0
+	github.com/google/go-cmp v0.5.4
 	github.com/gorilla/mux v1.7.4
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/jinzhu/gorm v1.9.12
@@ -30,11 +29,10 @@ require (
 	github.com/tidwall/gjson v1.6.1
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.15.0
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	google.golang.org/api v0.28.0
+	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible
-	gotest.tools/v3 v3.0.2
+	gotest.tools/v3 v3.0.3
 	istio.io/api v0.0.0-20191115173247-e1a1952e5b81
 	istio.io/client-go v0.0.0-20191120150049-26c62a04cdbc
 	k8s.io/api v0.18.3

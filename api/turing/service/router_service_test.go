@@ -40,7 +40,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		for i, router := range routers {
 			router, err := svc.Save(router)
 			assert.NoError(t, err)
-			assert.Equal(t, uint(i+1), router.ID)
+			assert.Equal(t, models.ID(i+1), router.ID)
 			assert.NotNil(t, router.CreatedAt)
 			assert.NotNil(t, router.UpdatedAt)
 		}
