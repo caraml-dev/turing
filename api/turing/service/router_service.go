@@ -19,7 +19,11 @@ type RoutersService interface {
 	FindByProjectAndName(projectID models.ID, routerName string) (*models.Router, error)
 	//FindByProjectAndEnvironmentAndName Find a router within the given project and environment
 	// that matches the given name.
-	FindByProjectAndEnvironmentAndName(projectID models.ID, environmentName string, routerName string) (*models.Router, error)
+	FindByProjectAndEnvironmentAndName(
+		projectID models.ID,
+		environmentName string,
+		routerName string,
+	) (*models.Router, error)
 	// Delete a router. This deletes all child objects of the router (router versions, ensemblers and enrichers)
 	// (Transactional).
 	Delete(router *models.Router) error

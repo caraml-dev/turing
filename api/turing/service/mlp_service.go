@@ -3,16 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gojek/turing/api/turing/models"
 	"log"
 	"net/http"
 	"time"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/client"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2/google"
 
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	"github.com/gojek/turing/api/turing/models"
 )
 
 const (
