@@ -309,53 +309,45 @@ func (c RoutersController) ListRouterEvents(r *http.Request,
 func (c RoutersController) Routes() []Route {
 	return []Route{
 		{
-			name:    "ListRouters",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers",
 			handler: c.ListRouters,
 		},
 		{
-			name:    "GetRouter",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}",
 			handler: c.GetRouter,
 		},
 		{
-			name:    "CreateRouter",
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers",
 			body:    request.CreateOrUpdateRouterRequest{},
 			handler: c.CreateRouter,
 		},
 		{
-			name:    "UpdateRouter",
 			method:  http.MethodPut,
 			path:    "/projects/{project_id}/routers/{router_id}",
 			body:    request.CreateOrUpdateRouterRequest{},
 			handler: c.UpdateRouter,
 		},
 		{
-			name:    "DeleteRouter",
 			method:  http.MethodDelete,
 			path:    "/projects/{project_id}/routers/{router_id}",
 			handler: c.DeleteRouter,
 		},
 		// Deploy / Undeploy router version
 		{
-			name:    "DeployRouter",
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/deploy",
 			handler: c.DeployRouter,
 		},
 		{
-			name:    "UndeployRouter",
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
 			handler: c.UndeployRouter,
 		},
 		// Router Events
 		{
-			name:    "ListRouterEvents",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/events",
 			handler: c.ListRouterEvents,

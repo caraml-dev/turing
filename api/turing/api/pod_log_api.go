@@ -115,13 +115,11 @@ func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, b
 func (c PodLogController) Routes() []Route {
 	return []Route{
 		{
-			name:    "ListPodLogs",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/logs",
 			handler: c.ListPodLogs,
 		},
 		{
-			name:    "ListPodLogs",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/logs",
 			handler: c.ListPodLogs,

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"runtime"
 
 	val "github.com/go-playground/validator/v10"
 	"github.com/gojek/turing/api/turing/validation"
@@ -25,6 +26,16 @@ type Route struct {
 	body    interface{}
 	handler Handler
 	name    string
+}
+
+// Name returns the name of the route by either using Route's property `name`
+// or if it's empty – then by inferring it from the Route's `handler` function name
+func (route Route) Name() string {
+	if len(route.name) > 0 {
+		return route.name
+	}
+	v := reflect.ValueOf(route.handler)
+	return runtime.FuncForPC(v.Pointer()).Name()
 }
 
 // HandlerFunc returns the HandlerFunc for this route, which validates the request and
@@ -79,7 +90,7 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 	controllers := []Controller{
 		RoutersController{deploymentController},
 		RouterVersionsController{deploymentController},
-		EnsemblersControler{baseController},
+		EnsemblersController{baseController},
 		AlertsController{baseController},
 		PodLogController{baseController},
 		ExperimentsController{baseController},
@@ -93,14 +104,14 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	for _, r := range routes {
-		_, handler := newrelic.WrapHandle(r.name, r.HandlerFunc(validator))
+		_, handler := newrelic.WrapHandle(r.Name(), r.HandlerFunc(validator))
 
 		// Wrap with authz handler, if provided
 		if appCtx.Authorizer != nil {
 			handler = appCtx.Authorizer.Middleware(handler)
 		}
 
-		router.Name(r.name).
+		router.Name(r.Name()).
 			Methods(r.method).
 			Path(r.path).
 			Handler(handler)

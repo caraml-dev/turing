@@ -137,26 +137,21 @@ func (c RouterVersionsController) DeployRouterVersion(
 func (c RouterVersionsController) Routes() []Route {
 	return []Route{
 		{
-			name:    "ListRouterVersions",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
 			handler: c.ListRouterVersions,
 		},
 		{
-			name:    "GetRouterVersion",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
 			handler: c.GetRouterVersion,
 		},
 		{
-			name:    "DeleteRouterVersion",
 			method:  http.MethodDelete,
 			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
 			handler: c.DeleteRouterVersion,
 		},
-
 		{
-			name:    "DeployRouterVersion",
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy",
 			handler: c.DeployRouterVersion,

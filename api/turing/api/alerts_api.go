@@ -212,34 +212,29 @@ func (c AlertsController) getService(r models.Router) string {
 func (c AlertsController) Routes() []Route {
 	return []Route{
 		{
-			name:    "CreateAlert",
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/alerts",
 			body:    models.Alert{},
 			handler: c.CreateAlert,
 		},
 		{
-			name:    "ListAlerts",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/alerts",
 			handler: c.ListAlerts,
 		},
 		{
-			name:    "UpdateAlert",
 			method:  http.MethodPut,
 			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
 			body:    models.Alert{},
 			handler: c.UpdateAlert,
 		},
 		{
-			name:    "GetAlert",
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
 			body:    models.Alert{},
 			handler: c.GetAlert,
 		},
 		{
-			name:    "DeleteAlert",
 			method:  http.MethodDelete,
 			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
 			handler: c.DeleteAlert,

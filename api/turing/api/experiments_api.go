@@ -92,25 +92,21 @@ func (c ExperimentsController) ListExperimentEngineVariables(
 func (c ExperimentsController) Routes() []Route {
 	return []Route{
 		{
-			name:    "ListExperimentEngines",
 			method:  http.MethodGet,
 			path:    "/experiment-engines",
 			handler: c.ListExperimentEngines,
 		},
 		{
-			name:    "ListExperimentEngineClients",
 			method:  http.MethodGet,
 			path:    "/experiment-engines/{engine}/clients",
 			handler: c.ListExperimentEngineClients,
 		},
 		{
-			name:    "ListExperimentEngineExperiments",
 			method:  http.MethodGet,
 			path:    "/experiment-engines/{engine}/experiments",
 			handler: c.ListExperimentEngineExperiments,
 		},
 		{
-			name:    "ListExperimentEngineVariables",
 			method:  http.MethodGet,
 			path:    "/experiment-engines/{engine}/variables",
 			handler: c.ListExperimentEngineVariables,

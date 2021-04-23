@@ -14,11 +14,16 @@ type Ensembler struct {
 	DockerConfig   *EnsemblerDockerConfig   `json:"docker_config"`   // Ensembler config when Type is "docker"
 }
 
+func (*Ensembler) TableName() string {
+	return "ensemblers_config"
+}
+
 type EnsemblerType string
 
 const (
-	EnsemblerStandardType = "standard"
-	EnsemblerDockerType   = "docker"
+	EnsemblerStandardType EnsemblerType = "standard"
+	EnsemblerDockerType   EnsemblerType = "docker"
+	EnsemblerTypePyFunc   EnsemblerType = "pyfunc"
 )
 
 type EnsemblerStandardConfig struct {
