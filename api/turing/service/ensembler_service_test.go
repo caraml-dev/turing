@@ -85,42 +85,53 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		pageSize := 6
 		pages := int(math.Ceil(float64(numEnsemblers) / float64(pageSize)))
 		fetched, err := svc.List(projectID, ListEnsemblersQuery{
-			paginationQuery{
-				page:     1,
-				pageSize: pageSize,
+			PaginationQuery{
+				Page:     1,
+				PageSize: pageSize,
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, 1, fetched.Paging.Page)
 		assert.Equal(t, numEnsemblers, fetched.Paging.Total)
 		assert.Equal(t, pages, fetched.Paging.Pages)
 		results, ok := fetched.Results.([]*models.GenericEnsembler)
-		assert.True(t, ok)
+		require.True(t, ok)
 		assert.ElementsMatch(t, found[0:pageSize], results)
 
 		// Next Page
 		fetched, err = svc.List(projectID, ListEnsemblersQuery{
-			paginationQuery{
-				page:     2,
-				pageSize: pageSize,
+			PaginationQuery{
+				Page:     2,
+				PageSize: pageSize,
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		results, ok = fetched.Results.([]*models.GenericEnsembler)
+		require.True(t, ok)
 		assert.Equal(t, numEnsemblers-pageSize, len(results))
-		assert.True(t, ok)
 		assert.ElementsMatch(t, found[pageSize:], results)
 
 		// Empty results
 		fetched, err = svc.List(projectID, ListEnsemblersQuery{
-			paginationQuery{
-				page:     3,
-				pageSize: pageSize,
+			PaginationQuery{
+				Page:     3,
+				PageSize: pageSize,
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		results, ok = fetched.Results.([]*models.GenericEnsembler)
-		assert.True(t, ok)
+		require.True(t, ok)
 		assert.Empty(t, results)
+
+		// Fetch all
+		fetched, err = svc.List(projectID, ListEnsemblersQuery{})
+		require.NoError(t, err)
+		assert.Equal(t, 1, fetched.Paging.Page)
+		assert.Equal(t, numEnsemblers, fetched.Paging.Total)
+		assert.Equal(t, 1, fetched.Paging.Pages)
+		results, ok = fetched.Results.([]*models.GenericEnsembler)
+		require.True(t, ok)
+		assert.Equal(t, numEnsemblers, len(results))
+		assert.ElementsMatch(t, found, results)
 	})
 }

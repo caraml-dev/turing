@@ -14,7 +14,7 @@ import (
 
 // routerDeploymentController handles the deployment of routers
 type routerDeploymentController struct {
-	*baseController
+	*BaseController
 }
 
 // deployOrRollbackRouter takes in the project, router and the version to be deployed

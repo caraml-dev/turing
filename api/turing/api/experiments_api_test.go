@@ -24,8 +24,8 @@ func TestListExperimentEngines(t *testing.T) {
 
 	// Create controller
 	ctrl := ExperimentsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				ExperimentsService: svc,
 			},
 		},
@@ -64,8 +64,8 @@ func TestListExperimentEngineClients(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{},
+				&BaseController{
+					AppContext: &AppContext{},
 				},
 			},
 			vars:     map[string]string{},
@@ -73,8 +73,8 @@ func TestListExperimentEngineClients(t *testing.T) {
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
@@ -84,8 +84,8 @@ func TestListExperimentEngineClients(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},
@@ -136,8 +136,8 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{},
+				&BaseController{
+					AppContext: &AppContext{},
 				},
 			},
 			vars:     map[string]string{},
@@ -145,8 +145,8 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
@@ -159,8 +159,8 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},
@@ -215,8 +215,8 @@ func TestListExperimentEngineVariables(t *testing.T) {
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{},
+				&BaseController{
+					AppContext: &AppContext{},
 				},
 			},
 			vars:     map[string]string{},
@@ -224,8 +224,8 @@ func TestListExperimentEngineVariables(t *testing.T) {
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
@@ -238,8 +238,8 @@ func TestListExperimentEngineVariables(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},

@@ -19,8 +19,8 @@ import (
 
 func TestAlertsControllerWhenAlertIsDisabled(t *testing.T) {
 	controller := &AlertsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:     &mocks.MLPService{},
 				RoutersService: &mocks.RoutersService{},
 				AlertService:   nil,
@@ -157,8 +157,8 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
 				AlertService:   mockAlertService,
@@ -234,8 +234,8 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
 				AlertService:   mockAlertService,
@@ -300,8 +300,8 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
 				AlertService:   mockAlertService,
@@ -457,8 +457,8 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
 				AlertService:   mockAlertService,
@@ -562,7 +562,7 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&baseController{
+		&BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -653,8 +653,8 @@ func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &AlertsController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						AlertService: alertSvc,
 					},
 				},

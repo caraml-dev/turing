@@ -7,15 +7,36 @@ paths:
   '/projects/{project_id}/ensemblers':
     get:
       summary: Returns a list of ensemblers that belong to the project
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: A JSON array of ensembler objects
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Ensembler'
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResults'
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GenericEnsembler'
   '/projects/{project_id}/jobs':
     get:
       summary: Returns a list of Ensembling jobs
@@ -32,7 +53,11 @@ paths:
 
 components:
   schemas:
-    Ensembler:
+    EnsemblerType:
+      type: 'string'
+      enum:
+        - pyfunc
+    GenericEnsembler:
       properties:
         id:
           type: 'integer'
@@ -40,23 +65,34 @@ components:
         project_id:
           type: 'integer'
           format: 'int32'
-        mlflow_url:
+        name:
           type: 'string'
-          format: 'uri'
-        mlflow_experiment_id:
-          type: 'integer'
-          format: 'int32'
-        mlflow_run_id:
-          type: 'string'
-        artifact_uri:
-          type: 'string'
-          format: 'uri'
+          minLength: 3
+          maxLength: 50
+        type:
+          $ref: '#/components/schemas/EnsemblerType'
         created_at:
           type: 'string'
           format: 'date-time'
         updated_at:
           type: 'string'
           format: 'date-time'
+    PyfuncEnsembler:
+      allOf:
+        - $ref: '#/components/schemas/Dataset'
+        - type: 'object'
+          properties:
+            mlflow_url:
+              type: 'string'
+              format: 'uri'
+            mlflow_experiment_id:
+              type: 'integer'
+              format: 'int32'
+            mlflow_run_id:
+              type: 'string'
+            artifact_uri:
+              type: 'string'
+              format: 'uri'
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
       properties:
@@ -174,3 +210,23 @@ components:
         - LONG
         - STRING
         - ARRAY
+
+    PaginatedResults:
+      type: 'object'
+      properties:
+        paging:
+          type: 'object'
+          properties:
+            total:
+              type: 'integer'
+              format: 'int32'
+              description: 'Total number of results matching the query criteria'
+            page:
+              type: 'integer'
+              format: 'int32'
+              description: 'Number of the current page'
+            pages:
+              type: 'integer'
+              format: 'int32'
+              description: 'Total number of pages'
+

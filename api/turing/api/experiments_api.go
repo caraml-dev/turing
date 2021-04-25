@@ -8,7 +8,7 @@ import (
 
 // ExperimentsController implements the handlers for experiment related APIs
 type ExperimentsController struct {
-	*baseController
+	*BaseController
 }
 
 // ListExperimentEngines returns a list of available experiment engines

@@ -157,8 +157,8 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 			// Create test controller
 			ctrl := &routerDeploymentController{
-				&baseController{
-					&AppContext{
+				&BaseController{
+					AppContext: &AppContext{
 						MLPService:            mlps,
 						EventService:          es,
 						DeploymentService:     ds,
@@ -272,8 +272,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 
 	// Create test controller
 	ctrl := &routerDeploymentController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:            mlps,
 				DeploymentService:     ds,
 				RoutersService:        rs,
@@ -369,8 +369,8 @@ func TestUndeployRouterSuccess(t *testing.T) {
 
 	// Create test controller
 	ctrl := &routerDeploymentController{
-		&baseController{
-			&AppContext{
+		&BaseController{
+			AppContext: &AppContext{
 				MLPService:            mlps,
 				DeploymentService:     ds,
 				RoutersService:        rs,

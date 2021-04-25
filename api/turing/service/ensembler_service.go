@@ -17,13 +17,22 @@ type EnsemblersService interface {
 	Save(ensembler models.EnsemblerLike) (models.EnsemblerLike, error)
 }
 
+// ListEnsemblersQuery holds query parameters for EnsemblersService.List method
 type ListEnsemblersQuery struct {
-	paginationQuery
+	PaginationQuery
+}
+
+// NewListEnsemblersQuery creates a new instance of ListEnsemblersQuery struct
+func NewListEnsemblersQuery(page int, pageSize int) ListEnsemblersQuery {
+	return ListEnsemblersQuery{PaginationQuery{
+		Page:     page,
+		PageSize: pageSize,
+	}}
 }
 
 // NewEnsemblersService creates a new ensemblers service
 func NewEnsemblersService(db *gorm.DB) EnsemblersService {
-	return &ensemblersService{db: db.Debug()}
+	return &ensemblersService{db: db}
 }
 
 type ensemblersService struct {
@@ -60,8 +69,18 @@ func (service *ensemblersService) List(
 		done <- true
 	}()
 
-	result := db.Scopes(Paginate(query)).Find(&results)
+	var scopes []func(*gorm.DB) *gorm.DB
+	if query.Page > 0 && query.PageSize > 0 {
+		scopes = append(scopes, Paginate(query.PaginationQuery))
+	}
+	result := db.Scopes(scopes...).Find(&results)
 	<-done
+
+	page := int(math.Max(1, float64(query.Page)))
+	totalPages := 1
+	if query.PageSize > 0 {
+		totalPages = int(math.Ceil(float64(count) / float64(query.PageSize)))
+	}
 
 	if err := result.Error; err != nil {
 		return nil, err
@@ -70,8 +89,8 @@ func (service *ensemblersService) List(
 		Results: results,
 		Paging: Paging{
 			Total: count,
-			Page:  query.Page(),
-			Pages: int(math.Ceil(float64(count) / float64(query.PageSize()))),
+			Page:  page,
+			Pages: totalPages,
 		},
 	}, nil
 }

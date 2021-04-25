@@ -58,8 +58,8 @@ func TestListRouterVersions(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
 				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+					&BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -119,8 +119,8 @@ func TestGetRouterVersion(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
 				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+					&BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -271,8 +271,8 @@ func TestDeleteRouterVersion(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
 				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+					&BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -451,8 +451,8 @@ func TestDeployRouterVersion(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
 				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+					&BaseController{
+						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,

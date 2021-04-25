@@ -3,18 +3,30 @@ package api
 import (
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gorilla/schema"
 )
 
 type Controller interface {
 	Routes() []Route
 }
 
-// baseController implements common methods that may be shared by all API controllers
-type baseController struct {
+// BaseController implements common methods that may be shared by all API controllers
+type BaseController struct {
 	*AppContext
+	decoder *schema.Decoder
 }
 
-func (c *baseController) getProjectFromRequestVars(vars map[string]string) (project *mlp.Project, error *Response) {
+func NewBaseController(ctx *AppContext) *BaseController {
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+
+	return &BaseController{
+		AppContext: ctx,
+		decoder:    decoder,
+	}
+}
+
+func (c *BaseController) getProjectFromRequestVars(vars map[string]string) (project *mlp.Project, error *Response) {
 	id, err := getIntFromVars(vars, "project_id")
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
@@ -26,7 +38,7 @@ func (c *baseController) getProjectFromRequestVars(vars map[string]string) (proj
 	return project, nil
 }
 
-func (c *baseController) getRouterFromRequestVars(vars map[string]string) (router *models.Router, error *Response) {
+func (c *BaseController) getRouterFromRequestVars(vars map[string]string) (router *models.Router, error *Response) {
 	id, err := getIntFromVars(vars, "router_id")
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
@@ -38,7 +50,7 @@ func (c *baseController) getRouterFromRequestVars(vars map[string]string) (route
 	return router, nil
 }
 
-func (c *baseController) getRouterVersionFromRequestVars(
+func (c *BaseController) getRouterVersionFromRequestVars(
 	vars map[string]string,
 ) (routerVersion *models.RouterVersion, error *Response) {
 	routerID, err := getIntFromVars(vars, "router_id")
@@ -56,6 +68,6 @@ func (c *baseController) getRouterVersionFromRequestVars(
 	return routerVersion, nil
 }
 
-func (c *baseController) Routes() []Route {
+func (c *BaseController) Routes() []Route {
 	return []Route{}
 }

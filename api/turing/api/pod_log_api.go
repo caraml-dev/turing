@@ -14,7 +14,7 @@ import (
 )
 
 type PodLogController struct {
-	*baseController
+	*BaseController
 }
 
 func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, body interface{}) *Response {
