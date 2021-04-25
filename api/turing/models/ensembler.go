@@ -15,7 +15,7 @@ type Ensembler struct {
 }
 
 func (*Ensembler) TableName() string {
-	return "ensemblers_config"
+	return "ensembler_configs"
 }
 
 type EnsemblerType string
