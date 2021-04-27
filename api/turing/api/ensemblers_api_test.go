@@ -94,18 +94,17 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 			TProjectID: 1,
 		},
 	}
-	ensemblerSvc := &mocks.EnsemblersService{}
-	ensemblerSvc.
-		On("FindByID", models.ID(1)).
-		Return(nil, errors.New("test ensembler error"))
-	ensemblerSvc.On("FindByID", models.ID(2)).Return(ensembler, nil)
 
 	tests := map[string]struct {
-		vars     map[string]string
-		expected *Response
+		vars         map[string]string
+		ensemblerSvc func() service.EnsemblersService
+		expected     *Response
 	}{
 		"failure | bad request": {
-			vars:     map[string]string{"project_id": "1"},
+			vars: map[string]string{"project_id": "1"},
+			ensemblerSvc: func() service.EnsemblersService {
+				return nil
+			},
 			expected: BadRequest("invalid ensembler id", "key ensembler_id not found in vars"),
 		},
 		"failure | not found": {
@@ -113,12 +112,26 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 				"project_id":   "1",
 				"ensembler_id": "1",
 			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(1)).
+					Return(nil, errors.New("test ensembler error"))
+				return ensemblerSvc
+			},
 			expected: NotFound("ensembler not found", "test ensembler error"),
 		},
 		"failure | not found in project": {
 			vars: map[string]string{
 				"project_id":   "2",
 				"ensembler_id": "2",
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2)).
+					Return(ensembler, nil)
+				return ensemblerSvc
 			},
 			expected: NotFound(
 				"ensembler not found",
@@ -130,6 +143,13 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 				"project_id":   "1",
 				"ensembler_id": "2",
 			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2)).
+					Return(ensembler, nil)
+				return ensemblerSvc
+			},
 			expected: Ok(ensembler),
 		},
 	}
@@ -139,7 +159,7 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
-						EnsemblersService: ensemblerSvc,
+						EnsemblersService: tt.ensemblerSvc(),
 					},
 				),
 			}

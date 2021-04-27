@@ -8,6 +8,8 @@ type EnsemblerLike interface {
 	ProjectID() ID
 	Type() EnsemblerType
 	Name() string
+
+	SetProjectID(id ID)
 }
 
 func EnsemblerTable(ensembler EnsemblerLike) func(tx *gorm.DB) *gorm.DB {
@@ -27,13 +29,17 @@ type GenericEnsembler struct {
 	// as retrieved from the MLP API.
 	TProjectID ID `json:"project_id" gorm:"column:project_id"`
 
-	TType EnsemblerType `json:"type" gorm:"column:type"`
+	TType EnsemblerType `json:"type" gorm:"column:type" validate:"required,oneof=pyfunc"`
 
 	TName string `json:"name" gorm:"column:name" validate:"required,min=3,max=50"`
 }
 
 func (e *GenericEnsembler) ProjectID() ID {
 	return e.TProjectID
+}
+
+func (e *GenericEnsembler) SetProjectID(id ID) {
+	e.TProjectID = id
 }
 
 func (e *GenericEnsembler) Type() EnsemblerType {

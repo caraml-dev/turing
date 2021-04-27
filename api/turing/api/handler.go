@@ -117,7 +117,9 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 			Handler(handler)
 	}
 
-	router.Use(appCtx.OpenAPIValidation.Middleware)
+	if appCtx.OpenAPIValidation != nil {
+		router.Use(appCtx.OpenAPIValidation.Middleware)
+	}
 	router.Use(recoveryHandler)
 	return router
 }

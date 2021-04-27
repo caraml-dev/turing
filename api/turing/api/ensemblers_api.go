@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -63,10 +64,25 @@ func (c EnsemblersController) GetEnsembler(
 	return Ok(ensembler)
 }
 
-func (c EnsemblersController) SaveEnsembler(r *http.Request,
-	vars map[string]string, _ interface{},
+func (c EnsemblersController) CreateEnsembler(r *http.Request,
+	vars map[string]string, body interface{},
 ) *Response {
-	return NotFound("Not implemented", "")
+	var errResp *Response
+	var project *mlp.Project
+	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+
+	request := body.(*CreateOrUpdateEnsemblerRequest)
+	ensembler := request.Ensembler
+	ensembler.SetProjectID(models.ID(project.Id))
+
+	var err error
+	if ensembler, err = c.EnsemblersService.Save(ensembler); err != nil {
+		return InternalServerError("unable to save an ensembler", err.Error())
+	}
+
+	return Created(ensembler)
 }
 
 func (c EnsemblersController) Routes() []Route {
@@ -79,8 +95,8 @@ func (c EnsemblersController) Routes() []Route {
 		{
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/ensemblers",
-			body:    models.PyFuncEnsembler{},
-			handler: c.SaveEnsembler,
+			body:    CreateOrUpdateEnsemblerRequest{},
+			handler: c.CreateEnsembler,
 		},
 		{
 			method:  http.MethodGet,
@@ -88,4 +104,33 @@ func (c EnsemblersController) Routes() []Route {
 			handler: c.GetEnsembler,
 		},
 	}
+}
+
+type CreateOrUpdateEnsemblerRequest struct {
+	Ensembler models.EnsemblerLike
+}
+
+func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
+	typeCheck := struct {
+		Type models.EnsemblerType
+	}{}
+
+	if err := json.Unmarshal(data, &typeCheck); err != nil {
+		return err
+	}
+
+	var ensembler models.EnsemblerLike
+	switch typeCheck.Type {
+	case models.EnsemblerTypePyFunc:
+		ensembler = &models.PyFuncEnsembler{}
+	default:
+		return fmt.Errorf("unsupported ensembler type: %s", typeCheck.Type)
+	}
+
+	if err := json.Unmarshal(data, ensembler); err != nil {
+		return err
+	}
+
+	r.Ensembler = ensembler
+	return nil
 }

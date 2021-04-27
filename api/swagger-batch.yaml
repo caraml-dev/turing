@@ -39,6 +39,32 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/GenericEnsembler"
+    post:
+      tags: ["Ensembler"]
+      summary: Saves a user-defined ensembler into the project
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: A JSON object containing information about the ensembler
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/PyFuncEnsembler"
+      responses:
+        "201":
+          description: A JSON representation of a successfully saved ensembler
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PyFuncEnsembler"
+
   "/projects/{project_id}/ensemblers/{ensembler_id}":
     get:
       tags: ["Ensembler"]
