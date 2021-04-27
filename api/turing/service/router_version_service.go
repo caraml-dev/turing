@@ -37,10 +37,7 @@ func (service *routerVersionsService) query() *gorm.DB {
 	return service.db.
 		Preload("Router").
 		Preload("Enricher").
-		Preload("Ensembler").
-		Joins("LEFT JOIN enrichers on enrichers.id = router_versions.enricher_id").
-		Joins("LEFT JOIN ensemblers on ensemblers.id = router_versions.enricher_id").
-		Select("router_versions.*")
+		Preload("Ensembler")
 }
 
 func (service *routerVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {

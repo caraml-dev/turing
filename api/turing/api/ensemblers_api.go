@@ -19,7 +19,7 @@ func (c EnsemblersController) ListEnsemblers(
 ) *Response {
 	var query service.ListEnsemblersQuery
 	if err := c.decoder.Decode(&query, r.URL.Query()); err != nil {
-		return BadRequest("unable to retrieve ensemblers",
+		return BadRequest("unable to list ensemblers",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
@@ -36,6 +36,31 @@ func (c EnsemblersController) ListEnsemblers(
 	}
 
 	return Ok(results)
+}
+
+func (c EnsemblersController) GetEnsembler(
+	_ *http.Request,
+	vars map[string]string,
+	_ interface{},
+) *Response {
+	projectID, err := getIDFromVars(vars, "project_id")
+	if err != nil {
+		return BadRequest("invalid project id", err.Error())
+	}
+	id, err := getIDFromVars(vars, "ensembler_id")
+	if err != nil {
+		return BadRequest("invalid ensembler id", err.Error())
+	}
+	ensembler, err := c.EnsemblersService.FindByID(id)
+	if err != nil {
+		return NotFound("ensembler not found", err.Error())
+	} else if ensembler.ProjectID() != projectID {
+		return NotFound(
+			"ensembler not found",
+			fmt.Sprintf("ensembler with ID %d doesn't belong to this project", id))
+	}
+
+	return Ok(ensembler)
 }
 
 func (c EnsemblersController) SaveEnsembler(r *http.Request,
@@ -56,6 +81,11 @@ func (c EnsemblersController) Routes() []Route {
 			path:    "/projects/{project_id}/ensemblers",
 			body:    models.PyFuncEnsembler{},
 			handler: c.SaveEnsembler,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/ensemblers/{ensembler_id}",
+			handler: c.GetEnsembler,
 		},
 	}
 }

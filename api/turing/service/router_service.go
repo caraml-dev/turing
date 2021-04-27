@@ -42,8 +42,7 @@ func (service *routersService) query() *gorm.DB {
 	return service.db.
 		Preload("CurrRouterVersion").
 		Preload("CurrRouterVersion.Enricher").
-		Preload("CurrRouterVersion.Ensembler").
-		Select("routers.*")
+		Preload("CurrRouterVersion.Ensembler")
 }
 
 func (service *routersService) ListRouters(projectID models.ID, environmentName string) ([]*models.Router, error) {
@@ -117,21 +116,28 @@ func (service *routersService) Delete(router *models.Router) error {
 		return errors.New("router must have valid primary key to be deleted")
 	}
 	tx := service.db.Begin()
-	var routerVersions []*models.RouterVersion
 
 	// remove associations
 	router.ClearCurrRouterVersion()
 	tx.Save(router)
 
-	service.db.Model(router).Related(&routerVersions)
+	var routerVersions []*models.RouterVersion
+	if err := service.db.
+		Preload("Enricher").
+		Preload("Ensembler").
+		Where("router_id = ?", router.ID).
+		Find(&routerVersions).Error; err != nil {
+		return err
+	}
+
 	for _, routerVersion := range routerVersions {
+		tx.Delete(routerVersion)
 		if routerVersion.Ensembler != nil {
 			tx.Delete(routerVersion.Ensembler)
 		}
 		if routerVersion.Enricher != nil {
 			tx.Delete(routerVersion.Enricher)
 		}
-		tx.Delete(routerVersion)
 	}
 	tx.Delete(router)
 

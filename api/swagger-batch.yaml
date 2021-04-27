@@ -2,16 +2,18 @@ openapi: 3.0.3
 info:
   title: Turing Batch Experiment API
   version: 0.0.1
-
+servers:
+  - url: localhost:8080/v1
 paths:
-  '/projects/{project_id}/ensemblers':
+  "/projects/{project_id}/ensemblers":
     get:
+      tags: ["Ensembler"]
       summary: Returns a list of ensemblers that belong to the project
       parameters:
         - in: path
           name: project_id
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
           required: true
         - in: query
           name: page
@@ -24,185 +26,205 @@ paths:
             type: integer
             default: 10
       responses:
-        '200':
-          description: A JSON array of ensembler objects
+        "200":
+          description: A JSON object, that represents paginated results response
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/PaginatedResults'
+                  - $ref: "#/components/schemas/PaginatedResults"
                   - type: object
                     properties:
                       results:
                         type: array
                         items:
-                          $ref: '#/components/schemas/GenericEnsembler'
-  '/projects/{project_id}/jobs':
+                          $ref: "#/components/schemas/GenericEnsembler"
+  "/projects/{project_id}/ensemblers/{ensembler_id}":
+    get:
+      tags: ["Ensembler"]
+      summary: Returns Ensembler"s details by its ID
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: path
+          name: ensembler_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        "200":
+          description: A JSON object representing an instance of the specific type of Ensembler
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PyFuncEnsembler"
+  "/projects/{project_id}/jobs":
     get:
       summary: Returns a list of Ensembling jobs
       responses:
-        '200':
+        "200":
           description: fswefewrf
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EnsemblingJob'
-
+                  $ref: "#/components/schemas/EnsemblingJob"
 
 components:
   schemas:
+    Id:
+      type: "integer"
+      format: "int32"
     EnsemblerType:
-      type: 'string'
+      type: "string"
       enum:
         - pyfunc
     GenericEnsembler:
       properties:
         id:
-          type: 'integer'
-          format: 'int32'
+          $ref: "#/components/schemas/Id"
         project_id:
-          type: 'integer'
-          format: 'int32'
+          $ref: "#/components/schemas/Id"
         name:
-          type: 'string'
+          type: "string"
           minLength: 3
           maxLength: 50
         type:
-          $ref: '#/components/schemas/EnsemblerType'
+          $ref: "#/components/schemas/EnsemblerType"
         created_at:
-          type: 'string'
-          format: 'date-time'
+          type: "string"
+          format: "date-time"
         updated_at:
-          type: 'string'
-          format: 'date-time'
-    PyfuncEnsembler:
+          type: "string"
+          format: "date-time"
+    PyFuncEnsembler:
       allOf:
-        - $ref: '#/components/schemas/Dataset'
-        - type: 'object'
+        - $ref: "#/components/schemas/GenericEnsembler"
+        - type: "object"
           properties:
             mlflow_url:
-              type: 'string'
-              format: 'uri'
+              type: "string"
+              format: "uri"
             mlflow_experiment_id:
-              type: 'integer'
-              format: 'int32'
+              $ref: "#/components/schemas/Id"
             mlflow_run_id:
-              type: 'string'
+              type: "string"
             artifact_uri:
-              type: 'string'
-              format: 'uri'
+              type: "string"
+              format: "uri"
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
       properties:
         id:
-          type: 'integer'
-          format: 'int32'
+          $ref: "#/components/schemas/Id"
         project_id:
-          type: 'integer'
-          format: 'int32'
+          $ref: "#/components/schemas/Id"
 
     EnsemblingJobMeta:
       description: Ensembling job Metadata
       properties:
         name:
-          type: 'string'
+          type: "string"
         annotations:
-          type: 'object'
+          type: "object"
           additionalProperties:
-            type: 'string'
+            type: "string"
 
     EnsemblingJobSpec:
       description: Ensembling job Specification
       properties:
         source:
-          $ref: '#/components/schemas/EnsemblingJobSource'
+          $ref: "#/components/schemas/EnsemblingJobSource"
         predictions:
-          type: 'array'
+          type: "array"
           items:
-            $ref: '#/components/schemas/EnsemblingJobPredictionSource'
+            $ref: "#/components/schemas/EnsemblingJobPredictionSource"
         ensembler:
-          $ref: '#/components/schemas/EnsemblingJobEnsemblerSpec'
+          $ref: "#/components/schemas/EnsemblingJobEnsemblerSpec"
 
     EnsemblingJobSource:
-      type: 'object'
+      type: "object"
       properties:
         dataset:
-          $ref: '#/components/schemas/Dataset'
+          $ref: "#/components/schemas/Dataset"
         join_on:
-          type: 'array'
+          type: "array"
           items:
-            type: 'string'
+            type: "string"
 
     Dataset:
-      type: 'object'
+      type: "object"
       required:
-        - 'type'
+        - "type"
       properties:
         type:
-          $ref: '#/components/schemas/DatasetType'
+          $ref: "#/components/schemas/DatasetType"
       discriminator:
-        propertyName: 'type'
+        propertyName: "type"
 
     DatasetType:
-      type: 'string'
+      type: "string"
       enum:
-        - 'BQ'
+        - "BQ"
 
     BigQueryDataset:
       allOf:
-        - $ref: '#/components/schemas/Dataset'
+        - $ref: "#/components/schemas/Dataset"
         - type: object
           properties:
             bq_config:
-              $ref: '#/components/schemas/BigQueryDatasetConfig'
+              $ref: "#/components/schemas/BigQueryDatasetConfig"
 
     BigQueryDatasetConfig:
       properties:
         table:
-          type: 'string'
+          type: "string"
           pattern: '^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$'
         features:
-          type: 'array'
+          type: "array"
           items:
-            type: 'string'
+            type: "string"
         query:
-          type: 'string'
+          type: "string"
         options:
-          type: 'object'
+          type: "object"
           additionalProperties:
-            type: 'string'
+            type: "string"
 
     EnsemblingJobPredictionSource:
-      type: 'object'
+      type: "object"
       allOf:
-        - $ref: '#/components/schemas/EnsemblingJobSource'
-        - type: 'object'
+        - $ref: "#/components/schemas/EnsemblingJobSource"
+        - type: "object"
           properties:
             columns:
-              type: 'array'
+              type: "array"
               items:
-                type: 'string'
+                type: "string"
 
     EnsemblingJobEnsemblerSpec:
-      type: 'object'
+      type: "object"
       properties:
         uri:
-          type: 'string'
-          format: 'uri'
+          type: "string"
+          format: "uri"
         result:
-          type: 'object'
+          type: "object"
           properties:
             type:
-              $ref: '#/components/schemas/EnsemblingJobResultType'
+              $ref: "#/components/schemas/EnsemblingJobResultType"
             item_type:
-              $ref: '#/components/schemas/EnsemblingJobResultType'
+              $ref: "#/components/schemas/EnsemblingJobResultType"
             column_name:
-              type: 'string'
+              type: "string"
 
     EnsemblingJobResultType:
-      type: 'string'
+      type: "string"
       enum:
         - DOUBLE
         - FLOAT
@@ -212,21 +234,21 @@ components:
         - ARRAY
 
     PaginatedResults:
-      type: 'object'
+      type: "object"
       properties:
         paging:
-          type: 'object'
+          type: "object"
           properties:
             total:
-              type: 'integer'
-              format: 'int32'
-              description: 'Total number of results matching the query criteria'
+              type: "integer"
+              format: "int32"
+              description: "Total number of results matching the query criteria"
             page:
-              type: 'integer'
-              format: 'int32'
-              description: 'Number of the current page'
+              type: "integer"
+              format: "int32"
+              description: "Number of the current page"
             pages:
-              type: 'integer'
-              format: 'int32'
-              description: 'Total number of pages'
+              type: "integer"
+              format: "int32"
+              description: "Total number of pages"
 

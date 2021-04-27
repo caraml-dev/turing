@@ -192,11 +192,11 @@ func (c AlertsController) getEmailFromRequestHeader(r *http.Request) (string, *R
 }
 
 func (c AlertsController) getAlertFromRequestVars(vars map[string]string) (*models.Alert, *Response) {
-	id, err := getIntFromVars(vars, "alert_id")
+	id, err := getIDFromVars(vars, "alert_id")
 	if err != nil {
 		return nil, BadRequest("invalid alert id", err.Error())
 	}
-	alert, err := c.AlertService.FindByID(models.ID(id))
+	alert, err := c.AlertService.FindByID(id)
 	if err != nil {
 		return nil, NotFound("alert not found", err.Error())
 	}

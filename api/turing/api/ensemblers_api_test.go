@@ -24,16 +24,16 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 	ensemblers := &service.PaginatedResults{
 		Results: []models.EnsemblerLike{
 			&models.GenericEnsembler{
-				Model:     models.Model{ID: 1},
-				ProjectID: 3,
-				Type:      models.EnsemblerTypePyFunc,
-				Name:      "test-ensembler-1",
+				Model:      models.Model{ID: 1},
+				TProjectID: 3,
+				TType:      models.EnsemblerTypePyFunc,
+				TName:      "test-ensembler-1",
 			},
 			&models.GenericEnsembler{
-				Model:     models.Model{ID: 2},
-				ProjectID: 3,
-				Type:      models.EnsemblerTypePyFunc,
-				Name:      "test-ensembler-2",
+				Model:      models.Model{ID: 2},
+				TProjectID: 3,
+				TType:      models.EnsemblerTypePyFunc,
+				TName:      "test-ensembler-2",
 			},
 		},
 		Paging: service.Paging{Total: 3, Page: 1, Pages: 1},
@@ -70,7 +70,6 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 		},
 	}
 
-	// Run tests
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &EnsemblersController{
@@ -82,6 +81,69 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 				),
 			}
 			response := ctrl.ListEnsemblers(&http.Request{URL: &url.URL{RawQuery: tt.query}}, tt.vars, nil)
+			assert.Equal(t, tt.expected, response)
+		})
+	}
+}
+
+func TestEnsemblersController_GetEnsembler(t *testing.T) {
+	ensembler := &models.PyFuncEnsembler{
+		GenericEnsembler: &models.GenericEnsembler{
+			Model:      models.Model{ID: 2},
+			TType:      models.EnsemblerTypePyFunc,
+			TProjectID: 1,
+		},
+	}
+	ensemblerSvc := &mocks.EnsemblersService{}
+	ensemblerSvc.
+		On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test ensembler error"))
+	ensemblerSvc.On("FindByID", models.ID(2)).Return(ensembler, nil)
+
+	tests := map[string]struct {
+		vars     map[string]string
+		expected *Response
+	}{
+		"failure | bad request": {
+			vars:     map[string]string{"project_id": "1"},
+			expected: BadRequest("invalid ensembler id", "key ensembler_id not found in vars"),
+		},
+		"failure | not found": {
+			vars: map[string]string{
+				"project_id":   "1",
+				"ensembler_id": "1",
+			},
+			expected: NotFound("ensembler not found", "test ensembler error"),
+		},
+		"failure | not found in project": {
+			vars: map[string]string{
+				"project_id":   "2",
+				"ensembler_id": "2",
+			},
+			expected: NotFound(
+				"ensembler not found",
+				"ensembler with ID 2 doesn't belong to this project",
+			),
+		},
+		"success": {
+			vars: map[string]string{
+				"project_id":   "1",
+				"ensembler_id": "2",
+			},
+			expected: Ok(ensembler),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctrl := &EnsemblersController{
+				NewBaseController(
+					&AppContext{
+						EnsemblersService: ensemblerSvc,
+					},
+				),
+			}
+			response := ctrl.GetEnsembler(nil, tt.vars, nil)
 			assert.Equal(t, tt.expected, response)
 		})
 	}

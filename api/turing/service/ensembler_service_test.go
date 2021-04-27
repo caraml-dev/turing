@@ -22,10 +22,12 @@ func assertEqualEnsembler(
 ) {
 	require.Equal(t, reflect.TypeOf(expected), reflect.TypeOf(actual))
 
+	assert.Equal(t, expected.Type(), actual.Type())
+	assert.Equal(t, expected.Name(), actual.Name())
+	assert.Equal(t, expected.ProjectID(), actual.ProjectID())
+
 	assertGeneric := func(t *testing.T, expected *models.GenericEnsembler, actual *models.GenericEnsembler) {
 		assert.Equal(t, expected.ID, actual.ID)
-		assert.Equal(t, expected.Name, actual.Name)
-		assert.Equal(t, expected.ProjectID, actual.ProjectID)
 		assert.NotNil(t, actual.CreatedAt)
 		assert.NotNil(t, actual.UpdatedAt)
 	}
@@ -35,12 +37,11 @@ func assertEqualEnsembler(
 		expectedConcrete := expected.(*models.PyFuncEnsembler)
 		actualConcrete := actual.(*models.PyFuncEnsembler)
 		assertGeneric(t, expectedConcrete.GenericEnsembler, actualConcrete.GenericEnsembler)
-		assert.Equal(t, models.EnsemblerTypePyFunc, actualConcrete.Type)
+		assert.Equal(t, models.EnsemblerTypePyFunc, actualConcrete.Type())
 		assert.Equal(t, expectedConcrete.ExperimentID, actualConcrete.ExperimentID)
 		assert.Equal(t, expectedConcrete.RunID, actualConcrete.RunID)
 		assert.Equal(t, expectedConcrete.ArtifactURI, actualConcrete.ArtifactURI)
 	}
-
 }
 
 func TestEnsemblersServiceIntegration(t *testing.T) {
@@ -53,8 +54,8 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		for i := 0; i < numEnsemblers; i++ {
 			ensemblers[i] = &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					ProjectID: projectID,
-					Name:      fmt.Sprintf("test-ensembler-%d", i),
+					TProjectID: projectID,
+					TName:      fmt.Sprintf("test-ensembler-%d", i),
 				},
 				ExperimentID: models.ID(10 + i),
 				RunID:        fmt.Sprintf("experiment-run-%d", i),

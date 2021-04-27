@@ -41,7 +41,7 @@ type Event struct {
 	// that triggered the event.
 	Version uint `json:"version"`
 
-	// Type of event
+	// EventType type of event
 	EventType EventType `json:"event_type"`
 
 	// Stage of deployment/undeployment
