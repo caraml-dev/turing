@@ -14,13 +14,16 @@ type EnsemblersService struct {
 	mock.Mock
 }
 
-// FindByID provides a mock function with given fields: id
-func (_m *EnsemblersService) FindByID(id models.ID) (models.EnsemblerLike, error) {
-	ret := _m.Called(id)
+// FindByID provides a mock function with given fields: id, options
+func (_m *EnsemblersService) FindByID(
+	id models.ID,
+	options service.EnsemblersFindByIDOptions,
+) (models.EnsemblerLike, error) {
+	ret := _m.Called(id, options)
 
 	var r0 models.EnsemblerLike
-	if rf, ok := ret.Get(0).(func(models.ID) models.EnsemblerLike); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(models.ID, service.EnsemblersFindByIDOptions) models.EnsemblerLike); ok {
+		r0 = rf(id, options)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(models.EnsemblerLike)
@@ -28,8 +31,8 @@ func (_m *EnsemblersService) FindByID(id models.ID) (models.EnsemblerLike, error
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblersFindByIDOptions) error); ok {
+		r1 = rf(id, options)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -37,13 +40,13 @@ func (_m *EnsemblersService) FindByID(id models.ID) (models.EnsemblerLike, error
 	return r0, r1
 }
 
-// List provides a mock function with given fields: projectID, query
-func (_m *EnsemblersService) List(projectID models.ID, query service.ListEnsemblersQuery) (*service.PaginatedResults, error) {
-	ret := _m.Called(projectID, query)
+// List provides a mock function with given fields: options
+func (_m *EnsemblersService) List(options service.EnsemblersListOptions) (*service.PaginatedResults, error) {
+	ret := _m.Called(options)
 
 	var r0 *service.PaginatedResults
-	if rf, ok := ret.Get(0).(func(models.ID, service.ListEnsemblersQuery) *service.PaginatedResults); ok {
-		r0 = rf(projectID, query)
+	if rf, ok := ret.Get(0).(func(service.EnsemblersListOptions) *service.PaginatedResults); ok {
+		r0 = rf(options)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*service.PaginatedResults)
@@ -51,8 +54,8 @@ func (_m *EnsemblersService) List(projectID models.ID, query service.ListEnsembl
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.ID, service.ListEnsemblersQuery) error); ok {
-		r1 = rf(projectID, query)
+	if rf, ok := ret.Get(1).(func(service.EnsemblersListOptions) error); ok {
+		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
 	}

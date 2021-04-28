@@ -76,7 +76,7 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 
 	type args struct {
 		r    *http.Request
-		vars map[string]string
+		vars RequestVars
 		body interface{}
 	}
 	tests := []struct {
@@ -87,15 +87,15 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "missing project_id",
 			args: args{
-				vars: map[string]string{},
+				vars: RequestVars{},
 			},
 			want: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		{
 			name: "missing router_id",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
+				vars: RequestVars{
+					"project_id": {"1"},
 				},
 			},
 			want: BadRequest("invalid router id", "key router_id not found in vars"),
@@ -103,9 +103,9 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "expected args",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "routerVersion1"}}),
@@ -113,10 +113,10 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "specific router version id",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "2",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"2"},
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "routerVersion2"}}),
@@ -124,10 +124,10 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid router version id",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "3",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"3"},
 				},
 			},
 			want: NotFound("router version not found", ""),
@@ -135,9 +135,9 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid router version id reference in router",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "2",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"2"},
 				},
 			},
 			want: BadRequest("Current router version id is invalid", "Make sure current router is deployed"),
@@ -145,9 +145,9 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "current version not found",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "3",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"3"},
 				},
 			},
 			want: InternalServerError("Failed to find current router version", "test router version error"),
@@ -155,16 +155,16 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "valid optional args",
 			args: args{
-				vars: map[string]string{
-					"project_id":     "1",
-					"router_id":      "1",
-					"version":        "1",
-					"component_type": "enricher",
-					"container":      "mycontainer",
-					"previous":       "true",
-					"since_time":     "2020-12-05T08:00:00Z",
-					"tail_lines":     "5",
-					"head_lines":     "3",
+				vars: RequestVars{
+					"project_id":     {"1"},
+					"router_id":      {"1"},
+					"version":        {"1"},
+					"component_type": {"enricher"},
+					"container":      {"mycontainer"},
+					"previous":       {"true"},
+					"since_time":     {"2020-12-05T08:00:00Z"},
+					"tail_lines":     {"5"},
+					"head_lines":     {"3"},
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "valid optional args"}}),
@@ -172,15 +172,15 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid component_type",
 			args: args{
-				vars: map[string]string{
-					"project_id":     "1",
-					"router_id":      "1",
-					"version":        "1",
-					"component_type": "invalidcomponenttype",
-					"container":      "mycontainer",
-					"previous":       "true",
-					"since_time":     "2020-12-05T08:00:00Z",
-					"tail_lines":     "5",
+				vars: RequestVars{
+					"project_id":     {"1"},
+					"router_id":      {"1"},
+					"version":        {"1"},
+					"component_type": {"invalidcomponenttype"},
+					"container":      {"mycontainer"},
+					"previous":       {"true"},
+					"since_time":     {"2020-12-05T08:00:00Z"},
+					"tail_lines":     {"5"},
 				},
 			},
 			want: BadRequest("Invalid component type 'invalidcomponenttype'",
@@ -189,11 +189,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid since_time time format",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"since_time": "2020-1205T08:00:00Z",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"since_time": {"2020-1205T08:00:00Z"},
 				},
 			},
 			want: BadRequest("Query string 'since_time' must be in RFC3339 format",
@@ -202,11 +202,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid previous arg",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"previous":   "yes",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"previous":   {"yes"},
 				},
 			},
 			want: BadRequest("Query string 'previous' must be a truthy value",
@@ -215,11 +215,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid tail_lines arg",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"tail_lines": "five",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"tail_lines": {"five"},
 				},
 			},
 			want: BadRequest("Query string 'tail_lines' must be a positive number",
@@ -228,11 +228,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "negative tail_lines arg",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"tail_lines": "-1",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"tail_lines": {"-1"},
 				},
 			},
 			want: BadRequest("Query string 'tail_lines' must be a positive number", ""),
@@ -240,11 +240,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "invalid head_lines arg",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"head_lines": "five",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"head_lines": {"five"},
 				},
 			},
 			want: BadRequest("Query string 'head_lines' must be a positive number",
@@ -253,11 +253,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "negative head_lines arg",
 			args: args{
-				vars: map[string]string{
-					"project_id": "1",
-					"router_id":  "1",
-					"version":    "1",
-					"head_lines": "-10",
+				vars: RequestVars{
+					"project_id": {"1"},
+					"router_id":  {"1"},
+					"version":    {"1"},
+					"head_lines": {"-10"},
 				},
 			},
 			want: BadRequest("Query string 'head_lines' must be a positive number", ""),
@@ -265,11 +265,11 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		{
 			name: "list logs error",
 			args: args{
-				vars: map[string]string{
-					"project_id":     "1",
-					"router_id":      "1",
-					"version":        "2",
-					"component_type": "ensembler",
+				vars: RequestVars{
+					"project_id":     {"1"},
+					"router_id":      {"1"},
+					"version":        {"2"},
+					"component_type": {"ensembler"},
 				},
 			},
 			want: InternalServerError("Failed to list logs", "test pod log error"),

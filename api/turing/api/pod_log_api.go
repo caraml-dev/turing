@@ -17,7 +17,7 @@ type PodLogController struct {
 	*BaseController
 }
 
-func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c PodLogController) ListPodLogs(_ *http.Request, vars RequestVars, _ interface{}) *Response {
 	// Parse input
 	var errResp *Response
 	var project *mlp.Project
@@ -31,7 +31,7 @@ func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, b
 
 	var routerVersion *models.RouterVersion
 	var err error
-	if vars["version"] != "" {
+	if _, ok := vars.get("version"); ok {
 		// Specific router version value is requested
 		routerVersion, errResp = c.getRouterVersionFromRequestVars(vars)
 		if errResp != nil {
@@ -49,41 +49,38 @@ func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, b
 	}
 
 	var componentType string
-	switch vars["component_type"] {
+	switch componentType, _ = vars.get("component_type"); componentType {
 	case servicebuilder.ComponentTypes.Router,
 		servicebuilder.ComponentTypes.Enricher,
 		servicebuilder.ComponentTypes.Ensembler:
-		componentType = vars["component_type"]
 	case "":
 		componentType = "router"
 	default:
-		return BadRequest(fmt.Sprintf("Invalid component type '%s'", vars["component_type"]),
+		return BadRequest(fmt.Sprintf("Invalid component type '%s'", componentType),
 			"must be one of router, enricher or ensembler")
 	}
 
 	opts := &service.PodLogOptions{}
-	if vars["container"] != "" {
-		opts.Container = vars["container"]
-	}
+	opts.Container, _ = vars.get("container")
 
-	if vars["previous"] != "" {
-		previous, err := strconv.ParseBool(vars["previous"])
+	if previous, ok := vars.get("previous"); ok {
+		previous, err := strconv.ParseBool(previous)
 		if err != nil {
 			return BadRequest("Query string 'previous' must be a truthy value", err.Error())
 		}
 		opts.Previous = previous
 	}
 
-	if vars["since_time"] != "" {
-		t, err := time.Parse(time.RFC3339, vars["since_time"])
+	if sinceTime, ok := vars.get("since_time"); ok {
+		t, err := time.Parse(time.RFC3339, sinceTime)
 		if err != nil {
 			return BadRequest("Query string 'since_time' must be in RFC3339 format", err.Error())
 		}
 		opts.SinceTime = &t
 	}
 
-	if vars["tail_lines"] != "" {
-		i, err := strconv.ParseInt(vars["tail_lines"], 10, 64)
+	if tailTimes, ok := vars.get("tail_lines"); ok {
+		i, err := strconv.ParseInt(tailTimes, 10, 64)
 		if err != nil {
 			return BadRequest("Query string 'tail_lines' must be a positive number", err.Error())
 		}
@@ -93,8 +90,8 @@ func (c PodLogController) ListPodLogs(r *http.Request, vars map[string]string, b
 		opts.TailLines = &i
 	}
 
-	if vars["head_lines"] != "" {
-		i, err := strconv.ParseInt(vars["head_lines"], 10, 64)
+	if headLines, ok := vars.get("head_lines"); ok {
+		i, err := strconv.ParseInt(headLines, 10, 64)
 		if err != nil {
 			return BadRequest("Query string 'head_lines' must be a positive number", err.Error())
 		}

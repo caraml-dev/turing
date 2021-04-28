@@ -19,19 +19,19 @@ func TestBaseControllerGetProjectFromRequestVars(t *testing.T) {
 
 	// Define test cases
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | invalid project id": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"success": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: nil,
 		},
 	}
@@ -60,19 +60,19 @@ func TestBaseControllerGetRouterFromRequestVars(t *testing.T) {
 
 	// Define test cases
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | invalid router id": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"success": {
-			vars:     map[string]string{"router_id": "2"},
+			vars:     RequestVars{"router_id": {"2"}},
 			expected: nil,
 		},
 	}
@@ -104,23 +104,23 @@ func TestBaseControllerGetRouterVersionFromRequestVars(t *testing.T) {
 
 	// Define test cases
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | invalid router id": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | invalid router version": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: BadRequest("invalid router version value", "key version not found in vars"),
 		},
 		"failure | router version not found": {
-			vars:     map[string]string{"router_id": "1", "version": "1"},
+			vars:     RequestVars{"router_id": {"1"}, "version": {"1"}},
 			expected: NotFound("router version not found", "test router version error"),
 		},
 		"success": {
-			vars:     map[string]string{"router_id": "1", "version": "2"},
+			vars:     RequestVars{"router_id": {"1"}, "version": {"2"}},
 			expected: nil,
 		},
 	}

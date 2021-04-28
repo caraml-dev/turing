@@ -4,6 +4,11 @@ import "time"
 
 type ID uint
 
+func NewID(id int) *ID {
+	casted := ID(id)
+	return &casted
+}
+
 // Model is a struct containing the basic fields for a persisted entity defined
 // in the API.
 type Model struct {

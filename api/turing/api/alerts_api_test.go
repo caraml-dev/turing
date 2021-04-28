@@ -32,11 +32,11 @@ func TestAlertsControllerWhenAlertIsDisabled(t *testing.T) {
 		assert.Check(t, strings.Contains(fmt.Sprintf("%v", resp.data), ErrAlertDisabled.Error()))
 	}
 
-	checkErr(t, controller.CreateAlert(&http.Request{}, map[string]string{}, nil))
-	checkErr(t, controller.ListAlerts(&http.Request{}, map[string]string{}, nil))
-	checkErr(t, controller.GetAlert(&http.Request{}, map[string]string{}, nil))
-	checkErr(t, controller.UpdateAlert(&http.Request{}, map[string]string{}, nil))
-	checkErr(t, controller.DeleteAlert(&http.Request{}, map[string]string{}, nil))
+	checkErr(t, controller.CreateAlert(&http.Request{}, RequestVars{}, nil))
+	checkErr(t, controller.ListAlerts(&http.Request{}, RequestVars{}, nil))
+	checkErr(t, controller.GetAlert(&http.Request{}, RequestVars{}, nil))
+	checkErr(t, controller.UpdateAlert(&http.Request{}, RequestVars{}, nil))
+	checkErr(t, controller.DeleteAlert(&http.Request{}, RequestVars{}, nil))
 }
 
 func TestAlertsControllerCreateAlert(t *testing.T) {
@@ -109,47 +109,47 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 	}
 	tests := map[string]struct {
 		req  *http.Request
-		vars map[string]string
+		vars RequestVars
 		body interface{}
 		want *Response
 	}{
 		"failure | missing project_id": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{},
+			vars: RequestVars{},
 			body: &models.Alert{},
 			want: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | router not found": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"project_id": "1", "router_id": "1"},
+			vars: RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			body: inputAlert,
 			want: NotFound("router not found", "test router error"),
 		},
 		"failure | email not found": {
 			req: &http.Request{
-				Header: map[string][]string{},
+				Header: http.Header{},
 			},
-			vars: map[string]string{"project_id": "1", "router_id": "2"},
+			vars: RequestVars{"project_id": {"1"}, "router_id": {"2"}},
 			body: inputAlert,
 			want: BadRequest("missing User-Email in header", ""),
 		},
 		"failure | save alert": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"project_id": "1", "router_id": "2"},
+			vars: RequestVars{"project_id": {"1"}, "router_id": {"2"}},
 			body: inputAlert,
 			want: InternalServerError("unable to create alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user2@gojek.com"}},
+				Header: http.Header{"User-Email": {"user2@gojek.com"}},
 			},
-			vars: map[string]string{"project_id": "1", "router_id": "2"},
+			vars: RequestVars{"project_id": {"1"}, "router_id": {"2"}},
 			body: inputAlert,
 			want: Ok(alert),
 		},
@@ -206,28 +206,28 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		req  *http.Request
-		vars map[string]string
+		vars RequestVars
 		want *Response
 	}{
 		"failure | router not found": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "1"},
+			vars: RequestVars{"router_id": {"1"}},
 			want: NotFound("router not found", "test router error"),
 		},
 		"failure | save alert": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "2"},
+			vars: RequestVars{"router_id": {"2"}},
 			want: InternalServerError("failed to list alerts", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user2@gojek.com"}},
+				Header: http.Header{"User-Email": {"user2@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "3"},
+			vars: RequestVars{"router_id": {"3"}},
 			want: Ok(alerts),
 		},
 	}
@@ -279,21 +279,21 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		req  *http.Request
-		vars map[string]string
+		vars RequestVars
 		want *Response
 	}{
 		"failure | alert not found": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "1"},
+			vars: RequestVars{"alert_id": {"1"}},
 			want: NotFound("alert not found", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "2"},
+			vars: RequestVars{"alert_id": {"2"}},
 			want: Ok(alert),
 		},
 	}
@@ -410,46 +410,46 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	}
 	tests := map[string]struct {
 		req  *http.Request
-		vars map[string]string
+		vars RequestVars
 		body interface{}
 		want *Response
 	}{
 		"failure | missing router_id": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{},
+			vars: RequestVars{},
 			body: body,
 			want: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | alert not found": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "1", "alert_id": "10"},
+			vars: RequestVars{"router_id": {"1"}, "alert_id": {"10"}},
 			body: body,
 			want: NotFound("alert not found", "test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
-				Header: map[string][]string{},
+				Header: http.Header{},
 			},
-			vars: map[string]string{"router_id": "1", "alert_id": "1"},
+			vars: RequestVars{"router_id": {"1"}, "alert_id": {"1"}},
 			want: BadRequest("missing User-Email in header", ""),
 		},
 		"failure | update alert": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "2", "alert_id": "1"},
+			vars: RequestVars{"router_id": {"2"}, "alert_id": {"1"}},
 			body: body,
 			want: InternalServerError("unable to update alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"router_id": "2", "alert_id": "2"},
+			vars: RequestVars{"router_id": {"2"}, "alert_id": {"2"}},
 			body: body,
 			want: Ok(alert2),
 		},
@@ -527,35 +527,35 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	// Delete tests
 	tests := map[string]struct {
 		req  *http.Request
-		vars map[string]string
+		vars RequestVars
 		want *Response
 	}{
 		"failure | alert not found": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "10", "router_id": "1"},
+			vars: RequestVars{"alert_id": {"10"}, "router_id": {"1"}},
 			want: NotFound("alert not found", "test alert find error"),
 		},
 		"failure | missing email": {
 			req: &http.Request{
-				Header: map[string][]string{},
+				Header: http.Header{},
 			},
-			vars: map[string]string{"alert_id": "1", "router_id": "1"},
+			vars: RequestVars{"alert_id": {"1"}, "router_id": {"1"}},
 			want: BadRequest("missing User-Email in header", ""),
 		},
 		"failure | delete alert": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "1", "router_id": "1"},
+			vars: RequestVars{"alert_id": {"1"}, "router_id": {"1"}},
 			want: InternalServerError("unable to delete alert", "test alert error"),
 		},
 		"success": {
 			req: &http.Request{
-				Header: map[string][]string{"User-Email": {"user@gojek.com"}},
+				Header: http.Header{"User-Email": {"user@gojek.com"}},
 			},
-			vars: map[string]string{"alert_id": "2", "router_id": "1"},
+			vars: RequestVars{"alert_id": {"2"}, "router_id": {"1"}},
 			want: Ok("Alert with id '2' deleted"),
 		},
 	}
@@ -584,13 +584,13 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 func TestAlertsControllerGetEmailFromRequestHeader(t *testing.T) {
 	// Create test requests
 	testRequestSuccess := &http.Request{
-		Header: map[string][]string{"User-Email": {"test@abc.com"}},
+		Header: http.Header{"User-Email": {"test@abc.com"}},
 	}
 	testRequestFailure := &http.Request{
-		Header: map[string][]string{"User-Email": {"test-email"}},
+		Header: http.Header{"User-Email": {"test-email"}},
 	}
 	testRequestFailureEmpty := &http.Request{
-		Header: map[string][]string{},
+		Header: http.Header{},
 	}
 
 	// Define test cases
@@ -632,19 +632,19 @@ func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 
 	// Define test cases
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | invalid alert id": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid alert id", "key alert_id not found in vars"),
 		},
 		"failure | alert not found": {
-			vars:     map[string]string{"alert_id": "1"},
+			vars:     RequestVars{"alert_id": {"1"}},
 			expected: NotFound("alert not found", "test alert error"),
 		},
 		"success": {
-			vars:     map[string]string{"alert_id": "2"},
+			vars:     RequestVars{"alert_id": {"2"}},
 			expected: nil,
 		},
 	}

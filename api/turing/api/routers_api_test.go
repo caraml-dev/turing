@@ -44,23 +44,23 @@ func TestListRouters(t *testing.T) {
 
 	// Define test cases
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | not found": {
-			vars:     map[string]string{"project_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | internal server error": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: InternalServerError("unable to list routers", "test router error"),
 		},
 		"success": {
-			vars: map[string]string{"project_id": "3"},
+			vars: RequestVars{"project_id": {"3"}},
 			expected: &Response{
 				code: 200,
 				data: routers,
@@ -99,19 +99,19 @@ func TestGetRouter(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | not found": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"success": {
-			vars: map[string]string{"router_id": "2"},
+			vars: RequestVars{"router_id": {"2"}},
 			expected: &Response{
 				code: 200,
 				data: router,
@@ -214,22 +214,22 @@ func TestCreateRouter(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		body     interface{}
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | router exists": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router name", "router with name router1 already exists in project 2"),
 		},
 		"failure | environment missing": {
@@ -237,7 +237,7 @@ func TestCreateRouter(t *testing.T) {
 				Name:        "router2",
 				Environment: "dev-invalid",
 			},
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid environment", "environment dev-invalid does not exist"),
 		},
 		"failure | router save": {
@@ -245,7 +245,7 @@ func TestCreateRouter(t *testing.T) {
 				Name:        "router2",
 				Environment: "dev",
 			},
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: InternalServerError("unable to create router", "test router save error"),
 		},
 		"failure | build router version": {
@@ -253,7 +253,7 @@ func TestCreateRouter(t *testing.T) {
 				Name:        "router3",
 				Environment: "dev",
 			},
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: InternalServerError("unable to create router", "router config is empty"),
 		},
 		"success": {
@@ -269,7 +269,7 @@ func TestCreateRouter(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{"project_id": "2"},
+			vars: RequestVars{"project_id": {"2"}},
 			expected: &Response{
 				code: 200,
 				data: router3Saved,
@@ -359,33 +359,33 @@ func TestUpdateRouter(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		body     interface{}
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
-			vars:     map[string]string{"project_id": "2", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | invalid router config": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
-			vars: map[string]string{"project_id": "2", "router_id": "2"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid router configuration",
 				"Router name and environment cannot be changed after creation",
@@ -396,7 +396,7 @@ func TestUpdateRouter(t *testing.T) {
 				Name:        "router2",
 				Environment: "dev",
 			},
-			vars: map[string]string{"project_id": "2", "router_id": "2"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid update request",
 				"another version is currently pending deployment",
@@ -407,7 +407,7 @@ func TestUpdateRouter(t *testing.T) {
 				Name:        "router3",
 				Environment: "dev",
 			},
-			vars:     map[string]string{"project_id": "2", "router_id": "3"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
 		"success": {
@@ -423,7 +423,7 @@ func TestUpdateRouter(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{"project_id": "2", "router_id": "4"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
 			expected: &Response{
 				code: 200,
 				data: router4,
@@ -533,44 +533,44 @@ func TestDeleteRouter(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | router deployed": {
-			vars: map[string]string{"router_id": "2"},
+			vars: RequestVars{"router_id": {"2"}},
 			expected: BadRequest(
 				"invalid delete request",
 				"router is currently deployed. Undeploy it first.",
 			),
 		},
 		"failure | list router versions": {
-			vars: map[string]string{"router_id": "3"},
+			vars: RequestVars{"router_id": {"3"}},
 			expected: InternalServerError(
 				"unable to retrieve router versions",
 				"test List Router Versions error",
 			),
 		},
 		"failure | pending router versions": {
-			vars: map[string]string{"router_id": "4"},
+			vars: RequestVars{"router_id": {"4"}},
 			expected: BadRequest(
 				"invalid delete request",
 				"a router version is currently pending deployment",
 			),
 		},
 		"failure | delete failed": {
-			vars:     map[string]string{"router_id": "5"},
+			vars:     RequestVars{"router_id": {"5"}},
 			expected: InternalServerError("unable to delete router", "test delete router error"),
 		},
 		"success": {
-			vars: map[string]string{"router_id": "6"},
+			vars: RequestVars{"router_id": {"6"}},
 			expected: &Response{
 				code: 200,
 				data: map[string]int{"id": 6},
@@ -690,46 +690,46 @@ func TestDeployRouter(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"project_id": "2", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | router status pending": {
-			vars: map[string]string{"project_id": "2", "router_id": "2"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid deploy request",
 				"router is currently deploying, cannot do another deployment",
 			),
 		},
 		"failure | router status deployed": {
-			vars:     map[string]string{"project_id": "2", "router_id": "3"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: BadRequest("invalid deploy request", "router is already deployed"),
 		},
 		"failure | no current version": {
-			vars:     map[string]string{"project_id": "2", "router_id": "4"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"4"}},
 			expected: BadRequest("invalid deploy request", "router has no current configuration"),
 		},
 		"failure | router version not found": {
-			vars:     map[string]string{"project_id": "2", "router_id": "5"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"5"}},
 			expected: NotFound("router version not found", "test router version error"),
 		},
 		"success": {
-			vars: map[string]string{"project_id": "2", "router_id": "6"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"6"}},
 			expected: &Response{
 				code: 202,
 				data: map[string]int{
@@ -827,34 +827,34 @@ func TestUndeployRouter(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"project_id": "2", "router_id": "1"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | undeploy error": {
-			vars: map[string]string{"project_id": "2", "router_id": "2"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: InternalServerError(
 				"unable to undeploy router",
 				"test undeploy error. test router deployment failure",
 			),
 		},
 		"success": {
-			vars: map[string]string{"project_id": "2", "router_id": "3"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: &Response{
 				code: 200,
 				data: map[string]int{"router_id": 3},
@@ -923,23 +923,23 @@ func TestListRouterEvents(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | events not found": {
-			vars:     map[string]string{"router_id": "2"},
+			vars:     RequestVars{"router_id": {"2"}},
 			expected: NotFound("events not found", "test event error"),
 		},
 		"success": {
-			vars: map[string]string{"router_id": "3"},
+			vars: RequestVars{"router_id": {"3"}},
 			expected: &Response{
 				code: 200,
 				data: map[string][]*models.Event{"events": events},

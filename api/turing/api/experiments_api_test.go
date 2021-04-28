@@ -59,7 +59,7 @@ func TestListExperimentEngineClients(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string]string
+		vars     map[string][]string
 		expected *Response
 	}{
 		"failure | bad input": {
@@ -68,7 +68,7 @@ func TestListExperimentEngineClients(t *testing.T) {
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string]string{},
+			vars:     map[string][]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
@@ -79,7 +79,7 @@ func TestListExperimentEngineClients(t *testing.T) {
 					},
 				},
 			},
-			vars:     map[string]string{"engine": "test-engine"},
+			vars:     map[string][]string{"engine": {"test-engine"}},
 			expected: InternalServerError("error when querying test-engine clients", "Test error"),
 		},
 		"success": {
@@ -90,7 +90,7 @@ func TestListExperimentEngineClients(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{"engine": "test-engine"},
+			vars: map[string][]string{"engine": {"test-engine"}},
 			expected: &Response{
 				code: 200,
 				data: clients,
@@ -131,7 +131,7 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string]string
+		vars     map[string][]string
 		expected *Response
 	}{
 		"failure | bad input": {
@@ -140,7 +140,7 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string]string{},
+			vars:     map[string][]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
@@ -151,9 +151,9 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{
-				"engine":    "test-engine",
-				"client_id": "2",
+			vars: map[string][]string{
+				"engine":    {"test-engine"},
+				"client_id": {"2"},
 			},
 			expected: InternalServerError("error when querying test-engine experiments", "Test error"),
 		},
@@ -165,9 +165,9 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{
-				"engine":    "test-engine",
-				"client_id": "1",
+			vars: map[string][]string{
+				"engine":    {"test-engine"},
+				"client_id": {"1"},
 			},
 			expected: &Response{
 				code: 200,
@@ -203,14 +203,16 @@ func TestListExperimentEngineVariables(t *testing.T) {
 		},
 	}
 	successSvc := &mocks.ExperimentsService{}
-	successSvc.On("ListVariables", "test-engine", "1", []string{"1", "2"}).Return(variables, nil)
+	successSvc.On("ListVariables", "test-engine", "1", []string{"1", "2"}).
+		Return(variables, nil)
 	failureSvc := &mocks.ExperimentsService{}
-	failureSvc.On("ListVariables", "test-engine", "2", []string{}).Return(manager.Variables{}, errors.New("Test error"))
+	failureSvc.On("ListVariables", "test-engine", "2", []string(nil)).
+		Return(manager.Variables{}, errors.New("Test error"))
 
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string]string
+		vars     map[string][]string
 		expected *Response
 	}{
 		"failure | bad input": {
@@ -219,7 +221,7 @@ func TestListExperimentEngineVariables(t *testing.T) {
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string]string{},
+			vars:     map[string][]string{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
@@ -230,9 +232,9 @@ func TestListExperimentEngineVariables(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{
-				"engine":    "test-engine",
-				"client_id": "2",
+			vars: map[string][]string{
+				"engine":    {"test-engine"},
+				"client_id": {"2"},
 			},
 			expected: InternalServerError("error when querying test-engine variables", "Test error"),
 		},
@@ -244,10 +246,10 @@ func TestListExperimentEngineVariables(t *testing.T) {
 					},
 				},
 			},
-			vars: map[string]string{
-				"engine":        "test-engine",
-				"client_id":     "1",
-				"experiment_id": "1,2",
+			vars: map[string][]string{
+				"engine":        {"test-engine"},
+				"client_id":     {"1"},
+				"experiment_id": {"1,2"},
 			},
 			expected: &Response{
 				code: 200,

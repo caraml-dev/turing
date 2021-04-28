@@ -26,10 +26,12 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 	}
 	// Register validators
 	instance.RegisterStructValidation(validateLogConfig, request.LogConfig{})
-	instance.RegisterStructValidation(
-		newExperimentConfigValidator(expSvc),
-		request.ExperimentEngineConfig{},
-	)
+	if expSvc != nil {
+		instance.RegisterStructValidation(
+			newExperimentConfigValidator(expSvc),
+			request.ExperimentEngineConfig{},
+		)
+	}
 	instance.RegisterStructValidation(validateRouterConfig, request.RouterConfig{})
 
 	// register common.RuleConditionOperator type to use its String representation for validation

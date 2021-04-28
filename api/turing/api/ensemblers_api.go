@@ -16,22 +16,17 @@ type EnsemblersController struct {
 
 func (c EnsemblersController) ListEnsemblers(
 	r *http.Request,
-	vars map[string]string, _ interface{},
+	vars RequestVars,
+	_ interface{},
 ) *Response {
-	var query service.ListEnsemblersQuery
-	if err := c.decoder.Decode(&query, r.URL.Query()); err != nil {
+	options := service.EnsemblersListOptions{}
+
+	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest("unable to list ensemblers",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
-	var errResp *Response
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
-	// List ensemblers
-	results, err := c.EnsemblersService.List(models.ID(project.Id), query)
+	results, err := c.EnsemblersService.List(options)
 	if err != nil {
 		return InternalServerError("unable to list ensemblers", err.Error())
 	}
@@ -41,31 +36,35 @@ func (c EnsemblersController) ListEnsemblers(
 
 func (c EnsemblersController) GetEnsembler(
 	_ *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
-	projectID, err := getIDFromVars(vars, "project_id")
-	if err != nil {
-		return BadRequest("invalid project id", err.Error())
+	params := struct {
+		ProjectID   *models.ID `schema:"project_id" validate:"required"`
+		EnsemblerID *models.ID `schema:"ensembler_id" validate:"required"`
+	}{}
+
+	if err := c.ParseVars(&params, vars); err != nil {
+		return BadRequest("failed to fetch ensembler",
+			fmt.Sprintf("failed to parse query string: %s", err))
 	}
-	id, err := getIDFromVars(vars, "ensembler_id")
-	if err != nil {
-		return BadRequest("invalid ensembler id", err.Error())
-	}
-	ensembler, err := c.EnsemblersService.FindByID(id)
+
+	ensembler, err := c.EnsemblersService.FindByID(
+		*params.EnsemblerID,
+		service.EnsemblersFindByIDOptions{
+			ProjectID: params.ProjectID,
+		})
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
-	} else if ensembler.ProjectID() != projectID {
-		return NotFound(
-			"ensembler not found",
-			fmt.Sprintf("ensembler with ID %d doesn't belong to this project", id))
 	}
 
 	return Ok(ensembler)
 }
 
-func (c EnsemblersController) CreateEnsembler(r *http.Request,
-	vars map[string]string, body interface{},
+func (c EnsemblersController) CreateEnsembler(
+	_ *http.Request,
+	vars RequestVars,
+	body interface{},
 ) *Response {
 	var errResp *Response
 	var project *mlp.Project
@@ -85,6 +84,14 @@ func (c EnsemblersController) CreateEnsembler(r *http.Request,
 	return Created(ensembler)
 }
 
+func (c EnsemblersController) UpdateEnsembler(
+	_ *http.Request,
+	vars RequestVars,
+	body interface{},
+) *Response {
+	return NotFound("", "")
+}
+
 func (c EnsemblersController) Routes() []Route {
 	return []Route{
 		{
@@ -102,6 +109,12 @@ func (c EnsemblersController) Routes() []Route {
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/ensemblers/{ensembler_id}",
 			handler: c.GetEnsembler,
+		},
+		{
+			method:  http.MethodPut,
+			path:    "/projects/{project_id}/ensemblers/{ensembler_id}",
+			body:    CreateOrUpdateEnsemblerRequest{},
+			handler: c.UpdateEnsembler,
 		},
 	}
 }

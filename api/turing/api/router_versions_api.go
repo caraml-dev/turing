@@ -15,7 +15,7 @@ type RouterVersionsController struct {
 // ListRouterVersions lists the router versions of the provided router.
 func (c RouterVersionsController) ListRouterVersions(
 	r *http.Request,
-	vars map[string]string, _ interface{},
+	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response
@@ -35,7 +35,7 @@ func (c RouterVersionsController) ListRouterVersions(
 // GetRouterVersion gets the router version for the provided router id and version number.
 func (c RouterVersionsController) GetRouterVersion(
 	r *http.Request,
-	vars map[string]string, _ interface{},
+	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response
@@ -54,7 +54,7 @@ func (c RouterVersionsController) GetRouterVersion(
 // DeleteRouterVersion deletes the config for the given version number.
 func (c RouterVersionsController) DeleteRouterVersion(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
@@ -89,7 +89,7 @@ func (c RouterVersionsController) DeleteRouterVersion(
 // DeployRouterVersion deploys the given router version into the associated kubernetes cluster
 func (c RouterVersionsController) DeployRouterVersion(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars

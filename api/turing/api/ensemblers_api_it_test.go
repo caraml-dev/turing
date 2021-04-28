@@ -46,6 +46,17 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 				return NotFound("project not found", "error")
 			},
 		},
+
+		"failure | invalid payload": {
+			method: http.MethodPost,
+			path:   "/projects/1/ensemblers",
+			body:   "string",
+			expected: func(_ models.EnsemblerLike) *Response {
+				return BadRequest(
+					"invalid request body",
+					"Failed to deserialize request body: invalid character 's' looking for beginning of value")
+			},
+		},
 		"failure | unsupported ensembler": {
 			method: http.MethodPost,
 			path:   "/projects/1/ensemblers",
@@ -59,7 +70,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 					"Failed to deserialize request body: unsupported ensembler type: unknown")
 			},
 		},
-		"failure | invalid payload": {
+		"failure | payload failed validation": {
 			method: http.MethodPost,
 			path:   "/projects/1/ensemblers",
 			body: `{

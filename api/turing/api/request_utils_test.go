@@ -11,28 +11,28 @@ import (
 func TestGetIntFromVars(t *testing.T) {
 	tt := []struct {
 		name     string
-		vars     map[string]string
+		vars     RequestVars
 		key      string
 		expected int
 		hasErr   bool
 	}{
 		{
 			"valid int",
-			map[string]string{"project": "1"},
+			RequestVars{"project": {"1"}},
 			"project",
 			1,
 			false,
 		},
 		{
 			"invalid value",
-			map[string]string{"project": "a"},
+			RequestVars{"project": {"a"}},
 			"project",
 			0,
 			true,
 		},
 		{
 			"key not found",
-			map[string]string{"project": "1"},
+			RequestVars{"project": {"1"}},
 			"pro",
 			0,
 			true,

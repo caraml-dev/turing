@@ -1,32 +1,50 @@
 package api
 
 import (
+	val "github.com/go-playground/validator/v10"
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gorilla/schema"
 )
 
 type Controller interface {
+	// Routes returns the list of routes of this controller
 	Routes() []Route
 }
 
 // BaseController implements common methods that may be shared by all API controllers
 type BaseController struct {
 	*AppContext
-	decoder *schema.Decoder
+	decoder   *schema.Decoder
+	validator *val.Validate
 }
 
-func NewBaseController(ctx *AppContext) *BaseController {
+// NewBaseController returns a new instance of BaseController
+func NewBaseController(ctx *AppContext, validator *val.Validate) *BaseController {
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
 
 	return &BaseController{
 		AppContext: ctx,
 		decoder:    decoder,
+		validator:  validator,
 	}
 }
 
-func (c *BaseController) getProjectFromRequestVars(vars map[string]string) (project *mlp.Project, error *Response) {
+func (c *BaseController) ParseVars(dst interface{}, vars RequestVars) error {
+	if err := c.decoder.Decode(dst, vars); err != nil {
+		return err
+	}
+
+	if c.validator != nil {
+		if err := c.validator.Struct(dst); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *BaseController) getProjectFromRequestVars(vars RequestVars) (project *mlp.Project, error *Response) {
 	id, err := getIDFromVars(vars, "project_id")
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
@@ -38,7 +56,7 @@ func (c *BaseController) getProjectFromRequestVars(vars map[string]string) (proj
 	return project, nil
 }
 
-func (c *BaseController) getRouterFromRequestVars(vars map[string]string) (router *models.Router, error *Response) {
+func (c *BaseController) getRouterFromRequestVars(vars RequestVars) (router *models.Router, error *Response) {
 	id, err := getIDFromVars(vars, "router_id")
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
@@ -51,7 +69,7 @@ func (c *BaseController) getRouterFromRequestVars(vars map[string]string) (route
 }
 
 func (c *BaseController) getRouterVersionFromRequestVars(
-	vars map[string]string,
+	vars RequestVars,
 ) (routerVersion *models.RouterVersion, error *Response) {
 	routerID, err := getIDFromVars(vars, "router_id")
 	if err != nil {
@@ -66,8 +84,4 @@ func (c *BaseController) getRouterVersionFromRequestVars(
 		return nil, NotFound("router version not found", err.Error())
 	}
 	return routerVersion, nil
-}
-
-func (c *BaseController) Routes() []Route {
-	return []Route{}
 }

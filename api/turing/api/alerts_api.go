@@ -15,7 +15,7 @@ type AlertsController struct {
 
 var ErrAlertDisabled = errors.New("alert is disabled in turing-api")
 
-func (c AlertsController) CreateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c AlertsController) CreateAlert(r *http.Request, vars RequestVars, body interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -59,7 +59,7 @@ func (c AlertsController) CreateAlert(r *http.Request, vars map[string]string, b
 	return Ok(created)
 }
 
-func (c AlertsController) ListAlerts(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -79,7 +79,7 @@ func (c AlertsController) ListAlerts(r *http.Request, vars map[string]string, _ 
 	return Ok(alerts)
 }
 
-func (c AlertsController) GetAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) GetAlert(r *http.Request, vars RequestVars, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -95,7 +95,7 @@ func (c AlertsController) GetAlert(r *http.Request, vars map[string]string, _ in
 	return Ok(alert)
 }
 
-func (c AlertsController) UpdateAlert(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c AlertsController) UpdateAlert(r *http.Request, vars RequestVars, body interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -140,7 +140,7 @@ func (c AlertsController) UpdateAlert(r *http.Request, vars map[string]string, b
 	return Ok(updateAlert)
 }
 
-func (c AlertsController) DeleteAlert(r *http.Request, vars map[string]string, _ interface{}) *Response {
+func (c AlertsController) DeleteAlert(r *http.Request, vars RequestVars, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -191,7 +191,7 @@ func (c AlertsController) getEmailFromRequestHeader(r *http.Request) (string, *R
 	return email, nil
 }
 
-func (c AlertsController) getAlertFromRequestVars(vars map[string]string) (*models.Alert, *Response) {
+func (c AlertsController) getAlertFromRequestVars(vars RequestVars) (*models.Alert, *Response) {
 	id, err := getIDFromVars(vars, "alert_id")
 	if err != nil {
 		return nil, BadRequest("invalid alert id", err.Error())

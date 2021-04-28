@@ -9,25 +9,22 @@ import (
 
 // EnsemblersService is the data access object for the Ensemblers from the db.
 type EnsemblersService interface {
-	// FindByID Find an ensembler matching the given id
-	FindByID(id models.ID) (models.EnsemblerLike, error)
-	// List tbu
-	List(projectID models.ID, query ListEnsemblersQuery) (*PaginatedResults, error)
+	// FindByID Find an ensembler matching the given id and options
+	FindByID(id models.ID, options EnsemblersFindByIDOptions) (models.EnsemblerLike, error)
+	// List ensemblers
+	List(options EnsemblersListOptions) (*PaginatedResults, error)
 	// Save the given router to the db. Updates the existing record if already exists
 	Save(ensembler models.EnsemblerLike) (models.EnsemblerLike, error)
 }
 
-// ListEnsemblersQuery holds query parameters for EnsemblersService.List method
-type ListEnsemblersQuery struct {
-	PaginationQuery
+type EnsemblersFindByIDOptions struct {
+	ProjectID *models.ID
 }
 
-// NewListEnsemblersQuery creates a new instance of ListEnsemblersQuery struct
-func NewListEnsemblersQuery(page int, pageSize int) ListEnsemblersQuery {
-	return ListEnsemblersQuery{PaginationQuery{
-		Page:     page,
-		PageSize: pageSize,
-	}}
+// EnsemblersListOptions holds query parameters for EnsemblersService.List method
+type EnsemblersListOptions struct {
+	PaginationOptions
+	ProjectID *models.ID `schema:"project_id" validate:"required"`
 }
 
 // NewEnsemblersService creates a new ensemblers service
@@ -39,9 +36,16 @@ type ensemblersService struct {
 	db *gorm.DB
 }
 
-func (service *ensemblersService) FindByID(id models.ID) (models.EnsemblerLike, error) {
+func (service *ensemblersService) FindByID(
+	id models.ID,
+	options EnsemblersFindByIDOptions,
+) (models.EnsemblerLike, error) {
 	var ensembler models.GenericEnsembler
 	query := service.db.Where("id = ?", id)
+
+	if options.ProjectID != nil {
+		query = query.Where("project_id = ?", options.ProjectID)
+	}
 
 	result := query.First(&ensembler)
 	if err := result.Error; err != nil {
@@ -55,31 +59,31 @@ func (service *ensemblersService) FindByID(id models.ID) (models.EnsemblerLike, 
 	return instance, nil
 }
 
-func (service *ensemblersService) List(
-	projectID models.ID,
-	query ListEnsemblersQuery,
-) (*PaginatedResults, error) {
+func (service *ensemblersService) List(options EnsemblersListOptions) (*PaginatedResults, error) {
 	var results []*models.GenericEnsembler
 	var count int
 	done := make(chan bool, 1)
 
-	db := service.db.Where("project_id = ?", projectID)
+	query := service.db
+	if options.ProjectID != nil {
+		query = query.Where("project_id = ?", options.ProjectID)
+	}
+
 	go func() {
-		db.Model(&results).Count(&count)
+		query.Model(&results).Count(&count)
 		done <- true
 	}()
 
-	var scopes []func(*gorm.DB) *gorm.DB
-	if query.Page > 0 && query.PageSize > 0 {
-		scopes = append(scopes, Paginate(query.PaginationQuery))
-	}
-	result := db.Scopes(scopes...).Find(&results)
+	result := query.
+		Scopes(PaginationScope(options.PaginationOptions)).
+		Find(&results)
 	<-done
 
-	page := int(math.Max(1, float64(query.Page)))
+	page := 1
 	totalPages := 1
-	if query.PageSize > 0 {
-		totalPages = int(math.Ceil(float64(count) / float64(query.PageSize)))
+	if options.Page != nil && options.PageSize != nil {
+		page = int(math.Max(1, float64(*options.Page)))
+		totalPages = int(math.Ceil(float64(count) / float64(*options.PageSize)))
 	}
 
 	if err := result.Error; err != nil {

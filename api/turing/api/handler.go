@@ -16,8 +16,20 @@ import (
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 )
 
+// RequestVars is an alias of map[string][]string
+// This is done to make it compatible with *http.Request.URL.Query() return type
+// and also to make it possible to use it with gorilla/schema Decoder
+type RequestVars map[string][]string
+
+func (vars RequestVars) get(key string) (string, bool) {
+	if values, ok := vars[key]; ok && len(values) > 0 {
+		return values[0], true
+	}
+	return "", false
+}
+
 // Handler is a function that returns a Response given the request.
-type Handler func(r *http.Request, vars map[string]string, body interface{}) *Response
+type Handler func(r *http.Request, vars RequestVars, body interface{}) *Response
 
 // Route is a http route for the API.
 type Route struct {
@@ -47,12 +59,11 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+		r.URL.Query()
+		vars := RequestVars(r.URL.Query())
 
-		for k, v := range r.URL.Query() {
-			if len(v) > 0 {
-				vars[k] = v[0]
-			}
+		for k, v := range mux.Vars(r) {
+			vars[k] = []string{v}
 		}
 
 		response := func() *Response {
@@ -85,7 +96,7 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 // NewRouter instantiates a mux.Router for this application.
 func NewRouter(appCtx *AppContext) *mux.Router {
 	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
-	baseController := NewBaseController(appCtx)
+	baseController := NewBaseController(appCtx, validator)
 	deploymentController := &routerDeploymentController{baseController}
 	controllers := []Controller{
 		RoutersController{deploymentController},

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func mockHandler(_ *http.Request, _ map[string]string, _ interface{}) *Response {
+func mockHandler(_ *http.Request, _ RequestVars, _ interface{}) *Response {
 	return nil
 }
 

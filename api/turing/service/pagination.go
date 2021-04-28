@@ -2,9 +2,9 @@ package service
 
 import "github.com/jinzhu/gorm"
 
-type PaginationQuery struct {
-	Page     int `schema:"page"`
-	PageSize int `schema:"page_size"`
+type PaginationOptions struct {
+	Page     *int `schema:"page" validate:"min=1"`
+	PageSize *int `schema:"page_size" validate:"min=1"`
 }
 
 type Paging struct {
@@ -18,9 +18,14 @@ type PaginatedResults struct {
 	Paging  Paging      `json:"paging"`
 }
 
-func Paginate(q PaginationQuery) func(db *gorm.DB) *gorm.DB {
+func PaginationScope(options PaginationOptions) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		offset := (q.Page - 1) * q.PageSize
-		return db.Offset(offset).Limit(q.PageSize)
+		if options.PageSize != nil {
+			db = db.Limit(*options.PageSize)
+			if options.Page != nil {
+				db = db.Offset((*options.Page - 1) * *options.PageSize)
+			}
+		}
+		return db
 	}
 }

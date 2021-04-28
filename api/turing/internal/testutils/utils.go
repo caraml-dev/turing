@@ -39,3 +39,7 @@ func GetRouterVersion(t *testing.T, filePath string) *models.RouterVersion {
 
 	return &routerVersion
 }
+
+func NullableInt(val int) *int {
+	return &val
+}
