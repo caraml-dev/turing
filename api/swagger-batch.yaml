@@ -93,7 +93,7 @@ paths:
       summary: Returns a list of Ensembling jobs
       responses:
         "200":
-          description: fswefewrf
+          description: TBU
           content:
             application/json:
               schema:
