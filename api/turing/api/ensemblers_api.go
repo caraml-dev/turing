@@ -73,11 +73,10 @@ func (c EnsemblersController) CreateEnsembler(
 	}
 
 	request := body.(*CreateOrUpdateEnsemblerRequest)
-	ensembler := request.Ensembler
-	ensembler.SetProjectID(models.ID(project.Id))
+	request.SetProjectID(models.ID(project.Id))
 
-	var err error
-	if ensembler, err = c.EnsemblersService.Save(ensembler); err != nil {
+	ensembler, err := c.EnsemblersService.Save(request)
+	if err != nil {
 		return InternalServerError("unable to save an ensembler", err.Error())
 	}
 
@@ -89,7 +88,42 @@ func (c EnsemblersController) UpdateEnsembler(
 	vars RequestVars,
 	body interface{},
 ) *Response {
-	return NotFound("", "")
+	params := struct {
+		ProjectID   *models.ID `schema:"project_id" validate:"required"`
+		EnsemblerID *models.ID `schema:"ensembler_id" validate:"required"`
+	}{}
+
+	if err := c.ParseVars(&params, vars); err != nil {
+		return BadRequest("failed to fetch ensembler",
+			fmt.Sprintf("failed to parse query string: %s", err))
+	}
+
+	ensembler, err := c.EnsemblersService.FindByID(
+		*params.EnsemblerID,
+		service.EnsemblersFindByIDOptions{
+			ProjectID: params.ProjectID,
+		})
+	if err != nil {
+		return NotFound("ensembler not found", err.Error())
+	}
+
+	request := body.(*CreateOrUpdateEnsemblerRequest)
+
+	if ensembler.GetType() != request.GetType() {
+		return BadRequest("invalid ensembler configuration",
+			"Ensembler type cannot be changed after creation")
+	}
+
+	if err = ensembler.Patch(request.EnsemblerLike); err != nil {
+		return BadRequest("invalid ensembler configuration", err.Error())
+	}
+
+	ensembler, err = c.EnsemblersService.Save(ensembler)
+	if err != nil {
+		return InternalServerError("failed to update an ensembler", err.Error())
+	}
+
+	return Ok(ensembler)
 }
 
 func (c EnsemblersController) Routes() []Route {
@@ -120,7 +154,7 @@ func (c EnsemblersController) Routes() []Route {
 }
 
 type CreateOrUpdateEnsemblerRequest struct {
-	Ensembler models.EnsemblerLike
+	models.EnsemblerLike
 }
 
 func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
@@ -144,6 +178,6 @@ func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	r.Ensembler = ensembler
+	r.EnsemblerLike = ensembler
 	return nil
 }

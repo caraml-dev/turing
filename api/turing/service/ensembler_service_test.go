@@ -23,22 +23,18 @@ func assertEqualEnsembler(
 ) {
 	require.Equal(t, reflect.TypeOf(expected), reflect.TypeOf(actual))
 
-	assert.Equal(t, expected.Type(), actual.Type())
-	assert.Equal(t, expected.Name(), actual.Name())
-	assert.Equal(t, expected.ProjectID(), actual.ProjectID())
-
-	assertGeneric := func(t *testing.T, expected *models.GenericEnsembler, actual *models.GenericEnsembler) {
-		assert.Equal(t, expected.ID, actual.ID)
-		assert.NotNil(t, actual.CreatedAt)
-		assert.NotNil(t, actual.UpdatedAt)
-	}
+	assert.Equal(t, expected.GetID(), actual.GetID())
+	assert.Equal(t, expected.GetType(), actual.GetType())
+	assert.Equal(t, expected.GetName(), actual.GetName())
+	assert.Equal(t, expected.GetProjectID(), actual.GetProjectID())
+	assert.NotNil(t, actual.GetCreatedAt())
+	assert.NotNil(t, actual.GetUpdatedAt())
 
 	switch actual.(type) {
 	case *models.PyFuncEnsembler:
 		expectedConcrete := expected.(*models.PyFuncEnsembler)
 		actualConcrete := actual.(*models.PyFuncEnsembler)
-		assertGeneric(t, expectedConcrete.GenericEnsembler, actualConcrete.GenericEnsembler)
-		assert.Equal(t, models.EnsemblerTypePyFunc, actualConcrete.Type())
+		assert.Equal(t, models.EnsemblerTypePyFunc, actualConcrete.GetType())
 		assert.Equal(t, expectedConcrete.ExperimentID, actualConcrete.ExperimentID)
 		assert.Equal(t, expectedConcrete.RunID, actualConcrete.RunID)
 		assert.Equal(t, expectedConcrete.ArtifactURI, actualConcrete.ArtifactURI)
@@ -56,8 +52,8 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		for i := 0; i < numEnsemblers; i++ {
 			ensemblers[i] = &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					TProjectID: projectID,
-					TName:      fmt.Sprintf("test-ensembler-%d", i),
+					ProjectID: projectID,
+					Name:      fmt.Sprintf("test-ensembler-%d", i),
 				},
 				ExperimentID: models.ID(10 + i),
 				RunID:        fmt.Sprintf("experiment-run-%d", i),
@@ -69,8 +65,8 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		ensemblers = append(ensemblers,
 			&models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					TProjectID: projectID_2,
-					TName:      fmt.Sprintf("test-ensembler-%d", numEnsemblers),
+					ProjectID: projectID_2,
+					Name:      fmt.Sprintf("test-ensembler-%d", numEnsemblers),
 				},
 				ExperimentID: models.ID(10 + numEnsemblers),
 				RunID:        fmt.Sprintf("experiment-run-%d", numEnsemblers),

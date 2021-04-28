@@ -3,8 +3,8 @@ package service
 import "github.com/jinzhu/gorm"
 
 type PaginationOptions struct {
-	Page     *int `schema:"page" validate:"min=1"`
-	PageSize *int `schema:"page_size" validate:"min=1"`
+	Page     *int `schema:"page" validate:"omitempty,min=1"`
+	PageSize *int `schema:"page_size" validate:"omitempty,min=1"`
 }
 
 type Paging struct {

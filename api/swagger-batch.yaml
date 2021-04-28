@@ -7,7 +7,7 @@ servers:
 paths:
   "/projects/{project_id}/ensemblers":
     get:
-      tags: ["Ensembler"]
+      tags: [ "Ensembler" ]
       summary: Returns a list of ensemblers that belong to the project
       parameters:
         - in: path
@@ -40,7 +40,7 @@ paths:
                         items:
                           $ref: "#/components/schemas/GenericEnsembler"
     post:
-      tags: ["Ensembler"]
+      tags: [ "Ensembler" ]
       summary: Saves a user-defined ensembler into the project
       parameters:
         - in: path
@@ -67,7 +67,7 @@ paths:
 
   "/projects/{project_id}/ensemblers/{ensembler_id}":
     get:
-      tags: ["Ensembler"]
+      tags: [ "Ensembler" ]
       summary: Returns Ensembler"s details by its ID
       parameters:
         - in: path
@@ -83,6 +83,36 @@ paths:
       responses:
         "200":
           description: A JSON object representing an instance of the specific type of Ensembler
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PyFuncEnsembler"
+    put:
+      tags: [ "Ensembler" ]
+      summary: Updates existing Ensembler with the data provided in the payload
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: path
+          name: ensembler_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: A JSON object, representing an update to the ensembler
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/PyFuncEnsembler"
+      responses:
+        "200":
+          description: A JSON object representing an instance of updated Ensembler
           content:
             application/json:
               schema:

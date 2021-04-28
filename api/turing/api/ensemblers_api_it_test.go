@@ -80,7 +80,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 			expected: func(_ models.EnsemblerLike) *Response {
 				return BadRequest(
 					"invalid request body",
-					"Key: 'CreateOrUpdateEnsemblerRequest.Ensembler.GenericEnsembler.TName' Error:Field validation for 'TName' failed on the 'required' tag")
+					"Key: 'CreateOrUpdateEnsemblerRequest.EnsemblerLike.GenericEnsembler.Name' Error:Field validation for 'Name' failed on the 'required' tag")
 			},
 		},
 		"failure | unable to save": {
@@ -91,19 +91,21 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 				"name": "new-ensembler",
 				"artifact_uri": "gs://unknown"
 			}`,
-			parsed: &models.PyFuncEnsembler{
-				GenericEnsembler: &models.GenericEnsembler{
-					TProjectID: 2,
-					TType:      "pyfunc",
-					TName:      "new-ensembler",
+			parsed: &CreateOrUpdateEnsemblerRequest{
+				EnsemblerLike: &models.PyFuncEnsembler{
+					GenericEnsembler: &models.GenericEnsembler{
+						ProjectID: 2,
+						Type:      "pyfunc",
+						Name:      "new-ensembler",
+					},
+					ArtifactURI: "gs://unknown",
 				},
-				ArtifactURI: "gs://unknown",
 			},
 			ensemblerSvc: func(parsed, _ models.EnsemblerLike) service.EnsemblersService {
 				mockSvc := &mocks.EnsemblersService{}
 				mockSvc.
 					On("Save", parsed).
-					Return(nil, fmt.Errorf(`ensembler with name "%s" already exists`, parsed.Name()))
+					Return(nil, fmt.Errorf(`ensembler with name "%s" already exists`, parsed.GetName()))
 				return mockSvc
 			},
 			expected: func(_ models.EnsemblerLike) *Response {
@@ -119,19 +121,21 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
  				"type": "pyfunc",
 				"name": "my-ensembler-1"
 			}`,
-			parsed: &models.PyFuncEnsembler{
-				GenericEnsembler: &models.GenericEnsembler{
-					TProjectID: 2,
-					TType:      "pyfunc",
-					TName:      "my-ensembler-1",
+			parsed: &CreateOrUpdateEnsemblerRequest{
+				EnsemblerLike: &models.PyFuncEnsembler{
+					GenericEnsembler: &models.GenericEnsembler{
+						ProjectID: 2,
+						Type:      "pyfunc",
+						Name:      "my-ensembler-1",
+					},
 				},
 			},
 			saved: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Model:      models.Model{ID: 1},
-					TProjectID: 2,
-					TType:      "pyfunc",
-					TName:      "my-ensembler-1",
+					Model:     models.Model{ID: 1},
+					ProjectID: 2,
+					Type:      "pyfunc",
+					Name:      "my-ensembler-1",
 				},
 				ExperimentID: 1,
 				RunID:        "abcd-efghij-klmn",

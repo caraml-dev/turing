@@ -19,3 +19,15 @@ type Model struct {
 	// Last updated timestamp. Updated when the object is updated in the db.
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+func (m Model) GetID() ID {
+	return m.ID
+}
+
+func (m Model) GetCreatedAt() time.Time {
+	return m.CreatedAt
+}
+
+func (m Model) GetUpdatedAt() time.Time {
+	return m.UpdatedAt
+}

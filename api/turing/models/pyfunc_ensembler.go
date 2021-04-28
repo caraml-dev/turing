@@ -1,20 +1,27 @@
 package models
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/jinzhu/gorm"
 )
 
 type EnsemblerLike interface {
-	ProjectID() ID
-	Type() EnsemblerType
-	Name() string
+	GetID() ID
+	GetProjectID() ID
+	GetType() EnsemblerType
+	GetName() string
+	GetCreatedAt() time.Time
+	GetUpdatedAt() time.Time
 
 	SetProjectID(id ID)
+	Patch(other EnsemblerLike) error
 }
 
 func EnsemblerTable(ensembler EnsemblerLike) func(tx *gorm.DB) *gorm.DB {
 	return func(tx *gorm.DB) *gorm.DB {
-		switch ensembler.Type() {
+		switch ensembler.GetType() {
 		case EnsemblerTypePyFunc:
 			return tx.Table("pyfunc_ensemblers")
 		default:
@@ -25,37 +32,42 @@ func EnsemblerTable(ensembler EnsemblerLike) func(tx *gorm.DB) *gorm.DB {
 
 type GenericEnsembler struct {
 	Model
-	// TProjectID id of the project this ensembler belongs to,
+	// ProjectID id of the project this ensembler belongs to,
 	// as retrieved from the MLP API.
-	TProjectID ID `json:"project_id" gorm:"column:project_id"`
+	ProjectID ID `json:"project_id" gorm:"column:project_id"`
 
-	TType EnsemblerType `json:"type" gorm:"column:type" validate:"required,oneof=pyfunc"`
+	Type EnsemblerType `json:"type" gorm:"column:type" validate:"required,oneof=pyfunc"`
 
-	TName string `json:"name" gorm:"column:name" validate:"required,min=3,max=50"`
+	Name string `json:"name" gorm:"column:name" validate:"required,min=3,max=50"`
 }
 
-func (e *GenericEnsembler) ProjectID() ID {
-	return e.TProjectID
+func (e *GenericEnsembler) GetProjectID() ID {
+	return e.ProjectID
 }
 
 func (e *GenericEnsembler) SetProjectID(id ID) {
-	e.TProjectID = id
+	e.ProjectID = id
 }
 
-func (e *GenericEnsembler) Type() EnsemblerType {
-	return e.TType
+func (e *GenericEnsembler) GetType() EnsemblerType {
+	return e.Type
 }
 
-func (e *GenericEnsembler) Name() string {
-	return e.TName
+func (e *GenericEnsembler) GetName() string {
+	return e.Name
 }
 
 func (*GenericEnsembler) TableName() string {
 	return "ensemblers"
 }
 
+func (e *GenericEnsembler) Patch(other EnsemblerLike) error {
+	e.Name = other.GetName()
+	return nil
+}
+
 func (e *GenericEnsembler) Instance() EnsemblerLike {
-	switch e.Type() {
+	switch e.GetType() {
 	case EnsemblerTypePyFunc:
 		return &PyFuncEnsembler{}
 	default:
@@ -79,6 +91,23 @@ func (*PyFuncEnsembler) BeforeCreate(scope *gorm.Scope) error {
 	return scope.SetColumn("type", EnsemblerTypePyFunc)
 }
 
-func (*PyFuncEnsembler) Type() EnsemblerType {
+func (*PyFuncEnsembler) GetType() EnsemblerType {
 	return EnsemblerTypePyFunc
+}
+
+func (e *PyFuncEnsembler) Patch(other EnsemblerLike) error {
+	otherPyfunc, ok := other.(*PyFuncEnsembler)
+	if !ok {
+		return fmt.Errorf("update must be of the same type as as the receiver")
+	}
+	if err := e.GenericEnsembler.Patch(otherPyfunc); err != nil {
+		return err
+	}
+
+	e.MlflowURL = otherPyfunc.MlflowURL
+	e.ExperimentID = otherPyfunc.ExperimentID
+	e.RunID = otherPyfunc.RunID
+	e.ArtifactURI = otherPyfunc.ArtifactURI
+
+	return nil
 }
