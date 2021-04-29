@@ -12,13 +12,13 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 )
 
-// routerDeploymentController handles the deployment of routers
-type routerDeploymentController struct {
-	*BaseController
+// RouterDeploymentController handles the deployment of routers
+type RouterDeploymentController struct {
+	BaseController
 }
 
 // deployOrRollbackRouter takes in the project, router and the version to be deployed
-func (c *routerDeploymentController) deployOrRollbackRouter(
+func (c RouterDeploymentController) deployOrRollbackRouter(
 	project *mlp.Project,
 	router *models.Router,
 	routerVersion *models.RouterVersion,
@@ -129,7 +129,7 @@ func (c *routerDeploymentController) deployOrRollbackRouter(
 	return nil
 }
 
-func (c *routerDeploymentController) writeDeploymentEvents(
+func (c RouterDeploymentController) writeDeploymentEvents(
 	eventsCh *utils.EventChannel, router *models.Router, version uint) {
 	for {
 		event, done := eventsCh.Read()
@@ -146,7 +146,7 @@ func (c *routerDeploymentController) writeDeploymentEvents(
 // version attributes are handled by this method, but the update of router attributes
 // (current version reference, status, endpoint, etc.) are not in the scope of this method.
 // This method returns the new router endpoint (if successful) and any error.
-func (c *routerDeploymentController) deployRouterVersion(
+func (c RouterDeploymentController) deployRouterVersion(
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
@@ -242,7 +242,7 @@ func (c *routerDeploymentController) deployRouterVersion(
 	return endpoint, err
 }
 
-func (c *routerDeploymentController) undeployRouter(
+func (c RouterDeploymentController) undeployRouter(
 	project *mlp.Project,
 	router *models.Router,
 ) error {
@@ -335,7 +335,7 @@ func (c *routerDeploymentController) undeployRouter(
 
 // updateRouterReferences updates the current version ref, the endpoint
 // of the router and its status
-func (c *routerDeploymentController) updateRouterReferences(
+func (c RouterDeploymentController) updateRouterReferences(
 	router *models.Router,
 	routerVersion *models.RouterVersion,
 	endpoint string,
@@ -373,7 +373,7 @@ func (c *routerDeploymentController) updateRouterReferences(
 
 // updateRouterStatus sets the status of the router, based on beginDeployment flag
 // and its current version reference.
-func (c *routerDeploymentController) updateRouterStatus(
+func (c RouterDeploymentController) updateRouterStatus(
 	router *models.Router,
 	beginDeployment bool,
 ) error {
@@ -396,7 +396,7 @@ func (c *routerDeploymentController) updateRouterStatus(
 
 // Updates the given router version status to failed, and persists the result. Returns the
 // original error concatenated with any errors that arose as a result of saving the router version.
-func (c *routerDeploymentController) updateRouterVersionStatusToFailed(
+func (c RouterDeploymentController) updateRouterVersionStatusToFailed(
 	err error, routerVersion *models.RouterVersion) error {
 	errorsStrings := []string{err.Error()}
 	routerVersion.Status = models.RouterVersionStatusFailed

@@ -12,7 +12,7 @@ func mockHandler(_ *http.Request, _ RequestVars, _ interface{}) *Response {
 }
 
 func TestRoute_Name(t *testing.T) {
-	ctrl := RoutersController{nil}
+	ctrl := RoutersController{}
 
 	tests := map[string]struct {
 		route    Route

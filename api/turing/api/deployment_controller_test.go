@@ -156,8 +156,8 @@ func TestDeployVersionSuccess(t *testing.T) {
 				"", "", data.expCfg, data.decryptedPasskey, eventsCh).Return("test-url", nil)
 
 			// Create test controller
-			ctrl := &routerDeploymentController{
-				&BaseController{
+			ctrl := RouterDeploymentController{
+				BaseController{
 					AppContext: &AppContext{
 						MLPService:            mlps,
 						EventService:          es,
@@ -271,8 +271,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	// Create test controller
-	ctrl := &routerDeploymentController{
-		&BaseController{
+	ctrl := RouterDeploymentController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:            mlps,
 				DeploymentService:     ds,
@@ -368,8 +368,8 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	// Create test controller
-	ctrl := &routerDeploymentController{
-		&BaseController{
+	ctrl := RouterDeploymentController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:            mlps,
 				DeploymentService:     ds,

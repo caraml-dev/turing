@@ -14,6 +14,10 @@ type Ensembler struct {
 	DockerConfig   *EnsemblerDockerConfig   `json:"docker_config"`   // Ensembler config when Type is "docker"
 }
 
+// TableName returns the name of a table, where GORM should store/retrieve
+// entities of this type. By default GORM uses the table name, that is
+// a plural form of the type's name (i.e `Ensembler` -> `ensemblers`),
+// and by implementing `TableName` method it is possible to override it.
 func (*Ensembler) TableName() string {
 	return "ensembler_configs"
 }

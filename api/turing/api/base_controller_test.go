@@ -39,7 +39,7 @@ func TestBaseControllerGetProjectFromRequestVars(t *testing.T) {
 	// Validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			ctrl := &BaseController{
+			ctrl := BaseController{
 				AppContext: &AppContext{
 					MLPService: mlpSvc,
 				},
@@ -80,7 +80,7 @@ func TestBaseControllerGetRouterFromRequestVars(t *testing.T) {
 	// Validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			ctrl := &BaseController{
+			ctrl := BaseController{
 				AppContext: &AppContext{
 					RoutersService: routerSvc,
 				},
@@ -128,7 +128,7 @@ func TestBaseControllerGetRouterVersionFromRequestVars(t *testing.T) {
 	// Validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			ctrl := &BaseController{
+			ctrl := BaseController{
 				AppContext: &AppContext{
 					RouterVersionsService: routerVersionSvc,
 				},

@@ -20,18 +20,18 @@ type BaseController struct {
 }
 
 // NewBaseController returns a new instance of BaseController
-func NewBaseController(ctx *AppContext, validator *val.Validate) *BaseController {
+func NewBaseController(ctx *AppContext, validator *val.Validate) BaseController {
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
 
-	return &BaseController{
+	return BaseController{
 		AppContext: ctx,
 		decoder:    decoder,
 		validator:  validator,
 	}
 }
 
-func (c *BaseController) ParseVars(dst interface{}, vars RequestVars) error {
+func (c BaseController) ParseVars(dst interface{}, vars RequestVars) error {
 	if err := c.decoder.Decode(dst, vars); err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (c *BaseController) ParseVars(dst interface{}, vars RequestVars) error {
 	return nil
 }
 
-func (c *BaseController) getProjectFromRequestVars(vars RequestVars) (project *mlp.Project, error *Response) {
+func (c BaseController) getProjectFromRequestVars(vars RequestVars) (project *mlp.Project, error *Response) {
 	id, err := getIDFromVars(vars, "project_id")
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
@@ -56,7 +56,7 @@ func (c *BaseController) getProjectFromRequestVars(vars RequestVars) (project *m
 	return project, nil
 }
 
-func (c *BaseController) getRouterFromRequestVars(vars RequestVars) (router *models.Router, error *Response) {
+func (c BaseController) getRouterFromRequestVars(vars RequestVars) (router *models.Router, error *Response) {
 	id, err := getIDFromVars(vars, "router_id")
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
@@ -68,7 +68,7 @@ func (c *BaseController) getRouterFromRequestVars(vars RequestVars) (router *mod
 	return router, nil
 }
 
-func (c *BaseController) getRouterVersionFromRequestVars(
+func (c BaseController) getRouterVersionFromRequestVars(
 	vars RequestVars,
 ) (routerVersion *models.RouterVersion, error *Response) {
 	routerID, err := getIDFromVars(vars, "router_id")

@@ -19,7 +19,7 @@ import (
 
 func TestAlertsControllerWhenAlertIsDisabled(t *testing.T) {
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     &mocks.MLPService{},
 				RoutersService: &mocks.RoutersService{},
@@ -157,7 +157,7 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -234,7 +234,7 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -300,7 +300,7 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -457,7 +457,7 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -562,7 +562,7 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 
 	// Create test controller
 	controller := &AlertsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				MLPService:     mockMLPService,
 				RoutersService: mockRouterService,
@@ -653,7 +653,7 @@ func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &AlertsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						AlertService: alertSvc,
 					},

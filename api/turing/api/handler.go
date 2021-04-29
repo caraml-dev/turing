@@ -97,7 +97,7 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 func NewRouter(appCtx *AppContext) *mux.Router {
 	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
 	baseController := NewBaseController(appCtx, validator)
-	deploymentController := &routerDeploymentController{baseController}
+	deploymentController := RouterDeploymentController{baseController}
 	controllers := []Controller{
 		RoutersController{deploymentController},
 		RouterVersionsController{deploymentController},

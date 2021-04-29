@@ -13,7 +13,7 @@ import (
 )
 
 type RoutersController struct {
-	*routerDeploymentController
+	RouterDeploymentController
 }
 
 // ListRouters lists all routers configured in the provided project.

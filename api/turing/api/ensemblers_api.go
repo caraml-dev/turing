@@ -11,7 +11,7 @@ import (
 )
 
 type EnsemblersController struct {
-	*BaseController
+	BaseController
 }
 
 func (c EnsemblersController) ListEnsemblers(

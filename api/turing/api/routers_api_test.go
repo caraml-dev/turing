@@ -72,8 +72,8 @@ func TestListRouters(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							MLPService:     mlpSvc,
 							RoutersService: routerSvc,
@@ -123,8 +123,8 @@ func TestGetRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							RoutersService: routerSvc,
 						},
@@ -281,8 +281,8 @@ func TestCreateRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
@@ -435,8 +435,8 @@ func TestUpdateRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
@@ -582,8 +582,8 @@ func TestDeleteRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
@@ -744,8 +744,8 @@ func TestDeployRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
@@ -866,8 +866,8 @@ func TestUndeployRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
@@ -951,8 +951,8 @@ func TestListRouterEvents(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				&routerDeploymentController{
-					&BaseController{
+				RouterDeploymentController{
+					BaseController{
 						AppContext: &AppContext{
 							RoutersService: routerSvc,
 							EventService:   eventSvc,

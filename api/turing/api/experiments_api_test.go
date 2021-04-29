@@ -24,7 +24,7 @@ func TestListExperimentEngines(t *testing.T) {
 
 	// Create controller
 	ctrl := ExperimentsController{
-		&BaseController{
+		BaseController{
 			AppContext: &AppContext{
 				ExperimentsService: svc,
 			},
@@ -59,38 +59,38 @@ func TestListExperimentEngineClients(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string][]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string][]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
 			},
-			vars:     map[string][]string{"engine": {"test-engine"}},
+			vars:     RequestVars{"engine": {"test-engine"}},
 			expected: InternalServerError("error when querying test-engine clients", "Test error"),
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},
 			},
-			vars: map[string][]string{"engine": {"test-engine"}},
+			vars: RequestVars{"engine": {"test-engine"}},
 			expected: &Response{
 				code: 200,
 				data: clients,
@@ -131,27 +131,27 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string][]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string][]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
 			},
-			vars: map[string][]string{
+			vars: RequestVars{
 				"engine":    {"test-engine"},
 				"client_id": {"2"},
 			},
@@ -159,13 +159,13 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},
 			},
-			vars: map[string][]string{
+			vars: RequestVars{
 				"engine":    {"test-engine"},
 				"client_id": {"1"},
 			},
@@ -212,27 +212,27 @@ func TestListExperimentEngineVariables(t *testing.T) {
 	// Define tests
 	tests := map[string]struct {
 		ctrl     ExperimentsController
-		vars     map[string][]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad input": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{},
 				},
 			},
-			vars:     map[string][]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid experiment engine", "key engine not found in vars"),
 		},
 		"failure | bad response": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: failureSvc,
 					},
 				},
 			},
-			vars: map[string][]string{
+			vars: RequestVars{
 				"engine":    {"test-engine"},
 				"client_id": {"2"},
 			},
@@ -240,13 +240,13 @@ func TestListExperimentEngineVariables(t *testing.T) {
 		},
 		"success": {
 			ctrl: ExperimentsController{
-				&BaseController{
+				BaseController{
 					AppContext: &AppContext{
 						ExperimentsService: successSvc,
 					},
 				},
 			},
-			vars: map[string][]string{
+			vars: RequestVars{
 				"engine":        {"test-engine"},
 				"client_id":     {"1"},
 				"experiment_id": {"1,2"},

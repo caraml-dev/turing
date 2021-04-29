@@ -123,8 +123,6 @@ func (service *routersService) Delete(router *models.Router) error {
 
 	var routerVersions []*models.RouterVersion
 	if err := service.db.
-		Preload("Enricher").
-		Preload("Ensembler").
 		Where("router_id = ?", router.ID).
 		Find(&routerVersions).Error; err != nil {
 		return err
@@ -132,11 +130,11 @@ func (service *routersService) Delete(router *models.Router) error {
 
 	for _, routerVersion := range routerVersions {
 		tx.Delete(routerVersion)
-		if routerVersion.Ensembler != nil {
-			tx.Delete(routerVersion.Ensembler)
+		if routerVersion.EnricherID.Valid {
+			tx.Delete(models.Enricher{}, "id = ?", routerVersion.EnricherID.Int32)
 		}
-		if routerVersion.Enricher != nil {
-			tx.Delete(routerVersion.Enricher)
+		if routerVersion.EnsemblerID.Valid {
+			tx.Delete(models.Ensembler{}, "id = ?", routerVersion.EnsemblerID.Int32)
 		}
 	}
 	tx.Delete(router)

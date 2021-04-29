@@ -10,7 +10,7 @@ import (
 )
 
 type AlertsController struct {
-	*BaseController
+	BaseController
 }
 
 var ErrAlertDisabled = errors.New("alert is disabled in turing-api")

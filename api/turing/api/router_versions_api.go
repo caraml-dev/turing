@@ -9,7 +9,7 @@ import (
 )
 
 type RouterVersionsController struct {
-	*routerDeploymentController
+	RouterDeploymentController
 }
 
 // ListRouterVersions lists the router versions of the provided router.
