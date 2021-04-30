@@ -21,7 +21,7 @@ type Router struct {
 	Model
 	// Project id of the project this router belongs to, as retrieved from
 	// the MLP API.
-	ProjectID int `json:"project_id"`
+	ProjectID ID `json:"project_id"`
 	// Environment name of the environment this router belongs to, as retrieved
 	// from the MLP API.
 	EnvironmentName string `json:"environment_name"`
@@ -37,7 +37,7 @@ type Router struct {
 	CurrRouterVersion   *RouterVersion `json:"config,omitempty" gorm:"foreignkey:CurrRouterVersionID"`
 }
 
-func (r *Router) SetCurrRouterVersionID(routerVersionID uint) {
+func (r *Router) SetCurrRouterVersionID(routerVersionID ID) {
 	r.CurrRouterVersionID = sql.NullInt32{Int32: int32(routerVersionID), Valid: true}
 }
 

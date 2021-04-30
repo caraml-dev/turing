@@ -21,7 +21,7 @@ const (
 type RouterVersion struct {
 	Model
 	// Router this RouterVersion is associated with.
-	RouterID uint    `json:"-"`
+	RouterID ID      `json:"-"`
 	Router   *Router `json:"router" gorm:"association_autoupdate:false"`
 
 	// Version of Router configuration.
@@ -57,17 +57,17 @@ type RouterVersion struct {
 	Ensembler   *Ensembler    `json:"ensembler,omitempty"`
 }
 
-// SetEnsemblerId Sets the id of the associated Ensembler
-func (r *RouterVersion) SetEnsemblerID(ensemblerID uint) {
+// SetEnsemblerID Sets the id of the associated Ensembler
+func (r *RouterVersion) SetEnsemblerID(ensemblerID ID) {
 	r.EnsemblerID = sql.NullInt32{Int32: int32(ensemblerID), Valid: true}
 }
 
-// SetEnricherId Sets the id of the associated Enricher
-func (r *RouterVersion) SetEnricherID(enricherID uint) {
+// SetEnricherID Sets the id of the associated Enricher
+func (r *RouterVersion) SetEnricherID(enricherID ID) {
 	r.EnricherID = sql.NullInt32{Int32: int32(enricherID), Valid: true}
 }
 
-// Sets version before creating
+// BeforeCreate Sets version before creating
 func (r *RouterVersion) BeforeCreate(tx *gorm.DB) error {
 	var latestVersion RouterVersion
 	err := tx.Select("router_versions.*").

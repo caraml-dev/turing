@@ -8,13 +8,13 @@ import (
 
 // ExperimentsController implements the handlers for experiment related APIs
 type ExperimentsController struct {
-	*AppContext
+	BaseController
 }
 
 // ListExperimentEngines returns a list of available experiment engines
 func (c ExperimentsController) ListExperimentEngines(
 	_ *http.Request,
-	_ map[string]string,
+	_ RequestVars,
 	_ interface{},
 ) *Response {
 	return Ok(c.ExperimentsService.ListEngines())
@@ -23,10 +23,10 @@ func (c ExperimentsController) ListExperimentEngines(
 // ListExperimentEngineClients returns a list of clients on the given experiment engine
 func (c ExperimentsController) ListExperimentEngineClients(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
-	engine, ok := vars["engine"]
+	engine, ok := vars.get("engine")
 	if !ok {
 		return BadRequest("invalid experiment engine", "key engine not found in vars")
 	}
@@ -43,16 +43,16 @@ func (c ExperimentsController) ListExperimentEngineClients(
 // optionally tied to the given client id
 func (c ExperimentsController) ListExperimentEngineExperiments(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
-	engine, ok := vars["engine"]
+	engine, ok := vars.get("engine")
 	if !ok {
 		return BadRequest("invalid experiment engine", "key engine not found in vars")
 	}
 
 	// Get client ID, if supplied
-	clientID := vars["client_id"]
+	clientID, _ := vars.get("client_id")
 	// Get experiments (optionally, tied to the client)
 	experiments, err := c.ExperimentsService.ListExperiments(engine, clientID)
 	if err != nil {
@@ -65,20 +65,21 @@ func (c ExperimentsController) ListExperimentEngineExperiments(
 // ListExperimentEngineVariables returns a list of variables for the given client and/or experiments
 func (c ExperimentsController) ListExperimentEngineVariables(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
-	engine, ok := vars["engine"]
+	engine, ok := vars.get("engine")
 	if !ok {
 		return BadRequest("invalid experiment engine", "key engine not found in vars")
 	}
 
 	// Get client ID, if supplied
-	clientID := vars["client_id"]
+	clientID, _ := vars.get("client_id")
 	// Get experiment IDs, if supplied
-	experimentIDs := []string{}
-	if len(vars["experiment_id"]) > 0 {
-		experimentIDs = strings.Split(vars["experiment_id"], ",")
+	experimentIDStr, _ := vars.get("experiment_id")
+	var experimentIDs []string
+	if len(experimentIDStr) > 0 {
+		experimentIDs = strings.Split(experimentIDStr, ",")
 	}
 	// Get variables
 	variables, err := c.ExperimentsService.ListVariables(engine, clientID, experimentIDs)
@@ -87,4 +88,29 @@ func (c ExperimentsController) ListExperimentEngineVariables(
 	}
 
 	return Ok(variables)
+}
+
+func (c ExperimentsController) Routes() []Route {
+	return []Route{
+		{
+			method:  http.MethodGet,
+			path:    "/experiment-engines",
+			handler: c.ListExperimentEngines,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/clients",
+			handler: c.ListExperimentEngineClients,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/experiments",
+			handler: c.ListExperimentEngineExperiments,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/experiment-engines/{engine}/variables",
+			handler: c.ListExperimentEngineVariables,
+		},
+	}
 }

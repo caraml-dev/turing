@@ -16,28 +16,36 @@ import (
 func TestListRouterVersions(t *testing.T) {
 	// Create mock services
 	routerSvc := &mocks.RoutersService{}
-	routerSvc.On("FindByID", uint(1)).Return(&models.Router{Model: models.Model{ID: 1}}, nil)
-	routerSvc.On("FindByID", uint(2)).Return(&models.Router{Model: models.Model{ID: 2}}, nil)
+	routerSvc.
+		On("FindByID", models.ID(1)).
+		Return(&models.Router{Model: models.Model{ID: 1}}, nil)
+	routerSvc.
+		On("FindByID", models.ID(2)).
+		Return(&models.Router{Model: models.Model{ID: 2}}, nil)
 	testVersions := []*models.RouterVersion{{Version: 1}}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("ListRouterVersions", uint(1)).Return(nil, errors.New("Test router versions error"))
-	routerVersionSvc.On("ListRouterVersions", uint(2)).Return(testVersions, nil)
+	routerVersionSvc.
+		On("ListRouterVersions", models.ID(1)).
+		Return(nil, errors.New("test router versions error"))
+	routerVersionSvc.
+		On("ListRouterVersions", models.ID(2)).
+		Return(testVersions, nil)
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | list router versions": {
-			vars:     map[string]string{"router_id": "1"},
-			expected: InternalServerError("unable to retrieve router versions", "Test router versions error"),
+			vars:     RequestVars{"router_id": {"1"}},
+			expected: InternalServerError("unable to retrieve router versions", "test router versions error"),
 		},
 		"success": {
-			vars: map[string]string{"router_id": "2"},
+			vars: RequestVars{"router_id": {"2"}},
 			expected: &Response{
 				code: 200,
 				data: testVersions,
@@ -49,9 +57,9 @@ func TestListRouterVersions(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
-				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+				RouterDeploymentController{
+					BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -68,33 +76,37 @@ func TestListRouterVersions(t *testing.T) {
 func TestGetRouterVersion(t *testing.T) {
 	// Create mock services
 	routerSvc := &mocks.RoutersService{}
-	routerSvc.On("FindByID", uint(1)).Return(&models.Router{Model: models.Model{ID: 1}}, nil)
+	routerSvc.
+		On("FindByID", models.ID(1)).
+		Return(&models.Router{Model: models.Model{ID: 1}}, nil)
 	testVersion := &models.RouterVersion{Version: 1}
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(1), uint(1)).
-		Return(nil, errors.New("Test router version error"))
-	routerVersionSvc.On("FindByRouterIDAndVersion", uint(1), uint(2)).Return(testVersion, nil)
+		On("FindByRouterIDAndVersion", models.ID(1), uint(1)).
+		Return(nil, errors.New("test router version error"))
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(1), uint(2)).
+		Return(testVersion, nil)
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | bad request (missing version)": {
-			vars:     map[string]string{"router_id": "1"},
+			vars:     RequestVars{"router_id": {"1"}},
 			expected: BadRequest("invalid router version value", "key version not found in vars"),
 		},
 		"failure | get router version": {
-			vars:     map[string]string{"router_id": "1", "version": "1"},
-			expected: NotFound("router version not found", "Test router version error"),
+			vars:     RequestVars{"router_id": {"1"}, "version": {"1"}},
+			expected: NotFound("router version not found", "test router version error"),
 		},
 		"success": {
-			vars: map[string]string{"router_id": "1", "version": "2"},
+			vars: RequestVars{"router_id": {"1"}, "version": {"2"}},
 			expected: &Response{
 				code: 200,
 				data: testVersion,
@@ -106,9 +118,9 @@ func TestGetRouterVersion(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
-				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+				RouterDeploymentController{
+					BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -152,14 +164,26 @@ func TestDeleteRouterVersion(t *testing.T) {
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(2), uint(1)).
-		Return(nil, errors.New("Test router version error"))
-	routerVersionSvc.On("FindByRouterIDAndVersion", uint(2), uint(2)).Return(routerVersion2, nil)
-	routerVersionSvc.On("FindByRouterIDAndVersion", uint(2), uint(3)).Return(routerVersion3, nil)
-	routerVersionSvc.On("FindByRouterIDAndVersion", uint(2), uint(4)).Return(routerVersion4, nil)
-	routerVersionSvc.On("FindByRouterIDAndVersion", uint(2), uint(5)).Return(routerVersion5, nil)
-	routerVersionSvc.On("Delete", routerVersion4).Return(errors.New("Test router version delete error"))
-	routerVersionSvc.On("Delete", routerVersion5).Return(nil)
+		On("FindByRouterIDAndVersion", models.ID(2), uint(1)).
+		Return(nil, errors.New("test router version error"))
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(2), uint(2)).
+		Return(routerVersion2, nil)
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(2), uint(3)).
+		Return(routerVersion3, nil)
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(2), uint(4)).
+		Return(routerVersion4, nil)
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(2), uint(5)).
+		Return(routerVersion5, nil)
+	routerVersionSvc.
+		On("Delete", routerVersion4).
+		Return(errors.New("test router version delete error"))
+	routerVersionSvc.
+		On("Delete", routerVersion5).
+		Return(nil)
 	// Router service
 	router2 := &models.Router{
 		Model: models.Model{
@@ -172,39 +196,43 @@ func TestDeleteRouterVersion(t *testing.T) {
 		},
 	}
 	routerSvc := &mocks.RoutersService{}
-	routerSvc.On("FindByID", uint(1)).Return(nil, errors.New("Test router error"))
-	routerSvc.On("FindByID", uint(2)).Return(router2, nil)
+	routerSvc.
+		On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router error"))
+	routerSvc.
+		On("FindByID", models.ID(2)).
+		Return(router2, nil)
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | get router": {
-			vars:     map[string]string{"router_id": "1", "version": "1"},
-			expected: NotFound("router not found", "Test router error"),
+			vars:     RequestVars{"router_id": {"1"}, "version": {"1"}},
+			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | bad request (missing version)": {
-			vars:     map[string]string{"router_id": "2"},
+			vars:     RequestVars{"router_id": {"2"}},
 			expected: BadRequest("invalid router version value", "key version not found in vars"),
 		},
 		"failure | get router version": {
-			vars:     map[string]string{"router_id": "2", "version": "1"},
-			expected: NotFound("router version not found", "Test router version error"),
+			vars:     RequestVars{"router_id": {"2"}, "version": {"1"}},
+			expected: NotFound("router version not found", "test router version error"),
 		},
 		"failure | router version deploying": {
-			vars: map[string]string{"router_id": "2", "version": "2"},
+			vars: RequestVars{"router_id": {"2"}, "version": {"2"}},
 			expected: BadRequest(
 				"invalid delete request",
 				"unable to delete router version that is currently deploying",
 			),
 		},
 		"failure | router version current": {
-			vars: map[string]string{"router_id": "2", "version": "3"},
+			vars: RequestVars{"router_id": {"2"}, "version": {"3"}},
 			expected: &Response{
 				code: 400,
 				data: struct {
@@ -217,7 +245,7 @@ func TestDeleteRouterVersion(t *testing.T) {
 			},
 		},
 		"failure | delete router version": {
-			vars: map[string]string{"router_id": "2", "version": "4"},
+			vars: RequestVars{"router_id": {"2"}, "version": {"4"}},
 			expected: &Response{
 				code: 500,
 				data: struct {
@@ -225,12 +253,12 @@ func TestDeleteRouterVersion(t *testing.T) {
 					Message     string `json:"error"`
 				}{
 					Description: "unable to delete router version",
-					Message:     "Test router version delete error",
+					Message:     "test router version delete error",
 				},
 			},
 		},
 		"success": {
-			vars: map[string]string{"router_id": "2", "version": "5"},
+			vars: RequestVars{"router_id": {"2"}, "version": {"5"}},
 			expected: &Response{
 				code: 200,
 				data: map[string]int{"router_id": 2, "version": 5},
@@ -242,9 +270,9 @@ func TestDeleteRouterVersion(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
-				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+				RouterDeploymentController{
+					BaseController{
+						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
@@ -262,10 +290,18 @@ func TestDeployRouterVersion(t *testing.T) {
 	// Create mock services
 	// MLP service
 	mlpSvc := &mocks.MLPService{}
-	mlpSvc.On("GetProject", 1).Return(nil, errors.New("Test project error"))
-	mlpSvc.On("GetProject", 2).Return(&mlp.Project{}, nil)
-	mlpSvc.On("GetEnvironment", "dev-invalid").Return(nil, errors.New("Test env error"))
-	mlpSvc.On("GetEnvironment", "dev").Return(&merlin.Environment{}, nil)
+	mlpSvc.
+		On("GetProject", models.ID(1)).
+		Return(nil, errors.New("test project error"))
+	mlpSvc.
+		On("GetProject", models.ID(2)).
+		Return(&mlp.Project{}, nil)
+	mlpSvc.
+		On("GetEnvironment", "dev-invalid").
+		Return(nil, errors.New("test env error"))
+	mlpSvc.
+		On("GetEnvironment", "dev").
+		Return(&merlin.Environment{}, nil)
 	// Router Service
 	router2 := &models.Router{
 		Name:            "router2",
@@ -295,97 +331,111 @@ func TestDeployRouterVersion(t *testing.T) {
 		},
 	}
 	routerSvc := &mocks.RoutersService{}
-	routerSvc.On("FindByID", uint(1)).Return(nil, errors.New("Test router error"))
-	routerSvc.On("FindByID", uint(2)).Return(router2, nil)
-	routerSvc.On("FindByID", uint(3)).Return(router3, nil)
-	routerSvc.On("FindByID", uint(4)).Return(router4, nil)
+	routerSvc.
+		On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router error"))
+	routerSvc.
+		On("FindByID", models.ID(2)).
+		Return(router2, nil)
+	routerSvc.
+		On("FindByID", models.ID(3)).
+		Return(router3, nil)
+	routerSvc.
+		On("FindByID", models.ID(4)).
+		Return(router4, nil)
 	// For the deployment method
-	routerSvc.On("Save", mock.Anything).Return(nil, errors.New("Test Router Deployment Failure"))
+	routerSvc.
+		On("Save", mock.Anything).
+		Return(nil, errors.New("test Router Deployment Failure"))
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
-		RouterID: uint(3),
+		RouterID: 3,
 		Router:   router3,
 		Version:  2,
 	}
 	routerVersion2 := &models.RouterVersion{
-		RouterID: uint(3),
+		RouterID: 3,
 		Router:   router2,
 		Version:  3,
 		Status:   models.RouterVersionStatusDeployed,
 	}
 	routerVersion3 := &models.RouterVersion{
-		RouterID: uint(3),
+		RouterID: 3,
 		Router:   router3,
 		Version:  3,
 		Status:   models.RouterVersionStatusUndeployed,
 	}
 	routerVersion4 := &models.RouterVersion{
-		RouterID: uint(4),
+		RouterID: 4,
 		Router:   router3,
 		Version:  4,
 		Status:   models.RouterVersionStatusUndeployed,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("FindByID", uint(1)).Return(nil, errors.New("Test router version error"))
-	routerVersionSvc.On("FindByID", uint(2)).Return(routerVersion, nil)
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(2), uint(2)).
+		On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router version error"))
+	routerVersionSvc.
+		On("FindByID", models.ID(2)).
+		Return(routerVersion, nil)
+	routerVersionSvc.
+		On("FindByRouterIDAndVersion", models.ID(2), uint(2)).
 		Return(nil, nil)
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(3), uint(1)).
-		Return(nil, errors.New("Test router version error"))
+		On("FindByRouterIDAndVersion", models.ID(3), uint(1)).
+		Return(nil, errors.New("test router version error"))
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(3), uint(2)).
+		On("FindByRouterIDAndVersion", models.ID(3), uint(2)).
 		Return(routerVersion2, nil)
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(3), uint(3)).
+		On("FindByRouterIDAndVersion", models.ID(3), uint(3)).
 		Return(routerVersion3, nil)
 	routerVersionSvc.
-		On("FindByRouterIDAndVersion", uint(4), uint(4)).
+		On("FindByRouterIDAndVersion", models.ID(4), uint(4)).
 		Return(routerVersion4, nil)
 
 	// Define tests
 	tests := map[string]struct {
-		vars     map[string]string
+		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
-			vars:     map[string]string{},
+			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     map[string]string{"project_id": "1", "router_id": "1", "version": "1"},
-			expected: NotFound("project not found", "Test project error"),
+			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}, "version": {"1"}},
+			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
-			vars:     map[string]string{"project_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
-			vars:     map[string]string{"project_id": "2", "router_id": "1"},
-			expected: NotFound("router not found", "Test router error"),
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
+			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | bad request (missing version)": {
-			vars:     map[string]string{"project_id": "2", "router_id": "2"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest("invalid router version value", "key version not found in vars"),
 		},
 		"failure | router version not found": {
-			vars:     map[string]string{"project_id": "2", "router_id": "3", "version": "1"},
-			expected: NotFound("router version not found", "Test router version error"),
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}, "version": {"1"}},
+			expected: NotFound("router version not found", "test router version error"),
 		},
 		"failure | router status pending": {
-			vars: map[string]string{"project_id": "2", "router_id": "2", "version": "2"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}, "version": {"2"}},
 			expected: BadRequest(
 				"invalid deploy request",
 				"router is currently deploying, cannot do another deployment",
 			),
 		},
 		"failure | version already deployed": {
-			vars:     map[string]string{"project_id": "2", "router_id": "3", "version": "2"},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}, "version": {"2"}},
 			expected: BadRequest("invalid deploy request", "router version is already deployed"),
 		},
 		"success": {
-			vars: map[string]string{"project_id": "2", "router_id": "4", "version": "4"},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}, "version": {"4"}},
 			expected: &Response{
 				code: 202,
 				data: map[string]int{
@@ -400,9 +450,9 @@ func TestDeployRouterVersion(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RouterVersionsController{
-				&routerDeploymentController{
-					&baseController{
-						&AppContext{
+				RouterDeploymentController{
+					BaseController{
+						AppContext: &AppContext{
 							MLPService:            mlpSvc,
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,

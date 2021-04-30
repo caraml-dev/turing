@@ -36,6 +36,6 @@ func TestEventSetters(t *testing.T) {
 	event.SetRouter(&testRouter)
 	event.SetVersion(uint(10))
 	// Validate
-	assert.Equal(t, uint(1), event.RouterID)
+	assert.Equal(t, ID(1), event.RouterID)
 	assert.Equal(t, uint(10), event.Version)
 }

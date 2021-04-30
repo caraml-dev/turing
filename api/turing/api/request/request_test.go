@@ -131,7 +131,7 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 }
 
 func TestRequestBuildRouter(t *testing.T) {
-	projectID := 1
+	projectID := models.ID(1)
 	expected := &models.Router{
 		ProjectID:       projectID,
 		EnvironmentName: "env",
@@ -162,7 +162,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			},
 		},
 	}
-	projectID := 1
+	projectID := models.ID(1)
 	router := createOrUpdateRequest.BuildRouter(projectID)
 	expected := models.RouterVersion{
 		Router: router,

@@ -21,7 +21,7 @@ func TestGetValueFromRequest(t *testing.T) {
 			field:    "CustomerID",
 			fieldSrc: common.HeaderFieldSource,
 			header: func() http.Header {
-				header := http.Header(map[string][]string{})
+				header := http.Header{}
 				header.Set("CustomerID", "123")
 				return header
 			}(),
@@ -55,7 +55,7 @@ func TestGetValueFromRequest(t *testing.T) {
 			field:    "CustomerID",
 			fieldSrc: common.HeaderFieldSource,
 			header: func() http.Header {
-				header := http.Header(map[string][]string{})
+				header := http.Header{}
 				header.Set("SessionID", "123")
 				return header
 			}(),

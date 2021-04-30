@@ -40,7 +40,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		for i, router := range routers {
 			router, err := svc.Save(router)
 			assert.NoError(t, err)
-			assert.Equal(t, uint(i+1), router.ID)
+			assert.Equal(t, models.ID(i+1), router.ID)
 			assert.NotNil(t, router.CreatedAt)
 			assert.NotNil(t, router.UpdatedAt)
 		}
@@ -124,12 +124,14 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		found, err = svc.FindByID(router.ID)
 		assert.Error(t, err)
 		assert.Nil(t, found)
-		var count int
-		db.Select("router_versions.*").Count(&count)
-		assert.Equal(t, count, 0)
-		db.Select("ensemblers.*").Count(&count)
-		assert.Equal(t, count, 0)
-		db.Select("enrichers.*").Count(&count)
-		assert.Equal(t, count, 0)
+		count := -1
+		db.Model(&models.RouterVersion{}).Count(&count)
+		assert.Equal(t, 0, count)
+		count = -1
+		db.Model(&models.Ensembler{}).Count(&count)
+		assert.Equal(t, 0, count)
+		count = -1
+		db.Model(&models.Enricher{}).Count(&count)
+		assert.Equal(t, 0, count)
 	})
 }

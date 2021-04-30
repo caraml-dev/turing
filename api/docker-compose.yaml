@@ -30,15 +30,15 @@ services:
         echo "Done!"
 
   swagger-ui:
-    image: swaggerapi/swagger-ui:v3.24.3
+    image: swaggerapi/swagger-ui:v3.47.1
     ports:
       - 8081:5555
     volumes:
-      - ./swagger.yaml:/app/swagger.yaml:ro
+      - ./swagger.yaml:/usr/share/nginx/html/swagger.yaml:ro
+      - ./swagger-batch.yaml:/usr/share/nginx/html/swagger-batch.yaml:ro
     environment:
       - PORT=5555
-      - LAYOUT=BaseLayout
-      - SWAGGER_JSON=/app/swagger.yaml
+      - "URLS=[{ url: 'swagger.yaml', name: 'v1' }, { url: '/swagger-batch.yaml', name: 'batch' }]"
 
   postgres-auth:
     image: bitnami/postgresql:11.6.0-debian-9-r0

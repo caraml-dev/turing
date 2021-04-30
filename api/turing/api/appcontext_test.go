@@ -197,6 +197,7 @@ func TestNewAppContext(t *testing.T) {
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
 		RoutersService:        service.NewRoutersService(nil),
+		EnsemblersService:     service.NewEnsemblersService(nil),
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,

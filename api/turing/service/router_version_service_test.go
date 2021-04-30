@@ -111,7 +111,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		}
 		saved, err := svc.Save(routerVersion)
 		assert.NoError(t, err)
-		assert.Equal(t, uint(1), saved.ID)
+		assert.Equal(t, models.ID(1), saved.ID)
 		assert.NotNil(t, saved.CreatedAt)
 		assert.NotNil(t, saved.UpdatedAt)
 		assert.Equal(t, 1, int(saved.EnsemblerID.Int32))
@@ -155,7 +155,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		found.Status = models.RouterVersionStatusDeployed
 		saved, err = svc.Save(found)
 		assert.NoError(t, err)
-		assert.Equal(t, uint(1), saved.ID)
+		assert.Equal(t, models.ID(1), saved.ID)
 		assert.Equal(t, models.RouterVersionStatusDeployed, saved.Status)
 
 		// list with versions
@@ -180,11 +180,14 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		found, err = svc.FindByID(1)
 		assert.Error(t, err)
 		assert.Nil(t, found)
-		var count int
-		db.Select("ensemblers.*").Count(&count)
-		assert.Equal(t, count, 0)
-		db.Select("enrichers.*").Count(&count)
-		assert.Equal(t, count, 0)
+
+		count := -1
+		db.Model(&models.Ensembler{}).Count(&count)
+		assert.Equal(t, 0, count)
+		// reset count
+		count = -1
+		db.Model(&models.Enricher{}).Count(&count)
+		assert.Equal(t, 0, count)
 
 		// create router again without ensembler and enricher
 		routerVersion.EnricherID = sql.NullInt32{}

@@ -13,14 +13,14 @@ import (
 )
 
 type RoutersController struct {
-	*routerDeploymentController
+	RouterDeploymentController
 }
 
 // ListRouters lists all routers configured in the provided project.
 // If none are found, an error will be thrown.
 func (c RoutersController) ListRouters(
 	r *http.Request,
-	vars map[string]string, _ interface{},
+	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse input
 	var errResp *Response
@@ -30,7 +30,7 @@ func (c RoutersController) ListRouters(
 	}
 
 	// List routers
-	routers, err := c.RoutersService.ListRouters(int(project.Id), "")
+	routers, err := c.RoutersService.ListRouters(models.ID(project.Id), "")
 	if err != nil {
 		return InternalServerError("unable to list routers", err.Error())
 	}
@@ -41,7 +41,7 @@ func (c RoutersController) ListRouters(
 // GetRouter gets a router matching the provided routerID.
 func (c RoutersController) GetRouter(
 	r *http.Request,
-	vars map[string]string, _ interface{},
+	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse input
 	var errResp *Response
@@ -59,7 +59,7 @@ func (c RoutersController) GetRouter(
 // If not, a new Router and associated RouterVersion will be created and deployed.
 func (c RoutersController) CreateRouter(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars
@@ -72,7 +72,7 @@ func (c RoutersController) CreateRouter(
 	request := body.(*request.CreateOrUpdateRouterRequest)
 
 	// check if router already exists
-	router, _ := c.RoutersService.FindByProjectAndName(int(project.Id), request.Name)
+	router, _ := c.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
 	if router != nil {
 		return BadRequest("invalid router name",
 			fmt.Sprintf("router with name %s already exists in project %d", request.Name, project.Id))
@@ -84,7 +84,7 @@ func (c RoutersController) CreateRouter(
 	}
 
 	// if not, create
-	router, err = c.RoutersService.Save(request.BuildRouter(int(project.Id)))
+	router, err = c.RoutersService.Save(request.BuildRouter(models.ID(project.Id)))
 	if err != nil {
 		return InternalServerError("unable to create router", err.Error())
 	}
@@ -123,7 +123,7 @@ func (c RoutersController) CreateRouter(
 // UpdateRouter updates a router from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created and deployed.
-func (c RoutersController) UpdateRouter(r *http.Request, vars map[string]string, body interface{}) *Response {
+func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
 	var errResp *Response
 	var project *mlp.Project
@@ -176,7 +176,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars map[string]string,
 // DeleteRouter deletes a router and all its associated versions.
 func (c RoutersController) DeleteRouter(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
@@ -211,7 +211,7 @@ func (c RoutersController) DeleteRouter(
 // kubernetes cluster. If there is no current version, an error is returned.
 func (c RoutersController) DeployRouter(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars
@@ -237,11 +237,11 @@ func (c RoutersController) DeployRouter(
 	// Get the current router version. If nil, it means there is no version of the
 	// router to deploy.
 	if router.CurrRouterVersion == nil {
-		return BadRequest("invalid deploy request", "Router has no current configuration")
+		return BadRequest("invalid deploy request", "router has no current configuration")
 	}
 
 	// Query router version to load all relationships
-	routerVersion, err := c.RouterVersionsService.FindByID(uint(router.CurrRouterVersion.ID))
+	routerVersion, err := c.RouterVersionsService.FindByID(router.CurrRouterVersion.ID)
 	if err != nil {
 		return NotFound("router version not found", err.Error())
 	}
@@ -264,7 +264,7 @@ func (c RoutersController) DeployRouter(
 // UndeployRouter deletes the given router specs from the associated kubernetes cluster
 func (c RoutersController) UndeployRouter(
 	r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars
@@ -288,7 +288,7 @@ func (c RoutersController) UndeployRouter(
 }
 
 func (c RoutersController) ListRouterEvents(r *http.Request,
-	vars map[string]string,
+	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars
@@ -304,4 +304,53 @@ func (c RoutersController) ListRouterEvents(r *http.Request,
 		return NotFound("events not found", err.Error())
 	}
 	return Ok(map[string][]*models.Event{"events": events})
+}
+
+func (c RoutersController) Routes() []Route {
+	return []Route{
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers",
+			handler: c.ListRouters,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			handler: c.GetRouter,
+		},
+		{
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers",
+			body:    request.CreateOrUpdateRouterRequest{},
+			handler: c.CreateRouter,
+		},
+		{
+			method:  http.MethodPut,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			body:    request.CreateOrUpdateRouterRequest{},
+			handler: c.UpdateRouter,
+		},
+		{
+			method:  http.MethodDelete,
+			path:    "/projects/{project_id}/routers/{router_id}",
+			handler: c.DeleteRouter,
+		},
+		// Deploy / Undeploy router version
+		{
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/deploy",
+			handler: c.DeployRouter,
+		},
+		{
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
+			handler: c.UndeployRouter,
+		},
+		// Router Events
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers/{router_id}/events",
+			handler: c.ListRouterEvents,
+		},
+	}
 }

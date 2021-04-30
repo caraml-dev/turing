@@ -32,7 +32,7 @@ type Event struct {
 	Model
 
 	// Router id this event is for
-	RouterID uint    `json:"-"`
+	RouterID ID      `json:"-"`
 	Router   *Router `json:"-"`
 
 	// Version of router that triggered this deployment event.
@@ -41,7 +41,7 @@ type Event struct {
 	// that triggered the event.
 	Version uint `json:"version"`
 
-	// Type of event
+	// EventType type of event
 	EventType EventType `json:"event_type"`
 
 	// Stage of deployment/undeployment

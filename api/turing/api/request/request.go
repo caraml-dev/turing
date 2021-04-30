@@ -104,7 +104,7 @@ func (cfg EnricherEnsemblerConfig) BuildEnricher() *models.Enricher {
 }
 
 // BuildRouter builds the router model from the entire request payload
-func (r CreateOrUpdateRouterRequest) BuildRouter(projectID int) *models.Router {
+func (r CreateOrUpdateRouterRequest) BuildRouter(projectID models.ID) *models.Router {
 	return &models.Router{
 		ProjectID:       projectID,
 		EnvironmentName: r.Environment,
@@ -120,7 +120,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 	cryptoSvc service.CryptoService,
 ) (*models.RouterVersion, error) {
 	if r.Config == nil {
-		return nil, errors.New("Router Config is empty")
+		return nil, errors.New("router config is empty")
 	}
 	rv := &models.RouterVersion{
 		RouterID:       router.ID,

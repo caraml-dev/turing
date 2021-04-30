@@ -6,9 +6,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-
-	"github.com/gojek/turing/api/turing/api/request"
-	"github.com/gojek/turing/api/turing/models"
+	"runtime"
 
 	val "github.com/go-playground/validator/v10"
 	"github.com/gojek/turing/api/turing/validation"
@@ -18,8 +16,20 @@ import (
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 )
 
+// RequestVars is an alias of map[string][]string
+// This is done to make it compatible with *http.Request.URL.Query() return type
+// and also to make it possible to use it with gorilla/schema Decoder
+type RequestVars map[string][]string
+
+func (vars RequestVars) get(key string) (string, bool) {
+	if values, ok := vars[key]; ok && len(values) > 0 {
+		return values[0], true
+	}
+	return "", false
+}
+
 // Handler is a function that returns a Response given the request.
-type Handler func(r *http.Request, vars map[string]string, body interface{}) *Response
+type Handler func(r *http.Request, vars RequestVars, body interface{}) *Response
 
 // Route is a http route for the API.
 type Route struct {
@@ -28,6 +38,16 @@ type Route struct {
 	body    interface{}
 	handler Handler
 	name    string
+}
+
+// Name returns the name of the route by either using Route's property `name`
+// or if it's empty – then by inferring it from the Route's `handler` function name
+func (route Route) Name() string {
+	if len(route.name) > 0 {
+		return route.name
+	}
+	v := reflect.ValueOf(route.handler)
+	return runtime.FuncForPC(v.Pointer()).Name()
 }
 
 // HandlerFunc returns the HandlerFunc for this route, which validates the request and
@@ -39,12 +59,11 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+		r.URL.Query()
+		vars := RequestVars(r.URL.Query())
 
-		for k, v := range r.URL.Query() {
-			if len(v) > 0 {
-				vars[k] = v[0]
-			}
+		for k, v := range mux.Vars(r) {
+			vars[k] = []string{v}
 		}
 
 		response := func() *Response {
@@ -77,181 +96,41 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 // NewRouter instantiates a mux.Router for this application.
 func NewRouter(appCtx *AppContext) *mux.Router {
 	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
-	baseController := &baseController{appCtx}
-	deploymentController := &routerDeploymentController{baseController}
-	routersController := RoutersController{deploymentController}
-	routerVersionsController := RouterVersionsController{deploymentController}
-	alertsController := &AlertsController{baseController}
-	podLogController := PodLogController{baseController}
-	experimentsController := &ExperimentsController{appCtx}
+	baseController := NewBaseController(appCtx, validator)
+	deploymentController := RouterDeploymentController{baseController}
+	controllers := []Controller{
+		RoutersController{deploymentController},
+		RouterVersionsController{deploymentController},
+		EnsemblersController{baseController},
+		AlertsController{baseController},
+		PodLogController{baseController},
+		ExperimentsController{baseController},
+	}
 
-	routes := []Route{
-		{
-			name:    "ListRouters",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers",
-			handler: routersController.ListRouters,
-		},
-		{
-			name:    "GetRouter",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			handler: routersController.GetRouter,
-		},
-		{
-			name:    "CreateRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers",
-			body:    request.CreateOrUpdateRouterRequest{},
-			handler: routersController.CreateRouter,
-		},
-		{
-			name:    "UpdateRouter",
-			method:  http.MethodPut,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			body:    request.CreateOrUpdateRouterRequest{},
-			handler: routersController.UpdateRouter,
-		},
-		{
-			name:    "DeleteRouter",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}",
-			handler: routersController.DeleteRouter,
-		},
-		{
-			name:    "ListRouterVersions",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions",
-			handler: routerVersionsController.ListRouterVersions,
-		},
-		{
-			name:    "GetRouterVersion",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
-			handler: routerVersionsController.GetRouterVersion,
-		},
-		{
-			name:    "DeleteRouterVersion",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}",
-			handler: routerVersionsController.DeleteRouterVersion,
-		},
-		// Deploy / Undeploy router version
-		{
-			name:    "DeployRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/deploy",
-			handler: routersController.DeployRouter,
-		},
-		{
-			name:    "DeployRouterVersion",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy",
-			handler: routerVersionsController.DeployRouterVersion,
-		},
-		{
-			name:    "DeployRouter",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
-			handler: routersController.UndeployRouter,
-		},
-		// Router Events
-		{
-			name:    "ListRouterEvents",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/events",
-			handler: routersController.ListRouterEvents,
-		},
-		// CRUD operations router alerts
-		{
-			name:    "CreateAlert",
-			method:  http.MethodPost,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts",
-			body:    models.Alert{},
-			handler: alertsController.CreateAlert,
-		},
-		{
-			name:    "ListAlerts",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts",
-			handler: alertsController.ListAlerts,
-		},
-		{
-			name:    "UpdateAlert",
-			method:  http.MethodPut,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			body:    models.Alert{},
-			handler: alertsController.UpdateAlert,
-		},
-		{
-			name:    "GetAlert",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			body:    models.Alert{},
-			handler: alertsController.GetAlert,
-		},
-		{
-			name:    "DeleteAlert",
-			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}",
-			handler: alertsController.DeleteAlert,
-		},
-		{
-			name:    "ListPodLogs",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/logs",
-			handler: podLogController.ListPodLogs,
-		},
-		{
-			name:    "ListPodLogs",
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/logs",
-			handler: podLogController.ListPodLogs,
-		},
-		// Experiments APIs
-		{
-			name:    "ListExperimentEngines",
-			method:  http.MethodGet,
-			path:    "/experiment-engines",
-			handler: experimentsController.ListExperimentEngines,
-		},
-		{
-			name:    "ListExperimentEngineClients",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/clients",
-			handler: experimentsController.ListExperimentEngineClients,
-		},
-		{
-			name:    "ListExperimentEngineExperiments",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/experiments",
-			handler: experimentsController.ListExperimentEngineExperiments,
-		},
-		{
-			name:    "ListExperimentEngineVariables",
-			method:  http.MethodGet,
-			path:    "/experiment-engines/{engine}/variables",
-			handler: experimentsController.ListExperimentEngineVariables,
-		},
+	var routes []Route
+	for _, c := range controllers {
+		routes = append(routes, c.Routes()...)
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
 
 	for _, r := range routes {
-		_, handler := newrelic.WrapHandle(r.name, r.HandlerFunc(validator))
+		_, handler := newrelic.WrapHandle(r.Name(), r.HandlerFunc(validator))
 
 		// Wrap with authz handler, if provided
 		if appCtx.Authorizer != nil {
 			handler = appCtx.Authorizer.Middleware(handler)
 		}
 
-		router.Name(r.name).
+		router.Name(r.Name()).
 			Methods(r.method).
 			Path(r.path).
 			Handler(handler)
 	}
 
-	router.Use(appCtx.OpenAPIValidation.Middleware)
+	if appCtx.OpenAPIValidation != nil {
+		router.Use(appCtx.OpenAPIValidation.Middleware)
+	}
 	router.Use(recoveryHandler)
 	return router
 }

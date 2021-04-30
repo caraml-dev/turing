@@ -23,6 +23,7 @@ type AppContext struct {
 	RoutersService        service.RoutersService
 	RouterVersionsService service.RouterVersionsService
 	EventService          service.EventService
+	EnsemblersService     service.EnsemblersService
 	AlertService          service.AlertService
 
 	// Default configuration for routers
@@ -83,6 +84,7 @@ func NewAppContext(
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
 		RoutersService:        service.NewRoutersService(db),
+		EnsemblersService:     service.NewEnsemblersService(db),
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
