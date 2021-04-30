@@ -156,7 +156,7 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 			vars: RequestVars{"project_id": {"1"}},
 			expected: BadRequest(
 				"failed to fetch ensembler",
-				"failed to parse query string: Key: 'EnsemblerID' "+
+				"failed to parse query string: Key: 'EnsemblersPathOptions.EnsemblerID' "+
 					"Error:Field validation for 'EnsemblerID' failed on the 'required' tag",
 			),
 		},

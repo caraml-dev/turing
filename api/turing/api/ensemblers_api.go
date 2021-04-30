@@ -39,20 +39,17 @@ func (c EnsemblersController) GetEnsembler(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	params := struct {
-		ProjectID   *models.ID `schema:"project_id" validate:"required"`
-		EnsemblerID *models.ID `schema:"ensembler_id" validate:"required"`
-	}{}
+	options := EnsemblersPathOptions{}
 
-	if err := c.ParseVars(&params, vars); err != nil {
+	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest("failed to fetch ensembler",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
 	ensembler, err := c.EnsemblersService.FindByID(
-		*params.EnsemblerID,
+		*options.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
-			ProjectID: params.ProjectID,
+			ProjectID: options.ProjectID,
 		})
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
@@ -88,20 +85,17 @@ func (c EnsemblersController) UpdateEnsembler(
 	vars RequestVars,
 	body interface{},
 ) *Response {
-	params := struct {
-		ProjectID   *models.ID `schema:"project_id" validate:"required"`
-		EnsemblerID *models.ID `schema:"ensembler_id" validate:"required"`
-	}{}
+	options := EnsemblersPathOptions{}
 
-	if err := c.ParseVars(&params, vars); err != nil {
+	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest("failed to fetch ensembler",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
 	ensembler, err := c.EnsemblersService.FindByID(
-		*params.EnsemblerID,
+		*options.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
-			ProjectID: params.ProjectID,
+			ProjectID: options.ProjectID,
 		})
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
@@ -180,4 +174,9 @@ func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
 
 	r.EnsemblerLike = ensembler
 	return nil
+}
+
+type EnsemblersPathOptions struct {
+	ProjectID   *models.ID `schema:"project_id" validate:"required"`
+	EnsemblerID *models.ID `schema:"ensembler_id" validate:"required"`
 }
