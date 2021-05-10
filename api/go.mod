@@ -5,6 +5,7 @@ go 1.14
 require (
 	bou.ke/monkey v1.0.2
 	github.com/DATA-DOG/go-sqlmock v1.3.3
+	github.com/antihax/optional v1.0.0
 	github.com/getkin/kin-openapi v0.20.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.3.0

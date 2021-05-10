@@ -75,7 +75,7 @@ build: tidy
 	go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
 
 run: build local-db
-	./bin/${BIN_NAME}
+	./bin/${BIN_NAME} -config config-dev.yaml
 
 local-db:
 	@docker-compose up -d postgres && docker-compose run migrations

@@ -80,9 +80,11 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 	<-done
 
 	page := 1
-	totalPages := 1
-	if options.Page != nil && options.PageSize != nil {
+	if options.Page != nil {
 		page = int(math.Max(1, float64(*options.Page)))
+	}
+	totalPages := 1
+	if options.PageSize != nil {
 		totalPages = int(math.Ceil(float64(count) / float64(*options.PageSize)))
 	}
 

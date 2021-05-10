@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/antihax/optional"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
 	"github.com/patrickmn/go-cache"
@@ -27,6 +28,8 @@ type MLPService interface {
 	GetEnvironments() ([]merlin.Environment, error)
 	// GetEnvironment gets the environment matching the provided name.
 	GetEnvironment(name string) (*merlin.Environment, error)
+	// GetProjects list available projects, optionally filtered by given project `name`
+	GetProjects(name string) ([]mlp.Project, error)
 	// GetProject gets the project matching the provided id.
 	GetProject(id models.ID) (*mlp.Project, error)
 	// GetSecret gets a secret by project and name.
@@ -73,7 +76,7 @@ func newMLPClient(googleClient *http.Client, basePath string, encryptionKey stri
 // from (currently) the Merlin API.
 func NewMLPService(
 	mlpBasePath string,
-	mlpEncryptionkey string,
+	mlpEncryptionKey string,
 	merlinBasePath string,
 ) (MLPService, error) {
 	// Create an HTTP client with Google default credential.
@@ -90,7 +93,7 @@ func NewMLPService(
 
 	svc := &mlpService{
 		merlinClient: newMerlinClient(httpClient, merlinBasePath),
-		mlpClient:    newMLPClient(httpClient, mlpBasePath, mlpEncryptionkey),
+		mlpClient:    newMLPClient(httpClient, mlpBasePath, mlpEncryptionKey),
 		cache:        cache.New(mlpCacheExpirySeconds*time.Second, mlpCacheCleanUpSeconds*time.Second),
 	}
 
@@ -133,6 +136,23 @@ func (service mlpService) getEnvironment(name string) (*merlin.Environment, erro
 		return nil, fmt.Errorf("Malformed project info found in the cache for %s", name)
 	}
 	return &environment, nil
+}
+
+func (service mlpService) GetProjects(name string) ([]mlp.Project, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
+	defer cancel()
+
+	var options *mlp.ProjectApiProjectsGetOpts
+	if len(name) > 0 {
+		options = &mlp.ProjectApiProjectsGetOpts{
+			Name: optional.NewString(name),
+		}
+	}
+	projects, _, err := service.mlpClient.api.ProjectApi.ProjectsGet(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
 }
 
 // GetProject gets the project matching the provided id.

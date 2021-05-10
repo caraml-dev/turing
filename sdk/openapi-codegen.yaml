@@ -1,0 +1,9 @@
+projectName: turing-sdk
+packageName: turing.generated
+generateSourceCodeOnly: true
+# Global Properties
+globalProperties:
+  apiTests: false
+  modelTests: false
+  apiDocs: false
+  modelDocs: false

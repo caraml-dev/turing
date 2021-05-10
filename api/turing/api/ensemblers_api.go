@@ -68,11 +68,11 @@ func (c EnsemblersController) CreateEnsembler(
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
+	var err error
+	ensembler := body.(*CreateOrUpdateEnsemblerRequest).EnsemblerLike
+	ensembler.SetProjectID(models.ID(project.Id))
 
-	request := body.(*CreateOrUpdateEnsemblerRequest)
-	request.SetProjectID(models.ID(project.Id))
-
-	ensembler, err := c.EnsemblersService.Save(request)
+	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {
 		return InternalServerError("unable to save an ensembler", err.Error())
 	}

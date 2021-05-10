@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Turing Minimal Openapi Spec for SDK
+  version: 0.0.1
+servers:
+  - url: localhost:8080/v1
+paths:
+  "/projects":
+    $ref: "projects.yaml#/paths/~1projects"
+  "/projects/{project_id}/ensemblers":
+    $ref: "ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers"
+  "/projects/{project_id}/ensemblers/{ensembler_id}":
+    $ref: "ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"
