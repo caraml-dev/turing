@@ -148,9 +148,12 @@ func (service mlpService) GetProjects(name string) ([]mlp.Project, error) {
 			Name: optional.NewString(name),
 		}
 	}
-	projects, _, err := service.mlpClient.api.ProjectApi.ProjectsGet(ctx, options)
+	projects, resp, err := service.mlpClient.api.ProjectApi.ProjectsGet(ctx, options)
 	if err != nil {
 		return nil, err
+	}
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
 	}
 	return projects, nil
 }

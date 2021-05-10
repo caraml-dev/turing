@@ -71,7 +71,7 @@ func (a *Authorizer) FilterAuthorizedProjects(
 	projects []mlp.Project,
 	action string,
 ) ([]mlp.Project, error) {
-	projectIDs := make([]string, 0, 0)
+	projectIDs := make([]string, 0)
 	var allowedProjects []mlp.Project
 	projectMap := make(map[string]mlp.Project)
 	for _, project := range projects {

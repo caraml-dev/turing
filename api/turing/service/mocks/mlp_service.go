@@ -34,6 +34,17 @@ func (m *MLPService) GetEnvironment(name string) (*merlin.Environment, error) {
 	return (ret[0]).(*merlin.Environment), nil
 }
 
+// GetProjects satisfies the MLPService interface
+func (m *MLPService) GetProjects(name string) ([]mlp.Project, error) {
+	ret := m.Called(name)
+
+	if ret[1] != nil {
+		return nil, ret[1].(error)
+	}
+
+	return (ret[0]).([]mlp.Project), nil
+}
+
 // GetProject satisfies the MLPService interface
 func (m *MLPService) GetProject(id models.ID) (*mlp.Project, error) {
 	ret := m.Called(id)
