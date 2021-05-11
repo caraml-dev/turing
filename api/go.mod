@@ -17,6 +17,7 @@ require (
 	github.com/gojek/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.5
+	github.com/google/go-containerregistry v0.0.0-20200331213917-3d03ed9b1ca2
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/schema v1.1.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
