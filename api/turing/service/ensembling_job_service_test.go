@@ -66,7 +66,7 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 						JoinOn: []string{"customer_id", "target_date"},
 					},
 					Predictions: map[string]*batchensembler.PredictionSource{
-						"model_a": &batchensembler.PredictionSource{
+						"model_a": {
 							Dataset: &batchensembler.Dataset{
 								Type: batchensembler.Dataset_DatasetType(
 									batchensembler.Dataset_BQ,
@@ -85,7 +85,7 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 							Columns: []string{"predictions"},
 							JoinOn:  []string{"customer_id", "target_date"},
 						},
-						"model_b": &batchensembler.PredictionSource{
+						"model_b": {
 							Dataset: &batchensembler.Dataset{
 								Type: batchensembler.Dataset_DatasetType(
 									batchensembler.Dataset_BQ,

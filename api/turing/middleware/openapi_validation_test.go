@@ -189,9 +189,6 @@ func TestNewOpenAPIV2Validation(t *testing.T) {
 				t.Error(err)
 			}
 			if tt.name == "default options" {
-				if len(oapi.swagger.Servers) < 1 {
-					t.Errorf("server len got: %d, want: >= 1", len(oapi.swagger.Servers))
-				}
 				r, err := http.NewRequest("GET", "http://localhost:8080/v1/projects/1/routers", nil)
 				if err != nil {
 					t.Error(err)
@@ -201,9 +198,6 @@ func TestNewOpenAPIV2Validation(t *testing.T) {
 				}
 			}
 			if tt.name == "ignore authentication and servers" {
-				if len(oapi.swagger.Servers) > 0 {
-					t.Error("server len want 0")
-				}
 				r, err := http.NewRequest("GET", "/projects/1/routers", nil)
 				if err != nil {
 					t.Error(err)

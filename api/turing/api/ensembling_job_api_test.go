@@ -16,6 +16,20 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+var (
+	annotationKeyOne   string = "spark/spark.jars"
+	annotationValueOne string = "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
+
+	annotationKeyTwo   string = "spark/spark.jars.packages"
+	annotationValueTwo string = "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
+
+	annotationKeyThree   string = "hadoopConfiguration/fs.gs.impl"
+	annotationValueThree string = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
+
+	annotationKeyFour   string = "hadoopConfiguration/fs.AbstractFileSystem.gs.impl"
+	annotationValueFour string = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
+)
+
 func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models.ID) *models.EnsemblingJob {
 	return &models.EnsemblingJob{
 		Name:            fmt.Sprintf("test-ensembler-%d", i),
@@ -44,10 +58,10 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 				Metadata: &batchensembler.BatchEnsemblingJobMetadata{
 					Name: fmt.Sprintf("test-batch-ensembling-%d", i),
 					Annotations: map[string]string{
-						"spark/spark.jars":                                  "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar",
-						"spark/spark.jars.packages":                         "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1",
-						"hadoopConfiguration/fs.gs.impl":                    "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
-						"hadoopConfiguration/fs.AbstractFileSystem.gs.impl": "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
+						annotationKeyOne:   annotationValueOne,
+						annotationKeyTwo:   annotationValueTwo,
+						annotationKeyThree: annotationValueThree,
+						annotationKeyFour:  annotationValueFour,
 					},
 				},
 				Spec: &batchensembler.BatchEnsemblingJobSpec{
@@ -69,7 +83,7 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 						JoinOn: []string{"customer_id", "target_date"},
 					},
 					Predictions: map[string]*batchensembler.PredictionSource{
-						"model_a": &batchensembler.PredictionSource{
+						"model_a": {
 							Dataset: &batchensembler.Dataset{
 								Type: batchensembler.Dataset_DatasetType(
 									batchensembler.Dataset_BQ,
@@ -88,7 +102,7 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 							Columns: []string{"predictions"},
 							JoinOn:  []string{"customer_id", "target_date"},
 						},
-						"model_b": &batchensembler.PredictionSource{
+						"model_b": {
 							Dataset: &batchensembler.Dataset{
 								Type: batchensembler.Dataset_DatasetType(
 									batchensembler.Dataset_BQ,

@@ -32,7 +32,10 @@ func (s *ensemblingJobService) Save(ensemblingJob *models.EnsemblingJob) error {
 	return s.db.Save(ensemblingJob).Error
 }
 
-func (s *ensemblingJobService) FindByID(id models.ID, options EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error) {
+func (s *ensemblingJobService) FindByID(
+	id models.ID,
+	options EnsemblingJobFindByIDOptions,
+) (*models.EnsemblingJob, error) {
 	query := s.db.Where("id = ?", id)
 
 	if options.ProjectID != nil {

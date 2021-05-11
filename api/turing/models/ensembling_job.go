@@ -123,7 +123,8 @@ const (
 
 // IsTerminal checks if the job has reached a final state.
 func (s State) IsTerminal() bool {
-	return s == JobTerminated || s == JobFailedSubmission || s == JobFailed || s == JobCompleted || s == JobFailedBuildImage
+	return s == JobTerminated || s == JobFailedSubmission ||
+		s == JobFailed || s == JobCompleted || s == JobFailedBuildImage
 }
 
 // IsSuccessful checks if the ensembling job has completed.

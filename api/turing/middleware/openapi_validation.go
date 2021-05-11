@@ -16,7 +16,6 @@ import (
 
 // OpenAPIValidation middleware validates HTTP requests against OpenAPI spec.
 type OpenAPIValidation struct {
-	swagger *openapi3.Swagger
 	routers []*openapi3filter.Router
 	options *openapi3filter.Options
 }
@@ -30,7 +29,11 @@ type OpenAPIValidationOptions struct {
 }
 
 // Create OpenAPIValidation object from swagger.yaml file with OpenAPI v2
-func NewOpenAPIValidation(swaggerV2YamlFile string, swaggerV3YamlFiles []string, options OpenAPIValidationOptions) (*OpenAPIValidation, error) {
+func NewOpenAPIValidation(
+	swaggerV2YamlFile string,
+	swaggerV3YamlFiles []string,
+	options OpenAPIValidationOptions,
+) (*OpenAPIValidation, error) {
 	data, err := ioutil.ReadFile(swaggerV2YamlFile)
 	if err != nil {
 		return nil, err
@@ -78,7 +81,7 @@ func NewOpenAPIValidation(swaggerV2YamlFile string, swaggerV3YamlFiles []string,
 		v3Swagger.Servers = nil
 	}
 
-	return &OpenAPIValidation{swagger: v3Swagger, routers: routers, options: opts}, nil
+	return &OpenAPIValidation{routers: routers, options: opts}, nil
 }
 
 // Validate the request against the OpenAPI spec
