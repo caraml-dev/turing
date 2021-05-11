@@ -444,3 +444,4 @@ components:
         - completed
         - failed
         - failed_submission
+        - failed_building
