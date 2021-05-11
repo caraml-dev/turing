@@ -188,7 +188,7 @@ function install_turing() {
     cd "$script_dir/../.."
 
     kubectl apply -f ./test/e2e/turing.mockserver.yaml
-    helm install turing ./infra/chart -f ./test/e2e/turing.helm-values.yaml --wait
+    helm upgrade --install turing ./infra/chart -f ./test/e2e/turing.helm-values.yaml --wait
     kubectl apply -f ./test/e2e/turing.ingress.yaml
     kubectl wait --for=condition=Ready --timeout=1m pod/mockserver
 
