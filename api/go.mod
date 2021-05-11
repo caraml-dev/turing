@@ -11,10 +11,11 @@ require (
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v0.0.0
+	github.com/gojek/turing/engines/batch-ensembler v0.0.0-00010101000000-000000000000
 	github.com/gojek/turing/engines/experiment v0.0.0
 	github.com/gojek/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.5
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/schema v1.1.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
@@ -31,6 +32,7 @@ require (
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
+	google.golang.org/protobuf v1.26.0
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible
 	gotest.tools/v3 v3.0.3
@@ -53,6 +55,7 @@ replace (
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20200928080507-5e2221e40627
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20200928080507-5e2221e40627
 	github.com/gojek/mlp => github.com/gojek/mlp/api v0.0.0-20200916102056-00ec9dccd758
+	github.com/gojek/turing/engines/batch-ensembler => ../engines/batch-ensembler
 
 	github.com/gojek/turing/engines/experiment => ../engines/experiment
 	github.com/gojek/turing/engines/router => ../engines/router
