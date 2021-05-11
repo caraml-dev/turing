@@ -89,7 +89,8 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
-		SwaggerFile: "swagger.yaml",
+		SwaggerV2File:  "swagger.yaml",
+		SwaggerV3Files: []string{"swagger-batch.yaml"},
 	}
 	// Create test auth enforcer and Vault client
 	me := &mocks.Enforcer{}
@@ -170,9 +171,10 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(
-		middleware.NewOpenAPIV2Validation,
-		func(file string, opt middleware.OpenAPIValidationOptions) (*middleware.OpenAPIValidation, error) {
-			assert.Equal(t, testCfg.SwaggerFile, file)
+		middleware.NewOpenAPIValidation,
+		func(file string, files []string, opt middleware.OpenAPIValidationOptions) (*middleware.OpenAPIValidation, error) {
+			assert.Equal(t, testCfg.SwaggerV2File, file)
+			assert.Equal(t, testCfg.SwaggerV3Files, files)
 			return &middleware.OpenAPIValidation{}, nil
 		},
 	)
@@ -198,6 +200,7 @@ func TestNewAppContext(t *testing.T) {
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
 		RoutersService:        service.NewRoutersService(nil),
 		EnsemblersService:     service.NewEnsemblersService(nil),
+		EnsemblingJobService:  service.NewEnsemblingJobService(nil),
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,

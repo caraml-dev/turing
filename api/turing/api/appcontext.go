@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
@@ -24,6 +25,7 @@ type AppContext struct {
 	RouterVersionsService service.RouterVersionsService
 	EventService          service.EventService
 	EnsemblersService     service.EnsemblersService
+	EnsemblingJobService  service.EnsemblingJobService
 	AlertService          service.AlertService
 
 	// Default configuration for routers
@@ -85,6 +87,7 @@ func NewAppContext(
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
 		RoutersService:        service.NewRoutersService(db),
 		EnsemblersService:     service.NewEnsemblersService(db),
+		EnsemblingJobService:  service.NewEnsemblingJobService(db),
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
@@ -102,11 +105,17 @@ func NewAppContext(
 	}
 
 	// Initialize OpenAPI validation middleware
-	if _, err = os.Stat(cfg.SwaggerFile); os.IsExist(err) {
-		return nil, errors.Wrapf(err, "Swagger spec file not found")
+	if _, err = os.Stat(cfg.SwaggerV2File); os.IsExist(err) {
+		return nil, errors.Wrapf(err, "Swagger v2 spec file not found")
 	}
-	appContext.OpenAPIValidation, err = middleware.NewOpenAPIV2Validation(
-		cfg.SwaggerFile,
+	for _, swaggerFile := range cfg.SwaggerV3Files {
+		if _, err = os.Stat(swaggerFile); os.IsExist(err) {
+			return nil, errors.Wrapf(err, fmt.Sprintf("Swagger v3 spec file not found %s", swaggerFile))
+		}
+	}
+	appContext.OpenAPIValidation, err = middleware.NewOpenAPIValidation(
+		cfg.SwaggerV2File,
+		cfg.SwaggerV3Files,
 		middleware.OpenAPIValidationOptions{
 			// Authentication is ignored because it is handled by another middleware
 			IgnoreAuthentication: true,

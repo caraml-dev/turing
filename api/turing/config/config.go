@@ -63,7 +63,8 @@ type Config struct {
 	TuringUIConfig      *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerFile string
+	SwaggerV2File  string
+	SwaggerV3Files []string
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -316,7 +317,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.AppDirectory", "")
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
-	v.SetDefault("SwaggerFile", "swagger.yaml")
+	v.SetDefault("SwaggerV2File", "swagger.yaml")
+	v.SetDefault("SwaggerV3Files", []string{"swagger-batch.yaml"})
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

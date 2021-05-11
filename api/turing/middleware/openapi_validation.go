@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ import (
 // OpenAPIValidation middleware validates HTTP requests against OpenAPI spec.
 type OpenAPIValidation struct {
 	swagger *openapi3.Swagger
-	router  *openapi3filter.Router
+	routers []*openapi3filter.Router
 	options *openapi3filter.Options
 }
 
@@ -29,8 +30,8 @@ type OpenAPIValidationOptions struct {
 }
 
 // Create OpenAPIValidation object from swagger.yaml file with OpenAPI v2
-func NewOpenAPIV2Validation(swaggerYamlFile string, options OpenAPIValidationOptions) (*OpenAPIValidation, error) {
-	data, err := ioutil.ReadFile(swaggerYamlFile)
+func NewOpenAPIValidation(swaggerV2YamlFile string, swaggerV3YamlFiles []string, options OpenAPIValidationOptions) (*OpenAPIValidation, error) {
+	data, err := ioutil.ReadFile(swaggerV2YamlFile)
 	if err != nil {
 		return nil, err
 	}
@@ -46,9 +47,25 @@ func NewOpenAPIV2Validation(swaggerYamlFile string, options OpenAPIValidationOpt
 	if err != nil {
 		return nil, err
 	}
+	var routers []*openapi3filter.Router
+	routers = append(
+		routers,
+		openapi3filter.NewRouter().WithSwagger(v3Swagger),
+	)
 
-	router := openapi3filter.NewRouter().WithSwagger(v3Swagger)
 	opts := &openapi3filter.Options{}
+
+	for _, swaggerFile := range swaggerV3YamlFiles {
+		swaggerLoader := &openapi3.SwaggerLoader{
+			IsExternalRefsAllowed: true,
+		}
+		swagger, err := swaggerLoader.LoadSwaggerFromFile(swaggerFile)
+		if err != nil {
+			return nil, err
+		}
+		router := openapi3filter.NewRouter().WithSwagger(swagger)
+		routers = append(routers, router)
+	}
 
 	if options.IgnoreAuthentication {
 		// when IgnoreAuthentication is true, the authentication function always succeed i.e returns nil error.
@@ -61,19 +78,27 @@ func NewOpenAPIV2Validation(swaggerYamlFile string, options OpenAPIValidationOpt
 		v3Swagger.Servers = nil
 	}
 
-	return &OpenAPIValidation{swagger: v3Swagger, router: router, options: opts}, nil
+	return &OpenAPIValidation{swagger: v3Swagger, routers: routers, options: opts}, nil
 }
 
 // Validate the request against the OpenAPI spec
 func (openapi *OpenAPIValidation) Validate(r *http.Request) error {
-	route, pathParams, _ := openapi.router.FindRoute(r.Method, r.URL)
-	input := &openapi3filter.RequestValidationInput{
-		Request:    r,
-		PathParams: pathParams,
-		Route:      route,
-		Options:    openapi.options,
+	var err error
+	for _, router := range openapi.routers {
+		route, pathParams, _ := router.FindRoute(r.Method, r.URL)
+		input := &openapi3filter.RequestValidationInput{
+			Request:    r,
+			PathParams: pathParams,
+			Route:      route,
+			Options:    openapi.options,
+		}
+		err := openapi3filter.ValidateRequest(context.Background(), input)
+		if err != errors.New("invalid route") || err == nil {
+			// Make sure that it is the correct error message, ignore invalid route error unless that is the only error
+			return err
+		}
 	}
-	return openapi3filter.ValidateRequest(context.Background(), input)
+	return err
 }
 
 // Middleware returns a middleware function

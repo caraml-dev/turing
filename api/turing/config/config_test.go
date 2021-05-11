@@ -3,12 +3,13 @@
 package config
 
 import (
-	"github.com/mitchellh/copystructure"
-	"github.com/mitchellh/mapstructure"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/mitchellh/copystructure"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
@@ -155,7 +156,8 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerV2File:  "swagger.yaml",
+				SwaggerV3Files: []string{"swagger-batch.yaml"},
 			},
 		},
 		"single file": {
@@ -220,7 +222,8 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerV2File:  "swagger.yaml",
+				SwaggerV3Files: []string{"swagger-batch.yaml"},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -300,7 +303,8 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerV2File:  "swagger.yaml",
+				SwaggerV3Files: []string{"swagger-batch.yaml"},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -398,7 +402,8 @@ func TestLoad(t *testing.T) {
 					AppDirectory: "appdir-env",
 					Homepage:     "/turing-env",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerV2File:  "swagger.yaml",
+				SwaggerV3Files: []string{"swagger-batch.yaml"},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
