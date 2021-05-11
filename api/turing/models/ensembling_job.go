@@ -13,7 +13,6 @@ import (
 type EnsemblingJob struct {
 	Model
 	Name            string           `json:"name"`
-	VersionID       ID               `json:"version_id"`
 	EnsemblerID     ID               `json:"ensembler_id"`
 	ProjectID       ID               `json:"project_id"`
 	EnvironmentName string           `json:"environment_name"`
@@ -55,7 +54,6 @@ func (r *EnsemblerConfig) Scan(value interface{}) error {
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
 	ServiceAccountName string                       `json:"service_account_name"`
-	ImageRef           string                       `json:"image_ref"`
 	Resources          *BatchEnsemblingJobResources `json:"resources"`
 }
 

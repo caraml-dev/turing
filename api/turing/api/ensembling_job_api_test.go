@@ -30,16 +30,14 @@ var (
 	annotationValueFour string = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
 )
 
-func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models.ID) *models.EnsemblingJob {
-	return &models.EnsemblingJob{
+func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models.ID, genExpected bool) *models.EnsemblingJob {
+	value := &models.EnsemblingJob{
 		Name:            fmt.Sprintf("test-ensembler-%d", i),
-		VersionID:       models.ID(i),
 		ProjectID:       models.ID(projectID),
 		EnsemblerID:     ensemblerID,
 		EnvironmentName: "gods-dev",
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			ImageRef:           "gcr.io/hello/world:123",
 			Resources: &models.BatchEnsemblingJobResources{
 				Requests: &models.Resource{
 					CPU:    "2",
@@ -118,7 +116,6 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 						},
 					},
 					Ensembler: &batchensembler.Ensembler{
-						Uri: "gs://bucket-name/my-ensembler/artifacts/ensembler",
 						Result: &batchensembler.Ensembler_Result{
 							ColumnName: "prediction_score",
 							Type:       batchensembler.Ensembler_FLOAT,
@@ -147,11 +144,25 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 			},
 		},
 	}
+	if genExpected {
+		value.EnsemblerConfig.EnsemblerConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+	}
+	return value
+}
+
+func createPyFuncEnsembler(id int) models.EnsemblerLike {
+	return &models.PyFuncEnsembler{
+		GenericEnsembler: &models.GenericEnsembler{
+			Model:     models.Model{ID: 1},
+			Type:      models.EnsemblerTypePyFunc,
+			ProjectID: 1,
+		},
+		ArtifactURI: "gs://d-gods-mlp/ensembler",
+	}
 }
 
 func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
-	var tests = []struct {
-		name                 string
+	var tests = map[string]struct {
 		expected             *Response
 		ensemblersService    func() service.EnsemblersService
 		ensemblingJobService func() service.EnsemblingJobService
@@ -159,23 +170,22 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		vars                 RequestVars
 		body                 interface{}
 	}{
-		{
-			name:     "nominal flow",
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1))),
+		"nominal flow": {
+			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(nil, nil)
+				).Return(createPyFuncEnsembler(1), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -194,10 +204,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0)),
+			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), false),
 		},
-		{
-			name:     "non existent ensembler",
+		"non existent ensembler": {
 			expected: NotFound("ensembler not found", errors.New("no exist").Error()),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
@@ -212,7 +221,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -231,10 +240,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0)),
+			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), false),
 		},
-		{
-			name:     "invalid mlp environment",
+		"invalid mlp environment": {
 			expected: BadRequest("invalid environment", fmt.Sprintf("environment %s does not exist", "gods-dev")),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
@@ -242,14 +250,14 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(nil, nil)
+				).Return(createPyFuncEnsembler(1), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -268,10 +276,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0)),
+			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), false),
 		},
-		{
-			name:     "non existent project",
+		"non existent project": {
 			expected: NotFound("project not found", errors.New("hello").Error()),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
@@ -286,7 +293,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -305,11 +312,11 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0)),
+			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), false),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			ensemblersService := tt.ensemblersService()
 			ensemblingJobService := tt.ensemblingJobService()
 			mlpService := tt.mlpService()

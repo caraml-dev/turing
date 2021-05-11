@@ -16,13 +16,11 @@ import (
 func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models.ID) *models.EnsemblingJob {
 	return &models.EnsemblingJob{
 		Name:            fmt.Sprintf("test-ensembler-%d", i),
-		VersionID:       models.ID(i),
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
 		EnvironmentName: "gods-dev",
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			ImageRef:           "gcr.io/hello/world:123",
 			Resources: &models.BatchEnsemblingJobResources{
 				Requests: &models.Resource{
 					CPU:    "2",
@@ -152,7 +150,6 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 
 			assert.NotEqual(t, found.ID, models.ID(0))
 			assert.Equal(t, found.Name, ensemblingJob.Name)
-			assert.Equal(t, found.VersionID, ensemblingJob.VersionID)
 			assert.Equal(t, found.EnsemblerID, ensemblingJob.EnsemblerID)
 			assert.Equal(t, found.ProjectID, ensemblingJob.ProjectID)
 			assert.Equal(t, found.EnvironmentName, ensemblingJob.EnvironmentName)

@@ -132,8 +132,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: "#/components/schemas/EnsemblingJob"
+              $ref: "#/components/schemas/EnsemblingJob"
       responses:
         "202":
           description: Accepted.
@@ -199,8 +198,6 @@ components:
           maxLength: 50
         project_id:
           $ref: "#/components/schemas/Id"
-        version_id:
-          $ref: "#/components/schemas/Id"
         ensembler_id:
           $ref: "#/components/schemas/Id"
         environment_name:
@@ -261,7 +258,6 @@ components:
         sink:
           $ref: "#/components/schemas/EnsemblingJobSink"
 
-    # roman
     EnsemblingJobSource:
       type: "object"
       properties:
@@ -292,9 +288,12 @@ components:
         - "BQ"
 
     BigQueryDataset:
-      properties:
-        bq_config:
-          $ref: "#/components/schemas/BigQueryDatasetConfig"
+      allOf:
+        - $ref: "#/components/schemas/Dataset"
+        - type: object
+          properties:
+            bq_config:
+              $ref: "#/components/schemas/BigQueryDatasetConfig"
 
     BigQueryDatasetConfig:
       properties:

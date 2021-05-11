@@ -1,8 +1,10 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
@@ -27,15 +29,12 @@ func (c EnsemblingJobController) Create(
 		return errResp
 	}
 
-	request, ok := body.(*models.EnsemblingJob)
-	if !ok {
-		return BadRequest("Unable to parse body as ensembling job", "could not unmarshal request body")
-	}
-
+	// Check is done in api.handlers
+	request, _ := body.(*models.EnsemblingJob)
 	request.ProjectID = models.ID(project.Id)
 
 	// Check if ensembler exists
-	_, err := c.EnsemblersService.FindByID(
+	ensembler, err := c.EnsemblersService.FindByID(
 		request.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
 			ProjectID: &request.ProjectID,
@@ -44,6 +43,15 @@ func (c EnsemblingJobController) Create(
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
 	}
+
+	// Ensembler URI will be a local directory
+	// Dockerfile will build copy the artifact into the local directory.
+	// See engines/batch-ensembler/app.Dockerfile
+	artifactFolderName, err := getEnsemblerFolderName(ensembler)
+	if err != nil {
+		return BadRequest("ensembler not supported", err.Error())
+	}
+	request.EnsemblerConfig.EnsemblerConfig.Spec.Ensembler.Uri = fmt.Sprintf("/home/spark/%s", artifactFolderName)
 
 	_, err = c.MLPService.GetEnvironment(request.EnvironmentName)
 	if err != nil {
@@ -60,6 +68,17 @@ func (c EnsemblingJobController) Create(
 	}
 
 	return Accepted(request)
+}
+
+func getEnsemblerFolderName(ensembler models.EnsemblerLike) (string, error) {
+	switch ensembler.(type) {
+	case *models.PyFuncEnsembler:
+		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
+		splitURI := strings.Split(pyFuncEnsembler.ArtifactURI, "/")
+		return splitURI[len(splitURI)-1], nil
+	default:
+		return "", errors.New("only pyfunc ensemblers are supported for now")
+	}
 }
 
 // Routes returns all the HTTP routes given by the EnsemblingJobController.

@@ -22,7 +22,6 @@ import (
 func generateEnsemblingJobFixtureJSON() string {
 	return `{
 		"name":"test-ensembler-1",
-		"version_id":1,
 		"ensembler_id":1,
 		"environment_name":"gods-dev",
 		"infra_config":{
@@ -73,7 +72,6 @@ func generateEnsemblingJobFixtureJSON() string {
 					}
 				},
 				"ensembler":{
-					"uri":"gs://bucket-name/my-ensembler/artifacts/ensembler",
 					"result":{
 						"type":"FLOAT",
 						"itemType":"FLOAT",
@@ -131,8 +129,7 @@ func generateEnsemblingJobFixtureJSON() string {
 }
 
 func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
-	var tests = []struct {
-		name                 string
+	var tests = map[string]struct {
 		method               string
 		path                 string
 		expected             *Response
@@ -142,18 +139,17 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		vars                 RequestVars
 		body                 string
 	}{
-		{
-			name:     "nominal flow",
+		"nominal flow": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1))),
+			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(nil, nil)
+				).Return(createPyFuncEnsembler(1), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -181,8 +177,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			body: generateEnsemblingJobFixtureJSON(),
 		},
-		{
-			name:     "non existent ensembler",
+		"non existent ensembler": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
 			expected: NotFound("ensembler not found", errors.New("no exist").Error()),
@@ -199,7 +194,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -220,8 +215,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			body: generateEnsemblingJobFixtureJSON(),
 		},
-		{
-			name:     "invalid mlp environment",
+		"invalid mlp environment": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
 			expected: BadRequest("invalid environment", fmt.Sprintf("environment %s does not exist", "gods-dev")),
@@ -231,14 +225,14 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(nil, nil)
+				).Return(createPyFuncEnsembler(1), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -259,8 +253,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			body: generateEnsemblingJobFixtureJSON(),
 		},
-		{
-			name:     "non existent project",
+		"non existent project": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
 			expected: NotFound("project not found", errors.New("hello").Error()),
@@ -270,14 +263,14 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(nil, nil)
+				).Return(createPyFuncEnsembler(1), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
 					"Save",
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1)),
+					mock.Anything,
 				).Return(nil)
 				return ensemblingJobService
 			},
@@ -299,8 +292,8 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			body: generateEnsemblingJobFixtureJSON(),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			ensemblersService := tt.ensemblersService()
 			ensemblingJobService := tt.ensemblingJobService()
 			mlpService := tt.mlpService()
