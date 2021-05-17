@@ -522,6 +522,9 @@ func TestConfigValidate(t *testing.T) {
 			MaxCPU:          Quantity(resource.MustParse("2")),
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
+		EnsemblingJobConfig: &EnsemblingJobConfig{
+			DefaultEnvironment: "dev",
+		},
 		RouterDefaults: &RouterDefaults{
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
@@ -597,6 +600,13 @@ func TestConfigValidate(t *testing.T) {
 		"missing Merlin URL": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.MLPConfig.MerlinURL = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing ensembling job default environment": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,

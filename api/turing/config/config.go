@@ -52,9 +52,10 @@ type Config struct {
 	Port                int `validate:"required"`
 	AllowedOrigins      []string
 	AuthConfig          *AuthorizationConfig
-	DbConfig            *DatabaseConfig   `validate:"required"`
-	DeployConfig        *DeploymentConfig `validate:"required"`
-	RouterDefaults      *RouterDefaults   `validate:"required"`
+	DbConfig            *DatabaseConfig      `validate:"required"`
+	DeployConfig        *DeploymentConfig    `validate:"required"`
+	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
+	RouterDefaults      *RouterDefaults      `validate:"required"`
 	Sentry              sentry.Config
 	VaultConfig         *VaultConfig `validate:"required"`
 	TuringEncryptionKey string       `validate:"required"`
@@ -97,6 +98,11 @@ type DeploymentConfig struct {
 	DeletionTimeout time.Duration `validate:"required"`
 	MaxCPU          Quantity      `validate:"required"`
 	MaxMemory       Quantity      `validate:"required"`
+}
+
+// EnsemblingJobConfig captures the config related to the ensembling batch jobs.
+type EnsemblingJobConfig struct {
+	DefaultEnvironment string `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files

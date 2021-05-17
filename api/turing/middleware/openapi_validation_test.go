@@ -159,7 +159,7 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 }
 
-func TestNewOpenAPIV2Validation(t *testing.T) {
+func TestNewOpenAPIValidation(t *testing.T) {
 	tests := []struct {
 		name              string
 		swaggerV2YamlFile string

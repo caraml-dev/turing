@@ -87,7 +87,7 @@ func NewAppContext(
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
 		RoutersService:        service.NewRoutersService(db),
 		EnsemblersService:     service.NewEnsemblersService(db),
-		EnsemblingJobService:  service.NewEnsemblingJobService(db),
+		EnsemblingJobService:  service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment),
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -50,11 +50,9 @@ func NewOpenAPIValidation(
 	if err != nil {
 		return nil, err
 	}
-	var routers []*openapi3filter.Router
-	routers = append(
-		routers,
+	routers := []*openapi3filter.Router{
 		openapi3filter.NewRouter().WithSwagger(v3Swagger),
-	)
+	}
 
 	opts := &openapi3filter.Options{}
 
@@ -86,22 +84,22 @@ func NewOpenAPIValidation(
 
 // Validate the request against the OpenAPI spec
 func (openapi *OpenAPIValidation) Validate(r *http.Request) error {
-	var err error
-	for _, router := range openapi.routers {
+	for idx, router := range openapi.routers {
 		route, pathParams, _ := router.FindRoute(r.Method, r.URL)
+		if route == nil && idx == len(openapi.routers)-1 {
+			// endpoint is not described
+			return fmt.Errorf("Route `%s %s` is not described in openapi spec", r.Method, r.URL)
+		}
 		input := &openapi3filter.RequestValidationInput{
 			Request:    r,
 			PathParams: pathParams,
 			Route:      route,
 			Options:    openapi.options,
 		}
-		err := openapi3filter.ValidateRequest(context.Background(), input)
-		if err != errors.New("invalid route") || err == nil {
-			// Make sure that it is the correct error message, ignore invalid route error unless that is the only error
-			return err
-		}
+		return openapi3filter.ValidateRequest(context.Background(), input)
 	}
-	return err
+	// Will not reach this line.
+	return nil
 }
 
 // Middleware returns a middleware function

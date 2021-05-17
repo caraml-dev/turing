@@ -37,22 +37,92 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	return r0, r1
 }
 
-// FindPendingJobs provides a mock function with given fields: limit
-func (_m *EnsemblingJobService) FindPendingJobs(limit int) ([]*models.EnsemblingJob, error) {
-	ret := _m.Called(limit)
+// GenerateDefaultJobName provides a mock function with given fields: ensemblerName
+func (_m *EnsemblingJobService) GenerateDefaultJobName(ensemblerName string) string {
+	ret := _m.Called(ensemblerName)
 
-	var r0 []*models.EnsemblingJob
-	if rf, ok := ret.Get(0).(func(int) []*models.EnsemblingJob); ok {
-		r0 = rf(limit)
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(ensemblerName)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// GetArtifactURI provides a mock function with given fields: ensembler
+func (_m *EnsemblingJobService) GetArtifactURI(ensembler models.EnsemblerLike) (string, error) {
+	ret := _m.Called(ensembler)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(models.EnsemblerLike) string); ok {
+		r0 = rf(ensembler)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(models.EnsemblerLike) error); ok {
+		r1 = rf(ensembler)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDefaultEnvironment provides a mock function with given fields:
+func (_m *EnsemblingJobService) GetDefaultEnvironment() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// GetEnsemblerDirectory provides a mock function with given fields: ensembler
+func (_m *EnsemblingJobService) GetEnsemblerDirectory(ensembler models.EnsemblerLike) (string, error) {
+	ret := _m.Called(ensembler)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(models.EnsemblerLike) string); ok {
+		r0 = rf(ensembler)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(models.EnsemblerLike) error); ok {
+		r1 = rf(ensembler)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// List provides a mock function with given fields: options
+func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (*service.PaginatedResults, error) {
+	ret := _m.Called(options)
+
+	var r0 *service.PaginatedResults
+	if rf, ok := ret.Get(0).(func(service.EnsemblingJobListOptions) *service.PaginatedResults); ok {
+		r0 = rf(options)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.EnsemblingJob)
+			r0 = ret.Get(0).(*service.PaginatedResults)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(limit)
+	if rf, ok := ret.Get(1).(func(service.EnsemblingJobListOptions) error); ok {
+		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -67,20 +137,6 @@ func (_m *EnsemblingJobService) Save(ensembler *models.EnsemblingJob) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
 		r0 = rf(ensembler)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// UpdateJobStatus provides a mock function with given fields: id, status, errString
-func (_m *EnsemblingJobService) UpdateJobStatus(id models.ID, status models.State, errString string) error {
-	ret := _m.Called(id, status, errString)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(models.ID, models.State, string) error); ok {
-		r0 = rf(id, status, errString)
 	} else {
 		r0 = ret.Error(0)
 	}

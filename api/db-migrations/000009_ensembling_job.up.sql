@@ -12,7 +12,7 @@ CREATE TYPE ensembling_job_status as ENUM (
 CREATE TABLE IF NOT EXISTS ensembling_jobs
 (
     id               serial PRIMARY KEY,
-    name             varchar(50) NOT NULL,
+    name             text NOT NULL,
     ensembler_id     integer NOT NULL,
     project_id       integer NOT NULL,
     environment_name varchar(50) NOT NULL,

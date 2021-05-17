@@ -1,6 +1,10 @@
 package service
 
-import "github.com/jinzhu/gorm"
+import (
+	"math"
+
+	"github.com/jinzhu/gorm"
+)
 
 type PaginationOptions struct {
 	Page     *int `schema:"page" validate:"omitempty,min=1"`
@@ -27,5 +31,24 @@ func PaginationScope(options PaginationOptions) func(db *gorm.DB) *gorm.DB {
 			}
 		}
 		return db
+	}
+}
+
+// CreatePaginatedResults is a helper function that helps to create paginated results
+func CreatePaginatedResults(options PaginationOptions, count int, results interface{}) *PaginatedResults {
+	page := 1
+	totalPages := 1
+	if options.Page != nil && options.PageSize != nil {
+		page = int(math.Max(1, float64(*options.Page)))
+		totalPages = int(math.Ceil(float64(count) / float64(*options.PageSize)))
+	}
+
+	return &PaginatedResults{
+		Results: results,
+		Paging: Paging{
+			Total: count,
+			Page:  page,
+			Pages: totalPages,
+		},
 	}
 }

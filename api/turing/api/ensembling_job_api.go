@@ -1,10 +1,7 @@
 package api
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
@@ -44,22 +41,26 @@ func (c EnsemblingJobController) Create(
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	// Ensembler URI will be a local directory
-	// Dockerfile will build copy the artifact into the local directory.
-	// See engines/batch-ensembler/app.Dockerfile
-	artifactFolderName, err := getEnsemblerFolderName(ensembler)
+	// Populate name if the user does not define a name for the job
+	if request.Name == "" {
+		request.Name = c.EnsemblingJobService.GenerateDefaultJobName(
+			ensembler.GetName(),
+		)
+	}
+
+	// Populate default environment
+	request.EnvironmentName = c.EnsemblingJobService.GetDefaultEnvironment()
+
+	// Populate ensembler directory
+	ensemblerDirectory, err := c.EnsemblingJobService.GetEnsemblerDirectory(ensembler)
 	if err != nil {
 		return BadRequest("ensembler not supported", err.Error())
 	}
-	request.EnsemblerConfig.EnsemblerConfig.Spec.Ensembler.Uri = fmt.Sprintf("/home/spark/%s", artifactFolderName)
+	request.EnsemblerConfig.EnsemblerConfig.Spec.Ensembler.Uri = ensemblerDirectory
 
-	_, err = c.MLPService.GetEnvironment(request.EnvironmentName)
-	if err != nil {
-		return BadRequest(
-			"invalid environment",
-			fmt.Sprintf("environment %s does not exist", request.EnvironmentName),
-		)
-	}
+	// Populate ensembler artifact URI, error can be ignored since the type check is done prior
+	artifactURI, _ := c.EnsemblingJobService.GetArtifactURI(ensembler)
+	request.InfraConfig.ArtifactURI = artifactURI
 
 	// Save ensembling job
 	err = c.EnsemblingJobService.Save(request)
@@ -68,17 +69,6 @@ func (c EnsemblingJobController) Create(
 	}
 
 	return Accepted(request)
-}
-
-func getEnsemblerFolderName(ensembler models.EnsemblerLike) (string, error) {
-	switch ensembler.(type) {
-	case *models.PyFuncEnsembler:
-		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
-		splitURI := strings.Split(pyFuncEnsembler.ArtifactURI, "/")
-		return splitURI[len(splitURI)-1], nil
-	default:
-		return "", errors.New("only pyfunc ensemblers are supported for now")
-	}
 }
 
 // Routes returns all the HTTP routes given by the EnsemblingJobController.

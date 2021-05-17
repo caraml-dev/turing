@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
@@ -18,7 +19,7 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 		Name:            fmt.Sprintf("test-ensembler-%d", i),
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
-		EnvironmentName: "gods-dev",
+		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
 			Resources: &models.BatchEnsemblingJobResources{
@@ -131,9 +132,9 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 }
 
 func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
-	t.Run("insertion with no errors", func(t *testing.T) {
+	t.Run("success | insertion with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev")
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
@@ -153,7 +154,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, found.EnsemblerID, ensemblingJob.EnsemblerID)
 			assert.Equal(t, found.ProjectID, ensemblingJob.ProjectID)
 			assert.Equal(t, found.EnvironmentName, ensemblingJob.EnvironmentName)
-			assert.Equal(t, models.State("pending"), ensemblingJob.Status)
+			assert.Equal(t, models.Status("pending"), ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.EnsemblerConfig, ensemblingJob.EnsemblerConfig)
 		})
@@ -161,9 +162,9 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 }
 
 func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
-	t.Run("insertion with no errors", func(t *testing.T) {
+	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev")
 
 			// Save job
 			projectID := models.ID(1)
@@ -174,19 +175,27 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
 
 			// Query pending ensembling jobs
-			ensemblingJobs, err := ensemblingJobService.FindPendingJobs(10)
+			pageSize := 10
+			fetched, err := ensemblingJobService.List(
+				EnsemblingJobListOptions{
+					PaginationOptions: PaginationOptions{
+						Page:     testutils.NullableInt(1),
+						PageSize: &pageSize,
+					},
+					Status: models.JobPending,
+				},
+			)
 			assert.NoError(t, err)
-			assert.Equal(t, 1, len(ensemblingJobs))
+			assert.Equal(t, 1, fetched.Paging.Total)
+			ensemblingJobs := fetched.Results.([]*models.EnsemblingJob)
 
 			queriedEnsemblingJob := ensemblingJobs[0]
-			assert.Equal(t, models.State("pending"), queriedEnsemblingJob.Status)
+			assert.Equal(t, models.Status("pending"), queriedEnsemblingJob.Status)
 
 			// Update pending job
-			err = ensemblingJobService.UpdateJobStatus(
-				queriedEnsemblingJob.ID,
-				models.JobFailedSubmission,
-				"error",
-			)
+			queriedEnsemblingJob.Status = models.JobFailedSubmission
+			queriedEnsemblingJob.Error = "error"
+			err = ensemblingJobService.Save(queriedEnsemblingJob)
 			assert.NoError(t, err)
 
 			// Query back
@@ -195,7 +204,50 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NoError(t, err)
-			assert.Equal(t, models.State("failed_submission"), found.Status)
+			assert.Equal(t, models.Status("failed_submission"), found.Status)
 		})
 	})
+}
+
+func TestGetEnsemblerDirectory(t *testing.T) {
+	var tests = map[string]struct {
+		createEnsemblerLike func() models.EnsemblerLike
+		expected            string
+		success             bool
+	}{
+		"success | pyFuncEnsembler": {
+			createEnsemblerLike: func() models.EnsemblerLike {
+				return &models.PyFuncEnsembler{
+					GenericEnsembler: &models.GenericEnsembler{
+						Model:     models.Model{ID: 1},
+						Type:      models.EnsemblerTypePyFunc,
+						ProjectID: 1,
+					},
+					ArtifactURI: "gs://bucket/ensembler",
+				}
+			},
+			expected: "/home/spark/ensembler",
+			success:  true,
+		},
+		"failure | not pyFuncEnsembler": {
+			createEnsemblerLike: func() models.EnsemblerLike {
+				return &models.GenericEnsembler{
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				}
+			},
+			expected: "",
+			success:  false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			ensembler := tt.createEnsemblerLike()
+			svc := NewEnsemblingJobService(nil, "")
+			folderName, err := svc.GetEnsemblerDirectory(ensembler)
+			assert.Equal(t, tt.expected, folderName)
+			assert.Equal(t, tt.success, err == nil)
+		})
+	}
 }

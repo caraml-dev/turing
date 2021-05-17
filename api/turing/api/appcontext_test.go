@@ -54,6 +54,9 @@ func TestNewAppContext(t *testing.T) {
 			MaxCPU:          config.Quantity(resource.MustParse("200m")),
 			MaxMemory:       config.Quantity(resource.MustParse("100Mi")),
 		},
+		EnsemblingJobConfig: &config.EnsemblingJobConfig{
+			DefaultEnvironment: "dev",
+		},
 		RouterDefaults: &config.RouterDefaults{
 			Image:                   "asia.gcr.io/gcp-project-id/turing-router:1.0.0",
 			FiberDebugLogEnabled:    true,
@@ -200,7 +203,7 @@ func TestNewAppContext(t *testing.T) {
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
 		RoutersService:        service.NewRoutersService(nil),
 		EnsemblersService:     service.NewEnsemblersService(nil),
-		EnsemblingJobService:  service.NewEnsemblingJobService(nil),
+		EnsemblingJobService:  service.NewEnsemblingJobService(nil, "dev"),
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,

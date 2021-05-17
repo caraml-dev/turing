@@ -5,12 +5,10 @@ package api
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -23,7 +21,6 @@ func generateEnsemblingJobFixtureJSON() string {
 	return `{
 		"name":"test-ensembler-1",
 		"ensembler_id":1,
-		"environment_name":"gods-dev",
 		"infra_config":{
 			"service_account_name":"test-service-account-1",
 			"image_ref":"gcr.io/hello/world:123",
@@ -139,10 +136,10 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		vars                 RequestVars
 		body                 string
 	}{
-		"nominal flow": {
+		"success | nominal flow": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), true)),
+			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
@@ -158,14 +155,30 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"Save",
 					mock.Anything,
 				).Return(nil)
+
+				ensemblingJobService.On(
+					"GetDefaultEnvironment",
+					mock.Anything,
+				).Return("dev")
+
+				ensemblingJobService.On(
+					"GenerateDefaultJobName",
+					mock.Anything,
+				).Return("test-ensembler-1")
+
+				ensemblingJobService.On(
+					"GetEnsemblerDirectory",
+					mock.Anything,
+				).Return("/home/spark/ensembler", nil)
+
+				ensemblingJobService.On(
+					"GetArtifactURI",
+					mock.Anything,
+				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
 				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					"gods-dev",
-				).Return(&merlin.Environment{}, nil)
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
@@ -177,7 +190,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			body: generateEnsemblingJobFixtureJSON(),
 		},
-		"non existent ensembler": {
+		"failure | non existent ensembler": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
 			expected: NotFound("ensembler not found", errors.New("no exist").Error()),
@@ -196,52 +209,30 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"Save",
 					mock.Anything,
 				).Return(nil)
-				return ensemblingJobService
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					"gods-dev",
-				).Return(&merlin.Environment{}, nil)
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
-			vars: RequestVars{
-				"project_id": {"1"},
-			},
-			body: generateEnsemblingJobFixtureJSON(),
-		},
-		"invalid mlp environment": {
-			path:     "/projects/1/jobs",
-			method:   http.MethodPost,
-			expected: BadRequest("invalid environment", fmt.Sprintf("environment %s does not exist", "gods-dev")),
-			ensemblersService: func() service.EnsemblersService {
-				ensemblersSvc := &mocks.EnsemblersService{}
-				ensemblersSvc.On(
-					"FindByID",
-					mock.Anything,
-					mock.Anything,
-				).Return(createPyFuncEnsembler(1), nil)
-				return ensemblersSvc
-			},
-			ensemblingJobService: func() service.EnsemblingJobService {
-				ensemblingJobService := &mocks.EnsemblingJobService{}
+
 				ensemblingJobService.On(
-					"Save",
+					"GetDefaultEnvironment",
 					mock.Anything,
-				).Return(nil)
+				).Return("dev")
+
+				ensemblingJobService.On(
+					"GenerateDefaultJobName",
+					mock.Anything,
+				).Return("test-ensembler-1")
+
+				ensemblingJobService.On(
+					"GetEnsemblerDirectory",
+					mock.Anything,
+				).Return("/home/spark/ensembler", nil)
+
+				ensemblingJobService.On(
+					"GetArtifactURI",
+					mock.Anything,
+				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
 				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					"gods-dev",
-				).Return(&merlin.Environment{}, errors.New("error mlp"))
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
@@ -253,7 +244,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			body: generateEnsemblingJobFixtureJSON(),
 		},
-		"non existent project": {
+		"failure | non existent project": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
 			expected: NotFound("project not found", errors.New("hello").Error()),
@@ -272,14 +263,30 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"Save",
 					mock.Anything,
 				).Return(nil)
+
+				ensemblingJobService.On(
+					"GetDefaultEnvironment",
+					mock.Anything,
+				).Return("dev")
+
+				ensemblingJobService.On(
+					"GenerateDefaultJobName",
+					mock.Anything,
+				).Return("test-ensembler-1")
+
+				ensemblingJobService.On(
+					"GetEnsemblerDirectory",
+					mock.Anything,
+				).Return("/home/spark/ensembler", nil)
+
+				ensemblingJobService.On(
+					"GetArtifactURI",
+					mock.Anything,
+				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
 				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					"gods-dev",
-				).Return(&merlin.Environment{}, nil)
 				mlpService.On(
 					"GetProject",
 					models.ID(1),

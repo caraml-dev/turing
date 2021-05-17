@@ -18,7 +18,7 @@ type EnsemblingJob struct {
 	EnvironmentName string           `json:"environment_name"`
 	InfraConfig     *InfraConfig     `json:"infra_config"`
 	EnsemblerConfig *EnsemblerConfig `json:"ensembler_config"`
-	Status          State            `json:"status" gorm:"default:pending"`
+	Status          Status           `json:"status" gorm:"default:pending"`
 	Error           string           `json:"error"`
 }
 
@@ -53,6 +53,7 @@ func (r *EnsemblerConfig) Scan(value interface{}) error {
 
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
+	ArtifactURI        string                       `json:"artiface_uri"`
 	ServiceAccountName string                       `json:"service_account_name"`
 	Resources          *BatchEnsemblingJobResources `json:"resources"`
 }
@@ -83,8 +84,8 @@ type Resource struct {
 	Memory string `json:"memory"`
 }
 
-// State is the state of the finite machine ensembling job.
-// Possible states:
+// Status is the state of the finite machine ensembling job.
+// Possible statuses:
 // JobPending --▶ JobFailedSubmission
 //     |
 //     |--▶ JobFailedBuildImage
@@ -98,34 +99,34 @@ type Resource struct {
 //     |
 //     ▼
 // JobCompleted
-type State string
+type Status string
 
 const (
 	// JobPending is when the job has just been introduced.
-	JobPending State = "pending"
+	JobPending Status = "pending"
 	// JobRunning is when the job has been picked up and running.
-	JobRunning State = "running"
+	JobRunning Status = "running"
 	// JobTerminating is when the job has begun stopping.
-	JobTerminating State = "terminating"
+	JobTerminating Status = "terminating"
 	// JobTerminated is when the job has stopped. This is a terminal state.
-	JobTerminated State = "terminated"
+	JobTerminated Status = "terminated"
 	// JobCompleted is when the job has successfully completed. This is a terminal state.
-	JobCompleted State = "completed"
+	JobCompleted Status = "completed"
 	// JobFailed is when the job has failed. This is a terminal state.
-	JobFailed State = "failed"
+	JobFailed Status = "failed"
 	// JobFailedSubmission is when the job has failed to submit. This is a terminal state.
-	JobFailedSubmission State = "failed_submission"
+	JobFailedSubmission Status = "failed_submission"
 	// JobFailedBuildImage is when the job has failed to build an ensembling image.
-	JobFailedBuildImage State = "failed_building"
+	JobFailedBuildImage Status = "failed_building"
 )
 
 // IsTerminal checks if the job has reached a final state.
-func (s State) IsTerminal() bool {
+func (s Status) IsTerminal() bool {
 	return s == JobTerminated || s == JobFailedSubmission ||
 		s == JobFailed || s == JobCompleted || s == JobFailedBuildImage
 }
 
 // IsSuccessful checks if the ensembling job has completed.
-func (s State) IsSuccessful() bool {
+func (s Status) IsSuccessful() bool {
 	return s == JobCompleted
 }
