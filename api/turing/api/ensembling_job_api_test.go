@@ -157,6 +157,7 @@ func generateEnsemblingJobFixture(
 			value.Name = "test-ensembler-1"
 		}
 		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
+		value.InfraConfig.EnsemblerName = "ensembler"
 	}
 	return value
 }
@@ -164,6 +165,7 @@ func generateEnsemblingJobFixture(
 func createPyFuncEnsembler(id int) models.EnsemblerLike {
 	return &models.PyFuncEnsembler{
 		GenericEnsembler: &models.GenericEnsembler{
+			Name:      "ensembler",
 			Model:     models.Model{ID: 1},
 			Type:      models.EnsemblerTypePyFunc,
 			ProjectID: 1,

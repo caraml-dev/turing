@@ -54,6 +54,7 @@ func (r *EnsemblerConfig) Scan(value interface{}) error {
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
 	ArtifactURI        string                       `json:"artiface_uri"`
+	EnsemblerName      string                       `json:"ensembler_name"`
 	ServiceAccountName string                       `json:"service_account_name"`
 	Resources          *BatchEnsemblingJobResources `json:"resources"`
 }

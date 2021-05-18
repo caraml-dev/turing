@@ -410,9 +410,11 @@ components:
     EnsemblerInfraConfig:
       type: "object"
       properties:
-        service_account_name:
+        artifact_uri:
           type: string
-        image_ref:
+        ensembler_name:
+          type: string
+        service_account_name:
           type: string
         resources:
           $ref: "#/components/schemas/EnsemblingResources"

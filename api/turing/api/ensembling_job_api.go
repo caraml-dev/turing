@@ -61,6 +61,7 @@ func (c EnsemblingJobController) Create(
 	// Populate ensembler artifact URI, error can be ignored since the type check is done prior
 	artifactURI, _ := c.EnsemblingJobService.GetArtifactURI(ensembler)
 	request.InfraConfig.ArtifactURI = artifactURI
+	request.InfraConfig.EnsemblerName = ensembler.GetName()
 
 	// Save ensembling job
 	err = c.EnsemblingJobService.Save(request)
