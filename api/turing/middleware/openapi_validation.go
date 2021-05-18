@@ -90,15 +90,17 @@ func (openapi *OpenAPIValidation) Validate(r *http.Request) error {
 			// endpoint is not described
 			return fmt.Errorf("Route `%s %s` is not described in openapi spec", r.Method, r.URL)
 		}
-		input := &openapi3filter.RequestValidationInput{
-			Request:    r,
-			PathParams: pathParams,
-			Route:      route,
-			Options:    openapi.options,
+
+		if route != nil {
+			input := &openapi3filter.RequestValidationInput{
+				Request:    r,
+				PathParams: pathParams,
+				Route:      route,
+				Options:    openapi.options,
+			}
+			return openapi3filter.ValidateRequest(context.Background(), input)
 		}
-		return openapi3filter.ValidateRequest(context.Background(), input)
 	}
-	// Will not reach this line.
 	return nil
 }
 

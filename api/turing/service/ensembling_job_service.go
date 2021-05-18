@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -120,7 +119,7 @@ func (ensemblingJobService) GetEnsemblerDirectory(ensembler models.EnsemblerLike
 	// Ensembler URI will be a local directory
 	// Dockerfile will build copy the artifact into the local directory.
 	// See engines/batch-ensembler/app.Dockerfile
-	switch ensembler.(type) {
+	switch v := ensembler.(type) {
 	case *models.PyFuncEnsembler:
 		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
 		splitURI := strings.Split(pyFuncEnsembler.ArtifactURI, "/")
@@ -130,7 +129,7 @@ func (ensemblingJobService) GetEnsemblerDirectory(ensembler models.EnsemblerLike
 			splitURI[len(splitURI)-1],
 		), nil
 	default:
-		return "", errors.New("only pyfunc ensemblers are supported for now")
+		return "", fmt.Errorf("only pyfunc ensemblers are supported for now, given %T", v)
 	}
 }
 
@@ -139,11 +138,11 @@ func (ensemblingJobService) GetArtifactURI(ensembler models.EnsemblerLike) (stri
 	// Ensembler URI will be a local directory
 	// Dockerfile will build copy the artifact into the local directory.
 	// See engines/batch-ensembler/app.Dockerfile
-	switch ensembler.(type) {
+	switch v := ensembler.(type) {
 	case *models.PyFuncEnsembler:
 		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
 		return pyFuncEnsembler.ArtifactURI, nil
 	default:
-		return "", errors.New("only pyfunc ensemblers are supported for now")
+		return "", fmt.Errorf("only pyfunc ensemblers are supported for now, given %T", v)
 	}
 }
