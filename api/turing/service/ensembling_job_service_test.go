@@ -204,7 +204,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NoError(t, err)
-			assert.Equal(t, models.Status("failed_submission"), found.Status)
+			assert.Equal(t, models.JobFailedSubmission, found.Status)
 		})
 	})
 }
