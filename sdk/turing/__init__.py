@@ -1,10 +1,14 @@
-from typing import Optional, List, Any, Dict
+from typing import Optional
 
-from turing.generated.models import Project, EnsemblersPaginatedResults
+import mlflow.tracking
+
+from turing.generated.models import Project, Ensembler, PyFuncEnsembler, EnsemblersPaginatedResults
 from turing.client import TuringClient
+from turing.session import TuringSession
 
 _turing_client: Optional[TuringClient] = None
 _active_project: Optional[Project]
+active_session: Optional[TuringSession] = None
 
 
 def set_url(url: str, use_google_oauth: bool = True):
@@ -17,8 +21,11 @@ def set_url(url: str, use_google_oauth: bool = True):
     global _turing_client
     _turing_client = TuringClient(url, use_google_oauth)
 
+    global active_session
+    active_session = TuringSession(host=url, use_google_oauth=use_google_oauth)
 
-def _require_client(f):
+
+def require_client(f):
     def wrap(*args, **kwargs):
         if not _turing_client:
             raise Exception("URL is not set, use set_url(...) to set it")
@@ -27,7 +34,7 @@ def _require_client(f):
     return wrap
 
 
-def __require_active_project(f):
+def require_active_project(f):
     def wrap(*args, **kwargs):
         if not _active_project:
             raise Exception("Active project isn't set, use set_project(...) to set it")
@@ -36,7 +43,7 @@ def __require_active_project(f):
     return wrap
 
 
-@_require_client
+@require_client
 def set_project(project_name: str):
     """
     Set active project
@@ -44,13 +51,17 @@ def set_project(project_name: str):
     :param project_name: project name
     """
 
-    p = _turing_client.get_project(project_name)
+    p = _turing_client.get_project_by_name(project_name)
     global _active_project
     _active_project = p
+    mlflow.tracking.set_tracking_uri(_active_project.mlflow_tracking_url)
+
+    global active_session
+    active_session.set_project(project_name)
 
 
-@_require_client
-@__require_active_project
+@require_client
+@require_active_project
 def active_project() -> Optional[Project]:
     """
     Get current active project
@@ -60,15 +71,15 @@ def active_project() -> Optional[Project]:
     return _active_project
 
 
-@_require_client
-@__require_active_project
+@require_client
+@require_active_project
 def list_ensemblers(
         page: Optional[int] = None,
         page_size: Optional[int] = None) -> EnsemblersPaginatedResults:
     return _turing_client.list_ensemblers(_active_project.id, page, page_size)
 
 
-@_require_client
-@__require_active_project
-def log_new_ensembler():
-    return _turing_client.create_ensembler(_active_project)
+@require_client
+@require_active_project
+def get_ensembler(ensembler_id: int) -> Ensembler:
+    return _turing_client.get_ensembler_by_id(_active_project.id, ensembler_id)

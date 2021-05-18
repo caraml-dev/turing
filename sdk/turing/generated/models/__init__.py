@@ -10,6 +10,7 @@
 # sys.setrecursionlimit(n)
 
 from turing.generated.model.ensembler import Ensembler
+from turing.generated.model.ensembler_type import EnsemblerType
 from turing.generated.model.ensemblers_paginated_results import EnsemblersPaginatedResults
 from turing.generated.model.ensemblers_paginated_results_all_of import EnsemblersPaginatedResultsAllOf
 from turing.generated.model.generic_ensembler import GenericEnsembler

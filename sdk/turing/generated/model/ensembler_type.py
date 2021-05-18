@@ -176,6 +176,3 @@ class EnsemblerType(ModelSimple):
                 path_to_item=_path_to_item,
                 valid_classes=(self.__class__,),
             )
-    #
-    # def __hash__(self):
-    #     return self.value.__hash__()

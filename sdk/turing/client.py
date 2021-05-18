@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from turing.generated.api_client import ApiClient, Configuration
 from turing.generated.apis import ProjectApi, EnsemblerApi
-from turing.generated.models import Project, EnsemblersPaginatedResults, PyFuncEnsembler
+from turing.generated.models import Ensembler, Project, EnsemblersPaginatedResults
 import google.auth
 from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
@@ -22,7 +22,7 @@ class TuringClient:
         self._project_api = ProjectApi(self._api_client)
         self._ensemblers_api = EnsemblerApi(self._api_client)
 
-    def get_project(self, project_name: str) -> Project:
+    def get_project_by_name(self, project_name: str) -> Project:
         p_list = self._project_api.projects_get(name=project_name)
 
         filtered = [p for p in p_list if p.name == project_name][:1]
@@ -49,17 +49,17 @@ class TuringClient:
             kwargs['page_size'] = page_size
         return self._ensemblers_api.list_ensemblers(**kwargs)
 
-    def create_ensembler(
-            self,
-            project: Project):
-        ensembler = PyFuncEnsembler(
-            name="test-ensembler",
-            type="pyfunc"
+    def get_ensembler_by_id(self, project_id: int, ensembler_id: int) -> Ensembler:
+        return self._ensemblers_api.get_ensembler_details(
+            project_id=project_id,
+            ensembler_id=ensembler_id
         )
 
-        kwargs = {
-            'project_id': project.id,
-            'ensembler': ensembler
-        }
-
-        return self._ensemblers_api.create_ensembler(**kwargs)
+    def create_ensembler(
+            self,
+            project_id: int,
+            ensembler: Ensembler) -> Ensembler:
+        return self._ensemblers_api.create_ensembler(
+            project_id=project_id,
+            ensembler=ensembler
+        )

@@ -40,15 +40,15 @@ func migrate(db *sql.DB, dbName string) (*sql.DB, error) {
 
 	if migrations, err := gomigrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", migrationsFolder),
 		dbName, driver); err != nil {
-		return nil, err
+		return db, err
 	} else if err = migrations.Up(); err != nil {
-		return nil, err
+		return db, err
 	}
 	return sql.Open("postgres", connectionString(dbName))
 }
 
-// Connects to test postgreSQL instance (either local or the one at CI environment)
-// and creates a new database with an up-to-date schema
+// CreateTestDatabase connects to test postgreSQL instance (either local or the one
+// at CI environment) and creates a new database with an up-to-date schema
 func CreateTestDatabase() (*gorm.DB, func(), error) {
 	testDbName := fmt.Sprintf("mlp_id_%d", time.Now().UnixNano())
 

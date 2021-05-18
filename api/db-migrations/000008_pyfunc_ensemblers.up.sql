@@ -17,5 +17,7 @@ CREATE TABLE IF NOT EXISTS pyfunc_ensemblers
 (
     mlflow_experiment_id integer      NOT NULL,
     mlflow_run_id        varchar(32)  NOT NULL,
-    artifact_uri         varchar(128) NOT NULL
+    artifact_uri         varchar(128) NOT NULL,
+
+    CONSTRAINT uc_pyfunc_ensemblers_project_name UNIQUE (project_id, name)
 ) inherits (ensemblers);

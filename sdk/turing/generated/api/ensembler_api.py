@@ -22,6 +22,7 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_and_convert_types
 )
 from turing.generated.model.ensembler import Ensembler
+from turing.generated.model.ensembler_type import EnsemblerType
 from turing.generated.model.ensemblers_paginated_results import EnsemblersPaginatedResults
 
 
@@ -309,6 +310,7 @@ class EnsemblerApi(object):
             Keyword Args:
                 page (int): [optional] if omitted the server will use the default value of 1
                 page_size (int): [optional] if omitted the server will use the default value of 10
+                type (EnsemblerType): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
                 _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -371,6 +373,7 @@ class EnsemblerApi(object):
                     'project_id',
                     'page',
                     'page_size',
+                    'type',
                 ],
                 'required': [
                     'project_id',
@@ -394,16 +397,20 @@ class EnsemblerApi(object):
                         (int,),
                     'page_size':
                         (int,),
+                    'type':
+                        (EnsemblerType,),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
                     'page': 'page',
                     'page_size': 'page_size',
+                    'type': 'type',
                 },
                 'location_map': {
                     'project_id': 'path',
                     'page': 'query',
                     'page_size': 'query',
+                    'type': 'query',
                 },
                 'collection_format_map': {
                 }
