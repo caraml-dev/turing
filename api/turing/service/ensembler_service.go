@@ -81,7 +81,7 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 		return nil, err
 	}
 
-	paginatedResults := CreatePaginatedResults(options.PaginationOptions, count, results)
+	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
 	return paginatedResults, nil
 }
 

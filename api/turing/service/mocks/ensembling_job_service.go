@@ -14,6 +14,29 @@ type EnsemblingJobService struct {
 	mock.Mock
 }
 
+// CreateEnsemblingJob provides a mock function with given fields: request, projectID, ensembler
+func (_m *EnsemblingJobService) CreateEnsemblingJob(request *models.EnsemblingJob, projectID models.ID, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
+	ret := _m.Called(request, projectID, ensembler)
+
+	var r0 *models.EnsemblingJob
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
+		r0 = rf(request, projectID, ensembler)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.EnsemblingJob)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) error); ok {
+		r1 = rf(request, projectID, ensembler)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindByID provides a mock function with given fields: id, options
 func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error) {
 	ret := _m.Called(id, options)
@@ -30,76 +53,6 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	var r1 error
 	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblingJobFindByIDOptions) error); ok {
 		r1 = rf(id, options)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GenerateDefaultJobName provides a mock function with given fields: ensemblerName
-func (_m *EnsemblingJobService) GenerateDefaultJobName(ensemblerName string) string {
-	ret := _m.Called(ensemblerName)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(ensemblerName)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
-}
-
-// GetArtifactURI provides a mock function with given fields: ensembler
-func (_m *EnsemblingJobService) GetArtifactURI(ensembler models.EnsemblerLike) (string, error) {
-	ret := _m.Called(ensembler)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(models.EnsemblerLike) string); ok {
-		r0 = rf(ensembler)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(models.EnsemblerLike) error); ok {
-		r1 = rf(ensembler)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetDefaultEnvironment provides a mock function with given fields:
-func (_m *EnsemblingJobService) GetDefaultEnvironment() string {
-	ret := _m.Called()
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
-}
-
-// GetEnsemblerDirectory provides a mock function with given fields: ensembler
-func (_m *EnsemblingJobService) GetEnsemblerDirectory(ensembler models.EnsemblerLike) (string, error) {
-	ret := _m.Called(ensembler)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(models.EnsemblerLike) string); ok {
-		r0 = rf(ensembler)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(models.EnsemblerLike) error); ok {
-		r1 = rf(ensembler)
 	} else {
 		r1 = ret.Error(1)
 	}

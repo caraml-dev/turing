@@ -14,9 +14,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models.ID) *models.EnsemblingJob {
-	return &models.EnsemblingJob{
-		Name:            fmt.Sprintf("test-ensembler-%d", i),
+func generateEnsemblingJobFixture(
+	i int,
+	ensemblerID models.ID,
+	projectID models.ID,
+	name string,
+	genExpected bool,
+) *models.EnsemblingJob {
+	value := &models.EnsemblingJob{
+		Name:            name,
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
 		EnvironmentName: "dev",
@@ -33,8 +39,8 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 				},
 			},
 		},
-		EnsemblerConfig: &models.EnsemblerConfig{
-			EnsemblerConfig: batchensembler.BatchEnsemblingJob{
+		JobConfig: &models.JobConfig{
+			JobConfig: batchensembler.BatchEnsemblingJob{
 				Version: "v1",
 				Kind:    batchensembler.BatchEnsemblingJob_BatchEnsemblingJob,
 				Metadata: &batchensembler.BatchEnsemblingJobMetadata{
@@ -129,6 +135,14 @@ func generateEnsemblingJobFixture(i int, ensemblerID models.ID, projectID models
 			},
 		},
 	}
+	if genExpected {
+		value.JobConfig.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+		value.EnvironmentName = "dev"
+		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
+		value.InfraConfig.EnsemblerName = "ensembler"
+	}
+
+	return value
 }
 
 func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
@@ -138,7 +152,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -154,9 +168,9 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, found.EnsemblerID, ensemblingJob.EnsemblerID)
 			assert.Equal(t, found.ProjectID, ensemblingJob.ProjectID)
 			assert.Equal(t, found.EnvironmentName, ensemblingJob.EnvironmentName)
-			assert.Equal(t, models.Status("pending"), ensemblingJob.Status)
+			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
-			assert.Equal(t, found.EnsemblerConfig, ensemblingJob.EnsemblerConfig)
+			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
 		})
 	})
 }
@@ -169,20 +183,21 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
 
 			// Query pending ensembling jobs
 			pageSize := 10
+			pendingStatus := models.JobPending
 			fetched, err := ensemblingJobService.List(
 				EnsemblingJobListOptions{
 					PaginationOptions: PaginationOptions{
 						Page:     testutils.NullableInt(1),
 						PageSize: &pageSize,
 					},
-					Status: models.JobPending,
+					Status: &pendingStatus,
 				},
 			)
 			assert.NoError(t, err)
@@ -209,45 +224,69 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 	})
 }
 
-func TestGetEnsemblerDirectory(t *testing.T) {
+func TestCreateEnsemblingJob(t *testing.T) {
 	var tests = map[string]struct {
-		createEnsemblerLike func() models.EnsemblerLike
-		expected            string
-		success             bool
+		ensembler *models.PyFuncEnsembler
+		request   *models.EnsemblingJob
+		expected  *models.EnsemblingJob
 	}{
-		"success | pyFuncEnsembler": {
-			createEnsemblerLike: func() models.EnsemblerLike {
-				return &models.PyFuncEnsembler{
-					GenericEnsembler: &models.GenericEnsembler{
-						Model:     models.Model{ID: 1},
-						Type:      models.EnsemblerTypePyFunc,
-						ProjectID: 1,
-					},
-					ArtifactURI: "gs://bucket/ensembler",
-				}
-			},
-			expected: "/home/spark/ensembler",
-			success:  true,
-		},
-		"failure | not pyFuncEnsembler": {
-			createEnsemblerLike: func() models.EnsemblerLike {
-				return &models.GenericEnsembler{
+		"success | name provided": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
-				}
+				},
+				ArtifactURI: "gs://bucket/ensembler",
 			},
-			expected: "",
-			success:  false,
+			request:  generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
+			expected: generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+		},
+		"success | name not provided": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				},
+				ArtifactURI: "gs://bucket/ensembler",
+			},
+			request:  generateEnsemblingJobFixture(1, 1, 1, "", false),
+			expected: generateEnsemblingJobFixture(1, 1, 1, "", true),
 		},
 	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			ensembler := tt.createEnsemblerLike()
-			svc := NewEnsemblingJobService(nil, "")
-			folderName, err := svc.GetEnsemblerDirectory(ensembler)
-			assert.Equal(t, tt.expected, folderName)
-			assert.Equal(t, tt.success, err == nil)
-		})
-	}
+
+	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				ensemblingJobService := NewEnsemblingJobService(db, "dev")
+				result, err := ensemblingJobService.CreateEnsemblingJob(
+					tt.request,
+					1,
+					tt.ensembler,
+				)
+				assert.Nil(t, err)
+				expected := tt.expected
+
+				assert.NotEqual(t, models.ID(0), result.ID)
+
+				assert.NotEqual(t, result.Name, "")
+				assert.Equal(t, expected.EnsemblerID, result.EnsemblerID)
+				assert.Equal(t, expected.ProjectID, result.ProjectID)
+				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
+				assert.Equal(t, models.JobPending, result.Status)
+
+				assert.Equal(
+					t,
+					result.JobConfig.JobConfig.Spec.Ensembler.Uri,
+					expected.JobConfig.JobConfig.Spec.Ensembler.Uri,
+				)
+
+				assert.Equal(t, expected.InfraConfig.ArtifactURI, result.InfraConfig.ArtifactURI)
+				assert.Equal(t, expected.InfraConfig.EnsemblerName, result.InfraConfig.EnsemblerName)
+			})
+		}
+	})
 }

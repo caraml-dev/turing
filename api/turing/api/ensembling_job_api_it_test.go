@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -23,7 +24,6 @@ func generateEnsemblingJobFixtureJSON() string {
 		"ensembler_id":1,
 		"infra_config":{
 			"service_account_name":"test-service-account-1",
-			"image_ref":"gcr.io/hello/world:123",
 			"resources":{
 				"requests":{
 					"cpu":"2",
@@ -35,7 +35,7 @@ func generateEnsemblingJobFixtureJSON() string {
 				}
 			}
 		},
-		"ensembler_config":{
+		"job_config":{
 			"spec":{
 				"sink":{
 					"type":"BQ",
@@ -146,35 +146,18 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createPyFuncEnsembler(1), nil)
+				).Return(createEnsembler(1, "pyfunc"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
 				ensemblingJobService.On(
-					"Save",
+					"CreateEnsemblingJob",
 					mock.Anything,
-				).Return(nil)
+					mock.Anything,
+					mock.Anything,
+				).Return(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true), nil)
 
-				ensemblingJobService.On(
-					"GetDefaultEnvironment",
-					mock.Anything,
-				).Return("dev")
-
-				ensemblingJobService.On(
-					"GenerateDefaultJobName",
-					mock.Anything,
-				).Return("test-ensembler-1")
-
-				ensemblingJobService.On(
-					"GetEnsemblerDirectory",
-					mock.Anything,
-				).Return("/home/spark/ensembler", nil)
-
-				ensemblingJobService.On(
-					"GetArtifactURI",
-					mock.Anything,
-				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
@@ -205,34 +188,44 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
-				ensemblingJobService.On(
-					"Save",
-					mock.Anything,
-				).Return(nil)
-
-				ensemblingJobService.On(
-					"GetDefaultEnvironment",
-					mock.Anything,
-				).Return("dev")
-
-				ensemblingJobService.On(
-					"GenerateDefaultJobName",
-					mock.Anything,
-				).Return("test-ensembler-1")
-
-				ensemblingJobService.On(
-					"GetEnsemblerDirectory",
-					mock.Anything,
-				).Return("/home/spark/ensembler", nil)
-
-				ensemblingJobService.On(
-					"GetArtifactURI",
-					mock.Anything,
-				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
 				mlpService := &mocks.MLPService{}
+				mlpService.On(
+					"GetProject",
+					models.ID(1),
+				).Return(&mlp.Project{Id: 1}, nil)
+				return mlpService
+			},
+			vars: RequestVars{
+				"project_id": {"1"},
+			},
+			body: generateEnsemblingJobFixtureJSON(),
+		},
+		"failure | wrong type of ensembler": {
+			path:     "/projects/1/jobs",
+			method:   http.MethodPost,
+			expected: BadRequest("only pyfunc ensemblers allowed", "ensembler type given: *models.GenericEnsembler"),
+			ensemblersService: func() service.EnsemblersService {
+				ensemblersSvc := &mocks.EnsemblersService{}
+				ensemblersSvc.On(
+					"FindByID",
+					mock.Anything,
+					mock.Anything,
+				).Return(createEnsembler(1, "generic"), nil)
+				return ensemblersSvc
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				ensemblingJobService := &mocks.EnsemblingJobService{}
+				return ensemblingJobService
+			},
+			mlpService: func() service.MLPService {
+				mlpService := &mocks.MLPService{}
+				mlpService.On(
+					"GetEnvironment",
+					"dev",
+				).Return(&merlin.Environment{}, nil)
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
@@ -254,35 +247,11 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createPyFuncEnsembler(1), nil)
+				).Return(createEnsembler(1, "pyfunc"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				ensemblingJobService := &mocks.EnsemblingJobService{}
-				ensemblingJobService.On(
-					"Save",
-					mock.Anything,
-				).Return(nil)
-
-				ensemblingJobService.On(
-					"GetDefaultEnvironment",
-					mock.Anything,
-				).Return("dev")
-
-				ensemblingJobService.On(
-					"GenerateDefaultJobName",
-					mock.Anything,
-				).Return("test-ensembler-1")
-
-				ensemblingJobService.On(
-					"GetEnsemblerDirectory",
-					mock.Anything,
-				).Return("/home/spark/ensembler", nil)
-
-				ensemblingJobService.On(
-					"GetArtifactURI",
-					mock.Anything,
-				).Return("gs://bucket/ensembler", nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {

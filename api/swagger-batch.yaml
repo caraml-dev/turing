@@ -204,7 +204,7 @@ components:
           type: "string"
         infra_config:
           $ref: "#/components/schemas/EnsemblerInfraConfig"
-        ensembler_config:
+        job_config:
           $ref: "#/components/schemas/EnsemblerConfig"
         status:
           $ref: "#/components/schemas/EnsemblerJobStatus"
@@ -289,7 +289,6 @@ components:
 
     BigQueryDataset:
       allOf:
-        - $ref: "#/components/schemas/Dataset"
         - type: object
           properties:
             bq_config:

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	mlp "github.com/gojek/mlp/client"
@@ -28,48 +29,33 @@ func (c EnsemblingJobController) Create(
 
 	// Check is done in api.handlers
 	request, _ := body.(*models.EnsemblingJob)
-	request.ProjectID = models.ID(project.Id)
+	projectID := models.ID(project.Id)
 
 	// Check if ensembler exists
 	ensembler, err := c.EnsemblersService.FindByID(
 		request.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
-			ProjectID: &request.ProjectID,
+			ProjectID: &projectID,
 		},
 	)
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	// Populate name if the user does not define a name for the job
-	if request.Name == "" {
-		request.Name = c.EnsemblingJobService.GenerateDefaultJobName(
-			ensembler.GetName(),
-		)
+	var pyFuncEnsembler *models.PyFuncEnsembler
+	switch v := ensembler.(type) {
+	case *models.PyFuncEnsembler:
+		pyFuncEnsembler = ensembler.(*models.PyFuncEnsembler)
+	default:
+		return BadRequest("only pyfunc ensemblers allowed", fmt.Sprintf("ensembler type given: %T", v))
 	}
 
-	// Populate default environment
-	request.EnvironmentName = c.EnsemblingJobService.GetDefaultEnvironment()
-
-	// Populate ensembler directory
-	ensemblerDirectory, err := c.EnsemblingJobService.GetEnsemblerDirectory(ensembler)
-	if err != nil {
-		return BadRequest("ensembler not supported", err.Error())
-	}
-	request.EnsemblerConfig.EnsemblerConfig.Spec.Ensembler.Uri = ensemblerDirectory
-
-	// Populate ensembler artifact URI, error can be ignored since the type check is done prior
-	artifactURI, _ := c.EnsemblingJobService.GetArtifactURI(ensembler)
-	request.InfraConfig.ArtifactURI = artifactURI
-	request.InfraConfig.EnsemblerName = ensembler.GetName()
-
-	// Save ensembling job
-	err = c.EnsemblingJobService.Save(request)
+	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(request, projectID, pyFuncEnsembler)
 	if err != nil {
 		return BadRequest("could not create request", err.Error())
 	}
 
-	return Accepted(request)
+	return Accepted(ensemblingJob)
 }
 
 // Routes returns all the HTTP routes given by the EnsemblingJobController.

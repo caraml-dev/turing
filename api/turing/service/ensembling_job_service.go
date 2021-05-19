@@ -22,7 +22,7 @@ type EnsemblingJobFindByIDOptions struct {
 type EnsemblingJobListOptions struct {
 	PaginationOptions
 	ProjectID *models.ID
-	Status    models.Status
+	Status    *models.Status `validate:"oneof=pending running terminating terminated completed failed failed_submission failed_building"`
 }
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.
@@ -30,10 +30,11 @@ type EnsemblingJobService interface {
 	Save(ensembler *models.EnsemblingJob) error
 	FindByID(id models.ID, options EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error)
 	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
-	GetDefaultEnvironment() string
-	GenerateDefaultJobName(ensemblerName string) string
-	GetEnsemblerDirectory(ensembler models.EnsemblerLike) (string, error)
-	GetArtifactURI(ensembler models.EnsemblerLike) (string, error)
+	CreateEnsemblingJob(
+		request *models.EnsemblingJob,
+		projectID models.ID,
+		ensembler *models.PyFuncEnsembler,
+	) (*models.EnsemblingJob, error)
 }
 
 // NewEnsemblingJobService creates a new ensembling job service
@@ -84,7 +85,7 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		query = query.Where("project_id = ?", options.ProjectID)
 	}
 
-	if options.Status != "" {
+	if options.Status != nil {
 		query = query.Where("status = ?", options.Status)
 	}
 
@@ -102,47 +103,49 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		return nil, err
 	}
 
-	paginatedResults := CreatePaginatedResults(options.PaginationOptions, count, results)
+	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
 	return paginatedResults, nil
 }
 
-func (s *ensemblingJobService) GetDefaultEnvironment() string {
-	return s.defaultEnvironment
-}
-
-func (ensemblingJobService) GenerateDefaultJobName(ensemblerName string) string {
+func generateDefaultJobName(ensemblerName string) string {
 	return fmt.Sprintf("%s: %s", ensemblerName, time.Now().Format(time.RFC3339))
 }
 
-// GetEnsemblerDirectory gets the ensembler directory that local to the container's local directory
-func (ensemblingJobService) GetEnsemblerDirectory(ensembler models.EnsemblerLike) (string, error) {
+func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	// Ensembler URI will be a local directory
 	// Dockerfile will build copy the artifact into the local directory.
 	// See engines/batch-ensembler/app.Dockerfile
-	switch v := ensembler.(type) {
-	case *models.PyFuncEnsembler:
-		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
-		splitURI := strings.Split(pyFuncEnsembler.ArtifactURI, "/")
-		return fmt.Sprintf(
-			"%s/%s",
-			sparkHomeFolder,
-			splitURI[len(splitURI)-1],
-		), nil
-	default:
-		return "", fmt.Errorf("only pyfunc ensemblers are supported for now, given %T", v)
-	}
+	splitURI := strings.Split(ensembler.ArtifactURI, "/")
+	return fmt.Sprintf(
+		"%s/%s",
+		sparkHomeFolder,
+		splitURI[len(splitURI)-1],
+	)
 }
 
-// GetEnsemblerDirectory gets the ensembler directory that local to the container's local directory
-func (ensemblingJobService) GetArtifactURI(ensembler models.EnsemblerLike) (string, error) {
-	// Ensembler URI will be a local directory
-	// Dockerfile will build copy the artifact into the local directory.
-	// See engines/batch-ensembler/app.Dockerfile
-	switch v := ensembler.(type) {
-	case *models.PyFuncEnsembler:
-		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
-		return pyFuncEnsembler.ArtifactURI, nil
-	default:
-		return "", fmt.Errorf("only pyfunc ensemblers are supported for now, given %T", v)
+// CreateEnsemblingJob creates an ensembling job.
+func (s *ensemblingJobService) CreateEnsemblingJob(
+	request *models.EnsemblingJob,
+	projectID models.ID,
+	ensembler *models.PyFuncEnsembler,
+) (*models.EnsemblingJob, error) {
+	request.ProjectID = projectID
+	request.EnvironmentName = s.defaultEnvironment
+
+	// Populate name if the user does not define a name for the job
+	if request.Name == "" {
+		request.Name = generateDefaultJobName(ensembler.Name)
 	}
+
+	request.JobConfig.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
+	request.InfraConfig.ArtifactURI = ensembler.ArtifactURI
+	request.InfraConfig.EnsemblerName = ensembler.Name
+
+	// Save ensembling job
+	err := s.Save(request)
+	if err != nil {
+		return nil, err
+	}
+
+	return request, nil
 }

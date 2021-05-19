@@ -12,48 +12,48 @@ import (
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously
 type EnsemblingJob struct {
 	Model
-	Name            string           `json:"name"`
-	EnsemblerID     ID               `json:"ensembler_id"`
-	ProjectID       ID               `json:"project_id"`
-	EnvironmentName string           `json:"environment_name"`
-	InfraConfig     *InfraConfig     `json:"infra_config"`
-	EnsemblerConfig *EnsemblerConfig `json:"ensembler_config"`
-	Status          Status           `json:"status" gorm:"default:pending"`
-	Error           string           `json:"error"`
+	Name            string       `json:"name"`
+	EnsemblerID     ID           `json:"ensembler_id"`
+	ProjectID       ID           `json:"project_id"`
+	EnvironmentName string       `json:"environment_name"`
+	InfraConfig     *InfraConfig `json:"infra_config"`
+	JobConfig       *JobConfig   `json:"job_config"`
+	Status          Status       `json:"status" gorm:"default:pending"`
+	Error           string       `json:"error"`
 }
 
-// EnsemblerConfig stores the infra and ensembler config
-type EnsemblerConfig struct {
-	EnsemblerConfig batchensembler.BatchEnsemblingJob `json:"ensembler_config"`
+// JobConfig stores the infra and ensembler config
+type JobConfig struct {
+	JobConfig batchensembler.BatchEnsemblingJob `json:"job_config"`
 }
 
 // UnmarshalJSON unmarshals the json into the proto message, used by the json.Marshaler interface
-func (r *EnsemblerConfig) UnmarshalJSON(data []byte) error {
-	return protojson.Unmarshal(data, &r.EnsemblerConfig)
+func (r *JobConfig) UnmarshalJSON(data []byte) error {
+	return protojson.Unmarshal(data, &r.JobConfig)
 }
 
 // MarshalJSON unmarshals the json into the proto message, used by the json.Marshaler interface
-func (r *EnsemblerConfig) MarshalJSON() ([]byte, error) {
-	return protojson.Marshal(&r.EnsemblerConfig)
+func (r *JobConfig) MarshalJSON() ([]byte, error) {
+	return protojson.Marshal(&r.JobConfig)
 }
 
 // Value returns json value, implement driver.Valuer interface
-func (r *EnsemblerConfig) Value() (driver.Value, error) {
-	return protojson.Marshal(&r.EnsemblerConfig)
+func (r *JobConfig) Value() (driver.Value, error) {
+	return protojson.Marshal(&r.JobConfig)
 }
 
 // Scan scans value into Jsonb, implements sql.Scanner interface
-func (r *EnsemblerConfig) Scan(value interface{}) error {
+func (r *JobConfig) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-	return protojson.Unmarshal(b, &r.EnsemblerConfig)
+	return protojson.Unmarshal(b, &r.JobConfig)
 }
 
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
-	ArtifactURI        string                       `json:"artiface_uri"`
+	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
 	ServiceAccountName string                       `json:"service_account_name"`
 	Resources          *BatchEnsemblingJobResources `json:"resources"`

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     project_id       integer NOT NULL,
     environment_name varchar(50) NOT NULL,
     infra_config     jsonb NOT NULL,
-    ensembler_config jsonb NOT NULL,
+    job_config       jsonb NOT NULL,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
     created_at       timestamp   NOT NULL default current_timestamp,

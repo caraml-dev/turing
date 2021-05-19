@@ -34,8 +34,8 @@ func PaginationScope(options PaginationOptions) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
-// CreatePaginatedResults is a helper function that helps to create paginated results
-func CreatePaginatedResults(options PaginationOptions, count int, results interface{}) *PaginatedResults {
+// createPaginatedResults is a helper function that helps to create paginated results
+func createPaginatedResults(options PaginationOptions, count int, results interface{}) *PaginatedResults {
 	page := 1
 	totalPages := 1
 	if options.Page != nil && options.PageSize != nil {
