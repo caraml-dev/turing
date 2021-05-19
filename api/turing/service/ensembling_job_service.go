@@ -22,7 +22,7 @@ type EnsemblingJobFindByIDOptions struct {
 type EnsemblingJobListOptions struct {
 	PaginationOptions
 	ProjectID *models.ID
-	Status    *models.Status `validate:"oneof=pending running terminating terminated completed failed failed_submission failed_building"`
+	Status    *models.Status
 }
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.
