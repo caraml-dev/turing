@@ -5,6 +5,10 @@
     padding: $euiSize $euiSizeL;
     border-right: 1px solid #d3dae6;
     width: 216px;
+
+    .euiSpacer {
+      margin-top: $euiHeaderHeight + 1;
+    }
   }
 
   .accordionForm--content {

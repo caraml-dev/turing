@@ -17,9 +17,19 @@ npm install
 
 ## Configuration
 
-The React application can be configured using environment variables. By default 
+The React application can be configured using environment variables. By default, 
 it will read from config values from `.env.development` file. Refer to 
 this [documentation](https://create-react-app.dev/docs/adding-custom-environment-variables/) for more details.
+
+### Config Variables
+| Environment Variable            | Required | Default  | Description     |
+| ------------------------------- | -------- | -------- | --------------- |
+| `REACT_APP_API_TIMEOUT`         | No       | 5000     | Timeout (in milliseconds) for requests to API | 
+| `REACT_APP_TURING_API`          | Yes      |          | Endpoint of Turing API | 
+| `REACT_APP_MERLIN_API`          | Yes      |          | Endpoint of Merlin API | 
+| `REACT_APP_MLP_API`             | Yes      |          | Endpoint of MLP API | 
+| ...                             | ...      | ...      | ... | 
+| `REACT_APP_MAX_ALLOWED_REPLICA` | No       | 10       | Sets the upper bound of the number max replicas that user can configure for router/enricher/ensembler | 
 
 ### Setup Google OAuth2
 
