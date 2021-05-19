@@ -25,14 +25,11 @@ func generateEnsemblingJobFixtureJSON() string {
 		"infra_config":{
 			"service_account_name":"test-service-account-1",
 			"resources":{
-				"requests":{
-					"cpu":"2",
-					"memory":"2Gi"
-				},
-				"limits":{
-					"cpu":"2",
-					"memory":"2Gi"
-				}
+				"driver_cpu_request": "1",
+				"driver_memory_request": "1Gi",
+				"executor_replica": 10,
+				"executor_cpu_request": "1",
+				"executor_memory_request": "1Gi"
 			}
 		},
 		"job_config":{

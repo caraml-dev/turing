@@ -75,14 +75,11 @@ func (r *InfraConfig) Scan(value interface{}) error {
 
 // BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
 type BatchEnsemblingJobResources struct {
-	Requests *Resource `json:"requests"`
-	Limits   *Resource `json:"limits"`
-}
-
-// Resource contains the Kubernetes resource request and limits
-type Resource struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
+	DriverCPURequest      string `json:"driver_cpu_request,omitempty"`
+	DriverMemoryRequest   string `json:"driver_memory_request,omitempty"`
+	ExecutorReplica       int32  `json:"executor_replica,omitempty"`
+	ExecutorCPURequest    string `json:"executor_cpu_request,omitempty"`
+	ExecutorMemoryRequest string `json:"executor_memory_request,omitempty"`
 }
 
 // Status is the state of the finite machine ensembling job.

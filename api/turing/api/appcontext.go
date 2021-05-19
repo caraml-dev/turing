@@ -105,17 +105,13 @@ func NewAppContext(
 	}
 
 	// Initialize OpenAPI validation middleware
-	if _, err = os.Stat(cfg.SwaggerV2File); os.IsExist(err) {
-		return nil, errors.Wrapf(err, "Swagger v2 spec file not found")
-	}
-	for _, swaggerFile := range cfg.SwaggerV3Files {
-		if _, err = os.Stat(swaggerFile); os.IsExist(err) {
-			return nil, errors.Wrapf(err, fmt.Sprintf("Swagger v3 spec file not found %s", swaggerFile))
+	for _, swaggerFile := range cfg.SwaggerFiles {
+		if _, err = os.Stat(swaggerFile.File); os.IsExist(err) {
+			return nil, errors.Wrapf(err, fmt.Sprintf("Swagger spec file not found %s", swaggerFile.File))
 		}
 	}
 	appContext.OpenAPIValidation, err = middleware.NewOpenAPIValidation(
-		cfg.SwaggerV2File,
-		cfg.SwaggerV3Files,
+		cfg.SwaggerFiles,
 		middleware.OpenAPIValidationOptions{
 			// Authentication is ignored because it is handled by another middleware
 			IgnoreAuthentication: true,

@@ -29,14 +29,11 @@ func generateEnsemblingJobFixture(
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
 			Resources: &models.BatchEnsemblingJobResources{
-				Requests: &models.Resource{
-					CPU:    "2",
-					Memory: "2Gi",
-				},
-				Limits: &models.Resource{
-					CPU:    "2",
-					Memory: "2Gi",
-				},
+				DriverCPURequest:      "1",
+				DriverMemoryRequest:   "1Gi",
+				ExecutorReplica:       10,
+				ExecutorCPURequest:    "1",
+				ExecutorMemoryRequest: "1Gi",
 			},
 		},
 		JobConfig: &models.JobConfig{

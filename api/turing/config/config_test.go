@@ -13,6 +13,7 @@ import (
 
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -156,8 +157,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerV2File:  "swagger.yaml",
-				SwaggerV3Files: []string{"swagger-batch.yaml"},
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 			},
 		},
 		"single file": {
@@ -222,8 +231,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerV2File:  "swagger.yaml",
-				SwaggerV3Files: []string{"swagger-batch.yaml"},
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -303,8 +320,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerV2File:  "swagger.yaml",
-				SwaggerV3Files: []string{"swagger-batch.yaml"},
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -402,8 +427,16 @@ func TestLoad(t *testing.T) {
 					AppDirectory: "appdir-env",
 					Homepage:     "/turing-env",
 				},
-				SwaggerV2File:  "swagger.yaml",
-				SwaggerV3Files: []string{"swagger-batch.yaml"},
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",

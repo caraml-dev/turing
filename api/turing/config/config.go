@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gojek/turing/api/turing/middleware"
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be
 	// easily marshalled into JSON, which is currently the format required for experiment config.
@@ -64,8 +65,7 @@ type Config struct {
 	TuringUIConfig      *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerV2File  string
-	SwaggerV3Files []string
+	SwaggerFiles []middleware.SwaggerYamlFile
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -323,8 +323,16 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.AppDirectory", "")
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
-	v.SetDefault("SwaggerV2File", "swagger.yaml")
-	v.SetDefault("SwaggerV3Files", []string{"swagger-batch.yaml"})
+	v.SetDefault("SwaggerFiles", []middleware.SwaggerYamlFile{
+		{
+			Type: middleware.SwaggerV2Type,
+			File: "swagger.yaml",
+		},
+		{
+			Type: middleware.SwaggerV3Type,
+			File: "swagger-batch.yaml",
+		},
+	})
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

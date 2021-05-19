@@ -349,6 +349,8 @@ components:
 
     EnsemblingJobSink:
       type: "object"
+      oneOf:
+        - $ref: "#/components/schemas/BigQuerySink"
       properties:
         type:
           $ref: "#/components/schemas/SinkType"
@@ -358,8 +360,17 @@ components:
             type: "string"
         save_mode:
           $ref: "#/components/schemas/SaveMode"
-        bq_config:
-          $ref: "#/components/schemas/BigQuerySinkConfig"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          BQ: "#/components/schemas/BigQuerySink"
+
+    BigQuerySink:
+      allOf:
+        - type: object
+          properties:
+            bq_config:
+              $ref: "#/components/schemas/BigQuerySinkConfig"
 
     BigQuerySinkConfig:
       type: "object"
@@ -421,18 +432,17 @@ components:
     EnsemblingResources:
       type: "object"
       properties:
-        requests:
-          $ref: "#/components/schemas/EnsemblingResource"
-        limits:
-          $ref: "#/components/schemas/EnsemblingResource"
+        driver_cpu_request:
+          type: string
+        driver_memory_request:
+          type: string
+        executor_replica:
+          type: integer
+        executor_cpu_request:
+          type: string
+        executor_memory_request:
+          type: string
 
-    EnsemblingResource:
-      type: "object"
-      properties:
-        cpu:
-          type: string
-        memory:
-          type: string
 
     EnsemblerJobStatus:
       type: "string"
