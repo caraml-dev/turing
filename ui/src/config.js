@@ -32,7 +32,9 @@ export const appConfig = {
   environment: process.env.REACT_APP_ENVIRONMENT || "dev",
   homepage: process.env.REACT_APP_HOMEPAGE || process.env.PUBLIC_URL,
   appIcon: "graphApp",
-  docsUrl: process.env.REACT_APP_USER_DOCS_URL,
+  docsUrl: process.env.REACT_APP_USER_DOCS_URL
+    ? JSON.parse(process.env.REACT_APP_USER_DOCS_URL)
+    : [{ href: "https://github.com/gojek/turing", label: "Turing User Guide" }],
   privateDockerRegistries: process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES
     ? process.env.REACT_APP_PRIVATE_DOCKER_REGISTRIES.split(",")
     : [],
