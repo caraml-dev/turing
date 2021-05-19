@@ -12,6 +12,8 @@ import {
 import { FormLabelWithToolTip } from "../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 
+const maxTicks = 20;
+
 export const ResourcesPanel = ({
   resourcesConfig,
   onChangeHandler,
@@ -88,6 +90,8 @@ export const ResourcesPanel = ({
             fullWidth
             min={0}
             max={maxAllowedReplica}
+            // This component only allows up to 20 ticks to be displayed at the slider
+            tickInterval={Math.ceil((maxAllowedReplica + 1) / maxTicks)}
             showInput
             showTicks
             value={[
