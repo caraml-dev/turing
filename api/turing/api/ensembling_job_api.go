@@ -28,12 +28,12 @@ func (c EnsemblingJobController) Create(
 	}
 
 	// Check is done in api.handlers
-	request, _ := body.(*models.EnsemblingJob)
+	job, _ := body.(*models.EnsemblingJob)
 	projectID := models.ID(project.Id)
 
 	// Check if ensembler exists
 	ensembler, err := c.EnsemblersService.FindByID(
-		request.EnsemblerID,
+		job.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
 			ProjectID: &projectID,
 		},
@@ -50,9 +50,9 @@ func (c EnsemblingJobController) Create(
 		return BadRequest("only pyfunc ensemblers allowed", fmt.Sprintf("ensembler type given: %T", v))
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(request, projectID, pyFuncEnsembler)
+	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, projectID, pyFuncEnsembler)
 	if err != nil {
-		return BadRequest("could not create request", err.Error())
+		return InternalServerError("could not create job request", err.Error())
 	}
 
 	return Accepted(ensemblingJob)

@@ -31,7 +31,7 @@ type EnsemblingJobService interface {
 	FindByID(id models.ID, options EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error)
 	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
 	CreateEnsemblingJob(
-		request *models.EnsemblingJob,
+		job *models.EnsemblingJob,
 		projectID models.ID,
 		ensembler *models.PyFuncEnsembler,
 	) (*models.EnsemblingJob, error)
@@ -125,27 +125,27 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 
 // CreateEnsemblingJob creates an ensembling job.
 func (s *ensemblingJobService) CreateEnsemblingJob(
-	request *models.EnsemblingJob,
+	job *models.EnsemblingJob,
 	projectID models.ID,
 	ensembler *models.PyFuncEnsembler,
 ) (*models.EnsemblingJob, error) {
-	request.ProjectID = projectID
-	request.EnvironmentName = s.defaultEnvironment
+	job.ProjectID = projectID
+	job.EnvironmentName = s.defaultEnvironment
 
 	// Populate name if the user does not define a name for the job
-	if request.Name == "" {
-		request.Name = generateDefaultJobName(ensembler.Name)
+	if job.Name == "" {
+		job.Name = generateDefaultJobName(ensembler.Name)
 	}
 
-	request.JobConfig.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
-	request.InfraConfig.ArtifactURI = ensembler.ArtifactURI
-	request.InfraConfig.EnsemblerName = ensembler.Name
+	job.JobConfig.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
+	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
+	job.InfraConfig.EnsemblerName = ensembler.Name
 
 	// Save ensembling job
-	err := s.Save(request)
+	err := s.Save(job)
 	if err != nil {
 		return nil, err
 	}
 
-	return request, nil
+	return job, nil
 }
