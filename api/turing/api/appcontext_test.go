@@ -54,6 +54,9 @@ func TestNewAppContext(t *testing.T) {
 			MaxCPU:          config.Quantity(resource.MustParse("200m")),
 			MaxMemory:       config.Quantity(resource.MustParse("100Mi")),
 		},
+		EnsemblingJobConfig: &config.EnsemblingJobConfig{
+			DefaultEnvironment: "dev",
+		},
 		RouterDefaults: &config.RouterDefaults{
 			Image:                   "asia.gcr.io/gcp-project-id/turing-router:1.0.0",
 			FiberDebugLogEnabled:    true,
@@ -89,7 +92,16 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
-		SwaggerFile: "swagger.yaml",
+		SwaggerFiles: []middleware.SwaggerYamlFile{
+			{
+				Type: middleware.SwaggerV2Type,
+				File: "swagger.yaml",
+			},
+			{
+				Type: middleware.SwaggerV3Type,
+				File: "swagger-batch.yaml",
+			},
+		},
 	}
 	// Create test auth enforcer and Vault client
 	me := &mocks.Enforcer{}
@@ -170,9 +182,12 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(
-		middleware.NewOpenAPIV2Validation,
-		func(file string, opt middleware.OpenAPIValidationOptions) (*middleware.OpenAPIValidation, error) {
-			assert.Equal(t, testCfg.SwaggerFile, file)
+		middleware.NewOpenAPIValidation,
+		func(
+			files []middleware.SwaggerYamlFile,
+			opt middleware.OpenAPIValidationOptions,
+		) (*middleware.OpenAPIValidation, error) {
+			assert.Equal(t, testCfg.SwaggerFiles, files)
 			return &middleware.OpenAPIValidation{}, nil
 		},
 	)
@@ -198,6 +213,7 @@ func TestNewAppContext(t *testing.T) {
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
 		RoutersService:        service.NewRoutersService(nil),
 		EnsemblersService:     service.NewEnsemblersService(nil),
+		EnsemblingJobService:  service.NewEnsemblingJobService(nil, "dev"),
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,

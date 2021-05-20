@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gojek/turing/api/turing/middleware"
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be
 	// easily marshalled into JSON, which is currently the format required for experiment config.
@@ -52,9 +53,10 @@ type Config struct {
 	Port                int `validate:"required"`
 	AllowedOrigins      []string
 	AuthConfig          *AuthorizationConfig
-	DbConfig            *DatabaseConfig   `validate:"required"`
-	DeployConfig        *DeploymentConfig `validate:"required"`
-	RouterDefaults      *RouterDefaults   `validate:"required"`
+	DbConfig            *DatabaseConfig      `validate:"required"`
+	DeployConfig        *DeploymentConfig    `validate:"required"`
+	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
+	RouterDefaults      *RouterDefaults      `validate:"required"`
 	Sentry              sentry.Config
 	VaultConfig         *VaultConfig `validate:"required"`
 	TuringEncryptionKey string       `validate:"required"`
@@ -63,7 +65,7 @@ type Config struct {
 	TuringUIConfig      *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerFile string
+	SwaggerFiles []middleware.SwaggerYamlFile
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -96,6 +98,11 @@ type DeploymentConfig struct {
 	DeletionTimeout time.Duration `validate:"required"`
 	MaxCPU          Quantity      `validate:"required"`
 	MaxMemory       Quantity      `validate:"required"`
+}
+
+// EnsemblingJobConfig captures the config related to the ensembling batch jobs.
+type EnsemblingJobConfig struct {
+	DefaultEnvironment string `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files
@@ -316,7 +323,16 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.AppDirectory", "")
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
-	v.SetDefault("SwaggerFile", "swagger.yaml")
+	v.SetDefault("SwaggerFiles", []middleware.SwaggerYamlFile{
+		{
+			Type: middleware.SwaggerV2Type,
+			File: "swagger.yaml",
+		},
+		{
+			Type: middleware.SwaggerV3Type,
+			File: "swagger-batch.yaml",
+		},
+	})
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

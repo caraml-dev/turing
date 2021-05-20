@@ -1,3 +1,5 @@
 env/
 .coverage
 tests/mlruns/
+
+vendor/

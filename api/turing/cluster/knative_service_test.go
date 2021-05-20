@@ -184,7 +184,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 						},
 						Annotations: annotations,
 					},
-					Spec:       knservingv1.RevisionSpec{
+					Spec: knservingv1.RevisionSpec{
 						PodSpec:        podSpec,
 						TimeoutSeconds: &timeout,
 					},

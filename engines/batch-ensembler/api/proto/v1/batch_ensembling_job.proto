@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package turing.batch.spec;
-option go_package = "github.com/gojek/turing/batch-ensembler/pkg/spec";
+option go_package = "github.com/turing/engines/batch-ensembler/pkg/api/proto/v1";
 
 // Represents a specification of the batch ensembling job
 message BatchEnsemblingJob {

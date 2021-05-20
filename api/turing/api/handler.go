@@ -102,6 +102,7 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 		RoutersController{deploymentController},
 		RouterVersionsController{deploymentController},
 		EnsemblersController{baseController},
+		EnsemblingJobController{baseController},
 		AlertsController{baseController},
 		PodLogController{baseController},
 		ExperimentsController{baseController},
