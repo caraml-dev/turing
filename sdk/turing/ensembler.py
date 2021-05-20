@@ -74,8 +74,9 @@ class EnsemblerType(Enum):
 @turing.utils.autostr
 @ApiObjectSpec(turing.generated.models.Ensembler)
 class Ensembler(ApiObject):
-    def __init__(self, name: str, type: EnsemblerType, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, name: str, type: EnsemblerType, project_id: int = None, **kwargs):
+        super(Ensembler, self).__init__(**kwargs)
+        self._project_id = project_id
         self._name = name
         self._type = type
 
@@ -91,15 +92,28 @@ class Ensembler(ApiObject):
     def type(self) -> str:
         return self._type.value
 
+    @property
+    def project_id(self) -> int:
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, project_id: int):
+        self._project_id = project_id
+
     @classmethod
     def list(
             cls,
-            type: Optional[EnsemblerType] = None,
+            ensembler_type: Optional[EnsemblerType] = None,
             page: Optional[int] = None,
-            page_size: Optional[int] = None):
+            page_size: Optional[int] = None) -> List['Ensembler']:
         from turing import active_session
 
-        active_session.create_ensembler
+        response = active_session.list_ensemblers(
+            ensembler_type=ensembler_type,
+            page=page,
+            page_size=page_size
+        )
+        return [Ensembler.from_open_api(item) for item in response.results]
 
 
 @ApiObjectSpec(turing.generated.models.PyFuncEnsembler)
@@ -108,9 +122,9 @@ class PyFuncEnsembler(Ensembler):
 
     def __init__(
             self,
-            mlflow_experiment_id: int,
-            mlflow_run_id: str,
-            artifact_uri: str,
+            mlflow_experiment_id: int = None,
+            mlflow_run_id: str = None,
+            artifact_uri: str = None,
             **kwargs):
         kwargs.pop('type', None)
         super(PyFuncEnsembler, self).__init__(type=EnsemblerType.PYFUNC, **kwargs)
@@ -146,11 +160,13 @@ class PyFuncEnsembler(Ensembler):
     def _experiment_name(cls, name: str) -> str:
         pass
 
-    def _save(self) -> 'PyFuncEnsembler':
+    def _save(self):
         from turing import active_session
-
-        return PyFuncEnsembler.from_open_api(
-            active_session.update_ensembler(self.to_open_api()))
+        self.__dict__.update(
+            PyFuncEnsembler.from_open_api(
+                active_session.update_ensembler(self.to_open_api())
+            ).__dict__
+        )
 
     def update(
             self,
@@ -158,7 +174,7 @@ class PyFuncEnsembler(Ensembler):
             ensembler_instance: Optional[EnsemblerBase] = None,
             conda_env: Optional[Union[str, Dict[str, Any]]] = None,
             code_dir: Optional[List[str]] = None,
-            artifacts: Optional[Dict[str, str]] = None) -> 'PyFuncEnsembler':
+            artifacts: Optional[Dict[str, str]] = None):
         import mlflow
         from turing import active_session
 
@@ -186,7 +202,22 @@ class PyFuncEnsembler(Ensembler):
 
             mlflow.end_run()
 
-        return self._save()
+        self._save()
+
+    @classmethod
+    def list(
+            cls,
+            page: Optional[int] = None,
+            page_size: Optional[int] = None,
+            **kwargs) -> List['PyFuncEnsembler']:
+        from turing import active_session
+
+        response = active_session.list_ensemblers(
+            ensembler_type=EnsemblerType.PYFUNC,
+            page=page,
+            page_size=page_size
+        )
+        return [PyFuncEnsembler.from_open_api(item) for item in response.results]
 
     @classmethod
     def create(

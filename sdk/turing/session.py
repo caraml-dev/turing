@@ -1,8 +1,9 @@
 import os
-from turing.generated.apis import EnsemblerApi, ProjectApi
-from typing import Optional
-from turing import Project, Ensembler
 import mlflow
+from typing import Optional
+from turing.ensembler import EnsemblerType
+from turing.generated.apis import EnsemblerApi, ProjectApi
+from turing.generated.models import Project, Ensembler, EnsemblersPaginatedResults
 
 
 def require_active_project(f):
@@ -60,16 +61,34 @@ class TuringSession:
         return filtered[0]
 
     @require_active_project
+    def list_ensemblers(
+            self,
+            ensembler_type: Optional[EnsemblerType] = None,
+            page: Optional[int] = None,
+            page_size: Optional[int] = None) -> EnsemblersPaginatedResults:
+        kwargs = {}
+
+        if ensembler_type:
+            kwargs["type"] = ensembler_type.value
+        if page:
+            kwargs["page"] = page
+        if page_size:
+            kwargs["page_size"] = page_size
+
+        return EnsemblerApi(self._api_client).list_ensemblers(
+            project_id=self.active_project.id,
+            **kwargs
+        )
+
+    @require_active_project
     def create_ensembler(self, ensembler: Ensembler) -> Ensembler:
-        ensemblers_api = EnsemblerApi(self._api_client)
-        return ensemblers_api.create_ensembler(
+        return EnsemblerApi(self._api_client).create_ensembler(
             project_id=self.active_project.id,
             ensembler=ensembler)
 
     @require_active_project
     def update_ensembler(self, ensembler: Ensembler) -> Ensembler:
-        ensemblers_api = EnsemblerApi(self._api_client)
-        return ensemblers_api.update_ensembler(
+        return EnsemblerApi(self._api_client).update_ensembler(
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,
             ensembler=ensembler)
