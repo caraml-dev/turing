@@ -45,7 +45,7 @@ jobs:
         run: make dev
 
       - name: Build
-        run: python setup.py sdist bdist_wheel
+        run: make build
 
       - name: Publish
         env:

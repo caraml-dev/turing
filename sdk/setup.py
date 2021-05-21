@@ -2,6 +2,10 @@ import setuptools
 import pathlib
 import pkg_resources
 
+with pathlib.Path('turing/version.py').open() as version_py:
+    _locals = locals()
+    exec(version_py.read(), globals(), _locals)
+    version = _locals['VERSION']
 
 with pathlib.Path('requirements.txt').open() as requirements_txt:
     requirements = [
@@ -19,6 +23,7 @@ with pathlib.Path('requirements.dev.txt').open() as dev_requirements_test:
 
 setuptools.setup(
     name='turing-sdk',
+    version=version,
     packages=setuptools.find_packages(),
     install_requires=requirements,
     dev_requirements=dev_requirements,

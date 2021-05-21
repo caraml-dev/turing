@@ -1,4 +1,6 @@
-.PHONY: setup
+.PHONY: evn dev gen-client build version
+
+VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker))
 
 env:
 	pip install -r requirements.txt
@@ -14,6 +16,9 @@ gen-client:
 		--output . \
 		--config openapi-codegen.yaml
 
-build:
-	python setup.py check
-	python setup.py sdist
+version:
+	@echo VERSION = \"$(VERSION_NUMBER)\" > turing/version.py
+	@echo $(VERSION_NUMBER)
+
+build: gen-client version
+	python setup.py sdist bdist_wheel
