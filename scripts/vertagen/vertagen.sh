@@ -65,7 +65,7 @@ function buildVersion() {
         local ref=`git log -n 1 --pretty=format:'%h'`
         if [[ $format == "docker" ]]; then
           vsn="${version_prefix}${version_candidate}-build.${commit_count}-${ref}"
-        if [[ $format == "pypi" ]]; then
+        elif [[ $format == "pypi" ]]; then
           vsn="${version_prefix}${version_candidate}-build.${commit_count}"
         else
           vsn="${version_prefix}${version_candidate}-build.${commit_count}+${ref}"
