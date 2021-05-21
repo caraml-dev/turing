@@ -20,5 +20,5 @@ version:
 	@echo VERSION = \"$(VERSION_NUMBER)\" > turing/version.py
 	@echo $(VERSION_NUMBER)
 
-build: gen-client version
+build: version
 	python setup.py sdist bdist_wheel
