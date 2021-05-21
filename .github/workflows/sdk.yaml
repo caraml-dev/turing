@@ -24,6 +24,14 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: |
+            pip-${{ hashFiles('sdk/requirements.txt') }}-${{ hashFiles('sdk/requirements.dev.txt') }}
+          restore-keys: pip-
+
       - name: Install dependencies
         run: make dev
 
@@ -40,6 +48,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: |
+            pip-${{ hashFiles('sdk/requirements.txt') }}-${{ hashFiles('sdk/requirements.dev.txt') }}
+          restore-keys: pip-
 
       - name: Install dependencies
         run: make dev

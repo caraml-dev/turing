@@ -1,1 +1,5 @@
-.openapi-generator
+.openapi-generator/
+
+build/
+dist/
+turing_sdk.egg-info/
