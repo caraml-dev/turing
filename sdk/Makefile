@@ -1,6 +1,6 @@
 .PHONY: evn dev gen-client build version
 
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker))
+VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f pypi))
 
 env:
 	pip install -r requirements.txt
