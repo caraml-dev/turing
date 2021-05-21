@@ -66,7 +66,7 @@ function buildVersion() {
         if [[ $format == "docker" ]]; then
           vsn="${version_prefix}${version_candidate}-build.${commit_count}-${ref}"
         elif [[ $format == "pypi" ]]; then
-          vsn="${version_prefix}${version_candidate}-build.${commit_count}"
+          vsn="${version_prefix}${version_candidate}.dev${commit_count}"
         else
           vsn="${version_prefix}${version_candidate}-build.${commit_count}+${ref}"
         fi

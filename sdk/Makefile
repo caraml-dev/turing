@@ -21,4 +21,5 @@ version:
 	@echo $(VERSION_NUMBER)
 
 build: version
-	python setup.py sdist bdist_wheel
+	@rm -rf build dist
+	@python setup.py sdist bdist_wheel
