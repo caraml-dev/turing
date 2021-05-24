@@ -26,6 +26,8 @@ setuptools.setup(
     version=version,
     packages=setuptools.find_packages(),
     install_requires=requirements,
-    dev_requirements=dev_requirements,
+    extras_require={
+        'dev': dev_requirements
+    },
     python_requires='>=3.8',
 )

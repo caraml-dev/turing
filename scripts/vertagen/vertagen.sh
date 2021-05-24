@@ -17,6 +17,7 @@ set -e
 format=
 version_prefix=
 commit_count=
+main_branch_name="main"
 version_candidate="0.0.0"
 version_tag=""
 vsn=
@@ -63,10 +64,15 @@ function buildVersion() {
         vsn=$version_candidate
     else
         local ref=`git log -n 1 --pretty=format:'%h'`
+        local current_branch=`git branch --show-current`
         if [[ $format == "docker" ]]; then
           vsn="${version_prefix}${version_candidate}-build.${commit_count}-${ref}"
         elif [[ $format == "pypi" ]]; then
-          vsn="${version_prefix}${version_candidate}.dev${commit_count}"
+          local suffix=""
+          if [[ $current_branch != "$main_branch_name" ]]; then
+            suffix=".dev"
+          fi
+          vsn="${version_prefix}${version_candidate}.post${commit_count}${suffix}"
         else
           vsn="${version_prefix}${version_candidate}-build.${commit_count}+${ref}"
         fi
@@ -75,22 +81,25 @@ function buildVersion() {
 
 
 function usage() {
-  echo "usage: vertagen [[-p <version_prefix>] | [-f docker] ] | [-h]]"
+  echo "usage: vertagen [[-p <version_prefix>] | [-m <main_branch_name>] | [-f docker] ] | [-h]]"
 }
 
 while [ "$1" != "" ]; do
     case $1 in
-        -p | --prefix )         shift
-                                version_prefix=$1
-                                ;;
-        -f | --format )         shift
-                                format=$1
-                                ;;
-        -h | --help )           usage
-                                exit
-                                ;;
-        * )                     usage
-                                exit 1
+        -p | --prefix )           shift
+                                  version_prefix=$1
+                                  ;;
+        -f | --format )           shift
+                                  format=$1
+                                  ;;
+        -m | --main-branch-name ) shift
+                                  main_branch_name=$1
+                                  ;;
+        -h | --help )             usage
+                                  exit
+                                  ;;
+        * )                       usage
+                                  exit 1
     esac
     shift
 done

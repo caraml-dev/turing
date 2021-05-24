@@ -43,6 +43,9 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+        with:
+          # fetch full history for a proper version number assignment
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v2
