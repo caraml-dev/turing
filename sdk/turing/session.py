@@ -1,7 +1,8 @@
 import os
 import mlflow
-from typing import Optional
+from typing import List, Optional
 from turing.ensembler import EnsemblerType
+from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, ProjectApi
 from turing.generated.models import Project, Ensembler, EnsemblersPaginatedResults
 
@@ -18,14 +19,13 @@ class TuringSession:
     OAUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email']
 
     def __init__(self, host: str, project_name: str = None, use_google_oauth: bool = True):
-        from turing.generated.api_client import ApiClient, Configuration
-        import google.auth
-        from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
-
         config = Configuration(host=os.path.join(host, 'v1'))
         self._api_client = ApiClient(config)
 
         if use_google_oauth:
+            import google.auth
+            from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
+
             credentials, project = google.auth.default(scopes=TuringSession.OAUTH_SCOPES)
             authorized_http = AuthorizedHttp(credentials, urllib3.PoolManager())
             self._api_client.rest_client.pool_manager = authorized_http
@@ -47,9 +47,14 @@ class TuringSession:
     def set_project(self, project_name: str):
         self.active_project = self.get_project_by_name(project_name)
 
+    def list_projects(self, name: Optional[str] = None) -> List[Project]:
+        kwargs = {}
+        if name:
+            kwargs["name"] = name
+        return ProjectApi(self._api_client).projects_get(**kwargs)
+
     def get_project_by_name(self, project_name: str) -> Project:
-        projects_api = ProjectApi(self._api_client)
-        p_list = projects_api.projects_get(name=project_name)
+        p_list = self.list_projects(name=project_name)
 
         filtered = [p for p in p_list if p.name == project_name][:1]
         if not filtered:
@@ -92,3 +97,30 @@ class TuringSession:
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,
             ensembler=ensembler)
+
+
+active_session: TuringSession = TuringSession(
+    host="http://localhost:8080",
+    use_google_oauth=False
+)
+
+
+def set_url(url: str, use_google_oauth: bool = True):
+    """
+    Set Turing API URL
+
+    :param url: Turing API URL
+    :param use_google_oauth: whether use google auth or not
+    """
+
+    global active_session
+    active_session = TuringSession(host=url, use_google_oauth=use_google_oauth)
+
+
+def set_project(project_name: str):
+    """
+    Set active project
+
+    :param project_name: project name
+    """
+    active_session.set_project(project_name)

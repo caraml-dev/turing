@@ -1,9 +1,8 @@
-import turing.utils
-from turing._base_types import ApiObject, ApiObjectSpec
+from typing import Optional, List
 import turing.generated.models
+from turing._base_types import ApiObject, ApiObjectSpec
 
 
-@turing.utils.autostr
 @ApiObjectSpec(turing.generated.models.Project)
 class Project(ApiObject):
 
@@ -18,3 +17,10 @@ class Project(ApiObject):
     @name.setter
     def name(self, name: str):
         self._name = name
+
+    @classmethod
+    def list(cls, name: Optional[str] = None) -> List['Project']:
+        from turing.session import active_session
+
+        response = active_session.list_projects(name=name)
+        return [Project.from_open_api(item) for item in response]

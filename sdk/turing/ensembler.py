@@ -1,20 +1,16 @@
 import abc
-import os
-from abc import abstractmethod
 from enum import Enum
 from typing import Optional, Union, List, Any, Dict
-import turing.utils
 import mlflow.pyfunc
 import numpy
 import pandas
-
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 
 
 class EnsemblerBase(abc.ABC):
 
-    @abstractmethod
+    @abc.abstractmethod
     def ensemble(
             self,
             features: pandas.Series,
@@ -71,7 +67,6 @@ class EnsemblerType(Enum):
     PYFUNC = "pyfunc"
 
 
-@turing.utils.autostr
 @ApiObjectSpec(turing.generated.models.Ensembler)
 class Ensembler(ApiObject):
     def __init__(self, name: str, type: EnsemblerType, project_id: int = None, **kwargs):
@@ -106,7 +101,7 @@ class Ensembler(ApiObject):
             ensembler_type: Optional[EnsemblerType] = None,
             page: Optional[int] = None,
             page_size: Optional[int] = None) -> List['Ensembler']:
-        from turing import active_session
+        from turing.session import active_session
 
         response = active_session.list_ensemblers(
             ensembler_type=ensembler_type,
@@ -157,11 +152,11 @@ class PyFuncEnsembler(Ensembler):
         self._artifact_uri = artifact_uri
 
     @classmethod
-    def _experiment_name(cls, name: str) -> str:
-        pass
+    def _experiment_name(cls, project_name: str, ensembler_name: str) -> str:
+        return f"{project_name}/ensemblers/{ensembler_name}"
 
     def _save(self):
-        from turing import active_session
+        from turing.session import active_session
         self.__dict__.update(
             PyFuncEnsembler.from_open_api(
                 active_session.update_ensembler(self.to_open_api())
@@ -176,14 +171,14 @@ class PyFuncEnsembler(Ensembler):
             code_dir: Optional[List[str]] = None,
             artifacts: Optional[Dict[str, str]] = None):
         import mlflow
-        from turing import active_session
+        from turing.session import active_session
 
         if name:
             self.name = name
 
         if ensembler_instance:
             project_name = active_session.active_project.name
-            mlflow.set_experiment(experiment_name=os.path.join(project_name, "ensemblers", self.name))
+            mlflow.set_experiment(experiment_name=self._experiment_name(project_name, self.name))
 
             mlflow.start_run()
             mlflow.pyfunc.log_model(
@@ -210,7 +205,7 @@ class PyFuncEnsembler(Ensembler):
             page: Optional[int] = None,
             page_size: Optional[int] = None,
             **kwargs) -> List['PyFuncEnsembler']:
-        from turing import active_session
+        from turing.session import active_session
 
         response = active_session.list_ensemblers(
             ensembler_type=EnsemblerType.PYFUNC,
@@ -229,10 +224,10 @@ class PyFuncEnsembler(Ensembler):
             artifacts: Dict[str, str] = None,
             ) -> 'PyFuncEnsembler':
         import mlflow
-        from turing import active_session
+        from turing.session import active_session
 
         project_name = active_session.active_project.name
-        mlflow.set_experiment(experiment_name=os.path.join(project_name, "ensemblers", name))
+        mlflow.set_experiment(experiment_name=cls._experiment_name(project_name, name))
 
         mlflow.start_run()
         mlflow.pyfunc.log_model(
@@ -255,6 +250,3 @@ class PyFuncEnsembler(Ensembler):
 
         return PyFuncEnsembler.from_open_api(
             active_session.create_ensembler(ensembler.to_open_api()))
-
-
-

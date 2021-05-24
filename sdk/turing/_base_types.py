@@ -1,12 +1,8 @@
 from datetime import datetime
-
-import json
-
 from turing.generated.model_utils import ModelNormal
 
 
 class ApiObject:
-
     def __init__(
             self,
             id: int = 0,
@@ -45,7 +41,7 @@ class ApiObject:
     def from_open_api(cls, open_api: ModelNormal):
         return cls(**open_api.to_dict())
 
-    def to_open_api(self):
+    def __attribs__(self):
         attribs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
 
         for name in dir(self.__class__):
@@ -59,7 +55,19 @@ class ApiObject:
                 if val:
                     attribs.append((name, val))
 
-        return self.OPEN_API_SPEC(**dict(attribs))
+        return attribs
+
+    def __str__(self):
+        return '%s(%s)' % (
+            type(self).__name__,
+            ','.join('\n\t%s=%s' % item for item in self.__attribs__())
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def to_open_api(self):
+        return self.OPEN_API_SPEC(**dict(self.__attribs__()))
 
 
 def ApiObjectSpec(spec: object):
