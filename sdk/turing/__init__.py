@@ -4,7 +4,7 @@ from turing.session import TuringSession
 from turing.version import VERSION
 
 
-active_session: TuringSession = TuringSession(host="http://localhost:8080")
+active_session: TuringSession = TuringSession(host="http://localhost:8080", use_google_oauth=False)
 
 
 def set_url(url: str, use_google_oauth: bool = True):
