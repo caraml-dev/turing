@@ -67,12 +67,12 @@ class ApiObject:
         return self.__str__()
 
     def to_open_api(self):
-        return self.OPEN_API_SPEC(**dict(self.__attribs__()))
+        return self._OPEN_API_SPEC(**dict(self.__attribs__()))
 
 
 def ApiObjectSpec(spec: object):
     def wrap(cls):
-        cls.OPEN_API_SPEC = spec
+        cls._OPEN_API_SPEC = spec
         return cls
 
     return wrap
