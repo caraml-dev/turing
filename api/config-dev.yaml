@@ -3,6 +3,8 @@ DbConfig:
   Password: turing
 DeployConfig:
   EnvironmentType: dev 
+EnsemblingJobConfig:
+  DefaultEnvironment: dev
 RouterDefaults:
   Image: localhost:5000/turing-router
 VaultConfig:

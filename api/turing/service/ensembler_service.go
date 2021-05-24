@@ -1,8 +1,6 @@
 package service
 
 import (
-	"math"
-
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -84,26 +82,12 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 		Find(&results)
 	<-done
 
-	page := 1
-	if options.Page != nil {
-		page = int(math.Max(1, float64(*options.Page)))
-	}
-	totalPages := 1
-	if options.PageSize != nil {
-		totalPages = int(math.Ceil(float64(count) / float64(*options.PageSize)))
-	}
-
 	if err := result.Error; err != nil {
 		return nil, err
 	}
-	return &PaginatedResults{
-		Results: results,
-		Paging: Paging{
-			Total: count,
-			Page:  page,
-			Pages: totalPages,
-		},
-	}, nil
+
+	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
+	return paginatedResults, nil
 }
 
 func (service *ensemblersService) Save(ensembler models.EnsemblerLike) (models.EnsemblerLike, error) {

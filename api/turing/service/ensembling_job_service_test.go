@@ -1,0 +1,289 @@
+// +build integration
+
+package service
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/it/database"
+	"github.com/gojek/turing/api/turing/models"
+	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
+	"github.com/jinzhu/gorm"
+	"github.com/stretchr/testify/assert"
+)
+
+func generateEnsemblingJobFixture(
+	i int,
+	ensemblerID models.ID,
+	projectID models.ID,
+	name string,
+	genExpected bool,
+) *models.EnsemblingJob {
+	value := &models.EnsemblingJob{
+		Name:            name,
+		EnsemblerID:     ensemblerID,
+		ProjectID:       projectID,
+		EnvironmentName: "dev",
+		InfraConfig: &models.InfraConfig{
+			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
+			Resources: &models.BatchEnsemblingJobResources{
+				DriverCPURequest:      "1",
+				DriverMemoryRequest:   "1Gi",
+				ExecutorReplica:       10,
+				ExecutorCPURequest:    "1",
+				ExecutorMemoryRequest: "1Gi",
+			},
+		},
+		JobConfig: &models.JobConfig{
+			JobConfig: batchensembler.BatchEnsemblingJob{
+				Version: "v1",
+				Kind:    batchensembler.BatchEnsemblingJob_BatchEnsemblingJob,
+				Metadata: &batchensembler.BatchEnsemblingJobMetadata{
+					Name: fmt.Sprintf("test-batch-ensembling-%d", i),
+					Annotations: map[string]string{
+						"spark/spark.jars":                                  "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar",
+						"spark/spark.jars.packages":                         "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1",
+						"hadoopConfiguration/fs.gs.impl":                    "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
+						"hadoopConfiguration/fs.AbstractFileSystem.gs.impl": "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
+					},
+				},
+				Spec: &batchensembler.BatchEnsemblingJobSpec{
+					Source: &batchensembler.Source{
+						Dataset: &batchensembler.Dataset{
+							Type: batchensembler.Dataset_DatasetType(
+								batchensembler.Dataset_BQ,
+							),
+							Config: &batchensembler.Dataset_BqConfig{
+								BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
+									Query: "select * from helloworld where customer_id = 4",
+									Options: map[string]string{
+										"viewsEnabled":           "true",
+										"materializationDataset": "dataset",
+									},
+								},
+							},
+						},
+						JoinOn: []string{"customer_id", "target_date"},
+					},
+					Predictions: map[string]*batchensembler.PredictionSource{
+						"model_a": {
+							Dataset: &batchensembler.Dataset{
+								Type: batchensembler.Dataset_DatasetType(
+									batchensembler.Dataset_BQ,
+								),
+								Config: &batchensembler.Dataset_BqConfig{
+									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
+										Table: "project.dataset.predictions_model_a",
+										Features: []string{
+											"customer_id",
+											"target_date",
+											"predictions",
+										},
+									},
+								},
+							},
+							Columns: []string{"predictions"},
+							JoinOn:  []string{"customer_id", "target_date"},
+						},
+						"model_b": {
+							Dataset: &batchensembler.Dataset{
+								Type: batchensembler.Dataset_DatasetType(
+									batchensembler.Dataset_BQ,
+								),
+								Config: &batchensembler.Dataset_BqConfig{
+									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
+										Query: "select * from helloworld where customer_id = 3",
+									},
+								},
+							},
+							Columns: []string{"predictions"},
+							JoinOn:  []string{"customer_id", "target_date"},
+						},
+					},
+					Ensembler: &batchensembler.Ensembler{
+						Uri: "gs://bucket-name/my-ensembler/artifacts/ensembler",
+						Result: &batchensembler.Ensembler_Result{
+							ColumnName: "prediction_score",
+							Type:       batchensembler.Ensembler_FLOAT,
+							ItemType:   batchensembler.Ensembler_FLOAT,
+						},
+					},
+					Sink: &batchensembler.Sink{
+						Type: batchensembler.Sink_BQ,
+						Columns: []string{
+							"customer_id as customerId",
+							"target_date",
+							"results",
+						},
+						SaveMode: batchensembler.Sink_OVERWRITE,
+						Config: &batchensembler.Sink_BqConfig{
+							BqConfig: &batchensembler.Sink_BigQuerySinkConfig{
+								Table:         "project.dataset.ensembling_results",
+								StagingBucket: "bucket-name",
+								Options: map[string]string{
+									"partitionField": "target_date",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	if genExpected {
+		value.JobConfig.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+		value.EnvironmentName = "dev"
+		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
+		value.InfraConfig.EnsemblerName = "ensembler"
+	}
+
+	return value
+}
+
+func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
+	t.Run("success | insertion with no errors", func(t *testing.T) {
+		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+
+			projectID := models.ID(1)
+			ensemblerID := models.ID(1000)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			err := ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+
+			found, err := ensemblingJobService.FindByID(
+				ensemblingJob.ID,
+				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+			)
+			assert.NoError(t, err)
+
+			assert.NotEqual(t, found.ID, models.ID(0))
+			assert.Equal(t, found.Name, ensemblingJob.Name)
+			assert.Equal(t, found.EnsemblerID, ensemblingJob.EnsemblerID)
+			assert.Equal(t, found.ProjectID, ensemblingJob.ProjectID)
+			assert.Equal(t, found.EnvironmentName, ensemblingJob.EnvironmentName)
+			assert.Equal(t, models.JobPending, ensemblingJob.Status)
+			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
+			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+		})
+	})
+}
+
+func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
+	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
+		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+
+			// Save job
+			projectID := models.ID(1)
+			ensemblerID := models.ID(1000)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			err := ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+
+			// Query pending ensembling jobs
+			pageSize := 10
+			pendingStatus := models.JobPending
+			fetched, err := ensemblingJobService.List(
+				EnsemblingJobListOptions{
+					PaginationOptions: PaginationOptions{
+						Page:     testutils.NullableInt(1),
+						PageSize: &pageSize,
+					},
+					Status: &pendingStatus,
+				},
+			)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, fetched.Paging.Total)
+			ensemblingJobs := fetched.Results.([]*models.EnsemblingJob)
+
+			queriedEnsemblingJob := ensemblingJobs[0]
+			assert.Equal(t, models.Status("pending"), queriedEnsemblingJob.Status)
+
+			// Update pending job
+			queriedEnsemblingJob.Status = models.JobFailedSubmission
+			queriedEnsemblingJob.Error = "error"
+			err = ensemblingJobService.Save(queriedEnsemblingJob)
+			assert.NoError(t, err)
+
+			// Query back
+			found, err := ensemblingJobService.FindByID(
+				ensemblingJob.ID,
+				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+			)
+			assert.NoError(t, err)
+			assert.Equal(t, models.JobFailedSubmission, found.Status)
+		})
+	})
+}
+
+func TestCreateEnsemblingJob(t *testing.T) {
+	var tests = map[string]struct {
+		ensembler *models.PyFuncEnsembler
+		request   *models.EnsemblingJob
+		expected  *models.EnsemblingJob
+	}{
+		"success | name provided": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				},
+				ArtifactURI: "gs://bucket/ensembler",
+			},
+			request:  generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
+			expected: generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+		},
+		"success | name not provided": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				},
+				ArtifactURI: "gs://bucket/ensembler",
+			},
+			request:  generateEnsemblingJobFixture(1, 1, 1, "", false),
+			expected: generateEnsemblingJobFixture(1, 1, 1, "", true),
+		},
+	}
+
+	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				ensemblingJobService := NewEnsemblingJobService(db, "dev")
+				result, err := ensemblingJobService.CreateEnsemblingJob(
+					tt.request,
+					1,
+					tt.ensembler,
+				)
+				assert.Nil(t, err)
+				expected := tt.expected
+
+				assert.NotEqual(t, models.ID(0), result.ID)
+
+				assert.NotEqual(t, result.Name, "")
+				assert.Equal(t, expected.EnsemblerID, result.EnsemblerID)
+				assert.Equal(t, expected.ProjectID, result.ProjectID)
+				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
+				assert.Equal(t, models.JobPending, result.Status)
+
+				assert.Equal(
+					t,
+					result.JobConfig.JobConfig.Spec.Ensembler.Uri,
+					expected.JobConfig.JobConfig.Spec.Ensembler.Uri,
+				)
+
+				assert.Equal(t, expected.InfraConfig.ArtifactURI, result.InfraConfig.ArtifactURI)
+				assert.Equal(t, expected.InfraConfig.EnsemblerName, result.InfraConfig.EnsemblerName)
+			})
+		}
+	})
+}

@@ -131,10 +131,23 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			openapi, err := NewOpenAPIV2Validation("../../swagger.yaml", OpenAPIValidationOptions{
-				IgnoreAuthentication: true,
-				IgnoreServers:        true,
-			})
+			swaggerYamlFiles := []SwaggerYamlFile{
+				{
+					Type: SwaggerV2Type,
+					File: "../../swagger.yaml",
+				},
+				{
+					Type: SwaggerV3Type,
+					File: "../../swagger-batch.yaml",
+				},
+			}
+			openapi, err := NewOpenAPIValidation(
+				swaggerYamlFiles,
+				OpenAPIValidationOptions{
+					IgnoreAuthentication: true,
+					IgnoreServers:        true,
+				},
+			)
 			if err != nil {
 				t.Error(err)
 			}
@@ -155,20 +168,38 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 }
 
-func TestNewOpenAPIV2Validation(t *testing.T) {
+func TestNewOpenAPIValidation(t *testing.T) {
 	tests := []struct {
-		name            string
-		swaggerYamlFile string
-		options         OpenAPIValidationOptions
+		name             string
+		swaggerYamlFiles []SwaggerYamlFile
+		options          OpenAPIValidationOptions
 	}{
 		{
-			name:            "default options",
-			swaggerYamlFile: "../../swagger.yaml",
-			options:         OpenAPIValidationOptions{},
+			name: "default options",
+			swaggerYamlFiles: []SwaggerYamlFile{
+				{
+					Type: SwaggerV2Type,
+					File: "../../swagger.yaml",
+				},
+				{
+					Type: SwaggerV3Type,
+					File: "../../swagger-batch.yaml",
+				},
+			},
+			options: OpenAPIValidationOptions{},
 		},
 		{
-			name:            "ignore authentication and servers",
-			swaggerYamlFile: "../../swagger.yaml",
+			name: "ignore authentication and servers",
+			swaggerYamlFiles: []SwaggerYamlFile{
+				{
+					Type: SwaggerV2Type,
+					File: "../../swagger.yaml",
+				},
+				{
+					Type: SwaggerV3Type,
+					File: "../../swagger-batch.yaml",
+				},
+			},
 			options: OpenAPIValidationOptions{
 				IgnoreAuthentication: true,
 				IgnoreServers:        true,
@@ -177,14 +208,11 @@ func TestNewOpenAPIV2Validation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oapi, err := NewOpenAPIV2Validation(tt.swaggerYamlFile, tt.options)
+			oapi, err := NewOpenAPIValidation(tt.swaggerYamlFiles, tt.options)
 			if err != nil {
 				t.Error(err)
 			}
 			if tt.name == "default options" {
-				if len(oapi.swagger.Servers) < 1 {
-					t.Errorf("server len got: %d, want: >= 1", len(oapi.swagger.Servers))
-				}
 				r, err := http.NewRequest("GET", "http://localhost:8080/v1/projects/1/routers", nil)
 				if err != nil {
 					t.Error(err)
@@ -194,9 +222,6 @@ func TestNewOpenAPIV2Validation(t *testing.T) {
 				}
 			}
 			if tt.name == "ignore authentication and servers" {
-				if len(oapi.swagger.Servers) > 0 {
-					t.Error("server len want 0")
-				}
 				r, err := http.NewRequest("GET", "/projects/1/routers", nil)
 				if err != nil {
 					t.Error(err)

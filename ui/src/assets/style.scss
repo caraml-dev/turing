@@ -1,2 +1,13 @@
 @import "~@elastic/eui/src/theme_light.scss";
 @import "~@gojek/mlp-ui/dist/index.css";
+
+// don't stretch all the way
+@media only screen and (min-width: 960px) {
+  .euiPage {
+    max-width: 92% !important;
+  }
+}
+
+.euiBody--collapsibleNavIsDocked {
+  padding-left: 262px !important;
+}

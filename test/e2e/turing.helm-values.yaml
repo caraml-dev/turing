@@ -17,6 +17,8 @@ turing:
       Password: secret
     DeployConfig:
       EnvironmentType: id-dev
+    EnsemblingJobConfig:
+      DefaultEnvironment: dev
     RouterDefaults:
       Image: localhost:5000/turing-router:latest
     VaultConfig:

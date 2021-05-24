@@ -1,14 +1,14 @@
+import React from "react";
+import { navigate } from "@reach/router";
 import {
   ApplicationsContextProvider,
   CurrentProjectContextProvider,
   Header,
-  NavDrawer,
   ProjectsContextProvider
 } from "@gojek/mlp-ui";
 import { appConfig } from "./config";
-import { navigate } from "@reach/router";
 import { EnvironmentsContextProvider } from "./providers/environments/context";
-import React from "react";
+import "./PrivateLayout.scss";
 
 export const PrivateLayout = Component => {
   return props => (
@@ -21,12 +21,13 @@ export const PrivateLayout = Component => {
             onProjectSelect={projectId =>
               navigate(`${appConfig.homepage}/projects/${projectId}/routers`)
             }
-            helpLink={appConfig.docsUrl}
+            docLinks={appConfig.docsUrl}
           />
-          <NavDrawer homeUrl={appConfig.homepage} />
-          <EnvironmentsContextProvider>
-            <Component {...props} />
-          </EnvironmentsContextProvider>
+          <div className="main-component-layout">
+            <EnvironmentsContextProvider>
+              <Component {...props} />
+            </EnvironmentsContextProvider>
+          </div>
         </CurrentProjectContextProvider>
       </ProjectsContextProvider>
     </ApplicationsContextProvider>

@@ -101,6 +101,7 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 	controllers := []Controller{
 		AlertsController{baseController},
 		EnsemblersController{baseController},
+		EnsemblingJobController{baseController},
 		ExperimentsController{baseController},
 		PodLogController{baseController},
 		ProjectsController{baseController},

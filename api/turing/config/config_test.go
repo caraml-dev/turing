@@ -3,15 +3,17 @@
 package config
 
 import (
-	"github.com/mitchellh/copystructure"
-	"github.com/mitchellh/mapstructure"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/mitchellh/copystructure"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -155,7 +157,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 			},
 		},
 		"single file": {
@@ -220,7 +231,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -300,7 +320,16 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -398,7 +427,16 @@ func TestLoad(t *testing.T) {
 					AppDirectory: "appdir-env",
 					Homepage:     "/turing-env",
 				},
-				SwaggerFile: "swagger.yaml",
+				SwaggerFiles: []middleware.SwaggerYamlFile{
+					{
+						Type: middleware.SwaggerV2Type,
+						File: "swagger.yaml",
+					},
+					{
+						Type: middleware.SwaggerV3Type,
+						File: "swagger-batch.yaml",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
@@ -517,6 +555,9 @@ func TestConfigValidate(t *testing.T) {
 			MaxCPU:          Quantity(resource.MustParse("2")),
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
+		EnsemblingJobConfig: &EnsemblingJobConfig{
+			DefaultEnvironment: "dev",
+		},
 		RouterDefaults: &RouterDefaults{
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
@@ -592,6 +633,13 @@ func TestConfigValidate(t *testing.T) {
 		"missing Merlin URL": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.MLPConfig.MerlinURL = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing ensembling job default environment": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
