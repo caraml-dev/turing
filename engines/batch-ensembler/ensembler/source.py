@@ -2,7 +2,7 @@ import os
 import logging
 from typing import List, TypeVar, Generic
 from pyspark.sql import DataFrame, SparkSession
-from .components.experimentation import PREDICTION_COLUMN_PREFIX
+from turing.ensembler import PyFunc
 from .dataset import DataSet, BigQueryDataSet, jinja
 from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
@@ -52,7 +52,7 @@ class BigQuerySource(Source['BigQueryDataSet']):
                 'features_query': self.dataset().query,
                 'join_columns': self.join_columns(),
                 'predictions': predictions,
-                'prefix': PREDICTION_COLUMN_PREFIX
+                'prefix': PyFunc.PREDICTION_COLUMN_PREFIX
             }
         )
 

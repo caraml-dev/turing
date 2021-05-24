@@ -3,10 +3,10 @@ from typing import Optional, Any
 import pandas
 import pytest
 from chispa.dataframe_comparer import assert_df_equality
-import ensembler.components.experimentation as experimentation
 from ensembler.ensembler import Ensembler
 from ensembler.api.proto.v1 import batch_ensembling_job_pb2 as pb2
 from pyspark.sql import functions as F
+from turing.ensembler import PyFunc
 
 from tests.utils.proto_utils import from_yaml
 
@@ -24,13 +24,13 @@ def input_df(spark):
         ],
         f'customer_id int,'
         f'name string,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_a int,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_b int,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_double double,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_float float,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_integer int,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_long long,'
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_string string'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_a int,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_b int,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_double double,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_float float,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_integer int,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_long long,'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_string string'
     )
 
 
@@ -38,19 +38,19 @@ def input_df(spark):
 def expected_result_df(input_df, request):
     if request.param == pb2.Ensembler.ResultType.ARRAY:
         input_df = input_df.withColumn(
-            f'{experimentation.PREDICTION_COLUMN_PREFIX}model_array',
+            f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_array',
             F.when(F.lit(True), F.array(
-                F.col(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_a') * 2,
-                F.col(f'{experimentation.PREDICTION_COLUMN_PREFIX}model_b') * 2,
+                F.col(f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_a') * 2,
+                F.col(f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_b') * 2,
             ))
         )
     return input_df.select(
         'customer_id',
-        f'{experimentation.PREDICTION_COLUMN_PREFIX}model_{pb2.Ensembler.ResultType.Name(request.param).lower()}'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_{pb2.Ensembler.ResultType.Name(request.param).lower()}'
     )
 
 
-class TestEnsembler(experimentation.Ensembler, ABC):
+class TestEnsembler(PyFunc, ABC):
 
     def __init__(self, result_type: pb2.Ensembler.ResultType) -> None:
         super().__init__()
@@ -84,7 +84,7 @@ def config_simple(request):
     """, pb2.Ensembler())
 
 
-class ArrayEnsembler(experimentation.Ensembler, ABC):
+class ArrayEnsembler(PyFunc, ABC):
 
     def ensemble(
             self,

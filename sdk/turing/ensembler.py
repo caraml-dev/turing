@@ -42,13 +42,13 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel):
     def load_context(self, context):
         self.initialize(context.artifacts)
 
-    @abstractmethod
     def initialize(self, artifacts: dict):
         """
         Implementation of EnsemblerBase can specify initialization step which
         will be called one time during model initialization.
         :param artifacts: dictionary of artifacts passed to log_component method
         """
+        pass
 
     def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
