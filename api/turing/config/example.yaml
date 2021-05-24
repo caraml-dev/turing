@@ -41,6 +41,26 @@ NewRelic:
     - 405
     - 412
 
+# Ensembling job config
+EnsemblingJobConfig:
+  DefaultEnvironment: dev
+
+# Spark Infra config for running on Kubernetes
+# This is specific to the environment that you Kubernetes cluster runs on.
+SparkInfraConfig:
+  NodeSelector:
+    "node-workload-type": "batch"
+  CorePerCPURequest: 1.5
+  CPURequestToCPULimit: 1.25
+  SparkVersion: "2.4.5"
+  TolerationName: "batch-job"
+  SubmissionFailureRetries: 3
+  SubmissionFailureRetryInterval: 10
+  FailureRetries: 3
+  FailureRetryInterval: 10
+  PythonVersion: "3"
+  TTLSecond: 86400
+
 # Turing router configuration
 RouterDefaults:
   Image: ghcr.io/gojek/turing:latest

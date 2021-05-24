@@ -1,9 +1,11 @@
-package batchensembling
+package batchrunner
 
 import (
 	"testing"
 
 	mlp "github.com/gojek/mlp/client"
+	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchcontrollermock "github.com/gojek/turing/api/turing/batch/controller/mocks"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	imagebuildermock "github.com/gojek/turing/api/turing/imagebuilder/mocks"
 	"github.com/gojek/turing/api/turing/models"
@@ -141,18 +143,25 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 }
 
 func TestProcess(t *testing.T) {
-	var tests = []struct {
-		name                 string
+	var tests = map[string]struct {
 		injectGojekLabels    bool
 		environment          string
+		ensemblingController func() batchcontroller.EnsemblingController
 		imageBuilder         func() imagebuilder.ImageBuilder
 		ensemblingJobService func() service.EnsemblingJobService
 		mlpService           func() service.MLPService
 	}{
-		{
-			name:              "nominal",
+		"success | nominal": {
 			injectGojekLabels: true,
 			environment:       "testing",
+			ensemblingController: func() batchcontroller.EnsemblingController {
+				ctlr := &batchcontrollermock.EnsemblingController{}
+				ctlr.On(
+					"Create",
+					mock.Anything,
+				).Return(nil)
+				return ctlr
+			},
 			imageBuilder: func() imagebuilder.ImageBuilder {
 				ib := &imagebuildermock.ImageBuilder{}
 				ib.On(
@@ -194,15 +203,69 @@ func TestProcess(t *testing.T) {
 				return svc
 			},
 		},
+		"success | no ensembling jobs": {
+			injectGojekLabels: true,
+			environment:       "testing",
+			ensemblingController: func() batchcontroller.EnsemblingController {
+				ctlr := &batchcontrollermock.EnsemblingController{}
+				ctlr.On(
+					"Create",
+					mock.Anything,
+				).Return(nil)
+				return ctlr
+			},
+			imageBuilder: func() imagebuilder.ImageBuilder {
+				ib := &imagebuildermock.ImageBuilder{}
+				ib.On(
+					"BuildImage",
+					mock.Anything,
+					mock.Anything,
+				).Return("ghcr.io/test-project/mymodel:1", nil)
+				return ib
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &servicemock.EnsemblingJobService{}
+
+				svc.On(
+					"List",
+					mock.Anything,
+				).Return(&service.PaginatedResults{
+					Results: []*models.EnsemblingJob{},
+					Paging: service.Paging{
+						Total: 0,
+						Page:  1,
+						Pages: 1,
+					},
+				}, nil)
+
+				svc.On(
+					"Save",
+					mock.Anything,
+				).Return(nil)
+
+				return svc
+			},
+			mlpService: func() service.MLPService {
+				svc := &servicemock.MLPService{}
+				svc.On(
+					"GetProject",
+					mock.Anything,
+					mock.Anything,
+				).Return(&mlp.Project{Id: 1}, nil)
+				return svc
+			},
+		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			ensemblingController := tt.ensemblingController()
 			ensemblingJobService := tt.ensemblingJobService()
 			mlpService := tt.mlpService()
 			imageBuilder := tt.imageBuilder()
 
 			r := NewBatchEnsemblingJobRunner(
+				ensemblingController,
 				ensemblingJobService,
 				mlpService,
 				imageBuilder,
@@ -211,6 +274,8 @@ func TestProcess(t *testing.T) {
 				10,
 			)
 			r.Run()
+
+			// TODO: test the update loop
 		})
 	}
 }

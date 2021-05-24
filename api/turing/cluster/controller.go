@@ -9,13 +9,20 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 
+	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	sparkclient "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned"
+	sparkoperatorv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/typed/sparkoperator.k8s.io/v1beta2"
 	apiappsv1 "k8s.io/api/apps/v1"
+	apibatchv1 "k8s.io/api/batch/v1"
 	apicorev1 "k8s.io/api/core/v1"
+	apirbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
+	batchv1 "k8s.io/client-go/kubernetes/typed/batch/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
 
 	networkingv1alpha3 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1alpha3"
 
@@ -72,14 +79,24 @@ type Controller interface {
 	DeletePersistentVolumeClaim(pvcName string, namespace string) error
 	ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
+	CreateKanikoJob(namespace string, kanikoJob KanikoJobSpec) (*apibatchv1.Job, error)
+	GetJob(namespace string, jobName string) (*apibatchv1.Job, error)
+	DeleteJob(namespace string, jobName string) error
+	CreateServiceAccount(namespace, serviceAccountName string) (*apicorev1.ServiceAccount, error)
+	CreateRole(namespace string, roleName string, policyRules []apirbacv1.PolicyRule) (*apirbacv1.Role, error)
+	CreateRoleBinding(namespace, roleBindingName, serviceAccountName, roleName string) (*apirbacv1.RoleBinding, error)
+	CreateSparkApplication(namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
 }
 
 // controller implements the Controller interface
 type controller struct {
-	knServingClient knservingclient.ServingV1Interface
-	k8sCoreClient   corev1.CoreV1Interface
-	k8sAppsClient   appsv1.AppsV1Interface
-	istioClient     networkingv1alpha3.NetworkingV1alpha3Interface
+	knServingClient  knservingclient.ServingV1Interface
+	k8sCoreClient    corev1.CoreV1Interface
+	k8sAppsClient    appsv1.AppsV1Interface
+	k8sBatchClient   batchv1.BatchV1Interface
+	k8sRBACClient    rbacv1.RbacV1Interface
+	k8sSparkOperator sparkoperatorv1beta2.SparkoperatorV1beta2Interface
+	istioClient      networkingv1alpha3.NetworkingV1alpha3Interface
 }
 
 // newController initializes a new cluster controller with the given cluster config
@@ -110,12 +127,19 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 	if err != nil {
 		return nil, err
 	}
+	sparkClient, err := sparkclient.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return &controller{
-		knServingClient: knsClientSet.ServingV1(),
-		k8sCoreClient:   k8sClientset.CoreV1(),
-		k8sAppsClient:   k8sClientset.AppsV1(),
-		istioClient:     istioClientSet,
+		knServingClient:  knsClientSet.ServingV1(),
+		k8sCoreClient:    k8sClientset.CoreV1(),
+		k8sAppsClient:    k8sClientset.AppsV1(),
+		k8sBatchClient:   k8sClientset.BatchV1(),
+		k8sRBACClient:    k8sClientset.RbacV1(),
+		k8sSparkOperator: sparkClient.SparkoperatorV1beta2(),
+		istioClient:      istioClientSet,
 	}, nil
 }
 
@@ -471,6 +495,144 @@ func (c *controller) ListPodLogs(
 	opts *apicorev1.PodLogOptions,
 ) (io.ReadCloser, error) {
 	return c.k8sCoreClient.Pods(namespace).GetLogs(podName, opts).Stream()
+}
+
+// CreateKanikoJob creates a Kaniko job
+func (c *controller) CreateKanikoJob(namespace string, kanikoJob KanikoJobSpec) (*apibatchv1.Job, error) {
+	jobSpec := kanikoJob.BuildSpec()
+	return c.k8sBatchClient.Jobs(namespace).Create(jobSpec)
+}
+
+// GetJob gets the Kubernetes job
+func (c *controller) GetJob(namespace, jobName string) (*apibatchv1.Job, error) {
+	return c.k8sBatchClient.Jobs(namespace).Get(jobName, metav1.GetOptions{})
+}
+
+// DeleteJob deletes the Kubernetes job
+func (c *controller) DeleteJob(namespace, jobName string) error {
+	return c.k8sBatchClient.Jobs(namespace).Delete(jobName, &metav1.DeleteOptions{})
+}
+
+func (c *controller) CreateServiceAccount(namespace, serviceAccountName string) (*apicorev1.ServiceAccount, error) {
+	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(serviceAccountName, metav1.GetOptions{})
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			return nil, errors.Errorf("failed getting status of driver service account %s in namespace %s", serviceAccountName, namespace)
+		}
+
+		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(
+			&apicorev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      serviceAccountName,
+					Namespace: namespace,
+				},
+			},
+		)
+
+		if err != nil {
+			return nil, errors.Errorf("failed creating driver service account %s in namespace %s", serviceAccountName, namespace)
+		}
+	}
+
+	return sa, nil
+}
+
+func (c *controller) CreateRole(
+	namespace string,
+	roleName string,
+	policyRules []apirbacv1.PolicyRule,
+) (*apirbacv1.Role, error) {
+	role, err := c.k8sRBACClient.Roles(namespace).Get(roleName, metav1.GetOptions{})
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			return nil, errors.Errorf(
+				"failed getting status of driver role %s in namespace %s",
+				roleName,
+				namespace,
+			)
+		}
+
+		role, err = c.k8sRBACClient.Roles(namespace).Create(
+			&apirbacv1.Role{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      roleName,
+					Namespace: namespace,
+				},
+				Rules: policyRules,
+			},
+		)
+
+		if err != nil {
+			return nil, errors.Errorf(
+				"failed creating driver roles %s in namespace %s",
+				roleName,
+				namespace,
+			)
+		}
+	}
+
+	return role, nil
+}
+
+func (c *controller) CreateRoleBinding(
+	namespace,
+	roleBindingName,
+	serviceAccountName,
+	roleName string,
+) (*apirbacv1.RoleBinding, error) {
+	rb, err := c.k8sRBACClient.RoleBindings(namespace).Get(roleBindingName, metav1.GetOptions{})
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			return nil, errors.Errorf(
+				"failed getting status of driver rolebinding %s in namespace %s",
+				roleBindingName,
+				namespace,
+			)
+		}
+
+		rb, err = c.k8sRBACClient.RoleBindings(namespace).Create(
+			&apirbacv1.RoleBinding{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      roleBindingName,
+					Namespace: namespace,
+				},
+				Subjects: []apirbacv1.Subject{
+					{
+						Kind:      "ServiceAccount",
+						Namespace: namespace,
+						Name:      serviceAccountName,
+					},
+				},
+				RoleRef: apirbacv1.RoleRef{
+					APIGroup: "rbac.authorization.k8s.io",
+					Kind:     "Role",
+					Name:     roleName,
+				},
+			},
+		)
+
+		if err != nil {
+			return nil, errors.Errorf(
+				"failed creating driver roles binding %s in namespace %s",
+				roleBindingName,
+				namespace,
+			)
+		}
+	}
+
+	return rb, nil
+}
+
+func (c *controller) CreateSparkApplication(
+	namespace string,
+	request *CreateSparkRequest,
+) (*apisparkv1beta2.SparkApplication, error) {
+	s, err := createSparkRequest(request)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.k8sSparkOperator.SparkApplications(namespace).Create(s)
 }
 
 // waitKnativeServiceReady waits for the given knative service to become ready, until the

@@ -522,6 +522,21 @@ func TestConfigValidate(t *testing.T) {
 		EnsemblingJobConfig: &EnsemblingJobConfig{
 			DefaultEnvironment: "dev",
 		},
+		SparkInfraConfig: &SparkInfraConfig{
+			NodeSelector: map[string]string{
+				"node-workload-type": "batch",
+			},
+			CorePerCPURequest:              1.5,
+			CPURequestToCPULimit:           1.25,
+			SparkVersion:                   "2.4.5",
+			TolerationName:                 "batch-job",
+			SubmissionFailureRetries:       3,
+			SubmissionFailureRetryInterval: 10,
+			FailureRetries:                 3,
+			FailureRetryInterval:           10,
+			PythonVersion:                  "3",
+			TTLSecond:                      86400,
+		},
 		RouterDefaults: &RouterDefaults{
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
@@ -610,6 +625,13 @@ func TestConfigValidate(t *testing.T) {
 		"missing ensembling job default environment": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing spark infra config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.SparkInfraConfig = nil
 				return validConfig
 			},
 			wantErr: true,

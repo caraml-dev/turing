@@ -1,5 +1,3 @@
-// +build unit
-
 package cluster
 
 import (
@@ -14,10 +12,14 @@ import (
 
 	"bou.ke/monkey"
 
+	sparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	sparkOpFake "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	istioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -479,6 +481,373 @@ func TestDeleteK8sService(t *testing.T) {
 	err := c.DeleteKubernetesService(testName, testNamespace, time.Second*5)
 	// Validate no error
 	assert.NoError(t, err)
+}
+
+func TestCreateKanikoJob(t *testing.T) {
+	namespace := "test-ns"
+	kanikoJob := KanikoJobSpec{
+		PodName:   "bob",
+		Namespace: "builder",
+		Labels: map[string]string{
+			"builderName": "bob",
+		},
+		Args: []string{
+			"--dockerfile=Dockerfile",
+		},
+		Image:         "gcr.io/kaniko-project/executor",
+		Version:       "v1.5.2",
+		CPURequest:    resource.MustParse("1"),
+		MemoryRequest: resource.MustParse("1Gi"),
+		CPULimit:      resource.MustParse("1"),
+		MemoryLimit:   resource.MustParse("1Gi"),
+	}
+	t.Run("success | nominal flow", func(t *testing.T) {
+		cs := fake.NewSimpleClientset()
+		cs.PrependReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+			po := action.(k8stesting.CreateAction).GetObject().(*batchv1.Job)
+			return true, &batchv1.Job{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: po.Name,
+				},
+			}, nil
+		})
+		c := &controller{
+			k8sBatchClient: cs.BatchV1(),
+		}
+		job, err := c.CreateKanikoJob(namespace, kanikoJob)
+		assert.Nil(t, err)
+		assert.NotNil(t, job)
+	})
+}
+
+func TestGetJob(t *testing.T) {
+	namespace := "test-ns"
+	jobName := "bicycle"
+	tests := map[string]struct {
+		reactors []reactor
+		jobNil   bool
+		errNil   bool
+	}{
+		"failure | no such job": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "job",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
+					},
+				},
+			},
+			jobNil: true,
+			errNil: false,
+		},
+		"success | job exists": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "jobs",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &batchv1.Job{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: jobName,
+							},
+						}, nil
+					},
+				},
+			},
+			jobNil: false,
+			errNil: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cs := fake.NewSimpleClientset()
+			for _, reactor := range tt.reactors {
+				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
+			}
+			c := &controller{
+				k8sBatchClient: cs.BatchV1(),
+			}
+			job, err := c.GetJob(namespace, jobName)
+			assert.True(t, (job == nil) == tt.jobNil)
+			assert.True(t, (err == nil) == tt.errNil)
+		})
+	}
+}
+
+func TestDeleteJob(t *testing.T) {
+	namespace := "test-ns"
+	jobName := "bicycle"
+	tests := map[string]struct {
+		reactors []reactor
+		jobNil   bool
+		errNil   bool
+	}{
+		"failure | no such job": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Delete,
+					resource: "job",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
+					},
+				},
+			},
+			errNil: false,
+		},
+		"success | job exists": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Delete,
+					resource: "jobs",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, nil, nil
+					},
+				},
+			},
+			errNil: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cs := fake.NewSimpleClientset()
+			for _, reactor := range tt.reactors {
+				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
+			}
+			c := &controller{
+				k8sBatchClient: cs.BatchV1(),
+			}
+			err := c.DeleteJob(namespace, jobName)
+			assert.True(t, (err == nil) == tt.errNil)
+		})
+	}
+}
+
+func TestCreateServiceAccount(t *testing.T) {
+	namespace := "test-ns"
+	serviceAccountName := "bicycle"
+	tests := map[string]struct {
+		reactors  []reactor
+		errNil    bool
+		svcAccNil bool
+	}{
+		"success | service account exists": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "serviceaccount",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &corev1.ServiceAccount{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: serviceAccountName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:    true,
+			svcAccNil: false,
+		},
+		"success | service account created": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Create,
+					resource: "serviceaccount",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &corev1.ServiceAccount{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: serviceAccountName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:    true,
+			svcAccNil: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cs := fake.NewSimpleClientset()
+			for _, reactor := range tt.reactors {
+				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
+			}
+			c := &controller{
+				k8sBatchClient: cs.BatchV1(),
+				k8sRBACClient:  cs.RbacV1(),
+				k8sCoreClient:  cs.CoreV1(),
+			}
+			svcAcc, err := c.CreateServiceAccount(namespace, serviceAccountName)
+			assert.True(t, (err == nil) == tt.errNil)
+			assert.True(t, (svcAcc == nil) == tt.svcAccNil)
+		})
+	}
+}
+
+func TestCreateRole(t *testing.T) {
+	namespace := "test-ns"
+	roleName := "bicycle"
+	tests := map[string]struct {
+		reactors []reactor
+		errNil   bool
+		roleNil  bool
+	}{
+		"success | service account exists": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "role",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &rbacv1.Role{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: roleName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:  true,
+			roleNil: false,
+		},
+		"success | service account created": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Create,
+					resource: "role",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &rbacv1.Role{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: roleName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:  true,
+			roleNil: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cs := fake.NewSimpleClientset()
+			for _, reactor := range tt.reactors {
+				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
+			}
+			c := &controller{
+				k8sBatchClient: cs.BatchV1(),
+				k8sRBACClient:  cs.RbacV1(),
+				k8sCoreClient:  cs.CoreV1(),
+			}
+			role, err := c.CreateRole(namespace, roleName, DefaultSparkDriverRoleRules)
+			assert.True(t, (err == nil) == tt.errNil)
+			assert.True(t, (role == nil) == tt.roleNil)
+		})
+	}
+}
+
+func TestCreateRoleBinding(t *testing.T) {
+	namespace := "test-ns"
+	roleName := "bicycle"
+	roleBindingName := "wd-40"
+	serviceAccountName := "bicycle-shop"
+	tests := map[string]struct {
+		reactors []reactor
+		errNil   bool
+		roleNil  bool
+	}{
+		"success | service account exists": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "rolebinding",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &rbacv1.RoleBinding{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: roleBindingName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:  true,
+			roleNil: false,
+		},
+		"success | service account created": {
+			reactors: []reactor{
+				{
+					verb:     reactorVerbs.Create,
+					resource: "rolebinding",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						return true, &rbacv1.RoleBinding{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: roleBindingName,
+							},
+						}, nil
+					},
+				},
+			},
+			errNil:  true,
+			roleNil: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cs := fake.NewSimpleClientset()
+			for _, reactor := range tt.reactors {
+				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
+			}
+			c := &controller{
+				k8sBatchClient: cs.BatchV1(),
+				k8sRBACClient:  cs.RbacV1(),
+				k8sCoreClient:  cs.CoreV1(),
+			}
+			role, err := c.CreateRoleBinding(namespace, roleBindingName, serviceAccountName, roleName)
+			assert.True(t, (err == nil) == tt.errNil)
+			assert.True(t, (role == nil) == tt.roleNil)
+		})
+	}
+}
+
+func TestCreateSparkApplication(t *testing.T) {
+	namespace := "test-ci"
+	t.Run("success | nominal", func(t *testing.T) {
+		cs := fake.NewSimpleClientset()
+		cs.PrependReactor(
+			reactorVerbs.Create,
+			"sparkapplication",
+			func(action k8stesting.Action) (bool, runtime.Object, error) {
+				return true, &sparkv1beta2.SparkApplication{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "spark",
+					},
+				}, nil
+			},
+		)
+		sparkClientSet := sparkOpFake.Clientset{}
+		c := &controller{
+			k8sBatchClient:   cs.BatchV1(),
+			k8sRBACClient:    cs.RbacV1(),
+			k8sCoreClient:    cs.CoreV1(),
+			k8sSparkOperator: sparkClientSet.SparkoperatorV1beta2(),
+		}
+		req := &CreateSparkRequest{
+			JobName:               jobName,
+			JobLabels:             jobLabels,
+			JobImageRef:           jobImageRef,
+			JobApplicationPath:    jobApplicationPath,
+			JobArguments:          jobArguments,
+			DriverCPURequest:      cpuValue,
+			DriverMemoryRequest:   memoryValue,
+			ExecutorCPURequest:    cpuValue,
+			ExecutorMemoryRequest: memoryValue,
+			ExecutorReplica:       executorReplica,
+			ServiceAccountName:    serviceAccountName,
+			SparkInfraConfig:      sparkInfraConfig,
+		}
+		sparkApp, err := c.CreateSparkApplication(namespace, req)
+		assert.NotNil(t, sparkApp)
+		assert.Nil(t, err)
+	})
 }
 
 func TestCreateNamespace(t *testing.T) {

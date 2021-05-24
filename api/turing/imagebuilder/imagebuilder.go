@@ -13,29 +13,16 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 	"github.com/pkg/errors"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
+	apibatchv1 "k8s.io/api/batch/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
+	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/log"
 )
 
 const (
-	googleApplicationEnvVarName = "GOOGLE_APPLICATION_CREDENTIALS"
-	kanikoSecretName            = "kaniko-secret"
-	kanikoSecretMountpath       = "/secret"
-	kanikoSecretFileName        = "kaniko-secret.json"
-	imageBuilderContainerName   = "kaniko-builder"
-	tickDurationInSeconds       = 5
-)
-
-var (
-	jobCompletions            int32 = 1
-	jobBackOffLimit           int32 = 3
-	jobTTLSecondAfterComplete int32 = 3600 * 24
+	tickDurationInSeconds = 5
 )
 
 // BuildImageRequest contains the information needed to build the OCI image
@@ -61,15 +48,15 @@ type nameGenerator interface {
 }
 
 type imageBuilder struct {
-	kubeClient    kubernetes.Interface
-	imageConfig   ImageConfig
-	kanikoConfig  KanikoConfig
-	nameGenerator nameGenerator
+	clusterController cluster.Controller
+	imageConfig       ImageConfig
+	kanikoConfig      KanikoConfig
+	nameGenerator     nameGenerator
 }
 
 // NewImageBuilder creates a new ImageBuilder
 func newImageBuilder(
-	kubeClient kubernetes.Interface,
+	clusterController cluster.Controller,
 	imageConfig ImageConfig,
 	kanikoConfig KanikoConfig,
 	nameGenerator nameGenerator,
@@ -80,10 +67,10 @@ func newImageBuilder(
 	}
 
 	return &imageBuilder{
-		kubeClient:    kubeClient,
-		imageConfig:   imageConfig,
-		kanikoConfig:  kanikoConfig,
-		nameGenerator: nameGenerator,
+		clusterController: clusterController,
+		imageConfig:       imageConfig,
+		kanikoConfig:      kanikoConfig,
+		nameGenerator:     nameGenerator,
 	}, nil
 }
 
@@ -102,9 +89,15 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	}
 
 	// Check if there is an existing build job
-	jobClient := ib.kubeClient.BatchV1().Jobs(ib.imageConfig.BuildNamespace)
-	kanikoPodName := ib.nameGenerator.generateBuilderJobName(request.ProjectName, request.ModelName, request.VersionID)
-	job, err := jobClient.Get(kanikoPodName, metav1.GetOptions{})
+	kanikoPodName := ib.nameGenerator.generateBuilderJobName(
+		request.ProjectName,
+		request.ModelName,
+		request.VersionID,
+	)
+	job, err := ib.clusterController.GetJob(
+		ib.imageConfig.BuildNamespace,
+		kanikoPodName,
+	)
 
 	if err != nil {
 		if !kerrors.IsNotFound(err) {
@@ -112,8 +105,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			return "", ErrUnableToGetJobStatus
 		}
 
-		jobSpec := ib.createKanikoJobSpec(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
-		job, err = jobClient.Create(jobSpec)
+		job, err = ib.createKanikoJob(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -122,14 +114,13 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		// Only recreate when job has failed too many times, else no action required and just wait for it to finish
 		if job.Status.Failed != 0 {
 			// job already created before so we have to delete it first if it failed
-			err = jobClient.Delete(job.Name, &metav1.DeleteOptions{})
+			err = ib.clusterController.DeleteJob(ib.imageConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("error deleting job: %v", err)
 				return "", ErrDeleteFailedJob
 			}
 
-			jobSpec := ib.createKanikoJobSpec(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
-			job, err = jobClient.Create(jobSpec)
+			job, err = ib.createKanikoJob(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -145,10 +136,9 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	return imageRef, nil
 }
 
-func (ib *imageBuilder) waitForJobToFinish(job *batchv1.Job) error {
+func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 	timeout := time.After(ib.imageConfig.BuildTimeoutDuration)
 	ticker := time.NewTicker(time.Second * tickDurationInSeconds)
-	jobClient := ib.kubeClient.BatchV1().Jobs(ib.imageConfig.BuildNamespace)
 
 	for {
 		select {
@@ -156,7 +146,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *batchv1.Job) error {
 			log.Errorf("timeout waiting for kaniko job completion %s", job.Name)
 			return ErrTimeoutBuildingImage
 		case <-ticker.C:
-			j, err := jobClient.Get(job.Name, metav1.GetOptions{})
+			j, err := ib.clusterController.GetJob(ib.imageConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
 				return ErrUnableToBuildImage
@@ -173,12 +163,12 @@ func (ib *imageBuilder) waitForJobToFinish(job *batchv1.Job) error {
 	}
 }
 
-func (ib *imageBuilder) createKanikoJobSpec(
+func (ib *imageBuilder) createKanikoJob(
 	kanikoPodName string,
 	imageRef string,
 	artifactURI string,
 	buildLabels map[string]string,
-) *batchv1.Job {
+) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := splitURI[len(splitURI)-1]
 
@@ -192,62 +182,23 @@ func (ib *imageBuilder) createKanikoJobSpec(
 		"--single-snapshot",
 	}
 
-	return &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      kanikoPodName,
-			Namespace: ib.imageConfig.BuildNamespace,
-			Labels:    buildLabels,
-		},
-		Spec: batchv1.JobSpec{
-			Completions:             &jobCompletions,
-			BackoffLimit:            &jobBackOffLimit,
-			TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicyNever,
-					Containers: []corev1.Container{
-						{
-							Name:  imageBuilderContainerName,
-							Image: fmt.Sprintf("%s:%s", ib.kanikoConfig.Image, ib.kanikoConfig.ImageVersion),
-							Args:  kanikoArgs,
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      kanikoSecretName,
-									MountPath: kanikoSecretMountpath,
-								},
-							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  googleApplicationEnvVarName,
-									Value: fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName),
-								},
-							},
-							Resources: corev1.ResourceRequirements{
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.CPU),
-									corev1.ResourceMemory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.Memory),
-								},
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.CPU),
-									corev1.ResourceMemory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.Memory),
-								},
-							},
-						},
-					},
-					Volumes: []corev1.Volume{
-						{
-							Name: kanikoSecretName,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: kanikoSecretName,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+	spec := cluster.KanikoJobSpec{
+		PodName:       kanikoPodName,
+		Namespace:     ib.imageConfig.BuildNamespace,
+		Labels:        buildLabels,
+		Args:          kanikoArgs,
+		Image:         ib.kanikoConfig.Image,
+		Version:       ib.kanikoConfig.ImageVersion,
+		CPURequest:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.CPU),
+		MemoryRequest: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.Memory),
+		CPULimit:      resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.CPU),
+		MemoryLimit:   resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.Memory),
 	}
+
+	return ib.clusterController.CreateKanikoJob(
+		ib.imageConfig.BuildNamespace,
+		spec,
+	)
 }
 
 func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (bool, error) {

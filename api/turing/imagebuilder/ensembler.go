@@ -3,17 +3,17 @@ package imagebuilder
 import (
 	"fmt"
 
-	"k8s.io/client-go/kubernetes"
+	"github.com/gojek/turing/api/turing/cluster"
 )
 
 // NewEnsemberJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
 func NewEnsemberJobImageBuilder(
-	kubeClient kubernetes.Interface,
+	clusterController cluster.Controller,
 	imageConfig ImageConfig,
 	kanikoConfig KanikoConfig,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
-		kubeClient,
+		clusterController,
 		imageConfig,
 		kanikoConfig,
 		&ensemblerJobNameGenerator{registry: imageConfig.Registry},

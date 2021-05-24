@@ -55,6 +55,7 @@ type Config struct {
 	DbConfig            *DatabaseConfig      `validate:"required"`
 	DeployConfig        *DeploymentConfig    `validate:"required"`
 	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
+	SparkInfraConfig    *SparkInfraConfig    `validate:"required"`
 	RouterDefaults      *RouterDefaults      `validate:"required"`
 	NewRelicConfig      newrelic.Config
 	Sentry              sentry.Config
@@ -103,6 +104,21 @@ type DeploymentConfig struct {
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
 	DefaultEnvironment string `validate:"required"`
+}
+
+// SparkInfraConfig contains the infra configurations that is unique to the user's Kubernetes
+type SparkInfraConfig struct {
+	NodeSelector                   map[string]string `validate:"required"`
+	CorePerCPURequest              float64           `validate:"required"`
+	CPURequestToCPULimit           float64           `validate:"required"`
+	SparkVersion                   string            `validate:"required"`
+	TolerationName                 string            `validate:"required"`
+	SubmissionFailureRetries       int32             `validate:"required"`
+	SubmissionFailureRetryInterval int64             `validate:"required"`
+	FailureRetries                 int32             `validate:"required"`
+	FailureRetryInterval           int64             `validate:"required"`
+	PythonVersion                  string            `validate:"required"`
+	TTLSecond                      int64             `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files

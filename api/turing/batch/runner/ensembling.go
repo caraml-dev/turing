@@ -1,7 +1,10 @@
-package batchensembling
+package batchrunner
 
 import (
-	"github.com/gojek/turing/api/turing/batch"
+	"sync"
+
+	mlp "github.com/gojek/mlp/client"
+	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/log"
@@ -10,6 +13,7 @@ import (
 )
 
 type ensemblingJobRunner struct {
+	ensemblingController batchcontroller.EnsemblingController
 	ensemblingJobService service.EnsemblingJobService
 	mlpService           service.MLPService
 	imageBuilder         imagebuilder.ImageBuilder
@@ -30,14 +34,16 @@ var (
 // NewBatchEnsemblingJobRunner creates a new batch ensembling job
 // This service controls the orchestration of batch ensembling jobs.
 func NewBatchEnsemblingJobRunner(
+	ensemblingController batchcontroller.EnsemblingController,
 	ensemblingJobService service.EnsemblingJobService,
 	mlpService service.MLPService,
 	imageBuilder imagebuilder.ImageBuilder,
 	injectGojekLabels bool,
 	environment string,
 	batchSize int,
-) batch.JobRunner {
+) BatchJobRunner {
 	return &ensemblingJobRunner{
+		ensemblingController: ensemblingController,
 		ensemblingJobService: ensemblingJobService,
 		mlpService:           mlpService,
 		imageBuilder:         imageBuilder,
@@ -63,27 +69,66 @@ func (r *ensemblingJobRunner) processNewEnsemblingJobs() {
 	}
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
 	if err != nil {
-		// TODO: send metric to Prometheus
 		log.Errorf("unable to query ensembling jobs", err)
 	}
+
 	ensemblingJobs := ensemblingJobsPaginated.Results.([]*models.EnsemblingJob)
+	var wg sync.WaitGroup
+	wg.Add(len(ensemblingJobs))
 	for _, ensemblingJob := range ensemblingJobs {
-		// Build Image
-		imageRef, imageBuildErr := r.buildImage(ensemblingJob)
-		if imageBuildErr != nil {
-			r.saveStatus(ensemblingJob, models.JobFailedBuildImage, imageBuildErr.Error())
-			continue
-		}
-
-		// Submit to Kubernetes
-		kubernetesError := r.submitToKubernetes(ensemblingJob, imageRef)
-		if kubernetesError != nil {
-			r.saveStatus(ensemblingJob, models.JobFailedSubmission, imageBuildErr.Error())
-			continue
-		}
-
-		r.saveStatus(ensemblingJob, models.JobRunning, "")
+		go r.processOneEnsemblingJob(&wg, ensemblingJob)
 	}
+	wg.Wait()
+}
+
+func (r *ensemblingJobRunner) processOneEnsemblingJob(wg *sync.WaitGroup, ensemblingJob *models.EnsemblingJob) {
+	defer wg.Done()
+
+	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
+	if queryErr != nil {
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error())
+		return
+	}
+
+	// Build Image
+	labels := r.buildLabels(ensemblingJob, mlpProject)
+	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels)
+	if imageBuildErr != nil {
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, imageBuildErr.Error())
+		return
+	}
+
+	// Submit to Kubernetes
+	controllerError := r.ensemblingController.Create(
+		&batchcontroller.CreateEnsemblingJobRequest{
+			EnsemblingJob: ensemblingJob,
+			Labels:        labels,
+			ImageRef:      imageRef,
+			Namespace:     mlpProject.Name,
+		},
+	)
+	if controllerError != nil {
+		r.saveStatus(ensemblingJob, models.JobFailedSubmission, controllerError.Error())
+		return
+	}
+
+	r.saveStatus(ensemblingJob, models.JobRunning, "")
+}
+
+func (r *ensemblingJobRunner) buildLabels(
+	ensemblingJob *models.EnsemblingJob,
+	mlpProject *mlp.Project,
+) map[string]string {
+	buildLabels := make(map[string]string)
+	if r.injectGojekLabels {
+		buildLabels[labelTeamName] = mlpProject.Team
+		buildLabels[labelStreamName] = mlpProject.Stream
+		buildLabels[labelAppName] = ensemblingJob.InfraConfig.EnsemblerName
+		buildLabels[labelEnvironment] = r.environment
+		buildLabels[labelOrchestratorName] = valueOrchestratorName
+	}
+
+	return buildLabels
 }
 
 func (r *ensemblingJobRunner) saveStatus(
@@ -99,21 +144,11 @@ func (r *ensemblingJobRunner) saveStatus(
 	}
 }
 
-func (r *ensemblingJobRunner) buildImage(ensemblingJob *models.EnsemblingJob) (string, error) {
-	mlpProject, err := r.mlpService.GetProject(ensemblingJob.ProjectID)
-	if err != nil {
-		return "", err
-	}
-
-	buildLabels := make(map[string]string)
-	if r.injectGojekLabels {
-		buildLabels[labelTeamName] = mlpProject.Team
-		buildLabels[labelStreamName] = mlpProject.Stream
-		buildLabels[labelAppName] = ensemblingJob.InfraConfig.EnsemblerName
-		buildLabels[labelEnvironment] = r.environment
-		buildLabels[labelOrchestratorName] = valueOrchestratorName
-	}
-
+func (r *ensemblingJobRunner) buildImage(
+	ensemblingJob *models.EnsemblingJob,
+	mlpProject *mlp.Project,
+	buildLabels map[string]string,
+) (string, error) {
 	request := imagebuilder.BuildImageRequest{
 		ProjectName: mlpProject.Name,
 		ModelName:   ensemblingJob.InfraConfig.EnsemblerName,
@@ -124,11 +159,6 @@ func (r *ensemblingJobRunner) buildImage(ensemblingJob *models.EnsemblingJob) (s
 	return r.imageBuilder.BuildImage(request)
 }
 
-func (r *ensemblingJobRunner) submitToKubernetes(ensemblingJob *models.EnsemblingJob, imageRef string) error {
-	// TODO: Implement
-	return nil
-}
-
 func (r *ensemblingJobRunner) updateEnsemblingJobStatus() {
-
+	// TODO: Fill in implementation
 }
