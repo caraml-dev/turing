@@ -3,6 +3,9 @@ from turing.generated.model_utils import ModelNormal
 
 
 class ApiObject:
+    """
+    Base DTO class, for objects retrieved from Turing API
+    """
     def __init__(
             self,
             id: int = 0,
@@ -39,14 +42,20 @@ class ApiObject:
 
     @classmethod
     def from_open_api(cls, open_api: ModelNormal):
+        """
+        Factory method, for constructing ApiObject (and its sub-classes) instances
+        from a relevant instance of openapi-generator generated model instance
+
+        :param open_api: instance of openapi-generator model
+        :return: new ApiObject instance
+        """
         return cls(**open_api.to_dict())
 
     def __attribs__(self):
         attribs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
 
         for name in dir(self.__class__):
-            # a protected property is somewhat uncommon but
-            # let's stay consistent with plain attribs
+            # skip private properties
             if name.startswith("_"):
                 continue
             obj = getattr(self.__class__, name)
@@ -67,6 +76,23 @@ class ApiObject:
         return self.__str__()
 
     def to_open_api(self):
+        """
+        Converts this ApiObject into an instance of openapi-generator model.
+        Sub-class of ApiObject should either
+        - have _OPEN_API_SPEC field set to a respective type from turing.generated.model model class
+          Example:
+
+          class Project(ApiObject):
+            _OPEN_API_SPEC = turing.generated.models.Project
+        or
+        - be annotated with ApiObjectSpec annotation
+          Example:
+
+          @ApiObjectSpec(turing.generated.models.Project)
+          class Project(ApiObject):
+
+        :return: instance of respective openapi data-transfer object
+        """
         return self._OPEN_API_SPEC(**dict(self.__attribs__()))
 
 

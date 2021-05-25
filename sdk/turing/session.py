@@ -16,9 +16,20 @@ def require_active_project(f):
 
 
 class TuringSession:
+    """
+    Session object for interacting with Turing back-end
+    """
+
     OAUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email']
 
     def __init__(self, host: str, project_name: str = None, use_google_oauth: bool = True):
+        """
+        Create new session
+
+        :param host: URL of Turing API
+        :param project_name: name of the project, this session should stick to
+        :param use_google_oauth: should be True if Turing API is protected with Google OAuth
+        """
         config = Configuration(host=os.path.join(host, 'v1'))
         self._api_client = ApiClient(config)
 
@@ -45,15 +56,31 @@ class TuringSession:
         self._project = project
 
     def set_project(self, project_name: str):
+        """
+        Set this session's active projects
+        """
         self.active_project = self.get_project_by_name(project_name)
 
     def list_projects(self, name: Optional[str] = None) -> List[Project]:
+        """
+        List all projects, that the current user has access to
+
+        :param name: filter projects by name
+        :return: list of projects
+        """
         kwargs = {}
         if name:
             kwargs["name"] = name
         return ProjectApi(self._api_client).projects_get(**kwargs)
 
     def get_project_by_name(self, project_name: str) -> Project:
+        """
+        Get MLP project by its name
+
+        :param project_name: name of the project
+        :raise Exception if the project with given name doesn't exist
+        :return: Project details
+        """
         p_list = self.list_projects(name=project_name)
 
         filtered = [p for p in p_list if p.name == project_name][:1]
@@ -71,6 +98,9 @@ class TuringSession:
             ensembler_type: Optional[EnsemblerType] = None,
             page: Optional[int] = None,
             page_size: Optional[int] = None) -> EnsemblersPaginatedResults:
+        """
+        List ensemblers
+        """
         kwargs = {}
 
         if ensembler_type:
@@ -87,12 +117,18 @@ class TuringSession:
 
     @require_active_project
     def create_ensembler(self, ensembler: Ensembler) -> Ensembler:
+        """
+        Create a new ensembler in the Turing back-end
+        """
         return EnsemblerApi(self._api_client).create_ensembler(
             project_id=self.active_project.id,
             ensembler=ensembler)
 
     @require_active_project
     def update_ensembler(self, ensembler: Ensembler) -> Ensembler:
+        """
+        Update existing ensembler
+        """
         return EnsemblerApi(self._api_client).update_ensembler(
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,

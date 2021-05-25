@@ -32,7 +32,12 @@ class EnsemblerBase(abc.ABC):
         """
 
 
-class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel):
+class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
+    """
+    Abstract implementation of PyFunc Ensembler.
+    It leverages the contract of mlflow's PythonModel and implements its `predict` method.
+    """
+
     PREDICTION_COLUMN_PREFIX = '__predictions__'
 
     def load_context(self, context):
@@ -69,6 +74,10 @@ class EnsemblerType(Enum):
 
 @ApiObjectSpec(turing.generated.models.Ensembler)
 class Ensembler(ApiObject):
+    """
+    API entity for Ensembler
+    """
+
     def __init__(self, name: str, type: EnsemblerType, project_id: int = None, **kwargs):
         super(Ensembler, self).__init__(**kwargs)
         self._project_id = project_id
@@ -101,6 +110,16 @@ class Ensembler(ApiObject):
             ensembler_type: Optional[EnsemblerType] = None,
             page: Optional[int] = None,
             page_size: Optional[int] = None) -> List['Ensembler']:
+        """
+        List ensemblers saved in the active project
+
+        :param ensembler_type: (optional) filter ensemblers by type
+        :param page: (optional) pagination parameters – page number
+        :param page_size: (optional) pagination parameters - page size
+
+        :return: list of ensemblers
+        """
+
         from turing.session import active_session
 
         response = active_session.list_ensemblers(
@@ -113,6 +132,10 @@ class Ensembler(ApiObject):
 
 @ApiObjectSpec(turing.generated.models.PyFuncEnsembler)
 class PyFuncEnsembler(Ensembler):
+    """
+    API entity for PyFuncEnsembler
+    """
+
     DEFAULT_ENSEMBLER_PATH = "ensembler"
 
     def __init__(
@@ -170,6 +193,21 @@ class PyFuncEnsembler(Ensembler):
             conda_env: Optional[Union[str, Dict[str, Any]]] = None,
             code_dir: Optional[List[str]] = None,
             artifacts: Optional[Dict[str, str]] = None):
+        """
+        Update existing pyfunc ensembler. Ensembler's data will be updated in-place
+
+        :param name: (optional) new name
+        :param ensembler_instance: (optional) updated implementation of the ensembler
+        :param conda_env: (optional) either a dictionary representation of a Conda
+            environment or the path to a Conda environment yaml file
+        :param code_dir: (optional) a list of local filesystem paths to Python file dependencies
+            (or directories containing file dependencies). These files are prepended to the
+            system path before the ensembler is loaded
+        :param artifacts: (optional) dictionary of artifact that will be stored together
+            with the model. This will be passed to turing.ensembler.PyFunc.initialize().
+            Example: {"config" : "config/staging.yaml"}
+        """
+
         import mlflow
         from turing.session import active_session
 
@@ -205,6 +243,14 @@ class PyFuncEnsembler(Ensembler):
             page: Optional[int] = None,
             page_size: Optional[int] = None,
             **kwargs) -> List['PyFuncEnsembler']:
+        """
+        List pyfunc ensemblers saved in the active project
+
+        :param page: (optional) pagination parameters – page number
+        :param page_size: (optional) pagination parameters - page size
+
+        :return: list of pyfunc ensemblers
+        """
         from turing.session import active_session
 
         response = active_session.list_ensemblers(
@@ -218,11 +264,27 @@ class PyFuncEnsembler(Ensembler):
     def create(
             cls,
             name: str,
-            ensembler_instance: EnsemblerBase,
+            ensembler_instance: PyFunc,
             conda_env: Union[str, Dict[str, Any]],
-            code_dir: List[str] = None,
+            code_dir: Optional[List[str]] = None,
             artifacts: Dict[str, str] = None,
             ) -> 'PyFuncEnsembler':
+        """
+        Save new pyfunc ensembler in the active project
+
+        :param name: ensembler's name. Must be unique among all ensemblers within the project
+        :param ensembler_instance: implementation of PyFunc ensembler
+        :param conda_env: either a dictionary representation of a Conda environment or
+            the path to a Conda environment yaml file
+        :param code_dir: (optional) a list of local filesystem paths to Python file dependencies
+            (or directories containing file dependencies). These files are prepended to the
+            system path before the ensembler is loaded
+        :param artifacts: dictionary of artifact that will be stored together with the model.
+            This will be passed to turing.ensembler.PyFunc.initialize().
+            Example: {"config" : "config/staging.yaml"}
+
+        :return: saved instance of PyFuncEnsembler
+        """
         import mlflow
         from turing.session import active_session
 

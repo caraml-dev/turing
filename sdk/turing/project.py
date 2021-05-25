@@ -5,7 +5,9 @@ from turing._base_types import ApiObject, ApiObjectSpec
 
 @ApiObjectSpec(turing.generated.models.Project)
 class Project(ApiObject):
-
+    """
+    API entity for MLP Project
+    """
     def __init__(self, name: str, mlflow_tracking_url: str, **kwargs):
         super().__init__(**kwargs)
         self._name = name
