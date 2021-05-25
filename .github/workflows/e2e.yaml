@@ -2,6 +2,13 @@ name: e2e
 
 on:
   push:
+    paths:
+      - ".github/workflows/e2e.yaml"
+      - "api/**"
+      - "engines/experiment/**"
+      - "engines/router/**"
+      - "infra/**"
+      - "test/e2e/**"
     branches:
     - "*"
   pull_request:
@@ -21,6 +28,11 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: "1.14"
+
+    - name: Reclaim some disk space
+      run: |
+        apt-get clean
+        du -h
 
     - name: Setup test infra
       working-directory: test/e2e
