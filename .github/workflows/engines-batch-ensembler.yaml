@@ -3,8 +3,8 @@ name: engines/batch-ensembler
 on:
   push:
     paths:
-      - .github/workflows/engines-batch-ensembler.yaml
-      - engines/batch-ensembler/**
+      - ".github/workflows/engines-batch-ensembler.yaml"
+      - "engines/batch-ensembler/**"
   pull_request:
     branches:
       - main

@@ -3,6 +3,7 @@ name: api
 on:
   push:
     paths:
+    - ".github/workflows/api.yaml"
     - "api/**"
   pull_request:
     branches:
