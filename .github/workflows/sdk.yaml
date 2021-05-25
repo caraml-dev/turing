@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: make dev
 
+      - name: Run unit tests
+        run: make test-unit
+
   publish:
     if: ${{ startsWith(github.ref, 'refs/tags/sdk/') }}
     runs-on: ubuntu-latest

@@ -1,4 +1,4 @@
-.PHONY: evn dev gen-client build version
+.PHONY: evn dev gen-client build version test-unit
 
 VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f pypi))
 
@@ -23,3 +23,6 @@ version:
 build: version
 	@rm -rf build dist
 	@python setup.py sdist bdist_wheel
+
+test-unit:
+	@python -m pytest --cov=turing

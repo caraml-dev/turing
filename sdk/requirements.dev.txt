@@ -3,4 +3,4 @@ wheel
 twine
 pytest
 pytest-cov
-fire
+urllib3-mock>=0.3.3
