@@ -32,7 +32,7 @@ jobs:
     - name: Reclaim some disk space
       run: |
         sudo apt-get clean
-        du -h
+        df -h
 
     - name: Setup test infra
       working-directory: test/e2e
