@@ -1,8 +1,6 @@
 import json
 import tests
 import turing
-
-
 from urllib3_mock import Responses
 
 responses = Responses('requests.packages.urllib3')
