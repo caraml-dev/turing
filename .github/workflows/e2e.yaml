@@ -31,7 +31,7 @@ jobs:
 
     - name: Reclaim some disk space
       run: |
-        apt-get clean
+        sudo apt-get clean
         du -h
 
     - name: Setup test infra
