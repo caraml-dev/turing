@@ -171,7 +171,7 @@ class EnsemblerApi(object):
             ensembler_id,
             **kwargs
         ):
-            """Returns Ensembler\"s details by its ID  # noqa: E501
+            """Returns Ensembler's details by its ID  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True

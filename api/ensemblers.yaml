@@ -60,7 +60,7 @@ paths:
     get:
       tags: [ "Ensembler" ]
       operationId: "GetEnsemblerDetails"
-      summary: Returns Ensembler"s details by its ID
+      summary: Returns Ensembler's details by its ID
       parameters:
         - in: path
           name: project_id
