@@ -31,6 +31,7 @@ jobs:
 
     - name: Reclaim some disk space
       run: |
+        df -h
         sudo apt-get clean
         df -h
 
@@ -59,6 +60,10 @@ jobs:
           - "build_turing_apiserver_docker_image" build_turing_apiserver_docker_image \
           --and-then \
           - "install_turing" install_turing
+
+    - name: Debug
+      run: |
+        df -h
 
     - name: Run test 
       working-directory: api 
