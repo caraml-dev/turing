@@ -3,6 +3,28 @@ import pandas
 import turing
 
 
+# Implement new pyfunc ensembler
+class MyEnsembler(turing.ensembler.PyFunc):
+    """
+    Simple ensembler, that returns predictions from the `model_odd`
+    if `customer_id` is odd, or predictions from `model_even` otherwise
+    """
+
+    def initialize(self, artifacts: dict):
+        pass
+
+    def ensemble(
+            self,
+            features: pandas.Series,
+            predictions: pandas.Series,
+            treatment_config: Optional[dict]) -> Any:
+        customer_id = features["customer_id"]
+        if (customer_id % 2) == 0:
+            return predictions['model_even']
+        else:
+            return predictions['model_odd']
+
+
 def main(turing_api: str, project: str):
     # Initialize Turing client
     turing.set_url(turing_api)
@@ -12,25 +34,6 @@ def main(turing_api: str, project: str):
     projects = turing.Project.list()
     for p in projects:
         print(p)
-
-    # Implement new pyfunc ensembler
-    class MyEnsembler(turing.ensembler.PyFunc):
-
-        def ensemble(
-                self,
-                features: pandas.Series,
-                predictions: pandas.Series,
-                treatment_config: Optional[dict]) -> Any:
-            """
-            Simple ensembler, that returns predictions from the `model_odd`
-            if `customer_id` is odd, or predictions from `model_even` otherwise
-            """
-
-            customer_id = features["customer_id"]
-            if (customer_id % 2) == 0:
-                return predictions['model_even']
-            else:
-                return predictions['model_odd']
 
     # Save pyfunc ensembler in Turing's backend
     ensembler = turing.PyFuncEnsembler.create(
@@ -73,4 +76,5 @@ def main(turing_api: str, project: str):
 
 if __name__ == '__main__':
     import fire
+
     fire.Fire(main)

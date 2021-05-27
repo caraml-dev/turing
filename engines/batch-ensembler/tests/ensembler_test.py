@@ -50,11 +50,14 @@ def expected_result_df(input_df, request):
     )
 
 
-class TestEnsembler(PyFunc, ABC):
+class TestEnsembler(PyFunc):
 
     def __init__(self, result_type: pb2.Ensembler.ResultType) -> None:
         super().__init__()
         self.result_type = result_type
+
+    def initialize(self, artifacts: dict):
+        pass
 
     def ensemble(
             self,
@@ -84,7 +87,10 @@ def config_simple(request):
     """, pb2.Ensembler())
 
 
-class ArrayEnsembler(PyFunc, ABC):
+class ArrayEnsembler(PyFunc):
+
+    def initialize(self, artifacts: dict):
+        pass
 
     def ensemble(
             self,

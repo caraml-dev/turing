@@ -10,9 +10,13 @@ from urllib3_mock import Responses
 
 responses = Responses('requests.packages.urllib3')
 
+
 class TestEnsembler(turing.ensembler.PyFunc):
     def __init__(self, default: float):
         self._default = default
+
+    def initialize(self, artifacts: dict):
+        pass
 
     def ensemble(
             self,
