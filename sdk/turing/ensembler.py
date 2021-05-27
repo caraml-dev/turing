@@ -30,6 +30,7 @@ class EnsemblerBase(abc.ABC):
 
         :returns ensembling result (one of str, int, float, double or array)
         """
+        pass
 
 
 class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
@@ -43,6 +44,7 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
     def load_context(self, context):
         self.initialize(context.artifacts)
 
+    @abc.abstractmethod
     def initialize(self, artifacts: dict):
         """
         Implementation of EnsemblerBase can specify initialization step which
