@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
 import pytest
-
-import tests
+from tests.fixtures.mlflow import mock_mlflow
+from tests.fixtures.gcs import mock_gcs
 
 
 @pytest.fixture
@@ -12,6 +13,20 @@ def turing_api() -> str:
 def use_google_oauth() -> bool:
     return False
 
+
 @pytest.fixture
-def project():
-    return tests.project_1
+def project(projects):
+    return projects[0]
+
+
+@pytest.fixture
+def projects(n=3):
+    from turing import generated as client
+    return [
+        client.models.Project(
+            id=i,
+            name=f"project_{i}",
+            mlflow_tracking_url="http://localhost:5000",
+            created_at=datetime.now() + timedelta(seconds=i+10),
+            updated_at=datetime.now() + timedelta(seconds=i+10)
+        ) for i in range(1, n + 1)]

@@ -7,8 +7,7 @@ responses = Responses('requests.packages.urllib3')
 
 
 @responses.activate
-def test_list_projects(turing_api, use_google_oauth):
-    projects = [tests.project_1, tests.project_2]
+def test_list_projects(turing_api, projects, use_google_oauth):
     responses.add(
         method="GET",
         url=f"/v1/projects",
