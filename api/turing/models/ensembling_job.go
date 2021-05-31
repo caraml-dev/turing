@@ -18,6 +18,8 @@ type EnsemblingJob struct {
 	EnvironmentName string       `json:"environment_name"`
 	InfraConfig     *InfraConfig `json:"infra_config"`
 	JobConfig       *JobConfig   `json:"job_config"`
+	IsLocked        bool         `json:"is_locked" gorm:"default:false"`
+	RetryCount      int          `json:"retry_count" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
 }
@@ -86,7 +88,13 @@ type BatchEnsemblingJobResources struct {
 // Possible statuses:
 // JobPending --▶ JobFailedSubmission
 //     |
-//     |--▶ JobFailedBuildImage
+//     |
+//     |
+//     |
+// JobBuildingImage --▶ JobFailedBuildImage
+//     |
+//     |
+//     |
 //     |
 //     ▼
 // JobRunning --▶ JobFailed
@@ -102,6 +110,8 @@ type Status string
 const (
 	// JobPending is when the job has just been introduced.
 	JobPending Status = "pending"
+	// JobBuildingImage is when the job is builing a OCI image.
+	JobBuildingImage Status = "building"
 	// JobRunning is when the job has been picked up and running.
 	JobRunning Status = "running"
 	// JobTerminating is when the job has begun stopping.

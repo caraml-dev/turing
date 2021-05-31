@@ -83,6 +83,9 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
 ENV PROJECT_DIR $HOME/batch-ensembler
 RUN mkdir -p $PROJECT_DIR
 COPY --chown=$UID:$GID . $PROJECT_DIR/
+COPY --chown=$UID:$GID entrypoint.sh .
+# Hack to ensure that it's compatible with the ../../sdk stated in requirements.txt
+COPY ./temp-deps/sdk $PROJECT_DIR/../../sdk
 
 # Setup base conda environment
 ENV CONDA_ENVIRONMENT turing-batch-ensembler
@@ -92,3 +95,5 @@ RUN conda env create -f $PROJECT_DIR/environment.yaml -n $CONDA_ENVIRONMENT && \
 RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc
 
 ENV PATH $CONDA_DIR/envs/$CONDA_ENVIRONMENT/bin:$PATH
+
+ENTRYPOINT ["./entrypoint.sh"]

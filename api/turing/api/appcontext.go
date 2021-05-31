@@ -5,8 +5,11 @@ import (
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 	"github.com/gojek/mlp/pkg/vault"
+	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -30,6 +33,7 @@ type AppContext struct {
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
 
+	BatchRunners       []batchrunner.BatchJobRunner
 	CryptoService      service.CryptoService
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
@@ -81,12 +85,41 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
 
+	// Initialise Batch components
+	// Since there is only the default environment, we will not create multiple batch runners.
+	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+		clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment],
+		cfg.EnsemblingJobConfig.ImageConfig,
+		cfg.EnsemblingJobConfig.KanikoConfig,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
+	}
+
+	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
+	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
+		clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment],
+		mlpSvc,
+		cfg.SparkInfraConfig,
+	)
+
+	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
+		batchEnsemblingController,
+		ensemblingJobService,
+		mlpSvc,
+		ensemblingImageBuilder,
+		cfg.EnsemblingJobConfig.InjectGojekConfig,
+		cfg.EnsemblingJobConfig.DefaultEnvironment,
+		cfg.EnsemblingJobConfig.BatchSize,
+		cfg.EnsemblingJobConfig.MaxRetryCount,
+	)
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
 		RoutersService:        service.NewRoutersService(db),
 		EnsemblersService:     service.NewEnsemblersService(db),
-		EnsemblingJobService:  service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment),
+		EnsemblingJobService:  ensemblingJobService,
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
@@ -94,6 +127,7 @@ func NewAppContext(
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
 		PodLogService:         service.NewPodLogService(clusterControllers),
+		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {

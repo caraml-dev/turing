@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 )
 
@@ -49,16 +50,16 @@ type nameGenerator interface {
 
 type imageBuilder struct {
 	clusterController cluster.Controller
-	imageConfig       ImageConfig
-	kanikoConfig      KanikoConfig
+	imageConfig       config.ImageConfig
+	kanikoConfig      config.KanikoConfig
 	nameGenerator     nameGenerator
 }
 
 // NewImageBuilder creates a new ImageBuilder
 func newImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig ImageConfig,
-	kanikoConfig KanikoConfig,
+	imageConfig config.ImageConfig,
+	kanikoConfig config.KanikoConfig,
 	nameGenerator nameGenerator,
 ) (ImageBuilder, error) {
 	err := checkParseResources(kanikoConfig.ResourceRequestsLimits)
@@ -76,7 +77,7 @@ func newImageBuilder(
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ModelName)
-	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(request.VersionID))
+	imageExists, err := ib.checkIfImageExists("localhost:5000/hello", strconv.Itoa(request.VersionID))
 	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
@@ -179,6 +180,7 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageConfig.BaseImageRef),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
+		"--cache=true",
 		"--single-snapshot",
 	}
 
@@ -203,6 +205,7 @@ func (ib *imageBuilder) createKanikoJob(
 
 func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (bool, error) {
 	keychain := authn.DefaultKeychain
+
 	if strings.Contains(ib.imageConfig.Registry, "gcr.io") {
 		keychain = google.Keychain
 	}
@@ -233,7 +236,7 @@ func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (b
 	return false, nil
 }
 
-func checkParseResources(resourceRequestsLimits ResourceRequestsLimits) error {
+func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) error {
 	_, err := resource.ParseQuantity(resourceRequestsLimits.Requests.CPU)
 	if err != nil {
 		return err

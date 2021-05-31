@@ -131,6 +131,7 @@ var (
 	serviceAccountName       = "service-account"
 	jobLabels                = make(map[string]string)
 	memoryResult, _          = toMegabyte(memoryValue)
+	taintKey                 = "batch-job"
 )
 
 func TestCreateSparkRequest(t *testing.T) {
@@ -147,6 +148,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
 		SparkInfraConfig:      sparkInfraConfig,
+		TaintKey:              &taintKey,
 	}
 	expected := &apisparkv1beta2.SparkApplication{
 		ObjectMeta: apimetav1.ObjectMeta{
@@ -196,7 +198,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					Env:    envVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
-						apicorev1.Toleration{
+						{
 							Key:      "batch-job",
 							Operator: apicorev1.TolerationOpEqual,
 							Value:    "true",
@@ -229,7 +231,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					Env:    envVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
-						apicorev1.Toleration{
+						{
 							Key:      "batch-job",
 							Operator: apicorev1.TolerationOpEqual,
 							Value:    "true",

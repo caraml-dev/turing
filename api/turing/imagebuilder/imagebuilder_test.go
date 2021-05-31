@@ -7,6 +7,7 @@ import (
 
 	"github.com/gojek/turing/api/turing/cluster"
 	clustermock "github.com/gojek/turing/api/turing/cluster/mocks"
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	apibatchv1 "k8s.io/api/batch/v1"
@@ -28,9 +29,7 @@ const (
 	dockerfilePath = "engines/batch-ensembler/app.Dockerfile"
 	buildContext   = "git://github.com/gojek/turing.git#refs/heads/master"
 	baseImageRef   = "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d"
-	folderName     = "ensembler"
 	buildNamespace = "mlp"
-	kanikoImageRef = "gcr.io/kaniko-project/executor:v1.5.2"
 )
 
 func TestBuildEnsemblerImage(t *testing.T) {
@@ -43,8 +42,8 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		versionID         int
 		inputDependencies []string
 		namespace         string
-		imageConfig       ImageConfig
-		kanikoConfig      KanikoConfig
+		imageConfig       config.ImageConfig
+		kanikoConfig      config.KanikoConfig
 		buildLabels       map[string]string
 		clusterController func() cluster.Controller
 	}{
@@ -101,7 +100,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: ImageConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -109,15 +108,15 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
 			},
-			kanikoConfig: KanikoConfig{
+			kanikoConfig: config.KanikoConfig{
 				Image:        "gcr.io/kaniko-project/executor",
 				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: ResourceRequestsLimits{
-					Requests: Resource{
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
-					Limits: Resource{
+					Limits: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
@@ -178,7 +177,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageConfig: ImageConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -186,15 +185,15 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
 			},
-			kanikoConfig: KanikoConfig{
+			kanikoConfig: config.KanikoConfig{
 				Image:        "gcr.io/kaniko-project/executor",
 				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: ResourceRequestsLimits{
-					Requests: Resource{
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
-					Limits: Resource{
+					Limits: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
@@ -264,7 +263,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: ImageConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -272,15 +271,15 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
 			},
-			kanikoConfig: KanikoConfig{
+			kanikoConfig: config.KanikoConfig{
 				Image:        "gcr.io/kaniko-project/executor",
 				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: ResourceRequestsLimits{
-					Requests: Resource{
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
-					Limits: Resource{
+					Limits: config.Resource{
 						CPU:    "1",
 						Memory: "2Gi",
 					},
@@ -314,16 +313,16 @@ func TestParseResources(t *testing.T) {
 	var tests = map[string]struct {
 		name                   string
 		expected               bool
-		resourceRequestsLimits ResourceRequestsLimits
+		resourceRequestsLimits config.ResourceRequestsLimits
 	}{
 		"success | parsable": {
 			expected: true,
-			resourceRequestsLimits: ResourceRequestsLimits{
-				Requests: Resource{
+			resourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
-				Limits: Resource{
+				Limits: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
@@ -331,12 +330,12 @@ func TestParseResources(t *testing.T) {
 		},
 		"failure | cpu_request_error": {
 			expected: false,
-			resourceRequestsLimits: ResourceRequestsLimits{
-				Requests: Resource{
+			resourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
 					CPU:    "Chicken",
 					Memory: "2Gi",
 				},
-				Limits: Resource{
+				Limits: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
@@ -344,12 +343,12 @@ func TestParseResources(t *testing.T) {
 		},
 		"failure | cpu_limit_error": {
 			expected: false,
-			resourceRequestsLimits: ResourceRequestsLimits{
-				Requests: Resource{
+			resourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
-				Limits: Resource{
+				Limits: config.Resource{
 					CPU:    "Vegetable",
 					Memory: "2Gi",
 				},
@@ -357,12 +356,12 @@ func TestParseResources(t *testing.T) {
 		},
 		"failure | memory_request_error": {
 			expected: false,
-			resourceRequestsLimits: ResourceRequestsLimits{
-				Requests: Resource{
+			resourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
 					CPU:    "1",
 					Memory: "Brains",
 				},
-				Limits: Resource{
+				Limits: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
@@ -370,12 +369,12 @@ func TestParseResources(t *testing.T) {
 		},
 		"failure | memory_limit_error": {
 			expected: false,
-			resourceRequestsLimits: ResourceRequestsLimits{
-				Requests: Resource{
+			resourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
 					CPU:    "1",
 					Memory: "2Gi",
 				},
-				Limits: Resource{
+				Limits: config.Resource{
 					CPU:    "1",
 					Memory: "DownloadMoreRam",
 				},

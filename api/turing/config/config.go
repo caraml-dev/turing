@@ -52,6 +52,7 @@ type Config struct {
 	Port                int `validate:"required"`
 	AllowedOrigins      []string
 	AuthConfig          *AuthorizationConfig
+	BatchRunnerConfig   *BatchRunnerConfig   `validate:"required"`
 	DbConfig            *DatabaseConfig      `validate:"required"`
 	DeployConfig        *DeploymentConfig    `validate:"required"`
 	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
@@ -91,6 +92,11 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
+// BatchRunnerConfig captures the config related to the running of batch runners
+type BatchRunnerConfig struct {
+	TimeInterval time.Duration `validate:"required"`
+}
+
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
 	EnvironmentType string `validate:"required"`
@@ -103,22 +109,58 @@ type DeploymentConfig struct {
 
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
-	DefaultEnvironment string `validate:"required"`
+	BatchSize          int          `validate:"required"`
+	MaxRetryCount      int          `validate:"required"`
+	DefaultEnvironment string       `validate:"required"`
+	KanikoConfig       KanikoConfig `validate:"required"`
+	ImageConfig        ImageConfig  `validate:"required"`
+	InjectGojekConfig  bool
+}
+
+// ImageConfig provides the configuration used for the OCI image building.
+type ImageConfig struct {
+	LocalRegistry        string
+	Registry             string `validate:"required"`
+	BaseImageRef         string `validate:"required"`
+	BuildNamespace       string `validate:"required"`
+	BuildContextURI      string `validate:"required"`
+	DockerfileFilePath   string `validate:"required"`
+	BuildTimeoutDuration time.Duration
+}
+
+// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
+type ResourceRequestsLimits struct {
+	Requests Resource `validate:"required"`
+	Limits   Resource `validate:"required"`
+}
+
+// Resource contains the Kubernetes resource request and limits
+type Resource struct {
+	CPU    string `validate:"required"`
+	Memory string `validate:"required"`
+}
+
+// KanikoConfig provides the configuration used for the Kaniko image.
+type KanikoConfig struct {
+	Image                  string                 `validate:"required"`
+	ImageVersion           string                 `validate:"required"`
+	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
 }
 
 // SparkInfraConfig contains the infra configurations that is unique to the user's Kubernetes
 type SparkInfraConfig struct {
-	NodeSelector                   map[string]string `validate:"required"`
-	CorePerCPURequest              float64           `validate:"required"`
-	CPURequestToCPULimit           float64           `validate:"required"`
-	SparkVersion                   string            `validate:"required"`
-	TolerationName                 string            `validate:"required"`
-	SubmissionFailureRetries       int32             `validate:"required"`
-	SubmissionFailureRetryInterval int64             `validate:"required"`
-	FailureRetries                 int32             `validate:"required"`
-	FailureRetryInterval           int64             `validate:"required"`
-	PythonVersion                  string            `validate:"required"`
-	TTLSecond                      int64             `validate:"required"`
+	NodeSelector                   map[string]string
+	CorePerCPURequest              float64 `validate:"required"`
+	CPURequestToCPULimit           float64 `validate:"required"`
+	SparkVersion                   string  `validate:"required"`
+	TolerationName                 string  `validate:"required"`
+	SubmissionFailureRetries       int32   `validate:"required"`
+	SubmissionFailureRetryInterval int64   `validate:"required"`
+	FailureRetries                 int32   `validate:"required"`
+	FailureRetryInterval           int64   `validate:"required"`
+	PythonVersion                  string  `validate:"required"`
+	TTLSecond                      int64   `validate:"required"`
+	TaintKey                       *string
 }
 
 // TuringUIConfig captures config related to serving Turing UI files

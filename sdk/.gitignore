@@ -3,3 +3,5 @@
 build/
 dist/
 turing_sdk.egg-info/
+env/
+__pycache__/

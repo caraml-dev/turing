@@ -526,7 +526,7 @@ func TestCreateEnsemblingJobController(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			mlpSvc := tt.mlpService()
-			ensemblingController := NewEnsemblingController(
+			ensemblingController := NewBatchEnsemblingController(
 				clusterController,
 				mlpSvc,
 				sparkInfraConfig,

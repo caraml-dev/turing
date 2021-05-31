@@ -11,7 +11,7 @@ import (
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	sparkclient "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned"
-	sparkoperatorv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/typed/sparkoperator.k8s.io/v1beta2"
+	sparkoperatorv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/typed/sparkoperator.k8s.io/v1beta2" //nolint
 	apiappsv1 "k8s.io/api/apps/v1"
 	apibatchv1 "k8s.io/api/batch/v1"
 	apicorev1 "k8s.io/api/core/v1"
@@ -517,7 +517,11 @@ func (c *controller) CreateServiceAccount(namespace, serviceAccountName string) 
 	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(serviceAccountName, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
-			return nil, errors.Errorf("failed getting status of driver service account %s in namespace %s", serviceAccountName, namespace)
+			return nil, errors.Errorf(
+				"failed getting status of driver service account %s in namespace %s",
+				serviceAccountName,
+				namespace,
+			)
 		}
 
 		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(

@@ -153,6 +153,8 @@ router Docker image is set to the image built and push from the previous step.
 
 ```yaml
 # config-dev.yaml
+BatchRunnerConfig:
+  TimeInterval: 10s
 DbConfig:
   User: turing
   Password: turing
@@ -160,13 +162,31 @@ DeployConfig:
   EnvironmentType: dev 
 EnsemblingJobConfig:
   DefaultEnvironment: dev
+  BatchSize: 10
+  ImageConfig:
+    Registry: ghcr.io
+    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d
+    BuildNamespace: default
+    BuildContextURI: git://github.com/gojek/turing.git#refs/heads/master
+    DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
+    BuildTimeoutDuration: 10m
+  KanikoConfig:
+    Image: gcr.io/kaniko-project/executor
+    ImageVersion: v1.5.2
+    ResourceRequestsLimits:
+      Requests:
+        CPU: 500m
+        Memory: 1Gi
+      Limits:
+        CPU: 500m
+        Memory: 1Gi
 SparkInfraConfig:
   NodeSelector:
     "node-workload-type": "batch"
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25
-  SparkVersion: "2.4.5"
-  TolerationName: "batch-job"
+  SparkVersion: 2.4.5
+  TolerationName: batch-job
   SubmissionFailureRetries: 3
   SubmissionFailureRetryInterval: 10
   FailureRetries: 3

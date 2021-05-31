@@ -505,6 +505,9 @@ func TestStringToQuantityHookFunc(t *testing.T) {
 func TestConfigValidate(t *testing.T) {
 	validConfig := Config{
 		Port: 5000,
+		BatchRunnerConfig: &BatchRunnerConfig{
+			TimeInterval: 3 * time.Minute,
+		},
 		DbConfig: &DatabaseConfig{
 			Host:     "localhost",
 			Port:     5432,
@@ -521,6 +524,30 @@ func TestConfigValidate(t *testing.T) {
 		},
 		EnsemblingJobConfig: &EnsemblingJobConfig{
 			DefaultEnvironment: "dev",
+			BatchSize:          10,
+			MaxRetryCount:      3,
+			ImageConfig: ImageConfig{
+				Registry:             "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
+				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
+				BuildTimeoutDuration: 10 * time.Minute,
+			},
+			KanikoConfig: KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: ResourceRequestsLimits{
+					Requests: Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+					Limits: Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+				},
+			},
 		},
 		SparkInfraConfig: &SparkInfraConfig{
 			NodeSelector: map[string]string{
@@ -632,6 +659,13 @@ func TestConfigValidate(t *testing.T) {
 		"missing spark infra config": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.SparkInfraConfig = nil
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing batch runner config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.BatchRunnerConfig = nil
 				return validConfig
 			},
 			wantErr: true,

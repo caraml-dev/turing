@@ -272,10 +272,9 @@ func TestProcess(t *testing.T) {
 				tt.injectGojekLabels,
 				tt.environment,
 				10,
+				3,
 			)
 			r.Run()
-
-			// TODO: test the update loop
 		})
 	}
 }

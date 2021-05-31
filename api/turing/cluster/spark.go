@@ -89,6 +89,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkInfraConfig
+	TaintKey              *string
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -145,7 +146,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 		return nil, fmt.Errorf("invalid executor memory request: %s", request.ExecutorMemoryRequest)
 	}
 
-	return &apisparkv1beta2.ExecutorSpec{
+	s := &apisparkv1beta2.ExecutorSpec{
 		Instances:   &request.ExecutorReplica,
 		CoreRequest: cpuRequest,
 		SparkPodSpec: apisparkv1beta2.SparkPodSpec{
@@ -166,16 +167,20 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 			},
 			Env:    envVars,
 			Labels: request.JobLabels,
-			Tolerations: []apicorev1.Toleration{
-				apicorev1.Toleration{
-					Key:      "batch-job",
-					Operator: apicorev1.TolerationOpEqual,
-					Value:    "true",
-					Effect:   apicorev1.TaintEffectNoSchedule,
-				},
-			},
 		},
-	}, nil
+	}
+	if request.TaintKey != nil {
+		s.SparkPodSpec.Tolerations = []apicorev1.Toleration{
+			{
+				Key:      *request.TaintKey,
+				Operator: apicorev1.TolerationOpEqual,
+				Value:    "true",
+				Effect:   apicorev1.TaintEffectNoSchedule,
+			},
+		}
+	}
+
+	return s, nil
 }
 
 func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec, error) {
@@ -199,7 +204,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 		},
 	}
 
-	return &apisparkv1beta2.DriverSpec{
+	s := &apisparkv1beta2.DriverSpec{
 		CoreRequest: cpuRequest,
 		SparkPodSpec: apisparkv1beta2.SparkPodSpec{
 			Cores:     core,
@@ -219,17 +224,21 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 			},
 			Env:    envVars,
 			Labels: request.JobLabels,
-			Tolerations: []apicorev1.Toleration{
-				apicorev1.Toleration{
-					Key:      "batch-job",
-					Operator: apicorev1.TolerationOpEqual,
-					Value:    "true",
-					Effect:   apicorev1.TaintEffectNoSchedule,
-				},
-			},
 		},
 		ServiceAccount: &request.ServiceAccountName,
-	}, nil
+	}
+	if request.TaintKey != nil {
+		s.SparkPodSpec.Tolerations = []apicorev1.Toleration{
+			{
+				Key:      *request.TaintKey,
+				Operator: apicorev1.TolerationOpEqual,
+				Value:    "true",
+				Effect:   apicorev1.TaintEffectNoSchedule,
+			},
+		}
+	}
+
+	return s, nil
 }
 
 func getCoreRequest(cpuRequest resource.Quantity, corePerCPURequest float64) *int32 {

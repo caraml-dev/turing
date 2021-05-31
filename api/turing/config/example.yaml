@@ -11,6 +11,11 @@ AuthConfig:
   # ORY Keto auth server URL: https://github.com/ory/keto
   URL: http://example.com/auth
 
+# Batch runner configurations
+BatchRunnerConfig:
+  # How long to wait before running the runners again.
+  TimeInterval: 10s
+
 # Postgresql connection and credentials
 DbConfig:
   Host: localhost
@@ -44,6 +49,30 @@ NewRelic:
 # Ensembling job config
 EnsemblingJobConfig:
   DefaultEnvironment: dev
+  BatchSize: 10
+  ImageConfig:
+    # Use this value if you are using the docker-compose script.
+    # This is because Turing will reside in your local machine,
+    # but kubernetes will not be able to access your docker registry
+    # via localhost.
+    # Similarly, your local machine does not know where local-registry is.
+    LocalRegistry: localhost:5000
+    Registry: local-registry:5000
+    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d
+    BuildNamespace: default
+    BuildContextURI: git://github.com/gojek/turing.git#refs/heads/master
+    DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
+    BuildTimeoutDuration: 10m
+  KanikoConfig:
+    Image: gcr.io/kaniko-project/executor
+    ImageVersion: v1.5.2
+    ResourceRequestsLimits:
+      Requests:
+        CPU: 500m
+        Memory: 1Gi
+      Limits:
+        CPU: 500m
+        Memory: 1Gi
 
 # Spark Infra config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.

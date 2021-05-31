@@ -9,8 +9,11 @@ import (
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/pkg/vault"
+	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/middleware/mocks"
 	"github.com/gojek/turing/api/turing/service"
@@ -39,6 +42,9 @@ func TestNewAppContext(t *testing.T) {
 			Enabled: true,
 			URL:     "test-auth-url",
 		},
+		BatchRunnerConfig: &config.BatchRunnerConfig{
+			TimeInterval: 3 * time.Minute,
+		},
 		DbConfig: &config.DatabaseConfig{
 			Host:     "turing-db-host",
 			Port:     5432,
@@ -56,6 +62,44 @@ func TestNewAppContext(t *testing.T) {
 		},
 		EnsemblingJobConfig: &config.EnsemblingJobConfig{
 			DefaultEnvironment: "dev",
+			BatchSize:          10,
+			ImageConfig: config.ImageConfig{
+				Registry:             "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
+				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
+				BuildTimeoutDuration: 10 * time.Minute,
+			},
+			KanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+				},
+			},
+		},
+		SparkInfraConfig: &config.SparkInfraConfig{
+			NodeSelector: map[string]string{
+				"node-workload-type": "batch",
+			},
+			CorePerCPURequest:              1.5,
+			CPURequestToCPULimit:           1.25,
+			SparkVersion:                   "2.4.5",
+			TolerationName:                 "batch-job",
+			SubmissionFailureRetries:       3,
+			SubmissionFailureRetryInterval: 10,
+			FailureRetries:                 3,
+			FailureRetryInterval:           10,
+			PythonVersion:                  "3",
+			TTLSecond:                      86400,
 		},
 		RouterDefaults: &config.RouterDefaults{
 			Image:                   "asia.gcr.io/gcp-project-id/turing-router:1.0.0",
@@ -196,12 +240,36 @@ func TestNewAppContext(t *testing.T) {
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
 	assert.NoError(t, err)
 
+	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+		nil,
+		testCfg.EnsemblingJobConfig.ImageConfig,
+		testCfg.EnsemblingJobConfig.KanikoConfig,
+	)
+	assert.Nil(t, err)
+
+	ensemblingJobService := service.NewEnsemblingJobService(nil, testCfg.EnsemblingJobConfig.DefaultEnvironment)
+	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
+		nil,
+		mlpSvc,
+		testCfg.SparkInfraConfig,
+	)
+	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
+		batchEnsemblingController,
+		ensemblingJobService,
+		mlpSvc,
+		ensemblingImageBuilder,
+		testCfg.EnsemblingJobConfig.InjectGojekConfig,
+		testCfg.EnsemblingJobConfig.DefaultEnvironment,
+		testCfg.EnsemblingJobConfig.BatchSize,
+		testCfg.EnsemblingJobConfig.MaxRetryCount,
+	)
+
 	assert.Equal(t, &AppContext{
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
 		RoutersService:        service.NewRoutersService(nil),
 		EnsemblersService:     service.NewEnsemblersService(nil),
-		EnsemblingJobService:  service.NewEnsemblingJobService(nil, "dev"),
+		EnsemblingJobService:  ensemblingJobService,
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,
@@ -211,5 +279,6 @@ func TestNewAppContext(t *testing.T) {
 		PodLogService:         service.NewPodLogService(map[string]cluster.Controller{}),
 		AlertService:          alertService,
 		OpenAPIValidation:     &middleware.OpenAPIValidation{},
+		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}, appCtx)
 }

@@ -21,8 +21,10 @@ type EnsemblingJobFindByIDOptions struct {
 // EnsemblingJobListOptions holds query parameters for EnsemblersService.List method.
 type EnsemblingJobListOptions struct {
 	PaginationOptions
-	ProjectID *models.ID `schema:"project_id" validate:"required"`
-	Status    *models.Status
+	ProjectID          *models.ID `schema:"project_id" validate:"required"`
+	Statuses           []models.Status
+	IsLocked           *bool
+	RetryCountLessThan *int
 }
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.
@@ -85,8 +87,16 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		query = query.Where("project_id = ?", options.ProjectID)
 	}
 
-	if options.Status != nil {
-		query = query.Where("status = ?", options.Status)
+	if options.Statuses != nil {
+		query = query.Where("status IN (?)", options.Statuses)
+	}
+
+	if options.IsLocked != nil {
+		query = query.Where("is_locked = ?", options.IsLocked)
+	}
+
+	if options.RetryCountLessThan != nil {
+		query = query.Where("retry_count < ?", options.RetryCountLessThan)
 	}
 
 	go func() {

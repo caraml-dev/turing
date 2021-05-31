@@ -1,6 +1,8 @@
 package batchcontroller
 
 import (
+	"context"
+	"errors"
 	"fmt"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
@@ -11,6 +13,10 @@ import (
 	"github.com/gojek/turing/api/turing/service"
 	apicorev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
+)
+
+const (
+	ensemblingJobApplicationPath = "local:///home/spark/batch-ensembler/main.py"
 )
 
 // CreateEnsemblingJobRequest is a request to run an ensembling job on Kubernetes.
@@ -32,8 +38,8 @@ type ensemblingController struct {
 	sparkInfraConfig  *config.SparkInfraConfig
 }
 
-// NewEnsemblingController creates a new batch ensembling controller
-func NewEnsemblingController(
+// NewBatchEnsemblingController creates a new batch ensembling controller
+func NewBatchEnsemblingController(
 	clusterController cluster.Controller,
 	mlpService service.MLPService,
 	sparkInfraConfig *config.SparkInfraConfig,
@@ -54,6 +60,11 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 	}()
 
 	err = c.clusterController.CreateNamespace(request.Namespace)
+	if errors.Is(err, cluster.ErrNamespaceAlreadyExists) {
+		// This error is ok to ignore because we just need the namespace.
+		err = nil
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed creating namespace %s: %v", request.Namespace, err)
 	}
@@ -122,7 +133,7 @@ func (c *ensemblingController) createSparkApplication(
 		JobName:            jobRequest.EnsemblingJob.Name,
 		JobLabels:          jobRequest.Labels,
 		JobImageRef:        jobRequest.ImageRef,
-		JobApplicationPath: "main.py",
+		JobApplicationPath: ensemblingJobApplicationPath,
 		JobArguments: []string{
 			"--job-spec",
 			fmt.Sprintf("%s%s", cluster.JobConfigMount, cluster.JobConfigFileName),
@@ -170,7 +181,9 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 			cluster.ServiceAccountFileName: secretName,
 		},
 	}
-	err := c.clusterController.CreateSecret(nil, secret)
+	// I'm not sure why we need to pass in a context here but not other kubernetes cluster functions.
+	// Leaving a context.TODO() until we figure out what to do with this.
+	err := c.clusterController.CreateSecret(context.TODO(), secret)
 	if err != nil {
 		return err
 	}

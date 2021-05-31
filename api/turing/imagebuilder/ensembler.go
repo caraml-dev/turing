@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/config"
 )
 
 // NewEnsemberJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
 func NewEnsemberJobImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig ImageConfig,
-	kanikoConfig KanikoConfig,
+	imageConfig config.ImageConfig,
+	kanikoConfig config.KanikoConfig,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,

@@ -1,8 +1,6 @@
 package batchrunner
 
 import (
-	"sync"
-
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
@@ -20,6 +18,7 @@ type ensemblingJobRunner struct {
 	injectGojekLabels    bool
 	environment          string
 	batchSize            int
+	maxRetryCount        int
 }
 
 var (
@@ -41,6 +40,7 @@ func NewBatchEnsemblingJobRunner(
 	injectGojekLabels bool,
 	environment string,
 	batchSize int,
+	maxRetryCount int,
 ) BatchJobRunner {
 	return &ensemblingJobRunner{
 		ensemblingController: ensemblingController,
@@ -50,39 +50,61 @@ func NewBatchEnsemblingJobRunner(
 		injectGojekLabels:    injectGojekLabels,
 		environment:          environment,
 		batchSize:            batchSize,
+		maxRetryCount:        maxRetryCount,
 	}
 }
 
 func (r *ensemblingJobRunner) Run() {
-	r.processNewEnsemblingJobs()
-	r.updateEnsemblingJobStatus()
-}
-
-func (r *ensemblingJobRunner) processNewEnsemblingJobs() {
-	pendingStatus := models.JobPending
+	isLocked := false
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     testutils.NullableInt(1),
 			PageSize: &r.batchSize,
 		},
-		Status: &pendingStatus,
+		Statuses: []models.Status{
+			models.JobPending,
+			models.JobFailedSubmission,
+			models.JobFailedBuildImage,
+			models.JobFailed,
+		},
+		IsLocked:           &isLocked,
+		RetryCountLessThan: &r.maxRetryCount,
 	}
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs", err)
 	}
 
-	ensemblingJobs := ensemblingJobsPaginated.Results.([]*models.EnsemblingJob)
-	var wg sync.WaitGroup
-	wg.Add(len(ensemblingJobs))
-	for _, ensemblingJob := range ensemblingJobs {
-		go r.processOneEnsemblingJob(&wg, ensemblingJob)
+	if ensemblingJobsPaginated.Results == nil {
+		return
 	}
-	wg.Wait()
+	ensemblingJobs := ensemblingJobsPaginated.Results.([]*models.EnsemblingJob)
+	for _, ensemblingJob := range ensemblingJobs {
+		// Don't bother waiting, let the person calling the
+		// BatchJobRunner interface decide how many to submit at once.
+		go r.processOneEnsemblingJob(ensemblingJob)
+	}
 }
 
-func (r *ensemblingJobRunner) processOneEnsemblingJob(wg *sync.WaitGroup, ensemblingJob *models.EnsemblingJob) {
-	defer wg.Done()
+func (r *ensemblingJobRunner) unlockJob(ensemblingJob *models.EnsemblingJob) {
+	ensemblingJob.IsLocked = false
+	err := r.ensemblingJobService.Save(ensemblingJob)
+	if err != nil {
+		log.Errorf("unable to unlock ensembling job", err)
+	}
+}
+
+func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.EnsemblingJob) {
+	defer r.unlockJob(ensemblingJob)
+
+	// lock ensembling job so others parallel processes don't take it
+	ensemblingJob.IsLocked = true
+	ensemblingJob.Status = models.JobBuildingImage
+	err := r.ensemblingJobService.Save(ensemblingJob)
+	if err != nil {
+		r.saveStatus(ensemblingJob, models.JobPending, err.Error())
+		return
+	}
 
 	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
 	if queryErr != nil {
@@ -136,6 +158,9 @@ func (r *ensemblingJobRunner) saveStatus(
 	status models.Status,
 	errorMessage string,
 ) {
+	if !status.IsSuccessful() {
+		ensemblingJob.RetryCount++
+	}
 	ensemblingJob.Status = status
 	ensemblingJob.Error = errorMessage
 	err := r.ensemblingJobService.Save(ensemblingJob)
@@ -157,8 +182,4 @@ func (r *ensemblingJobRunner) buildImage(
 		BuildLabels: buildLabels,
 	}
 	return r.imageBuilder.BuildImage(request)
-}
-
-func (r *ensemblingJobRunner) updateEnsemblingJobStatus() {
-	// TODO: Fill in implementation
 }
