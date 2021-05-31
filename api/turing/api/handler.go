@@ -99,13 +99,14 @@ func NewRouter(appCtx *AppContext) *mux.Router {
 	baseController := NewBaseController(appCtx, validator)
 	deploymentController := RouterDeploymentController{baseController}
 	controllers := []Controller{
-		RoutersController{deploymentController},
-		RouterVersionsController{deploymentController},
+		AlertsController{baseController},
 		EnsemblersController{baseController},
 		EnsemblingJobController{baseController},
-		AlertsController{baseController},
-		PodLogController{baseController},
 		ExperimentsController{baseController},
+		PodLogController{baseController},
+		ProjectsController{baseController},
+		RoutersController{deploymentController},
+		RouterVersionsController{deploymentController},
 	}
 
 	var routes []Route

@@ -22,7 +22,8 @@ type EnsemblersFindByIDOptions struct {
 // EnsemblersListOptions holds query parameters for EnsemblersService.List method
 type EnsemblersListOptions struct {
 	PaginationOptions
-	ProjectID *models.ID `schema:"project_id" validate:"required"`
+	ProjectID     *models.ID            `schema:"project_id" validate:"required"`
+	EnsemblerType *models.EnsemblerType `schema:"type" validate:"omitempty,oneof=pyfunc docker"`
 }
 
 // NewEnsemblersService creates a new ensemblers service
@@ -67,6 +68,10 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 		query = query.Where("project_id = ?", options.ProjectID)
 	}
 
+	if options.EnsemblerType != nil {
+		query = query.Where("type = ?", options.EnsemblerType)
+	}
+
 	go func() {
 		query.Model(&results).Count(&count)
 		done <- true
@@ -93,5 +98,5 @@ func (service *ensemblersService) Save(ensembler models.EnsemblerLike) (models.E
 	if err := result.Error; err != nil {
 		return nil, err
 	}
-	return ensembler, nil
+	return service.FindByID(ensembler.GetID(), EnsemblersFindByIDOptions{})
 }

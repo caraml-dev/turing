@@ -66,7 +66,7 @@ paths:
   "/projects/{project_id}/ensemblers/{ensembler_id}":
     get:
       tags: [ "Ensembler" ]
-      summary: Returns Ensembler"s details by its ID
+      summary: Returns Ensemblers details by its ID
       parameters:
         - in: path
           name: project_id

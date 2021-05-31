@@ -3,8 +3,8 @@ name: engines/batch-ensembler
 on:
   push:
     paths:
-      - .github/workflows/engines-batch-ensembler.yaml
-      - engines/batch-ensembler/**
+      - ".github/workflows/engines-batch-ensembler.yaml"
+      - "engines/batch-ensembler/**"
   pull_request:
     branches:
       - main
@@ -41,8 +41,7 @@ jobs:
           path: engines/batch-ensembler/env
           key: |
             conda-${{ hashFiles('engines/batch-ensembler/environment.yaml') }}-${{ hashFiles('engines/batch-ensembler/requirements.txt') }}-${{ hashFiles('engines/batch-ensembler/requirements.dev.txt') }}
-          restore-keys: |
-            conda-
+          restore-keys: conda-
 
       - name: Install dependencies
         run: make setup

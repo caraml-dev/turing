@@ -71,7 +71,7 @@ func (e *GenericEnsembler) Instance() EnsemblerLike {
 	case EnsemblerTypePyFunc:
 		return &PyFuncEnsembler{}
 	default:
-		return nil
+		return e
 	}
 }
 

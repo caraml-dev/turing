@@ -1,4 +1,4 @@
-from typing import Any, Dict, MutableMapping, Tuple
+from typing import Dict, MutableMapping, Tuple
 from google.protobuf import json_format
 from pyspark.sql import SparkSession
 import yaml

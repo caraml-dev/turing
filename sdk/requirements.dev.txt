@@ -1,0 +1,6 @@
+setuptools>=21.0.0
+wheel
+twine
+pytest
+pytest-cov
+urllib3-mock>=0.3.3

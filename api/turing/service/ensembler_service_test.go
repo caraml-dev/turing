@@ -47,7 +47,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 
 		numEnsemblers := 10
 		projectID := models.ID(1)
-		projectID_2 := models.ID(2)
+		otherProjectID := models.ID(2)
 		ensemblers := make([]models.EnsemblerLike, numEnsemblers)
 		for i := 0; i < numEnsemblers; i++ {
 			ensemblers[i] = &models.PyFuncEnsembler{
@@ -65,7 +65,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		ensemblers = append(ensemblers,
 			&models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					ProjectID: projectID_2,
+					ProjectID: otherProjectID,
 					Name:      fmt.Sprintf("test-ensembler-%d", numEnsemblers),
 				},
 				ExperimentID: models.ID(10 + numEnsemblers),
@@ -101,7 +101,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 
 		// Find by ID and ProjectID
 		actual, err = svc.FindByID(models.ID(numEnsemblers+1), EnsemblersFindByIDOptions{
-			ProjectID: &projectID_2,
+			ProjectID: &otherProjectID,
 		})
 		assert.NoError(t, err)
 		assertEqualEnsembler(t, ensemblers[numEnsemblers], actual)
@@ -163,6 +163,25 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		results, ok = fetched.Results.([]*models.GenericEnsembler)
 		require.True(t, ok)
 		assert.Equal(t, numEnsemblers, len(results))
+		assert.ElementsMatch(t, found, results)
+
+		// Insert non-pyfunc ensembler
+		_, err = svc.Save(&models.GenericEnsembler{
+			ProjectID: projectID,
+			Type:      "unknown",
+			Name:      "unknown-ensembler",
+		})
+		require.NoError(t, err)
+
+		// Fetch all of specific type
+		pyfunc := models.EnsemblerTypePyFunc
+		fetched, err = svc.List(EnsemblersListOptions{
+			ProjectID:     &projectID,
+			EnsemblerType: &pyfunc,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, numEnsemblers, fetched.Paging.Total)
+		results, ok = fetched.Results.([]*models.GenericEnsembler)
 		assert.ElementsMatch(t, found, results)
 	})
 }

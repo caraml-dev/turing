@@ -91,15 +91,13 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 				"name": "new-ensembler",
 				"artifact_uri": "gs://unknown"
 			}`,
-			parsed: &CreateOrUpdateEnsemblerRequest{
-				EnsemblerLike: &models.PyFuncEnsembler{
-					GenericEnsembler: &models.GenericEnsembler{
-						ProjectID: 2,
-						Type:      "pyfunc",
-						Name:      "new-ensembler",
-					},
-					ArtifactURI: "gs://unknown",
+			parsed: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					ProjectID: 2,
+					Type:      "pyfunc",
+					Name:      "new-ensembler",
 				},
+				ArtifactURI: "gs://unknown",
 			},
 			ensemblerSvc: func(parsed, _ models.EnsemblerLike) service.EnsemblersService {
 				mockSvc := &mocks.EnsemblersService{}
@@ -121,13 +119,11 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
  				"type": "pyfunc",
 				"name": "my-ensembler-1"
 			}`,
-			parsed: &CreateOrUpdateEnsemblerRequest{
-				EnsemblerLike: &models.PyFuncEnsembler{
-					GenericEnsembler: &models.GenericEnsembler{
-						ProjectID: 2,
-						Type:      "pyfunc",
-						Name:      "my-ensembler-1",
-					},
+			parsed: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					ProjectID: 2,
+					Type:      "pyfunc",
+					Name:      "my-ensembler-1",
 				},
 			},
 			saved: &models.PyFuncEnsembler{

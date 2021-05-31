@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 )
 
@@ -63,6 +64,33 @@ func (a *Authorizer) Middleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (a *Authorizer) FilterAuthorizedProjects(
+	user string,
+	projects []mlp.Project,
+	action string,
+) ([]mlp.Project, error) {
+	projectIDs := make([]string, 0)
+
+	projectMap := make(map[string]mlp.Project)
+	for _, project := range projects {
+		projectID := fmt.Sprintf("projects:%d", project.Id)
+		projectIDs = append(projectIDs, projectID)
+		projectMap[projectID] = project
+	}
+
+	allowedProjectIds, err := a.authEnforcer.FilterAuthorizedResource(user, projectIDs, action)
+	if err != nil {
+		return nil, err
+	}
+
+	var allowedProjects []mlp.Project
+	for _, projectID := range allowedProjectIds {
+		allowedProjects = append(allowedProjects, projectMap[projectID])
+	}
+
+	return allowedProjects, nil
 }
 
 func getResourceFromPath(path string) string {

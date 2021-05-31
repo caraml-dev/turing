@@ -1,0 +1,65 @@
+paths:
+  /projects:
+    get:
+      tags: [ "Project" ]
+      summary: List existing projects
+      description: "Projects can be filtered by optional `name` parameter"
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Project"
+
+components:
+  schemas:
+    Project:
+      type: "object"
+      required:
+        - name
+      properties:
+        id:
+          $ref: "openapi-batch.yaml#/components/schemas/Id"
+        name:
+          type: "string"
+        mlflow_tracking_url:
+          type: "string"
+        administrators:
+          type: "array"
+          items:
+            type: "string"
+        readers:
+          type: "array"
+          items:
+            type: "string"
+        team:
+          type: "string"
+        stream:
+          type: "string"
+        labels:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Label"
+        created_at:
+          type: "string"
+          format: "date-time"
+        updated_at:
+          type: "string"
+          format: "date-time"
+
+    Label:
+      type: "object"
+      properties:
+        key:
+          type: "string"
+        value:
+          type: "string"
