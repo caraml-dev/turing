@@ -29,7 +29,7 @@ EXPOSE ${TURING_PORT}
 RUN addgroup -S app && adduser -S app -G app && mkdir /app && chown -R app:app /app
 
 COPY --chown=app:app --from=api-builder /app/bin/* /app
-COPY --chown=app:app --from=api-builder /app/openapi/* /app/openapi
+COPY --chown=app:app --from=api-builder /app/openapi /app/openapi
 COPY --chown=app:app --from=api-builder /app/openapi.yaml /app
 
 USER app
