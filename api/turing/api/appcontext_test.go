@@ -94,12 +94,8 @@ func TestNewAppContext(t *testing.T) {
 		},
 		SwaggerFiles: []middleware.SwaggerYamlFile{
 			{
-				Type: middleware.SwaggerV2Type,
-				File: "swagger.yaml",
-			},
-			{
 				Type: middleware.SwaggerV3Type,
-				File: "swagger-batch.yaml",
+				File: "openapi.yaml",
 			},
 		},
 	}

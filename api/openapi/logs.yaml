@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of Turing Logs
+  version: 0.0.1
+
+.tags: &tags
+  - "Logs"
+
+paths:
+  "/projects/{project_id}/routers/{router_id}/logs":
+    get:
+      tags: *tags
+      summary: "List logs for a router, default to 'router' component type and the currently deployed version"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "query"
+          name: "component_type"
+          description: "component type of the router to get the logs from, default to 'router' component type"
+          schema:
+            type: "string"
+            enum: [ "router", "enricher", "ensembler" ]
+          required: false
+        - in: "query"
+          name: "container"
+          description: "container to get the logs from, default to 'user-container', the default container name in Knative"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "since_time"
+          description: "RFC 3399 timestamp from which to retrieve the logs e.g. 2002-10-02T15:00:00Z. The logs retrieved will have timestamp after (but not including) since_time"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "tail_lines"
+          description: "number of lines from the end of the logs to retrieve. If both tail_lines and head_lines are set, tail_lines will be ignored"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "head_lines"
+          description: "number of lines from the start of the logs to retrieve. If both tail_lines and head_lines are set, tail_lines will be ignored"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "previous"
+          description: "if true, return the logs from previous terminated container in all pods, default to false"
+          schema:
+            type: "boolean"
+          required: false
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PodLog"
+        400:
+          description: "Invalid value for the router id or query strings"
+        500:
+          description: "Failed to list pod logs due to internal error"
+
+  "/projects/{project_id}/routers/{router_id}/versions/{version}/logs":
+    get:
+      tags: *tags
+      summary: "List logs for a router with a specific version, default to 'router' component type"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "version"
+          description: "router version value to get the logs from"
+          schema:
+            type: "string"
+          required: true
+        - in: "query"
+          name: "component_type"
+          description: "component type of the router to get the logs from, default to 'router' component type"
+          schema:
+            type: "string"
+            enum: [ "router", "enricher", "ensembler" ]
+          required: false
+        - in: "query"
+          name: "container"
+          description: "container to get the logs from, default to 'user-container', the default container name in Knative"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "since_time"
+          description: "RFC 3399 timestamp from which to retrieve the logs e.g. 2002-10-02T15:00:00Z"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "tail_lines"
+          description: "number of lines from the end of the logs to retrieve, this takes priority over 'since_time'"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "previous"
+          description: "if true, return the logs from previous terminated container in all pods, default to false"
+          schema:
+            type: "boolean"
+          required: false
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PodLog"
+        400:
+          description: "Invalid value for the router, version id or query strings"
+        500:
+          description: "Failed to list pod logs due to internal error"
+
+components:
+  schemas:
+    Id:
+      $ref: "common.yaml#/components/schemas/Id"
+
+    PodLog:
+      type: object
+      description: "PodLog object contains a log item from a container in a pod"
+      properties:
+        timestamp:
+          type: "string"
+          format: "date-time"
+          description: "Log timestamp in RFC3339 format"
+          example: "2020-07-10T21:13:51Z"
+        environment:
+          type: "string"
+          description: "Environment name of the router running the container that produces this log"
+          example: "staging"
+        namespace:
+          type: "string"
+          description: "Kubernetes namespace where the pod running the container is created"
+          example: "cartography"
+        pod_name:
+          type: "string"
+          description: "Pod name running the container that produces this log"
+          example: "nearby-turing-router-90-deployment-7b49b4bcb5-jlr7n"
+        container_name:
+          type: "string"
+          description: "Container name that produces this log"
+          example: "user-container"
+        text_payload:
+          type: "string"
+          description: "Log in text format, either text_payload or json_payload will be set but not both"
+          example: "Example log from a container"
+        json_payload:
+          type: "object"
+          description: "Log in JSON format, either text_payload or json_payload will be set but not both"
+          example: { "level": "info","msg": "Initializing Nop Result Logger","router_version": "test-1-1.integration-test","ts": 1594386832.6632557 }

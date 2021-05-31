@@ -1,7 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of MLP projects
+  version: 0.0.1
+
+.tags: &tags
+  - "Project"
+
 paths:
   /projects:
     get:
-      tags: [ "Project" ]
+      tags: *tags
       summary: List existing projects
       description: "Projects can be filtered by optional `name` parameter"
       parameters:
@@ -28,7 +36,7 @@ components:
         - name
       properties:
         id:
-          $ref: "openapi-batch.yaml#/components/schemas/Id"
+          $ref: "common.yaml#/components/schemas/Id"
         name:
           type: "string"
         mlflow_tracking_url:

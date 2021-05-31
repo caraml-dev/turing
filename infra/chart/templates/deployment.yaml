@@ -111,7 +111,7 @@ spec:
         - name: LAYOUT
           value: "BaseLayout"
         - name: SWAGGER_JSON
-          value: "/app/swagger.yaml"
+          value: "/app/openapi.yaml"
         - name: PORT
           value: "{{ .Values.swaggerUi.service.internalPort }}"
         - name: API_HOST
@@ -122,8 +122,8 @@ spec:
         args:
         - |
           mkdir /app
-          echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml..."
-          until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/swagger.yaml); do
+          echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/openapi.yaml..."
+          until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/openapi.yaml); do
             printf '.'
             sleep 10
           done

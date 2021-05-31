@@ -21,9 +21,9 @@ type OpenAPIValidation struct {
 }
 
 type OpenAPIValidationOptions struct {
-	// If true, ignore "securityDefinitions" in swagger.yaml.
+	// If true, ignore "security" in openapi.yaml.
 	IgnoreAuthentication bool
-	// If true, ignore "server" declarations in swagger.yaml when validating requests paths. Only consider the paths
+	// If true, ignore "server" declarations in openapi.yaml when validating requests paths. Only consider the paths
 	// relative to the server url versus checking the full paths (which include the server URL) in the requests.
 	IgnoreServers bool
 }

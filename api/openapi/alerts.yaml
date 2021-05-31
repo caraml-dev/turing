@@ -1,0 +1,234 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of Turing Alerts
+  version: 0.0.1
+
+.tags: &tags
+  - "Alerts"
+
+paths:
+  "/projects/{project_id}/routers/{router_id}/alerts":
+    get:
+      tags: *tags
+      summary: "List alerts for a router"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router for the alerts"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Alert"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "project_id or router_id not found"
+        500:
+          description: "Error retrieving the alerts for the router"
+    post:
+      tags: *tags
+      summary: "Create a new alert for a router"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router for the alert"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: "alert specification"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Alert"
+        required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "project_id or router_id not found"
+        500:
+          description: "Error creating new alert"
+
+  "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}":
+    get:
+      tags: *tags
+      summary: "Get the alert for a router by ID"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router for the alerts"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "alert_id"
+          description: "id of the alert"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        400:
+          description: "Invalid project_id, router_id or alert_id"
+        404:
+          description: "Alert not found"
+        500:
+          description: "Error retrieving the alert"
+    put:
+      tags: *tags
+      summary: "Update the alert for a router by ID"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router for the alerts"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "alert_id"
+          description: "id of the alert"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: "alert specification"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Alert"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        400:
+          description: "Invalid project_id, router_id or alert_id"
+        404:
+          description: "Alert not found"
+        500:
+          description: "Error updating the alert"
+    delete:
+      tags: *tags
+      summary: "Delete the alert for a router by ID"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router for the alerts"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "alert_id"
+          description: "id of the alert"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "Alert deleted successfully"
+        400:
+          description: "Invalid project_id, router_id or alert_id"
+        404:
+          description: "Alert not found"
+        500:
+          description: "Error deleting the alert"
+
+components:
+  schemas:
+    Id:
+      $ref: "common.yaml#/components/schemas/Id"
+
+    AlertMetric:
+      type: string
+      enum:
+        - "throughput"
+        - "latency95p"
+        - "error_rate"
+        - "cpu_util"
+        - "memory_util"
+
+    Alert:
+      type: "object"
+      required:
+        - environment
+        - team
+        - metric
+      properties:
+        id:
+          type: "integer"
+          readOnly: true
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        environment:
+          type: "string"
+        team:
+          type: "string"
+        service:
+          type: "string"
+        metric:
+          $ref: "#/components/schemas/AlertMetric"
+        warning_threshold:
+          type: "number"
+        critical_threshold:
+          type: "number"
+        duration:
+          type: "string"

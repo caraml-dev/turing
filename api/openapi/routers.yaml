@@ -1,0 +1,850 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of Turing Routers
+  version: 0.0.1
+
+.tags: &tags
+  - "Router"
+
+paths:
+  "/projects/{project_id}/routers":
+    get:
+      tags: *tags
+      summary: "List routers belonging to project"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project to retrieve routers from"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Router"
+        400:
+          description: "Invalid project_id"
+        500:
+          description: "Error retrieving routers"
+    post:
+      tags: *tags
+      summary: "Create new router in project"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project to save router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: "router configuration to save"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouterConfig"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+        400:
+          description: "Invalid project_id or router configuration"
+        500:
+          description: "Unable to save configuration"
+  "/projects/{project_id}/routers/{router_id}":
+    get:
+      tags: *tags
+      summary: "Get router belonging to project by ID"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project to retrieve routers from"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be retrieved"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "No router found"
+    put:
+      tags: *tags
+      summary: "Update router"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to update"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: "router configuration to save"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouterConfig"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+        400:
+          description: "Invalid project_id, router_id or router configuration"
+        500:
+          description: "Unable to save configuration"
+
+    delete:
+      tags: *tags
+      summary: "Delete router"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to delete"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  router_id:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "Router not found"
+        500:
+          description: "Unable to delete router"
+
+  "/projects/{project_id}/routers/{router_id}/deploy":
+    post:
+      tags: *tags
+      summary: "Deploy the current router configuration"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be deployed"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        202:
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  router_id:
+                    $ref: "#/components/schemas/Id"
+                  version:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid project_id, router_id or deploy request"
+        404:
+          description: "No router version found"
+
+  "/projects/{project_id}/routers/{router_id}/undeploy":
+    post:
+      tags: *tags
+      summary: "Undeploy router configuration"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to undeploy"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  router_id:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "Router not found"
+        500:
+          description: "Error undeploying router version"
+
+  "/projects/{project_id}/routers/{router_id}/versions":
+    get:
+      tags: *tags
+      summary: "List router config versions"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project to retrieve routers from"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be retrieved"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RouterVersion"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "No router versions found"
+
+  "/projects/{project_id}/routers/{router_id}/versions/{version}":
+    get:
+      tags: *tags
+      summary: "Get specific router config version"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project to retrieve routers from"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be retrieved"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "version"
+          description: "version of router configuration to be retrieved"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouterVersion"
+        400:
+          description: "Invalid project_id, router_id or version_id"
+        404:
+          description: "No router version found"
+
+    delete:
+      tags: *tags
+      summary: "Delete router version"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "version"
+          description: "version of router configuration to delete"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  router_id:
+                    $ref: "#/components/schemas/Id"
+                  version:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid project_id, router_id or version"
+        404:
+          description: "Router version not found"
+        500:
+          description: "Unable to delete router version"
+
+  "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy":
+    post:
+      tags: *tags
+      summary: "Deploy specified version of router configuration"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be deployed"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "version"
+          description: "version of router configuration to be deployed"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        202:
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  router_id:
+                    $ref: "#/components/schemas/Id"
+                  version:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid project_id, router_id, version_id or deploy request"
+        404:
+          description: "No router version found"
+
+  "/projects/{project_id}/routers/{router_id}/events":
+    get:
+      tags: *tags
+      summary: "Get deployment events associated with this router"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the router belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to be deployed"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        200:
+          description: "Get events"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Event"
+        400:
+          description: "Invalid project_id or router_id"
+        404:
+          description: "No router version found"
+
+components:
+  schemas:
+    Id:
+      $ref: "common.yaml#/components/schemas/Id"
+
+    Router:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          readOnly: true
+        name:
+          type: "string"
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        project:
+          type: "integer"
+        environment_name:
+          type: "string"
+        endpoint:
+          type: "string"
+        status:
+          $ref: "#/components/schemas/RouterStatus"
+        config:
+          $ref: "#/components/schemas/RouterVersion"
+
+    RouterVersion:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          readOnly: true
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        router:
+          type: "object"
+          properties:
+            Router:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                name:
+                  type: "string"
+                created_at:
+                  type: "string"
+                  format: "date-time"
+                  readOnly: true
+                updated_at:
+                  type: "string"
+                  format: "date-time"
+                  readOnly: true
+                project:
+                  type: "integer"
+                environment_name:
+                  type: "string"
+                endpoint:
+                  type: "string"
+                status:
+                  $ref: "#/components/schemas/RouterStatus"
+        version:
+          type: "integer"
+        status:
+          $ref: "#/components/schemas/RouterVersionStatus"
+        error:
+          type: "string"
+        image:
+          type: "string"
+        routes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Route"
+        default_route:
+          type: "string"
+        experiment_engine:
+          type: "object"
+          properties:
+            type:
+              $ref: "experiment-engines.yaml#/components/schemas/ExperimentEngineType"
+            config:
+              $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfigResponse"
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
+        timeout:
+          type: "string"
+        log_config:
+          type: "object"
+          properties:
+            log_level:
+              $ref: "#/components/schemas/LogLevel"
+            custom_metrics_enabled:
+              type: "boolean"
+            fiber_debug_log_enabled:
+              type: "boolean"
+            jaeger_enabled:
+              type: "boolean"
+            result_logger_type:
+              $ref: "#/components/schemas/ResultLoggerType"
+            bigquery_config:
+              $ref: "#/components/schemas/BigQueryConfig"
+            kafka_config:
+              $ref: "#/components/schemas/KafkaConfig"
+        enricher:
+          $ref: "#/components/schemas/Enricher"
+        ensembler:
+          $ref: "#/components/schemas/Ensembler"
+
+    ResultLoggerType:
+      type: "string"
+      enum:
+        - "nop"
+        - "console"
+        - "bigquery"
+        - "kafka"
+      default: "nop"
+
+    RouterStatus:
+      type: "string"
+      enum:
+        - "deployed"
+        - "undeployed"
+        - "failed"
+        - "pending"
+      default: "pending"
+
+    RouterVersionStatus:
+      type: "string"
+      enum:
+        - "deployed"
+        - "undeployed"
+        - "failed"
+        - "pending"
+      default: "pending"
+
+    LogLevel:
+      type: "string"
+      enum:
+        - "DEBUG"
+        - "INFO"
+        - "WARN"
+        - "ERROR"
+
+    RouterConfig:
+      type: "object"
+      required:
+        - environment_name
+        - name
+        - config
+      properties:
+        environment_name:
+          type: "string"
+        name:
+          type: "string"
+        config:
+          type: "object"
+          required:
+            - routes
+            - default_route_id
+            - experiment_engine
+            - timeout
+            - log_config
+          properties:
+            routes:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Route"
+            rules:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/TrafficRule"
+            default_route_id:
+              type: "string"
+            experiment_engine:
+              type: "object"
+              properties:
+                type:
+                  $ref: "experiment-engines.yaml#/components/schemas/ExperimentEngineType"
+                config:
+                  $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfigRequest"
+            resource_request:
+              $ref: "#/components/schemas/ResourceRequest"
+            timeout:
+              type: "string"
+            log_config:
+              type: "object"
+              properties:
+                result_logger_type:
+                  $ref: "#/components/schemas/ResultLoggerType"
+                bigquery_config:
+                  $ref: "#/components/schemas/BigQueryConfig"
+                kafka_config:
+                  $ref: "#/components/schemas/KafkaConfig"
+            enricher:
+              $ref: "#/components/schemas/Enricher"
+            ensembler:
+              $ref: "#/components/schemas/Ensembler"
+
+    Route:
+      type: "object"
+      required:
+        - id
+        - type
+        - endpoint
+        - timeout
+      properties:
+        id:
+          type: "string"
+        type:
+          type: "string"
+        endpoint:
+          type: "string"
+        timeout:
+          type: "string"
+
+    TrafficRule:
+      type: "object"
+      required:
+        - conditions
+        - routes
+      properties:
+        conditions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/TrafficRuleCondition"
+        routes:
+          type: "array"
+          description: "List of IDs of the routes, that should be activated by this rule"
+          items:
+            type: "string"
+
+    TrafficRuleCondition:
+      type: "object"
+      required:
+        - field_source
+        - field
+        - operator
+        - values
+      properties:
+        field_source:
+          $ref: "common.yaml#/components/schemas/FieldSource"
+        field:
+          type: "string"
+          description: >
+            If `field_source` is `header`, then `field` should contain the name of the request header,
+            otherwise, if `field_source` is `payload`, then `field` should be a valid json path
+        operator:
+          type: "string"
+          enum:
+            - "in"
+        values:
+          type: "array"
+          items:
+            type: "string"
+
+    Enricher:
+      type: "object"
+      required:
+        - image
+        - resource_request
+        - endpoint
+        - timeout
+        - port
+        - env
+      properties:
+        image:
+          type: "string"
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
+        endpoint:
+          type: "string"
+        timeout:
+          type: "string"
+        port:
+          type: "integer"
+        env:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EnvVar"
+        service_account:
+          type: "string"
+          description: >
+            (Optional) Name of the secret registered in the current MLP project that contains the Google service account
+            JSON key. This secret will be mounted as a file inside the container and the environment variable
+            GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
+          example: "secret-name-for-google-service-account"
+
+    Ensembler:
+      type: "object"
+      required:
+        - type
+      properties:
+        type:
+          description: "type of ensembler"
+          type: "string"
+          enum: [ "standard", "docker" ]
+        standard_config:
+          $ref: "#/components/schemas/EnsemblerStandardConfig"
+        docker_config:
+          $ref: "#/components/schemas/EnsemblerDockerConfig"
+
+    EnsemblerStandardConfig:
+      description: "ensembler config when ensembler type is standard"
+      type: "object"
+      required:
+        - "experiment_mappings"
+      properties:
+        experiment_mappings:
+          type: "array"
+          items:
+            type: "object"
+            required:
+              - "experiment"
+              - "treatment"
+              - "route"
+            properties:
+              experiment:
+                description: "experiment name from the configured experiment engine"
+                type: "string"
+                example: "experiment-1"
+              treatment:
+                description: "treatment name of the experiment"
+                type: "string"
+                example: "treatment-1"
+              route:
+                description: "route id of the routes configured in the router"
+                type: "string"
+                example: "route-1"
+
+    EnsemblerDockerConfig:
+      description: "ensembler config when ensembler type is docker"
+      type: "object"
+      required:
+        - image
+        - resource_request
+        - endpoint
+        - timeout
+        - port
+        - env
+      properties:
+        image:
+          type: "string"
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
+        endpoint:
+          type: "string"
+        timeout:
+          type: "string"
+        port:
+          type: "integer"
+        env:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EnvVar"
+        service_account:
+          type: "string"
+          description: >
+            (Optional) Name of the secret registered in the current MLP project that contains the Google service account
+            JSON key. This secret will be mounted as a file inside the container and the environment variable
+            GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
+          example: "secret-name-for-google-service-account"
+
+    ResourceRequest:
+      type: "object"
+      properties:
+        min_replica:
+          type: "integer"
+        max_replica:
+          type: "integer"
+        cpu_request:
+          type: "string"
+        memory_request:
+          type: "string"
+
+    EnvVar:
+      type: "object"
+      required:
+        - name
+      properties:
+        name:
+          type: "string"
+        value:
+          type: "string"
+
+    BigQueryConfig:
+      type: "object"
+      required:
+        - table
+        - service_account_secret
+      properties:
+        table:
+          type: "string"
+        service_account_secret:
+          type: "string"
+
+    KafkaConfig:
+      type: "object"
+      required:
+        - brokers
+        - topic
+        - serialization_format
+      properties:
+        brokers:
+          type: "string"
+          description: Comma-separated list of host and port pairs that are the addresses of the Kafka brokers.
+        topic:
+          type: "string"
+        serialization_format:
+          type: "string"
+          enum:
+            - "json"
+            - "protobuf"
+
+    Event:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          readOnly: true
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        version:
+          type: "integer"
+        event_type:
+          type: "string"
+          enum: [ "info", "error" ]
+        stage:
+          type: "string"
+        message:
+          type: "string"

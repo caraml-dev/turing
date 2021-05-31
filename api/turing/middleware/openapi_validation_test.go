@@ -133,12 +133,8 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			swaggerYamlFiles := []SwaggerYamlFile{
 				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
 					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
+					File: "../../openapi.yaml",
 				},
 			}
 			openapi, err := NewOpenAPIValidation(
@@ -178,12 +174,8 @@ func TestNewOpenAPIValidation(t *testing.T) {
 			name: "default options",
 			swaggerYamlFiles: []SwaggerYamlFile{
 				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
 					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
+					File: "../../openapi.yaml",
 				},
 			},
 			options: OpenAPIValidationOptions{},
@@ -192,12 +184,8 @@ func TestNewOpenAPIValidation(t *testing.T) {
 			name: "ignore authentication and servers",
 			swaggerYamlFiles: []SwaggerYamlFile{
 				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
 					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
+					File: "../../openapi.yaml",
 				},
 			},
 			options: OpenAPIValidationOptions{
