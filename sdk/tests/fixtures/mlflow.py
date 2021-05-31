@@ -1,14 +1,13 @@
 import json
 import pytest
+from urllib.parse import quote_plus
 
 
 @pytest.fixture
-def mock_mlflow(responses, project, ensembler, experiment_id, run_id, artifact_uri):
-    import urllib.parse
-    experiment_name = f"{project.name}/ensemblers/{ensembler.name}"
+def mock_mlflow(responses, experiment_name, experiment_id, run_id, artifact_uri):
     responses.add(
         method="GET",
-        url=f"/api/2.0/mlflow/experiments/get-by-name?experiment_name={urllib.parse.quote(experiment_name)}",
+        url=f"/api/2.0/mlflow/experiments/get-by-name?experiment_name={quote_plus(experiment_name)}",
         body=json.dumps({
             'experiment': {
                 'id': experiment_id,

@@ -7,10 +7,14 @@ import re
 import tests
 import turing.ensembler
 from urllib3_mock import Responses
-from datetime import datetime
 from turing import generated as client
 
 responses = Responses('requests.packages.urllib3')
+
+
+@pytest.fixture(scope="module", name="responses")
+def _responses():
+    return responses
 
 
 class TestEnsembler(turing.ensembler.PyFunc):
@@ -50,7 +54,8 @@ def test_predict():
 
 
 @responses.activate
-def test_list_ensemblers(turing_api, project, use_google_oauth):
+@pytest.mark.parametrize(('num_projects', 'num_ensemblers'), [(1, 6)])
+def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oauth):
     with pytest.raises(Exception, match=re.escape("Active project isn't set, use set_project(...) to set it")):
         turing.PyFuncEnsembler.list()
 
@@ -68,9 +73,8 @@ def test_list_ensemblers(turing_api, project, use_google_oauth):
 
     from turing import generated as client
 
-    expected = [tests.ensembler_1]
     page = client.models.EnsemblersPaginatedResults(
-        results=expected,
+        results=generic_ensemblers,
         paging=client.models.PaginatedResultsPaging(total=1, page=1, pages=1)
     )
 
@@ -86,7 +90,7 @@ def test_list_ensemblers(turing_api, project, use_google_oauth):
     actual = turing.PyFuncEnsembler.list()
     assert all([isinstance(p, turing.PyFuncEnsembler) for p in actual])
 
-    for actual, expected in zip(actual, expected):
+    for actual, expected in zip(actual, generic_ensemblers):
         assert actual.id == expected.id
         assert actual.name == expected.name
         assert actual.project_id == project.id
@@ -95,14 +99,14 @@ def test_list_ensemblers(turing_api, project, use_google_oauth):
 
 
 @responses.activate
+@pytest.mark.parametrize('num_projects', [1])
+@pytest.mark.parametrize('ensembler_name', ["ensembler_1"])
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_create_ensembler(
         turing_api,
         project,
-        ensembler,
-        use_google_oauth,
-        mock_mlflow,
-        mock_gcs):
+        pyfunc_ensembler,
+        use_google_oauth):
     responses.add(
         method="GET",
         url=f"/v1/projects?name={project.name}",
@@ -115,7 +119,7 @@ def test_create_ensembler(
     responses.add(
         method="POST",
         url=f"/v1/projects/{project.id}/ensemblers",
-        body=json.dumps(ensembler, default=tests.json_serializer),
+        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
         status=201,
         content_type="application/json"
     )
@@ -124,7 +128,7 @@ def test_create_ensembler(
     turing.set_project(project.name)
 
     actual = turing.PyFuncEnsembler.create(
-        name=ensembler.name,
+        name=pyfunc_ensembler.name,
         ensembler_instance=TestEnsembler(0.01),
         conda_env={
             'channels': ['defaults'],
@@ -134,25 +138,26 @@ def test_create_ensembler(
         }
     )
 
-    assert actual.id == ensembler.id
-    assert actual.name == ensembler.name
-    assert actual.project_id == ensembler.project_id
-    assert actual.mlflow_experiment_id == ensembler.mlflow_experiment_id
-    assert actual.mlflow_run_id == ensembler.mlflow_run_id
-    assert actual.artifact_uri == ensembler.artifact_uri
-    assert actual.created_at == ensembler.created_at
-    assert actual.updated_at == ensembler.updated_at
+    assert actual.id == pyfunc_ensembler.id
+    assert actual.name == pyfunc_ensembler.name
+    assert actual.project_id == pyfunc_ensembler.project_id
+    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
+    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
+    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
+    assert actual.created_at == pyfunc_ensembler.created_at
+    assert actual.updated_at == pyfunc_ensembler.updated_at
 
 
 @responses.activate
+@pytest.mark.parametrize(('num_projects', 'num_ensemblers'), [(1, 3)])
+@pytest.mark.parametrize('ensembler_name', ["updated_ensembler"])
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_update_ensembler(
         turing_api,
         project,
-        ensembler,
-        use_google_oauth,
-        mock_mlflow,
-        mock_gcs):
+        generic_ensemblers,
+        pyfunc_ensembler,
+        use_google_oauth):
     responses.add(
         method="GET",
         url=f"/v1/projects?name={project.name}",
@@ -163,7 +168,7 @@ def test_update_ensembler(
     )
 
     page = client.models.EnsemblersPaginatedResults(
-        results=[tests.ensembler_1],
+        results=generic_ensemblers,
         paging=client.models.PaginatedResultsPaging(total=1, page=1, pages=1)
     )
 
@@ -183,52 +188,27 @@ def test_update_ensembler(
     responses.add(
         method="PUT",
         url=f"/v1/projects/{project.id}/ensemblers/{actual.id}",
-        body=json.dumps(actual.to_open_api(), default=tests.json_serializer),
+        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
         status=200,
         content_type="application/json"
     )
 
     actual.update(
-        name="pyfunc-ensembler-update"
+        name=pyfunc_ensembler.name,
+        ensembler_instance=TestEnsembler(0.06),
+        conda_env={
+            'channels': ['defaults'],
+            'dependencies': [
+                'python>=3.8.0'
+            ]
+        },
+        code_dir=["../samples/quickstart"]
     )
-    # assert actual.name == "pyfunc-ensembler-update"
-
-
-@pytest.fixture
-def bucket_name():
-    return "bucket-name"
-
-
-@pytest.fixture
-def experiment_id():
-    return 1
-
-
-@pytest.fixture
-def run_id():
-    return "xyz"
-
-
-@pytest.fixture
-def artifact_uri(bucket_name, experiment_id, run_id):
-    return f"gs://{bucket_name}/mlflow/{experiment_id}/{run_id}"
-
-
-@pytest.fixture(name="responses")
-def responses_fixture():
-    return responses
-
-
-@pytest.fixture
-def ensembler(project, experiment_id, run_id, artifact_uri):
-    return client.models.PyFuncEnsembler(
-        id=1,
-        project_id=project.id,
-        type="pyfunc",
-        name="test_ensembler_1",
-        mlflow_experiment_id=experiment_id,
-        mlflow_run_id=run_id,
-        artifact_uri=artifact_uri,
-        created_at=datetime.now(),
-        updated_at=datetime.now()
-    )
+    assert actual.id == pyfunc_ensembler.id
+    assert actual.name == pyfunc_ensembler.name
+    assert actual.project_id == pyfunc_ensembler.project_id
+    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
+    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
+    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
+    assert actual.created_at == pyfunc_ensembler.created_at
+    assert actual.updated_at == pyfunc_ensembler.updated_at
