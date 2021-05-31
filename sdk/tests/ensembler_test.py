@@ -1,7 +1,6 @@
 import json
 import os.path
 import random
-from typing import Optional, Any
 import pandas
 import pytest
 import re
@@ -18,28 +17,9 @@ def _responses():
     return responses
 
 
-class TestEnsembler(turing.ensembler.PyFunc):
-    def __init__(self, default: float):
-        self._default = default
-
-    def initialize(self, artifacts: dict):
-        pass
-
-    def ensemble(
-            self,
-            features: pandas.Series,
-            predictions: pandas.Series,
-            treatment_config: Optional[dict]
-    ) -> Any:
-        if features["treatment"] in predictions:
-            return predictions[features["treatment"]]
-        else:
-            return self._default
-
-
 def test_predict():
     default_value = random.random()
-    ensembler = TestEnsembler(default_value)
+    ensembler = tests.MyTestEnsembler(default_value)
 
     model_input = pandas.DataFrame(data={
         "treatment": ["model_a", "model_b", "unknown"],
@@ -132,7 +112,7 @@ def test_create_ensembler(
 
     actual = turing.PyFuncEnsembler.create(
         name=pyfunc_ensembler.name,
-        ensembler_instance=TestEnsembler(0.01),
+        ensembler_instance=tests.MyTestEnsembler(0.01),
         conda_env={
             'channels': ['defaults'],
             'dependencies': [
@@ -200,7 +180,7 @@ def test_update_ensembler(
 
     actual.update(
         name=pyfunc_ensembler.name,
-        ensembler_instance=TestEnsembler(0.06),
+        ensembler_instance=tests.MyTestEnsembler(0.06),
         conda_env={
             'channels': ['defaults'],
             'dependencies': [
