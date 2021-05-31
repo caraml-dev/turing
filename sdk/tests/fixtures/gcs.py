@@ -1,9 +1,13 @@
 import json
+import os
 import pytest
+import google.auth.environment_vars
 
 
 @pytest.fixture
 def mock_gcs(responses, bucket_name):
+    os.environ[google.auth.environment_vars.PROJECT] = "test-project"
+
     responses.add(
         method="POST",
         url="/token",

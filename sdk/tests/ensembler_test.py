@@ -1,4 +1,5 @@
 import json
+import os.path
 import random
 from typing import Optional, Any
 import pandas
@@ -99,8 +100,10 @@ def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oau
 
 
 @responses.activate
-@pytest.mark.parametrize('num_projects', [1])
-@pytest.mark.parametrize('ensembler_name', ["ensembler_1"])
+@pytest.mark.parametrize(
+    ('num_projects', 'ensembler_name'),
+    [(1, "ensembler_1")]
+)
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_create_ensembler(
         turing_api,
@@ -149,8 +152,10 @@ def test_create_ensembler(
 
 
 @responses.activate
-@pytest.mark.parametrize(('num_projects', 'num_ensemblers'), [(1, 3)])
-@pytest.mark.parametrize('ensembler_name', ["updated_ensembler"])
+@pytest.mark.parametrize(
+    ('num_projects', 'num_ensemblers', 'ensembler_name'),
+    [(1, 3, "updated_ensembler")]
+)
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_update_ensembler(
         turing_api,
@@ -202,7 +207,7 @@ def test_update_ensembler(
                 'python>=3.8.0'
             ]
         },
-        code_dir=["../samples/quickstart"]
+        code_dir=[os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "samples/quickstart")]
     )
     assert actual.id == pyfunc_ensembler.id
     assert actual.name == pyfunc_ensembler.name
