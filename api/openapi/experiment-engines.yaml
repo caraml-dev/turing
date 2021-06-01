@@ -1,0 +1,251 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of Turing Experiment Engines
+  version: 0.0.1
+
+.tags: &tags
+  - "Experiments"
+
+paths:
+  "/experiment-engines":
+    get:
+      tags: *tags
+      summary: "List the available experiment engines"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ExperimentEngine"
+        500:
+          description: "Error querying experiment engines"
+
+  "/experiment-engines/{engine}/clients":
+    get:
+      tags: *tags
+      summary: "List the clients configured on the given experiment engine"
+      parameters:
+        - in: "path"
+          name: "engine"
+          description: "name of the experiment engine"
+          schema:
+            type: "string"
+          required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ExperimentClient"
+        400:
+          description: "Invalid engine name"
+        500:
+          description: "Error querying experiment engine clients"
+
+  "/experiment-engines/{engine}/experiments":
+    get:
+      tags: *tags
+      summary: "List the experiments configured on the given experiment engine"
+      parameters:
+        - in: "path"
+          name: "engine"
+          description: "name of the experiment engine"
+          schema:
+            type: "string"
+          required: true
+        - in: "query"
+          name: "client_id"
+          description: "internal (unique) id of the client to filter experiments by"
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Experiment"
+        400:
+          description: "Invalid engine name"
+        500:
+          description: "Error querying experiments for the given experiment engine"
+
+  "/experiment-engines/{engine}/variables":
+    get:
+      tags: *tags
+      summary: "List the variables configured for the given client and/or experiment(s)"
+      parameters:
+        - in: "path"
+          name: "engine"
+          description: "name of the experiment engine"
+          schema:
+            type: "string"
+          required: true
+        - in: "query"
+          name: "client_id"
+          description: "internal (unique) id of the client."
+          schema:
+            type: "string"
+        - in: "query"
+          name: "experiment_id"
+          description: "comma-separated internal (unique) ids of the experiments."
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExperimentVariables"
+        400:
+          description: "Invalid engine name, client_id or experiment_id(s)"
+        500:
+          description: "Error querying variables for the given client / experiment(s)"
+
+components:
+  schemas:
+    ExperimentEngine:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        client_selection_enabled:
+          type: "boolean"
+        experiment_selection_enabled:
+          type: "boolean"
+
+    ExperimentClient:
+      type: "object"
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: "string"
+        username:
+          type: "string"
+        passkey:
+          type: "string"
+
+    Experiment:
+      type: "object"
+      required:
+        - id
+        - name
+        - client_id
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        client_id:
+          type: "string"
+        variants:
+          type: "array"
+          description: "List of variants in the experiment"
+          items:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                example: control
+
+    ExperimentVariable:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        required:
+          type: "boolean"
+        type:
+          type: "string"
+          enum:
+            - "unsupported"
+            - "unit"
+            - "filter"
+
+    ExperimentVariableConfig:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        required:
+          type: "boolean"
+        field:
+          type: "string"
+        field_source:
+          $ref: "common.yaml#/components/schemas/FieldSource"
+
+    ExperimentVariables:
+      type: "object"
+      properties:
+        client_variables:
+          description: "list of variables defined for the client"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ExperimentVariable"
+        experiment_variables:
+          description: "map of experiment id to its variables"
+          type: "object"
+          properties:
+            default:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/ExperimentVariable"
+          additionalProperties:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/ExperimentVariable"
+        config:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExperimentVariableConfig"
+
+    ExperimentConfigRequest:
+      type: "object"
+      properties:
+        client:
+          $ref: "#/components/schemas/ExperimentClient"
+        experiments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Experiment"
+        variables:
+          $ref: "#/components/schemas/ExperimentVariables"
+
+    ExperimentConfigResponse:
+      type: "object"
+      properties:
+        deployment:
+          type: "object"
+          properties:
+            endpoint:
+              type: "string"
+            timeout:
+              type: "string"
+              description: "timeout duration for responses from the XP API server"
+              example: "60ms"
+        client:
+          $ref: "#/components/schemas/ExperimentClient"
+        experiments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Experiment"
+        variables:
+          $ref: "#/components/schemas/ExperimentVariables"
+
+    # Enums
+    ExperimentEngineType:
+      type: "string"
+      enum:
+        - "nop"
+      default: "nop"

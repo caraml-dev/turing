@@ -56,7 +56,7 @@ def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oau
 
     page = client.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
-        paging=client.models.PaginatedResultsPaging(total=1, page=1, pages=1)
+        paging=client.models.PaginationPaging(total=1, page=1, pages=1)
     )
 
     responses.add(
@@ -154,7 +154,7 @@ def test_update_ensembler(
 
     page = client.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
-        paging=client.models.PaginatedResultsPaging(total=1, page=1, pages=1)
+        paging=client.models.PaginationPaging(total=1, page=1, pages=1)
     )
 
     responses.add(

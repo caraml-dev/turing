@@ -1,124 +1,15 @@
 openapi: 3.0.3
 info:
-  title: Turing Batch Experiment API
+  title: Endpoints and schemas of Turing ensembling jobs
   version: 0.0.1
-paths:
-  "/projects/{project_id}/ensemblers":
-    get:
-      tags: [ "Ensembler" ]
-      summary: Returns a list of ensemblers that belong to the project
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 1
-        - in: query
-          name: page_size
-          schema:
-            type: integer
-            default: 10
-      responses:
-        "200":
-          description: A JSON object, that represents paginated results response
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResults"
-                  - type: object
-                    properties:
-                      results:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/GenericEnsembler"
-    post:
-      tags: [ "Ensembler" ]
-      summary: Saves a user-defined ensembler into the project
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-      requestBody:
-        description: A JSON object containing information about the ensembler
-        required: true
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: "#/components/schemas/PyFuncEnsembler"
-      responses:
-        "201":
-          description: A JSON representation of a successfully saved ensembler
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/PyFuncEnsembler"
 
-  "/projects/{project_id}/ensemblers/{ensembler_id}":
-    get:
-      tags: [ "Ensembler" ]
-      summary: Returns Ensemblers details by its ID
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-        - in: path
-          name: ensembler_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-      responses:
-        "200":
-          description: A JSON object representing an instance of the specific type of Ensembler
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/PyFuncEnsembler"
-    put:
-      tags: [ "Ensembler" ]
-      summary: Updates existing Ensembler with the data provided in the payload
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-        - in: path
-          name: ensembler_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-      requestBody:
-        description: A JSON object, representing an update to the ensembler
-        required: true
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: "#/components/schemas/PyFuncEnsembler"
-      responses:
-        "200":
-          description: A JSON object representing an instance of updated Ensembler
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/PyFuncEnsembler"
+.tags: &tags
+  - "Ensembling Job"
+
+paths:
   "/projects/{project_id}/jobs":
     post:
-      tags: ["Ensembling Job"]
+      tags: *tags
       summary: Submit an Ensembling job.
       parameters:
         - in: path
@@ -144,48 +35,7 @@ paths:
 components:
   schemas:
     Id:
-      type: "integer"
-      format: "int32"
-
-    EnsemblerType:
-      type: "string"
-      enum:
-        - pyfunc
-
-    GenericEnsembler:
-      properties:
-        id:
-          $ref: "#/components/schemas/Id"
-        project_id:
-          $ref: "#/components/schemas/Id"
-        name:
-          type: "string"
-          minLength: 3
-          maxLength: 50
-        type:
-          $ref: "#/components/schemas/EnsemblerType"
-        created_at:
-          type: "string"
-          format: "date-time"
-        updated_at:
-          type: "string"
-          format: "date-time"
-
-    PyFuncEnsembler:
-      allOf:
-        - $ref: "#/components/schemas/GenericEnsembler"
-        - type: "object"
-          properties:
-            mlflow_url:
-              type: "string"
-              format: "uri"
-            mlflow_experiment_id:
-              $ref: "#/components/schemas/Id"
-            mlflow_run_id:
-              type: "string"
-            artifact_uri:
-              type: "string"
-              format: "uri"
+      $ref: "common.yaml#/components/schemas/Id"
 
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
@@ -397,25 +247,6 @@ components:
       enum:
         - CONSOLE
         - BQ
-
-    PaginatedResults:
-      type: "object"
-      properties:
-        paging:
-          type: "object"
-          properties:
-            total:
-              type: "integer"
-              format: "int32"
-              description: "Total number of results matching the query criteria"
-            page:
-              type: "integer"
-              format: "int32"
-              description: "Number of the current page"
-            pages:
-              type: "integer"
-              format: "int32"
-              description: "Total number of pages"
 
     EnsemblerInfraConfig:
       type: "object"

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
@@ -105,13 +104,12 @@ func NewAppContext(
 	}
 
 	// Initialize OpenAPI validation middleware
-	for _, swaggerFile := range cfg.SwaggerFiles {
-		if _, err = os.Stat(swaggerFile.File); os.IsExist(err) {
-			return nil, errors.Wrapf(err, fmt.Sprintf("Swagger spec file not found %s", swaggerFile.File))
-		}
+	if _, err = os.Stat(cfg.SwaggerFile); os.IsExist(err) {
+		return nil, errors.Wrapf(err, "Swagger spec file not found")
 	}
+
 	appContext.OpenAPIValidation, err = middleware.NewOpenAPIValidation(
-		cfg.SwaggerFiles,
+		cfg.SwaggerFile,
 		middleware.OpenAPIValidationOptions{
 			// Authentication is ignored because it is handled by another middleware
 			IgnoreAuthentication: true,

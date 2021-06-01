@@ -22,6 +22,7 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 			body: `
 {
   "environment_name": "myenv",
+  "environment_name": "myenv",
   "name": "myrouter",
   "config": {
     "routes": [
@@ -131,18 +132,8 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			swaggerYamlFiles := []SwaggerYamlFile{
-				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
-					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
-				},
-			}
 			openapi, err := NewOpenAPIValidation(
-				swaggerYamlFiles,
+				"../../openapi.yaml",
 				OpenAPIValidationOptions{
 					IgnoreAuthentication: true,
 					IgnoreServers:        true,
@@ -170,36 +161,18 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 
 func TestNewOpenAPIValidation(t *testing.T) {
 	tests := []struct {
-		name             string
-		swaggerYamlFiles []SwaggerYamlFile
-		options          OpenAPIValidationOptions
+		name            string
+		openapiYamlFile string
+		options         OpenAPIValidationOptions
 	}{
 		{
-			name: "default options",
-			swaggerYamlFiles: []SwaggerYamlFile{
-				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
-					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
-				},
-			},
-			options: OpenAPIValidationOptions{},
+			name:            "default options",
+			openapiYamlFile: "../../openapi.yaml",
+			options:         OpenAPIValidationOptions{},
 		},
 		{
-			name: "ignore authentication and servers",
-			swaggerYamlFiles: []SwaggerYamlFile{
-				{
-					Type: SwaggerV2Type,
-					File: "../../swagger.yaml",
-				},
-				{
-					Type: SwaggerV3Type,
-					File: "../../swagger-batch.yaml",
-				},
-			},
+			name:            "ignore authentication and servers",
+			openapiYamlFile: "../../openapi.yaml",
 			options: OpenAPIValidationOptions{
 				IgnoreAuthentication: true,
 				IgnoreServers:        true,
@@ -208,7 +181,7 @@ func TestNewOpenAPIValidation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oapi, err := NewOpenAPIValidation(tt.swaggerYamlFiles, tt.options)
+			oapi, err := NewOpenAPIValidation(tt.openapiYamlFile, tt.options)
 			if err != nil {
 				t.Error(err)
 			}

@@ -70,7 +70,7 @@ The `turing-integration-test` MLP project is used by the CI to exercise the end 
 
 | folder     | description 
 |------------|-------------
-| /turing/api | HTTP handlers and routing for Turing API as defined in [swagger.yaml](./swagger.yaml)
+| /turing/api | HTTP handlers and routing for Turing API as defined in [openapi.yaml](./openapi.yaml)
 | /turing/cluster | Packages for creating, updating and deleting Turing router deployment in Kubernetes cluster
 | /turing/cmd | Turing API server binaries
 | /turing/config | Configuration spec for Turing API

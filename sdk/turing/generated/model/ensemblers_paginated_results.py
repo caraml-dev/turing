@@ -28,13 +28,13 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.ensemblers_paginated_results_all_of import EnsemblersPaginatedResultsAllOf
+    from turing.generated.model.ensemblers_paginated_results_all_of1 import EnsemblersPaginatedResultsAllOf1
     from turing.generated.model.generic_ensembler import GenericEnsembler
-    from turing.generated.model.paginated_results import PaginatedResults
-    from turing.generated.model.paginated_results_paging import PaginatedResultsPaging
+    from turing.generated.model.pagination_paging import PaginationPaging
     globals()['EnsemblersPaginatedResultsAllOf'] = EnsemblersPaginatedResultsAllOf
+    globals()['EnsemblersPaginatedResultsAllOf1'] = EnsemblersPaginatedResultsAllOf1
     globals()['GenericEnsembler'] = GenericEnsembler
-    globals()['PaginatedResults'] = PaginatedResults
-    globals()['PaginatedResultsPaging'] = PaginatedResultsPaging
+    globals()['PaginationPaging'] = PaginationPaging
 
 
 class EnsemblersPaginatedResults(ModelComposed):
@@ -90,7 +90,7 @@ class EnsemblersPaginatedResults(ModelComposed):
         """
         lazy_import()
         return {
-            'paging': (PaginatedResultsPaging,),  # noqa: E501
+            'paging': (PaginationPaging,),  # noqa: E501
             'results': ([GenericEnsembler],),  # noqa: E501
         }
 
@@ -151,7 +151,7 @@ class EnsemblersPaginatedResults(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            paging (PaginatedResultsPaging): [optional]  # noqa: E501
+            paging (PaginationPaging): [optional]  # noqa: E501
             results ([GenericEnsembler]): [optional]  # noqa: E501
         """
 
@@ -223,7 +223,7 @@ class EnsemblersPaginatedResults(ModelComposed):
           ],
           'allOf': [
               EnsemblersPaginatedResultsAllOf,
-              PaginatedResults,
+              EnsemblersPaginatedResultsAllOf1,
           ],
           'oneOf': [
           ],

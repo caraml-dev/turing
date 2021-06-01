@@ -34,11 +34,12 @@ services:
     ports:
       - 8081:5555
     volumes:
-      - ./swagger.yaml:/usr/share/nginx/html/swagger.yaml:ro
-      - ./swagger-batch.yaml:/usr/share/nginx/html/swagger-batch.yaml:ro
+      - ./openapi:/app/openapi:ro
+      - ./openapi.yaml:/app/openapi.yaml:ro
     environment:
       - PORT=5555
-      - "URLS=[{ url: 'swagger.yaml', name: 'v1' }, { url: '/swagger-batch.yaml', name: 'batch' }]"
+      - LAYOUT=BaseLayout
+      - SWAGGER_JSON=/app/openapi.yaml
 
   postgres-auth:
     image: bitnami/postgresql:11.6.0-debian-9-r0

@@ -103,8 +103,8 @@ TuringUIConfig:
   AppDirectory: /ui
   Homepage: /turing
  
-# File path to find OpenAPI v2 specfication file
-SwaggerFile: swagger.yaml
+# File path to find OpenAPI v3 specification file
+SwaggerFile: "openapi.yaml"
 
 # Experiment is a map of experiment engine name to configuration object.
 # This will be used to configure the corresponding experiment engines.

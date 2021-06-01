@@ -13,10 +13,10 @@ from turing.generated.model.ensembler import Ensembler
 from turing.generated.model.ensembler_type import EnsemblerType
 from turing.generated.model.ensemblers_paginated_results import EnsemblersPaginatedResults
 from turing.generated.model.ensemblers_paginated_results_all_of import EnsemblersPaginatedResultsAllOf
+from turing.generated.model.ensemblers_paginated_results_all_of1 import EnsemblersPaginatedResultsAllOf1
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.label import Label
-from turing.generated.model.paginated_results import PaginatedResults
-from turing.generated.model.paginated_results_paging import PaginatedResultsPaging
+from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project
 from turing.generated.model.py_func_ensembler import PyFuncEnsembler
 from turing.generated.model.py_func_ensembler_all_of import PyFuncEnsemblerAllOf

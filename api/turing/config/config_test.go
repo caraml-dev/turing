@@ -13,7 +13,6 @@ import (
 
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -157,16 +156,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFiles: []middleware.SwaggerYamlFile{
-					{
-						Type: middleware.SwaggerV2Type,
-						File: "swagger.yaml",
-					},
-					{
-						Type: middleware.SwaggerV3Type,
-						File: "swagger-batch.yaml",
-					},
-				},
+				SwaggerFile: "openapi.yaml",
 			},
 		},
 		"single file": {
@@ -231,16 +221,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFiles: []middleware.SwaggerYamlFile{
-					{
-						Type: middleware.SwaggerV2Type,
-						File: "swagger.yaml",
-					},
-					{
-						Type: middleware.SwaggerV3Type,
-						File: "swagger-batch.yaml",
-					},
-				},
+				SwaggerFile: "openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -320,16 +301,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFiles: []middleware.SwaggerYamlFile{
-					{
-						Type: middleware.SwaggerV2Type,
-						File: "swagger.yaml",
-					},
-					{
-						Type: middleware.SwaggerV3Type,
-						File: "swagger-batch.yaml",
-					},
-				},
+				SwaggerFile: "openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -427,16 +399,7 @@ func TestLoad(t *testing.T) {
 					AppDirectory: "appdir-env",
 					Homepage:     "/turing-env",
 				},
-				SwaggerFiles: []middleware.SwaggerYamlFile{
-					{
-						Type: middleware.SwaggerV2Type,
-						File: "swagger.yaml",
-					},
-					{
-						Type: middleware.SwaggerV3Type,
-						File: "swagger-batch.yaml",
-					},
-				},
+				SwaggerFile: "openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
