@@ -8,8 +8,8 @@ servers:
 
 paths:
   "/projects":
-    $ref: "projects.yaml#/paths/~1projects"
+    $ref: "openapi/projects.yaml#/paths/~1projects"
   "/projects/{project_id}/ensemblers":
-    $ref: "ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers"
+    $ref: "openapi/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers"
   "/projects/{project_id}/ensemblers/{ensembler_id}":
-    $ref: "ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"
+    $ref: "openapi/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"

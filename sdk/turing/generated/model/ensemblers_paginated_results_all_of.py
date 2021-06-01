@@ -27,8 +27,8 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
-    from turing.generated.model.generic_ensembler import GenericEnsembler
-    globals()['GenericEnsembler'] = GenericEnsembler
+    from turing.generated.model.pagination_paging import PaginationPaging
+    globals()['PaginationPaging'] = PaginationPaging
 
 
 class EnsemblersPaginatedResultsAllOf(ModelNormal):
@@ -77,7 +77,7 @@ class EnsemblersPaginatedResultsAllOf(ModelNormal):
         """
         lazy_import()
         return {
-            'results': ([GenericEnsembler],),  # noqa: E501
+            'paging': (PaginationPaging,),  # noqa: E501
         }
 
     @cached_property
@@ -86,7 +86,7 @@ class EnsemblersPaginatedResultsAllOf(ModelNormal):
 
 
     attribute_map = {
-        'results': 'results',  # noqa: E501
+        'paging': 'paging',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -135,7 +135,7 @@ class EnsemblersPaginatedResultsAllOf(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            results ([GenericEnsembler]): [optional]  # noqa: E501
+            paging (PaginationPaging): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
