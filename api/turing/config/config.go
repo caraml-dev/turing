@@ -7,16 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gojek/turing/api/turing/middleware"
+	"github.com/go-playground/validator/v10"
+	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/mitchellh/mapstructure"
+
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be
 	// easily marshalled into JSON, which is currently the format required for experiment config.
 	"github.com/ory/viper"
-
-	"github.com/mitchellh/mapstructure"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -63,9 +61,9 @@ type Config struct {
 	AlertConfig         *AlertConfig
 	MLPConfig           *MLPConfig `validate:"required"`
 	TuringUIConfig      *TuringUIConfig
-	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
+	// SwaggerFile specifies the file path containing OpenAPI v3 spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerFiles []middleware.SwaggerYamlFile
+	SwaggerFile string
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -323,12 +321,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.AppDirectory", "")
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
-	v.SetDefault("SwaggerFiles", []middleware.SwaggerYamlFile{
-		{
-			Type: middleware.SwaggerV3Type,
-			File: "openapi.yaml",
-		},
-	})
+	v.SetDefault("SwaggerFile", "openapi.yaml")
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

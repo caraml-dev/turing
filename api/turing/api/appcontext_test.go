@@ -92,12 +92,7 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
-		SwaggerFiles: []middleware.SwaggerYamlFile{
-			{
-				Type: middleware.SwaggerV3Type,
-				File: "openapi.yaml",
-			},
-		},
+		SwaggerFile: "openapi.yaml",
 	}
 	// Create test auth enforcer and Vault client
 	me := &mocks.Enforcer{}
@@ -179,11 +174,8 @@ func TestNewAppContext(t *testing.T) {
 	)
 	monkey.Patch(
 		middleware.NewOpenAPIValidation,
-		func(
-			files []middleware.SwaggerYamlFile,
-			opt middleware.OpenAPIValidationOptions,
-		) (*middleware.OpenAPIValidation, error) {
-			assert.Equal(t, testCfg.SwaggerFiles, files)
+		func(file string, opt middleware.OpenAPIValidationOptions) (*middleware.OpenAPIValidation, error) {
+			assert.Equal(t, testCfg.SwaggerFile, file)
 			return &middleware.OpenAPIValidation{}, nil
 		},
 	)

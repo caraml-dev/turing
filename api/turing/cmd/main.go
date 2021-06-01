@@ -107,8 +107,11 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/v1/internal/", http.StripPrefix("/v1/internal", health))
 	mux.Handle("/v1/", http.StripPrefix("/v1", api.NewRouter(appCtx)))
-	// Serve Swagger Spec
-	mux.Handle("/openapi.yaml", web.FileHandler("./openapi.yaml", false))
+
+	if len(cfg.SwaggerFile) > 0 {
+		// Serve Swagger Spec
+		mux.Handle("/openapi.yaml", web.FileHandler(cfg.SwaggerFile, false))
+	}
 	// Serve UI
 	if cfg.TuringUIConfig.AppDirectory != "" {
 		log.Infof(
