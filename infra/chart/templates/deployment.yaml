@@ -114,10 +114,8 @@ spec:
           value: "/app/openapi.yaml"
         - name: PORT
           value: "{{ .Values.swaggerUi.service.internalPort }}"
-        - name: API_HOST
-          value: "{{ .Values.swaggerUi.apiHost }}"
-        - name: BASE_PATH
-          value: "{{ .Values.swaggerUi.basePath }}"
+        - name: API_SERVER
+          value: "{{ .Values.swaggerUi.apiServer }}"
         command: ['sh', '-c']
         args:
         - |
@@ -128,8 +126,7 @@ spec:
             sleep 10
           done
           echo "Update Swagger config..."
-          sed -r -i 's/^(\s*)(host\s*:.*$$)/\host: "'$${API_HOST}'"/' $${SWAGGER_JSON}
-          sed -r -i 's#^(\s*)(basePath\s*:.*$$)#\basePath: "'$${BASE_PATH}'"#' $${SWAGGER_JSON}
+          sed -r -i 's%^((\s*)-(\s*)url\s*:).*$$%\1 "'$${API_SERVER}'"%' $${SWAGGER_JSON}
           echo "Running Swagger UI..."
           /usr/share/nginx/run.sh
       {{- with .Values.turing.extraContainers }}

@@ -104,11 +104,9 @@ dbMigrations:
 swaggerUi:
   # -- Docker tag for Swagger UI https://hub.docker.com/r/swaggerapi/swagger-ui
   image:
-    tag: v3.24.3
-  # -- Host for the Swagger UI
-  apiHost: "127.0.0.1"
-  # -- Base URL path to serve the Swagger UI
-  basePath: "/v1"
+    tag: v3.47.1
+  # -- URL of API server
+  apiServer: "http://127.0.0.1/v1"
   service:
     # -- Swagger UI container port number
     internalPort: 8081
