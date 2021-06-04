@@ -1,6 +1,8 @@
 package batchrunner
 
 import (
+	"time"
+
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
@@ -11,14 +13,15 @@ import (
 )
 
 type ensemblingJobRunner struct {
-	ensemblingController batchcontroller.EnsemblingController
-	ensemblingJobService service.EnsemblingJobService
-	mlpService           service.MLPService
-	imageBuilder         imagebuilder.ImageBuilder
-	injectGojekLabels    bool
-	environment          string
-	batchSize            int
-	maxRetryCount        int
+	ensemblingController      batchcontroller.EnsemblingController
+	ensemblingJobService      service.EnsemblingJobService
+	mlpService                service.MLPService
+	imageBuilder              imagebuilder.ImageBuilder
+	injectGojekLabels         bool
+	environment               string
+	batchSize                 int
+	maxRetryCount             int
+	imageBuildTimeoutDuration time.Duration
 }
 
 var (
@@ -41,16 +44,18 @@ func NewBatchEnsemblingJobRunner(
 	environment string,
 	batchSize int,
 	maxRetryCount int,
+	imageBuildTimeoutDuration time.Duration,
 ) BatchJobRunner {
 	return &ensemblingJobRunner{
-		ensemblingController: ensemblingController,
-		ensemblingJobService: ensemblingJobService,
-		mlpService:           mlpService,
-		imageBuilder:         imageBuilder,
-		injectGojekLabels:    injectGojekLabels,
-		environment:          environment,
-		batchSize:            batchSize,
-		maxRetryCount:        maxRetryCount,
+		ensemblingController:      ensemblingController,
+		ensemblingJobService:      ensemblingJobService,
+		mlpService:                mlpService,
+		imageBuilder:              imageBuilder,
+		injectGojekLabels:         injectGojekLabels,
+		environment:               environment,
+		batchSize:                 batchSize,
+		maxRetryCount:             maxRetryCount,
+		imageBuildTimeoutDuration: imageBuildTimeoutDuration,
 	}
 }
 
@@ -61,28 +66,45 @@ func (r *ensemblingJobRunner) Run() {
 
 func (r *ensemblingJobRunner) updateStatus() {
 	// Here we want to check all non terminal cases.
-	// i.e. JobBuildingImage, JobRunning
-	options := service.EnsemblingJobListOptions{
+	// i.e. JobBuildingImage but with updated_at timeout
+	//		JobRunning
+	optionsJobRunning := service.EnsemblingJobListOptions{
+		PaginationOptions: service.PaginationOptions{
+			Page:     testutils.NullableInt(1),
+			PageSize: &r.batchSize,
+		},
+		Statuses: []models.Status{
+			models.JobRunning,
+		},
+	}
+	r.processEnsemblingJobs(optionsJobRunning)
+
+	// To ensure that we only pickup jobs that weren't picked up, we check the last updated at.
+	updatedAtAfter := time.Now().Add(r.imageBuildTimeoutDuration * -1)
+	optionsJobBuildingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     testutils.NullableInt(1),
 			PageSize: &r.batchSize,
 		},
 		Statuses: []models.Status{
 			models.JobBuildingImage,
-			models.JobRunning,
 		},
+		UpdatedAtAfter:     &updatedAtAfter,
+		RetryCountLessThan: &r.maxRetryCount,
 	}
-	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
+	r.processEnsemblingJobs(optionsJobBuildingImage)
+}
+
+func (r *ensemblingJobRunner) processEnsemblingJobs(queryOptions service.EnsemblingJobListOptions) {
+	ensemblingJobsPaginated, err := r.ensemblingJobService.List(queryOptions)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs", err)
-	}
-
-	if ensemblingJobsPaginated.Results == nil {
 		return
 	}
+
 	ensemblingJobs := ensemblingJobsPaginated.Results.([]*models.EnsemblingJob)
 	for _, ensemblingJob := range ensemblingJobs {
-		go r.updateOneStatus(ensemblingJob)
+		r.updateOneStatus(ensemblingJob)
 	}
 }
 
@@ -104,7 +126,7 @@ func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJo
 
 	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
 	if queryErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error())
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error(), true)
 		return
 	}
 	switch ensemblingJob.Status {
@@ -216,13 +238,13 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 	ensemblingJob.Status = models.JobBuildingImage
 	err := r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
-		r.saveStatus(ensemblingJob, models.JobPending, err.Error())
+		r.saveStatus(ensemblingJob, models.JobPending, err.Error(), true)
 		return
 	}
 
 	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
 	if queryErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error())
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error(), true)
 		return
 	}
 
@@ -230,7 +252,7 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 	labels := r.buildLabels(ensemblingJob, mlpProject)
 	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels)
 	if imageBuildErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, imageBuildErr.Error())
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, imageBuildErr.Error(), true)
 		return
 	}
 
@@ -244,11 +266,11 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 		},
 	)
 	if controllerError != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedSubmission, controllerError.Error())
+		r.saveStatus(ensemblingJob, models.JobFailedSubmission, controllerError.Error(), true)
 		return
 	}
 
-	r.saveStatus(ensemblingJob, models.JobRunning, "")
+	r.saveStatus(ensemblingJob, models.JobRunning, "", false)
 }
 
 func (r *ensemblingJobRunner) buildLabels(
@@ -271,8 +293,9 @@ func (r *ensemblingJobRunner) saveStatus(
 	ensemblingJob *models.EnsemblingJob,
 	status models.Status,
 	errorMessage string,
+	incrementRetry bool,
 ) {
-	if !status.IsSuccessful() {
+	if incrementRetry {
 		ensemblingJob.RetryCount++
 	}
 	ensemblingJob.Status = status

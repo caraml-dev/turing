@@ -2,6 +2,7 @@ package batchrunner
 
 import (
 	"testing"
+	"time"
 
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
@@ -367,6 +368,7 @@ func TestRun(t *testing.T) {
 				tt.environment,
 				10,
 				3,
+				10*time.Minute,
 			)
 			r.Run()
 		})

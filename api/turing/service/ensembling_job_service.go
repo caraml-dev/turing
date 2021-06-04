@@ -25,6 +25,7 @@ type EnsemblingJobListOptions struct {
 	Statuses           []models.Status `validate:"oneof=pending running terminated completed failed failed_submission failed_building"` //nolint
 	IsLocked           *bool
 	RetryCountLessThan *int
+	UpdatedAtAfter     *time.Time
 }
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.
@@ -97,6 +98,10 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 
 	if options.RetryCountLessThan != nil {
 		query = query.Where("retry_count < ?", options.RetryCountLessThan)
+	}
+
+	if options.UpdatedAtAfter != nil {
+		query = query.Where("updated_at < ?", options.UpdatedAtAfter)
 	}
 
 	go func() {

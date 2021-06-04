@@ -11,6 +11,8 @@ turing:
       cpu: 100m
       memory: 128Mi
   config: 
+    BatchRunnerConfig:
+      TimeInterval: 10s
     DbConfig:
       Host: turing-postgresql
       User: turing 

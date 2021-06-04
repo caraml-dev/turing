@@ -63,6 +63,7 @@ func TestNewAppContext(t *testing.T) {
 		EnsemblingJobConfig: &config.EnsemblingJobConfig{
 			DefaultEnvironment: "dev",
 			BatchSize:          10,
+			MaxRetryCount:      3,
 			ImageConfig: config.ImageConfig{
 				Registry:             "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
@@ -262,6 +263,7 @@ func TestNewAppContext(t *testing.T) {
 		testCfg.EnsemblingJobConfig.DefaultEnvironment,
 		testCfg.EnsemblingJobConfig.BatchSize,
 		testCfg.EnsemblingJobConfig.MaxRetryCount,
+		testCfg.EnsemblingJobConfig.ImageConfig.BuildTimeoutDuration,
 	)
 
 	assert.Equal(t, &AppContext{

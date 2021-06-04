@@ -112,6 +112,7 @@ func NewAppContext(
 		cfg.EnsemblingJobConfig.DefaultEnvironment,
 		cfg.EnsemblingJobConfig.BatchSize,
 		cfg.EnsemblingJobConfig.MaxRetryCount,
+		cfg.EnsemblingJobConfig.ImageConfig.BuildTimeoutDuration,
 	)
 
 	appContext := &AppContext{
