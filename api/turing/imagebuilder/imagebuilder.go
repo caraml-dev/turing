@@ -32,7 +32,7 @@ const (
 	JobStatusActive = JobStatus(iota)
 	// JobStatusFailed is when the image building job has failed
 	JobStatusFailed
-	// JobStatusSucceeded is when the image building job has succeded
+	// JobStatusSucceeded is when the image building job has succeeded
 	JobStatusSucceeded
 	// JobStatusUnknown is when the image building job status is unknown
 	JobStatusUnknown
