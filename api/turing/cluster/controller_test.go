@@ -486,7 +486,7 @@ func TestDeleteK8sService(t *testing.T) {
 func TestCreateKanikoJob(t *testing.T) {
 	namespace := "test-ns"
 	kanikoJob := KanikoJobSpec{
-		PodName:   "bob",
+		JobName:   "bob",
 		Namespace: "builder",
 		Labels: map[string]string{
 			"builderName": "bob",
@@ -846,6 +846,32 @@ func TestCreateSparkApplication(t *testing.T) {
 		}
 		sparkApp, err := c.CreateSparkApplication(namespace, req)
 		assert.NotNil(t, sparkApp)
+		assert.Nil(t, err)
+	})
+}
+
+func TestGetSparkApplication(t *testing.T) {
+	namespace := "test-ns"
+	appName := "bicycle"
+	t.Run("Success | nominal", func(t *testing.T) {
+		cs := fake.NewSimpleClientset()
+		cs.PrependReactor(
+			reactorVerbs.Get,
+			"sparkapplication",
+			func(action k8stesting.Action) (bool, runtime.Object, error) {
+				return true, &sparkv1beta2.SparkApplication{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "spark",
+					},
+				}, nil
+			},
+		)
+		sparkClientSet := sparkOpFake.Clientset{}
+		c := &controller{
+			k8sSparkOperator: sparkClientSet.SparkoperatorV1beta2(),
+		}
+		app, err := c.GetSparkApplication(namespace, appName)
+		assert.NotNil(t, app)
 		assert.Nil(t, err)
 	})
 }

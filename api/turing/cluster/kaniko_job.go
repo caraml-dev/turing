@@ -25,7 +25,7 @@ var (
 
 // KanikoJobSpec contains the information required to build a OCI image.
 type KanikoJobSpec struct {
-	PodName       string
+	JobName       string
 	Namespace     string
 	Labels        map[string]string
 	Args          []string
@@ -41,7 +41,7 @@ type KanikoJobSpec struct {
 func (s *KanikoJobSpec) BuildSpec() *batchv1.Job {
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.PodName,
+			Name:      s.JobName,
 			Namespace: s.Namespace,
 			Labels:    s.Labels,
 		},

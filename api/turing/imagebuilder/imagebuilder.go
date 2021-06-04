@@ -20,17 +20,29 @@ import (
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
+	"github.com/gojek/turing/api/turing/models"
 )
+
+// JobStatus is the current state of the image building job.
+type JobStatus string
 
 const (
 	tickDurationInSeconds = 5
+	// JobStatusActive is the status of the image building job is active
+	JobStatusActive = JobStatus(iota)
+	// JobStatusFailed is when the image building job has failed
+	JobStatusFailed
+	// JobStatusSucceeded is when the image building job has succeded
+	JobStatusSucceeded
+	// JobStatusUnknown is when the image building job status is unknown
+	JobStatusUnknown
 )
 
 // BuildImageRequest contains the information needed to build the OCI image
 type BuildImageRequest struct {
 	ProjectName string
 	ModelName   string
-	VersionID   int
+	VersionID   models.ID
 	ArtifactURI string
 	BuildLabels map[string]string
 }
@@ -39,11 +51,16 @@ type BuildImageRequest struct {
 type ImageBuilder interface {
 	// Build OCI image based on a Dockerfile
 	BuildImage(request BuildImageRequest) (string, error)
+	GetImageBuildingJobStatus(
+		projectName string,
+		modelName string,
+		versionID models.ID,
+	) (JobStatus, error)
 }
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderJobName(projectName string, modelName string, versionID int) string
+	generateBuilderJobName(projectName string, modelName string, versionID models.ID) string
 	// generateDockerImageName generate image name based on project and model
 	generateDockerImageName(projectName string, modelName string) string
 }
@@ -77,7 +94,7 @@ func newImageBuilder(
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ModelName)
-	imageExists, err := ib.checkIfImageExists("localhost:5000/hello", strconv.Itoa(request.VersionID))
+	imageExists, err := ib.checkIfImageExists("localhost:5000/hello", strconv.Itoa(int(request.VersionID)))
 	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
@@ -90,14 +107,14 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	}
 
 	// Check if there is an existing build job
-	kanikoPodName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
 		request.ProjectName,
 		request.ModelName,
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(
 		ib.imageConfig.BuildNamespace,
-		kanikoPodName,
+		kanikoJobName,
 	)
 
 	if err != nil {
@@ -106,7 +123,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			return "", ErrUnableToGetJobStatus
 		}
 
-		job, err = ib.createKanikoJob(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
+		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -121,7 +138,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 				return "", ErrDeleteFailedJob
 			}
 
-			job, err = ib.createKanikoJob(kanikoPodName, imageRef, request.ArtifactURI, request.BuildLabels)
+			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -165,7 +182,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 }
 
 func (ib *imageBuilder) createKanikoJob(
-	kanikoPodName string,
+	kanikoJobName string,
 	imageRef string,
 	artifactURI string,
 	buildLabels map[string]string,
@@ -185,7 +202,7 @@ func (ib *imageBuilder) createKanikoJob(
 	}
 
 	spec := cluster.KanikoJobSpec{
-		PodName:       kanikoPodName,
+		JobName:       kanikoJobName,
 		Namespace:     ib.imageConfig.BuildNamespace,
 		Labels:        buildLabels,
 		Args:          kanikoArgs,
@@ -258,4 +275,37 @@ func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) e
 	}
 
 	return nil
+}
+
+func (ib *imageBuilder) GetImageBuildingJobStatus(
+	projectName string,
+	modelName string,
+	versionID models.ID,
+) (JobStatus, error) {
+	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+		projectName,
+		modelName,
+		versionID,
+	)
+	job, err := ib.clusterController.GetJob(
+		ib.imageConfig.BuildNamespace,
+		kanikoJobName,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	if job.Status.Active != 0 {
+		return JobStatusActive, nil
+	}
+
+	if job.Status.Succeeded != 0 {
+		return JobStatusSucceeded, nil
+	}
+
+	if job.Status.Failed != 0 {
+		return JobStatusFailed, nil
+	}
+
+	return JobStatusUnknown, nil
 }

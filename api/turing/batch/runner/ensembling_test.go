@@ -142,7 +142,10 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 	}
 }
 
-func TestProcess(t *testing.T) {
+func TestRun(t *testing.T) {
+	// Unfortunately this is hard to test as we need Kubernetes integration
+	// and a Spark Operator. Testing with an actual cluster is required.
+	// Here we just try to run it without throwing an exception.
 	var tests = map[string]struct {
 		injectGojekLabels    bool
 		environment          string
@@ -160,6 +163,11 @@ func TestProcess(t *testing.T) {
 					"Create",
 					mock.Anything,
 				).Return(nil)
+				ctlr.On(
+					"GetStatus",
+					mock.Anything,
+					mock.Anything,
+				).Return(batchcontroller.SparkApplicationStateCompleted, nil)
 				return ctlr
 			},
 			imageBuilder: func() imagebuilder.ImageBuilder {
@@ -184,12 +192,98 @@ func TestProcess(t *testing.T) {
 						Page:  1,
 						Pages: 1,
 					},
-				}, nil)
+				}, nil).Once()
 
 				svc.On(
 					"Save",
 					mock.Anything,
 				).Return(nil)
+
+				newFixture := generateEnsemblingJobFixture()
+				newFixture.Status = models.JobRunning
+				svc.On(
+					"List",
+					mock.Anything,
+				).Return(&service.PaginatedResults{
+					Results: []*models.EnsemblingJob{newFixture},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				}, nil)
+
+				return svc
+			},
+			mlpService: func() service.MLPService {
+				svc := &servicemock.MLPService{}
+				svc.On(
+					"GetProject",
+					mock.Anything,
+					mock.Anything,
+				).Return(&mlp.Project{Id: 1}, nil)
+				return svc
+			},
+		},
+		"success | imagebuilding stuck": {
+			injectGojekLabels: true,
+			environment:       "testing",
+			ensemblingController: func() batchcontroller.EnsemblingController {
+				ctlr := &batchcontrollermock.EnsemblingController{}
+				ctlr.On(
+					"Create",
+					mock.Anything,
+				).Return(nil)
+				return ctlr
+			},
+			imageBuilder: func() imagebuilder.ImageBuilder {
+				ib := &imagebuildermock.ImageBuilder{}
+				ib.On(
+					"BuildImage",
+					mock.Anything,
+					mock.Anything,
+				).Return("ghcr.io/test-project/mymodel:1", nil)
+				ib.On(
+					"GetImageBuildingJobStatus",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(imagebuilder.JobStatusFailed, nil)
+				return ib
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &servicemock.EnsemblingJobService{}
+
+				svc.On(
+					"List",
+					mock.Anything,
+				).Return(&service.PaginatedResults{
+					Results: []*models.EnsemblingJob{generateEnsemblingJobFixture()},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				}, nil).Once()
+
+				svc.On(
+					"Save",
+					mock.Anything,
+				).Return(nil)
+
+				newFixture := generateEnsemblingJobFixture()
+				newFixture.Status = models.JobBuildingImage
+				svc.On(
+					"List",
+					mock.Anything,
+				).Return(&service.PaginatedResults{
+					Results: []*models.EnsemblingJob{newFixture},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				}, nil)
 
 				return svc
 			},

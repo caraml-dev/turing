@@ -15,8 +15,19 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// SparkApplicationState is the state of the spark application
+type SparkApplicationState string
+
 const (
 	ensemblingJobApplicationPath = "local:///home/spark/batch-ensembler/main.py"
+	// SparkApplicationStateRunning is when the spark application is still running
+	SparkApplicationStateRunning = SparkApplicationState(iota)
+	// SparkApplicationStateCompleted is when the spark application has completed its run
+	SparkApplicationStateCompleted
+	// SparkApplicationStateFailed is when the spark application has failed its run
+	SparkApplicationStateFailed
+	// SparkApplicationStateUnknown is when the spark application state is unknown
+	SparkApplicationStateUnknown
 )
 
 // CreateEnsemblingJobRequest is a request to run an ensembling job on Kubernetes.
@@ -30,6 +41,7 @@ type CreateEnsemblingJobRequest struct {
 // EnsemblingController is an interface that exposes the batch ensembling kubernetes controller.
 type EnsemblingController interface {
 	Create(request *CreateEnsemblingJobRequest) error
+	GetStatus(namespace string, ensemblingJob *models.EnsemblingJob) (SparkApplicationState, error)
 }
 
 type ensemblingController struct {
@@ -49,6 +61,31 @@ func NewBatchEnsemblingController(
 		mlpService:        mlpService,
 		sparkInfraConfig:  sparkInfraConfig,
 	}
+}
+
+func (c *ensemblingController) GetStatus(
+	namespace string,
+	ensemblingJob *models.EnsemblingJob,
+) (SparkApplicationState, error) {
+	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	if err != nil {
+		return SparkApplicationStateUnknown, fmt.Errorf("failed to retrieve spark application %v", err)
+	}
+
+	state := sa.Status.AppState.State
+	if state == apisparkv1beta2.CompletedState {
+		return SparkApplicationStateCompleted, nil
+	}
+
+	if state == apisparkv1beta2.FailedState {
+		return SparkApplicationStateFailed, nil
+	}
+
+	if state == apisparkv1beta2.UnknownState {
+		return SparkApplicationStateUnknown, nil
+	}
+
+	return SparkApplicationStateRunning, nil
 }
 
 func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error {

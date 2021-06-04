@@ -18,8 +18,8 @@ type EnsemblingJob struct {
 	EnvironmentName string       `json:"environment_name"`
 	InfraConfig     *InfraConfig `json:"infra_config"`
 	JobConfig       *JobConfig   `json:"job_config"`
-	IsLocked        bool         `json:"is_locked" gorm:"default:false"`
-	RetryCount      int          `json:"retry_count" gorm:"default:0"`
+	IsLocked        bool         `json:"-" gorm:"default:false"`
+	RetryCount      int          `json:"-" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
 }
@@ -100,7 +100,7 @@ type BatchEnsemblingJobResources struct {
 // JobRunning --▶ JobFailed
 //     |
 //     |
-//     |--▶ JobTerminating --▶ JobTerminated
+//     |--▶ JobTerminated
 //     |
 //     |
 //     ▼
@@ -114,8 +114,6 @@ const (
 	JobBuildingImage Status = "building"
 	// JobRunning is when the job has been picked up and running.
 	JobRunning Status = "running"
-	// JobTerminating is when the job has begun stopping.
-	JobTerminating Status = "terminating"
 	// JobTerminated is when the job has stopped. This is a terminal state.
 	JobTerminated Status = "terminated"
 	// JobCompleted is when the job has successfully completed. This is a terminal state.

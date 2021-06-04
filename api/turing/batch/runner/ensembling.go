@@ -55,6 +55,121 @@ func NewBatchEnsemblingJobRunner(
 }
 
 func (r *ensemblingJobRunner) Run() {
+	r.processJobs()
+	r.updateStatus()
+}
+
+func (r *ensemblingJobRunner) updateStatus() {
+	// Here we want to check all non terminal cases.
+	// i.e. JobBuildingImage, JobRunning
+	options := service.EnsemblingJobListOptions{
+		PaginationOptions: service.PaginationOptions{
+			Page:     testutils.NullableInt(1),
+			PageSize: &r.batchSize,
+		},
+		Statuses: []models.Status{
+			models.JobBuildingImage,
+			models.JobRunning,
+		},
+	}
+	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
+	if err != nil {
+		log.Errorf("unable to query ensembling jobs", err)
+	}
+
+	if ensemblingJobsPaginated.Results == nil {
+		return
+	}
+	ensemblingJobs := ensemblingJobsPaginated.Results.([]*models.EnsemblingJob)
+	for _, ensemblingJob := range ensemblingJobs {
+		go r.updateOneStatus(ensemblingJob)
+	}
+}
+
+func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJob) {
+	// Consider that the application may terminate when processing halfway.
+	// So we only check locked state, it's ok for it to be processed multiple times
+	// between multiple instances because they will have the same outcome.
+	// If that happens, we should mark them for retry
+	// i.e. in the general case, we set back to JobPending but bump retry count
+	// If JobBuildingImage, we want to check if the image building has already been done
+	//   -> if image building is active, we do not do anything
+	//   -> else we just set to JobPending because it has hanged for some reason.
+	// If JobRunning, check if the spark driver is running
+	//   -> If running, do nothing
+	//   -> If error, set it to JobFailed; we don't want to retry because spark
+	//      has a retry mechanism
+	//   -> If completed, mark as JobCompleted
+	// For all of these cases, we have to unlock the record.
+
+	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
+	if queryErr != nil {
+		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error())
+		return
+	}
+	switch ensemblingJob.Status {
+	case models.JobBuildingImage:
+		r.processBuildingImage(ensemblingJob, mlpProject)
+	case models.JobRunning:
+		r.processJobRunning(ensemblingJob, mlpProject)
+	}
+}
+
+func (r *ensemblingJobRunner) processJobRunning(
+	ensemblingJob *models.EnsemblingJob,
+	mlpProject *mlp.Project,
+) {
+	state, err := r.ensemblingController.GetStatus(mlpProject.Name, ensemblingJob)
+	if err != nil {
+		log.Errorf("Unable to get status of spark application: %v", err)
+		return
+	}
+
+	if state == batchcontroller.SparkApplicationStateUnknown {
+		// Do nothing, just wait to see if something happens
+		log.Warnf("Spark application state is unknown: %s", ensemblingJob.Name)
+		return
+	}
+
+	if state == batchcontroller.SparkApplicationStateCompleted {
+		ensemblingJob.Status = models.JobCompleted
+	} else if state == batchcontroller.SparkApplicationStateFailed {
+		ensemblingJob.Status = models.JobFailed
+	}
+
+	err = r.ensemblingJobService.Save(ensemblingJob)
+	if err != nil {
+		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, err)
+		return
+	}
+}
+
+func (r *ensemblingJobRunner) processBuildingImage(
+	ensemblingJob *models.EnsemblingJob,
+	mlpProject *mlp.Project,
+) {
+	status, err := r.imageBuilder.GetImageBuildingJobStatus(
+		mlpProject.Name,
+		ensemblingJob.InfraConfig.EnsemblerName,
+		ensemblingJob.EnsemblerID,
+	)
+
+	if status == imagebuilder.JobStatusActive {
+		// Do nothing
+		return
+	}
+
+	// We retry on all other possible outcomes
+	ensemblingJob.Status = models.JobPending
+	ensemblingJob.IsLocked = false
+	ensemblingJob.RetryCount++
+	saveErr := r.ensemblingJobService.Save(ensemblingJob)
+	if saveErr != nil {
+		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, err)
+	}
+}
+
+func (r *ensemblingJobRunner) processJobs() {
 	isLocked := false
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
@@ -65,14 +180,13 @@ func (r *ensemblingJobRunner) Run() {
 			models.JobPending,
 			models.JobFailedSubmission,
 			models.JobFailedBuildImage,
-			models.JobFailed,
 		},
 		IsLocked:           &isLocked,
 		RetryCountLessThan: &r.maxRetryCount,
 	}
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
 	if err != nil {
-		log.Errorf("unable to query ensembling jobs", err)
+		log.Errorf("unable to query ensembling jobs: %v", err)
 	}
 
 	if ensemblingJobsPaginated.Results == nil {
@@ -90,7 +204,7 @@ func (r *ensemblingJobRunner) unlockJob(ensemblingJob *models.EnsemblingJob) {
 	ensemblingJob.IsLocked = false
 	err := r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
-		log.Errorf("unable to unlock ensembling job", err)
+		log.Errorf("unable to unlock ensembling job %v", err)
 	}
 }
 
@@ -165,7 +279,7 @@ func (r *ensemblingJobRunner) saveStatus(
 	ensemblingJob.Error = errorMessage
 	err := r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
-		log.Errorf("unable to save ensembling job", err)
+		log.Errorf("unable to save ensembling job %v", err)
 	}
 }
 
@@ -177,7 +291,7 @@ func (r *ensemblingJobRunner) buildImage(
 	request := imagebuilder.BuildImageRequest{
 		ProjectName: mlpProject.Name,
 		ModelName:   ensemblingJob.InfraConfig.EnsemblerName,
-		VersionID:   int(ensemblingJob.EnsemblerID),
+		VersionID:   ensemblingJob.EnsemblerID,
 		ArtifactURI: ensemblingJob.InfraConfig.ArtifactURI,
 		BuildLabels: buildLabels,
 	}

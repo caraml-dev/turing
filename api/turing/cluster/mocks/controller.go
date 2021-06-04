@@ -375,6 +375,29 @@ func (_m *Controller) GetKnativeServiceURL(svcName string, namespace string) str
 	return r0
 }
 
+// GetSparkApplication provides a mock function with given fields: namespace, appName
+func (_m *Controller) GetSparkApplication(namespace string, appName string) (*v1beta2.SparkApplication, error) {
+	ret := _m.Called(namespace, appName)
+
+	var r0 *v1beta2.SparkApplication
+	if rf, ok := ret.Get(0).(func(string, string) *v1beta2.SparkApplication); ok {
+		r0 = rf(namespace, appName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1beta2.SparkApplication)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(namespace, appName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListPodLogs provides a mock function with given fields: namespace, podName, opts
 func (_m *Controller) ListPodLogs(namespace string, podName string, opts *corev1.PodLogOptions) (io.ReadCloser, error) {
 	ret := _m.Called(namespace, podName, opts)

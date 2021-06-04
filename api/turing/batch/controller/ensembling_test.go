@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/cluster"
 	clustermock "github.com/gojek/turing/api/turing/cluster/mocks"
 	"github.com/gojek/turing/api/turing/config"
@@ -11,8 +12,8 @@ import (
 	"github.com/gojek/turing/api/turing/service"
 	servicemock "github.com/gojek/turing/api/turing/service/mocks"
 	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gotest.tools/assert"
 	apicorev1 "k8s.io/api/core/v1"
 	apirbacv1 "k8s.io/api/rbac/v1"
 	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -537,6 +538,115 @@ func TestCreateEnsemblingJobController(t *testing.T) {
 			} else {
 				assert.Equal(t, tt.expected, err)
 			}
+		})
+	}
+}
+
+func TestGetStatus(t *testing.T) {
+	tests := map[string]struct {
+		clusterController func() cluster.Controller
+		expectedVal       SparkApplicationState
+		err               bool
+	}{
+		"failure | unable to get spark app": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					// Important to note that spark always returns a object rather than nil!!!
+					&apisparkv1beta2.SparkApplication{},
+					fmt.Errorf("hello"),
+				)
+				return ctrler
+			},
+			expectedVal: SparkApplicationStateUnknown,
+			err:         true,
+		},
+		"success | completed job": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					&apisparkv1beta2.SparkApplication{
+						Status: apisparkv1beta2.SparkApplicationStatus{
+							AppState: apisparkv1beta2.ApplicationState{
+								State: apisparkv1beta2.CompletedState,
+							},
+						},
+					},
+					nil,
+				)
+				return ctrler
+			},
+			expectedVal: SparkApplicationStateCompleted,
+			err:         false,
+		},
+		"success | failed job": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					&apisparkv1beta2.SparkApplication{
+						Status: apisparkv1beta2.SparkApplicationStatus{
+							AppState: apisparkv1beta2.ApplicationState{
+								State: apisparkv1beta2.FailedState,
+							},
+						},
+					},
+					nil,
+				)
+				return ctrler
+			},
+			expectedVal: SparkApplicationStateFailed,
+			err:         false,
+		},
+		"success | unknown state": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					&apisparkv1beta2.SparkApplication{
+						Status: apisparkv1beta2.SparkApplicationStatus{
+							AppState: apisparkv1beta2.ApplicationState{
+								State: apisparkv1beta2.UnknownState,
+							},
+						},
+					},
+					nil,
+				)
+				return ctrler
+			},
+			expectedVal: SparkApplicationStateUnknown,
+			err:         false,
+		},
+		"success | other cases": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					&apisparkv1beta2.SparkApplication{
+						Status: apisparkv1beta2.SparkApplicationStatus{
+							AppState: apisparkv1beta2.ApplicationState{
+								State: apisparkv1beta2.PendingRerunState,
+							},
+						},
+					},
+					nil,
+				)
+				return ctrler
+			},
+			expectedVal: SparkApplicationStateRunning,
+			err:         false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			namespace := "test-ns"
+			ensemblingJob := &models.EnsemblingJob{
+				Name: "ensembling-job",
+			}
+			cc := tt.clusterController()
+			var c EnsemblingController = &ensemblingController{
+				clusterController: cc,
+			}
+			val, err := c.GetStatus(namespace, ensemblingJob)
+			assert.Equal(t, tt.expectedVal, val)
+			assert.True(t, (err != nil) == tt.err)
 		})
 	}
 }

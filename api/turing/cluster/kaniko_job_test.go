@@ -72,7 +72,7 @@ func TestNewKanikoJob(t *testing.T) {
 	}
 
 	spec := &KanikoJobSpec{
-		PodName:   "bob",
+		JobName:   "bob",
 		Namespace: "builder",
 		Labels: map[string]string{
 			"builderName": "bob",

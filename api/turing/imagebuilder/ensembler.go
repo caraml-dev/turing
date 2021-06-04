@@ -5,6 +5,7 @@ import (
 
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/models"
 )
 
 // NewEnsemberJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
@@ -27,7 +28,7 @@ type ensemblerJobNameGenerator struct {
 }
 
 // generateBuilderJobName generate pod name that will be used to build docker image of the prediction job
-func (n *ensemblerJobNameGenerator) generateBuilderJobName(projectName string, modelName string, versionID int) string {
+func (n *ensemblerJobNameGenerator) generateBuilderJobName(projectName string, modelName string, versionID models.ID) string {
 	return fmt.Sprintf("batch-%s-%s-%d", projectName, modelName, versionID)
 }
 

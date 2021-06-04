@@ -86,6 +86,7 @@ type Controller interface {
 	CreateRole(namespace string, roleName string, policyRules []apirbacv1.PolicyRule) (*apirbacv1.Role, error)
 	CreateRoleBinding(namespace, roleBindingName, serviceAccountName, roleName string) (*apirbacv1.RoleBinding, error)
 	CreateSparkApplication(namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
+	GetSparkApplication(namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
 }
 
 // controller implements the Controller interface
@@ -637,6 +638,10 @@ func (c *controller) CreateSparkApplication(
 	}
 
 	return c.k8sSparkOperator.SparkApplications(namespace).Create(s)
+}
+
+func (c *controller) GetSparkApplication(namespace, appName string) (*apisparkv1beta2.SparkApplication, error) {
+	return c.k8sSparkOperator.SparkApplications(namespace).Get(appName, metav1.GetOptions{})
 }
 
 // waitKnativeServiceReady waits for the given knative service to become ready, until the

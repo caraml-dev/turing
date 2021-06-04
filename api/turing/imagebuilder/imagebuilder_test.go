@@ -8,6 +8,7 @@ import (
 	"github.com/gojek/turing/api/turing/cluster"
 	clustermock "github.com/gojek/turing/api/turing/cluster/mocks"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	apibatchv1 "k8s.io/api/batch/v1"
@@ -23,7 +24,7 @@ var (
 const (
 	projectName    = "test-project"
 	modelName      = "mymodel"
-	modelVersion   = 1
+	modelVersion   = models.ID(1)
 	dockerRegistry = "ghcr.io"
 	artifactURI    = "gs://bucket/ensembler"
 	dockerfilePath = "engines/batch-ensembler/app.Dockerfile"
@@ -39,7 +40,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		projectName       string
 		modelName         string
 		artifactURI       string
-		versionID         int
+		versionID         models.ID
 		inputDependencies []string
 		namespace         string
 		imageConfig       config.ImageConfig
