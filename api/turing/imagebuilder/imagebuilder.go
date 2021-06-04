@@ -94,7 +94,7 @@ func newImageBuilder(
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ModelName)
-	imageExists, err := ib.checkIfImageExists("localhost:5000/hello", strconv.Itoa(int(request.VersionID)))
+	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.VersionID)))
 	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
