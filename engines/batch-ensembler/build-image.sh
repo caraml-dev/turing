@@ -8,5 +8,4 @@ mkdir -p temp-deps
 cp -r ../../sdk temp-deps/
 
 docker build -t $1 .
-docker push $1
 rm -rf temp-deps
