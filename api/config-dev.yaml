@@ -27,8 +27,6 @@ EnsemblingJobConfig:
         CPU: "1"
         Memory: 1Gi
 SparkInfraConfig:
-  NodeSelector:
-    "node-workload-type": "batch"
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25
   SparkVersion: 2.4.5
@@ -39,7 +37,6 @@ SparkInfraConfig:
   FailureRetryInterval: 10
   PythonVersion: "3"
   TTLSecond: 86400
-  TaintKey: "batch-job"
 RouterDefaults:
   Image: localhost:5000/turing-router
 VaultConfig:

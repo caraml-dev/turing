@@ -51,13 +51,7 @@ EnsemblingJobConfig:
   DefaultEnvironment: dev
   BatchSize: 10
   ImageConfig:
-    # Use this value if you are using the docker-compose script.
-    # This is because Turing will reside in your local machine,
-    # but kubernetes will not be able to access your docker registry
-    # via localhost.
-    # Similarly, your local machine does not know where local-registry is.
-    LocalRegistry: localhost:5000
-    Registry: local-registry:5000
+    Registry: ghcr.io
     BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d
     BuildNamespace: default
     BuildContextURI: git://github.com/gojek/turing.git#refs/heads/master
@@ -68,21 +62,18 @@ EnsemblingJobConfig:
     ImageVersion: v1.5.2
     ResourceRequestsLimits:
       Requests:
-        CPU: 500m
+        CPU: "1"
         Memory: 1Gi
       Limits:
-        CPU: 500m
+        CPU: "1"
         Memory: 1Gi
 
 # Spark Infra config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.
 SparkInfraConfig:
-  NodeSelector:
-    "node-workload-type": "batch"
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25
   SparkVersion: "2.4.5"
-  TolerationName: "batch-job"
   SubmissionFailureRetries: 3
   SubmissionFailureRetryInterval: 10
   FailureRetries: 3
