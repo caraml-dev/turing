@@ -80,7 +80,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	r.processEnsemblingJobs(optionsJobRunning)
 
 	// To ensure that we only pickup jobs that weren't picked up, we check the last updated at.
-	updatedAtAfter := time.Now().Add(r.imageBuildTimeoutDuration * -1)
+	updatedAtBefore := time.Now().Add(r.imageBuildTimeoutDuration * -1)
 	optionsJobBuildingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     testutils.NullableInt(1),
@@ -89,7 +89,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 		Statuses: []models.Status{
 			models.JobBuildingImage,
 		},
-		UpdatedAtAfter:     &updatedAtAfter,
+		UpdatedAtBefore:    &updatedAtBefore,
 		RetryCountLessThan: &r.maxRetryCount,
 	}
 	r.processEnsemblingJobs(optionsJobBuildingImage)
