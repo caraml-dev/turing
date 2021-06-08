@@ -87,6 +87,28 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 	return Ok(ensemblingJob)
 }
 
+// ListEnsemblingJobs is HTTP handler that will get a list of EnsemblingJobs
+func (c EnsemblingJobController) ListEnsemblingJobs(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := service.EnsemblingJobListOptions{}
+	if err := c.ParseVars(&options, vars); err != nil {
+		return BadRequest(
+			"unable to list ensembling jobs",
+			fmt.Sprintf("failed to parse query string: %s", err),
+		)
+	}
+
+	results, err := c.EnsemblingJobService.List(options)
+	if err != nil {
+		return InternalServerError("unable to list ensemblers", err.Error())
+	}
+
+	return Ok(results)
+}
+
 // Routes returns all the HTTP routes given by the EnsemblingJobController.
 func (c EnsemblingJobController) Routes() []Route {
 	return []Route{
@@ -100,6 +122,11 @@ func (c EnsemblingJobController) Routes() []Route {
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/jobs/{id}",
 			handler: c.GetEnsemblingJob,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/jobs",
+			handler: c.ListEnsemblingJobs,
 		},
 	}
 }
