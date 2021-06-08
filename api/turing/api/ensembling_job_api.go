@@ -58,6 +58,35 @@ func (c EnsemblingJobController) Create(
 	return Accepted(ensemblingJob)
 }
 
+// GetEnsemblingJob is HTTP handler that will get a single EnsemblingJob
+func (c EnsemblingJobController) GetEnsemblingJob(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := &GetEnsemblingJobOptions{}
+
+	if err := c.ParseVars(options, vars); err != nil {
+		return BadRequest(
+			"failed to fetch ensembling job",
+			fmt.Sprintf("failed to parse query string: %s", err),
+		)
+	}
+
+	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+		*options.ID,
+		service.EnsemblingJobFindByIDOptions{
+			ProjectID: options.ProjectID,
+		},
+	)
+
+	if err != nil {
+		return NotFound("ensembling job not found", err.Error())
+	}
+
+	return Ok(ensemblingJob)
+}
+
 // Routes returns all the HTTP routes given by the EnsemblingJobController.
 func (c EnsemblingJobController) Routes() []Route {
 	return []Route{
@@ -67,5 +96,17 @@ func (c EnsemblingJobController) Routes() []Route {
 			handler: c.Create,
 			body:    models.EnsemblingJob{},
 		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/jobs/{id}",
+			handler: c.GetEnsemblingJob,
+		},
 	}
+}
+
+// GetEnsemblingJobOptions is the options that can be parsed
+// from query params for the GET ensembling job method
+type GetEnsemblingJobOptions struct {
+	ProjectID *models.ID `schema:"project_id" validate:"required"`
+	ID        *models.ID `schema:"id" validate:"required"`
 }

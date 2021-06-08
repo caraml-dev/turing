@@ -23,6 +23,8 @@ paths:
   # J O B S
   "/projects/{project_id}/jobs":
     $ref: "openapi/jobs.yaml#/paths/~1projects~1{project_id}~1jobs"
+  "/projects/{project_id}/jobs/{id}":
+    $ref: "openapi/jobs.yaml#/paths/~1projects~1{project_id}~1jobs~1{id}"
 
   # A L E R T S
   "/projects/{project_id}/routers/{router_id}/alerts":

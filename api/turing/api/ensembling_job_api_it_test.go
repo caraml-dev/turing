@@ -294,3 +294,68 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
+	tests := map[string]struct {
+		method               string
+		path                 string
+		expected             *Response
+		ensemblingJobService func() service.EnsemblingJobService
+	}{
+		"success | nominal": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs/1",
+			expected: Ok(generateEnsemblingJobFixture(
+				1,
+				models.ID(1),
+				models.ID(1),
+				"test-ensembler-1",
+				true,
+			)),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					nil,
+				)
+				return svc
+			},
+		},
+		"failure | not found": {
+			method:   http.MethodGet,
+			path:     "/projects/1/jobs/1",
+			expected: NotFound("ensembling job not found", errors.New("no exist").Error()),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					nil,
+					errors.New("no exist"),
+				)
+				return svc
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			router := NewRouter(
+				&AppContext{
+					EnsemblingJobService: svc,
+				},
+			)
+			actual := httptest.NewRecorder()
+
+			request, err := http.NewRequest(tt.method, tt.path, nil)
+			if err != nil {
+				t.Fatalf("unexpected error happened, %v", err)
+			}
+			router.ServeHTTP(actual, request)
+
+			expected := httptest.NewRecorder()
+			tt.expected.WriteTo(expected)
+
+			assert.Equal(t, expected.Body.String(), actual.Body.String())
+			assert.Equal(t, expected.Code, actual.Code)
+		})
+	}
+}
