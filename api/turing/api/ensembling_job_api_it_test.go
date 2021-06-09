@@ -294,3 +294,163 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
+	tests := map[string]struct {
+		method               string
+		path                 string
+		expected             *Response
+		ensemblingJobService func() service.EnsemblingJobService
+	}{
+		"success | nominal": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs/1",
+			expected: Ok(generateEnsemblingJobFixture(
+				1,
+				models.ID(1),
+				models.ID(1),
+				"test-ensembler-1",
+				true,
+			)),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					nil,
+				)
+				return svc
+			},
+		},
+		"failure | not found": {
+			method:   http.MethodGet,
+			path:     "/projects/1/jobs/1",
+			expected: NotFound("ensembling job not found", errors.New("no exist").Error()),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					nil,
+					errors.New("no exist"),
+				)
+				return svc
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			router := NewRouter(
+				&AppContext{
+					EnsemblingJobService: svc,
+				},
+			)
+			actual := httptest.NewRecorder()
+
+			request, err := http.NewRequest(tt.method, tt.path, nil)
+			if err != nil {
+				t.Fatalf("unexpected error happened, %v", err)
+			}
+			router.ServeHTTP(actual, request)
+
+			expected := httptest.NewRecorder()
+			tt.expected.WriteTo(expected)
+
+			assert.Equal(t, expected.Body.String(), actual.Body.String())
+			assert.Equal(t, expected.Code, actual.Code)
+		})
+	}
+}
+
+func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
+	tests := map[string]struct {
+		method               string
+		path                 string
+		expected             *Response
+		ensemblingJobService func() service.EnsemblingJobService
+	}{
+		"success | nominal": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs",
+			expected: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+		},
+		"success | no result": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs",
+			expected: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			router := NewRouter(
+				&AppContext{
+					EnsemblingJobService: svc,
+				},
+			)
+			actual := httptest.NewRecorder()
+
+			request, err := http.NewRequest(tt.method, tt.path, nil)
+			if err != nil {
+				t.Fatalf("unexpected error happened, %v", err)
+			}
+			router.ServeHTTP(actual, request)
+
+			expected := httptest.NewRecorder()
+			tt.expected.WriteTo(expected)
+
+			assert.Equal(t, expected.Body.String(), actual.Body.String())
+			assert.Equal(t, expected.Code, actual.Code)
+		})
+	}
+}
