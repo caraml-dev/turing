@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Maximize build space
-      uses: ashwinath/maximize-build-space@master
+      uses: easimon/maximize-build-space@b4d02c14493a9653fe7af06cc89ca5298071c66e
       with:
         root-reserve-mb: 40000
         swap-size-mb: 1024

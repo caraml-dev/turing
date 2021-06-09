@@ -526,6 +526,43 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				},
 			),
 		},
+		"success | nominal with paging": {
+			params: RequestVars{
+				"project_id": {"1"},
+				"page":       {"1"},
+				"pageSize":   {"20"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
 		"success | no result": {
 			params: RequestVars{
 				"project_id": {"1"},
