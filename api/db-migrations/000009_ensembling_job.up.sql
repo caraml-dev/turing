@@ -25,3 +25,5 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     created_at       timestamp   NOT NULL default current_timestamp,
     updated_at       timestamp   NOT NULL default current_timestamp
 );
+
+CREATE INDEX ensembling_jobs_status_updated_at_idx on ensembling_jobs (status, updated_at);

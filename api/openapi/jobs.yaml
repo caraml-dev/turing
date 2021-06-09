@@ -52,6 +52,12 @@ paths:
           schema:
             type: integer
             default: 10
+        - in: query
+          name: status
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/EnsemblerJobStatus"
       responses:
         "200":
           description: A JSON object, that represents paginated results response

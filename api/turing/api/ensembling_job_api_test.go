@@ -526,6 +526,78 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				},
 			),
 		},
+		"success | nominal with single status": {
+			params: RequestVars{
+				"project_id": {"1"},
+				"status":     {"pending"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
+		"success | nominal with multiple statuses": {
+			params: RequestVars{
+				"project_id": {"1"},
+				"status":     {"pending", "terminated"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
 		"success | nominal with paging": {
 			params: RequestVars{
 				"project_id": {"1"},
@@ -566,6 +638,38 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		"success | no result": {
 			params: RequestVars{
 				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{},
+					Paging: service.Paging{
+						Total: 0,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
+		"success | invalid status, it should still go through": {
+			params: RequestVars{
+				"project_id": {"1"},
+				"status":     {"non_existent_status"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
