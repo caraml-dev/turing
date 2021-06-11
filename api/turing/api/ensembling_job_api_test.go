@@ -385,3 +385,242 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		})
 	}
 }
+
+func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
+	tests := map[string]struct {
+		params               RequestVars
+		ensemblingJobService func() service.EnsemblingJobService
+		expectedResponseCode int
+		expectedBody         *Response
+	}{
+		"success | nominal": {
+			params: RequestVars{
+				"id":         {"1"},
+				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(generateEnsemblingJobFixture(
+				1,
+				models.ID(1),
+				models.ID(1),
+				"test-ensembler-1",
+				true,
+			)),
+		},
+		"failure | no such ensembling job": {
+			params: RequestVars{
+				"id":         {"1"},
+				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					nil,
+					errors.New("hello"),
+				)
+				return svc
+			},
+			expectedResponseCode: 404,
+			expectedBody:         nil,
+		},
+		"failure | missing project_id": {
+			params: RequestVars{
+				"id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				return svc
+			},
+			expectedResponseCode: 400,
+			expectedBody:         nil,
+		},
+		"failure | missing ensembling id": {
+			params: RequestVars{
+				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				return svc
+			},
+			expectedResponseCode: 400,
+			expectedBody:         nil,
+		},
+		"failure | missing all params": {
+			params: RequestVars{},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				return svc
+			},
+			expectedResponseCode: 400,
+			expectedBody:         nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			validator, _ := validation.NewValidator(nil)
+			ctrl := &EnsemblingJobController{
+				NewBaseController(
+					&AppContext{
+						EnsemblingJobService: svc,
+					},
+					validator,
+				),
+			}
+			resp := ctrl.GetEnsemblingJob(nil, tt.params, nil)
+			assert.Equal(t, tt.expectedResponseCode, resp.code)
+			if tt.expectedBody != nil {
+				assert.Equal(t, tt.expectedBody, resp)
+			}
+		})
+	}
+}
+
+func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
+	tests := map[string]struct {
+		params               RequestVars
+		ensemblingJobService func() service.EnsemblingJobService
+		expectedResponseCode int
+		expectedBody         *Response
+	}{
+		"success | nominal": {
+			params: RequestVars{
+				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
+		"success | nominal with paging": {
+			params: RequestVars{
+				"project_id": {"1"},
+				"page":       {"1"},
+				"pageSize":   {"20"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
+		"success | no result": {
+			params: RequestVars{
+				"project_id": {"1"},
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+			expectedResponseCode: 200,
+			expectedBody: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{},
+					Paging: service.Paging{
+						Total: 0,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+		},
+		"failure | missing value": {
+			params: RequestVars{},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				return svc
+			},
+			expectedResponseCode: 400,
+			expectedBody:         nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			validator, _ := validation.NewValidator(nil)
+			ctrl := &EnsemblingJobController{
+				NewBaseController(
+					&AppContext{
+						EnsemblingJobService: svc,
+					},
+					validator,
+				),
+			}
+			resp := ctrl.ListEnsemblingJobs(nil, tt.params, nil)
+			assert.Equal(t, tt.expectedResponseCode, resp.code)
+			if tt.expectedBody != nil {
+				assert.Equal(t, tt.expectedBody, resp)
+			}
+		})
+	}
+}

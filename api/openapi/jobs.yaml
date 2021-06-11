@@ -10,6 +10,7 @@ paths:
   "/projects/{project_id}/jobs":
     post:
       tags: *tags
+      operationId: "CreateEnsemblingJob"
       summary: Submit an Ensembling job.
       parameters:
         - in: path
@@ -27,6 +28,57 @@ paths:
       responses:
         "202":
           description: Accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblingJob"
+    get:
+      tags: *tags
+      operationId: "ListEnsemblingJobs"
+      summary: Returns a list of ensembling jobs that belong to the project
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: A JSON object, that represents paginated results response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblingJobPaginatedResults"
+
+  "/projects/{project_id}/jobs/{id}":
+    get:
+      tags: *tags
+      operationId: "GetEnsemblingJob"
+      summary: Get an existing Ensembling job.
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: path
+          name: id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        "200":
+          description: A JSON object representing an Ensembling Job
           content:
             application/json:
               schema:
@@ -274,7 +326,6 @@ components:
         executor_memory_request:
           type: string
 
-
     EnsemblerJobStatus:
       type: "string"
       enum:
@@ -286,3 +337,16 @@ components:
         - failed
         - failed_submission
         - failed_building
+
+    EnsemblingJobPaginatedResults:
+      allOf:
+        - type: object
+          properties:
+            paging:
+              $ref: "common.yaml#/components/schemas/pagination.Paging"
+        - type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/EnsemblingJob"

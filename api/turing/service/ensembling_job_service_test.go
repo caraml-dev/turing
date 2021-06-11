@@ -172,6 +172,84 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 	})
 }
 
+func TestListEnsemblingJobIntegration(t *testing.T) {
+	tests := map[string]struct {
+		saveQuantity  int
+		queryQuantity int
+		pageNumber    int
+		expectedCount int
+	}{
+		"success | first page nominal": {
+			saveQuantity:  5,
+			queryQuantity: 5,
+			pageNumber:    1,
+			expectedCount: 5,
+		},
+		"success | first page nominal, over query": {
+			saveQuantity:  5,
+			queryQuantity: 10,
+			pageNumber:    1,
+			expectedCount: 5,
+		},
+		"success | first page nominal, under query": {
+			saveQuantity:  5,
+			queryQuantity: 3,
+			pageNumber:    1,
+			expectedCount: 3,
+		},
+		"success | second page nominal": {
+			saveQuantity:  10,
+			queryQuantity: 5,
+			pageNumber:    2,
+			expectedCount: 5,
+		},
+		"success | second page nominal, under query": {
+			saveQuantity:  9,
+			queryQuantity: 5,
+			pageNumber:    2,
+			expectedCount: 4,
+		},
+		"success | second page nominal, over query": {
+			saveQuantity:  6,
+			queryQuantity: 5,
+			pageNumber:    2,
+			expectedCount: 1,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+				ensemblingJobService := NewEnsemblingJobService(db, "dev")
+
+				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
+					projectID := models.ID(1)
+					ensemblerID := models.ID(1000)
+					ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+					err := ensemblingJobService.Save(ensemblingJob)
+					assert.NoError(t, err)
+					assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+				}
+
+				// Query pending ensembling jobs
+				fetched, err := ensemblingJobService.List(
+					EnsemblingJobListOptions{
+						PaginationOptions: PaginationOptions{
+							Page:     testutils.NullableInt(tt.pageNumber),
+							PageSize: &tt.queryQuantity,
+						},
+					},
+				)
+				assert.Nil(t, err)
+				assert.Equal(t, tt.saveQuantity, fetched.Paging.Total)
+				assert.Equal(t, tt.pageNumber, fetched.Paging.Page)
+
+				ensemblingJobs := fetched.Results.([]*models.EnsemblingJob)
+				assert.Equal(t, tt.expectedCount, len(ensemblingJobs))
+			})
+		})
+	}
+}
+
 func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {

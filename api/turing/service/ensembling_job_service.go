@@ -21,8 +21,8 @@ type EnsemblingJobFindByIDOptions struct {
 // EnsemblingJobListOptions holds query parameters for EnsemblersService.List method.
 type EnsemblingJobListOptions struct {
 	PaginationOptions
-	ProjectID *models.ID
-	Status    *models.Status `validate:"oneof=pending running terminating terminated completed failed failed_submission failed_building"` //nolint
+	ProjectID *models.ID `schema:"project_id" validate:"required"`
+	Status    *models.Status
 }
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.

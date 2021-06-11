@@ -24,22 +24,6 @@ type OpenAPIValidationOptions struct {
 	IgnoreServers bool
 }
 
-const (
-	// SwaggerV2Type is Swagger V2 file type
-	SwaggerV2Type = SwaggerType(iota)
-	// SwaggerV3Type is Swagger V3 file type
-	SwaggerV3Type
-)
-
-// SwaggerType is the enum value of swagger version types
-type SwaggerType int
-
-// SwaggerYamlFile Stores the type of swagger file.
-type SwaggerYamlFile struct {
-	Type SwaggerType
-	File string
-}
-
 // NewOpenAPIValidation creates OpenAPIValidation object from OAS3 spec file
 // and provided options
 func NewOpenAPIValidation(
