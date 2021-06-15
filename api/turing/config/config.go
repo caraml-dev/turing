@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
 
@@ -72,7 +73,8 @@ type Config struct {
 	//
 	// For example:
 	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
-	Experiment map[string]interface{}
+	Experiment     map[string]interface{}
+	NewRelicConfig newrelic.Config
 }
 
 // ListenAddress returns the Turing Api app's port
