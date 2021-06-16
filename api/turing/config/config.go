@@ -56,6 +56,7 @@ type Config struct {
 	DeployConfig        *DeploymentConfig    `validate:"required"`
 	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
 	RouterDefaults      *RouterDefaults      `validate:"required"`
+	NewRelicConfig      newrelic.Config
 	Sentry              sentry.Config
 	VaultConfig         *VaultConfig `validate:"required"`
 	TuringEncryptionKey string       `validate:"required"`
@@ -73,8 +74,7 @@ type Config struct {
 	//
 	// For example:
 	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
-	Experiment     map[string]interface{}
-	NewRelicConfig newrelic.Config
+	Experiment map[string]interface{}
 }
 
 // ListenAddress returns the Turing Api app's port
