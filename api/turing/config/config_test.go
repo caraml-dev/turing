@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/copystructure"
 	"github.com/mitchellh/mapstructure"
 
+	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/stretchr/testify/assert"
@@ -526,6 +527,12 @@ func TestConfigValidate(t *testing.T) {
 			LogLevel: "DEBUG",
 		},
 		Sentry: sentry.Config{},
+		NewRelicConfig: newrelic.Config{
+			Enabled:           true,
+			AppName:           "test",
+			License:           "test",
+			IgnoreStatusCodes: []int{403, 404},
+		},
 		VaultConfig: &VaultConfig{
 			Address: "http://localhost:8200",
 			Token:   "root",

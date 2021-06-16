@@ -28,6 +28,19 @@ DeployConfig:
   MaxCPU: "4"
   MaxMemory: "8Gi"
 
+# New Relic Config
+NewRelic:
+  Enabled: true
+  AppName: turing
+  License: <your very secret license key here>
+  IgnoreStatusCodes: 
+    - 400
+    - 401
+    - 403
+    - 404
+    - 405
+    - 412
+
 # Turing router configuration
 RouterDefaults:
   Image: ghcr.io/gojek/turing:latest

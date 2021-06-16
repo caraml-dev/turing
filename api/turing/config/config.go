@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
 
@@ -55,6 +56,7 @@ type Config struct {
 	DeployConfig        *DeploymentConfig    `validate:"required"`
 	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
 	RouterDefaults      *RouterDefaults      `validate:"required"`
+	NewRelicConfig      newrelic.Config
 	Sentry              sentry.Config
 	VaultConfig         *VaultConfig `validate:"required"`
 	TuringEncryptionKey string       `validate:"required"`

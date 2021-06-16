@@ -10,6 +10,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
+	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/gojek/turing/api/turing/api"
 	"github.com/gojek/turing/api/turing/config"
@@ -65,6 +66,12 @@ func main() {
 	}
 	db.LogMode(false)
 	defer db.Close()
+
+	// Initialise NewRelic
+	if err := newrelic.InitNewRelic(cfg.NewRelicConfig); err != nil {
+		log.Errorf("Failed to initialize newrelic: %s", err)
+	}
+	defer newrelic.Shutdown(5 * time.Second)
 
 	// Init auth enforcer, vault client
 	var authEnforcer *enforcer.Enforcer
