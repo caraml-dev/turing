@@ -1,6 +1,7 @@
 # Table of contents
 
 * [Introduction](README.md)
+* [Concepts](concepts.md)
 
 ## How to guides
 * [Create a project](how-to/create-project.md)
