@@ -22,3 +22,7 @@
     * [More actions](how-to/viewing-routers/more-actions.md)
 * [Configuring Alerts](how-to/configuring-alerts.md)
 * [Undeploying Routers](how-to/undeploying-router.md)
+* [Redeploying Routers](how-to/redeploy-router/README.md)
+    * [Redeploy undeployed router](how-to/redeploy-router/redeploy-undeployed-router.md)
+    * [Redeploy version from history](how-to/redeploy-router/redeploy-version-from-history.md)
+    * [Redeploy version from version details page](how-to/redeploy-router/redeploy-from-version-detail.md)
