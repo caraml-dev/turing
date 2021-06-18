@@ -20,3 +20,4 @@
     * [Logs](how-to/viewing-routers/logs.md)
     * [Monitoring](how-to/viewing-routers/monitoring.md)
     * [More actions](how-to/viewing-routers/more-actions.md)
+* [Configuring Alerts](how-to/configuring-alerts.md)
