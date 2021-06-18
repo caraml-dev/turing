@@ -26,3 +26,7 @@
     * [Redeploy undeployed router](how-to/redeploy-router/redeploy-undeployed-router.md)
     * [Redeploy version from history](how-to/redeploy-router/redeploy-version-from-history.md)
     * [Redeploy version from version details page](how-to/redeploy-router/redeploy-from-version-detail.md)
+* [Deleting routers](how-to/delete-router/README.md)
+    * [Deleting router versions](how-to/delete-router/delete-router-version.md)
+    * [Deleting router versions from details page](how-to/delete-router/delete-router-version-from-details-page.md)
+    * [Deleting routers](how-to/delete-router/delete-router.md)

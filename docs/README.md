@@ -2,10 +2,10 @@
 
 ## What is Turing?
 
-Turing is a fast, scalable and extensible system that can be used to design, deploy and evaluate ML experiments in production. It takes care of the core Engineering aspects of experimentation such as traffic routing, outcome logging, system monitoring, etc. and is designed to work with pluggable Experiment Engines, pre and post processors. It is backed by existing systems like Merlin for model endpoints and Litmus / XP (WIP) for experiment configuration.
+Turing is a fast, scalable and extensible system that can be used to design, deploy and evaluate ML experiments in production. It takes care of the core Engineering aspects of experimentation such as traffic routing, outcome logging, system monitoring, etc. and is designed to work with pluggable Experiment Engines, pre and post processors. It is backed by existing systems like [Merlin](https://github.com/gojek/merlin) for model endpoints.
 
 ## Concepts
-**Project**: Holds all MLP resources that belong to a specific team such as service accounts, Merlin models, etc.
+**Project**: Holds all [MLP](https://github.com/gojek/mlp) resources that belong to a specific team such as service accounts, Merlin models, etc.
 
 **Router**: The router is the nucleus of the Turing system. It is responsible for coordinating the traffic routing to multiple model endpoints, invoking the pre and post processors, incorporating the response from the Experiment engine and logging of these responses.  
 
@@ -30,9 +30,9 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 ## Features
 * Low-latency, high-throughput traffic routing to an unlimited number of ML models.
 
-* Experimentation rules based on incoming requests to determine the treatment to be applied. The experiment engines currently supported are Litmus and XP (WIP).
+* Experimentation rules based on incoming requests to determine the treatment to be applied. The experiment engines currently supported are closed source for now (we are working on this!).
 
-* Feature enrichment of incoming requests through Feast (planned) and arbitrary pre-processors.
+* Feature enrichment of incoming requests through [Feast](https://github.com/feast-dev/feast) (planned) and arbitrary pre-processors.
 
 * Dynamic ensembling of models for each treatment. This could be selecting one of the models' response, a custom ensembling of responses from two or more models or any other arbitrary post-processing.
 
@@ -57,7 +57,7 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 ## When To Use Turing
 * You need to send traffic to multiple model endpoints
 
-* You need to ensemble the resulting response based on the experiment configuration in Litmus / XP
+* You need to ensemble the resulting response based on the experiment configuration.
 
 * You want request-response pairs to be logged.
 
