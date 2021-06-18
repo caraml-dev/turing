@@ -16,31 +16,31 @@ Configure the Docker Container. There are 4 required inputs.
 
 ![](../.gitbook/assets/docker_container_config.png)
 
-1. *Docker Image*: The image is formed of 2 parts. Select the registry to where your image is stored. Following that, enter the name of the image.  
+**Docker Image**: The image is formed of 2 parts. Select the registry to where your image is stored. Following that, enter the name of the image.  
 
-2. *Endpoint*: Relative URL endpoint of the enricher.
+**Endpoint**: Relative URL endpoint of the enricher.
 
-3. *Port*: Port number exposed by your container.
+**Port**: Port number exposed by your container.
 
-4. *Timeout*: Request timeout, which when exceeded, the request to enricher will be terminated
+**Timeout**: Request timeout, which when exceeded, the request to enricher will be terminated
 
-5. *Service Account*: You can **optionally** mount a service account for your Docker deployment.
+**Service Account**: You can **optionally** mount a service account for your Docker deployment.
 
 ![](../.gitbook/assets/service_acc_dropdown.png)
 
-2. Configure any environment variables required by the docker container. You need to input the name and corresponding value of each input.
+Configure any environment variables required by the docker container. You need to input the name and corresponding value of each input.
 
 ![](../.gitbook/assets/env_var_panel.png)
 
-3. Configure the resources required for the enricher. There are 3 required inputs, with default values provided for each.
+Configure the resources required for the enricher. There are 3 required inputs, with default values provided for each.
 
 ![](../.gitbook/assets/resources_panel.png)
 
-1. *CPU*: Total amount of CPU available for your enricher.
+**CPU**: Total amount of CPU available for your enricher.
 
-2. *Memory*: Total amount of RAM available for your enricher.
+**Memory**: Total amount of RAM available for your enricher.
 
-3. *Min/Max Replicas*: Min/max number of replicas for your enricher. Scaling of the enricher based on traffic volume will be automatically done for you.
+**Min/Max Replicas**: Min/max number of replicas for your enricher. Scaling of the enricher based on traffic volume will be automatically done for you.
 
 ### External Enricher
 

@@ -18,15 +18,15 @@ Configure the Docker Container. There are 4 required inputs.
 
 ![](../.gitbook/assets/docker_container_config.png)
 
-1. *Docker Image*: The image is formed of 2 parts. Select the registry to where your image is stored. Following that, enter the name of the image.
+**Docker Image**: The image is formed of 2 parts. Select the registry to where your image is stored. Following that, enter the name of the image.
 
-2. *Endpoint*: Relative URL endpoint of the ensembler.
+**Endpoint**: Relative URL endpoint of the ensembler.
 
-3. *Port*: Port number exposed by your container.
+**Port**: Port number exposed by your container.
 
-4. *Timeout*: Request timeout, which when exceeded, the request to the ensembler will be terminated
+**Timeout**: Request timeout, which when exceeded, the request to the ensembler will be terminated
 
-5. *Service Account*: You can **optionally** mount a service account for your Docker deployment.
+**Service Account**: You can **optionally** mount a service account for your Docker deployment.
 
 Configure any environment variables required by the docker container. You need to input the name and corresponding value of each input.
 
@@ -36,11 +36,11 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 
 ![](../.gitbook/assets/resources_panel.png)
 
-1. *CPU*: Total amount of CPU available for your ensembler.
+**CPU**: Total amount of CPU available for your ensembler.
 
-2. *Memory*: Total amount of RAM available for your ensembler.
+**Memory**: Total amount of RAM available for your ensembler.
 
-3. *Min/Max Replicas*: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
+**Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
 
 ## External Ensembler

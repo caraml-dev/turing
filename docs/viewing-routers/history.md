@@ -20,7 +20,7 @@ You will see a summary of each version being displayed.
 
 **Actions**: Represents the actions that can be done to the router version:
 
-    * **Compare**: It's possible to compare any two router versions to see what has been changed. See [Comparing Versions](./history.md) 
+    * **Compare**: It's possible to compare any two router versions to see what has been changed. See [Comparing Versions](./history.md#comparing-versions) 
       
     * **Deploy**: A router version which is not currently deployed can be deployed to the router. 
 
