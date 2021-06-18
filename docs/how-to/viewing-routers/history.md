@@ -4,7 +4,7 @@ The history tab displays all versions and activity log associated with the route
 
 ### Versions
 
-![](../.gitbook/assets/versions_list.png)
+![](../../.gitbook/assets/versions_list.png)
 
 You will see a summary of each version being displayed.
 
@@ -30,10 +30,10 @@ You will see a summary of each version being displayed.
 
 | Status     | Description | Badge |
 | ---        | ---         | ---   |
-| Deployed | The configuration provided in the router version is valid and currently deployed. | ![deployed_version](../.gitbook/assets/deployed_version_badge.png) |
-| Not Deployed | The configuration provided in the router version is valid.  | ![undeployed_version](../.gitbook/assets/not_deployed_version_badge.png) |
-| Updating | The configuration provided in the router version is being validated and will be deployed to the router if successful. | ![updating_version](../.gitbook/assets/updating_version_badge.png) |
-| Failed | The configuration provided in the router version is invalid. | ![failed_version](../.gitbook/assets/failed_version_badge.png) |
+| Deployed | The configuration provided in the router version is valid and currently deployed. | ![deployed_version](../../.gitbook/assets/deployed_version_badge.png) |
+| Not Deployed | The configuration provided in the router version is valid.  | ![undeployed_version](../../.gitbook/assets/not_deployed_version_badge.png) |
+| Updating | The configuration provided in the router version is being validated and will be deployed to the router if successful. | ![updating_version](../../.gitbook/assets/updating_version_badge.png) |
+| Failed | The configuration provided in the router version is invalid. | ![failed_version](../../.gitbook/assets/failed_version_badge.png) |
 
 To view the configuration of the version in detail, proceed to you can click on the version to find out the details of that particular version.
 
@@ -41,10 +41,10 @@ To view the configuration of the version in detail, proceed to you can click on 
 
 You can compare any two versions of router and check which part of the configuration has been changed. To do so, select two versions from the versions list and click on `Compare` button:
 
-![](../.gitbook/assets/version_comparison.png)
+![](../../.gitbook/assets/version_comparison.png)
 
 ### Activity Log
 
 The activity log displays information regarding the progress of the deployment and potential reasons of failed deployments.
 
-![](../.gitbook/assets/activity_log.png)
+![](../../.gitbook/assets/activity_log.png)

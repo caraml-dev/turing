@@ -4,7 +4,7 @@
 This step is **optional** and the default behaviour will not discriminate between requests.
 {% endhint %}
 
-![](../.gitbook/assets/create_router_rules.png)
+![](../../.gitbook/assets/create_router_rules.png)
 
 It is also possible to configure your router such that each request is only dispatched to a subset of the configured routes, based on some request specific conditions. For example, you might have some models, trained on geography-specific data. So, in this scenario, you want to call `model-a` if the request contains header `"X-Region: Region-A"` or `model-b` if `X-Region` header equals `"Region-B"`. It's possible to achieve this by configuring traffic rules on your router.
 
@@ -12,7 +12,7 @@ Traffic rules define which routes should be "activated" for a particular request
 
 Rules are matched against the incoming request in the order in which they are defined. This property can be used to create one ore more specific rules over a general rule. Consider the following example, where a router has rules defined such that requests are routed by the country of origin (ID, SG, etc.). In addition, if the routing logic must be altered for a certain service type in a country, this rule (the 'specific' rule) can be defined before the general rule.
 
-![](../.gitbook/assets/create_router_rules_priority.png)
+![](../../.gitbook/assets/create_router_rules_priority.png)
 
 ### Conditions
 

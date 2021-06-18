@@ -6,5 +6,5 @@ This step is **optional** and the default behaviour will be to send the request 
 
 If you intend to determine how to select/combine responses from the individual routes (typically in the Ensembler) to send back as the Turing response, configure the Experiment Engine as shown in Configure Experiment Engine. 
 
-![](../.gitbook/assets/configure_expriement_engine.png)
+![](../../.gitbook/assets/configure_expriement_engine.png)
 

@@ -10,7 +10,7 @@ Turing currently supports logging request-treatment-response data to BigQuery an
 
 Configure the BigQuery destination. There are 2 required inputs.
 
-![](../.gitbook/assets/bq_panel.png)
+![](../../.gitbook/assets/bq_panel.png)
 
 **BigQuery Table**: Specify the name of the BigQuery Table in the format of `project_name.dataset.table`. If the table does not exist, it will be created automatically at the deployment.
 
@@ -20,7 +20,7 @@ Configure the BigQuery destination. There are 2 required inputs.
 
 Select Kafka as the Results Logging Destination and configure the required values.
 
-![](../.gitbook/assets/kafka_panel.png)
+![](../../.gitbook/assets/kafka_panel.png)
 
 **Brokers**: A comma-separated list of one or more Kafka brokers
 
@@ -28,4 +28,4 @@ Select Kafka as the Results Logging Destination and configure the required value
 
 **Serialization Format**: The message serialization format to be used. This can be SON or Protobuf.  When Protobuf serialization is used, the message published to the topic is of type `TuringResultLogV2Message` and the message key is of type `TuringResultLogV2Key`. When JSON serialization is used, the `TuringResultLogV2Message`'s JSON representation is published to the topic.
 
-![](../.gitbook/assets/kafka_message_proto.png)
+![](../../.gitbook/assets/kafka_message_proto.png)

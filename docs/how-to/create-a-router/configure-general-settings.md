@@ -8,4 +8,4 @@ There are 3 required inputs:
 
 **Timeout**: Overall timeout, which when exceeded, the request execution by your Turing router will be terminated.
 
-![](../.gitbook/assets/general_router_settings.png)
+![](../../.gitbook/assets/general_router_settings.png)
