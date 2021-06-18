@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](how-to/README.md)
+* [Introduction](README.md)
 
 ## How to guides
 * [Create a project](how-to/create-project.md)
@@ -21,3 +21,4 @@
     * [Monitoring](how-to/viewing-routers/monitoring.md)
     * [More actions](how-to/viewing-routers/more-actions.md)
 * [Configuring Alerts](how-to/configuring-alerts.md)
+* [Undeploying Routers](how-to/undeploying-router.md)
