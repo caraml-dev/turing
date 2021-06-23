@@ -51,9 +51,9 @@ EnsemblingJobConfig:
   DefaultEnvironment: dev
   BatchSize: 10
   MaxRetryCount: 3
-  ImageConfig:
+  ImageBuilderConfig:
     Registry: ghcr.io
-    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d
+    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
     BuildNamespace: default
     BuildContextURI: git://github.com/gojek/turing.git#refs/heads/master
     DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
@@ -69,9 +69,9 @@ EnsemblingJobConfig:
         CPU: "1"
         Memory: 1Gi
 
-# Spark Infra config for running on Kubernetes
+# Spark App config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.
-SparkInfraConfig:
+SparkAppConfig:
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25
   SparkVersion: "2.4.5"

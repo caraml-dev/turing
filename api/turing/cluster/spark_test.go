@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	sparkInfraConfig *config.SparkInfraConfig = &config.SparkInfraConfig{
+	sparkInfraConfig *config.SparkAppConfig = &config.SparkAppConfig{
 		NodeSelector: map[string]string{
 			"node-workload-type": "batch",
 		},

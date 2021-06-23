@@ -526,7 +526,7 @@ func TestConfigValidate(t *testing.T) {
 			DefaultEnvironment: "dev",
 			BatchSize:          10,
 			MaxRetryCount:      3,
-			ImageConfig: ImageConfig{
+			ImageBuilderConfig: ImageBuilderConfig{
 				Registry:             "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
@@ -549,7 +549,7 @@ func TestConfigValidate(t *testing.T) {
 				},
 			},
 		},
-		SparkInfraConfig: &SparkInfraConfig{
+		SparkAppConfig: &SparkAppConfig{
 			NodeSelector: map[string]string{
 				"node-workload-type": "batch",
 			},
@@ -658,7 +658,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing spark infra config": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.SparkInfraConfig = nil
+				validConfig.SparkAppConfig = nil
 				return validConfig
 			},
 			wantErr: true,

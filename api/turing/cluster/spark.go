@@ -88,7 +88,7 @@ type CreateSparkRequest struct {
 	ExecutorMemoryRequest string
 	ExecutorReplica       int32
 	ServiceAccountName    string
-	SparkInfraConfig      *config.SparkInfraConfig
+	SparkInfraConfig      *config.SparkAppConfig
 	TaintKey              *string
 }
 

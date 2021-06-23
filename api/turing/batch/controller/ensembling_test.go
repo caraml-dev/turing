@@ -28,7 +28,7 @@ var (
 	standardLabels map[string]string = map[string]string{
 		"model": "T800",
 	}
-	sparkInfraConfig *config.SparkInfraConfig = &config.SparkInfraConfig{
+	sparkInfraConfig *config.SparkAppConfig = &config.SparkAppConfig{
 		NodeSelector: map[string]string{
 			"node-workload-type": "batch",
 		},

@@ -5,6 +5,7 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	"github.com/gojek/turing/api/turing/common"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/log"
@@ -24,16 +25,7 @@ type ensemblingJobRunner struct {
 	imageBuildTimeoutDuration time.Duration
 }
 
-var (
-	labelTeamName         = "gojek.com/team"
-	labelStreamName       = "gojek.com/stream"
-	labelAppName          = "gojek.com/app"
-	labelEnvironment      = "gojek.com/environment"
-	labelOrchestratorName = "gojek.com/orchestrator"
-	valueOrchestratorName = "turing"
-)
-
-// NewBatchEnsemblingJobRunner creates a new batch ensembling job
+// NewBatchEnsemblingJobRunner creates a new batch ensembling job runner
 // This service controls the orchestration of batch ensembling jobs.
 func NewBatchEnsemblingJobRunner(
 	ensemblingController batchcontroller.EnsemblingController,
@@ -279,11 +271,11 @@ func (r *ensemblingJobRunner) buildLabels(
 ) map[string]string {
 	buildLabels := make(map[string]string)
 	if r.injectGojekLabels {
-		buildLabels[labelTeamName] = mlpProject.Team
-		buildLabels[labelStreamName] = mlpProject.Stream
-		buildLabels[labelAppName] = ensemblingJob.InfraConfig.EnsemblerName
-		buildLabels[labelEnvironment] = r.environment
-		buildLabels[labelOrchestratorName] = valueOrchestratorName
+		buildLabels[common.GojekLabelTeam] = mlpProject.Team
+		buildLabels[common.GojekLabelStream] = mlpProject.Stream
+		buildLabels[common.GojekLabelApp] = ensemblingJob.InfraConfig.EnsemblerName
+		buildLabels[common.GojekLabelEnvironment] = r.environment
+		buildLabels[common.GojekLabelOrchestrator] = common.DeploymentOrchestratorValue
 	}
 
 	return buildLabels

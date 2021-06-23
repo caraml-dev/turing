@@ -43,7 +43,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		versionID         models.ID
 		inputDependencies []string
 		namespace         string
-		imageConfig       config.ImageConfig
+		imageConfig       config.ImageBuilderConfig
 		kanikoConfig      config.KanikoConfig
 		buildLabels       map[string]string
 		clusterController func() cluster.Controller
@@ -101,7 +101,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageConfig{
+			imageConfig: config.ImageBuilderConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -178,7 +178,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageConfig: config.ImageConfig{
+			imageConfig: config.ImageBuilderConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -264,7 +264,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageConfig{
+			imageConfig: config.ImageBuilderConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,

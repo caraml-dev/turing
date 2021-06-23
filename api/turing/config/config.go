@@ -56,7 +56,7 @@ type Config struct {
 	DbConfig            *DatabaseConfig      `validate:"required"`
 	DeployConfig        *DeploymentConfig    `validate:"required"`
 	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
-	SparkInfraConfig    *SparkInfraConfig    `validate:"required"`
+	SparkAppConfig      *SparkAppConfig      `validate:"required"`
 	RouterDefaults      *RouterDefaults      `validate:"required"`
 	NewRelicConfig      newrelic.Config
 	Sentry              sentry.Config
@@ -109,35 +109,48 @@ type DeploymentConfig struct {
 
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
-	BatchSize          int          `validate:"required"`
-	MaxRetryCount      int          `validate:"required"`
-	DefaultEnvironment string       `validate:"required"`
-	KanikoConfig       KanikoConfig `validate:"required"`
-	ImageConfig        ImageConfig  `validate:"required"`
-	InjectGojekConfig  bool
+	// BatchSize dictates the number of batch ensembling jobs to be queried at once.
+	BatchSize int `validate:"required"`
+	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
+	MaxRetryCount int `validate:"required"`
+	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
+	DefaultEnvironment string `validate:"required"`
+	// KanikoConfig contains the configuration related to the kaniko executor image
+	KanikoConfig KanikoConfig `validate:"required"`
+	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
+	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
+	// InjectGojekConfig is a flag to insert Gojek specific labels that is used internally.
+	InjectGojekConfig bool
 }
 
-// ImageConfig provides the configuration used for the OCI image building.
-type ImageConfig struct {
-	LocalRegistry        string
-	Registry             string `validate:"required"`
-	BaseImageRef         string `validate:"required"`
-	BuildNamespace       string `validate:"required"`
-	BuildContextURI      string `validate:"required"`
-	DockerfileFilePath   string `validate:"required"`
+// ImageBuilderConfig provides the configuration used for the OCI image building.
+// The details here contain the details pertaining to the ensembler image and not the kaniko image.
+type ImageBuilderConfig struct {
+	// Registry is the registry of the newly built ensembler image.
+	Registry string `validate:"required"`
+	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
+	BaseImageRef string `validate:"required"`
+	// BuildNamespace contains the Kubernetes namespace it should be built in.
+	BuildNamespace string `validate:"required"`
+	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
+	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+	BuildContextURI string `validate:"required"`
+	// DockerfileFilePath contains where the Dockerfile is
+	DockerfileFilePath string `validate:"required"`
+	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
 	BuildTimeoutDuration time.Duration
-}
-
-// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
-type ResourceRequestsLimits struct {
-	Requests Resource `validate:"required"`
-	Limits   Resource `validate:"required"`
 }
 
 // Resource contains the Kubernetes resource request and limits
 type Resource struct {
 	CPU    string `validate:"required"`
 	Memory string `validate:"required"`
+}
+
+// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
+type ResourceRequestsLimits struct {
+	Requests Resource `validate:"required"`
+	Limits   Resource `validate:"required"`
 }
 
 // KanikoConfig provides the configuration used for the Kaniko image.
@@ -147,8 +160,8 @@ type KanikoConfig struct {
 	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
 }
 
-// SparkInfraConfig contains the infra configurations that is unique to the user's Kubernetes
-type SparkInfraConfig struct {
+// SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
+type SparkAppConfig struct {
 	NodeSelector                   map[string]string
 	CorePerCPURequest              float64 `validate:"required"`
 	CPURequestToCPULimit           float64 `validate:"required"`

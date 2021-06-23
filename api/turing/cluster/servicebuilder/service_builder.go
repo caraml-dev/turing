@@ -10,6 +10,7 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/common"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -334,10 +335,10 @@ func buildLabels(
 	router *models.Router,
 ) map[string]string {
 	return map[string]string{
-		labelEnvironment:  envType,
-		labelStream:       project.Stream,
-		labelTeam:         project.Team,
-		labelApp:          router.Name,
-		labelOrchestrator: deploymentOrchestrator,
+		common.GojekLabelEnvironment:  envType,
+		common.GojekLabelStream:       project.Stream,
+		common.GojekLabelTeam:         project.Team,
+		common.GojekLabelApp:          router.Name,
+		common.GojekLabelOrchestrator: common.DeploymentOrchestratorValue,
 	}
 }

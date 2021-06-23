@@ -64,7 +64,7 @@ func TestNewAppContext(t *testing.T) {
 			DefaultEnvironment: "dev",
 			BatchSize:          10,
 			MaxRetryCount:      3,
-			ImageConfig: config.ImageConfig{
+			ImageBuilderConfig: config.ImageBuilderConfig{
 				Registry:             "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
@@ -87,7 +87,7 @@ func TestNewAppContext(t *testing.T) {
 				},
 			},
 		},
-		SparkInfraConfig: &config.SparkInfraConfig{
+		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
 				"node-workload-type": "batch",
 			},
@@ -243,7 +243,7 @@ func TestNewAppContext(t *testing.T) {
 
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
 		nil,
-		testCfg.EnsemblingJobConfig.ImageConfig,
+		testCfg.EnsemblingJobConfig.ImageBuilderConfig,
 		testCfg.EnsemblingJobConfig.KanikoConfig,
 	)
 	assert.Nil(t, err)
@@ -252,7 +252,7 @@ func TestNewAppContext(t *testing.T) {
 	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
 		nil,
 		mlpSvc,
-		testCfg.SparkInfraConfig,
+		testCfg.SparkAppConfig,
 	)
 	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
 		batchEnsemblingController,
@@ -263,7 +263,7 @@ func TestNewAppContext(t *testing.T) {
 		testCfg.EnsemblingJobConfig.DefaultEnvironment,
 		testCfg.EnsemblingJobConfig.BatchSize,
 		testCfg.EnsemblingJobConfig.MaxRetryCount,
-		testCfg.EnsemblingJobConfig.ImageConfig.BuildTimeoutDuration,
+		testCfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
 	)
 
 	assert.Equal(t, &AppContext{

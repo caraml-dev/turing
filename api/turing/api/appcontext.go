@@ -87,9 +87,10 @@ func NewAppContext(
 
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
+	defaultController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
-		clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment],
-		cfg.EnsemblingJobConfig.ImageConfig,
+		defaultController,
+		cfg.EnsemblingJobConfig.ImageBuilderConfig,
 		cfg.EnsemblingJobConfig.KanikoConfig,
 	)
 	if err != nil {
@@ -98,9 +99,9 @@ func NewAppContext(
 
 	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
 	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
-		clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment],
+		defaultController,
 		mlpSvc,
-		cfg.SparkInfraConfig,
+		cfg.SparkAppConfig,
 	)
 
 	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
@@ -112,7 +113,7 @@ func NewAppContext(
 		cfg.EnsemblingJobConfig.DefaultEnvironment,
 		cfg.EnsemblingJobConfig.BatchSize,
 		cfg.EnsemblingJobConfig.MaxRetryCount,
-		cfg.EnsemblingJobConfig.ImageConfig.BuildTimeoutDuration,
+		cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
 	)
 
 	appContext := &AppContext{

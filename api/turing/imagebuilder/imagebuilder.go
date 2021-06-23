@@ -24,7 +24,7 @@ import (
 )
 
 // JobStatus is the current state of the image building job.
-type JobStatus string
+type JobStatus int
 
 const (
 	tickDurationInSeconds = 5
@@ -67,7 +67,7 @@ type nameGenerator interface {
 
 type imageBuilder struct {
 	clusterController cluster.Controller
-	imageConfig       config.ImageConfig
+	imageConfig       config.ImageBuilderConfig
 	kanikoConfig      config.KanikoConfig
 	nameGenerator     nameGenerator
 }
@@ -75,7 +75,7 @@ type imageBuilder struct {
 // NewImageBuilder creates a new ImageBuilder
 func newImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig config.ImageConfig,
+	imageConfig config.ImageBuilderConfig,
 	kanikoConfig config.KanikoConfig,
 	nameGenerator nameGenerator,
 ) (ImageBuilder, error) {
@@ -292,7 +292,7 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 		kanikoJobName,
 	)
 	if err != nil {
-		return "", err
+		return JobStatusUnknown, err
 	}
 
 	if job.Status.Active != 0 {

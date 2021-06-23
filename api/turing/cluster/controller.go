@@ -653,6 +653,7 @@ func (c *controller) waitKnativeServiceReady(
 ) error {
 	// Init ticker to check status every second
 	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
 
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(namespace)
@@ -718,6 +719,7 @@ func (c *controller) waitDeploymentReady(
 ) error {
 	// Init ticker to check status every second
 	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
 
 	// Init knative ServicesGetter
 	deployments := c.k8sAppsClient.Deployments(namespace)

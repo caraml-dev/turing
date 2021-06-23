@@ -77,7 +77,4 @@ jobs:
         PROJECT_ID: "1"
         PROJECT_NAME: default
         KUBECONFIG_USE_LOCAL: "true" 
-      run: |
-        go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
-        free -h
-        df -h
+      run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd

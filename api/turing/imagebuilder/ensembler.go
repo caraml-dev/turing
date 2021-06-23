@@ -11,7 +11,7 @@ import (
 // NewEnsemberJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
 func NewEnsemberJobImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig config.ImageConfig,
+	imageConfig config.ImageBuilderConfig,
 	kanikoConfig config.KanikoConfig,
 ) (ImageBuilder, error) {
 	return newImageBuilder(

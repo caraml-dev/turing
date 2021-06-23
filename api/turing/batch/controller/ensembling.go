@@ -47,14 +47,14 @@ type EnsemblingController interface {
 type ensemblingController struct {
 	clusterController cluster.Controller
 	mlpService        service.MLPService
-	sparkInfraConfig  *config.SparkInfraConfig
+	sparkInfraConfig  *config.SparkAppConfig
 }
 
 // NewBatchEnsemblingController creates a new batch ensembling controller
 func NewBatchEnsemblingController(
 	clusterController cluster.Controller,
 	mlpService service.MLPService,
-	sparkInfraConfig *config.SparkInfraConfig,
+	sparkInfraConfig *config.SparkAppConfig,
 ) EnsemblingController {
 	return &ensemblingController{
 		clusterController: clusterController,
@@ -106,7 +106,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		return fmt.Errorf("failed creating namespace %s: %v", request.Namespace, err)
 	}
 
-	serviceAccount, err := c.createDriverAuthorization(request.Namespace)
+	serviceAccount, err := c.createSparkDriverAuthorization(request.Namespace)
 	if err != nil {
 		return fmt.Errorf(
 			"failed creating spark driver authorization in namespace %s: %v",
@@ -240,7 +240,7 @@ func (c *ensemblingController) cleanup(jobName string, namespace string) {
 	}
 }
 
-func (c *ensemblingController) createDriverAuthorization(namespace string) (*apicorev1.ServiceAccount, error) {
+func (c *ensemblingController) createSparkDriverAuthorization(namespace string) (*apicorev1.ServiceAccount, error) {
 	serviceAccountName, roleName, roleBindingName := createAuthorizationResourceNames(namespace)
 
 	sa, err := c.clusterController.CreateServiceAccount(namespace, serviceAccountName)
