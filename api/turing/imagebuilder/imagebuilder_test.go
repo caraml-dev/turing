@@ -84,7 +84,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				).Once()
 
 				ctlr.On(
-					"CreateKanikoJob",
+					"CreateJob",
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -164,7 +164,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				).Once()
 
 				ctlr.On(
-					"CreateKanikoJob",
+					"CreateJob",
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -247,7 +247,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 				).Return(nil).Once()
 
 				ctlr.On(
-					"CreateKanikoJob",
+					"CreateJob",
 					mock.Anything,
 					mock.Anything,
 				).Return(

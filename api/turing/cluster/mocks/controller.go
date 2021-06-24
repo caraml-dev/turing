@@ -69,13 +69,13 @@ func (_m *Controller) ApplyPersistentVolumeClaim(ctx context.Context, namespace 
 	return r0
 }
 
-// CreateKanikoJob provides a mock function with given fields: namespace, kanikoJob
-func (_m *Controller) CreateKanikoJob(namespace string, kanikoJob cluster.KanikoJobSpec) (*v1.Job, error) {
-	ret := _m.Called(namespace, kanikoJob)
+// CreateJob provides a mock function with given fields: namespace, job
+func (_m *Controller) CreateJob(namespace string, job cluster.Job) (*v1.Job, error) {
+	ret := _m.Called(namespace, job)
 
 	var r0 *v1.Job
-	if rf, ok := ret.Get(0).(func(string, cluster.KanikoJobSpec) *v1.Job); ok {
-		r0 = rf(namespace, kanikoJob)
+	if rf, ok := ret.Get(0).(func(string, cluster.Job) *v1.Job); ok {
+		r0 = rf(namespace, job)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Job)
@@ -83,8 +83,8 @@ func (_m *Controller) CreateKanikoJob(namespace string, kanikoJob cluster.Kaniko
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, cluster.KanikoJobSpec) error); ok {
-		r1 = rf(namespace, kanikoJob)
+	if rf, ok := ret.Get(1).(func(string, cluster.Job) error); ok {
+		r1 = rf(namespace, job)
 	} else {
 		r1 = ret.Error(1)
 	}

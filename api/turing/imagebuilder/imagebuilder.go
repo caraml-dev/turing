@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 	"github.com/pkg/errors"
 	apibatchv1 "k8s.io/api/batch/v1"
+	apicorev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 
@@ -21,6 +22,20 @@ import (
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
+)
+
+var (
+	jobCompletions            int32 = 1
+	jobBackOffLimit           int32 = 3
+	jobTTLSecondAfterComplete int32 = 3600 * 24
+)
+
+const (
+	imageBuilderContainerName   = "kaniko-builder"
+	googleApplicationEnvVarName = "GOOGLE_APPLICATION_CREDENTIALS"
+	kanikoSecretName            = "kaniko-secret"
+	kanikoSecretFileName        = "kaniko-secret.json"
+	kanikoSecretMountpath       = "/secret"
 )
 
 // JobStatus is the current state of the image building job.
@@ -201,22 +216,54 @@ func (ib *imageBuilder) createKanikoJob(
 		"--single-snapshot",
 	}
 
-	spec := cluster.KanikoJobSpec{
-		JobName:       kanikoJobName,
-		Namespace:     ib.imageConfig.BuildNamespace,
-		Labels:        buildLabels,
-		Args:          kanikoArgs,
-		Image:         ib.kanikoConfig.Image,
-		Version:       ib.kanikoConfig.ImageVersion,
-		CPURequest:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.CPU),
-		MemoryRequest: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.Memory),
-		CPULimit:      resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.CPU),
-		MemoryLimit:   resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.Memory),
+	job := cluster.Job{
+		Name:                    kanikoJobName,
+		Namespace:               ib.imageConfig.BuildNamespace,
+		Labels:                  buildLabels,
+		Completions:             &jobCompletions,
+		BackOffLimit:            &jobBackOffLimit,
+		TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
+		RestartPolicy:           apicorev1.RestartPolicyNever,
+		Containers: []cluster.Container{
+			{
+				Name:  imageBuilderContainerName,
+				Image: fmt.Sprintf("%s:%s", ib.kanikoConfig.Image, ib.kanikoConfig.ImageVersion),
+				Args:  kanikoArgs,
+				VolumeMounts: []cluster.VolumeMount{
+					{
+						Name:      kanikoSecretName,
+						MountPath: kanikoSecretMountpath,
+					},
+				},
+				Envs: []cluster.Env{
+					{
+						Name:  googleApplicationEnvVarName,
+						Value: fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName),
+					},
+				},
+				Resources: cluster.RequestLimitResources{
+					Request: cluster.Resource{
+						CPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.CPU),
+						Memory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.Memory),
+					},
+					Limit: cluster.Resource{
+						CPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.CPU),
+						Memory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.Memory),
+					},
+				},
+			},
+		},
+		SecretVolumes: []cluster.SecretVolume{
+			{
+				Name:       kanikoSecretName,
+				SecretName: kanikoSecretName,
+			},
+		},
 	}
 
-	return ib.clusterController.CreateKanikoJob(
+	return ib.clusterController.CreateJob(
 		ib.imageConfig.BuildNamespace,
-		spec,
+		job,
 	)
 }
 

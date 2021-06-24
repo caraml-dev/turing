@@ -79,7 +79,7 @@ type Controller interface {
 	DeletePersistentVolumeClaim(pvcName string, namespace string) error
 	ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
-	CreateKanikoJob(namespace string, kanikoJob KanikoJobSpec) (*apibatchv1.Job, error)
+	CreateJob(namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(namespace string, jobName string) error
 	CreateServiceAccount(namespace, serviceAccountName string) (*apicorev1.ServiceAccount, error)
@@ -498,10 +498,10 @@ func (c *controller) ListPodLogs(
 	return c.k8sCoreClient.Pods(namespace).GetLogs(podName, opts).Stream()
 }
 
-// CreateKanikoJob creates a Kaniko job
-func (c *controller) CreateKanikoJob(namespace string, kanikoJob KanikoJobSpec) (*apibatchv1.Job, error) {
-	jobSpec := kanikoJob.BuildSpec()
-	return c.k8sBatchClient.Jobs(namespace).Create(jobSpec)
+// CreateJob creates a Kubernetes job
+func (c *controller) CreateJob(namespace string, job Job) (*apibatchv1.Job, error) {
+	j := job.Build()
+	return c.k8sBatchClient.Jobs(namespace).Create(j)
 }
 
 // GetJob gets the Kubernetes job

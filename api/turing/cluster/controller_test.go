@@ -484,23 +484,22 @@ func TestDeleteK8sService(t *testing.T) {
 }
 
 func TestCreateKanikoJob(t *testing.T) {
-	namespace := "test-ns"
-	kanikoJob := KanikoJobSpec{
-		JobName:   "bob",
-		Namespace: "builder",
-		Labels: map[string]string{
-			"builderName": "bob",
+	j := Job{
+		Name:                    jobName,
+		Namespace:               namespace,
+		Labels:                  labels,
+		Completions:             &jobCompletions,
+		BackOffLimit:            &jobBackOffLimit,
+		TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
+		RestartPolicy:           corev1.RestartPolicyNever,
+		Containers: []Container{
+			CreateContainer(),
 		},
-		Args: []string{
-			"--dockerfile=Dockerfile",
+		SecretVolumes: []SecretVolume{
+			CreateSecretVolume(),
 		},
-		Image:         "gcr.io/kaniko-project/executor",
-		Version:       "v1.5.2",
-		CPURequest:    resource.MustParse("1"),
-		MemoryRequest: resource.MustParse("1Gi"),
-		CPULimit:      resource.MustParse("1"),
-		MemoryLimit:   resource.MustParse("1Gi"),
 	}
+
 	t.Run("success | nominal flow", func(t *testing.T) {
 		cs := fake.NewSimpleClientset()
 		cs.PrependReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -514,7 +513,7 @@ func TestCreateKanikoJob(t *testing.T) {
 		c := &controller{
 			k8sBatchClient: cs.BatchV1(),
 		}
-		job, err := c.CreateKanikoJob(namespace, kanikoJob)
+		job, err := c.CreateJob(namespace, j)
 		assert.Nil(t, err)
 		assert.NotNil(t, job)
 	})

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     environment_name varchar(50) NOT NULL,
     infra_config     jsonb NOT NULL,
     job_config       jsonb NOT NULL,
-    is_locked        bool NOT NULL default 'false',
+    is_locked        bool NOT NULL default 'false', -- This is set true when API picks a record up
     retry_count      integer NOT NULL default 0,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
