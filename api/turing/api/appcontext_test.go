@@ -259,7 +259,6 @@ func TestNewAppContext(t *testing.T) {
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		testCfg.EnsemblingJobConfig.InjectGojekConfig,
 		testCfg.EnsemblingJobConfig.DefaultEnvironment,
 		testCfg.EnsemblingJobConfig.BatchSize,
 		testCfg.EnsemblingJobConfig.MaxRetryCount,

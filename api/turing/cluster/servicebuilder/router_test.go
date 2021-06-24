@@ -104,11 +104,11 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -198,11 +198,11 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_FLUENTD_TAG", Value: "fluentd-tag"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -295,11 +295,11 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -392,11 +392,11 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -503,11 +503,11 @@ func TestNewRouterEndpoint(t *testing.T) {
 		Name:      "test-svc-turing-router",
 		Namespace: project.Name,
 		Labels: map[string]string{
-			"gojek.com/app":          "test-svc",
-			"gojek.com/environment":  "test-env",
-			"gojek.com/orchestrator": "turing",
-			"gojek.com/stream":       "test-stream",
-			"gojek.com/team":         "test-team",
+			"app":          "test-svc",
+			"environment":  "test-env",
+			"orchestrator": "turing",
+			"stream":       "test-stream",
+			"team":         "test-team",
 		},
 		Endpoint:        "test-svc-turing-router.models.example.com",
 		HostRewrite:     "test-svc-turing-router-1.models.example.com",

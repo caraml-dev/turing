@@ -10,6 +10,7 @@ import (
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/imagebuilder"
+	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -97,6 +98,8 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
 	}
 
+	labeller.InitKubernetesLabeller(cfg.KubernetesLabelPrefix)
+
 	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
 	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
 		defaultController,
@@ -109,7 +112,6 @@ func NewAppContext(
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		cfg.EnsemblingJobConfig.InjectGojekConfig,
 		cfg.EnsemblingJobConfig.DefaultEnvironment,
 		cfg.EnsemblingJobConfig.BatchSize,
 		cfg.EnsemblingJobConfig.MaxRetryCount,

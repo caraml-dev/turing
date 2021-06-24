@@ -148,7 +148,6 @@ func TestRun(t *testing.T) {
 	// and a Spark Operator. Testing with an actual cluster is required.
 	// Here we just try to run it without throwing an exception.
 	var tests = map[string]struct {
-		injectGojekLabels    bool
 		environment          string
 		ensemblingController func() batchcontroller.EnsemblingController
 		imageBuilder         func() imagebuilder.ImageBuilder
@@ -156,8 +155,7 @@ func TestRun(t *testing.T) {
 		mlpService           func() service.MLPService
 	}{
 		"success | nominal": {
-			injectGojekLabels: true,
-			environment:       "testing",
+			environment: "testing",
 			ensemblingController: func() batchcontroller.EnsemblingController {
 				ctlr := &batchcontrollermock.EnsemblingController{}
 				ctlr.On(
@@ -227,8 +225,7 @@ func TestRun(t *testing.T) {
 			},
 		},
 		"success | imagebuilding stuck": {
-			injectGojekLabels: true,
-			environment:       "testing",
+			environment: "testing",
 			ensemblingController: func() batchcontroller.EnsemblingController {
 				ctlr := &batchcontrollermock.EnsemblingController{}
 				ctlr.On(
@@ -299,8 +296,7 @@ func TestRun(t *testing.T) {
 			},
 		},
 		"success | no ensembling jobs": {
-			injectGojekLabels: true,
-			environment:       "testing",
+			environment: "testing",
 			ensemblingController: func() batchcontroller.EnsemblingController {
 				ctlr := &batchcontrollermock.EnsemblingController{}
 				ctlr.On(
@@ -364,7 +360,6 @@ func TestRun(t *testing.T) {
 				ensemblingJobService,
 				mlpService,
 				imageBuilder,
-				tt.injectGojekLabels,
 				tt.environment,
 				10,
 				3,

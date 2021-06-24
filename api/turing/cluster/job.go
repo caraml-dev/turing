@@ -42,6 +42,9 @@ func (j *Job) Build() *batchv1.Job {
 			BackoffLimit:            j.BackOffLimit,
 			TTLSecondsAfterFinished: j.TTLSecondsAfterFinished,
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: j.Labels,
+				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: j.RestartPolicy,
 					Containers:    containers,

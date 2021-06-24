@@ -5,9 +5,9 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
-	"github.com/gojek/turing/api/turing/common"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -18,7 +18,6 @@ type ensemblingJobRunner struct {
 	ensemblingJobService      service.EnsemblingJobService
 	mlpService                service.MLPService
 	imageBuilder              imagebuilder.ImageBuilder
-	injectGojekLabels         bool
 	environment               string
 	batchSize                 int
 	maxRetryCount             int
@@ -32,7 +31,6 @@ func NewBatchEnsemblingJobRunner(
 	ensemblingJobService service.EnsemblingJobService,
 	mlpService service.MLPService,
 	imageBuilder imagebuilder.ImageBuilder,
-	injectGojekLabels bool,
 	environment string,
 	batchSize int,
 	maxRetryCount int,
@@ -43,7 +41,6 @@ func NewBatchEnsemblingJobRunner(
 		ensemblingJobService:      ensemblingJobService,
 		mlpService:                mlpService,
 		imageBuilder:              imageBuilder,
-		injectGojekLabels:         injectGojekLabels,
 		environment:               environment,
 		batchSize:                 batchSize,
 		maxRetryCount:             maxRetryCount,
@@ -269,16 +266,14 @@ func (r *ensemblingJobRunner) buildLabels(
 	ensemblingJob *models.EnsemblingJob,
 	mlpProject *mlp.Project,
 ) map[string]string {
-	buildLabels := make(map[string]string)
-	if r.injectGojekLabels {
-		buildLabels[common.GojekLabelTeam] = mlpProject.Team
-		buildLabels[common.GojekLabelStream] = mlpProject.Stream
-		buildLabels[common.GojekLabelApp] = ensemblingJob.InfraConfig.EnsemblerName
-		buildLabels[common.GojekLabelEnvironment] = r.environment
-		buildLabels[common.GojekLabelOrchestrator] = common.DeploymentOrchestratorValue
+	rq := labeller.KubernetesLabelsRequest{
+		Environment: r.environment,
+		Stream:      mlpProject.Stream,
+		Team:        mlpProject.Team,
+		App:         ensemblingJob.InfraConfig.EnsemblerName,
 	}
 
-	return buildLabels
+	return labeller.BuildLabels(rq)
 }
 
 func (r *ensemblingJobRunner) saveStatus(

@@ -34,6 +34,9 @@ func TestJob(t *testing.T) {
 			BackoffLimit:            &jobBackOffLimit,
 			TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicyNever,
 					Containers: []corev1.Container{

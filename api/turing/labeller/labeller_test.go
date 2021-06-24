@@ -1,0 +1,50 @@
+package labeller
+
+import "testing"
+
+func TestLabeller(t *testing.T) {
+	var tests = map[string]struct {
+		doInit       bool
+		prefix       string
+		expectedKeys map[string]struct{}
+	}{
+		"success | no init called": {
+			doInit: false,
+			expectedKeys: map[string]struct{}{
+				"environment":  {},
+				"stream":       {},
+				"team":         {},
+				"app":          {},
+				"orchestrator": {},
+			},
+		},
+		"success | init called": {
+			doInit: true,
+			prefix: "gojek.com/",
+			expectedKeys: map[string]struct{}{
+				"gojek.com/environment":  {},
+				"gojek.com/stream":       {},
+				"gojek.com/team":         {},
+				"gojek.com/app":          {},
+				"gojek.com/orchestrator": {},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Always reset singleton objects.
+			defer InitKubernetesLabeller("")
+
+			if tt.doInit {
+				InitKubernetesLabeller(tt.prefix)
+			}
+
+			labels := BuildLabels(KubernetesLabelsRequest{})
+			for key := range tt.expectedKeys {
+				if _, ok := labels[key]; !ok {
+					t.Errorf("expected key %s", key)
+				}
+			}
+		})
+	}
+}

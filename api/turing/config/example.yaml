@@ -69,6 +69,21 @@ EnsemblingJobConfig:
         CPU: "1"
         Memory: 1Gi
 
+# KubernetesLabelPrefix is the prefix used for tagging kubernetes components.
+# Default is an empty string which means your tags will look something like this:
+#   team: teen-titans
+#   stream: nile
+#   environment: dev
+#   orchestrator: turing
+#   app: my-model-app
+# With this setting, it will look something like this:
+#   gojek.com/team: teen-titans
+#   gojek.com/stream: nile
+#   gojek.com/environment: dev
+#   gojek.com/orchestrator: turing
+#   gojek.com/app: my-model-app
+KubernetesLabelPrefix: "gojek.com/"
+
 # Spark App config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.
 SparkAppConfig:

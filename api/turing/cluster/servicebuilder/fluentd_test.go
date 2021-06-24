@@ -53,11 +53,11 @@ func TestNewFluentdService(t *testing.T) {
 			ProbeInitDelaySeconds: 10,
 			ProbePort:             9880,
 			Labels: map[string]string{
-				"gojek.com/app":          "test-svc",
-				"gojek.com/environment":  "test-env",
-				"gojek.com/orchestrator": "turing",
-				"gojek.com/stream":       "test-stream",
-				"gojek.com/team":         "test-team",
+				"app":          "test-svc",
+				"environment":  "test-env",
+				"orchestrator": "turing",
+				"stream":       "test-stream",
+				"team":         "test-team",
 			},
 			Envs: []corev1.EnvVar{
 				{Name: "FLUENTD_LOG_LEVEL", Value: "info"},

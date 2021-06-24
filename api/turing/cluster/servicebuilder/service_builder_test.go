@@ -42,11 +42,11 @@ func TestNewEnricherService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/enricher-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -114,11 +114,11 @@ func TestNewEnsemblerService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/ensembler-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -152,11 +152,11 @@ func TestNewEnsemblerService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/ensembler-service-account.json"},
 					},
 					Labels: map[string]string{
-						"gojek.com/app":          "test-svc",
-						"gojek.com/environment":  "test-env",
-						"gojek.com/orchestrator": "turing",
-						"gojek.com/stream":       "test-stream",
-						"gojek.com/team":         "test-team",
+						"app":          "test-svc",
+						"environment":  "test-env",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
 					},
 					Volumes: []corev1.Volume{
 						{
