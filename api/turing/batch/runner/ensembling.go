@@ -6,12 +6,13 @@ import (
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
-	"github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 )
+
+var pageOne = 1
 
 type ensemblingJobRunner struct {
 	ensemblingController      batchcontroller.EnsemblingController
@@ -55,11 +56,11 @@ func (r *ensemblingJobRunner) Run() {
 
 func (r *ensemblingJobRunner) updateStatus() {
 	// Here we want to check all non terminal cases.
-	// i.e. JobBuildingImage but with updated_at timeout
-	//		JobRunning
+	// 1. JobRunning
+	// 2. JobBuildingImage but with updated_at timeout.
 	optionsJobRunning := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
-			Page:     testutils.NullableInt(1),
+			Page:     &pageOne,
 			PageSize: &r.batchSize,
 		},
 		Statuses: []models.Status{
@@ -69,10 +70,26 @@ func (r *ensemblingJobRunner) updateStatus() {
 	r.processEnsemblingJobs(optionsJobRunning)
 
 	// To ensure that we only pickup jobs that weren't picked up, we check the last updated at.
+	// Two conditions that can happen:
+	//
+	// Case 1: Job is actually being watched by a live goroutine.
+	//              <---imageBuildTimeoutDuration--->
+	// ------------|-----------------|---------------|---------> time
+	//          job start          now       timeout cut off
+	//          (updated at)
+	// We don't want to pick up this situation since the image building might take a long time.
+	//
+	// Case 2: job hanged or Turing API unexpectedly terminated.
+	//              <---imageBuildTimeoutDuration--->
+	// ------------|---------------------------------|------> time
+	//           job start                          now
+	//           (updated at)
+	// Here Turing API might have crashed and we probably want to retry this situation.
+
 	updatedAtBefore := time.Now().Add(r.imageBuildTimeoutDuration * -1)
 	optionsJobBuildingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
-			Page:     testutils.NullableInt(1),
+			Page:     &pageOne,
 			PageSize: &r.batchSize,
 		},
 		Statuses: []models.Status{
@@ -100,7 +117,7 @@ func (r *ensemblingJobRunner) processEnsemblingJobs(queryOptions service.Ensembl
 func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJob) {
 	// Consider that the application may terminate when processing halfway.
 	// So we only check locked state, it's ok for it to be processed multiple times
-	// between multiple instances because they will have the same outcome.
+	// between multiple processes/goroutines because they will have the same outcome.
 	// If that happens, we should mark them for retry
 	// i.e. in the general case, we set back to JobPending but bump retry count
 	// If JobBuildingImage, we want to check if the image building has already been done
@@ -184,7 +201,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	isLocked := false
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
-			Page:     testutils.NullableInt(1),
+			Page:     &pageOne,
 			PageSize: &r.batchSize,
 		},
 		Statuses: []models.Status{

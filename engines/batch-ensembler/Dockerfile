@@ -96,4 +96,4 @@ RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc
 
 ENV PATH $CONDA_DIR/envs/$CONDA_ENVIRONMENT/bin:$PATH
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/opt/entrypoint.sh"]
