@@ -6,11 +6,11 @@ This step is **optional** and the default behaviour will not discriminate betwee
 
 ![](../../.gitbook/assets/create_router_rules.png)
 
-It is also possible to configure your router such that each request is only dispatched to a subset of the configured routes, based on some request specific conditions. For example, you might have some models, trained on geography-specific data. So, in this scenario, you want to call `model-a` if the request contains header `"X-Region: Region-A"` or `model-b` if `X-Region` header equals `"Region-B"`. It's possible to achieve this by configuring traffic rules on your router.
+It is also possible to configure your router such that each request is only dispatched to a subset of the configured routes, based on some request specific conditions. For example, you might have some models, trained on geography-specific data. So, in this scenario, you want to call `mock` if the request contains header `"X-Region: region-A"` or `model-b` if `X-Region` header equals `"region-B"`. It's possible to achieve this by configuring traffic rules on your router.
 
-Traffic rules define which routes should be "activated" for a particular request to your router. Each rule is defined by one or more request conditions, and one or more routes that would be activated if the request satisfies the conditions of the rule. Routes that are not part of any traffic rules will be called for each request.
+Traffic rules define which routes should be "activated" for a particular request to your router. Each rule is defined by one or more request conditions and one or more routes that would be activated if the request satisfies the conditions of the rule. Routes that are not part of any traffic rules will be called for each request.
 
-Rules are matched against the incoming request in the order in which they are defined. This property can be used to create one ore more specific rules over a general rule. Consider the following example, where a router has rules defined such that requests are routed by the country of origin (ID, SG, etc.). In addition, if the routing logic must be altered for a certain service type in a country, this rule (the 'specific' rule) can be defined before the general rule.
+Rules are matched against the incoming request in the order in which they are defined. This property can be used to create one or more specific rules over a general rule. Consider the following example, where a router has rules defined such that requests are routed by the country of origin (ID, SG, etc.). In addition, if the routing logic must be altered for a certain service type in a country, this rule (the 'specific' rule) can be defined before the general rule.
 
 ![](../../.gitbook/assets/create_router_rules_priority.png)
 
@@ -28,8 +28,8 @@ Provided values are case-sensitive.
 
 ### Routes   
 
-You should also select from the drop-down list one or more routes, that would be activated if this rule is triggered. It's not allowed to include the default route into any of traffic rules. As for non-default routes, they could be attached to zero or more traffic rules:
+You should also select one or more routes from the drop-down list that would be activated if the rule is triggered. The default route cannot be selected in any of traffic rules. As for non-default routes, they could be attached to zero or more traffic rules.
 
-* If route is attached to some traffic rule, then Turing will only send request to this route if the request meets this rule's conditions.
-* If route is not attached to any of the traffic rules, then Turing call this route with every incoming request.
-* If route is attached to multiple rules and the request satisfies more than one rule, then Turing will decide what group of routes should receive this request based on the order in which the traffic rules are defined.
+* If a route is attached to some traffic rule, then Turing will only send request to this route if the request meets this rule's conditions.
+* If a route is not attached to any of the traffic rules, then Turing will call this route with every incoming request.
+* If a route is attached to multiple rules and the request satisfies more than one rule, then Turing will decide what group of routes should receive this request based on the order in which the traffic rules are defined.

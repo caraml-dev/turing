@@ -22,9 +22,9 @@ These members can either be individual users or service accounts, defined by the
 
 ![](.gitbook/assets/project_members.png)
 
-    1. Administrators: These users will have full access to your project.
+**Administrators**: These users will have full access to your project.
 
-    2. Readers: These users will have read-only access to your project.
+**Readers**: These users will have read-only access to your project.
 
 You can optionally add labels, which are key-value pairs, to your project. These labels will be applied to the Kubernetes resources of your project.
 

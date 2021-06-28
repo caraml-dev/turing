@@ -10,6 +10,6 @@ Confirm if you want to deploy the specified version of your router.
 
 ![](../../.gitbook/assets/redeploy_version_modal.png)
  
-Once the specified version is in the process of redeployment, the status of the version will be changed to Updating and is in the process of being deployed to your router.
+Once the specified version is in the process of redeployment, the status of the version will be changed to Updating and it will be in the process of deploying your router.
 
 ![](../../.gitbook/assets/redeploy_version_config.png)

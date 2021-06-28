@@ -4,9 +4,9 @@ A Router in the Turing system represents an ML experiment and holds the configur
 
 ### Setting Up An Experiment
 
-In Turing, your will need to create a router with an optional Experiment Engine, Pre-processor (Enricher) and Post-processor (Ensembler) configured based on your requirements. After configuring and deploying the router, you will receive a url to which you are able to send your experimentation requests.
+In Turing, your will need to create a router with an optional Experiment Engine, Pre-processor (Enricher) and Post-processor (Ensembler) configured based on your requirements. After configuring and deploying the router, you will receive a URL to which you are able to send your experimentation requests.
 
-### Navigate to the Create Router UI.
+### Navigate to the Create Router UI
 * Open the Turing homepage.
 
 * Choose a project in which you want to create your router. 

@@ -20,7 +20,7 @@ You will now be able to see the Router Details View with details about the route
     
 **Name and Status Badge**: You will see the name of the router alongside a badge that indicates the status of the router deployment.
 
-**Endpoint**: Dynamically generated url to which users can send their experimentation requests.
+**Endpoint**: Dynamically generated URL to which users can send their experimentation requests.
 
 **Environment**: The environment in which the router has been deployed.
 

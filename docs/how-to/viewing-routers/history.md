@@ -30,10 +30,10 @@ You will see a summary of each version being displayed.
 
 | Status     | Description | Badge |
 | ---        | ---         | ---   |
-| Deployed | The configuration provided in the router version is valid and currently deployed. | ![deployed_version](../../.gitbook/assets/deployed_version_badge.png) |
-| Not Deployed | The configuration provided in the router version is valid.  | ![undeployed_version](../../.gitbook/assets/not_deployed_version_badge.png) |
-| Updating | The configuration provided in the router version is being validated and will be deployed to the router if successful. | ![updating_version](../../.gitbook/assets/updating_version_badge.png) |
-| Failed | The configuration provided in the router version is invalid. | ![failed_version](../../.gitbook/assets/failed_version_badge.png) |
+| Deployed | The configuration provided in the router version is valid and currently deployed. | ![](../../.gitbook/assets/deployed_version_badge.png) |
+| Not Deployed | The configuration provided in the router version is valid.  | ![](../../.gitbook/assets/not_deployed_version_badge.png) |
+| Updating | The configuration provided in the router version is being validated and will be deployed to the router if successful. | ![](../../.gitbook/assets/updating_version_badge.png) |
+| Failed | The configuration provided in the router version is invalid. | ![](../../.gitbook/assets/failed_version_badge.png) |
 
 To view the configuration of the version in detail, proceed to you can click on the version to find out the details of that particular version.
 

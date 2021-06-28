@@ -17,7 +17,6 @@
 * [Viewing routers](how-to/viewing-routers/README.md)
     * [Configuration](how-to/viewing-routers/configuration.md)
     * [History](how-to/viewing-routers/history.md)
-    * [Alerts](how-to/viewing-routers/alerts.md)
     * [Logs](how-to/viewing-routers/logs.md)
     * [More actions](how-to/viewing-routers/more-actions.md)
 * [Undeploying routers](how-to/undeploying-router.md)

@@ -28,7 +28,7 @@ Configure the Docker Container. There are 4 required inputs.
 
 **Service Account**: You can **optionally** mount a service account for your Docker deployment.
 
-Configure any environment variables required by the docker container. You need to input the name and corresponding value of each input.
+Configure any environment variables required by the Docker container. You need to fill in the name and corresponding value of each input.
 
 ![](../../.gitbook/assets/env_var_panel.png)
 

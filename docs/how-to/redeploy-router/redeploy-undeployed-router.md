@@ -4,7 +4,7 @@ Navigate to the Router Details View of your router.
 
 Click on the More Actions button and select Redeploy router. 
 
-Only an **undeployed** router (indicated by the router status `Not deployed`) can be redeployed and Turing will automatically redeploy the most recently deployed version for you. If you want to deploy a different version, proceed to Redeploy a Valid Version.
+Only an **undeployed** router (indicated by the router status `Not deployed`) can be redeployed and Turing will automatically redeploy the most recently deployed version for you.
 
 ![](../../.gitbook/assets/redeploy_router.png)
 

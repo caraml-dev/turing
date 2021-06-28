@@ -4,7 +4,7 @@
 This step is **optional** and the default behaviour will send the original request to the configured routes.
 {% endhint %}
 
-The Turing enricher has the ability to perform arbitrary transformations on the incoming request for feature enrichment. It can deploy any enricher image (implemented by a user) and integrate it with the rest of the system.  Currently, there are 3 options available - no enricher, Docker and an external enricher coming soon.
+The Turing enricher has the ability to perform arbitrary transformations on the incoming request for feature enrichment. It can deploy any enricher image (implemented by a user) and integrate it with the rest of the system.  Currently, there are 3 options available - no enricher, Docker and an external enricher that is coming soon.
 
 ### No Enricher
 Original request will be sent to configured routes without enrichment.
@@ -28,7 +28,7 @@ Configure the Docker Container. There are 4 required inputs.
 
 ![](../../.gitbook/assets/service_acc_dropdown.png)
 
-Configure any environment variables required by the docker container. You need to input the name and corresponding value of each input.
+Configure any environment variables required by the Docker container. You need to input the name and corresponding value of each input.
 
 ![](../../.gitbook/assets/env_var_panel.png)
 

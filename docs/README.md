@@ -11,7 +11,7 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 
 * Feature enrichment of incoming requests through [Feast](https://github.com/feast-dev/feast) (planned) and arbitrary pre-processors.
 
-* Dynamic ensembling of models for each treatment. This could be selecting one of the models' response, a custom ensembling of responses from two or more models or any other arbitrary post-processing.
+* Dynamic ensembling of models for each treatment. This could be selecting one of the models' response, custom ensembling of responses from two or more models or any other arbitrary post-processing.
 
 * Reliable and safe fallbacks in case of timeouts.
 
@@ -27,7 +27,7 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 
 4. The Ensembler is called with the original Turing request, the implementation of exploration policies from the experiment engine response and the model responses.
 
-5. A tracking ID is appended to the ensembled response and it is logged (together with the individual model responses and the original request) as it is returned to the client.
+5. A tracking ID is appended to the ensembled response and it is logged (together with the individual model responses and the original request) and it is returned to the client.
 
 6. The client will then be able to log the outcome with the tracking ID.
 
@@ -37,5 +37,3 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 * You need to ensemble the resulting response based on the experiment configuration.
 
 * You want request-response pairs to be logged.
-
-* You require out of the box monitoring of response times, errors and other router standard metrics.
