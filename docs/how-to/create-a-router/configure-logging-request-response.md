@@ -1,7 +1,7 @@
 # Logging Response/Request
 
 {% hint style="info" %}
-This step is **optional** and the default behaviour is not to log any request response pair.
+This step is **optional** and the default behaviour is not to log any request-response pair.
 {% endhint %}
 
 Turing currently supports logging request-treatment-response data to BigQuery and Kafka.
@@ -26,6 +26,4 @@ Select Kafka as the Results Logging Destination and configure the required value
 
 **Topic**: A valid Kafka topic name on the server. The data will be written to this topic.
 
-**Serialization Format**: The message serialization format to be used. This can be SON or Protobuf.  When Protobuf serialization is used, the message published to the topic is of type `TuringResultLogV2Message` and the message key is of type `TuringResultLogV2Key`. When JSON serialization is used, the `TuringResultLogV2Message`'s JSON representation is published to the topic.
-
-![](../../.gitbook/assets/kafka_message_proto.png)
+**Serialization Format**: The message serialization format to be used. This can be JSON or Protobuf. When Protobuf serialization is used, the message published to the topic is of type `TuringResultLogMessage` and the message key is of type `TuringResultLogKey`. When JSON serialization is used, the `TuringResultLogMessage`'s JSON representation is published to the topic. The protocol buffers can be found [here](https://github.com/gojek/turing/blob/main/engines/router/missionctl/log/resultlog/proto/turing/TuringResultLog.proto).

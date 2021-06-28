@@ -39,7 +39,6 @@ There are 5 tabs that can be viewed in the homepage a more-actions button that w
 
 {% page-ref page="configuration.md" %}
 {% page-ref page="history.md" %}
-{% page-ref page="monitoring.md" %}
 {% page-ref page="logs.md" %}
 {% page-ref page="alerts.md" %}
 {% page-ref page="more-actions.md" %}

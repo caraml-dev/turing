@@ -23,7 +23,7 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 
 2. Enrichment of request with features from external sources can be done if required by the Enricher. 
 
-3. The unit ID is extracted and passed to a Experiment Engine to determine the treatment. Simultaneously, the request is forwarded to all model endpoints via the configured routes.
+3. The unit ID is extracted and passed to an Experiment Engine to determine the treatment. Simultaneously, the request is forwarded to all model endpoints via the configured routes.
 
 4. The Ensembler is called with the original Turing request, the implementation of exploration policies from the experiment engine response and the model responses.
 

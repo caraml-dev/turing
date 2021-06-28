@@ -2,7 +2,7 @@
 
 There are 3 required inputs:
 
-**Environment**: Target environment your router will be deployed to.
+**Environment**: A drop down menu of the target environment your router will be deployed to. This is set [here](https://github.com/gojek/merlin/blob/main/charts/merlin/values.yaml#L102-L130). An example used in turing is [here](https://github.com/gojek/turing/blob/main/infra/docker-compose/dev/merlin/deployment-config.yaml). As Turing manages multiple deployment environments, you are free to choose which environment your router will be deployed in.
 
 **Name**: Name of your router deployment.
 

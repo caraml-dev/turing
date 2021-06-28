@@ -22,7 +22,7 @@ If such a project does not exist, you can [create a project](../create-project.m
 
 Now that we have navigated to the create a router page, we can continue to configure the router.
 
-{% page-ref page="configure-general-router-settings.md" %}
+{% page-ref page="configure-general-settings.md" %}
 {% page-ref page="configure-routes.md" %}
 {% page-ref page="configure-traffic-rules.md" %}
 {% page-ref page="configure-autoscaling.md" %}
