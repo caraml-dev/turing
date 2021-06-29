@@ -17,17 +17,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-const (
-	annotationKeyOne     = "spark/spark.jars"
-	annotationValueOne   = "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
-	annotationKeyTwo     = "spark/spark.jars.packages"
-	annotationValueTwo   = "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
-	annotationKeyThree   = "hadoopConfiguration/fs.gs.impl"
-	annotationValueThree = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
-	annotationKeyFour    = "hadoopConfiguration/fs.AbstractFileSystem.gs.impl"
-	annotationValueFour  = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
-)
-
 func TestRun(t *testing.T) {
 	// Unfortunately this is hard to test as we need Kubernetes integration
 	// and a Spark Operator. Testing with an actual cluster is required.
