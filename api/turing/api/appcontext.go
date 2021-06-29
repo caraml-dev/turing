@@ -5,7 +5,7 @@ import (
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 	"github.com/gojek/mlp/pkg/vault"
-	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/cluster/labeller"
@@ -98,21 +98,23 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
 	}
 
-	labeller.InitKubernetesLabeller(cfg.KubernetesLabelPrefix)
+	labeller.InitKubernetesLabeller(
+		cfg.KubernetesLabelConfigs.LabelPrefix,
+		cfg.KubernetesLabelConfigs.Environment,
+	)
 
 	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
-	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
+	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		batchClusterController,
 		mlpSvc,
 		cfg.SparkAppConfig,
 	)
 
-	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
+	batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
 		batchEnsemblingController,
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		cfg.EnsemblingJobConfig.DefaultEnvironment,
 		cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
 		cfg.EnsemblingJobConfig.MaxRetryCount,
 		cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,

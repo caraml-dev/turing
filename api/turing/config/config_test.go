@@ -568,6 +568,9 @@ func TestConfigValidate(t *testing.T) {
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
 		},
+		KubernetesLabelConfigs: &KubernetesLabelConfigs{
+			Environment: "dev",
+		},
 		Sentry: sentry.Config{},
 		NewRelicConfig: newrelic.Config{
 			Enabled:           true,
@@ -666,6 +669,13 @@ func TestConfigValidate(t *testing.T) {
 		"missing batch runner config": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.BatchRunnerConfig = nil
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing kubernetes label config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.KubernetesLabelConfigs = nil
 				return validConfig
 			},
 			wantErr: true,

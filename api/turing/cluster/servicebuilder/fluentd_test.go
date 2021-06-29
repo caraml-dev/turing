@@ -54,7 +54,7 @@ func TestNewFluentdService(t *testing.T) {
 			ProbePort:             9880,
 			Labels: map[string]string{
 				"app":          "test-svc",
-				"environment":  "test-env",
+				"environment":  "",
 				"orchestrator": "turing",
 				"stream":       "test-stream",
 				"team":         "test-team",

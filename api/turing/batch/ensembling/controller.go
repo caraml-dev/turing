@@ -1,4 +1,4 @@
-package batchcontroller
+package batchensembling
 
 import (
 	"context"

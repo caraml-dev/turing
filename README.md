@@ -186,6 +186,8 @@ EnsemblingJobConfig:
       Limits:
         CPU: "1"
         Memory: 1Gi
+KubernetesLabelConfigs:
+  Environment: dev
 SparkAppConfig:
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25

@@ -43,7 +43,7 @@ func TestNewEnricherService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -115,7 +115,7 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -153,7 +153,7 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",

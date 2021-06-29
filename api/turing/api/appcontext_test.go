@@ -9,7 +9,7 @@ import (
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/pkg/vault"
-	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
@@ -114,6 +114,9 @@ func TestNewAppContext(t *testing.T) {
 				Tag:                  "turing-result.log",
 				FlushIntervalSeconds: 90,
 			},
+		},
+		KubernetesLabelConfigs: &config.KubernetesLabelConfigs{
+			Environment: "dev",
 		},
 		Sentry: sentry.Config{
 			Enabled: false,
@@ -249,17 +252,16 @@ func TestNewAppContext(t *testing.T) {
 	assert.Nil(t, err)
 
 	ensemblingJobService := service.NewEnsemblingJobService(nil, testCfg.EnsemblingJobConfig.DefaultEnvironment)
-	batchEnsemblingController := batchcontroller.NewBatchEnsemblingController(
+	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
 		mlpSvc,
 		testCfg.SparkAppConfig,
 	)
-	batchEnsemblingJobRunner := batchrunner.NewBatchEnsemblingJobRunner(
+	batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
 		batchEnsemblingController,
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		testCfg.EnsemblingJobConfig.DefaultEnvironment,
 		testCfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
 		testCfg.EnsemblingJobConfig.MaxRetryCount,
 		testCfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,

@@ -33,10 +33,10 @@ func TestLabeller(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			// Always reset singleton objects.
-			defer InitKubernetesLabeller("")
+			defer InitKubernetesLabeller("", "dev")
 
 			if tt.doInit {
-				InitKubernetesLabeller(tt.prefix)
+				InitKubernetesLabeller(tt.prefix, "dev")
 			}
 
 			labels := BuildLabels(KubernetesLabelsRequest{})

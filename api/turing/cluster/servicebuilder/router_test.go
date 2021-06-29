@@ -105,7 +105,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -199,7 +199,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -296,7 +296,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -393,7 +393,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
-						"environment":  "test-env",
+						"environment":  "",
 						"orchestrator": "turing",
 						"stream":       "test-stream",
 						"team":         "test-team",
@@ -504,7 +504,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 		Namespace: project.Name,
 		Labels: map[string]string{
 			"app":          "test-svc",
-			"environment":  "test-env",
+			"environment":  "",
 			"orchestrator": "turing",
 			"stream":       "test-stream",
 			"team":         "test-team",

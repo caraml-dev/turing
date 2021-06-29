@@ -1,10 +1,10 @@
-package batchrunner
+package batchensembling
 
 import (
 	"time"
 
 	mlp "github.com/gojek/mlp/client"
-	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/log"
@@ -15,11 +15,10 @@ import (
 var pageOne = 1
 
 type ensemblingJobRunner struct {
-	ensemblingController      batchcontroller.EnsemblingController
+	ensemblingController      EnsemblingController
 	ensemblingJobService      service.EnsemblingJobService
 	mlpService                service.MLPService
 	imageBuilder              imagebuilder.ImageBuilder
-	environment               string
 	batchSize                 int
 	maxRetryCount             int
 	imageBuildTimeoutDuration time.Duration
@@ -28,21 +27,19 @@ type ensemblingJobRunner struct {
 // NewBatchEnsemblingJobRunner creates a new batch ensembling job runner
 // This service controls the orchestration of batch ensembling jobs.
 func NewBatchEnsemblingJobRunner(
-	ensemblingController batchcontroller.EnsemblingController,
+	ensemblingController EnsemblingController,
 	ensemblingJobService service.EnsemblingJobService,
 	mlpService service.MLPService,
 	imageBuilder imagebuilder.ImageBuilder,
-	environment string,
 	batchSize int,
 	maxRetryCount int,
 	imageBuildTimeoutDuration time.Duration,
-) BatchJobRunner {
+) batchrunner.BatchJobRunner {
 	return &ensemblingJobRunner{
 		ensemblingController:      ensemblingController,
 		ensemblingJobService:      ensemblingJobService,
 		mlpService:                mlpService,
 		imageBuilder:              imageBuilder,
-		environment:               environment,
 		batchSize:                 batchSize,
 		maxRetryCount:             maxRetryCount,
 		imageBuildTimeoutDuration: imageBuildTimeoutDuration,
@@ -153,15 +150,15 @@ func (r *ensemblingJobRunner) processJobRunning(
 		return
 	}
 
-	if state == batchcontroller.SparkApplicationStateUnknown {
+	if state == SparkApplicationStateUnknown {
 		// Do nothing, just wait to see if something happens
 		log.Warnf("Spark application state is unknown: %s", ensemblingJob.Name)
 		return
 	}
 
-	if state == batchcontroller.SparkApplicationStateCompleted {
+	if state == SparkApplicationStateCompleted {
 		ensemblingJob.Status = models.JobCompleted
-	} else if state == batchcontroller.SparkApplicationStateFailed {
+	} else if state == SparkApplicationStateFailed {
 		ensemblingJob.Status = models.JobFailed
 	}
 
@@ -275,7 +272,7 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 
 	// Submit to Kubernetes
 	controllerError := r.ensemblingController.Create(
-		&batchcontroller.CreateEnsemblingJobRequest{
+		&CreateEnsemblingJobRequest{
 			EnsemblingJob: ensemblingJob,
 			Labels:        labels,
 			ImageRef:      imageRef,
@@ -295,10 +292,9 @@ func (r *ensemblingJobRunner) buildLabels(
 	mlpProject *mlp.Project,
 ) map[string]string {
 	rq := labeller.KubernetesLabelsRequest{
-		Environment: r.environment,
-		Stream:      mlpProject.Stream,
-		Team:        mlpProject.Team,
-		App:         ensemblingJob.InfraConfig.EnsemblerName,
+		Stream: mlpProject.Stream,
+		Team:   mlpProject.Team,
+		App:    ensemblingJob.InfraConfig.EnsemblerName,
 	}
 
 	return labeller.BuildLabels(rq)

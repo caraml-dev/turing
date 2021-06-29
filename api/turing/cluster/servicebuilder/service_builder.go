@@ -323,10 +323,9 @@ func buildLabels(
 	router *models.Router,
 ) map[string]string {
 	r := labeller.KubernetesLabelsRequest{
-		Environment: envType,
-		Stream:      project.Stream,
-		Team:        project.Team,
-		App:         router.Name,
+		Stream: project.Stream,
+		Team:   project.Team,
+		App:    router.Name,
 	}
 	return labeller.BuildLabels(r)
 }

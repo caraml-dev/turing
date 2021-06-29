@@ -1,18 +1,19 @@
-package batchrunner
+package batchensembling
+
+// Mocking here is tricky due to cyclic imports.
+// To circumvent this, use the --inpackage flag in mockery
+// i.e. mockery --name=EnsemblingController --case underscore --inpackage
 
 import (
 	"testing"
 	"time"
 
 	mlp "github.com/gojek/mlp/client"
-	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
-	batchcontrollermock "github.com/gojek/turing/api/turing/batch/controller/mocks"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	imagebuildermock "github.com/gojek/turing/api/turing/imagebuilder/mocks"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	servicemock "github.com/gojek/turing/api/turing/service/mocks"
-	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -27,137 +28,19 @@ const (
 	annotationValueFour  = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
 )
 
-func generateEnsemblingJobFixture() *models.EnsemblingJob {
-	return &models.EnsemblingJob{
-		Name:            "test-ensembler-1",
-		ProjectID:       models.ID(1),
-		EnsemblerID:     models.ID(1),
-		EnvironmentName: "dev",
-		InfraConfig: &models.InfraConfig{
-			ArtifactURI:        "gs://bucket/ensembler",
-			EnsemblerName:      "ensembler",
-			ServiceAccountName: "test-service-account",
-			Resources: &models.BatchEnsemblingJobResources{
-				DriverCPURequest:      "1",
-				DriverMemoryRequest:   "1Gi",
-				ExecutorReplica:       10,
-				ExecutorCPURequest:    "1",
-				ExecutorMemoryRequest: "1Gi",
-			},
-		},
-		JobConfig: &models.JobConfig{
-			JobConfig: batchensembler.BatchEnsemblingJob{
-				Version: "v1",
-				Kind:    batchensembler.BatchEnsemblingJob_BatchEnsemblingJob,
-				Metadata: &batchensembler.BatchEnsemblingJobMetadata{
-					Name: "test-batch-ensembling",
-					Annotations: map[string]string{
-						annotationKeyOne:   annotationValueOne,
-						annotationKeyTwo:   annotationValueTwo,
-						annotationKeyThree: annotationValueThree,
-						annotationKeyFour:  annotationValueFour,
-					},
-				},
-				Spec: &batchensembler.BatchEnsemblingJobSpec{
-					Source: &batchensembler.Source{
-						Dataset: &batchensembler.Dataset{
-							Type: batchensembler.Dataset_DatasetType(
-								batchensembler.Dataset_BQ,
-							),
-							Config: &batchensembler.Dataset_BqConfig{
-								BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-									Query: "select * from helloworld where customer_id = 4",
-									Options: map[string]string{
-										"viewsEnabled":           "true",
-										"materializationDataset": "dataset",
-									},
-								},
-							},
-						},
-						JoinOn: []string{"customer_id", "target_date"},
-					},
-					Predictions: map[string]*batchensembler.PredictionSource{
-						"model_a": {
-							Dataset: &batchensembler.Dataset{
-								Type: batchensembler.Dataset_DatasetType(
-									batchensembler.Dataset_BQ,
-								),
-								Config: &batchensembler.Dataset_BqConfig{
-									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-										Table: "project.dataset.predictions_model_a",
-										Features: []string{
-											"customer_id",
-											"target_date",
-											"predictions",
-										},
-									},
-								},
-							},
-							Columns: []string{"predictions"},
-							JoinOn:  []string{"customer_id", "target_date"},
-						},
-						"model_b": {
-							Dataset: &batchensembler.Dataset{
-								Type: batchensembler.Dataset_DatasetType(
-									batchensembler.Dataset_BQ,
-								),
-								Config: &batchensembler.Dataset_BqConfig{
-									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-										Query: "select * from helloworld where customer_id = 3",
-									},
-								},
-							},
-							Columns: []string{"predictions"},
-							JoinOn:  []string{"customer_id", "target_date"},
-						},
-					},
-					Ensembler: &batchensembler.Ensembler{
-						Uri: "/home/spark/ensembler",
-						Result: &batchensembler.Ensembler_Result{
-							ColumnName: "prediction_score",
-							Type:       batchensembler.Ensembler_FLOAT,
-							ItemType:   batchensembler.Ensembler_FLOAT,
-						},
-					},
-					Sink: &batchensembler.Sink{
-						Type: batchensembler.Sink_BQ,
-						Columns: []string{
-							"customer_id as customerId",
-							"target_date",
-							"results",
-						},
-						SaveMode: batchensembler.Sink_OVERWRITE,
-						Config: &batchensembler.Sink_BqConfig{
-							BqConfig: &batchensembler.Sink_BigQuerySinkConfig{
-								Table:         "project.dataset.ensembling_results",
-								StagingBucket: "bucket-name",
-								Options: map[string]string{
-									"partitionField": "target_date",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func TestRun(t *testing.T) {
 	// Unfortunately this is hard to test as we need Kubernetes integration
 	// and a Spark Operator. Testing with an actual cluster is required.
 	// Here we just try to run it without throwing an exception.
 	var tests = map[string]struct {
-		environment          string
-		ensemblingController func() batchcontroller.EnsemblingController
+		ensemblingController func() EnsemblingController
 		imageBuilder         func() imagebuilder.ImageBuilder
 		ensemblingJobService func() service.EnsemblingJobService
 		mlpService           func() service.MLPService
 	}{
 		"success | nominal": {
-			environment: "testing",
-			ensemblingController: func() batchcontroller.EnsemblingController {
-				ctlr := &batchcontrollermock.EnsemblingController{}
+			ensemblingController: func() EnsemblingController {
+				ctlr := &MockEnsemblingController{}
 				ctlr.On(
 					"Create",
 					mock.Anything,
@@ -166,7 +49,7 @@ func TestRun(t *testing.T) {
 					"GetStatus",
 					mock.Anything,
 					mock.Anything,
-				).Return(batchcontroller.SparkApplicationStateCompleted, nil)
+				).Return(SparkApplicationStateCompleted, nil)
 				return ctlr
 			},
 			imageBuilder: func() imagebuilder.ImageBuilder {
@@ -225,9 +108,8 @@ func TestRun(t *testing.T) {
 			},
 		},
 		"success | imagebuilding stuck": {
-			environment: "testing",
-			ensemblingController: func() batchcontroller.EnsemblingController {
-				ctlr := &batchcontrollermock.EnsemblingController{}
+			ensemblingController: func() EnsemblingController {
+				ctlr := &MockEnsemblingController{}
 				ctlr.On(
 					"Create",
 					mock.Anything,
@@ -296,9 +178,8 @@ func TestRun(t *testing.T) {
 			},
 		},
 		"success | no ensembling jobs": {
-			environment: "testing",
-			ensemblingController: func() batchcontroller.EnsemblingController {
-				ctlr := &batchcontrollermock.EnsemblingController{}
+			ensemblingController: func() EnsemblingController {
+				ctlr := &MockEnsemblingController{}
 				ctlr.On(
 					"Create",
 					mock.Anything,
@@ -360,7 +241,6 @@ func TestRun(t *testing.T) {
 				ensemblingJobService,
 				mlpService,
 				imageBuilder,
-				tt.environment,
 				10,
 				3,
 				10*time.Minute,

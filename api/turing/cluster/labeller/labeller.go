@@ -18,18 +18,19 @@ const (
 )
 
 var prefix string
+var environment string
 
 // InitKubernetesLabeller builds a new KubernetesLabeller Singleton
-func InitKubernetesLabeller(p string) {
+func InitKubernetesLabeller(p, e string) {
 	prefix = p
+	environment = e
 }
 
 // KubernetesLabelsRequest helps to build the Kubernetes labels needed for Kubernetes objects.
 type KubernetesLabelsRequest struct {
-	Stream      string
-	Team        string
-	App         string
-	Environment string
+	Stream string
+	Team   string
+	App    string
 }
 
 // BuildLabels builds the labels for the Kubernetes object
@@ -39,6 +40,6 @@ func BuildLabels(r KubernetesLabelsRequest) map[string]string {
 		fmt.Sprintf("%s%s", prefix, streamLabel):       r.Stream,
 		fmt.Sprintf("%s%s", prefix, teamLabel):         r.Team,
 		fmt.Sprintf("%s%s", prefix, appLabel):          r.App,
-		fmt.Sprintf("%s%s", prefix, environmentLabel):  r.Environment,
+		fmt.Sprintf("%s%s", prefix, environmentLabel):  environment,
 	}
 }

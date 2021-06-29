@@ -49,30 +49,23 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 
 // Config is used to parse and store the environment configs
 type Config struct {
-	Port           int `validate:"required"`
-	AllowedOrigins []string
-	// KubernetesLabelPrefix is the prefix used for tagging kubernetes components.
-	// Default is an empty string which means your tags will look something like this:
-	//   team: teen-titans
-	//   stream: nile
-	//   environment: dev
-	//   orchestrator: turing
-	//   app: my-model-app
-	KubernetesLabelPrefix string
-	AuthConfig            *AuthorizationConfig
-	BatchRunnerConfig     *BatchRunnerConfig   `validate:"required"`
-	DbConfig              *DatabaseConfig      `validate:"required"`
-	DeployConfig          *DeploymentConfig    `validate:"required"`
-	EnsemblingJobConfig   *EnsemblingJobConfig `validate:"required"`
-	SparkAppConfig        *SparkAppConfig      `validate:"required"`
-	RouterDefaults        *RouterDefaults      `validate:"required"`
-	NewRelicConfig        newrelic.Config
-	Sentry                sentry.Config
-	VaultConfig           *VaultConfig `validate:"required"`
-	TuringEncryptionKey   string       `validate:"required"`
-	AlertConfig           *AlertConfig
-	MLPConfig             *MLPConfig `validate:"required"`
-	TuringUIConfig        *TuringUIConfig
+	Port                   int `validate:"required"`
+	AllowedOrigins         []string
+	AuthConfig             *AuthorizationConfig
+	BatchRunnerConfig      *BatchRunnerConfig      `validate:"required"`
+	DbConfig               *DatabaseConfig         `validate:"required"`
+	DeployConfig           *DeploymentConfig       `validate:"required"`
+	EnsemblingJobConfig    *EnsemblingJobConfig    `validate:"required"`
+	SparkAppConfig         *SparkAppConfig         `validate:"required"`
+	RouterDefaults         *RouterDefaults         `validate:"required"`
+	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
+	NewRelicConfig         newrelic.Config
+	Sentry                 sentry.Config
+	VaultConfig            *VaultConfig `validate:"required"`
+	TuringEncryptionKey    string       `validate:"required"`
+	AlertConfig            *AlertConfig
+	MLPConfig              *MLPConfig `validate:"required"`
+	TuringUIConfig         *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI v3 spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
 	SwaggerFile string
@@ -113,6 +106,20 @@ type DeploymentConfig struct {
 	DeletionTimeout time.Duration `validate:"required"`
 	MaxCPU          Quantity      `validate:"required"`
 	MaxMemory       Quantity      `validate:"required"`
+}
+
+// KubernetesLabelConfigs are the configurations for labeling
+type KubernetesLabelConfigs struct {
+	// LabelPrefix is the prefix used for tagging kubernetes components.
+	// Default is an empty string which means your tags will look something like this:
+	//   team: teen-titans
+	//   stream: nile
+	//   environment: dev
+	//   orchestrator: turing
+	//   app: my-model-app
+	LabelPrefix string
+	// Environment is the value for the environment label
+	Environment string `validate:"required"`
 }
 
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
