@@ -35,10 +35,9 @@ You will now be able to see the Router Details View with details about the route
 | Updating | The newly provided configuration for the router is being validated and will be deployed if valid. | ![](../../.gitbook/assets/updating_router_badge.png)
 | Failed | All configurations provided for the router are invalid and deployment has been unsuccessful. | ![](../../.gitbook/assets/failed_router_badge.png)
 
-There are 5 tabs that can be viewed in the homepage a more-actions button that will be explained more here:
+There are 5 tabs that can be viewed in the homepage a more-actions button that will be explained more below. However there is no easy way to set up alerts and monitoring, which we will add in a future release.
 
 {% page-ref page="configuration.md" %}
 {% page-ref page="history.md" %}
 {% page-ref page="logs.md" %}
-{% page-ref page="alerts.md" %}
 {% page-ref page="more-actions.md" %}

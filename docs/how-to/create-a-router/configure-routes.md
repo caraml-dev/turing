@@ -4,7 +4,7 @@ Routes are an essential part of your Turing Router setup. Each route is defined 
 
 ![](../../.gitbook/assets/routes_panel.png)
 
-It is also required to specify, which is default route. Each router has exactly one default route and zero or more non-default routes. Depending on the configuration of Experiment Engine and Ensembler, Turing might use a response from the default route as a final response that would be sent to the calling upstream system:
+It is also required to specify, which route is the default route. Each router has exactly one default route and zero or more non-default routes. Depending on the configuration of Experiment Engine and Ensembler, Turing might use a response from the default route as a final response that would be sent to the calling upstream system:
 
 | Experiment Engine | Ensembler    | Final Router Response |
 | ---               | ---          | ---                   |
