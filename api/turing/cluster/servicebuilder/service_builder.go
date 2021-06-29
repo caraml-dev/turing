@@ -10,8 +10,8 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/models"
 	"k8s.io/apimachinery/pkg/api/resource"
 )

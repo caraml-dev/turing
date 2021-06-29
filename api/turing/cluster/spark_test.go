@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/stretchr/testify/assert"
 	apicorev1 "k8s.io/api/core/v1"
@@ -141,6 +142,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		JobImageRef:           jobImageRef,
 		JobApplicationPath:    jobApplicationPath,
 		JobArguments:          jobArguments,
+		JobConfigMount:        batch.JobConfigMount,
 		DriverCPURequest:      cpuValue,
 		DriverMemoryRequest:   memoryValue,
 		ExecutorCPURequest:    cpuValue,
@@ -186,7 +188,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					ConfigMaps: []apisparkv1beta2.NamePath{
 						{
 							Name: jobName,
-							Path: JobConfigMount,
+							Path: batch.JobConfigMount,
 						},
 					},
 					Secrets: []apisparkv1beta2.SecretInfo{
@@ -219,7 +221,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					ConfigMaps: []apisparkv1beta2.NamePath{
 						{
 							Name: jobName,
-							Path: JobConfigMount,
+							Path: batch.JobConfigMount,
 						},
 					},
 					Secrets: []apisparkv1beta2.SecretInfo{

@@ -61,9 +61,9 @@ func TestNewAppContext(t *testing.T) {
 			MaxMemory:       config.Quantity(resource.MustParse("100Mi")),
 		},
 		EnsemblingJobConfig: &config.EnsemblingJobConfig{
-			DefaultEnvironment: "dev",
-			BatchSize:          10,
-			MaxRetryCount:      3,
+			DefaultEnvironment:             "dev",
+			RecordsToProcessInOneIteration: 10,
+			MaxRetryCount:                  3,
 			ImageBuilderConfig: config.ImageBuilderConfig{
 				Registry:             "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
@@ -260,7 +260,7 @@ func TestNewAppContext(t *testing.T) {
 		mlpSvc,
 		ensemblingImageBuilder,
 		testCfg.EnsemblingJobConfig.DefaultEnvironment,
-		testCfg.EnsemblingJobConfig.BatchSize,
+		testCfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
 		testCfg.EnsemblingJobConfig.MaxRetryCount,
 		testCfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
 	)

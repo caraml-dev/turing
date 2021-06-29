@@ -55,11 +55,11 @@ const (
 
 // BuildImageRequest contains the information needed to build the OCI image
 type BuildImageRequest struct {
-	ProjectName string
-	ModelName   string
-	VersionID   models.ID
-	ArtifactURI string
-	BuildLabels map[string]string
+	ProjectName  string
+	ResourceName string
+	VersionID    models.ID
+	ArtifactURI  string
+	BuildLabels  map[string]string
 }
 
 // ImageBuilder defines the operations on building and publishing OCI images.
@@ -108,7 +108,7 @@ func newImageBuilder(
 }
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
-	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ModelName)
+	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName)
 	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.VersionID)))
 	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
 	if err != nil {
@@ -124,7 +124,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	// Check if there is an existing build job
 	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
 		request.ProjectName,
-		request.ModelName,
+		request.ResourceName,
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(

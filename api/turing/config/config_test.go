@@ -523,9 +523,9 @@ func TestConfigValidate(t *testing.T) {
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
 		EnsemblingJobConfig: &EnsemblingJobConfig{
-			DefaultEnvironment: "dev",
-			BatchSize:          10,
-			MaxRetryCount:      3,
+			DefaultEnvironment:             "dev",
+			RecordsToProcessInOneIteration: 10,
+			MaxRetryCount:                  3,
 			ImageBuilderConfig: ImageBuilderConfig{
 				Registry:             "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",

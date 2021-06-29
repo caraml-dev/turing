@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
@@ -16,7 +17,7 @@ import (
 )
 
 // SparkApplicationState is the state of the spark application
-type SparkApplicationState string
+type SparkApplicationState int
 
 const (
 	ensemblingJobApplicationPath = "local:///home/spark/batch-ensembler/main.py"
@@ -173,8 +174,9 @@ func (c *ensemblingController) createSparkApplication(
 		JobApplicationPath: ensemblingJobApplicationPath,
 		JobArguments: []string{
 			"--job-spec",
-			fmt.Sprintf("%s%s", cluster.JobConfigMount, cluster.JobConfigFileName),
+			fmt.Sprintf("%s%s", batch.JobConfigMount, batch.JobConfigFileName),
 		},
+		JobConfigMount:        batch.JobConfigMount,
 		DriverCPURequest:      infraConfig.Resources.DriverCPURequest,
 		DriverMemoryRequest:   infraConfig.Resources.DriverMemoryRequest,
 		ExecutorCPURequest:    infraConfig.Resources.ExecutorCPURequest,
@@ -199,7 +201,7 @@ func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.Ensembli
 
 	cm := &cluster.ConfigMap{
 		Name:     ensemblingJob.Name,
-		FileName: cluster.JobConfigFileName,
+		FileName: batch.JobConfigFileName,
 		Data:     string(jobConfigYAML),
 	}
 	err = c.clusterController.ApplyConfigMap(namespace, cm)

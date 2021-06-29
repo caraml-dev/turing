@@ -167,7 +167,7 @@ DeployConfig:
   EnvironmentType: dev 
 EnsemblingJobConfig:
   DefaultEnvironment: dev
-  BatchSize: 10
+  RecordsToProcessInOneIteration: 10
   MaxRetryCount: 3
   ImageBuilderConfig:
     Registry: ghcr.io

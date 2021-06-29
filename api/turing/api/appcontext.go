@@ -8,9 +8,9 @@ import (
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/imagebuilder"
-	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -113,7 +113,7 @@ func NewAppContext(
 		mlpSvc,
 		ensemblingImageBuilder,
 		cfg.EnsemblingJobConfig.DefaultEnvironment,
-		cfg.EnsemblingJobConfig.BatchSize,
+		cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
 		cfg.EnsemblingJobConfig.MaxRetryCount,
 		cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
 	)

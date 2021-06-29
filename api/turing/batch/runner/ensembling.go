@@ -5,8 +5,8 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	batchcontroller "github.com/gojek/turing/api/turing/batch/controller"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
-	"github.com/gojek/turing/api/turing/labeller"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -198,6 +198,17 @@ func (r *ensemblingJobRunner) processBuildingImage(
 }
 
 func (r *ensemblingJobRunner) processJobs() {
+	// Note that there might be a possible race condition here but the effects are not too dire
+	// between the time the record gets locked and queried, another goroutine/process could have
+	// picked up this job.
+	// This is unlikely to happen because there is no real requirement to make this API server
+	// run in multiple instances as a bit of downtime would have no impact on real time traffic.
+	// The time between the runners firing off is quite long (recommended at least 10s).
+	// the goroutine should have at least locked the record before the next runner gets fired.
+	// Also, if there is a rare case where both jobs get fired and a race does indeed happen,
+	// the only problem is that there are two jobs running at the same time.
+	// The results would be the same but it just gets published twice; the only real damage is
+	// wasted resources.
 	isLocked := false
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
@@ -316,11 +327,11 @@ func (r *ensemblingJobRunner) buildImage(
 	buildLabels map[string]string,
 ) (string, error) {
 	request := imagebuilder.BuildImageRequest{
-		ProjectName: mlpProject.Name,
-		ModelName:   ensemblingJob.InfraConfig.EnsemblerName,
-		VersionID:   ensemblingJob.EnsemblerID,
-		ArtifactURI: ensemblingJob.InfraConfig.ArtifactURI,
-		BuildLabels: buildLabels,
+		ProjectName:  mlpProject.Name,
+		ResourceName: ensemblingJob.InfraConfig.EnsemblerName,
+		VersionID:    ensemblingJob.EnsemblerID,
+		ArtifactURI:  ensemblingJob.InfraConfig.ArtifactURI,
+		BuildLabels:  buildLabels,
 	}
 	return r.imageBuilder.BuildImage(request)
 }

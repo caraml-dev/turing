@@ -15,10 +15,6 @@ import (
 const (
 	// ServiceAccountFileName is the name of the service account
 	ServiceAccountFileName = "service-account.json"
-	// JobConfigFileName is the name of the defined container job config, e.g. ensembler config
-	JobConfigFileName = "jobConfig.yaml"
-	// JobConfigMount is where the job spec if mounted
-	JobConfigMount = "/mnt/job-spec/"
 
 	serviceAccountMount      = "/mnt/secrets/"
 	envServiceAccountPathKey = "GOOGLE_APPLICATION_CREDENTIALS"
@@ -82,6 +78,7 @@ type CreateSparkRequest struct {
 	JobImageRef           string
 	JobApplicationPath    string
 	JobArguments          []string
+	JobConfigMount        string
 	DriverCPURequest      string
 	DriverMemoryRequest   string
 	ExecutorCPURequest    string
@@ -156,7 +153,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 			ConfigMaps: []apisparkv1beta2.NamePath{
 				{
 					Name: request.JobName,
-					Path: JobConfigMount,
+					Path: request.JobConfigMount,
 				},
 			},
 			Secrets: []apisparkv1beta2.SecretInfo{
@@ -213,7 +210,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 			ConfigMaps: []apisparkv1beta2.NamePath{
 				{
 					Name: request.JobName,
-					Path: JobConfigMount,
+					Path: request.JobConfigMount,
 				},
 			},
 			Secrets: []apisparkv1beta2.SecretInfo{

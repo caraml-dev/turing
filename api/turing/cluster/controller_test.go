@@ -14,6 +14,7 @@ import (
 
 	sparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	sparkOpFake "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/fake"
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/stretchr/testify/assert"
 	istioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	appsv1 "k8s.io/api/apps/v1"
@@ -835,6 +836,7 @@ func TestCreateSparkApplication(t *testing.T) {
 			JobImageRef:           jobImageRef,
 			JobApplicationPath:    jobApplicationPath,
 			JobArguments:          jobArguments,
+			JobConfigMount:        batch.JobConfigMount,
 			DriverCPURequest:      cpuValue,
 			DriverMemoryRequest:   memoryValue,
 			ExecutorCPURequest:    cpuValue,

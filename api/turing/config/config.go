@@ -117,8 +117,8 @@ type DeploymentConfig struct {
 
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
-	// BatchSize dictates the number of batch ensembling jobs to be queried at once.
-	BatchSize int `validate:"required"`
+	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
+	RecordsToProcessInOneIteration int `validate:"required"`
 	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
 	MaxRetryCount int `validate:"required"`
 	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
