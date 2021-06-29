@@ -6,7 +6,7 @@
 
 **Request**: Incoming message from the client to the Turing system.
 
-**Response**: The Turing workflow involves the pre-processor (Enricher), the model endpoints, the Experiment engine and the post-processor (Ensembler), some of which are optional. Each component creates a response which becomes the request to the next component in the workflow (refer to How It Works below). In general, the Response refers to the final response from the Turing system, after passing through all stages.
+**Response**: The Turing workflow involves the pre-processor (Enricher), the model endpoints, the Experiment engine and the post-processor (Ensembler), some of which are optional. Each component creates a response which becomes the request to the next component in the workflow. In general, the Response refers to the final response from the Turing system, after passing through all stages.
 
 **Route**: Model endpoint which may be a Merlin model or any arbitrary URL that can be reached from the Turing infrastructure.
 
