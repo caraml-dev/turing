@@ -18,7 +18,6 @@ type EnsemblingJob struct {
 	EnvironmentName string       `json:"environment_name"`
 	InfraConfig     *InfraConfig `json:"infra_config"`
 	JobConfig       *JobConfig   `json:"job_config"`
-	IsLocked        bool         `json:"-" gorm:"default:false"`
 	RetryCount      int          `json:"-" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`

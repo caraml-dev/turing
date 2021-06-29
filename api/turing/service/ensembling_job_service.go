@@ -23,7 +23,6 @@ type EnsemblingJobListOptions struct {
 	PaginationOptions
 	ProjectID          *models.ID      `schema:"project_id" validate:"required"`
 	Statuses           []models.Status `schema:"status"`
-	IsLocked           *bool           `schema:"-"`
 	RetryCountLessThan *int            `schema:"-"`
 	UpdatedAtBefore    *time.Time      `schema:"-"`
 }
@@ -90,10 +89,6 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 
 	if options.Statuses != nil {
 		query = query.Where("status IN (?)", options.Statuses)
-	}
-
-	if options.IsLocked != nil {
-		query = query.Where("is_locked = ?", options.IsLocked)
 	}
 
 	if options.RetryCountLessThan != nil {

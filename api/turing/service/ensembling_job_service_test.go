@@ -266,7 +266,6 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			// Query pending ensembling jobs
 			pageSize := 10
 			retryCountLessThan := 3
-			isLocked := false
 			fetched, err := ensemblingJobService.List(
 				EnsemblingJobListOptions{
 					PaginationOptions: PaginationOptions{
@@ -275,7 +274,6 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 					},
 					Statuses:           []models.Status{models.JobPending},
 					RetryCountLessThan: &retryCountLessThan,
-					IsLocked:           &isLocked,
 				},
 			)
 			assert.NoError(t, err)

@@ -113,8 +113,8 @@ func (r *ensemblingJobRunner) processEnsemblingJobs(queryOptions service.Ensembl
 
 func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJob) {
 	// Consider that the application may terminate when processing halfway.
-	// So we only check locked state, it's ok for it to be processed multiple times
-	// between multiple processes/goroutines because they will have the same outcome.
+	// It's ok for it to be processed multiple times between multiple processes/goroutines
+	// because they will have the same outcome.
 	// If that happens, we should mark them for retry
 	// i.e. in the general case, we set back to JobPending but bump retry count
 	// If JobBuildingImage, we want to check if the image building has already been done
@@ -125,7 +125,6 @@ func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJo
 	//   -> If error, set it to JobFailed; we don't want to retry because spark
 	//      has a retry mechanism
 	//   -> If completed, mark as JobCompleted
-	// For all of these cases, we have to unlock the record.
 
 	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
 	if queryErr != nil {
@@ -186,7 +185,6 @@ func (r *ensemblingJobRunner) processBuildingImage(
 
 	// We retry on all other possible outcomes
 	ensemblingJob.Status = models.JobPending
-	ensemblingJob.IsLocked = false
 	ensemblingJob.RetryCount++
 	saveErr := r.ensemblingJobService.Save(ensemblingJob)
 	if saveErr != nil {
@@ -195,18 +193,6 @@ func (r *ensemblingJobRunner) processBuildingImage(
 }
 
 func (r *ensemblingJobRunner) processJobs() {
-	// Note that there might be a possible race condition here but the effects are not too dire
-	// between the time the record gets locked and queried, another goroutine/process could have
-	// picked up this job.
-	// This is unlikely to happen because there is no real requirement to make this API server
-	// run in multiple instances as a bit of downtime would have no impact on real time traffic.
-	// The time between the runners firing off is quite long (recommended at least 10s).
-	// the goroutine should have at least locked the record before the next runner gets fired.
-	// Also, if there is a rare case where both jobs get fired and a race does indeed happen,
-	// the only problem is that there are two jobs running at the same time.
-	// The results would be the same but it just gets published twice; the only real damage is
-	// wasted resources.
-	isLocked := false
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
@@ -217,7 +203,6 @@ func (r *ensemblingJobRunner) processJobs() {
 			models.JobFailedSubmission,
 			models.JobFailedBuildImage,
 		},
-		IsLocked:           &isLocked,
 		RetryCountLessThan: &r.maxRetryCount,
 	}
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
@@ -236,19 +221,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	}
 }
 
-func (r *ensemblingJobRunner) unlockJob(ensemblingJob *models.EnsemblingJob) {
-	ensemblingJob.IsLocked = false
-	err := r.ensemblingJobService.Save(ensemblingJob)
-	if err != nil {
-		log.Errorf("unable to unlock ensembling job %v", err)
-	}
-}
-
 func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.EnsemblingJob) {
-	defer r.unlockJob(ensemblingJob)
-
-	// lock ensembling job so others parallel processes don't take it
-	ensemblingJob.IsLocked = true
 	ensemblingJob.Status = models.JobBuildingImage
 	err := r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
