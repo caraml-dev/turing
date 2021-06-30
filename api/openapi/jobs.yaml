@@ -8,30 +8,6 @@ info:
 
 paths:
   "/projects/{project_id}/jobs":
-    post:
-      tags: *tags
-      operationId: "CreateEnsemblingJob"
-      summary: Submit an Ensembling job.
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-      requestBody:
-        description: A JSON object containing information about the ensembler.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EnsemblingJob"
-      responses:
-        "202":
-          description: Accepted.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EnsemblingJob"
     get:
       tags: *tags
       operationId: "ListEnsemblingJobs"
@@ -65,8 +41,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsemblingJobPaginatedResults"
-
-  "/projects/{project_id}/jobs/{id}":
+    post:
+      tags: *tags
+      operationId: "CreateEnsemblingJob"
+      summary: Submit an Ensembling job.
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: A JSON object containing information about the ensembler.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnsemblingJob"
+      responses:
+        "202":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblingJob"
+  "/projects/{project_id}/jobs/{job_id}":
     get:
       tags: *tags
       operationId: "GetEnsemblingJob"
@@ -78,7 +77,7 @@ paths:
             $ref: "#/components/schemas/Id"
           required: true
         - in: path
-          name: id
+          name: job_id
           schema:
             $ref: "#/components/schemas/Id"
           required: true
@@ -176,27 +175,31 @@ components:
           items:
             type: "string"
 
+    DatasetType: &DatasetType
+      type: "string"
+      enum:
+        - "BQ"
+
     Dataset:
       type: "object"
       oneOf:
         - $ref: "#/components/schemas/BigQueryDataset"
-      required:
-        - "type"
-      properties:
-        type:
-          $ref: "#/components/schemas/DatasetType"
       discriminator:
         propertyName: "type"
         mapping:
           BQ: "#/components/schemas/BigQueryDataset"
 
-    DatasetType:
-      type: "string"
-      enum:
-        - "BQ"
+    GenericDataset:
+      type: "object"
+      required:
+        - "type"
+      properties:
+        type:
+          <<: *DatasetType
 
     BigQueryDataset:
       allOf:
+        - $ref: "#/components/schemas/GenericDataset"
         - type: object
           properties:
             bq_config:
@@ -255,26 +258,38 @@ components:
         - STRING
         - ARRAY
 
+    SinkType: &SinkType
+      type: "string"
+      enum:
+        - CONSOLE
+        - BQ
+
     EnsemblingJobSink:
       type: "object"
       oneOf:
         - $ref: "#/components/schemas/BigQuerySink"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          BQ: "#/components/schemas/BigQuerySink"
+
+    GenericSink:
+      type: "object"
+      required:
+        - "type"
       properties:
         type:
-          $ref: "#/components/schemas/SinkType"
+          <<: *SinkType
         columns:
           type: "array"
           items:
             type: "string"
         save_mode:
           $ref: "#/components/schemas/SaveMode"
-      discriminator:
-        propertyName: "type"
-        mapping:
-          BQ: "#/components/schemas/BigQuerySink"
 
     BigQuerySink:
       allOf:
+        - $ref: "#/components/schemas/GenericSink"
         - type: object
           properties:
             bq_config:
@@ -299,12 +314,6 @@ components:
         - OVERWRITE
         - APPEND
         - IGNORE
-
-    SinkType:
-      type: "string"
-      enum:
-        - CONSOLE
-        - BQ
 
     EnsemblerInfraConfig:
       type: "object"
