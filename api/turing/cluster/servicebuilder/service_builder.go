@@ -10,21 +10,10 @@ import (
 
 	mlp "github.com/gojek/mlp/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"k8s.io/apimachinery/pkg/api/resource"
-)
-
-// Define pod label names and default values
-const (
-	// Label names
-	labelEnvironment  = "gojek.com/environment"
-	labelStream       = "gojek.com/stream"
-	labelTeam         = "gojek.com/team"
-	labelOrchestrator = "gojek.com/orchestrator"
-	labelApp          = "gojek.com/app"
-	// Default values
-	deploymentOrchestrator = "turing"
 )
 
 const (
@@ -333,11 +322,10 @@ func buildLabels(
 	envType string,
 	router *models.Router,
 ) map[string]string {
-	return map[string]string{
-		labelEnvironment:  envType,
-		labelStream:       project.Stream,
-		labelTeam:         project.Team,
-		labelApp:          router.Name,
-		labelOrchestrator: deploymentOrchestrator,
+	r := labeller.KubernetesLabelsRequest{
+		Stream: project.Stream,
+		Team:   project.Team,
+		App:    router.Name,
 	}
+	return labeller.BuildLabels(r)
 }

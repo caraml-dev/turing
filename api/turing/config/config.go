@@ -49,20 +49,23 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 
 // Config is used to parse and store the environment configs
 type Config struct {
-	Port                int `validate:"required"`
-	AllowedOrigins      []string
-	AuthConfig          *AuthorizationConfig
-	DbConfig            *DatabaseConfig      `validate:"required"`
-	DeployConfig        *DeploymentConfig    `validate:"required"`
-	EnsemblingJobConfig *EnsemblingJobConfig `validate:"required"`
-	RouterDefaults      *RouterDefaults      `validate:"required"`
-	NewRelicConfig      newrelic.Config
-	Sentry              sentry.Config
-	VaultConfig         *VaultConfig `validate:"required"`
-	TuringEncryptionKey string       `validate:"required"`
-	AlertConfig         *AlertConfig
-	MLPConfig           *MLPConfig `validate:"required"`
-	TuringUIConfig      *TuringUIConfig
+	Port                   int `validate:"required"`
+	AllowedOrigins         []string
+	AuthConfig             *AuthorizationConfig
+	BatchRunnerConfig      *BatchRunnerConfig      `validate:"required"`
+	DbConfig               *DatabaseConfig         `validate:"required"`
+	DeployConfig           *DeploymentConfig       `validate:"required"`
+	EnsemblingJobConfig    *EnsemblingJobConfig    `validate:"required"`
+	SparkAppConfig         *SparkAppConfig         `validate:"required"`
+	RouterDefaults         *RouterDefaults         `validate:"required"`
+	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
+	NewRelicConfig         newrelic.Config
+	Sentry                 sentry.Config
+	VaultConfig            *VaultConfig `validate:"required"`
+	TuringEncryptionKey    string       `validate:"required"`
+	AlertConfig            *AlertConfig
+	MLPConfig              *MLPConfig `validate:"required"`
+	TuringUIConfig         *TuringUIConfig
 	// SwaggerFile specifies the file path containing OpenAPI v3 spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
 	SwaggerFile string
@@ -90,6 +93,11 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
+// BatchRunnerConfig captures the config related to the running of batch runners
+type BatchRunnerConfig struct {
+	TimeInterval time.Duration `validate:"required"`
+}
+
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
 	EnvironmentType string `validate:"required"`
@@ -100,9 +108,85 @@ type DeploymentConfig struct {
 	MaxMemory       Quantity      `validate:"required"`
 }
 
+// KubernetesLabelConfigs are the configurations for labeling
+type KubernetesLabelConfigs struct {
+	// LabelPrefix is the prefix used for tagging kubernetes components.
+	// Default is an empty string which means your tags will look something like this:
+	//   team: teen-titans
+	//   stream: nile
+	//   environment: dev
+	//   orchestrator: turing
+	//   app: my-model-app
+	LabelPrefix string
+	// Environment is the value for the environment label
+	Environment string `validate:"required"`
+}
+
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
+	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
+	RecordsToProcessInOneIteration int `validate:"required"`
+	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
+	MaxRetryCount int `validate:"required"`
+	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
 	DefaultEnvironment string `validate:"required"`
+	// KanikoConfig contains the configuration related to the kaniko executor image
+	KanikoConfig KanikoConfig `validate:"required"`
+	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
+	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
+}
+
+// ImageBuilderConfig provides the configuration used for the OCI image building.
+// The details here contain the details pertaining to the ensembler image and not the kaniko image.
+type ImageBuilderConfig struct {
+	// Registry is the registry of the newly built ensembler image.
+	Registry string `validate:"required"`
+	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
+	BaseImageRef string `validate:"required"`
+	// BuildNamespace contains the Kubernetes namespace it should be built in.
+	BuildNamespace string `validate:"required"`
+	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
+	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+	BuildContextURI string `validate:"required"`
+	// DockerfileFilePath contains where the Dockerfile is
+	DockerfileFilePath string `validate:"required"`
+	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
+	BuildTimeoutDuration time.Duration
+}
+
+// Resource contains the Kubernetes resource request and limits
+type Resource struct {
+	CPU    string `validate:"required"`
+	Memory string `validate:"required"`
+}
+
+// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
+type ResourceRequestsLimits struct {
+	Requests Resource `validate:"required"`
+	Limits   Resource `validate:"required"`
+}
+
+// KanikoConfig provides the configuration used for the Kaniko image.
+type KanikoConfig struct {
+	Image                  string                 `validate:"required"`
+	ImageVersion           string                 `validate:"required"`
+	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
+}
+
+// SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
+type SparkAppConfig struct {
+	NodeSelector                   map[string]string
+	CorePerCPURequest              float64 `validate:"required"`
+	CPURequestToCPULimit           float64 `validate:"required"`
+	SparkVersion                   string  `validate:"required"`
+	TolerationName                 string  `validate:"required"`
+	SubmissionFailureRetries       int32   `validate:"required"`
+	SubmissionFailureRetryInterval int64   `validate:"required"`
+	FailureRetries                 int32   `validate:"required"`
+	FailureRetryInterval           int64   `validate:"required"`
+	PythonVersion                  string  `validate:"required"`
+	TTLSecond                      int64   `validate:"required"`
+	TaintKey                       *string
 }
 
 // TuringUIConfig captures config related to serving Turing UI files

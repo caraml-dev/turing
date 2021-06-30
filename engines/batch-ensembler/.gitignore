@@ -3,3 +3,4 @@ env/
 tests/mlruns/
 
 vendor/
+temp-deps/

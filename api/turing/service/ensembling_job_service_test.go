@@ -265,14 +265,15 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 
 			// Query pending ensembling jobs
 			pageSize := 10
-			pendingStatus := models.JobPending
+			retryCountLessThan := 3
 			fetched, err := ensemblingJobService.List(
 				EnsemblingJobListOptions{
 					PaginationOptions: PaginationOptions{
 						Page:     testutils.NullableInt(1),
 						PageSize: &pageSize,
 					},
-					Status: &pendingStatus,
+					Statuses:           []models.Status{models.JobPending},
+					RetryCountLessThan: &retryCountLessThan,
 				},
 			)
 			assert.NoError(t, err)

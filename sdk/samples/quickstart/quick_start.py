@@ -42,7 +42,6 @@ def main(turing_api: str, project: str):
         conda_env={
             'dependencies': [
                 'python>=3.8.0',
-                'cloudpickle==0.5.8',
                 # other dependencies, if required
             ]
         }

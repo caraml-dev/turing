@@ -7,7 +7,10 @@ Turing is a fast, scalable and extensible system that can be used to design, dep
 The following diagram shows the high level overview of the Turing system. Users
 configure Turing routers from the Turing UI. Turing API creates the required
 workloads and components to run Turing routers. The Turing router will be
-accessible from the Router endpoint after a sucessful deployment.
+accessible from the Router endpoint after a sucessful deployment. Requests to the
+Turing router will be served in real time.
+Turing also provides an ensembling job runner that can be run in batches instead 
+of real time.
 
 ![Turing architecture](./docs/assets/turing_architecture.png)
 
@@ -15,6 +18,7 @@ Turing contains these main components:
 - API server
 - Router engine
 - Experiment engine
+- Batch ensembler engine
 - UI web application
 
 Refer to the README under the individual directories for getting started with the respective components:
@@ -23,7 +27,8 @@ Refer to the README under the individual directories for getting started with th
 ├── api 
 ├── engines
 │   ├── experiment 
-│   └── router 
+│   ├── router
+│   └── batch-ensembler
 └── ui 
 ```
 
@@ -33,7 +38,7 @@ The following guide will help you quickly get started with running Turing.
 Turing requires these infrastructure dependencies in order to function properly:
 - [MLP](https://github.com/gojek/mlp) API server to namespace Turing routers
 - [Merlin](https://github.com/gojek/merlin) API server to manage environments where Turing routers are deployed
-- [Kubernetes](https://kubernetes.io/) cluster (with [Knative Serving](https://knative.dev/docs/serving/) and [Istio](https://istio.io/) installed) to provision and manage Turing router workloads
+- [Kubernetes](https://kubernetes.io/) cluster (with [Knative Serving](https://knative.dev/docs/serving/) and [Istio](https://istio.io/) installed and [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)) to provision and manage Turing router workloads (Note that our local setup does not install Spark on K8s Operator as of writing)
 - [Vault](https://www.vaultproject.io/) to store deployment and user secrets
 
 For ease of setup, we will use [Docker compose](https://docs.docker.com/compose/) to install the infrastructure 
@@ -153,11 +158,47 @@ router Docker image is set to the image built and push from the previous step.
 
 ```yaml
 # config-dev.yaml
+BatchRunnerConfig:
+  TimeInterval: 10s
 DbConfig:
   User: turing
   Password: turing
 DeployConfig:
   EnvironmentType: dev 
+EnsemblingJobConfig:
+  DefaultEnvironment: dev
+  RecordsToProcessInOneIteration: 10
+  MaxRetryCount: 3
+  ImageBuilderConfig:
+    Registry: ghcr.io
+    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
+    BuildNamespace: default
+    BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
+    DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
+    BuildTimeoutDuration: 20m
+  KanikoConfig:
+    Image: gcr.io/kaniko-project/executor
+    ImageVersion: v1.5.2
+    ResourceRequestsLimits:
+      Requests:
+        CPU: "1"
+        Memory: 1Gi
+      Limits:
+        CPU: "1"
+        Memory: 1Gi
+KubernetesLabelConfigs:
+  Environment: dev
+SparkAppConfig:
+  CorePerCPURequest: 1.5
+  CPURequestToCPULimit: 1.25
+  SparkVersion: 2.4.5
+  TolerationName: batch-job
+  SubmissionFailureRetries: 3
+  SubmissionFailureRetryInterval: 10
+  FailureRetries: 3
+  FailureRetryInterval: 10
+  PythonVersion: "3"
+  TTLSecond: 86400
 RouterDefaults:
   Image: localhost:5000/turing-router
 VaultConfig:

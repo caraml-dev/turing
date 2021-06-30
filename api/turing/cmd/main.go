@@ -13,6 +13,7 @@ import (
 	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	"github.com/gojek/turing/api/turing/api"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/vault"
@@ -106,6 +107,12 @@ func main() {
 		}
 		defer sentry.Close()
 	}
+
+	// Run batch runners
+	go batchrunner.RunBatchRunners(
+		cfg.BatchRunnerConfig.TimeInterval,
+		appCtx.BatchRunners,
+	)
 
 	// Register handlers
 	health := healthcheck.NewHandler()

@@ -1,12 +1,12 @@
 CREATE TYPE ensembling_job_status as ENUM (
     'pending',
     'running',
-    'terminating',
     'completed',
     'failed',
     'terminated',
     'failed_submission',
-    'failed_building'
+    'failed_building',
+    'building'
 );
 
 CREATE TABLE IF NOT EXISTS ensembling_jobs
@@ -18,8 +18,11 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     environment_name varchar(50) NOT NULL,
     infra_config     jsonb NOT NULL,
     job_config       jsonb NOT NULL,
+    retry_count      integer NOT NULL default 0,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
     created_at       timestamp   NOT NULL default current_timestamp,
     updated_at       timestamp   NOT NULL default current_timestamp
 );
+
+CREATE INDEX ensembling_jobs_status_updated_at_idx on ensembling_jobs (status, updated_at);

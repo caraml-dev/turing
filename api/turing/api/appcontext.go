@@ -5,8 +5,12 @@ import (
 
 	"github.com/gojek/mlp/pkg/authz/enforcer"
 	"github.com/gojek/mlp/pkg/vault"
+	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -30,6 +34,7 @@ type AppContext struct {
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
 
+	BatchRunners       []batchrunner.BatchJobRunner
 	CryptoService      service.CryptoService
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
@@ -81,12 +86,46 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
 
+	// Initialise Batch components
+	// Since there is only the default environment, we will not create multiple batch runners.
+	batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
+	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+		batchClusterController,
+		cfg.EnsemblingJobConfig.ImageBuilderConfig,
+		cfg.EnsemblingJobConfig.KanikoConfig,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
+	}
+
+	labeller.InitKubernetesLabeller(
+		cfg.KubernetesLabelConfigs.LabelPrefix,
+		cfg.KubernetesLabelConfigs.Environment,
+	)
+
+	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
+	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
+		batchClusterController,
+		mlpSvc,
+		cfg.SparkAppConfig,
+	)
+
+	batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
+		batchEnsemblingController,
+		ensemblingJobService,
+		mlpSvc,
+		ensemblingImageBuilder,
+		cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
+		cfg.EnsemblingJobConfig.MaxRetryCount,
+		cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
+	)
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
 		RoutersService:        service.NewRoutersService(db),
 		EnsemblersService:     service.NewEnsemblersService(db),
-		EnsemblingJobService:  service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment),
+		EnsemblingJobService:  ensemblingJobService,
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
@@ -94,6 +133,7 @@ func NewAppContext(
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
 		PodLogService:         service.NewPodLogService(clusterControllers),
+		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {

@@ -505,6 +505,9 @@ func TestStringToQuantityHookFunc(t *testing.T) {
 func TestConfigValidate(t *testing.T) {
 	validConfig := Config{
 		Port: 5000,
+		BatchRunnerConfig: &BatchRunnerConfig{
+			TimeInterval: 3 * time.Minute,
+		},
 		DbConfig: &DatabaseConfig{
 			Host:     "localhost",
 			Port:     5432,
@@ -520,11 +523,53 @@ func TestConfigValidate(t *testing.T) {
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
 		EnsemblingJobConfig: &EnsemblingJobConfig{
-			DefaultEnvironment: "dev",
+			DefaultEnvironment:             "dev",
+			RecordsToProcessInOneIteration: 10,
+			MaxRetryCount:                  3,
+			ImageBuilderConfig: ImageBuilderConfig{
+				Registry:             "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
+				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
+				BuildTimeoutDuration: 10 * time.Minute,
+			},
+			KanikoConfig: KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: ResourceRequestsLimits{
+					Requests: Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+					Limits: Resource{
+						CPU:    "500m",
+						Memory: "1Gi",
+					},
+				},
+			},
+		},
+		SparkAppConfig: &SparkAppConfig{
+			NodeSelector: map[string]string{
+				"node-workload-type": "batch",
+			},
+			CorePerCPURequest:              1.5,
+			CPURequestToCPULimit:           1.25,
+			SparkVersion:                   "2.4.5",
+			TolerationName:                 "batch-job",
+			SubmissionFailureRetries:       3,
+			SubmissionFailureRetryInterval: 10,
+			FailureRetries:                 3,
+			FailureRetryInterval:           10,
+			PythonVersion:                  "3",
+			TTLSecond:                      86400,
 		},
 		RouterDefaults: &RouterDefaults{
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
+		},
+		KubernetesLabelConfigs: &KubernetesLabelConfigs{
+			Environment: "dev",
 		},
 		Sentry: sentry.Config{},
 		NewRelicConfig: newrelic.Config{
@@ -610,6 +655,27 @@ func TestConfigValidate(t *testing.T) {
 		"missing ensembling job default environment": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing spark infra config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.SparkAppConfig = nil
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing batch runner config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.BatchRunnerConfig = nil
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing kubernetes label config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.KubernetesLabelConfigs = nil
 				return validConfig
 			},
 			wantErr: true,

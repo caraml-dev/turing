@@ -400,6 +400,72 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				return svc
 			},
 		},
+		"success | nominal with single status": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs?status=pending",
+			expected: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+		},
+		"success | nominal with multiple statuses": {
+			method: http.MethodGet,
+			path:   "/projects/1/jobs?status=pending&status=terminated",
+			expected: Ok(
+				&service.PaginatedResults{
+					Results: []interface{}{
+						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					},
+					Paging: service.Paging{
+						Total: 1,
+						Page:  1,
+						Pages: 1,
+					},
+				},
+			),
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("List", mock.Anything, mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil,
+				)
+				return svc
+			},
+		},
 		"success | no result": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs",
