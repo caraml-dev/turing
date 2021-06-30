@@ -25,7 +25,7 @@ function install_vault_cli() {
 }
 
 function install_kind_cli() {
-    kind_version=${kind_version:-0.9.0}
+    kind_version=${kind_version:-0.11.1}
 
     wget https://github.com/kubernetes-sigs/kind/releases/download/v${kind_version}/kind-linux-amd64 && \
         sudo install kind-linux-amd64 /usr/local/bin/kind && \
