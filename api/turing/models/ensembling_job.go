@@ -99,7 +99,7 @@ type BatchEnsemblingJobResources struct {
 // JobRunning --▶ JobFailed
 //     |
 //     |
-//     |--▶ JobTerminated
+//     |--▶ JobTerminating --▶ JobTerminated
 //     |
 //     |
 //     ▼
@@ -113,6 +113,8 @@ const (
 	JobBuildingImage Status = "building"
 	// JobRunning is when the job has been picked up and running.
 	JobRunning Status = "running"
+	// JobTerminating is when the job has been requested to terminate.
+	JobTerminating Status = "terminating"
 	// JobTerminated is when the job has stopped. This is a terminal state.
 	JobTerminated Status = "terminated"
 	// JobCompleted is when the job has successfully completed. This is a terminal state.

@@ -109,6 +109,47 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 	return Ok(results)
 }
 
+type deleteEnsemblingJobResponse struct {
+	ID models.ID `schema:"id"`
+}
+
+// DeleteEnsemblingJob deletes and ensembling job and cancels any ongoing process.
+func (c EnsemblingJobController) DeleteEnsemblingJob(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := &GetEnsemblingJobOptions{}
+
+	if err := c.ParseVars(options, vars); err != nil {
+		return BadRequest(
+			"failed to fetch ensembling job",
+			fmt.Sprintf("failed to parse query string: %s", err),
+		)
+	}
+
+	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+		*options.ID,
+		service.EnsemblingJobFindByIDOptions{
+			ProjectID: options.ProjectID,
+		},
+	)
+	if err != nil {
+		return NotFound("ensembler not found", err.Error())
+	}
+
+	err = c.EnsemblingJobService.DeleteEnsemblingJob(ensemblingJob)
+	if err != nil {
+		return InternalServerError("unable to delete ensembling job", err.Error())
+	}
+
+	return Accepted(
+		deleteEnsemblingJobResponse{
+			ID: *options.ID,
+		},
+	)
+}
+
 // Routes returns all the HTTP routes given by the EnsemblingJobController.
 func (c EnsemblingJobController) Routes() []Route {
 	return []Route{

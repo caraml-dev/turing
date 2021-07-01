@@ -37,6 +37,7 @@ type EnsemblingJobService interface {
 		projectID models.ID,
 		ensembler *models.PyFuncEnsembler,
 	) (*models.EnsemblingJob, error)
+	DeleteEnsemblingJob(ensemblingJob *models.EnsemblingJob) error
 }
 
 // NewEnsemblingJobService creates a new ensembling job service
@@ -158,4 +159,9 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	}
 
 	return job, nil
+}
+
+func (s *ensemblingJobService) DeleteEnsemblingJob(job *models.EnsemblingJob) error {
+	job.Status = models.JobTerminating
+	return s.Save(job)
 }

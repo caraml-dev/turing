@@ -3,6 +3,7 @@ CREATE TYPE ensembling_job_status as ENUM (
     'running',
     'completed',
     'failed',
+    'terminating',
     'terminated',
     'failed_submission',
     'failed_building',
