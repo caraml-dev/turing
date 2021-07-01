@@ -36,8 +36,11 @@ proto:
 
 .PHONY: build-image
 build-image:
-	@./build-image.sh \ 
-		$(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}
+	mkdir -p temp-deps
+	cp -r ../../sdk temp-deps/
+	@docker build . \
+		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}
+	rm -rf temp-deps
 
 .PHONY: version
 version:
