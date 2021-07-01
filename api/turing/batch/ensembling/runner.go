@@ -334,7 +334,10 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 	}
 
 	// Delete record
-	r.ensemblingJobService.Delete(ensemblingJob)
+	err := r.ensemblingJobService.Delete(ensemblingJob)
+	if err != nil {
+		log.Errorf("unable to delete ensembling job %v", err)
+	}
 }
 
 // terminateIfRequired returns true if the process should drop what it is doing.
