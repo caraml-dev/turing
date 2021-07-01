@@ -8,13 +8,13 @@ ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 setup: $(CONDA_ENV_NAME)
 $(CONDA_ENV_NAME):
 	@conda env update -p env/$(CONDA_ENV_NAME) -f environment.yaml --prune
-	$(ACTIVATE_ENV) && \
-		pip install -r requirements.dev.txt && \
-		mypy --install-types --non-interactive
+	$(ACTIVATE_ENV) && pip install -r requirements.dev.txt
 
 .PHONY: type-check
 type-check:
 	@$(ACTIVATE_ENV) && mypy \
+		--install-types \
+		--non-interactive \
 		--ignore-missing-imports \
 		--allow-untyped-globals \
 		ensembler
