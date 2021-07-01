@@ -310,6 +310,20 @@ func (_m *Controller) DeleteSecret(secretName string, namespace string) error {
 	return r0
 }
 
+// DeleteSparkApplication provides a mock function with given fields: namespace, appName
+func (_m *Controller) DeleteSparkApplication(namespace string, appName string) error {
+	ret := _m.Called(namespace, appName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(namespace, appName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeployKnativeService provides a mock function with given fields: ctx, svc
 func (_m *Controller) DeployKnativeService(ctx context.Context, svc *cluster.KnativeService) error {
 	ret := _m.Called(ctx, svc)

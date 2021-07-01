@@ -29,7 +29,8 @@ type EnsemblingJobListOptions struct {
 
 // EnsemblingJobService is the data access object for the EnsemblingJob from the db.
 type EnsemblingJobService interface {
-	Save(ensembler *models.EnsemblingJob) error
+	Save(ensemblingJob *models.EnsemblingJob) error
+	Delete(ensemblingJob *models.EnsemblingJob) error
 	FindByID(id models.ID, options EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error)
 	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
 	CreateEnsemblingJob(
@@ -58,6 +59,10 @@ func (s *ensemblingJobService) Save(ensemblingJob *models.EnsemblingJob) error {
 	return s.db.Save(ensemblingJob).Error
 }
 
+func (s *ensemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) error {
+	return s.db.Delete(ensemblingJob).Error
+}
+
 func (s *ensemblingJobService) FindByID(
 	id models.ID,
 	options EnsemblingJobFindByIDOptions,
@@ -72,7 +77,7 @@ func (s *ensemblingJobService) FindByID(
 	result := query.First(&ensemblingJob)
 
 	if err := result.Error; err != nil {
-		return &ensemblingJob, err
+		return nil, err
 	}
 
 	return &ensemblingJob, nil

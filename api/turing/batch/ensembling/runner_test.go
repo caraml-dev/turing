@@ -84,6 +84,11 @@ func TestRun(t *testing.T) {
 					},
 				}, nil)
 
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					&models.EnsemblingJob{},
+					nil,
+				)
+
 				return svc
 			},
 			mlpService: func() service.MLPService {
@@ -154,6 +159,11 @@ func TestRun(t *testing.T) {
 					},
 				}, nil)
 
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					&models.EnsemblingJob{},
+					nil,
+				)
+
 				return svc
 			},
 			mlpService: func() service.MLPService {
@@ -203,6 +213,11 @@ func TestRun(t *testing.T) {
 					"Save",
 					mock.Anything,
 				).Return(nil)
+
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					&models.EnsemblingJob{},
+					nil,
+				)
 
 				return svc
 			},

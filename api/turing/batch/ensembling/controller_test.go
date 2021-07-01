@@ -156,7 +156,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 	}
 }
 
-func TestCreateEnsemblingJobController(t *testing.T) {
+func TestCreate(t *testing.T) {
 	tests := map[string]struct {
 		expected          error
 		clusterController func() cluster.Controller
@@ -647,6 +647,61 @@ func TestGetStatus(t *testing.T) {
 			val, err := c.GetStatus(namespace, ensemblingJob)
 			assert.Equal(t, tt.expectedVal, val)
 			assert.True(t, (err != nil) == tt.err)
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+	tests := map[string]struct {
+		clusterController func() cluster.Controller
+		hasErr            bool
+	}{
+		"success | delete spark application": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					&apisparkv1beta2.SparkApplication{},
+					nil,
+				)
+				ctrler.On("DeleteSparkApplication", mock.Anything, mock.Anything).Return(
+					nil,
+				)
+				return ctrler
+			},
+			hasErr: false,
+		},
+		"failure | no such job": {
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+					nil,
+					fmt.Errorf("hello"),
+				)
+				return ctrler
+			},
+			hasErr: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			clusterController := tt.clusterController()
+			ensemblingController := NewBatchEnsemblingController(
+				clusterController,
+				nil,
+				sparkInfraConfig,
+			)
+			err := ensemblingController.Delete("", &models.EnsemblingJob{})
+			if tt.hasErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
 		})
 	}
 }

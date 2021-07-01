@@ -394,3 +394,31 @@ func TestDeleteEnsemblingJob(t *testing.T) {
 		})
 	})
 }
+
+func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
+	t.Run("success | delete ensembling job", func(t *testing.T) {
+		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+
+			// Save job
+			projectID := models.ID(1)
+			ensemblerID := models.ID(1000)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			err := ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+
+			// Delete job
+			err = ensemblingJobService.Delete(ensemblingJob)
+			assert.NoError(t, err)
+
+			// Query back job to check if job is no longer there
+			found, err := ensemblingJobService.FindByID(
+				ensemblingJob.ID,
+				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+			)
+			assert.NotNil(t, err)
+			assert.Nil(t, found)
+		})
+	})
+}

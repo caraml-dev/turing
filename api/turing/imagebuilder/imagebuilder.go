@@ -71,6 +71,11 @@ type ImageBuilder interface {
 		modelName string,
 		versionID models.ID,
 	) (JobStatus, error)
+	DeleteImageBuildingJob(
+		projectName string,
+		modelName string,
+		versionID models.ID,
+	) error
 }
 
 type nameGenerator interface {
@@ -355,4 +360,26 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 	}
 
 	return JobStatusUnknown, nil
+}
+
+func (ib *imageBuilder) DeleteImageBuildingJob(
+	projectName string,
+	modelName string,
+	versionID models.ID,
+) error {
+	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+		projectName,
+		modelName,
+		versionID,
+	)
+	job, err := ib.clusterController.GetJob(
+		ib.imageConfig.BuildNamespace,
+		kanikoJobName,
+	)
+	if err != nil {
+		// Not found.
+		return err
+	}
+	// Delete job
+	return ib.clusterController.DeleteJob(job.Name, ib.imageConfig.BuildNamespace)
 }

@@ -37,6 +37,20 @@ func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, p
 	return r0, r1
 }
 
+// Delete provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
+		r0 = rf(ensemblingJob)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteEnsemblingJob provides a mock function with given fields: ensemblingJob
 func (_m *EnsemblingJobService) DeleteEnsemblingJob(ensemblingJob *models.EnsemblingJob) error {
 	ret := _m.Called(ensemblingJob)
@@ -97,13 +111,13 @@ func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: ensembler
-func (_m *EnsemblingJobService) Save(ensembler *models.EnsemblingJob) error {
-	ret := _m.Called(ensembler)
+// Save provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) Save(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
-		r0 = rf(ensembler)
+		r0 = rf(ensemblingJob)
 	} else {
 		r0 = ret.Error(0)
 	}

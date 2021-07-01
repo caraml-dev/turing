@@ -42,6 +42,7 @@ type CreateEnsemblingJobRequest struct {
 // EnsemblingController is an interface that exposes the batch ensembling kubernetes controller.
 type EnsemblingController interface {
 	Create(request *CreateEnsemblingJobRequest) error
+	Delete(namespace string, ensemblingJob *models.EnsemblingJob) error
 	GetStatus(namespace string, ensemblingJob *models.EnsemblingJob) (SparkApplicationState, error)
 }
 
@@ -62,6 +63,16 @@ func NewBatchEnsemblingController(
 		mlpService:        mlpService,
 		sparkInfraConfig:  sparkInfraConfig,
 	}
+}
+
+func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.EnsemblingJob) error {
+	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	if err != nil {
+		c.cleanup(ensemblingJob.Name, namespace)
+		return err
+	}
+	c.cleanup(ensemblingJob.Name, namespace)
+	return c.clusterController.DeleteSparkApplication(namespace, sa.Name)
 }
 
 func (c *ensemblingController) GetStatus(
