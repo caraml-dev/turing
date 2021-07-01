@@ -673,7 +673,7 @@ func TestDelete(t *testing.T) {
 			},
 			hasErr: false,
 		},
-		"failure | no such job": {
+		"success | no such job": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
 				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
@@ -685,7 +685,9 @@ func TestDelete(t *testing.T) {
 				)
 				return ctrler
 			},
-			hasErr: true,
+			// It is important that no action is to be done, we ignore the error
+			// Just that there is no further action required on the delete function
+			hasErr: false,
 		},
 	}
 	for name, tt := range tests {

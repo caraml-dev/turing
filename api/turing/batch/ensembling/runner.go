@@ -179,6 +179,11 @@ func (r *ensemblingJobRunner) processJobRunning(
 		ensemblingJob.Status = models.JobFailed
 	}
 
+	// Check if up for termination
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
+
 	err = r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
 		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, err)
@@ -198,6 +203,11 @@ func (r *ensemblingJobRunner) processBuildingImage(
 
 	if status == imagebuilder.JobStatusActive {
 		// Do nothing
+		return
+	}
+
+	// Check if up for termination
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
 		return
 	}
 
@@ -252,6 +262,11 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 		return
 	}
 
+	// Check if termination required.
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
+
 	ensemblingJob.Status = models.JobBuildingImage
 	err := r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
@@ -264,6 +279,9 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels)
 
 	if imageBuildErr != nil {
+		// Here unfortunately we have to wait till the image building process has
+		// finished/errored before we can delete the job
+		// It's still worth cleaning up even after the job is done.
 		r.saveStatusOrTerminate(
 			ensemblingJob,
 			mlpProject,
@@ -303,14 +321,17 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 
 func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, mlpProject *mlp.Project) {
 	// Delete building image job
-	r.imageBuilder.DeleteImageBuildingJob(
+	jobErr := r.imageBuilder.DeleteImageBuildingJob(
 		mlpProject.Name,
 		ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
 	)
-
 	// Delete spark resource
-	r.ensemblingController.Delete(mlpProject.Name, ensemblingJob)
+	sparkErr := r.ensemblingController.Delete(mlpProject.Name, ensemblingJob)
+
+	if jobErr != nil || sparkErr != nil {
+		return
+	}
 
 	// Delete record
 	r.ensemblingJobService.Delete(ensemblingJob)
@@ -321,8 +342,12 @@ func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlp
 	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{})
 
 	if err != nil {
-		// This shouldn't happen, pretend nothing happened and continue trying the process
-		return false
+		// Job already deleted, must not allow job to be revived.
+		// Because of the async activities, the job could have been deleted.
+		// There might be a chance where the job has been already deleted but
+		// a stale record was processing.
+		// We return true here because this will happen.
+		return true
 	}
 
 	if ensemblingJob.Status == models.JobTerminating {

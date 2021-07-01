@@ -69,7 +69,9 @@ func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.En
 	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
 	if err != nil {
 		c.cleanup(ensemblingJob.Name, namespace)
-		return err
+		// Not found, we do not consider this as an error because its just no further
+		// action required on this part.
+		return nil
 	}
 	c.cleanup(ensemblingJob.Name, namespace)
 	return c.clusterController.DeleteSparkApplication(namespace, sa.Name)

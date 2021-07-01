@@ -161,13 +161,18 @@ func (c EnsemblingJobController) Routes() []Route {
 		},
 		{
 			method:  http.MethodGet,
+			path:    "/projects/{project_id}/jobs",
+			handler: c.ListEnsemblingJobs,
+		},
+		{
+			method:  http.MethodGet,
 			path:    "/projects/{project_id}/jobs/{id}",
 			handler: c.GetEnsemblingJob,
 		},
 		{
-			method:  http.MethodGet,
-			path:    "/projects/{project_id}/jobs",
-			handler: c.ListEnsemblingJobs,
+			method:  http.MethodDelete,
+			path:    "/projects/{project_id}/jobs/{id}",
+			handler: c.DeleteEnsemblingJob,
 		},
 	}
 }
