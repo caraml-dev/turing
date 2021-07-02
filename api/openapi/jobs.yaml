@@ -34,6 +34,8 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/EnsemblerJobStatus"
+          style: form
+          explode: true
       responses:
         "200":
           description: A JSON object, that represents paginated results response

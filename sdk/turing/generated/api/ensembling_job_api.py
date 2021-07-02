@@ -413,7 +413,7 @@ class EnsemblingJobApi(object):
                     'status': 'query',
                 },
                 'collection_format_map': {
-                    'status': 'csv',
+                    'status': 'multi',
                 }
             },
             headers_map={
