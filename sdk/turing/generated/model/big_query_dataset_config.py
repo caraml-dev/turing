@@ -77,10 +77,10 @@ class BigQueryDatasetConfig(ModelNormal):
                 and the value is attribute type.
         """
         return {
-            'table': (str,),  # noqa: E501
-            'features': ([str],),  # noqa: E501
-            'query': (str,),  # noqa: E501
-            'options': ({str: (str,)},),  # noqa: E501
+            'table': (str, none_type,),  # noqa: E501
+            'features': ([str], none_type,),  # noqa: E501
+            'query': (str, none_type,),  # noqa: E501
+            'options': ({str: (str,)}, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -141,10 +141,10 @@ class BigQueryDatasetConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            table (str): [optional]  # noqa: E501
-            features ([str]): [optional]  # noqa: E501
-            query (str): [optional]  # noqa: E501
-            options ({str: (str,)}): [optional]  # noqa: E501
+            table (str, none_type): [optional]  # noqa: E501
+            features ([str], none_type): [optional]  # noqa: E501
+            query (str, none_type): [optional]  # noqa: E501
+            options ({str: (str,)}, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

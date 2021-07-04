@@ -1,5 +1,6 @@
 from typing import List, Optional
 import turing.generated.models
+import turing.batch.config
 from enum import Enum
 
 from turing._base_types import ApiObject, ApiObjectSpec
@@ -18,6 +19,8 @@ class EnsemblingJobStatus(Enum):
 
 @ApiObjectSpec(turing.generated.models.EnsemblingJob)
 class EnsemblingJob(ApiObject):
+    _VERSION = "v1"
+    _KIND = "BatchEnsemblingJob"
 
     def __init__(
             self,
@@ -65,8 +68,27 @@ class EnsemblingJob(ApiObject):
         self._status = status
 
     @classmethod
-    def submit(cls) -> 'EnsemblingJob':
-        pass
+    def submit(
+            cls,
+            ensembler: turing.PyFuncEnsembler,
+            config: turing.batch.config.EnsemblingJobConfig) -> 'EnsemblingJob':
+        from turing.session import active_session
+
+        job_config = turing.generated.models.EnsemblerConfig(
+            version=EnsemblingJob._VERSION,
+            kind=turing.generated.models.EnsemblerConfigKind(EnsemblingJob._KIND),
+            spec=config.job_spec
+        )
+
+        job = turing.generated.models.EnsemblingJob(
+            ensembler_id=ensembler.id,
+            job_config=job_config,
+
+        )
+
+        return EnsemblingJob.from_open_api(
+            active_session.submit_ensembling_job(job=job)
+        )
 
     @classmethod
     def list(

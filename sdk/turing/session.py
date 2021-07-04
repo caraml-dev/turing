@@ -8,11 +8,10 @@ from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi
 from turing.generated.models import \
     Project, \
     Ensembler, \
+    EnsemblingJob, \
     EnsemblerJobStatus, \
     EnsemblersPaginatedResults, \
     EnsemblingJobPaginatedResults
-
-
 
 
 def require_active_project(f):
@@ -162,6 +161,13 @@ class TuringSession:
         return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
             project_id=self.active_project.id,
             **kwargs
+        )
+
+    @require_active_project
+    def submit_ensembling_job(self, job: EnsemblingJob) -> EnsemblingJob:
+        return EnsemblingJobApi(self._api_client).create_ensembling_job(
+            project_id=self.active_project.id,
+            ensembling_job=job
         )
 
 

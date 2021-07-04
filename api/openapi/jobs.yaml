@@ -54,7 +54,7 @@ paths:
             $ref: "#/components/schemas/Id"
           required: true
       requestBody:
-        description: A JSON object containing information about the ensembler.
+        description: A JSON object that contains the configuration of the ensembling job
         required: true
         content:
           application/json:
@@ -212,14 +212,18 @@ components:
         table:
           type: "string"
           pattern: '^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$'
+          nullable: true
         features:
           type: "array"
+          nullable: true
           items:
             type: "string"
         query:
           type: "string"
+          nullable: true
         options:
           type: "object"
+          nullable: true
           additionalProperties:
             type: "string"
 
@@ -306,6 +310,7 @@ components:
           type: string
         options:
           type: object
+          nullable: true
           additionalProperties:
             type: string
 

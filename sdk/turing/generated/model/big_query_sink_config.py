@@ -74,7 +74,7 @@ class BigQuerySinkConfig(ModelNormal):
         return {
             'table': (str,),  # noqa: E501
             'staging_bucket': (str,),  # noqa: E501
-            'options': ({str: (str,)},),  # noqa: E501
+            'options': ({str: (str,)}, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -136,7 +136,7 @@ class BigQuerySinkConfig(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             table (str): [optional]  # noqa: E501
             staging_bucket (str): [optional]  # noqa: E501
-            options ({str: (str,)}): [optional]  # noqa: E501
+            options ({str: (str,)}, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
