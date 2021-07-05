@@ -82,7 +82,7 @@ def config_simple(request):
     yield from_yaml(f"""\
     uri: {ensembler_path}
     result: 
-        columnName: test_results
+        column_name: test_results
         type: {pb2.Ensembler.ResultType.Name(request.param)}
     """, pb2.Ensembler())
 
@@ -115,9 +115,9 @@ def config_array():
     yield from_yaml(f"""\
     uri: {ensembler_path}
     result: 
-        columnName: test_results
+        column_name: test_results
         type: ARRAY
-        itemType: INTEGER
+        item_type: INTEGER
     """, pb2.Ensembler())
 
 

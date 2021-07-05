@@ -9,7 +9,7 @@ from tests.utils.proto_utils import from_yaml
 def config():
     return from_yaml("""\
     type: BQ
-    bqConfig:
+    bq_config:
       table: "project.dataset.table"
       features:
         - customer_id
