@@ -236,6 +236,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs: %v", err)
+		return
 	}
 
 	if ensemblingJobsPaginated.Results == nil {
