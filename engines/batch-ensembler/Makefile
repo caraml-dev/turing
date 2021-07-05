@@ -29,7 +29,8 @@ test-unit: type-check
 
 .PHONY: proto
 proto:
-	protoc -I=. \
+	@$(ACTIVATE_ENV) && \
+		protoc -I=. \
 		--python_out=ensembler \
 		--mypy_out=ensembler \
 		--go_out=pkg \

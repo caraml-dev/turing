@@ -82,8 +82,8 @@ class EnsemblingJob(ApiObject):
 
         job = turing.generated.models.EnsemblingJob(
             ensembler_id=ensembler.id,
+            infra_config=config.infra_spec,
             job_config=job_config,
-
         )
 
         return EnsemblingJob.from_open_api(

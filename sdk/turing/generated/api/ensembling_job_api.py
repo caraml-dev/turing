@@ -54,7 +54,7 @@ class EnsemblingJobApi(object):
 
             Args:
                 project_id (int):
-                ensembling_job (EnsemblingJob): A JSON object containing information about the ensembler.
+                ensembling_job (EnsemblingJob): A JSON object that contains the configuration of the ensembling job
 
             Keyword Args:
                 _return_http_data_only (bool): response data without head status

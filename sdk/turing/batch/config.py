@@ -61,3 +61,10 @@ class EnsemblingJobConfig:
             ensembler=ensembler,
             sink=sink
         )
+
+    @property
+    def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
+        return turing.generated.models.EnsemblerInfraConfig(
+            service_account_name=self._service_account,
+            resources=self._resource_request
+        )

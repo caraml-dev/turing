@@ -332,7 +332,9 @@ components:
         service_account_name:
           type: string
         resources:
-          $ref: "#/components/schemas/EnsemblingResources"
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/EnsemblingResources"
 
     EnsemblingResources:
       type: "object"

@@ -89,7 +89,7 @@ func NewAppContext(
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
-	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		batchClusterController,
 		cfg.EnsemblingJobConfig.ImageBuilderConfig,
 		cfg.EnsemblingJobConfig.KanikoConfig,

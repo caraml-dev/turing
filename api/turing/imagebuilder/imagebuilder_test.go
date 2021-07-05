@@ -293,7 +293,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 
-			ib, err := NewEnsemberJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, err := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
 			assert.Nil(t, err)
 
 			buildImageRequest := BuildImageRequest{

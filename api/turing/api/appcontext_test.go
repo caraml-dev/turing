@@ -244,7 +244,7 @@ func TestNewAppContext(t *testing.T) {
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
 	assert.NoError(t, err)
 
-	ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
 		testCfg.EnsemblingJobConfig.ImageBuilderConfig,
 		testCfg.EnsemblingJobConfig.KanikoConfig,
