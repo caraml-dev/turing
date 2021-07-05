@@ -185,6 +185,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 		case <-ticker.C:
 			j, err := ib.clusterController.GetJob(ib.imageConfig.BuildNamespace, job.Name)
 			if err != nil {
+				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
 				return ErrUnableToBuildImage
 			}
 
@@ -192,6 +193,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 				// successfully created pod
 				return nil
 			} else if j.Status.Failed == 1 {
+				log.Errorf("failed building OCI image %s: %v", job.Name, j.Status)
 				return ErrUnableToBuildImage
 			}
 		}

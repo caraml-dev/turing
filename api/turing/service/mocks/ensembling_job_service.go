@@ -51,20 +51,6 @@ func (_m *EnsemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) erro
 	return r0
 }
 
-// DeleteEnsemblingJob provides a mock function with given fields: ensemblingJob
-func (_m *EnsemblingJobService) DeleteEnsemblingJob(ensemblingJob *models.EnsemblingJob) error {
-	ret := _m.Called(ensemblingJob)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
-		r0 = rf(ensemblingJob)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // FindByID provides a mock function with given fields: id, options
 func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error) {
 	ret := _m.Called(id, options)
@@ -109,6 +95,20 @@ func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (
 	}
 
 	return r0, r1
+}
+
+// MarkEnsemblingJobForTermination provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) MarkEnsemblingJobForTermination(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
+		r0 = rf(ensemblingJob)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // Save provides a mock function with given fields: ensemblingJob

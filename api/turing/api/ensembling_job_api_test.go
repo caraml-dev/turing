@@ -395,7 +395,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	}{
 		"success | nominal": {
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -417,7 +417,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		},
 		"failure | no such ensembling job": {
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -433,7 +433,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		},
 		"failure | missing project_id": {
 			params: RequestVars{
-				"id": {"1"},
+				"job_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
@@ -744,13 +744,13 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				svc.On(
-					"DeleteEnsemblingJob",
+					"MarkEnsemblingJobForTermination",
 					mock.Anything,
 				).Return(nil)
 				return svc
 			},
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			expectedResponseCode: 202,
@@ -766,11 +766,11 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 				return svc
 			},
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			expectedResponseCode: 404,
-			expectedBody:         NotFound("ensembler not found", fmt.Errorf("hello").Error()),
+			expectedBody:         NotFound("ensembling job not found", fmt.Errorf("hello").Error()),
 		},
 		"failure | internal server error": {
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -780,13 +780,13 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				svc.On(
-					"DeleteEnsemblingJob",
+					"MarkEnsemblingJobForTermination",
 					mock.Anything,
 				).Return(fmt.Errorf("hello"))
 				return svc
 			},
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			expectedResponseCode: 500,

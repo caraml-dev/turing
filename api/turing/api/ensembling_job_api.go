@@ -135,10 +135,10 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		},
 	)
 	if err != nil {
-		return NotFound("ensembler not found", err.Error())
+		return NotFound("ensembling job not found", err.Error())
 	}
 
-	err = c.EnsemblingJobService.DeleteEnsemblingJob(ensemblingJob)
+	err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
 	if err != nil {
 		return InternalServerError("unable to delete ensembling job", err.Error())
 	}
@@ -166,12 +166,12 @@ func (c EnsemblingJobController) Routes() []Route {
 		},
 		{
 			method:  http.MethodGet,
-			path:    "/projects/{project_id}/jobs/{id}",
+			path:    "/projects/{project_id}/jobs/{job_id}",
 			handler: c.GetEnsemblingJob,
 		},
 		{
 			method:  http.MethodDelete,
-			path:    "/projects/{project_id}/jobs/{id}",
+			path:    "/projects/{project_id}/jobs/{job_id}",
 			handler: c.DeleteEnsemblingJob,
 		},
 	}
@@ -181,5 +181,5 @@ func (c EnsemblingJobController) Routes() []Route {
 // from query params for the GET ensembling job method
 type GetEnsemblingJobOptions struct {
 	ProjectID *models.ID `schema:"project_id" validate:"required"`
-	ID        *models.ID `schema:"id" validate:"required"`
+	ID        *models.ID `schema:"job_id" validate:"required"`
 }

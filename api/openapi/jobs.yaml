@@ -66,7 +66,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/EnsemblingJobPaginatedResults"
 
-  "/projects/{project_id}/jobs/{id}":
+  "/projects/{project_id}/jobs/{job_id}":
     get:
       tags: *tags
       operationId: "GetEnsemblingJob"
@@ -78,7 +78,7 @@ paths:
             $ref: "#/components/schemas/Id"
           required: true
         - in: path
-          name: id
+          name: job_id
           schema:
             $ref: "#/components/schemas/Id"
           required: true
@@ -95,7 +95,7 @@ paths:
     delete:
       tags: *tags
       operationId: "DeleteEnsemblingJob"
-      summary: Deletee an ongoing Ensembling Job.
+      summary: Delete an ongoing Ensembling Job.
       parameters:
         - in: path
           name: project_id
@@ -103,7 +103,7 @@ paths:
             $ref: "#/components/schemas/Id"
           required: true
         - in: path
-          name: id
+          name: job_id
           schema:
             $ref: "#/components/schemas/Id"
           required: true

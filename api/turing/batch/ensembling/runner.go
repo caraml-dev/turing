@@ -15,13 +15,13 @@ import (
 var pageOne = 1
 
 type ensemblingJobRunner struct {
-	ensemblingController      EnsemblingController
-	ensemblingJobService      service.EnsemblingJobService
-	mlpService                service.MLPService
-	imageBuilder              imagebuilder.ImageBuilder
-	batchSize                 int
-	maxRetryCount             int
-	imageBuildTimeoutDuration time.Duration
+	ensemblingController           EnsemblingController
+	ensemblingJobService           service.EnsemblingJobService
+	mlpService                     service.MLPService
+	imageBuilder                   imagebuilder.ImageBuilder
+	recordsToProcessInOneIteration int
+	maxRetryCount                  int
+	imageBuildTimeoutDuration      time.Duration
 }
 
 // NewBatchEnsemblingJobRunner creates a new batch ensembling job runner
@@ -31,18 +31,18 @@ func NewBatchEnsemblingJobRunner(
 	ensemblingJobService service.EnsemblingJobService,
 	mlpService service.MLPService,
 	imageBuilder imagebuilder.ImageBuilder,
-	batchSize int,
+	recordsToProcessInOneIteration int,
 	maxRetryCount int,
 	imageBuildTimeoutDuration time.Duration,
 ) batchrunner.BatchJobRunner {
 	return &ensemblingJobRunner{
-		ensemblingController:      ensemblingController,
-		ensemblingJobService:      ensemblingJobService,
-		mlpService:                mlpService,
-		imageBuilder:              imageBuilder,
-		batchSize:                 batchSize,
-		maxRetryCount:             maxRetryCount,
-		imageBuildTimeoutDuration: imageBuildTimeoutDuration,
+		ensemblingController:           ensemblingController,
+		ensemblingJobService:           ensemblingJobService,
+		mlpService:                     mlpService,
+		imageBuilder:                   imageBuilder,
+		recordsToProcessInOneIteration: recordsToProcessInOneIteration,
+		maxRetryCount:                  maxRetryCount,
+		imageBuildTimeoutDuration:      imageBuildTimeoutDuration,
 	}
 }
 
@@ -61,7 +61,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	optionsJobRunning := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobRunning,
@@ -91,7 +91,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	optionsJobBuildingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobBuildingImage,
@@ -105,7 +105,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	optionsJobTerminatingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobTerminating,
@@ -224,7 +224,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobPending,

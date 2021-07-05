@@ -367,7 +367,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 	})
 }
 
-func TestDeleteEnsemblingJob(t *testing.T) {
+func TestMarkEnsemblingJobForTermination(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 			ensemblingJobService := NewEnsemblingJobService(db, "dev")
@@ -381,7 +381,7 @@ func TestDeleteEnsemblingJob(t *testing.T) {
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
 
 			// Delete job
-			err = ensemblingJobService.DeleteEnsemblingJob(ensemblingJob)
+			err = ensemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
 			assert.NoError(t, err)
 
 			// Query back job to check if terminated
