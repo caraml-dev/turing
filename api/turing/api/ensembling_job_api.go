@@ -109,6 +109,47 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 	return Ok(results)
 }
 
+type deleteEnsemblingJobResponse struct {
+	ID models.ID `schema:"id"`
+}
+
+// DeleteEnsemblingJob deletes and ensembling job and cancels any ongoing process.
+func (c EnsemblingJobController) DeleteEnsemblingJob(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := &GetEnsemblingJobOptions{}
+
+	if err := c.ParseVars(options, vars); err != nil {
+		return BadRequest(
+			"failed to fetch ensembling job",
+			fmt.Sprintf("failed to parse query string: %s", err),
+		)
+	}
+
+	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+		*options.ID,
+		service.EnsemblingJobFindByIDOptions{
+			ProjectID: options.ProjectID,
+		},
+	)
+	if err != nil {
+		return NotFound("ensembling job not found", err.Error())
+	}
+
+	err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
+	if err != nil {
+		return InternalServerError("unable to delete ensembling job", err.Error())
+	}
+
+	return Accepted(
+		deleteEnsemblingJobResponse{
+			ID: *options.ID,
+		},
+	)
+}
+
 // Routes returns all the HTTP routes given by the EnsemblingJobController.
 func (c EnsemblingJobController) Routes() []Route {
 	return []Route{
@@ -120,13 +161,18 @@ func (c EnsemblingJobController) Routes() []Route {
 		},
 		{
 			method:  http.MethodGet,
-			path:    "/projects/{project_id}/jobs/{id}",
-			handler: c.GetEnsemblingJob,
+			path:    "/projects/{project_id}/jobs",
+			handler: c.ListEnsemblingJobs,
 		},
 		{
 			method:  http.MethodGet,
-			path:    "/projects/{project_id}/jobs",
-			handler: c.ListEnsemblingJobs,
+			path:    "/projects/{project_id}/jobs/{job_id}",
+			handler: c.GetEnsemblingJob,
+		},
+		{
+			method:  http.MethodDelete,
+			path:    "/projects/{project_id}/jobs/{job_id}",
+			handler: c.DeleteEnsemblingJob,
 		},
 	}
 }
@@ -135,5 +181,5 @@ func (c EnsemblingJobController) Routes() []Route {
 // from query params for the GET ensembling job method
 type GetEnsemblingJobOptions struct {
 	ProjectID *models.ID `schema:"project_id" validate:"required"`
-	ID        *models.ID `schema:"id" validate:"required"`
+	ID        *models.ID `schema:"job_id" validate:"required"`
 }

@@ -14,13 +14,13 @@ type EnsemblingJobService struct {
 	mock.Mock
 }
 
-// CreateEnsemblingJob provides a mock function with given fields: request, projectID, ensembler
-func (_m *EnsemblingJobService) CreateEnsemblingJob(request *models.EnsemblingJob, projectID models.ID, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
-	ret := _m.Called(request, projectID, ensembler)
+// CreateEnsemblingJob provides a mock function with given fields: job, projectID, ensembler
+func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, projectID models.ID, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
+	ret := _m.Called(job, projectID, ensembler)
 
 	var r0 *models.EnsemblingJob
 	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
-		r0 = rf(request, projectID, ensembler)
+		r0 = rf(job, projectID, ensembler)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EnsemblingJob)
@@ -29,12 +29,26 @@ func (_m *EnsemblingJobService) CreateEnsemblingJob(request *models.EnsemblingJo
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) error); ok {
-		r1 = rf(request, projectID, ensembler)
+		r1 = rf(job, projectID, ensembler)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// Delete provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
+		r0 = rf(ensemblingJob)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // FindByID provides a mock function with given fields: id, options
@@ -83,13 +97,27 @@ func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: ensembler
-func (_m *EnsemblingJobService) Save(ensembler *models.EnsemblingJob) error {
-	ret := _m.Called(ensembler)
+// MarkEnsemblingJobForTermination provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) MarkEnsemblingJobForTermination(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
-		r0 = rf(ensembler)
+		r0 = rf(ensemblingJob)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Save provides a mock function with given fields: ensemblingJob
+func (_m *EnsemblingJobService) Save(ensemblingJob *models.EnsemblingJob) error {
+	ret := _m.Called(ensemblingJob)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob) error); ok {
+		r0 = rf(ensemblingJob)
 	} else {
 		r0 = ret.Error(0)
 	}

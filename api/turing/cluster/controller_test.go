@@ -877,6 +877,27 @@ func TestGetSparkApplication(t *testing.T) {
 	})
 }
 
+func TestDeleteSparkApplication(t *testing.T) {
+	namespace := "test-ns"
+	appName := "bicycle"
+	t.Run("Success | nominal", func(t *testing.T) {
+		cs := fake.NewSimpleClientset()
+		cs.PrependReactor(
+			reactorVerbs.Get,
+			"sparkapplication",
+			func(action k8stesting.Action) (bool, runtime.Object, error) {
+				return true, nil, nil
+			},
+		)
+		sparkClientSet := sparkOpFake.Clientset{}
+		c := &controller{
+			k8sSparkOperator: sparkClientSet.SparkoperatorV1beta2(),
+		}
+		err := c.DeleteSparkApplication(namespace, appName)
+		assert.Nil(t, err)
+	})
+}
+
 func TestCreateNamespace(t *testing.T) {
 	namespace := "test-ns"
 	nsResource := schema.GroupVersionResource{

@@ -71,6 +71,11 @@ type ImageBuilder interface {
 		modelName string,
 		versionID models.ID,
 	) (JobStatus, error)
+	DeleteImageBuildingJob(
+		projectName string,
+		modelName string,
+		versionID models.ID,
+	) error
 }
 
 type nameGenerator interface {
@@ -176,7 +181,6 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 	for {
 		select {
 		case <-timeout:
-			log.Errorf("timeout waiting for kaniko job completion %s", job.Name)
 			return ErrTimeoutBuildingImage
 		case <-ticker.C:
 			j, err := ib.clusterController.GetJob(ib.imageConfig.BuildNamespace, job.Name)
@@ -355,4 +359,27 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 	}
 
 	return JobStatusUnknown, nil
+}
+
+func (ib *imageBuilder) DeleteImageBuildingJob(
+	projectName string,
+	modelName string,
+	versionID models.ID,
+) error {
+	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+		projectName,
+		modelName,
+		versionID,
+	)
+	job, err := ib.clusterController.GetJob(
+		ib.imageConfig.BuildNamespace,
+		kanikoJobName,
+	)
+	if err != nil {
+		// Not found.
+		return nil
+	}
+	// Delete job
+	err = ib.clusterController.DeleteJob(ib.imageConfig.BuildNamespace, job.Name)
+	return err
 }

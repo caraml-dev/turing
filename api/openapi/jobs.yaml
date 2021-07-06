@@ -26,7 +26,7 @@ paths:
             schema:
               $ref: "#/components/schemas/EnsemblingJob"
       responses:
-        "202":
+        202:
           description: Accepted.
           content:
             application/json:
@@ -59,14 +59,14 @@ paths:
             items:
               $ref: "#/components/schemas/EnsemblerJobStatus"
       responses:
-        "200":
+        200:
           description: A JSON object, that represents paginated results response
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsemblingJobPaginatedResults"
 
-  "/projects/{project_id}/jobs/{id}":
+  "/projects/{project_id}/jobs/{job_id}":
     get:
       tags: *tags
       operationId: "GetEnsemblingJob"
@@ -78,17 +78,49 @@ paths:
             $ref: "#/components/schemas/Id"
           required: true
         - in: path
-          name: id
+          name: job_id
           schema:
             $ref: "#/components/schemas/Id"
           required: true
       responses:
-        "200":
+        200:
           description: A JSON object representing an Ensembling Job
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsemblingJob"
+        404:
+          description: "Invalid ensembling job"
+
+    delete:
+      tags: *tags
+      operationId: "DeleteEnsemblingJob"
+      summary: Delete an ongoing Ensembling Job.
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: path
+          name: job_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      responses:
+        202:
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  id:
+                    $ref: "#/components/schemas/Id"
+        400:
+          description: "Invalid ensembling job"
+        404:
+          description: "Ensembling job not found"
 
 components:
   schemas:
