@@ -11,9 +11,9 @@ class SaveMode:
 
 
 class EnsemblingJobSink:
-    def __init__(self, type: str):
+    def __init__(self, type: str, save_mode: SaveMode = None):
         self._type = type
-        self._save_mode = SaveMode.ERRORIFEXISTS
+        self._save_mode = save_mode
         self._columns = []
 
     def save_mode(self, save_mode: SaveMode) -> 'EnsemblingJobSink':
@@ -53,3 +53,8 @@ class BigQuerySink(EnsemblingJobSink):
             columns=self._columns,
             bq_config=self._bq_config
         )
+
+
+__all__ = [
+    "SaveMode", "BigQuerySink",
+]

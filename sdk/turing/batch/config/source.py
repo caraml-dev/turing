@@ -1,5 +1,6 @@
 import abc
 from typing import Iterable, MutableMapping
+import turing.generated.models
 
 
 class EnsemblingJobSource:
@@ -54,7 +55,6 @@ class BigQueryDataset(Dataset):
         self._options = options
 
     def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
-        import turing.generated.models
         dataset = turing.generated.models.BigQueryDataset(
             type=BigQueryDataset._TYPE,
             bq_config=turing.generated.models.BigQueryDatasetConfig(

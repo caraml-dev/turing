@@ -1,3 +1,5 @@
-from turing.batch.config import EnsemblingJobConfig
-from turing.batch.source import EnsemblingJobSource, EnsemblingJobPredictionSource
-from turing.batch.sink import EnsemblingJobSink
+from turing.batch.job import EnsemblingJob, EnsemblingJobStatus
+
+__all__ = [
+    "EnsemblingJob", "EnsemblingJobStatus"
+]
