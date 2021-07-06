@@ -1,21 +1,29 @@
 import abc
-from typing import Iterable, MutableMapping
+from typing import Iterable, MutableMapping, Optional
 import turing.generated.models
+from turing.generated.model_utils import OpenApiModel
+from turing._base_types import DataObject
 
 
 class EnsemblingJobSource:
 
-    def __init__(self, dataset, join_on):
+    def __init__(self, dataset: 'Dataset', join_on: Iterable[str]):
         self._dataset = dataset
         self._join_on = join_on
 
     @property
-    def dataset(self):
+    def dataset(self) -> 'Dataset':
         return self._dataset
 
     @property
     def join_on(self) -> Iterable[str]:
         return self._join_on
+
+    def to_open_api(self) -> OpenApiModel:
+        return turing.generated.models.EnsemblingJobSource(
+            dataset=self.dataset.to_open_api(),
+            join_on=self.join_on
+        )
 
     def select(self, columns: Iterable[str]) -> 'EnsemblingJobPredictionSource':
         return EnsemblingJobPredictionSource(
@@ -34,10 +42,20 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
     def columns(self) -> Iterable[str]:
         return self._columns
 
+    def to_open_api(self) -> OpenApiModel:
+        return turing.generated.models.EnsemblingJobPredictionSource(
+            dataset=self.dataset.to_open_api(),
+            join_on=self.join_on,
+            columns=self.columns
+        )
 
-class Dataset(abc.ABC):
+
+class Dataset(DataObject, abc.ABC):
 
     def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
+        pass
+
+    def to_open_api(self) -> OpenApiModel:
         pass
 
 
@@ -54,8 +72,24 @@ class BigQueryDataset(Dataset):
         self._features = features
         self._options = options
 
-    def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
-        dataset = turing.generated.models.BigQueryDataset(
+    @property
+    def table(self) -> Optional[str]:
+        return self._table
+
+    @property
+    def query(self) -> Optional[str]:
+        return self._query
+
+    @property
+    def features(self) -> Optional[Iterable[str]]:
+        return self._features
+
+    @property
+    def options(self) -> Optional[MutableMapping[str, str]]:
+        return self._options
+
+    def to_open_api(self) -> OpenApiModel:
+        return turing.generated.models.BigQueryDataset(
             type=BigQueryDataset._TYPE,
             bq_config=turing.generated.models.BigQueryDatasetConfig(
                 table=self._table,
@@ -65,7 +99,8 @@ class BigQueryDataset(Dataset):
             )
         )
 
+    def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
         return EnsemblingJobSource(
-            dataset=dataset,
+            dataset=self,
             join_on=columns
         )

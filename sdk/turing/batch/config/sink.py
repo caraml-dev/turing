@@ -1,6 +1,7 @@
 import abc
-from typing import Iterable, MutableMapping
+from typing import Iterable, MutableMapping, Optional
 import turing.generated.models
+from turing.generated.model_utils import OpenApiModel
 
 
 class SaveMode:
@@ -38,20 +39,32 @@ class BigQuerySink(EnsemblingJobSink):
             staging_bucket: str,
             options: MutableMapping[str, str] = None):
         super(BigQuerySink, self).__init__(type=BigQuerySink._TYPE_)
+        self._table = table
+        self._staging_bucket = staging_bucket
+        self._options = options
 
-        self._bq_config = turing.generated.models.BigQuerySinkConfig(
-            table=table,
-            staging_bucket=staging_bucket,
-            options=options
-        )
+    @property
+    def table(self) -> str:
+        return self._table
 
-    def to_open_api(self):
-        import turing.generated.models
+    @property
+    def staging_bucket(self) -> str:
+        return self._staging_bucket
+
+    @property
+    def options(self) -> Optional[MutableMapping[str, str]]:
+        return self._options
+
+    def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQuerySink(
             type=self._type,
             save_mode=self._save_mode,
             columns=self._columns,
-            bq_config=self._bq_config
+            bq_config=turing.generated.models.BigQuerySinkConfig(
+                table=self.table,
+                staging_bucket=self.staging_bucket,
+                options=self.options
+            )
         )
 
 

@@ -26,32 +26,26 @@ class EnsemblingJobConfig:
         self._resource_request = resource_request
         self._env_vars = env_vars
 
+    @property
+    def source(self) -> 'EnsemblingJobSource':
+        return self._source
+
+    @property
+    def predictions(self) -> Dict[str, EnsemblingJobPredictionSource]:
+        return self._predictions
+
+    @property
+    def sink(self) -> 'EnsemblingJobSink':
+        return self._sink
+
     def job_spec(self) -> turing.generated.models.EnsemblingJobSpec:
-        source = turing.generated.models.EnsemblingJobSource(
-            dataset=self._source.dataset,
-            join_on=self._source.join_on
-        )
-
-        predictions = {
-            name: turing.generated.models.EnsemblingJobPredictionSource(
-                dataset=source.dataset,
-                join_on=source.join_on,
-                columns=source.columns
-            )
-            for name, source in self._predictions.items()
-        }
-
-        ensembler = turing.generated.models.EnsemblingJobEnsemblerSpec(
-            result=self._result_config
-        )
-
-        sink = self._sink.to_open_api()
-
         return turing.generated.models.EnsemblingJobSpec(
-            source=source,
-            predictions=predictions,
-            ensembler=ensembler,
-            sink=sink
+            source=self.source.to_open_api(),
+            predictions={name: source.to_open_api() for name, source in self.predictions.items()},
+            ensembler=turing.generated.models.EnsemblingJobEnsemblerSpec(
+                result=self._result_config
+            ),
+            sink=self.sink.to_open_api()
         )
 
     def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
