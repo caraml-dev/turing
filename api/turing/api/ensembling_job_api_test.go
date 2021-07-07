@@ -395,7 +395,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	}{
 		"success | nominal": {
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -417,7 +417,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		},
 		"failure | no such ensembling job": {
 			params: RequestVars{
-				"id":         {"1"},
+				"job_id":     {"1"},
 				"project_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -433,7 +433,7 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		},
 		"failure | missing project_id": {
 			params: RequestVars{
-				"id": {"1"},
+				"job_id": {"1"},
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
@@ -721,6 +721,91 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				),
 			}
 			resp := ctrl.ListEnsemblingJobs(nil, tt.params, nil)
+			assert.Equal(t, tt.expectedResponseCode, resp.code)
+			if tt.expectedBody != nil {
+				assert.Equal(t, tt.expectedBody, resp)
+			}
+		})
+	}
+}
+
+func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
+	var tests = map[string]struct {
+		ensemblingJobService func() service.EnsemblingJobService
+		params               RequestVars
+		expectedResponseCode int
+		expectedBody         *Response
+	}{
+		"success | job deleted": {
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					nil,
+				)
+				svc.On(
+					"MarkEnsemblingJobForTermination",
+					mock.Anything,
+				).Return(nil)
+				return svc
+			},
+			params: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+			},
+			expectedResponseCode: 202,
+			expectedBody:         Accepted(deleteEnsemblingJobResponse{ID: models.ID(1)}),
+		},
+		"failure | job not found": {
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					nil,
+					fmt.Errorf("hello"),
+				)
+				return svc
+			},
+			params: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+			},
+			expectedResponseCode: 404,
+			expectedBody:         NotFound("ensembling job not found", fmt.Errorf("hello").Error()),
+		},
+		"failure | internal server error": {
+			ensemblingJobService: func() service.EnsemblingJobService {
+				svc := &mocks.EnsemblingJobService{}
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
+					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					nil,
+				)
+				svc.On(
+					"MarkEnsemblingJobForTermination",
+					mock.Anything,
+				).Return(fmt.Errorf("hello"))
+				return svc
+			},
+			params: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+			},
+			expectedResponseCode: 500,
+			expectedBody:         InternalServerError("unable to delete ensembling job", fmt.Errorf("hello").Error()),
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.ensemblingJobService()
+			validator, _ := validation.NewValidator(nil)
+			ctrl := &EnsemblingJobController{
+				NewBaseController(
+					&AppContext{
+						EnsemblingJobService: svc,
+					},
+					validator,
+				),
+			}
+			resp := ctrl.DeleteEnsemblingJob(nil, tt.params, nil)
 			assert.Equal(t, tt.expectedResponseCode, resp.code)
 			if tt.expectedBody != nil {
 				assert.Equal(t, tt.expectedBody, resp)

@@ -393,3 +393,271 @@ func TestParseResources(t *testing.T) {
 		})
 	}
 }
+
+func TestGetImageBuildingJobStatus(t *testing.T) {
+	tests := map[string]struct {
+		clusterController func() cluster.Controller
+		imageConfig       config.ImageBuilderConfig
+		kanikoConfig      config.KanikoConfig
+		hasErr            bool
+		expected          JobStatus
+	}{
+		"success | active": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					&apibatchv1.Job{
+						Status: apibatchv1.JobStatus{
+							Active: 1,
+						},
+					},
+					nil,
+				)
+				return ctlr
+			},
+			hasErr:   false,
+			expected: JobStatusActive,
+		},
+		"success | succeeded": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					&apibatchv1.Job{
+						Status: apibatchv1.JobStatus{
+							Succeeded: 1,
+						},
+					},
+					nil,
+				)
+				return ctlr
+			},
+			hasErr:   false,
+			expected: JobStatusSucceeded,
+		},
+		"success | Failed": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					&apibatchv1.Job{
+						Status: apibatchv1.JobStatus{
+							Failed: 1,
+						},
+					},
+					nil,
+				)
+				return ctlr
+			},
+			hasErr:   false,
+			expected: JobStatusFailed,
+		},
+		"success | Unknown": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					&apibatchv1.Job{},
+					nil,
+				)
+				return ctlr
+			},
+			hasErr:   false,
+			expected: JobStatusUnknown,
+		},
+		"failure | Unknown": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					nil,
+					fmt.Errorf("hello"),
+				)
+				return ctlr
+			},
+			hasErr:   true,
+			expected: JobStatusUnknown,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			clusterController := tt.clusterController()
+			ib, _ := NewEnsemberJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1))
+
+			if tt.hasErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tt.expected, status)
+		})
+	}
+}
+
+func TestDeleteImageBuildingJob(t *testing.T) {
+	tests := map[string]struct {
+		clusterController func() cluster.Controller
+		imageConfig       config.ImageBuilderConfig
+		kanikoConfig      config.KanikoConfig
+		hasErr            bool
+	}{
+		"success | no error": {
+			imageConfig: config.ImageBuilderConfig{
+				Registry:             dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				BuildNamespace:       buildNamespace,
+				BuildContextURI:      buildContext,
+				DockerfileFilePath:   dockerfilePath,
+				BuildTimeoutDuration: timeout,
+			},
+			kanikoConfig: config.KanikoConfig{
+				Image:        "gcr.io/kaniko-project/executor",
+				ImageVersion: "v1.5.2",
+				ResourceRequestsLimits: config.ResourceRequestsLimits{
+					Requests: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+					Limits: config.Resource{
+						CPU:    "1",
+						Memory: "2Gi",
+					},
+				},
+			},
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+					&apibatchv1.Job{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: "bicycle",
+						},
+					},
+					nil,
+				)
+				ctlr.On("DeleteJob", mock.Anything, mock.Anything).Return(nil)
+				return ctlr
+			},
+			hasErr: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			clusterController := tt.clusterController()
+			ib, _ := NewEnsemberJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			err := ib.DeleteImageBuildingJob("", "", models.ID(1))
+
+			if tt.hasErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}

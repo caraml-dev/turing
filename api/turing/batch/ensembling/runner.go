@@ -15,13 +15,13 @@ import (
 var pageOne = 1
 
 type ensemblingJobRunner struct {
-	ensemblingController      EnsemblingController
-	ensemblingJobService      service.EnsemblingJobService
-	mlpService                service.MLPService
-	imageBuilder              imagebuilder.ImageBuilder
-	batchSize                 int
-	maxRetryCount             int
-	imageBuildTimeoutDuration time.Duration
+	ensemblingController           EnsemblingController
+	ensemblingJobService           service.EnsemblingJobService
+	mlpService                     service.MLPService
+	imageBuilder                   imagebuilder.ImageBuilder
+	recordsToProcessInOneIteration int
+	maxRetryCount                  int
+	imageBuildTimeoutDuration      time.Duration
 }
 
 // NewBatchEnsemblingJobRunner creates a new batch ensembling job runner
@@ -31,18 +31,18 @@ func NewBatchEnsemblingJobRunner(
 	ensemblingJobService service.EnsemblingJobService,
 	mlpService service.MLPService,
 	imageBuilder imagebuilder.ImageBuilder,
-	batchSize int,
+	recordsToProcessInOneIteration int,
 	maxRetryCount int,
 	imageBuildTimeoutDuration time.Duration,
 ) batchrunner.BatchJobRunner {
 	return &ensemblingJobRunner{
-		ensemblingController:      ensemblingController,
-		ensemblingJobService:      ensemblingJobService,
-		mlpService:                mlpService,
-		imageBuilder:              imageBuilder,
-		batchSize:                 batchSize,
-		maxRetryCount:             maxRetryCount,
-		imageBuildTimeoutDuration: imageBuildTimeoutDuration,
+		ensemblingController:           ensemblingController,
+		ensemblingJobService:           ensemblingJobService,
+		mlpService:                     mlpService,
+		imageBuilder:                   imageBuilder,
+		recordsToProcessInOneIteration: recordsToProcessInOneIteration,
+		maxRetryCount:                  maxRetryCount,
+		imageBuildTimeoutDuration:      imageBuildTimeoutDuration,
 	}
 }
 
@@ -55,10 +55,13 @@ func (r *ensemblingJobRunner) updateStatus() {
 	// Here we want to check all non terminal cases.
 	// 1. JobRunning
 	// 2. JobBuildingImage but with updated_at timeout.
+	// 3. JobTerminating
+
+	// JobRunning
 	optionsJobRunning := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobRunning,
@@ -66,6 +69,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	}
 	r.processEnsemblingJobs(optionsJobRunning)
 
+	// JobBuildingImage
 	// To ensure that we only pickup jobs that weren't picked up, we check the last updated at.
 	// Two conditions that can happen:
 	//
@@ -87,7 +91,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 	optionsJobBuildingImage := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobBuildingImage,
@@ -96,6 +100,18 @@ func (r *ensemblingJobRunner) updateStatus() {
 		RetryCountLessThan: &r.maxRetryCount,
 	}
 	r.processEnsemblingJobs(optionsJobBuildingImage)
+
+	// JobTerminating
+	optionsJobTerminatingImage := service.EnsemblingJobListOptions{
+		PaginationOptions: service.PaginationOptions{
+			Page:     &pageOne,
+			PageSize: &r.recordsToProcessInOneIteration,
+		},
+		Statuses: []models.Status{
+			models.JobTerminating,
+		},
+	}
+	r.processEnsemblingJobs(optionsJobTerminatingImage)
 }
 
 func (r *ensemblingJobRunner) processEnsemblingJobs(queryOptions service.EnsemblingJobListOptions) {
@@ -128,7 +144,7 @@ func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJo
 
 	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
 	if queryErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error(), true)
+		r.saveStatusOrTerminate(ensemblingJob, mlpProject, models.JobFailedBuildImage, queryErr.Error(), true)
 		return
 	}
 	switch ensemblingJob.Status {
@@ -136,6 +152,8 @@ func (r *ensemblingJobRunner) updateOneStatus(ensemblingJob *models.EnsemblingJo
 		r.processBuildingImage(ensemblingJob, mlpProject)
 	case models.JobRunning:
 		r.processJobRunning(ensemblingJob, mlpProject)
+	case models.JobTerminating:
+		r.terminateJob(ensemblingJob, mlpProject)
 	}
 }
 
@@ -161,6 +179,11 @@ func (r *ensemblingJobRunner) processJobRunning(
 		ensemblingJob.Status = models.JobFailed
 	}
 
+	// Check if up for termination
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
+
 	err = r.ensemblingJobService.Save(ensemblingJob)
 	if err != nil {
 		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, err)
@@ -183,6 +206,11 @@ func (r *ensemblingJobRunner) processBuildingImage(
 		return
 	}
 
+	// Check if up for termination
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
+
 	// We retry on all other possible outcomes
 	ensemblingJob.Status = models.JobPending
 	ensemblingJob.RetryCount++
@@ -196,7 +224,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	options := service.EnsemblingJobListOptions{
 		PaginationOptions: service.PaginationOptions{
 			Page:     &pageOne,
-			PageSize: &r.batchSize,
+			PageSize: &r.recordsToProcessInOneIteration,
 		},
 		Statuses: []models.Status{
 			models.JobPending,
@@ -208,6 +236,7 @@ func (r *ensemblingJobRunner) processJobs() {
 	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs: %v", err)
+		return
 	}
 
 	if ensemblingJobsPaginated.Results == nil {
@@ -222,27 +251,52 @@ func (r *ensemblingJobRunner) processJobs() {
 }
 
 func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.EnsemblingJob) {
-	ensemblingJob.Status = models.JobBuildingImage
-	err := r.ensemblingJobService.Save(ensemblingJob)
-	if err != nil {
-		r.saveStatus(ensemblingJob, models.JobPending, err.Error(), true)
+	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
+	if queryErr != nil {
+		r.saveStatusOrTerminate(
+			ensemblingJob,
+			mlpProject,
+			models.JobFailedBuildImage,
+			queryErr.Error(),
+			true,
+		)
 		return
 	}
 
-	mlpProject, queryErr := r.mlpService.GetProject(ensemblingJob.ProjectID)
-	if queryErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, queryErr.Error(), true)
+	// Check if termination required.
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
+
+	ensemblingJob.Status = models.JobBuildingImage
+	err := r.ensemblingJobService.Save(ensemblingJob)
+	if err != nil {
+		r.saveStatusOrTerminate(ensemblingJob, mlpProject, models.JobPending, err.Error(), true)
 		return
 	}
 
 	// Build Image
 	labels := r.buildLabels(ensemblingJob, mlpProject)
 	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels)
+
 	if imageBuildErr != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedBuildImage, imageBuildErr.Error(), true)
+		// Here unfortunately we have to wait till the image building process has
+		// finished/errored before we can delete the job
+		// It's still worth cleaning up even after the job is done.
+		r.saveStatusOrTerminate(
+			ensemblingJob,
+			mlpProject,
+			models.JobFailedBuildImage,
+			imageBuildErr.Error(),
+			true,
+		)
 		return
 	}
 
+	// Before submitting to Kubernetes Spark, check if job should terminate
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return
+	}
 	// Submit to Kubernetes
 	controllerError := r.ensemblingController.Create(
 		&CreateEnsemblingJobRequest{
@@ -253,11 +307,58 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 		},
 	)
 	if controllerError != nil {
-		r.saveStatus(ensemblingJob, models.JobFailedSubmission, controllerError.Error(), true)
+		r.saveStatusOrTerminate(
+			ensemblingJob,
+			mlpProject,
+			models.JobFailedSubmission,
+			controllerError.Error(),
+			true,
+		)
 		return
 	}
 
-	r.saveStatus(ensemblingJob, models.JobRunning, "", false)
+	r.saveStatusOrTerminate(ensemblingJob, mlpProject, models.JobRunning, "", false)
+}
+
+func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, mlpProject *mlp.Project) {
+	// Delete building image job
+	jobErr := r.imageBuilder.DeleteImageBuildingJob(
+		mlpProject.Name,
+		ensemblingJob.InfraConfig.EnsemblerName,
+		ensemblingJob.EnsemblerID,
+	)
+	// Delete spark resource
+	sparkErr := r.ensemblingController.Delete(mlpProject.Name, ensemblingJob)
+
+	if jobErr != nil || sparkErr != nil {
+		return
+	}
+
+	// Delete record
+	err := r.ensemblingJobService.Delete(ensemblingJob)
+	if err != nil {
+		log.Errorf("unable to delete ensembling job %v", err)
+	}
+}
+
+// terminateIfRequired returns true if the process should drop what it is doing.
+func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlpProject *mlp.Project) bool {
+	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{})
+
+	if err != nil {
+		// Job already deleted, must not allow job to be revived.
+		// Because of the async activities, the job could have been deleted.
+		// There might be a chance where the job has been already deleted but
+		// a stale record was processing.
+		// We return true here because this will happen.
+		return true
+	}
+
+	if ensemblingJob.Status == models.JobTerminating {
+		r.terminateJob(ensemblingJob, mlpProject)
+		return true
+	}
+	return false
 }
 
 func (r *ensemblingJobRunner) buildLabels(
@@ -273,12 +374,16 @@ func (r *ensemblingJobRunner) buildLabels(
 	return labeller.BuildLabels(rq)
 }
 
-func (r *ensemblingJobRunner) saveStatus(
+func (r *ensemblingJobRunner) saveStatusOrTerminate(
 	ensemblingJob *models.EnsemblingJob,
+	mlpProject *mlp.Project,
 	status models.Status,
 	errorMessage string,
 	incrementRetry bool,
-) {
+) bool {
+	if shouldTerminate := r.terminateIfRequired(ensemblingJob.ID, mlpProject); shouldTerminate {
+		return true
+	}
 	if incrementRetry {
 		ensemblingJob.RetryCount++
 	}
@@ -288,6 +393,8 @@ func (r *ensemblingJobRunner) saveStatus(
 	if err != nil {
 		log.Errorf("unable to save ensembling job %v", err)
 	}
+
+	return false
 }
 
 func (r *ensemblingJobRunner) buildImage(

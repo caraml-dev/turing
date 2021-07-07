@@ -35,6 +35,20 @@ func (_m *ImageBuilder) BuildImage(request imagebuilder.BuildImageRequest) (stri
 	return r0, r1
 }
 
+// DeleteImageBuildingJob provides a mock function with given fields: projectName, modelName, versionID
+func (_m *ImageBuilder) DeleteImageBuildingJob(projectName string, modelName string, versionID models.ID) error {
+	ret := _m.Called(projectName, modelName, versionID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string, models.ID) error); ok {
+		r0 = rf(projectName, modelName, versionID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetImageBuildingJobStatus provides a mock function with given fields: projectName, modelName, versionID
 func (_m *ImageBuilder) GetImageBuildingJobStatus(projectName string, modelName string, versionID models.ID) (imagebuilder.JobStatus, error) {
 	ret := _m.Called(projectName, modelName, versionID)
