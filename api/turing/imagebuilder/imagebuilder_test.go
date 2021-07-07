@@ -588,7 +588,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemberJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
 			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1))
 
 			if tt.hasErr {
@@ -650,7 +650,7 @@ func TestDeleteImageBuildingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemberJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1))
 
 			if tt.hasErr {
