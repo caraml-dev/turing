@@ -6,6 +6,9 @@ from turing._base_types import DataObject
 
 
 class EnsemblingJobSource:
+    """
+    Configuration of source of the ensembling job
+    """
 
     def __init__(self, dataset: 'Dataset', join_on: Iterable[str]):
         self._dataset = dataset
@@ -26,6 +29,12 @@ class EnsemblingJobSource:
         )
 
     def select(self, columns: Iterable[str]) -> 'EnsemblingJobPredictionSource':
+        """
+        Creates an instance of prediction source configuration
+
+        :param columns: list of columns from this source, that contain prediction data
+        :return: instance of `EnsemblingJobPredictionSource`
+        """
         return EnsemblingJobPredictionSource(
             self._dataset,
             self._join_on,
@@ -34,6 +43,10 @@ class EnsemblingJobSource:
 
 
 class EnsemblingJobPredictionSource(EnsemblingJobSource):
+    """
+    Configuration of the prediction data for the ensembling job
+    """
+
     def __init__(self, dataset, join_on, columns):
         super(EnsemblingJobPredictionSource, self).__init__(dataset, join_on)
         self._columns = columns
@@ -51,8 +64,20 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
 
 
 class Dataset(DataObject, abc.ABC):
+    """
+    Abstract dataset
+    """
 
     def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
+        """
+        Create ensembling job source configuration from this dataset,
+        by specifying how this dataset could be joined with the
+        datasets containing predictions of individual models
+
+        :param columns: list of columns, that would be used to join this
+            dataset with predictions data
+        :return: instance of ensembling job source configuration
+        """
         pass
 
     def to_open_api(self) -> OpenApiModel:
@@ -60,13 +85,26 @@ class Dataset(DataObject, abc.ABC):
 
 
 class BigQueryDataset(Dataset):
+    """
+    BigQuery dataset configuration
+    """
+
     _TYPE = "BQ"
 
     def __init__(self,
                  table: str = None,
-                 query: str = None,
                  features: Iterable[str] = None,
+                 query: str = None,
                  options: MutableMapping[str, str] = None):
+        """
+        Create new instance of BigQuery dataset
+
+        :param table: fully-qualified BQ table id e.g. `gcp-project.dataset.table_name`
+        :param features: list of columns from the `table` to be selected for this dataset
+        :param query: (optional) Alternatively, dataset can be defined by BQ standard SQL query.
+             This allows to define dataset from the data, stored in multiple tables
+        :param options: (optional) Additional BQ options to configure the dataset
+        """
         self._table = table
         self._query = query
         self._features = features

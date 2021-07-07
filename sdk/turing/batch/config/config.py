@@ -9,6 +9,9 @@ ResultConfig = turing.generated.models.EnsemblingJobEnsemblerSpecResult
 
 
 class EnsemblingJobConfig:
+    """
+    Configuration of the batch ensembling job
+    """
 
     def __init__(self,
                  source: EnsemblingJobSource,
@@ -18,6 +21,18 @@ class EnsemblingJobConfig:
                  service_account: str,
                  resource_request: ResourceRequest = None,
                  env_vars: Dict[str, str] = None):
+        """
+        Create new instance of batch ensembling job configuration
+
+        :param source: source configuration
+        :param predictions: dictionary with configuration of model predictions
+        :param result_config: configuration of ensembling results
+        :param sink: sink configuration
+        :param service_account:  secret name containing the service account for executing the ensembling job
+        :param resource_request: optional resource request for starting the ensembling job.
+            If not given the system default will be used.
+        :param env_vars: optional environment variables in the form of a key value pair in a list.
+        """
         self._source = source
         self._predictions = predictions
         self._result_config = result_config

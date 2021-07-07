@@ -6,6 +6,31 @@ from turing._base_types import ApiObject, ApiObjectSpec
 
 
 class EnsemblingJobStatus(Enum):
+    """
+    Status of ensembling job
+    Possible statuses:
+
+    JobPending --▶ JobFailedSubmission
+        |
+        |
+        |
+        |
+    JobBuildingImage --▶ JobFailedBuildImage
+        |
+        |
+        |
+        |
+        ▼
+    JobRunning --▶ JobFailed
+        |
+        |
+        |--▶ JobTerminated
+        |
+        |
+        ▼
+    JobCompleted
+    """
+
     PENDING = "pending"
     RUNNING = "running"
     TERMINATING = "terminating"
@@ -66,6 +91,13 @@ class EnsemblingJob(ApiObject):
             cls,
             ensembler_id: int,
             config: EnsemblingJobConfig) -> 'EnsemblingJob':
+        """
+        Submit ensembling job with a given configuration for execution
+
+        :param ensembler_id: Id of the ensembler, that should be used for ensembling
+        :param config: configuration of ensembling job
+        :return: instance of ensembling job
+        """
         from turing.session import active_session
 
         job_config = turing.generated.models.EnsemblerConfig(
@@ -90,6 +122,16 @@ class EnsemblingJob(ApiObject):
             status: List[EnsemblingJobStatus] = None,
             page: Optional[int] = None,
             page_size: Optional[int] = None) -> List['EnsemblingJob']:
+        """
+        List ensembling jobs in the active project
+
+        :param status: (optional) filter jobs by one or more statuses
+        :param page:  (optional) pagination parameters – page number
+        :param page_size: (optional) pagination parameters - page size
+
+        :return: list of ensembling jobs
+        """
+
         from turing.session import active_session
 
         mapped_statuses = None

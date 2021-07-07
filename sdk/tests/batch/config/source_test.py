@@ -36,7 +36,7 @@ import turing.batch.config.source
 )
 def test_bq_dataset(table, query, features, options, expected):
     dataset = turing.batch.config.source.BigQueryDataset(
-        table, query, features, options
+        table, features, query, options
     )
 
     assert dataset.to_dict() == expected
