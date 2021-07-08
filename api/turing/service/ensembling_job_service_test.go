@@ -15,6 +15,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
+	BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
+		DriverCPURequest:      "100",
+		DriverMemoryRequest:   "1Gi",
+		ExecutorReplica:       2,
+		ExecutorCPURequest:    "1",
+		ExecutorMemoryRequest: "1Gi",
+	},
+	SparkConfigAnnotations: map[string]string{
+		"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
+	},
+}
+
 func generateEnsemblingJobFixture(
 	i int,
 	ensemblerID models.ID,
@@ -138,7 +151,7 @@ func generateEnsemblingJobFixture(
 func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 	t.Run("success | insertion with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
@@ -212,7 +225,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-				ensemblingJobService := NewEnsemblingJobService(db, "dev")
+				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
 
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
 					projectID := models.ID(1)
@@ -246,7 +259,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
 
 			// Save job
 			projectID := models.ID(1)
@@ -295,9 +308,11 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 
 func TestCreateEnsemblingJob(t *testing.T) {
 	var tests = map[string]struct {
-		ensembler *models.PyFuncEnsembler
-		request   *models.EnsemblingJob
-		expected  *models.EnsemblingJob
+		ensembler              *models.PyFuncEnsembler
+		request                *models.EnsemblingJob
+		expected               *models.EnsemblingJob
+		removeDefaultResources bool
+		removeDriverCPURequest bool
 	}{
 		"success | name provided": {
 			ensembler: &models.PyFuncEnsembler{
@@ -309,8 +324,10 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				},
 				ArtifactURI: "gs://bucket/ensembler",
 			},
-			request:  generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected: generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			removeDefaultResources: false,
+			removeDriverCPURequest: false,
 		},
 		"success | name not provided": {
 			ensembler: &models.PyFuncEnsembler{
@@ -322,15 +339,56 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				},
 				ArtifactURI: "gs://bucket/ensembler",
 			},
-			request:  generateEnsemblingJobFixture(1, 1, 1, "", false),
-			expected: generateEnsemblingJobFixture(1, 1, 1, "", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, "", false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, "", true),
+			removeDefaultResources: false,
+			removeDriverCPURequest: false,
+		},
+		"success | default resources removed": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				},
+				ArtifactURI: "gs://bucket/ensembler",
+			},
+			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			removeDefaultResources: true,
+			removeDriverCPURequest: false,
+		},
+		"success | remove 1 setting from resources": {
+			ensembler: &models.PyFuncEnsembler{
+				GenericEnsembler: &models.GenericEnsembler{
+					Name:      "ensembler",
+					Model:     models.Model{ID: 1},
+					Type:      models.EnsemblerTypePyFunc,
+					ProjectID: 1,
+				},
+				ArtifactURI: "gs://bucket/ensembler",
+			},
+			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			removeDefaultResources: false,
+			removeDriverCPURequest: true,
 		},
 	}
 
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		for name, tt := range tests {
 			t.Run(name, func(t *testing.T) {
-				ensemblingJobService := NewEnsemblingJobService(db, "dev")
+				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+
+				if tt.removeDefaultResources {
+					tt.request.InfraConfig.Resources = nil
+				}
+
+				if tt.removeDriverCPURequest {
+					tt.request.InfraConfig.Resources.DriverCPURequest = ""
+				}
+
 				result, err := ensemblingJobService.CreateEnsemblingJob(
 					tt.request,
 					1,
@@ -355,6 +413,29 @@ func TestCreateEnsemblingJob(t *testing.T) {
 
 				assert.Equal(t, expected.InfraConfig.ArtifactURI, result.InfraConfig.ArtifactURI)
 				assert.Equal(t, expected.InfraConfig.EnsemblerName, result.InfraConfig.EnsemblerName)
+
+				// Check if merging of spark config is done properly
+				sparkMap := result.JobConfig.JobConfig.Metadata.Annotations
+				expectedKeys := map[string]string{
+					"spark/spark.jars":                                  "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar",
+					"spark/spark.jars.packages":                         "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1",
+					"hadoopConfiguration/fs.gs.impl":                    "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
+					"hadoopConfiguration/fs.AbstractFileSystem.gs.impl": "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
+					"spark/spark.sql.execution.arrow.pyspark.enabled":   "true",
+				}
+				for key, expectedValue := range expectedKeys {
+					resultValue, ok := sparkMap[key]
+					assert.Equal(t, true, ok)
+					assert.Equal(t, expectedValue, resultValue)
+				}
+
+				if tt.removeDriverCPURequest {
+					assert.Equal(
+						t,
+						defaultConfigurations.BatchEnsemblingJobResources.DriverCPURequest,
+						result.InfraConfig.Resources.DriverCPURequest,
+					)
+				}
 			})
 		}
 	})
@@ -363,7 +444,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 func TestMarkEnsemblingJobForTermination(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
 
 			// Save job
 			projectID := models.ID(1)
@@ -391,7 +472,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev")
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
 
 			// Save job
 			projectID := models.ID(1)
