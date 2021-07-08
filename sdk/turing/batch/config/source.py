@@ -36,8 +36,8 @@ class EnsemblingJobSource:
         :return: instance of `EnsemblingJobPredictionSource`
         """
         return EnsemblingJobPredictionSource(
-            self._dataset,
-            self._join_on,
+            self.dataset,
+            self.join_on,
             columns
         )
 
@@ -130,10 +130,10 @@ class BigQueryDataset(Dataset):
         return turing.generated.models.BigQueryDataset(
             type=BigQueryDataset._TYPE,
             bq_config=turing.generated.models.BigQueryDatasetConfig(
-                table=self._table,
-                query=self._query,
-                features=self._features,
-                options=self._options
+                table=self.table,
+                query=self.query,
+                features=self.features,
+                options=self.options
             )
         )
 

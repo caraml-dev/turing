@@ -67,6 +67,15 @@ def main(turing_api: str, project: str):
     ).save_mode(turing.batch.config.sink.SaveMode.OVERWRITE) \
         .select(columns=["feature_1", "feature_2", "prediction_result"])
 
+    # (Optional) Configure resources allocation for the job execution
+    resource_request = turing.batch.config.ResourceRequest(
+        driver_cpu_request="1",
+        driver_memory_request="1G",
+        executor_replica=5,
+        executor_cpu_request="500Mi",
+        executor_memory_request="800M"
+    )
+
     # Submit the job for execution
     job = ensembler.submit_job(
         turing.batch.config.EnsemblingJobConfig(
@@ -74,7 +83,8 @@ def main(turing_api: str, project: str):
             predictions=predictions,
             result_config=result_config,
             sink=sink,
-            service_account=SERVICE_ACCOUNT_NAME
+            service_account=SERVICE_ACCOUNT_NAME,
+            resource_request=resource_request
         )
     )
     print(job)

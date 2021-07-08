@@ -1,6 +1,5 @@
-from typing import Dict
+from typing import Dict, Optional
 import turing.generated.models
-
 from .source import EnsemblingJobSource, EnsemblingJobPredictionSource
 from .sink import EnsemblingJobSink
 
@@ -53,18 +52,30 @@ class EnsemblingJobConfig:
     def sink(self) -> 'EnsemblingJobSink':
         return self._sink
 
+    @property
+    def result_config(self) -> 'ResultConfig':
+        return self._result_config
+
+    @property
+    def service_account(self) -> str:
+        return self._service_account
+
+    @property
+    def resource_request(self) -> Optional['ResourceRequest']:
+        return self._resource_request
+
     def job_spec(self) -> turing.generated.models.EnsemblingJobSpec:
         return turing.generated.models.EnsemblingJobSpec(
             source=self.source.to_open_api(),
             predictions={name: source.to_open_api() for name, source in self.predictions.items()},
             ensembler=turing.generated.models.EnsemblingJobEnsemblerSpec(
-                result=self._result_config
+                result=self.result_config
             ),
             sink=self.sink.to_open_api()
         )
 
     def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
         return turing.generated.models.EnsemblerInfraConfig(
-            service_account_name=self._service_account,
-            resources=self._resource_request
+            service_account_name=self.service_account,
+            resources=self.resource_request
         )

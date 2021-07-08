@@ -41,6 +41,7 @@ from turing.generated.model.ensembling_resources import EnsemblingResources
 from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink
+from turing.generated.model.id_object import IdObject
 from turing.generated.model.label import Label
 from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project

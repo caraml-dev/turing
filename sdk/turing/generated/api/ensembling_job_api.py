@@ -24,6 +24,7 @@ from turing.generated.model_utils import (  # noqa: F401
 from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
 from turing.generated.model.ensembling_job import EnsemblingJob
 from turing.generated.model.ensembling_job_paginated_results import EnsemblingJobPaginatedResults
+from turing.generated.model.id_object import IdObject
 
 
 class EnsemblingJobApi(object):
@@ -163,6 +164,132 @@ class EnsemblingJobApi(object):
             },
             api_client=api_client,
             callable=__create_ensembling_job
+        )
+
+        def __delete_ensembling_job(
+            self,
+            project_id,
+            job_id,
+            **kwargs
+        ):
+            """Delete an ongoing Ensembling Job.  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.delete_ensembling_job(project_id, job_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int):
+                job_id (int):
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                IdObject
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['job_id'] = \
+                job_id
+            return self.call_with_http_info(**kwargs)
+
+        self.delete_ensembling_job = _Endpoint(
+            settings={
+                'response_type': (IdObject,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/jobs/{job_id}',
+                'operation_id': 'delete_ensembling_job',
+                'http_method': 'DELETE',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'job_id',
+                ],
+                'required': [
+                    'project_id',
+                    'job_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'job_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'job_id': 'job_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'job_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__delete_ensembling_job
         )
 
         def __get_ensembling_job(

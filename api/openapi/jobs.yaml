@@ -92,7 +92,6 @@ paths:
                 $ref: "#/components/schemas/EnsemblingJob"
         404:
           description: "Invalid ensembling job"
-
     delete:
       tags: *tags
       operationId: "DeleteEnsemblingJob"
@@ -114,10 +113,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  id:
-                    $ref: "#/components/schemas/Id"
+                $ref: "#/components/schemas/IdObject"
         400:
           description: "Invalid ensembling job"
         404:
@@ -127,6 +123,11 @@ components:
   schemas:
     Id:
       $ref: "common.yaml#/components/schemas/Id"
+
+    IdObject:
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
 
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
@@ -364,12 +365,11 @@ components:
         service_account_name:
           type: string
         resources:
-          nullable: true
-          oneOf:
-            - $ref: "#/components/schemas/EnsemblingResources"
+          $ref: "#/components/schemas/EnsemblingResources"
 
     EnsemblingResources:
       type: "object"
+      nullable: true
       properties:
         driver_cpu_request:
           type: string
