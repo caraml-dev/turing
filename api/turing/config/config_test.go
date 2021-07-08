@@ -530,6 +530,7 @@ func TestConfigValidate(t *testing.T) {
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
 		EnsemblingJobConfig: &EnsemblingJobConfig{
+			Enabled:                        true,
 			DefaultEnvironment:             "dev",
 			RecordsToProcessInOneIteration: 10,
 			MaxRetryCount:                  3,

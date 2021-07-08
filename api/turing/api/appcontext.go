@@ -86,43 +86,47 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
 
-	// Initialise Batch components
-	// Since there is only the default environment, we will not create multiple batch runners.
-	batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
-	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
-		batchClusterController,
-		cfg.EnsemblingJobConfig.ImageBuilderConfig,
-		cfg.EnsemblingJobConfig.KanikoConfig,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
-	}
+	// Initialise Ensembling Job Service
+	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
 
+	// Initialise Labeller
 	labeller.InitKubernetesLabeller(
 		cfg.KubernetesLabelConfigs.LabelPrefix,
 		cfg.KubernetesLabelConfigs.Environment,
 	)
 
-	ensemblingJobService := service.NewEnsemblingJobService(
-		db,
-		cfg.EnsemblingJobConfig.DefaultEnvironment,
-		cfg.EnsemblingJobConfig.DefaultConfigurations,
-	)
-	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
-		batchClusterController,
-		mlpSvc,
-		cfg.SparkAppConfig,
-	)
+	// Initialise Batch components
+	// Since there is only the default environment, we will not create multiple batch runners.
+	var batchJobRunners []batchrunner.BatchJobRunner
 
-	batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
-		batchEnsemblingController,
-		ensemblingJobService,
-		mlpSvc,
-		ensemblingImageBuilder,
-		cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
-		cfg.EnsemblingJobConfig.MaxRetryCount,
-		cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
-	)
+	if cfg.EnsemblingJobConfig.Enabled {
+		batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
+		ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+			batchClusterController,
+			cfg.EnsemblingJobConfig.ImageBuilderConfig,
+			cfg.EnsemblingJobConfig.KanikoConfig,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
+		}
+
+		batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
+			batchClusterController,
+			mlpSvc,
+			cfg.SparkAppConfig,
+		)
+
+		batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
+			batchEnsemblingController,
+			ensemblingJobService,
+			mlpSvc,
+			ensemblingImageBuilder,
+			cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
+			cfg.EnsemblingJobConfig.MaxRetryCount,
+			cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
+		)
+		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
+	}
 
 	appContext := &AppContext{
 		Authorizer:            authorizer,
@@ -137,7 +141,7 @@ func NewAppContext(
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
 		PodLogService:         service.NewPodLogService(clusterControllers),
-		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		BatchRunners:          batchJobRunners,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
