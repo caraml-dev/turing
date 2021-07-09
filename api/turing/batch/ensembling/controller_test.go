@@ -139,7 +139,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 							"target_date",
 							"results",
 						},
-						SaveMode: batchensembler.Sink_OVERWRITE,
+						SaveMode: batchensembler.SaveMode_OVERWRITE,
 						Config: &batchensembler.Sink_BqConfig{
 							BqConfig: &batchensembler.Sink_BigQuerySinkConfig{
 								Table:         "project.dataset.ensembling_results",

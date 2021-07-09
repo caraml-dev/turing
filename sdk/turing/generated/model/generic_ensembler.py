@@ -79,9 +79,9 @@ class GenericEnsembler(ModelNormal):
                 and the value is attribute type.
         """
         return {
+            'type': (str,),  # noqa: E501
             'id': (int,),  # noqa: E501
             'project_id': (int,),  # noqa: E501
-            'type': (str,),  # noqa: E501
             'name': (str,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
@@ -93,9 +93,9 @@ class GenericEnsembler(ModelNormal):
 
 
     attribute_map = {
+        'type': 'type',  # noqa: E501
         'id': 'id',  # noqa: E501
         'project_id': 'project_id',  # noqa: E501
-        'type': 'type',  # noqa: E501
         'name': 'name',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
@@ -116,7 +116,10 @@ class GenericEnsembler(ModelNormal):
     def __init__(self, *args, **kwargs):  # noqa: E501
         """GenericEnsembler - a model defined in OpenAPI
 
+        Args:
+
         Keyword Args:
+            type (str): defaults to "pyfunc", must be one of ["pyfunc", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -149,12 +152,12 @@ class GenericEnsembler(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             id (int): [optional]  # noqa: E501
             project_id (int): [optional]  # noqa: E501
-            type (str): [optional] if omitted the server will use the default value of "pyfunc"  # noqa: E501
             name (str): [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "pyfunc")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())
@@ -178,6 +181,7 @@ class GenericEnsembler(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.type = type
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

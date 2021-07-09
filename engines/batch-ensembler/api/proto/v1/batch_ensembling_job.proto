@@ -11,7 +11,8 @@ message BatchEnsemblingJob {
 
   // Represents a kind of the batch job
   enum JobKind {
-    BatchEnsemblingJob = 0;
+    Unknown = 0;
+    BatchEnsemblingJob = 1;
   }
   JobKind kind = 2;
 
@@ -77,13 +78,14 @@ message Source {
   //
   // NOTE: The cardinality of `join_on` list should match the
   // cardinality of `join_on` lists in all sources with predictions
-  repeated string join_on = 2;
+  repeated string join_on = 2 [json_name="join_on"];
 }
 
 // Represents a configuration of a dataset
 message Dataset {
   enum DatasetType {
-    BQ = 0;
+    UNKNOWN = 0;
+    BQ = 1;
   }
 
   // Represents a configuration of a BigQuery dataset
@@ -125,7 +127,7 @@ message Dataset {
   // One of the dataset type-specific configurations should be provided
   oneof config {
     // If `type` == DatasetType.BQ
-    BigQueryDatasetConfig bq_config = 2;
+    BigQueryDatasetConfig bq_config = 2 [json_name="bq_config"];
   }
 }
 
@@ -145,7 +147,7 @@ message PredictionSource {
   //
   // NOTE: The cardinality of `join_on` list should match the
   // cardinality of `join_on` list of the `Source`
-  repeated string join_on = 2;
+  repeated string join_on = 2 [json_name="join_on"];
 
   // List of columns from this data source, that contain
   // results of the model inference
@@ -158,11 +160,13 @@ message Ensembler {
   // a primitive type (one of double, float, int, long or string)
   // or an array of primitives
   enum ResultType {
-    DOUBLE = 0;
-    FLOAT = 1;
-    INTEGER = 2;
-    LONG = 3;
-    STRING = 4;
+    UNKNOWN = 0;
+
+    DOUBLE = 1;
+    FLOAT = 2;
+    INTEGER = 3;
+    LONG = 4;
+    STRING = 5;
 
     ARRAY = 10;
   }
@@ -170,12 +174,12 @@ message Ensembler {
   // Represents a configuration of the ensembling result
   message Result {
     // Name of the column, that will store the results of ensembling
-    string column_name = 1;
+    string column_name = 1 [json_name="column_name"];
 
     // Expected type of ensembling
     ResultType type = 2;
     // only if type is array
-    ResultType item_type = 3;
+    ResultType item_type = 3 [json_name="item_type"];
   }
 
   // URI of the user-defined ensembler, stored as an MLFlow PyFunc model
@@ -188,22 +192,25 @@ message Ensembler {
   Result result = 2;
 }
 
+// See: https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/SaveMode.html
+enum SaveMode {
+  UNKNOWN = 0;
+
+  ERRORIFEXISTS = 1;
+  OVERWRITE = 2;
+  APPEND = 3;
+  IGNORE = 4;
+}
+
 // Represents a configuration of the ensembling results sink
 message Sink {
 
   enum SinkType {
+    UNKNOWN = 0;
     // Output results to stdout. For testing only
-    CONSOLE = 0;
+    CONSOLE = 1;
     // Writes results into a Google BQ table
-    BQ = 1;
-  }
-
-  // See: https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/SaveMode.html
-  enum SaveMode {
-    ERRORIFEXISTS = 0;
-    OVERWRITE = 1;
-    APPEND = 2;
-    IGNORE = 3;
+    BQ = 2;
   }
 
   // Represents a configuration of a BQ sink
@@ -214,7 +221,7 @@ message Sink {
     // Spark BQ connector writes data to GCS first, before loading it into BQ
     // `staging_bucket` should contain the name of a GCS bucket, where the
     // data will be temporarily stored at
-    string staging_bucket = 2;
+    string staging_bucket = 2 [json_name="staging_bucket"];
 
     // List of an extra key-value config options, that is passed
     // into Spark-BQ connector.
@@ -231,11 +238,11 @@ message Sink {
   repeated string columns = 2;
 
   // Save mode to be used with this sink
-  SaveMode save_mode = 3;
+  SaveMode save_mode = 3 [json_name="save_mode"];
 
   // One of the type-specific sink configurations
   oneof config {
     // If `type` == SinkType.BQ
-    BigQuerySinkConfig bq_config = 10;
+    BigQuerySinkConfig bq_config = 10 [json_name="bq_config"];
   }
 }

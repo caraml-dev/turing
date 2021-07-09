@@ -41,22 +41,22 @@ func generateEnsemblingJobFixtureJSON() string {
 						"target_date",
 						"results"
 					],
-					"bqConfig":{
+					"bq_config":{
 						"table":"project.dataset.ensembling_results",
 						"options":{
 							"partitionField":"target_date"
 						},
-						"stagingBucket":"bucket-name"
+						"staging_bucket":"bucket-name"
 					},
-					"saveMode":"OVERWRITE"
+					"save_mode":"OVERWRITE"
 				},
 				"source":{
-					"joinOn":[
+					"join_on":[
 						"customer_id",
 						"target_date"
 					],
 					"dataset":{
-						"bqConfig":{
+						"bq_config":{
 							"query":"select * from helloworld where customer_id = 4",
 							"options":{
 								"viewsEnabled":"true",
@@ -68,13 +68,13 @@ func generateEnsemblingJobFixtureJSON() string {
 				"ensembler":{
 					"result":{
 						"type":"FLOAT",
-						"itemType":"FLOAT",
-						"columnName":"prediction_score"
+						"item_type":"FLOAT",
+						"column_name":"prediction_score"
 					}
 				},
 				"predictions":{
 					"model_a":{
-						"joinOn":[
+						"join_on":[
 							"customer_id",
 							"target_date"
 						],
@@ -82,7 +82,7 @@ func generateEnsemblingJobFixtureJSON() string {
 							"predictions"
 						],
 						"dataset":{
-							"bqConfig":{
+							"bq_config":{
 								"table":"project.dataset.predictions_model_a",
 								"features":[
 									"customer_id",
@@ -93,7 +93,7 @@ func generateEnsemblingJobFixtureJSON() string {
 						}
 					},
 					"model_b":{
-						"joinOn":[
+						"join_on":[
 							"customer_id",
 							"target_date"
 						],
@@ -101,7 +101,7 @@ func generateEnsemblingJobFixtureJSON() string {
 							"predictions"
 						],
 						"dataset":{
-							"bqConfig":{
+							"bq_config":{
 								"query":"select * from helloworld where customer_id = 3"
 							}
 						}

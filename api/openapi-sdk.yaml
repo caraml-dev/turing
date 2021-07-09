@@ -9,7 +9,15 @@ servers:
 paths:
   "/projects":
     $ref: "openapi/projects.yaml#/paths/~1projects"
+
+  # E N S E M B L E R S
   "/projects/{project_id}/ensemblers":
     $ref: "openapi/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers"
   "/projects/{project_id}/ensemblers/{ensembler_id}":
     $ref: "openapi/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"
+
+  # J O B S
+  "/projects/{project_id}/jobs":
+    $ref: "openapi/jobs.yaml#/paths/~1projects~1{project_id}~1jobs"
+  "/projects/{project_id}/jobs/{job_id}":
+    $ref: "openapi/jobs.yaml#/paths/~1projects~1{project_id}~1jobs~1{job_id}"

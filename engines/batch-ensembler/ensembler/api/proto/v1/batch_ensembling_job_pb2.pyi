@@ -12,14 +12,37 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
+class SaveMode(metaclass=_SaveMode):
+    V = typing.NewType('V', builtins.int)
+
+global___SaveMode = SaveMode
+
+UNKNOWN = SaveMode.V(0)
+ERRORIFEXISTS = SaveMode.V(1)
+OVERWRITE = SaveMode.V(2)
+APPEND = SaveMode.V(3)
+IGNORE = SaveMode.V(4)
+
+class _SaveMode(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SaveMode.V], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+    UNKNOWN = SaveMode.V(0)
+    ERRORIFEXISTS = SaveMode.V(1)
+    OVERWRITE = SaveMode.V(2)
+    APPEND = SaveMode.V(3)
+    IGNORE = SaveMode.V(4)
+
 class BatchEnsemblingJob(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class _JobKind(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[JobKind.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        BatchEnsemblingJob = BatchEnsemblingJob.JobKind.V(0)
     class JobKind(metaclass=_JobKind):
         V = typing.NewType('V', builtins.int)
-    BatchEnsemblingJob = BatchEnsemblingJob.JobKind.V(0)
+
+    Unknown = BatchEnsemblingJob.JobKind.V(0)
+    BatchEnsemblingJob = BatchEnsemblingJob.JobKind.V(1)
+
+    class _JobKind(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[JobKind.V], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Unknown = BatchEnsemblingJob.JobKind.V(0)
+        BatchEnsemblingJob = BatchEnsemblingJob.JobKind.V(1)
 
     VERSION_FIELD_NUMBER: builtins.int
     KIND_FIELD_NUMBER: builtins.int
@@ -127,7 +150,9 @@ class Source(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     DATASET_FIELD_NUMBER: builtins.int
     JOIN_ON_FIELD_NUMBER: builtins.int
-    join_on: google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text] = ...
+
+    @property
+    def join_on(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
 
     @property
     def dataset(self) -> global___Dataset: ...
@@ -143,12 +168,16 @@ global___Source = Source
 
 class Dataset(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class _DatasetType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DatasetType.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        BQ = Dataset.DatasetType.V(0)
     class DatasetType(metaclass=_DatasetType):
         V = typing.NewType('V', builtins.int)
-    BQ = Dataset.DatasetType.V(0)
+
+    UNKNOWN = Dataset.DatasetType.V(0)
+    BQ = Dataset.DatasetType.V(1)
+
+    class _DatasetType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DatasetType.V], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        UNKNOWN = Dataset.DatasetType.V(0)
+        BQ = Dataset.DatasetType.V(1)
 
     class BigQueryDatasetConfig(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
@@ -171,7 +200,9 @@ class Dataset(google.protobuf.message.Message):
         QUERY_FIELD_NUMBER: builtins.int
         OPTIONS_FIELD_NUMBER: builtins.int
         table: typing.Text = ...
-        features: google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text] = ...
+
+        @property
+        def features(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
         query: typing.Text = ...
 
         @property
@@ -208,8 +239,12 @@ class PredictionSource(google.protobuf.message.Message):
     DATASET_FIELD_NUMBER: builtins.int
     JOIN_ON_FIELD_NUMBER: builtins.int
     COLUMNS_FIELD_NUMBER: builtins.int
-    join_on: google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text] = ...
-    columns: google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text] = ...
+
+    @property
+    def join_on(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+
+    @property
+    def columns(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
 
     @property
     def dataset(self) -> global___Dataset: ...
@@ -226,22 +261,26 @@ global___PredictionSource = PredictionSource
 
 class Ensembler(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class _ResultType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ResultType.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        DOUBLE = Ensembler.ResultType.V(0)
-        FLOAT = Ensembler.ResultType.V(1)
-        INTEGER = Ensembler.ResultType.V(2)
-        LONG = Ensembler.ResultType.V(3)
-        STRING = Ensembler.ResultType.V(4)
-        ARRAY = Ensembler.ResultType.V(10)
     class ResultType(metaclass=_ResultType):
         V = typing.NewType('V', builtins.int)
-    DOUBLE = Ensembler.ResultType.V(0)
-    FLOAT = Ensembler.ResultType.V(1)
-    INTEGER = Ensembler.ResultType.V(2)
-    LONG = Ensembler.ResultType.V(3)
-    STRING = Ensembler.ResultType.V(4)
+
+    UNKNOWN = Ensembler.ResultType.V(0)
+    DOUBLE = Ensembler.ResultType.V(1)
+    FLOAT = Ensembler.ResultType.V(2)
+    INTEGER = Ensembler.ResultType.V(3)
+    LONG = Ensembler.ResultType.V(4)
+    STRING = Ensembler.ResultType.V(5)
     ARRAY = Ensembler.ResultType.V(10)
+
+    class _ResultType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ResultType.V], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        UNKNOWN = Ensembler.ResultType.V(0)
+        DOUBLE = Ensembler.ResultType.V(1)
+        FLOAT = Ensembler.ResultType.V(2)
+        INTEGER = Ensembler.ResultType.V(3)
+        LONG = Ensembler.ResultType.V(4)
+        STRING = Ensembler.ResultType.V(5)
+        ARRAY = Ensembler.ResultType.V(10)
 
     class Result(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
@@ -278,27 +317,18 @@ global___Ensembler = Ensembler
 
 class Sink(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class _SinkType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SinkType.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        CONSOLE = Sink.SinkType.V(0)
-        BQ = Sink.SinkType.V(1)
     class SinkType(metaclass=_SinkType):
         V = typing.NewType('V', builtins.int)
-    CONSOLE = Sink.SinkType.V(0)
-    BQ = Sink.SinkType.V(1)
 
-    class _SaveMode(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SaveMode.V], builtins.type):
+    UNKNOWN = Sink.SinkType.V(0)
+    CONSOLE = Sink.SinkType.V(1)
+    BQ = Sink.SinkType.V(2)
+
+    class _SinkType(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SinkType.V], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        ERRORIFEXISTS = Sink.SaveMode.V(0)
-        OVERWRITE = Sink.SaveMode.V(1)
-        APPEND = Sink.SaveMode.V(2)
-        IGNORE = Sink.SaveMode.V(3)
-    class SaveMode(metaclass=_SaveMode):
-        V = typing.NewType('V', builtins.int)
-    ERRORIFEXISTS = Sink.SaveMode.V(0)
-    OVERWRITE = Sink.SaveMode.V(1)
-    APPEND = Sink.SaveMode.V(2)
-    IGNORE = Sink.SaveMode.V(3)
+        UNKNOWN = Sink.SinkType.V(0)
+        CONSOLE = Sink.SinkType.V(1)
+        BQ = Sink.SinkType.V(2)
 
     class BigQuerySinkConfig(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
@@ -338,8 +368,10 @@ class Sink(google.protobuf.message.Message):
     SAVE_MODE_FIELD_NUMBER: builtins.int
     BQ_CONFIG_FIELD_NUMBER: builtins.int
     type: global___Sink.SinkType.V = ...
-    columns: google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text] = ...
-    save_mode: global___Sink.SaveMode.V = ...
+
+    @property
+    def columns(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    save_mode: global___SaveMode.V = ...
 
     @property
     def bq_config(self) -> global___Sink.BigQuerySinkConfig: ...
@@ -348,7 +380,7 @@ class Sink(google.protobuf.message.Message):
         *,
         type : global___Sink.SinkType.V = ...,
         columns : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        save_mode : global___Sink.SaveMode.V = ...,
+        save_mode : global___SaveMode.V = ...,
         bq_config : typing.Optional[global___Sink.BigQuerySinkConfig] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal[u"bq_config",b"bq_config",u"config",b"config"]) -> builtins.bool: ...

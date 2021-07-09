@@ -13,6 +13,8 @@ $(CONDA_ENV_NAME):
 .PHONY: type-check
 type-check:
 	@$(ACTIVATE_ENV) && mypy \
+		--install-types \
+		--non-interactive \
 		--ignore-missing-imports \
 		--allow-untyped-globals \
 		ensembler
@@ -27,7 +29,8 @@ test-unit: type-check
 
 .PHONY: proto
 proto:
-	protoc -I=. \
+	@$(ACTIVATE_ENV) && \
+		protoc -I=. \
 		--python_out=ensembler \
 		--mypy_out=ensembler \
 		--go_out=pkg \

@@ -129,15 +129,16 @@ components:
 
     Ensembler:
       type: object
-      properties:
-        type:
-          <<: *EnsemblerType
+      oneOf:
+        - $ref: "#/components/schemas/PyFuncEnsembler"
       discriminator:
         propertyName: type
         mapping:
           'pyfunc': '#/components/schemas/PyFuncEnsembler'
 
     GenericEnsembler:
+      required:
+        - "type"
       properties:
         id:
           $ref: "common.yaml#/components/schemas/Id"

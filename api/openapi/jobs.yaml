@@ -8,30 +8,6 @@ info:
 
 paths:
   "/projects/{project_id}/jobs":
-    post:
-      tags: *tags
-      operationId: "CreateEnsemblingJob"
-      summary: Submit an Ensembling job.
-      parameters:
-        - in: path
-          name: project_id
-          schema:
-            $ref: "#/components/schemas/Id"
-          required: true
-      requestBody:
-        description: A JSON object containing information about the ensembler.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EnsemblingJob"
-      responses:
-        202:
-          description: Accepted.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EnsemblingJob"
     get:
       tags: *tags
       operationId: "ListEnsemblingJobs"
@@ -58,6 +34,8 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/EnsemblerJobStatus"
+          style: form
+          explode: true
       responses:
         200:
           description: A JSON object, that represents paginated results response
@@ -65,7 +43,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsemblingJobPaginatedResults"
-
+    post:
+      tags: *tags
+      operationId: "CreateEnsemblingJob"
+      summary: Submit an Ensembling job.
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+      requestBody:
+        description: A JSON object that contains the configuration of the ensembling job
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnsemblingJob"
+      responses:
+        202:
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblingJob"
   "/projects/{project_id}/jobs/{job_id}":
     get:
       tags: *tags
@@ -91,7 +92,6 @@ paths:
                 $ref: "#/components/schemas/EnsemblingJob"
         404:
           description: "Invalid ensembling job"
-
     delete:
       tags: *tags
       operationId: "DeleteEnsemblingJob"
@@ -113,10 +113,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  id:
-                    $ref: "#/components/schemas/Id"
+                $ref: "#/components/schemas/IdObject"
         400:
           description: "Invalid ensembling job"
         404:
@@ -126,6 +123,11 @@ components:
   schemas:
     Id:
       $ref: "common.yaml#/components/schemas/Id"
+
+    IdObject:
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
 
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
@@ -208,27 +210,31 @@ components:
           items:
             type: "string"
 
+    DatasetType: &DatasetType
+      type: "string"
+      enum:
+        - "BQ"
+
     Dataset:
       type: "object"
       oneOf:
         - $ref: "#/components/schemas/BigQueryDataset"
-      required:
-        - "type"
-      properties:
-        type:
-          $ref: "#/components/schemas/DatasetType"
       discriminator:
         propertyName: "type"
         mapping:
           BQ: "#/components/schemas/BigQueryDataset"
 
-    DatasetType:
-      type: "string"
-      enum:
-        - "BQ"
+    GenericDataset:
+      type: "object"
+      required:
+        - "type"
+      properties:
+        type:
+          <<: *DatasetType
 
     BigQueryDataset:
       allOf:
+        - $ref: "#/components/schemas/GenericDataset"
         - type: object
           properties:
             bq_config:
@@ -239,14 +245,18 @@ components:
         table:
           type: "string"
           pattern: '^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$'
+          nullable: true
         features:
           type: "array"
+          nullable: true
           items:
             type: "string"
         query:
           type: "string"
+          nullable: true
         options:
           type: "object"
+          nullable: true
           additionalProperties:
             type: "string"
 
@@ -287,26 +297,38 @@ components:
         - STRING
         - ARRAY
 
+    SinkType: &SinkType
+      type: "string"
+      enum:
+        - CONSOLE
+        - BQ
+
     EnsemblingJobSink:
       type: "object"
       oneOf:
         - $ref: "#/components/schemas/BigQuerySink"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          BQ: "#/components/schemas/BigQuerySink"
+
+    GenericSink:
+      type: "object"
+      required:
+        - "type"
       properties:
         type:
-          $ref: "#/components/schemas/SinkType"
+          <<: *SinkType
         columns:
           type: "array"
           items:
             type: "string"
         save_mode:
           $ref: "#/components/schemas/SaveMode"
-      discriminator:
-        propertyName: "type"
-        mapping:
-          BQ: "#/components/schemas/BigQuerySink"
 
     BigQuerySink:
       allOf:
+        - $ref: "#/components/schemas/GenericSink"
         - type: object
           properties:
             bq_config:
@@ -321,6 +343,7 @@ components:
           type: string
         options:
           type: object
+          nullable: true
           additionalProperties:
             type: string
 
@@ -331,12 +354,6 @@ components:
         - OVERWRITE
         - APPEND
         - IGNORE
-
-    SinkType:
-      type: "string"
-      enum:
-        - CONSOLE
-        - BQ
 
     EnsemblerInfraConfig:
       type: "object"
@@ -352,6 +369,7 @@ components:
 
     EnsemblingResources:
       type: "object"
+      nullable: true
       properties:
         driver_cpu_request:
           type: string

@@ -93,9 +93,9 @@ class PyFuncEnsembler(ModelComposed):
         """
         lazy_import()
         return {
+            'type': (str,),  # noqa: E501
             'id': (int,),  # noqa: E501
             'project_id': (int,),  # noqa: E501
-            'type': (str,),  # noqa: E501
             'name': (str,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
@@ -111,9 +111,9 @@ class PyFuncEnsembler(ModelComposed):
 
 
     attribute_map = {
+        'type': 'type',  # noqa: E501
         'id': 'id',  # noqa: E501
         'project_id': 'project_id',  # noqa: E501
-        'type': 'type',  # noqa: E501
         'name': 'name',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
@@ -139,7 +139,10 @@ class PyFuncEnsembler(ModelComposed):
     def __init__(self, *args, **kwargs):  # noqa: E501
         """PyFuncEnsembler - a model defined in OpenAPI
 
+        Args:
+
         Keyword Args:
+            type (str): defaults to "pyfunc", must be one of ["pyfunc", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -172,7 +175,6 @@ class PyFuncEnsembler(ModelComposed):
                                 _visited_composed_classes = (Animal,)
             id (int): [optional]  # noqa: E501
             project_id (int): [optional]  # noqa: E501
-            type (str): [optional] if omitted the server will use the default value of "pyfunc"  # noqa: E501
             name (str): [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
@@ -182,6 +184,7 @@ class PyFuncEnsembler(ModelComposed):
             artifact_uri (str): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "pyfunc")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())
@@ -213,6 +216,7 @@ class PyFuncEnsembler(ModelComposed):
             '_visited_composed_classes': self._visited_composed_classes,
         }
         required_args = {
+            'type': type,
         }
         model_args = {}
         model_args.update(required_args)

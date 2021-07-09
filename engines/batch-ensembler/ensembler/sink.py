@@ -5,8 +5,8 @@ from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
 
 
 class Sink(ABC):
-    def __init__(self, save_mode: pb2.Sink.SaveMode, columns: List[str] = None):
-        self._save_mode = pb2.Sink.SaveMode.Name(save_mode).lower()
+    def __init__(self, save_mode: pb2.SaveMode, columns: List[str] = None):
+        self._save_mode = pb2.SaveMode.Name(save_mode).lower()
         self._columns = columns
 
     def save(self, df: DataFrame):
@@ -42,7 +42,7 @@ class BigQuerySink(Sink):
 
     def __init__(
             self,
-            save_mode: pb2.Sink.SaveMode,
+            save_mode: pb2.SaveMode,
             columns: List[str],
             config: pb2.Sink.BigQuerySinkConfig):
         super().__init__(save_mode=save_mode, columns=columns)

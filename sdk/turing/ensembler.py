@@ -7,6 +7,9 @@ import pandas
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 
+from turing.batch import EnsemblingJob
+from turing.batch.config import EnsemblingJobConfig
+
 
 class EnsemblerBase(abc.ABC):
 
@@ -238,6 +241,16 @@ class PyFuncEnsembler(Ensembler):
             mlflow.end_run()
 
         self._save()
+
+    def submit_job(self, job_config: EnsemblingJobConfig) -> 'EnsemblingJob':
+        """
+        Submit a batch ensembling jobs
+
+        :param job_config: ensembling job configuration
+
+        :return: instance of a submitted ensembling job
+        """
+        return EnsemblingJob.submit(self.id, job_config)
 
     @classmethod
     def list(

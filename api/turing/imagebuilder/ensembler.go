@@ -8,8 +8,8 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 )
 
-// NewEnsemberJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
-func NewEnsemberJobImageBuilder(
+// NewEnsemblerJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
+func NewEnsemblerJobImageBuilder(
 	clusterController cluster.Controller,
 	imageConfig config.ImageBuilderConfig,
 	kanikoConfig config.KanikoConfig,

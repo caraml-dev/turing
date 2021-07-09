@@ -1,5 +1,5 @@
 chispa
-mypy
+mypy>=0.910
 mypy-protobuf>=1.19
 pytest
 pytest-cov

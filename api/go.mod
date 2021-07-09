@@ -58,8 +58,8 @@ replace (
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20200928080507-5e2221e40627
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20200928080507-5e2221e40627
 	github.com/gojek/mlp => github.com/gojek/mlp/api v0.0.0-20200916102056-00ec9dccd758
-	github.com/gojek/turing/engines/batch-ensembler => ../engines/batch-ensembler
 
+	github.com/gojek/turing/engines/batch-ensembler => ../engines/batch-ensembler
 	github.com/gojek/turing/engines/experiment => ../engines/experiment
 	github.com/gojek/turing/engines/router => ../engines/router
 

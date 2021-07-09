@@ -35,7 +35,7 @@ spec:
   source:
     dataset:
       type: BQ
-      bqConfig:
+      bq_config:
         query: |-
           WITH customer_filter AS (
             SELECT customer_id, target_date
@@ -56,14 +56,14 @@ spec:
         options:
           viewsEnabled: "true"
           materializationDataset: dataset
-    joinOn:
+    join_on:
       - customer_id
       - target_date
   predictions:
     model_a:
       dataset:
         type: BQ
-        bqConfig:
+        bq_config:
           table: "project.dataset.predictions_model_a"
           features:
             - customer_id
@@ -71,37 +71,37 @@ spec:
             - predictions
       columns:
         - predictions
-      joinOn:
+      join_on:
         - customer_id
         - target_date
     model_b:
       dataset:
         type: BQ
-        bqConfig:
+        bq_config:
           query: |-
             SELECT *
             FROM `project.dataset.predictions_model_b`
       columns:
         - predictions
-      joinOn:
+      join_on:
         - customer_id
         - target_date
   ensembler:
     uri: gs://bucket-name/my-ensembler/artifacts/ensembler
     result:
-      columnName: prediction_score
+      column_name: prediction_score
       type: ARRAY
-      itemType: FLOAT
+      item_type: FLOAT
   sink:
     type: BQ
-    saveMode: OVERWRITE
+    save_mode: OVERWRITE
     columns:
       - customer_id as customerId
       - target_date
       - results
-    bqConfig:
+    bq_config:
       table: project.dataset.ensembling_results
-      stagingBucket: bucket-name
+      staging_bucket: bucket-name
       options:
         partitionField: target_date
 ```

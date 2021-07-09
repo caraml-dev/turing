@@ -1,10 +1,17 @@
 import os
 import mlflow
 from typing import List, Optional
+
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
-from turing.generated.apis import EnsemblerApi, ProjectApi
-from turing.generated.models import Project, Ensembler, EnsemblersPaginatedResults
+from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi
+from turing.generated.models import \
+    Project, \
+    Ensembler, \
+    EnsemblingJob, \
+    EnsemblerJobStatus, \
+    EnsemblersPaginatedResults, \
+    EnsemblingJobPaginatedResults
 
 
 def require_active_project(f):
@@ -133,6 +140,35 @@ class TuringSession:
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,
             ensembler=ensembler)
+
+    @require_active_project
+    def list_ensembling_jobs(self,
+                             status: List[EnsemblerJobStatus] = None,
+                             page: Optional[int] = None,
+                             page_size: Optional[int] = None) -> EnsemblingJobPaginatedResults:
+        """
+        List ensembling jobs
+        """
+        kwargs = {}
+
+        if status:
+            kwargs["status"] = status
+        if page:
+            kwargs["page"] = page
+        if page_size:
+            kwargs["page_size"] = page_size
+
+        return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
+            project_id=self.active_project.id,
+            **kwargs
+        )
+
+    @require_active_project
+    def submit_ensembling_job(self, job: EnsemblingJob) -> EnsemblingJob:
+        return EnsemblingJobApi(self._api_client).create_ensembling_job(
+            project_id=self.active_project.id,
+            ensembling_job=job
+        )
 
 
 active_session: TuringSession = TuringSession(
