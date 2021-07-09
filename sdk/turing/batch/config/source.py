@@ -63,7 +63,7 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
         )
 
 
-class Dataset(DataObject, abc.ABC):
+class Dataset(abc.ABC):
     """
     Abstract dataset
     """

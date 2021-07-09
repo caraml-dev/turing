@@ -3,6 +3,11 @@ from turing.generated.model_utils import ModelNormal
 
 
 class DataObject:
+    """
+    Base class to standardize the conversion of inherited classes into a generic
+    JSON-like dictionary objects
+    """
+
     def to_dict(self):
         attribs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
 
@@ -45,10 +50,6 @@ class ApiObject(DataObject):
     @property
     def id(self) -> int:
         return self._id
-
-    @id.setter
-    def id(self, id: int):
-        self._id = id
 
     @property
     def created_at(self) -> datetime:

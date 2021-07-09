@@ -8,8 +8,8 @@ from turing._base_types import ApiObject, ApiObjectSpec
 class EnsemblingJobStatus(Enum):
     """
     Status of ensembling job
-    Possible statuses:
 
+    Possible statuses:
     JobPending --▶ JobFailedSubmission
         |
         |
@@ -24,7 +24,7 @@ class EnsemblingJobStatus(Enum):
     JobRunning --▶ JobFailed
         |
         |
-        |--▶ JobTerminated
+        |--▶ JobTerminating --▶ JobTerminated
         |
         |
         ▼
