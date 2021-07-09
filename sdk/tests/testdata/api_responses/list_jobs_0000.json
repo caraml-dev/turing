@@ -1,0 +1,197 @@
+{
+  "results":
+  [
+    {
+      "id": 11,
+      "created_at": "2021-07-06T12:28:32.850365Z",
+      "updated_at": "2021-07-06T13:28:56.252642Z",
+      "name": "my-ensembler-updated: 2021-07-06T12:28:32+03:00",
+      "ensembler_id": 2,
+      "project_id": 1,
+      "environment_name": "dev",
+      "infra_config": {
+        "artifact_uri": "gs://bucket-name/mlflow/343/f5fb1c8bdb3845648c02001c54a609d7/artifacts",
+        "ensembler_name": "my-ensembler-updated",
+        "service_account_name": "service-account@gcp-project.iam.gserviceaccount.com",
+        "resources": null
+      },
+      "job_config": {
+        "version": "v1",
+        "kind": "BatchEnsemblingJob",
+        "spec": {
+          "source": {
+            "dataset": {
+              "type": "BQ",
+              "bq_config": {
+                "table": "project.dataset.ensembling_results",
+                "features":
+                [
+                  "feature_1",
+                  "feature_2"
+                ]
+              }
+            },
+            "join_on":
+            [
+              "feature_1"
+            ]
+          },
+          "predictions": {
+            "model_a": {
+              "dataset": {
+                "type": "BQ",
+                "bq_config": {
+                  "table": "project.dataset.ensembling_results",
+                  "features":
+                  [
+                    "feature_1",
+                    "feature_2"
+                  ]
+                }
+              },
+              "join_on":
+              [
+                "feature_1"
+              ],
+              "columns":
+              [
+                "feature_2"
+              ]
+            }
+          },
+          "ensembler": {
+            "uri": "/home/spark/artifacts",
+            "result": {
+              "column_name": "prediction_result",
+              "type": "DOUBLE"
+            }
+          },
+          "sink": {
+            "type": "BQ",
+            "columns":
+            [
+              "prediction_score"
+            ],
+            "save_mode": "ERRORIFEXISTS",
+            "bq_config": {
+              "table": "project.dataset.ensembling_results",
+              "staging_bucket": "staging_bucket"
+            }
+          }
+        }
+      },
+      "status": "pending",
+      "error": ""
+    },
+    {
+      "id": 17,
+      "created_at": "2021-07-06T23:44:30.675673Z",
+      "updated_at": "2021-07-07T07:36:33.604794Z",
+      "name": "my-ensembler: 2021-07-06T23:44:30+03:00",
+      "ensembler_id": 3,
+      "project_id": 1,
+      "environment_name": "dev",
+      "infra_config": {
+        "artifact_uri": "gs://bucket-name/mlflow/342/db2295decd4b455699aed0df6c9e5bcf/artifacts",
+        "ensembler_name": "my-ensembler",
+        "service_account_name": "service-account@gcp-project.iam.gserviceaccount.com",
+        "resources": null
+      },
+      "job_config": {
+        "version": "v1",
+        "kind": "BatchEnsemblingJob",
+        "spec": {
+          "source": {
+            "dataset": {
+              "type": "BQ",
+              "bq_config": {
+                "table": "project.dataset.features",
+                "features":
+                [
+                  "feature_1",
+                  "feature_2",
+                  "features_3"
+                ]
+              }
+            },
+            "join_on":
+            [
+              "feature_1"
+            ]
+          },
+          "predictions": {
+            "model_even": {
+              "dataset": {
+                "type": "BQ",
+                "bq_config": {
+                  "query": "\n                    SELECT feature_1, prediction_score\n                    FROM `project.dataset.scores_model_even`\n                    WHERE target_date = DATE(\"2021-03-15\", \"Asia/Jakarta\")\n                ",
+                  "options": {
+                    "materializationDataset": "my_dataset",
+                    "viewsEnabled": "true"
+                  }
+                }
+              },
+              "join_on":
+              [
+                "feature_1"
+              ],
+              "columns":
+              [
+                "prediction_score"
+              ]
+            },
+            "model_odd": {
+              "dataset": {
+                "type": "BQ",
+                "bq_config": {
+                  "table": "project.dataset.scores_model_odd",
+                  "features":
+                  [
+                    "feature_1",
+                    "prediction_score"
+                  ]
+                }
+              },
+              "join_on":
+              [
+                "feature_1"
+              ],
+              "columns":
+              [
+                "prediction_score"
+              ]
+            }
+          },
+          "ensembler": {
+            "uri": "/home/spark/artifacts",
+            "result": {
+              "column_name": "prediction_result",
+              "type": "INTEGER"
+            }
+          },
+          "sink": {
+            "type": "BQ",
+            "columns":
+            [
+              "feature_1",
+              "feature_2",
+              "prediction_result"
+            ],
+            "save_mode": "OVERWRITE",
+            "bq_config": {
+              "table": "project.dataset.ensembling_results",
+              "staging_bucket": "staging_bucket"
+            }
+          }
+        }
+      },
+      "status": "failed_building",
+      "error": "failed building OCI image"
+    }
+  ],
+  "paging": {
+    "total": 2,
+    "page": 1,
+    "pages": 1
+  }
+}

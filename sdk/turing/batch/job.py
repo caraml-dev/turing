@@ -63,7 +63,7 @@ class EnsemblingJob(ApiObject):
         self._name = name
         self._project_id = project_id
         self._ensembler_id = ensembler_id
-        self._status = status
+        self._status = EnsemblingJobStatus(status)
         self._error = error
 
     @property
