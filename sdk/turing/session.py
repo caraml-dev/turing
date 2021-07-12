@@ -11,7 +11,8 @@ from turing.generated.models import \
     EnsemblingJob, \
     EnsemblerJobStatus, \
     EnsemblersPaginatedResults, \
-    EnsemblingJobPaginatedResults
+    EnsemblingJobPaginatedResults, \
+    IdObject
 
 
 def require_active_project(f):
@@ -132,6 +133,16 @@ class TuringSession:
             ensembler=ensembler)
 
     @require_active_project
+    def get_ensembler(self, ensembler_id: int) -> Ensembler:
+        """
+        Fetch ensembler details by its ID
+        """
+        return EnsemblerApi(self._api_client).get_ensembler_details(
+            project_id=self.active_project.id,
+            ensembler_id=ensembler_id,
+        )
+
+    @require_active_project
     def update_ensembler(self, ensembler: Ensembler) -> Ensembler:
         """
         Update existing ensembler
@@ -161,6 +172,23 @@ class TuringSession:
         return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
             project_id=self.active_project.id,
             **kwargs
+        )
+
+    @require_active_project
+    def get_ensembling_job(self, job_id: int) -> EnsemblingJob:
+        """
+        Fetch ensembling job by its ID
+        """
+        return EnsemblingJobApi(self._api_client).get_ensembling_job(
+            project_id=self.active_project.id,
+            job_id=job_id
+        )
+
+    @require_active_project
+    def terminate_ensembling_job(self, job_id: int) -> IdObject:
+        return EnsemblingJobApi(self._api_client).terminate_ensembling_job(
+            project_id=self.active_project.id,
+            job_id=job_id
         )
 
     @require_active_project

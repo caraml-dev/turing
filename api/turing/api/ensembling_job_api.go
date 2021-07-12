@@ -110,7 +110,7 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 }
 
 type deleteEnsemblingJobResponse struct {
-	ID models.ID `schema:"id"`
+	ID models.ID `json:"id"`
 }
 
 // DeleteEnsemblingJob deletes and ensembling job and cancels any ongoing process.

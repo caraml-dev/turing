@@ -253,6 +253,19 @@ class PyFuncEnsembler(Ensembler):
         return EnsemblingJob.submit(self.id, job_config)
 
     @classmethod
+    def get_by_id(cls, ensembler_id: int) -> 'PyFuncEnsembler':
+        """
+        Get the instance of a pyfunc ensembler with given ID
+
+        :param ensembler_id:
+        :return: instance of pyfunc ensembler
+        """
+        from turing.session import active_session
+
+        return PyFuncEnsembler.from_open_api(
+            active_session.get_ensembler(ensembler_id))
+
+    @classmethod
     def list(
             cls,
             page: Optional[int] = None,

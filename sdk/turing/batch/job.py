@@ -32,6 +32,7 @@ class EnsemblingJobStatus(Enum):
     """
 
     PENDING = "pending"
+    BUILDING = "building"
     RUNNING = "running"
     TERMINATING = "terminating"
     TERMINATED = "terminated"
@@ -85,6 +86,36 @@ class EnsemblingJob(ApiObject):
     @property
     def error(self) -> str:
         return self._error
+
+    def refresh(self):
+        """
+        Fetches latest updates of this ensembling job
+        """
+        from turing.session import active_session
+        self.__dict__.update(
+            EnsemblingJob.from_open_api(
+                active_session.get_ensembling_job(job_id=self.id)
+            ).__dict__
+        )
+
+    def terminate(self):
+        """
+        Terminates this ensembling job
+        """
+        from turing.session import active_session
+        active_session.terminate_ensembling_job(job_id=self.id)
+
+        self.refresh()
+
+    @classmethod
+    def get_by_id(cls, job_id: int) -> 'EnsemblingJob':
+        """
+        Fetch ensembling job by its ID
+        """
+        from turing.session import active_session
+        return EnsemblingJob.from_open_api(
+            active_session.get_ensembling_job(job_id=job_id)
+        )
 
     @classmethod
     def submit(
