@@ -1,10 +1,9 @@
 import os
 import pytest
+from tests import utc_date
 import turing
 import turing.batch
 import turing.batch.config
-from datetime import datetime
-from dateutil.tz import tzutc
 from urllib3_mock import Responses
 
 responses = Responses('requests.packages.urllib3')
@@ -43,12 +42,8 @@ def _responses():
                     status=turing.batch.EnsemblingJobStatus.PENDING,
                     project_id=1,
                     error="",
-                    created_at=datetime.strptime(
-                        "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ).replace(tzinfo=tzutc()),
-                    updated_at=datetime.strptime(
-                        "2021-07-06T13:28:56.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ).replace(tzinfo=tzutc())
+                    created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                    updated_at=utc_date("2021-07-06T13:28:56.252642Z")
                 ),
                 turing.batch.EnsemblingJob(
                     id=17,
@@ -57,12 +52,8 @@ def _responses():
                     status=turing.batch.EnsemblingJobStatus.FAILED_BUILDING,
                     project_id=1,
                     error="failed building OCI image",
-                    created_at=datetime.strptime(
-                        "2021-07-06T23:44:30.675673Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ).replace(tzinfo=tzutc()),
-                    updated_at=datetime.strptime(
-                        "2021-07-07T07:36:33.604794Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ).replace(tzinfo=tzutc())
+                    created_at=utc_date("2021-07-06T23:44:30.675673Z"),
+                    updated_at=utc_date("2021-07-07T07:36:33.604794Z")
                 )
             ],
             id="Non empty list"
@@ -107,12 +98,8 @@ def test_list_jobs(turing_api, active_project, api_response, expected, use_googl
                 status=turing.batch.EnsemblingJobStatus.PENDING,
                 project_id=1,
                 error="",
-                created_at=datetime.strptime(
-                    "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc()),
-                updated_at=datetime.strptime(
-                    "2021-07-06T13:28:56.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc())
+                created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                updated_at=utc_date("2021-07-06T13:28:56.252642Z")
             )
         )
     ]
@@ -154,12 +141,8 @@ def test_submit_job(
                 status=turing.batch.EnsemblingJobStatus.PENDING,
                 project_id=1,
                 error="",
-                created_at=datetime.strptime(
-                    "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc()),
-                updated_at=datetime.strptime(
-                    "2021-07-06T13:28:56.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc())
+                created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                updated_at=utc_date("2021-07-06T13:28:56.252642Z")
             ),
             get_job_0000,
             turing.batch.EnsemblingJob(
@@ -169,12 +152,8 @@ def test_submit_job(
                 status=turing.batch.EnsemblingJobStatus.FAILED_BUILDING,
                 project_id=1,
                 error="timeout has occurred",
-                created_at=datetime.strptime(
-                    "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc()),
-                updated_at=datetime.strptime(
-                    "2021-07-07T00:00:00.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(tzinfo=tzutc())
+                created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                updated_at=utc_date("2021-07-07T00:00:00.252642Z")
             )
         )
     ]
@@ -214,3 +193,66 @@ def test_fetch_job(
     job.refresh()
 
     assert job == updated
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "job, api_response_delete, api_response_get, expected", [
+        pytest.param(
+            turing.batch.EnsemblingJob(
+                id=1,
+                name="ensembling-job",
+                ensembler_id=1,
+                status=turing.batch.EnsemblingJobStatus.RUNNING,
+                project_id=1,
+                error="",
+                created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                updated_at=utc_date("2021-07-06T13:28:56.252642Z")
+            ),
+            '{"id": 1}',
+            get_job_0000,
+            turing.batch.EnsemblingJob(
+                id=1,
+                name="pyfunc-ensembler: 2021-07-06T00:00:00+03:00",
+                ensembler_id=2,
+                status=turing.batch.EnsemblingJobStatus.FAILED_BUILDING,
+                project_id=1,
+                error="timeout has occurred",
+                created_at=utc_date("2021-07-06T12:28:32.850365Z"),
+                updated_at=utc_date("2021-07-07T00:00:00.252642Z")
+            )
+        )
+    ]
+)
+def test_terminate_job(
+        turing_api,
+        active_project,
+        job,
+        api_response_delete,
+        api_response_get,
+        expected,
+        use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    responses.add(
+        method="DELETE",
+        url=f"/v1/projects/{active_project.id}/jobs/{job.id}",
+        body=api_response_delete,
+        status=201,
+        content_type="application/json"
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs/{job.id}",
+        body=api_response_get,
+        status=200,
+        content_type="application/json"
+    )
+
+    assert job != expected
+
+    job.terminate()
+
+    assert job == expected
