@@ -12,7 +12,7 @@ from turing import generated as client
 responses = Responses('requests.packages.urllib3')
 
 
-@pytest.fixture(scope="module", name="responses")
+@pytest.fixture(scope="function", name="responses")
 def _responses():
     return responses
 

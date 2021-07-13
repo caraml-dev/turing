@@ -19,7 +19,7 @@ with open(os.path.join(data_dir, "get_job_0000.json")) as f:
     get_job_0000 = f.read()
 
 
-@pytest.fixture(scope="module", name="responses")
+@pytest.fixture(scope="function", name="responses")
 def _responses():
     return responses
 
