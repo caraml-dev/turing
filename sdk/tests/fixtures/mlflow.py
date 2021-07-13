@@ -60,7 +60,7 @@ def mock_mlflow(responses, experiment_name, experiment_id, run_id, artifact_uri)
 
     responses.add(
         method="POST",
-        url=f"/api/2.0/mlflow/runs/log-model",
+        url="/api/2.0/mlflow/runs/log-model",
         body="{}",
         status=200,
         content_type="application/json",

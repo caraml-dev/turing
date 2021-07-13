@@ -19,7 +19,7 @@ with open(os.path.join(data_dir, "get_job_0000.json")) as f:
     get_job_0000 = f.read()
 
 
-@pytest.fixture(scope="function", name="responses")
+@pytest.fixture(scope="module", name="responses")
 def _responses():
     return responses
 
@@ -181,18 +181,18 @@ def test_fetch_job(
 
     assert job == expected
 
-    # responses.reset()
-    # responses.add(
-    #     method="GET",
-    #     url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
-    #     body=api_response_refresh,
-    #     status=200,
-    #     content_type="application/json"
-    # )
-    #
-    # job.refresh()
-    #
-    # assert job == updated
+    responses.reset()
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
+        body=api_response_refresh,
+        status=200,
+        content_type="application/json"
+    )
+
+    job.refresh()
+
+    assert job == updated
 
 
 @responses.activate
