@@ -68,22 +68,13 @@ def _responses():
         )
     ]
 )
-def test_list_jobs(turing_api, project, use_google_oauth, api_response, expected):
-    responses.add(
-        method="GET",
-        url=f"/v1/projects?name={project.name}",
-        body=json.dumps([project], default=tests.json_serializer),
-        match_querystring=True,
-        status=200,
-        content_type="application/json"
-    )
-
+def test_list_jobs(turing_api, active_project, api_response, expected, use_google_oauth):
     turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(project.name)
+    turing.set_project(active_project.name)
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{project.id}/jobs?"
+        url=f"/v1/projects/{active_project.id}/jobs?"
             f"status={turing.batch.EnsemblingJobStatus.PENDING.value}&"
             f"status={turing.batch.EnsemblingJobStatus.RUNNING.value}",
         body=api_response,
@@ -132,22 +123,19 @@ def test_list_jobs(turing_api, project, use_google_oauth, api_response, expected
         )
     ]
 )
-def test_submit_job(turing_api, project, use_google_oauth, ensembling_job_config, api_response, expected):
-    responses.add(
-        method="GET",
-        url=f"/v1/projects?name={project.name}",
-        body=json.dumps([project], default=tests.json_serializer),
-        match_querystring=True,
-        status=200,
-        content_type="application/json"
-    )
-
+def test_submit_job(
+        turing_api,
+        active_project,
+        ensembling_job_config,
+        api_response,
+        expected,
+        use_google_oauth):
     turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(project.name)
+    turing.set_project(active_project.name)
 
     responses.add(
         method="POST",
-        url=f"/v1/projects/{project.id}/jobs",
+        url=f"/v1/projects/{active_project.id}/jobs",
         body=api_response,
         status=201,
         content_type="application/json"
@@ -166,3 +154,7 @@ def test_submit_job(turing_api, project, use_google_oauth, ensembling_job_config
     assert actual.error == expected.error
     assert actual.created_at == expected.created_at
     assert actual.updated_at == expected.updated_at
+
+
+def test_fetch_job():
+    pass

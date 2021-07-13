@@ -1,6 +1,8 @@
+import json
 from datetime import datetime, timedelta
 import pytest
 import random
+import tests
 from turing import generated as client
 from turing import ensembler
 import turing.batch.config
@@ -28,6 +30,19 @@ def project():
         created_at=datetime.now(),
         updated_at=datetime.now()
     )
+
+
+@pytest.fixture
+def active_project(responses, project):
+    responses.add(
+        method="GET",
+        url=f"/v1/projects?name={project.name}",
+        body=json.dumps([project], default=tests.json_serializer),
+        match_querystring=True,
+        status=200,
+        content_type="application/json"
+    )
+    return project
 
 
 @pytest.fixture
