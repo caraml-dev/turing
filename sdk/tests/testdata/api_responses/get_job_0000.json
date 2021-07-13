@@ -1,0 +1,88 @@
+{
+  "id": 1,
+  "created_at": "2021-07-06T12:28:32.850365Z",
+  "updated_at": "2021-07-07T00:00:00.252642Z",
+  "name": "pyfunc-ensembler: 2021-07-06T00:00:00+03:00",
+  "ensembler_id": 2,
+  "project_id": 1,
+  "environment_name": "dev",
+  "infra_config": {
+    "artifact_uri": "gs://bucket-name/mlflow/343/f5fb1c8bdb3845648c02001c54a609d7/artifacts",
+    "ensembler_name": "pyfunc-ensembler",
+    "service_account_name": "service-account",
+    "resources": {
+      "driver_cpu_request": "1",
+      "driver_memory_request": "2Gi",
+      "executor_replica": 5,
+      "executor_cpu_request": "0.8",
+      "executor_memory_request": "1Gi"
+    }
+  },
+  "job_config": {
+    "version": "v1",
+    "kind": "BatchEnsemblingJob",
+    "spec": {
+      "source": {
+        "dataset": {
+          "type": "BQ",
+          "bq_config": {
+            "table": "project.dataset.ensembling_results",
+            "features":
+            [
+              "feature_1",
+              "feature_2"
+            ]
+          }
+        },
+        "join_on":
+        [
+          "feature_1"
+        ]
+      },
+      "predictions": {
+        "model_a": {
+          "dataset": {
+            "type": "BQ",
+            "bq_config": {
+              "table": "project.dataset.ensembling_results",
+              "features":
+              [
+                "feature_1",
+                "feature_2"
+              ]
+            }
+          },
+          "join_on":
+          [
+            "feature_1"
+          ],
+          "columns":
+          [
+            "feature_2"
+          ]
+        }
+      },
+      "ensembler": {
+        "uri": "/home/spark/artifacts",
+        "result": {
+          "column_name": "prediction_result",
+          "type": "DOUBLE"
+        }
+      },
+      "sink": {
+        "type": "BQ",
+        "columns":
+        [
+          "prediction_score"
+        ],
+        "save_mode": "ERRORIFEXISTS",
+        "bq_config": {
+          "table": "project.dataset.ensembling_results",
+          "staging_bucket": "staging_bucket"
+        }
+      }
+    }
+  },
+  "status": "failed_building",
+  "error": "timeout has occurred"
+}

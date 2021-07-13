@@ -61,11 +61,7 @@ def test_list_ensemblers(turing_api, active_project, generic_ensemblers, use_goo
     assert all([isinstance(p, turing.PyFuncEnsembler) for p in actual])
 
     for actual, expected in zip(actual, generic_ensemblers):
-        assert actual.id == expected.id
-        assert actual.name == expected.name
-        assert actual.project_id == active_project.id
-        assert actual.created_at == expected.created_at
-        assert actual.updated_at == expected.updated_at
+        assert actual.to_dict() == expected.to_dict()
 
 
 @responses.activate
@@ -98,14 +94,7 @@ def test_create_ensembler(
         }
     )
 
-    assert actual.id == pyfunc_ensembler.id
-    assert actual.name == pyfunc_ensembler.name
-    assert actual.project_id == pyfunc_ensembler.project_id
-    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
-    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
-    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
-    assert actual.created_at == pyfunc_ensembler.created_at
-    assert actual.updated_at == pyfunc_ensembler.updated_at
+    assert actual.to_dict() == pyfunc_ensembler.to_dict()
 
 
 @responses.activate
@@ -157,11 +146,4 @@ def test_update_ensembler(
         },
         code_dir=[os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "samples/quickstart")]
     )
-    assert actual.id == pyfunc_ensembler.id
-    assert actual.name == pyfunc_ensembler.name
-    assert actual.project_id == pyfunc_ensembler.project_id
-    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
-    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
-    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
-    assert actual.created_at == pyfunc_ensembler.created_at
-    assert actual.updated_at == pyfunc_ensembler.updated_at
+    assert actual.to_dict() == pyfunc_ensembler.to_dict()

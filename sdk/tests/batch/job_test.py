@@ -1,7 +1,5 @@
-import json
 import os
 import pytest
-import tests
 import turing
 import turing.batch
 import turing.batch.config
@@ -17,6 +15,9 @@ with open(os.path.join(data_dir, "list_jobs_0000.json")) as f:
 
 with open(os.path.join(data_dir, "submit_job_0000.json")) as f:
     submit_job_0000 = f.read()
+
+with open(os.path.join(data_dir, "get_job_0000.json")) as f:
+    get_job_0000 = f.read()
 
 
 @pytest.fixture(scope="module", name="responses")
@@ -91,14 +92,7 @@ def test_list_jobs(turing_api, active_project, api_response, expected, use_googl
     assert len(actual) == len(expected)
 
     for actual, expected in zip(actual, expected):
-        assert actual.id == expected.id
-        assert actual.name == expected.name
-        assert actual.project_id == expected.project_id
-        assert actual.ensembler_id == expected.ensembler_id
-        assert actual.status == expected.status
-        assert actual.error == expected.error
-        assert actual.created_at == expected.created_at
-        assert actual.updated_at == expected.updated_at
+        assert actual == expected
 
 
 @responses.activate
@@ -145,16 +139,78 @@ def test_submit_job(
         ensembler_id=2,
         config=ensembling_job_config,
     )
-
-    assert actual.id == expected.id
-    assert actual.name == expected.name
-    assert actual.project_id == expected.project_id
-    assert actual.ensembler_id == expected.ensembler_id
-    assert actual.status == expected.status
-    assert actual.error == expected.error
-    assert actual.created_at == expected.created_at
-    assert actual.updated_at == expected.updated_at
+    assert actual == expected
 
 
-def test_fetch_job():
-    pass
+@responses.activate
+@pytest.mark.parametrize(
+    "api_response_get, expected, api_response_refresh, updated", [
+        pytest.param(
+            submit_job_0000,
+            turing.batch.EnsemblingJob(
+                id=1,
+                name="pyfunc-ensembler: 2021-07-06T00:00:00+03:00",
+                ensembler_id=2,
+                status=turing.batch.EnsemblingJobStatus.PENDING,
+                project_id=1,
+                error="",
+                created_at=datetime.strptime(
+                    "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
+                ).replace(tzinfo=tzutc()),
+                updated_at=datetime.strptime(
+                    "2021-07-06T13:28:56.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
+                ).replace(tzinfo=tzutc())
+            ),
+            get_job_0000,
+            turing.batch.EnsemblingJob(
+                id=1,
+                name="pyfunc-ensembler: 2021-07-06T00:00:00+03:00",
+                ensembler_id=2,
+                status=turing.batch.EnsemblingJobStatus.FAILED_BUILDING,
+                project_id=1,
+                error="timeout has occurred",
+                created_at=datetime.strptime(
+                    "2021-07-06T12:28:32.850365Z", "%Y-%m-%dT%H:%M:%S.%fZ"
+                ).replace(tzinfo=tzutc()),
+                updated_at=datetime.strptime(
+                    "2021-07-07T00:00:00.252642Z", "%Y-%m-%dT%H:%M:%S.%fZ"
+                ).replace(tzinfo=tzutc())
+            )
+        )
+    ]
+)
+def test_fetch_job(
+        turing_api,
+        active_project,
+        api_response_get,
+        expected,
+        api_response_refresh,
+        updated,
+        use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
+        body=api_response_get,
+        status=200,
+        content_type="application/json"
+    )
+
+    job = turing.batch.EnsemblingJob.get_by_id(expected.id)
+
+    assert job == expected
+
+    responses.reset()
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
+        body=api_response_refresh,
+        status=200,
+        content_type="application/json"
+    )
+
+    job.refresh()
+
+    assert job == updated

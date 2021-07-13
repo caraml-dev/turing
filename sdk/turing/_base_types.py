@@ -23,6 +23,11 @@ class DataObject:
 
         return dict(attribs)
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.to_dict() == other.to_dict()
+        return False
+
     def __str__(self):
         return '%s(%s)' % (
             type(self).__name__,
