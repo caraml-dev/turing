@@ -1,5 +1,5 @@
 from datetime import datetime
-from turing.generated.model_utils import ModelNormal
+from turing.generated.model_utils import OpenApiModel
 
 
 class DataObject:
@@ -22,6 +22,11 @@ class DataObject:
                     attribs.append((name, val))
 
         return dict(attribs)
+
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.to_dict() == other.to_dict()
+        return False
 
     def __str__(self):
         return '%s(%s)' % (
@@ -60,7 +65,7 @@ class ApiObject(DataObject):
         return self._updated_at
 
     @classmethod
-    def from_open_api(cls, open_api: ModelNormal):
+    def from_open_api(cls, open_api: OpenApiModel):
         """
         Factory method, for constructing ApiObject (and its sub-classes) instances
         from a relevant instance of openapi-generator generated model instance

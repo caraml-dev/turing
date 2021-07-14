@@ -32,6 +32,7 @@ class EnsemblingJobStatus(Enum):
     """
 
     PENDING = "pending"
+    BUILDING = "building"
     RUNNING = "running"
     TERMINATING = "terminating"
     TERMINATED = "terminated"
@@ -86,6 +87,31 @@ class EnsemblingJob(ApiObject):
     def error(self) -> str:
         return self._error
 
+    def refresh(self):
+        """
+        Fetches latest updates of this ensembling job
+        """
+        self.__dict__.update(
+            EnsemblingJob.from_open_api(
+                turing.active_session.get_ensembling_job(job_id=self.id)
+            ).__dict__
+        )
+
+    def terminate(self):
+        """
+        Terminates this ensembling job
+        """
+        turing.active_session.terminate_ensembling_job(job_id=self.id)
+        self.refresh()
+
+    @classmethod
+    def get_by_id(cls, job_id: int) -> 'EnsemblingJob':
+        """
+        Fetch ensembling job by its ID
+        """
+        return EnsemblingJob.from_open_api(
+            turing.active_session.get_ensembling_job(job_id=job_id))
+
     @classmethod
     def submit(
             cls,
@@ -98,8 +124,6 @@ class EnsemblingJob(ApiObject):
         :param config: configuration of ensembling job
         :return: instance of ensembling job
         """
-        from turing.session import active_session
-
         job_config = turing.generated.models.EnsemblerConfig(
             version=EnsemblingJob._VERSION,
             kind=turing.generated.models.EnsemblerConfigKind(EnsemblingJob._KIND),
@@ -113,8 +137,7 @@ class EnsemblingJob(ApiObject):
         )
 
         return EnsemblingJob.from_open_api(
-            active_session.submit_ensembling_job(job=job)
-        )
+            turing.active_session.submit_ensembling_job(job=job))
 
     @classmethod
     def list(
@@ -131,14 +154,11 @@ class EnsemblingJob(ApiObject):
 
         :return: list of ensembling jobs
         """
-
-        from turing.session import active_session
-
         mapped_statuses = None
         if status:
             mapped_statuses = [turing.generated.models.EnsemblerJobStatus(s.value) for s in status]
 
-        response = active_session.list_ensembling_jobs(
+        response = turing.active_session.list_ensembling_jobs(
             status=mapped_statuses,
             page=page,
             page_size=page_size

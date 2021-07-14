@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from dateutil.tz import tzutc
 from turing import generated as client
 import turing.ensembler
 
@@ -8,6 +9,12 @@ def json_serializer(o):
         return o.isoformat()
     if isinstance(o, (client.model_utils.ModelNormal, client.model_utils.ModelComposed)):
         return o.to_dict()
+
+
+def utc_date(date_str: str):
+    return datetime.strptime(
+        date_str, "%Y-%m-%dT%H:%M:%S.%fZ"
+    ).replace(tzinfo=tzutc())
 
 
 class MyTestEnsembler(turing.ensembler.PyFunc):

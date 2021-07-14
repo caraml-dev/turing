@@ -1,12 +1,11 @@
 import abc
 from enum import Enum
 from typing import Optional, Union, List, Any, Dict
-import mlflow.pyfunc
+import mlflow
 import numpy
 import pandas
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
-
 from turing.batch import EnsemblingJob
 from turing.batch.config import EnsemblingJobConfig
 
@@ -125,9 +124,7 @@ class Ensembler(ApiObject):
         :return: list of ensemblers
         """
 
-        from turing.session import active_session
-
-        response = active_session.list_ensemblers(
+        response = turing.active_session.list_ensemblers(
             ensembler_type=ensembler_type,
             page=page,
             page_size=page_size
@@ -184,10 +181,9 @@ class PyFuncEnsembler(Ensembler):
         return f"{project_name}/ensemblers/{ensembler_name}"
 
     def _save(self):
-        from turing.session import active_session
         self.__dict__.update(
             PyFuncEnsembler.from_open_api(
-                active_session.update_ensembler(self.to_open_api())
+                turing.active_session.update_ensembler(self.to_open_api())
             ).__dict__
         )
 
@@ -212,15 +208,11 @@ class PyFuncEnsembler(Ensembler):
             with the model. This will be passed to turing.ensembler.PyFunc.initialize().
             Example: {"config" : "config/staging.yaml"}
         """
-
-        import mlflow
-        from turing.session import active_session
-
         if name:
             self.name = name
 
         if ensembler_instance:
-            project_name = active_session.active_project.name
+            project_name = turing.active_session.active_project.name
             mlflow.set_experiment(experiment_name=self._experiment_name(project_name, self.name))
 
             mlflow.start_run()
@@ -253,6 +245,17 @@ class PyFuncEnsembler(Ensembler):
         return EnsemblingJob.submit(self.id, job_config)
 
     @classmethod
+    def get_by_id(cls, ensembler_id: int) -> 'PyFuncEnsembler':
+        """
+        Get the instance of a pyfunc ensembler with given ID
+
+        :param ensembler_id:
+        :return: instance of pyfunc ensembler
+        """
+        return PyFuncEnsembler.from_open_api(
+            turing.active_session.get_ensembler(ensembler_id))
+
+    @classmethod
     def list(
             cls,
             page: Optional[int] = None,
@@ -266,9 +269,7 @@ class PyFuncEnsembler(Ensembler):
 
         :return: list of pyfunc ensemblers
         """
-        from turing.session import active_session
-
-        response = active_session.list_ensemblers(
+        response = turing.active_session.list_ensemblers(
             ensembler_type=EnsemblerType.PYFUNC,
             page=page,
             page_size=page_size
@@ -300,10 +301,7 @@ class PyFuncEnsembler(Ensembler):
 
         :return: saved instance of PyFuncEnsembler
         """
-        import mlflow
-        from turing.session import active_session
-
-        project_name = active_session.active_project.name
+        project_name = turing.active_session.active_project.name
         mlflow.set_experiment(experiment_name=cls._experiment_name(project_name, name))
 
         mlflow.start_run()
@@ -326,4 +324,4 @@ class PyFuncEnsembler(Ensembler):
         mlflow.end_run()
 
         return PyFuncEnsembler.from_open_api(
-            active_session.create_ensembler(ensembler.to_open_api()))
+            turing.active_session.create_ensembler(ensembler.to_open_api()))

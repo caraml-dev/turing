@@ -94,8 +94,8 @@ paths:
           description: "Invalid ensembling job"
     delete:
       tags: *tags
-      operationId: "DeleteEnsemblingJob"
-      summary: Delete an ongoing Ensembling Job.
+      operationId: "TerminateEnsemblingJob"
+      summary: Terminate an ongoing Ensembling Job.
       parameters:
         - in: path
           name: project_id
@@ -386,6 +386,7 @@ components:
       type: "string"
       enum:
         - pending
+        - building
         - running
         - terminating
         - terminated

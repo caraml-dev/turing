@@ -36,21 +36,12 @@ def test_predict():
 
 @responses.activate
 @pytest.mark.parametrize("num_ensemblers", [6])
-def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oauth):
+def test_list_ensemblers(turing_api, active_project, generic_ensemblers, use_google_oauth):
     with pytest.raises(Exception, match=re.escape("Active project isn't set, use set_project(...) to set it")):
         turing.PyFuncEnsembler.list()
 
-    responses.add(
-        method="GET",
-        url=f"/v1/projects?name={project.name}",
-        body=json.dumps([project], default=tests.json_serializer),
-        match_querystring=True,
-        status=200,
-        content_type="application/json"
-    )
-
     turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(project.name)
+    turing.set_project(active_project.name)
 
     page = client.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
@@ -59,7 +50,7 @@ def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oau
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{project.id}/ensemblers?type={turing.EnsemblerType.PYFUNC.value}",
+        url=f"/v1/projects/{active_project.id}/ensemblers?type={turing.EnsemblerType.PYFUNC.value}",
         body=json.dumps(page, default=tests.json_serializer),
         match_querystring=True,
         status=200,
@@ -70,11 +61,7 @@ def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oau
     assert all([isinstance(p, turing.PyFuncEnsembler) for p in actual])
 
     for actual, expected in zip(actual, generic_ensemblers):
-        assert actual.id == expected.id
-        assert actual.name == expected.name
-        assert actual.project_id == project.id
-        assert actual.created_at == expected.created_at
-        assert actual.updated_at == expected.updated_at
+        assert actual.to_dict() == expected.to_dict()
 
 
 @responses.activate
@@ -82,28 +69,19 @@ def test_list_ensemblers(turing_api, project, generic_ensemblers, use_google_oau
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_create_ensembler(
         turing_api,
-        project,
+        active_project,
         pyfunc_ensembler,
         use_google_oauth):
     responses.add(
-        method="GET",
-        url=f"/v1/projects?name={project.name}",
-        body=json.dumps([project], default=tests.json_serializer),
-        match_querystring=True,
-        status=200,
-        content_type="application/json"
-    )
-
-    responses.add(
         method="POST",
-        url=f"/v1/projects/{project.id}/ensemblers",
+        url=f"/v1/projects/{active_project.id}/ensemblers",
         body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
         status=201,
         content_type="application/json"
     )
 
     turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(project.name)
+    turing.set_project(active_project.name)
 
     actual = turing.PyFuncEnsembler.create(
         name=pyfunc_ensembler.name,
@@ -116,14 +94,7 @@ def test_create_ensembler(
         }
     )
 
-    assert actual.id == pyfunc_ensembler.id
-    assert actual.name == pyfunc_ensembler.name
-    assert actual.project_id == pyfunc_ensembler.project_id
-    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
-    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
-    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
-    assert actual.created_at == pyfunc_ensembler.created_at
-    assert actual.updated_at == pyfunc_ensembler.updated_at
+    assert actual.to_dict() == pyfunc_ensembler.to_dict()
 
 
 @responses.activate
@@ -134,18 +105,12 @@ def test_create_ensembler(
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_update_ensembler(
         turing_api,
-        project,
+        active_project,
         generic_ensemblers,
         pyfunc_ensembler,
         use_google_oauth):
-    responses.add(
-        method="GET",
-        url=f"/v1/projects?name={project.name}",
-        body=json.dumps([project], default=tests.json_serializer),
-        match_querystring=True,
-        status=200,
-        content_type="application/json"
-    )
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
 
     page = client.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
@@ -154,20 +119,17 @@ def test_update_ensembler(
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{project.id}/ensemblers",
+        url=f"/v1/projects/{active_project.id}/ensemblers",
         body=json.dumps(page, default=tests.json_serializer),
         status=201,
         content_type="application/json"
     )
 
-    turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(project.name)
-
     actual, *rest = turing.PyFuncEnsembler.list()
 
     responses.add(
         method="PUT",
-        url=f"/v1/projects/{project.id}/ensemblers/{actual.id}",
+        url=f"/v1/projects/{active_project.id}/ensemblers/{actual.id}",
         body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
         status=200,
         content_type="application/json"
@@ -184,11 +146,4 @@ def test_update_ensembler(
         },
         code_dir=[os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "samples/quickstart")]
     )
-    assert actual.id == pyfunc_ensembler.id
-    assert actual.name == pyfunc_ensembler.name
-    assert actual.project_id == pyfunc_ensembler.project_id
-    assert actual.mlflow_experiment_id == pyfunc_ensembler.mlflow_experiment_id
-    assert actual.mlflow_run_id == pyfunc_ensembler.mlflow_run_id
-    assert actual.artifact_uri == pyfunc_ensembler.artifact_uri
-    assert actual.created_at == pyfunc_ensembler.created_at
-    assert actual.updated_at == pyfunc_ensembler.updated_at
+    assert actual.to_dict() == pyfunc_ensembler.to_dict()
