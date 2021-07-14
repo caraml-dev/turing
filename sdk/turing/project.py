@@ -31,7 +31,5 @@ class Project(ApiObject):
 
     @classmethod
     def list(cls, name: Optional[str] = None) -> List['Project']:
-        from turing.session import active_session
-
-        response = active_session.list_projects(name=name)
+        response = turing.active_session.list_projects(name=name)
         return [Project.from_open_api(item) for item in response]
