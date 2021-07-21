@@ -32,7 +32,7 @@ import turing.generated.models
                     source=source.to_open_api(),
                     predictions={name: source.to_open_api() for name, source in predictions.items()},
                     ensembler=turing.generated.models.EnsemblingJobEnsemblerSpec(
-                        result=result_config
+                        result=result_config.to_open_api()
                     ),
                     sink=sink.to_open_api()
                 ),

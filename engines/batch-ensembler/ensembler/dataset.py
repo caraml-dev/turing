@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from typing import MutableMapping
 from pyspark.sql import DataFrame, SparkSession
 from jinjasql import JinjaSql
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.generated.models as openapi
+import turing.batch.config as sdk
 
 __all__ = ['DataSet', 'BigQueryDataSet', 'jinja']
 
@@ -18,12 +19,12 @@ class DataSet(ABC):
         pass
 
     @abstractmethod
-    def type(self) -> pb2.Dataset.DatasetType:
+    def type(self) -> str:
         pass
 
     @classmethod
-    def from_config(cls, config: pb2.Dataset) -> 'DataSet':
-        if config.type == pb2.Dataset.DatasetType.BQ:
+    def from_config(cls, config: openapi.Dataset) -> 'DataSet':
+        if config.type == sdk.source.BigQueryDataset.TYPE:
             return BigQueryDataSet.from_config(config.bq_config)
         raise ValueError(f'Unknown dataset type: {config.type} is not implemented')
 
@@ -40,7 +41,7 @@ class BigQueryDataSet(DataSet):
         self.options = options
 
     def type(self):
-        return pb2.Dataset.DatasetType.BQ
+        return sdk.source.BigQueryDataset.TYPE
 
     def load(self, spark: SparkSession) -> DataFrame:
         return spark.read \
@@ -50,8 +51,8 @@ class BigQueryDataSet(DataSet):
             .load()
 
     @classmethod
-    def from_config(cls, config: pb2.Dataset.BigQueryDatasetConfig) -> 'BigQueryDataSet':
-        if config.query:
+    def from_config(cls, config: openapi.BigQueryDatasetConfig) -> 'BigQueryDataSet':
+        if config.get('query', ""):
             query = config.query
         elif config.table:
             template, bind_params = jinja.prepare_query(
@@ -64,4 +65,4 @@ class BigQueryDataSet(DataSet):
                 'Dataset initialization failed: '
                 'either "query" or "table" should be provided'
             )
-        return BigQueryDataSet(query, config.options)
+        return BigQueryDataSet(query, config.get('options', {}))

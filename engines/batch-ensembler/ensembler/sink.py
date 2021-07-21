@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import List
 from pyspark.sql import DataFrame
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.batch.config as sdk
+import turing.generated.models as openapi
 
 
 class Sink(ABC):
-    def __init__(self, save_mode: pb2.SaveMode, columns: List[str] = None):
-        self._save_mode = pb2.SaveMode.Name(save_mode).lower()
+    def __init__(self, save_mode: sdk.SaveMode, columns: List[str] = None):
+        self._save_mode = sdk.SaveMode.Name(save_mode).lower()
         self._columns = columns
 
     def save(self, df: DataFrame):
@@ -19,10 +20,8 @@ class Sink(ABC):
         pass
 
     @classmethod
-    def from_config(cls, config: pb2.Sink):
-        if config.type == pb2.Sink.SinkType.CONSOLE:
-            return ConsoleSink(config.columns)
-        if config.type == pb2.Sink.SinkType.BQ:
+    def from_config(cls, config: openapi.EnsemblingJobSink):
+        if config.type == sdk.BigQuerySink.TYPE:
             return BigQuerySink(config.save_mode, config.columns, config.bq_config)
         raise ValueError(f'Sink not implemented: {config.type}')
 
@@ -42,9 +41,9 @@ class BigQuerySink(Sink):
 
     def __init__(
             self,
-            save_mode: pb2.SaveMode,
+            save_mode: sdk.SaveMode,
             columns: List[str],
-            config: pb2.Sink.BigQuerySinkConfig):
+            config: openapi.BigQuerySinkConfig):
         super().__init__(save_mode=save_mode, columns=columns)
 
         self._options = {

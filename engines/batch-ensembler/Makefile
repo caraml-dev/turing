@@ -31,8 +31,6 @@ test-unit: type-check
 proto:
 	@$(ACTIVATE_ENV) && \
 		protoc -I=. \
-		--python_out=ensembler \
-		--mypy_out=ensembler \
 		--go_out=pkg \
 		--go_opt=paths=source_relative \
 		api/proto/v1/*.proto

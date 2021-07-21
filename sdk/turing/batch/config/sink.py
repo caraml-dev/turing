@@ -64,7 +64,7 @@ class BigQuerySink(EnsemblingJobSink):
     BigQuery Sink configuration
     """
 
-    _TYPE_ = "BQ"
+    TYPE = "BQ"
 
     def __init__(
             self,
@@ -76,7 +76,7 @@ class BigQuerySink(EnsemblingJobSink):
         :param staging_bucket: temporary GCS bucket for staging write into BQ table
         :param options: additional sink option to configure the prediction job
         """
-        super(BigQuerySink, self).__init__(type=BigQuerySink._TYPE_)
+        super(BigQuerySink, self).__init__(type=BigQuerySink.TYPE)
         self._table = table
         self._staging_bucket = staging_bucket
         self._options = options

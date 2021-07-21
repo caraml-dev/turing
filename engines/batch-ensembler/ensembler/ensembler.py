@@ -1,20 +1,21 @@
 import mlflow
 from pyspark.sql import SparkSession, DataFrame, types
 from pyspark.sql.functions import struct
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.batch.config as sdk
+import turing.generated.models as openapi
 
 
 class Ensembler:
     _PRIMITIVE_TYPE_MAP = {
-        pb2.Ensembler.ResultType.DOUBLE: types.DoubleType(),
-        pb2.Ensembler.ResultType.FLOAT: types.FloatType(),
-        pb2.Ensembler.ResultType.INTEGER: types.LongType(),
-        pb2.Ensembler.ResultType.LONG: types.LongType(),
-        pb2.Ensembler.ResultType.STRING: types.StringType(),
+        sdk.ResultType.DOUBLE: types.DoubleType(),
+        sdk.ResultType.FLOAT: types.FloatType(),
+        sdk.ResultType.INTEGER: types.LongType(),
+        sdk.ResultType.LONG: types.LongType(),
+        sdk.ResultType.STRING: types.StringType(),
     }
 
     _CAST_TYPE_MAP = {
-        pb2.Ensembler.ResultType.INTEGER: types.IntegerType(),
+        sdk.ResultType.INTEGER: types.IntegerType(),
     }
 
     def __init__(self,
@@ -42,25 +43,31 @@ class Ensembler:
         )
 
     @classmethod
-    def from_config(cls, config: pb2.Ensembler) -> 'Ensembler':
-        result_type = None
-        cast_type = None
-        if config.result.type == pb2.Ensembler.ResultType.ARRAY:
-            if config.result.item_type in cls._PRIMITIVE_TYPE_MAP:
-                result_type = types.ArrayType(
-                    cls._PRIMITIVE_TYPE_MAP.get(config.result.item_type)
+    def from_config(cls, config: openapi.EnsemblingJobEnsemblerSpec) -> 'Ensembler':
+        spark_result_type, spark_cast_type = None, None
+
+        result_type = sdk.ResultType[config.result.type.value]
+        if result_type == sdk.ResultType.ARRAY:
+            item_type = sdk.ResultType[config.result.item_type.value]
+            if item_type in cls._PRIMITIVE_TYPE_MAP:
+                spark_result_type = types.ArrayType(
+                    cls._PRIMITIVE_TYPE_MAP.get(item_type)
                 )
-                if config.result.item_type in cls._CAST_TYPE_MAP:
-                    cast_type = types.ArrayType(
-                        cls._CAST_TYPE_MAP.get(config.result.item_type)
+                if item_type in cls._CAST_TYPE_MAP:
+                    spark_cast_type = types.ArrayType(
+                        cls._CAST_TYPE_MAP.get(item_type)
                     )
             else:
-                raise ValueError(f'unknown item type for array: {config.result.item_type}')
+                raise ValueError(f'unknown item type for array: {item_type}')
         else:
-            result_type = cls._PRIMITIVE_TYPE_MAP.get(config.result.type)
-            cast_type = cls._CAST_TYPE_MAP.get(config.result.type)
+            spark_result_type = cls._PRIMITIVE_TYPE_MAP.get(result_type)
+            spark_cast_type = cls._CAST_TYPE_MAP.get(result_type)
 
-        if result_type is None:
-            raise ValueError(f'unknown result type: {config.result.type}')
+        if spark_result_type is None:
+            raise ValueError(f'unknown result type: {result_type}')
 
-        return Ensembler(config.uri, config.result.column_name, result_type, cast_type)
+        return Ensembler(
+            config.uri,
+            config.result.column_name,
+            spark_result_type,
+            spark_cast_type)

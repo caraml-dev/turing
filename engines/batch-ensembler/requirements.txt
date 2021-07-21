@@ -3,7 +3,6 @@ jinjasql==0.1.8
 mlflow==1.14.1
 numpy==1.17.3
 pandas==1.2.2
-protobuf>=3.0
 py4j==0.10.9
 pyarrow==3.0.0
 pyspark==3.0.1

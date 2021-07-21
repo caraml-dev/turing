@@ -4,7 +4,7 @@ from typing import List, TypeVar, Generic
 from pyspark.sql import DataFrame, SparkSession
 from turing.ensembler import PyFunc
 from .dataset import DataSet, BigQueryDataSet, jinja
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.generated.models as openapi
 
 T = TypeVar('T', bound='DataSet')
 
@@ -28,7 +28,7 @@ class Source(Generic[T]):
         raise NotImplementedError
 
     @classmethod
-    def from_config(cls, config: pb2.Source) -> 'Source':
+    def from_config(cls, config: openapi.EnsemblingJobSource) -> 'Source':
         dataset = DataSet.from_config(config.dataset)
 
         if isinstance(dataset, BigQueryDataSet):
@@ -78,6 +78,6 @@ class PredictionSource(Source[T]):
         return self._prediction_columns
 
     @classmethod
-    def from_config(cls, config: pb2.PredictionSource) -> 'PredictionSource':
+    def from_config(cls, config: openapi.EnsemblingJobPredictionSource) -> 'PredictionSource':
         dataset = DataSet.from_config(config.dataset)
         return PredictionSource(dataset, config.join_on, config.columns)

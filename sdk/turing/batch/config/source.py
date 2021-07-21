@@ -2,7 +2,6 @@ import abc
 from typing import Iterable, MutableMapping, Optional
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
-from turing._base_types import DataObject
 
 
 class EnsemblingJobSource:
@@ -89,7 +88,7 @@ class BigQueryDataset(Dataset):
     BigQuery dataset configuration
     """
 
-    _TYPE = "BQ"
+    TYPE = "BQ"
 
     def __init__(self,
                  table: str = None,
@@ -128,7 +127,7 @@ class BigQueryDataset(Dataset):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQueryDataset(
-            type=BigQueryDataset._TYPE,
+            type=BigQueryDataset.TYPE,
             bq_config=turing.generated.models.BigQueryDatasetConfig(
                 table=self.table,
                 query=self.query,
