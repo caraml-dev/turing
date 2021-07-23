@@ -2,14 +2,13 @@ package api
 
 import (
 	"errors"
-	"github.com/gojek/turing/api/turing/internal/ref"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/validation"
-
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
+	"github.com/gojek/turing/api/turing/validation"
 	"github.com/stretchr/testify/assert"
 )
 
