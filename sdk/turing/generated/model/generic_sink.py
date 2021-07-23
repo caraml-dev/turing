@@ -28,9 +28,7 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.save_mode import SaveMode
-    from turing.generated.model.sink_type import SinkType
     globals()['SaveMode'] = SaveMode
-    globals()['SinkType'] = SinkType
 
 
 class GenericSink(ModelNormal):
@@ -58,6 +56,10 @@ class GenericSink(ModelNormal):
     """
 
     allowed_values = {
+        ('type',): {
+            'CONSOLE': "CONSOLE",
+            'BQ': "BQ",
+        },
     }
 
     validations = {
@@ -79,7 +81,7 @@ class GenericSink(ModelNormal):
         """
         lazy_import()
         return {
-            'type': (SinkType,),  # noqa: E501
+            'type': (str,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'columns': ([str], none_type,),  # noqa: E501
         }
@@ -111,7 +113,7 @@ class GenericSink(ModelNormal):
         """GenericSink - a model defined in OpenAPI
 
         Args:
-            type (SinkType):
+            type (str):
             save_mode (SaveMode):
 
         Keyword Args:

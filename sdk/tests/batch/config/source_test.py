@@ -11,7 +11,6 @@ import turing.generated.models
             "",
             None,
             turing.generated.models.BigQueryDataset(
-                type=turing.batch.config.source.BigQueryDataset.TYPE,
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     table="project.table.dataset_1",
                     features=["feature_1", "feature_2"],
@@ -29,7 +28,6 @@ import turing.generated.models
                 "materializationDataset": "my_dataset"
             },
             turing.generated.models.BigQueryDataset(
-                type=turing.batch.config.source.BigQueryDataset.TYPE,
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     query="SELECT * FROM `project.dataset.table`",
                     options={

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/batch"
+
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
 	openapi "github.com/gojek/turing/api/turing/generated"
@@ -44,12 +46,12 @@ func generateEnsemblingJobFixture(
 		EnsemblerID: ensemblerID,
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			Resources: &models.BatchEnsemblingJobResources{
-				DriverCPURequest:      "1",
-				DriverMemoryRequest:   "1Gi",
-				ExecutorReplica:       10,
-				ExecutorCPURequest:    "1",
-				ExecutorMemoryRequest: "1Gi",
+			Resources: &openapi.EnsemblingResources{
+				DriverCpuRequest:      ref.String("1"),
+				DriverMemoryRequest:   ref.String("1Gi"),
+				ExecutorReplica:       ref.Int32(10),
+				ExecutorCpuRequest:    ref.String("1"),
+				ExecutorMemoryRequest: ref.String("1Gi"),
 			},
 		},
 		JobConfig: &models.JobConfig{
@@ -68,7 +70,7 @@ func generateEnsemblingJobFixture(
 				Source: openapi.EnsemblingJobSource{
 					Dataset: openapi.Dataset{
 						BigQueryDataset: &openapi.BigQueryDataset{
-							Type: openapi.DATASETTYPE_BQ,
+							Type: batch.DatasetTypeBQ,
 							BqConfig: openapi.BigQueryDatasetConfig{
 								Query: "select * from hello_world where customer_id = 4",
 								Options: map[string]string{
@@ -84,7 +86,7 @@ func generateEnsemblingJobFixture(
 					"model_a": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: openapi.DATASETTYPE_BQ,
+								Type: batch.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Table: "project.dataset.predictions_model_a",
 									Features: []string{
@@ -101,7 +103,7 @@ func generateEnsemblingJobFixture(
 					"model_b": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: openapi.DATASETTYPE_BQ,
+								Type: batch.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Query: "select * from hello_world where customer_id = 3",
 								},
@@ -120,7 +122,7 @@ func generateEnsemblingJobFixture(
 				},
 				Sink: openapi.EnsemblingJobSink{
 					BigQuerySink: &openapi.BigQuerySink{
-						Type: openapi.SINKTYPE_BQ,
+						Type: batch.SinkTypeBQ,
 						Columns: []string{
 							"customer_id as customerId",
 							"target_date",

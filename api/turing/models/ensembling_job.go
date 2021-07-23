@@ -44,7 +44,7 @@ type InfraConfig struct {
 	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
 	ServiceAccountName string                       `json:"service_account_name"`
-	Resources          *BatchEnsemblingJobResources `json:"resources"`
+	Resources          *openapi.EnsemblingResources `json:"resources"`
 }
 
 // Value returns json value, implement driver.Valuer interface
@@ -59,15 +59,6 @@ func (r *InfraConfig) Scan(value interface{}) error {
 		return errors.New("type assertion to []byte failed")
 	}
 	return json.Unmarshal(b, &r)
-}
-
-// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
-type BatchEnsemblingJobResources struct {
-	DriverCPURequest      string `json:"driver_cpu_request,omitempty"`
-	DriverMemoryRequest   string `json:"driver_memory_request,omitempty"`
-	ExecutorReplica       int32  `json:"executor_replica,omitempty"`
-	ExecutorCPURequest    string `json:"executor_cpu_request,omitempty"`
-	ExecutorMemoryRequest string `json:"executor_memory_request,omitempty"`
 }
 
 // Status is the state of the finite machine ensembling job.

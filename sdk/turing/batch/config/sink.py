@@ -63,7 +63,7 @@ class BigQuerySink(EnsemblingJobSink):
     BigQuery Sink configuration
     """
 
-    TYPE = turing.generated.models.SinkType("BQ")
+    TYPE = "BQ"
 
     def __init__(
             self,
@@ -94,7 +94,6 @@ class BigQuerySink(EnsemblingJobSink):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQuerySink(
-            type=BigQuerySink.TYPE,
             save_mode=self._save_mode.to_open_api(),
             columns=self._columns,
             bq_config=turing.generated.models.BigQuerySinkConfig(

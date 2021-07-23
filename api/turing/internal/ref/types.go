@@ -9,3 +9,11 @@ func EnsemblingJobResultType(i openapi.EnsemblingJobResultType) *openapi.Ensembl
 func Int(i int) *int {
 	return &i
 }
+
+func Int32(i int32) *int32 {
+	return &i
+}
+
+func String(i string) *string {
+	return &i
+}

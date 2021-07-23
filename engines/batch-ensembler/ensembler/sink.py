@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, MutableMapping, Optional
 from pyspark.sql import DataFrame
 import turing.batch.config as sdk
 import turing.generated.models as openapi
@@ -7,8 +7,20 @@ import turing.generated.models as openapi
 
 class Sink(ABC):
     def __init__(self, save_mode: sdk.sink.SaveMode, columns: List[str] = None):
-        self._save_mode = sdk.sink.SaveMode.Name(save_mode).lower()
+        self._save_mode = save_mode
         self._columns = columns
+
+    @property
+    def type(self) -> str:
+        pass
+
+    @property
+    def save_mode(self) -> sdk.sink.SaveMode:
+        return self._save_mode
+
+    @property
+    def columns(self) -> Optional[List[str]]:
+        return self._columns
 
     def save(self, df: DataFrame):
         if self._columns:
@@ -28,7 +40,11 @@ class Sink(ABC):
 
 class ConsoleSink(Sink):
     def __init__(self, columns: List[str] = None):
-        super().__init__(save_mode=None, columns=columns)
+        super(ConsoleSink, self).__init__(save_mode=None, columns=columns)
+
+    @property
+    def type(self) -> str:
+        return "CONSOLE"
 
     def _save(self, df: DataFrame):
         df.show()
@@ -44,7 +60,7 @@ class BigQuerySink(Sink):
             save_mode: sdk.sink.SaveMode,
             columns: List[str],
             config: openapi.BigQuerySinkConfig):
-        super().__init__(save_mode=save_mode, columns=columns)
+        super(BigQuerySink, self).__init__(save_mode=save_mode, columns=columns)
 
         self._options = {
             **config.options,
@@ -52,9 +68,17 @@ class BigQuerySink(Sink):
             self._OPTION_NAME_TABLE: config.table,
         }
 
+    @property
+    def type(self) -> str:
+        return sdk.sink.BigQuerySink.TYPE
+
+    @property
+    def options(self) -> MutableMapping[str, str]:
+        return self._options
+
     def _save(self, df: DataFrame):
         df.write \
-            .mode(self._save_mode) \
+            .mode(sdk.sink.SaveMode.Name(self.save_mode).lower()) \
             .format(self._WRITE_FORMAT) \
-            .options(**self._options) \
+            .options(**self.options) \
             .save()

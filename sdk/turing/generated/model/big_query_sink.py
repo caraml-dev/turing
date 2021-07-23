@@ -31,12 +31,10 @@ def lazy_import():
     from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
     from turing.generated.model.generic_sink import GenericSink
     from turing.generated.model.save_mode import SaveMode
-    from turing.generated.model.sink_type import SinkType
     globals()['BigQuerySinkAllOf'] = BigQuerySinkAllOf
     globals()['BigQuerySinkConfig'] = BigQuerySinkConfig
     globals()['GenericSink'] = GenericSink
     globals()['SaveMode'] = SaveMode
-    globals()['SinkType'] = SinkType
 
 
 class BigQuerySink(ModelComposed):
@@ -64,6 +62,10 @@ class BigQuerySink(ModelComposed):
     """
 
     allowed_values = {
+        ('type',): {
+            'CONSOLE': "CONSOLE",
+            'BQ': "BQ",
+        },
     }
 
     validations = {
@@ -92,7 +94,7 @@ class BigQuerySink(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (SinkType,),  # noqa: E501
+            'type': (str,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
             'columns': ([str], none_type,),  # noqa: E501
@@ -123,15 +125,15 @@ class BigQuerySink(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, save_mode, bq_config, *args, **kwargs):  # noqa: E501
+    def __init__(self, save_mode, bq_config, *args, **kwargs):  # noqa: E501
         """BigQuerySink - a model defined in OpenAPI
 
         Args:
-            type (SinkType):
             save_mode (SaveMode):
             bq_config (BigQuerySinkConfig):
 
         Keyword Args:
+            type (str): defaults to "BQ", must be one of ["CONSOLE", "BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -165,6 +167,7 @@ class BigQuerySink(ModelComposed):
             columns ([str], none_type): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

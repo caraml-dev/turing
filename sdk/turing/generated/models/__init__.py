@@ -16,7 +16,6 @@ from turing.generated.model.big_query_sink import BigQuerySink
 from turing.generated.model.big_query_sink_all_of import BigQuerySinkAllOf
 from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
 from turing.generated.model.dataset import Dataset
-from turing.generated.model.dataset_type import DatasetType
 from turing.generated.model.ensembler import Ensembler
 from turing.generated.model.ensembler_config import EnsemblerConfig
 from turing.generated.model.ensembler_config_kind import EnsemblerConfigKind
@@ -49,4 +48,3 @@ from turing.generated.model.project import Project
 from turing.generated.model.py_func_ensembler import PyFuncEnsembler
 from turing.generated.model.py_func_ensembler_all_of import PyFuncEnsemblerAllOf
 from turing.generated.model.save_mode import SaveMode
-from turing.generated.model.sink_type import SinkType

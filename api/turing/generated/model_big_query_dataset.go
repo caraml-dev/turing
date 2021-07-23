@@ -16,7 +16,7 @@ import (
 
 // BigQueryDataset struct for BigQueryDataset
 type BigQueryDataset struct {
-	Type     DatasetType           `json:"type"`
+	Type     string                `json:"type"`
 	BqConfig BigQueryDatasetConfig `json:"bq_config"`
 }
 
@@ -24,7 +24,7 @@ type BigQueryDataset struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBigQueryDataset(type_ DatasetType, bqConfig BigQueryDatasetConfig) *BigQueryDataset {
+func NewBigQueryDataset(type_ string, bqConfig BigQueryDatasetConfig) *BigQueryDataset {
 	this := BigQueryDataset{}
 	this.Type = type_
 	this.BqConfig = bqConfig
@@ -36,13 +36,15 @@ func NewBigQueryDataset(type_ DatasetType, bqConfig BigQueryDatasetConfig) *BigQ
 // but it doesn't guarantee that properties required by API are set
 func NewBigQueryDatasetWithDefaults() *BigQueryDataset {
 	this := BigQueryDataset{}
+	var type_ string = "BQ"
+	this.Type = type_
 	return &this
 }
 
 // GetType returns the Type field value
-func (o *BigQueryDataset) GetType() DatasetType {
+func (o *BigQueryDataset) GetType() string {
 	if o == nil {
-		var ret DatasetType
+		var ret string
 		return ret
 	}
 
@@ -51,7 +53,7 @@ func (o *BigQueryDataset) GetType() DatasetType {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *BigQueryDataset) GetTypeOk() (*DatasetType, bool) {
+func (o *BigQueryDataset) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -59,7 +61,7 @@ func (o *BigQueryDataset) GetTypeOk() (*DatasetType, bool) {
 }
 
 // SetType sets field value
-func (o *BigQueryDataset) SetType(v DatasetType) {
+func (o *BigQueryDataset) SetType(v string) {
 	o.Type = v
 }
 

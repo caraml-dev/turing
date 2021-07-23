@@ -56,6 +56,10 @@ class BigQuerySinkAllOf(ModelNormal):
     """
 
     allowed_values = {
+        ('type',): {
+            'CONSOLE': "CONSOLE",
+            'BQ': "BQ",
+        },
     }
 
     validations = {
@@ -78,6 +82,7 @@ class BigQuerySinkAllOf(ModelNormal):
         lazy_import()
         return {
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
+            'type': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -87,6 +92,7 @@ class BigQuerySinkAllOf(ModelNormal):
 
     attribute_map = {
         'bq_config': 'bq_config',  # noqa: E501
+        'type': 'type',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -138,6 +144,7 @@ class BigQuerySinkAllOf(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            type (str): [optional] if omitted the server will use the default value of "BQ"  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

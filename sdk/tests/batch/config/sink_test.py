@@ -14,7 +14,6 @@ import turing.generated.models
             turing.batch.config.sink.SaveMode.APPEND,
             ["target_date", "user_id", "prediction_score"],
             turing.generated.models.BigQuerySink(
-                type=turing.batch.config.sink.BigQuerySink.TYPE,
                 save_mode=turing.generated.models.SaveMode("APPEND"),
                 columns=["target_date", "user_id", "prediction_score"],
                 bq_config=turing.generated.models.BigQuerySinkConfig(

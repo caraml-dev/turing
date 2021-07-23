@@ -5,4 +5,21 @@ globalProperties:
   modelTests: false
   apiDocs: false
   modelDocs: false
-  models: ""
+  models:
+    - BigQueryDataset
+    - BigQueryDatasetConfig
+    - BigQuerySink
+    - BigQuerySinkConfig
+    - Dataset
+    - EnsemblerConfig
+    - EnsemblerConfigKind
+    - EnsemblingJobEnsemblerSpec
+    - EnsemblingJobEnsemblerSpecResult
+    - EnsemblingJobMeta
+    - EnsemblingJobPredictionSource
+    - EnsemblingJobResultType
+    - EnsemblingJobSink
+    - EnsemblingJobSource
+    - EnsemblingJobSpec
+    - EnsemblingResources
+    - SaveMode

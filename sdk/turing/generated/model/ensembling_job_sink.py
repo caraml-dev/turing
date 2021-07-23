@@ -30,11 +30,9 @@ def lazy_import():
     from turing.generated.model.big_query_sink import BigQuerySink
     from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
     from turing.generated.model.save_mode import SaveMode
-    from turing.generated.model.sink_type import SinkType
     globals()['BigQuerySink'] = BigQuerySink
     globals()['BigQuerySinkConfig'] = BigQuerySinkConfig
     globals()['SaveMode'] = SaveMode
-    globals()['SinkType'] = SinkType
 
 
 class EnsemblingJobSink(ModelComposed):
@@ -62,6 +60,10 @@ class EnsemblingJobSink(ModelComposed):
     """
 
     allowed_values = {
+        ('type',): {
+            'CONSOLE': "CONSOLE",
+            'BQ': "BQ",
+        },
     }
 
     validations = {
@@ -90,7 +92,7 @@ class EnsemblingJobSink(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (SinkType,),  # noqa: E501
+            'type': (str,),  # noqa: E501
             'columns': ([str], none_type,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
@@ -127,13 +129,13 @@ class EnsemblingJobSink(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, *args, **kwargs):  # noqa: E501
+    def __init__(self, *args, **kwargs):  # noqa: E501
         """EnsemblingJobSink - a model defined in OpenAPI
 
         Args:
-            type (SinkType):
 
         Keyword Args:
+            type (str): defaults to "BQ", must be one of ["CONSOLE", "BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -169,6 +171,7 @@ class EnsemblingJobSink(ModelComposed):
             bq_config (BigQuerySinkConfig): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

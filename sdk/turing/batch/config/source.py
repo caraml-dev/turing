@@ -88,7 +88,7 @@ class BigQueryDataset(Dataset):
     BigQuery dataset configuration
     """
 
-    TYPE = turing.generated.models.DatasetType("BQ")
+    TYPE = "BQ"
 
     def __init__(self,
                  table: str = "",
@@ -128,7 +128,6 @@ class BigQueryDataset(Dataset):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQueryDataset(
-            type=BigQueryDataset.TYPE,
             bq_config=turing.generated.models.BigQueryDatasetConfig(
                 table=self.table,
                 query=self.query,

@@ -225,7 +225,7 @@ components:
           items:
             type: "string"
 
-    DatasetType:
+    DatasetType: &DatasetType
       type: "string"
       enum:
         - "BQ"
@@ -245,7 +245,7 @@ components:
         - "type"
       properties:
         type:
-          $ref: "#/components/schemas/DatasetType"
+          <<: *DatasetType
 
     BigQueryDataset:
       allOf:
@@ -254,6 +254,9 @@ components:
           required:
             - bq_config
           properties:
+            type:
+              <<: *DatasetType
+              default: "BQ"
             bq_config:
               $ref: "#/components/schemas/BigQueryDatasetConfig"
 
@@ -292,6 +295,19 @@ components:
               items:
                 type: "string"
 
+    EnsemblingJobEnsemblerSpecResult:
+      type: "object"
+      required:
+        - column_name
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/EnsemblingJobResultType"
+        item_type:
+          $ref: "#/components/schemas/EnsemblingJobResultType"
+        column_name:
+          type: "string"
+
     EnsemblingJobEnsemblerSpec:
       type: "object"
       required:
@@ -303,17 +319,7 @@ components:
           format: "uri"
           default: ""
         result:
-          type: "object"
-          required:
-            - column_name
-            - type
-          properties:
-            type:
-              $ref: "#/components/schemas/EnsemblingJobResultType"
-            item_type:
-              $ref: "#/components/schemas/EnsemblingJobResultType"
-            column_name:
-              type: "string"
+          $ref: "#/components/schemas/EnsemblingJobEnsemblerSpecResult"
 
     EnsemblingJobResultType:
       type: "string"
@@ -325,7 +331,7 @@ components:
         - STRING
         - ARRAY
 
-    SinkType:
+    SinkType: &SinkType
       type: "string"
       enum:
         - CONSOLE
@@ -347,7 +353,7 @@ components:
         - save_mode
       properties:
         type:
-          $ref: "#/components/schemas/SinkType"
+          <<: *SinkType
         columns:
           type: "array"
           nullable: true
@@ -363,6 +369,9 @@ components:
           required:
             - bq_config
           properties:
+            type:
+              <<: *SinkType
+              default: "BQ"
             bq_config:
               $ref: "#/components/schemas/BigQuerySinkConfig"
 

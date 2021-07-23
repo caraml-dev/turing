@@ -16,7 +16,7 @@ import (
 
 // BigQuerySink struct for BigQuerySink
 type BigQuerySink struct {
-	Type     SinkType           `json:"type"`
+	Type     string             `json:"type"`
 	Columns  []string           `json:"columns,omitempty"`
 	SaveMode SaveMode           `json:"save_mode"`
 	BqConfig BigQuerySinkConfig `json:"bq_config"`
@@ -26,7 +26,7 @@ type BigQuerySink struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBigQuerySink(type_ SinkType, saveMode SaveMode, bqConfig BigQuerySinkConfig) *BigQuerySink {
+func NewBigQuerySink(type_ string, saveMode SaveMode, bqConfig BigQuerySinkConfig) *BigQuerySink {
 	this := BigQuerySink{}
 	this.Type = type_
 	this.SaveMode = saveMode
@@ -39,13 +39,15 @@ func NewBigQuerySink(type_ SinkType, saveMode SaveMode, bqConfig BigQuerySinkCon
 // but it doesn't guarantee that properties required by API are set
 func NewBigQuerySinkWithDefaults() *BigQuerySink {
 	this := BigQuerySink{}
+	var type_ string = "BQ"
+	this.Type = type_
 	return &this
 }
 
 // GetType returns the Type field value
-func (o *BigQuerySink) GetType() SinkType {
+func (o *BigQuerySink) GetType() string {
 	if o == nil {
-		var ret SinkType
+		var ret string
 		return ret
 	}
 
@@ -54,7 +56,7 @@ func (o *BigQuerySink) GetType() SinkType {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *BigQuerySink) GetTypeOk() (*SinkType, bool) {
+func (o *BigQuerySink) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -62,7 +64,7 @@ func (o *BigQuerySink) GetTypeOk() (*SinkType, bool) {
 }
 
 // SetType sets field value
-func (o *BigQuerySink) SetType(v SinkType) {
+func (o *BigQuerySink) SetType(v string) {
 	o.Type = v
 }
 
