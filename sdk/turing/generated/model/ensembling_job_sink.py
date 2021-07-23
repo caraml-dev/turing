@@ -30,9 +30,11 @@ def lazy_import():
     from turing.generated.model.big_query_sink import BigQuerySink
     from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
     from turing.generated.model.save_mode import SaveMode
+    from turing.generated.model.sink_type import SinkType
     globals()['BigQuerySink'] = BigQuerySink
     globals()['BigQuerySinkConfig'] = BigQuerySinkConfig
     globals()['SaveMode'] = SaveMode
+    globals()['SinkType'] = SinkType
 
 
 class EnsemblingJobSink(ModelComposed):
@@ -60,10 +62,6 @@ class EnsemblingJobSink(ModelComposed):
     """
 
     allowed_values = {
-        ('type',): {
-            'CONSOLE': "CONSOLE",
-            'BQ': "BQ",
-        },
     }
 
     validations = {
@@ -92,8 +90,8 @@ class EnsemblingJobSink(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (str,),  # noqa: E501
-            'columns': ([str],),  # noqa: E501
+            'type': (SinkType,),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
         }
@@ -133,7 +131,7 @@ class EnsemblingJobSink(ModelComposed):
         """EnsemblingJobSink - a model defined in OpenAPI
 
         Args:
-            type (str):
+            type (SinkType):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -166,7 +164,7 @@ class EnsemblingJobSink(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            columns ([str]): [optional]  # noqa: E501
+            columns ([str], none_type): [optional]  # noqa: E501
             save_mode (SaveMode): [optional]  # noqa: E501
             bq_config (BigQuerySinkConfig): [optional]  # noqa: E501
         """

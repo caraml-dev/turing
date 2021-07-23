@@ -6,8 +6,8 @@ import turing.generated.models as openapi
 
 
 class Sink(ABC):
-    def __init__(self, save_mode: sdk.SaveMode, columns: List[str] = None):
-        self._save_mode = sdk.SaveMode.Name(save_mode).lower()
+    def __init__(self, save_mode: sdk.sink.SaveMode, columns: List[str] = None):
+        self._save_mode = sdk.sink.SaveMode.Name(save_mode).lower()
         self._columns = columns
 
     def save(self, df: DataFrame):
@@ -21,7 +21,7 @@ class Sink(ABC):
 
     @classmethod
     def from_config(cls, config: openapi.EnsemblingJobSink):
-        if config.type == sdk.BigQuerySink.TYPE:
+        if config.type == sdk.sink.BigQuerySink.TYPE:
             return BigQuerySink(config.save_mode, config.columns, config.bq_config)
         raise ValueError(f'Sink not implemented: {config.type}')
 
@@ -41,7 +41,7 @@ class BigQuerySink(Sink):
 
     def __init__(
             self,
-            save_mode: sdk.SaveMode,
+            save_mode: sdk.sink.SaveMode,
             columns: List[str],
             config: openapi.BigQuerySinkConfig):
         super().__init__(save_mode=save_mode, columns=columns)

@@ -1,18 +1,19 @@
 import pytest
-import turing.batch.config
+import turing.batch.config.source
+import turing.batch.config.sink
 import turing.generated.models
 
 
 @pytest.mark.parametrize(
     "source,predictions,result_config,sink,expected_fn", [
         pytest.param(
-            turing.batch.config.BigQueryDataset(
+            turing.batch.config.source.BigQueryDataset(
                 table="project.table.dataset_1",
                 features=["feature_1", "feature_2", "feature_3"]
             ).join_on(columns=["feature_2", "feature_3"]),
             {
                 "model_a":
-                    turing.batch.config.BigQueryDataset(
+                    turing.batch.config.source.BigQueryDataset(
                         table="project.table.model_a_results",
                         features=["feature_2", "feature_3", "prediction"]
                     ).join_on(["feature_2", "feature_3"]).select(["prediction"])
@@ -21,7 +22,7 @@ import turing.generated.models
                 type=turing.batch.config.ResultType.FLOAT,
                 column_name="ensembling_result"
             ),
-            (turing.batch.config.BigQuerySink(
+            (turing.batch.config.sink.BigQuerySink(
                 table="project.table.ensembling_results",
                 staging_bucket="staging_bucket",
                 options={})

@@ -7,7 +7,7 @@ import re
 import tests
 import turing.ensembler
 from urllib3_mock import Responses
-from turing import generated as client
+import turing.generated.models
 
 responses = Responses('requests.packages.urllib3')
 
@@ -43,14 +43,14 @@ def test_list_ensemblers(turing_api, active_project, generic_ensemblers, use_goo
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
-    page = client.models.EnsemblersPaginatedResults(
+    page = turing.generated.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
-        paging=client.models.PaginationPaging(total=1, page=1, pages=1)
+        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1)
     )
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{active_project.id}/ensemblers?type={turing.EnsemblerType.PYFUNC.value}",
+        url=f"/v1/projects/{active_project.id}/ensemblers?type={turing.PyFuncEnsembler.TYPE.value}",
         body=json.dumps(page, default=tests.json_serializer),
         match_querystring=True,
         status=200,
@@ -61,7 +61,7 @@ def test_list_ensemblers(turing_api, active_project, generic_ensemblers, use_goo
     assert all([isinstance(p, turing.PyFuncEnsembler) for p in actual])
 
     for actual, expected in zip(actual, generic_ensemblers):
-        assert actual.to_dict() == expected.to_dict()
+        assert actual == turing.PyFuncEnsembler.from_open_api(expected)
 
 
 @responses.activate
@@ -94,7 +94,7 @@ def test_create_ensembler(
         }
     )
 
-    assert actual.to_dict() == pyfunc_ensembler.to_dict()
+    assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
 
 
 @responses.activate
@@ -112,9 +112,9 @@ def test_update_ensembler(
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
-    page = client.models.EnsemblersPaginatedResults(
+    page = turing.generated.models.EnsemblersPaginatedResults(
         results=generic_ensemblers,
-        paging=client.models.PaginationPaging(total=1, page=1, pages=1)
+        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1)
     )
 
     responses.add(
@@ -146,4 +146,4 @@ def test_update_ensembler(
         },
         code_dir=[os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "samples/quickstart")]
     )
-    assert actual.to_dict() == pyfunc_ensembler.to_dict()
+    assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)

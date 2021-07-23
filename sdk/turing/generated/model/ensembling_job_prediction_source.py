@@ -90,7 +90,7 @@ class EnsemblingJobPredictionSource(ModelComposed):
         return {
             'dataset': (Dataset,),  # noqa: E501
             'join_on': ([str],),  # noqa: E501
-            'columns': ([str],),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -117,8 +117,12 @@ class EnsemblingJobPredictionSource(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, dataset, join_on, *args, **kwargs):  # noqa: E501
         """EnsemblingJobPredictionSource - a model defined in OpenAPI
+
+        Args:
+            dataset (Dataset):
+            join_on ([str]):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -151,9 +155,7 @@ class EnsemblingJobPredictionSource(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            dataset (Dataset): [optional]  # noqa: E501
-            join_on ([str]): [optional]  # noqa: E501
-            columns ([str]): [optional]  # noqa: E501
+            columns ([str], none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -187,6 +189,8 @@ class EnsemblingJobPredictionSource(ModelComposed):
             '_visited_composed_classes': self._visited_composed_classes,
         }
         required_args = {
+            'dataset': dataset,
+            'join_on': join_on,
         }
         model_args = {}
         model_args.update(required_args)

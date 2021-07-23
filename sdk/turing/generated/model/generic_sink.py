@@ -28,7 +28,9 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.save_mode import SaveMode
+    from turing.generated.model.sink_type import SinkType
     globals()['SaveMode'] = SaveMode
+    globals()['SinkType'] = SinkType
 
 
 class GenericSink(ModelNormal):
@@ -56,10 +58,6 @@ class GenericSink(ModelNormal):
     """
 
     allowed_values = {
-        ('type',): {
-            'CONSOLE': "CONSOLE",
-            'BQ': "BQ",
-        },
     }
 
     validations = {
@@ -81,9 +79,9 @@ class GenericSink(ModelNormal):
         """
         lazy_import()
         return {
-            'type': (str,),  # noqa: E501
-            'columns': ([str],),  # noqa: E501
+            'type': (SinkType,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -93,8 +91,8 @@ class GenericSink(ModelNormal):
 
     attribute_map = {
         'type': 'type',  # noqa: E501
-        'columns': 'columns',  # noqa: E501
         'save_mode': 'save_mode',  # noqa: E501
+        'columns': 'columns',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -109,11 +107,12 @@ class GenericSink(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, *args, **kwargs):  # noqa: E501
+    def __init__(self, type, save_mode, *args, **kwargs):  # noqa: E501
         """GenericSink - a model defined in OpenAPI
 
         Args:
-            type (str):
+            type (SinkType):
+            save_mode (SaveMode):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -146,8 +145,7 @@ class GenericSink(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            columns ([str]): [optional]  # noqa: E501
-            save_mode (SaveMode): [optional]  # noqa: E501
+            columns ([str], none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -174,6 +172,7 @@ class GenericSink(ModelNormal):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         self.type = type
+        self.save_mode = save_mode
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

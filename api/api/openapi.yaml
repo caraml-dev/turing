@@ -1,0 +1,73 @@
+openapi: 3.0.3
+info:
+  title: Turing API
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:8080/v1
+
+security:
+  - bearerAuth: []
+
+paths:
+  # P R O J E C T S
+  "/projects":
+    $ref: "specs/projects.yaml#/paths/~1projects"
+
+  # E N S E M B L E R S
+  "/projects/{project_id}/ensemblers":
+    $ref: "specs/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers"
+  "/projects/{project_id}/ensemblers/{ensembler_id}":
+    $ref: "specs/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"
+
+  # J O B S
+  "/projects/{project_id}/jobs":
+    $ref: "specs/jobs.yaml#/paths/~1projects~1{project_id}~1jobs"
+  "/projects/{project_id}/jobs/{job_id}":
+    $ref: "specs/jobs.yaml#/paths/~1projects~1{project_id}~1jobs~1{job_id}"
+
+  # A L E R T S
+  "/projects/{project_id}/routers/{router_id}/alerts":
+    $ref: "specs/alerts.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1alerts"
+  "/projects/{project_id}/routers/{router_id}/alerts/{alert_id}":
+    $ref: "specs/alerts.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1alerts~1{alert_id}"
+
+  # R O U T E R S
+  "/projects/{project_id}/routers":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers"
+  "/projects/{project_id}/routers/{router_id}":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}"
+  "/projects/{project_id}/routers/{router_id}/deploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1deploy"
+  "/projects/{project_id}/routers/{router_id}/undeploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1undeploy"
+  "/projects/{project_id}/routers/{router_id}/versions":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions"
+  "/projects/{project_id}/routers/{router_id}/versions/{version}":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}"
+  "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}~1deploy"
+  "/projects/{project_id}/routers/{router_id}/events":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1events"
+
+  # L O G S
+  "/projects/{project_id}/routers/{router_id}/logs":
+    $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1logs"
+  "/projects/{project_id}/routers/{router_id}/versions/{version}/logs":
+    $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}~1logs"
+
+  # E X P E R I M E N T S
+  "/experiment-engines":
+    $ref: "specs/experiment-engines.yaml#/paths/~1experiment-engines"
+  "/experiment-engines/{engine}/clients":
+    $ref: "specs/experiment-engines.yaml#/paths/~1experiment-engines~1{engine}~1clients"
+  "/experiment-engines/{engine}/experiments":
+    $ref: "specs/experiment-engines.yaml#/paths/~1experiment-engines~1{engine}~1experiments"
+  "/experiment-engines/{engine}/variables":
+    $ref: "specs/experiment-engines.yaml#/paths/~1experiment-engines~1{engine}~1variables"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

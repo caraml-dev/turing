@@ -125,3 +125,11 @@ clean_docker_stack:
 	@echo "Cleaning up local docker stack..."
 	@docker stack rm turing_api_stack
 	@docker secret rm google_app_creds
+
+gen-client:
+	rm -rf turing/generated
+	@openapi-generator generate \
+		--input-spec api/openapi-sdk.yaml \
+		--generator-name go \
+		--output turing/generated \
+		--config openapi-codegen.yaml

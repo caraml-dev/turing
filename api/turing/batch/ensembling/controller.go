@@ -2,6 +2,7 @@ package batchensembling
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -202,7 +203,7 @@ func (c *ensemblingController) createSparkApplication(
 }
 
 func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string) error {
-	jobConfigJSON, err := ensemblingJob.JobConfig.MarshalJSON()
+	jobConfigJSON, err := json.Marshal(ensemblingJob.JobConfig)
 	if err != nil {
 		return err
 	}

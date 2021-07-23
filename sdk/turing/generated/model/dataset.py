@@ -29,8 +29,10 @@ from turing.generated.model_utils import (  # noqa: F401
 def lazy_import():
     from turing.generated.model.big_query_dataset import BigQueryDataset
     from turing.generated.model.big_query_dataset_config import BigQueryDatasetConfig
+    from turing.generated.model.dataset_type import DatasetType
     globals()['BigQueryDataset'] = BigQueryDataset
     globals()['BigQueryDatasetConfig'] = BigQueryDatasetConfig
+    globals()['DatasetType'] = DatasetType
 
 
 class Dataset(ModelComposed):
@@ -58,9 +60,6 @@ class Dataset(ModelComposed):
     """
 
     allowed_values = {
-        ('type',): {
-            'BQ': "BQ",
-        },
     }
 
     validations = {
@@ -89,7 +88,7 @@ class Dataset(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (str,),  # noqa: E501
+            'type': (DatasetType,),  # noqa: E501
             'bq_config': (BigQueryDatasetConfig,),  # noqa: E501
         }
 
@@ -122,13 +121,13 @@ class Dataset(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, type, *args, **kwargs):  # noqa: E501
         """Dataset - a model defined in OpenAPI
 
         Args:
+            type (DatasetType):
 
         Keyword Args:
-            type (str): defaults to "BQ", must be one of ["BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -162,7 +161,6 @@ class Dataset(ModelComposed):
             bq_config (BigQueryDatasetConfig): [optional]  # noqa: E501
         """
 
-        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

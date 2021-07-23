@@ -133,7 +133,7 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			openapi, err := NewOpenAPIValidation(
-				"../../openapi.yaml",
+				"../../api/openapi.yaml",
 				OpenAPIValidationOptions{
 					IgnoreAuthentication: true,
 					IgnoreServers:        true,
@@ -167,12 +167,12 @@ func TestNewOpenAPIValidation(t *testing.T) {
 	}{
 		{
 			name:            "default options",
-			openapiYamlFile: "../../openapi.yaml",
+			openapiYamlFile: "../../api/openapi.yaml",
 			options:         OpenAPIValidationOptions{},
 		},
 		{
 			name:            "ignore authentication and servers",
-			openapiYamlFile: "../../openapi.yaml",
+			openapiYamlFile: "../../api/openapi.yaml",
 			options: OpenAPIValidationOptions{
 				IgnoreAuthentication: true,
 				IgnoreServers:        true,

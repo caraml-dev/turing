@@ -11,7 +11,7 @@ dev: env
 gen-client:
 	rm -rf turing/generated
 	@openapi-generator generate \
-		--input-spec ../api/openapi-sdk.yaml \
+		--input-spec ../api/api/openapi-sdk.yaml \
 		--generator-name python \
 		--output . \
 		--config openapi-codegen.yaml

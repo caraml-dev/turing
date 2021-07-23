@@ -1,10 +1,10 @@
 import abc
-from enum import Enum
 from typing import Optional, Union, List, Any, Dict
 import mlflow
 import numpy
 import pandas
 import turing.generated.models
+from turing.generated.models import EnsemblerType
 from turing._base_types import ApiObject, ApiObjectSpec
 from turing.batch import EnsemblingJob
 from turing.batch.config import EnsemblingJobConfig
@@ -72,10 +72,6 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
                    ), axis=1, result_type='expand')
 
 
-class EnsemblerType(Enum):
-    PYFUNC = "pyfunc"
-
-
 @ApiObjectSpec(turing.generated.models.Ensembler)
 class Ensembler(ApiObject):
     """
@@ -92,21 +88,13 @@ class Ensembler(ApiObject):
     def name(self) -> str:
         return self._name
 
-    @name.setter
-    def name(self, name):
-        self._name = name
-
     @property
-    def type(self) -> str:
-        return self._type.value
+    def type(self) -> 'EnsemblerType':
+        return self._type
 
     @property
     def project_id(self) -> int:
         return self._project_id
-
-    @project_id.setter
-    def project_id(self, project_id: int):
-        self._project_id = project_id
 
     @classmethod
     def list(
@@ -138,6 +126,7 @@ class PyFuncEnsembler(Ensembler):
     API entity for PyFuncEnsembler
     """
 
+    TYPE = EnsemblerType("pyfunc")
     DEFAULT_ENSEMBLER_PATH = "ensembler"
 
     def __init__(
@@ -147,7 +136,7 @@ class PyFuncEnsembler(Ensembler):
             artifact_uri: str = None,
             **kwargs):
         kwargs.pop('type', None)
-        super(PyFuncEnsembler, self).__init__(type=EnsemblerType.PYFUNC, **kwargs)
+        super(PyFuncEnsembler, self).__init__(type=PyFuncEnsembler.TYPE, **kwargs)
         self._mlflow_experiment_id = mlflow_experiment_id
         self._mlflow_run_id = mlflow_run_id
         self._artifact_uri = artifact_uri
@@ -209,7 +198,7 @@ class PyFuncEnsembler(Ensembler):
             Example: {"config" : "config/staging.yaml"}
         """
         if name:
-            self.name = name
+            self._name = name
 
         if ensembler_instance:
             project_name = turing.active_session.active_project.name
@@ -270,7 +259,7 @@ class PyFuncEnsembler(Ensembler):
         :return: list of pyfunc ensemblers
         """
         response = turing.active_session.list_ensemblers(
-            ensembler_type=EnsemblerType.PYFUNC,
+            ensembler_type=PyFuncEnsembler.TYPE,
             page=page,
             page_size=page_size
         )

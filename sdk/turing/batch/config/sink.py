@@ -24,8 +24,7 @@ class EnsemblingJobSink:
     Abstract sink configuration of the ensembling job
     """
 
-    def __init__(self, type: str, save_mode: SaveMode = None):
-        self._type = type
+    def __init__(self, save_mode: SaveMode = None):
         self._save_mode = save_mode
         self._columns = []
 
@@ -64,7 +63,7 @@ class BigQuerySink(EnsemblingJobSink):
     BigQuery Sink configuration
     """
 
-    TYPE = "BQ"
+    TYPE = turing.generated.models.SinkType("BQ")
 
     def __init__(
             self,
@@ -76,7 +75,7 @@ class BigQuerySink(EnsemblingJobSink):
         :param staging_bucket: temporary GCS bucket for staging write into BQ table
         :param options: additional sink option to configure the prediction job
         """
-        super(BigQuerySink, self).__init__(type=BigQuerySink.TYPE)
+        super(BigQuerySink, self).__init__()
         self._table = table
         self._staging_bucket = staging_bucket
         self._options = options
@@ -95,7 +94,7 @@ class BigQuerySink(EnsemblingJobSink):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQuerySink(
-            type=self._type,
+            type=BigQuerySink.TYPE,
             save_mode=self._save_mode.to_open_api(),
             columns=self._columns,
             bq_config=turing.generated.models.BigQuerySinkConfig(

@@ -88,12 +88,12 @@ class BigQueryDataset(Dataset):
     BigQuery dataset configuration
     """
 
-    TYPE = "BQ"
+    TYPE = turing.generated.models.DatasetType("BQ")
 
     def __init__(self,
-                 table: str = None,
+                 table: str = "",
                  features: Iterable[str] = None,
-                 query: str = None,
+                 query: str = "",
                  options: MutableMapping[str, str] = None):
         """
         Create new instance of BigQuery dataset
@@ -104,6 +104,7 @@ class BigQueryDataset(Dataset):
              This allows to define dataset from the data, stored in multiple tables
         :param options: (optional) Additional BQ options to configure the dataset
         """
+        super(BigQueryDataset, self).__init__()
         self._table = table
         self._query = query
         self._features = features

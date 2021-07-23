@@ -73,7 +73,7 @@ class EnsemblingJobMeta(ModelNormal):
         """
         return {
             'name': (str,),  # noqa: E501
-            'annotations': ({str: (str,)},),  # noqa: E501
+            'annotations': ({str: (str,)}, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -98,8 +98,11 @@ class EnsemblingJobMeta(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, name, *args, **kwargs):  # noqa: E501
         """EnsemblingJobMeta - a model defined in OpenAPI
+
+        Args:
+            name (str):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -132,8 +135,7 @@ class EnsemblingJobMeta(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            name (str): [optional]  # noqa: E501
-            annotations ({str: (str,)}): [optional]  # noqa: E501
+            annotations ({str: (str,)}, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -159,6 +161,7 @@ class EnsemblingJobMeta(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.name = name
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

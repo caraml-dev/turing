@@ -34,12 +34,11 @@ services:
     ports:
       - 8081:5555
     volumes:
-      - ./openapi:/app/openapi:ro
-      - ./openapi.yaml:/app/openapi.yaml:ro
+      - ./api:/app/api:ro
     environment:
       - PORT=5555
       - LAYOUT=BaseLayout
-      - SWAGGER_JSON=/app/openapi.yaml
+      - SWAGGER_JSON=/app/api/openapi.yaml
 
   postgres-auth:
     image: bitnami/postgresql:11.6.0-debian-9-r0

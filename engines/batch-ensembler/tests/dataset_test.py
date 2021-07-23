@@ -23,7 +23,7 @@ def test_load_from_config(config):
     print(config)
     dataset = DataSet.from_config(config=config)
 
-    assert dataset.type() == sdk.BigQueryDataset.TYPE
+    assert dataset.type() == sdk.source.BigQueryDataset.TYPE
     assert isinstance(dataset, BigQueryDataSet)
     assert dataset.query == textwrap.dedent("""\
     SELECT

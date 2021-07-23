@@ -157,7 +157,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "openapi.yaml",
+				SwaggerFile: "api/openapi.yaml",
 			},
 		},
 		"single file": {
@@ -222,7 +222,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "openapi.yaml",
+				SwaggerFile: "api/openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -302,7 +302,7 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &TuringUIConfig{
 					Homepage: "/turing",
 				},
-				SwaggerFile: "openapi.yaml",
+				SwaggerFile: "api/openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -400,7 +400,7 @@ func TestLoad(t *testing.T) {
 					AppDirectory: "appdir-env",
 					Homepage:     "/turing-env",
 				},
-				SwaggerFile: "openapi.yaml",
+				SwaggerFile: "api/openapi.yaml",
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",

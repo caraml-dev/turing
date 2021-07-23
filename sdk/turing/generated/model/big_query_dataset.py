@@ -29,9 +29,11 @@ from turing.generated.model_utils import (  # noqa: F401
 def lazy_import():
     from turing.generated.model.big_query_dataset_all_of import BigQueryDatasetAllOf
     from turing.generated.model.big_query_dataset_config import BigQueryDatasetConfig
+    from turing.generated.model.dataset_type import DatasetType
     from turing.generated.model.generic_dataset import GenericDataset
     globals()['BigQueryDatasetAllOf'] = BigQueryDatasetAllOf
     globals()['BigQueryDatasetConfig'] = BigQueryDatasetConfig
+    globals()['DatasetType'] = DatasetType
     globals()['GenericDataset'] = GenericDataset
 
 
@@ -60,9 +62,6 @@ class BigQueryDataset(ModelComposed):
     """
 
     allowed_values = {
-        ('type',): {
-            'BQ': "BQ",
-        },
     }
 
     validations = {
@@ -91,7 +90,7 @@ class BigQueryDataset(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (str,),  # noqa: E501
+            'type': (DatasetType,),  # noqa: E501
             'bq_config': (BigQueryDatasetConfig,),  # noqa: E501
         }
 
@@ -118,13 +117,14 @@ class BigQueryDataset(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, type, bq_config, *args, **kwargs):  # noqa: E501
         """BigQueryDataset - a model defined in OpenAPI
 
         Args:
+            type (DatasetType):
+            bq_config (BigQueryDatasetConfig):
 
         Keyword Args:
-            type (str): defaults to "BQ", must be one of ["BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -155,10 +155,8 @@ class BigQueryDataset(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            bq_config (BigQueryDatasetConfig): [optional]  # noqa: E501
         """
 
-        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())
@@ -191,6 +189,7 @@ class BigQueryDataset(ModelComposed):
         }
         required_args = {
             'type': type,
+            'bq_config': bq_config,
         }
         model_args = {}
         model_args.update(required_args)

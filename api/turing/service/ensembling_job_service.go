@@ -153,7 +153,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 		job.Name = generateDefaultJobName(ensembler.Name)
 	}
 
-	job.JobConfig.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
+	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 

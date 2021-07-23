@@ -83,8 +83,8 @@ class EnsemblerConfig(ModelNormal):
         return {
             'version': (str,),  # noqa: E501
             'kind': (EnsemblerConfigKind,),  # noqa: E501
-            'metadata': (EnsemblingJobMeta,),  # noqa: E501
             'spec': (EnsemblingJobSpec,),  # noqa: E501
+            'metadata': (EnsemblingJobMeta,),  # noqa: E501
         }
 
     @cached_property
@@ -95,8 +95,8 @@ class EnsemblerConfig(ModelNormal):
     attribute_map = {
         'version': 'version',  # noqa: E501
         'kind': 'kind',  # noqa: E501
-        'metadata': 'metadata',  # noqa: E501
         'spec': 'spec',  # noqa: E501
+        'metadata': 'metadata',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -111,8 +111,13 @@ class EnsemblerConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, version, kind, spec, *args, **kwargs):  # noqa: E501
         """EnsemblerConfig - a model defined in OpenAPI
+
+        Args:
+            version (str):
+            kind (EnsemblerConfigKind):
+            spec (EnsemblingJobSpec):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -145,10 +150,7 @@ class EnsemblerConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            version (str): [optional]  # noqa: E501
-            kind (EnsemblerConfigKind): [optional]  # noqa: E501
             metadata (EnsemblingJobMeta): [optional]  # noqa: E501
-            spec (EnsemblingJobSpec): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -174,6 +176,9 @@ class EnsemblerConfig(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.version = version
+        self.kind = kind
+        self.spec = spec
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

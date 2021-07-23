@@ -2,9 +2,9 @@ package api
 
 import (
 	"errors"
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/validation"
 
 	"github.com/gojek/turing/api/turing/models"
@@ -106,8 +106,8 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 				ensemblersSvc.
 					On("List", service.EnsemblersListOptions{
 						PaginationOptions: service.PaginationOptions{
-							Page:     testutils.NullableInt(1),
-							PageSize: testutils.NullableInt(10),
+							Page:     ref.Int(1),
+							PageSize: ref.Int(10),
 						},
 						ProjectID: models.NewID(3),
 					}).
