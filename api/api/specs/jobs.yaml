@@ -261,14 +261,10 @@ components:
               $ref: "#/components/schemas/BigQueryDatasetConfig"
 
     BigQueryDatasetConfig:
-      required:
-        - table
-        - query
       properties:
         table:
           type: "string"
           pattern: '^([a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+)?$'
-          default: ""
         features:
           type: "array"
           nullable: true
@@ -276,7 +272,6 @@ components:
             type: "string"
         query:
           type: "string"
-          default: ""
         options:
           type: "object"
           nullable: true

@@ -1,6 +1,7 @@
 import abc
 from typing import Iterable, MutableMapping, Optional
 import turing.generated.models
+from turing._base_types import DataObject
 from turing.generated.model_utils import OpenApiModel
 
 
@@ -62,7 +63,7 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
         )
 
 
-class Dataset(abc.ABC):
+class Dataset(abc.ABC, DataObject):
     """
     Abstract dataset
     """
@@ -91,10 +92,10 @@ class BigQueryDataset(Dataset):
     TYPE = "BQ"
 
     def __init__(self,
-                 table: str = "",
-                 features: Iterable[str] = None,
-                 query: str = "",
-                 options: MutableMapping[str, str] = None):
+                 table: Optional[str] = None,
+                 features: Optional[Iterable[str]] = None,
+                 query: Optional[str] = None,
+                 options: Optional[MutableMapping[str, str]] = None):
         """
         Create new instance of BigQuery dataset
 
@@ -128,12 +129,7 @@ class BigQueryDataset(Dataset):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQueryDataset(
-            bq_config=turing.generated.models.BigQueryDatasetConfig(
-                table=self.table,
-                query=self.query,
-                features=self.features,
-                options=self.options
-            )
+            bq_config=turing.generated.models.BigQueryDatasetConfig(**self.to_dict())
         )
 
     def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':

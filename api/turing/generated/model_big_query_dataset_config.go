@@ -16,9 +16,9 @@ import (
 
 // BigQueryDatasetConfig struct for BigQueryDatasetConfig
 type BigQueryDatasetConfig struct {
-	Table    string            `json:"table"`
+	Table    *string           `json:"table,omitempty"`
 	Features []string          `json:"features,omitempty"`
-	Query    string            `json:"query"`
+	Query    *string           `json:"query,omitempty"`
 	Options  map[string]string `json:"options,omitempty"`
 }
 
@@ -26,10 +26,8 @@ type BigQueryDatasetConfig struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBigQueryDatasetConfig(table string, query string) *BigQueryDatasetConfig {
+func NewBigQueryDatasetConfig() *BigQueryDatasetConfig {
 	this := BigQueryDatasetConfig{}
-	this.Table = table
-	this.Query = query
 	return &this
 }
 
@@ -38,35 +36,39 @@ func NewBigQueryDatasetConfig(table string, query string) *BigQueryDatasetConfig
 // but it doesn't guarantee that properties required by API are set
 func NewBigQueryDatasetConfigWithDefaults() *BigQueryDatasetConfig {
 	this := BigQueryDatasetConfig{}
-	var table string = ""
-	this.Table = table
-	var query string = ""
-	this.Query = query
 	return &this
 }
 
-// GetTable returns the Table field value
+// GetTable returns the Table field value if set, zero value otherwise.
 func (o *BigQueryDatasetConfig) GetTable() string {
-	if o == nil {
+	if o == nil || o.Table == nil {
 		var ret string
 		return ret
 	}
-
-	return o.Table
+	return *o.Table
 }
 
-// GetTableOk returns a tuple with the Table field value
+// GetTableOk returns a tuple with the Table field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *BigQueryDatasetConfig) GetTableOk() (*string, bool) {
-	if o == nil {
+	if o == nil || o.Table == nil {
 		return nil, false
 	}
-	return &o.Table, true
+	return o.Table, true
 }
 
-// SetTable sets field value
+// HasTable returns a boolean if a field has been set.
+func (o *BigQueryDatasetConfig) HasTable() bool {
+	if o != nil && o.Table != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetTable gets a reference to the given string and assigns it to the Table field.
 func (o *BigQueryDatasetConfig) SetTable(v string) {
-	o.Table = v
+	o.Table = &v
 }
 
 // GetFeatures returns the Features field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -102,28 +104,36 @@ func (o *BigQueryDatasetConfig) SetFeatures(v []string) {
 	o.Features = v
 }
 
-// GetQuery returns the Query field value
+// GetQuery returns the Query field value if set, zero value otherwise.
 func (o *BigQueryDatasetConfig) GetQuery() string {
-	if o == nil {
+	if o == nil || o.Query == nil {
 		var ret string
 		return ret
 	}
-
-	return o.Query
+	return *o.Query
 }
 
-// GetQueryOk returns a tuple with the Query field value
+// GetQueryOk returns a tuple with the Query field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *BigQueryDatasetConfig) GetQueryOk() (*string, bool) {
-	if o == nil {
+	if o == nil || o.Query == nil {
 		return nil, false
 	}
-	return &o.Query, true
+	return o.Query, true
 }
 
-// SetQuery sets field value
+// HasQuery returns a boolean if a field has been set.
+func (o *BigQueryDatasetConfig) HasQuery() bool {
+	if o != nil && o.Query != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetQuery gets a reference to the given string and assigns it to the Query field.
 func (o *BigQueryDatasetConfig) SetQuery(v string) {
-	o.Query = v
+	o.Query = &v
 }
 
 // GetOptions returns the Options field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -161,13 +171,13 @@ func (o *BigQueryDatasetConfig) SetOptions(v map[string]string) {
 
 func (o BigQueryDatasetConfig) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if true {
+	if o.Table != nil {
 		toSerialize["table"] = o.Table
 	}
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-	if true {
+	if o.Query != nil {
 		toSerialize["query"] = o.Query
 	}
 	if o.Options != nil {

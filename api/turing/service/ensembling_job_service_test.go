@@ -55,7 +55,7 @@ func generateEnsemblingJobFixture(
 						BigQueryDataset: &openapi.BigQueryDataset{
 							Type: batch.DatasetTypeBQ,
 							BqConfig: openapi.BigQueryDatasetConfig{
-								Query: "select * from hello_world where customer_id = 4",
+								Query: ref.String("select * from hello_world where customer_id = 4"),
 								Options: map[string]string{
 									"viewsEnabled":           "true",
 									"materializationDataset": "dataset",
@@ -71,7 +71,7 @@ func generateEnsemblingJobFixture(
 							BigQueryDataset: &openapi.BigQueryDataset{
 								Type: batch.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
-									Table: "project.dataset.predictions_model_a",
+									Table: ref.String("project.dataset.predictions_model_a"),
 									Features: []string{
 										"customer_id",
 										"target_date",
@@ -88,7 +88,7 @@ func generateEnsemblingJobFixture(
 							BigQueryDataset: &openapi.BigQueryDataset{
 								Type: batch.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
-									Query: "select * from hello_world where customer_id = 3",
+									Query: ref.String("select * from hello_world where customer_id = 3"),
 								},
 							},
 						},

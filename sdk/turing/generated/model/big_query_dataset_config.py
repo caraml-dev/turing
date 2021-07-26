@@ -78,8 +78,8 @@ class BigQueryDatasetConfig(ModelNormal):
         """
         return {
             'table': (str,),  # noqa: E501
-            'query': (str,),  # noqa: E501
             'features': ([str], none_type,),  # noqa: E501
+            'query': (str,),  # noqa: E501
             'options': ({str: (str,)}, none_type,),  # noqa: E501
         }
 
@@ -90,8 +90,8 @@ class BigQueryDatasetConfig(ModelNormal):
 
     attribute_map = {
         'table': 'table',  # noqa: E501
-        'query': 'query',  # noqa: E501
         'features': 'features',  # noqa: E501
+        'query': 'query',  # noqa: E501
         'options': 'options',  # noqa: E501
     }
 
@@ -110,11 +110,7 @@ class BigQueryDatasetConfig(ModelNormal):
     def __init__(self, *args, **kwargs):  # noqa: E501
         """BigQueryDatasetConfig - a model defined in OpenAPI
 
-        Args:
-
         Keyword Args:
-            table (str): defaults to ""  # noqa: E501
-            query (str): defaults to ""  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -145,12 +141,12 @@ class BigQueryDatasetConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            table (str): [optional]  # noqa: E501
             features ([str], none_type): [optional]  # noqa: E501
+            query (str): [optional]  # noqa: E501
             options ({str: (str,)}, none_type): [optional]  # noqa: E501
         """
 
-        table = kwargs.get('table', "")
-        query = kwargs.get('query', "")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())
@@ -174,8 +170,6 @@ class BigQueryDatasetConfig(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
-        self.table = table
-        self.query = query
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

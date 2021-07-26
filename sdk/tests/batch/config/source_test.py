@@ -8,19 +8,18 @@ import turing.generated.models
         pytest.param(
             "project.table.dataset_1",
             ["feature_1", "feature_2"],
-            "",
+            None,
             None,
             turing.generated.models.BigQueryDataset(
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     table="project.table.dataset_1",
-                    features=["feature_1", "feature_2"],
-                    options=None,
+                    features=["feature_1", "feature_2"]
                 )
             ),
             id="Initialize BQ dataset table and list of features"
         ),
         pytest.param(
-            "",
+            None,
             None,
             "SELECT * FROM `project.dataset.table`",
             {
@@ -33,8 +32,7 @@ import turing.generated.models
                     options={
                        "viewsEnabled": "true",
                        "materializationDataset": "my_dataset"
-                    },
-                    features=None
+                    }
                 )
             ),
             id="Initialize BQ dataset from query"
