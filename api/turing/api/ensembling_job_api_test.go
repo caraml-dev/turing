@@ -5,29 +5,32 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/batch"
+
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/client"
+	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/validation"
-	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 var (
-	annotationKeyOne   string = "spark/spark.jars"
-	annotationValueOne string = "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
+	annotationKeyOne   = "spark/spark.jars"
+	annotationValueOne = "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar"
 
-	annotationKeyTwo   string = "spark/spark.jars.packages"
-	annotationValueTwo string = "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
+	annotationKeyTwo   = "spark/spark.jars.packages"
+	annotationValueTwo = "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1"
 
-	annotationKeyThree   string = "hadoopConfiguration/fs.gs.impl"
-	annotationValueThree string = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
+	annotationKeyThree   = "hadoopConfiguration/fs.gs.impl"
+	annotationValueThree = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"
 
-	annotationKeyFour   string = "hadoopConfiguration/fs.AbstractFileSystem.gs.impl"
-	annotationValueFour string = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
+	annotationKeyFour   = "hadoopConfiguration/fs.AbstractFileSystem.gs.impl"
+	annotationValueFour = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
 )
 
 func generateEnsemblingJobFixture(
@@ -39,106 +42,98 @@ func generateEnsemblingJobFixture(
 ) *models.EnsemblingJob {
 	value := &models.EnsemblingJob{
 		Name:        name,
-		ProjectID:   models.ID(projectID),
+		ProjectID:   projectID,
 		EnsemblerID: ensemblerID,
 		InfraConfig: &models.InfraConfig{
 			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			Resources: &models.BatchEnsemblingJobResources{
-				DriverCPURequest:      "1",
-				DriverMemoryRequest:   "1Gi",
-				ExecutorReplica:       10,
-				ExecutorCPURequest:    "1",
-				ExecutorMemoryRequest: "1Gi",
+			Resources: &openapi.EnsemblingResources{
+				DriverCpuRequest:      ref.String("1"),
+				DriverMemoryRequest:   ref.String("1Gi"),
+				ExecutorReplica:       ref.Int32(10),
+				ExecutorCpuRequest:    ref.String("1"),
+				ExecutorMemoryRequest: ref.String("1Gi"),
 			},
 		},
 		JobConfig: &models.JobConfig{
-			JobConfig: batchensembler.BatchEnsemblingJob{
-				Version: "v1",
-				Kind:    batchensembler.BatchEnsemblingJob_BatchEnsemblingJob,
-				Metadata: &batchensembler.BatchEnsemblingJobMetadata{
-					Name: fmt.Sprintf("test-batch-ensembling-%d", i),
-					Annotations: map[string]string{
-						annotationKeyOne:   annotationValueOne,
-						annotationKeyTwo:   annotationValueTwo,
-						annotationKeyThree: annotationValueThree,
-						annotationKeyFour:  annotationValueFour,
+			Version: "v1",
+			Kind:    openapi.ENSEMBLERCONFIGKIND_BATCH_ENSEMBLING_JOB,
+			Metadata: &openapi.EnsemblingJobMeta{
+				Name: fmt.Sprintf("test-batch-ensembling-%d", i),
+				Annotations: map[string]string{
+					annotationKeyOne:   annotationValueOne,
+					annotationKeyTwo:   annotationValueTwo,
+					annotationKeyThree: annotationValueThree,
+					annotationKeyFour:  annotationValueFour,
+				},
+			},
+			Spec: openapi.EnsemblingJobSpec{
+				Source: openapi.EnsemblingJobSource{
+					Dataset: openapi.Dataset{
+						BigQueryDataset: &openapi.BigQueryDataset{
+							Type: batch.DatasetTypeBQ,
+							BqConfig: openapi.BigQueryDatasetConfig{
+								Query: ref.String("select * from hello_world where customer_id = 4"),
+								Options: map[string]string{
+									"viewsEnabled":           "true",
+									"materializationDataset": "dataset",
+								},
+							},
+						},
+					},
+					JoinOn: []string{"customer_id", "target_date"},
+				},
+				Predictions: map[string]openapi.EnsemblingJobPredictionSource{
+					"model_a": {
+						Dataset: openapi.Dataset{
+							BigQueryDataset: &openapi.BigQueryDataset{
+								Type: batch.DatasetTypeBQ,
+								BqConfig: openapi.BigQueryDatasetConfig{
+									Table: ref.String("project.dataset.predictions_model_a"),
+									Features: []string{
+										"customer_id",
+										"target_date",
+										"predictions",
+									},
+								},
+							},
+						},
+						Columns: []string{"predictions"},
+						JoinOn:  []string{"customer_id", "target_date"},
+					},
+					"model_b": {
+						Dataset: openapi.Dataset{
+							BigQueryDataset: &openapi.BigQueryDataset{
+								Type: batch.DatasetTypeBQ,
+								BqConfig: openapi.BigQueryDatasetConfig{
+									Query: ref.String("select * from hello_world where customer_id = 3"),
+								},
+							},
+						},
+						Columns: []string{"predictions"},
+						JoinOn:  []string{"customer_id", "target_date"},
 					},
 				},
-				Spec: &batchensembler.BatchEnsemblingJobSpec{
-					Source: &batchensembler.Source{
-						Dataset: &batchensembler.Dataset{
-							Type: batchensembler.Dataset_DatasetType(
-								batchensembler.Dataset_BQ,
-							),
-							Config: &batchensembler.Dataset_BqConfig{
-								BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-									Query: "select * from helloworld where customer_id = 4",
-									Options: map[string]string{
-										"viewsEnabled":           "true",
-										"materializationDataset": "dataset",
-									},
-								},
-							},
-						},
-						JoinOn: []string{"customer_id", "target_date"},
+				Ensembler: openapi.EnsemblingJobEnsemblerSpec{
+					Result: openapi.EnsemblingJobEnsemblerSpecResult{
+						ColumnName: "prediction_score",
+						Type:       openapi.ENSEMBLINGJOBRESULTTYPE_FLOAT,
+						ItemType:   ref.EnsemblingJobResultType(openapi.ENSEMBLINGJOBRESULTTYPE_FLOAT),
 					},
-					Predictions: map[string]*batchensembler.PredictionSource{
-						"model_a": {
-							Dataset: &batchensembler.Dataset{
-								Type: batchensembler.Dataset_DatasetType(
-									batchensembler.Dataset_BQ,
-								),
-								Config: &batchensembler.Dataset_BqConfig{
-									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-										Table: "project.dataset.predictions_model_a",
-										Features: []string{
-											"customer_id",
-											"target_date",
-											"predictions",
-										},
-									},
-								},
-							},
-							Columns: []string{"predictions"},
-							JoinOn:  []string{"customer_id", "target_date"},
-						},
-						"model_b": {
-							Dataset: &batchensembler.Dataset{
-								Type: batchensembler.Dataset_DatasetType(
-									batchensembler.Dataset_BQ,
-								),
-								Config: &batchensembler.Dataset_BqConfig{
-									BqConfig: &batchensembler.Dataset_BigQueryDatasetConfig{
-										Query: "select * from helloworld where customer_id = 3",
-									},
-								},
-							},
-							Columns: []string{"predictions"},
-							JoinOn:  []string{"customer_id", "target_date"},
-						},
-					},
-					Ensembler: &batchensembler.Ensembler{
-						Result: &batchensembler.Ensembler_Result{
-							ColumnName: "prediction_score",
-							Type:       batchensembler.Ensembler_FLOAT,
-							ItemType:   batchensembler.Ensembler_FLOAT,
-						},
-					},
-					Sink: &batchensembler.Sink{
-						Type: batchensembler.Sink_BQ,
+				},
+				Sink: openapi.EnsemblingJobSink{
+					BigQuerySink: &openapi.BigQuerySink{
+						Type: batch.SinkTypeBQ,
 						Columns: []string{
 							"customer_id as customerId",
 							"target_date",
 							"results",
 						},
-						SaveMode: batchensembler.SaveMode_OVERWRITE,
-						Config: &batchensembler.Sink_BqConfig{
-							BqConfig: &batchensembler.Sink_BigQuerySinkConfig{
-								Table:         "project.dataset.ensembling_results",
-								StagingBucket: "bucket-name",
-								Options: map[string]string{
-									"partitionField": "target_date",
-								},
+						SaveMode: openapi.SAVEMODE_OVERWRITE,
+						BqConfig: openapi.BigQuerySinkConfig{
+							Table:         "project.dataset.ensembling_results",
+							StagingBucket: "bucket-name",
+							Options: map[string]string{
+								"partitionField": "target_date",
 							},
 						},
 					},
@@ -148,7 +143,7 @@ func generateEnsemblingJobFixture(
 	}
 
 	if genExpected {
-		value.JobConfig.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+		value.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
 		value.EnvironmentName = "dev"
 		if name == "" {
 			value.Name = "test-ensembler-1"
@@ -164,7 +159,7 @@ func createEnsembler(id int, ensemblerType string) models.EnsemblerLike {
 		return &models.PyFuncEnsembler{
 			GenericEnsembler: &models.GenericEnsembler{
 				Name:      "ensembler",
-				Model:     models.Model{ID: 1},
+				Model:     models.Model{ID: models.ID(id)},
 				Type:      models.EnsemblerTypePyFunc,
 				ProjectID: 1,
 			},

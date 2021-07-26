@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
@@ -112,7 +112,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		fetched, err := svc.List(
 			EnsemblersListOptions{
 				PaginationOptions: PaginationOptions{
-					Page:     testutils.NullableInt(1),
+					Page:     ref.Int(1),
 					PageSize: &pageSize,
 				},
 				ProjectID: &projectID,
@@ -129,7 +129,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		fetched, err = svc.List(
 			EnsemblersListOptions{
 				PaginationOptions: PaginationOptions{
-					Page:     testutils.NullableInt(2),
+					Page:     ref.Int(2),
 					PageSize: &pageSize,
 				},
 				ProjectID: &projectID,
@@ -144,7 +144,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		fetched, err = svc.List(
 			EnsemblersListOptions{
 				PaginationOptions: PaginationOptions{
-					Page:     testutils.NullableInt(3),
+					Page:     ref.Int(3),
 					PageSize: &pageSize,
 				},
 				ProjectID: &projectID,

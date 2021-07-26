@@ -122,7 +122,7 @@ components:
     Id:
       $ref: "common.yaml#/components/schemas/Id"
 
-    EnsemblerType: &EnsemblerType
+    EnsemblerType:
       type: "string"
       enum:
         - pyfunc
@@ -134,7 +134,7 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          'pyfunc': '#/components/schemas/PyFuncEnsembler'
+          pyfunc: '#/components/schemas/PyFuncEnsembler'
 
     GenericEnsembler:
       required:
@@ -145,7 +145,7 @@ components:
         project_id:
           $ref: "common.yaml#/components/schemas/Id"
         type:
-          <<: *EnsemblerType
+          $ref: "#/components/schemas/EnsemblerType"
         name:
           type: "string"
           minLength: 3

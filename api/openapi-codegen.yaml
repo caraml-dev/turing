@@ -1,0 +1,25 @@
+enumClassPrefix: true
+# Global Properties
+globalProperties:
+  apiTests: false
+  modelTests: false
+  apiDocs: false
+  modelDocs: false
+  models:
+    - BigQueryDataset
+    - BigQueryDatasetConfig
+    - BigQuerySink
+    - BigQuerySinkConfig
+    - Dataset
+    - EnsemblerConfig
+    - EnsemblerConfigKind
+    - EnsemblingJobEnsemblerSpec
+    - EnsemblingJobEnsemblerSpecResult
+    - EnsemblingJobMeta
+    - EnsemblingJobPredictionSource
+    - EnsemblingJobResultType
+    - EnsemblingJobSink
+    - EnsemblingJobSource
+    - EnsemblingJobSpec
+    - EnsemblingResources
+    - SaveMode

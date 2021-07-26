@@ -11,12 +11,9 @@ import turing.generated.models
             None,
             None,
             turing.generated.models.BigQueryDataset(
-                type="BQ",
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     table="project.table.dataset_1",
-                    features=["feature_1", "feature_2"],
-                    query=None,
-                    options=None
+                    features=["feature_1", "feature_2"]
                 )
             ),
             id="Initialize BQ dataset table and list of features"
@@ -30,15 +27,12 @@ import turing.generated.models
                 "materializationDataset": "my_dataset"
             },
             turing.generated.models.BigQueryDataset(
-                type="BQ",
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     query="SELECT * FROM `project.dataset.table`",
                     options={
                        "viewsEnabled": "true",
                        "materializationDataset": "my_dataset"
-                    },
-                    table=None,
-                    features=None
+                    }
                 )
             ),
             id="Initialize BQ dataset from query"
@@ -56,7 +50,7 @@ def test_bq_dataset(table, query, features, options, expected):
 @pytest.mark.parametrize(
     "dataset,join_on,expected_fn", [
         pytest.param(
-            turing.batch.config.BigQueryDataset(
+            turing.batch.config.source.BigQueryDataset(
                 table="project.table.dataset_1",
                 features=["feature_1", "feature_2", "feature_3"],
             ),
@@ -77,7 +71,7 @@ def test_bq_source(dataset, join_on, expected_fn):
 @pytest.mark.parametrize(
     "source,prediction_columns,expected_fn", [
         pytest.param(
-            turing.batch.config.BigQueryDataset(
+            turing.batch.config.source.BigQueryDataset(
                 query="SELECT feature_2, feature_3, score FROM `project.dataset.table`",
                 options={
                     "viewsEnabled": "true",

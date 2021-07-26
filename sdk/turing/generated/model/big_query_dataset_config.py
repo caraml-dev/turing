@@ -57,7 +57,7 @@ class BigQueryDatasetConfig(ModelNormal):
     validations = {
         ('table',): {
             'regex': {
-                'pattern': r'^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$',  # noqa: E501
+                'pattern': r'^([a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+)?$',  # noqa: E501
             },
         },
     }
@@ -77,9 +77,9 @@ class BigQueryDatasetConfig(ModelNormal):
                 and the value is attribute type.
         """
         return {
-            'table': (str, none_type,),  # noqa: E501
+            'table': (str,),  # noqa: E501
             'features': ([str], none_type,),  # noqa: E501
-            'query': (str, none_type,),  # noqa: E501
+            'query': (str,),  # noqa: E501
             'options': ({str: (str,)}, none_type,),  # noqa: E501
         }
 
@@ -141,9 +141,9 @@ class BigQueryDatasetConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            table (str, none_type): [optional]  # noqa: E501
+            table (str): [optional]  # noqa: E501
             features ([str], none_type): [optional]  # noqa: E501
-            query (str, none_type): [optional]  # noqa: E501
+            query (str): [optional]  # noqa: E501
             options ({str: (str,)}, none_type): [optional]  # noqa: E501
         """
 

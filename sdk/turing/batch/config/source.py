@@ -1,8 +1,8 @@
 import abc
 from typing import Iterable, MutableMapping, Optional
 import turing.generated.models
-from turing.generated.model_utils import OpenApiModel
 from turing._base_types import DataObject
+from turing.generated.model_utils import OpenApiModel
 
 
 class EnsemblingJobSource:
@@ -63,7 +63,7 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
         )
 
 
-class Dataset(abc.ABC):
+class Dataset(abc.ABC, DataObject):
     """
     Abstract dataset
     """
@@ -89,13 +89,13 @@ class BigQueryDataset(Dataset):
     BigQuery dataset configuration
     """
 
-    _TYPE = "BQ"
+    TYPE = "BQ"
 
     def __init__(self,
-                 table: str = None,
-                 features: Iterable[str] = None,
-                 query: str = None,
-                 options: MutableMapping[str, str] = None):
+                 table: Optional[str] = None,
+                 features: Optional[Iterable[str]] = None,
+                 query: Optional[str] = None,
+                 options: Optional[MutableMapping[str, str]] = None):
         """
         Create new instance of BigQuery dataset
 
@@ -105,6 +105,7 @@ class BigQueryDataset(Dataset):
              This allows to define dataset from the data, stored in multiple tables
         :param options: (optional) Additional BQ options to configure the dataset
         """
+        super(BigQueryDataset, self).__init__()
         self._table = table
         self._query = query
         self._features = features
@@ -128,13 +129,7 @@ class BigQueryDataset(Dataset):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.BigQueryDataset(
-            type=BigQueryDataset._TYPE,
-            bq_config=turing.generated.models.BigQueryDatasetConfig(
-                table=self.table,
-                query=self.query,
-                features=self.features,
-                options=self.options
-            )
+            bq_config=turing.generated.models.BigQueryDatasetConfig(**self.to_dict())
         )
 
     def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':

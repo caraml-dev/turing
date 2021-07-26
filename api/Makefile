@@ -11,7 +11,7 @@ E2E_TEST_ROOT=./e2e
 E2E_API_PORT=8082
 E2E_API_BASE_PATH=http://localhost:${E2E_API_PORT}/v1
 
-.PHONY: default test clean setup tidy test build run local-db swagger-ui auth-server
+.PHONY: default test clean setup tidy test build run local-db swagger-ui auth-server gen-client
 
 default: test
 
@@ -125,3 +125,11 @@ clean_docker_stack:
 	@echo "Cleaning up local docker stack..."
 	@docker stack rm turing_api_stack
 	@docker secret rm google_app_creds
+
+gen-client:
+	rm -rf turing/generated
+	@openapi-generator generate \
+		--input-spec api/openapi-sdk.yaml \
+		--generator-name go \
+		--output turing/generated \
+		--config openapi-codegen.yaml

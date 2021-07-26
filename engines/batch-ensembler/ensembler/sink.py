@@ -1,13 +1,26 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, MutableMapping, Optional
 from pyspark.sql import DataFrame
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.batch.config as sdk
+import turing.generated.models as openapi
 
 
 class Sink(ABC):
-    def __init__(self, save_mode: pb2.SaveMode, columns: List[str] = None):
-        self._save_mode = pb2.SaveMode.Name(save_mode).lower()
+    def __init__(self, save_mode: sdk.sink.SaveMode, columns: List[str] = None):
+        self._save_mode = save_mode
         self._columns = columns
+
+    @property
+    def type(self) -> str:
+        pass
+
+    @property
+    def save_mode(self) -> sdk.sink.SaveMode:
+        return self._save_mode
+
+    @property
+    def columns(self) -> Optional[List[str]]:
+        return self._columns
 
     def save(self, df: DataFrame):
         if self._columns:
@@ -19,17 +32,19 @@ class Sink(ABC):
         pass
 
     @classmethod
-    def from_config(cls, config: pb2.Sink):
-        if config.type == pb2.Sink.SinkType.CONSOLE:
-            return ConsoleSink(config.columns)
-        if config.type == pb2.Sink.SinkType.BQ:
+    def from_config(cls, config: openapi.EnsemblingJobSink):
+        if config.type == sdk.sink.BigQuerySink.TYPE:
             return BigQuerySink(config.save_mode, config.columns, config.bq_config)
         raise ValueError(f'Sink not implemented: {config.type}')
 
 
 class ConsoleSink(Sink):
     def __init__(self, columns: List[str] = None):
-        super().__init__(save_mode=None, columns=columns)
+        super(ConsoleSink, self).__init__(save_mode=None, columns=columns)
+
+    @property
+    def type(self) -> str:
+        return "CONSOLE"
 
     def _save(self, df: DataFrame):
         df.show()
@@ -42,10 +57,10 @@ class BigQuerySink(Sink):
 
     def __init__(
             self,
-            save_mode: pb2.SaveMode,
+            save_mode: sdk.sink.SaveMode,
             columns: List[str],
-            config: pb2.Sink.BigQuerySinkConfig):
-        super().__init__(save_mode=save_mode, columns=columns)
+            config: openapi.BigQuerySinkConfig):
+        super(BigQuerySink, self).__init__(save_mode=save_mode, columns=columns)
 
         self._options = {
             **config.options,
@@ -53,9 +68,17 @@ class BigQuerySink(Sink):
             self._OPTION_NAME_TABLE: config.table,
         }
 
+    @property
+    def type(self) -> str:
+        return sdk.sink.BigQuerySink.TYPE
+
+    @property
+    def options(self) -> MutableMapping[str, str]:
+        return self._options
+
     def _save(self, df: DataFrame):
         df.write \
-            .mode(self._save_mode) \
+            .mode(sdk.sink.SaveMode.Name(self.save_mode).lower()) \
             .format(self._WRITE_FORMAT) \
-            .options(**self._options) \
+            .options(**self.options) \
             .save()

@@ -4,9 +4,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 
-	batchensembler "github.com/gojek/turing/engines/batch-ensembler/pkg/api/proto/v1"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously
@@ -24,32 +23,20 @@ type EnsemblingJob struct {
 }
 
 // JobConfig stores the infra and ensembler config
-type JobConfig struct {
-	JobConfig batchensembler.BatchEnsemblingJob `json:"job_config"`
-}
-
-// UnmarshalJSON unmarshals the json into the proto message, used by the json.Marshaler interface
-func (r *JobConfig) UnmarshalJSON(data []byte) error {
-	return protojson.Unmarshal(data, &r.JobConfig)
-}
-
-// MarshalJSON unmarshals the json into the proto message, used by the json.Marshaler interface
-func (r *JobConfig) MarshalJSON() ([]byte, error) {
-	return protojson.Marshal(&r.JobConfig)
-}
+type JobConfig openapi.EnsemblerConfig
 
 // Value returns json value, implement driver.Valuer interface
-func (r *JobConfig) Value() (driver.Value, error) {
-	return protojson.Marshal(&r.JobConfig)
+func (c JobConfig) Value() (driver.Value, error) {
+	return json.Marshal(c)
 }
 
 // Scan scans value into Jsonb, implements sql.Scanner interface
-func (r *JobConfig) Scan(value interface{}) error {
+func (c *JobConfig) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-	return protojson.Unmarshal(b, &r.JobConfig)
+	return json.Unmarshal(b, &c)
 }
 
 // InfraConfig stores the infrastructure related configurations required.
@@ -57,7 +44,7 @@ type InfraConfig struct {
 	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
 	ServiceAccountName string                       `json:"service_account_name"`
-	Resources          *BatchEnsemblingJobResources `json:"resources"`
+	Resources          *openapi.EnsemblingResources `json:"resources"`
 }
 
 // Value returns json value, implement driver.Valuer interface
@@ -72,15 +59,6 @@ func (r *InfraConfig) Scan(value interface{}) error {
 		return errors.New("type assertion to []byte failed")
 	}
 	return json.Unmarshal(b, &r)
-}
-
-// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
-type BatchEnsemblingJobResources struct {
-	DriverCPURequest      string `json:"driver_cpu_request,omitempty"`
-	DriverMemoryRequest   string `json:"driver_memory_request,omitempty"`
-	ExecutorReplica       int32  `json:"executor_replica,omitempty"`
-	ExecutorCPURequest    string `json:"executor_cpu_request,omitempty"`
-	ExecutorMemoryRequest string `json:"executor_memory_request,omitempty"`
 }
 
 // Status is the state of the finite machine ensembling job.

@@ -27,7 +27,9 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
+    from turing.generated.model.ensembler_type import EnsemblerType
     from turing.generated.model.py_func_ensembler import PyFuncEnsembler
+    globals()['EnsemblerType'] = EnsemblerType
     globals()['PyFuncEnsembler'] = PyFuncEnsembler
 
 
@@ -56,9 +58,6 @@ class Ensembler(ModelComposed):
     """
 
     allowed_values = {
-        ('type',): {
-            'PYFUNC': "pyfunc",
-        },
     }
 
     validations = {
@@ -91,7 +90,7 @@ class Ensembler(ModelComposed):
         """
         lazy_import()
         return {
-            'type': (str,),  # noqa: E501
+            'type': (EnsemblerType,),  # noqa: E501
             'id': (int,),  # noqa: E501
             'project_id': (int,),  # noqa: E501
             'name': (str,),  # noqa: E501
@@ -140,13 +139,13 @@ class Ensembler(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, type, *args, **kwargs):  # noqa: E501
         """Ensembler - a model defined in OpenAPI
 
         Args:
+            type (EnsemblerType):
 
         Keyword Args:
-            type (str): defaults to "pyfunc", must be one of ["pyfunc", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -188,7 +187,6 @@ class Ensembler(ModelComposed):
             artifact_uri (str): [optional]  # noqa: E501
         """
 
-        type = kwargs.get('type', "pyfunc")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

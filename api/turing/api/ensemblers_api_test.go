@@ -4,12 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/api/turing/validation"
-
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
+	"github.com/gojek/turing/api/turing/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,8 +105,8 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 				ensemblersSvc.
 					On("List", service.EnsemblersListOptions{
 						PaginationOptions: service.PaginationOptions{
-							Page:     testutils.NullableInt(1),
-							PageSize: testutils.NullableInt(10),
+							Page:     ref.Int(1),
+							PageSize: ref.Int(10),
 						},
 						ProjectID: models.NewID(3),
 					}).

@@ -1,17 +1,18 @@
 from typing import Dict, MutableMapping, Tuple
-from google.protobuf import json_format
 from pyspark.sql import SparkSession
 import yaml
 from .source import Source, PredictionSource
 from .ensembler import Ensembler
 from .sink import Sink
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+from turing.generated.models import EnsemblerConfig, EnsemblingJobMeta
+from turing.generated.model_utils import validate_and_convert_types
+from turing.generated.api_client import Configuration
 
 
 class BatchEnsemblingJob:
     def __init__(
             self,
-            metadata: pb2.BatchEnsemblingJobMetadata,
+            metadata: EnsemblingJobMeta,
             source: 'Source',
             predictions: Dict[str, 'PredictionSource'],
             ensembler: 'Ensembler',
@@ -40,11 +41,19 @@ class BatchEnsemblingJob:
         with open(spec_path, 'r') as file:
             job_spec_raw = file.read()
 
-        job_config = json_format.ParseDict(yaml.safe_load(job_spec_raw), pb2.BatchEnsemblingJob())
-        return BatchEnsemblingJob.from_config(job_config), job_spec_raw
+        parsed_data = yaml.safe_load(job_spec_raw)
+        job_spec = validate_and_convert_types(
+            input_value=parsed_data,
+            required_types_mixed=(EnsemblerConfig,),
+            path_to_item=[],
+            spec_property_naming=True,
+            _check_type=True,
+            configuration=Configuration()
+        )
+        return BatchEnsemblingJob.from_config(job_spec), job_spec_raw
 
     @classmethod
-    def from_config(cls, config: pb2.BatchEnsemblingJob) -> 'BatchEnsemblingJob':
+    def from_config(cls, config: EnsemblerConfig) -> 'BatchEnsemblingJob':
         metadata = config.metadata
         source = Source.from_config(config.spec.source)
         predictions: Dict[str, 'PredictionSource'] = \

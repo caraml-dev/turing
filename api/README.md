@@ -9,12 +9,24 @@ API for the Turing experimentation service.
 #### Requirements
 - Golang 1.14
 - Docker
+  
+#### Optional
+- openapi-generator >= 5.1.0 (`brew install openapi-generator`)
 
 #### Setup
 To set up and install necessary tools, run:
 
 ```bash
 make setup
+```
+
+### Re-generate openapi models 
+OAS3 specs are used to generate required Golang structs, that define 
+the configuration of ensembling batch jobs. If openapi specs have been 
+changed, then corresponding code can be re-generated with:
+
+```bash
+make gen-client
 ```
 
 ### Explore REST API
@@ -70,10 +82,11 @@ The `turing-integration-test` MLP project is used by the CI to exercise the end 
 
 | folder     | description 
 |------------|-------------
-| /turing/api | HTTP handlers and routing for Turing API as defined in [openapi.yaml](./openapi.yaml)
+| /turing/api | HTTP handlers and routing for Turing API as defined in [openapi.yaml](./api/openapi.yaml)
 | /turing/cluster | Packages for creating, updating and deleting Turing router deployment in Kubernetes cluster
 | /turing/cmd | Turing API server binaries
 | /turing/config | Configuration spec for Turing API
+| /turing/generated | Models generated from the openapi specs ([openapi-sdk.yaml](./api/openapi-sdk.yaml))
 | /turing/middleware | HTTP server middlewares e.g. authorization and request validation
 | /turing/models | Contains Turing domain model. Ideally, this package should not depend on packages outside the standard library.
 | /turing/service | Packages responsible for persisting domain objects and managing their relationships. Communication between services should use dependency injection when possible to reduce unnecessary tight coupling.

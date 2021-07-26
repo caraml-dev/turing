@@ -3,32 +3,33 @@ from abc import ABC, abstractmethod
 from typing import MutableMapping
 from pyspark.sql import DataFrame, SparkSession
 from jinjasql import JinjaSql
-from .api.proto.v1 import batch_ensembling_job_pb2 as pb2
+import turing.generated.models as openapi
+import turing.batch.config as sdk
 
-__all__ = ['DataSet', 'BigQueryDataSet', 'jinja']
+__all__ = ['Dataset', 'BigQueryDataset', 'jinja']
 
 jinja = JinjaSql(param_style='pyformat')
 jinja.env.filters['zip'] = zip
 
 
-class DataSet(ABC):
+class Dataset(ABC):
 
     @abstractmethod
     def load(self, spark: SparkSession) -> DataFrame:
         pass
 
     @abstractmethod
-    def type(self) -> pb2.Dataset.DatasetType:
+    def type(self) -> str:
         pass
 
     @classmethod
-    def from_config(cls, config: pb2.Dataset) -> 'DataSet':
-        if config.type == pb2.Dataset.DatasetType.BQ:
-            return BigQueryDataSet.from_config(config.bq_config)
+    def from_config(cls, config: openapi.Dataset) -> 'Dataset':
+        if config.type == sdk.source.BigQueryDataset.TYPE:
+            return BigQueryDataset.from_config(config.bq_config)
         raise ValueError(f'Unknown dataset type: {config.type} is not implemented')
 
 
-class BigQueryDataSet(DataSet):
+class BigQueryDataset(Dataset):
     with open(os.path.join(os.path.dirname(__file__), 'sql', 'bq_select.sql.jinja2'), 'r') as _f:
         _SQL_TEMPLATE = _f.read()
 
@@ -36,22 +37,31 @@ class BigQueryDataSet(DataSet):
     _OPTION_QUERY = 'query'
 
     def __init__(self, query: str, options: MutableMapping[str, str]):
-        self.query = query
-        self.options = options
+        self._query = query
+        self._options = options
 
+    @property
     def type(self):
-        return pb2.Dataset.DatasetType.BQ
+        return sdk.source.BigQueryDataset.TYPE
+
+    @property
+    def query(self) -> str:
+        return self._query
+
+    @property
+    def options(self) -> MutableMapping[str, str]:
+        return self._options
 
     def load(self, spark: SparkSession) -> DataFrame:
         return spark.read \
-            .format(BigQueryDataSet._READ_FORMAT) \
+            .format(BigQueryDataset._READ_FORMAT) \
             .options(**self.options) \
-            .option(BigQueryDataSet._OPTION_QUERY, self.query) \
+            .option(BigQueryDataset._OPTION_QUERY, self.query) \
             .load()
 
     @classmethod
-    def from_config(cls, config: pb2.Dataset.BigQueryDatasetConfig) -> 'BigQueryDataSet':
-        if config.query:
+    def from_config(cls, config: openapi.BigQueryDatasetConfig) -> 'BigQueryDataset':
+        if config.get('query', ""):
             query = config.query
         elif config.table:
             template, bind_params = jinja.prepare_query(
@@ -64,4 +74,4 @@ class BigQueryDataSet(DataSet):
                 'Dataset initialization failed: '
                 'either "query" or "table" should be provided'
             )
-        return BigQueryDataSet(query, config.options)
+        return BigQueryDataset(query, config.get('options', {}))

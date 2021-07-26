@@ -93,7 +93,7 @@ class EnsemblingJobSink(ModelComposed):
         lazy_import()
         return {
             'type': (str,),  # noqa: E501
-            'columns': ([str],),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
         }
@@ -129,13 +129,13 @@ class EnsemblingJobSink(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, *args, **kwargs):  # noqa: E501
+    def __init__(self, *args, **kwargs):  # noqa: E501
         """EnsemblingJobSink - a model defined in OpenAPI
 
         Args:
-            type (str):
 
         Keyword Args:
+            type (str): defaults to "BQ", must be one of ["CONSOLE", "BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -166,11 +166,12 @@ class EnsemblingJobSink(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            columns ([str]): [optional]  # noqa: E501
+            columns ([str], none_type): [optional]  # noqa: E501
             save_mode (SaveMode): [optional]  # noqa: E501
             bq_config (BigQuerySinkConfig): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

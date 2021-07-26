@@ -6,3 +6,9 @@ const (
 	// JobConfigMount is where the job spec if mounted
 	JobConfigMount = "/mnt/job-spec/"
 )
+
+const (
+	DatasetTypeBQ = "BQ"
+
+	SinkTypeBQ = "BQ"
+)

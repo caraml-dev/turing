@@ -1,12 +1,13 @@
 import textwrap
 import pytest
-from ensembler.api.proto.v1 import batch_ensembling_job_pb2 as pb2
-from ensembler.dataset import DataSet, BigQueryDataSet
-from tests.utils.proto_utils import from_yaml
+from ensembler.dataset import Dataset, BigQueryDataset
+from tests.utils.openapi_utils import from_yaml
+import turing.generated.models as openapi
+import turing.batch.config as sdk
 
 
-@pytest.fixture()
-def config():
+@pytest.fixture(scope="session")
+def dataset_config():
     return from_yaml("""\
     type: BQ
     bq_config:
@@ -15,14 +16,14 @@ def config():
         - customer_id
         - target_date
         - predictions
-    """, pb2.Dataset())
+    """, openapi.Dataset)
 
 
-def test_load_from_config(config):
-    dataset = DataSet.from_config(config=config)
+def test_load_from_config(dataset_config):
+    dataset = Dataset.from_config(config=dataset_config)
 
-    assert dataset.type() == pb2.Dataset.BQ
-    assert isinstance(dataset, BigQueryDataSet)
+    assert dataset.type == sdk.source.BigQueryDataset.TYPE
+    assert isinstance(dataset, BigQueryDataset)
     assert dataset.query == textwrap.dedent("""\
     SELECT
         customer_id,

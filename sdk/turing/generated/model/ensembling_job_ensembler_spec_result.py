@@ -78,8 +78,8 @@ class EnsemblingJobEnsemblerSpecResult(ModelNormal):
         lazy_import()
         return {
             'type': (EnsemblingJobResultType,),  # noqa: E501
-            'item_type': (EnsemblingJobResultType,),  # noqa: E501
             'column_name': (str,),  # noqa: E501
+            'item_type': (EnsemblingJobResultType,),  # noqa: E501
         }
 
     @cached_property
@@ -89,8 +89,8 @@ class EnsemblingJobEnsemblerSpecResult(ModelNormal):
 
     attribute_map = {
         'type': 'type',  # noqa: E501
-        'item_type': 'item_type',  # noqa: E501
         'column_name': 'column_name',  # noqa: E501
+        'item_type': 'item_type',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -105,8 +105,12 @@ class EnsemblingJobEnsemblerSpecResult(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, type, column_name, *args, **kwargs):  # noqa: E501
         """EnsemblingJobEnsemblerSpecResult - a model defined in OpenAPI
+
+        Args:
+            type (EnsemblingJobResultType):
+            column_name (str):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -139,9 +143,7 @@ class EnsemblingJobEnsemblerSpecResult(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            type (EnsemblingJobResultType): [optional]  # noqa: E501
             item_type (EnsemblingJobResultType): [optional]  # noqa: E501
-            column_name (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -167,6 +169,8 @@ class EnsemblingJobEnsemblerSpecResult(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.type = type
+        self.column_name = column_name
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

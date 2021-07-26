@@ -56,6 +56,9 @@ class BigQueryDatasetAllOf(ModelNormal):
     """
 
     allowed_values = {
+        ('type',): {
+            'BQ': "BQ",
+        },
     }
 
     validations = {
@@ -78,6 +81,7 @@ class BigQueryDatasetAllOf(ModelNormal):
         lazy_import()
         return {
             'bq_config': (BigQueryDatasetConfig,),  # noqa: E501
+            'type': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -87,6 +91,7 @@ class BigQueryDatasetAllOf(ModelNormal):
 
     attribute_map = {
         'bq_config': 'bq_config',  # noqa: E501
+        'type': 'type',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -101,8 +106,11 @@ class BigQueryDatasetAllOf(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, bq_config, *args, **kwargs):  # noqa: E501
         """BigQueryDatasetAllOf - a model defined in OpenAPI
+
+        Args:
+            bq_config (BigQueryDatasetConfig):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -135,7 +143,7 @@ class BigQueryDatasetAllOf(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            bq_config (BigQueryDatasetConfig): [optional]  # noqa: E501
+            type (str): [optional] if omitted the server will use the default value of "BQ"  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -161,6 +169,7 @@ class BigQueryDatasetAllOf(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.bq_config = bq_config
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \

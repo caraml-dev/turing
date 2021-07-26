@@ -118,10 +118,11 @@ class BigQueryDataset(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):  # noqa: E501
+    def __init__(self, bq_config, *args, **kwargs):  # noqa: E501
         """BigQueryDataset - a model defined in OpenAPI
 
         Args:
+            bq_config (BigQueryDatasetConfig):
 
         Keyword Args:
             type (str): defaults to "BQ", must be one of ["BQ", ]  # noqa: E501
@@ -155,7 +156,6 @@ class BigQueryDataset(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            bq_config (BigQueryDatasetConfig): [optional]  # noqa: E501
         """
 
         type = kwargs.get('type', "BQ")
@@ -191,6 +191,7 @@ class BigQueryDataset(ModelComposed):
         }
         required_args = {
             'type': type,
+            'bq_config': bq_config,
         }
         model_args = {}
         model_args.update(required_args)

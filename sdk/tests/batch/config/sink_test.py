@@ -1,5 +1,5 @@
 import pytest
-import turing.batch.config
+import turing.batch.config.sink
 import turing.generated.models
 
 
@@ -14,7 +14,6 @@ import turing.generated.models
             turing.batch.config.sink.SaveMode.APPEND,
             ["target_date", "user_id", "prediction_score"],
             turing.generated.models.BigQuerySink(
-                type="BQ",
                 save_mode=turing.generated.models.SaveMode("APPEND"),
                 columns=["target_date", "user_id", "prediction_score"],
                 bq_config=turing.generated.models.BigQuerySinkConfig(
@@ -30,7 +29,7 @@ import turing.generated.models
     ]
 )
 def test_create_bq_sink(table, staging_bucket, options, save_mode, columns, expected):
-    sink = turing.batch.config.BigQuerySink(table, staging_bucket, options)\
+    sink = turing.batch.config.sink.BigQuerySink(table, staging_bucket, options)\
         .select(columns)\
         .save_mode(save_mode)
 

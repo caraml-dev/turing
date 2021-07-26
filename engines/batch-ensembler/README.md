@@ -122,11 +122,6 @@ make setup
 make test-unit
 ```
 
-### Re-Generate code from protobuf spec 
-```shell script
-make proto
-```
-
 ### Build a Docker image
 ```shell script
 make build-image

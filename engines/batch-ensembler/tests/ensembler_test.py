@@ -1,14 +1,13 @@
-from abc import ABC
 from typing import Optional, Any
 import pandas
 import pytest
 from chispa.dataframe_comparer import assert_df_equality
 from ensembler.ensembler import Ensembler
-from ensembler.api.proto.v1 import batch_ensembling_job_pb2 as pb2
 from pyspark.sql import functions as F
 from turing.ensembler import PyFunc
-
-from tests.utils.proto_utils import from_yaml
+import turing.batch.config as sdk
+import turing.generated.models as openapi
+from tests.utils.openapi_utils import from_yaml
 
 NUM_CUSTOMERS = 3
 
@@ -36,7 +35,7 @@ def input_df(spark):
 
 @pytest.fixture
 def expected_result_df(input_df, request):
-    if request.param == pb2.Ensembler.ResultType.ARRAY:
+    if request.param == sdk.ResultType.ARRAY:
         input_df = input_df.withColumn(
             f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_array',
             F.when(F.lit(True), F.array(
@@ -46,13 +45,13 @@ def expected_result_df(input_df, request):
         )
     return input_df.select(
         'customer_id',
-        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_{pb2.Ensembler.ResultType.Name(request.param).lower()}'
+        f'{PyFunc.PREDICTION_COLUMN_PREFIX}model_{request.param.name.lower()}'
     )
 
 
 class TestEnsembler(PyFunc):
 
-    def __init__(self, result_type: pb2.Ensembler.ResultType) -> None:
+    def __init__(self, result_type: sdk.ResultType) -> None:
         super().__init__()
         self.result_type = result_type
 
@@ -64,7 +63,7 @@ class TestEnsembler(PyFunc):
             features: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]):
-        return predictions[f'model_{pb2.Ensembler.ResultType.Name(self.result_type).lower()}']
+        return predictions[f'model_{self.result_type.name.lower()}']
 
 
 @pytest.fixture
@@ -81,10 +80,10 @@ def config_simple(request):
 
     yield from_yaml(f"""\
     uri: {ensembler_path}
-    result: 
+    result:
         column_name: test_results
-        type: {pb2.Ensembler.ResultType.Name(request.param)}
-    """, pb2.Ensembler())
+        type: {request.param.name}
+    """, openapi.EnsemblingJobEnsemblerSpec)
 
 
 class ArrayEnsembler(PyFunc):
@@ -114,29 +113,26 @@ def config_array():
 
     yield from_yaml(f"""\
     uri: {ensembler_path}
-    result: 
+    result:
         column_name: test_results
         type: ARRAY
         item_type: INTEGER
-    """, pb2.Ensembler())
+    """, openapi.EnsemblingJobEnsemblerSpec)
 
 
 @pytest.mark.parametrize(
     'config_simple,expected_result_df',
     (
-            (pb2.Ensembler.ResultType.DOUBLE, pb2.Ensembler.ResultType.DOUBLE),
-            (pb2.Ensembler.ResultType.FLOAT, pb2.Ensembler.ResultType.FLOAT),
-            (pb2.Ensembler.ResultType.INTEGER, pb2.Ensembler.ResultType.INTEGER),
-            (pb2.Ensembler.ResultType.LONG, pb2.Ensembler.ResultType.LONG),
-            (pb2.Ensembler.ResultType.STRING, pb2.Ensembler.ResultType.STRING),
+            (sdk.ResultType.DOUBLE, sdk.ResultType.DOUBLE),
+            (sdk.ResultType.FLOAT, sdk.ResultType.FLOAT),
+            (sdk.ResultType.INTEGER, sdk.ResultType.INTEGER),
+            (sdk.ResultType.LONG, sdk.ResultType.LONG),
+            (sdk.ResultType.STRING, sdk.ResultType.STRING),
     ),
     indirect=True
 )
 def test_ensemble_simple(spark, input_df, config_simple, expected_result_df):
     ensembler = Ensembler.from_config(config_simple)
-
-    expected_result_df.show()
-
     result_df = ensembler.ensemble(input_df, spark)
 
     expected_df = input_df.join(
@@ -147,7 +143,7 @@ def test_ensemble_simple(spark, input_df, config_simple, expected_result_df):
 
 @pytest.mark.parametrize(
     'expected_result_df',
-    [pb2.Ensembler.ResultType.ARRAY],
+    [sdk.ResultType.ARRAY],
     indirect=True
 )
 def test_ensemble_array(spark, input_df, config_array, expected_result_df):

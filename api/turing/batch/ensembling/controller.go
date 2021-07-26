@@ -2,6 +2,7 @@ package batchensembling
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -190,11 +191,11 @@ func (c *ensemblingController) createSparkApplication(
 			fmt.Sprintf("%s%s", batch.JobConfigMount, batch.JobConfigFileName),
 		},
 		JobConfigMount:        batch.JobConfigMount,
-		DriverCPURequest:      infraConfig.Resources.DriverCPURequest,
-		DriverMemoryRequest:   infraConfig.Resources.DriverMemoryRequest,
-		ExecutorCPURequest:    infraConfig.Resources.ExecutorCPURequest,
-		ExecutorMemoryRequest: infraConfig.Resources.ExecutorMemoryRequest,
-		ExecutorReplica:       infraConfig.Resources.ExecutorReplica,
+		DriverCPURequest:      *infraConfig.Resources.DriverCpuRequest,
+		DriverMemoryRequest:   *infraConfig.Resources.DriverMemoryRequest,
+		ExecutorCPURequest:    *infraConfig.Resources.ExecutorCpuRequest,
+		ExecutorMemoryRequest: *infraConfig.Resources.ExecutorMemoryRequest,
+		ExecutorReplica:       *infraConfig.Resources.ExecutorReplica,
 		ServiceAccountName:    serviceAccount.Name,
 		SparkInfraConfig:      c.sparkInfraConfig,
 	}
@@ -202,7 +203,7 @@ func (c *ensemblingController) createSparkApplication(
 }
 
 func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string) error {
-	jobConfigJSON, err := ensemblingJob.JobConfig.MarshalJSON()
+	jobConfigJSON, err := json.Marshal(ensemblingJob.JobConfig)
 	if err != nil {
 		return err
 	}

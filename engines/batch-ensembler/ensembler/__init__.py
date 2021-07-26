@@ -31,7 +31,7 @@ class SparkApplication:
     _ANNOTATION_GROUP_HADOOP = 'hadoopConfiguration'
 
     def __init__(self, args):
-        self.job, raw_config = BatchEnsemblingJob.from_yaml(args.job_spec)
+        self._job, raw_config = BatchEnsemblingJob.from_yaml(args.job_spec)
         self._logger = logging.getLogger('SparkApplication')
         self._logger.debug(
             'Job Specification:\n'
@@ -43,7 +43,7 @@ class SparkApplication:
 
     def run(self):
         annotations = {}
-        for name, value in self.job.annotations().items():
+        for name, value in self._job.annotations().items():
             group, *keys = name.split('/', 1)
             annotations[group] = {
                 **annotations.get(group, {}),
@@ -51,11 +51,11 @@ class SparkApplication:
             }
         annotations.update()
         spark = build_spark_session(
-            self.job.name(),
+            self._job.name(),
             annotations.get(self._ANNOTATION_GROUP_SPARK),
             annotations.get(self._ANNOTATION_GROUP_HADOOP)
         )
-        self.job.run(spark)
+        self._job.run(spark)
 
 
 __all__ = [

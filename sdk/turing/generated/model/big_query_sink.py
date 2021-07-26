@@ -95,9 +95,9 @@ class BigQuerySink(ModelComposed):
         lazy_import()
         return {
             'type': (str,),  # noqa: E501
-            'columns': ([str],),  # noqa: E501
             'save_mode': (SaveMode,),  # noqa: E501
             'bq_config': (BigQuerySinkConfig,),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -107,9 +107,9 @@ class BigQuerySink(ModelComposed):
 
     attribute_map = {
         'type': 'type',  # noqa: E501
-        'columns': 'columns',  # noqa: E501
         'save_mode': 'save_mode',  # noqa: E501
         'bq_config': 'bq_config',  # noqa: E501
+        'columns': 'columns',  # noqa: E501
     }
 
     required_properties = set([
@@ -125,13 +125,15 @@ class BigQuerySink(ModelComposed):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, *args, **kwargs):  # noqa: E501
+    def __init__(self, save_mode, bq_config, *args, **kwargs):  # noqa: E501
         """BigQuerySink - a model defined in OpenAPI
 
         Args:
-            type (str):
+            save_mode (SaveMode):
+            bq_config (BigQuerySinkConfig):
 
         Keyword Args:
+            type (str): defaults to "BQ", must be one of ["CONSOLE", "BQ", ]  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -162,11 +164,10 @@ class BigQuerySink(ModelComposed):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            columns ([str]): [optional]  # noqa: E501
-            save_mode (SaveMode): [optional]  # noqa: E501
-            bq_config (BigQuerySinkConfig): [optional]  # noqa: E501
+            columns ([str], none_type): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "BQ")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())
@@ -199,6 +200,8 @@ class BigQuerySink(ModelComposed):
         }
         required_args = {
             'type': type,
+            'save_mode': save_mode,
+            'bq_config': bq_config,
         }
         model_args = {}
         model_args.update(required_args)

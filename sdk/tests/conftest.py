@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 import random
 import tests
-from turing import generated as client
 from turing import ensembler
+import turing.generated.models
 import turing.batch.config
+import turing.batch.config.source
+import turing.batch.config.sink
 import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
@@ -23,7 +25,7 @@ def use_google_oauth() -> bool:
 
 @pytest.fixture
 def project():
-    return client.models.Project(
+    return turing.generated.models.Project(
         id=10,
         name=f"project_name",
         mlflow_tracking_url="http://localhost:5000",
@@ -48,7 +50,7 @@ def active_project(responses, project):
 @pytest.fixture
 def projects(num_projects):
     return [
-        client.models.Project(
+        turing.generated.models.Project(
             id=i,
             name=f"project_{i}",
             mlflow_tracking_url="http://localhost:5000",
@@ -60,10 +62,10 @@ def projects(num_projects):
 @pytest.fixture
 def generic_ensemblers(project, num_ensemblers):
     return [
-        client.models.GenericEnsembler(
+        turing.generated.models.GenericEnsembler(
             id=i,
             project_id=project.id,
-            type=ensembler.EnsemblerType.PYFUNC.value,
+            type=ensembler.PyFuncEnsembler.TYPE,
             name=f"test_ensembler_{i}",
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10)
@@ -97,10 +99,10 @@ def artifact_uri(bucket_name, experiment_id, run_id):
 
 @pytest.fixture
 def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_uri):
-    return client.models.PyFuncEnsembler(
+    return turing.generated.models.PyFuncEnsembler(
         id=1,
         project_id=project.id,
-        type=ensembler.EnsemblerType.PYFUNC.value,
+        type=ensembler.PyFuncEnsembler.TYPE,
         name=ensembler_name,
         mlflow_experiment_id=experiment_id,
         mlflow_run_id=run_id,

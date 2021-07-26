@@ -161,6 +161,10 @@ components:
 
     EnsemblerConfig:
       type: "object"
+      required:
+        - version
+        - kind
+        - spec
       properties:
         version:
           type: string
@@ -178,16 +182,24 @@ components:
 
     EnsemblingJobMeta:
       description: Ensembling job Metadata
+      required:
+        - name
       properties:
         name:
           type: "string"
         annotations:
           type: "object"
+          nullable: true
           additionalProperties:
             type: "string"
 
     EnsemblingJobSpec:
       description: Ensembling job Specification
+      required:
+        - source
+        - predictions
+        - ensembler
+        - sink
       properties:
         source:
           $ref: "#/components/schemas/EnsemblingJobSource"
@@ -202,6 +214,9 @@ components:
 
     EnsemblingJobSource:
       type: "object"
+      required:
+        - dataset
+        - join_on
       properties:
         dataset:
           $ref: "#/components/schemas/Dataset"
@@ -236,7 +251,12 @@ components:
       allOf:
         - $ref: "#/components/schemas/GenericDataset"
         - type: object
+          required:
+            - bq_config
           properties:
+            type:
+              <<: *DatasetType
+              default: "BQ"
             bq_config:
               $ref: "#/components/schemas/BigQueryDatasetConfig"
 
@@ -244,8 +264,7 @@ components:
       properties:
         table:
           type: "string"
-          pattern: '^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$'
-          nullable: true
+          pattern: '^([a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+)?$'
         features:
           type: "array"
           nullable: true
@@ -253,7 +272,6 @@ components:
             type: "string"
         query:
           type: "string"
-          nullable: true
         options:
           type: "object"
           nullable: true
@@ -268,24 +286,35 @@ components:
           properties:
             columns:
               type: "array"
+              nullable: true
               items:
                 type: "string"
 
+    EnsemblingJobEnsemblerSpecResult:
+      type: "object"
+      required:
+        - column_name
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/EnsemblingJobResultType"
+        item_type:
+          $ref: "#/components/schemas/EnsemblingJobResultType"
+        column_name:
+          type: "string"
+
     EnsemblingJobEnsemblerSpec:
       type: "object"
+      required:
+        - uri
+        - result
       properties:
         uri:
           type: "string"
           format: "uri"
+          default: ""
         result:
-          type: "object"
-          properties:
-            type:
-              $ref: "#/components/schemas/EnsemblingJobResultType"
-            item_type:
-              $ref: "#/components/schemas/EnsemblingJobResultType"
-            column_name:
-              type: "string"
+          $ref: "#/components/schemas/EnsemblingJobEnsemblerSpecResult"
 
     EnsemblingJobResultType:
       type: "string"
@@ -315,12 +344,14 @@ components:
     GenericSink:
       type: "object"
       required:
-        - "type"
+        - type
+        - save_mode
       properties:
         type:
           <<: *SinkType
         columns:
           type: "array"
+          nullable: true
           items:
             type: "string"
         save_mode:
@@ -330,12 +361,20 @@ components:
       allOf:
         - $ref: "#/components/schemas/GenericSink"
         - type: object
+          required:
+            - bq_config
           properties:
+            type:
+              <<: *SinkType
+              default: "BQ"
             bq_config:
               $ref: "#/components/schemas/BigQuerySinkConfig"
 
     BigQuerySinkConfig:
       type: "object"
+      required:
+        - table
+        - staging_bucket
       properties:
         table:
           type: string

@@ -111,7 +111,7 @@ spec:
         - name: LAYOUT
           value: "BaseLayout"
         - name: SWAGGER_JSON
-          value: "/app/openapi.yaml"
+          value: "/app/api/openapi.yaml"
         - name: PORT
           value: "{{ .Values.swaggerUi.service.internalPort }}"
         - name: API_SERVER

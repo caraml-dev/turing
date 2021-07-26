@@ -140,7 +140,7 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
-		SwaggerFile: "openapi.yaml",
+		SwaggerFile: "api/openapi.yaml",
 	}
 	// Create test auth enforcer and Vault client
 	me := &mocks.Enforcer{}

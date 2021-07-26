@@ -407,7 +407,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig.AppDirectory", "")
 	v.SetDefault("TuringUIConfig.Homepage", "/turing")
 
-	v.SetDefault("SwaggerFile", "openapi.yaml")
+	v.SetDefault("SwaggerFile", "api/openapi.yaml")
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 
