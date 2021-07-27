@@ -85,7 +85,7 @@ func (a *Authorizer) FilterAuthorizedProjects(
 		return nil, err
 	}
 
-	var allowedProjects []mlp.Project
+	allowedProjects := make([]mlp.Project, 0)
 	for _, projectID := range allowedProjectIds {
 		allowedProjects = append(allowedProjects, projectMap[projectID])
 	}

@@ -11,7 +11,7 @@ type ProjectsController struct {
 }
 
 func (c ProjectsController) ListProjects(
-	_ *http.Request,
+	r *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
@@ -22,7 +22,7 @@ func (c ProjectsController) ListProjects(
 	}
 
 	if c.Authorizer != nil {
-		user, _ := vars.get("user")
+		user := r.Header.Get("User-Email")
 		projects, err = c.Authorizer.FilterAuthorizedProjects(user, projects, enforcer.ActionRead)
 		if err != nil {
 			return InternalServerError("failed to fetch projects", err.Error())
