@@ -3,7 +3,7 @@ package batchensembling
 import (
 	"time"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/imagebuilder"

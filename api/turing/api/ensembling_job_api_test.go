@@ -8,7 +8,7 @@ import (
 	"github.com/gojek/turing/api/turing/batch"
 
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"

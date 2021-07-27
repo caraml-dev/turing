@@ -5,7 +5,7 @@ package mocks
 import (
 	json "encoding/json"
 
-	client "github.com/gojek/mlp/client"
+	client "github.com/gojek/mlp/api/client"
 
 	merlin_apiclient "github.com/gojek/merlin/client"
 

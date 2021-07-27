@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	logger "github.com/gojek/turing/api/turing/log"

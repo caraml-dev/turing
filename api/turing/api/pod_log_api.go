@@ -8,7 +8,7 @@ import (
 
 	"github.com/gojek/turing/api/turing/service"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
 )

@@ -13,7 +13,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	fiberconfig "github.com/gojek/fiber/config"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/models"
 	corev1 "k8s.io/api/core/v1"

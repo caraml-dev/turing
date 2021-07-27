@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
 
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	_ "github.com/gojek/turing/engines/experiment/runner/nop"
 	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/config"

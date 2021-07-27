@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/kelseyhightower/envconfig"
 )

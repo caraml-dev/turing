@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/mlp/client"
+	"github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/cluster/mocks"
 	"github.com/gojek/turing/api/turing/models"

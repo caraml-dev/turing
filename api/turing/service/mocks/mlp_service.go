@@ -2,7 +2,7 @@ package mocks
 
 import (
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/mock"
 )

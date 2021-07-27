@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/gojek/mlp/pkg/authz/enforcer"
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 )
 
 type ProjectsController struct {

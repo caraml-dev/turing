@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	imagebuildermock "github.com/gojek/turing/api/turing/imagebuilder/mocks"
 	"github.com/gojek/turing/api/turing/models"

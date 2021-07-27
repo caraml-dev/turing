@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()

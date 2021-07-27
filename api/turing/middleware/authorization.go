@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	mlp "github.com/gojek/mlp/client"
-	"github.com/gojek/mlp/pkg/authz/enforcer"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 
-	"github.com/gojek/mlp/pkg/vault"
+	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
 	networkingv1alpha3 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1alpha3"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

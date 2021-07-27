@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 
 	"github.com/gojek/turing/api/turing/config"
 	corev1 "k8s.io/api/core/v1"

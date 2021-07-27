@@ -9,7 +9,7 @@ import (
 
 	"github.com/antihax/optional"
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2/google"
 
