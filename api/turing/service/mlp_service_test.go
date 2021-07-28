@@ -17,7 +17,7 @@ import (
 	"golang.org/x/oauth2/google"
 
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 )
 

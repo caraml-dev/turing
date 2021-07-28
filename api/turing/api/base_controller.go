@@ -2,7 +2,7 @@ package api
 
 import (
 	val "github.com/go-playground/validator/v10"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gorilla/schema"
 )

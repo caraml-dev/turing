@@ -12,7 +12,7 @@ import (
 	"github.com/gojek/turing/api/turing/utils"
 
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"

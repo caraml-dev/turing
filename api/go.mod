@@ -12,7 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
-	github.com/gojek/mlp v0.0.0
+	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
 	github.com/gojek/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
@@ -54,9 +54,8 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
 	github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200213202729-31a86c4ab209
 
-	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20200928080507-5e2221e40627
-	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20200928080507-5e2221e40627
-	github.com/gojek/mlp => github.com/gojek/mlp/api v0.0.0-20200916102056-00ec9dccd758
+	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
+	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
 
 	github.com/gojek/turing/engines/experiment => ../engines/experiment
 	github.com/gojek/turing/engines/router => ../engines/router

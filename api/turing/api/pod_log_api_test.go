@@ -10,7 +10,7 @@ import (
 
 	"github.com/gojek/turing/api/turing/service"
 
-	"github.com/gojek/mlp/client"
+	"github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 )

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	mlp "github.com/gojek/mlp/client"
-	"github.com/gojek/mlp/pkg/authz/enforcer"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 )
 
 const (
@@ -85,7 +85,7 @@ func (a *Authorizer) FilterAuthorizedProjects(
 		return nil, err
 	}
 
-	var allowedProjects []mlp.Project
+	allowedProjects := make([]mlp.Project, 0)
 	for _, projectID := range allowedProjectIds {
 		allowedProjects = append(allowedProjects, projectMap[projectID])
 	}

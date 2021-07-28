@@ -3,7 +3,7 @@ package middleware
 import (
 	"testing"
 
-	"github.com/gojek/mlp/pkg/authz/enforcer"
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/turing/api/turing/middleware/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

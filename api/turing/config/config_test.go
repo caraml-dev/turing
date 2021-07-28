@@ -11,8 +11,8 @@ import (
 	"github.com/mitchellh/copystructure"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"

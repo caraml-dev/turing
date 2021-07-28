@@ -1,7 +1,7 @@
 package vault
 
 import (
-	"github.com/gojek/mlp/pkg/vault"
+	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/pkg/errors"
 )

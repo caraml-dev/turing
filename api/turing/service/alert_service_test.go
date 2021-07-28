@@ -11,7 +11,7 @@ import (
 	"time"
 
 	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 
 	"github.com/gojek/turing/api/turing/config"
 

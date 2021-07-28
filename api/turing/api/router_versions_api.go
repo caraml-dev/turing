@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	mlp "github.com/gojek/mlp/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 )

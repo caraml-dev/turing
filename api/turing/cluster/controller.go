@@ -33,7 +33,7 @@ import (
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 
-	"github.com/gojek/mlp/pkg/vault"
+	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/pkg/errors"
 

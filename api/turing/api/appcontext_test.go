@@ -6,9 +6,9 @@ import (
 
 	"bou.ke/monkey"
 	merlin "github.com/gojek/merlin/client"
-	"github.com/gojek/mlp/pkg/authz/enforcer"
-	"github.com/gojek/mlp/pkg/instrumentation/sentry"
-	"github.com/gojek/mlp/pkg/vault"
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
