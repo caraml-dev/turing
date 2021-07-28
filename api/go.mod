@@ -11,7 +11,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
-	github.com/gojek/merlin v0.14.0-rc1.0.20210723093139-cc0240032d58
+	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
 	github.com/gojek/turing/engines/router v0.0.0
