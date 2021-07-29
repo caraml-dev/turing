@@ -51,6 +51,8 @@ RUN wget -qO- \
     https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz | \
     tar xzf - -C /
 
+COPY ./entrypoint.sh /opt/entrypoint.sh
+
 # Configure non-root user
 ARG username=spark
 ARG spark_uid=185
