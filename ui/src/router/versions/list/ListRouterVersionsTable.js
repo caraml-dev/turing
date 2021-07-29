@@ -8,12 +8,11 @@ import {
   EuiTextAlign
 } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
-import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
 import { FormLabelWithToolTip } from "../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { DefaultItemAction } from "../components/DefaultItemAction";
-
-const defaultTextSize = "s";
-const defaultIconSize = "s";
+import { appConfig } from "../../../config";
+import { DeploymentStatusHealth } from "../../../components/status_health/DeploymentStatusHealth";
+import { Status } from "../../../services/status/Status";
 
 export const ListRouterVersionsTable = ({
   items,
@@ -104,7 +103,7 @@ export const ListRouterVersionsTable = ({
       width: "21%",
       render: version => (
         <EuiText
-          size={defaultTextSize}
+          size={appConfig.tables.defaultTextSize}
           style={{ display: "flex", alignItems: "center" }}>
           {version}&nbsp;&nbsp;
           {version === deployedVersion && (
@@ -117,25 +116,31 @@ export const ListRouterVersionsTable = ({
       field: "status",
       name: "Status",
       width: "26%",
-      render: status => <DeploymentStatusHealth status={status} />
+      render: status => (
+        <DeploymentStatusHealth status={Status.fromValue(status)} />
+      )
     },
     {
       field: "created_at",
       name: "Created",
       width: "23%",
-      render: date => <DateFromNow date={date} size={defaultTextSize} />
+      render: date => (
+        <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
+      )
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "23%",
-      render: date => <DateFromNow date={date} size={defaultTextSize} />
+      render: date => (
+        <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
+      )
     },
     {
       name: (
         <FormLabelWithToolTip
           label="Actions"
-          size={defaultIconSize}
+          size={appConfig.tables.defaultIconSize}
           content="Router version actions"
         />
       ),

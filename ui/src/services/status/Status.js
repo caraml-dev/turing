@@ -1,11 +1,6 @@
-const EnumValue = (name, props) =>
-  Object.freeze({
-    ...props,
-    toJSON: () => name,
-    toString: () => name
-  });
+import { EnumValue } from "../enum_value/EnumValue";
 
-export const Status = Object.freeze({
+const values = {
   DEPLOYED: EnumValue("deployed", {
     label: "Deployed",
     color: "#017D73",
@@ -24,9 +19,13 @@ export const Status = Object.freeze({
   UNDEPLOYED: EnumValue("undeployed", {
     label: "Not Deployed",
     color: "#6A717D"
-  }),
-  fromValue: name =>
-    [Status.DEPLOYED, Status.UNDEPLOYED, Status.FAILED, Status.PENDING].find(
-      s => name === s.toString()
-    )
+  })
+};
+
+const allValues = Object.values(values);
+
+export const Status = Object.freeze({
+  ...values,
+  values: allValues,
+  fromValue: name => allValues.find(s => name === s.toString())
 });

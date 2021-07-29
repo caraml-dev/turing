@@ -44,6 +44,14 @@ export const appConfig = {
     maxAllowedReplica: process.env.REACT_APP_MAX_ALLOWED_REPLICA
       ? parseInt(process.env.REACT_APP_MAX_ALLOWED_REPLICA)
       : 10
+  },
+  pagination: {
+    defaultPageSize: 10
+  },
+  tables: {
+    defaultTextSize: "s",
+    defaultIconSize: "s",
+    dateFormat: "YYYY-MM-DDTHH:mm.SSZ"
   }
 };
 
