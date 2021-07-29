@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gojek/turing/api/turing/models"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/mitchellh/mapstructure"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
@@ -143,7 +143,7 @@ type EnsemblingJobConfig struct {
 // DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.
 type DefaultEnsemblingJobConfigurations struct {
 	// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
-	BatchEnsemblingJobResources models.BatchEnsemblingJobResources
+	BatchEnsemblingJobResources openapi.EnsemblingResources
 	// SparkConfigAnnotations contains the Spark configurations
 	SparkConfigAnnotations map[string]string
 }

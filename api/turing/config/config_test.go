@@ -13,8 +13,8 @@ import (
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -504,6 +504,12 @@ func TestStringToQuantityHookFunc(t *testing.T) {
 }
 
 func TestConfigValidate(t *testing.T) {
+	driverCPURequest := "1"
+	driverMemoryRequest := "1Gi"
+	var executorReplica int32 = 2
+	executorCPURequest := "1"
+	executorMemoryRequest := "1Gi"
+
 	validConfig := Config{
 		Port: 5000,
 		BatchRunnerConfig: &BatchRunnerConfig{
@@ -550,12 +556,12 @@ func TestConfigValidate(t *testing.T) {
 				},
 			},
 			DefaultConfigurations: DefaultEnsemblingJobConfigurations{
-				BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
-					DriverCPURequest:      "1",
-					DriverMemoryRequest:   "1Gi",
-					ExecutorReplica:       2,
-					ExecutorCPURequest:    "1",
-					ExecutorMemoryRequest: "1Gi",
+				BatchEnsemblingJobResources: openapi.EnsemblingResources{
+					DriverCpuRequest:      &driverCPURequest,
+					DriverMemoryRequest:   &driverMemoryRequest,
+					ExecutorReplica:       &executorReplica,
+					ExecutorCpuRequest:    &executorCPURequest,
+					ExecutorMemoryRequest: &executorMemoryRequest,
 				},
 				SparkConfigAnnotations: map[string]string{
 					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",

@@ -13,10 +13,10 @@ import (
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/middleware/mocks"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	svcmocks "github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/jinzhu/gorm"
@@ -37,6 +37,13 @@ func TestNewAppContext(t *testing.T) {
 	// Create test config
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
+
+	driverCPURequest := "1"
+	driverMemoryRequest := "1Gi"
+	var executorReplica int32 = 2
+	executorCPURequest := "1"
+	executorMemoryRequest := "1Gi"
+
 	testCfg := &config.Config{
 		Port: 8080,
 		AuthConfig: &config.AuthorizationConfig{
@@ -88,12 +95,12 @@ func TestNewAppContext(t *testing.T) {
 				},
 			},
 			DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
-				BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
-					DriverCPURequest:      "1",
-					DriverMemoryRequest:   "1Gi",
-					ExecutorReplica:       2,
-					ExecutorCPURequest:    "1",
-					ExecutorMemoryRequest: "1Gi",
+				BatchEnsemblingJobResources: openapi.EnsemblingResources{
+					DriverCpuRequest:      &driverCPURequest,
+					DriverMemoryRequest:   &driverMemoryRequest,
+					ExecutorReplica:       &executorReplica,
+					ExecutorCpuRequest:    &executorCPURequest,
+					ExecutorMemoryRequest: &executorMemoryRequest,
 				},
 				SparkConfigAnnotations: map[string]string{
 					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",

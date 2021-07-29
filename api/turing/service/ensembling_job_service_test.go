@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gojek/turing/api/turing/batch"
+	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/it/database"
@@ -15,13 +16,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	driverCPURequest            = "100"
+	driverMemoryRequest         = "1Gi"
+	executorReplica       int32 = 2
+	executorCPURequest          = "1"
+	executorMemoryRequest       = "1Gi"
+)
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
-	BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
-		DriverCPURequest:      "100",
-		DriverMemoryRequest:   "1Gi",
-		ExecutorReplica:       2,
-		ExecutorCPURequest:    "1",
-		ExecutorMemoryRequest: "1Gi",
+	BatchEnsemblingJobResources: openapi.EnsemblingResources{
+		DriverCpuRequest:      &driverCPURequest,
+		DriverMemoryRequest:   &driverMemoryRequest,
+		ExecutorReplica:       &executorReplica,
+		ExecutorCpuRequest:    &executorCPURequest,
+		ExecutorMemoryRequest: &executorMemoryRequest,
 	},
 	SparkConfigAnnotations: map[string]string{
 		"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
@@ -386,7 +394,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				}
 
 				if tt.removeDriverCPURequest {
-					tt.request.InfraConfig.Resources.DriverCPURequest = ""
+					tt.request.InfraConfig.Resources.DriverCpuRequest = nil
 				}
 
 				result, err := ensemblingJobService.CreateEnsemblingJob(
@@ -415,7 +423,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				assert.Equal(t, expected.InfraConfig.EnsemblerName, result.InfraConfig.EnsemblerName)
 
 				// Check if merging of spark config is done properly
-				sparkMap := result.JobConfig.JobConfig.Metadata.Annotations
+				sparkMap := result.JobConfig.Metadata.Annotations
 				expectedKeys := map[string]string{
 					"spark/spark.jars":                                  "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar",
 					"spark/spark.jars.packages":                         "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.19.1",
@@ -432,8 +440,8 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				if tt.removeDriverCPURequest {
 					assert.Equal(
 						t,
-						defaultConfigurations.BatchEnsemblingJobResources.DriverCPURequest,
-						result.InfraConfig.Resources.DriverCPURequest,
+						defaultConfigurations.BatchEnsemblingJobResources.DriverCpuRequest,
+						result.InfraConfig.Resources.DriverCpuRequest,
 					)
 				}
 			})

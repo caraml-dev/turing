@@ -164,7 +164,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	job.JobConfig.JobConfig.Metadata.Name = generateDefaultJobName(ensembler.Name)
+	job.JobConfig.Metadata.Name = generateDefaultJobName(ensembler.Name)
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
@@ -184,8 +184,8 @@ func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.Ensem
 func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {
 	// Only apply default if key does not exist, we should respect the users annotation override.
 	for key, value := range s.defaultConfig.SparkConfigAnnotations {
-		if _, ok := job.JobConfig.JobConfig.Metadata.Annotations[key]; !ok {
-			job.JobConfig.JobConfig.Metadata.Annotations[key] = value
+		if _, ok := job.JobConfig.Metadata.Annotations[key]; !ok {
+			job.JobConfig.Metadata.Annotations[key] = value
 		}
 	}
 
@@ -195,23 +195,23 @@ func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.Ensembling
 		return
 	}
 
-	if job.InfraConfig.Resources.DriverCPURequest == "" {
-		job.InfraConfig.Resources.DriverCPURequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCPURequest
+	if job.InfraConfig.Resources.DriverCpuRequest == nil {
+		job.InfraConfig.Resources.DriverCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCpuRequest
 	}
 
-	if job.InfraConfig.Resources.DriverMemoryRequest == "" {
+	if job.InfraConfig.Resources.DriverMemoryRequest == nil {
 		job.InfraConfig.Resources.DriverMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverMemoryRequest
 	}
 
-	if job.InfraConfig.Resources.ExecutorReplica == 0 {
+	if job.InfraConfig.Resources.ExecutorReplica == nil {
 		job.InfraConfig.Resources.ExecutorReplica = s.defaultConfig.BatchEnsemblingJobResources.ExecutorReplica
 	}
 
-	if job.InfraConfig.Resources.ExecutorCPURequest == "" {
-		job.InfraConfig.Resources.ExecutorCPURequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorCPURequest
+	if job.InfraConfig.Resources.ExecutorCpuRequest == nil {
+		job.InfraConfig.Resources.ExecutorCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorCpuRequest
 	}
 
-	if job.InfraConfig.Resources.ExecutorMemoryRequest == "" {
+	if job.InfraConfig.Resources.ExecutorMemoryRequest == nil {
 		job.InfraConfig.Resources.ExecutorMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorMemoryRequest
 	}
 }
