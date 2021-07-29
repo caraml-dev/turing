@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -42,16 +43,22 @@ type EnsemblingJobService interface {
 }
 
 // NewEnsemblingJobService creates a new ensembling job service
-func NewEnsemblingJobService(db *gorm.DB, defaultEnvironment string) EnsemblingJobService {
+func NewEnsemblingJobService(
+	db *gorm.DB,
+	defaultEnvironment string,
+	defaultConfig config.DefaultEnsemblingJobConfigurations,
+) EnsemblingJobService {
 	return &ensemblingJobService{
 		db:                 db,
 		defaultEnvironment: defaultEnvironment,
+		defaultConfig:      defaultConfig,
 	}
 }
 
 type ensemblingJobService struct {
 	db                 *gorm.DB
 	defaultEnvironment string
+	defaultConfig      config.DefaultEnsemblingJobConfigurations
 }
 
 // Save the given router to the db. Updates the existing record if already exists
@@ -157,6 +164,9 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
+	job.JobConfig.Metadata.Name = generateDefaultJobName(ensembler.Name)
+	s.mergeDefaultConfigurations(job)
+
 	// Save ensembling job
 	err := s.Save(job)
 	if err != nil {
@@ -169,4 +179,39 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.EnsemblingJob) error {
 	job.Status = models.JobTerminating
 	return s.Save(job)
+}
+
+func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {
+	// Only apply default if key does not exist, we should respect the users annotation override.
+	for key, value := range s.defaultConfig.SparkConfigAnnotations {
+		if _, ok := job.JobConfig.Metadata.Annotations[key]; !ok {
+			job.JobConfig.Metadata.Annotations[key] = value
+		}
+	}
+
+	if job.InfraConfig.Resources == nil {
+		configCopy := s.defaultConfig.BatchEnsemblingJobResources
+		job.InfraConfig.Resources = &configCopy
+		return
+	}
+
+	if job.InfraConfig.Resources.DriverCpuRequest == nil {
+		job.InfraConfig.Resources.DriverCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCpuRequest
+	}
+
+	if job.InfraConfig.Resources.DriverMemoryRequest == nil {
+		job.InfraConfig.Resources.DriverMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverMemoryRequest
+	}
+
+	if job.InfraConfig.Resources.ExecutorReplica == nil {
+		job.InfraConfig.Resources.ExecutorReplica = s.defaultConfig.BatchEnsemblingJobResources.ExecutorReplica
+	}
+
+	if job.InfraConfig.Resources.ExecutorCpuRequest == nil {
+		job.InfraConfig.Resources.ExecutorCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorCpuRequest
+	}
+
+	if job.InfraConfig.Resources.ExecutorMemoryRequest == nil {
+		job.InfraConfig.Resources.ExecutorMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorMemoryRequest
+	}
 }
