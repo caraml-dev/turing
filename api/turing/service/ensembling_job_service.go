@@ -2,10 +2,12 @@ package service
 
 import (
 	"fmt"
+	"hash/fnv"
 	"strings"
 	"time"
 
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -130,8 +132,10 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	return paginatedResults, nil
 }
 
-func generateDefaultJobName(ensemblerName string) string {
-	return fmt.Sprintf("%s: %s", ensemblerName, time.Now().Format(time.RFC3339))
+func generateDefaultJobName(ensemblerName string) (string, error) {
+	hasher := fnv.New32a()
+	_, err := hasher.Write([]byte(time.Now().Format(time.RFC3339)))
+	return fmt.Sprintf("%s-%x", ensemblerName, hasher.Sum32()), err
 }
 
 func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
@@ -140,7 +144,7 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	// See engines/batch-ensembler/app.Dockerfile
 	splitURI := strings.Split(ensembler.ArtifactURI, "/")
 	return fmt.Sprintf(
-		"%s/%s",
+		"%s/%s/ensembler",
 		sparkHomeFolder,
 		splitURI[len(splitURI)-1],
 	)
@@ -157,14 +161,17 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 
 	// Populate name if the user does not define a name for the job
 	if job.Name == "" {
-		job.Name = generateDefaultJobName(ensembler.Name)
+		name, err := generateDefaultJobName(ensembler.Name)
+		job.Name = name
+		if err != nil {
+			return nil, fmt.Errorf("Error generating hash: %w", err)
+		}
 	}
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	job.JobConfig.Metadata.Name = generateDefaultJobName(ensembler.Name)
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
@@ -182,6 +189,12 @@ func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.Ensem
 }
 
 func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {
+	if job.JobConfig.Metadata == nil {
+		job.JobConfig.Metadata = &openapi.EnsemblingJobMeta{
+			Annotations: make(map[string]string),
+		}
+	}
+
 	// Only apply default if key does not exist, we should respect the users annotation override.
 	for key, value := range s.defaultConfig.SparkConfigAnnotations {
 		if _, ok := job.JobConfig.Metadata.Annotations[key]; !ok {

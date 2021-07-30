@@ -118,7 +118,6 @@ func generateEnsemblingJobFixture(
 					},
 				},
 				Ensembler: openapi.EnsemblingJobEnsemblerSpec{
-					Uri: "gs://bucket-name/my-ensembler/artifacts/ensembler",
 					Result: openapi.EnsemblingJobEnsemblerSpecResult{
 						ColumnName: "prediction_score",
 						Type:       openapi.ENSEMBLINGJOBRESULTTYPE_FLOAT,
@@ -147,9 +146,9 @@ func generateEnsemblingJobFixture(
 		},
 	}
 	if genExpected {
-		value.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+		value.JobConfig.Spec.Ensembler.Uri = "/home/spark/artifact/ensembler"
 		value.EnvironmentName = "dev"
-		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
+		value.InfraConfig.ArtifactURI = "gs://bucket/artifact"
 		value.InfraConfig.EnsemblerName = "ensembler"
 	}
 
@@ -330,7 +329,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: "gs://bucket/artifact",
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
@@ -345,7 +344,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: "gs://bucket/artifact",
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "", true),
@@ -360,7 +359,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: "gs://bucket/artifact",
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
@@ -375,7 +374,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: "gs://bucket/artifact",
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),

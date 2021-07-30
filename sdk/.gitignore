@@ -5,3 +5,4 @@ dist/
 turing_sdk.egg-info/
 env/
 __pycache__/
+.coverage

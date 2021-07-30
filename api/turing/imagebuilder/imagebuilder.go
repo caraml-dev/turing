@@ -207,7 +207,7 @@ func (ib *imageBuilder) createKanikoJob(
 	buildLabels map[string]string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
-	folderName := splitURI[len(splitURI)-1]
+	folderName := fmt.Sprintf("%s/ensembler", splitURI[len(splitURI)-1])
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageConfig.DockerfileFilePath),
