@@ -21,9 +21,9 @@ export const EnsemblersContextContextProvider = ({
       query: !!ensemblerType
         ? {
             type: ensemblerType,
-            pageSize: Number.MAX_SAFE_INTEGER
+            page_size: Number.MAX_SAFE_INTEGER
           }
-        : { pageSize: Number.MAX_SAFE_INTEGER }
+        : { page_size: Number.MAX_SAFE_INTEGER }
     },
     { results: [] }
   );
