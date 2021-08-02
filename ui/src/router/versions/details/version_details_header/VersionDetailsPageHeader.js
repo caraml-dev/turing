@@ -1,10 +1,11 @@
 import React from "react";
 import { EuiLink } from "@elastic/eui";
 import { HorizontalDescriptionList } from "../../../../components/horizontal_description_list/HorizontalDescriptionList";
-import { DeploymentStatusHealth } from "../../../components/status_health/DeploymentStatusHealth";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { PageSecondaryHeader } from "../../../components/page_header/PageSecondaryHeader";
 import { get } from "../../../../components/form/utils";
+import { DeploymentStatusHealth } from "../../../../components/status_health/DeploymentStatusHealth";
+import { Status } from "../../../../services/status/Status";
 
 export const VersionDetailsPageHeader = ({ version }) => {
   const headerItems = [
@@ -16,7 +17,9 @@ export const VersionDetailsPageHeader = ({ version }) => {
     },
     {
       title: "Status",
-      description: <DeploymentStatusHealth status={version.status} />
+      description: (
+        <DeploymentStatusHealth status={Status.fromValue(version.status)} />
+      )
     },
     {
       title: "Created At",

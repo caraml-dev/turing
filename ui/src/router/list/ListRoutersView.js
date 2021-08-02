@@ -8,7 +8,6 @@ import {
   EuiPageHeaderSection
 } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import { Link } from "@reach/router";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
 import { PageTitle } from "../../components/page/PageTitle";
@@ -34,9 +33,9 @@ export const ListRoutersView = ({ projectId, ...props }) => {
             <PageTitle title="Routers" />
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            <Link to={"./create"}>
-              <EuiButton fill>Create Router</EuiButton>
-            </Link>
+            <EuiButton fill href={"routers/create"}>
+              Create Router
+            </EuiButton>
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>

@@ -16,6 +16,7 @@ import { ListRoutersView } from "./router/list/ListRoutersView";
 import { RouterDetailsView } from "./router/details/RouterDetailsView";
 import { RouterVersionDetailsView } from "./router/versions/details/RouterVersionDetailsView";
 import { PrivateLayout } from "./PrivateLayout";
+import { ListEnsemblingJobsView } from "./job/list/ListEnsemblingJobsView";
 
 const App = () => (
   <ErrorBoundary>
@@ -39,6 +40,12 @@ const App = () => (
           <PrivateRoute
             path={appConfig.homepage}
             render={PrivateLayout(Home)}
+          />
+
+          {/* BATCH JOBS */}
+          <PrivateRoute
+            path={`${appConfig.homepage}/projects/:projectId/jobs`}
+            render={PrivateLayout(ListEnsemblingJobsView)}
           />
 
           {/* CREATE ROUTER */}

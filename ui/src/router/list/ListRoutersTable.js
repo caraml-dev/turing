@@ -11,14 +11,14 @@ import {
   EuiSearchBar
 } from "@elastic/eui";
 import { useMonitoring } from "../../hooks/useMonitoring";
-import { DeploymentStatusHealth } from "../components/status_health/DeploymentStatusHealth";
 import { RouterEndpoint } from "../components/router_endpoint/RouterEndpoint";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
+import { appConfig } from "../../config";
+import moment from "moment";
+import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
+import { Status } from "../../services/status/Status";
 
-const moment = require("moment");
-
-const defaultTextSize = "s";
-const defaultIconSize = "s";
+const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
 
 const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   const [config, setConfig] = useState({
@@ -75,7 +75,9 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       field: "status",
       name: "Status",
       width: "10%",
-      render: status => <DeploymentStatusHealth status={status} />
+      render: status => (
+        <DeploymentStatusHealth status={Status.fromValue(status)} />
+      )
     },
     {
       field: "created_at",
@@ -85,9 +87,9 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       render: date => (
         <EuiToolTip
           position="top"
-          content={moment(date, "YYYY-MM-DDTHH:mm.SSZ").toLocaleString()}>
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
-            {moment(date, "YYYY-MM-DDTHH:mm.SSZ").fromNow()}
+            {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
       )
@@ -99,9 +101,9 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       render: date => (
         <EuiToolTip
           position="top"
-          content={moment(date, "YYYY-MM-DDTHH:mm.SSZ").toLocaleString()}>
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
-            {moment(date, "YYYY-MM-DDTHH:mm.SSZ").fromNow()}
+            {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
       )
@@ -122,10 +124,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       width: "10%",
       render: item => {
         const monitoringLink = item.config
-          ? getMonitoringDashboardUrl(
-              item.environment_name,
-              item.name
-            )
+          ? getMonitoringDashboardUrl(item.environment_name, item.name)
           : undefined;
 
         return (
