@@ -13,6 +13,7 @@ import (
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/middleware/mocks"
@@ -36,6 +37,13 @@ func TestNewAppContext(t *testing.T) {
 	// Create test config
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
+
+	driverCPURequest := "1"
+	driverMemoryRequest := "1Gi"
+	var executorReplica int32 = 2
+	executorCPURequest := "1"
+	executorMemoryRequest := "1Gi"
+
 	testCfg := &config.Config{
 		Port: 8080,
 		AuthConfig: &config.AuthorizationConfig{
@@ -84,6 +92,18 @@ func TestNewAppContext(t *testing.T) {
 						CPU:    "500m",
 						Memory: "1Gi",
 					},
+				},
+			},
+			DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
+				BatchEnsemblingJobResources: openapi.EnsemblingResources{
+					DriverCpuRequest:      &driverCPURequest,
+					DriverMemoryRequest:   &driverMemoryRequest,
+					ExecutorReplica:       &executorReplica,
+					ExecutorCpuRequest:    &executorCPURequest,
+					ExecutorMemoryRequest: &executorMemoryRequest,
+				},
+				SparkConfigAnnotations: map[string]string{
+					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
 				},
 			},
 		},
@@ -251,7 +271,11 @@ func TestNewAppContext(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	ensemblingJobService := service.NewEnsemblingJobService(nil, testCfg.EnsemblingJobConfig.DefaultEnvironment)
+	ensemblingJobService := service.NewEnsemblingJobService(
+		nil,
+		testCfg.EnsemblingJobConfig.DefaultEnvironment,
+		testCfg.EnsemblingJobConfig.DefaultConfigurations,
+	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
 		mlpSvc,

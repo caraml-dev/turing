@@ -11,12 +11,12 @@ import (
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously
 type EnsemblingJob struct {
 	Model
-	Name            string       `json:"name"`
-	EnsemblerID     ID           `json:"ensembler_id"`
+	Name            string       `json:"name" validate:"required"`
+	EnsemblerID     ID           `json:"ensembler_id" validate:"required"`
 	ProjectID       ID           `json:"project_id"`
 	EnvironmentName string       `json:"environment_name"`
-	InfraConfig     *InfraConfig `json:"infra_config"`
-	JobConfig       *JobConfig   `json:"job_config"`
+	InfraConfig     *InfraConfig `json:"infra_config" validate:"required"`
+	JobConfig       *JobConfig   `json:"job_config" validate:"required"`
 	RetryCount      int          `json:"-" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
@@ -43,7 +43,7 @@ func (c *JobConfig) Scan(value interface{}) error {
 type InfraConfig struct {
 	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
-	ServiceAccountName string                       `json:"service_account_name"`
+	ServiceAccountName string                       `json:"service_account_name" validate:"required"`
 	Resources          *openapi.EnsemblingResources `json:"resources"`
 }
 
