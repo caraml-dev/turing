@@ -8,6 +8,14 @@ import (
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/utils"
+)
+
+const (
+	rfc1123MaxLength = 63
+	// 10 digits for unix timestamp and a hyphen
+	unixTimestampPadding          = 11
+	maxAllowedEnsemblerNameLength = rfc1123MaxLength - unixTimestampPadding
 )
 
 type EnsemblersController struct {
@@ -72,6 +80,16 @@ func (c EnsemblersController) CreateEnsembler(
 	ensembler := body.(*CreateOrUpdateEnsemblerRequest).EnsemblerLike
 	ensembler.SetProjectID(models.ID(project.Id))
 
+	if ok := utils.IsQualifiedKubernetesName(ensembler.GetName(), unixTimestampPadding); !ok {
+		return BadRequest(
+			fmt.Sprintf(
+				"ensembler name is not DNS compliant or is greater than %d char long",
+				maxAllowedEnsemblerNameLength,
+			),
+			"",
+		)
+	}
+
 	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {
 		return InternalServerError("unable to save an ensembler", err.Error())
@@ -110,6 +128,16 @@ func (c EnsemblersController) UpdateEnsembler(
 
 	if err = ensembler.Patch(request.EnsemblerLike); err != nil {
 		return BadRequest("invalid ensembler configuration", err.Error())
+	}
+
+	if ok := utils.IsQualifiedKubernetesName(ensembler.GetName(), unixTimestampPadding); !ok {
+		return BadRequest(
+			fmt.Sprintf(
+				"ensembler name is not DNS compliant or is greater than %d chars",
+				maxAllowedEnsemblerNameLength,
+			),
+			"",
+		)
 	}
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)

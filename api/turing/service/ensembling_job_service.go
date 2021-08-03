@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"hash/fnv"
 	"strings"
 	"time"
 
@@ -13,7 +12,12 @@ import (
 )
 
 const (
-	sparkHomeFolder string = "/home/spark"
+	// SparkHomeFolder is the home folder of the spark user in the Docker container
+	// used in engines/batch-ensembler/Dockerfile
+	SparkHomeFolder = "/home/spark"
+	// EnsemblerFolder is the folder created by the Turing SDK that contains
+	// the ensembler dependencies and pickled Python files.
+	EnsemblerFolder = "ensembler"
 )
 
 // EnsemblingJobFindByIDOptions contains the options allowed when finding ensembling jobs.
@@ -132,10 +136,9 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	return paginatedResults, nil
 }
 
-func generateDefaultJobName(ensemblerName string) (string, error) {
-	hasher := fnv.New32a()
-	_, err := hasher.Write([]byte(time.Now().Format(time.RFC3339)))
-	return fmt.Sprintf("%s-%x", ensemblerName, hasher.Sum32()), err
+func generateDefaultJobName(ensemblerName string) string {
+	t := time.Now().Unix()
+	return fmt.Sprintf("%s-%d", ensemblerName, t)
 }
 
 func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
@@ -145,7 +148,7 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	splitURI := strings.Split(ensembler.ArtifactURI, "/")
 	return fmt.Sprintf(
 		"%s/%s/ensembler",
-		sparkHomeFolder,
+		SparkHomeFolder,
 		splitURI[len(splitURI)-1],
 	)
 }
@@ -161,11 +164,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 
 	// Populate name if the user does not define a name for the job
 	if job.Name == "" {
-		name, err := generateDefaultJobName(ensembler.Name)
-		job.Name = name
-		if err != nil {
-			return nil, fmt.Errorf("Error generating hash: %w", err)
-		}
+		job.Name = generateDefaultJobName(ensembler.Name)
 	}
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
