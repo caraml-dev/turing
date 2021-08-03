@@ -24,15 +24,13 @@ export const ListEnsemblingJobsTable = ({
   totalItemCount,
   isLoaded,
   error,
-  defaultPageSize,
+  page,
   onQueryChange,
   onPaginationChange,
   onRowClick
 }) => {
   const ensemblers = useContext(EnsemblersContext);
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
 
   const onSearchChange = ({ queryText }) => {
     const query = EuiSearchBar.Query.parse(queryText);
@@ -40,12 +38,7 @@ export const ListEnsemblingJobsTable = ({
     onQueryChange(query);
   };
 
-  const onTableChange = ({ page = {} }) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-
-    onPaginationChange(page);
-  };
+  const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
   const columns = [
     {
@@ -128,8 +121,8 @@ export const ListEnsemblingJobsTable = ({
   ];
 
   const pagination = {
-    pageIndex,
-    pageSize,
+    pageIndex: page.index,
+    pageSize: page.size,
     totalItemCount
   };
 

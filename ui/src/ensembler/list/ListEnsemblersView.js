@@ -14,8 +14,8 @@ import { appConfig } from "../../config";
 
 const { defaultPageSize } = appConfig.pagination;
 
-export const ListEnsemblersView = ({ projectId, ...props }) => {
-  const [pagination, setPagination] = useState({ page_size: defaultPageSize });
+export const ListEnsemblersView = ({ projectId }) => {
+  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const [filter, setFilter] = useState({});
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
 
@@ -32,19 +32,15 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
     });
   };
 
-  const onPaginationChange = page => {
-    setPagination({
-      page: page.index + 1,
-      page_size: page.size
-    });
-  };
-
   const [{ data, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/ensemblers`,
     {
       query: {
         ...filter,
-        ...pagination
+        ...{
+          page: page.index + 1,
+          page_size: page.size
+        }
       }
     },
     { results: [], paging: { total: 0 } }
@@ -79,9 +75,9 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
             {...results}
             isLoaded={isLoaded}
             error={error}
-            defaultPageSize={defaultPageSize}
+            page={page}
             onQueryChange={onQueryChange}
-            onPaginationChange={onPaginationChange}
+            onPaginationChange={setPage}
             onRowClick={onRowClick}
           />
         </EuiPageContent>

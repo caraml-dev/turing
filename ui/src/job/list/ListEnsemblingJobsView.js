@@ -17,7 +17,7 @@ import { appConfig } from "../../config";
 const { defaultPageSize } = appConfig.pagination;
 
 export const ListEnsemblingJobsView = ({ projectId }) => {
-  const [pagination, setPagination] = useState({ page_size: defaultPageSize });
+  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const [filter, setFilter] = useState({});
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
 
@@ -34,19 +34,15 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
     });
   };
 
-  const onPaginationChange = page => {
-    setPagination({
-      page: page.index + 1,
-      page_size: page.size
-    });
-  };
-
   const [{ data, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/jobs`,
     {
       query: {
         ...filter,
-        ...pagination
+        ...{
+          page: page.index + 1,
+          page_size: page.size
+        }
       }
     },
     { results: [], paging: { total: 0 } }
@@ -87,9 +83,9 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
               {...results}
               isLoaded={isLoaded}
               error={error}
-              defaultPageSize={defaultPageSize}
+              page={page}
               onQueryChange={onQueryChange}
-              onPaginationChange={onPaginationChange}
+              onPaginationChange={setPage}
               onRowClick={onRowClick}
             />
           </EnsemblersContextContextProvider>

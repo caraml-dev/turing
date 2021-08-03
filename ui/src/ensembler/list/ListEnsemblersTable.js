@@ -20,14 +20,12 @@ export const ListEnsemblersTable = ({
   totalItemCount,
   isLoaded,
   error,
-  defaultPageSize,
+  page,
   onQueryChange,
   onPaginationChange,
   onRowClick
 }) => {
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
 
   const onSearchChange = ({ queryText }) => {
     const query = EuiSearchBar.Query.parse(queryText);
@@ -35,12 +33,7 @@ export const ListEnsemblersTable = ({
     onQueryChange(query);
   };
 
-  const onTableChange = ({ page = {} }) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-
-    onPaginationChange(page);
-  };
+  const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
   const columns = [
     {
@@ -68,6 +61,11 @@ export const ListEnsemblersTable = ({
           {name}
         </span>
       )
+    },
+    {
+      field: "type",
+      name: "Type",
+      width: "15%"
     },
     {
       field: "created_at",
@@ -101,8 +99,8 @@ export const ListEnsemblersTable = ({
   ];
 
   const pagination = {
-    pageIndex,
-    pageSize,
+    pageIndex: page.index,
+    pageSize: page.size,
     totalItemCount
   };
 
