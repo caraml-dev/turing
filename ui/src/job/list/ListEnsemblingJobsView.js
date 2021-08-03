@@ -8,30 +8,40 @@ import {
   EuiPageHeaderSection
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
 import { EnsemblersContextContextProvider } from "../../providers/ensemblers/context";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { appConfig } from "../../config";
+import { parse, stringify } from "query-string";
 
 const { defaultPageSize } = appConfig.pagination;
 
-export const ListEnsemblingJobsView = ({ projectId }) => {
-  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
-  const [filter, setFilter] = useState({});
+export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
+  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
+  const filter = useMemo(() => parse(props.location.search), [
+    props.location.search
+  ]);
 
-  const onQueryChange = query => {
-    setFilter(filter => {
-      const statusClause = query.getOrFieldClause("status");
+  const onQueryChange = ({ query }) => {
+    const filter = {};
+    const ensemblerClause = query.getSimpleFieldClause("ensembler_id");
+    if (!!ensemblerClause) {
+      filter["ensembler_id"] = ensemblerClause.value;
+    }
 
-      if (!!statusClause) {
-        filter["status"] = statusClause.value;
-      } else {
-        delete filter["status"];
-      }
-      return { ...filter };
-    });
+    const statusClause = query.getOrFieldClause("status");
+    if (!!statusClause) {
+      filter["status"] = statusClause.value;
+    }
+
+    const searchClause = query.ast.getTermClauses();
+    if (!!searchClause) {
+      filter["search"] = searchClause.map(c => c.value).join(" ");
+    }
+
+    props.navigate(`${props.location.pathname}?${stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -84,6 +94,7 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
               isLoaded={isLoaded}
               error={error}
               page={page}
+              filter={filter}
               onQueryChange={onQueryChange}
               onPaginationChange={setPage}
               onRowClick={onRowClick}

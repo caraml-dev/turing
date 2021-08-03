@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import {
@@ -11,25 +11,30 @@ import {
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { appConfig } from "../../config";
+import { parse, stringify } from "query-string";
 
 const { defaultPageSize } = appConfig.pagination;
 
-export const ListEnsemblersView = ({ projectId }) => {
-  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
-  const [filter, setFilter] = useState({});
+export const ListEnsemblersView = ({ projectId, ...props }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
+  const [page, setPage] = useState({ index: 0, size: defaultPageSize });
+  const filter = useMemo(() => parse(props.location.search), [
+    props.location.search
+  ]);
 
-  const onQueryChange = query => {
-    setFilter(filter => {
-      const typeClause = query.getSimpleFieldClause("type");
+  const onQueryChange = ({ query }) => {
+    const filter = {};
+    const typeClause = query.getSimpleFieldClause("type");
+    if (!!typeClause) {
+      filter["type"] = typeClause.value;
+    }
 
-      if (!!typeClause) {
-        filter["type"] = typeClause.value;
-      } else {
-        delete filter["type"];
-      }
-      return { ...filter };
-    });
+    const searchClause = query.ast.getTermClauses();
+    if (!!searchClause) {
+      filter["search"] = searchClause.map(c => c.value).join(" ");
+    }
+
+    props.navigate(`${props.location.pathname}?${stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -76,9 +81,11 @@ export const ListEnsemblersView = ({ projectId }) => {
             isLoaded={isLoaded}
             error={error}
             page={page}
+            filter={filter}
             onQueryChange={onQueryChange}
             onPaginationChange={setPage}
             onRowClick={onRowClick}
+            {...props}
           />
         </EuiPageContent>
       </EuiPageBody>

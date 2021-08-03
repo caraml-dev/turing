@@ -2,8 +2,6 @@ import { EnumValue, Enum } from "../enum/Enum";
 
 export const EnsemblerType = Enum({
   PYFUNC: EnumValue("pyfunc", {
-    label: "Pyfunc",
-    color: "#BD271E",
-    iconType: "cross"
+    label: "Pyfunc"
   })
 });

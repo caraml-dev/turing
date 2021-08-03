@@ -1,9 +1,9 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo } from "react";
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiHealth,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -12,6 +12,7 @@ import {
 import { appConfig } from "../../config";
 import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
+import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
 const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
 
@@ -21,17 +22,23 @@ export const ListEnsemblersTable = ({
   isLoaded,
   error,
   page,
+  filter,
   onQueryChange,
   onPaginationChange,
-  onRowClick
+  onRowClick,
+  ...props
 }) => {
-  const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+  const searchQuery = useMemo(() => {
+    const parts = [];
+    if (!!filter.search) {
+      parts.push(filter.search);
+    }
+    if (!!filter.type) {
+      parts.push(`type:${filter.type}`);
+    }
 
-  const onSearchChange = ({ queryText }) => {
-    const query = EuiSearchBar.Query.parse(queryText);
-    setSearchQuery(query);
-    onQueryChange(query);
-  };
+    return parts.join(" ");
+  }, [filter]);
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
@@ -95,6 +102,30 @@ export const ListEnsemblersTable = ({
           </EuiText>
         </EuiToolTip>
       )
+    },
+    {
+      field: "id",
+      name: (
+        <FormLabelWithToolTip
+          label="Actions"
+          size={defaultIconSize}
+          content="Ensembler actions"
+        />
+      ),
+      align: "right",
+      mobileOptions: {
+        header: true,
+        fullWidth: false
+      },
+      width: "15%",
+      render: ensemblerId => (
+        <EuiButtonEmpty
+          onClick={_ => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
+          iconType="storage"
+          size="xs">
+          <EuiText size="xs">Batch Jobs</EuiText>
+        </EuiButtonEmpty>
+      )
     }
   ];
 
@@ -106,9 +137,9 @@ export const ListEnsemblersTable = ({
 
   const search = {
     query: searchQuery,
-    onChange: onSearchChange,
+    onChange: onQueryChange,
     box: {
-      incremental: true
+      incremental: false
     },
     filters: [
       {
@@ -116,9 +147,9 @@ export const ListEnsemblersTable = ({
         field: "type",
         name: "Ensembler Type",
         multiSelect: false,
-        options: EnsemblerType.values.map(status => ({
-          value: status.toString(),
-          view: <EuiHealth color={status.color}>{status.toString()}</EuiHealth>
+        options: EnsemblerType.values.map(type => ({
+          value: type.toString(),
+          view: type.label
         }))
       }
     ]

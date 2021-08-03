@@ -1,4 +1,4 @@
-import React, { useContext, Fragment, useState } from "react";
+import React, { Fragment, useContext, useMemo } from "react";
 import {
   EuiBadge,
   EuiCallOut,
@@ -25,18 +25,30 @@ export const ListEnsemblingJobsTable = ({
   isLoaded,
   error,
   page,
+  filter,
   onQueryChange,
   onPaginationChange,
   onRowClick
 }) => {
   const ensemblers = useContext(EnsemblersContext);
-  const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
 
-  const onSearchChange = ({ queryText }) => {
-    const query = EuiSearchBar.Query.parse(queryText);
-    setSearchQuery(query);
-    onQueryChange(query);
-  };
+  const searchQuery = useMemo(() => {
+    const parts = [];
+    if (!!filter.search) {
+      parts.push(filter.search);
+    }
+    if (!!filter.ensembler_id) {
+      parts.push(`ensembler_id:${filter.ensembler_id}`);
+    }
+    if (!!filter.status) {
+      const statuses = Array.isArray(filter.status)
+        ? filter.status
+        : [filter.status];
+      parts.push(`status:(${statuses.join(" or ")})`);
+    }
+
+    return parts.join(" ");
+  }, [filter]);
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
@@ -128,9 +140,9 @@ export const ListEnsemblingJobsTable = ({
 
   const search = {
     query: searchQuery,
-    onChange: onSearchChange,
+    onChange: onQueryChange,
     box: {
-      incremental: true
+      incremental: false
     },
     filters: [
       {
@@ -141,6 +153,16 @@ export const ListEnsemblingJobsTable = ({
         options: JobStatus.values.map(status => ({
           value: status.toString(),
           view: <EuiHealth color={status.color}>{status.toString()}</EuiHealth>
+        }))
+      },
+      {
+        type: "field_value_selection",
+        field: "ensembler_id",
+        name: "Ensembler",
+        multiSelect: false,
+        options: Object.values(ensemblers).map(ensembler => ({
+          value: ensembler.id,
+          view: ensembler.name
         }))
       }
     ]
