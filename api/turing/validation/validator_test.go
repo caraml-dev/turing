@@ -4,6 +4,7 @@ package validation_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/gojek/turing/engines/router"
@@ -469,4 +470,17 @@ func TestValidateTrafficRules(t *testing.T) {
 			}
 		})
 	}
+}
+
+type DNSTestStruct struct {
+	Name string `validate:"dns,lte=50,gte=3"`
+}
+
+func genString(length int) string {
+	var sb strings.Builder
+	for i := 0; i < length; i++ {
+		sb.WriteString("a")
+	}
+
+	return sb.String()
 }

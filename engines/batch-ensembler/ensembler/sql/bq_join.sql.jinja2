@@ -4,7 +4,7 @@ WITH features AS (
 
 {% for name, source in predictions.items() -%}
 {{ name }}_predictions AS (
-    {{ source.dataset().query | indent }}
+    {{ source.dataset.query | indent }}
 ){% if not loop.last %},{% endif %}
 
 {% endfor -%}
@@ -12,11 +12,11 @@ WITH features AS (
 SELECT
     features.*
     {%- for name, source in predictions.items() %}
-    {% if source.prediction_columns() | length == 1 -%}
-    , {{ name }}_predictions.{{ source.prediction_columns()[0] }} as {{ prefix }}{{ name }}
+    {% if source.prediction_columns | length == 1 -%}
+    , {{ name }}_predictions.{{ source.prediction_columns[0] }} as {{ prefix }}{{ name }}
     {%- else -%}
     , (SELECT AS STRUCT
-      {%- for col in source.prediction_columns() %}
+      {%- for col in source.prediction_columns %}
           {{ name }}_predictions.{{ col }}{% if not loop.last %},{% endif %}
       {%- endfor %}
     ) as {{ prefix }}{{ name }}
@@ -25,7 +25,7 @@ SELECT
 FROM features
 {%- for name, source in predictions.items() %}
     LEFT JOIN {{name}}_predictions ON
-    {%- for left, right in join_columns | zip(source.join_columns()) -%}
+    {%- for left, right in join_columns | zip(source.join_columns) -%}
     {% if not loop.first %}
         AND{% endif %} features.{{ left }}={{name}}_predictions.{{ right }}
     {%- endfor -%}

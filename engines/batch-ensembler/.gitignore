@@ -1,6 +1,7 @@
 env/
 .coverage
-tests/mlruns/
+**/mlruns/
+**/__pycache__
 
 vendor/
 temp-deps/

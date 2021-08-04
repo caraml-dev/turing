@@ -16,6 +16,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	artifactFolder string = "artifact"
+)
+
 var (
 	driverCPURequest            = "100"
 	driverMemoryRequest         = "1Gi"
@@ -23,6 +27,7 @@ var (
 	executorCPURequest          = "1"
 	executorMemoryRequest       = "1Gi"
 )
+
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
 	BatchEnsemblingJobResources: openapi.EnsemblingResources{
 		DriverCpuRequest:      &driverCPURequest,
@@ -118,7 +123,6 @@ func generateEnsemblingJobFixture(
 					},
 				},
 				Ensembler: openapi.EnsemblingJobEnsemblerSpec{
-					Uri: "gs://bucket-name/my-ensembler/artifacts/ensembler",
 					Result: openapi.EnsemblingJobEnsemblerSpecResult{
 						ColumnName: "prediction_score",
 						Type:       openapi.ENSEMBLINGJOBRESULTTYPE_FLOAT,
@@ -147,10 +151,15 @@ func generateEnsemblingJobFixture(
 		},
 	}
 	if genExpected {
-		value.JobConfig.Spec.Ensembler.Uri = "/home/spark/ensembler"
+		value.JobConfig.Spec.Ensembler.Uri = fmt.Sprintf(
+			"%s/%s/%s",
+			SparkHomeFolder,
+			artifactFolder,
+			EnsemblerFolder,
+		)
 		value.EnvironmentName = "dev"
-		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
-		value.InfraConfig.EnsemblerName = "ensembler"
+		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
+		value.InfraConfig.EnsemblerName = EnsemblerFolder
 	}
 
 	return value
@@ -319,36 +328,22 @@ func TestCreateEnsemblingJob(t *testing.T) {
 		ensembler              *models.PyFuncEnsembler
 		request                *models.EnsemblingJob
 		expected               *models.EnsemblingJob
+		err                    error
 		removeDefaultResources bool
 		removeDriverCPURequest bool
 	}{
 		"success | name provided": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
+					Name:      EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
-			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
-			removeDefaultResources: false,
-			removeDriverCPURequest: false,
-		},
-		"success | name not provided": {
-			ensembler: &models.PyFuncEnsembler{
-				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
-					Model:     models.Model{ID: 1},
-					Type:      models.EnsemblerTypePyFunc,
-					ProjectID: 1,
-				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "", true),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, EnsemblerFolder, true),
 			removeDefaultResources: false,
 			removeDriverCPURequest: false,
 		},
@@ -360,7 +355,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
@@ -375,7 +370,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
-				ArtifactURI: "gs://bucket/ensembler",
+				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
 			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
 			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
@@ -402,6 +397,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					1,
 					tt.ensembler,
 				)
+
 				assert.Nil(t, err)
 				expected := tt.expected
 

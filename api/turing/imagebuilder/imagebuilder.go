@@ -22,6 +22,7 @@ import (
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/service"
 )
 
 var (
@@ -207,7 +208,7 @@ func (ib *imageBuilder) createKanikoJob(
 	buildLabels map[string]string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
-	folderName := splitURI[len(splitURI)-1]
+	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], service.EnsemblerFolder)
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageConfig.DockerfileFilePath),

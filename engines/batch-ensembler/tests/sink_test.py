@@ -26,7 +26,7 @@ def test_load_from_config(sink_config):
 
     assert sink.type == sdk.sink.BigQuerySink.TYPE
     assert isinstance(sink, BigQuerySink)
-    assert sink.save_mode == sdk.sink.SaveMode.OVERWRITE.to_open_api()
+    assert sink.save_mode == sdk.sink.SaveMode.OVERWRITE
     assert sink.columns == ["customer_id", "ensembling_result"]
     assert sink.options == {
         "table": "project.dataset.table",

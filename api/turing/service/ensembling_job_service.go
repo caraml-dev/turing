@@ -6,12 +6,18 @@ import (
 	"time"
 
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
 
 const (
-	sparkHomeFolder string = "/home/spark"
+	// SparkHomeFolder is the home folder of the spark user in the Docker container
+	// used in engines/batch-ensembler/Dockerfile
+	SparkHomeFolder = "/home/spark"
+	// EnsemblerFolder is the folder created by the Turing SDK that contains
+	// the ensembler dependencies and pickled Python files.
+	EnsemblerFolder = "ensembler"
 )
 
 // EnsemblingJobFindByIDOptions contains the options allowed when finding ensembling jobs.
@@ -141,7 +147,8 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 }
 
 func generateDefaultJobName(ensemblerName string) string {
-	return fmt.Sprintf("%s: %s", ensemblerName, time.Now().Format(time.RFC3339))
+	t := time.Now().Unix()
+	return fmt.Sprintf("%s-%d", ensemblerName, t)
 }
 
 func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
@@ -150,8 +157,8 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	// See engines/batch-ensembler/app.Dockerfile
 	splitURI := strings.Split(ensembler.ArtifactURI, "/")
 	return fmt.Sprintf(
-		"%s/%s",
-		sparkHomeFolder,
+		"%s/%s/ensembler",
+		SparkHomeFolder,
 		splitURI[len(splitURI)-1],
 	)
 }
@@ -174,7 +181,6 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	job.JobConfig.Metadata.Name = generateDefaultJobName(ensembler.Name)
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
@@ -192,6 +198,12 @@ func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.Ensem
 }
 
 func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {
+	if job.JobConfig.Metadata == nil {
+		job.JobConfig.Metadata = &openapi.EnsemblingJobMeta{
+			Annotations: make(map[string]string),
+		}
+	}
+
 	// Only apply default if key does not exist, we should respect the users annotation override.
 	for key, value := range s.defaultConfig.SparkConfigAnnotations {
 		if _, ok := job.JobConfig.Metadata.Annotations[key]; !ok {

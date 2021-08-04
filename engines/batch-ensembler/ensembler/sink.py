@@ -34,7 +34,11 @@ class Sink(ABC):
     @classmethod
     def from_config(cls, config: openapi.EnsemblingJobSink):
         if config.type == sdk.sink.BigQuerySink.TYPE:
-            return BigQuerySink(config.save_mode, config.columns, config.bq_config)
+            return BigQuerySink(
+                getattr(sdk.sink.SaveMode, config.save_mode.to_str()),
+                config.columns,
+                config.bq_config
+            )
         raise ValueError(f'Sink not implemented: {config.type}')
 
 
@@ -78,7 +82,7 @@ class BigQuerySink(Sink):
 
     def _save(self, df: DataFrame):
         df.write \
-            .mode(sdk.sink.SaveMode.Name(self.save_mode).lower()) \
+            .mode(self.save_mode.name.lower()) \
             .format(self._WRITE_FORMAT) \
             .options(**self.options) \
             .save()
