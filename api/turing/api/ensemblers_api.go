@@ -1,11 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 )
@@ -69,7 +69,7 @@ func (c EnsemblersController) CreateEnsembler(
 		return errResp
 	}
 	var err error
-	ensembler := body.(*CreateOrUpdateEnsemblerRequest).EnsemblerLike
+	ensembler := body.(*request.CreateOrUpdateEnsemblerRequest).EnsemblerLike
 	ensembler.SetProjectID(models.ID(project.Id))
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)
@@ -101,7 +101,7 @@ func (c EnsemblersController) UpdateEnsembler(
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	request := body.(*CreateOrUpdateEnsemblerRequest)
+	request := body.(*request.CreateOrUpdateEnsemblerRequest)
 
 	if ensembler.GetType() != request.GetType() {
 		return BadRequest("invalid ensembler configuration",
@@ -130,7 +130,7 @@ func (c EnsemblersController) Routes() []Route {
 		{
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/ensemblers",
-			body:    CreateOrUpdateEnsemblerRequest{},
+			body:    request.CreateOrUpdateEnsemblerRequest{},
 			handler: c.CreateEnsembler,
 		},
 		{
@@ -141,39 +141,10 @@ func (c EnsemblersController) Routes() []Route {
 		{
 			method:  http.MethodPut,
 			path:    "/projects/{project_id}/ensemblers/{ensembler_id}",
-			body:    CreateOrUpdateEnsemblerRequest{},
+			body:    request.CreateOrUpdateEnsemblerRequest{},
 			handler: c.UpdateEnsembler,
 		},
 	}
-}
-
-type CreateOrUpdateEnsemblerRequest struct {
-	models.EnsemblerLike
-}
-
-func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
-	typeCheck := struct {
-		Type models.EnsemblerType
-	}{}
-
-	if err := json.Unmarshal(data, &typeCheck); err != nil {
-		return err
-	}
-
-	var ensembler models.EnsemblerLike
-	switch typeCheck.Type {
-	case models.EnsemblerTypePyFunc:
-		ensembler = &models.PyFuncEnsembler{}
-	default:
-		return fmt.Errorf("unsupported ensembler type: %s", typeCheck.Type)
-	}
-
-	if err := json.Unmarshal(data, ensembler); err != nil {
-		return err
-	}
-
-	r.EnsemblerLike = ensembler
-	return nil
 }
 
 type EnsemblersPathOptions struct {

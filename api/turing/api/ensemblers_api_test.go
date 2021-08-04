@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -239,7 +240,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			Model:     models.Model{ID: 2},
 			ProjectID: 2,
 			Type:      models.EnsemblerTypePyFunc,
-			Name:      "original ensembler",
+			Name:      "original-ensembler",
 		},
 		MlflowURL:    "http://localhost:5000/experiemnts/0/runs/1",
 		ExperimentID: 0,
@@ -252,7 +253,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			Model:     models.Model{ID: 2},
 			ProjectID: 2,
 			Type:      models.EnsemblerTypePyFunc,
-			Name:      "updated ensembler",
+			Name:      "updated-ensembler",
 		},
 		MlflowURL:    "http://localhost:5000/experiemnts/0/runs/2",
 		ExperimentID: 0,
@@ -297,7 +298,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.GenericEnsembler{
 					Model:     models.Model{},
 					ProjectID: 2,
@@ -324,7 +325,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.GenericEnsembler{
 					Model:     models.Model{},
 					ProjectID: 2,
@@ -351,7 +352,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.PyFuncEnsembler{
 					GenericEnsembler: &models.GenericEnsembler{
 						Model:     models.Model{},
@@ -384,7 +385,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.PyFuncEnsembler{
 					GenericEnsembler: &models.GenericEnsembler{
 						Model:     models.Model{},

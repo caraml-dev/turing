@@ -11,7 +11,7 @@ import (
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously
 type EnsemblingJob struct {
 	Model
-	Name            string       `json:"name" validate:"required"`
+	Name            string       `json:"name"`
 	EnsemblerID     ID           `json:"ensembler_id" validate:"required"`
 	ProjectID       ID           `json:"project_id"`
 	EnvironmentName string       `json:"environment_name"`
