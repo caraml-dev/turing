@@ -164,12 +164,12 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 
 	// Populate name if the user does not define a name for the job
 	if job.Name == "" {
-		job.Name = generateDefaultJobName(ensembler.Name)
+		job.Name = generateDefaultJobName(string(ensembler.Name))
 	}
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
-	job.InfraConfig.EnsemblerName = ensembler.Name
+	job.InfraConfig.EnsemblerName = string(ensembler.Name)
 
 	s.mergeDefaultConfigurations(job)
 

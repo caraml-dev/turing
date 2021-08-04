@@ -2,9 +2,9 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
@@ -298,7 +298,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.GenericEnsembler{
 					Model:     models.Model{},
 					ProjectID: 2,
@@ -325,7 +325,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.GenericEnsembler{
 					Model:     models.Model{},
 					ProjectID: 2,
@@ -352,7 +352,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.PyFuncEnsembler{
 					GenericEnsembler: &models.GenericEnsembler{
 						Model:     models.Model{},
@@ -380,50 +380,12 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			expected: InternalServerError(
 				"failed to update an ensembler", "failed to save"),
 		},
-		"failure | non compliant dns name": {
-			vars: RequestVars{
-				"project_id":   {"2"},
-				"ensembler_id": {"2"},
-			},
-			body: &CreateOrUpdateEnsemblerRequest{
-				EnsemblerLike: &models.PyFuncEnsembler{
-					GenericEnsembler: &models.GenericEnsembler{
-						Model:     models.Model{},
-						ProjectID: 2,
-						Name:      "non compliant name",
-					},
-					MlflowURL:    "http://localhost:5000/experiemnts/0/runs/2",
-					ExperimentID: 0,
-					RunID:        "2",
-					ArtifactURI:  "gs://bucket-name/mlflow/0/2/artifacts",
-				},
-			},
-			ensemblerSvc: func() service.EnsemblersService {
-				ensemblerSvc := &mocks.EnsemblersService{}
-				ensemblerSvc.
-					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
-						ProjectID: models.NewID(2),
-					}).
-					Return(original, nil)
-				ensemblerSvc.
-					On("Save", updated).
-					Return(updated, nil)
-				return ensemblerSvc
-			},
-			expected: BadRequest(
-				fmt.Sprintf(
-					"ensembler name is not DNS compliant or is greater than %d chars",
-					maxAllowedEnsemblerNameLength,
-				),
-				"",
-			),
-		},
 		"success": {
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
 			},
-			body: &CreateOrUpdateEnsemblerRequest{
+			body: &request.CreateOrUpdateEnsemblerRequest{
 				EnsemblerLike: &models.PyFuncEnsembler{
 					GenericEnsembler: &models.GenericEnsembler{
 						Model:     models.Model{},

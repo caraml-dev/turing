@@ -4,6 +4,7 @@ package validation_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/gojek/turing/engines/router"
@@ -466,6 +467,69 @@ func TestValidateTrafficRules(t *testing.T) {
 				require.NoError(t, err)
 			} else {
 				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+type DNSTestStruct struct {
+	Name string `validate:"dns,lte=50,gte=3"`
+}
+
+func genString(length int) string {
+	var sb strings.Builder
+	for i := 0; i < length; i++ {
+		sb.WriteString("a")
+	}
+
+	return sb.String()
+}
+
+func TestValidateDns(t *testing.T) {
+	tests := map[string]struct {
+		given    DNSTestStruct
+		hasError bool
+	}{
+		"success | nominal": {
+			given: DNSTestStruct{
+				Name: "foobar",
+			},
+			hasError: false,
+		},
+		"success | exactly maximum": {
+			given: DNSTestStruct{
+				Name: genString(50),
+			},
+			hasError: false,
+		},
+		"failure | exactly maximum + 1": {
+			given: DNSTestStruct{
+				Name: genString(51),
+			},
+			hasError: true,
+		},
+		"failure | non dns compliant": {
+			given: DNSTestStruct{
+				Name: "foo:bar",
+			},
+			hasError: true,
+		},
+		"failure | empty": {
+			given: DNSTestStruct{
+				Name: "",
+			},
+			hasError: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			validate, err := validation.NewValidator(nil)
+			require.NoError(t, err)
+			err = validate.Struct(tt.given)
+			if tt.hasError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
 			}
 		})
 	}

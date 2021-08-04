@@ -1,21 +1,13 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/api/turing/utils"
-)
-
-const (
-	rfc1123MaxLength = 63
-	// 10 digits for unix timestamp and a hyphen
-	unixTimestampPadding          = 11
-	maxAllowedEnsemblerNameLength = rfc1123MaxLength - unixTimestampPadding
 )
 
 type EnsemblersController struct {
@@ -77,18 +69,8 @@ func (c EnsemblersController) CreateEnsembler(
 		return errResp
 	}
 	var err error
-	ensembler := body.(*CreateOrUpdateEnsemblerRequest).EnsemblerLike
+	ensembler := body.(*request.CreateOrUpdateEnsemblerRequest).EnsemblerLike
 	ensembler.SetProjectID(models.ID(project.Id))
-
-	if ok := utils.IsQualifiedKubernetesName(ensembler.GetName(), unixTimestampPadding); !ok {
-		return BadRequest(
-			fmt.Sprintf(
-				"ensembler name is not DNS compliant or is greater than %d char long",
-				maxAllowedEnsemblerNameLength,
-			),
-			"",
-		)
-	}
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {
@@ -119,7 +101,7 @@ func (c EnsemblersController) UpdateEnsembler(
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	request := body.(*CreateOrUpdateEnsemblerRequest)
+	request := body.(*request.CreateOrUpdateEnsemblerRequest)
 
 	if ensembler.GetType() != request.GetType() {
 		return BadRequest("invalid ensembler configuration",
@@ -128,16 +110,6 @@ func (c EnsemblersController) UpdateEnsembler(
 
 	if err = ensembler.Patch(request.EnsemblerLike); err != nil {
 		return BadRequest("invalid ensembler configuration", err.Error())
-	}
-
-	if ok := utils.IsQualifiedKubernetesName(ensembler.GetName(), unixTimestampPadding); !ok {
-		return BadRequest(
-			fmt.Sprintf(
-				"ensembler name is not DNS compliant or is greater than %d chars",
-				maxAllowedEnsemblerNameLength,
-			),
-			"",
-		)
 	}
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)
@@ -158,7 +130,7 @@ func (c EnsemblersController) Routes() []Route {
 		{
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/ensemblers",
-			body:    CreateOrUpdateEnsemblerRequest{},
+			body:    request.CreateOrUpdateEnsemblerRequest{},
 			handler: c.CreateEnsembler,
 		},
 		{
@@ -169,39 +141,10 @@ func (c EnsemblersController) Routes() []Route {
 		{
 			method:  http.MethodPut,
 			path:    "/projects/{project_id}/ensemblers/{ensembler_id}",
-			body:    CreateOrUpdateEnsemblerRequest{},
+			body:    request.CreateOrUpdateEnsemblerRequest{},
 			handler: c.UpdateEnsembler,
 		},
 	}
-}
-
-type CreateOrUpdateEnsemblerRequest struct {
-	models.EnsemblerLike
-}
-
-func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
-	typeCheck := struct {
-		Type models.EnsemblerType
-	}{}
-
-	if err := json.Unmarshal(data, &typeCheck); err != nil {
-		return err
-	}
-
-	var ensembler models.EnsemblerLike
-	switch typeCheck.Type {
-	case models.EnsemblerTypePyFunc:
-		ensembler = &models.PyFuncEnsembler{}
-	default:
-		return fmt.Errorf("unsupported ensembler type: %s", typeCheck.Type)
-	}
-
-	if err := json.Unmarshal(data, ensembler); err != nil {
-		return err
-	}
-
-	r.EnsemblerLike = ensembler
-	return nil
 }
 
 type EnsemblersPathOptions struct {

@@ -14,6 +14,7 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 var tableRegexString string = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
@@ -42,7 +43,23 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 		return nil
 	}, router.RuleConditionOperator{})
 
+	err := instance.RegisterValidation("dns", validateDNSCompliantName)
+	if err != nil {
+		return nil, err
+	}
+
 	return instance, nil
+}
+
+func validateDNSCompliantName(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	switch field.Kind() {
+	case reflect.String:
+		errs := validation.IsQualifiedName(field.String())
+		return len(errs) == 0
+	default:
+		return false
+	}
 }
 
 func validateLogConfig(sl validator.StructLevel) {
