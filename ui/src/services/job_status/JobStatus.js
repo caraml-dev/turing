@@ -1,6 +1,6 @@
-import { EnumValue } from "../enum_value/EnumValue";
+import { Enum, EnumValue } from "../enum/Enum";
 
-const values = {
+export const JobStatus = Enum({
   PENDING: EnumValue("pending", {
     label: "Pending",
     color: "#F5A700",
@@ -45,12 +45,4 @@ const values = {
     color: "#BD271E",
     iconType: "cross"
   })
-};
-
-const allValues = Object.values(values);
-
-export const JobStatus = Object.freeze({
-  ...values,
-  values: allValues,
-  fromValue: name => allValues.find(s => name === s.toString())
 });

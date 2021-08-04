@@ -29,7 +29,9 @@ type EnsemblingJobFindByIDOptions struct {
 type EnsemblingJobListOptions struct {
 	PaginationOptions
 	ProjectID          *models.ID      `schema:"project_id" validate:"required"`
+	EnsemblerID        *models.ID      `schema:"ensembler_id"`
 	Statuses           []models.Status `schema:"status"`
+	Search             *string         `schema:"search"`
 	RetryCountLessThan *int            `schema:"-"`
 	UpdatedAtBefore    *time.Time      `schema:"-"`
 }
@@ -104,6 +106,14 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	query := s.db
 	if options.ProjectID != nil {
 		query = query.Where("project_id = ?", options.ProjectID)
+	}
+
+	if options.EnsemblerID != nil {
+		query = query.Where("ensembler_id = ?", options.EnsemblerID)
+	}
+
+	if options.Search != nil && len(*options.Search) > 0 {
+		query = query.Where("name like ?", fmt.Sprintf("%%%s%%", *options.Search))
 	}
 
 	if options.Statuses != nil {

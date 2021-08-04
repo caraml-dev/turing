@@ -1,25 +1,22 @@
-import React, { Fragment, useContext, useMemo } from "react";
+import React, { Fragment, useMemo } from "react";
 import {
   EuiBadge,
-  EuiCallOut,
-  EuiHealth,
-  EuiIcon,
   EuiBasicTable,
-  EuiLink,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiToolTip
 } from "@elastic/eui";
 import { appConfig } from "../../config";
+import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
-import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
-import { JobStatus } from "../../services/job_status/JobStatus";
-import EnsemblersContext from "../../providers/ensemblers/context";
+import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
 const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
 
-export const ListEnsemblingJobsTable = ({
+export const ListEnsemblersTable = ({
   items,
   totalItemCount,
   isLoaded,
@@ -28,23 +25,16 @@ export const ListEnsemblingJobsTable = ({
   filter,
   onQueryChange,
   onPaginationChange,
-  onRowClick
+  onRowClick,
+  ...props
 }) => {
-  const ensemblers = useContext(EnsemblersContext);
-
   const searchQuery = useMemo(() => {
     const parts = [];
     if (!!filter.search) {
       parts.push(filter.search);
     }
-    if (!!filter.ensembler_id) {
-      parts.push(`ensembler_id:${filter.ensembler_id}`);
-    }
-    if (!!filter.status) {
-      const statuses = Array.isArray(filter.status)
-        ? filter.status
-        : [filter.status];
-      parts.push(`status:(${statuses.join(" or ")})`);
+    if (!!filter.type) {
+      parts.push(`type:${filter.type}`);
     }
 
     return parts.join(" ");
@@ -80,26 +70,9 @@ export const ListEnsemblingJobsTable = ({
       )
     },
     {
-      field: "ensembler_id",
-      name: "Ensembler",
-      width: "20%",
-      render: id =>
-        !!ensemblers[id] ? (
-          <EuiLink href={`./ensemblers/${id}`}>
-            <EuiIcon type={"aggregate"} size={defaultIconSize} />
-            {ensemblers[id].name}
-          </EuiLink>
-        ) : (
-          "[Removed]"
-        )
-    },
-    {
-      field: "status",
-      name: "Status",
-      width: "20%",
-      render: status => (
-        <DeploymentStatusHealth status={JobStatus.fromValue(status)} />
-      )
+      field: "type",
+      name: "Type",
+      width: "15%"
     },
     {
       field: "created_at",
@@ -129,6 +102,30 @@ export const ListEnsemblingJobsTable = ({
           </EuiText>
         </EuiToolTip>
       )
+    },
+    {
+      field: "id",
+      name: (
+        <FormLabelWithToolTip
+          label="Actions"
+          size={defaultIconSize}
+          content="Ensembler actions"
+        />
+      ),
+      align: "right",
+      mobileOptions: {
+        header: true,
+        fullWidth: false
+      },
+      width: "15%",
+      render: ensemblerId => (
+        <EuiButtonEmpty
+          onClick={_ => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
+          iconType="storage"
+          size="xs">
+          <EuiText size="xs">Batch Jobs</EuiText>
+        </EuiButtonEmpty>
+      )
     }
   ];
 
@@ -147,22 +144,12 @@ export const ListEnsemblingJobsTable = ({
     filters: [
       {
         type: "field_value_selection",
-        field: "status",
-        name: "Status",
-        multiSelect: "or",
-        options: JobStatus.values.map(status => ({
-          value: status.toString(),
-          view: <EuiHealth color={status.color}>{status.toString()}</EuiHealth>
-        }))
-      },
-      {
-        type: "field_value_selection",
-        field: "ensembler_id",
-        name: "Ensembler",
+        field: "type",
+        name: "Ensembler Type",
         multiSelect: false,
-        options: Object.values(ensemblers).map(ensembler => ({
-          value: ensembler.id,
-          view: ensembler.name
+        options: EnsemblerType.values.map(type => ({
+          value: type.toString(),
+          view: type.label
         }))
       }
     ]

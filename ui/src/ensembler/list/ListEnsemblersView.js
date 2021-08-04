@@ -1,6 +1,7 @@
+import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
+import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import {
-  EuiButton,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -8,16 +9,13 @@ import {
   EuiPageHeaderSection
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
-import React, { useEffect, useMemo, useState } from "react";
-import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
-import { EnsemblersContextContextProvider } from "../../providers/ensemblers/context";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { appConfig } from "../../config";
 import { parse, stringify } from "query-string";
 
 const { defaultPageSize } = appConfig.pagination;
 
-export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
+export const ListEnsemblersView = ({ projectId, ...props }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(() => parse(props.location.search), [
@@ -26,14 +24,9 @@ export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
 
   const onQueryChange = ({ query }) => {
     const filter = {};
-    const ensemblerClause = query.getSimpleFieldClause("ensembler_id");
-    if (!!ensemblerClause) {
-      filter["ensembler_id"] = ensemblerClause.value;
-    }
-
-    const statusClause = query.getOrFieldClause("status");
-    if (!!statusClause) {
-      filter["status"] = statusClause.value;
+    const typeClause = query.getSimpleFieldClause("type");
+    if (!!typeClause) {
+      filter["type"] = typeClause.value;
     }
 
     const searchClause = query.ast.getTermClauses();
@@ -45,7 +38,7 @@ export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
   };
 
   const [{ data, isLoaded, error }] = useTuringApi(
-    `/projects/${projectId}/jobs`,
+    `/projects/${projectId}/ensemblers`,
     {
       query: {
         ...filter,
@@ -68,7 +61,7 @@ export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
   }, [data, isLoaded, error]);
 
   useEffect(() => {
-    replaceBreadcrumbs([{ text: "Jobs" }]);
+    replaceBreadcrumbs([{ text: "Ensemblers" }]);
   }, []);
 
   const onRowClick = item => {};
@@ -79,27 +72,21 @@ export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
       <EuiPageBody>
         <EuiPageHeader>
           <EuiPageHeaderSection>
-            <PageTitle title="Ensembling Jobs" />
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButton fill disabled href={"jobs/create"}>
-              Submit Job
-            </EuiButton>
+            <PageTitle title="Ensemblers" />
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
-          <EnsemblersContextContextProvider projectId={projectId}>
-            <ListEnsemblingJobsTable
-              {...results}
-              isLoaded={isLoaded}
-              error={error}
-              page={page}
-              filter={filter}
-              onQueryChange={onQueryChange}
-              onPaginationChange={setPage}
-              onRowClick={onRowClick}
-            />
-          </EnsemblersContextContextProvider>
+          <ListEnsemblersTable
+            {...results}
+            isLoaded={isLoaded}
+            error={error}
+            page={page}
+            filter={filter}
+            onQueryChange={onQueryChange}
+            onPaginationChange={setPage}
+            onRowClick={onRowClick}
+            {...props}
+          />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
