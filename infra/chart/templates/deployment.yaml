@@ -96,7 +96,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       - name: swagger-ui
-        image: "swaggerapi/swagger-ui:{{ .Values.swaggerUi.image.tag }}"
+        image: {{ .Values.swaggerUi.image.registry }}{{ .Values.swaggerUi.image.repository }}:{{ .Values.swaggerUi.image.tag }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: {{ .Values.swaggerUi.service.internalPort }}
@@ -119,12 +119,6 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          mkdir /app
-          echo "Fetching swagger configuration from http://127.0.0.1:{{ .Values.turing.service.internalPort }}/openapi.yaml..."
-          until $$(wget -O $${SWAGGER_JSON} --tries 1 --timeout 1 http://127.0.0.1:{{ .Values.turing.service.internalPort }}/openapi.yaml); do
-            printf '.'
-            sleep 10
-          done
           echo "Update Swagger config..."
           sed -r -i 's%^((\s*)-(\s*)url\s*:).*$$%\1 "'$${API_SERVER}'"%' $${SWAGGER_JSON}
           echo "Running Swagger UI..."
