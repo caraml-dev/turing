@@ -24,8 +24,8 @@ jobs:
     
     - name: Install
       working-directory: ui
-      run: npm config set unsafe-perm true && npm install --no-optional --verbose
+      run: yarn install --network-concurrency 1
 
     - name: Lint code
       working-directory: ui
-      run: npm run lint
+      run: yarn lint

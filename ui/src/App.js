@@ -7,7 +7,7 @@ import {
   Login,
   MlpApiContextProvider,
   PrivateRoute,
-  Toast
+  Toast,
 } from "@gojek/mlp-ui";
 import Home from "./Home";
 import { CreateRouterView } from "./router/create/CreateRouterView";

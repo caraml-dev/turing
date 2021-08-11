@@ -5,14 +5,14 @@ This is the UI component of Turing based on React web framework.
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/) v14
-- npm v6 (usually bundled with Node.js installation)
+- yarn 1.22.x (`npm install --global yarn`)
 
 ## Install Dependencies
 
 To start developing, you need to first download the packages required by
 Turing UI.
 ```bash
-npm install
+yarn install
 ```
 
 ## Configuration
@@ -54,7 +54,7 @@ For more info and, please refer to this Google [documentation](https://developer
 
 Run the following command to start the app in development mode.
 ```bash
-npm start
+yarn start
 ```
 
 Open [http://localhost:3001](http://localhost:3001) to view the app in the browser.
@@ -64,7 +64,7 @@ Open [http://localhost:3001](http://localhost:3001) to view the app in the brows
 Run the following command to build Turing UI app for production. 
 It correctly bundles React in production mode and optimizes the build for the best performance.
 ```bash
-npm run build
+yarn build
 ```
 
 The final build will be available under the `/build` folder, which is ready to

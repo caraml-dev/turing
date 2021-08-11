@@ -56,7 +56,7 @@ in these getting started guide.
 - [Docker](https://www.docker.com/get-started) v19.03
 - [Docker compose](https://docs.docker.com/compose/) v1.27
 - [Go](https://golang.org/dl/) v1.14
-- [Node.js](https://nodejs.org/en/download/) v14 and npm v6
+- [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.19 (optional)
 - Local ports 80, 8080, 8081, 8082, 8200, 5000, 6443 should be available
 
@@ -310,10 +310,10 @@ REACT_APP_OAUTH_CLIENT_ID=xxxxxxx.apps.googleusercontent.com
 REACT_APP_DEFAULT_DOCKER_REGISTRY=docker.io
 ```
 
-Now we can start Turing API React application. By default, it will listen on port 3001.
+Now we can start Turing UI application. By default, it will listen on port 3001.
 ```bash
-npm install
-npm start
+yarn install
+yarn start
 ```
 
 Open http://localhost:3001/turing on your default web browser. Login
