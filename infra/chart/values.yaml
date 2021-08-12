@@ -105,11 +105,11 @@ swaggerUi:
   image:
     # -- Docker registry for Turing Swagger UI image. User is required to override
     # the registry for now as there is no publicly available Turing Swagger UI image
-    registry: docker.io/
+    registry: ghcr.io/turing
     # -- Docker image repository for Turing Swagger UI
     repository: turing-swagger
     # -- Docker image tag for Turing Swagger UI
-    tag: v3.47.1
+    tag: latest
   # -- URL of API server
   apiServer: "http://127.0.0.1/v1"
   service:
