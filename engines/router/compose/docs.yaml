@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   swagger-ui:
-    image: swaggerapi/swagger-ui:v3.47.1
+    image: swaggerapi/swagger-ui:v3.52.0
     ports:
       - 5555:8080
     volumes:
