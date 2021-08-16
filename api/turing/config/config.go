@@ -193,14 +193,13 @@ type SparkAppConfig struct {
 	CorePerCPURequest              float64 `validate:"required"`
 	CPURequestToCPULimit           float64 `validate:"required"`
 	SparkVersion                   string  `validate:"required"`
-	TolerationName                 string  `validate:"required"`
-	SubmissionFailureRetries       int32   `validate:"required"`
-	SubmissionFailureRetryInterval int64   `validate:"required"`
-	FailureRetries                 int32   `validate:"required"`
-	FailureRetryInterval           int64   `validate:"required"`
-	PythonVersion                  string  `validate:"required"`
-	TTLSecond                      int64   `validate:"required"`
-	TaintKey                       *string
+	TolerationName                 *string
+	SubmissionFailureRetries       int32  `validate:"required"`
+	SubmissionFailureRetryInterval int64  `validate:"required"`
+	FailureRetries                 int32  `validate:"required"`
+	FailureRetryInterval           int64  `validate:"required"`
+	PythonVersion                  string `validate:"required"`
+	TTLSecond                      int64  `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files

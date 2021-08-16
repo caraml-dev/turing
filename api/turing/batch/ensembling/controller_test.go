@@ -31,6 +31,7 @@ var (
 	standardLabels map[string]string = map[string]string{
 		"model": "T800",
 	}
+	tolerationName                          = "batch-job"
 	sparkInfraConfig *config.SparkAppConfig = &config.SparkAppConfig{
 		NodeSelector: map[string]string{
 			"node-workload-type": "batch",
@@ -38,7 +39,7 @@ var (
 		CorePerCPURequest:              1.5,
 		CPURequestToCPULimit:           1.25,
 		SparkVersion:                   "2.4.5",
-		TolerationName:                 "batch-job",
+		TolerationName:                 &tolerationName,
 		SubmissionFailureRetries:       3,
 		SubmissionFailureRetryInterval: 10,
 		FailureRetries:                 3,

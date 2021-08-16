@@ -35,6 +35,7 @@ func (c *MockVaultClient) GetClusterSecret(clusterName string) (*vault.ClusterSe
 
 func TestNewAppContext(t *testing.T) {
 	// Create test config
+	tolerationName := "batch-job"
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
 
@@ -115,7 +116,7 @@ func TestNewAppContext(t *testing.T) {
 			CorePerCPURequest:              1.5,
 			CPURequestToCPULimit:           1.25,
 			SparkVersion:                   "2.4.5",
-			TolerationName:                 "batch-job",
+			TolerationName:                 &tolerationName,
 			SubmissionFailureRetries:       3,
 			SubmissionFailureRetryInterval: 10,
 			FailureRetries:                 3,

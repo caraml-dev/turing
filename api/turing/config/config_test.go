@@ -509,7 +509,7 @@ func TestConfigValidate(t *testing.T) {
 	var executorReplica int32 = 2
 	executorCPURequest := "1"
 	executorMemoryRequest := "1Gi"
-
+	tolerationName := "batch-job"
 	validConfig := Config{
 		Port: 5000,
 		BatchRunnerConfig: &BatchRunnerConfig{
@@ -576,7 +576,7 @@ func TestConfigValidate(t *testing.T) {
 			CorePerCPURequest:              1.5,
 			CPURequestToCPULimit:           1.25,
 			SparkVersion:                   "2.4.5",
-			TolerationName:                 "batch-job",
+			TolerationName:                 &tolerationName,
 			SubmissionFailureRetries:       3,
 			SubmissionFailureRetryInterval: 10,
 			FailureRetries:                 3,

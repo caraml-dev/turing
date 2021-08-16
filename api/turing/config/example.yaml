@@ -102,6 +102,7 @@ SparkAppConfig:
   CorePerCPURequest: 1.5
   CPURequestToCPULimit: 1.25
   SparkVersion: "2.4.5"
+  TolerationName: batch-job
   SubmissionFailureRetries: 3
   SubmissionFailureRetryInterval: 10
   FailureRetries: 3
