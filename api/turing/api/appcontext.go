@@ -86,13 +86,17 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
 
-	// Initialise Ensembling Job Service
-	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
-
 	// Initialise Labeller
 	labeller.InitKubernetesLabeller(
 		cfg.KubernetesLabelConfigs.LabelPrefix,
 		cfg.KubernetesLabelConfigs.Environment,
+	)
+
+	// Initialise Ensembling Job Service
+	ensemblingJobService := service.NewEnsemblingJobService(
+		db,
+		cfg.EnsemblingJobConfig.DefaultEnvironment,
+		cfg.EnsemblingJobConfig.DefaultConfigurations,
 	)
 
 	// Initialise Batch components
@@ -101,7 +105,7 @@ func NewAppContext(
 
 	if cfg.EnsemblingJobConfig.Enabled {
 		batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
-		ensemblingImageBuilder, err := imagebuilder.NewEnsemberJobImageBuilder(
+		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
 			cfg.EnsemblingJobConfig.ImageBuilderConfig,
 			cfg.EnsemblingJobConfig.KanikoConfig,
