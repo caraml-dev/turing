@@ -22,6 +22,7 @@ type ensemblingJobRunner struct {
 	recordsToProcessInOneIteration int
 	maxRetryCount                  int
 	imageBuildTimeoutDuration      time.Duration
+	timeInterval                   time.Duration
 }
 
 // NewBatchEnsemblingJobRunner creates a new batch ensembling job runner
@@ -34,6 +35,7 @@ func NewBatchEnsemblingJobRunner(
 	recordsToProcessInOneIteration int,
 	maxRetryCount int,
 	imageBuildTimeoutDuration time.Duration,
+	timeInterval time.Duration,
 ) batchrunner.BatchJobRunner {
 	return &ensemblingJobRunner{
 		ensemblingController:           ensemblingController,
@@ -43,7 +45,12 @@ func NewBatchEnsemblingJobRunner(
 		recordsToProcessInOneIteration: recordsToProcessInOneIteration,
 		maxRetryCount:                  maxRetryCount,
 		imageBuildTimeoutDuration:      imageBuildTimeoutDuration,
+		timeInterval:                   timeInterval,
 	}
+}
+
+func (r *ensemblingJobRunner) GetInterval() time.Duration {
+	return r.timeInterval
 }
 
 func (r *ensemblingJobRunner) Run() {

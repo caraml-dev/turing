@@ -43,7 +43,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		versionID         models.ID
 		inputDependencies []string
 		namespace         string
-		imageConfig       config.ImageBuilderConfig
+		imageConfig       config.ImageConfig
 		kanikoConfig      config.KanikoConfig
 		buildLabels       map[string]string
 		clusterController func() cluster.Controller
@@ -101,7 +101,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -178,7 +178,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -264,7 +264,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -397,13 +397,13 @@ func TestParseResources(t *testing.T) {
 func TestGetImageBuildingJobStatus(t *testing.T) {
 	tests := map[string]struct {
 		clusterController func() cluster.Controller
-		imageConfig       config.ImageBuilderConfig
+		imageConfig       config.ImageConfig
 		kanikoConfig      config.KanikoConfig
 		hasErr            bool
 		expected          JobStatus
 	}{
 		"success | active": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -441,7 +441,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusActive,
 		},
 		"success | succeeded": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -479,7 +479,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusSucceeded,
 		},
 		"success | Failed": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -517,7 +517,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusFailed,
 		},
 		"success | Unknown": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -551,7 +551,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusUnknown,
 		},
 		"failure | Unknown": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,
@@ -604,12 +604,12 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 func TestDeleteImageBuildingJob(t *testing.T) {
 	tests := map[string]struct {
 		clusterController func() cluster.Controller
-		imageConfig       config.ImageBuilderConfig
+		imageConfig       config.ImageConfig
 		kanikoConfig      config.KanikoConfig
 		hasErr            bool
 	}{
 		"success | no error": {
-			imageConfig: config.ImageBuilderConfig{
+			imageConfig: config.ImageConfig{
 				Registry:             dockerRegistry,
 				BaseImageRef:         baseImageRef,
 				BuildNamespace:       buildNamespace,

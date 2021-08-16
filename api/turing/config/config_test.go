@@ -512,8 +512,52 @@ func TestConfigValidate(t *testing.T) {
 	tolerationName := "batch-job"
 	validConfig := Config{
 		Port: 5000,
-		BatchRunnerConfig: &BatchRunnerConfig{
-			TimeInterval: 3 * time.Minute,
+		BatchEnsemblerConfig: &BatchEnsemblerConfig{
+			Enabled: true,
+			JobConfig: JobConfig{
+				DefaultEnvironment: "dev",
+				DefaultConfigurations: DefaultEnsemblingJobConfigurations{
+					BatchEnsemblingJobResources: openapi.EnsemblingResources{
+						DriverCpuRequest:      &driverCPURequest,
+						DriverMemoryRequest:   &driverMemoryRequest,
+						ExecutorReplica:       &executorReplica,
+						ExecutorCpuRequest:    &executorCPURequest,
+						ExecutorMemoryRequest: &executorMemoryRequest,
+					},
+					SparkConfigAnnotations: map[string]string{
+						"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
+					},
+				},
+			},
+			RunnerConfig: RunnerConfig{
+				TimeInterval:                   3 * time.Minute,
+				RecordsToProcessInOneIteration: 10,
+				MaxRetryCount:                  3,
+			},
+			ImageBuildingConfig: ImageBuildingConfig{
+				ImageConfig: ImageConfig{
+					Registry:             "ghcr.io",
+					BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+					BuildNamespace:       "default",
+					BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
+					BuildTimeoutDuration: 10 * time.Minute,
+				},
+				KanikoConfig: KanikoConfig{
+					Image:        "gcr.io/kaniko-project/executor",
+					ImageVersion: "v1.5.2",
+					ResourceRequestsLimits: ResourceRequestsLimits{
+						Requests: Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
 		},
 		DbConfig: &DatabaseConfig{
 			Host:     "localhost",
@@ -528,46 +572,6 @@ func TestConfigValidate(t *testing.T) {
 			DeletionTimeout: 1 * time.Minute,
 			MaxCPU:          Quantity(resource.MustParse("2")),
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
-		},
-		EnsemblingJobConfig: &EnsemblingJobConfig{
-			Enabled:                        true,
-			DefaultEnvironment:             "dev",
-			RecordsToProcessInOneIteration: 10,
-			MaxRetryCount:                  3,
-			ImageBuilderConfig: ImageBuilderConfig{
-				Registry:             "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
-				BuildNamespace:       "default",
-				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
-				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
-				BuildTimeoutDuration: 10 * time.Minute,
-			},
-			KanikoConfig: KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: ResourceRequestsLimits{
-					Requests: Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-					Limits: Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-				},
-			},
-			DefaultConfigurations: DefaultEnsemblingJobConfigurations{
-				BatchEnsemblingJobResources: openapi.EnsemblingResources{
-					DriverCpuRequest:      &driverCPURequest,
-					DriverMemoryRequest:   &driverMemoryRequest,
-					ExecutorReplica:       &executorReplica,
-					ExecutorCpuRequest:    &executorCPURequest,
-					ExecutorMemoryRequest: &executorMemoryRequest,
-				},
-				SparkConfigAnnotations: map[string]string{
-					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
-				},
-			},
 		},
 		SparkAppConfig: &SparkAppConfig{
 			NodeSelector: map[string]string{
@@ -674,7 +678,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing ensembling job default environment": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
+				validConfig.BatchEnsemblerConfig.JobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
@@ -688,7 +692,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing batch runner config": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchRunnerConfig = nil
+				validConfig.BatchEnsemblerConfig = nil
 				return validConfig
 			},
 			wantErr: true,

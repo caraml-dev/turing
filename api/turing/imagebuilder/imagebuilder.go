@@ -88,7 +88,7 @@ type nameGenerator interface {
 
 type imageBuilder struct {
 	clusterController cluster.Controller
-	imageConfig       config.ImageBuilderConfig
+	imageConfig       config.ImageConfig
 	kanikoConfig      config.KanikoConfig
 	nameGenerator     nameGenerator
 }
@@ -96,7 +96,7 @@ type imageBuilder struct {
 // NewImageBuilder creates a new ImageBuilder
 func newImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig config.ImageBuilderConfig,
+	imageConfig config.ImageConfig,
 	kanikoConfig config.KanikoConfig,
 	nameGenerator nameGenerator,
 ) (ImageBuilder, error) {

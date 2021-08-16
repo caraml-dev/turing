@@ -95,20 +95,20 @@ func NewAppContext(
 	// Initialise Ensembling Job Service
 	ensemblingJobService := service.NewEnsemblingJobService(
 		db,
-		cfg.EnsemblingJobConfig.DefaultEnvironment,
-		cfg.EnsemblingJobConfig.DefaultConfigurations,
+		cfg.BatchEnsemblerConfig.JobConfig.DefaultEnvironment,
+		cfg.BatchEnsemblerConfig.JobConfig.DefaultConfigurations,
 	)
 
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
 
-	if cfg.EnsemblingJobConfig.Enabled {
-		batchClusterController := clusterControllers[cfg.EnsemblingJobConfig.DefaultEnvironment]
+	if cfg.BatchEnsemblerConfig.Enabled {
+		batchClusterController := clusterControllers[cfg.BatchEnsemblerConfig.JobConfig.DefaultEnvironment]
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
-			cfg.EnsemblingJobConfig.ImageBuilderConfig,
-			cfg.EnsemblingJobConfig.KanikoConfig,
+			cfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig,
+			cfg.BatchEnsemblerConfig.ImageBuildingConfig.KanikoConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -125,9 +125,10 @@ func NewAppContext(
 			ensemblingJobService,
 			mlpSvc,
 			ensemblingImageBuilder,
-			cfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
-			cfg.EnsemblingJobConfig.MaxRetryCount,
-			cfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
+			cfg.BatchEnsemblerConfig.RunnerConfig.RecordsToProcessInOneIteration,
+			cfg.BatchEnsemblerConfig.RunnerConfig.MaxRetryCount,
+			cfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
+			cfg.BatchEnsemblerConfig.RunnerConfig.TimeInterval,
 		)
 		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
 	}

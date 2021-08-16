@@ -53,10 +53,9 @@ type Config struct {
 	Port                   int `validate:"required"`
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
-	BatchRunnerConfig      *BatchRunnerConfig      `validate:"required"`
+	BatchEnsemblerConfig   *BatchEnsemblerConfig   `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
-	EnsemblingJobConfig    *EnsemblingJobConfig    `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
 	RouterDefaults         *RouterDefaults         `validate:"required"`
 	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
@@ -94,49 +93,18 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
-// BatchRunnerConfig captures the config related to the running of batch runners
-type BatchRunnerConfig struct {
-	TimeInterval time.Duration `validate:"required"`
+// BatchEnsemblerConfig captures the config related to the running of batch runners
+type BatchEnsemblerConfig struct {
+	Enabled             bool                `validate:"required"`
+	JobConfig           JobConfig           `validate:"required"`
+	RunnerConfig        RunnerConfig        `validate:"required"`
+	ImageBuildingConfig ImageBuildingConfig `validate:"required"`
 }
 
-// DeploymentConfig captures the config related to the deployment of the turing routers
-type DeploymentConfig struct {
-	EnvironmentType string `validate:"required"`
-	GcpProject      string
-	Timeout         time.Duration `validate:"required"`
-	DeletionTimeout time.Duration `validate:"required"`
-	MaxCPU          Quantity      `validate:"required"`
-	MaxMemory       Quantity      `validate:"required"`
-}
-
-// KubernetesLabelConfigs are the configurations for labeling
-type KubernetesLabelConfigs struct {
-	// LabelPrefix is the prefix used for tagging kubernetes components.
-	// Default is an empty string which means your tags will look something like this:
-	//   team: teen-titans
-	//   stream: nile
-	//   environment: dev
-	//   orchestrator: turing
-	//   app: my-model-app
-	LabelPrefix string
-	// Environment is the value for the environment label
-	Environment string `validate:"required"`
-}
-
-// EnsemblingJobConfig captures the config related to the ensembling batch jobs.
-type EnsemblingJobConfig struct {
-	// Enabled is a switch to enable/disable batch ensembling.
-	Enabled bool
-	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
-	RecordsToProcessInOneIteration int `validate:"required"`
-	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
-	MaxRetryCount int `validate:"required"`
+// JobConfig captures the config related to the ensembling batch jobs.
+type JobConfig struct {
 	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
 	DefaultEnvironment string `validate:"required"`
-	// KanikoConfig contains the configuration related to the kaniko executor image
-	KanikoConfig KanikoConfig `validate:"required"`
-	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
-	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
 	// DefaultConfigurations contains the default configurations applied to the ensembling job.
 	// The user (the person who calls the API) is free to override/append the default values.
 	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
@@ -150,9 +118,27 @@ type DefaultEnsemblingJobConfigurations struct {
 	SparkConfigAnnotations map[string]string
 }
 
-// ImageBuilderConfig provides the configuration used for the OCI image building.
+// RunnerConfig contains the batch runner configurations
+type RunnerConfig struct {
+	// TimeInterval is the interval between job firings
+	TimeInterval time.Duration `validate:"required"`
+	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
+	RecordsToProcessInOneIteration int `validate:"required"`
+	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
+	MaxRetryCount int `validate:"required"`
+}
+
+// ImageBuildingConfig contains the information regarding the image builder and the image buildee.
+type ImageBuildingConfig struct {
+	// ImageConfig contains the configuration related to the image buildee.
+	ImageConfig ImageConfig `validate:"required"`
+	// KanikoConfig contains the configuration related to the kaniko executor image builder.
+	KanikoConfig KanikoConfig `validate:"required"`
+}
+
+// ImageConfig provides the configuration used for the OCI image building.
 // The details here contain the details pertaining to the ensembler image and not the kaniko image.
-type ImageBuilderConfig struct {
+type ImageConfig struct {
 	// Registry is the registry of the newly built ensembler image.
 	Registry string `validate:"required"`
 	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
@@ -165,7 +151,7 @@ type ImageBuilderConfig struct {
 	// DockerfileFilePath contains where the Dockerfile is
 	DockerfileFilePath string `validate:"required"`
 	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
-	BuildTimeoutDuration time.Duration
+	BuildTimeoutDuration time.Duration `validate:"required"`
 }
 
 // Resource contains the Kubernetes resource request and limits
@@ -200,6 +186,30 @@ type SparkAppConfig struct {
 	FailureRetryInterval           int64  `validate:"required"`
 	PythonVersion                  string `validate:"required"`
 	TTLSecond                      int64  `validate:"required"`
+}
+
+// DeploymentConfig captures the config related to the deployment of the turing routers
+type DeploymentConfig struct {
+	EnvironmentType string `validate:"required"`
+	GcpProject      string
+	Timeout         time.Duration `validate:"required"`
+	DeletionTimeout time.Duration `validate:"required"`
+	MaxCPU          Quantity      `validate:"required"`
+	MaxMemory       Quantity      `validate:"required"`
+}
+
+// KubernetesLabelConfigs are the configurations for labeling
+type KubernetesLabelConfigs struct {
+	// LabelPrefix is the prefix used for tagging kubernetes components.
+	// Default is an empty string which means your tags will look something like this:
+	//   team: teen-titans
+	//   stream: nile
+	//   environment: dev
+	//   orchestrator: turing
+	//   app: my-model-app
+	LabelPrefix string
+	// Environment is the value for the environment label
+	Environment string `validate:"required"`
 }
 
 // TuringUIConfig captures config related to serving Turing UI files
