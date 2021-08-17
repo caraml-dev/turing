@@ -11,14 +11,12 @@ import (
 // NewEnsemblerJobImageBuilder create ImageBuilder for building docker image of prediction job (batch)
 func NewEnsemblerJobImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig config.ImageConfig,
-	kanikoConfig config.KanikoConfig,
+	imageBuildingConfig config.ImageBuildingConfig,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,
-		imageConfig,
-		kanikoConfig,
-		&ensemblerJobNameGenerator{registry: imageConfig.Registry},
+		imageBuildingConfig,
+		&ensemblerJobNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
 	)
 }
 

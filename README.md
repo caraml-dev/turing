@@ -177,7 +177,7 @@ BatchEnsemblingConfig:
     MaxRetryCount: 3
   ImageBuildingConfig:
     ImageConfig:
-      Registry: ghcr.io
+      DestinationRegistry: ghcr.io
       BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
       BuildNamespace: default
       BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main

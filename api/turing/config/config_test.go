@@ -535,17 +535,15 @@ func TestConfigValidate(t *testing.T) {
 				MaxRetryCount:                  3,
 			},
 			ImageBuildingConfig: ImageBuildingConfig{
-				ImageConfig: ImageConfig{
-					Registry:             "ghcr.io",
-					BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
-					BuildNamespace:       "default",
-					BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
-					DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
-					BuildTimeoutDuration: 10 * time.Minute,
-				},
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: KanikoConfig{
-					Image:        "gcr.io/kaniko-project/executor",
-					ImageVersion: "v1.5.2",
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
 					ResourceRequestsLimits: ResourceRequestsLimits{
 						Requests: Resource{
 							CPU:    "500m",

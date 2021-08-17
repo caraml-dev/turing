@@ -29,16 +29,15 @@ turing:
         RecordsToProcessInOneIteration: 10
         MaxRetryCount: 3
       ImageBuildingConfig:
-        ImageConfig:
-          Registry: ghcr.io
-          BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
-          BuildNamespace: default
+        BuildNamespace: default
+        BuildTimeoutDuration: 20m
+        DestinationRegistry: ghcr.io
+        BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
+        KanikoConfig:
           BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
           DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
-          BuildTimeoutDuration: 20m
-        KanikoConfig:
           Image: gcr.io/kaniko-project/executor
-          ImageVersion: v1.5.2
+          ImageVersion: v1.6.0
           ResourceRequestsLimits:
             Requests:
               CPU: "1"

@@ -35,18 +35,17 @@ const (
 
 func TestBuildEnsemblerImage(t *testing.T) {
 	var tests = map[string]struct {
-		name              string
-		expected          string
-		projectName       string
-		modelName         string
-		artifactURI       string
-		versionID         models.ID
-		inputDependencies []string
-		namespace         string
-		imageConfig       config.ImageConfig
-		kanikoConfig      config.KanikoConfig
-		buildLabels       map[string]string
-		clusterController func() cluster.Controller
+		name                string
+		expected            string
+		projectName         string
+		modelName           string
+		artifactURI         string
+		versionID           models.ID
+		inputDependencies   []string
+		namespace           string
+		imageBuildingConfig config.ImageBuildingConfig
+		buildLabels         map[string]string
+		clusterController   func() cluster.Controller
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -101,25 +100,25 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -178,25 +177,25 @@ func TestBuildEnsemblerImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -264,25 +263,25 @@ func TestBuildEnsemblerImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -293,7 +292,7 @@ func TestBuildEnsemblerImage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 
-			ib, err := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, err := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
 			assert.Nil(t, err)
 
 			buildImageRequest := BuildImageRequest{
@@ -396,32 +395,31 @@ func TestParseResources(t *testing.T) {
 
 func TestGetImageBuildingJobStatus(t *testing.T) {
 	tests := map[string]struct {
-		clusterController func() cluster.Controller
-		imageConfig       config.ImageConfig
-		kanikoConfig      config.KanikoConfig
-		hasErr            bool
-		expected          JobStatus
+		clusterController   func() cluster.Controller
+		imageBuildingConfig config.ImageBuildingConfig
+		hasErr              bool
+		expected            JobStatus
 	}{
 		"success | active": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -441,25 +439,25 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusActive,
 		},
 		"success | succeeded": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -479,25 +477,25 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusSucceeded,
 		},
 		"success | Failed": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -517,25 +515,25 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusFailed,
 		},
 		"success | Unknown": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -551,25 +549,25 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusUnknown,
 		},
 		"failure | Unknown": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -588,7 +586,7 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
 			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1))
 
 			if tt.hasErr {
@@ -603,31 +601,30 @@ func TestGetImageBuildingJobStatus(t *testing.T) {
 
 func TestDeleteImageBuildingJob(t *testing.T) {
 	tests := map[string]struct {
-		clusterController func() cluster.Controller
-		imageConfig       config.ImageConfig
-		kanikoConfig      config.KanikoConfig
-		hasErr            bool
+		clusterController   func() cluster.Controller
+		imageBuildingConfig config.ImageBuildingConfig
+		hasErr              bool
 	}{
 		"success | no error": {
-			imageConfig: config.ImageConfig{
-				Registry:             dockerRegistry,
-				BaseImageRef:         baseImageRef,
+			imageBuildingConfig: config.ImageBuildingConfig{
 				BuildNamespace:       buildNamespace,
-				BuildContextURI:      buildContext,
-				DockerfileFilePath:   dockerfilePath,
 				BuildTimeoutDuration: timeout,
-			},
-			kanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "1",
-						Memory: "2Gi",
+				DestinationRegistry:  dockerRegistry,
+				BaseImageRef:         baseImageRef,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    buildContext,
+					DockerfileFilePath: dockerfilePath,
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "1",
+							Memory: "2Gi",
+						},
 					},
 				},
 			},
@@ -650,7 +647,7 @@ func TestDeleteImageBuildingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageConfig, tt.kanikoConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1))
 
 			if tt.hasErr {

@@ -70,17 +70,15 @@ func TestNewAppContext(t *testing.T) {
 				MaxRetryCount:                  3,
 			},
 			ImageBuildingConfig: config.ImageBuildingConfig{
-				ImageConfig: config.ImageConfig{
-					Registry:             "ghcr.io",
-					BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
-					BuildNamespace:       "default",
-					BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
-					DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
-					BuildTimeoutDuration: 10 * time.Minute,
-				},
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
-					Image:        "gcr.io/kaniko-project/executor",
-					ImageVersion: "v1.5.2",
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
 					ResourceRequestsLimits: config.ResourceRequestsLimits{
 						Requests: config.Resource{
 							CPU:    "500m",
@@ -272,8 +270,7 @@ func TestNewAppContext(t *testing.T) {
 
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
-		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig,
-		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.KanikoConfig,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
 	)
 	assert.Nil(t, err)
 
@@ -294,7 +291,7 @@ func TestNewAppContext(t *testing.T) {
 		ensemblingImageBuilder,
 		testCfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
 		testCfg.BatchEnsemblingConfig.RunnerConfig.MaxRetryCount,
-		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildTimeoutDuration,
 		testCfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 	)
 

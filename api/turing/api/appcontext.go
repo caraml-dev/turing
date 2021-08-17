@@ -107,8 +107,7 @@ func NewAppContext(
 		batchClusterController := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig.KanikoConfig,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -127,7 +126,7 @@ func NewAppContext(
 			ensemblingImageBuilder,
 			cfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
 			cfg.BatchEnsemblingConfig.RunnerConfig.MaxRetryCount,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildTimeoutDuration,
 			cfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 		)
 		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)

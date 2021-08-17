@@ -130,28 +130,16 @@ type RunnerConfig struct {
 
 // ImageBuildingConfig contains the information regarding the image builder and the image buildee.
 type ImageBuildingConfig struct {
-	// ImageConfig contains the configuration related to the image buildee.
-	ImageConfig ImageConfig `validate:"required"`
-	// KanikoConfig contains the configuration related to the kaniko executor image builder.
-	KanikoConfig KanikoConfig `validate:"required"`
-}
-
-// ImageConfig provides the configuration used for the OCI image building.
-// The details here contain the details pertaining to the ensembler image and not the kaniko image.
-type ImageConfig struct {
-	// Registry is the registry of the newly built ensembler image.
-	Registry string `validate:"required"`
-	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
-	BaseImageRef string `validate:"required"`
 	// BuildNamespace contains the Kubernetes namespace it should be built in.
 	BuildNamespace string `validate:"required"`
-	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
-	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
-	BuildContextURI string `validate:"required"`
-	// DockerfileFilePath contains where the Dockerfile is
-	DockerfileFilePath string `validate:"required"`
 	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
 	BuildTimeoutDuration time.Duration `validate:"required"`
+	// DestinationRegistry is the registry of the newly built ensembler image.
+	DestinationRegistry string `validate:"required"`
+	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
+	BaseImageRef string `validate:"required"`
+	// KanikoConfig contains the configuration related to the kaniko executor image builder.
+	KanikoConfig KanikoConfig `validate:"required"`
 }
 
 // Resource contains the Kubernetes resource request and limits
@@ -168,8 +156,16 @@ type ResourceRequestsLimits struct {
 
 // KanikoConfig provides the configuration used for the Kaniko image.
 type KanikoConfig struct {
-	Image                  string                 `validate:"required"`
-	ImageVersion           string                 `validate:"required"`
+	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
+	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+	BuildContextURI string `validate:"required"`
+	// DockerfileFilePath contains where the Dockerfile is
+	DockerfileFilePath string `validate:"required"`
+	// Image is the Kaniko image
+	Image string `validate:"required"`
+	// ImageVersion is the version tag of the Kaniko image
+	ImageVersion string `validate:"required"`
+	// ResourceRequestsLimits is the resources required by Kaniko executor.
 	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
 }
 
