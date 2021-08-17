@@ -158,7 +158,7 @@ router Docker image is set to the image built and push from the previous step.
 
 ```yaml
 # config-dev.yaml
-BatchEnsemblerConfig:
+BatchEnsemblingConfig:
   Enabled: true
   JobConfig:
     DefaultEnvironment: dev

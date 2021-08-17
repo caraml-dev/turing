@@ -512,7 +512,7 @@ func TestConfigValidate(t *testing.T) {
 	tolerationName := "batch-job"
 	validConfig := Config{
 		Port: 5000,
-		BatchEnsemblerConfig: &BatchEnsemblerConfig{
+		BatchEnsemblingConfig: &BatchEnsemblingConfig{
 			Enabled: true,
 			JobConfig: JobConfig{
 				DefaultEnvironment: "dev",
@@ -678,7 +678,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing ensembling job default environment": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchEnsemblerConfig.JobConfig.DefaultEnvironment = ""
+				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
@@ -692,7 +692,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing batch runner config": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchEnsemblerConfig = nil
+				validConfig.BatchEnsemblingConfig = nil
 				return validConfig
 			},
 			wantErr: true,

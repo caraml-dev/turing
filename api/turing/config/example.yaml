@@ -12,7 +12,7 @@ AuthConfig:
   URL: http://example.com/auth
 
 # Batch ensembler job configurations
-BatchRunnerConfig:
+BatchEnsemblingConfig:
   Enabled: true
   JobConfig:
     DefaultEnvironment: dev

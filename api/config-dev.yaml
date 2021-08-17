@@ -1,4 +1,4 @@
-BatchEnsemblerConfig:
+BatchEnsemblingConfig:
   Enabled: true
   JobConfig:
     DefaultEnvironment: dev

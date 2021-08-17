@@ -95,20 +95,20 @@ func NewAppContext(
 	// Initialise Ensembling Job Service
 	ensemblingJobService := service.NewEnsemblingJobService(
 		db,
-		cfg.BatchEnsemblerConfig.JobConfig.DefaultEnvironment,
-		cfg.BatchEnsemblerConfig.JobConfig.DefaultConfigurations,
+		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 	)
 
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
 
-	if cfg.BatchEnsemblerConfig.Enabled {
-		batchClusterController := clusterControllers[cfg.BatchEnsemblerConfig.JobConfig.DefaultEnvironment]
+	if cfg.BatchEnsemblingConfig.Enabled {
+		batchClusterController := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
-			cfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig,
-			cfg.BatchEnsemblerConfig.ImageBuildingConfig.KanikoConfig,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.KanikoConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -125,10 +125,10 @@ func NewAppContext(
 			ensemblingJobService,
 			mlpSvc,
 			ensemblingImageBuilder,
-			cfg.BatchEnsemblerConfig.RunnerConfig.RecordsToProcessInOneIteration,
-			cfg.BatchEnsemblerConfig.RunnerConfig.MaxRetryCount,
-			cfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
-			cfg.BatchEnsemblerConfig.RunnerConfig.TimeInterval,
+			cfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
+			cfg.BatchEnsemblingConfig.RunnerConfig.MaxRetryCount,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
+			cfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 		)
 		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
 	}

@@ -47,7 +47,7 @@ func TestNewAppContext(t *testing.T) {
 
 	testCfg := &config.Config{
 		Port: 8080,
-		BatchEnsemblerConfig: &config.BatchEnsemblerConfig{
+		BatchEnsemblingConfig: &config.BatchEnsemblingConfig{
 			Enabled: true,
 			JobConfig: config.JobConfig{
 				DefaultEnvironment: "dev",
@@ -272,15 +272,15 @@ func TestNewAppContext(t *testing.T) {
 
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
-		testCfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig,
-		testCfg.BatchEnsemblerConfig.ImageBuildingConfig.KanikoConfig,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.KanikoConfig,
 	)
 	assert.Nil(t, err)
 
 	ensemblingJobService := service.NewEnsemblingJobService(
 		nil,
-		testCfg.BatchEnsemblerConfig.JobConfig.DefaultEnvironment,
-		testCfg.BatchEnsemblerConfig.JobConfig.DefaultConfigurations,
+		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
@@ -292,10 +292,10 @@ func TestNewAppContext(t *testing.T) {
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		testCfg.BatchEnsemblerConfig.RunnerConfig.RecordsToProcessInOneIteration,
-		testCfg.BatchEnsemblerConfig.RunnerConfig.MaxRetryCount,
-		testCfg.BatchEnsemblerConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
-		testCfg.BatchEnsemblerConfig.RunnerConfig.TimeInterval,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.MaxRetryCount,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.ImageConfig.BuildTimeoutDuration,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 	)
 
 	assert.Equal(t, &AppContext{

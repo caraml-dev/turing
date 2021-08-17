@@ -53,7 +53,7 @@ type Config struct {
 	Port                   int `validate:"required"`
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
-	BatchEnsemblerConfig   *BatchEnsemblerConfig   `validate:"required"`
+	BatchEnsemblingConfig  *BatchEnsemblingConfig  `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
@@ -93,8 +93,8 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
-// BatchEnsemblerConfig captures the config related to the running of batch runners
-type BatchEnsemblerConfig struct {
+// BatchEnsemblingConfig captures the config related to the running of batch runners
+type BatchEnsemblingConfig struct {
 	Enabled             bool                `validate:"required"`
 	JobConfig           JobConfig           `validate:"required"`
 	RunnerConfig        RunnerConfig        `validate:"required"`
