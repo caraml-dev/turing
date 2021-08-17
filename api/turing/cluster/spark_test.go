@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	tolerationName                          = "batch-job"
 	sparkInfraConfig *config.SparkAppConfig = &config.SparkAppConfig{
 		NodeSelector: map[string]string{
 			"node-workload-type": "batch",
@@ -20,7 +21,7 @@ var (
 		CorePerCPURequest:              1.0,
 		CPURequestToCPULimit:           1.0,
 		SparkVersion:                   "2.4.5",
-		TolerationName:                 "batch-job",
+		TolerationName:                 &tolerationName,
 		SubmissionFailureRetries:       3,
 		SubmissionFailureRetryInterval: 10,
 		FailureRetries:                 3,
@@ -132,7 +133,6 @@ var (
 	serviceAccountName       = "service-account"
 	jobLabels                = make(map[string]string)
 	memoryResult, _          = toMegabyte(memoryValue)
-	taintKey                 = "batch-job"
 )
 
 func TestCreateSparkRequest(t *testing.T) {
@@ -150,7 +150,6 @@ func TestCreateSparkRequest(t *testing.T) {
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
 		SparkInfraConfig:      sparkInfraConfig,
-		TaintKey:              &taintKey,
 	}
 	expected := &apisparkv1beta2.SparkApplication{
 		ObjectMeta: apimetav1.ObjectMeta{

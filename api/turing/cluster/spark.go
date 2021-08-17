@@ -86,7 +86,6 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
-	TaintKey              *string
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -166,10 +165,10 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 			Labels: request.JobLabels,
 		},
 	}
-	if request.TaintKey != nil {
+	if request.SparkInfraConfig.TolerationName != nil {
 		s.SparkPodSpec.Tolerations = []apicorev1.Toleration{
 			{
-				Key:      *request.TaintKey,
+				Key:      *request.SparkInfraConfig.TolerationName,
 				Operator: apicorev1.TolerationOpEqual,
 				Value:    "true",
 				Effect:   apicorev1.TaintEffectNoSchedule,
@@ -224,10 +223,10 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 		},
 		ServiceAccount: &request.ServiceAccountName,
 	}
-	if request.TaintKey != nil {
+	if request.SparkInfraConfig.TolerationName != nil {
 		s.SparkPodSpec.Tolerations = []apicorev1.Toleration{
 			{
-				Key:      *request.TaintKey,
+				Key:      *request.SparkInfraConfig.TolerationName,
 				Operator: apicorev1.TolerationOpEqual,
 				Value:    "true",
 				Effect:   apicorev1.TaintEffectNoSchedule,

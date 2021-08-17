@@ -109,10 +109,7 @@ func main() {
 	}
 
 	// Run batch runners
-	go batchrunner.RunBatchRunners(
-		cfg.BatchRunnerConfig.TimeInterval,
-		appCtx.BatchRunners,
-	)
+	go batchrunner.RunBatchRunners(appCtx.BatchRunners)
 
 	// Register handlers
 	health := healthcheck.NewHandler()

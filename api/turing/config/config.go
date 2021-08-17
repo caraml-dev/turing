@@ -53,10 +53,9 @@ type Config struct {
 	Port                   int `validate:"required"`
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
-	BatchRunnerConfig      *BatchRunnerConfig      `validate:"required"`
+	BatchEnsemblingConfig  *BatchEnsemblingConfig  `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
-	EnsemblingJobConfig    *EnsemblingJobConfig    `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
 	RouterDefaults         *RouterDefaults         `validate:"required"`
 	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
@@ -94,9 +93,95 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
-// BatchRunnerConfig captures the config related to the running of batch runners
-type BatchRunnerConfig struct {
+// BatchEnsemblingConfig captures the config related to the running of batch runners
+type BatchEnsemblingConfig struct {
+	Enabled             bool                `validate:"required"`
+	JobConfig           JobConfig           `validate:"required"`
+	RunnerConfig        RunnerConfig        `validate:"required"`
+	ImageBuildingConfig ImageBuildingConfig `validate:"required"`
+}
+
+// JobConfig captures the config related to the ensembling batch jobs.
+type JobConfig struct {
+	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
+	DefaultEnvironment string `validate:"required"`
+	// DefaultConfigurations contains the default configurations applied to the ensembling job.
+	// The user (the person who calls the API) is free to override/append the default values.
+	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
+}
+
+// DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.
+type DefaultEnsemblingJobConfigurations struct {
+	// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
+	BatchEnsemblingJobResources openapi.EnsemblingResources
+	// SparkConfigAnnotations contains the Spark configurations
+	SparkConfigAnnotations map[string]string
+}
+
+// RunnerConfig contains the batch runner configurations
+type RunnerConfig struct {
+	// TimeInterval is the interval between job firings
 	TimeInterval time.Duration `validate:"required"`
+	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
+	RecordsToProcessInOneIteration int `validate:"required"`
+	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
+	MaxRetryCount int `validate:"required"`
+}
+
+// ImageBuildingConfig contains the information regarding the image builder and the image buildee.
+type ImageBuildingConfig struct {
+	// BuildNamespace contains the Kubernetes namespace it should be built in.
+	BuildNamespace string `validate:"required"`
+	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
+	BuildTimeoutDuration time.Duration `validate:"required"`
+	// DestinationRegistry is the registry of the newly built ensembler image.
+	DestinationRegistry string `validate:"required"`
+	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
+	BaseImageRef string `validate:"required"`
+	// KanikoConfig contains the configuration related to the kaniko executor image builder.
+	KanikoConfig KanikoConfig `validate:"required"`
+}
+
+// Resource contains the Kubernetes resource request and limits
+type Resource struct {
+	CPU    string `validate:"required"`
+	Memory string `validate:"required"`
+}
+
+// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
+type ResourceRequestsLimits struct {
+	Requests Resource `validate:"required"`
+	Limits   Resource `validate:"required"`
+}
+
+// KanikoConfig provides the configuration used for the Kaniko image.
+type KanikoConfig struct {
+	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
+	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+	BuildContextURI string `validate:"required"`
+	// DockerfileFilePath contains where the Dockerfile is
+	DockerfileFilePath string `validate:"required"`
+	// Image is the Kaniko image
+	Image string `validate:"required"`
+	// ImageVersion is the version tag of the Kaniko image
+	ImageVersion string `validate:"required"`
+	// ResourceRequestsLimits is the resources required by Kaniko executor.
+	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
+}
+
+// SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
+type SparkAppConfig struct {
+	NodeSelector                   map[string]string
+	CorePerCPURequest              float64 `validate:"required"`
+	CPURequestToCPULimit           float64 `validate:"required"`
+	SparkVersion                   string  `validate:"required"`
+	TolerationName                 *string
+	SubmissionFailureRetries       int32  `validate:"required"`
+	SubmissionFailureRetryInterval int64  `validate:"required"`
+	FailureRetries                 int32  `validate:"required"`
+	FailureRetryInterval           int64  `validate:"required"`
+	PythonVersion                  string `validate:"required"`
+	TTLSecond                      int64  `validate:"required"`
 }
 
 // DeploymentConfig captures the config related to the deployment of the turing routers
@@ -121,84 +206,6 @@ type KubernetesLabelConfigs struct {
 	LabelPrefix string
 	// Environment is the value for the environment label
 	Environment string `validate:"required"`
-}
-
-// EnsemblingJobConfig captures the config related to the ensembling batch jobs.
-type EnsemblingJobConfig struct {
-	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
-	RecordsToProcessInOneIteration int `validate:"required"`
-	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
-	MaxRetryCount int `validate:"required"`
-	// DefaultEnvironment is the environment used for image building and running the batch ensemblers.
-	DefaultEnvironment string `validate:"required"`
-	// KanikoConfig contains the configuration related to the kaniko executor image
-	KanikoConfig KanikoConfig `validate:"required"`
-	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
-	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
-	// DefaultConfigurations contains the default configurations applied to the ensembling job.
-	// The user (the person who calls the API) is free to override/append the default values.
-	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
-}
-
-// DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.
-type DefaultEnsemblingJobConfigurations struct {
-	// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
-	BatchEnsemblingJobResources openapi.EnsemblingResources
-	// SparkConfigAnnotations contains the Spark configurations
-	SparkConfigAnnotations map[string]string
-}
-
-// ImageBuilderConfig provides the configuration used for the OCI image building.
-// The details here contain the details pertaining to the ensembler image and not the kaniko image.
-type ImageBuilderConfig struct {
-	// Registry is the registry of the newly built ensembler image.
-	Registry string `validate:"required"`
-	// BaseImageRef is the image name of the base ensembler image based on engines/batch-ensembler/Dockerfile.
-	BaseImageRef string `validate:"required"`
-	// BuildNamespace contains the Kubernetes namespace it should be built in.
-	BuildNamespace string `validate:"required"`
-	// BuildContextURI contains the image build context, which should be engines/batch-ensembler/
-	// The forms supported are listed here https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
-	BuildContextURI string `validate:"required"`
-	// DockerfileFilePath contains where the Dockerfile is
-	DockerfileFilePath string `validate:"required"`
-	// BuildTimeoutDuration is the Kubernetes Job timeout duration.
-	BuildTimeoutDuration time.Duration
-}
-
-// Resource contains the Kubernetes resource request and limits
-type Resource struct {
-	CPU    string `validate:"required"`
-	Memory string `validate:"required"`
-}
-
-// ResourceRequestsLimits contains the Kubernetes resource request and limits for kaniko
-type ResourceRequestsLimits struct {
-	Requests Resource `validate:"required"`
-	Limits   Resource `validate:"required"`
-}
-
-// KanikoConfig provides the configuration used for the Kaniko image.
-type KanikoConfig struct {
-	Image                  string                 `validate:"required"`
-	ImageVersion           string                 `validate:"required"`
-	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
-}
-
-// SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
-type SparkAppConfig struct {
-	NodeSelector                   map[string]string
-	CorePerCPURequest              float64 `validate:"required"`
-	CPURequestToCPULimit           float64 `validate:"required"`
-	SparkVersion                   string  `validate:"required"`
-	TolerationName                 string  `validate:"required"`
-	SubmissionFailureRetries       int32   `validate:"required"`
-	SubmissionFailureRetryInterval int64   `validate:"required"`
-	FailureRetries                 int32   `validate:"required"`
-	FailureRetryInterval           int64   `validate:"required"`
-	PythonVersion                  string  `validate:"required"`
-	TTLSecond                      int64   `validate:"required"`
-	TaintKey                       *string
 }
 
 // TuringUIConfig captures config related to serving Turing UI files
