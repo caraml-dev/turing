@@ -18,6 +18,7 @@ import { RouterVersionDetailsView } from "./router/versions/details/RouterVersio
 import { PrivateLayout } from "./PrivateLayout";
 import { ListEnsemblingJobsView } from "./job/list/ListEnsemblingJobsView";
 import { ListEnsemblersView } from "./ensembler/list/ListEnsemblersView";
+import { ListExperimentsView } from "./experiment/list/ListExperimentsView";
 
 const App = () => (
   <ErrorBoundary>
@@ -65,6 +66,12 @@ const App = () => (
           <PrivateRoute
             path={`${appConfig.homepage}/projects/:projectId/routers`}
             render={PrivateLayout(ListRoutersView)}
+          />
+
+          {/* LIST EXPERIMENTS */}
+          <PrivateRoute
+            path={`${appConfig.homepage}/projects/:projectId/experiments`}
+            render={PrivateLayout(ListExperimentsView)}
           />
 
           {/* ROUTER DETAILS */}
