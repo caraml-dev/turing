@@ -120,7 +120,7 @@ spec:
         args:
         - |
           echo "Update Swagger config..."
-          sed -r -i 's%^((\s*)-(\s*)url\s*:).*$$%\1 "'$${API_SERVER}'"%' $${SWAGGER_JSON}
+          sed -i "s|localhost:8080/v1|$${API_SERVER}|g" $${SWAGGER_JSON}
           echo "Running Swagger UI..."
           /usr/share/nginx/run.sh
       {{- with .Values.turing.extraContainers }}
