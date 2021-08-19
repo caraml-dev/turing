@@ -209,6 +209,8 @@ type KubernetesLabelConfigs struct {
 	Environment string `validate:"required"`
 }
 
+// KnativeServiceDefaults captures some of the configurable defaults specific to
+// Knative services
 type KnativeServiceDefaults struct {
 	TargetConcurrency            int
 	QueueProxyResourcePercentage int
@@ -399,8 +401,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::MaxCPU", "4")
 	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
 
-	v.SetDefault("KnativeServiceDefaults.TargetConcurrency", "1")
-	v.SetDefault("KnativeServiceDefaults.QueueProxyResourcePercentage", "30")
+	v.SetDefault("KnativeServiceDefaults::TargetConcurrency", "1")
+	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
 
 	v.SetDefault("RouterDefaults::Image", "")
 	v.SetDefault("RouterDefaults::FiberDebugLogEnabled", "false")

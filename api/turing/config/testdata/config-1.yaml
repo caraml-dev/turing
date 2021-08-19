@@ -15,6 +15,9 @@ DeployConfig:
   Timeout: 5m
   MaxCPU: 500m
   MaxMemory: 4000Mi
+KnativeServiceDefaults:
+  TargetConcurrency: 2
+  QueueProxyResourcePercentage: 20
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60

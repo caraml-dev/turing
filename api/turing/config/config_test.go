@@ -136,6 +136,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:          Quantity(resource.MustParse("4")),
 					MaxMemory:       Quantity(resource.MustParse("8Gi")),
 				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            1,
+					QueueProxyResourcePercentage: 30,
+				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
 					FluentdConfig: &FluentdConfig{
@@ -184,6 +188,10 @@ func TestLoad(t *testing.T) {
 					DeletionTimeout: 1 * time.Minute,
 					MaxCPU:          Quantity(resource.MustParse("500m")),
 					MaxMemory:       Quantity(resource.MustParse("4000Mi")),
+				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            2,
+					QueueProxyResourcePercentage: 20,
 				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
@@ -262,6 +270,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:          Quantity(resource.MustParse("500m")),
 					MaxMemory:       Quantity(resource.MustParse("12Gi")),
 				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            2,
+					QueueProxyResourcePercentage: 20,
+				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
 					FluentdConfig: &FluentdConfig{
@@ -322,20 +334,21 @@ func TestLoad(t *testing.T) {
 		"multiple files and environment variables": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			env: map[string]string{
-				"PORT":                                  "5000",
-				"ALLOWEDORIGINS":                        "http://baz.com,http://qux.com",
-				"AUTHCONFIG_ENABLED":                    "true",
-				"AUTHCONFIG_URL":                        "http://env.example.com",
-				"DBCONFIG_USER":                         "dbuser-env",
-				"DBCONFIG_PASSWORD":                     "dbpassword-env",
-				"DEPLOYCONFIG_TIMEOUT":                  "10m",
-				"DEPLOYCONFIG_MAXMEMORY":                "4500Mi",
-				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1": "fooval1-env",
-				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":    "quuxval-env",
-				"TURINGUICONFIG_APPDIRECTORY":           "appdir-env",
-				"TURINGUICONFIG_HOMEPAGE":               "/turing-env",
-				"EXPERIMENT_QUX_QUXKEY1":                "quxval1-env",
-				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":      "quxval2-1-env",
+				"PORT":                                     "5000",
+				"ALLOWEDORIGINS":                           "http://baz.com,http://qux.com",
+				"AUTHCONFIG_ENABLED":                       "true",
+				"AUTHCONFIG_URL":                           "http://env.example.com",
+				"DBCONFIG_USER":                            "dbuser-env",
+				"DBCONFIG_PASSWORD":                        "dbpassword-env",
+				"DEPLOYCONFIG_TIMEOUT":                     "10m",
+				"DEPLOYCONFIG_MAXMEMORY":                   "4500Mi",
+				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":    "fooval1-env",
+				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":       "quuxval-env",
+				"TURINGUICONFIG_APPDIRECTORY":              "appdir-env",
+				"TURINGUICONFIG_HOMEPAGE":                  "/turing-env",
+				"EXPERIMENT_QUX_QUXKEY1":                   "quxval1-env",
+				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":         "quxval2-1-env",
+				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY": "4",
 			},
 			want: &Config{
 				Port:           5000,
@@ -350,6 +363,10 @@ func TestLoad(t *testing.T) {
 					User:     "dbuser-env",
 					Password: "dbpassword-env",
 					Database: "turing",
+				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            4,
+					QueueProxyResourcePercentage: 20,
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",

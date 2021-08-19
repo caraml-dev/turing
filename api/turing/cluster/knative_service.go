@@ -19,14 +19,9 @@ const KnativeUserContainerName = "user-container"
 var knativeSvcDefaults = struct {
 	// AutoscalingClass holds the name of the default knative autoscaling class (Knative Pod Autoscaler)
 	AutoscalingClass string
-	// TargetConcurrency holds the target knative observed concurrecy value for autoscaling
-	TargetConcurrency int
 	// RequestTimeoutSeconds is the the max duration the instance is allowed for responding
 	// to requests
 	RequestTimeoutSeconds int
-	// QueueProxyResourcePercentage is the CPU/Memory resource percentage to be allocated
-	// for the queue proxy, of the total resources applied to the pod.
-	QueueProxyResourcePercentage int
 }{
 	AutoscalingClass:      "kpa.autoscaling.knative.dev",
 	RequestTimeoutSeconds: 30,
