@@ -59,6 +59,7 @@ type Config struct {
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
 	RouterDefaults         *RouterDefaults         `validate:"required"`
 	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
+	KnativeServiceDefaults *KnativeServiceDefaults
 	NewRelicConfig         newrelic.Config
 	Sentry                 sentry.Config
 	VaultConfig            *VaultConfig `validate:"required"`
@@ -206,6 +207,11 @@ type KubernetesLabelConfigs struct {
 	LabelPrefix string
 	// Environment is the value for the environment label
 	Environment string `validate:"required"`
+}
+
+type KnativeServiceDefaults struct {
+	TargetConcurrency            int
+	QueueProxyResourcePercentage int
 }
 
 // TuringUIConfig captures config related to serving Turing UI files
@@ -392,6 +398,9 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::DeletionTimeout", "1m")
 	v.SetDefault("DeployConfig::MaxCPU", "4")
 	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
+
+	v.SetDefault("KnativeServiceDefaults.TargetConcurrency", "1")
+	v.SetDefault("KnativeServiceDefaults.QueueProxyResourcePercentage", "30")
 
 	v.SetDefault("RouterDefaults::Image", "")
 	v.SetDefault("RouterDefaults::FiberDebugLogEnabled", "false")

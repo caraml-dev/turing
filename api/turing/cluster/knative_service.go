@@ -24,9 +24,11 @@ var knativeSvcDefaults = struct {
 	// RequestTimeoutSeconds is the the max duration the instance is allowed for responding
 	// to requests
 	RequestTimeoutSeconds int
+	// QueueProxyResourcePercentage is the CPU/Memory resource percentage to be allocated
+	// for the queue proxy, of the total resources applied to the pod.
+	QueueProxyResourcePercentage int
 }{
 	AutoscalingClass:      "kpa.autoscaling.knative.dev",
-	TargetConcurrency:     1,
 	RequestTimeoutSeconds: 30,
 }
 
@@ -38,8 +40,10 @@ type KnativeService struct {
 	ContainerPort  int32 `json:"containerPort"`
 
 	// Autoscaling properties
-	MinReplicas int `json:"minReplicas"`
-	MaxReplicas int `json:"maxReplicas"`
+	MinReplicas                  int `json:"minReplicas"`
+	MaxReplicas                  int `json:"maxReplicas"`
+	TargetConcurrency            int `json:"targetConcurrency"`
+	QueueProxyResourcePercentage int `json:"queueProxyResourcePercentage"`
 }
 
 // Creates a new config object compatible with the knative serving API, from
@@ -88,10 +92,11 @@ func (cfg *KnativeService) buildSvcSpec(
 
 	// Build annotations, set target concurrency of 1
 	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale": strconv.Itoa(cfg.MinReplicas),
-		"autoscaling.knative.dev/maxScale": strconv.Itoa(cfg.MaxReplicas),
-		"autoscaling.knative.dev/target":   strconv.Itoa(knativeSvcDefaults.TargetConcurrency),
-		"autoscaling.knative.dev/class":    knativeSvcDefaults.AutoscalingClass,
+		"autoscaling.knative.dev/minScale":                     strconv.Itoa(cfg.MinReplicas),
+		"autoscaling.knative.dev/maxScale":                     strconv.Itoa(cfg.MaxReplicas),
+		"autoscaling.knative.dev/target":                       strconv.Itoa(cfg.TargetConcurrency),
+		"autoscaling.knative.dev/class":                        knativeSvcDefaults.AutoscalingClass,
+		"queue.sidecar.serving.knative.dev/resourcePercentage": strconv.Itoa(cfg.QueueProxyResourcePercentage),
 	}
 
 	// Revision name

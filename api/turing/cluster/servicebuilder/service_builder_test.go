@@ -59,10 +59,12 @@ func TestNewEnricherService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal: true,
-				ContainerPort:  8080,
-				MinReplicas:    1,
-				MaxReplicas:    2,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				TargetConcurrency:            1,
+				QueueProxyResourcePercentage: 10,
 			},
 			success: true,
 		},
@@ -84,7 +86,7 @@ func TestNewEnricherService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "test-env", "secret")
+			svc, err := sb.NewEnricherService(routerVersion, project, "test-env", "secret", 1, 10)
 			if data.success {
 				assert.NoError(t, err)
 				tu.FailOnError(t, tu.CompareObjects(*svc, data.expected))
@@ -131,10 +133,12 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal: true,
-				ContainerPort:  8080,
-				MinReplicas:    2,
-				MaxReplicas:    3,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  2,
+				MaxReplicas:                  3,
+				TargetConcurrency:            1,
+				QueueProxyResourcePercentage: 20,
 			},
 			success: true,
 		},
@@ -169,10 +173,12 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal: true,
-				ContainerPort:  8080,
-				MinReplicas:    2,
-				MaxReplicas:    3,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  2,
+				MaxReplicas:                  3,
+				TargetConcurrency:            1,
+				QueueProxyResourcePercentage: 20,
 			},
 			success: true,
 		},
@@ -194,7 +200,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret")
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret", 1, 20)
 			if data.success {
 				assert.NoError(t, err)
 				tu.FailOnError(t, tu.CompareObjects(*svc, data.expected))

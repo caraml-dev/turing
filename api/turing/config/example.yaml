@@ -95,6 +95,13 @@ KubernetesLabelConfigs:
   LabelPrefix: "gojek.com/"
   Environment: dev
 
+# KnativeServiceDefaults are the applied to the Knative services created during deployment,
+# using the appropriate k8s resource specs. The below configs are supported. If left unset,
+# the values shown below will be used as the defaults.
+KnativeServiceDefaults:
+  TargetConcurrency: 1
+  QueueProxyResourcePercentage: 30
+
 # Spark App config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.
 SparkAppConfig:
