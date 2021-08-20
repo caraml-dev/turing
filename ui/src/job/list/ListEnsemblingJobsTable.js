@@ -9,7 +9,7 @@ import {
   EuiSearchBar,
   EuiSpacer,
   EuiText,
-  EuiToolTip
+  EuiToolTip,
 } from "@elastic/eui";
 import { appConfig } from "../../config";
 import moment from "moment";
@@ -28,9 +28,10 @@ export const ListEnsemblingJobsTable = ({
   filter,
   onQueryChange,
   onPaginationChange,
-  onRowClick
+  onRowClick,
+  ...props
 }) => {
-  const ensemblers = useContext(EnsemblersContext);
+  const { ensemblers } = useContext(EnsemblersContext);
 
   const searchQuery = useMemo(() => {
     const parts = [];
@@ -67,46 +68,50 @@ export const ListEnsemblingJobsTable = ({
             </Fragment>
           )}
         </EuiText>
-      )
+      ),
     },
     {
       field: "name",
       name: "Name",
       width: "30%",
-      render: name => (
+      render: (name) => (
         <span className="eui-textTruncate" title={name}>
           {name}
         </span>
-      )
+      ),
     },
     {
       field: "ensembler_id",
       name: "Ensembler",
       width: "20%",
-      render: id =>
+      render: (id) =>
         !!ensemblers[id] ? (
-          <EuiLink href={`./ensemblers/${id}`}>
+          <EuiLink
+            onClick={(e) => {
+              e.stopPropagation();
+              props.navigate(`./?ensembler_id=${id}`);
+            }}>
             <EuiIcon type={"aggregate"} size={defaultIconSize} />
             {ensemblers[id].name}
           </EuiLink>
         ) : (
           "[Removed]"
-        )
+        ),
     },
     {
       field: "status",
       name: "Status",
       width: "20%",
-      render: status => (
+      render: (status) => (
         <DeploymentStatusHealth status={JobStatus.fromValue(status)} />
-      )
+      ),
     },
     {
       field: "created_at",
       name: "Created",
       sortable: true,
       width: "20%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -114,13 +119,13 @@ export const ListEnsemblingJobsTable = ({
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
+      ),
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "20%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -128,21 +133,21 @@ export const ListEnsemblingJobsTable = ({
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
-    }
+      ),
+    },
   ];
 
   const pagination = {
     pageIndex: page.index,
     pageSize: page.size,
-    totalItemCount
+    totalItemCount,
   };
 
   const search = {
     query: searchQuery,
     onChange: onQueryChange,
     box: {
-      incremental: false
+      incremental: false,
     },
     filters: [
       {
@@ -150,29 +155,29 @@ export const ListEnsemblingJobsTable = ({
         field: "status",
         name: "Status",
         multiSelect: "or",
-        options: JobStatus.values.map(status => ({
+        options: JobStatus.values.map((status) => ({
           value: status.toString(),
-          view: <EuiHealth color={status.color}>{status.toString()}</EuiHealth>
-        }))
+          view: <EuiHealth color={status.color}>{status.toString()}</EuiHealth>,
+        })),
       },
       {
         type: "field_value_selection",
         field: "ensembler_id",
         name: "Ensembler",
         multiSelect: false,
-        options: Object.values(ensemblers).map(ensembler => ({
+        options: Object.values(ensemblers).map((ensembler) => ({
           value: ensembler.id,
-          view: ensembler.name
-        }))
-      }
-    ]
+          view: ensembler.name,
+        })),
+      },
+    ],
   };
 
-  const cellProps = item =>
+  const cellProps = (item) =>
     onRowClick
       ? {
           style: { cursor: "pointer" },
-          onClick: () => onRowClick(item)
+          onClick: () => onRowClick(item),
         }
       : undefined;
 
