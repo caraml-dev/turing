@@ -97,7 +97,7 @@ func NewAppContext(
 		db,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		cfg.BatchEnsemblingConfig.DashboardURL,
+		cfg.BatchEnsemblingConfig.DashboardURLTemplate,
 	)
 
 	// Initialise Batch components

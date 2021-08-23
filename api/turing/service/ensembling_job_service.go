@@ -1,12 +1,16 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+	"text/template"
 	"time"
 
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -17,7 +21,8 @@ const (
 	SparkHomeFolder = "/home/spark"
 	// EnsemblerFolder is the folder created by the Turing SDK that contains
 	// the ensembler dependencies and pickled Python files.
-	EnsemblerFolder = "ensembler"
+	EnsemblerFolder  = "ensembler"
+	jobNameMaxLength = 20
 )
 
 // EnsemblingJobFindByIDOptions contains the options allowed when finding ensembling jobs.
@@ -44,7 +49,7 @@ type EnsemblingJobService interface {
 	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
 	CreateEnsemblingJob(
 		job *models.EnsemblingJob,
-		projectID models.ID,
+		project *mlp.Project,
 		ensembler *models.PyFuncEnsembler,
 	) (*models.EnsemblingJob, error)
 	MarkEnsemblingJobForTermination(ensemblingJob *models.EnsemblingJob) error
@@ -55,21 +60,25 @@ func NewEnsemblingJobService(
 	db *gorm.DB,
 	defaultEnvironment string,
 	defaultConfig config.DefaultEnsemblingJobConfigurations,
-	dashboardURL string,
+	dashboardURLTemplate string,
 ) EnsemblingJobService {
+	t, err := template.New("dashboardTemplate").Parse(dashboardURLTemplate)
+	if err != nil {
+		log.Warnf("error parsing ensembling dashboard template, values will be nil: %s", err.Error())
+	}
 	return &ensemblingJobService{
-		db:                 db,
-		defaultEnvironment: defaultEnvironment,
-		defaultConfig:      defaultConfig,
-		dashboardURL:       dashboardURL,
+		db:                   db,
+		defaultEnvironment:   defaultEnvironment,
+		defaultConfig:        defaultConfig,
+		dashboardURLTemplate: t,
 	}
 }
 
 type ensemblingJobService struct {
-	db                 *gorm.DB
-	defaultEnvironment string
-	defaultConfig      config.DefaultEnsemblingJobConfigurations
-	dashboardURL       string
+	db                   *gorm.DB
+	defaultEnvironment   string
+	defaultConfig        config.DefaultEnsemblingJobConfigurations
+	dashboardURLTemplate *template.Template
 }
 
 // Save the given router to the db. Updates the existing record if already exists
@@ -98,7 +107,6 @@ func (s *ensemblingJobService) FindByID(
 		return nil, err
 	}
 
-	ensemblingJob.DashboardURL = s.dashboardURL
 	return &ensemblingJob, nil
 }
 
@@ -146,10 +154,6 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		return nil, err
 	}
 
-	for _, r := range results {
-		r.DashboardURL = s.dashboardURL
-	}
-
 	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
 	return paginatedResults, nil
 }
@@ -171,13 +175,42 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	)
 }
 
+// EnsemblingDashboardVariables the values supplied to BatchEnsemblingConfig.DashboardURLTemplate
+type EnsemblingDashboardVariables struct {
+	// Project is the MLP Project associated with the batch ensembler
+	Project string
+	// Job is the name of the ensembling job.
+	Job string
+}
+
+func (s *ensemblingJobService) populateDashboardURL(job *models.EnsemblingJob, project *mlp.Project) error {
+	name := job.Name
+	if len(name) > jobNameMaxLength {
+		name = name[:jobNameMaxLength]
+	}
+
+	values := EnsemblingDashboardVariables{
+		Project: project.Name,
+		Job:     name,
+	}
+
+	var b bytes.Buffer
+	err := s.dashboardURLTemplate.Execute(&b, values)
+	if err != nil {
+		return err
+	}
+
+	job.DashboardURL = b.String()
+	return nil
+}
+
 // CreateEnsemblingJob creates an ensembling job.
 func (s *ensemblingJobService) CreateEnsemblingJob(
 	job *models.EnsemblingJob,
-	projectID models.ID,
+	project *mlp.Project,
 	ensembler *models.PyFuncEnsembler,
 ) (*models.EnsemblingJob, error) {
-	job.ProjectID = projectID
+	job.ProjectID = models.ID(project.Id)
 	job.EnvironmentName = s.defaultEnvironment
 
 	// Populate name if the user does not define a name for the job
@@ -188,12 +221,16 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
-	job.DashboardURL = s.dashboardURL
+
+	err := s.populateDashboardURL(job, project)
+	if err != nil {
+		return nil, err
+	}
 
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
-	err := s.Save(job)
+	err = s.Save(job)
 	if err != nil {
 		return nil, err
 	}

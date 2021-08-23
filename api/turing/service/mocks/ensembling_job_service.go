@@ -3,8 +3,10 @@
 package mocks
 
 import (
-	models "github.com/gojek/turing/api/turing/models"
+	client "github.com/gojek/mlp/api/client"
 	mock "github.com/stretchr/testify/mock"
+
+	models "github.com/gojek/turing/api/turing/models"
 
 	service "github.com/gojek/turing/api/turing/service"
 )
@@ -14,13 +16,13 @@ type EnsemblingJobService struct {
 	mock.Mock
 }
 
-// CreateEnsemblingJob provides a mock function with given fields: job, projectID, ensembler
-func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, projectID models.ID, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
-	ret := _m.Called(job, projectID, ensembler)
+// CreateEnsemblingJob provides a mock function with given fields: job, project, ensembler
+func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, project *client.Project, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
+	ret := _m.Called(job, project, ensembler)
 
 	var r0 *models.EnsemblingJob
-	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
-		r0 = rf(job, projectID, ensembler)
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, *client.Project, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
+		r0 = rf(job, project, ensembler)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EnsemblingJob)
@@ -28,8 +30,8 @@ func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, p
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) error); ok {
-		r1 = rf(job, projectID, ensembler)
+	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, *client.Project, *models.PyFuncEnsembler) error); ok {
+		r1 = rf(job, project, ensembler)
 	} else {
 		r1 = ret.Error(1)
 	}

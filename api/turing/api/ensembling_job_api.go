@@ -50,7 +50,7 @@ func (c EnsemblingJobController) Create(
 		return BadRequest("only pyfunc ensemblers allowed", fmt.Sprintf("ensembler type given: %T", v))
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, projectID, pyFuncEnsembler)
+	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, project, pyFuncEnsembler)
 	if err != nil {
 		return InternalServerError("could not create job request", err.Error())
 	}

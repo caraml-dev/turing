@@ -14,7 +14,8 @@ AuthConfig:
 # Batch ensembler job configurations
 BatchEnsemblingConfig:
   Enabled: true
-  DashboardURL: https://grafana.example.com/graph/d/foobar/foobar
+  # Note that {{.Project}} and {{.Job}} is required.
+  DashboardURLTemplate: https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:
