@@ -162,12 +162,15 @@ components:
           type: "string"
         dashboard_url:
           type: "string"
+          readOnly: true
         created_at:
           type: "string"
           format: "date-time"
+          readOnly: true
         updated_at:
           type: "string"
           format: "date-time"
+          readOnly: true
 
     EnsemblerConfig:
       type: "object"
