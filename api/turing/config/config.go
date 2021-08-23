@@ -96,7 +96,8 @@ func (c *Config) Validate() error {
 
 // BatchEnsemblingConfig captures the config related to the running of batch runners
 type BatchEnsemblingConfig struct {
-	Enabled             bool                `validate:"required"`
+	Enabled             bool `validate:"required"`
+	DashboardURL        string
 	JobConfig           JobConfig           `validate:"required"`
 	RunnerConfig        RunnerConfig        `validate:"required"`
 	ImageBuildingConfig ImageBuildingConfig `validate:"required"`

@@ -1,5 +1,6 @@
 BatchEnsemblingConfig:
   Enabled: true
+  DashboardURL: https://grafana.example.com/graph/d/foobar/foobar
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:

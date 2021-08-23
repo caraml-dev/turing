@@ -18,6 +18,7 @@ import (
 
 const (
 	artifactFolder string = "artifact"
+	dashboardURL   string = "www.example.com/dashboard"
 )
 
 var (
@@ -160,6 +161,7 @@ func generateEnsemblingJobFixture(
 		value.EnvironmentName = "dev"
 		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.EnsemblerName = EnsemblerFolder
+		value.DashboardURL = dashboardURL
 	}
 
 	return value
@@ -168,7 +170,7 @@ func generateEnsemblingJobFixture(
 func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 	t.Run("success | insertion with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
@@ -191,6 +193,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+			assert.Equal(t, found.DashboardURL, dashboardURL)
 		})
 	})
 }
@@ -242,7 +245,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
 					projectID := models.ID(1)
@@ -268,6 +271,10 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 
 				ensemblingJobs := fetched.Results.([]*models.EnsemblingJob)
 				assert.Equal(t, tt.expectedCount, len(ensemblingJobs))
+
+				for _, j := range ensemblingJobs {
+					assert.Equal(t, j.DashboardURL, dashboardURL)
+				}
 			})
 		})
 	}
@@ -276,7 +283,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 			// Save job
 			projectID := models.ID(1)
@@ -382,7 +389,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		for name, tt := range tests {
 			t.Run(name, func(t *testing.T) {
-				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+				ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 				if tt.removeDefaultResources {
 					tt.request.InfraConfig.Resources = nil
@@ -408,6 +415,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
 				assert.Equal(t, models.JobPending, result.Status)
+				assert.Equal(t, expected.DashboardURL, result.DashboardURL)
 
 				assert.Equal(
 					t,
@@ -448,7 +456,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 func TestMarkEnsemblingJobForTermination(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 			// Save job
 			projectID := models.ID(1)
@@ -476,7 +484,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations)
+			ensemblingJobService := NewEnsemblingJobService(db, "dev", defaultConfigurations, dashboardURL)
 
 			// Save job
 			projectID := models.ID(1)

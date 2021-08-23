@@ -55,11 +55,13 @@ func NewEnsemblingJobService(
 	db *gorm.DB,
 	defaultEnvironment string,
 	defaultConfig config.DefaultEnsemblingJobConfigurations,
+	dashboardURL string,
 ) EnsemblingJobService {
 	return &ensemblingJobService{
 		db:                 db,
 		defaultEnvironment: defaultEnvironment,
 		defaultConfig:      defaultConfig,
+		dashboardURL:       dashboardURL,
 	}
 }
 
@@ -67,6 +69,7 @@ type ensemblingJobService struct {
 	db                 *gorm.DB
 	defaultEnvironment string
 	defaultConfig      config.DefaultEnsemblingJobConfigurations
+	dashboardURL       string
 }
 
 // Save the given router to the db. Updates the existing record if already exists
@@ -95,6 +98,7 @@ func (s *ensemblingJobService) FindByID(
 		return nil, err
 	}
 
+	ensemblingJob.DashboardURL = s.dashboardURL
 	return &ensemblingJob, nil
 }
 
@@ -142,6 +146,10 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		return nil, err
 	}
 
+	for _, r := range results {
+		r.DashboardURL = s.dashboardURL
+	}
+
 	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
 	return paginatedResults, nil
 }
@@ -180,6 +188,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
+	job.DashboardURL = s.dashboardURL
 
 	s.mergeDefaultConfigurations(job)
 

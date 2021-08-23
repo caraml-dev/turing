@@ -278,6 +278,7 @@ func TestNewAppContext(t *testing.T) {
 		nil,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
+		testCfg.BatchEnsemblingConfig.DashboardURL,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
