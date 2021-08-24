@@ -143,6 +143,70 @@ paths:
         500:
           description: "Failed to list pod logs due to internal error"
 
+  "/projects/{project_id}/jobs/{job_id}/logs":
+    get:
+      tags: *tags
+      summary: "List logs for an ensembling job, default to 'image_builder' component type"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "id of the project that the ensembling job belongs to"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "path"
+          name: "job_id"
+          description: "id of the ensembling job"
+          schema:
+            $ref: "#/components/schemas/Id"
+          required: true
+        - in: "query"
+          name: "component_type"
+          description: "component type of the ensembling job to get the logs from, default to 'image_builder' component type"
+          schema:
+            type: "string"
+            enum: [ "image_builder", "driver", "executor" ]
+          required: false
+        - in: "query"
+          name: "since_time"
+          description: "RFC 3399 timestamp from which to retrieve the logs e.g. 2002-10-02T15:00:00Z. The logs retrieved will have timestamp after (but not including) since_time"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "tail_lines"
+          description: "number of lines from the end of the logs to retrieve. If both tail_lines and head_lines are set, tail_lines will be ignored"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "head_lines"
+          description: "number of lines from the start of the logs to retrieve. If both tail_lines and head_lines are set, tail_lines will be ignored"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "previous"
+          description: "if true, return the logs from previous terminated container in all pods, default to false"
+          schema:
+            type: "boolean"
+          required: false
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PodLog"
+        400:
+          description: "Invalid value for the ensembling job id or query strings"
+        404:
+          description: "Ensembling job not found"
+        500:
+          description: "Failed to list pod logs due to internal error"
+
 components:
   schemas:
     Id:
@@ -159,7 +223,7 @@ components:
           example: "2020-07-10T21:13:51Z"
         environment:
           type: "string"
-          description: "Environment name of the router running the container that produces this log"
+          description: "Environment name of the pod running the container that produces this log"
           example: "staging"
         namespace:
           type: "string"

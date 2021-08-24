@@ -146,8 +146,12 @@ func NewAppContext(
 		CryptoService:         cryptoService,
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
-		PodLogService:         service.NewPodLogService(clusterControllers),
-		BatchRunners:          batchJobRunners,
+		PodLogService: service.NewPodLogService(
+			clusterControllers,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		),
+		BatchRunners: batchJobRunners,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {

@@ -15,7 +15,7 @@ import (
 	"github.com/gojek/turing/api/turing/service/mocks"
 )
 
-func TestPodLogControllerListPodLogs(t *testing.T) {
+func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 	podLogService := &mocks.PodLogService{}
 	mlpService := &mocks.MLPService{}
 	routersService := &mocks.RoutersService{}
@@ -61,17 +61,17 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 		On("FindByRouterIDAndVersion", models.ID(1), uint(3)).
 		Return(nil, errors.New(""))
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion1, "router", &service.PodLogOptions{}).
+		On("ListRouterPodLogs", project, router1, routerVersion1, "router", &service.PodLogOptions{}).
 		Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion2, "router", &service.PodLogOptions{}).
+		On("ListRouterPodLogs", project, router1, routerVersion2, "router", &service.PodLogOptions{}).
 		Return([]*service.PodLog{{TextPayload: "routerVersion2"}}, nil)
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion1, "enricher", podLogOptions).
+		On("ListRouterPodLogs", project, router1, routerVersion1, "enricher", podLogOptions).
 		Return([]*service.PodLog{{TextPayload: "valid optional args"}}, nil)
 	// Simulate error when logs for router with component 'ensembler' is requested
 	podLogService.
-		On("ListPodLogs", project, router1, routerVersion2, "ensembler", &service.PodLogOptions{}).
+		On("ListRouterPodLogs", project, router1, routerVersion2, "ensembler", &service.PodLogOptions{}).
 		Return([]*service.PodLog{}, errors.New("test pod log error"))
 
 	type args struct {
@@ -287,8 +287,8 @@ func TestPodLogControllerListPodLogs(t *testing.T) {
 					},
 				},
 			}
-			if got := c.ListPodLogs(tt.args.r, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListPodLogs() = %v, want %v", got, tt.want)
+			if got := c.ListRouterPodLogs(tt.args.r, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ListRouterPodLogs() = %v, want %v", got, tt.want)
 			}
 		})
 	}

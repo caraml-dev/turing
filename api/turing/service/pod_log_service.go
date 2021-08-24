@@ -9,12 +9,20 @@ import (
 	"time"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	kubernetesSparkRoleLabel         = "spark-role"
+	kubernetesSparkRoleDriverValue   = "driver"
+	kubernetesSparkRoleExecutorValue = "executor"
 )
 
 // PodLog represents a single log line from a container running in Kubernetes.
@@ -54,44 +62,119 @@ type PodLogOptions struct {
 }
 
 type PodLogService interface {
-	// ListPodLogs retrieves logs from user-container (default) container from all pods running the router.
-	ListPodLogs(
+	// ListRouterPodLogs retrieves logs from user-container (default) container from all pods running the router.
+	ListRouterPodLogs(
 		project *mlp.Project,
 		router *models.Router,
 		routerVersion *models.RouterVersion,
 		componentType string,
 		opts *PodLogOptions,
 	) ([]*PodLog, error)
+
+	ListEnsemblingJobPodLogs(
+		ensemblingJobName string,
+		project *mlp.Project,
+		componentType string,
+		opts *PodLogOptions,
+	) ([]*PodLog, error)
 }
 
 type podLogService struct {
-	clusterControllers map[string]cluster.Controller
+	clusterControllers        map[string]cluster.Controller
+	imageBuilderNamespace     string
+	ensemblingEnvironmentName string
 }
 
-func NewPodLogService(clusterControllers map[string]cluster.Controller) PodLogService {
-	return &podLogService{clusterControllers: clusterControllers}
+// NewPodLogService creates a new PodLogService that deals with kubernetes pod logs
+func NewPodLogService(
+	clusterControllers map[string]cluster.Controller,
+	imageBuilderNamespace string,
+	ensemblingEnvironmentName string,
+) PodLogService {
+	return &podLogService{
+		clusterControllers:        clusterControllers,
+		imageBuilderNamespace:     imageBuilderNamespace,
+		ensemblingEnvironmentName: ensemblingEnvironmentName,
+	}
 }
 
-func (s *podLogService) ListPodLogs(
+func (s *podLogService) ListEnsemblingJobPodLogs(
+	ensemblingJobName string,
+	project *mlp.Project,
+	componentType string,
+	opts *PodLogOptions,
+) ([]*PodLog, error) {
+	var labelSelector string
+	var namespace string
+	switch componentType {
+	case batch.ImageBuilderPodType:
+		namespace = s.imageBuilderNamespace
+		labelSelector = fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblingJobName)
+	case batch.DriverPodType:
+		namespace = servicebuilder.GetNamespace(project)
+		labelSelector = fmt.Sprintf(
+			"%s=%s,%s=%s",
+			kubernetesSparkRoleLabel,
+			kubernetesSparkRoleDriverValue,
+			labeller.GetLabelName(labeller.AppLabel),
+			ensemblingJobName,
+		)
+	case batch.ExecutorPodType:
+		namespace = servicebuilder.GetNamespace(project)
+		labelSelector = fmt.Sprintf(
+			"%s=%s,%s=%s",
+			kubernetesSparkRoleLabel,
+			kubernetesSparkRoleExecutorValue,
+			labeller.GetLabelName(labeller.AppLabel),
+			ensemblingJobName,
+		)
+	}
+
+	return s.listPodLogs(
+		namespace,
+		s.ensemblingEnvironmentName,
+		labelSelector,
+		opts,
+		"",
+	)
+}
+
+func (s *podLogService) ListRouterPodLogs(
 	project *mlp.Project,
 	router *models.Router,
 	routerVersion *models.RouterVersion,
 	componentType string,
 	opts *PodLogOptions,
 ) ([]*PodLog, error) {
+	labelSelector := cluster.KnativeServiceLabelKey + "=" +
+		servicebuilder.GetComponentName(routerVersion, componentType)
+	namespace := servicebuilder.GetNamespace(project)
+	return s.listPodLogs(
+		namespace,
+		router.EnvironmentName,
+		labelSelector,
+		opts,
+		cluster.KnativeUserContainerName,
+	)
+}
+
+func (s *podLogService) listPodLogs(
+	namespace string,
+	environmentName string,
+	labelSelector string,
+	opts *PodLogOptions,
+	defaultContainer string,
+) ([]*PodLog, error) {
 	// If both TailLines and Headlines are set, TailLines is ignored
 	if opts.TailLines != nil && opts.HeadLines != nil {
 		opts.TailLines = nil
 	}
 
-	controller, ok := s.clusterControllers[router.EnvironmentName]
+	controller, ok := s.clusterControllers[environmentName]
 	if !ok {
-		return nil, fmt.Errorf("cluster controller for environment '%s' not found", router.EnvironmentName)
+		return nil, fmt.Errorf("cluster controller for environment '%s' not found", environmentName)
 	}
 
-	namespace := servicebuilder.GetNamespace(project)
-	labelSelector := cluster.KnativeServiceLabelKey + "=" +
-		servicebuilder.GetComponentName(routerVersion, componentType)
 	pods, err := controller.ListPods(namespace, labelSelector)
 	if err != nil {
 		return nil, err
@@ -114,7 +197,7 @@ func (s *podLogService) ListPodLogs(
 
 		// Set default container if not set
 		if logOpts.Container == "" {
-			logOpts.Container = cluster.KnativeUserContainerName
+			logOpts.Container = defaultContainer
 		}
 
 		if opts.SinceTime != nil {
@@ -165,7 +248,7 @@ func (s *podLogService) ListPodLogs(
 
 			log := &PodLog{
 				Timestamp:     timestamp,
-				Environment:   router.EnvironmentName,
+				Environment:   environmentName,
 				Namespace:     namespace,
 				PodName:       p.Name,
 				ContainerName: logOpts.Container,

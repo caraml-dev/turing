@@ -309,9 +309,13 @@ func TestNewAppContext(t *testing.T) {
 		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
 		MLPService:            mlpService,
 		ExperimentsService:    experimentService,
-		PodLogService:         service.NewPodLogService(map[string]cluster.Controller{}),
-		AlertService:          alertService,
-		OpenAPIValidation:     &middleware.OpenAPIValidation{},
-		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		PodLogService: service.NewPodLogService(
+			map[string]cluster.Controller{},
+			testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+			testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		),
+		AlertService:      alertService,
+		OpenAPIValidation: &middleware.OpenAPIValidation{},
+		BatchRunners:      []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}, appCtx)
 }

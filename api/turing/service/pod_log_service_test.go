@@ -299,7 +299,7 @@ invalidtimestamp line3
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &podLogService{clusterControllers: clusterControllers}
-			got, err := s.ListPodLogs(tt.args.project, tt.args.router, tt.args.routerVersion,
+			got, err := s.ListRouterPodLogs(tt.args.project, tt.args.router, tt.args.routerVersion,
 				tt.args.componentType, tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListPodLogs() error = %v, wantErr %v", err, tt.wantErr)
