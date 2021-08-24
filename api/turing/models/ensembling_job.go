@@ -20,7 +20,7 @@ type EnsemblingJob struct {
 	RetryCount      int          `json:"-" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
-	DashboardURL    string       `json:"dashboard_url"`
+	DashboardURL    string       `json:"dashboard_url" gorm:"-"`
 }
 
 // JobConfig stores the infra and ensembler config

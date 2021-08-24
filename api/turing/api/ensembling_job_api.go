@@ -64,6 +64,12 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
+	var errResp *Response
+	var project *mlp.Project
+	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+
 	options := &GetEnsemblingJobOptions{}
 
 	if err := c.ParseVars(options, vars); err != nil {
@@ -78,6 +84,7 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
 		},
+		project,
 	)
 
 	if err != nil {
@@ -93,6 +100,12 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
+	var errResp *Response
+	var project *mlp.Project
+	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+
 	options := service.EnsemblingJobListOptions{}
 	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest(
@@ -101,7 +114,7 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 		)
 	}
 
-	results, err := c.EnsemblingJobService.List(options)
+	results, err := c.EnsemblingJobService.List(options, project)
 	if err != nil {
 		return InternalServerError("unable to list ensemblers", err.Error())
 	}
@@ -119,8 +132,13 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	options := &GetEnsemblingJobOptions{}
+	var errResp *Response
+	var project *mlp.Project
+	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
 
+	options := &GetEnsemblingJobOptions{}
 	if err := c.ParseVars(options, vars); err != nil {
 		return BadRequest(
 			"failed to fetch ensembling job",
@@ -133,6 +151,7 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
 		},
+		project,
 	)
 	if err != nil {
 		return NotFound("ensembling job not found", err.Error())

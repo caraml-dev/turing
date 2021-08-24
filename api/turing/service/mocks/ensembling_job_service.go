@@ -53,13 +53,13 @@ func (_m *EnsemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) erro
 	return r0
 }
 
-// FindByID provides a mock function with given fields: id, options
-func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error) {
-	ret := _m.Called(id, options)
+// FindByID provides a mock function with given fields: id, options, project
+func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions, project *client.Project) (*models.EnsemblingJob, error) {
+	ret := _m.Called(id, options, project)
 
 	var r0 *models.EnsemblingJob
-	if rf, ok := ret.Get(0).(func(models.ID, service.EnsemblingJobFindByIDOptions) *models.EnsemblingJob); ok {
-		r0 = rf(id, options)
+	if rf, ok := ret.Get(0).(func(models.ID, service.EnsemblingJobFindByIDOptions, *client.Project) *models.EnsemblingJob); ok {
+		r0 = rf(id, options, project)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EnsemblingJob)
@@ -67,8 +67,8 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblingJobFindByIDOptions) error); ok {
-		r1 = rf(id, options)
+	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblingJobFindByIDOptions, *client.Project) error); ok {
+		r1 = rf(id, options, project)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -76,13 +76,13 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	return r0, r1
 }
 
-// List provides a mock function with given fields: options
-func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (*service.PaginatedResults, error) {
-	ret := _m.Called(options)
+// List provides a mock function with given fields: options, project
+func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions, project *client.Project) (*service.PaginatedResults, error) {
+	ret := _m.Called(options, project)
 
 	var r0 *service.PaginatedResults
-	if rf, ok := ret.Get(0).(func(service.EnsemblingJobListOptions) *service.PaginatedResults); ok {
-		r0 = rf(options)
+	if rf, ok := ret.Get(0).(func(service.EnsemblingJobListOptions, *client.Project) *service.PaginatedResults); ok {
+		r0 = rf(options, project)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*service.PaginatedResults)
@@ -90,8 +90,8 @@ func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(service.EnsemblingJobListOptions) error); ok {
-		r1 = rf(options)
+	if rf, ok := ret.Get(1).(func(service.EnsemblingJobListOptions, *client.Project) error); ok {
+		r1 = rf(options, project)
 	} else {
 		r1 = ret.Error(1)
 	}

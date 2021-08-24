@@ -45,8 +45,12 @@ type EnsemblingJobListOptions struct {
 type EnsemblingJobService interface {
 	Save(ensemblingJob *models.EnsemblingJob) error
 	Delete(ensemblingJob *models.EnsemblingJob) error
-	FindByID(id models.ID, options EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error)
-	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
+	FindByID(
+		id models.ID,
+		options EnsemblingJobFindByIDOptions,
+		project *mlp.Project,
+	) (*models.EnsemblingJob, error)
+	List(options EnsemblingJobListOptions, project *mlp.Project) (*PaginatedResults, error)
 	CreateEnsemblingJob(
 		job *models.EnsemblingJob,
 		project *mlp.Project,
@@ -93,6 +97,7 @@ func (s *ensemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) error
 func (s *ensemblingJobService) FindByID(
 	id models.ID,
 	options EnsemblingJobFindByIDOptions,
+	project *mlp.Project,
 ) (*models.EnsemblingJob, error) {
 	query := s.db.Where("id = ?", id)
 
@@ -107,10 +112,17 @@ func (s *ensemblingJobService) FindByID(
 		return nil, err
 	}
 
+	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
+	if project != nil {
+		if err := s.populateDashboardURL(&ensemblingJob, project); err != nil {
+			return nil, err
+		}
+	}
+
 	return &ensemblingJob, nil
 }
 
-func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*PaginatedResults, error) {
+func (s *ensemblingJobService) List(options EnsemblingJobListOptions, project *mlp.Project) (*PaginatedResults, error) {
 	var results []*models.EnsemblingJob
 	var count int
 	done := make(chan bool, 1)
@@ -152,6 +164,15 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 
 	if err := result.Error; err != nil {
 		return nil, err
+	}
+
+	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
+	if project != nil {
+		for _, r := range results {
+			if err := s.populateDashboardURL(r, project); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
@@ -222,16 +243,14 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	err := s.populateDashboardURL(job, project)
-	if err != nil {
+	if err := s.populateDashboardURL(job, project); err != nil {
 		return nil, err
 	}
 
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
-	err = s.Save(job)
-	if err != nil {
+	if err := s.Save(job); err != nil {
 		return nil, err
 	}
 

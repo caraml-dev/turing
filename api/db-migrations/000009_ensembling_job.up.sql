@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     retry_count      integer NOT NULL default 0,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
-    dashboard_url    text,
     created_at       timestamp   NOT NULL default current_timestamp,
     updated_at       timestamp   NOT NULL default current_timestamp
 );

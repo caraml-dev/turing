@@ -4,7 +4,6 @@ package service
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	mlp "github.com/gojek/mlp/api/client"
@@ -186,6 +185,10 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				&mlp.Project{
+					Id:   1,
+					Name: mlpProjectName,
+				},
 			)
 			assert.NoError(t, err)
 
@@ -197,6 +200,9 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
 		})
 	})
 }
@@ -267,6 +273,10 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 							PageSize: &tt.queryQuantity,
 						},
 					},
+					&mlp.Project{
+						Id:   1,
+						Name: mlpProjectName,
+					},
 				)
 				assert.Nil(t, err)
 				assert.Equal(t, tt.saveQuantity, fetched.Paging.Total)
@@ -304,6 +314,10 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 					Statuses:           []models.Status{models.JobPending},
 					RetryCountLessThan: &retryCountLessThan,
 				},
+				&mlp.Project{
+					Id:   1,
+					Name: mlpProjectName,
+				},
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, 1, fetched.Paging.Total)
@@ -322,9 +336,16 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				&mlp.Project{
+					Id:   1,
+					Name: mlpProjectName,
+				},
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobFailedSubmission, found.Status)
+
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
 		})
 	})
 }
@@ -417,7 +438,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
 				assert.Equal(t, models.JobPending, result.Status)
-				assert.True(t, strings.Contains(result.DashboardURL, expected.DashboardURL))
+				assert.Contains(t, result.DashboardURL, expected.DashboardURL)
 
 				assert.Equal(
 					t,
@@ -476,9 +497,16 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				&mlp.Project{
+					Id:   1,
+					Name: mlpProjectName,
+				},
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobTerminating, found.Status)
+
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
 		})
 	})
 }
@@ -504,6 +532,7 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
 				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				nil,
 			)
 			assert.NotNil(t, err)
 			assert.Nil(t, found)

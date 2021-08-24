@@ -122,7 +122,7 @@ func (r *ensemblingJobRunner) updateStatus() {
 }
 
 func (r *ensemblingJobRunner) processEnsemblingJobs(queryOptions service.EnsemblingJobListOptions) {
-	ensemblingJobsPaginated, err := r.ensemblingJobService.List(queryOptions)
+	ensemblingJobsPaginated, err := r.ensemblingJobService.List(queryOptions, nil)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs", err)
 		return
@@ -240,7 +240,7 @@ func (r *ensemblingJobRunner) processJobs() {
 		},
 		RetryCountLessThan: &r.maxRetryCount,
 	}
-	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options)
+	ensemblingJobsPaginated, err := r.ensemblingJobService.List(options, nil)
 	if err != nil {
 		log.Errorf("unable to query ensembling jobs: %v", err)
 		return
@@ -350,7 +350,7 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 
 // terminateIfRequired returns true if the process should drop what it is doing.
 func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlpProject *mlp.Project) bool {
-	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{})
+	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{}, nil)
 
 	if err != nil {
 		// Job already deleted, must not allow job to be revived.
