@@ -14,7 +14,7 @@ AuthConfig:
 # Batch ensembler job configurations
 BatchEnsemblingConfig:
   Enabled: true
-  # Note that {{.Project}} and {{.Job}} is required.
+  # Note that {{.Project}} and {{.Job}} is required and they provide the Project name and Job name respectively.
   DashboardURLTemplate: https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}
   JobConfig:
     DefaultEnvironment: dev
