@@ -22,7 +22,7 @@ const (
 	// EnsemblerFolder is the folder created by the Turing SDK that contains
 	// the ensembler dependencies and pickled Python files.
 	EnsemblerFolder  = "ensembler"
-	jobNameMaxLength = 20
+	jobNameMaxLength = 25
 )
 
 // EnsemblingJobFindByIDOptions contains the options allowed when finding ensembling jobs.
