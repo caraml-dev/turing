@@ -3,12 +3,15 @@ package service
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"testing"
 	"time"
 
 	"github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/cluster/mocks"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
@@ -16,7 +19,265 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestPodLogServiceListPodLogs(t *testing.T) {
+func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
+	sinceTime := time.Date(2020, 7, 7, 7, 0, 0, 0, time.UTC)
+	sinceTimeMinus1Sec := time.Date(2020, 7, 7, 6, 59, 59, 0, time.UTC)
+	sinceTimeV1Minus1Sec := metav1.Time{Time: sinceTimeMinus1Sec}
+	headLines := int64(2)
+	tailLines := int64(1)
+
+	controllerEnvironmentName := "environment"
+	namespace := "image"
+	ensemblingJobName := "test-ensembler"
+	podName := "pod-name"
+	labeller.InitKubernetesLabeller("example.com/", "dev")
+	defer labeller.InitKubernetesLabeller("", "dev")
+
+	type args struct {
+		ensemblingJobName string
+		project           *client.Project
+		componentType     string
+		opts              *PodLogOptions
+	}
+	tests := map[string]struct {
+		name       string
+		args       args
+		controller func() cluster.Controller
+		want       []*PodLog
+	}{
+		"success | nominal kaniko": {
+			args: args{
+				project:           &client.Project{Name: namespace},
+				ensemblingJobName: ensemblingJobName,
+				componentType:     batch.ImageBuilderPodType,
+				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+			},
+			want: []*PodLog{
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
+				},
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Pushed image to 1 destinations",
+				},
+			},
+			controller: func() cluster.Controller {
+				controller := &mocks.Controller{}
+				controller.
+					On("ListPods", namespace, fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblingJobName)).
+					Return(&corev1.PodList{
+						Items: []corev1.Pod{
+							{
+								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{Name: "kaniko"},
+									},
+								},
+							},
+						},
+					},
+						nil,
+					)
+				controller.On(
+					"ListPodLogs",
+					namespace,
+					podName,
+					&corev1.PodLogOptions{
+						Container:  "",
+						Timestamps: true,
+						SinceTime:  &sinceTimeV1Minus1Sec,
+					},
+				).Return(
+					ioutil.NopCloser(
+						bytes.NewBufferString(
+							`2020-07-07T06:59:59Z Please update conda by running
+2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
+2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
+						),
+					),
+					nil,
+				)
+				return controller
+			},
+		},
+		"success | nominal driver": {
+			args: args{
+				project:           &client.Project{Name: namespace},
+				ensemblingJobName: ensemblingJobName,
+				componentType:     batch.DriverPodType,
+				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+			},
+			want: []*PodLog{
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
+				},
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Pushed image to 1 destinations",
+				},
+			},
+			controller: func() cluster.Controller {
+				controller := &mocks.Controller{}
+				controller.
+					On("ListPods", namespace, fmt.Sprintf(
+						"%s=%s,%s=%s",
+						kubernetesSparkRoleLabel,
+						kubernetesSparkRoleDriverValue,
+						labeller.GetLabelName(labeller.AppLabel),
+						ensemblingJobName,
+					)).
+					Return(&corev1.PodList{
+						Items: []corev1.Pod{
+							{
+								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{Name: "kaniko"},
+									},
+								},
+							},
+						},
+					},
+						nil,
+					)
+				controller.On(
+					"ListPodLogs",
+					namespace,
+					podName,
+					&corev1.PodLogOptions{
+						Container:  "",
+						Timestamps: true,
+						SinceTime:  &sinceTimeV1Minus1Sec,
+					},
+				).Return(
+					ioutil.NopCloser(
+						bytes.NewBufferString(
+							`2020-07-07T06:59:59Z Please update conda by running
+2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
+2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
+						),
+					),
+					nil,
+				)
+				return controller
+			},
+		},
+		"success | nominal executor": {
+			args: args{
+				project:           &client.Project{Name: namespace},
+				ensemblingJobName: ensemblingJobName,
+				componentType:     batch.ExecutorPodType,
+				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+			},
+			want: []*PodLog{
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
+				},
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+					Environment:   controllerEnvironmentName,
+					Namespace:     namespace,
+					PodName:       podName,
+					ContainerName: "",
+					TextPayload:   "[INFO] Pushed image to 1 destinations",
+				},
+			},
+			controller: func() cluster.Controller {
+				controller := &mocks.Controller{}
+				controller.
+					On("ListPods", namespace, fmt.Sprintf(
+						"%s=%s,%s=%s",
+						kubernetesSparkRoleLabel,
+						kubernetesSparkRoleExecutorValue,
+						labeller.GetLabelName(labeller.AppLabel),
+						ensemblingJobName,
+					)).
+					Return(&corev1.PodList{
+						Items: []corev1.Pod{
+							{
+								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{Name: "kaniko"},
+									},
+								},
+							},
+						},
+					},
+						nil,
+					)
+				controller.On(
+					"ListPodLogs",
+					namespace,
+					podName,
+					&corev1.PodLogOptions{
+						Container:  "",
+						Timestamps: true,
+						SinceTime:  &sinceTimeV1Minus1Sec,
+					},
+				).Return(
+					ioutil.NopCloser(
+						bytes.NewBufferString(
+							`2020-07-07T06:59:59Z Please update conda by running
+2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
+2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
+						),
+					),
+					nil,
+				)
+				return controller
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			clusterControllers := map[string]cluster.Controller{controllerEnvironmentName: tt.controller()}
+
+			s := &podLogService{
+				clusterControllers:        clusterControllers,
+				imageBuilderNamespace:     namespace,
+				ensemblingEnvironmentName: controllerEnvironmentName,
+			}
+			got, _ := s.ListEnsemblingJobPodLogs(
+				tt.args.ensemblingJobName,
+				tt.args.project,
+				tt.args.componentType,
+				tt.args.opts,
+			)
+			if !cmp.Equal(got, tt.want) {
+				t.Errorf("ListPodLogs() got = %v, want %v", got, tt.want)
+				t.Log(cmp.Diff(got, tt.want))
+			}
+		})
+	}
+}
+
+func TestPodLogServiceListRouterPodLogs(t *testing.T) {
 	sinceTime := time.Date(2020, 7, 7, 7, 0, 0, 0, time.UTC)
 	sinceTimeMinus1Sec := time.Date(2020, 7, 7, 6, 59, 59, 0, time.UTC)
 	sinceTimeV1Minus1Sec := metav1.Time{Time: sinceTimeMinus1Sec}

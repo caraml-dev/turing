@@ -38,7 +38,7 @@ type PodLog struct {
 	// Pod name running the container that produces this log
 	PodName string `json:"pod_name"`
 	// Container name that produces this log
-	ContainerName string `json:"container_name"`
+	ContainerName string `json:"container_name,omitempty"`
 	// Log in text format, either TextPayload or JSONPayload will be set but not both
 	TextPayload string `json:"text_payload,omitempty"`
 	// Log in JSON format, either TextPayload or JSONPayload will be set but not both
