@@ -192,8 +192,9 @@ func (c PodLogController) parsePodLogOptions(vars RequestVars) (*service.PodLogO
 		opts.SinceTime = &t
 	}
 
-	if tailTimes, ok := vars.get("tail_lines"); ok {
-		i, err := strconv.ParseInt(tailTimes, 10, 64)
+	// sometimes the client passes tail_lines= and this causes ok to be true with empty string.
+	if tailLines, _ := vars.get("tail_lines"); tailLines != "" {
+		i, err := strconv.ParseInt(tailLines, 10, 64)
 		if err != nil {
 			return nil, &logVarParseError{
 				Description:  "Query string 'tail_lines' must be a positive number",
@@ -208,7 +209,8 @@ func (c PodLogController) parsePodLogOptions(vars RequestVars) (*service.PodLogO
 		opts.TailLines = &i
 	}
 
-	if headLines, ok := vars.get("head_lines"); ok {
+	// sometimes the client passes head_lines= and this causes ok to be true with empty string.
+	if headLines, _ := vars.get("head_lines"); headLines != "" {
 		i, err := strconv.ParseInt(headLines, 10, 64)
 		if err != nil {
 			return nil, &logVarParseError{
