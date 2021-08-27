@@ -51,7 +51,7 @@ BatchEnsemblingConfig:
           Memory: 1Gi
   Logging:
     # Note that {{.PodName}} and {{.Namespace}} is required and they provide the PodName and Namespace respectively.
-    # This is optional.
+    # This is optional logging url format is optional if you do not require the logging URL.
     LoggingURLFormat: "https://www.example.com/dashboard?pod_name={{.PodName}}&namespace={{.Namespace}}"
 
 # Postgresql connection and credentials
