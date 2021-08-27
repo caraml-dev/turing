@@ -3,17 +3,262 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/validation"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 )
+
+func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
+	ensemblingPodLogs := &service.EnsemblingPodLogs{
+		Environment: "dev",
+		Namespace:   "foo",
+		LoggingURL:  "https://www.example.com/hello/world",
+		Logs: []*service.EnsemblingPodLog{
+			{
+				Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+				PodName:     "bar",
+				TextPayload: "[INFO] Taking snapshot of full filesystem...",
+			},
+		},
+	}
+	ensemblingJob := &models.EnsemblingJob{
+		InfraConfig: &models.InfraConfig{
+			EnsemblerName: "hello",
+		},
+	}
+
+	tests := map[string]struct {
+		mlpService           func() service.MLPService
+		ensemblingJobService func() service.EnsemblingJobService
+		podLogService        func() service.PodLogService
+		componentType        string
+		vars                 RequestVars
+		expected             *Response
+	}{
+		"success | nominal": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(
+					ensemblingJob,
+					nil,
+				)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On(
+					"ListEnsemblingJobPodLogs",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(ensemblingPodLogs, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"5"},
+				"head_lines":     {"3"},
+				"component_type": {batch.ImageBuilderPodType},
+			},
+			expected: Ok(ensemblingPodLogs),
+		},
+		"success | default component type": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(
+					ensemblingJob,
+					nil,
+				)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On(
+					"ListEnsemblingJobPodLogs",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(ensemblingPodLogs, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+				"previous":   {"true"},
+				"since_time": {"2020-12-05T08:00:00Z"},
+				"tail_lines": {"5"},
+				"head_lines": {"3"},
+			},
+			expected: Ok(ensemblingPodLogs),
+		},
+		"failure | wrong component type": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(
+					ensemblingJob,
+					nil,
+				)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On(
+					"ListEnsemblingJobPodLogs",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(ensemblingPodLogs, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"5"},
+				"head_lines":     {"3"},
+				"component_type": {"broken_comp"},
+			},
+			expected: BadRequest("Invalid component type 'broken_comp'", fmt.Sprintf(
+				"must be one of the following: %s, %s or %s",
+				batch.ImageBuilderPodType,
+				batch.DriverPodType,
+				batch.ExecutorPodType,
+			)),
+		},
+		"failure | ensembling job not found": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(
+					nil,
+					fmt.Errorf("not found"),
+				)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On(
+					"ListEnsemblingJobPodLogs",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(ensemblingPodLogs, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+				"previous":   {"true"},
+				"since_time": {"2020-12-05T08:00:00Z"},
+				"tail_lines": {"5"},
+				"head_lines": {"3"},
+			},
+			expected: NotFound("ensembling job not found", "not found"),
+		},
+		"failure | fail to list logs": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(
+					ensemblingJob,
+					nil,
+				)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On(
+					"ListEnsemblingJobPodLogs",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(nil, fmt.Errorf("error"))
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":     {"1"},
+				"project_id": {"1"},
+				"previous":   {"true"},
+				"since_time": {"2020-12-05T08:00:00Z"},
+				"tail_lines": {"5"},
+				"head_lines": {"3"},
+			},
+			expected: InternalServerError("Failed to list logs", "error"),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			validator, _ := validation.NewValidator(nil)
+			c := PodLogController{
+				NewBaseController(
+					&AppContext{
+						PodLogService:        tt.podLogService(),
+						MLPService:           tt.mlpService(),
+						EnsemblingJobService: tt.ensemblingJobService(),
+					},
+					validator,
+				),
+			}
+			if got := c.ListEnsemblingPodLogs(nil, tt.vars, nil); !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("ListRouterPodLogs() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
 
 func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 	podLogService := &mocks.PodLogService{}
