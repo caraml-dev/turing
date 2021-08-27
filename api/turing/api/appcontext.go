@@ -150,6 +150,7 @@ func NewAppContext(
 			clusterControllers,
 			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
 			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+			cfg.BatchEnsemblingConfig.Logging.LoggingURLFormat,
 		),
 		BatchRunners: batchJobRunners,
 	}

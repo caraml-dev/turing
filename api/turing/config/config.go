@@ -101,6 +101,12 @@ type BatchEnsemblingConfig struct {
 	JobConfig             JobConfig           `validate:"required"`
 	RunnerConfig          RunnerConfig        `validate:"required"`
 	ImageBuildingConfig   ImageBuildingConfig `validate:"required"`
+	Logging               BatchEnsemblingLoggingConfig
+}
+
+// BatchEnsemblingLoggingConfig contains the Logging information
+type BatchEnsemblingLoggingConfig struct {
+	LoggingURLFormat *string
 }
 
 // JobConfig captures the config related to the ensembling batch jobs.

@@ -245,3 +245,7 @@ components:
           type: "object"
           description: "Log in JSON format, either text_payload or json_payload will be set but not both"
           example: { "level": "info","msg": "Initializing Nop Result Logger","router_version": "test-1-1.integration-test","ts": 1594386832.6632557 }
+        logging_url:
+          type: "string"
+          description: "A URL link to the dashboard but might not be present if a logging storage is not configured in your infrastructure."
+          example: "http://www.example.com/logging?pod_name=hello&namespace=world"

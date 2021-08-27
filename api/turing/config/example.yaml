@@ -49,6 +49,10 @@ BatchEnsemblingConfig:
         Limits:
           CPU: "1"
           Memory: 1Gi
+  Logging:
+    # Note that {{.PodName}} and {{.Namespace}} is required and they provide the PodName and Namespace respectively.
+    # This is optional.
+    LoggingURLFormat: "https://www.example.com/dashboard?pod_name={{.PodName}}&namespace={{.Namespace}}"
 
 # Postgresql connection and credentials
 DbConfig:

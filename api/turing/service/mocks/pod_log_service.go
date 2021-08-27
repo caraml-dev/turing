@@ -17,15 +17,15 @@ type PodLogService struct {
 }
 
 // ListEnsemblingJobPodLogs provides a mock function with given fields: ensemblingJobName, project, componentType, opts
-func (_m *PodLogService) ListEnsemblingJobPodLogs(ensemblingJobName string, project *client.Project, componentType string, opts *service.PodLogOptions) ([]*service.PodLog, error) {
+func (_m *PodLogService) ListEnsemblingJobPodLogs(ensemblingJobName string, project *client.Project, componentType string, opts *service.PodLogOptions) (*service.EnsemblingPodLogs, error) {
 	ret := _m.Called(ensemblingJobName, project, componentType, opts)
 
-	var r0 []*service.PodLog
-	if rf, ok := ret.Get(0).(func(string, *client.Project, string, *service.PodLogOptions) []*service.PodLog); ok {
+	var r0 *service.EnsemblingPodLogs
+	if rf, ok := ret.Get(0).(func(string, *client.Project, string, *service.PodLogOptions) *service.EnsemblingPodLogs); ok {
 		r0 = rf(ensemblingJobName, project, componentType, opts)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*service.PodLog)
+			r0 = ret.Get(0).(*service.EnsemblingPodLogs)
 		}
 	}
 

@@ -2,10 +2,12 @@ package service
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
+	"text/template"
 	"time"
 
 	mlp "github.com/gojek/mlp/api/client"
@@ -24,6 +26,37 @@ const (
 	kubernetesSparkRoleDriverValue   = "driver"
 	kubernetesSparkRoleExecutorValue = "executor"
 )
+
+var (
+	ensemblingLoggingPodPostfixesInSearch = map[string]string{
+		batch.DriverPodType:       ".*-driver",
+		batch.ExecutorPodType:     ".*-exec-.*",
+		batch.ImageBuilderPodType: "",
+	}
+)
+
+// EnsemblingPodLogs contains a list of logs in a kubernetes pod along with some extra information.
+type EnsemblingPodLogs struct {
+	// Environment name of the router running the container that produces this log
+	Environment string `json:"environment"`
+	// Kubernetes namespace where the pod running the container is created
+	Namespace string `json:"namespace"`
+	// URL to dashboard since pods might be deleted after use
+	// Since there are multiple pods, we will add the unique URLs here
+	LoggingURL string `json:"logging_url"`
+	// Logs is an array of logs, equivalent to one line of log
+	Logs []*EnsemblingPodLog `json:"logs"`
+}
+
+// EnsemblingPodLog represents a single log line from a container running in Kubernetes.
+type EnsemblingPodLog struct {
+	// Log timestamp in RFC3339 format
+	Timestamp time.Time `json:"timestamp"`
+	// Pod name running the container that produces this log
+	PodName string `json:"pod_name"`
+	// Log in text format, either TextPayload or JSONPayload will be set but not both
+	TextPayload string `json:"text_payload,omitempty"`
+}
 
 // PodLog represents a single log line from a container running in Kubernetes.
 // If the log message is in JSON format, JSONPayload must be populated with the
@@ -76,13 +109,14 @@ type PodLogService interface {
 		project *mlp.Project,
 		componentType string,
 		opts *PodLogOptions,
-	) ([]*PodLog, error)
+	) (*EnsemblingPodLogs, error)
 }
 
 type podLogService struct {
-	clusterControllers        map[string]cluster.Controller
-	imageBuilderNamespace     string
-	ensemblingEnvironmentName string
+	clusterControllers           map[string]cluster.Controller
+	imageBuilderNamespace        string
+	ensemblingEnvironmentName    string
+	ensemblingLoggingURLTemplate *template.Template
 }
 
 // NewPodLogService creates a new PodLogService that deals with kubernetes pod logs
@@ -90,26 +124,36 @@ func NewPodLogService(
 	clusterControllers map[string]cluster.Controller,
 	imageBuilderNamespace string,
 	ensemblingEnvironmentName string,
+	ensemblingLoggingURLFormat *string,
 ) PodLogService {
+	var t *template.Template
+	var err error
+	if ensemblingLoggingURLFormat != nil {
+		t, err = template.New("dashboardTemplate").Parse(*ensemblingLoggingURLFormat)
+		if err != nil {
+			logger.Warnf("error parsing ensembling logging template: %s", err)
+		}
+	}
 	return &podLogService{
-		clusterControllers:        clusterControllers,
-		imageBuilderNamespace:     imageBuilderNamespace,
-		ensemblingEnvironmentName: ensemblingEnvironmentName,
+		clusterControllers:           clusterControllers,
+		imageBuilderNamespace:        imageBuilderNamespace,
+		ensemblingEnvironmentName:    ensemblingEnvironmentName,
+		ensemblingLoggingURLTemplate: t,
 	}
 }
 
 func (s *podLogService) ListEnsemblingJobPodLogs(
-	ensemblingJobName string,
+	ensemblerName string,
 	project *mlp.Project,
 	componentType string,
 	opts *PodLogOptions,
-) ([]*PodLog, error) {
+) (*EnsemblingPodLogs, error) {
 	var labelSelector string
 	var namespace string
 	switch componentType {
 	case batch.ImageBuilderPodType:
 		namespace = s.imageBuilderNamespace
-		labelSelector = fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblingJobName)
+		labelSelector = fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblerName)
 	case batch.DriverPodType:
 		namespace = servicebuilder.GetNamespace(project)
 		labelSelector = fmt.Sprintf(
@@ -117,7 +161,7 @@ func (s *podLogService) ListEnsemblingJobPodLogs(
 			kubernetesSparkRoleLabel,
 			kubernetesSparkRoleDriverValue,
 			labeller.GetLabelName(labeller.AppLabel),
-			ensemblingJobName,
+			ensemblerName,
 		)
 	case batch.ExecutorPodType:
 		namespace = servicebuilder.GetNamespace(project)
@@ -126,17 +170,86 @@ func (s *podLogService) ListEnsemblingJobPodLogs(
 			kubernetesSparkRoleLabel,
 			kubernetesSparkRoleExecutorValue,
 			labeller.GetLabelName(labeller.AppLabel),
-			ensemblingJobName,
+			ensemblerName,
 		)
 	}
 
-	return s.listPodLogs(
+	podLogs, err := s.listPodLogs(
 		namespace,
 		s.ensemblingEnvironmentName,
 		labelSelector,
 		opts,
 		"",
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Here it's a little messy but it should be cleaned up in the future once we
+	// move router logs into the new format and we can share the code across all.
+	return s.marshalEnsemblingLogs(
+		namespace,
+		ensemblerName,
+		componentType,
+		podLogs,
+	)
+}
+
+func (s *podLogService) marshalEnsemblingLogs(
+	namespace string,
+	ensemblerName string,
+	componentType string,
+	podLogs []*PodLog,
+) (*EnsemblingPodLogs, error) {
+	ensemblingJobLogs := &EnsemblingPodLogs{
+		Environment: s.ensemblingEnvironmentName,
+		Namespace:   namespace,
+	}
+
+	if s.ensemblingLoggingURLTemplate != nil {
+		logURL, err := s.getLogURL(ensemblerName, namespace, componentType)
+		if err != nil {
+			return nil, err
+		}
+		ensemblingJobLogs.LoggingURL = logURL
+	}
+
+	allLines := []*EnsemblingPodLog{}
+	for _, p := range podLogs {
+		line := &EnsemblingPodLog{
+			Timestamp:   p.Timestamp,
+			PodName:     p.PodName,
+			TextPayload: p.TextPayload,
+		}
+		allLines = append(allLines, line)
+	}
+
+	ensemblingJobLogs.Logs = allLines
+
+	return ensemblingJobLogs, nil
+}
+
+// EnsemblingLogURLValues are the values supplied to the log URL template
+type EnsemblingLogURLValues struct {
+	PodName   string
+	Namespace string
+}
+
+func (s *podLogService) getLogURL(ensemblerName, namespace, componentType string) (string, error) {
+	podName := fmt.Sprintf("%s%s", ensemblerName, ensemblingLoggingPodPostfixesInSearch[componentType])
+	v := EnsemblingLogURLValues{
+		PodName:   podName,
+		Namespace: namespace,
+	}
+
+	var b bytes.Buffer
+	err := s.ensemblingLoggingURLTemplate.Execute(&b, v)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }
 
 func (s *podLogService) ListRouterPodLogs(

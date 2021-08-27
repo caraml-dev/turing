@@ -313,6 +313,7 @@ func TestNewAppContext(t *testing.T) {
 			map[string]cluster.Controller{},
 			testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
 			testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+			testCfg.BatchEnsemblingConfig.Logging.LoggingURLFormat,
 		),
 		AlertService:      alertService,
 		OpenAPIValidation: &middleware.OpenAPIValidation{},

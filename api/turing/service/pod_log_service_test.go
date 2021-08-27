@@ -32,6 +32,7 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 	podName := "pod-name"
 	labeller.InitKubernetesLabeller("example.com/", "dev")
 	defer labeller.InitKubernetesLabeller("", "dev")
+	template := "http://example.com/{{.Namespace}}/{{.PodName}}"
 
 	type args struct {
 		ensemblingJobName string
@@ -43,7 +44,7 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 		name       string
 		args       args
 		controller func() cluster.Controller
-		want       []*PodLog
+		want       *EnsemblingPodLogs
 	}{
 		"success | nominal kaniko": {
 			args: args{
@@ -52,22 +53,21 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 				componentType:     batch.ImageBuilderPodType,
 				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
 			},
-			want: []*PodLog{
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
-				},
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Pushed image to 1 destinations",
+			want: &EnsemblingPodLogs{
+				Environment: controllerEnvironmentName,
+				Namespace:   namespace,
+				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s", namespace, ensemblingJobName),
+				Logs: []*EnsemblingPodLog{
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Taking snapshot of full filesystem...",
+					},
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Pushed image to 1 destinations",
+					},
 				},
 			},
 			controller: func() cluster.Controller {
@@ -117,22 +117,21 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 				componentType:     batch.DriverPodType,
 				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
 			},
-			want: []*PodLog{
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
-				},
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Pushed image to 1 destinations",
+			want: &EnsemblingPodLogs{
+				Environment: controllerEnvironmentName,
+				Namespace:   namespace,
+				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s.*-driver", namespace, ensemblingJobName),
+				Logs: []*EnsemblingPodLog{
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Taking snapshot of full filesystem...",
+					},
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Pushed image to 1 destinations",
+					},
 				},
 			},
 			controller: func() cluster.Controller {
@@ -188,22 +187,21 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 				componentType:     batch.ExecutorPodType,
 				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
 			},
-			want: []*PodLog{
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Taking snapshot of full filesystem...",
-				},
-				{
-					Timestamp:     time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-					Environment:   controllerEnvironmentName,
-					Namespace:     namespace,
-					PodName:       podName,
-					ContainerName: "",
-					TextPayload:   "[INFO] Pushed image to 1 destinations",
+			want: &EnsemblingPodLogs{
+				Environment: controllerEnvironmentName,
+				Namespace:   namespace,
+				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s.*-exec-.*", namespace, ensemblingJobName),
+				Logs: []*EnsemblingPodLog{
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Taking snapshot of full filesystem...",
+					},
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
+						PodName:     podName,
+						TextPayload: "[INFO] Pushed image to 1 destinations",
+					},
 				},
 			},
 			controller: func() cluster.Controller {
@@ -258,11 +256,12 @@ func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterControllers := map[string]cluster.Controller{controllerEnvironmentName: tt.controller()}
 
-			s := &podLogService{
-				clusterControllers:        clusterControllers,
-				imageBuilderNamespace:     namespace,
-				ensemblingEnvironmentName: controllerEnvironmentName,
-			}
+			s := NewPodLogService(
+				clusterControllers,
+				namespace,
+				controllerEnvironmentName,
+				&template,
+			)
 			got, _ := s.ListEnsemblingJobPodLogs(
 				tt.args.ensemblingJobName,
 				tt.args.project,
