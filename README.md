@@ -160,7 +160,7 @@ router Docker image is set to the image built and push from the previous step.
 # config-dev.yaml
 BatchEnsemblingConfig:
   Enabled: true
-  DashboardURLTemplate: https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}
+  MonitoringURLTemplate: https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:

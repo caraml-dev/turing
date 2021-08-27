@@ -114,7 +114,7 @@ func (s *ensemblingJobService) FindByID(
 
 	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
 	if project != nil {
-		if err := s.populateDashboardURL(&ensemblingJob, project); err != nil {
+		if err := s.populateMonitoringURL(&ensemblingJob, project); err != nil {
 			return nil, err
 		}
 	}
@@ -169,7 +169,7 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions, project *m
 	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
 	if project != nil {
 		for _, r := range results {
-			if err := s.populateDashboardURL(r, project); err != nil {
+			if err := s.populateMonitoringURL(r, project); err != nil {
 				return nil, err
 			}
 		}
@@ -196,21 +196,21 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	)
 }
 
-// EnsemblingDashboardVariables the values supplied to BatchEnsemblingConfig.DashboardURLTemplate
-type EnsemblingDashboardVariables struct {
+// EnsemblingMonitoringVariables the values supplied to BatchEnsemblingConfig.MonitoringURLTemplate
+type EnsemblingMonitoringVariables struct {
 	// Project is the MLP Project associated with the batch ensembler
 	Project string
 	// Job is the name of the ensembling job.
 	Job string
 }
 
-func (s *ensemblingJobService) populateDashboardURL(job *models.EnsemblingJob, project *mlp.Project) error {
+func (s *ensemblingJobService) populateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) error {
 	name := job.Name
 	if len(name) > jobNameMaxLength {
 		name = name[:jobNameMaxLength]
 	}
 
-	values := EnsemblingDashboardVariables{
+	values := EnsemblingMonitoringVariables{
 		Project: project.Name,
 		Job:     name,
 	}
@@ -221,7 +221,7 @@ func (s *ensemblingJobService) populateDashboardURL(job *models.EnsemblingJob, p
 		return err
 	}
 
-	job.DashboardURL = b.String()
+	job.MonitoringURL = b.String()
 	return nil
 }
 
@@ -243,7 +243,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	if err := s.populateDashboardURL(job, project); err != nil {
+	if err := s.populateMonitoringURL(job, project); err != nil {
 		return nil, err
 	}
 

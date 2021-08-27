@@ -164,7 +164,7 @@ func generateEnsemblingJobFixture(
 		value.EnvironmentName = "dev"
 		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.EnsemblerName = EnsemblerFolder
-		value.DashboardURL = fmt.Sprintf(dashboardURLFormat, mlpProjectName, name)
+		value.MonitoringURL = fmt.Sprintf(dashboardURLFormat, mlpProjectName, name)
 	}
 
 	return value
@@ -202,7 +202,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
 
 			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
-			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
+			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
 }
@@ -345,7 +345,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			assert.Equal(t, models.JobFailedSubmission, found.Status)
 
 			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
-			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
+			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
 }
@@ -438,7 +438,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
 				assert.Equal(t, models.JobPending, result.Status)
-				assert.Contains(t, result.DashboardURL, expected.DashboardURL)
+				assert.Contains(t, result.MonitoringURL, expected.MonitoringURL)
 
 				assert.Equal(
 					t,
@@ -506,7 +506,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			assert.Equal(t, models.JobTerminating, found.Status)
 
 			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
-			assert.Contains(t, found.DashboardURL, expected.DashboardURL)
+			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
 }
