@@ -222,7 +222,7 @@ components:
         pod_name:
           type: "string"
           description: "Pod name running the container that produces this log"
-          example: "nearby-turing-router-90-deployment-7b49b4bcb5-jlr7n"
+          example: "batch-7b49b4bcb5-jlr7n"
         text_payload:
           type: "string"
           description: "Log in text format, either text_payload or json_payload will be set but not both"
