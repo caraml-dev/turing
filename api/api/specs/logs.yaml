@@ -197,9 +197,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/PodLog"
+                $ref: "#/components/schemas/EnsemblingPodLogs"
         400:
           description: "Invalid value for the ensembling job id or query strings"
         404:
@@ -211,6 +209,46 @@ components:
   schemas:
     Id:
       $ref: "common.yaml#/components/schemas/Id"
+
+    EnsemblingPodLog:
+      type: object
+      description: "EnsemblingPodLog object contains a log item from a container in an ensembling pod"
+      properties:
+        timestamp:
+          type: "string"
+          format: "date-time"
+          description: "Log timestamp in RFC3339 format"
+          example: "2020-07-10T21:13:51Z"
+        pod_name:
+          type: "string"
+          description: "Pod name running the container that produces this log"
+          example: "nearby-turing-router-90-deployment-7b49b4bcb5-jlr7n"
+        text_payload:
+          type: "string"
+          description: "Log in text format, either text_payload or json_payload will be set but not both"
+          example: "Example log from a container"
+
+    EnsemblingPodLogs:
+      type: object
+      description: "EnsemblingPodLog object contains a log item from a container in an ensembling pod"
+      properties:
+        environment:
+          type: "string"
+          description: "Environment name of the pod running the container that produces this log"
+          example: "staging"
+        namespace:
+          type: "string"
+          description: "Kubernetes namespace where the pod running the container is created"
+          example: "cartography"
+        logging_url:
+          type: "string"
+          description: "A URL link to the dashboard but might not be present if a logging storage is not configured in your infrastructure."
+          example: "http://www.example.com/logging?pod_name=hello&namespace=world"
+        logs:
+          type: "array"
+          description: "Logs from the ensembling job pod. Each element represents a line."
+          items:
+            $ref: "#/components/schemas/EnsemblingPodLog"
 
     PodLog:
       type: object
@@ -245,7 +283,3 @@ components:
           type: "object"
           description: "Log in JSON format, either text_payload or json_payload will be set but not both"
           example: { "level": "info","msg": "Initializing Nop Result Logger","router_version": "test-1-1.integration-test","ts": 1594386832.6632557 }
-        logging_url:
-          type: "string"
-          description: "A URL link to the dashboard but might not be present if a logging storage is not configured in your infrastructure."
-          example: "http://www.example.com/logging?pod_name=hello&namespace=world"
