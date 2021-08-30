@@ -3,6 +3,9 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { ConfigSection } from "../../../components/config_section";
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/eui";
 import { ConfigurationConfigSection } from "./configuration_section/ConfigurationConfigSection";
+import { SinkConfigSection } from "./sink_config_section/SinkConfigSection";
+import { PredictionsConfigSection } from "./prediction_config_section/PredictionsConfigSection";
+import { SourceConfigSection } from "./source_config_section/SourceConfigSection";
 
 export const EnsemblingJobConfigView = ({ job }) => {
   useEffect(() => {
@@ -25,17 +28,17 @@ export const EnsemblingJobConfigView = ({ job }) => {
     {
       title: "Source",
       iconType: "importAction",
-      children: null,
+      children: <SourceConfigSection job={job} />,
     },
     {
       title: "Predictions",
       iconType: "heatmap",
-      children: null,
+      children: <PredictionsConfigSection job={job} />,
     },
     {
       title: "Sink",
       iconType: "exportAction",
-      children: null,
+      children: <SinkConfigSection job={job} />,
     },
     {
       title: "Configuration",
