@@ -1,4 +1,4 @@
-@import "~@elastic/eui/src/global_styling/mixins/typography";
+@import "node_modules/@elastic/eui/src/global_styling/mixins/typography";
 
 // When text is truncated in a child flex element, the auto-calculated min width is wider than
 // its parent container which can break the layout. To prevent this, the min-width attribute

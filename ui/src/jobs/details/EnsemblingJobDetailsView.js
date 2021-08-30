@@ -19,7 +19,6 @@ import { Redirect, Router } from "@reach/router";
 import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
-import { EnsemblersContextContextProvider } from "../../providers/ensemblers/context";
 
 export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const [{ data: jobDetails, isLoaded, error }, fetchJobDetails] = useTuringApi(
@@ -64,9 +63,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
               </EuiPageHeaderSection>
             </EuiPageHeader>
 
-            <EnsemblersContextContextProvider projectId={projectId}>
-              <EnsemblingJobDetailsPageHeader job={jobDetails} {...props} />
-            </EnsemblersContextContextProvider>
+            <EnsemblingJobDetailsPageHeader job={jobDetails} {...props} />
 
             <EuiSpacer size="xs" />
 
@@ -90,7 +87,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
               </Fragment>
             )}
 
-            <Router primary={false}>
+            <Router>
               <Redirect from="/" to="details" noThrow />
               <EnsemblingJobConfigView path="details" job={jobDetails} />
 

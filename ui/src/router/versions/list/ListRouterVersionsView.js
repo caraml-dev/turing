@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { EuiPanel } from "@elastic/eui";
-import { ConfigSection } from "../../components/configuration/components/section";
+import { ConfigSection } from "../../../components/config_section";
 import { ListRouterVersionsTable } from "./ListRouterVersionsTable";
 import "./ListRouterVersionsView.scss";
 import { RouterVersionActions } from "../components/RouterVersionActions";
@@ -21,7 +21,7 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
     fetchVersions();
   }, [router.status, fetchVersions]);
 
-  const onRowClick = item => {
+  const onRowClick = (item) => {
     props.navigate(`../versions/${item.version}/details`);
   };
 
@@ -29,15 +29,15 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: `../`
+        href: `../`,
       },
       {
         text: router.name,
-        href: `./`
+        href: `./`,
       },
       {
-        text: "Versions"
-      }
+        text: "Versions",
+      },
     ]);
   }, [router.name]);
 
@@ -50,7 +50,7 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
             props.navigate("./", { state: { refresh: true } })
           }
           onDeleteSuccess={fetchVersions}>
-          {actions => (
+          {(actions) => (
             <ListRouterVersionsTable
               items={versions.data}
               isLoaded={versions.isLoaded}
@@ -58,11 +58,11 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
               deployedVersion={deployedVersion}
               onRowClick={onRowClick}
               renderActions={() =>
-                actions.map(action => ({
+                actions.map((action) => ({
                   ...action,
                   type: "icon",
                   name: action.label,
-                  description: action.name
+                  description: action.name,
                 }))
               }
               {...props}

@@ -5,9 +5,9 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiTextColor,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
-import { ConfigSectionPanel } from "./section";
+import { ConfigSectionPanel } from "../../../../components/config_section";
 import getExperimentUrl from "./config";
 
 const TreatmentMappingConfigTable = ({ items }) => {
@@ -15,13 +15,13 @@ const TreatmentMappingConfigTable = ({ items }) => {
     {
       field: "treatment",
       width: "50%",
-      name: "Variant"
+      name: "Variant",
     },
     {
       field: "route",
       width: "50%",
-      name: "Route"
-    }
+      name: "Route",
+    },
   ];
 
   return (
@@ -32,10 +32,10 @@ const TreatmentMappingConfigTable = ({ items }) => {
 export const TreatmentMappingConfigSection = ({
   engineProps,
   experiments = [],
-  mappings = []
+  mappings = [],
 }) => {
   const experimentNames = [
-    ...new Set(mappings.map(mapObj => mapObj.experiment))
+    ...new Set(mappings.map((mapObj) => mapObj.experiment)),
   ];
 
   const experimentInfo = experiments.reduce((acc, exp) => {
@@ -46,7 +46,7 @@ export const TreatmentMappingConfigSection = ({
   return (
     <ConfigSectionPanel title="Treatment Mapping" className="treatmentMapping">
       <EuiFlexGroup gutterSize="xl">
-        {experimentNames.map(exp => (
+        {experimentNames.map((exp) => (
           <EuiFlexItem key={`${exp}--mappingConfig`}>
             <EuiTitle size="xxs">
               <EuiTextColor color="secondary">
@@ -62,7 +62,7 @@ export const TreatmentMappingConfigSection = ({
               </EuiTextColor>
             </EuiTitle>
             <TreatmentMappingConfigTable
-              items={mappings.filter(mapObj => mapObj.experiment === exp)}
+              items={mappings.filter((mapObj) => mapObj.experiment === exp)}
             />
           </EuiFlexItem>
         ))}

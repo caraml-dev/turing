@@ -10,7 +10,6 @@ import {
 import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
-import { EnsemblersContextContextProvider } from "../../providers/ensemblers/context";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { appConfig } from "../../config";
 import { parse, stringify } from "query-string";
@@ -88,19 +87,17 @@ export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
-          <EnsemblersContextContextProvider projectId={projectId}>
-            <ListEnsemblingJobsTable
-              {...results}
-              isLoaded={isLoaded}
-              error={error}
-              page={page}
-              filter={filter}
-              onQueryChange={onQueryChange}
-              onPaginationChange={setPage}
-              onRowClick={onRowClick}
-              {...props}
-            />
-          </EnsemblersContextContextProvider>
+          <ListEnsemblingJobsTable
+            {...results}
+            isLoaded={isLoaded}
+            error={error}
+            page={page}
+            filter={filter}
+            onQueryChange={onQueryChange}
+            onPaginationChange={setPage}
+            onRowClick={onRowClick}
+            {...props}
+          />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

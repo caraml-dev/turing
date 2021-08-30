@@ -1,4 +1,4 @@
-export const getBigQueryConsoleUrl = table => {
+export const getBigQueryConsoleUrl = (table) => {
   if (table) {
     const parts = table.split(".");
     if (parts.length === 3) {
@@ -7,4 +7,9 @@ export const getBigQueryConsoleUrl = table => {
     }
   }
   return undefined;
+};
+
+export const getGCSDashboardUrl = (gcsBucketUri) => {
+  const uri = gcsBucketUri.replace("gs://", "");
+  return `https://console.cloud.google.com/storage/browser/${uri}/?authuser=1`;
 };

@@ -3,9 +3,9 @@ import {
   EuiPanel,
   EuiTextAlign,
   EuiLoadingChart,
-  EuiCallOut
+  EuiCallOut,
 } from "@elastic/eui";
-import { ConfigSection } from "../components/configuration/components/section";
+import { ConfigSection } from "../../components/config_section";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { Status } from "../../services/status/Status";
@@ -19,11 +19,11 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
     {
       data: { events },
       isLoaded,
-      error
+      error,
     },
     startPollingEvents,
     stopPollingEvents,
-    fetchEventsOnce
+    fetchEventsOnce,
   ] = usePollingTuringApi(
     `/projects/${projectId}/routers/${routerId}/events`,
     {},
@@ -32,9 +32,10 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
   );
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
-  const routerStatus = useMemo(() => Status.fromValue(router.status), [
-    router.status
-  ]);
+  const routerStatus = useMemo(
+    () => Status.fromValue(router.status),
+    [router.status]
+  );
 
   useEffect(() => {
     fetchEventsOnce();
