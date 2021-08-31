@@ -114,9 +114,11 @@ func (s *ensemblingJobService) FindByID(
 
 	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
 	if project != nil {
-		if err := s.populateMonitoringURL(&ensemblingJob, project); err != nil {
+		url, err := s.generateMonitoringURL(&ensemblingJob, project)
+		if err != nil {
 			return nil, err
 		}
+		ensemblingJob.MonitoringURL = url
 	}
 
 	return &ensemblingJob, nil
@@ -169,9 +171,11 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions, project *m
 	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
 	if project != nil {
 		for _, r := range results {
-			if err := s.populateMonitoringURL(r, project); err != nil {
+			url, err := s.generateMonitoringURL(r, project)
+			if err != nil {
 				return nil, err
 			}
+			r.MonitoringURL = url
 		}
 	}
 
@@ -204,7 +208,7 @@ type EnsemblingMonitoringVariables struct {
 	Job string
 }
 
-func (s *ensemblingJobService) populateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) error {
+func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) (string, error) {
 	name := job.Name
 	if len(name) > jobNameMaxLength {
 		name = name[:jobNameMaxLength]
@@ -218,11 +222,10 @@ func (s *ensemblingJobService) populateMonitoringURL(job *models.EnsemblingJob, 
 	var b bytes.Buffer
 	err := s.dashboardURLTemplate.Execute(&b, values)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	job.MonitoringURL = b.String()
-	return nil
+	return b.String(), nil
 }
 
 // CreateEnsemblingJob creates an ensembling job.
@@ -243,9 +246,11 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
 
-	if err := s.populateMonitoringURL(job, project); err != nil {
+	url, err := s.generateMonitoringURL(job, project)
+	if err != nil {
 		return nil, err
 	}
+	job.MonitoringURL = url
 
 	s.mergeDefaultConfigurations(job)
 
