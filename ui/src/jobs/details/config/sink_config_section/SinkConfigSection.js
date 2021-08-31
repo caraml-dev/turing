@@ -3,6 +3,7 @@ import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ConfigSectionPanel } from "../../../../components/config_section";
 import { BigQuerySinkConfigTable } from "./bq_config_section/BigQuerySinkConfigTable";
 import { SinkConfigTable } from "./sink_config_table/SinkConfigTable";
+import { SinkType } from "../../../../services/job/SinkType";
 
 export const SinkConfigSection = ({
   job: {
@@ -19,13 +20,16 @@ export const SinkConfigSection = ({
         </ConfigSectionPanel>
       </EuiFlexItem>
 
-      {sink.type === "BQ" && (
-        <EuiFlexItem grow={3}>
-          <ConfigSectionPanel title="BigQuery Configuration">
-            <BigQuerySinkConfigTable bqConfig={sink.bq_config} />
-          </ConfigSectionPanel>
-        </EuiFlexItem>
-      )}
+      {
+        /* eslint-disable-next-line eqeqeq */
+        sink.type == SinkType.BQ && (
+          <EuiFlexItem grow={3}>
+            <ConfigSectionPanel title="BigQuery Configuration">
+              <BigQuerySinkConfigTable bqConfig={sink.bq_config} />
+            </ConfigSectionPanel>
+          </EuiFlexItem>
+        )
+      }
     </EuiFlexGroup>
   );
 };

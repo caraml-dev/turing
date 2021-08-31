@@ -14,7 +14,7 @@ import {
 import { appConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
-import { JobStatus } from "../../services/job_status/JobStatus";
+import { JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
 
 const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;

@@ -1,6 +1,7 @@
 import React from "react";
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
+import { EuiDescriptionList } from "@elastic/eui";
 import { SinkType } from "../../../../../services/job/SinkType";
+import { CollapsibleBadgeGroup } from "../../../../../components/collapsible_badge_group/CollapsibleBadgeGroup";
 
 export const SinkConfigTable = ({ sink, ensembler }) => {
   const items = [
@@ -22,14 +23,11 @@ export const SinkConfigTable = ({ sink, ensembler }) => {
     {
       title: "Persisted Columns",
       description: (
-        <EuiFlexGroup direction="column" gutterSize="xxs">
-          {sink.columns.map((item, idx) => (
-            <EuiFlexItem key={idx}>
-              {item}
-              {idx + 1 < sink.columns.length && ","}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <CollapsibleBadgeGroup
+          className="euiBadgeGroup---insideDescriptionList"
+          items={sink.columns}
+          minItemsCount={5}
+        />
       ),
     },
     {

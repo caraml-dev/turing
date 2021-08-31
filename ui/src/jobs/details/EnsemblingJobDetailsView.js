@@ -14,14 +14,14 @@ import {
 import React, { Fragment } from "react";
 import { PageTitle } from "../../components/page/PageTitle";
 import { StatusBadge } from "../../components/status_badge/StatusBadge";
-import { JobStatus } from "../../services/job_status/JobStatus";
+import { JobStatus } from "../../services/job/JobStatus";
 import { Redirect, Router } from "@reach/router";
 import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
 
 export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
-  const [{ data: jobDetails, isLoaded, error }, fetchJobDetails] = useTuringApi(
+  const [{ data: jobDetails, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/jobs/${jobId}`,
     {},
     { config: {} }
