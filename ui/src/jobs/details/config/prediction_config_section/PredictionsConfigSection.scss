@@ -1,0 +1,18 @@
+@import "~@elastic/eui/src/global_styling/variables/colors";
+
+.predictionSources {
+  .euiStepNumber--small {
+    background-color: $euiColorSecondary;
+  }
+
+  .euiStep__content {
+    margin-left: 16px;
+    padding: 0 0 16px 16px;
+  }
+
+  .euiStep:last-child {
+    .euiStep__content {
+      padding-bottom: 0;
+    }
+  }
+}
