@@ -21,8 +21,8 @@ export const EnsemblingJobDetailsPageNavigation = ({ job, ...props }) => {
           <EuiIcon className="eui-alignBaseline" type="popout" size="s" />
         </span>
       ),
-      href: "blank",
-      disabled: true,
+      href: job.monitoring_url,
+      disabled: !job.monitoring_url,
     },
   ];
 

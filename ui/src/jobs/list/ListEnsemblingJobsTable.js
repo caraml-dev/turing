@@ -57,7 +57,7 @@ export const ListEnsemblingJobsTable = ({
     {
       field: "id",
       name: "Id",
-      width: "72px",
+      width: "96px",
       render: (id, item) => (
         <EuiText size={defaultTextSize}>
           {id}
@@ -73,7 +73,7 @@ export const ListEnsemblingJobsTable = ({
     {
       field: "name",
       name: "Name",
-      width: "30%",
+      truncateText: true,
       render: (name) => (
         <span className="eui-textTruncate" title={name}>
           {name}
@@ -83,7 +83,6 @@ export const ListEnsemblingJobsTable = ({
     {
       field: "ensembler_id",
       name: "Ensembler",
-      width: "20%",
       render: (id) =>
         !!ensemblers[id] ? (
           <EuiLink
@@ -101,7 +100,7 @@ export const ListEnsemblingJobsTable = ({
     {
       field: "status",
       name: "Status",
-      width: "20%",
+      width: "120px",
       render: (status) => (
         <DeploymentStatusHealth status={JobStatus.fromValue(status)} />
       ),
@@ -110,7 +109,6 @@ export const ListEnsemblingJobsTable = ({
       field: "created_at",
       name: "Created",
       sortable: true,
-      width: "20%",
       render: (date) => (
         <EuiToolTip
           position="top"
@@ -124,7 +122,6 @@ export const ListEnsemblingJobsTable = ({
     {
       field: "updated_at",
       name: "Updated",
-      width: "20%",
       render: (date) => (
         <EuiToolTip
           position="top"
@@ -134,6 +131,22 @@ export const ListEnsemblingJobsTable = ({
           </EuiText>
         </EuiToolTip>
       ),
+    },
+    {
+      name: "Actions",
+      actions: [
+        {
+          name: "Monitoring",
+          description: "Open Monitoring Dashboard",
+          icon: "visLine",
+          type: "icon",
+          isPrimary: true,
+          onClick: ({ monitoring_url }) => {
+            window.open(monitoring_url, "_blank");
+          },
+          enabled: ({ monitoring_url }) => !!monitoring_url,
+        },
+      ],
     },
   ];
 
@@ -199,6 +212,9 @@ export const ListEnsemblingJobsTable = ({
         cellProps={cellProps}
         pagination={pagination}
         onChange={onTableChange}
+        hasActions={true}
+        responsive={true}
+        tableLayout="auto"
       />
     </Fragment>
   );

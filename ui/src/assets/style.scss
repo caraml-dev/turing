@@ -11,3 +11,9 @@
 .euiBody--collapsibleNavIsDocked {
   padding-left: 262px !important;
 }
+
+// to overwrite this from @gojek/mlp-ui
+.euiTableCellContent .cell-first-column,
+.euiTableCellContent svg {
+  margin-right: 0 !important;
+}
