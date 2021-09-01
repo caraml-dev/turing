@@ -48,12 +48,11 @@ type EnsemblingJobService interface {
 	FindByID(
 		id models.ID,
 		options EnsemblingJobFindByIDOptions,
-		project *mlp.Project,
 	) (*models.EnsemblingJob, error)
-	List(options EnsemblingJobListOptions, project *mlp.Project) (*PaginatedResults, error)
+	List(options EnsemblingJobListOptions) (*PaginatedResults, error)
 	CreateEnsemblingJob(
 		job *models.EnsemblingJob,
-		project *mlp.Project,
+		projectID models.ID,
 		ensembler *models.PyFuncEnsembler,
 	) (*models.EnsemblingJob, error)
 	MarkEnsemblingJobForTermination(ensemblingJob *models.EnsemblingJob) error
@@ -65,6 +64,7 @@ func NewEnsemblingJobService(
 	defaultEnvironment string,
 	defaultConfig config.DefaultEnsemblingJobConfigurations,
 	dashboardURLTemplate string,
+	mlpService MLPService,
 ) EnsemblingJobService {
 	t, err := template.New("dashboardTemplate").Parse(dashboardURLTemplate)
 	if err != nil {
@@ -75,6 +75,7 @@ func NewEnsemblingJobService(
 		defaultEnvironment:   defaultEnvironment,
 		defaultConfig:        defaultConfig,
 		dashboardURLTemplate: t,
+		mlpService:           mlpService,
 	}
 }
 
@@ -83,6 +84,7 @@ type ensemblingJobService struct {
 	defaultEnvironment   string
 	defaultConfig        config.DefaultEnsemblingJobConfigurations
 	dashboardURLTemplate *template.Template
+	mlpService           MLPService
 }
 
 // Save the given router to the db. Updates the existing record if already exists
@@ -97,7 +99,6 @@ func (s *ensemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) error
 func (s *ensemblingJobService) FindByID(
 	id models.ID,
 	options EnsemblingJobFindByIDOptions,
-	project *mlp.Project,
 ) (*models.EnsemblingJob, error) {
 	query := s.db.Where("id = ?", id)
 
@@ -112,8 +113,12 @@ func (s *ensemblingJobService) FindByID(
 		return nil, err
 	}
 
-	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
-	if project != nil {
+	if options.ProjectID != nil {
+		project, err := s.mlpService.GetProject(*options.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+
 		url, err := s.generateMonitoringURL(&ensemblingJob, project)
 		if err != nil {
 			return nil, err
@@ -124,7 +129,7 @@ func (s *ensemblingJobService) FindByID(
 	return &ensemblingJob, nil
 }
 
-func (s *ensemblingJobService) List(options EnsemblingJobListOptions, project *mlp.Project) (*PaginatedResults, error) {
+func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*PaginatedResults, error) {
 	var results []*models.EnsemblingJob
 	var count int
 	done := make(chan bool, 1)
@@ -168,9 +173,13 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions, project *m
 		return nil, err
 	}
 
-	// Here we don't bother filling in the dashboard if the it's just meant for batch processing
-	if project != nil {
+	if options.ProjectID != nil {
 		for _, r := range results {
+			project, err := s.mlpService.GetProject(*options.ProjectID)
+			if err != nil {
+				return nil, err
+			}
+
 			url, err := s.generateMonitoringURL(r, project)
 			if err != nil {
 				return nil, err
@@ -231,10 +240,10 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 // CreateEnsemblingJob creates an ensembling job.
 func (s *ensemblingJobService) CreateEnsemblingJob(
 	job *models.EnsemblingJob,
-	project *mlp.Project,
+	projectID models.ID,
 	ensembler *models.PyFuncEnsembler,
 ) (*models.EnsemblingJob, error) {
-	job.ProjectID = models.ID(project.Id)
+	job.ProjectID = projectID
 	job.EnvironmentName = s.defaultEnvironment
 
 	// Populate name if the user does not define a name for the job
@@ -245,6 +254,11 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = ensembler.Name
+
+	project, err := s.mlpService.GetProject(projectID)
+	if err != nil {
+		return nil, err
+	}
 
 	url, err := s.generateMonitoringURL(job, project)
 	if err != nil {
@@ -264,7 +278,22 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 
 func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.EnsemblingJob) error {
 	job.Status = models.JobTerminating
-	return s.Save(job)
+	if err := s.Save(job); err != nil {
+		return err
+	}
+
+	project, err := s.mlpService.GetProject(job.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	url, err := s.generateMonitoringURL(job, project)
+	if err != nil {
+		return err
+	}
+	job.MonitoringURL = url
+
+	return nil
 }
 
 func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {

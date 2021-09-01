@@ -385,7 +385,6 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	tests := map[string]struct {
 		params               RequestVars
 		ensemblingJobService func() service.EnsemblingJobService
-		mlpService           func() service.MLPService
 		expectedResponseCode int
 		expectedBody         *Response
 	}{
@@ -396,19 +395,11 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(generateEnsemblingJobFixture(
@@ -426,19 +417,11 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					nil,
 					errors.New("hello"),
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 404,
 			expectedBody:         nil,
@@ -451,14 +434,6 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 				svc := &mocks.EnsemblingJobService{}
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 			expectedResponseCode: 400,
 			expectedBody:         nil,
 		},
@@ -470,14 +445,6 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 				svc := &mocks.EnsemblingJobService{}
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 			expectedResponseCode: 400,
 			expectedBody:         nil,
 		},
@@ -487,14 +454,6 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 				svc := &mocks.EnsemblingJobService{}
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 			expectedResponseCode: 400,
 			expectedBody:         nil,
 		},
@@ -502,13 +461,11 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			mlpSvc := tt.mlpService()
 			validator, _ := validation.NewValidator(nil)
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
-						MLPService:           mlpSvc,
 					},
 					validator,
 				),
@@ -526,7 +483,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 	tests := map[string]struct {
 		params               RequestVars
 		ensemblingJobService func() service.EnsemblingJobService
-		mlpService           func() service.MLPService
 		expectedResponseCode int
 		expectedBody         *Response
 	}{
@@ -536,7 +492,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -550,14 +506,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -580,7 +528,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -594,14 +542,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -624,7 +564,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -638,14 +578,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -669,7 +601,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -683,14 +615,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -712,7 +636,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{},
 						Paging: service.Paging{
@@ -724,14 +648,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -752,7 +668,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{},
 						Paging: service.Paging{
@@ -764,14 +680,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			expectedResponseCode: 200,
 			expectedBody: Ok(
@@ -791,14 +699,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc := &mocks.EnsemblingJobService{}
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 			expectedResponseCode: 400,
 			expectedBody:         nil,
 		},
@@ -806,13 +706,11 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			mlpSvc := tt.mlpService()
 			validator, _ := validation.NewValidator(nil)
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
-						MLPService:           mlpSvc,
 					},
 					validator,
 				),
@@ -829,7 +727,6 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 	var tests = map[string]struct {
 		ensemblingJobService func() service.EnsemblingJobService
-		mlpService           func() service.MLPService
 		params               RequestVars
 		expectedResponseCode int
 		expectedBody         *Response
@@ -837,7 +734,7 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 		"success | job deleted": {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
@@ -846,14 +743,6 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 					mock.Anything,
 				).Return(nil)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			params: RequestVars{
 				"job_id":     {"1"},
@@ -865,19 +754,11 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 		"failure | job not found": {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					nil,
 					fmt.Errorf("hello"),
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			params: RequestVars{
 				"job_id":     {"1"},
@@ -889,7 +770,7 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 		"failure | internal server error": {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
@@ -898,14 +779,6 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 					mock.Anything,
 				).Return(fmt.Errorf("hello"))
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 			params: RequestVars{
 				"job_id":     {"1"},
@@ -918,13 +791,11 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			mlpSvc := tt.mlpService()
 			validator, _ := validation.NewValidator(nil)
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
-						MLPService:           mlpSvc,
 					},
 					validator,
 				),

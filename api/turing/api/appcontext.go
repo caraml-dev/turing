@@ -98,6 +98,7 @@ func NewAppContext(
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 		cfg.BatchEnsemblingConfig.MonitoringURLTemplate,
+		mlpSvc,
 	)
 
 	// Initialise Batch components

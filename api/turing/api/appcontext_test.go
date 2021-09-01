@@ -279,6 +279,7 @@ func TestNewAppContext(t *testing.T) {
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 		testCfg.BatchEnsemblingConfig.MonitoringURLTemplate,
+		mlpService,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,

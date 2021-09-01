@@ -50,7 +50,7 @@ func (c EnsemblingJobController) Create(
 		return BadRequest("only pyfunc ensemblers allowed", fmt.Sprintf("ensembler type given: %T", v))
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, project, pyFuncEnsembler)
+	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, projectID, pyFuncEnsembler)
 	if err != nil {
 		return InternalServerError("could not create job request", err.Error())
 	}
@@ -64,12 +64,6 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	var errResp *Response
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
 	options := &GetEnsemblingJobOptions{}
 
 	if err := c.ParseVars(options, vars); err != nil {
@@ -84,7 +78,6 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
 		},
-		project,
 	)
 
 	if err != nil {
@@ -100,12 +93,6 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	var errResp *Response
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
 	options := service.EnsemblingJobListOptions{}
 	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest(
@@ -114,7 +101,7 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 		)
 	}
 
-	results, err := c.EnsemblingJobService.List(options, project)
+	results, err := c.EnsemblingJobService.List(options)
 	if err != nil {
 		return InternalServerError("unable to list ensemblers", err.Error())
 	}
@@ -132,12 +119,6 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	var errResp *Response
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
 	options := &GetEnsemblingJobOptions{}
 	if err := c.ParseVars(options, vars); err != nil {
 		return BadRequest(
@@ -151,7 +132,6 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
 		},
-		project,
 	)
 	if err != nil {
 		return NotFound("ensembling job not found", err.Error())

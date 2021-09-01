@@ -162,7 +162,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: RequestVars{
@@ -192,7 +192,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: RequestVars{
@@ -226,7 +226,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: RequestVars{
@@ -289,8 +289,8 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			expected := httptest.NewRecorder()
 			tt.expected.WriteTo(expected)
 
-			assert.Equal(t, expected.Body.String(), actual.Body.String())
 			assert.Equal(t, expected.Code, actual.Code)
+			assert.Equal(t, expected.Body.String(), actual.Body.String())
 		})
 	}
 }
@@ -300,7 +300,6 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		method               string
 		path                 string
 		expected             *Response
-		mlpService           func() service.MLPService
 		ensemblingJobService func() service.EnsemblingJobService
 	}{
 		"success | nominal": {
@@ -315,19 +314,11 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			)),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 		},
 		"failure | not found": {
@@ -336,30 +327,20 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			expected: NotFound("ensembling job not found", errors.New("no exist").Error()),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					nil,
 					errors.New("no exist"),
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			mlpService := tt.mlpService()
 			router := NewRouter(
 				&AppContext{
 					EnsemblingJobService: svc,
-					MLPService:           mlpService,
 				},
 			)
 			actual := httptest.NewRecorder()
@@ -384,7 +365,6 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		method               string
 		path                 string
 		expected             *Response
-		mlpService           func() service.MLPService
 		ensemblingJobService func() service.EnsemblingJobService
 	}{
 		"success | nominal": {
@@ -418,14 +398,6 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 					nil,
 				)
 				return svc
-			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
 			},
 		},
 		"success | nominal with single status": {
@@ -460,14 +432,6 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				)
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 		},
 		"success | nominal with multiple statuses": {
 			method: http.MethodGet,
@@ -501,14 +465,6 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				)
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 		},
 		"success | no result": {
 			method: http.MethodGet,
@@ -538,24 +494,14 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				)
 				return svc
 			},
-			mlpService: func() service.MLPService {
-				mlpService := &mocks.MLPService{}
-				mlpService.On(
-					"GetProject",
-					models.ID(1),
-				).Return(&mlp.Project{Id: 1}, nil)
-				return mlpService
-			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			mlpService := tt.mlpService()
 			router := NewRouter(
 				&AppContext{
 					EnsemblingJobService: svc,
-					MLPService:           mlpService,
 				},
 			)
 			actual := httptest.NewRecorder()

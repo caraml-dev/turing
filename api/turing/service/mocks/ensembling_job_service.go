@@ -3,10 +3,8 @@
 package mocks
 
 import (
-	client "github.com/gojek/mlp/api/client"
-	mock "github.com/stretchr/testify/mock"
-
 	models "github.com/gojek/turing/api/turing/models"
+	mock "github.com/stretchr/testify/mock"
 
 	service "github.com/gojek/turing/api/turing/service"
 )
@@ -16,13 +14,13 @@ type EnsemblingJobService struct {
 	mock.Mock
 }
 
-// CreateEnsemblingJob provides a mock function with given fields: job, project, ensembler
-func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, project *client.Project, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
-	ret := _m.Called(job, project, ensembler)
+// CreateEnsemblingJob provides a mock function with given fields: job, projectID, ensembler
+func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, projectID models.ID, ensembler *models.PyFuncEnsembler) (*models.EnsemblingJob, error) {
+	ret := _m.Called(job, projectID, ensembler)
 
 	var r0 *models.EnsemblingJob
-	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, *client.Project, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
-		r0 = rf(job, project, ensembler)
+	if rf, ok := ret.Get(0).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) *models.EnsemblingJob); ok {
+		r0 = rf(job, projectID, ensembler)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EnsemblingJob)
@@ -30,8 +28,8 @@ func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, p
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, *client.Project, *models.PyFuncEnsembler) error); ok {
-		r1 = rf(job, project, ensembler)
+	if rf, ok := ret.Get(1).(func(*models.EnsemblingJob, models.ID, *models.PyFuncEnsembler) error); ok {
+		r1 = rf(job, projectID, ensembler)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -53,13 +51,13 @@ func (_m *EnsemblingJobService) Delete(ensemblingJob *models.EnsemblingJob) erro
 	return r0
 }
 
-// FindByID provides a mock function with given fields: id, options, project
-func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions, project *client.Project) (*models.EnsemblingJob, error) {
-	ret := _m.Called(id, options, project)
+// FindByID provides a mock function with given fields: id, options
+func (_m *EnsemblingJobService) FindByID(id models.ID, options service.EnsemblingJobFindByIDOptions) (*models.EnsemblingJob, error) {
+	ret := _m.Called(id, options)
 
 	var r0 *models.EnsemblingJob
-	if rf, ok := ret.Get(0).(func(models.ID, service.EnsemblingJobFindByIDOptions, *client.Project) *models.EnsemblingJob); ok {
-		r0 = rf(id, options, project)
+	if rf, ok := ret.Get(0).(func(models.ID, service.EnsemblingJobFindByIDOptions) *models.EnsemblingJob); ok {
+		r0 = rf(id, options)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EnsemblingJob)
@@ -67,8 +65,8 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblingJobFindByIDOptions, *client.Project) error); ok {
-		r1 = rf(id, options, project)
+	if rf, ok := ret.Get(1).(func(models.ID, service.EnsemblingJobFindByIDOptions) error); ok {
+		r1 = rf(id, options)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -76,13 +74,13 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	return r0, r1
 }
 
-// List provides a mock function with given fields: options, project
-func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions, project *client.Project) (*service.PaginatedResults, error) {
-	ret := _m.Called(options, project)
+// List provides a mock function with given fields: options
+func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions) (*service.PaginatedResults, error) {
+	ret := _m.Called(options)
 
 	var r0 *service.PaginatedResults
-	if rf, ok := ret.Get(0).(func(service.EnsemblingJobListOptions, *client.Project) *service.PaginatedResults); ok {
-		r0 = rf(options, project)
+	if rf, ok := ret.Get(0).(func(service.EnsemblingJobListOptions) *service.PaginatedResults); ok {
+		r0 = rf(options)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*service.PaginatedResults)
@@ -90,8 +88,8 @@ func (_m *EnsemblingJobService) List(options service.EnsemblingJobListOptions, p
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(service.EnsemblingJobListOptions, *client.Project) error); ok {
-		r1 = rf(options, project)
+	if rf, ok := ret.Get(1).(func(service.EnsemblingJobListOptions) error); ok {
+		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
 	}
