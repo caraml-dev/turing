@@ -56,7 +56,6 @@ func TestRun(t *testing.T) {
 				svc.On(
 					"List",
 					mock.Anything,
-					mock.Anything,
 				).Return(&service.PaginatedResults{
 					Results: []*models.EnsemblingJob{generateEnsemblingJobFixture()},
 					Paging: service.Paging{
@@ -76,7 +75,6 @@ func TestRun(t *testing.T) {
 				svc.On(
 					"List",
 					mock.Anything,
-					mock.Anything,
 				).Return(&service.PaginatedResults{
 					Results: []*models.EnsemblingJob{newFixture},
 					Paging: service.Paging{
@@ -86,7 +84,7 @@ func TestRun(t *testing.T) {
 					},
 				}, nil)
 
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					&models.EnsemblingJob{},
 					nil,
 				)
@@ -133,7 +131,6 @@ func TestRun(t *testing.T) {
 				svc.On(
 					"List",
 					mock.Anything,
-					mock.Anything,
 				).Return(&service.PaginatedResults{
 					Results: []*models.EnsemblingJob{generateEnsemblingJobFixture()},
 					Paging: service.Paging{
@@ -153,7 +150,6 @@ func TestRun(t *testing.T) {
 				svc.On(
 					"List",
 					mock.Anything,
-					mock.Anything,
 				).Return(&service.PaginatedResults{
 					Results: []*models.EnsemblingJob{newFixture},
 					Paging: service.Paging{
@@ -163,7 +159,7 @@ func TestRun(t *testing.T) {
 					},
 				}, nil)
 
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					&models.EnsemblingJob{},
 					nil,
 				)
@@ -204,7 +200,6 @@ func TestRun(t *testing.T) {
 				svc.On(
 					"List",
 					mock.Anything,
-					mock.Anything,
 				).Return(&service.PaginatedResults{
 					Results: []*models.EnsemblingJob{},
 					Paging: service.Paging{
@@ -219,7 +214,7 @@ func TestRun(t *testing.T) {
 					mock.Anything,
 				).Return(nil)
 
-				svc.On("FindByID", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("FindByID", mock.Anything, mock.Anything).Return(
 					&models.EnsemblingJob{},
 					nil,
 				)

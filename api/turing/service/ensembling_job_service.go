@@ -113,18 +113,16 @@ func (s *ensemblingJobService) FindByID(
 		return nil, err
 	}
 
-	if options.ProjectID != nil {
-		project, err := s.mlpService.GetProject(*options.ProjectID)
-		if err != nil {
-			return nil, err
-		}
-
-		url, err := s.generateMonitoringURL(&ensemblingJob, project)
-		if err != nil {
-			return nil, err
-		}
-		ensemblingJob.MonitoringURL = url
+	project, err := s.mlpService.GetProject(ensemblingJob.ProjectID)
+	if err != nil {
+		return nil, err
 	}
+
+	url, err := s.generateMonitoringURL(&ensemblingJob, project)
+	if err != nil {
+		return nil, err
+	}
+	ensemblingJob.MonitoringURL = url
 
 	return &ensemblingJob, nil
 }
@@ -173,19 +171,17 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		return nil, err
 	}
 
-	if options.ProjectID != nil {
-		for _, r := range results {
-			project, err := s.mlpService.GetProject(*options.ProjectID)
-			if err != nil {
-				return nil, err
-			}
-
-			url, err := s.generateMonitoringURL(r, project)
-			if err != nil {
-				return nil, err
-			}
-			r.MonitoringURL = url
+	for _, r := range results {
+		project, err := s.mlpService.GetProject(r.ProjectID)
+		if err != nil {
+			return nil, err
 		}
+
+		url, err := s.generateMonitoringURL(r, project)
+		if err != nil {
+			return nil, err
+		}
+		r.MonitoringURL = url
 	}
 
 	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
@@ -260,18 +256,18 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 		return nil, err
 	}
 
-	url, err := s.generateMonitoringURL(job, project)
-	if err != nil {
-		return nil, err
-	}
-	job.MonitoringURL = url
-
 	s.mergeDefaultConfigurations(job)
 
 	// Save ensembling job
 	if err := s.Save(job); err != nil {
 		return nil, err
 	}
+
+	url, err := s.generateMonitoringURL(job, project)
+	if err != nil {
+		return nil, err
+	}
+	job.MonitoringURL = url
 
 	return job, nil
 }
