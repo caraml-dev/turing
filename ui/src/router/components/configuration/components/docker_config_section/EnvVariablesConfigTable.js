@@ -8,22 +8,20 @@ export const EnvVariablesConfigTable = ({ variables }) => {
     description: v.value,
   }));
 
-  return (
+  return variables.length ? (
     <ExpandableContainer maxCollapsedHeight={300}>
-      {variables.length ? (
-        <EuiDescriptionList
-          compressed
-          textStyle="reverse"
-          type="responsiveColumn"
-          listItems={items}
-          titleProps={{ style: { width: "30%" } }}
-          descriptionProps={{ style: { width: "70%" } }}
-        />
-      ) : (
-        <EuiText size="s" color="subdued">
-          None
-        </EuiText>
-      )}
+      <EuiDescriptionList
+        compressed
+        textStyle="reverse"
+        type="responsiveColumn"
+        listItems={items}
+        titleProps={{ style: { width: "30%" } }}
+        descriptionProps={{ style: { width: "70%" } }}
+      />
     </ExpandableContainer>
+  ) : (
+    <EuiText size="s" color="subdued">
+      None
+    </EuiText>
   );
 };

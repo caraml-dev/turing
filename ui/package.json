@@ -24,6 +24,7 @@
     "react-scroll-to-bottom": "^4.0.0",
     "react-spinners": "^0.9.0",
     "react-sticky": "^6.0.3",
+    "react-use-dimensions": "^1.2.1",
     "resize-observer-polyfill": "^1.5.1",
     "ts-dedent": "^2.2.0",
     "yup": "^0.29.1"
