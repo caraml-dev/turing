@@ -3,13 +3,13 @@ import { EuiDescriptionList, EuiText } from "@elastic/eui";
 import { ExpandableContainer } from "../../../../../components/expandable_container/ExpandableContainer";
 
 export const EnvVariablesConfigTable = ({ variables }) => {
-  const items = variables.map(v => ({
+  const items = variables.map((v) => ({
     title: v.name,
-    description: v.value
+    description: v.value,
   }));
 
   return (
-    <ExpandableContainer maxHeight={300}>
+    <ExpandableContainer maxCollapsedHeight={300}>
       {variables.length ? (
         <EuiDescriptionList
           compressed
