@@ -3,8 +3,10 @@
 package mocks
 
 import (
-	models "github.com/gojek/turing/api/turing/models"
+	client "github.com/gojek/mlp/api/client"
 	mock "github.com/stretchr/testify/mock"
+
+	models "github.com/gojek/turing/api/turing/models"
 
 	service "github.com/gojek/turing/api/turing/service"
 )
@@ -35,6 +37,22 @@ func (_m *EnsemblingJobService) CreateEnsemblingJob(job *models.EnsemblingJob, p
 	}
 
 	return r0, r1
+}
+
+// CreatePodLabelSelector provides a mock function with given fields: ensemblerName, componentType
+func (_m *EnsemblingJobService) CreatePodLabelSelector(ensemblerName string, componentType string) []service.LabelSelector {
+	ret := _m.Called(ensemblerName, componentType)
+
+	var r0 []service.LabelSelector
+	if rf, ok := ret.Get(0).(func(string, string) []service.LabelSelector); ok {
+		r0 = rf(ensemblerName, componentType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]service.LabelSelector)
+		}
+	}
+
+	return r0
 }
 
 // Delete provides a mock function with given fields: ensemblingJob
@@ -72,6 +90,55 @@ func (_m *EnsemblingJobService) FindByID(id models.ID, options service.Ensemblin
 	}
 
 	return r0, r1
+}
+
+// FormatLoggingURL provides a mock function with given fields: ensemblerName, namespace, componentType
+func (_m *EnsemblingJobService) FormatLoggingURL(ensemblerName string, namespace string, componentType string) (string, error) {
+	ret := _m.Called(ensemblerName, namespace, componentType)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string, string) string); ok {
+		r0 = rf(ensemblerName, namespace, componentType)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
+		r1 = rf(ensemblerName, namespace, componentType)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDefaultEnvironment provides a mock function with given fields:
+func (_m *EnsemblingJobService) GetDefaultEnvironment() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// GetNamespaceByComponent provides a mock function with given fields: componentType, project
+func (_m *EnsemblingJobService) GetNamespaceByComponent(componentType string, project *client.Project) string {
+	ret := _m.Called(componentType, project)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, *client.Project) string); ok {
+		r0 = rf(componentType, project)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
 }
 
 // List provides a mock function with given fields: options

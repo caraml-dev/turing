@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/gojek/turing/api/turing/batch"
+	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/validation"
 	"github.com/stretchr/testify/mock"
@@ -20,11 +22,23 @@ import (
 )
 
 func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
-	ensemblingPodLogs := &service.EnsemblingPodLogs{
-		Environment: "dev",
-		Namespace:   "foo",
-		LoggingURL:  "https://www.example.com/hello/world",
-		Logs: []*service.EnsemblingPodLog{
+	namespace := "foo"
+	environment := "dev"
+	loggingURL := "https://www.example.com/hello/world"
+	podLogsLegacyFormat := []*service.PodLog{
+		{
+			Environment: environment,
+			Namespace:   namespace,
+			Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+			PodName:     "bar",
+			TextPayload: "[INFO] Taking snapshot of full filesystem...",
+		},
+	}
+	ensemblingPodLogs := &service.PodLogsV2{
+		Environment: environment,
+		Namespace:   namespace,
+		LoggingURL:  loggingURL,
+		Logs: []*service.PodLogV2{
 			{
 				Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
 				PodName:     "bar",
@@ -55,21 +69,16 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				s := &mocks.EnsemblingJobService{}
-				s.On("FindByID", mock.Anything, mock.Anything).Return(
-					ensemblingJob,
-					nil,
-				)
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
+				s.On("FormatLoggingURL", mock.Anything, mock.Anything, mock.Anything).Return(loggingURL, nil)
 				return s
 			},
 			podLogService: func() service.PodLogService {
 				s := &mocks.PodLogService{}
-				s.On(
-					"ListEnsemblingJobPodLogs",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(ensemblingPodLogs, nil)
+				s.On("ListPodLogs", mock.Anything).Return(podLogsLegacyFormat, nil)
 				return s
 			},
 			componentType: "",
@@ -93,21 +102,16 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				s := &mocks.EnsemblingJobService{}
-				s.On("FindByID", mock.Anything, mock.Anything).Return(
-					ensemblingJob,
-					nil,
-				)
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
+				s.On("FormatLoggingURL", mock.Anything, mock.Anything, mock.Anything).Return(loggingURL, nil)
 				return s
 			},
 			podLogService: func() service.PodLogService {
 				s := &mocks.PodLogService{}
-				s.On(
-					"ListEnsemblingJobPodLogs",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(ensemblingPodLogs, nil)
+				s.On("ListPodLogs", mock.Anything).Return(podLogsLegacyFormat, nil)
 				return s
 			},
 			componentType: "",
@@ -130,22 +134,15 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				s := &mocks.EnsemblingJobService{}
-				s.On("FindByID", mock.Anything, mock.Anything).Return(
-					ensemblingJob,
-					nil,
-				)
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
+				s.On("FormatLoggingURL", mock.Anything, mock.Anything, mock.Anything).Return(loggingURL, nil)
 				return s
 			},
 			podLogService: func() service.PodLogService {
-				s := &mocks.PodLogService{}
-				s.On(
-					"ListEnsemblingJobPodLogs",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(ensemblingPodLogs, nil)
-				return s
+				return &mocks.PodLogService{}
 			},
 			componentType: "",
 			vars: RequestVars{
@@ -173,22 +170,11 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				s := &mocks.EnsemblingJobService{}
-				s.On("FindByID", mock.Anything, mock.Anything).Return(
-					nil,
-					fmt.Errorf("not found"),
-				)
+				s.On("FindByID", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("not found"))
 				return s
 			},
 			podLogService: func() service.PodLogService {
-				s := &mocks.PodLogService{}
-				s.On(
-					"ListEnsemblingJobPodLogs",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(ensemblingPodLogs, nil)
-				return s
+				return &mocks.PodLogService{}
 			},
 			componentType: "",
 			vars: RequestVars{
@@ -210,21 +196,15 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
 				s := &mocks.EnsemblingJobService{}
-				s.On("FindByID", mock.Anything, mock.Anything).Return(
-					ensemblingJob,
-					nil,
-				)
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
 				return s
 			},
 			podLogService: func() service.PodLogService {
 				s := &mocks.PodLogService{}
-				s.On(
-					"ListEnsemblingJobPodLogs",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(nil, fmt.Errorf("error"))
+				s.On("ListPodLogs", mock.Anything).Return(nil, fmt.Errorf("error"))
 				return s
 			},
 			componentType: "",
@@ -253,8 +233,8 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 					validator,
 				),
 			}
-			if got := c.ListEnsemblingPodLogs(nil, tt.vars, nil); !reflect.DeepEqual(got, tt.expected) {
-				t.Errorf("ListRouterPodLogs() = %v, want %v", got, tt.expected)
+			if got := c.ListEnsemblingJobPodLogs(nil, tt.vars, nil); !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("ListEnsemblingJobPodLogs() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
@@ -270,21 +250,14 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 	router1 := &models.Router{Model: models.Model{ID: 1}, CurrRouterVersionID: sql.NullInt32{Int32: 1, Valid: true}}
 	// Simulate router where the CurrRouterVersionID value is invalid
 	router2 := &models.Router{Model: models.Model{ID: 2}, CurrRouterVersionID: sql.NullInt32{Int32: 2, Valid: false}}
-	routerVersion1 := &models.RouterVersion{Model: models.Model{ID: 1}}
-	routerVersion2 := &models.RouterVersion{Model: models.Model{ID: 2}}
+	routerVersion1 := &models.RouterVersion{Model: models.Model{ID: 1}, Router: &models.Router{Name: "hello"}}
+	routerVersion2 := &models.RouterVersion{Model: models.Model{ID: 2}, Router: &models.Router{Name: "hello"}}
 	// Simulate error in retrieving router's current version
 	router3 := &models.Router{Model: models.Model{ID: 3}, CurrRouterVersionID: sql.NullInt32{Int32: 3, Valid: true}}
 
 	sinceTime := time.Date(2020, 12, 5, 8, 0, 0, 0, time.UTC)
 	tailLines := int64(5)
 	headLines := int64(3)
-	podLogOptions := &service.PodLogOptions{
-		Container: "mycontainer",
-		Previous:  true,
-		SinceTime: &sinceTime,
-		TailLines: &tailLines,
-		HeadLines: &headLines,
-	}
 
 	mlpService.On("GetProject", models.ID(1)).Return(project, nil)
 	routersService.On("FindByID", models.ID(1)).Return(router1, nil)
@@ -306,17 +279,62 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 		On("FindByRouterIDAndVersion", models.ID(1), uint(3)).
 		Return(nil, errors.New(""))
 	podLogService.
-		On("ListRouterPodLogs", project, router1, routerVersion1, "router", &service.PodLogOptions{}).
+		On("ListPodLogs", service.PodLogRequest{
+			Namespace:        servicebuilder.GetNamespace(project),
+			DefaultContainer: cluster.KnativeUserContainerName,
+			Environment:      router1.EnvironmentName,
+			LabelSelectors: []service.LabelSelector{
+				{
+					Key:   cluster.KnativeServiceLabelKey,
+					Value: servicebuilder.GetComponentName(routerVersion1, "router"),
+				},
+			},
+		}).
 		Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
 	podLogService.
-		On("ListRouterPodLogs", project, router1, routerVersion2, "router", &service.PodLogOptions{}).
+		On("ListPodLogs", service.PodLogRequest{
+			Namespace:        servicebuilder.GetNamespace(project),
+			DefaultContainer: cluster.KnativeUserContainerName,
+			Environment:      router1.EnvironmentName,
+			LabelSelectors: []service.LabelSelector{
+				{
+					Key:   cluster.KnativeServiceLabelKey,
+					Value: servicebuilder.GetComponentName(routerVersion2, "router"),
+				},
+			},
+		}).
 		Return([]*service.PodLog{{TextPayload: "routerVersion2"}}, nil)
 	podLogService.
-		On("ListRouterPodLogs", project, router1, routerVersion1, "enricher", podLogOptions).
+		On("ListPodLogs", service.PodLogRequest{
+			Namespace:        servicebuilder.GetNamespace(project),
+			DefaultContainer: cluster.KnativeUserContainerName,
+			Environment:      router1.EnvironmentName,
+			LabelSelectors: []service.LabelSelector{
+				{
+					Key:   cluster.KnativeServiceLabelKey,
+					Value: servicebuilder.GetComponentName(routerVersion1, "enricher"),
+				},
+			},
+			Container: "mycontainer",
+			Previous:  true,
+			SinceTime: &sinceTime,
+			TailLines: &tailLines,
+			HeadLines: &headLines,
+		}).
 		Return([]*service.PodLog{{TextPayload: "valid optional args"}}, nil)
 	// Simulate error when logs for router with component 'ensembler' is requested
 	podLogService.
-		On("ListRouterPodLogs", project, router1, routerVersion2, "ensembler", &service.PodLogOptions{}).
+		On("ListPodLogs", service.PodLogRequest{
+			Namespace:        servicebuilder.GetNamespace(project),
+			DefaultContainer: cluster.KnativeUserContainerName,
+			Environment:      router1.EnvironmentName,
+			LabelSelectors: []service.LabelSelector{
+				{
+					Key:   cluster.KnativeServiceLabelKey,
+					Value: servicebuilder.GetComponentName(routerVersion2, "ensembler"),
+				},
+			},
+		}).
 		Return([]*service.PodLog{}, errors.New("test pod log error"))
 
 	type args struct {
@@ -354,17 +372,6 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "routerVersion1"}}),
-		},
-		{
-			name: "specific router version id",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"2"},
-				},
-			},
-			want: Ok([]*service.PodLog{{TextPayload: "routerVersion2"}}),
 		},
 		{
 			name: "invalid router version id",
@@ -533,7 +540,7 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				},
 			}
 			if got := c.ListRouterPodLogs(tt.args.r, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListRouterPodLogs() = %v, want %v", got, tt.want)
+				t.Errorf("ListRouterPodLogs() = %+v, want %+v", got, tt.want)
 			}
 		})
 	}

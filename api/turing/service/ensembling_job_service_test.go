@@ -8,6 +8,7 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/batch"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/internal/ref"
@@ -31,6 +32,9 @@ var (
 	executorReplica       int32 = 2
 	executorCPURequest          = "1"
 	executorMemoryRequest       = "1Gi"
+
+	imageBuilderNamespace = "image"
+	loggingURLFormat      = "http://www.example.com/{{.Namespace}}/{{.PodName}}"
 )
 
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
@@ -189,6 +193,8 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 				defaultConfigurations,
 				dashboardURLTemplate,
 				createMLPService(),
+				imageBuilderNamespace,
+				&loggingURLFormat,
 			)
 
 			projectID := models.ID(1)
@@ -272,6 +278,8 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 					defaultConfigurations,
 					dashboardURLTemplate,
 					createMLPService(),
+					imageBuilderNamespace,
+					&loggingURLFormat,
 				)
 
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
@@ -312,6 +320,8 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 				defaultConfigurations,
 				dashboardURLTemplate,
 				createMLPService(),
+				imageBuilderNamespace,
+				&loggingURLFormat,
 			)
 
 			// Save job
@@ -427,6 +437,8 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					defaultConfigurations,
 					dashboardURLTemplate,
 					createMLPService(),
+					imageBuilderNamespace,
+					&loggingURLFormat,
 				)
 
 				if tt.removeDefaultResources {
@@ -500,6 +512,8 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 				defaultConfigurations,
 				dashboardURLTemplate,
 				createMLPService(),
+				imageBuilderNamespace,
+				&loggingURLFormat,
 			)
 
 			// Save job
@@ -537,6 +551,8 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 				defaultConfigurations,
 				dashboardURLTemplate,
 				nil,
+				imageBuilderNamespace,
+				&loggingURLFormat,
 			)
 
 			// Save job
@@ -560,4 +576,138 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			assert.Nil(t, found)
 		})
 	})
+}
+
+func TestGetNamespaceByComponent(t *testing.T) {
+	tests := map[string]struct {
+		componentType string
+		project       *mlp.Project
+		expected      string
+	}{
+		"success | image builder type": {
+			componentType: batch.ImageBuilderPodType,
+			project:       nil,
+			expected:      imageBuilderNamespace,
+		},
+		"success | any other type": {
+			componentType: batch.DriverPodType,
+			project: &mlp.Project{
+				Id:   1,
+				Name: "hello",
+			},
+			expected: "hello",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				defaultConfigurations,
+				imageBuilderNamespace,
+				&loggingURLFormat,
+			)
+			got := svc.GetNamespaceByComponent(tt.componentType, tt.project)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestCreatePodLabelSelector(t *testing.T) {
+	labeller.InitKubernetesLabeller("prefix/", "dev")
+	defer labeller.InitKubernetesLabeller("", "dev")
+
+	ensemblerName := "name"
+	tests := map[string]struct {
+		componentType string
+		expected      []LabelSelector
+	}{
+		"success | image builder": {
+			componentType: batch.ImageBuilderPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+			},
+		},
+		"success | driver": {
+			componentType: batch.DriverPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+				{
+					Key:   kubernetesSparkRoleLabel,
+					Value: kubernetesSparkRoleDriverValue,
+				},
+			},
+		},
+		"success | executor": {
+			componentType: batch.ExecutorPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+				{
+					Key:   kubernetesSparkRoleLabel,
+					Value: kubernetesSparkRoleExecutorValue,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				defaultConfigurations,
+				imageBuilderNamespace,
+				nil,
+			)
+			got := svc.CreatePodLabelSelector(ensemblerName, tt.componentType)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestFormatLoggingURL(t *testing.T) {
+	tests := map[string]struct {
+		ensemblerName string
+		namespace     string
+		componentType string
+		format        string
+		expected      string
+	}{
+		"success | nominal": {
+			ensemblerName: "fooname",
+			namespace:     "barspace",
+			componentType: batch.ImageBuilderPodType,
+			format:        "http://www.example.com/{{.Namespace}}/{{.PodName}}",
+			expected:      "http://www.example.com/barspace/fooname",
+		},
+		"success | not initialised with format": {
+			ensemblerName: "fooname",
+			namespace:     "barspace",
+			componentType: batch.ImageBuilderPodType,
+			format:        "",
+			expected:      "",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				defaultConfigurations,
+				imageBuilderNamespace,
+				&tt.format,
+			)
+			got, err := svc.FormatLoggingURL(tt.ensemblerName, tt.namespace, tt.componentType)
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
 }

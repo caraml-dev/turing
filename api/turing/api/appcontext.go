@@ -99,6 +99,8 @@ func NewAppContext(
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 		cfg.BatchEnsemblingConfig.MonitoringURLTemplate,
 		mlpSvc,
+		cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+		cfg.BatchEnsemblingConfig.LoggingURLFormat,
 	)
 
 	// Initialise Batch components
@@ -148,9 +150,6 @@ func NewAppContext(
 		ExperimentsService:    expSvc,
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
-			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
-			cfg.BatchEnsemblingConfig.LoggingURLFormat,
 		),
 		BatchRunners: batchJobRunners,
 	}

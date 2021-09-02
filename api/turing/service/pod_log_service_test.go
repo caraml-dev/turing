@@ -3,348 +3,74 @@ package service
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"testing"
 	"time"
 
-	"github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/cluster/mocks"
+	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestPodLogServiceListEnsemblingJobPodLogs(t *testing.T) {
-	sinceTime := time.Date(2020, 7, 7, 7, 0, 0, 0, time.UTC)
-	sinceTimeMinus1Sec := time.Date(2020, 7, 7, 6, 59, 59, 0, time.UTC)
-	sinceTimeV1Minus1Sec := metav1.Time{Time: sinceTimeMinus1Sec}
-	headLines := int64(2)
-	tailLines := int64(1)
+func TestConvertPodLogsToV2(t *testing.T) {
+	namespace := "namespace"
+	environment := "environment"
+	loggingURL := "wwww.example.com"
 
-	controllerEnvironmentName := "environment"
-	namespace := "image"
-	ensemblingJobName := "test-ensembler"
-	podName := "pod-name"
-	labeller.InitKubernetesLabeller("example.com/", "dev")
-	defer labeller.InitKubernetesLabeller("", "dev")
-	template := "http://example.com/{{.Namespace}}/{{.PodName}}"
-
-	type args struct {
-		ensemblingJobName string
-		project           *client.Project
-		componentType     string
-		opts              *PodLogOptions
-	}
 	tests := map[string]struct {
-		name       string
-		template   *string
-		args       args
-		controller func() cluster.Controller
-		want       *EnsemblingPodLogs
+		legacyPodLogs []*PodLog
+		want          *PodLogsV2
 	}{
-		"success | nominal kaniko": {
-			args: args{
-				project:           &client.Project{Name: namespace},
-				ensemblingJobName: ensemblingJobName,
-				componentType:     batch.ImageBuilderPodType,
-				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
-			},
-			template: &template,
-			want: &EnsemblingPodLogs{
-				Environment: controllerEnvironmentName,
-				Namespace:   namespace,
-				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s", namespace, ensemblingJobName),
-				Logs: []*EnsemblingPodLog{
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Taking snapshot of full filesystem...",
-					},
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Pushed image to 1 destinations",
-					},
+		"success | nominal": {
+			legacyPodLogs: []*PodLog{
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+					Environment:   "environment",
+					Namespace:     "namespace",
+					PodName:       "json-payload",
+					ContainerName: "user-container",
+					TextPayload:   "No this is patrick",
 				},
 			},
-			controller: func() cluster.Controller {
-				controller := &mocks.Controller{}
-				controller.
-					On("ListPods", namespace, fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblingJobName)).
-					Return(&corev1.PodList{
-						Items: []corev1.Pod{
-							{
-								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
-								Spec: corev1.PodSpec{
-									Containers: []corev1.Container{
-										{Name: "kaniko"},
-									},
-								},
-							},
-						},
+			want: &PodLogsV2{
+				Environment: environment,
+				Namespace:   namespace,
+				LoggingURL:  loggingURL,
+				Logs: []*PodLogV2{
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+						PodName:     "json-payload",
+						TextPayload: "No this is patrick",
 					},
-						nil,
-					)
-				controller.On(
-					"ListPodLogs",
-					namespace,
-					podName,
-					&corev1.PodLogOptions{
-						Container:  "",
-						Timestamps: true,
-						SinceTime:  &sinceTimeV1Minus1Sec,
-					},
-				).Return(
-					ioutil.NopCloser(
-						bytes.NewBufferString(
-							`2020-07-07T06:59:59Z Please update conda by running
-2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
-2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
-						),
-					),
-					nil,
-				)
-				return controller
+				},
 			},
 		},
-		"success | nominal driver": {
-			args: args{
-				project:           &client.Project{Name: namespace},
-				ensemblingJobName: ensemblingJobName,
-				componentType:     batch.DriverPodType,
-				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
-			},
-			template: &template,
-			want: &EnsemblingPodLogs{
-				Environment: controllerEnvironmentName,
+		"success | no log entry": {
+			legacyPodLogs: []*PodLog{},
+			want: &PodLogsV2{
+				Environment: environment,
 				Namespace:   namespace,
-				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s.*-driver", namespace, ensemblingJobName),
-				Logs: []*EnsemblingPodLog{
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Taking snapshot of full filesystem...",
-					},
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Pushed image to 1 destinations",
-					},
-				},
-			},
-			controller: func() cluster.Controller {
-				controller := &mocks.Controller{}
-				controller.
-					On("ListPods", namespace, fmt.Sprintf(
-						"%s=%s,%s=%s",
-						kubernetesSparkRoleLabel,
-						kubernetesSparkRoleDriverValue,
-						labeller.GetLabelName(labeller.AppLabel),
-						ensemblingJobName,
-					)).
-					Return(&corev1.PodList{
-						Items: []corev1.Pod{
-							{
-								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
-								Spec: corev1.PodSpec{
-									Containers: []corev1.Container{
-										{Name: "kaniko"},
-									},
-								},
-							},
-						},
-					},
-						nil,
-					)
-				controller.On(
-					"ListPodLogs",
-					namespace,
-					podName,
-					&corev1.PodLogOptions{
-						Container:  "",
-						Timestamps: true,
-						SinceTime:  &sinceTimeV1Minus1Sec,
-					},
-				).Return(
-					ioutil.NopCloser(
-						bytes.NewBufferString(
-							`2020-07-07T06:59:59Z Please update conda by running
-2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
-2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
-						),
-					),
-					nil,
-				)
-				return controller
-			},
-		},
-		"success | nominal executor": {
-			args: args{
-				project:           &client.Project{Name: namespace},
-				ensemblingJobName: ensemblingJobName,
-				componentType:     batch.ExecutorPodType,
-				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
-			},
-			template: &template,
-			want: &EnsemblingPodLogs{
-				Environment: controllerEnvironmentName,
-				Namespace:   namespace,
-				LoggingURL:  fmt.Sprintf("http://example.com/%s/%s.*-exec-.*", namespace, ensemblingJobName),
-				Logs: []*EnsemblingPodLog{
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Taking snapshot of full filesystem...",
-					},
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Pushed image to 1 destinations",
-					},
-				},
-			},
-			controller: func() cluster.Controller {
-				controller := &mocks.Controller{}
-				controller.
-					On("ListPods", namespace, fmt.Sprintf(
-						"%s=%s,%s=%s",
-						kubernetesSparkRoleLabel,
-						kubernetesSparkRoleExecutorValue,
-						labeller.GetLabelName(labeller.AppLabel),
-						ensemblingJobName,
-					)).
-					Return(&corev1.PodList{
-						Items: []corev1.Pod{
-							{
-								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
-								Spec: corev1.PodSpec{
-									Containers: []corev1.Container{
-										{Name: "kaniko"},
-									},
-								},
-							},
-						},
-					},
-						nil,
-					)
-				controller.On(
-					"ListPodLogs",
-					namespace,
-					podName,
-					&corev1.PodLogOptions{
-						Container:  "",
-						Timestamps: true,
-						SinceTime:  &sinceTimeV1Minus1Sec,
-					},
-				).Return(
-					ioutil.NopCloser(
-						bytes.NewBufferString(
-							`2020-07-07T06:59:59Z Please update conda by running
-2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
-2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
-						),
-					),
-					nil,
-				)
-				return controller
-			},
-		},
-		"success | template not given": {
-			args: args{
-				project:           &client.Project{Name: namespace},
-				ensemblingJobName: ensemblingJobName,
-				componentType:     batch.ImageBuilderPodType,
-				opts:              &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
-			},
-			template: nil,
-			want: &EnsemblingPodLogs{
-				Environment: controllerEnvironmentName,
-				Namespace:   namespace,
-				Logs: []*EnsemblingPodLog{
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Taking snapshot of full filesystem...",
-					},
-					{
-						Timestamp:   time.Date(2020, 7, 7, 7, 0, 10, 0, time.UTC),
-						PodName:     podName,
-						TextPayload: "[INFO] Pushed image to 1 destinations",
-					},
-				},
-			},
-			controller: func() cluster.Controller {
-				controller := &mocks.Controller{}
-				controller.
-					On("ListPods", namespace, fmt.Sprintf("%s=%s", labeller.GetLabelName(labeller.AppLabel), ensemblingJobName)).
-					Return(&corev1.PodList{
-						Items: []corev1.Pod{
-							{
-								ObjectMeta: metav1.ObjectMeta{Name: "pod-name"},
-								Spec: corev1.PodSpec{
-									Containers: []corev1.Container{
-										{Name: "kaniko"},
-									},
-								},
-							},
-						},
-					},
-						nil,
-					)
-				controller.On(
-					"ListPodLogs",
-					namespace,
-					podName,
-					&corev1.PodLogOptions{
-						Container:  "",
-						Timestamps: true,
-						SinceTime:  &sinceTimeV1Minus1Sec,
-					},
-				).Return(
-					ioutil.NopCloser(
-						bytes.NewBufferString(
-							`2020-07-07T06:59:59Z Please update conda by running
-2020-07-07T07:00:05Z [INFO] Taking snapshot of full filesystem...
-2020-07-07T07:00:10Z [INFO] Pushed image to 1 destinations`,
-						),
-					),
-					nil,
-				)
-				return controller
+				LoggingURL:  loggingURL,
+				Logs:        []*PodLogV2{},
 			},
 		},
 	}
-
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			clusterControllers := map[string]cluster.Controller{controllerEnvironmentName: tt.controller()}
-
-			s := NewPodLogService(
-				clusterControllers,
-				namespace,
-				controllerEnvironmentName,
-				tt.template,
-			)
-			got, _ := s.ListEnsemblingJobPodLogs(
-				tt.args.ensemblingJobName,
-				tt.args.project,
-				tt.args.componentType,
-				tt.args.opts,
-			)
+			got := ConvertPodLogsToV2(namespace, environment, loggingURL, tt.legacyPodLogs)
 			if !cmp.Equal(got, tt.want) {
-				t.Errorf("ListPodLogs() got = %v, want %v", got, tt.want)
+				t.Errorf("ConvertPodLogsToV2() got = %v, want %v", got, tt.want)
 				t.Log(cmp.Diff(got, tt.want))
 			}
 		})
 	}
 }
 
-func TestPodLogServiceListRouterPodLogs(t *testing.T) {
+func TestPodLogServiceListPodLogs(t *testing.T) {
 	sinceTime := time.Date(2020, 7, 7, 7, 0, 0, 0, time.UTC)
 	sinceTimeMinus1Sec := time.Date(2020, 7, 7, 6, 59, 59, 0, time.UTC)
 	sinceTimeV1Minus1Sec := metav1.Time{Time: sinceTimeMinus1Sec}
@@ -436,27 +162,29 @@ invalidtimestamp line3
 		Return(nil, errors.New(""))
 	clusterControllers := map[string]cluster.Controller{"environment": controller}
 
-	type args struct {
-		project       *client.Project
-		router        *models.Router
-		routerVersion *models.RouterVersion
-		componentType string
-		opts          *PodLogOptions
-	}
+	routerVersion := &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1}
+
 	tests := []struct {
 		name    string
-		args    args
+		args    PodLogRequest
 		want    []*PodLog
 		wantErr bool
 	}{
 		{
 			name: "expected arguments with headlines and taillines",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				SinceTime: &sinceTime,
+				HeadLines: &headLines,
+				TailLines: &tailLines,
 			},
 			want: []*PodLog{
 				{
@@ -500,12 +228,17 @@ invalidtimestamp line3
 		},
 		{
 			name: "expected arguments with taillines only",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{TailLines: &tailLines},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				TailLines: &tailLines,
 			},
 			want: []*PodLog{
 				{
@@ -531,12 +264,16 @@ invalidtimestamp line3
 		},
 		{
 			name: "expected arguments no headlines and taillines",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
 			},
 			want: []*PodLog{
 				{
@@ -589,36 +326,35 @@ invalidtimestamp line3
 		},
 		{
 			name: "controller listpods error",
-			args: args{
-				project:       &client.Project{Name: "listpods-error"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "listpods-error",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
 			},
 			want:    nil,
 			wantErr: true,
 		},
 		{
-			name: "controller listpodlogs error",
-			args: args{
-				project:       &client.Project{Name: "listpodlogs-error"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
-			},
-			want:    []*PodLog{},
-			wantErr: false,
-		},
-		{
 			name: "controller for environment not found",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment-not-found"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment-not-found",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				SinceTime: &sinceTime,
+				HeadLines: &headLines,
+				TailLines: &tailLines,
 			},
 			want:    nil,
 			wantErr: true,
@@ -627,8 +363,7 @@ invalidtimestamp line3
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &podLogService{clusterControllers: clusterControllers}
-			got, err := s.ListRouterPodLogs(tt.args.project, tt.args.router, tt.args.routerVersion,
-				tt.args.componentType, tt.args.opts)
+			got, err := s.ListPodLogs(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListPodLogs() error = %v, wantErr %v", err, tt.wantErr)
 				return

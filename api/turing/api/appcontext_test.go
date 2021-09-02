@@ -280,6 +280,8 @@ func TestNewAppContext(t *testing.T) {
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
 		testCfg.BatchEnsemblingConfig.MonitoringURLTemplate,
 		mlpService,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+		testCfg.BatchEnsemblingConfig.LoggingURLFormat,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
@@ -311,9 +313,6 @@ func TestNewAppContext(t *testing.T) {
 		ExperimentsService:    experimentService,
 		PodLogService: service.NewPodLogService(
 			map[string]cluster.Controller{},
-			testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
-			testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
-			testCfg.BatchEnsemblingConfig.LoggingURLFormat,
 		),
 		AlertService:      alertService,
 		OpenAPIValidation: &middleware.OpenAPIValidation{},
