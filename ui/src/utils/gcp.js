@@ -11,5 +11,5 @@ export const getBigQueryConsoleUrl = (table) => {
 
 export const getGCSDashboardUrl = (gcsBucketUri) => {
   const uri = gcsBucketUri.replace("gs://", "");
-  return `https://console.cloud.google.com/storage/browser/${uri}/?authuser=1`;
+  return `https://console.cloud.google.com/storage/browser/${uri}`;
 };
