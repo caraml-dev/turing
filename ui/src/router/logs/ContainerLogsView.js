@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ConfigSection } from "../components/configuration/components/section";
+import { ConfigSection } from "../../components/config_section";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from "@elastic/eui";
 import { LazyLog, ScrollFollow } from "react-lazylog";
 import { LogEntry } from "../../services/logs/LogEntry";
@@ -9,22 +9,22 @@ import { replaceBreadcrumbs, slugify } from "@gojek/mlp-ui";
 import useLogsApiEventEmitter from "./hooks/useEventEmitterLogsApi";
 import "./ContainerLogsView.scss";
 
-const formatMessage = data => LogEntry.fromJson(data).toString();
+const formatMessage = (data) => LogEntry.fromJson(data).toString();
 
 export const ContainerLogsView = ({ projectId, routerId, router }) => {
   useEffect(() => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: "../"
+        href: "../",
       },
       {
         text: router.name,
-        href: "./"
+        href: "./",
       },
       {
-        text: "Logs"
-      }
+        text: "Logs",
+      },
     ]);
   }, [projectId, routerId, router.name]);
 
@@ -32,14 +32,14 @@ export const ContainerLogsView = ({ projectId, routerId, router }) => {
     return [
       "router",
       ...["enricher", "ensembler"].filter(
-        component => !!get(router, `config.${component}`)
-      )
+        (component) => !!get(router, `config.${component}`)
+      ),
     ];
   }, [router]);
 
   const [params, setParams] = useState({
     component_type: "router",
-    tail_lines: "1000"
+    tail_lines: "1000",
   });
 
   const { emitter } = useLogsApiEventEmitter(

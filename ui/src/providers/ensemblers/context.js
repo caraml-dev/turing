@@ -6,24 +6,24 @@ const EnsemblersContext = React.createContext([]);
 export const EnsemblersContextContextProvider = ({
   projectId,
   children,
-  ensemblerType = ""
+  ensemblerType = "",
 }) => {
   const [ensemblers, setEnsemblers] = useState({});
   const [
     {
       data: { results },
       isLoaded,
-      error
-    }
+      error,
+    },
   ] = useTuringApi(
     `/projects/${projectId}/ensemblers`,
     {
       query: !!ensemblerType
         ? {
             type: ensemblerType,
-            page_size: Number.MAX_SAFE_INTEGER
+            page_size: Number.MAX_SAFE_INTEGER,
           }
-        : { page_size: Number.MAX_SAFE_INTEGER }
+        : { page_size: Number.MAX_SAFE_INTEGER },
     },
     { results: [] }
   );
@@ -40,7 +40,7 @@ export const EnsemblersContextContextProvider = ({
   }, [results, isLoaded, error]);
 
   return (
-    <EnsemblersContext.Provider value={ensemblers}>
+    <EnsemblersContext.Provider value={{ ensemblers, isLoaded }}>
       {children}
     </EnsemblersContext.Provider>
   );

@@ -8,13 +8,13 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
 import { RouterConfigView } from "./config/RouterConfigView";
 import { RouterDetailsPageHeader } from "./components/router_details_header/RouterDetailsPageHeader";
-import { DeploymentStatusBadge } from "../components/status_badge/DeploymentStatusBadge";
+import { StatusBadge } from "../../components/status_badge/StatusBadge";
 import { EditRouterView } from "../edit/EditRouterView";
 import { PageTitle } from "../../components/page/PageTitle";
 import { RouterDetailsPageNavigation } from "./components/page_navigation/RouterDetailsPageNavigation";
@@ -69,11 +69,9 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
             <EuiPageHeader>
               <EuiPageHeaderSection>
                 <PageTitle
-                  title={
-                    <Fragment>
-                      {router.name}&nbsp;
-                      <DeploymentStatusBadge status={router.status} />
-                    </Fragment>
+                  title={router.name}
+                  prepend={
+                    <StatusBadge status={Status.fromValue(router.status)} />
                   }
                 />
               </EuiPageHeaderSection>
@@ -88,7 +86,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
                   onDeploySuccess={fetchRouterDetails}
                   onUndeploySuccess={fetchRouterDetails}
                   onDeleteSuccess={() => props.navigate("../")}>
-                  {getActions => (
+                  {(getActions) => (
                     <RouterDetailsPageNavigation
                       router={router}
                       actions={getActions(router)}

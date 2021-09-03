@@ -1,4 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd ui && yarn lint-staged
+pushd ./ui
+yarn lint-staged
+popd

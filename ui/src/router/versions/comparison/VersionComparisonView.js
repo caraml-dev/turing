@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ConfigSection } from "../../components/configuration/components/section";
+import { ConfigSection } from "../../../components/config_section";
 import {
   EuiCallOut,
   EuiFilterButton,
@@ -9,7 +9,7 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiTextAlign
+  EuiTextAlign,
 } from "@elastic/eui";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
@@ -56,19 +56,19 @@ export const VersionComparisonView = ({
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: `../../../../`
+        href: `../../../../`,
       },
       {
         text: router.name,
-        href: `../../../`
+        href: `../../../`,
       },
       {
         text: "Versions",
-        href: `../../`
+        href: `../../`,
       },
       {
-        text: "Compare"
-      }
+        text: "Compare",
+      },
     ]);
   }, [router.name]);
 
@@ -113,8 +113,8 @@ export const VersionComparisonView = ({
             styles={{
               line: {
                 wordBreak: "break-word",
-                fontSize: "0.775rem"
-              }
+                fontSize: "0.775rem",
+              },
             }}
             compareMethod={DiffMethod.WORDS_WITH_SPACE}
             splitView={splitView}

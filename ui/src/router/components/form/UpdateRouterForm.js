@@ -11,7 +11,7 @@ import { ExperimentStep } from "./steps/ExperimentStep";
 import { EnricherStep } from "./steps/EnricherStep";
 import { EnsemblerStep } from "./steps/EnsemblerStep";
 import { OutcomeStep } from "./steps/OutcomeStep";
-import { ConfigSectionTitle } from "../configuration/components/section";
+import { ConfigSectionTitle } from "../../../components/config_section";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 
 export const UpdateRouterForm = ({ projectId, onCancel, onSuccess }) => {
@@ -21,7 +21,7 @@ export const UpdateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     `/projects/${projectId}/routers/${router.id}`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -35,7 +35,7 @@ export const UpdateRouterForm = ({ projectId, onCancel, onSuccess }) => {
         id: "submit-success-create",
         title: "Router configuration is updated!",
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess();
     }
@@ -48,33 +48,33 @@ export const UpdateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       title: "Router",
       iconType: "bolt",
       children: <RouterStep projectId={projectId} />,
-      validationSchema: schema[0]
+      validationSchema: schema[0],
     },
     {
       title: "Experiments",
       iconType: "beaker",
       children: <ExperimentStep />,
       validationSchema: schema[1],
-      validationContext: { experimentEngineOptions }
+      validationContext: { experimentEngineOptions },
     },
     {
       title: "Enricher",
       iconType: "package",
       children: <EnricherStep projectId={projectId} />,
-      validationSchema: schema[2]
+      validationSchema: schema[2],
     },
     {
       title: "Ensembler",
       iconType: "aggregate",
       children: <EnsemblerStep projectId={projectId} />,
-      validationSchema: schema[3]
+      validationSchema: schema[3],
     },
     {
       title: "Outcome Tracking",
       iconType: "visTagCloud",
       children: <OutcomeStep projectId={projectId} />,
-      validationSchema: schema[4]
-    }
+      validationSchema: schema[4],
+    },
   ];
 
   return (
@@ -85,7 +85,7 @@ export const UpdateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
       confirmButtonColor="primary">
-      {onSubmit => (
+      {(onSubmit) => (
         <AccordionForm
           name="Edit Router"
           sections={sections}

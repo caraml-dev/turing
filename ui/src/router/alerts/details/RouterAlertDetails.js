@@ -5,13 +5,13 @@ import {
   EuiButton,
   EuiText,
   EuiSpacer,
-  EuiLoadingChart
+  EuiLoadingChart,
 } from "@elastic/eui";
 import { AlertConfigSection } from "../components/alert_config_section/AlertConfigSection";
 import {
   ConfigSectionPanel,
-  ConfigSectionTitle
-} from "../../components/configuration/components/section";
+  ConfigSectionTitle,
+} from "../../../components/config_section";
 import { Status } from "../../../services/status/Status";
 import { OverlayMask } from "../../../components/overlay_mask/OverlayMask";
 import { supportedAlerts } from "../config";
