@@ -16,10 +16,10 @@ import (
 
 // EnsemblingJobSpec Ensembling job Specification
 type EnsemblingJobSpec struct {
-	Source      EnsemblingJobSource                      `json:"source"`
+	Source EnsemblingJobSource `json:"source"`
 	Predictions map[string]EnsemblingJobPredictionSource `json:"predictions"`
-	Ensembler   EnsemblingJobEnsemblerSpec               `json:"ensembler"`
-	Sink        EnsemblingJobSink                        `json:"sink"`
+	Ensembler EnsemblingJobEnsemblerSpec `json:"ensembler"`
+	Sink EnsemblingJobSink `json:"sink"`
 }
 
 // NewEnsemblingJobSpec instantiates a new EnsemblingJobSpec object
@@ -56,7 +56,7 @@ func (o *EnsemblingJobSpec) GetSource() EnsemblingJobSource {
 // GetSourceOk returns a tuple with the Source field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSpec) GetSourceOk() (*EnsemblingJobSource, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Source, true
@@ -80,7 +80,7 @@ func (o *EnsemblingJobSpec) GetPredictions() map[string]EnsemblingJobPredictionS
 // GetPredictionsOk returns a tuple with the Predictions field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSpec) GetPredictionsOk() (*map[string]EnsemblingJobPredictionSource, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Predictions, true
@@ -104,7 +104,7 @@ func (o *EnsemblingJobSpec) GetEnsembler() EnsemblingJobEnsemblerSpec {
 // GetEnsemblerOk returns a tuple with the Ensembler field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSpec) GetEnsemblerOk() (*EnsemblingJobEnsemblerSpec, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Ensembler, true
@@ -128,7 +128,7 @@ func (o *EnsemblingJobSpec) GetSink() EnsemblingJobSink {
 // GetSinkOk returns a tuple with the Sink field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSpec) GetSinkOk() (*EnsemblingJobSink, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Sink, true
@@ -191,3 +191,5 @@ func (v *NullableEnsemblingJobSpec) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

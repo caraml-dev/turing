@@ -22,8 +22,9 @@ type EnsemblingJobSink struct {
 
 // BigQuerySinkAsEnsemblingJobSink is a convenience function that returns BigQuerySink wrapped in EnsemblingJobSink
 func BigQuerySinkAsEnsemblingJobSink(v *BigQuerySink) EnsemblingJobSink {
-	return EnsemblingJobSink{BigQuerySink: v}
+	return EnsemblingJobSink{ BigQuerySink: v}
 }
+
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *EnsemblingJobSink) UnmarshalJSON(data []byte) error {
@@ -64,7 +65,7 @@ func (src EnsemblingJobSink) MarshalJSON() ([]byte, error) {
 }
 
 // Get the actual instance
-func (obj *EnsemblingJobSink) GetActualInstance() interface{} {
+func (obj *EnsemblingJobSink) GetActualInstance() (interface{}) {
 	if obj.BigQuerySink != nil {
 		return obj.BigQuerySink
 	}
@@ -108,3 +109,5 @@ func (v *NullableEnsemblingJobSink) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

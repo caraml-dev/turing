@@ -10,11 +10,11 @@ dev: env
 
 gen-client:
 	rm -rf turing/generated
-	@openapi-generator generate \
-		--input-spec ../api/api/openapi-sdk.yaml \
+	@docker run --rm -v ${PWD}/..:/local openapitools/openapi-generator-cli:v5.1.1 generate \
+		--input-spec /local/api/api/openapi-sdk.yaml \
 		--generator-name python \
-		--output . \
-		--config openapi-codegen.yaml
+		--output /local/sdk/. \
+		--config /local/sdk/openapi-codegen.yaml
 
 version:
 	@echo VERSION = \"$(VERSION_NUMBER)\" > turing/version.py
