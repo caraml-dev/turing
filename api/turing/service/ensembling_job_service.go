@@ -252,6 +252,10 @@ type EnsemblingMonitoringVariables struct {
 }
 
 func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) (string, error) {
+	if s.dashboardURLTemplate == nil {
+		return "", nil
+	}
+
 	name := job.Name
 	if len(name) > jobNameMaxLength {
 		name = name[:jobNameMaxLength]
