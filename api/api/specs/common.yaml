@@ -10,6 +10,7 @@ components:
     Id:
       type: "integer"
       format: "int32"
+      readOnly: true
 
     FieldSource:
       type: "string"

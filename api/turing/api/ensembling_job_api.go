@@ -120,7 +120,6 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 	_ interface{},
 ) *Response {
 	options := &GetEnsemblingJobOptions{}
-
 	if err := c.ParseVars(options, vars); err != nil {
 		return BadRequest(
 			"failed to fetch ensembling job",
