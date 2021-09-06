@@ -96,11 +96,11 @@ func NewAppContext(
 	ensemblingJobService := service.NewEnsemblingJobService(
 		db,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
-		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		cfg.BatchEnsemblingConfig.MonitoringURLTemplate,
-		mlpSvc,
 		cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
 		cfg.BatchEnsemblingConfig.LoggingURLFormat,
+		cfg.BatchEnsemblingConfig.MonitoringURLFormat,
+		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
+		mlpSvc,
 	)
 
 	// Initialise Batch components

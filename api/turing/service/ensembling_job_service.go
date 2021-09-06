@@ -81,27 +81,36 @@ type EnsemblingJobService interface {
 func NewEnsemblingJobService(
 	db *gorm.DB,
 	defaultEnvironment string,
-	defaultConfig config.DefaultEnsemblingJobConfigurations,
-	dashboardURLTemplate string,
-	mlpService MLPService,
 	imageBuilderNamespace string,
 	loggingURLFormat *string,
+	dashboardURLFormat *string,
+	defaultConfig config.DefaultEnsemblingJobConfigurations,
+	mlpService MLPService,
 ) EnsemblingJobService {
-	var t *template.Template
+	var loggingURLTemplate *template.Template
 	var err error
 	if loggingURLFormat != nil {
-		t, err = template.New("dashboardTemplate").Parse(*loggingURLFormat)
+		loggingURLTemplate, err = template.New("dashboardTemplate").Parse(*loggingURLFormat)
 		if err != nil {
 			logger.Warnf("error parsing ensembling logging url template: %s", err)
+		}
+	}
+
+	var dashboardTemplate *template.Template
+	if dashboardURLFormat != nil {
+		dashboardTemplate, err = template.New("dashboardTemplate").Parse(*dashboardURLFormat)
+		if err != nil {
+			logger.Warnf("error parsing ensembling dashboard template, values will be nil: %s", err.Error())
 		}
 	}
 
 	return &ensemblingJobService{
 		db:                    db,
 		defaultEnvironment:    defaultEnvironment,
-		defaultConfig:         defaultConfig,
 		imageBuilderNamespace: imageBuilderNamespace,
-		loggingURLTemplate:    t,
+		dashboardURLTemplate:  dashboardTemplate,
+		loggingURLTemplate:    loggingURLTemplate,
+		defaultConfig:         defaultConfig,
 		mlpService:            mlpService,
 	}
 }
@@ -109,11 +118,11 @@ func NewEnsemblingJobService(
 type ensemblingJobService struct {
 	db                    *gorm.DB
 	defaultEnvironment    string
-	defaultConfig         config.DefaultEnsemblingJobConfigurations
-	dashboardURLTemplate  *template.Template
-	mlpService            MLPService
 	imageBuilderNamespace string
+	dashboardURLTemplate  *template.Template
 	loggingURLTemplate    *template.Template
+	defaultConfig         config.DefaultEnsemblingJobConfigurations
+	mlpService            MLPService
 }
 
 // Save the given router to the db. Updates the existing record if already exists

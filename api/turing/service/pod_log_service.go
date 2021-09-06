@@ -69,7 +69,7 @@ type podLogService struct {
 }
 
 // NewPodLogService creates a new PodLogService that deals with kubernetes pod logs
-func NewPodLogService( clusterControllers map[string]cluster.Controller) PodLogService {
+func NewPodLogService(clusterControllers map[string]cluster.Controller) PodLogService {
 	return &podLogService{clusterControllers: clusterControllers}
 }
 

@@ -20,10 +20,9 @@ import (
 )
 
 const (
-	artifactFolder       string = "artifact"
-	dashboardURLTemplate string = "https://a.co/dashboard?var-project={{.Project}}&var-job={{.Job}}"
-	dashboardURLFormat   string = "https://a.co/dashboard?var-project=%s&var-job=%s"
-	mlpProjectName       string = "foo"
+	artifactFolder           string = "artifact"
+	dashboardURLStringFormat string = "https://a.co/dashboard?var-project=%s&var-job=%s"
+	mlpProjectName           string = "foo"
 )
 
 var (
@@ -35,6 +34,7 @@ var (
 
 	imageBuilderNamespace = "image"
 	loggingURLFormat      = "http://www.example.com/{{.Namespace}}/{{.PodName}}"
+	dashboardURLFormat    = "https://a.co/dashboard?var-project={{.Project}}&var-job={{.Job}}"
 )
 
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
@@ -178,7 +178,7 @@ func generateEnsemblingJobFixture(
 		value.EnvironmentName = "dev"
 		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.EnsemblerName = EnsemblerFolder
-		value.MonitoringURL = fmt.Sprintf(dashboardURLFormat, mlpProjectName, name)
+		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, name)
 	}
 
 	return value
@@ -190,11 +190,11 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
-				defaultConfigurations,
-				dashboardURLTemplate,
-				createMLPService(),
 				imageBuilderNamespace,
 				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 
 			projectID := models.ID(1)
@@ -275,11 +275,11 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 				ensemblingJobService := NewEnsemblingJobService(
 					db,
 					"dev",
-					defaultConfigurations,
-					dashboardURLTemplate,
-					createMLPService(),
 					imageBuilderNamespace,
 					&loggingURLFormat,
+					&dashboardURLFormat,
+					defaultConfigurations,
+					createMLPService(),
 				)
 
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
@@ -317,11 +317,11 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
-				defaultConfigurations,
-				dashboardURLTemplate,
-				createMLPService(),
 				imageBuilderNamespace,
 				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 
 			// Save job
@@ -434,11 +434,11 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				ensemblingJobService := NewEnsemblingJobService(
 					db,
 					"dev",
-					defaultConfigurations,
-					dashboardURLTemplate,
-					createMLPService(),
 					imageBuilderNamespace,
 					&loggingURLFormat,
+					&dashboardURLFormat,
+					defaultConfigurations,
+					createMLPService(),
 				)
 
 				if tt.removeDefaultResources {
@@ -509,11 +509,11 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
-				defaultConfigurations,
-				dashboardURLTemplate,
-				createMLPService(),
 				imageBuilderNamespace,
 				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 
 			// Save job
@@ -548,11 +548,11 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
-				defaultConfigurations,
-				dashboardURLTemplate,
-				nil,
 				imageBuilderNamespace,
 				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 
 			// Save job
@@ -603,9 +603,11 @@ func TestGetNamespaceByComponent(t *testing.T) {
 			svc := NewEnsemblingJobService(
 				nil,
 				"dev",
-				defaultConfigurations,
 				imageBuilderNamespace,
 				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 			got := svc.GetNamespaceByComponent(tt.componentType, tt.project)
 			assert.Equal(t, tt.expected, got)
@@ -663,9 +665,11 @@ func TestCreatePodLabelSelector(t *testing.T) {
 			svc := NewEnsemblingJobService(
 				nil,
 				"dev",
-				defaultConfigurations,
 				imageBuilderNamespace,
-				nil,
+				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 			got := svc.CreatePodLabelSelector(ensemblerName, tt.componentType)
 			assert.Equal(t, tt.expected, got)
@@ -701,9 +705,11 @@ func TestFormatLoggingURL(t *testing.T) {
 			svc := NewEnsemblingJobService(
 				nil,
 				"dev",
-				defaultConfigurations,
 				imageBuilderNamespace,
 				&tt.format,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
 			)
 			got, err := svc.FormatLoggingURL(tt.ensemblerName, tt.namespace, tt.componentType)
 			assert.Nil(t, err)
