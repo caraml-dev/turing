@@ -384,7 +384,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -417,7 +417,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -450,7 +450,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
 							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
@@ -481,7 +481,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
-				svc.On("List", mock.Anything, mock.Anything, mock.Anything).Return(
+				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{},
 						Paging: service.Paging{
