@@ -3,25 +3,25 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiStepsHorizontal
+  EuiStepsHorizontal,
 } from "@elastic/eui";
 import { StepContent } from "./StepContent";
 import { StepActions } from "./StepActions";
 import FormValidationContext, {
-  FormValidationContextProvider
+  FormValidationContextProvider,
 } from "../form/validation";
 
 export const StepsWizardHorizontal = ({
   steps,
   onCancel,
   onSubmit,
-  submitLabel = "Done"
+  submitLabel = "Done",
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isLastStep = currentStep === steps.length - 1;
 
-  const onPrevious = () => setCurrentStep(step => step - 1);
-  const onNext = () => setCurrentStep(step => step + 1);
+  const onPrevious = () => setCurrentStep((step) => step - 1);
+  const onNext = () => setCurrentStep((step) => step + 1);
 
   return (
     <FormValidationContextProvider
@@ -37,7 +37,7 @@ export const StepsWizardHorizontal = ({
               isComplete: idx < currentStep,
               onClick: () => {
                 idx < currentStep && setCurrentStep(idx);
-              }
+              },
             }))}
           />
         </EuiFlexItem>
@@ -55,9 +55,8 @@ export const StepsWizardHorizontal = ({
             <FormValidationContext.Consumer>
               {({ onSubmit, isSubmitting }) => (
                 <StepActions
-                  currentStep={currentStep}
                   submitLabel={isLastStep ? submitLabel : "Next"}
-                  onCancel={onCancel}
+                  onCancel={currentStep === 0 ? onCancel : undefined}
                   onPrevious={onPrevious}
                   onSubmit={onSubmit}
                   isSubmitting={isSubmitting}

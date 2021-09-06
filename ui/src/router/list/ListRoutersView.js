@@ -5,7 +5,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
-  EuiPageHeaderSection
+  EuiPageHeaderSection,
 } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../hooks/useTuringApi";
@@ -23,7 +23,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
     replaceBreadcrumbs([{ text: "Routers" }]);
   }, []);
 
-  const onRowClick = item => props.navigate(`./${item.id}/details`);
+  const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
     <EuiPage>
@@ -33,7 +33,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
             <PageTitle title="Routers" />
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            <EuiButton fill href={"routers/create"}>
+            <EuiButton onClick={() => props.navigate("./create")} fill>
               Create Router
             </EuiButton>
           </EuiPageHeaderSection>
