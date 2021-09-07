@@ -7,7 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20200424034326-7cd886c7ec44
 	github.com/antihax/optional v1.0.0
-	github.com/getkin/kin-openapi v0.20.0
+	github.com/getkin/kin-openapi v0.75.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
@@ -18,7 +18,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.5
 	github.com/google/go-containerregistry v0.0.0-20200331213917-3d03ed9b1ca2
-	github.com/gorilla/mux v1.7.4
+	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.1.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/jinzhu/gorm v1.9.12
