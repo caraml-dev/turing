@@ -6,7 +6,15 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import useLogsApiEventEmitter from "../../../pod_logs/hooks/useEventEmitterLogsApi";
 import { PodLogsViewer } from "../../../pod_logs/components/logs_viewer/PodLogsViewer";
 
-const formatMessage = (data) => LogEntry.fromJson(data).toString();
+const processLogs = (data) => {
+  const chunk = data
+    .map((entry) => LogEntry.fromJson(entry).toString())
+    .join("\n");
+
+  const timestamp = !!data.length ? data[data.length - 1].timestamp : undefined;
+
+  return { chunk, timestamp };
+};
 
 const components = [
   {
@@ -48,7 +56,7 @@ export const RouterLogsView = ({ projectId, routerId, router }) => {
   const { emitter } = useLogsApiEventEmitter(
     `/projects/${projectId}/routers/${routerId}/logs`,
     params,
-    formatMessage
+    processLogs
   );
 
   return (

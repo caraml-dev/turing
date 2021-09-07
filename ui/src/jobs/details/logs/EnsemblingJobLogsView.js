@@ -6,7 +6,7 @@ import { PodLogsViewer } from "../../../pod_logs/components/logs_viewer/PodLogsV
 import useLogsApiEventEmitter from "../../../pod_logs/hooks/useEventEmitterLogsApi";
 import { LogEntry } from "../../../services/logs/LogEntry";
 
-const formatMessage = (data) => LogEntry.fromJson(data).toString();
+const processLogs = (data) => LogEntry.fromJson(data).toString();
 
 const components = [
   {
@@ -48,7 +48,7 @@ export const EnsemblingJobLogsView = ({ job }) => {
   const { emitter } = useLogsApiEventEmitter(
     `/projects/${job.project_id}/jobs/${job.id}/logs`,
     params,
-    formatMessage
+    processLogs
   );
 
   return (

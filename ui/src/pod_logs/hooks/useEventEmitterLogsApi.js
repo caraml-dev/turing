@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { usePollingTuringApi } from "../../hooks/usePollingTuringApi";
 import useEventEmitter from "./useEventEmitter";
 
-const POLLING_INTERVAL = 5000;
+const POLLING_INTERVAL = 7000;
 const BATCH_SIZE = 500;
 
-const useEventEmitterLogsApi = (apiEndpoint, params, formatMessage) => {
+const useEventEmitterLogsApi = (apiEndpoint, params, processLogs) => {
   const { emitter, isActive } = useEventEmitter();
 
   const [query, setQuery] = useState();
@@ -20,7 +20,7 @@ const useEventEmitterLogsApi = (apiEndpoint, params, formatMessage) => {
   const [{ data, error }, startPolling, stopPolling] = usePollingTuringApi(
     apiEndpoint,
     {},
-    [],
+    undefined,
     POLLING_INTERVAL
   );
 
@@ -35,16 +35,15 @@ const useEventEmitterLogsApi = (apiEndpoint, params, formatMessage) => {
     (data) => {
       let didCancel = false;
       Promise.resolve(data)
-        .then((entries) => {
-          let logChunk = entries.map(formatMessage).join("\n");
-          logChunk = logChunk.endsWith("\n") ? logChunk : `${logChunk}\n`;
+        .then((data) => {
+          const { chunk, timestamp } = processLogs(data);
 
-          if (!didCancel) emitter.emit("data", logChunk);
+          if (!didCancel && chunk) emitter.emit("data", chunk);
 
-          return entries[entries.length - 1].timestamp;
+          return timestamp;
         })
         .then((lastTimestamp) => {
-          if (!didCancel) {
+          if (!didCancel && lastTimestamp) {
             setQuery((q) => ({
               ...q,
               since_time: lastTimestamp,
@@ -59,11 +58,11 @@ const useEventEmitterLogsApi = (apiEndpoint, params, formatMessage) => {
         },
       };
     },
-    [emitter, formatMessage]
+    [emitter, processLogs]
   );
 
   useEffect(() => {
-    if (data.length && !error) {
+    if (data && !error) {
       const promise = dispatchData(data);
       return promise.cancel;
     }
