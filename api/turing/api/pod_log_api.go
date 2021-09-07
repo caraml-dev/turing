@@ -3,10 +3,8 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/service"
 
@@ -18,19 +16,6 @@ import (
 type PodLogController struct {
 	BaseController
 }
-
-var (
-	batchEnsemblingAllowedComponents = map[string]struct{}{
-		batch.ImageBuilderPodType: {},
-		batch.DriverPodType:       {},
-		batch.ExecutorPodType:     {},
-	}
-	routerAllowedComponents = map[string]struct{}{
-		servicebuilder.ComponentTypes.Router:    {},
-		servicebuilder.ComponentTypes.Enricher:  {},
-		servicebuilder.ComponentTypes.Ensembler: {},
-	}
-)
 
 // ListRouterPodLogs handles the HTTP request for getting Router Pod Logs
 // It supports 3 types of pods:
@@ -49,9 +34,17 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 		return errResp
 	}
 
+	options := &listRouterPodLogsOptions{}
+	if err := c.ParseVars(options, vars); err != nil {
+		return BadRequest(
+			"failed to fetch router pod logs",
+			fmt.Sprintf("failed to parse query string: %s", err),
+		)
+	}
+
 	var routerVersion *models.RouterVersion
 	var err error
-	if _, ok := vars.get("version"); ok {
+	if options.RouterVersion != nil {
 		// Specific router version value is requested
 		routerVersion, errResp = c.getRouterVersionFromRequestVars(vars)
 		if errResp != nil {
@@ -68,11 +61,6 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 		}
 	}
 
-	componentType, err := getComponentType(servicebuilder.ComponentTypes.Router, vars, routerAllowedComponents)
-	if err != nil {
-		return BadRequest(err.Error(), "must be one of router, enricher or ensembler")
-	}
-
 	request := service.PodLogRequest{
 		Namespace:        servicebuilder.GetNamespace(project),
 		DefaultContainer: cluster.KnativeUserContainerName,
@@ -80,14 +68,14 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 		LabelSelectors: []service.LabelSelector{
 			{
 				Key:   cluster.KnativeServiceLabelKey,
-				Value: servicebuilder.GetComponentName(routerVersion, componentType),
+				Value: servicebuilder.GetComponentName(routerVersion, options.ComponentType),
 			},
 		},
-	}
-	varLogError := c.parsePodLogRequest(&request, vars)
-
-	if varLogError != nil {
-		return BadRequest(varLogError.Description, varLogError.ErrorMessage)
+		SinceTime: options.SinceTime,
+		TailLines: options.TailLines,
+		HeadLines: options.HeadLines,
+		Previous:  options.Previous,
+		Container: options.Container,
 	}
 
 	logs, err := c.PodLogService.ListPodLogs(request)
@@ -112,15 +100,14 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 
 	options := &listEnsemblingPodLogsOptions{}
 	if err := c.ParseVars(options, vars); err != nil {
-		fmt.Printf("%+v", err)
 		return BadRequest(
-			"failed to fetch ensembling job",
+			"failed to fetch ensembling job pod logs",
 			fmt.Sprintf("failed to parse query string: %s", err),
 		)
 	}
 
 	ensemblingJob, err := c.EnsemblingJobService.FindByID(
-		*options.ID,
+		options.ID,
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
 		},
@@ -144,6 +131,7 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 		TailLines: options.TailLines,
 		HeadLines: options.HeadLines,
 		Previous:  options.Previous,
+		Container: options.Container,
 	}
 
 	legacyFormatLogs, err := c.PodLogService.ListPodLogs(request)
@@ -175,100 +163,26 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 	return Ok(logs)
 }
 
-func getComponentType(defaultComponentType string, vars RequestVars, allowedTypes map[string]struct{}) (string, error) {
-	componentType, _ := vars.get("component_type")
-	if componentType == "" {
-		return defaultComponentType, nil
-	}
-
-	if _, ok := allowedTypes[componentType]; ok {
-		return componentType, nil
-	}
-
-	return "", fmt.Errorf("Invalid component type '%s'", componentType)
-}
-
 type podLogOptions struct {
-	ID        *models.ID `schema:"job_id" validate:"required"`
 	ProjectID *models.ID `schema:"project_id" validate:"required"`
 	Previous  bool       `schema:"previous"`
 	HeadLines *int64     `schema:"head_lines" validate:"omitempty,gte=0"`
 	TailLines *int64     `schema:"tail_lines" validate:"omitempty,gte=0"`
 	SinceTime *time.Time `schema:"since_time"`
+	Container string     `schema:"container"`
 }
 
 type listEnsemblingPodLogsOptions struct {
 	podLogOptions
-	ComponentType string `schema:"component_type" validate:"required,oneof=image_builder driver executor"`
+	ID            models.ID `schema:"job_id" validate:"required"`
+	ComponentType string    `schema:"component_type" validate:"required,oneof=image_builder driver executor"`
 }
 
-type logVarParseError struct {
-	Description  string
-	ErrorMessage string
-}
-
-func (c PodLogController) parsePodLogRequest(
-	podLogRequest *service.PodLogRequest,
-	vars RequestVars,
-) *logVarParseError {
-	podLogRequest.Container, _ = vars.get("container")
-
-	if previous, ok := vars.get("previous"); ok {
-		previous, err := strconv.ParseBool(previous)
-		if err != nil {
-			return &logVarParseError{
-				Description:  "Query string 'previous' must be a truthy value",
-				ErrorMessage: err.Error(),
-			}
-		}
-		podLogRequest.Previous = previous
-	}
-
-	if sinceTime, ok := vars.get("since_time"); ok {
-		t, err := time.Parse(time.RFC3339, sinceTime)
-		if err != nil {
-			return &logVarParseError{
-				Description:  "Query string 'since_time' must be in RFC3339 format",
-				ErrorMessage: err.Error(),
-			}
-		}
-		podLogRequest.SinceTime = &t
-	}
-
-	// sometimes the client passes tail_lines= and this causes ok to be true with empty string.
-	if tailLines, _ := vars.get("tail_lines"); tailLines != "" {
-		i, err := strconv.ParseInt(tailLines, 10, 64)
-		if err != nil {
-			return &logVarParseError{
-				Description:  "Query string 'tail_lines' must be a positive number",
-				ErrorMessage: err.Error(),
-			}
-		}
-		if i <= 0 {
-			return &logVarParseError{
-				Description: "Query string 'tail_lines' must be a positive number",
-			}
-		}
-		podLogRequest.TailLines = &i
-	}
-
-	// sometimes the client passes head_lines= and this causes ok to be true with empty string.
-	if headLines, _ := vars.get("head_lines"); headLines != "" {
-		i, err := strconv.ParseInt(headLines, 10, 64)
-		if err != nil {
-			return &logVarParseError{
-				Description:  "Query string 'head_lines' must be a positive number",
-				ErrorMessage: err.Error(),
-			}
-		}
-		if i <= 0 {
-			return &logVarParseError{
-				Description: "Query string 'head_lines' must be a positive number",
-			}
-		}
-		podLogRequest.HeadLines = &i
-	}
-	return nil
+type listRouterPodLogsOptions struct {
+	podLogOptions
+	RouterID      models.ID `schema:"router_id" validate:"required"`
+	RouterVersion *string   `schema:"version"`
+	ComponentType string    `schema:"component_type" validate:"required,oneof=router ensembler enricher"`
 }
 
 func (c PodLogController) Routes() []Route {

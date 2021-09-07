@@ -188,7 +188,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"component_type": {batch.ImageBuilderPodType},
 			},
 			expected: BadRequest(
-				"failed to fetch ensembling job",
+				"failed to fetch ensembling job pod logs",
 				"failed to parse query string: Key: 'listEnsemblingPodLogsOptions.podLogOptions.TailLines'"+
 					" Error:Field validation for 'TailLines' failed on the 'gte' tag",
 			),
@@ -223,7 +223,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"component_type": {"broken_comp"},
 			},
 			expected: BadRequest(
-				"failed to fetch ensembling job",
+				"failed to fetch ensembling job pod logs",
 				"failed to parse query string: Key: 'listEnsemblingPodLogsOptions.ComponentType'"+
 					" Error:Field validation for 'ComponentType' failed on the 'oneof' tag",
 			),
@@ -310,15 +310,13 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 }
 
 func TestPodLogControllerListRouterPodLogs(t *testing.T) {
-	podLogService := &mocks.PodLogService{}
-	mlpService := &mocks.MLPService{}
-	routersService := &mocks.RoutersService{}
-	routerVersionsService := &mocks.RouterVersionsService{}
 
 	project := &client.Project{Name: "project1"}
+
 	router1 := &models.Router{Model: models.Model{ID: 1}, CurrRouterVersionID: sql.NullInt32{Int32: 1, Valid: true}}
 	// Simulate router where the CurrRouterVersionID value is invalid
 	router2 := &models.Router{Model: models.Model{ID: 2}, CurrRouterVersionID: sql.NullInt32{Int32: 2, Valid: false}}
+
 	routerVersion1 := &models.RouterVersion{Model: models.Model{ID: 1}, Router: &models.Router{Name: "hello"}}
 	routerVersion2 := &models.RouterVersion{Model: models.Model{ID: 2}, Router: &models.Router{Name: "hello"}}
 	// Simulate error in retrieving router's current version
@@ -328,93 +326,19 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 	tailLines := int64(5)
 	headLines := int64(3)
 
-	mlpService.On("GetProject", models.ID(1)).Return(project, nil)
-	routersService.On("FindByID", models.ID(1)).Return(router1, nil)
-	routersService.On("FindByID", models.ID(2)).Return(router2, nil)
-	routersService.On("FindByID", models.ID(3)).Return(router3, nil)
-	routerVersionsService.On("FindByID", models.ID(1)).Return(routerVersion1, nil)
-	routerVersionsService.On("FindByID", models.ID(2)).Return(routerVersion2, nil)
-	routerVersionsService.On("FindByID", models.ID(3)).
-		Return(nil, errors.New("test router version error"))
-	// Simulate error when router with id 3 is requested
-	routerVersionsService.On("FindByID", models.ID(3)).
-		Return(nil, errors.New(""))
-	routerVersionsService.
-		On("FindByRouterIDAndVersion", models.ID(1), uint(1)).Return(routerVersion1, nil)
-	routerVersionsService.
-		On("FindByRouterIDAndVersion", models.ID(1), uint(2)).Return(routerVersion2, nil)
-	// Simulate error when router with id 1 and version 3 is requested
-	routerVersionsService.
-		On("FindByRouterIDAndVersion", models.ID(1), uint(3)).
-		Return(nil, errors.New(""))
-	podLogService.
-		On("ListPodLogs", service.PodLogRequest{
-			Namespace:        servicebuilder.GetNamespace(project),
-			DefaultContainer: cluster.KnativeUserContainerName,
-			Environment:      router1.EnvironmentName,
-			LabelSelectors: []service.LabelSelector{
-				{
-					Key:   cluster.KnativeServiceLabelKey,
-					Value: servicebuilder.GetComponentName(routerVersion1, "router"),
-				},
-			},
-		}).
-		Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
-	podLogService.
-		On("ListPodLogs", service.PodLogRequest{
-			Namespace:        servicebuilder.GetNamespace(project),
-			DefaultContainer: cluster.KnativeUserContainerName,
-			Environment:      router1.EnvironmentName,
-			LabelSelectors: []service.LabelSelector{
-				{
-					Key:   cluster.KnativeServiceLabelKey,
-					Value: servicebuilder.GetComponentName(routerVersion2, "router"),
-				},
-			},
-		}).
-		Return([]*service.PodLog{{TextPayload: "routerVersion2"}}, nil)
-	podLogService.
-		On("ListPodLogs", service.PodLogRequest{
-			Namespace:        servicebuilder.GetNamespace(project),
-			DefaultContainer: cluster.KnativeUserContainerName,
-			Environment:      router1.EnvironmentName,
-			LabelSelectors: []service.LabelSelector{
-				{
-					Key:   cluster.KnativeServiceLabelKey,
-					Value: servicebuilder.GetComponentName(routerVersion1, "enricher"),
-				},
-			},
-			Container: "mycontainer",
-			Previous:  true,
-			SinceTime: &sinceTime,
-			TailLines: &tailLines,
-			HeadLines: &headLines,
-		}).
-		Return([]*service.PodLog{{TextPayload: "valid optional args"}}, nil)
-	// Simulate error when logs for router with component 'ensembler' is requested
-	podLogService.
-		On("ListPodLogs", service.PodLogRequest{
-			Namespace:        servicebuilder.GetNamespace(project),
-			DefaultContainer: cluster.KnativeUserContainerName,
-			Environment:      router1.EnvironmentName,
-			LabelSelectors: []service.LabelSelector{
-				{
-					Key:   cluster.KnativeServiceLabelKey,
-					Value: servicebuilder.GetComponentName(routerVersion2, "ensembler"),
-				},
-			},
-		}).
-		Return([]*service.PodLog{}, errors.New("test pod log error"))
-
 	type args struct {
 		r    *http.Request
 		vars RequestVars
 		body interface{}
 	}
 	tests := []struct {
-		name string
-		args args
-		want *Response
+		name                  string
+		args                  args
+		want                  *Response
+		mlpService            func() service.MLPService
+		routersService        func() service.RoutersService
+		routerVersionsService func() service.RouterVersionsService
+		podLogService         func() service.PodLogService
 	}{
 		{
 			name: "missing project_id",
@@ -422,6 +346,18 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				vars: RequestVars{},
 			},
 			want: BadRequest("invalid project id", "key project_id not found in vars"),
+			mlpService: func() service.MLPService {
+				return nil
+			},
+			routersService: func() service.RoutersService {
+				return nil
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				return nil
+			},
+			podLogService: func() service.PodLogService {
+				return nil
+			},
 		},
 		{
 			name: "missing router_id",
@@ -431,47 +367,149 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				},
 			},
 			want: BadRequest("invalid router id", "key router_id not found in vars"),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				return nil
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				return nil
+			},
+			podLogService: func() service.PodLogService {
+				return nil
+			},
 		},
 		{
 			name: "expected args",
 			args: args{
 				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
+					"project_id":     {"1"},
+					"router_id":      {"1"},
+					"component_type": {"router"},
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "routerVersion1"}}),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(1)).Return(router1, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByID", models.ID(1)).Return(routerVersion1, nil)
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				svc := &mocks.PodLogService{}
+				svc.On("ListPodLogs", service.PodLogRequest{
+					Namespace:        servicebuilder.GetNamespace(project),
+					DefaultContainer: cluster.KnativeUserContainerName,
+					Environment:      router1.EnvironmentName,
+					LabelSelectors: []service.LabelSelector{
+						{
+							Key:   cluster.KnativeServiceLabelKey,
+							Value: servicebuilder.GetComponentName(routerVersion1, "router"),
+						},
+					},
+				}).Return([]*service.PodLog{{TextPayload: "routerVersion1"}}, nil)
+				return svc
+			},
 		},
 		{
 			name: "invalid router version id",
 			args: args{
 				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"3"},
+					"project_id":     {"1"},
+					"router_id":      {"1"},
+					"version":        {"3"},
+					"component_type": {"router"},
 				},
 			},
 			want: NotFound("router version not found", ""),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(1)).Return(router1, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByRouterIDAndVersion", models.ID(1), uint(3)).Return(nil, errors.New(""))
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				return nil
+			},
 		},
 		{
 			name: "invalid router version id reference in router",
 			args: args{
 				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"2"},
+					"project_id":     {"1"},
+					"router_id":      {"2"},
+					"component_type": {"router"},
 				},
 			},
 			want: BadRequest("Current router version id is invalid", "Make sure current router is deployed"),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(2)).Return(router2, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByID", models.ID(2)).Return(routerVersion2, nil)
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				return nil
+			},
 		},
 		{
 			name: "current version not found",
 			args: args{
 				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"3"},
+					"project_id":     {"1"},
+					"router_id":      {"3"},
+					"component_type": {"router"},
 				},
 			},
 			want: InternalServerError("Failed to find current router version", "test router version error"),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(3)).Return(router3, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByID", models.ID(3)).Return(nil, errors.New("test router version error"))
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				return nil
+			},
 		},
 		{
 			name: "valid optional args",
@@ -489,6 +527,41 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				},
 			},
 			want: Ok([]*service.PodLog{{TextPayload: "valid optional args"}}),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(1)).Return(router1, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByRouterIDAndVersion", models.ID(1), uint(1)).Return(routerVersion1, nil)
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				svc := &mocks.PodLogService{}
+				svc.On("ListPodLogs", service.PodLogRequest{
+					Namespace:        servicebuilder.GetNamespace(project),
+					DefaultContainer: cluster.KnativeUserContainerName,
+					Environment:      router1.EnvironmentName,
+					LabelSelectors: []service.LabelSelector{
+						{
+							Key:   cluster.KnativeServiceLabelKey,
+							Value: servicebuilder.GetComponentName(routerVersion1, "enricher"),
+						},
+					},
+					SinceTime: &sinceTime,
+					TailLines: &tailLines,
+					HeadLines: &headLines,
+					Previous:  true,
+					Container: "mycontainer",
+				}).Return([]*service.PodLog{{TextPayload: "valid optional args"}}, nil)
+				return svc
+			},
 		},
 		{
 			name: "invalid component_type",
@@ -504,84 +577,27 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 					"tail_lines":     {"5"},
 				},
 			},
-			want: BadRequest("Invalid component type 'invalidcomponenttype'",
-				"must be one of router, enricher or ensembler"),
-		},
-		{
-			name: "invalid since_time time format",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"since_time": {"2020-1205T08:00:00Z"},
-				},
+			want: BadRequest(
+				"failed to fetch router pod logs",
+				"failed to parse query string: Key: 'listRouterPodLogsOptions.ComponentType'"+
+					" Error:Field validation for 'ComponentType' failed on the 'oneof' tag",
+			),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
 			},
-			want: BadRequest("Query string 'since_time' must be in RFC3339 format",
-				`parsing time "2020-1205T08:00:00Z" as "2006-01-02T15:04:05Z07:00": cannot parse "05T08:00:00Z" as "-"`),
-		},
-		{
-			name: "invalid previous arg",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"previous":   {"yes"},
-				},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(1)).Return(router1, nil)
+				return svc
 			},
-			want: BadRequest("Query string 'previous' must be a truthy value",
-				`strconv.ParseBool: parsing "yes": invalid syntax`),
-		},
-		{
-			name: "invalid tail_lines arg",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"tail_lines": {"five"},
-				},
+			routerVersionsService: func() service.RouterVersionsService {
+				return nil
 			},
-			want: BadRequest("Query string 'tail_lines' must be a positive number",
-				`strconv.ParseInt: parsing "five": invalid syntax`),
-		},
-		{
-			name: "negative tail_lines arg",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"tail_lines": {"-1"},
-				},
+			podLogService: func() service.PodLogService {
+				return nil
 			},
-			want: BadRequest("Query string 'tail_lines' must be a positive number", ""),
-		},
-		{
-			name: "invalid head_lines arg",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"head_lines": {"five"},
-				},
-			},
-			want: BadRequest("Query string 'head_lines' must be a positive number",
-				`strconv.ParseInt: parsing "five": invalid syntax`),
-		},
-		{
-			name: "negative head_lines arg",
-			args: args{
-				vars: RequestVars{
-					"project_id": {"1"},
-					"router_id":  {"1"},
-					"version":    {"1"},
-					"head_lines": {"-10"},
-				},
-			},
-			want: BadRequest("Query string 'head_lines' must be a positive number", ""),
 		},
 		{
 			name: "list logs error",
@@ -589,24 +605,55 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 				vars: RequestVars{
 					"project_id":     {"1"},
 					"router_id":      {"1"},
-					"version":        {"2"},
-					"component_type": {"ensembler"},
+					"component_type": {"router"},
 				},
 			},
 			want: InternalServerError("Failed to list logs", "test pod log error"),
+			mlpService: func() service.MLPService {
+				svc := &mocks.MLPService{}
+				svc.On("GetProject", models.ID(1)).Return(project, nil)
+				return svc
+			},
+			routersService: func() service.RoutersService {
+				svc := &mocks.RoutersService{}
+				svc.On("FindByID", models.ID(1)).Return(router1, nil)
+				return svc
+			},
+			routerVersionsService: func() service.RouterVersionsService {
+				svc := &mocks.RouterVersionsService{}
+				svc.On("FindByID", models.ID(1)).Return(routerVersion1, nil)
+				return svc
+			},
+			podLogService: func() service.PodLogService {
+				svc := &mocks.PodLogService{}
+				svc.On("ListPodLogs", service.PodLogRequest{
+					Namespace:        servicebuilder.GetNamespace(project),
+					DefaultContainer: cluster.KnativeUserContainerName,
+					Environment:      router1.EnvironmentName,
+					LabelSelectors: []service.LabelSelector{
+						{
+							Key:   cluster.KnativeServiceLabelKey,
+							Value: servicebuilder.GetComponentName(routerVersion1, "router"),
+						},
+					},
+				}).Return(nil, fmt.Errorf("test pod log error"))
+				return svc
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			validator, _ := validation.NewValidator(nil)
 			c := PodLogController{
-				BaseController{
-					AppContext: &AppContext{
-						PodLogService:         podLogService,
-						MLPService:            mlpService,
-						RoutersService:        routersService,
-						RouterVersionsService: routerVersionsService,
+				NewBaseController(
+					&AppContext{
+						PodLogService:         tt.podLogService(),
+						MLPService:            tt.mlpService(),
+						RoutersService:        tt.routersService(),
+						RouterVersionsService: tt.routerVersionsService(),
 					},
-				},
+					validator,
+				),
 			}
 			if got := c.ListRouterPodLogs(tt.args.r, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ListRouterPodLogs() = %+v, want %+v", got, tt.want)
