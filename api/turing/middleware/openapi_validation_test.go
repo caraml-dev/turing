@@ -51,11 +51,12 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:          "bad path parameter",
-			method:        "GET",
-			url:           "/projects/NOT_NUMBER/routers",
-			wantErr:       true,
-			wantErrSubstr: `parameter "project_id" in path has an error: value NOT_NUMBER: an invalid integer: strconv.ParseFloat: parsing "NOT_NUMBER": invalid syntax`,
+			name:    "bad path parameter",
+			method:  "GET",
+			url:     "/projects/NOT_NUMBER/routers",
+			wantErr: true,
+			wantErrSubstr: strings.Join([]string{`parameter "project_id" in path has an error: value NOT_NUMBER: `,
+				`an invalid integer: strconv.ParseFloat: parsing "NOT_NUMBER": invalid syntax`}, ""),
 		},
 		{
 			name:   "Missing property in body",
@@ -88,8 +89,9 @@ func TestOpenAPIValidationValidate(t *testing.T) {
   }
 }
 `,
-			wantErr:       true,
-			wantErrSubstr: `request body has an error: doesn't match the schema: Error at "/environment_name": property "environment_name" is missing`,
+			wantErr: true,
+			wantErrSubstr: strings.Join([]string{`request body has an error: doesn't match the schema: `,
+				`Error at "/environment_name": property "environment_name" is missing`}, ""),
 		},
 		{
 			name:   "invalid enum",
@@ -126,8 +128,9 @@ func TestOpenAPIValidationValidate(t *testing.T) {
   }
 }
 `,
-			wantErr:       true,
-			wantErrSubstr: `request body has an error: doesn't match the schema: Error at "/config/ensembler/type": value is not one of the allowed values`,
+			wantErr: true,
+			wantErrSubstr: strings.Join([]string{`request body has an error: doesn't match the schema: `,
+				`Error at "/config/ensembler/type": value is not one of the allowed values`}, ""),
 		},
 	}
 	for _, tt := range tests {
