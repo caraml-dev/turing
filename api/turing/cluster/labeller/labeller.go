@@ -3,9 +3,9 @@ package labeller
 import "fmt"
 
 const (
-	// OrchestratorValue is the value of the orchestrator (which is Turing)
+	// orchestratorValue is the value of the orchestrator (which is Turing)
 	orchestratorValue = "turing"
-	// EnvironmentLabel refers to the environment the Kubernetes object is in
+	// environmentLabel refers to the environment the Kubernetes object is in
 	environmentLabel = "environment"
 	// streamLabel refers to the stream the Kubernetes object it belongs to
 	streamLabel = "stream"

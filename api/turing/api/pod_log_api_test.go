@@ -93,7 +93,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			expected: Ok(ensemblingPodLogs),
 		},
-		"success | default component type": {
+		"success | head lines empty": {
 			mlpService: func() service.MLPService {
 				s := &mocks.MLPService{}
 				project := &client.Project{Name: "project"}
@@ -116,14 +116,82 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			componentType: "",
 			vars: RequestVars{
-				"job_id":     {"1"},
-				"project_id": {"1"},
-				"previous":   {"true"},
-				"since_time": {"2020-12-05T08:00:00Z"},
-				"tail_lines": {"5"},
-				"head_lines": {"3"},
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"tail_lines":     {"5"},
+				"component_type": {batch.ImageBuilderPodType},
 			},
 			expected: Ok(ensemblingPodLogs),
+		},
+		"success | since date missing": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
+				s.On("FormatLoggingURL", mock.Anything, mock.Anything, mock.Anything).Return(loggingURL, nil)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On("ListPodLogs", mock.Anything).Return(podLogsLegacyFormat, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"5"},
+				"component_type": {batch.ImageBuilderPodType},
+			},
+			expected: Ok(ensemblingPodLogs),
+		},
+		"failure | negative tail lines": {
+			mlpService: func() service.MLPService {
+				s := &mocks.MLPService{}
+				project := &client.Project{Name: "project"}
+				s.On("GetProject", models.ID(1)).Return(project, nil)
+				return s
+			},
+			ensemblingJobService: func() service.EnsemblingJobService {
+				s := &mocks.EnsemblingJobService{}
+				s.On("FindByID", mock.Anything, mock.Anything).Return(ensemblingJob, nil)
+				s.On("GetNamespaceByComponent", mock.Anything, mock.Anything).Return(namespace)
+				s.On("GetDefaultEnvironment").Return(environment)
+				s.On("CreatePodLabelSelector", mock.Anything, mock.Anything).Return([]service.LabelSelector{})
+				s.On("FormatLoggingURL", mock.Anything, mock.Anything, mock.Anything).Return(loggingURL, nil)
+				return s
+			},
+			podLogService: func() service.PodLogService {
+				s := &mocks.PodLogService{}
+				s.On("ListPodLogs", mock.Anything).Return(podLogsLegacyFormat, nil)
+				return s
+			},
+			componentType: "",
+			vars: RequestVars{
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"-5"},
+				"head_lines":     {"3"},
+				"component_type": {batch.ImageBuilderPodType},
+			},
+			expected: BadRequest(
+				"failed to fetch ensembling job",
+				"failed to parse query string: Key: 'listEnsemblingPodLogsOptions.podLogOptions.TailLines'"+
+					" Error:Field validation for 'TailLines' failed on the 'gte' tag",
+			),
 		},
 		"failure | wrong component type": {
 			mlpService: func() service.MLPService {
@@ -154,12 +222,11 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"head_lines":     {"3"},
 				"component_type": {"broken_comp"},
 			},
-			expected: BadRequest("Invalid component type 'broken_comp'", fmt.Sprintf(
-				"must be one of the following: %s, %s or %s",
-				batch.ImageBuilderPodType,
-				batch.DriverPodType,
-				batch.ExecutorPodType,
-			)),
+			expected: BadRequest(
+				"failed to fetch ensembling job",
+				"failed to parse query string: Key: 'listEnsemblingPodLogsOptions.ComponentType'"+
+					" Error:Field validation for 'ComponentType' failed on the 'oneof' tag",
+			),
 		},
 		"failure | ensembling job not found": {
 			mlpService: func() service.MLPService {
@@ -178,12 +245,13 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			componentType: "",
 			vars: RequestVars{
-				"job_id":     {"1"},
-				"project_id": {"1"},
-				"previous":   {"true"},
-				"since_time": {"2020-12-05T08:00:00Z"},
-				"tail_lines": {"5"},
-				"head_lines": {"3"},
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"5"},
+				"head_lines":     {"3"},
+				"component_type": {batch.ImageBuilderPodType},
 			},
 			expected: NotFound("ensembling job not found", "not found"),
 		},
@@ -209,12 +277,13 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			},
 			componentType: "",
 			vars: RequestVars{
-				"job_id":     {"1"},
-				"project_id": {"1"},
-				"previous":   {"true"},
-				"since_time": {"2020-12-05T08:00:00Z"},
-				"tail_lines": {"5"},
-				"head_lines": {"3"},
+				"job_id":         {"1"},
+				"project_id":     {"1"},
+				"previous":       {"true"},
+				"since_time":     {"2020-12-05T08:00:00Z"},
+				"tail_lines":     {"5"},
+				"head_lines":     {"3"},
+				"component_type": {batch.ImageBuilderPodType},
 			},
 			expected: InternalServerError("Failed to list logs", "error"),
 		},
