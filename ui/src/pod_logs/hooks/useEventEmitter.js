@@ -19,7 +19,7 @@ const useEventEmitter = () => {
     return Object.freeze({
       on: (event, fn) => emitter.on(event, fn),
       off: (event, fn) => emitter.off(event, fn),
-      emit: (event, payload) => emitter.emit(event, payload)
+      emit: (event, payload) => emitter.emit(event, payload),
     });
   }, [setDoPoll]);
 

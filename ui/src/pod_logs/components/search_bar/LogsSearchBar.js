@@ -1,26 +1,13 @@
 import React, { useMemo } from "react";
 import { EuiSearchBar } from "@elastic/eui";
 
-export const LogsSearchBar = ({ components, params, setParams }) => {
+export const LogsSearchBar = ({ components, params, onParamsChange }) => {
   const filters = useMemo(() => {
     return [
       {
         type: "field_value_toggle_group",
         field: "component_type",
-        items: [
-          {
-            value: "router",
-            name: "Router"
-          },
-          {
-            value: "enricher",
-            name: "Enricher"
-          },
-          {
-            value: "ensembler",
-            name: "Ensembler"
-          }
-        ].filter(option => components.includes(option.value))
+        items: components,
       },
       {
         type: "field_value_selection",
@@ -30,18 +17,18 @@ export const LogsSearchBar = ({ components, params, setParams }) => {
         options: [
           {
             value: "100",
-            name: "Last 100 records"
+            name: "Last 100 records",
           },
           {
             value: "1000",
-            name: "Last 1000 records"
+            name: "Last 1000 records",
           },
           {
             value: "",
-            name: "From the container start"
-          }
-        ]
-      }
+            name: "From the container start",
+          },
+        ],
+      },
     ];
   }, [components]);
 
@@ -58,11 +45,11 @@ export const LogsSearchBar = ({ components, params, setParams }) => {
         ...query.ast.clauses.reduce((acc, { field, value }) => {
           acc[field] = value;
           return acc;
-        }, {})
+        }, {}),
       };
 
       if (JSON.stringify(newParams) !== JSON.stringify(params)) {
-        setParams(newParams);
+        onParamsChange(newParams);
       }
     }
   };

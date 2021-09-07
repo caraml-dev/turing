@@ -1,0 +1,66 @@
+import React, { useEffect, useState } from "react";
+import { ConfigSection } from "../../../components/config_section";
+import { LogEntry } from "../../../services/logs/LogEntry";
+import { get } from "../../../components/form/utils";
+import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import useLogsApiEventEmitter from "../../../pod_logs/hooks/useEventEmitterLogsApi";
+import { PodLogsViewer } from "../../../pod_logs/components/logs_viewer/PodLogsViewer";
+
+const formatMessage = (data) => LogEntry.fromJson(data).toString();
+
+const components = [
+  {
+    value: "router",
+    name: "Router",
+  },
+  {
+    value: "enricher",
+    name: "Enricher",
+  },
+  {
+    value: "ensembler",
+    name: "Ensembler",
+  },
+];
+
+export const RouterLogsView = ({ projectId, routerId, router }) => {
+  useEffect(() => {
+    replaceBreadcrumbs([
+      {
+        text: "Routers",
+        href: "../",
+      },
+      {
+        text: router.name,
+        href: "./",
+      },
+      {
+        text: "Logs",
+      },
+    ]);
+  }, [projectId, routerId, router.name]);
+
+  const [params, setParams] = useState({
+    component_type: "router",
+    tail_lines: "1000",
+  });
+
+  const { emitter } = useLogsApiEventEmitter(
+    `/projects/${projectId}/routers/${routerId}/logs`,
+    params,
+    formatMessage
+  );
+
+  return (
+    <ConfigSection title="Logs">
+      <PodLogsViewer
+        components={components.filter(
+          (c) => c.value === "router" || !!get(router, `config.${c.value}`)
+        )}
+        emitter={emitter}
+        params={params}
+        onParamsChange={setParams}
+      />
+    </ConfigSection>
+  );
+};

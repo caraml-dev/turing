@@ -1,24 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
-import { usePollingTuringApi } from "../../../hooks/usePollingTuringApi";
+import { usePollingTuringApi } from "../../hooks/usePollingTuringApi";
 import useEventEmitter from "./useEventEmitter";
 
 const POLLING_INTERVAL = 5000;
 const BATCH_SIZE = 500;
 
-const useEventEmitterLogsApi = (projectId, routerId, params, formatMessage) => {
+const useEventEmitterLogsApi = (apiEndpoint, params, formatMessage) => {
   const { emitter, isActive } = useEventEmitter();
 
   const [query, setQuery] = useState();
 
   useEffect(() => {
     setQuery({
-      head_lines: !params.tail_lines ? BATCH_SIZE : "",
-      ...params
+      ...(!params.tail_lines ? { head_lines: BATCH_SIZE } : {}),
+      ...params,
     });
   }, [params, setQuery]);
 
   const [{ data, error }, startPolling, stopPolling] = usePollingTuringApi(
-    `/projects/${projectId}/routers/${routerId}/logs`,
+    apiEndpoint,
     {},
     [],
     POLLING_INTERVAL
@@ -32,10 +32,10 @@ const useEventEmitterLogsApi = (projectId, routerId, params, formatMessage) => {
   }, [isActive, query, startPolling, stopPolling]);
 
   const dispatchData = useCallback(
-    data => {
+    (data) => {
       let didCancel = false;
       Promise.resolve(data)
-        .then(entries => {
+        .then((entries) => {
           let logChunk = entries.map(formatMessage).join("\n");
           logChunk = logChunk.endsWith("\n") ? logChunk : `${logChunk}\n`;
 
@@ -43,12 +43,12 @@ const useEventEmitterLogsApi = (projectId, routerId, params, formatMessage) => {
 
           return entries[entries.length - 1].timestamp;
         })
-        .then(lastTimestamp => {
+        .then((lastTimestamp) => {
           if (!didCancel) {
-            setQuery(q => ({
+            setQuery((q) => ({
               ...q,
               since_time: lastTimestamp,
-              head_lines: BATCH_SIZE
+              head_lines: BATCH_SIZE,
             }));
           }
         });
@@ -56,7 +56,7 @@ const useEventEmitterLogsApi = (projectId, routerId, params, formatMessage) => {
       return {
         cancel: () => {
           didCancel = true;
-        }
+        },
       };
     },
     [emitter, formatMessage]
