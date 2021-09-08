@@ -3,8 +3,10 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 
 	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )
 
@@ -21,6 +23,30 @@ type EnsemblingJob struct {
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
 	MonitoringURL   string       `json:"monitoring_url" gorm:"-"`
+	RunID           int          `json:"-"`
+}
+
+type runIDProjection struct {
+	RunID int
+}
+
+// BeforeCreate sets the ensembling job name and run_id before creating
+func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
+	var latest EnsemblingJob
+	err := tx.Select("ensembling_jobs.run_id").
+		Where("ensembler_id = ?", job.EnsemblerID).
+		Order("run_id desc").
+		FirstOrInit(&latest, &EnsemblingJob{RunID: 0}).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	job.RunID = latest.RunID + 1
+	job.Name = fmt.Sprintf("%s-%d", job.InfraConfig.EnsemblerName, job.RunID)
+
+	return nil
 }
 
 // JobConfig stores the infra and ensembler config

@@ -38,7 +38,7 @@ type GenericEnsembler struct {
 
 	Type EnsemblerType `json:"type" gorm:"column:type" validate:"required,oneof=pyfunc"`
 
-	Name string `json:"name" gorm:"column:name" validate:"required,hostname_rfc1123,lte=15,gte=3"`
+	Name string `json:"name" gorm:"column:name" validate:"required,hostname_rfc1123,lte=20,gte=3"`
 }
 
 func (e *GenericEnsembler) GetProjectID() ID {

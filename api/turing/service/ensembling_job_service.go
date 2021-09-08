@@ -24,8 +24,7 @@ const (
 	SparkHomeFolder = "/home/spark"
 	// EnsemblerFolder is the folder created by the Turing SDK that contains
 	// the ensembler dependencies and pickled Python files.
-	EnsemblerFolder  = "ensembler"
-	jobNameMaxLength = 25
+	EnsemblerFolder = "ensembler"
 
 	kubernetesSparkRoleLabel         = "spark-role"
 	kubernetesSparkRoleDriverValue   = "driver"
@@ -257,10 +256,6 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 	}
 
 	name := job.Name
-	if len(name) > jobNameMaxLength {
-		name = name[:jobNameMaxLength]
-	}
-
 	values := EnsemblingMonitoringVariables{
 		Project: project.Name,
 		Job:     name,
@@ -283,11 +278,6 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 ) (*models.EnsemblingJob, error) {
 	job.ProjectID = projectID
 	job.EnvironmentName = s.defaultEnvironment
-
-	// Populate name if the user does not define a name for the job
-	if job.Name == "" {
-		job.Name = generateDefaultJobName(ensembler.Name)
-	}
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
