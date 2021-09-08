@@ -17,7 +17,6 @@ export const useTuringPollingApiEmitter = (
   );
 
   const emitter = useMemo(() => {
-    console.log("Creating new emitter...");
     const emitter = new mitt();
 
     emitter.on("start", () => {
