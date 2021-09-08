@@ -1,10 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useEffect } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { ConfigSection } from "../../../components/config_section";
 import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
-import { useTuringPollingApiEmitter } from "../../../hooks/useTuringPollingApiEmitter";
-import { useLogsApiEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsApiEmitter";
 import { LogEntry } from "../../../services/logs/LogEntry";
 import {
   EuiFlexGroup,
@@ -14,9 +12,7 @@ import {
   EuiText,
 } from "@elastic/eui";
 import { appConfig } from "../../../config";
-
-const processLogs = (data) =>
-  (data.logs || []).map((entry) => LogEntry.fromJson(entry).toString());
+import { useLogsEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsEmitter";
 
 const components = [
   {
@@ -53,55 +49,29 @@ export const EnsemblingJobLogsView = ({ job }) => {
     ]);
   }, [job.id]);
 
-  const [apiOptions, setApiOptions] = useState({
-    query: {
-      component_type: "driver",
-      tail_lines: configOptions.defaultTailLines,
-    },
+  const [query, setQuery] = useState({
+    component_type: "driver",
+    tail_lines: configOptions.defaultTailLines,
   });
 
-  const setQuery = useCallback(
-    (setQuery) => {
-      setApiOptions((options) => ({
-        ...options,
-        query: setQuery(options.query),
-      }));
-    },
-    [setApiOptions]
-  );
-
-  const { emitter: apiEmitter } = useTuringPollingApiEmitter(
+  const { emitter } = useLogsEmitter(
     `/projects/${job.project_id}/jobs/${job.id}/logs`,
-    apiOptions,
-    configOptions.pollInterval
-  );
-
-  useEffect(() => {
-    apiEmitter.on("data", (data) => {
-      setLoggingUrl(data.logging_url);
-
+    query,
+    (data) => {
       const entries = data.logs || [];
-      const lastTimestamp = !!entries.length
+      return !!entries.length
         ? entries[entries.length - 1].timestamp
         : undefined;
+    },
+    (data) => {
+      // Update External Logs URL
+      setLoggingUrl(data.logging_url);
 
-      if (!!lastTimestamp) {
-        setQuery((q) => ({
-          ...q,
-          since_time: lastTimestamp,
-          head_lines: configOptions.batchSize,
-        }));
-      }
-    });
-
-    apiEmitter.emit("start");
-
-    return () => {
-      apiEmitter.emit("abort");
-    };
-  }, [apiEmitter, setLoggingUrl, configOptions.batchSize, setQuery]);
-
-  const { emitter } = useLogsApiEmitter(apiEmitter, processLogs);
+      return (data.logs || []).map((entry) =>
+        LogEntry.fromJson(entry).toString()
+      );
+    }
+  );
 
   return (
     <ConfigSection title="Logs">
@@ -111,7 +81,7 @@ export const EnsemblingJobLogsView = ({ job }) => {
             <PodLogsViewer
               components={components}
               emitter={emitter}
-              query={apiOptions.query}
+              query={query}
               onQueryChange={setQuery}
               batchSize={configOptions.batchSize}
             />

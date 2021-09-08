@@ -30,7 +30,11 @@ export const CollapsibleBadgeGroup = ({
       );
 
       if (!isExpanded && items.length > minItemsCount) {
-        children.push(<EuiLink {...getToggleProps()}>Show All</EuiLink>);
+        children.push(
+          <EuiLink key={minItemsCount + 1} {...getToggleProps()}>
+            Show All
+          </EuiLink>
+        );
       }
     }
 
