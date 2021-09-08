@@ -225,11 +225,6 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	return paginatedResults, nil
 }
 
-func generateDefaultJobName(ensemblerName string) string {
-	t := time.Now().Unix()
-	return fmt.Sprintf("%s-%d", ensemblerName, t)
-}
-
 func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	// Ensembler URI will be a local directory
 	// Dockerfile will build copy the artifact into the local directory.

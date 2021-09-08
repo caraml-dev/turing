@@ -26,10 +26,6 @@ type EnsemblingJob struct {
 	RunID           int          `json:"-"`
 }
 
-type runIDProjection struct {
-	RunID int
-}
-
 // BeforeCreate sets the ensembling job name and run_id before creating
 func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
 	var latest EnsemblingJob
