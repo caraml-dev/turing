@@ -26,7 +26,7 @@ paths:
           required: true
         - in: "query"
           name: "component_type"
-          description: "component type of the router to get the logs from, default to 'router' component type"
+          description: "component type of the router to get the logs from"
           schema:
             type: "string"
             enum: [ "router", "enricher", "ensembler" ]
@@ -100,7 +100,7 @@ paths:
           required: true
         - in: "query"
           name: "component_type"
-          description: "component type of the router to get the logs from, default to 'router' component type"
+          description: "component type of the router to get the logs from"
           schema:
             type: "string"
             enum: [ "router", "enricher", "ensembler" ]
@@ -162,7 +162,7 @@ paths:
           required: true
         - in: "query"
           name: "component_type"
-          description: "component type of the ensembling job to get the logs from, default to 'image_builder' component type"
+          description: "component type of the ensembling job to get the logs from"
           schema:
             type: "string"
             enum: [ "image_builder", "driver", "executor" ]
