@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ConfigSection } from "../../../components/config_section";
 import { LogEntry } from "../../../services/logs/LogEntry";
 import { get } from "../../../components/form/utils";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import useLogsApiEventEmitter from "../../../pod_logs/hooks/useEventEmitterLogsApi";
-import { PodLogsViewer } from "../../../pod_logs/components/logs_viewer/PodLogsViewer";
+import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
+import { EuiPanel } from "@elastic/eui";
+import { useTuringPollingApiEmitter } from "../../../hooks/useTuringPollingApiEmitter";
+import { useLogsApiEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsApiEmitter";
+import { appConfig } from "../../../config";
 
-const processLogs = (data) => {
-  const chunk = data
-    .map((entry) => LogEntry.fromJson(entry).toString())
-    .join("\n");
-
-  const timestamp = !!data.length ? data[data.length - 1].timestamp : undefined;
-
-  return { chunk, timestamp };
-};
+const processLogs = (data) =>
+  data.map((entry) => LogEntry.fromJson(entry).toString());
 
 const components = [
   {
@@ -31,7 +27,9 @@ const components = [
   },
 ];
 
-export const RouterLogsView = ({ projectId, routerId, router }) => {
+export const RouterLogsView = ({ router }) => {
+  const { podLogs: configOptions } = appConfig;
+
   useEffect(() => {
     replaceBreadcrumbs([
       {
@@ -46,29 +44,68 @@ export const RouterLogsView = ({ projectId, routerId, router }) => {
         text: "Logs",
       },
     ]);
-  }, [projectId, routerId, router.name]);
+  }, [router.name]);
 
-  const [params, setParams] = useState({
-    component_type: "router",
-    tail_lines: "1000",
+  const [apiOptions, setApiOptions] = useState({
+    query: {
+      component_type: "router",
+      tail_lines: configOptions.defaultTailLines,
+    },
   });
 
-  const { emitter } = useLogsApiEventEmitter(
-    `/projects/${projectId}/routers/${routerId}/logs`,
-    params,
-    processLogs
+  const setQuery = useCallback(
+    (setQuery) => {
+      setApiOptions((options) => ({
+        ...options,
+        query: setQuery(options.query),
+      }));
+    },
+    [setApiOptions]
   );
+
+  const { emitter: apiEmitter } = useTuringPollingApiEmitter(
+    `/projects/${router.project_id}/routers/${router.id}/logs`,
+    apiOptions,
+    configOptions.pollInterval
+  );
+
+  useEffect(() => {
+    apiEmitter.on("data", (entries) => {
+      const lastTimestamp = !!entries.length
+        ? entries[entries.length - 1].timestamp
+        : undefined;
+
+      if (!!lastTimestamp) {
+        setQuery((q) => ({
+          ...q,
+          since_time: lastTimestamp,
+          head_lines: configOptions.batchSize,
+        }));
+      }
+    });
+
+    apiEmitter.emit("start");
+
+    return () => {
+      apiEmitter.emit("abort");
+    };
+  }, [apiEmitter, setQuery, configOptions.batchSize]);
+
+  const { emitter } = useLogsApiEmitter(apiEmitter, processLogs);
 
   return (
     <ConfigSection title="Logs">
-      <PodLogsViewer
-        components={components.filter(
-          (c) => c.value === "router" || !!get(router, `config.${c.value}`)
-        )}
-        emitter={emitter}
-        params={params}
-        onParamsChange={setParams}
-      />
+      <EuiPanel>
+        <PodLogsViewer
+          components={components.filter(
+            (c) => c.value === "router" || !!get(router, `config.${c.value}`)
+          )}
+          emitter={emitter}
+          query={apiOptions.query}
+          onQueryChange={setQuery}
+          batchSize={configOptions.batchSize}
+        />
+      </EuiPanel>
     </ConfigSection>
   );
 };

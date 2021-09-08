@@ -21,11 +21,11 @@ export const apiConfig = {
   mlpApiUrl:
     process.env.NODE_ENV === "development"
       ? "/api/mlp"
-      : process.env.REACT_APP_MLP_API
+      : process.env.REACT_APP_MLP_API,
 };
 
 export const authConfig = {
-  oauthClientId: process.env.REACT_APP_OAUTH_CLIENT_ID
+  oauthClientId: process.env.REACT_APP_OAUTH_CLIENT_ID,
 };
 
 export const appConfig = {
@@ -43,32 +43,40 @@ export const appConfig = {
   scaling: {
     maxAllowedReplica: process.env.REACT_APP_MAX_ALLOWED_REPLICA
       ? parseInt(process.env.REACT_APP_MAX_ALLOWED_REPLICA)
-      : 10
+      : 10,
   },
   pagination: {
-    defaultPageSize: 10
+    defaultPageSize: 10,
   },
   tables: {
     defaultTextSize: "s",
     defaultIconSize: "s",
-    dateFormat: "YYYY-MM-DDTHH:mm.SSZ"
-  }
+    dateFormat: "YYYY-MM-DDTHH:mm.SSZ",
+  },
+  podLogs: {
+    // Interval (in ms) between API calls to Logs API
+    pollInterval: 10000,
+    // Max number of log entries to be fetched in a single API call
+    batchSize: 500,
+    // Default number of tail log entries to be fetched
+    defaultTailLines: 1000,
+  },
 };
 
 export const sentryConfig = {
   dsn: process.env.REACT_APP_SENTRY_DSN,
-  environment: appConfig.environment
+  environment: appConfig.environment,
 };
 
 export const resultLoggingConfig = {
-  protoUrl: process.env.REACT_APP_RESULT_LOG_PROTO_URL
+  protoUrl: process.env.REACT_APP_RESULT_LOG_PROTO_URL,
 };
 
 export const monitoringConfig = {
-  dashboardUrl: process.env.REACT_APP_ROUTER_MONITORING_URL || ""
+  dashboardUrl: process.env.REACT_APP_ROUTER_MONITORING_URL || "",
 };
 
 export const alertConfig = {
   environment:
-    appConfig.environment === "dev" ? "development" : appConfig.environment
+    appConfig.environment === "dev" ? "development" : appConfig.environment,
 };

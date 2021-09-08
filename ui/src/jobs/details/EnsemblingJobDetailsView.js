@@ -72,22 +72,6 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
 
             <EuiSpacer size="m" />
 
-            {!!jobDetails.error && (
-              <Fragment>
-                <EuiCallOut
-                  title="Ensembling job has failed"
-                  color="danger"
-                  iconType="alert">
-                  <p>
-                    <b>Reason: </b>
-                    {jobDetails.error}
-                  </p>
-                </EuiCallOut>
-
-                <EuiSpacer size="m" />
-              </Fragment>
-            )}
-
             <Router>
               <Redirect from="/" to="details" noThrow />
               <EnsemblingJobConfigView path="details" job={jobDetails} />
