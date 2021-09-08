@@ -132,7 +132,7 @@ components:
       oneOf:
         - $ref: "#/components/schemas/PyFuncEnsembler"
       discriminator:
-        propertyName: type
+        propertyName: "type"
         mapping:
           pyfunc: '#/components/schemas/PyFuncEnsembler'
 

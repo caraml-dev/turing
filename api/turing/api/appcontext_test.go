@@ -277,9 +277,11 @@ func TestNewAppContext(t *testing.T) {
 	ensemblingJobService := service.NewEnsemblingJobService(
 		nil,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+		testCfg.BatchEnsemblingConfig.LoggingURLFormat,
+		testCfg.BatchEnsemblingConfig.MonitoringURLFormat,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		testCfg.BatchEnsemblingConfig.MonitoringURLTemplate,
-		mlpService,
+		mlpSvc,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
@@ -309,9 +311,11 @@ func TestNewAppContext(t *testing.T) {
 		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
 		MLPService:            mlpService,
 		ExperimentsService:    experimentService,
-		PodLogService:         service.NewPodLogService(map[string]cluster.Controller{}),
-		AlertService:          alertService,
-		OpenAPIValidation:     &middleware.OpenAPIValidation{},
-		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		PodLogService: service.NewPodLogService(
+			map[string]cluster.Controller{},
+		),
+		AlertService:      alertService,
+		OpenAPIValidation: &middleware.OpenAPIValidation{},
+		BatchRunners:      []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}, appCtx)
 }

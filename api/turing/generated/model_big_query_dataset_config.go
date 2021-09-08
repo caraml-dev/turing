@@ -16,10 +16,10 @@ import (
 
 // BigQueryDatasetConfig struct for BigQueryDatasetConfig
 type BigQueryDatasetConfig struct {
-	Table    *string           `json:"table,omitempty"`
-	Features []string          `json:"features,omitempty"`
-	Query    *string           `json:"query,omitempty"`
-	Options  map[string]string `json:"options,omitempty"`
+	Table *string `json:"table,omitempty"`
+	Features []string `json:"features,omitempty"`
+	Query *string `json:"query,omitempty"`
+	Options map[string]string `json:"options,omitempty"`
 }
 
 // NewBigQueryDatasetConfig instantiates a new BigQueryDatasetConfig object
@@ -73,7 +73,7 @@ func (o *BigQueryDatasetConfig) SetTable(v string) {
 
 // GetFeatures returns the Features field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BigQueryDatasetConfig) GetFeatures() []string {
-	if o == nil {
+	if o == nil  {
 		var ret []string
 		return ret
 	}
@@ -138,7 +138,7 @@ func (o *BigQueryDatasetConfig) SetQuery(v string) {
 
 // GetOptions returns the Options field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BigQueryDatasetConfig) GetOptions() map[string]string {
-	if o == nil {
+	if o == nil  {
 		var ret map[string]string
 		return ret
 	}
@@ -221,3 +221,5 @@ func (v *NullableBigQueryDatasetConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

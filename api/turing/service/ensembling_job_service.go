@@ -8,9 +8,12 @@ import (
 	"time"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/batch"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
+	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
-	"github.com/gojek/turing/api/turing/log"
+	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -23,6 +26,18 @@ const (
 	// the ensembler dependencies and pickled Python files.
 	EnsemblerFolder  = "ensembler"
 	jobNameMaxLength = 25
+
+	kubernetesSparkRoleLabel         = "spark-role"
+	kubernetesSparkRoleDriverValue   = "driver"
+	kubernetesSparkRoleExecutorValue = "executor"
+)
+
+var (
+	loggingPodPostfixesInSearch = map[string]string{
+		batch.DriverPodType:       ".*-driver",
+		batch.ExecutorPodType:     ".*-exec-.*",
+		batch.ImageBuilderPodType: "",
+	}
 )
 
 // EnsemblingJobFindByIDOptions contains the options allowed when finding ensembling jobs.
@@ -56,35 +71,58 @@ type EnsemblingJobService interface {
 		ensembler *models.PyFuncEnsembler,
 	) (*models.EnsemblingJob, error)
 	MarkEnsemblingJobForTermination(ensemblingJob *models.EnsemblingJob) error
+	GetNamespaceByComponent(componentType string, project *mlp.Project) string
+	GetDefaultEnvironment() string
+	CreatePodLabelSelector(ensemblerName, componentType string) []LabelSelector
+	FormatLoggingURL(ensemblerName string, namespace string, componentType string) (string, error)
 }
 
 // NewEnsemblingJobService creates a new ensembling job service
 func NewEnsemblingJobService(
 	db *gorm.DB,
 	defaultEnvironment string,
+	imageBuilderNamespace string,
+	loggingURLFormat *string,
+	dashboardURLFormat *string,
 	defaultConfig config.DefaultEnsemblingJobConfigurations,
-	dashboardURLTemplate string,
 	mlpService MLPService,
 ) EnsemblingJobService {
-	t, err := template.New("dashboardTemplate").Parse(dashboardURLTemplate)
-	if err != nil {
-		log.Warnf("error parsing ensembling dashboard template, values will be nil: %s", err.Error())
+	var loggingURLTemplate *template.Template
+	var err error
+	if loggingURLFormat != nil {
+		loggingURLTemplate, err = template.New("dashboardTemplate").Parse(*loggingURLFormat)
+		if err != nil {
+			logger.Warnf("error parsing ensembling logging url template: %s", err)
+		}
 	}
+
+	var dashboardTemplate *template.Template
+	if dashboardURLFormat != nil {
+		dashboardTemplate, err = template.New("dashboardTemplate").Parse(*dashboardURLFormat)
+		if err != nil {
+			logger.Warnf("error parsing ensembling dashboard template, values will be nil: %s", err.Error())
+		}
+	}
+
 	return &ensemblingJobService{
-		db:                   db,
-		defaultEnvironment:   defaultEnvironment,
-		defaultConfig:        defaultConfig,
-		dashboardURLTemplate: t,
-		mlpService:           mlpService,
+		db:                    db,
+		defaultEnvironment:    defaultEnvironment,
+		imageBuilderNamespace: imageBuilderNamespace,
+		dashboardURLTemplate:  dashboardTemplate,
+		loggingURLTemplate:    loggingURLTemplate,
+		defaultConfig:         defaultConfig,
+		mlpService:            mlpService,
 	}
 }
 
 type ensemblingJobService struct {
-	db                   *gorm.DB
-	defaultEnvironment   string
-	defaultConfig        config.DefaultEnsemblingJobConfigurations
-	dashboardURLTemplate *template.Template
-	mlpService           MLPService
+	db                    *gorm.DB
+	defaultEnvironment    string
+	imageBuilderNamespace string
+	dashboardURLTemplate  *template.Template
+	loggingURLTemplate    *template.Template
+	defaultConfig         config.DefaultEnsemblingJobConfigurations
+	mlpService            MLPService
 }
 
 // Save the given router to the db. Updates the existing record if already exists
@@ -214,6 +252,10 @@ type EnsemblingMonitoringVariables struct {
 }
 
 func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) (string, error) {
+	if s.dashboardURLTemplate == nil {
+		return "", nil
+	}
+
 	name := job.Name
 	if len(name) > jobNameMaxLength {
 		name = name[:jobNameMaxLength]
@@ -290,6 +332,66 @@ func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.Ensem
 	job.MonitoringURL = url
 
 	return nil
+}
+
+func (s *ensemblingJobService) GetNamespaceByComponent(componentType string, project *mlp.Project) string {
+	if componentType == batch.ImageBuilderPodType {
+		return s.imageBuilderNamespace
+	}
+	return servicebuilder.GetNamespace(project)
+}
+
+func (s *ensemblingJobService) GetDefaultEnvironment() string {
+	return s.defaultEnvironment
+}
+
+func (s *ensemblingJobService) CreatePodLabelSelector(ensemblerName, componentType string) []LabelSelector {
+	labelSelector := []LabelSelector{
+		{
+			Key:   labeller.GetLabelName(labeller.AppLabel),
+			Value: ensemblerName,
+		},
+	}
+
+	if componentType == batch.DriverPodType {
+		labelSelector = append(labelSelector, LabelSelector{
+			Key:   kubernetesSparkRoleLabel,
+			Value: kubernetesSparkRoleDriverValue,
+		})
+	} else if componentType == batch.ExecutorPodType {
+		labelSelector = append(labelSelector, LabelSelector{
+			Key:   kubernetesSparkRoleLabel,
+			Value: kubernetesSparkRoleExecutorValue,
+		})
+	}
+
+	return labelSelector
+}
+
+type ensemblingLogURLValues struct {
+	PodName   string
+	Namespace string
+}
+
+func (s *ensemblingJobService) FormatLoggingURL(ensemblerName, namespace, componentType string) (string, error) {
+	if s.loggingURLTemplate == nil {
+		// Not configured properly or not configured
+		return "", nil
+	}
+
+	podName := fmt.Sprintf("%s%s", ensemblerName, loggingPodPostfixesInSearch[componentType])
+	v := ensemblingLogURLValues{
+		PodName:   podName,
+		Namespace: namespace,
+	}
+
+	var b bytes.Buffer
+	err := s.loggingURLTemplate.Execute(&b, v)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }
 
 func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.EnsemblingJob) {

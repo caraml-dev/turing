@@ -64,7 +64,7 @@ class PyFuncEnsembler(ModelComposed):
 
     validations = {
         ('name',): {
-            'max_length': 50,
+            'max_length': 15,
             'min_length': 3,
         },
     }

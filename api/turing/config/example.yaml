@@ -15,7 +15,10 @@ AuthConfig:
 BatchEnsemblingConfig:
   Enabled: true
   # Note that {{.Project}} and {{.Job}} is required and they provide the Project name and Job name respectively.
-  MonitoringURLTemplate: https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}
+  MonitoringURLFormat: "https://grafana.example.com/graph/d/foo/dashboard?var-project={{.Project}}&var-job={{.Job}}"
+  # Note that {{.PodName}} and {{.Namespace}} is required and they provide the PodName and Namespace respectively.
+  # This is optional logging url format is optional if you do not require the logging URL.
+  LoggingURLFormat: "https://www.example.com/dashboard?pod_name={{.PodName}}&namespace={{.Namespace}}"
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:

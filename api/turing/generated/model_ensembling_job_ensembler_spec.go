@@ -16,7 +16,7 @@ import (
 
 // EnsemblingJobEnsemblerSpec struct for EnsemblingJobEnsemblerSpec
 type EnsemblingJobEnsemblerSpec struct {
-	Uri    string                           `json:"uri"`
+	Uri string `json:"uri"`
 	Result EnsemblingJobEnsemblerSpecResult `json:"result"`
 }
 
@@ -54,7 +54,7 @@ func (o *EnsemblingJobEnsemblerSpec) GetUri() string {
 // GetUriOk returns a tuple with the Uri field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobEnsemblerSpec) GetUriOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Uri, true
@@ -78,7 +78,7 @@ func (o *EnsemblingJobEnsemblerSpec) GetResult() EnsemblingJobEnsemblerSpecResul
 // GetResultOk returns a tuple with the Result field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobEnsemblerSpec) GetResultOk() (*EnsemblingJobEnsemblerSpecResult, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Result, true
@@ -135,3 +135,5 @@ func (v *NullableEnsemblingJobEnsemblerSpec) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

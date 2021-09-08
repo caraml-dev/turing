@@ -94,6 +94,7 @@ class EnsemblingJob(ModelNormal):
             'job_config': (EnsemblerConfig,),  # noqa: E501
             'status': (EnsemblerJobStatus,),  # noqa: E501
             'error': (str,),  # noqa: E501
+            'monitoring_url': (str,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
         }
@@ -113,6 +114,7 @@ class EnsemblingJob(ModelNormal):
         'job_config': 'job_config',  # noqa: E501
         'status': 'status',  # noqa: E501
         'error': 'error',  # noqa: E501
+        'monitoring_url': 'monitoring_url',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
     }
@@ -172,6 +174,7 @@ class EnsemblingJob(ModelNormal):
             job_config (EnsemblerConfig): [optional]  # noqa: E501
             status (EnsemblerJobStatus): [optional]  # noqa: E501
             error (str): [optional]  # noqa: E501
+            monitoring_url (str): [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
         """
