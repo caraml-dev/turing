@@ -11,7 +11,7 @@ import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { Status } from "../../services/status/Status";
 import { EventsList } from "./events_list/EventsList";
 import "./RouterActivityLogView.scss";
-import { usePollingTuringApi } from "../../hooks/usePollingTuringApi";
+import { useTuringPollingApi } from "../../hooks/useTuringPollingApi";
 
 const POLLING_INTERVAL = 5000;
 export const RouterActivityLogView = ({ projectId, routerId, router }) => {
@@ -24,7 +24,7 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
     startPollingEvents,
     stopPollingEvents,
     fetchEventsOnce,
-  ] = usePollingTuringApi(
+  ] = useTuringPollingApi(
     `/projects/${projectId}/routers/${routerId}/events`,
     {},
     [],

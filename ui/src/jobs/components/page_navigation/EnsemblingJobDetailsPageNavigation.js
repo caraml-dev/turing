@@ -11,7 +11,6 @@ export const EnsemblingJobDetailsPageNavigation = ({ job, ...props }) => {
     {
       id: "logs",
       name: "Logs",
-      disabled: true,
     },
     {
       id: "monitoring",
