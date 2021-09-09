@@ -2,6 +2,7 @@ import yaml from "js-yaml";
 import objectAssignDeep from "object-assign-deep";
 import { BaseExperimentEngine } from "../experiment_engine";
 import { get } from "../../components/form/utils";
+import { stripKeys } from "../../utils/object";
 
 export class RouterVersion {
   static fromJson(json) {
@@ -13,6 +14,34 @@ export class RouterVersion {
   }
 
   toPrettyYaml() {
+    const experiment_engine =
+      this.experiment_engine.type !== "nop"
+        ? {
+            type: this.experiment_engine.type,
+            config: {
+              client: {
+                id: this.experiment_engine.config.client.username,
+                ...(this.experiment_engine.config.client.passkey_set
+                  ? {
+                      encrypted_passkey:
+                        this.experiment_engine.config.client.encrypted_passkey,
+                    }
+                  : {
+                      encrypted_passkey: "<to be computed>",
+                      passkey: this.experiment_engine.config.client.passkey,
+                    }),
+              },
+              experiments: this.experiment_engine.config.experiments,
+              variables: stripKeys(this.experiment_engine.config.variables, [
+                "idx",
+                "selected",
+              ]),
+            },
+          }
+        : {
+            type: "none",
+          };
+
     const pretty = {
       version: this.version,
       router: {
@@ -26,31 +55,7 @@ export class RouterVersion {
         })),
         resource_request: this.resource_request,
       },
-      experiment_engine:
-        this.experiment_engine.type !== "nop"
-          ? {
-              type: this.experiment_engine.type,
-              config: {
-                client: {
-                  id: this.experiment_engine.config.client.username,
-                  ...(this.experiment_engine.config.client.passkey_set
-                    ? {
-                        encrypted_passkey:
-                          this.experiment_engine.config.client
-                            .encrypted_passkey,
-                      }
-                    : {
-                        encrypted_passkey: "<to be computed>",
-                        passkey: this.experiment_engine.config.client.passkey,
-                      }),
-                },
-                experiments: this.experiment_engine.config.experiments,
-                variables: this.experiment_engine.config.variables,
-              },
-            }
-          : {
-              type: "none",
-            },
+      experiment_engine,
       enricher:
         !!this.enricher && this.enricher.type !== "nop"
           ? {
