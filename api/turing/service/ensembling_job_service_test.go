@@ -218,9 +218,19 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+			oldRunID := found.RunID
+			assert.NotEqual(t, oldRunID, 0)
 
 			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
+
+			// save again to test if RunID has incremented.
+			ensemblingJob = generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			err = ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+			assert.Equal(t, oldRunID+1, ensemblingJob.RunID)
 		})
 	})
 }
