@@ -8,6 +8,7 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/batch"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/internal/ref"
@@ -19,10 +20,10 @@ import (
 )
 
 const (
-	artifactFolder       string = "artifact"
-	dashboardURLTemplate string = "https://a.co/dashboard?var-project={{.Project}}&var-job={{.Job}}"
-	dashboardURLFormat   string = "https://a.co/dashboard?var-project=%s&var-job=%s"
-	mlpProjectName       string = "foo"
+	artifactFolder string = "artifact"
+	// Actually this var-job=%s has a run_id appended to it, but it's ok since we use assert.Contains
+	dashboardURLStringFormat string = "https://a.co/dashboard?var-project=%s&var-job=%s"
+	mlpProjectName           string = "foo"
 )
 
 var (
@@ -31,6 +32,10 @@ var (
 	executorReplica       int32 = 2
 	executorCPURequest          = "1"
 	executorMemoryRequest       = "1Gi"
+
+	imageBuilderNamespace = "image"
+	loggingURLFormat      = "http://www.example.com/{{.Namespace}}/{{.PodName}}"
+	dashboardURLFormat    = "https://a.co/dashboard?var-project={{.Project}}&var-job={{.Job}}"
 )
 
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
@@ -59,11 +64,9 @@ func generateEnsemblingJobFixture(
 	i int,
 	ensemblerID models.ID,
 	projectID models.ID,
-	name string,
 	genExpected bool,
 ) *models.EnsemblingJob {
 	value := &models.EnsemblingJob{
-		Name:            name,
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
 		EnvironmentName: "dev",
@@ -174,7 +177,7 @@ func generateEnsemblingJobFixture(
 		value.EnvironmentName = "dev"
 		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.EnsemblerName = EnsemblerFolder
-		value.MonitoringURL = fmt.Sprintf(dashboardURLFormat, mlpProjectName, name)
+		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, EnsemblerFolder)
 	}
 
 	return value
@@ -186,14 +189,17 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
 				defaultConfigurations,
-				dashboardURLTemplate,
 				createMLPService(),
 			)
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -212,9 +218,19 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+			oldRunID := found.RunID
+			assert.NotEqual(t, oldRunID, 0)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
+
+			// save again to test if RunID has incremented.
+			ensemblingJob = generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			err = ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+			assert.Equal(t, oldRunID+1, ensemblingJob.RunID)
 		})
 	})
 }
@@ -269,15 +285,17 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 				ensemblingJobService := NewEnsemblingJobService(
 					db,
 					"dev",
+					imageBuilderNamespace,
+					&loggingURLFormat,
+					&dashboardURLFormat,
 					defaultConfigurations,
-					dashboardURLTemplate,
 					createMLPService(),
 				)
 
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
 					projectID := models.ID(1)
 					ensemblerID := models.ID(1000)
-					ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+					ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
 					err := ensemblingJobService.Save(ensemblingJob)
 					assert.NoError(t, err)
 					assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -309,15 +327,18 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
 				defaultConfigurations,
-				dashboardURLTemplate,
 				createMLPService(),
 			)
 
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -356,7 +377,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobFailedSubmission, found.Status)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
@@ -381,38 +402,38 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, EnsemblerFolder, true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: false,
 			removeDriverCPURequest: false,
 		},
 		"success | default resources removed": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
+					Name:      EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: true,
 			removeDriverCPURequest: false,
 		},
 		"success | remove 1 setting from resources": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
+					Name:      EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: false,
 			removeDriverCPURequest: true,
 		},
@@ -424,8 +445,10 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				ensemblingJobService := NewEnsemblingJobService(
 					db,
 					"dev",
+					imageBuilderNamespace,
+					&loggingURLFormat,
+					&dashboardURLFormat,
 					defaultConfigurations,
-					dashboardURLTemplate,
 					createMLPService(),
 				)
 
@@ -448,7 +471,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 
 				assert.NotEqual(t, models.ID(0), result.ID)
 
-				assert.NotEqual(t, result.Name, "")
+				assert.Contains(t, result.Name, EnsemblerFolder)
 				assert.Equal(t, expected.EnsemblerID, result.EnsemblerID)
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
@@ -497,15 +520,18 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
 				defaultConfigurations,
-				dashboardURLTemplate,
 				createMLPService(),
 			)
 
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -522,7 +548,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobTerminating, found.Status)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
@@ -534,15 +560,17 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			ensemblingJobService := NewEnsemblingJobService(
 				db,
 				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
 				defaultConfigurations,
-				dashboardURLTemplate,
-				nil,
+				createMLPService(),
 			)
 
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -560,4 +588,144 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			assert.Nil(t, found)
 		})
 	})
+}
+
+func TestGetNamespaceByComponent(t *testing.T) {
+	tests := map[string]struct {
+		componentType string
+		project       *mlp.Project
+		expected      string
+	}{
+		"success | image builder type": {
+			componentType: batch.ImageBuilderPodType,
+			project:       nil,
+			expected:      imageBuilderNamespace,
+		},
+		"success | any other type": {
+			componentType: batch.DriverPodType,
+			project: &mlp.Project{
+				Id:   1,
+				Name: "hello",
+			},
+			expected: "hello",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
+			)
+			got := svc.GetNamespaceByComponent(tt.componentType, tt.project)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestCreatePodLabelSelector(t *testing.T) {
+	labeller.InitKubernetesLabeller("prefix/", "dev")
+	defer labeller.InitKubernetesLabeller("", "dev")
+
+	ensemblerName := "name"
+	tests := map[string]struct {
+		componentType string
+		expected      []LabelSelector
+	}{
+		"success | image builder": {
+			componentType: batch.ImageBuilderPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+			},
+		},
+		"success | driver": {
+			componentType: batch.DriverPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+				{
+					Key:   kubernetesSparkRoleLabel,
+					Value: kubernetesSparkRoleDriverValue,
+				},
+			},
+		},
+		"success | executor": {
+			componentType: batch.ExecutorPodType,
+			expected: []LabelSelector{
+				{
+					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
+					Value: ensemblerName,
+				},
+				{
+					Key:   kubernetesSparkRoleLabel,
+					Value: kubernetesSparkRoleExecutorValue,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				imageBuilderNamespace,
+				&loggingURLFormat,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
+			)
+			got := svc.CreatePodLabelSelector(ensemblerName, tt.componentType)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestFormatLoggingURL(t *testing.T) {
+	tests := map[string]struct {
+		ensemblerName string
+		namespace     string
+		componentType string
+		format        string
+		expected      string
+	}{
+		"success | nominal": {
+			ensemblerName: "fooname",
+			namespace:     "barspace",
+			componentType: batch.ImageBuilderPodType,
+			format:        "http://www.example.com/{{.Namespace}}/{{.PodName}}",
+			expected:      "http://www.example.com/barspace/fooname",
+		},
+		"success | not initialised with format": {
+			ensemblerName: "fooname",
+			namespace:     "barspace",
+			componentType: batch.ImageBuilderPodType,
+			format:        "",
+			expected:      "",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewEnsemblingJobService(
+				nil,
+				"dev",
+				imageBuilderNamespace,
+				&tt.format,
+				&dashboardURLFormat,
+				defaultConfigurations,
+				createMLPService(),
+			)
+			got, err := svc.FormatLoggingURL(tt.ensemblerName, tt.namespace, tt.componentType)
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
 }

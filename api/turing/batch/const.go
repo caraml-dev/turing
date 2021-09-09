@@ -8,7 +8,17 @@ const (
 )
 
 const (
+	// DatasetTypeBQ is the BQ source dataset type
 	DatasetTypeBQ = "BQ"
-
+	// SinkTypeBQ is the BQ sink dataset type
 	SinkTypeBQ = "BQ"
+
+	// Batch Ensembling Pod component types
+
+	// ImageBuilderPodType is the image builder pod type
+	ImageBuilderPodType = "image_builder"
+	// DriverPodType is the spark driver pod type
+	DriverPodType = "driver"
+	// ExecutorPodType is the spark executor pod type
+	ExecutorPodType = "executor"
 )

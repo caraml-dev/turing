@@ -66,7 +66,7 @@ def generic_ensemblers(project, num_ensemblers):
             id=i,
             project_id=project.id,
             type=ensembler.PyFuncEnsembler.TYPE,
-            name=f"test_ensembler_{i}",
+            name=f"test_{i}",
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10)
         ) for i in range(1, num_ensemblers + 1)]

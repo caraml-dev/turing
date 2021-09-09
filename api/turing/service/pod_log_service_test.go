@@ -7,14 +7,68 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/cluster/mocks"
+	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func TestConvertPodLogsToV2(t *testing.T) {
+	namespace := "namespace"
+	environment := "environment"
+	loggingURL := "wwww.example.com"
+
+	tests := map[string]struct {
+		legacyPodLogs []*PodLog
+		want          *PodLogsV2
+	}{
+		"success | nominal": {
+			legacyPodLogs: []*PodLog{
+				{
+					Timestamp:     time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+					Environment:   "environment",
+					Namespace:     "namespace",
+					PodName:       "json-payload",
+					ContainerName: "user-container",
+					TextPayload:   "No this is patrick",
+				},
+			},
+			want: &PodLogsV2{
+				Environment: environment,
+				Namespace:   namespace,
+				LoggingURL:  loggingURL,
+				Logs: []*PodLogV2{
+					{
+						Timestamp:   time.Date(2020, 7, 7, 7, 0, 5, 0, time.UTC),
+						PodName:     "json-payload",
+						TextPayload: "No this is patrick",
+					},
+				},
+			},
+		},
+		"success | no log entry": {
+			legacyPodLogs: []*PodLog{},
+			want: &PodLogsV2{
+				Environment: environment,
+				Namespace:   namespace,
+				LoggingURL:  loggingURL,
+				Logs:        []*PodLogV2{},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := ConvertPodLogsToV2(namespace, environment, loggingURL, tt.legacyPodLogs)
+			if !cmp.Equal(got, tt.want) {
+				t.Errorf("ConvertPodLogsToV2() got = %v, want %v", got, tt.want)
+				t.Log(cmp.Diff(got, tt.want))
+			}
+		})
+	}
+}
 
 func TestPodLogServiceListPodLogs(t *testing.T) {
 	sinceTime := time.Date(2020, 7, 7, 7, 0, 0, 0, time.UTC)
@@ -108,27 +162,29 @@ invalidtimestamp line3
 		Return(nil, errors.New(""))
 	clusterControllers := map[string]cluster.Controller{"environment": controller}
 
-	type args struct {
-		project       *client.Project
-		router        *models.Router
-		routerVersion *models.RouterVersion
-		componentType string
-		opts          *PodLogOptions
-	}
+	routerVersion := &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1}
+
 	tests := []struct {
 		name    string
-		args    args
+		args    PodLogRequest
 		want    []*PodLog
 		wantErr bool
 	}{
 		{
 			name: "expected arguments with headlines and taillines",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{SinceTime: &sinceTime, HeadLines: &headLines, TailLines: &tailLines},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				SinceTime: &sinceTime,
+				HeadLines: &headLines,
+				TailLines: &tailLines,
 			},
 			want: []*PodLog{
 				{
@@ -172,12 +228,17 @@ invalidtimestamp line3
 		},
 		{
 			name: "expected arguments with taillines only",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{TailLines: &tailLines},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				TailLines: &tailLines,
 			},
 			want: []*PodLog{
 				{
@@ -203,12 +264,16 @@ invalidtimestamp line3
 		},
 		{
 			name: "expected arguments no headlines and taillines",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
 			},
 			want: []*PodLog{
 				{
@@ -261,36 +326,35 @@ invalidtimestamp line3
 		},
 		{
 			name: "controller listpods error",
-			args: args{
-				project:       &client.Project{Name: "listpods-error"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "listpods-error",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
 			},
 			want:    nil,
 			wantErr: true,
 		},
 		{
-			name: "controller listpodlogs error",
-			args: args{
-				project:       &client.Project{Name: "listpodlogs-error"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
-			},
-			want:    []*PodLog{},
-			wantErr: false,
-		},
-		{
 			name: "controller for environment not found",
-			args: args{
-				project:       &client.Project{Name: "namespace"},
-				router:        &models.Router{Name: "router1", EnvironmentName: "environment-not-found"},
-				routerVersion: &models.RouterVersion{Router: &models.Router{Name: "router1"}, Version: 1},
-				componentType: "router",
-				opts:          &PodLogOptions{},
+			args: PodLogRequest{
+				Namespace:        "namespace",
+				DefaultContainer: cluster.KnativeUserContainerName,
+				Environment:      "environment-not-found",
+				LabelSelectors: []LabelSelector{
+					{
+						Key:   cluster.KnativeServiceLabelKey,
+						Value: servicebuilder.GetComponentName(routerVersion, "router"),
+					},
+				},
+				SinceTime: &sinceTime,
+				HeadLines: &headLines,
+				TailLines: &tailLines,
 			},
 			want:    nil,
 			wantErr: true,
@@ -299,8 +363,7 @@ invalidtimestamp line3
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &podLogService{clusterControllers: clusterControllers}
-			got, err := s.ListPodLogs(tt.args.project, tt.args.router, tt.args.routerVersion,
-				tt.args.componentType, tt.args.opts)
+			got, err := s.ListPodLogs(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListPodLogs() error = %v, wantErr %v", err, tt.wantErr)
 				return

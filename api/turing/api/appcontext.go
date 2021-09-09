@@ -96,8 +96,10 @@ func NewAppContext(
 	ensemblingJobService := service.NewEnsemblingJobService(
 		db,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+		cfg.BatchEnsemblingConfig.LoggingURLFormat,
+		cfg.BatchEnsemblingConfig.MonitoringURLFormat,
 		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		cfg.BatchEnsemblingConfig.MonitoringURLTemplate,
 		mlpSvc,
 	)
 
@@ -146,8 +148,10 @@ func NewAppContext(
 		CryptoService:         cryptoService,
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
-		PodLogService:         service.NewPodLogService(clusterControllers),
-		BatchRunners:          batchJobRunners,
+		PodLogService: service.NewPodLogService(
+			clusterControllers,
+		),
+		BatchRunners: batchJobRunners,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {

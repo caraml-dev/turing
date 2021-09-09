@@ -16,9 +16,9 @@ import (
 
 // BigQuerySinkConfig struct for BigQuerySinkConfig
 type BigQuerySinkConfig struct {
-	Table         string            `json:"table"`
-	StagingBucket string            `json:"staging_bucket"`
-	Options       map[string]string `json:"options,omitempty"`
+	Table string `json:"table"`
+	StagingBucket string `json:"staging_bucket"`
+	Options map[string]string `json:"options,omitempty"`
 }
 
 // NewBigQuerySinkConfig instantiates a new BigQuerySinkConfig object
@@ -53,7 +53,7 @@ func (o *BigQuerySinkConfig) GetTable() string {
 // GetTableOk returns a tuple with the Table field value
 // and a boolean to check if the value has been set.
 func (o *BigQuerySinkConfig) GetTableOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Table, true
@@ -77,7 +77,7 @@ func (o *BigQuerySinkConfig) GetStagingBucket() string {
 // GetStagingBucketOk returns a tuple with the StagingBucket field value
 // and a boolean to check if the value has been set.
 func (o *BigQuerySinkConfig) GetStagingBucketOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.StagingBucket, true
@@ -90,7 +90,7 @@ func (o *BigQuerySinkConfig) SetStagingBucket(v string) {
 
 // GetOptions returns the Options field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BigQuerySinkConfig) GetOptions() map[string]string {
-	if o == nil {
+	if o == nil  {
 		var ret map[string]string
 		return ret
 	}
@@ -170,3 +170,5 @@ func (v *NullableBigQuerySinkConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

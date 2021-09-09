@@ -55,6 +55,8 @@ paths:
     $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1logs"
   "/projects/{project_id}/routers/{router_id}/versions/{version}/logs":
     $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}~1logs"
+  "/projects/{project_id}/jobs/{job_id}/logs":
+    $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1jobs~1{job_id}~1logs"
 
   # E X P E R I M E N T S
   "/experiment-engines":

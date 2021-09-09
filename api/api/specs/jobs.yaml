@@ -146,6 +146,7 @@ components:
           type: "string"
           minLength: 3
           maxLength: 50
+          readOnly: true
         project_id:
           $ref: "#/components/schemas/Id"
         ensembler_id:

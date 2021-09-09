@@ -16,10 +16,10 @@ import (
 
 // EnsemblerConfig struct for EnsemblerConfig
 type EnsemblerConfig struct {
-	Version  string              `json:"version"`
-	Kind     EnsemblerConfigKind `json:"kind"`
-	Metadata *EnsemblingJobMeta  `json:"metadata,omitempty"`
-	Spec     EnsemblingJobSpec   `json:"spec"`
+	Version string `json:"version"`
+	Kind EnsemblerConfigKind `json:"kind"`
+	Metadata *EnsemblingJobMeta `json:"metadata,omitempty"`
+	Spec EnsemblingJobSpec `json:"spec"`
 }
 
 // NewEnsemblerConfig instantiates a new EnsemblerConfig object
@@ -55,7 +55,7 @@ func (o *EnsemblerConfig) GetVersion() string {
 // GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblerConfig) GetVersionOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Version, true
@@ -79,7 +79,7 @@ func (o *EnsemblerConfig) GetKind() EnsemblerConfigKind {
 // GetKindOk returns a tuple with the Kind field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblerConfig) GetKindOk() (*EnsemblerConfigKind, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Kind, true
@@ -135,7 +135,7 @@ func (o *EnsemblerConfig) GetSpec() EnsemblingJobSpec {
 // GetSpecOk returns a tuple with the Spec field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblerConfig) GetSpecOk() (*EnsemblingJobSpec, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Spec, true
@@ -198,3 +198,5 @@ func (v *NullableEnsemblerConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

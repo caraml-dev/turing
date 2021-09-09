@@ -10,9 +10,6 @@ API for the Turing experimentation service.
 - Golang 1.14
 - Docker
   
-#### Optional
-- openapi-generator >= 5.1.0 (`brew install openapi-generator`)
-
 #### Setup
 To set up and install necessary tools, run:
 
