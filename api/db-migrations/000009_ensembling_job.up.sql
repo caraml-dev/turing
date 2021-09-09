@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     infra_config     jsonb NOT NULL,
     job_config       jsonb NOT NULL,
     retry_count      integer NOT NULL default 0,
+    run_id           integer NOT NULL,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
     created_at       timestamp   NOT NULL default current_timestamp,
@@ -27,3 +28,4 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
 );
 
 CREATE INDEX ensembling_jobs_status_updated_at_idx on ensembling_jobs (status, updated_at);
+CREATE INDEX ensembling_job_ensembler_id_idx on ensembling_jobs (ensembler_id);

@@ -149,7 +149,7 @@ components:
         name:
           type: "string"
           minLength: 3
-          maxLength: 15
+          maxLength: 20
         created_at:
           type: "string"
           format: "date-time"

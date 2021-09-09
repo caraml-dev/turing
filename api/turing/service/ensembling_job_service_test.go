@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	artifactFolder           string = "artifact"
+	artifactFolder string = "artifact"
+	// Actually this var-job=%s has a run_id appended to it, but it's ok since we use assert.Contains
 	dashboardURLStringFormat string = "https://a.co/dashboard?var-project=%s&var-job=%s"
 	mlpProjectName           string = "foo"
 )
@@ -63,11 +64,9 @@ func generateEnsemblingJobFixture(
 	i int,
 	ensemblerID models.ID,
 	projectID models.ID,
-	name string,
 	genExpected bool,
 ) *models.EnsemblingJob {
 	value := &models.EnsemblingJob{
-		Name:            name,
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
 		EnvironmentName: "dev",
@@ -178,7 +177,7 @@ func generateEnsemblingJobFixture(
 		value.EnvironmentName = "dev"
 		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.EnsemblerName = EnsemblerFolder
-		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, name)
+		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, EnsemblerFolder)
 	}
 
 	return value
@@ -199,7 +198,8 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -218,9 +218,19 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.Equal(t, models.JobPending, ensemblingJob.Status)
 			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
 			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+			oldRunID := found.RunID
+			assert.NotEqual(t, oldRunID, 0)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
+
+			// save again to test if RunID has incremented.
+			ensemblingJob = generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			err = ensemblingJobService.Save(ensemblingJob)
+			assert.NoError(t, err)
+			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
+			assert.Equal(t, oldRunID+1, ensemblingJob.RunID)
 		})
 	})
 }
@@ -285,7 +295,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 				for saveCounter := 0; saveCounter < tt.saveQuantity; saveCounter++ {
 					projectID := models.ID(1)
 					ensemblerID := models.ID(1000)
-					ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+					ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
 					err := ensemblingJobService.Save(ensemblingJob)
 					assert.NoError(t, err)
 					assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -327,7 +337,8 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -366,7 +377,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobFailedSubmission, found.Status)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
@@ -391,38 +402,38 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, EnsemblerFolder, true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: false,
 			removeDriverCPURequest: false,
 		},
 		"success | default resources removed": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
+					Name:      EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: true,
 			removeDriverCPURequest: false,
 		},
 		"success | remove 1 setting from resources": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      "ensembler",
+					Name:      EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
 			},
-			request:                generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", false),
-			expected:               generateEnsemblingJobFixture(1, 1, 1, "test-ensembler", true),
+			request:                generateEnsemblingJobFixture(1, 1, 1, false),
+			expected:               generateEnsemblingJobFixture(1, 1, 1, true),
 			removeDefaultResources: false,
 			removeDriverCPURequest: true,
 		},
@@ -460,7 +471,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 
 				assert.NotEqual(t, models.ID(0), result.ID)
 
-				assert.NotEqual(t, result.Name, "")
+				assert.Contains(t, result.Name, EnsemblerFolder)
 				assert.Equal(t, expected.EnsemblerID, result.EnsemblerID)
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
@@ -519,7 +530,8 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
+			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -536,7 +548,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobTerminating, found.Status)
 
-			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", true)
+			expected := generateEnsemblingJobFixture(1, ensemblerID, projectID, true)
 			assert.Contains(t, found.MonitoringURL, expected.MonitoringURL)
 		})
 	})
@@ -558,7 +570,7 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			// Save job
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
-			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, "test-ensembler", false)
+			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)

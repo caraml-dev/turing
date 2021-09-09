@@ -24,8 +24,7 @@ const (
 	SparkHomeFolder = "/home/spark"
 	// EnsemblerFolder is the folder created by the Turing SDK that contains
 	// the ensembler dependencies and pickled Python files.
-	EnsemblerFolder  = "ensembler"
-	jobNameMaxLength = 25
+	EnsemblerFolder = "ensembler"
 
 	kubernetesSparkRoleLabel         = "spark-role"
 	kubernetesSparkRoleDriverValue   = "driver"
@@ -226,11 +225,6 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	return paginatedResults, nil
 }
 
-func generateDefaultJobName(ensemblerName string) string {
-	t := time.Now().Unix()
-	return fmt.Sprintf("%s-%d", ensemblerName, t)
-}
-
 func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 	// Ensembler URI will be a local directory
 	// Dockerfile will build copy the artifact into the local directory.
@@ -256,14 +250,9 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 		return "", nil
 	}
 
-	name := job.Name
-	if len(name) > jobNameMaxLength {
-		name = name[:jobNameMaxLength]
-	}
-
 	values := EnsemblingMonitoringVariables{
 		Project: project.Name,
-		Job:     name,
+		Job:     job.Name,
 	}
 
 	var b bytes.Buffer
@@ -283,11 +272,6 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 ) (*models.EnsemblingJob, error) {
 	job.ProjectID = projectID
 	job.EnvironmentName = s.defaultEnvironment
-
-	// Populate name if the user does not define a name for the job
-	if job.Name == "" {
-		job.Name = generateDefaultJobName(ensembler.Name)
-	}
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
