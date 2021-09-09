@@ -26,10 +26,10 @@ export class RouterVersion {
         })),
         resource_request: this.resource_request,
       },
-      experiment_engine: {
-        type: this.experiment_engine.type,
-        ...(this.experiment_engine.type !== "nop"
+      experiment_engine:
+        this.experiment_engine.type !== "nop"
           ? {
+              type: this.experiment_engine.type,
               config: {
                 client: {
                   id: this.experiment_engine.config.client.username,
@@ -40,7 +40,7 @@ export class RouterVersion {
                             .encrypted_passkey,
                       }
                     : {
-                        encrypted_passkey: "[to be computed]",
+                        encrypted_passkey: "<to be computed>",
                         passkey: this.experiment_engine.config.client.passkey,
                       }),
                 },
@@ -48,8 +48,9 @@ export class RouterVersion {
                 variables: this.experiment_engine.config.variables,
               },
             }
-          : undefined),
-      },
+          : {
+              type: "none",
+            },
       enricher:
         !!this.enricher && this.enricher.type !== "nop"
           ? {
