@@ -250,10 +250,9 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 		return "", nil
 	}
 
-	name := job.Name
 	values := EnsemblingMonitoringVariables{
 		Project: project.Name,
-		Job:     name,
+		Job:     job.Name,
 	}
 
 	var b bytes.Buffer
