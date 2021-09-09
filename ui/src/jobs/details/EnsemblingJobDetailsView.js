@@ -19,6 +19,7 @@ import { Redirect, Router } from "@reach/router";
 import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
+import { EnsemblingJobLogsView } from "./logs/EnsemblingJobLogsView";
 
 export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const [{ data: jobDetails, isLoaded, error }] = useTuringApi(
@@ -71,25 +72,11 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
 
             <EuiSpacer size="m" />
 
-            {!!jobDetails.error && (
-              <Fragment>
-                <EuiCallOut
-                  title="Ensembling job has failed"
-                  color="danger"
-                  iconType="alert">
-                  <p>
-                    <b>Reason: </b>
-                    {jobDetails.error}
-                  </p>
-                </EuiCallOut>
-
-                <EuiSpacer size="m" />
-              </Fragment>
-            )}
-
             <Router>
               <Redirect from="/" to="details" noThrow />
               <EnsemblingJobConfigView path="details" job={jobDetails} />
+
+              <EnsemblingJobLogsView path="logs" job={jobDetails} />
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>

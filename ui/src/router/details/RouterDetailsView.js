@@ -23,7 +23,7 @@ import { RouterAlertsView } from "../alerts/RouterAlertsView";
 import { Status } from "../../services/status/Status";
 import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { HistoryView } from "../history/HistoryView";
-import { ContainerLogsView } from "../logs/ContainerLogsView";
+import { RouterLogsView } from "./logs/RouterLogsView";
 import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
 
 export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
@@ -114,7 +114,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
 
               <RouterAlertsView path="alerts/*" router={router} />
 
-              <ContainerLogsView path="logs" router={router} />
+              <RouterLogsView path="logs" router={router} />
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
