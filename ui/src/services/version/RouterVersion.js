@@ -1,9 +1,15 @@
 import yaml from "js-yaml";
 import objectAssignDeep from "object-assign-deep";
+import { BaseExperimentEngine } from "../experiment_engine";
+import { get } from "../../components/form/utils";
 
 export class RouterVersion {
   static fromJson(json) {
-    return objectAssignDeep(new RouterVersion(), json);
+    const version = objectAssignDeep(new RouterVersion(), json);
+    version.experiment_engine = BaseExperimentEngine.fromJson(
+      get(json, "experiment_engine")
+    );
+    return version;
   }
 
   toPrettyYaml() {
@@ -27,8 +33,16 @@ export class RouterVersion {
               config: {
                 client: {
                   id: this.experiment_engine.config.client.username,
-                  encrypted_passkey:
-                    this.experiment_engine.config.client.passkey,
+                  ...(this.experiment_engine.config.client.passkey_set
+                    ? {
+                        encrypted_passkey:
+                          this.experiment_engine.config.client
+                            .encrypted_passkey,
+                      }
+                    : {
+                        encrypted_passkey: "[to be computed]",
+                        passkey: this.experiment_engine.config.client.passkey,
+                      }),
                 },
                 experiments: this.experiment_engine.config.experiments,
                 variables: this.experiment_engine.config.variables,
