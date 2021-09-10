@@ -1,12 +1,12 @@
 const proxy = require("http-proxy-middleware");
 
-module.exports = function(app) {
+module.exports = function (app) {
   app.use(
     "/api/mlp",
     proxy({
       target: process.env.REACT_APP_MLP_API,
       pathRewrite: { "^/api/mlp": "" },
-      changeOrigin: true
+      changeOrigin: true,
     })
   );
   app.use(
@@ -14,7 +14,7 @@ module.exports = function(app) {
     proxy({
       target: process.env.REACT_APP_MERLIN_API,
       pathRewrite: { "^/api/merlin": "" },
-      changeOrigin: true
+      changeOrigin: true,
     })
   );
   app.use(
@@ -22,7 +22,7 @@ module.exports = function(app) {
     proxy({
       target: process.env.REACT_APP_TURING_API,
       pathRewrite: { "^/api/turing": "" },
-      changeOrigin: true
+      changeOrigin: true,
     })
   );
 };

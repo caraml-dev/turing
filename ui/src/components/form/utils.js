@@ -1,8 +1,8 @@
 /*eslint no-sequences: 0*/
-export const normalizePath = key => key.replace(/\[([^}\]]+)]/g, ".$1");
+export const normalizePath = (key) => key.replace(/\[([^}\]]+)]/g, ".$1");
 
 export const get = (obj, key) => {
-  return key.split(".").reduce(function(o, x) {
+  return key.split(".").reduce(function (o, x) {
     return typeof o === "undefined" || o === null ? o : o[x];
   }, obj);
 };

@@ -19,7 +19,7 @@ export class StandardEnsembler extends Ensembler {
 
   static newConfig() {
     return {
-      experiment_mappings: []
+      experiment_mappings: [],
     };
   }
 }
@@ -27,5 +27,5 @@ export class StandardEnsembler extends Ensembler {
 export const newMapping = (experimentName, treatment) => ({
   experiment: experimentName,
   treatment: treatment,
-  route: ""
+  route: "",
 });

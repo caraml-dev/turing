@@ -15,14 +15,14 @@ export const fieldSourceSchema = yup
   .required("Valid Field Source should be selected")
   .oneOf(["header", "payload"], "Valid Field Source should be selected");
 
-export const fieldSchema = fieldSource =>
+export const fieldSchema = (fieldSource) =>
   yup
     .mixed()
     .when(fieldSource, {
       is: "header",
-      then: httpHeaderSchema
+      then: httpHeaderSchema,
     })
     .when(fieldSource, {
       is: "payload",
-      then: jsonPathSchema
+      then: jsonPathSchema,
     });

@@ -8,7 +8,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 
 export const RulesPanelFlyout = ({ onClose }) => {

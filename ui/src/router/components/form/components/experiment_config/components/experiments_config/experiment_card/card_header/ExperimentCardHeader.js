@@ -3,7 +3,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon
+  EuiIcon,
 } from "@elastic/eui";
 
 export const ExperimentCardHeader = ({ onDelete, dragHandleProps }) => (

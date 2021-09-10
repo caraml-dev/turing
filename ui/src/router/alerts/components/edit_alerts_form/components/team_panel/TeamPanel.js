@@ -8,12 +8,13 @@ export const TeamPanel = ({ team, onChange, errors }) => {
   const teams = useContext(TeamsContext);
 
   const teamOptions = useMemo(
-    () => teams.sort((a, b) => (a > b ? 1 : -1)).map(team => ({ label: team })),
+    () =>
+      teams.sort((a, b) => (a > b ? 1 : -1)).map((team) => ({ label: team })),
     [teams]
   );
 
   const onCreateOption = useCallback(
-    value => {
+    (value) => {
       onChange(!!value ? value.trim().toLowerCase() : undefined);
     },
     [onChange]

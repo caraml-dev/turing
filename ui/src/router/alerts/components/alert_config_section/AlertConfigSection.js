@@ -4,21 +4,21 @@ import "./AlertConfigSection.scss";
 
 export const AlertConfigSection = ({
   alert: { warning_threshold, critical_threshold, duration },
-  unit
+  unit,
 }) => {
   const items = [
     {
       title: "Warning Threshold",
-      description: warning_threshold ? warning_threshold + unit : "-"
+      description: warning_threshold ? warning_threshold + unit : "-",
     },
     {
       title: "Critical Threshold",
-      description: critical_threshold ? critical_threshold + unit : "-"
+      description: critical_threshold ? critical_threshold + unit : "-",
     },
     {
       title: "Duration",
-      description: duration
-    }
+      description: duration,
+    },
   ];
 
   return (

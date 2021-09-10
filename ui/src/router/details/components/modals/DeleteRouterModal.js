@@ -13,7 +13,7 @@ export const DeleteRouterModal = ({ onSuccess, deleteRouterRef }) => {
     `/projects/${router.project_id}/routers/${router.id}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -25,7 +25,7 @@ export const DeleteRouterModal = ({ onSuccess, deleteRouterRef }) => {
         id: `submit-success-delete-${router.name}`,
         title: `Router ${router.name} has been deleted!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess();
       closeModal();
@@ -45,7 +45,7 @@ export const DeleteRouterModal = ({ onSuccess, deleteRouterRef }) => {
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger">
-      {onSubmit =>
+      {(onSubmit) =>
         (deleteRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
       }

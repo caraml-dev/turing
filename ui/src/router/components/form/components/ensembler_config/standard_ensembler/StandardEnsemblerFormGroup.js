@@ -10,7 +10,7 @@ export const StandardEnsemblerFormGroup = ({
   routes,
   standardConfig,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -22,9 +22,9 @@ export const StandardEnsemblerFormGroup = ({
     {
       value: "nop",
       inputDisplay: "Select a route...",
-      disabled: true
+      disabled: true,
     },
-    ...routes.map(route => ({
+    ...routes.map((route) => ({
       icon: "graphApp",
       value: route.id,
       inputDisplay: route.id,
@@ -35,8 +35,8 @@ export const StandardEnsemblerFormGroup = ({
             {route.endpoint}
           </EuiText>
         </>
-      )
-    }))
+      ),
+    })),
   ];
 
   return (

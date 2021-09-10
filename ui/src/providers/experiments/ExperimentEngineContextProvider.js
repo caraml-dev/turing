@@ -10,14 +10,15 @@ export const ExperimentEngineContextProvider = ({ children }) => {
     []
   );
 
-  const getEngineProperties = engineType => {
+  const getEngineProperties = (engineType) => {
     return (
-      experimentEngines.find(eng => eng.name.toLowerCase() === engineType) || {}
+      experimentEngines.find((eng) => eng.name.toLowerCase() === engineType) ||
+      {}
     );
   };
 
   const experimentEngineOptions = useMemo(() => {
-    return getExperimentEngineOptions(experimentEngines).map(o => o.value);
+    return getExperimentEngineOptions(experimentEngines).map((o) => o.value);
   }, [experimentEngines]);
 
   return (
@@ -25,7 +26,7 @@ export const ExperimentEngineContextProvider = ({ children }) => {
       value={{
         experimentEngines,
         experimentEngineOptions,
-        getEngineProperties
+        getEngineProperties,
       }}>
       {children}
     </ExperimentEngineContext.Provider>

@@ -13,21 +13,21 @@ export const RouterDetailsPageNavigation = ({
   const tabs = [
     {
       id: "details",
-      name: "Configuration"
+      name: "Configuration",
     },
     {
       id: "history",
-      name: "History"
+      name: "History",
     },
     {
       id: "alerts",
       name: "Alerts",
-      disabled: !config.version
+      disabled: !config.version,
     },
     {
       id: "logs",
       name: "Logs",
-      disabled: !config.version
+      disabled: !config.version,
     },
     {
       id: "monitoring_dashboard_link",
@@ -37,12 +37,9 @@ export const RouterDetailsPageNavigation = ({
           <EuiIcon className="eui-alignBaseline" type="popout" size="s" />
         </span>
       ),
-      href: getMonitoringDashboardUrl(
-        router.environment_name,
-        router.name
-      ),
-      disabled: !config.version
-    }
+      href: getMonitoringDashboardUrl(router.environment_name, router.name),
+      disabled: !config.version,
+    },
   ];
 
   return (

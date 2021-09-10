@@ -3,7 +3,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiInMemoryTable
+  EuiInMemoryTable,
 } from "@elastic/eui";
 import { get } from "../utils";
 
@@ -11,13 +11,13 @@ import "./InMemoryTableForm.scss";
 
 export const InMemoryTableForm = ({
   errors = {},
-  renderErrorHeader = key => key,
+  renderErrorHeader = (key) => key,
   ...props
 }) => {
   const errorMessage = useMemo(() => {
-    return Object.keys(errors).flatMap(fieldName => {
+    return Object.keys(errors).flatMap((fieldName) => {
       const fieldErrors = Object.keys(errors[fieldName]).flatMap(
-        key => get(errors[fieldName], key) || []
+        (key) => get(errors[fieldName], key) || []
       );
       return (
         <EuiFlexGroup direction="row" gutterSize="s">

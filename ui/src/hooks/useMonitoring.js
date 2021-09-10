@@ -6,7 +6,7 @@ import template from "lodash/template";
 import templateSettings from "lodash/templateSettings";
 
 const getEnvironmentCluster = (envName, environments) => {
-  const env = environments.find(e => e.name === envName);
+  const env = environments.find((e) => e.name === envName);
   return env ? env.cluster : undefined;
 };
 
@@ -21,7 +21,7 @@ const getMonitoringLink = (
     cluster: clusterName,
     project: projectName,
     router: routerName,
-    version: routerVersion
+    version: routerVersion,
   });
 };
 

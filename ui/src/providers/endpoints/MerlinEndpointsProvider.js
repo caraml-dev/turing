@@ -4,7 +4,7 @@ import EnvironmentsContext from "../environments/context";
 import { useMerlinApi } from "../../hooks/useMerlinApi";
 
 const getEnvironmentRegion = (envName, environments) => {
-  const env = environments.find(e => e.name === envName);
+  const env = environments.find((e) => e.name === envName);
   return env ? env.region : undefined;
 };
 
@@ -41,15 +41,15 @@ export const MerlinEndpointsProvider = ({
         label: "Merlin Model Endpoints",
         options: data
           // To only show currently deployed endpoints
-          .filter(modelEndpoint => modelEndpoint.status === "serving")
-          .map(modelEndpoint => ({
+          .filter((modelEndpoint) => modelEndpoint.status === "serving")
+          .map((modelEndpoint) => ({
             icon: "machineLearningApp",
             label: `http://${modelEndpoint.url}/v1/predict`,
             annotations: {
-              [ANNOTATIONS_MERLIN_MODEL_ID]: `${modelEndpoint.model.id}`
-            }
-          }))
-      }
+              [ANNOTATIONS_MERLIN_MODEL_ID]: `${modelEndpoint.model.id}`,
+            },
+          })),
+      },
     ]);
   }, [data, setEndpoints]);
 

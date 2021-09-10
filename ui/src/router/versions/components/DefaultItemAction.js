@@ -4,7 +4,7 @@ import {
   EuiButtonIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from "@elastic/eui";
 import isString from "lodash/isString";
 

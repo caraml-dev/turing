@@ -6,7 +6,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSpacer,
-  EuiText
+  EuiText,
 } from "@elastic/eui";
 import SecretsContext from "../../../../../../providers/secrets/context";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
@@ -17,7 +17,7 @@ export const BigQueryConfigPanel = ({
   projectId,
   bigQueryConfig,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const secrets = useContext(SecretsContext);
 
@@ -42,7 +42,7 @@ export const BigQueryConfigPanel = ({
             fullWidth
             placeholder="project_name.dataset.table"
             value={bigQueryConfig.table || ""}
-            onChange={e => onChange("table")(e.target.value)}
+            onChange={(e) => onChange("table")(e.target.value)}
             isInvalid={!!errors.table}
             name="bigQuery-table"
           />

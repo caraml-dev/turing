@@ -9,7 +9,7 @@ export const MultiSectionFormValidationContextProvider = ({
   schemas,
   contexts,
   onSubmit,
-  children
+  children,
 }) => {
   const { data: formData } = useContext(FormContext);
 
@@ -23,13 +23,13 @@ export const MultiSectionFormValidationContextProvider = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState([]);
 
-  const isValid = errors =>
+  const isValid = (errors) =>
     errors.reduce(
       (isValid, errors) => isValid && !Object.keys(errors).length,
       true
     );
 
-  const onStartSubmitting = event => {
+  const onStartSubmitting = (event) => {
     event && event.preventDefault();
     setIsTouched(true);
     setIsSubmitting(true);
@@ -52,11 +52,11 @@ export const MultiSectionFormValidationContextProvider = ({
                   schema
                     .validate(formData, {
                       abortEarly: false,
-                      context: ctx
+                      context: ctx,
                     })
                     .then(
                       () => resolve({}),
-                      err => resolve(extractErrors(err))
+                      (err) => resolve(extractErrors(err))
                     );
                 })
               : Promise.resolve({});

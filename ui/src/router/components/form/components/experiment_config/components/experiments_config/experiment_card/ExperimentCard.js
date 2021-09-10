@@ -16,18 +16,18 @@ export const ExperimentCard = ({
   const { experiments: allExperiments } = useContext(ExperimentContext);
 
   const experimentOptions = useMemo(() => {
-    return sortBy(experiments, "name").map(exp => ({
+    return sortBy(experiments, "name").map((exp) => ({
       icon: "beaker",
-      label: exp.name
+      label: exp.name,
     }));
   }, [experiments]);
 
   // Define onchange handler
   const onExperimentNameChange = useCallback(
-    expName => {
+    (expName) => {
       onChangeHandler({
-        ...allExperiments.find(e => e.name === expName),
-        uuid: experiment.uuid
+        ...allExperiments.find((e) => e.name === expName),
+        uuid: experiment.uuid,
       });
     },
     [allExperiments, experiment.uuid, onChangeHandler]

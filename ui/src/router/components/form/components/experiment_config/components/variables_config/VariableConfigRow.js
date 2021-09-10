@@ -5,7 +5,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSuperSelect
+  EuiSuperSelect,
 } from "@elastic/eui";
 import { useOnChangeHandler } from "../../../../../../../components/form/hooks/useOnChangeHandler";
 import { FieldSourceFormLabel } from "../../../../../request_field_source/FieldSourceFormLabel";
@@ -19,14 +19,14 @@ export const VariableConfigRow = ({
   availableVariables,
   onChangeHandler,
   forceUpdate,
-  error = {}
+  error = {},
 }) => {
   // Add current variable to options list and sort by name
   const variableOptions = useMemo(() => {
     return sortBy([...availableVariables, { name: variable.name }], "name").map(
-      v => ({
+      (v) => ({
         value: v.name,
-        inputDisplay: v.name
+        inputDisplay: v.name,
       })
     );
   }, [availableVariables, variable.name]);
@@ -37,21 +37,21 @@ export const VariableConfigRow = ({
   // Define onChange handlers
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
-  const onDeleteVariableConfig = name => () => {
-    const deleteVar = allVariables.find(v => v.name === name);
+  const onDeleteVariableConfig = (name) => () => {
+    const deleteVar = allVariables.find((v) => v.name === name);
     resetVariableSelection(deleteVar);
     forceUpdate();
   };
 
-  const onChangeFieldSource = fieldSource => {
+  const onChangeFieldSource = (fieldSource) => {
     setVariableSource(fieldSource);
     // If not a new variable, update the config
     !!variable.name && onChange("field_source")(fieldSource);
   };
 
-  const onChangeName = varName => {
+  const onChangeName = (varName) => {
     // Update the new variable with the input configs from the current variable
-    const newVariable = allVariables.find(v => v.name === varName);
+    const newVariable = allVariables.find((v) => v.name === varName);
     if (!!newVariable) {
       newVariable.field = variable.field;
       newVariable.field_source = variableSource;
@@ -59,7 +59,7 @@ export const VariableConfigRow = ({
       newVariable.selected = true;
       resetVariableSelection(variable);
       // Update the variables list
-      const varNames = allVariables.map(v => v.name);
+      const varNames = allVariables.map((v) => v.name);
       if (!!variable.name) {
         // If current variable name is not empty, swap position with new variable in the list
         allVariables[varNames.indexOf(variable.name)] = newVariable;
@@ -102,7 +102,7 @@ export const VariableConfigRow = ({
             disabled={!variable.name}
             placeholder={"Enter Field Name..."}
             value={variable.field}
-            onChange={e => onChange("field")(e.target.value)}
+            onChange={(e) => onChange("field")(e.target.value)}
             isInvalid={!!error.field}
             prepend={
               <FieldSourceFormLabel

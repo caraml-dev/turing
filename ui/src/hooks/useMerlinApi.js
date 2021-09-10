@@ -16,7 +16,7 @@ export const useMerlinApi = (
       baseApiUrl: apiConfig.merlinApiUrl,
       timeout: apiConfig.apiTimeout,
       useMockData: apiConfig.useMockData,
-      ...options
+      ...options,
     },
     authCtx,
     result,

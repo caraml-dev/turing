@@ -19,8 +19,8 @@ export const RouterDetailsPageHeader = ({ router }) => {
       ),
       flexProps: {
         grow: true,
-        className: "euiFlexItem--endpoint"
-      }
+        className: "euiFlexItem--endpoint",
+      },
     },
     {
       title: "Environment",
@@ -30,9 +30,9 @@ export const RouterDetailsPageHeader = ({ router }) => {
       flexProps: {
         grow: 1,
         style: {
-          minWidth: "100px"
-        }
-      }
+          minWidth: "100px",
+        },
+      },
     },
     {
       title: "Created At",
@@ -40,9 +40,9 @@ export const RouterDetailsPageHeader = ({ router }) => {
       flexProps: {
         grow: 1,
         style: {
-          minWidth: "100px"
-        }
-      }
+          minWidth: "100px",
+        },
+      },
     },
     {
       title: "Updated At",
@@ -50,10 +50,10 @@ export const RouterDetailsPageHeader = ({ router }) => {
       flexProps: {
         grow: 1,
         style: {
-          minWidth: "100px"
-        }
-      }
-    }
+          minWidth: "100px",
+        },
+      },
+    },
   ];
 
   return (

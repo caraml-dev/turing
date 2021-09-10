@@ -6,7 +6,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSpacer,
-  EuiSuperSelect
+  EuiSuperSelect,
 } from "@elastic/eui";
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
@@ -19,14 +19,14 @@ import "./RuleCard.scss";
 const noneRoute = {
   value: "_none_",
   inputDisplay: "Add a route to this rule...",
-  disabled: true
+  disabled: true,
 };
 
 const newCondition = () => ({
   field_source: "header",
   field: "",
   operator: "in",
-  values: []
+  values: [],
 });
 
 export const RuleCard = ({
@@ -35,16 +35,16 @@ export const RuleCard = ({
   defaultRouteId,
   onChangeHandler,
   onDelete,
-  errors
+  errors,
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const routesOptions = useCallback(
-    item => {
+    (item) => {
       return routes
-        .filter(route => route.id === item || !rule.routes.includes(route.id))
-        .filter(route => !!route.id && !!route.endpoint)
-        .map(route => ({
+        .filter((route) => route.id === item || !rule.routes.includes(route.id))
+        .filter((route) => !!route.id && !!route.endpoint)
+        .map((route) => ({
           value: route.id,
           inputDisplay: (
             <RuleCardRouteDropDownOption
@@ -52,18 +52,18 @@ export const RuleCard = ({
               isDefault={route.id === defaultRouteId}
             />
           ),
-          disabled: route.id === defaultRouteId
+          disabled: route.id === defaultRouteId,
         }));
     },
     [rule.routes, routes, defaultRouteId]
   );
 
-  const onDeleteCondition = idx => () => {
+  const onDeleteCondition = (idx) => () => {
     rule.conditions.splice(idx, 1);
     onChange("conditions")([...rule.conditions]);
   };
 
-  const onDeleteRoute = idx => () => {
+  const onDeleteRoute = (idx) => () => {
     rule.routes.splice(idx, 1);
     onChange("routes")([...rule.routes]);
   };

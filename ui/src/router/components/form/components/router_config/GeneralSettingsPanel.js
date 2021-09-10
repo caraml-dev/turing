@@ -6,7 +6,7 @@ import {
   EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { Panel } from "../Panel";
 import EnvironmentsContext from "../../../../../providers/environments/context";
@@ -21,14 +21,16 @@ export const GeneralSettingsPanel = ({
   timeout,
   isEdit,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   const environments = useContext(EnvironmentsContext);
 
-  const environmentOptions = sortBy(environments, "name").map(environment => ({
-    value: environment.name,
-    inputDisplay: environment.name
-  }));
+  const environmentOptions = sortBy(environments, "name").map(
+    (environment) => ({
+      value: environment.name,
+      inputDisplay: environment.name,
+    })
+  );
 
   return (
     <Panel title="General">
@@ -75,7 +77,7 @@ export const GeneralSettingsPanel = ({
                 fullWidth
                 placeholder="deployment-name"
                 value={name}
-                onChange={e => onChange("name")(e.target.value)}
+                onChange={(e) => onChange("name")(e.target.value)}
                 isInvalid={!!errors.name}
                 disabled={isEdit}
                 name="router-name"

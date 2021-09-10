@@ -6,7 +6,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 import getExperimentUrl from "../../config";
 import "./ExperimentsConfigTable.scss";

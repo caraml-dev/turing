@@ -9,42 +9,42 @@ export const RouterActions = ({
   onDeploySuccess,
   onUndeploySuccess,
   onDeleteSuccess,
-  children
+  children,
 }) => {
   const undeployRouterRef = useRef();
   const redeployRouterRef = useRef();
   const deleteRouterRef = useRef();
 
   const actions = useCallback(
-    router => {
+    (router) => {
       const status = Status.fromValue(router.status);
       return [
         {
           name: "Edit Router",
           icon: "documentEdit",
           disabled: status === Status.PENDING,
-          onClick: onEditRouter
+          onClick: onEditRouter,
         },
         {
           name: "Undeploy Router",
           icon: "exportAction",
           disabled: status === Status.PENDING,
           hidden: status === Status.UNDEPLOYED,
-          onClick: () => undeployRouterRef.current(router)
+          onClick: () => undeployRouterRef.current(router),
         },
         {
           name: "Redeploy Router",
           icon: "importAction",
           hidden: [Status.DEPLOYED, Status.PENDING].includes(status),
-          onClick: () => redeployRouterRef.current(router)
+          onClick: () => redeployRouterRef.current(router),
         },
         {
           name: "Delete Router",
           icon: "trash",
           color: "danger",
           disabled: [Status.DEPLOYED, Status.PENDING].includes(status),
-          onClick: () => deleteRouterRef.current(router)
-        }
+          onClick: () => deleteRouterRef.current(router),
+        },
       ];
     },
     [onEditRouter]

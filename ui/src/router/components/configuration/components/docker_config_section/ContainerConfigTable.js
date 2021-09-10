@@ -2,31 +2,31 @@ import React from "react";
 import { EuiDescriptionList } from "@elastic/eui";
 
 export const ContainerConfigTable = ({
-  config: { image, endpoint, port, timeout, service_account }
+  config: { image, endpoint, port, timeout, service_account },
 }) => {
   const items = [
     {
       title: "Image",
-      description: image
+      description: image,
     },
     {
       title: "Endpoint",
-      description: endpoint
+      description: endpoint,
     },
     {
       title: "Port",
-      description: port
+      description: port,
     },
     {
       title: "Timeout",
-      description: timeout
-    }
+      description: timeout,
+    },
   ];
 
   if (service_account) {
     items.push({
       title: "Service Account",
-      description: service_account
+      description: service_account,
     });
   }
 

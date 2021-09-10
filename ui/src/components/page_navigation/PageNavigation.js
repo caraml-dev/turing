@@ -7,7 +7,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTab,
-  EuiTabs
+  EuiTabs,
 } from "@elastic/eui";
 
 import "./PageNavigation.scss";
@@ -44,10 +44,10 @@ export const PageNavigation = ({
 
 const MoreActionsButton = ({ actions }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const togglePopover = () => setPopover(isPopoverOpen => !isPopoverOpen);
+  const togglePopover = () => setPopover((isPopoverOpen) => !isPopoverOpen);
 
   const items = actions
-    .filter(item => !item.hidden)
+    .filter((item) => !item.hidden)
     .map((item, idx) => (
       <EuiContextMenuItem
         key={idx}

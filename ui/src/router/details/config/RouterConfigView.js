@@ -8,23 +8,24 @@ import { Status } from "../../../services/status/Status";
 export const RouterConfigView = ({ router }) => {
   const configSectionRef = useRef();
 
-  const status = useMemo(() => Status.fromValue(router.status), [
-    router.status
-  ]);
+  const status = useMemo(
+    () => Status.fromValue(router.status),
+    [router.status]
+  );
 
   useEffect(() => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: "../"
+        href: "../",
       },
       {
         text: router.name,
-        href: "./"
+        href: "./",
       },
       {
-        text: "Configuration"
-      }
+        text: "Configuration",
+      },
     ]);
   }, [router.name]);
 

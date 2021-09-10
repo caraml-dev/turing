@@ -25,10 +25,10 @@ export class DockerEnsembler extends Ensembler {
         cpu_request: "500m",
         memory_request: "512Mi",
         min_replica: 0,
-        max_replica: 2
+        max_replica: 2,
       },
       env: [],
-      service_account: ""
+      service_account: "",
     };
   }
 }

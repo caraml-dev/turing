@@ -12,9 +12,9 @@ import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChang
 export const EnsemblerStep = ({ projectId }) => {
   const {
     data: {
-      config: { experiment_engine, ensembler, routes }
+      config: { experiment_engine, ensembler, routes },
     },
-    onChangeHandler
+    onChangeHandler,
   } = useContext(FormContext);
 
   const { errors } = useContext(FormValidationContext);

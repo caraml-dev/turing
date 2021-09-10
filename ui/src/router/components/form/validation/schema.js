@@ -5,11 +5,11 @@ import { appConfig } from "../../../../config";
 import { experimentConfigSchema } from "../components/experiment_config/validation/schema";
 import {
   fieldSchema,
-  fieldSourceSchema
+  fieldSourceSchema,
 } from "../../../../components/validation";
 
-yup.addMethod(yup.array, "unique", function(propertyPath, message) {
-  return this.test("unique", message, function(list) {
+yup.addMethod(yup.array, "unique", function (propertyPath, message) {
+  return this.test("unique", message, function (list) {
     const errors = [];
 
     list.forEach((item, index) => {
@@ -18,13 +18,14 @@ yup.addMethod(yup.array, "unique", function(propertyPath, message) {
       if (
         propertyValue &&
         list.some(
-          other => other !== item && get(other, propertyPath) === propertyValue
+          (other) =>
+            other !== item && get(other, propertyPath) === propertyValue
         )
       ) {
         errors.push(
           this.createError({
             path: `${this.path}[${index}].${propertyPath}`,
-            message
+            message,
           })
         );
       }
@@ -43,9 +44,11 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   cpuRequestRegex = /^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$/,
   memRequestRegex = /^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$/,
   envVariableNameRegex = /^[a-z0-9_]*$/i,
-  dockerImageRegex = /^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$/i,
+  dockerImageRegex =
+    /^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$/i,
   bigqueryTableRegex = /^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$/i,
-  kafkaBrokersRegex = /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
+  kafkaBrokersRegex =
+    /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
   kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i;
 
 const timeoutSchema = yup
@@ -59,7 +62,7 @@ const routeSchema = yup.object().shape({
     .string()
     .required("Valid url is required")
     .url("Valid url is required"),
-  timeout: timeoutSchema.required("Timeout is required")
+  timeout: timeoutSchema.required("Timeout is required"),
 });
 
 const ruleConditionSchema = yup.object().shape({
@@ -70,7 +73,7 @@ const ruleConditionSchema = yup.object().shape({
     .oneOf(["in"], "One of supported operators should be specified"),
   values: yup
     .array(yup.string())
-    .required("At least one value should be provided")
+    .required("At least one value should be provided"),
 });
 
 const trafficRuleSchema = yup.object().shape({
@@ -83,17 +86,20 @@ const trafficRuleSchema = yup.object().shape({
     .of(
       yup
         .mixed()
-        .test("valid-route", "Valid, non-default route is required", function(
-          value
-        ) {
-          const [, configSchema] = this.from;
-          const { routes, default_route_id } = configSchema.value;
-          return (
-            routes.map(r => r.id).includes(value) && default_route_id !== value
-          );
-        })
+        .test(
+          "valid-route",
+          "Valid, non-default route is required",
+          function (value) {
+            const [, configSchema] = this.from;
+            const { routes, default_route_id } = configSchema.value;
+            return (
+              routes.map((r) => r.id).includes(value) &&
+              default_route_id !== value
+            );
+          }
+        )
     )
-    .min(1, "At least one route should be attached to the rule")
+    .min(1, "At least one route should be attached to the rule"),
 });
 
 const environmentVariableSchema = yup.object().shape({
@@ -104,7 +110,7 @@ const environmentVariableSchema = yup.object().shape({
       envVariableNameRegex,
       "The name of a variable can contain only alphanumeric character or the underscore"
     ),
-  value: yup.string()
+  value: yup.string(),
 });
 
 const resourceRequestSchema = yup.object().shape({
@@ -133,14 +139,14 @@ const resourceRequestSchema = yup.object().shape({
       minReplica === 0
         ? schema.positive("Max Replica should be positive")
         : schema
-    )
+    ),
 });
 
 const enricherSchema = yup.object().shape({
   type: yup
     .mixed()
     .required("Valid Enricher type should be selected")
-    .oneOf(["nop", "docker"], "Valid Enricher type should be selected")
+    .oneOf(["nop", "docker"], "Valid Enricher type should be selected"),
 });
 
 const dockerImageSchema = yup
@@ -160,17 +166,17 @@ const dockerDeploymentSchema = yup.object().shape({
     .required("Port value is required, e.g. 8080"),
   timeout: timeoutSchema.required("Timeout is required"),
   env: yup.array(environmentVariableSchema),
-  resource_request: resourceRequestSchema
+  resource_request: resourceRequestSchema,
 });
 
 const mappingSchema = yup.object().shape({
   experiment: yup.string().required("Experiment name is required"),
   treatment: yup.string().required("Treatment name is required"),
-  route: yup.string().required("Treatment needs to be mapped back to a route")
+  route: yup.string().required("Treatment needs to be mapped back to a route"),
 });
 
 const standardEnsemblerConfigSchema = yup.object().shape({
-  experiment_mappings: yup.array(mappingSchema)
+  experiment_mappings: yup.array(mappingSchema),
 });
 
 const bigQueryConfigSchema = yup.object().shape({
@@ -181,7 +187,7 @@ const bigQueryConfigSchema = yup.object().shape({
       bigqueryTableRegex,
       "Valid BQ table name is required, e.g. project_name.dataset.table"
     ),
-  service_account_secret: yup.string().required("Service Account is required")
+  service_account_secret: yup.string().required("Service Account is required"),
 });
 
 const kafkaConfigSchema = yup.object().shape({
@@ -202,7 +208,10 @@ const kafkaConfigSchema = yup.object().shape({
   serialization_format: yup
     .mixed()
     .required("Serialzation format should be selected")
-    .oneOf(["json", "protobuf"], "Valid serialzation format should be selected")
+    .oneOf(
+      ["json", "protobuf"],
+      "Valid serialzation format should be selected"
+    ),
 });
 
 const schema = [
@@ -228,8 +237,8 @@ const schema = [
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
       rules: yup.array(trafficRuleSchema),
-      resource_request: resourceRequestSchema
-    })
+      resource_request: resourceRequestSchema,
+    }),
   }),
   yup.object().shape({
     config: yup.object().shape({
@@ -242,22 +251,22 @@ const schema = [
           ),
         config: yup.mixed().when("type", {
           is: "nop",
-          otherwise: experimentConfigSchema
-        })
-      })
-    })
+          otherwise: experimentConfigSchema,
+        }),
+      }),
+    }),
   }),
   yup.object().shape({
     config: yup.object().shape({
-      enricher: yup.lazy(value => {
+      enricher: yup.lazy((value) => {
         switch (value.type) {
           case "docker":
             return enricherSchema.concat(dockerDeploymentSchema);
           default:
             return enricherSchema;
         }
-      })
-    })
+      }),
+    }),
   }),
   yup.object().shape({
     config: yup.object().shape({
@@ -271,14 +280,14 @@ const schema = [
           ),
         docker_config: yup.mixed().when("type", {
           is: "docker",
-          then: dockerDeploymentSchema
+          then: dockerDeploymentSchema,
         }),
         standard_config: yup.mixed().when("type", {
           is: "standard",
-          then: standardEnsemblerConfigSchema
-        })
-      })
-    })
+          then: standardEnsemblerConfigSchema,
+        }),
+      }),
+    }),
   }),
   yup.object().shape({
     config: yup.object().shape({
@@ -292,15 +301,15 @@ const schema = [
           ),
         bigquery_config: yup.mixed().when("result_logger_type", {
           is: "bigquery",
-          then: bigQueryConfigSchema
+          then: bigQueryConfigSchema,
         }),
         kafka_config: yup.mixed().when("result_logger_type", {
           is: "kafka",
-          then: kafkaConfigSchema
-        })
-      })
-    })
-  })
+          then: kafkaConfigSchema,
+        }),
+      }),
+    }),
+  }),
 ];
 
 export default schema;

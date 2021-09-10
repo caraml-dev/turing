@@ -6,14 +6,14 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiText
+  EuiText,
 } from "@elastic/eui";
 import { Panel } from "../../../../../components/form/components/Panel";
 import "./MetricPanel.scss";
 import { FieldDuration } from "../field_duration/FieldDuration";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
 
-export const intValue = e => {
+export const intValue = (e) => {
   if (e && e.target.value) {
     const intVal = parseInt(e.target.value);
     if (!isNaN(intVal)) {
@@ -31,7 +31,7 @@ export const MetricPanel = ({
   onChangeHandler,
   errors = {},
   isExpanded,
-  toggleExpanded
+  toggleExpanded,
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -75,7 +75,9 @@ export const MetricPanel = ({
                     <EuiFieldNumber
                       min={0}
                       value={alert.warning_threshold || 0}
-                      onChange={e => onChange("warning_threshold")(intValue(e))}
+                      onChange={(e) =>
+                        onChange("warning_threshold")(intValue(e))
+                      }
                       append={unit}
                     />
                   </EuiFormRow>
@@ -88,7 +90,7 @@ export const MetricPanel = ({
                     <EuiFieldNumber
                       min={0}
                       value={alert.critical_threshold || 0}
-                      onChange={e =>
+                      onChange={(e) =>
                         onChange("critical_threshold")(intValue(e))
                       }
                       append={unit}

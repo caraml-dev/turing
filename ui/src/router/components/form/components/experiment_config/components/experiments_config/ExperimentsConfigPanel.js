@@ -7,7 +7,7 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { ExperimentCard } from "./experiment_card/ExperimentCard";
@@ -19,18 +19,18 @@ import { useOnChangeHandler } from "../../../../../../../components/form/hooks/u
 export const ExperimentsConfigPanel = ({
   experiments,
   onChangeHandler,
-  errors = []
+  errors = [],
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
   const {
     experiments: allExperiments,
     isLoaded,
-    setExperimentsValidated
+    setExperimentsValidated,
   } = useContext(ExperimentContext);
 
   const experimentsOptions = useCallback(
-    experiment => {
-      const expNames = experiments.map(e => e.name);
+    (experiment) => {
+      const expNames = experiments.map((e) => e.name);
       // Exclude already selected experiments
       return allExperiments.filter(
         ({ name }) => experiment.name === name || !expNames.includes(name)
@@ -42,10 +42,10 @@ export const ExperimentsConfigPanel = ({
   // Update selected experiments if new experiments list does not include some of them
   useEffect(() => {
     if (isLoaded("experiments")) {
-      const allExperimentIds = allExperiments.map(e => e.id);
+      const allExperimentIds = allExperiments.map((e) => e.id);
       // Filter selected experiments against available (!e.id check is for the dummy experiment card)
       const filteredExps = experiments.filter(
-        e => !e.id || allExperimentIds.includes(e.id)
+        (e) => !e.id || allExperimentIds.includes(e.id)
       );
       if (filteredExps.length < experiments.length) {
         onChangeHandler(filteredExps);
@@ -60,7 +60,7 @@ export const ExperimentsConfigPanel = ({
     allExperiments,
     isLoaded,
     setExperimentsValidated,
-    onChangeHandler
+    onChangeHandler,
   ]);
 
   // Define onchange handlers
@@ -68,7 +68,7 @@ export const ExperimentsConfigPanel = ({
     onChangeHandler([...experiments, { uuid: makeId() }]);
   }, [onChangeHandler, experiments]);
 
-  const onDeleteExperiment = idx => () => {
+  const onDeleteExperiment = (idx) => () => {
     experiments.splice(idx, 1);
     onChangeHandler([...experiments]);
   };
@@ -104,7 +104,7 @@ export const ExperimentsConfigPanel = ({
                 draggableId={`${experiment.uuid || experiment.id}`}
                 customDragHandle={true}
                 disableInteractiveElementBlocking>
-                {provided => (
+                {(provided) => (
                   <EuiFlexItem>
                     <ExperimentCard
                       experiment={experiment}

@@ -8,7 +8,7 @@ export const SelectEndpointComboBox = ({
   options,
   ...props
 }) => {
-  const onCreateOption = value => {
+  const onCreateOption = (value) => {
     if (!isValidUrl(value)) {
       return false;
     }

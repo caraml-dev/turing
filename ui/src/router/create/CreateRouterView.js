@@ -9,7 +9,7 @@ import {
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
@@ -33,7 +33,7 @@ export const CreateRouterView = ({ projectId, ...props }) => {
               <CreateRouterForm
                 projectId={projectId}
                 onCancel={() => window.history.back()}
-                onSuccess={routerId => props.navigate(`../${routerId}`)}
+                onSuccess={(routerId) => props.navigate(`../${routerId}`)}
               />
             </ExperimentEngineContextProvider>
           </FormContextProvider>

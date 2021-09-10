@@ -15,10 +15,10 @@ export const ExperimentStep = () => {
     data: {
       config: {
         experiment_engine,
-        ensembler: { type: ensemblerType }
-      }
+        ensembler: { type: ensemblerType },
+      },
     },
-    onChangeHandler
+    onChangeHandler,
   } = useContext(FormContext);
 
   const { errors } = useContext(FormValidationContext);
@@ -35,11 +35,11 @@ export const ExperimentStep = () => {
 
   useEffect(() => {
     const ensemblerOptions = ensemblerTypeOptions(engineProps).filter(
-      o => !o.disabled
+      (o) => !o.disabled
     );
 
     const ensemblerTypeOption = ensemblerOptions.find(
-      o => o.value === ensemblerType
+      (o) => o.value === ensemblerType
     );
 
     if (ensemblerOptions.length && !ensemblerTypeOption) {

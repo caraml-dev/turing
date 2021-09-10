@@ -7,26 +7,26 @@ import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnCh
 export const EnvVariablesPanel = ({
   variables,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const items = [
     ...variables.map((v, idx) => ({ idx, ...v })),
-    { idx: variables.length }
+    { idx: variables.length },
   ];
 
-  const onDeleteVariable = idx => () => {
+  const onDeleteVariable = (idx) => () => {
     variables.splice(idx, 1);
     onChangeHandler(variables);
   };
 
-  const getRowProps = item => {
+  const getRowProps = (item) => {
     const { idx } = item;
     const isInvalid = !!errors[idx];
     return {
       className: isInvalid ? "euiTableRow--isInvalid" : "",
-      "data-test-subj": `row-${idx}`
+      "data-test-subj": `row-${idx}`,
     };
   };
 
@@ -41,9 +41,9 @@ export const EnvVariablesPanel = ({
           className="inlineTableInput"
           placeholder="Name"
           value={name || ""}
-          onChange={e => onChange(`${item.idx}.name`)(e.target.value)}
+          onChange={(e) => onChange(`${item.idx}.name`)(e.target.value)}
         />
-      )
+      ),
     },
     {
       name: "Value",
@@ -55,15 +55,15 @@ export const EnvVariablesPanel = ({
           className="inlineTableInput"
           placeholder="Value"
           value={value || ""}
-          onChange={e => onChange(`${item.idx}.value`)(e.target.value)}
+          onChange={(e) => onChange(`${item.idx}.value`)(e.target.value)}
         />
-      )
+      ),
     },
     {
       width: "10%",
       actions: [
         {
-          render: item =>
+          render: (item) =>
             item.idx < items.length - 1 ? (
               <EuiButtonIcon
                 size="s"
@@ -74,10 +74,10 @@ export const EnvVariablesPanel = ({
               />
             ) : (
               <div />
-            )
-        }
-      ]
-    }
+            ),
+        },
+      ],
+    },
   ];
 
   return (
@@ -89,7 +89,7 @@ export const EnvVariablesPanel = ({
         items={items}
         hasActions={true}
         errors={errors}
-        renderErrorHeader={key => `Row ${parseInt(key) + 1}`}
+        renderErrorHeader={(key) => `Row ${parseInt(key) + 1}`}
       />
     </Panel>
   );

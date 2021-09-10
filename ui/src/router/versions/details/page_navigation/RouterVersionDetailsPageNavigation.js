@@ -13,7 +13,7 @@ export const RouterVersionDetailsPageNavigation = ({
   const tabs = [
     {
       id: "details",
-      name: "Configuration"
+      name: "Configuration",
     },
     {
       id: "monitoring_dashboard_link",
@@ -27,8 +27,8 @@ export const RouterVersionDetailsPageNavigation = ({
         version.router.environment_name,
         version.router.name,
         version.version
-      )
-    }
+      ),
+    },
   ];
 
   return (
