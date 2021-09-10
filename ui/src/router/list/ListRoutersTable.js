@@ -8,7 +8,7 @@ import {
   EuiText,
   EuiTextAlign,
   EuiToolTip,
-  EuiSearchBar
+  EuiSearchBar,
 } from "@elastic/eui";
 import { useMonitoring } from "../../hooks/useMonitoring";
 import { RouterEndpoint } from "../components/router_endpoint/RouterEndpoint";
@@ -22,7 +22,7 @@ const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
 
 const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   const [config, setConfig] = useState({
-    environments: []
+    environments: [],
   });
 
   const [getMonitoringDashboardUrl] = useMonitoring();
@@ -30,11 +30,11 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   useEffect(() => {
     if (isLoaded && items.length) {
       let envDict = {};
-      items.forEach(item => {
+      items.forEach((item) => {
         envDict[item.environment_name] = true;
       });
       setConfig({
-        environments: Object.keys(envDict)
+        environments: Object.keys(envDict),
       });
     }
   }, [isLoaded, items]);
@@ -45,7 +45,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       name: "Name",
       mobileOptions: {
         enlarge: true,
-        fullWidth: true
+        fullWidth: true,
       },
       width: "10%",
       render: (name, item) => (
@@ -55,36 +55,36 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
             <EuiBadge color="secondary">New</EuiBadge>
           )}
         </EuiText>
-      )
+      ),
     },
     {
       field: "environment_name",
       name: "Environment",
       width: "10%",
-      render: environment_name => (
+      render: (environment_name) => (
         <EuiText size={defaultTextSize}>{environment_name}</EuiText>
-      )
+      ),
     },
     {
       field: "endpoint",
       name: "Endpoint",
       width: "15%",
-      render: endpoint => <RouterEndpoint endpoint={endpoint} />
+      render: (endpoint) => <RouterEndpoint endpoint={endpoint} />,
     },
     {
       field: "status",
       name: "Status",
       width: "10%",
-      render: status => (
+      render: (status) => (
         <DeploymentStatusHealth status={Status.fromValue(status)} />
-      )
+      ),
     },
     {
       field: "created_at",
       name: "Created",
       sortable: true,
       width: "10%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -92,13 +92,13 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
+      ),
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "10%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -106,7 +106,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
+      ),
     },
     {
       name: (
@@ -119,17 +119,17 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       align: "right",
       mobileOptions: {
         header: true,
-        fullWidth: false
+        fullWidth: false,
       },
       width: "10%",
-      render: item => {
+      render: (item) => {
         const monitoringLink = item.config
           ? getMonitoringDashboardUrl(item.environment_name, item.name)
           : undefined;
 
         return (
           <EuiButtonEmpty
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
             }}
             href={monitoringLink}
@@ -140,15 +140,15 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
             <EuiText size="xs">Monitoring</EuiText>
           </EuiButtonEmpty>
         );
-      }
-    }
+      },
+    },
   ];
 
-  const cellProps = item =>
+  const cellProps = (item) =>
     onRowClick
       ? {
           style: { cursor: "pointer" },
-          onClick: () => onRowClick(item)
+          onClick: () => onRowClick(item),
         }
       : undefined;
 
@@ -157,7 +157,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       return error;
     } else {
       return EuiSearchBar.Query.execute(query, items, {
-        defaultFields: ["name"]
+        defaultFields: ["name"],
       });
     }
   };
@@ -165,7 +165,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   const search = {
     onChange: onChange,
     box: {
-      incremental: true
+      incremental: true,
     },
     filters: [
       {
@@ -173,11 +173,11 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
         field: "environment_name",
         name: "Environment",
         multiSelect: "or",
-        options: config.environments.map(item => ({
-          value: item
-        }))
-      }
-    ]
+        options: config.environments.map((item) => ({
+          value: item,
+        })),
+      },
+    ],
   };
 
   return !isLoaded ? (

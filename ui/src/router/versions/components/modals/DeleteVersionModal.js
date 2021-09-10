@@ -9,7 +9,7 @@ export const DeleteVersionModal = ({
   routerId,
   routerName,
   onSuccess,
-  deleteVersionRef
+  deleteVersionRef,
 }) => {
   const closeModalRef = useRef();
 
@@ -18,7 +18,7 @@ export const DeleteVersionModal = ({
     `/projects/${projectId}/routers/${routerId}/versions/${version}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -30,7 +30,7 @@ export const DeleteVersionModal = ({
         id: `submit-success-delete-${version}`,
         title: `Router version ${version} has been deleted!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess();
       closeModal();
@@ -50,7 +50,7 @@ export const DeleteVersionModal = ({
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger">
-      {onSubmit =>
+      {(onSubmit) =>
         (deleteVersionRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
       }

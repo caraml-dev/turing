@@ -13,22 +13,22 @@ export const VersionDetailsPageHeader = ({ version }) => {
       title: "Router",
       description: (
         <EuiLink href="../../">{get(version, "router.name")}</EuiLink>
-      )
+      ),
     },
     {
       title: "Status",
       description: (
         <DeploymentStatusHealth status={Status.fromValue(version.status)} />
-      )
+      ),
     },
     {
       title: "Created At",
-      description: <DateFromNow date={version.created_at} size="s" />
+      description: <DateFromNow date={version.created_at} size="s" />,
     },
     {
       title: "Updated At",
-      description: <DateFromNow date={version.updated_at} size="s" />
-    }
+      description: <DateFromNow date={version.updated_at} size="s" />,
+    },
   ];
 
   return (

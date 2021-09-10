@@ -7,7 +7,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
@@ -18,7 +18,7 @@ export const ResourcesPanel = ({
   resourcesConfig,
   onChangeHandler,
   errors = {},
-  maxAllowedReplica
+  maxAllowedReplica,
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -45,7 +45,7 @@ export const ResourcesPanel = ({
               <EuiFieldText
                 placeholder="500m"
                 value={resourcesConfig.cpu_request}
-                onChange={e => onChange("cpu_request")(e.target.value)}
+                onChange={(e) => onChange("cpu_request")(e.target.value)}
                 isInvalid={!!errors.cpu_request}
                 name="cpu"
               />
@@ -66,7 +66,7 @@ export const ResourcesPanel = ({
               <EuiFieldText
                 placeholder="500Mi"
                 value={resourcesConfig.memory_request}
-                onChange={e => onChange("memory_request")(e.target.value)}
+                onChange={(e) => onChange("memory_request")(e.target.value)}
                 isInvalid={!!errors.memory_request}
                 name="memory"
               />
@@ -96,7 +96,7 @@ export const ResourcesPanel = ({
             showTicks
             value={[
               resourcesConfig.min_replica || 0,
-              resourcesConfig.max_replica || 0
+              resourcesConfig.max_replica || 0,
             ]}
             onChange={([min_replica, max_replica]) => {
               onChange("min_replica")(parseInt(min_replica));

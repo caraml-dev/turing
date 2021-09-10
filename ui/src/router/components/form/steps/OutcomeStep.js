@@ -13,9 +13,9 @@ import { resultLoggingOptions } from "../components/outcome_config/typeOptions";
 export const OutcomeStep = ({ projectId }) => {
   const {
     data: {
-      config: { log_config }
+      config: { log_config },
     },
-    onChangeHandler
+    onChangeHandler,
   } = useContext(FormContext);
 
   const { errors } = useContext(FormValidationContext);

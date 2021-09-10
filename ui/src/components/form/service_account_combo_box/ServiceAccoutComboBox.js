@@ -11,9 +11,9 @@ export const ServiceAccountComboBox = ({
   const secretsOptions = useMemo(
     () =>
       secrets
-        ? secrets.map(s => ({
+        ? secrets.map((s) => ({
             label: s.name,
-            icon: serviceAccIcon
+            icon: serviceAccIcon,
           }))
         : [],
     [secrets]
@@ -27,7 +27,7 @@ export const ServiceAccountComboBox = ({
       isInvalid={props.isInvalid}
       options={secretsOptions}
       value={value}
-      onChange={value => onChange(value || "")}
+      onChange={(value) => onChange(value || "")}
     />
   );
 };

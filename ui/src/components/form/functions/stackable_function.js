@@ -2,7 +2,7 @@ import { ExtensibleFunction } from "./extensible_function";
 
 export class StackableFunction extends ExtensibleFunction {
   constructor(args, apply) {
-    super(value => {
+    super((value) => {
       apply(args, value);
     });
     this.apply = apply;

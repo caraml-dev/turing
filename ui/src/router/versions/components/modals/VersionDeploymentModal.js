@@ -8,7 +8,7 @@ export const VersionDeploymentModal = ({
   projectId,
   routerId,
   onSuccess,
-  deployVersionRef
+  deployVersionRef,
 }) => {
   const closeModalRef = useRef();
 
@@ -17,7 +17,7 @@ export const VersionDeploymentModal = ({
     `/projects/${projectId}/routers/${routerId}/versions/${version}/deploy`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -29,7 +29,7 @@ export const VersionDeploymentModal = ({
         id: `submit-success-deploy-${version}`,
         title: `Router version ${version} is deployed!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess(version);
       closeModal();
@@ -44,7 +44,7 @@ export const VersionDeploymentModal = ({
       content={<p>You are about to deploy Router version {version}.</p>}
       confirmButtonText="Deploy"
       confirmButtonColor="primary">
-      {onSubmit =>
+      {(onSubmit) =>
         (deployVersionRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
       }

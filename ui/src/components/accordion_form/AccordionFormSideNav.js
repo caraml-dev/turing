@@ -12,9 +12,9 @@ export const AccordionFormSideNav = ({ name, sections }) => {
       items: sections.map((section, idx) => ({
         id: idx,
         name: section.title,
-        renderItem: () => <AccordionFormSideNavItem section={section} />
-      }))
-    }
+        renderItem: () => <AccordionFormSideNavItem section={section} />,
+      })),
+    },
   ];
 
   return <EuiSideNav items={sideNav} />;

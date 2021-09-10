@@ -2,7 +2,7 @@ import { get } from "../../components/form/utils";
 import { Ensembler, NopEnsembler } from "../ensembler";
 import {
   BaseExperimentEngine,
-  NopExperimentEngine
+  NopExperimentEngine,
 } from "../experiment_engine";
 import { Status } from "../status/Status";
 
@@ -22,7 +22,7 @@ export class TuringRouter {
         cpu_request: "500m",
         memory_request: "512Mi",
         min_replica: 0,
-        max_replica: 2
+        max_replica: 2,
       },
       timeout: "100ms",
       experiment_engine: new NopExperimentEngine(),
@@ -35,24 +35,24 @@ export class TuringRouter {
           cpu_request: "500m",
           memory_request: "512Mi",
           min_replica: 0,
-          max_replica: 2
+          max_replica: 2,
         },
         env: [],
-        service_account: ""
+        service_account: "",
       },
       ensembler: new NopEnsembler(),
       log_config: {
         result_logger_type: "nop",
         bigquery_config: {
           table: "",
-          service_account_secret: ""
+          service_account_secret: "",
         },
         kafka_config: {
           brokers: "",
           topic: "",
-          serialization_format: "protobuf"
-        }
-      }
+          serialization_format: "protobuf",
+        },
+      },
     };
   }
 
@@ -65,7 +65,7 @@ export class TuringRouter {
     router.config.ensembler = Ensembler.fromJson(get(json, "config.ensembler"));
 
     const {
-      config: { enricher }
+      config: { enricher },
     } = router;
 
     if (!!get(json, "config.enricher")) {
@@ -110,10 +110,10 @@ export class TuringRouter {
 export const newRoute = () => ({
   id: "",
   type: "PROXY",
-  timeout: "20ms"
+  timeout: "20ms",
 });
 
 export const newRule = () => ({
   conditions: [],
-  routes: []
+  routes: [],
 });

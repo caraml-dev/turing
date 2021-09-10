@@ -13,7 +13,7 @@ export const ExperimentConfigGroup = ({
   engineType,
   experimentConfig,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const experimentSectionRef = useRef();
 
@@ -35,7 +35,7 @@ export const ExperimentConfigGroup = ({
       ) {
         onChangeHandler({
           ...initConfig(),
-          engine: engineProps
+          engine: engineProps,
         });
       } else if (!experimentConfig.engine || !experimentConfig.engine.name) {
         // Set the engine props to the experiment config
@@ -48,8 +48,8 @@ export const ExperimentConfigGroup = ({
      while the id property of each experiment will be set after the experiment
      element is created, and we want the change to be detected correctly. */
   const selectedExpIds = ((experimentConfig || {}).experiments || [])
-    .filter(exp => !!exp.id)
-    .map(exp => exp.id)
+    .filter((exp) => !!exp.id)
+    .map((exp) => exp.id)
     .sort((a, b) => (a > b ? 1 : -1));
 
   return !!experimentConfig &&

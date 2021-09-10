@@ -8,7 +8,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIcon,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { SelectEndpointComboBox } from "../../../../../../components/form/endpoint_combo_box/SelectEndpointComboBox";
 import { EuiFieldDuration } from "../../../../../../components/form/field_duration/EuiFieldDuration";
@@ -22,14 +22,14 @@ export const RouteCard = ({
   onChange,
   onSelect,
   onDelete,
-  errors
+  errors,
 }) => {
   const [endpointsMap, setEndpointsMap] = useState({});
 
   useEffect(() => {
     setEndpointsMap(
       endpointOptions
-        .flatMap(option => option.options || [option])
+        .flatMap((option) => option.options || [option])
         .reduce((dict, option) => {
           dict[option.label] = option;
           return dict;
@@ -46,9 +46,9 @@ export const RouteCard = ({
       selectable={{
         children: isDefault ? "Default" : "Set Default",
         onClick: onSelect,
-        isSelected: isDefault
+        isSelected: isDefault,
       }}>
-      <EuiForm onClick={e => e.stopPropagation()}>
+      <EuiForm onClick={(e) => e.stopPropagation()}>
         <EuiFlexGroup
           className="euiFlexGroup--removeButton"
           justifyContent="flexEnd"
@@ -77,11 +77,11 @@ export const RouteCard = ({
             placeholder="http://models.internal/predict"
             value={route.endpoint}
             options={endpointOptions}
-            onChange={endpoint => {
+            onChange={(endpoint) => {
               onChange({
                 ...route,
                 endpoint,
-                annotations: (endpointsMap[endpoint] || {}).annotations
+                annotations: (endpointsMap[endpoint] || {}).annotations,
               });
             }}
             isInvalid={!!get(errors, "endpoint")}
@@ -99,7 +99,7 @@ export const RouteCard = ({
               <EuiFieldText
                 placeholder="control"
                 value={route.id}
-                onChange={e => onChange({ ...route, id: e.target.value })}
+                onChange={(e) => onChange({ ...route, id: e.target.value })}
                 isInvalid={!!get(errors, "id")}
                 aria-label="route-id"
               />
@@ -113,7 +113,7 @@ export const RouteCard = ({
               <EuiFieldDuration
                 value={route.timeout}
                 max={10000}
-                onChange={value => onChange({ ...route, timeout: value })}
+                onChange={(value) => onChange({ ...route, timeout: value })}
                 isInvalid={!!get(errors, "timeout")}
                 aria-label="route-timeout"
               />

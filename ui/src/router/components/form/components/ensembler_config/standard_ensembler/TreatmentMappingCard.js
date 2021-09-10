@@ -4,7 +4,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSuperSelect,
-  EuiText
+  EuiText,
 } from "@elastic/eui";
 import { InMemoryTableForm } from "../../../../../../components/form/in_memory_table_form/InMemoryTableForm";
 import "./TreatmentMappingCard.scss";
@@ -14,14 +14,14 @@ export const TreatmentMappingCard = ({
   items = [],
   routeOptions,
   onChange,
-  getError
+  getError,
 }) => {
   const columns = [
     {
       name: "Treatment",
       field: "treatment",
       width: "40%",
-      render: treatment => <EuiText size="s">{treatment}</EuiText>
+      render: (treatment) => <EuiText size="s">{treatment}</EuiText>,
     },
     {
       name: "Route",
@@ -37,15 +37,15 @@ export const TreatmentMappingCard = ({
             hasDividers
             compressed
             valueOfSelected={routeId || "nop"}
-            onChange={routeId =>
+            onChange={(routeId) =>
               onChange(item.experiment, item.treatment, routeId)
             }
             options={routeOptions}
             isInvalid={!!getError(item.experiment, item.treatment)}
           />
         </EuiFormRow>
-      )
-    }
+      ),
+    },
   ];
 
   return (

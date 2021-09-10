@@ -8,7 +8,7 @@ export const ComboboxSuggestItem = ({
   searchValue,
   optionContentClassname,
   prepend,
-  append
+  append,
 }) => {
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween">

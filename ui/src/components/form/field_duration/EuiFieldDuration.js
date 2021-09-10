@@ -3,7 +3,7 @@ import { EuiFieldNumber, EuiFormLabel } from "@elastic/eui";
 
 const durationRegex = /([0-9]+)(ms|s|m|h)$/;
 
-const parseDuration = value => {
+const parseDuration = (value) => {
   if (value) {
     let matches = `${value}`.match(durationRegex);
     if (matches) {
@@ -13,7 +13,7 @@ const parseDuration = value => {
   return undefined;
 };
 
-export const EuiFieldDuration = props => {
+export const EuiFieldDuration = (props) => {
   const [value, timeUnit] = parseDuration(props.value) || [0, "ms"];
 
   return (
@@ -21,7 +21,7 @@ export const EuiFieldDuration = props => {
       {...props}
       min={0}
       value={value}
-      onChange={e => props.onChange(`${e.target.value}${timeUnit}`)}
+      onChange={(e) => props.onChange(`${e.target.value}${timeUnit}`)}
       append={<EuiFormLabel>{timeUnit}</EuiFormLabel>}
     />
   );

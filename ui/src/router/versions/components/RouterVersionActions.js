@@ -7,19 +7,20 @@ export const RouterVersionActions = ({
   router,
   onDeploySuccess,
   onDeleteSuccess,
-  children
+  children,
 }) => {
   const deployVersionRef = useRef();
   const deleteVersionRef = useRef();
 
-  const routerStatus = useMemo(() => Status.fromValue(router.status), [
-    router.status
-  ]);
+  const routerStatus = useMemo(
+    () => Status.fromValue(router.status),
+    [router.status]
+  );
 
-  const configStatus = config => Status.fromValue(config.status);
+  const configStatus = (config) => Status.fromValue(config.status);
 
   const isActiveConfig = useCallback(
-    config => config.version === (router.config || {}).version,
+    (config) => config.version === (router.config || {}).version,
     [router.config]
   );
 
@@ -30,10 +31,10 @@ export const RouterVersionActions = ({
         name: "Deploy this version",
         icon: "importAction",
         available: () => true,
-        enabled: config =>
+        enabled: (config) =>
           !(isActiveConfig(config) && routerStatus === Status.DEPLOYED) &&
           routerStatus !== Status.PENDING,
-        onClick: config => deployVersionRef.current(config.version)
+        onClick: (config) => deployVersionRef.current(config.version),
       },
       {
         label: "Delete",
@@ -41,10 +42,10 @@ export const RouterVersionActions = ({
         icon: "trash",
         color: "danger",
         available: () => true,
-        enabled: config =>
+        enabled: (config) =>
           !isActiveConfig(config) && configStatus(config) !== Status.PENDING,
-        onClick: config => deleteVersionRef.current(config.version)
-      }
+        onClick: (config) => deleteVersionRef.current(config.version),
+      },
     ],
     [routerStatus, isActiveConfig]
   );

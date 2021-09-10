@@ -7,7 +7,7 @@ import {
   EuiSearchBar,
   EuiSpacer,
   EuiText,
-  EuiToolTip
+  EuiToolTip,
 } from "@elastic/eui";
 import { appConfig } from "../../config";
 import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
@@ -57,29 +57,29 @@ export const ListEnsemblersTable = ({
             </Fragment>
           )}
         </EuiText>
-      )
+      ),
     },
     {
       field: "name",
       name: "Name",
       width: "30%",
-      render: name => (
+      render: (name) => (
         <span className="eui-textTruncate" title={name}>
           {name}
         </span>
-      )
+      ),
     },
     {
       field: "type",
       name: "Type",
-      width: "15%"
+      width: "15%",
     },
     {
       field: "created_at",
       name: "Created",
       sortable: true,
       width: "20%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -87,13 +87,13 @@ export const ListEnsemblersTable = ({
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
+      ),
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "20%",
-      render: date => (
+      render: (date) => (
         <EuiToolTip
           position="top"
           content={moment(date, dateFormat).toLocaleString()}>
@@ -101,7 +101,7 @@ export const ListEnsemblersTable = ({
             {moment(date, dateFormat).fromNow()}
           </EuiText>
         </EuiToolTip>
-      )
+      ),
     },
     {
       field: "id",
@@ -115,31 +115,31 @@ export const ListEnsemblersTable = ({
       align: "right",
       mobileOptions: {
         header: true,
-        fullWidth: false
+        fullWidth: false,
       },
       width: "15%",
-      render: ensemblerId => (
+      render: (ensemblerId) => (
         <EuiButtonEmpty
-          onClick={_ => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
+          onClick={(_) => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
           iconType="storage"
           size="xs">
           <EuiText size="xs">Batch Jobs</EuiText>
         </EuiButtonEmpty>
-      )
-    }
+      ),
+    },
   ];
 
   const pagination = {
     pageIndex: page.index,
     pageSize: page.size,
-    totalItemCount
+    totalItemCount,
   };
 
   const search = {
     query: searchQuery,
     onChange: onQueryChange,
     box: {
-      incremental: false
+      incremental: false,
     },
     filters: [
       {
@@ -147,19 +147,19 @@ export const ListEnsemblersTable = ({
         field: "type",
         name: "Ensembler Type",
         multiSelect: false,
-        options: EnsemblerType.values.map(type => ({
+        options: EnsemblerType.values.map((type) => ({
           value: type.toString(),
-          view: type.label
-        }))
-      }
-    ]
+          view: type.label,
+        })),
+      },
+    ],
   };
 
-  const cellProps = item =>
+  const cellProps = (item) =>
     onRowClick
       ? {
           style: { cursor: "pointer" },
-          onClick: () => onRowClick(item)
+          onClick: () => onRowClick(item),
         }
       : undefined;
 

@@ -6,8 +6,8 @@ import { TreatmentMappingConfigSection } from "./TreatmentMappingConfigSection";
 export const EnsemblerConfigSection = ({
   config: {
     ensembler,
-    experiment_engine: { config: experimentConfig }
-  }
+    experiment_engine: { config: experimentConfig },
+  },
 }) => {
   return !ensembler ? (
     <EuiPanel>Not Configured</EuiPanel>

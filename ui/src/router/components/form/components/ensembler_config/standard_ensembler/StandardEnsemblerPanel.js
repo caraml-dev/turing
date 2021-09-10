@@ -12,29 +12,31 @@ export const StandardEnsemblerPanel = ({
   mappings = [],
   routeOptions,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
   const experimentTreatments = experiments.reduce((acc, exp) => {
     if (!!exp.name) {
-      acc[exp.name] = exp.variants.map(v => v.name);
+      acc[exp.name] = exp.variants.map((v) => v.name);
     }
     return acc;
   }, {});
-  const experimentNames = experiments.filter(e => !!e.name).map(e => e.name);
+  const experimentNames = experiments
+    .filter((e) => !!e.name)
+    .map((e) => e.name);
 
   useEffect(() => {
-    const mappingExperiments = [...new Set(mappings.map(m => m.experiment))];
+    const mappingExperiments = [...new Set(mappings.map((m) => m.experiment))];
     const isSame =
       experimentNames.length === mappingExperiments.length &&
-      experimentNames.every(name => mappingExperiments.includes(name));
+      experimentNames.every((name) => mappingExperiments.includes(name));
     if (!isSame && !isEmpty(experimentTreatments)) {
-      const editedMappings = mappings.filter(m =>
+      const editedMappings = mappings.filter((m) =>
         experimentNames.includes(m.experiment)
       );
-      experimentNames.forEach(expName => {
+      experimentNames.forEach((expName) => {
         if (!mappingExperiments.includes(expName)) {
-          experimentTreatments[expName].forEach(t =>
+          experimentTreatments[expName].forEach((t) =>
             editedMappings.push(newMapping(expName, t))
           );
         }
@@ -45,7 +47,7 @@ export const StandardEnsemblerPanel = ({
 
   const onChangeMapping = (experiment, treatment, route) => {
     const idx = mappings.findIndex(
-      mapObj =>
+      (mapObj) =>
         mapObj.experiment === experiment && mapObj.treatment === treatment
     );
     onChange(`${idx}.route`)(route);
@@ -53,7 +55,7 @@ export const StandardEnsemblerPanel = ({
 
   const getError = (experiment, treatment) => {
     const idx = mappings.findIndex(
-      mapObj =>
+      (mapObj) =>
         mapObj.experiment === experiment && mapObj.treatment === treatment
     );
     return get(errors, `${idx}.route`);
@@ -69,7 +71,7 @@ export const StandardEnsemblerPanel = ({
               <TreatmentMappingCard
                 experimentName={experiment}
                 items={mappings.filter(
-                  mapObj => mapObj.experiment === experiment
+                  (mapObj) => mapObj.experiment === experiment
                 )}
                 routeOptions={routeOptions}
                 onChange={onChangeMapping}

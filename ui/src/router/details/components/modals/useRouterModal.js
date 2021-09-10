@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 
-export const useRouterModal = closeModalRef => {
+export const useRouterModal = (closeModalRef) => {
   const [router, setRouter] = useState();
 
-  const openModal = useCallback(onSubmit => {
-    return router => {
+  const openModal = useCallback((onSubmit) => {
+    return (router) => {
       setRouter(router);
       onSubmit();
     };

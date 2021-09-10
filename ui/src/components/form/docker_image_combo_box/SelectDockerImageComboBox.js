@@ -5,7 +5,7 @@ import { EuiComboBoxSelect } from "../combo_box/EuiComboBoxSelect";
 
 const extractRegistry = (image, registries) => {
   if (image) {
-    const registry = registries.find(o => image.startsWith(o.value));
+    const registry = registries.find((o) => image.startsWith(o.value));
     if (registry && registry.value) {
       image = image.substr(registry.value.length);
       image && image.startsWith("/") && (image = image.substr(1));
@@ -25,11 +25,11 @@ export const SelectDockerImageComboBox = ({
 }) => {
   const [registry, image] = extractRegistry(value, registryOptions);
 
-  const onRegistryChange = value => {
+  const onRegistryChange = (value) => {
     onChange(value ? `${value}/${image}` : image);
   };
 
-  const onImageChange = value => {
+  const onImageChange = (value) => {
     onChange(registry ? `${registry}/${value}` : value);
   };
 
@@ -42,7 +42,7 @@ export const SelectDockerImageComboBox = ({
       isInvalid={props.isInvalid}
       options={imageOptions}
       value={image}
-      onChange={value => onImageChange(value || "")}
+      onChange={(value) => onImageChange(value || "")}
       onCreateOption={onImageChange}
       prepend={
         <DockerRegistryPopover

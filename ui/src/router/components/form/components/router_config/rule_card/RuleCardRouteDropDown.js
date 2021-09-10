@@ -5,7 +5,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTextColor,
-  EuiToolTip
+  EuiToolTip,
 } from "@elastic/eui";
 
 export const RuleCardRouteDropDownOption = ({ id, endpoint, isDefault }) => {

@@ -4,7 +4,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 
 const PanelContent = ({ contentWidth = "75%", children }) => (

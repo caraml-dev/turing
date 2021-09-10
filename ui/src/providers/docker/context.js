@@ -5,14 +5,14 @@ const DockerRegistriesContext = React.createContext([]);
 
 export const DockerRegistriesContextProvider = ({ children }) => {
   const registries = [
-    ...appConfig.privateDockerRegistries.map(registry => ({
+    ...appConfig.privateDockerRegistries.map((registry) => ({
       value: registry,
-      inputDisplay: registry
+      inputDisplay: registry,
     })),
     {
       value: "docker.io",
-      inputDisplay: "Docker Hub"
-    }
+      inputDisplay: "Docker Hub",
+    },
   ];
 
   return (

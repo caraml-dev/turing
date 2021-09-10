@@ -20,7 +20,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     `/projects/${projectId}/routers`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -34,7 +34,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
         id: "submit-success-create",
         title: "New Turing router is created!",
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess(submissionResponse.data.id);
     }
@@ -46,29 +46,29 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     {
       title: "Router",
       children: <RouterStep projectId={projectId} />,
-      validationSchema: schema[0]
+      validationSchema: schema[0],
     },
     {
       title: "Experiments",
       children: <ExperimentStep />,
       validationSchema: schema[1],
-      validationContext: { experimentEngineOptions }
+      validationContext: { experimentEngineOptions },
     },
     {
       title: "Enricher",
       children: <EnricherStep projectId={projectId} />,
-      validationSchema: schema[2]
+      validationSchema: schema[2],
     },
     {
       title: "Ensembler",
       children: <EnsemblerStep projectId={projectId} />,
-      validationSchema: schema[3]
+      validationSchema: schema[3],
     },
     {
       title: "Outcome Tracking",
       children: <OutcomeStep projectId={projectId} />,
-      validationSchema: schema[4]
-    }
+      validationSchema: schema[4],
+    },
   ];
 
   return (
@@ -79,7 +79,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
       confirmButtonColor="primary">
-      {onSubmit => (
+      {(onSubmit) => (
         <StepsWizardHorizontal
           steps={steps}
           onCancel={onCancel}

@@ -5,7 +5,7 @@ import {
   EuiDescriptionListTitle,
   EuiLink,
   EuiTextColor,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 import "./CredentialsConfigSection.scss";
 
@@ -13,7 +13,7 @@ export const CredentialsConfigSection = ({
   engineType,
   deployment,
   client,
-  engineProps
+  engineProps,
 }) => {
   const username = client.username || "N/A";
 

@@ -1,14 +1,14 @@
 export const resultLoggingOptions = [
   {
     value: "nop",
-    inputDisplay: "None"
+    inputDisplay: "None",
   },
   {
     value: "bigquery",
-    inputDisplay: "BigQuery"
+    inputDisplay: "BigQuery",
   },
   {
     value: "kafka",
-    inputDisplay: "Kafka"
-  }
+    inputDisplay: "Kafka",
+  },
 ];

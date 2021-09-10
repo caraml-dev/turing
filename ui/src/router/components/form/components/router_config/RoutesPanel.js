@@ -11,13 +11,13 @@ export const RoutesPanel = ({
   routes,
   defaultRouteId,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const [defaultRouteIndex, setDefaultRouteIndex] = useState(
     (() => {
-      let defaultRouteIdx = routes.findIndex(r => r.id === defaultRouteId);
+      let defaultRouteIdx = routes.findIndex((r) => r.id === defaultRouteId);
       if (defaultRouteIdx < 0) {
         defaultRouteIdx = 0;
       }
@@ -31,10 +31,10 @@ export const RoutesPanel = ({
     onChange("routes")([...routes, newRoute()]);
   };
 
-  const onDeleteRoute = idx => () => {
+  const onDeleteRoute = (idx) => () => {
     routes.splice(idx, 1);
     onChange("routes")(routes);
-    idx < defaultRouteIndex && setDefaultRouteIndex(idx => idx - 1);
+    idx < defaultRouteIndex && setDefaultRouteIndex((idx) => idx - 1);
   };
 
   const defaultRouteIdUpdated = routes[defaultRouteIndex].id;

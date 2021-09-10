@@ -4,7 +4,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow
+  EuiFormRow,
 } from "@elastic/eui";
 import { get } from "../../../components/form/utils";
 import { FieldSourceFormLabel } from "../request_field_source/FieldSourceFormLabel";
@@ -13,18 +13,18 @@ export const TrafficRuleCondition = ({
   condition,
   onChangeHandler,
   errors,
-  readOnly
+  readOnly,
 }) => {
   const selectedOptions = useMemo(() => {
-    return condition.values.map(v => ({ label: v }));
+    return condition.values.map((v) => ({ label: v }));
   }, [condition.values]);
 
-  const onChange = field => value => {
+  const onChange = (field) => (value) => {
     condition[field] = value;
     onChangeHandler({ ...condition });
   };
 
-  const onAddValue = searchValue => {
+  const onAddValue = (searchValue) => {
     onChange("values")([...condition.values, searchValue]);
   };
 
@@ -38,7 +38,7 @@ export const TrafficRuleCondition = ({
             readOnly={readOnly}
             compressed
             value={condition.field || ""}
-            onChange={e => onChange("field")(e.target.value)}
+            onChange={(e) => onChange("field")(e.target.value)}
             isInvalid={!!get(errors, "field")}
             prepend={
               <FieldSourceFormLabel
@@ -63,8 +63,8 @@ export const TrafficRuleCondition = ({
             customOptionText="Add {searchValue} as a value"
             selectedOptions={selectedOptions}
             onCreateOption={onAddValue}
-            onChange={selected =>
-              onChange("values")(selected.map(l => l.label))
+            onChange={(selected) =>
+              onChange("values")(selected.map((l) => l.label))
             }
             isInvalid={!!get(errors, "values")}
           />

@@ -7,7 +7,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiToolTip
+  EuiToolTip,
 } from "@elastic/eui";
 import { get } from "../../../../../components/form/utils";
 import { RulesPanelFlyout } from "./RulesPanelFlyout";
@@ -20,7 +20,7 @@ export const RulesPanel = ({
   routes,
   defaultRouteId,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -28,7 +28,7 @@ export const RulesPanel = ({
     onChange("rules")([...rules, newRule()]);
   };
 
-  const onDeleteRule = idx => () => {
+  const onDeleteRule = (idx) => () => {
     rules.splice(idx, 1);
     onChange("rules")(rules);
   };

@@ -9,7 +9,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiLink
+  EuiLink,
 } from "@elastic/eui";
 import { Panel } from "../Panel";
 import { SelectDockerImageComboBox } from "../../../../../components/form/docker_image_combo_box/SelectDockerImageComboBox";
@@ -26,7 +26,7 @@ export const DockerDeploymentPanel = ({
   projectId,
   values: { image, port = 0, endpoint, timeout, service_account },
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const secrets = useContext(SecretsContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
@@ -64,7 +64,7 @@ export const DockerDeploymentPanel = ({
                 fullWidth
                 placeholder="/preprocess"
                 value={endpoint}
-                onChange={e => onChange("endpoint")(e.target.value)}
+                onChange={(e) => onChange("endpoint")(e.target.value)}
                 isInvalid={!!errors.endpoint}
               />
             </EuiFormRow>
@@ -81,7 +81,7 @@ export const DockerDeploymentPanel = ({
                 max={65535}
                 placeholder="8080"
                 value={port}
-                onChange={e => {
+                onChange={(e) => {
                   let port = parseInt(e.target.value);
                   onChange("port")(isNaN(port) ? undefined : port);
                 }}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const useInitiallyLoaded = isLoaded => {
+export const useInitiallyLoaded = (isLoaded) => {
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(isLoaded);
 
   useEffect(() => {

@@ -6,9 +6,8 @@ import { animatedScrollConfig } from "./scroll";
 import { isSectionInvalid } from "./AccordionForm";
 
 export const AccordionFormScrollController = ({ sections }) => {
-  const [isFormSubmissionInProgress, setFormSubmissionInProgress] = useState(
-    false
-  );
+  const [isFormSubmissionInProgress, setFormSubmissionInProgress] =
+    useState(false);
   const { isSubmitting, errors } = useContext(FormValidationContext);
 
   useEffect(() => {

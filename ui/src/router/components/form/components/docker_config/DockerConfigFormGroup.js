@@ -13,7 +13,7 @@ export const DockerConfigFormGroup = ({
   projectId,
   dockerConfig,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 

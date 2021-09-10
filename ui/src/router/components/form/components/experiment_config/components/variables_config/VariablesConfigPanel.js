@@ -16,12 +16,12 @@ import isEqualWith from "lodash/isEqualWith";
 export const VariablesConfigPanel = ({
   variables,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const {
     variables: allVariables,
     isLoaded,
-    setVariablesValidated
+    setVariablesValidated,
   } = useContext(ExperimentContext);
 
   // Update current variables config when new variables data arrives, if required
@@ -59,7 +59,7 @@ export const VariablesConfigPanel = ({
       ) {
         onChangeHandler({
           ...allVariables,
-          config: allVariables.config.map(v => currentVars[v.name] || v)
+          config: allVariables.config.map((v) => currentVars[v.name] || v),
         });
       }
       setVariablesValidated(true);
@@ -69,7 +69,7 @@ export const VariablesConfigPanel = ({
     allVariables,
     isLoaded,
     setVariablesValidated,
-    onChangeHandler
+    onChangeHandler,
   ]);
 
   const sortedVariables = useMemo(() => {
@@ -83,17 +83,17 @@ export const VariablesConfigPanel = ({
     // Sort required variables by name, and append the remaining variables
     return [
       ...sortBy(
-        variables.config.filter(v => v.required),
+        variables.config.filter((v) => v.required),
         "name"
       ),
-      ...variables.config.filter(v => !v.required)
+      ...variables.config.filter((v) => !v.required),
     ];
   }, [variables.config]);
 
   // Get the required variables and the optional variables whose values have been set
   const { selectedVariables = [], availableVariables = [] } = groupBy(
     sortedVariables,
-    v => {
+    (v) => {
       return v.required || v.field || v.selected
         ? "selectedVariables"
         : "availableVariables";
@@ -103,7 +103,7 @@ export const VariablesConfigPanel = ({
   const { onChange } = useOnChangeHandler(onChangeHandler);
   // forceUpdate will be used to update the Variables UI on add/remove variable configurations.
   // eslint-disable-next-line no-unused-vars
-  const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
 
   // Add a dummy variable to the selected variables
   !!availableVariables.length && selectedVariables.push(newVariableConfig());
@@ -121,7 +121,7 @@ export const VariablesConfigPanel = ({
       {!!selectedVariables.length ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {selectedVariables.map(variable => (
+            {selectedVariables.map((variable) => (
               <EuiFlexItem key={`experiment-variable-${variable.name}`}>
                 <VariableConfigRow
                   variable={variable}

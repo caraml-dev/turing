@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 
-export const useVersionModal = closeModalRef => {
+export const useVersionModal = (closeModalRef) => {
   const [version, setVersion] = useState();
 
-  const openModal = useCallback(onSubmit => {
-    return version => {
+  const openModal = useCallback((onSubmit) => {
+    return (version) => {
       setVersion(version);
       onSubmit();
     };

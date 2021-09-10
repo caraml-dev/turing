@@ -1,13 +1,13 @@
 import React from "react";
 import FormValidationContext, {
-  MultiSectionFormValidationContextProvider
+  MultiSectionFormValidationContextProvider,
 } from ".";
 
 export const FormValidationContextProvider = ({
   schema,
   context,
   onSubmit,
-  children
+  children,
 }) => (
   <MultiSectionFormValidationContextProvider
     onSubmit={onSubmit}
