@@ -10,15 +10,15 @@ import { ExperimentConfigGroup } from "../components/experiment_config/Experimen
 import { ensemblerTypeOptions } from "../components/ensembler_config/typeOptions";
 import { getExperimentEngineOptions } from "../components/experiment_config/typeOptions";
 
-export const ExperimentStep = () => {
+export const ExperimentStep = ({ projectId }) => {
   const {
     data: {
       config: {
         experiment_engine,
-        ensembler: { type: ensemblerType }
-      }
+        ensembler: { type: ensemblerType },
+      },
     },
-    onChangeHandler
+    onChangeHandler,
   } = useContext(FormContext);
 
   const { errors } = useContext(FormValidationContext);
@@ -35,11 +35,11 @@ export const ExperimentStep = () => {
 
   useEffect(() => {
     const ensemblerOptions = ensemblerTypeOptions(engineProps).filter(
-      o => !o.disabled
+      (o) => !o.disabled
     );
 
     const ensemblerTypeOption = ensemblerOptions.find(
-      o => o.value === ensemblerType
+      (o) => o.value === ensemblerType
     );
 
     if (ensemblerOptions.length && !ensemblerTypeOption) {
@@ -47,6 +47,9 @@ export const ExperimentStep = () => {
     }
   }, [experiment_engine.type, engineProps, onChange, ensemblerType]);
 
+  const View = React.lazy(() => import("expEngine/EditExperimentEngineConfig"));
+
+  /* Check for xp should be replaced by a check for the default engine property. */
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -58,13 +61,23 @@ export const ExperimentStep = () => {
         />
       </EuiFlexItem>
 
-      {experiment_engine.type !== "nop" && (
-        <ExperimentConfigGroup
-          engineType={experiment_engine.type}
-          experimentConfig={experiment_engine.config}
-          onChangeHandler={onChange("config.experiment_engine.config")}
-          errors={get(errors, "config.experiment_engine.config")}
-        />
+      {experiment_engine.type === "xp" ? (
+        <React.Suspense fallback="Loading Experiments">
+          <View
+            projectId={projectId}
+            experimentConfig={experiment_engine.config}
+            onChangeHandler={onChange("config.experiment_engine.config")}
+          />
+        </React.Suspense>
+      ) : (
+        experiment_engine.type !== "nop" && (
+          <ExperimentConfigGroup
+            engineType={experiment_engine.type}
+            experimentConfig={experiment_engine.config}
+            onChangeHandler={onChange("config.experiment_engine.config")}
+            errors={get(errors, "config.experiment_engine.config")}
+          />
+        )
       )}
     </EuiFlexGroup>
   );
