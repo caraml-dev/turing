@@ -32,8 +32,14 @@ build-image:
 	mkdir -p temp-deps
 	cp -r ../../sdk temp-deps/
 	@docker build . \
-		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}
+		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER} \
+		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:latest
 	rm -rf temp-deps
+
+.PHONY: push-image
+push-image:
+	@docker push $(DOCKER_REGISTRY)/turing/batch-ensembler:$(VERSION_NUMBER)
+	@docker push $(DOCKER_REGISTRY)/turing/batch-ensembler:latest
 
 .PHONY: version
 version:
