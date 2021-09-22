@@ -268,6 +268,8 @@ type RouterDefaults struct {
 	// {"experiment_engine_a": {"endpoint": "http://engine-a.com", "timeout": "500ms"},
 	//  "experiment_engine_b": {"endpoint": "http://engine-b.com", "timeout": "250ms"} }
 	Experiment map[string]interface{}
+
+	MonitoringURLFormat *string
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled

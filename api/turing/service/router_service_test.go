@@ -86,7 +86,8 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				},
 			},
 		}
-		routerVersion, err := NewRouterVersionsService(db).Save(routerVersion)
+
+		routerVersion, err := NewRouterVersionsService(db, nil, nil).Save(routerVersion)
 		assert.NoError(t, err)
 		router.SetCurrRouterVersionID(routerVersion.ID)
 		saved, err := svc.Save(router)

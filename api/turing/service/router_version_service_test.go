@@ -7,11 +7,13 @@ import (
 	"encoding/json"
 	"testing"
 
+	merlin "github.com/gojek/merlin/client"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -28,7 +30,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.NoError(t, err)
 
 		// populate database
-		svc := NewRouterVersionsService(db)
+		svc := NewRouterVersionsService(db, nil, nil)
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
 			Status:   models.RouterVersionStatusPending,
@@ -199,4 +201,65 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.Nil(t, routerVersion.Enricher)
 		assert.Nil(t, routerVersion.Ensembler)
 	})
+}
+
+func TestGenerateMonitoringURL(t *testing.T) {
+	monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+	tests := map[string]struct {
+		format          *string
+		mlpService      func() MLPService
+		environmentName string
+		projectName     string
+		routerVersion   *models.RouterVersion
+		expected        string
+	}{
+		"success | nominal": {
+			format: &monitoringURLFormat,
+			mlpService: func() MLPService {
+				mlpService := &MockMLPService{}
+				mlpService.On(
+					"GetEnvironment",
+					mock.Anything,
+				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+				return mlpService
+			},
+			environmentName: "environment",
+			projectName:     "project-name",
+			routerVersion: &models.RouterVersion{
+				Router: &models.Router{
+					Name: "router-name",
+				},
+				Version: 10,
+			},
+			expected: "https://www.example.com/project-name/cluster-name/router-name/10",
+		},
+		"success | no format given": {
+			format: nil,
+			mlpService: func() MLPService {
+				mlpService := &MockMLPService{}
+				mlpService.On(
+					"GetEnvironment",
+					mock.Anything,
+				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+				return mlpService
+			},
+			environmentName: "environment",
+			projectName:     "project-name",
+			routerVersion: &models.RouterVersion{
+				Router: &models.Router{
+					Name: "router-name",
+				},
+				Version: 10,
+			},
+			expected: "",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := NewRouterVersionsService(nil, tt.mlpService(), tt.format)
+			result, err := svc.GenerateMonitoringURL(tt.projectName, tt.environmentName, tt.routerVersion)
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }

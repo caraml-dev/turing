@@ -22,16 +22,24 @@ func TestListRouters(t *testing.T) {
 		On("GetProject", models.ID(1)).
 		Return(nil, errors.New("test project error"))
 	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{Id: 2}, nil)
-	mlpSvc.On("GetProject", models.ID(3)).Return(&mlp.Project{Id: 3}, nil)
+	mlpSvc.On("GetProject", models.ID(3)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)
+
 	// Router Service
+	monitoringURL := "http://www.example.com"
 	routers := []*models.Router{
 		{
 			Model:     models.Model{ID: 1},
 			ProjectID: 3,
+			CurrRouterVersion: &models.RouterVersion{
+				MonitoringURL: monitoringURL,
+			},
 		},
 		{
 			Model:     models.Model{ID: 2},
 			ProjectID: 3,
+			CurrRouterVersion: &models.RouterVersion{
+				MonitoringURL: monitoringURL,
+			},
 		},
 	}
 	routerSvc := &mocks.RoutersService{}
@@ -41,6 +49,11 @@ func TestListRouters(t *testing.T) {
 	routerSvc.
 		On("ListRouters", models.ID(3), "").
 		Return(routers, nil)
+
+	routerVersionSvc := &mocks.RouterVersionsService{}
+	routerVersionSvc.
+		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything).
+		Return(monitoringURL, nil)
 
 	// Define test cases
 	tests := map[string]struct {
@@ -75,8 +88,9 @@ func TestListRouters(t *testing.T) {
 				RouterDeploymentController{
 					BaseController{
 						AppContext: &AppContext{
-							MLPService:     mlpSvc,
-							RoutersService: routerSvc,
+							MLPService:            mlpSvc,
+							RoutersService:        routerSvc,
+							RouterVersionsService: routerVersionSvc,
 						},
 					},
 				},
@@ -88,14 +102,28 @@ func TestListRouters(t *testing.T) {
 }
 
 func TestGetRouter(t *testing.T) {
+	monitoringURL := "http://www.example.com"
 	router := &models.Router{
 		Model: models.Model{ID: 2},
+		CurrRouterVersion: &models.RouterVersion{
+			MonitoringURL: monitoringURL,
+		},
 	}
 	routerSvc := &mocks.RoutersService{}
 	routerSvc.
 		On("FindByID", models.ID(1)).
 		Return(nil, errors.New("test router error"))
 	routerSvc.On("FindByID", models.ID(2)).Return(router, nil)
+
+	routerVersionSvc := &mocks.RouterVersionsService{}
+	routerVersionSvc.
+		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything).
+		Return(monitoringURL, nil)
+
+	mlpService := &mocks.MLPService{}
+	mlpService.
+		On("GetProject", models.ID(1)).
+		Return(&mlp.Project{Id: 1, Name: "mlp-project"}, nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -107,11 +135,11 @@ func TestGetRouter(t *testing.T) {
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | not found": {
-			vars:     RequestVars{"router_id": {"1"}},
+			vars:     RequestVars{"router_id": {"1"}, "project_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"success": {
-			vars: RequestVars{"router_id": {"2"}},
+			vars: RequestVars{"router_id": {"2"}, "project_id": {"1"}},
 			expected: &Response{
 				code: 200,
 				data: router,
@@ -126,7 +154,9 @@ func TestGetRouter(t *testing.T) {
 				RouterDeploymentController{
 					BaseController{
 						AppContext: &AppContext{
-							RoutersService: routerSvc,
+							RoutersService:        routerSvc,
+							RouterVersionsService: routerVersionSvc,
+							MLPService:            mlpService,
 						},
 					},
 				},

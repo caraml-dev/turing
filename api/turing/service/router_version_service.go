@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"errors"
+	"text/template"
 
+	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -23,14 +26,35 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
+	// GenerateMonitoringURL generates the monitoring url based on the router version.
+	GenerateMonitoringURL(projectName, environmentName string, routerVersion *models.RouterVersion) (string, error)
 }
 
-func NewRouterVersionsService(db *gorm.DB) RouterVersionsService {
-	return &routerVersionsService{db: db}
+func NewRouterVersionsService(
+	db *gorm.DB,
+	mlpService MLPService,
+	monitoringURLFormat *string,
+) RouterVersionsService {
+	var monitoringURLTemplate *template.Template
+	var err error
+	if monitoringURLFormat != nil {
+		monitoringURLTemplate, err = template.New("monitoringURLTemplate").Parse(*monitoringURLFormat)
+		if err != nil {
+			logger.Warnf("error parsing monitoring url template: %s", err)
+		}
+	}
+
+	return &routerVersionsService{
+		db:                    db,
+		mlpService:            mlpService,
+		monitoringURLTemplate: monitoringURLTemplate,
+	}
 }
 
 type routerVersionsService struct {
-	db *gorm.DB
+	db                    *gorm.DB
+	mlpService            MLPService
+	monitoringURLTemplate *template.Template
 }
 
 func (service *routerVersionsService) query() *gorm.DB {
@@ -152,4 +176,41 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 		tx.Delete(routerVersion.Ensembler)
 	}
 	return tx.Commit().Error
+}
+
+type monitoringURLValues struct {
+	ClusterName string
+	ProjectName string
+	RouterName  string
+	Version     uint
+}
+
+func (service *routerVersionsService) GenerateMonitoringURL(
+	projectName string,
+	environmentName string,
+	routerVersion *models.RouterVersion,
+) (string, error) {
+	if service.monitoringURLTemplate == nil {
+		return "", nil
+	}
+
+	env, err := service.mlpService.GetEnvironment(environmentName)
+	if err != nil {
+		return "", err
+	}
+
+	values := monitoringURLValues{
+		ClusterName: env.Cluster,
+		ProjectName: projectName,
+		RouterName:  routerVersion.Router.Name,
+		Version:     routerVersion.Version,
+	}
+
+	var b bytes.Buffer
+	err = service.monitoringURLTemplate.Execute(&b, values)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }

@@ -519,6 +519,9 @@ components:
           $ref: "#/components/schemas/Enricher"
         ensembler:
           $ref: "#/components/schemas/Ensembler"
+        monitoring_url:
+          type: "string"
+          readOnly: true
 
     ResultLoggerType:
       type: "string"

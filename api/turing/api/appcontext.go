@@ -142,7 +142,7 @@ func NewAppContext(
 		RoutersService:        service.NewRoutersService(db),
 		EnsemblersService:     service.NewEnsemblersService(db),
 		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(db),
+		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
 		CryptoService:         cryptoService,
