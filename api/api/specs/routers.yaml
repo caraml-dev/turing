@@ -428,6 +428,9 @@ components:
           type: "string"
         endpoint:
           type: "string"
+        monitoring_url:
+          type: "string"
+          readOnly: true
         status:
           $ref: "#/components/schemas/RouterStatus"
         config:

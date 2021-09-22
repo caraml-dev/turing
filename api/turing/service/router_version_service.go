@@ -3,11 +3,16 @@ package service
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"text/template"
 
 	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
+)
+
+const (
+	grafanaAllVariable = "$__all"
 )
 
 // RouterVersionsService is the data access object for RouterVersions from the db.
@@ -27,7 +32,12 @@ type RouterVersionsService interface {
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
 	// GenerateMonitoringURL generates the monitoring url based on the router version.
-	GenerateMonitoringURL(projectName, environmentName string, routerVersion *models.RouterVersion) (string, error)
+	GenerateMonitoringURL(
+		projectName string,
+		environmentName string,
+		routerName string,
+		routerVersion *uint,
+	) (string, error)
 }
 
 func NewRouterVersionsService(
@@ -182,13 +192,14 @@ type monitoringURLValues struct {
 	ClusterName string
 	ProjectName string
 	RouterName  string
-	Version     uint
+	Version     string
 }
 
 func (service *routerVersionsService) GenerateMonitoringURL(
 	projectName string,
 	environmentName string,
-	routerVersion *models.RouterVersion,
+	routerName string,
+	routerVersion *uint,
 ) (string, error) {
 	if service.monitoringURLTemplate == nil {
 		return "", nil
@@ -199,11 +210,18 @@ func (service *routerVersionsService) GenerateMonitoringURL(
 		return "", err
 	}
 
+	var versionString string
+	if routerVersion == nil {
+		versionString = grafanaAllVariable
+	} else {
+		versionString = fmt.Sprintf("%d", *routerVersion)
+	}
+
 	values := monitoringURLValues{
 		ClusterName: env.Cluster,
 		ProjectName: projectName,
-		RouterName:  routerVersion.Router.Name,
-		Version:     routerVersion.Version,
+		RouterName:  routerName,
+		Version:     versionString,
 	}
 
 	var b bytes.Buffer

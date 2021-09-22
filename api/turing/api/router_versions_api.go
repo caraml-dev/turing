@@ -40,7 +40,8 @@ func (c RouterVersionsController) ListRouterVersions(
 		monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
 			project.Name,
 			router.EnvironmentName,
-			routerVersion,
+			router.Name,
+			&routerVersion.Version,
 		)
 		if err != nil {
 			return InternalServerError("unable to generate monitoringURL for router version", err.Error())
@@ -76,7 +77,8 @@ func (c RouterVersionsController) GetRouterVersion(
 	monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
 		project.Name,
 		router.EnvironmentName,
-		routerVersion,
+		router.Name,
+		&routerVersion.Version,
 	)
 	if err != nil {
 		return InternalServerError("unable to generate monitoringURL for router version", err.Error())

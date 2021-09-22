@@ -26,20 +26,19 @@ func TestListRouters(t *testing.T) {
 
 	// Router Service
 	monitoringURL := "http://www.example.com"
+	routerName := "router-name"
 	routers := []*models.Router{
 		{
-			Model:     models.Model{ID: 1},
-			ProjectID: 3,
-			CurrRouterVersion: &models.RouterVersion{
-				MonitoringURL: monitoringURL,
-			},
+			Name:          routerName,
+			Model:         models.Model{ID: 1},
+			ProjectID:     3,
+			MonitoringURL: monitoringURL,
 		},
 		{
-			Model:     models.Model{ID: 2},
-			ProjectID: 3,
-			CurrRouterVersion: &models.RouterVersion{
-				MonitoringURL: monitoringURL,
-			},
+			Name:          routerName,
+			Model:         models.Model{ID: 2},
+			ProjectID:     3,
+			MonitoringURL: monitoringURL,
 		},
 	}
 	routerSvc := &mocks.RoutersService{}
@@ -52,7 +51,7 @@ func TestListRouters(t *testing.T) {
 
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything).
+		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(monitoringURL, nil)
 
 	// Define test cases
@@ -103,11 +102,11 @@ func TestListRouters(t *testing.T) {
 
 func TestGetRouter(t *testing.T) {
 	monitoringURL := "http://www.example.com"
+	routerName := "router-name"
 	router := &models.Router{
-		Model: models.Model{ID: 2},
-		CurrRouterVersion: &models.RouterVersion{
-			MonitoringURL: monitoringURL,
-		},
+		Name:          routerName,
+		Model:         models.Model{ID: 2},
+		MonitoringURL: monitoringURL,
 	}
 	routerSvc := &mocks.RoutersService{}
 	routerSvc.
@@ -117,7 +116,7 @@ func TestGetRouter(t *testing.T) {
 
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything).
+		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(monitoringURL, nil)
 
 	mlpService := &mocks.MLPService{}

@@ -205,12 +205,14 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 
 func TestGenerateMonitoringURL(t *testing.T) {
 	monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+	var routerVersion uint = 10
 	tests := map[string]struct {
 		format          *string
 		mlpService      func() MLPService
 		environmentName string
 		projectName     string
-		routerVersion   *models.RouterVersion
+		routerName      string
+		routerVersion   *uint
 		expected        string
 	}{
 		"success | nominal": {
@@ -225,13 +227,25 @@ func TestGenerateMonitoringURL(t *testing.T) {
 			},
 			environmentName: "environment",
 			projectName:     "project-name",
-			routerVersion: &models.RouterVersion{
-				Router: &models.Router{
-					Name: "router-name",
-				},
-				Version: 10,
+			routerName:      "router-name",
+			routerVersion:   &routerVersion,
+			expected:        "https://www.example.com/project-name/cluster-name/router-name/10",
+		},
+		"success | no router version provided": {
+			format: &monitoringURLFormat,
+			mlpService: func() MLPService {
+				mlpService := &MockMLPService{}
+				mlpService.On(
+					"GetEnvironment",
+					mock.Anything,
+				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+				return mlpService
 			},
-			expected: "https://www.example.com/project-name/cluster-name/router-name/10",
+			environmentName: "environment",
+			projectName:     "project-name",
+			routerName:      "router-name",
+			routerVersion:   nil,
+			expected:        "https://www.example.com/project-name/cluster-name/router-name/$__all",
 		},
 		"success | no format given": {
 			format: nil,
@@ -245,19 +259,15 @@ func TestGenerateMonitoringURL(t *testing.T) {
 			},
 			environmentName: "environment",
 			projectName:     "project-name",
-			routerVersion: &models.RouterVersion{
-				Router: &models.Router{
-					Name: "router-name",
-				},
-				Version: 10,
-			},
-			expected: "",
+			routerName:      "router-name",
+			routerVersion:   &routerVersion,
+			expected:        "",
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := NewRouterVersionsService(nil, tt.mlpService(), tt.format)
-			result, err := svc.GenerateMonitoringURL(tt.projectName, tt.environmentName, tt.routerVersion)
+			result, err := svc.GenerateMonitoringURL(tt.projectName, tt.environmentName, tt.routerName, tt.routerVersion)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expected, result)
 		})

@@ -35,19 +35,18 @@ func (c RoutersController) ListRouters(
 		return InternalServerError("unable to list routers", err.Error())
 	}
 
-	// Append monitoring URL to router version
+	// Append monitoring URL to router
 	for _, router := range routers {
-		if router.CurrRouterVersion != nil {
-			monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-				project.Name,
-				router.EnvironmentName,
-				router.CurrRouterVersion,
-			)
-			if err != nil {
-				return InternalServerError("unable to generate monitoringURL for router version", err.Error())
-			}
-			router.CurrRouterVersion.MonitoringURL = monitoringURL
+		monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
+			project.Name,
+			router.EnvironmentName,
+			router.Name,
+			nil,
+		)
+		if err != nil {
+			return InternalServerError("unable to generate monitoringURL for router", err.Error())
 		}
+		router.MonitoringURL = monitoringURL
 	}
 
 	return Ok(routers)
@@ -70,18 +69,17 @@ func (c RoutersController) GetRouter(
 		return errResp
 	}
 
-	// Append monitoring URL to router version
-	if router.CurrRouterVersion != nil {
-		monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-			project.Name,
-			router.EnvironmentName,
-			router.CurrRouterVersion,
-		)
-		if err != nil {
-			return InternalServerError("unable to generate monitoringURL for router version", err.Error())
-		}
-		router.CurrRouterVersion.MonitoringURL = monitoringURL
+	// Append monitoring URL to router
+	monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
+		project.Name,
+		router.EnvironmentName,
+		router.Name,
+		nil,
+	)
+	if err != nil {
+		return InternalServerError("unable to generate monitoringURL for router version", err.Error())
 	}
+	router.MonitoringURL = monitoringURL
 
 	// Return router
 	return Ok(router)
