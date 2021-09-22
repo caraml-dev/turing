@@ -64,10 +64,6 @@ jobs:
           --and-then \
           - "install_turing" install_turing
 
-    - name: Debug Free Space
-      run: |
-        df -h
-
     - name: Run test 
       working-directory: api 
       env:
