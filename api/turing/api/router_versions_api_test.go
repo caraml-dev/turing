@@ -34,9 +34,6 @@ func TestListRouterVersions(t *testing.T) {
 	routerVersionSvc.
 		On("ListRouterVersions", models.ID(2)).
 		Return(testVersions, nil)
-	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(monitoringURL, nil)
 
 	mlpSvc := &mocks.MLPService{}
 	mlpSvc.On("GetProject", models.ID(1)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)
@@ -98,9 +95,6 @@ func TestGetRouterVersion(t *testing.T) {
 	routerVersionSvc.
 		On("FindByRouterIDAndVersion", models.ID(1), uint(2)).
 		Return(testVersion, nil)
-	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(monitoringURL, nil)
 
 	mlpSvc := &mocks.MLPService{}
 	mlpSvc.On("GetProject", models.ID(1)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)

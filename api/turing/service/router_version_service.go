@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"text/template"
@@ -31,13 +30,6 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
-	// GenerateMonitoringURL generates the monitoring url based on the router version.
-	GenerateMonitoringURL(
-		projectName string,
-		environmentName string,
-		routerName string,
-		routerVersion *uint,
-	) (string, error)
 }
 
 func NewRouterVersionsService(
@@ -46,8 +38,8 @@ func NewRouterVersionsService(
 	monitoringURLFormat *string,
 ) RouterVersionsService {
 	var monitoringURLTemplate *template.Template
-	var err error
 	if monitoringURLFormat != nil {
+		var err error
 		monitoringURLTemplate, err = template.New("monitoringURLTemplate").Parse(*monitoringURLFormat)
 		if err != nil {
 			logger.Warnf("error parsing monitoring url template: %s", err)
@@ -55,16 +47,17 @@ func NewRouterVersionsService(
 	}
 
 	return &routerVersionsService{
-		db:                    db,
-		mlpService:            mlpService,
-		monitoringURLTemplate: monitoringURLTemplate,
+		db: db,
+		routerMonitoringService: routerMonitoringService{
+			mlpService:            mlpService,
+			monitoringURLTemplate: monitoringURLTemplate,
+		},
 	}
 }
 
 type routerVersionsService struct {
-	db                    *gorm.DB
-	mlpService            MLPService
-	monitoringURLTemplate *template.Template
+	db *gorm.DB
+	routerMonitoringService
 }
 
 func (service *routerVersionsService) query() *gorm.DB {
@@ -77,6 +70,20 @@ func (service *routerVersionsService) query() *gorm.DB {
 func (service *routerVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := service.query().Where("router_id = ?", routerID).Find(&routerVersions)
+
+	for _, routerVersion := range routerVersions {
+		var err error
+		routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+			routerVersion.Router.ProjectID,
+			routerVersion.Router.EnvironmentName,
+			routerVersion.Router.Name,
+			&routerVersion.Version,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+		}
+	}
+
 	return routerVersions, query.Error
 }
 
@@ -89,6 +96,20 @@ func (service *routerVersionsService) ListRouterVersionsWithStatus(
 		Where("router_id = ?", routerID).
 		Where("status = ?", status).
 		Find(&routerVersions)
+
+	for _, routerVersion := range routerVersions {
+		var err error
+		routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+			routerVersion.Router.ProjectID,
+			routerVersion.Router.EnvironmentName,
+			routerVersion.Router.Name,
+			&routerVersion.Version,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+		}
+	}
+
 	return routerVersions, query.Error
 }
 
@@ -132,6 +153,18 @@ func (service *routerVersionsService) FindByID(
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+
+	var err error
+	routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+		routerVersion.Router.ProjectID,
+		routerVersion.Router.EnvironmentName,
+		routerVersion.Router.Name,
+		&routerVersion.Version,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+	}
+
 	return &routerVersion, nil
 }
 
@@ -147,6 +180,18 @@ func (service *routerVersionsService) FindByRouterIDAndVersion(
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+
+	var err error
+	routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+		routerVersion.Router.ProjectID,
+		routerVersion.Router.EnvironmentName,
+		routerVersion.Router.Name,
+		&routerVersion.Version,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+	}
+
 	return &routerVersion, nil
 }
 
@@ -161,6 +206,18 @@ func (service *routerVersionsService) FindLatestVersionByRouterID(
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+
+	var err error
+	routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+		routerVersion.Router.ProjectID,
+		routerVersion.Router.EnvironmentName,
+		routerVersion.Router.Name,
+		&routerVersion.Version,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+	}
+
 	return &routerVersion, nil
 }
 
@@ -186,49 +243,4 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 		tx.Delete(routerVersion.Ensembler)
 	}
 	return tx.Commit().Error
-}
-
-type monitoringURLValues struct {
-	ClusterName string
-	ProjectName string
-	RouterName  string
-	Version     string
-}
-
-func (service *routerVersionsService) GenerateMonitoringURL(
-	projectName string,
-	environmentName string,
-	routerName string,
-	routerVersion *uint,
-) (string, error) {
-	if service.monitoringURLTemplate == nil {
-		return "", nil
-	}
-
-	env, err := service.mlpService.GetEnvironment(environmentName)
-	if err != nil {
-		return "", err
-	}
-
-	var versionString string
-	if routerVersion == nil {
-		versionString = grafanaAllVariable
-	} else {
-		versionString = fmt.Sprintf("%d", *routerVersion)
-	}
-
-	values := monitoringURLValues{
-		ClusterName: env.Cluster,
-		ProjectName: projectName,
-		RouterName:  routerName,
-		Version:     versionString,
-	}
-
-	var b bytes.Buffer
-	err = service.monitoringURLTemplate.Execute(&b, values)
-	if err != nil {
-		return "", err
-	}
-
-	return b.String(), nil
 }

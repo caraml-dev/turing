@@ -49,11 +49,6 @@ func TestListRouters(t *testing.T) {
 		On("ListRouters", models.ID(3), "").
 		Return(routers, nil)
 
-	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(monitoringURL, nil)
-
 	// Define test cases
 	tests := map[string]struct {
 		vars     RequestVars
@@ -87,9 +82,8 @@ func TestListRouters(t *testing.T) {
 				RouterDeploymentController{
 					BaseController{
 						AppContext: &AppContext{
-							MLPService:            mlpSvc,
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
+							MLPService:     mlpSvc,
+							RoutersService: routerSvc,
 						},
 					},
 				},
@@ -113,11 +107,6 @@ func TestGetRouter(t *testing.T) {
 		On("FindByID", models.ID(1)).
 		Return(nil, errors.New("test router error"))
 	routerSvc.On("FindByID", models.ID(2)).Return(router, nil)
-
-	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.
-		On("GenerateMonitoringURL", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(monitoringURL, nil)
 
 	mlpService := &mocks.MLPService{}
 	mlpService.
@@ -153,9 +142,8 @@ func TestGetRouter(t *testing.T) {
 				RouterDeploymentController{
 					BaseController{
 						AppContext: &AppContext{
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
-							MLPService:            mlpService,
+							RoutersService: routerSvc,
+							MLPService:     mlpService,
 						},
 					},
 				},

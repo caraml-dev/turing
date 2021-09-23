@@ -95,27 +95,6 @@ func (_m *RouterVersionsService) FindLatestVersionByRouterID(routerID models.ID)
 	return r0, r1
 }
 
-// GenerateMonitoringURL provides a mock function with given fields: projectName, environmentName, routerName, routerVersion
-func (_m *RouterVersionsService) GenerateMonitoringURL(projectName string, environmentName string, routerName string, routerVersion *uint) (string, error) {
-	ret := _m.Called(projectName, environmentName, routerName, routerVersion)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string, string, string, *uint) string); ok {
-		r0 = rf(projectName, environmentName, routerName, routerVersion)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, *uint) error); ok {
-		r1 = rf(projectName, environmentName, routerName, routerVersion)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ListRouterVersions provides a mock function with given fields: routerID
 func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID)

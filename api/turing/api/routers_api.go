@@ -35,20 +35,6 @@ func (c RoutersController) ListRouters(
 		return InternalServerError("unable to list routers", err.Error())
 	}
 
-	// Append monitoring URL to router
-	for _, router := range routers {
-		monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-			project.Name,
-			router.EnvironmentName,
-			router.Name,
-			nil,
-		)
-		if err != nil {
-			return InternalServerError("unable to generate monitoringURL for router", err.Error())
-		}
-		router.MonitoringURL = monitoringURL
-	}
-
 	return Ok(routers)
 }
 
@@ -63,23 +49,6 @@ func (c RoutersController) GetRouter(
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
-
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
-	// Append monitoring URL to router
-	monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-		project.Name,
-		router.EnvironmentName,
-		router.Name,
-		nil,
-	)
-	if err != nil {
-		return InternalServerError("unable to generate monitoringURL for router version", err.Error())
-	}
-	router.MonitoringURL = monitoringURL
 
 	// Return router
 	return Ok(router)

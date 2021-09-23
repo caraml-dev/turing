@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
@@ -19,6 +20,18 @@ import (
 
 func TestRouterVersionsServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+		// Monitoring URL Deps
+		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+		mlpService := &MockMLPService{}
+		mlpService.On(
+			"GetEnvironment",
+			mock.Anything,
+		).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+		mlpService.On(
+			"GetProject",
+			mock.Anything,
+		).Return(&mlp.Project{Name: "project-name"}, nil)
+
 		// create router first
 		router := &models.Router{
 			ProjectID:       1,
@@ -26,11 +39,11 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 			Name:            "wooper",
 			Status:          models.RouterStatusPending,
 		}
-		router, err := NewRoutersService(db).Save(router)
+		router, err := NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 
 		// populate database
-		svc := NewRouterVersionsService(db, nil, nil)
+		svc := NewRouterVersionsService(db, mlpService, &monitoringURLFormat)
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
 			Status:   models.RouterVersionStatusPending,
@@ -126,6 +139,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		routerVersion.Version = found.Version
 		routerVersion.CreatedAt = found.CreatedAt
 		routerVersion.UpdatedAt = found.UpdatedAt
+		router.MonitoringURL = ""
 		routerVersion.Router = router
 		routerVersion.Router.CreatedAt = found.Router.CreatedAt
 		routerVersion.Router.UpdatedAt = found.Router.UpdatedAt
@@ -133,6 +147,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		routerVersion.Enricher.UpdatedAt = found.Enricher.UpdatedAt
 		routerVersion.Ensembler.CreatedAt = found.Ensembler.CreatedAt
 		routerVersion.Ensembler.UpdatedAt = found.Ensembler.UpdatedAt
+		routerVersion.MonitoringURL = "https://www.example.com/project-name/cluster-name/wooper/1"
 		if !cmp.Equal(routerVersion, found) {
 			routerVersionJson, _ := json.Marshal(routerVersion)
 			foundJson, _ := json.Marshal(found)
@@ -168,7 +183,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 
 		// delete with upstream reference
 		router.SetCurrRouterVersion(routerVersion)
-		_, err = NewRoutersService(db).Save(router)
+		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		assert.Error(t, err, "unable to delete router version - there exists a router that is currently using this version")
@@ -176,7 +191,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		// clear reference and delete
 		router.CurrRouterVersionID = sql.NullInt32{}
 		router.CurrRouterVersion = nil
-		_, err = NewRoutersService(db).Save(router)
+		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		found, err = svc.FindByID(1)
@@ -201,75 +216,4 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.Nil(t, routerVersion.Enricher)
 		assert.Nil(t, routerVersion.Ensembler)
 	})
-}
-
-func TestGenerateMonitoringURL(t *testing.T) {
-	monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
-	var routerVersion uint = 10
-	tests := map[string]struct {
-		format          *string
-		mlpService      func() MLPService
-		environmentName string
-		projectName     string
-		routerName      string
-		routerVersion   *uint
-		expected        string
-	}{
-		"success | nominal": {
-			format: &monitoringURLFormat,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					mock.Anything,
-				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
-				return mlpService
-			},
-			environmentName: "environment",
-			projectName:     "project-name",
-			routerName:      "router-name",
-			routerVersion:   &routerVersion,
-			expected:        "https://www.example.com/project-name/cluster-name/router-name/10",
-		},
-		"success | no router version provided": {
-			format: &monitoringURLFormat,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					mock.Anything,
-				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
-				return mlpService
-			},
-			environmentName: "environment",
-			projectName:     "project-name",
-			routerName:      "router-name",
-			routerVersion:   nil,
-			expected:        "https://www.example.com/project-name/cluster-name/router-name/$__all",
-		},
-		"success | no format given": {
-			format: nil,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
-				mlpService.On(
-					"GetEnvironment",
-					mock.Anything,
-				).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
-				return mlpService
-			},
-			environmentName: "environment",
-			projectName:     "project-name",
-			routerName:      "router-name",
-			routerVersion:   &routerVersion,
-			expected:        "",
-		},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			svc := NewRouterVersionsService(nil, tt.mlpService(), tt.format)
-			result, err := svc.GenerateMonitoringURL(tt.projectName, tt.environmentName, tt.routerName, tt.routerVersion)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
 }

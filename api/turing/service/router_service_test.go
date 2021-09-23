@@ -6,15 +6,30 @@ import (
 	"database/sql"
 	"testing"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 )
 
 func TestRoutersServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-		svc := NewRoutersService(db)
+		// Monitoring URL Deps
+		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+		mlpService := &MockMLPService{}
+		mlpService.On(
+			"GetEnvironment",
+			mock.Anything,
+		).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+		mlpService.On(
+			"GetProject",
+			mock.Anything,
+		).Return(&mlp.Project{Name: "project-name"}, nil)
+
+		svc := NewRoutersService(db, mlpService, &monitoringURLFormat)
 
 		// create routers
 		routers := []*models.Router{
@@ -35,6 +50,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				EnvironmentName: "env",
 				Name:            "pizza",
 				Status:          models.RouterStatusDeployed,
+				MonitoringURL:   "https://www.example.com/project-name/cluster-name/pizza/$__all",
 			},
 		}
 		for i, router := range routers {

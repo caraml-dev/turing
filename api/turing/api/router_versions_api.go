@@ -24,29 +24,10 @@ func (c RouterVersionsController) ListRouterVersions(
 		return errResp
 	}
 
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
 	// List router versions
 	routerVersions, err := c.RouterVersionsService.ListRouterVersions(router.ID)
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())
-	}
-
-	// Append monitoring URL to router versions
-	for _, routerVersion := range routerVersions {
-		monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-			project.Name,
-			router.EnvironmentName,
-			router.Name,
-			&routerVersion.Version,
-		)
-		if err != nil {
-			return InternalServerError("unable to generate monitoringURL for router version", err.Error())
-		}
-		routerVersion.MonitoringURL = monitoringURL
 	}
 
 	return Ok(routerVersions)
@@ -60,30 +41,9 @@ func (c RouterVersionsController) GetRouterVersion(
 	// Parse request vars
 	var errResp *Response
 	var routerVersion *models.RouterVersion
-	var router *models.Router
-	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
 	if routerVersion, errResp = c.getRouterVersionFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
-
-	var project *mlp.Project
-	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-
-	// Append monitoring URL to router version
-	monitoringURL, err := c.RouterVersionsService.GenerateMonitoringURL(
-		project.Name,
-		router.EnvironmentName,
-		router.Name,
-		&routerVersion.Version,
-	)
-	if err != nil {
-		return InternalServerError("unable to generate monitoringURL for router version", err.Error())
-	}
-	routerVersion.MonitoringURL = monitoringURL
 
 	// Return router version
 	return Ok(routerVersion)

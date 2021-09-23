@@ -305,10 +305,10 @@ func TestNewAppContext(t *testing.T) {
 	assert.Equal(t, &AppContext{
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
-		RoutersService:        service.NewRoutersService(nil),
+		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     service.NewEnsemblersService(nil),
 		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(nil, mlpService, testCfg.RouterDefaults.MonitoringURLFormat),
+		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,
 		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
