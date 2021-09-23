@@ -81,6 +81,7 @@ class EnsemblerInfraConfig(ModelNormal):
             'ensembler_name': (str,),  # noqa: E501
             'service_account_name': (str,),  # noqa: E501
             'resources': (EnsemblingResources,),  # noqa: E501
+            'environment_variables': ({str: (str,)},),  # noqa: E501
         }
 
     @cached_property
@@ -93,6 +94,7 @@ class EnsemblerInfraConfig(ModelNormal):
         'ensembler_name': 'ensembler_name',  # noqa: E501
         'service_account_name': 'service_account_name',  # noqa: E501
         'resources': 'resources',  # noqa: E501
+        'environment_variables': 'environment_variables',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -145,6 +147,7 @@ class EnsemblerInfraConfig(ModelNormal):
             ensembler_name (str): [optional]  # noqa: E501
             service_account_name (str): [optional]  # noqa: E501
             resources (EnsemblingResources): [optional]  # noqa: E501
+            environment_variables ({str: (str,)}): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

@@ -69,7 +69,8 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
             lambda service_account, resource_request, env_vars:
                 turing.generated.models.EnsemblerInfraConfig(
                     service_account_name=service_account,
-                    resources=resource_request
+                    resources=resource_request,
+                    environment_variables=env_vars,
                 ),
             id="Initialize ensembling job infra spec"
         ),
@@ -82,7 +83,8 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
             lambda service_account, resource_request, env_vars:
                 turing.generated.models.EnsemblerInfraConfig(
                     service_account_name=service_account,
-                    resources=resource_request
+                    resources=resource_request,
+                    environment_variables=env_vars,
                 ),
             id="Initialize ensembling job with default resource request"
         )

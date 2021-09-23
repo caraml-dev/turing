@@ -16,6 +16,9 @@
       "executor_replica": 5,
       "executor_cpu_request": "0.8",
       "executor_memory_request": "1Gi"
+    },
+    "environment_variables": {
+        "SOME_VAR": "SOME_VALUE"
     }
   },
   "job_config": {
