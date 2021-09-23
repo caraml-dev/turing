@@ -1,10 +1,14 @@
 // +build integration
 
-package api
+package api_test
 
 import (
 	"bytes"
 	"errors"
+	"github.com/gojek/turing/api/turing/api"
+	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/server"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -126,24 +130,24 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 	var tests = map[string]struct {
 		method               string
 		path                 string
-		expected             *Response
+		expected             *api.Response
 		ensemblersService    func() service.EnsemblersService
 		ensemblingJobService func() service.EnsemblingJobService
 		mlpService           func() service.MLPService
-		vars                 RequestVars
+		vars                 api.RequestVars
 		body                 string
 	}{
 		"success | nominal flow": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true)),
+			expected: api.Accepted(api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "pyfunc"), nil)
+				).Return(api.CreateEnsembler(1, "pyfunc"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -153,7 +157,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-				).Return(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true), nil)
+				).Return(api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true), nil)
 
 				return ensemblingJobService
 			},
@@ -165,7 +169,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
-			vars: RequestVars{
+			vars: api.RequestVars{
 				"project_id": {"1"},
 			},
 			body: generateEnsemblingJobFixtureJSON(),
@@ -173,7 +177,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		"failure | non existent ensembler": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: NotFound("ensembler not found", errors.New("no exist").Error()),
+			expected: api.NotFound("ensembler not found", errors.New("no exist").Error()),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
@@ -195,7 +199,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
-			vars: RequestVars{
+			vars: api.RequestVars{
 				"project_id": {"1"},
 			},
 			body: generateEnsemblingJobFixtureJSON(),
@@ -203,14 +207,14 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		"failure | wrong type of ensembler": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: BadRequest("only pyfunc ensemblers allowed", "ensembler type given: *models.GenericEnsembler"),
+			expected: api.BadRequest("only pyfunc ensemblers allowed", "ensembler type given: *models.GenericEnsembler"),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "generic"), nil)
+				).Return(api.CreateEnsembler(1, "generic"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -229,7 +233,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
 				return mlpService
 			},
-			vars: RequestVars{
+			vars: api.RequestVars{
 				"project_id": {"1"},
 			},
 			body: generateEnsemblingJobFixtureJSON(),
@@ -237,14 +241,14 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		"failure | non existent project": {
 			path:     "/projects/1/jobs",
 			method:   http.MethodPost,
-			expected: NotFound("project not found", errors.New("hello").Error()),
+			expected: api.NotFound("project not found", errors.New("hello").Error()),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "pyfunc"), nil)
+				).Return(api.CreateEnsembler(1, "pyfunc"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -259,7 +263,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(nil, errors.New("hello"))
 				return mlpService
 			},
-			vars: RequestVars{
+			vars: api.RequestVars{
 				"project_id": {"1"},
 			},
 			body: generateEnsemblingJobFixtureJSON(),
@@ -271,13 +275,14 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			ensemblingJobService := tt.ensemblingJobService()
 			mlpService := tt.mlpService()
 
-			router := NewRouter(
-				&AppContext{
-					EnsemblersService:    ensemblersService,
-					EnsemblingJobService: ensemblingJobService,
-					MLPService:           mlpService,
-				},
-			)
+			router := mux.NewRouter()
+			appCtx := &api.AppContext{
+				EnsemblersService:    ensemblersService,
+				EnsemblingJobService: ensemblingJobService,
+				MLPService:           mlpService,
+			}
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+
 			actual := httptest.NewRecorder()
 
 			request, err := http.NewRequest(tt.method, tt.path, bytes.NewBufferString(tt.body))
@@ -299,13 +304,13 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	tests := map[string]struct {
 		method               string
 		path                 string
-		expected             *Response
+		expected             *api.Response
 		ensemblingJobService func() service.EnsemblingJobService
 	}{
 		"success | nominal": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs/1",
-			expected: Ok(generateEnsemblingJobFixture(
+			expected: api.Ok(api.GenerateEnsemblingJobFixture(
 				1,
 				models.ID(1),
 				models.ID(1),
@@ -315,7 +320,7 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
 				svc.On("FindByID", mock.Anything, mock.Anything).Return(
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				return svc
@@ -324,7 +329,7 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		"failure | not found": {
 			method:   http.MethodGet,
 			path:     "/projects/1/jobs/1",
-			expected: NotFound("ensembling job not found", errors.New("no exist").Error()),
+			expected: api.NotFound("ensembling job not found", errors.New("no exist").Error()),
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
 				svc.On("FindByID", mock.Anything, mock.Anything).Return(
@@ -338,13 +343,14 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			router := NewRouter(
-				&AppContext{
-					EnsemblingJobService: svc,
-				},
-			)
-			actual := httptest.NewRecorder()
 
+			router := mux.NewRouter()
+			appCtx := &api.AppContext{
+				EnsemblingJobService: svc,
+			}
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+
+			actual := httptest.NewRecorder()
 			request, err := http.NewRequest(tt.method, tt.path, nil)
 			if err != nil {
 				t.Fatalf("unexpected error happened, %v", err)
@@ -364,16 +370,16 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 	tests := map[string]struct {
 		method               string
 		path                 string
-		expected             *Response
+		expected             *api.Response
 		ensemblingJobService func() service.EnsemblingJobService
 	}{
 		"success | nominal": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs",
-			expected: Ok(
+			expected: api.Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -387,7 +393,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -403,10 +409,10 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		"success | nominal with single status": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs?status=pending",
-			expected: Ok(
+			expected: api.Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -420,7 +426,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -436,10 +442,10 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		"success | nominal with multiple statuses": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs?status=pending&status=terminated",
-			expected: Ok(
+			expected: api.Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -453,7 +459,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							api.GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -469,7 +475,7 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		"success | no result": {
 			method: http.MethodGet,
 			path:   "/projects/1/jobs",
-			expected: Ok(
+			expected: api.Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{},
 					Paging: service.Paging{
@@ -499,11 +505,13 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
-			router := NewRouter(
-				&AppContext{
-					EnsemblingJobService: svc,
-				},
-			)
+
+			router := mux.NewRouter()
+			appCtx := &api.AppContext{
+				EnsemblingJobService: svc,
+			}
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+
 			actual := httptest.NewRecorder()
 
 			request, err := http.NewRequest(tt.method, tt.path, nil)

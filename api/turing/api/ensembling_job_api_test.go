@@ -33,7 +33,7 @@ var (
 	annotationValueFour = "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"
 )
 
-func generateEnsemblingJobFixture(
+func GenerateEnsemblingJobFixture(
 	i int,
 	ensemblerID models.ID,
 	projectID models.ID,
@@ -154,7 +154,7 @@ func generateEnsemblingJobFixture(
 	return value
 }
 
-func createEnsembler(id int, ensemblerType string) models.EnsemblerLike {
+func CreateEnsembler(id int, ensemblerType string) models.EnsemblerLike {
 	if ensemblerType == "pyfunc" {
 		return &models.PyFuncEnsembler{
 			GenericEnsembler: &models.GenericEnsembler{
@@ -184,14 +184,14 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		body                 interface{}
 	}{
 		"success | name not provided": {
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true)),
+			expected: Accepted(GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "pyfunc"), nil)
+				).Return(CreateEnsembler(1, "pyfunc"), nil)
 
 				return ensemblersSvc
 			},
@@ -202,7 +202,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-				).Return(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true), nil)
+				).Return(GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true), nil)
 
 				return ensemblingJobService
 			},
@@ -221,17 +221,17 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "", false),
+			body: GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "", false),
 		},
 		"success | name provided": {
-			expected: Accepted(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true)),
+			expected: Accepted(GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true)),
 			ensemblersService: func() service.EnsemblersService {
 				ensemblersSvc := &mocks.EnsemblersService{}
 				ensemblersSvc.On(
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "pyfunc"), nil)
+				).Return(CreateEnsembler(1, "pyfunc"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -241,7 +241,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-				).Return(generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true), nil)
+				).Return(GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true), nil)
 				return ensemblingJobService
 			},
 			mlpService: func() service.MLPService {
@@ -259,7 +259,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
+			body: GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
 		},
 		"failure | non existent ensembler": {
 			expected: NotFound("ensembler not found", errors.New("no exist").Error()),
@@ -291,7 +291,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
+			body: GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
 		},
 		"failure | wrong type of ensembler": {
 			expected: BadRequest("only pyfunc ensemblers allowed", "ensembler type given: *models.GenericEnsembler"),
@@ -301,7 +301,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					"FindByID",
 					mock.Anything,
 					mock.Anything,
-				).Return(createEnsembler(1, "generic"), nil)
+				).Return(CreateEnsembler(1, "generic"), nil)
 				return ensemblersSvc
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
@@ -323,7 +323,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
+			body: GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
 		},
 		"failure | non existent project": {
 			expected: NotFound("project not found", errors.New("hello").Error()),
@@ -355,7 +355,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
-			body: generateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
+			body: GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(0), "test-ensembler-1", false),
 		},
 	}
 	for name, tt := range tests {
@@ -396,13 +396,13 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
 				svc.On("FindByID", mock.Anything, mock.Anything).Return(
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				return svc
 			},
 			expectedResponseCode: 200,
-			expectedBody: Ok(generateEnsemblingJobFixture(
+			expectedBody: Ok(GenerateEnsemblingJobFixture(
 				1,
 				models.ID(1),
 				models.ID(1),
@@ -495,7 +495,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -511,7 +511,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			expectedBody: Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -531,7 +531,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -547,7 +547,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			expectedBody: Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -567,7 +567,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -583,7 +583,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			expectedBody: Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -604,7 +604,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 				svc.On("List", mock.Anything, mock.Anything).Return(
 					&service.PaginatedResults{
 						Results: []interface{}{
-							generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+							GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 						},
 						Paging: service.Paging{
 							Total: 1,
@@ -620,7 +620,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			expectedBody: Ok(
 				&service.PaginatedResults{
 					Results: []interface{}{
-						generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+						GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					},
 					Paging: service.Paging{
 						Total: 1,
@@ -735,7 +735,7 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
 				svc.On("FindByID", mock.Anything, mock.Anything).Return(
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				svc.On(
@@ -771,7 +771,7 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 			ensemblingJobService: func() service.EnsemblingJobService {
 				svc := &mocks.EnsemblingJobService{}
 				svc.On("FindByID", mock.Anything, mock.Anything).Return(
-					generateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
+					GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "test-ensembler-1", true),
 					nil,
 				)
 				svc.On(

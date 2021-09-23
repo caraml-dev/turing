@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/cors"
-
 	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -16,9 +14,9 @@ import (
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
+	"github.com/gojek/turing/api/turing/server"
 	"github.com/gojek/turing/api/turing/vault"
-	"github.com/gojek/turing/api/turing/web"
-	"github.com/heptiolabs/healthcheck"
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -112,27 +110,25 @@ func main() {
 	go batchrunner.RunBatchRunners(appCtx.BatchRunners)
 
 	// Register handlers
-	health := healthcheck.NewHandler()
-	health.AddReadinessCheck("database", healthcheck.DatabasePingCheck(db.DB(), 1*time.Second))
+	r := mux.NewRouter()
 
-	mux := http.NewServeMux()
-	mux.Handle("/v1/internal/", http.StripPrefix("/v1/internal", health))
-	mux.Handle("/v1/", http.StripPrefix("/v1", api.NewRouter(appCtx)))
+	// HealthCheck Handler
+	server.AddHealthCheckHandler(r, "/v1/internal", db)
 
-	// Serve UI
-	if cfg.TuringUIConfig.AppDirectory != "" {
-		log.Infof(
-			"Serving Turing UI from %s at %s",
-			cfg.TuringUIConfig.AppDirectory,
-			cfg.TuringUIConfig.Homepage)
-		web.ServeReactApp(mux, cfg.TuringUIConfig.Homepage, cfg.TuringUIConfig.AppDirectory)
+	// API Handler
+	err = server.AddAPIRoutesHandler(r, "/v1", appCtx, cfg)
+	if err != nil {
+		log.Panicf("Failed to configure API routes: %v", err)
 	}
 
+	// Serve Swagger UI
+	server.ServeSinglePageApplication(r, "/rest-api", "static/swagger-ui")
+
+	// Serve Turing UI
+	server.ServeSinglePageApplication(r, cfg.TuringUIConfig.Homepage, cfg.TuringUIConfig.AppDirectory)
+
 	log.Infof("Listening on port %d", cfg.Port)
-	corsHandler := cors.New(cors.Options{
-		AllowedOrigins: cfg.AllowedOrigins,
-	})
-	if err := http.ListenAndServe(cfg.ListenAddress(), corsHandler.Handler(mux)); err != nil {
+	if err := http.ListenAndServe(cfg.ListenAddress(), r); err != nil {
 		log.Errorf("Failed to start turing-api: %s", err)
 	}
 }

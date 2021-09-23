@@ -67,9 +67,7 @@ type Config struct {
 	AlertConfig            *AlertConfig
 	MLPConfig              *MLPConfig `validate:"required"`
 	TuringUIConfig         *TuringUIConfig
-	// SwaggerFile specifies the file path containing OpenAPI v3 spec. This file will be used to configure
-	// OpenAPI validation middleware, which validates HTTP requests against the spec.
-	SwaggerFile string
+	OpenapiConfig          *OpenapiConfig
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -320,6 +318,14 @@ type MLPConfig struct {
 	MLPEncryptionKey string `validate:"required"`
 }
 
+type OpenapiConfig struct {
+	// ValidationEnabled specifies whether to use OpenAPI validation middleware,
+	// which validates HTTP requests against the spec.
+	ValidationEnabled bool
+	// SpecFile specifies the file path containing OpenAPI v3 spec
+	SpecFile string
+}
+
 // Load creates a Config object from default config values, config files and environment variables.
 // Load accepts config files as the argument. JSON and YAML format are both supported.
 //
@@ -441,7 +447,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig::AppDirectory", "")
 	v.SetDefault("TuringUIConfig::Homepage", "/turing")
 
-	v.SetDefault("SwaggerFile", "api/openapi.yaml")
+	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
+	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

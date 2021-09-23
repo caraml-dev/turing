@@ -167,7 +167,6 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
-		SwaggerFile: "api/openapi.yaml",
 	}
 	// Create test auth enforcer and Vault client
 	me := &mocks.Enforcer{}
@@ -247,13 +246,6 @@ func TestNewAppContext(t *testing.T) {
 			return nil, nil
 		},
 	)
-	monkey.Patch(
-		middleware.NewOpenAPIValidation,
-		func(file string, opt middleware.OpenAPIValidationOptions) (*middleware.OpenAPIValidation, error) {
-			assert.Equal(t, testCfg.SwaggerFile, file)
-			return &middleware.OpenAPIValidation{}, nil
-		},
-	)
 
 	// Create expected components
 	testAuthorizer, err := middleware.NewAuthorizer(testEnforcer)
@@ -317,8 +309,7 @@ func TestNewAppContext(t *testing.T) {
 		PodLogService: service.NewPodLogService(
 			map[string]cluster.Controller{},
 		),
-		AlertService:      alertService,
-		OpenAPIValidation: &middleware.OpenAPIValidation{},
-		BatchRunners:      []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		AlertService: alertService,
+		BatchRunners: []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}, appCtx)
 }
