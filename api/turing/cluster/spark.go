@@ -130,10 +130,7 @@ func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkAppl
 }
 
 func addEnvVars(request *CreateSparkRequest) []apicorev1.EnvVar {
-	allEnvVars := []apicorev1.EnvVar{}
-	for _, envVar := range defaultEnvVars {
-		allEnvVars = append(allEnvVars, envVar)
-	}
+	allEnvVars := append([]apicorev1.EnvVar{}, defaultEnvVars...)
 
 	for key, value := range request.EnvironmentVariables {
 		envVar := apicorev1.EnvVar{
