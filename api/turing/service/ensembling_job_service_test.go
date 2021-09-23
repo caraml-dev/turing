@@ -79,6 +79,9 @@ func generateEnsemblingJobFixture(
 				ExecutorCpuRequest:    ref.String("1"),
 				ExecutorMemoryRequest: ref.String("1Gi"),
 			},
+			EnvironmentVariables: map[string]string{
+				"foo": "bar",
+			},
 		},
 		JobConfig: &models.JobConfig{
 			Version: "v1",

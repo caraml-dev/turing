@@ -30,7 +30,7 @@ const (
 )
 
 var (
-	envVars = []apicorev1.EnvVar{
+	defaultEnvVars = []apicorev1.EnvVar{
 		{
 			Name:  envServiceAccountPathKey,
 			Value: envServiceAccountPath,
@@ -86,6 +86,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
+	EnvironmentVariables  map[string]string
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -128,6 +129,23 @@ func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkAppl
 	}, nil
 }
 
+func addEnvVars(request *CreateSparkRequest) []apicorev1.EnvVar {
+	allEnvVars := []apicorev1.EnvVar{}
+	for _, envVar := range defaultEnvVars {
+		allEnvVars = append(allEnvVars, envVar)
+	}
+
+	for key, value := range request.EnvironmentVariables {
+		envVar := apicorev1.EnvVar{
+			Name:  key,
+			Value: value,
+		}
+		allEnvVars = append(allEnvVars, envVar)
+	}
+
+	return allEnvVars
+}
+
 func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.ExecutorSpec, error) {
 	userCPURequest, err := resource.ParseQuantity(request.ExecutorCPURequest)
 	if err != nil {
@@ -161,7 +179,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    envVars,
+			Env:    addEnvVars(request),
 			Labels: request.JobLabels,
 		},
 	}
@@ -193,13 +211,6 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 		return nil, fmt.Errorf("invalid driver memory request: %s", request.DriverMemoryRequest)
 	}
 
-	envVars := []apicorev1.EnvVar{
-		{
-			Name:  envServiceAccountPathKey,
-			Value: envServiceAccountPath,
-		},
-	}
-
 	s := &apisparkv1beta2.DriverSpec{
 		CoreRequest: cpuRequest,
 		SparkPodSpec: apisparkv1beta2.SparkPodSpec{
@@ -218,7 +229,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    envVars,
+			Env:    addEnvVars(request),
 			Labels: request.JobLabels,
 		},
 		ServiceAccount: &request.ServiceAccountName,

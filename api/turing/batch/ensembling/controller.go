@@ -198,6 +198,7 @@ func (c *ensemblingController) createSparkApplication(
 		ExecutorReplica:       *infraConfig.Resources.ExecutorReplica,
 		ServiceAccountName:    serviceAccount.Name,
 		SparkInfraConfig:      c.sparkInfraConfig,
+		EnvironmentVariables:  jobRequest.EnsemblingJob.InfraConfig.EnvironmentVariables,
 	}
 	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
 }

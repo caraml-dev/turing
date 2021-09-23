@@ -133,6 +133,17 @@ var (
 	serviceAccountName       = "service-account"
 	jobLabels                = make(map[string]string)
 	memoryResult, _          = toMegabyte(memoryValue)
+	envVars                  = map[string]string{"foo": "bar"}
+	expectedEnvVars          = []apicorev1.EnvVar{
+		{
+			Name:  envServiceAccountPathKey,
+			Value: envServiceAccountPath,
+		},
+		{
+			Name:  "foo",
+			Value: "bar",
+		},
+	}
 )
 
 func TestCreateSparkRequest(t *testing.T) {
@@ -150,6 +161,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
 		SparkInfraConfig:      sparkInfraConfig,
+		EnvironmentVariables:  envVars,
 	}
 	expected := &apisparkv1beta2.SparkApplication{
 		ObjectMeta: apimetav1.ObjectMeta{
@@ -196,7 +208,7 @@ func TestCreateSparkRequest(t *testing.T) {
 							Path: serviceAccountMount,
 						},
 					},
-					Env:    envVars,
+					Env:    expectedEnvVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
 						{
@@ -229,7 +241,7 @@ func TestCreateSparkRequest(t *testing.T) {
 							Path: serviceAccountMount,
 						},
 					},
-					Env:    envVars,
+					Env:    expectedEnvVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
 						{

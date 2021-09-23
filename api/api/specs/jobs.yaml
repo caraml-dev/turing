@@ -419,6 +419,10 @@ components:
           type: string
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
+        environment_variables:
+          type: object
+          additionalProperties:
+            type: string
 
     EnsemblingResources:
       type: "object"
