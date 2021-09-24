@@ -43,4 +43,4 @@ jobs:
 
     - name: Lint code
       working-directory: api
-      run: make lint-ci
+      run: make lint

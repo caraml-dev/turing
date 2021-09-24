@@ -1,5 +1,5 @@
 # Build turing-api binary
-FROM golang:1.14-alpine as api-builder
+FROM golang:1.17-alpine as api-builder
 ARG API_BIN_NAME=turing-api
 
 ENV GO111MODULE=on \

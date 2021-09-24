@@ -11,6 +11,11 @@ components:
       type: "integer"
       format: "int32"
 
+    IdObject:
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+
     FieldSource:
       type: "string"
       enum:

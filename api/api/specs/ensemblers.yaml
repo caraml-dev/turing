@@ -6,6 +6,10 @@ info:
 .tags: &tags
   - "Ensembler"
 
+.id: &id
+  type: "integer"
+  format: "int32"
+
 paths:
   "/projects/{project_id}/ensemblers":
     get:
@@ -16,7 +20,7 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: query
           name: page
@@ -47,7 +51,7 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: A JSON object containing information about the ensembler
@@ -73,12 +77,12 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: path
           name: ensembler_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         "200":
@@ -95,12 +99,12 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: path
           name: ensembler_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: A JSON object, representing an update to the ensembler
@@ -119,9 +123,6 @@ paths:
 
 components:
   schemas:
-    Id:
-      $ref: "common.yaml#/components/schemas/Id"
-
     EnsemblerType:
       type: "string"
       enum:

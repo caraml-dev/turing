@@ -2,56 +2,48 @@ include .env.development*
 export
 
 BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-api)
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker))
-ALL_PACKAGES=$(shell go list ./...)
-GOPRIVATE=github.com/gojek/*
 SRC_ROOT=./turing
-
-E2E_TEST_ROOT=./e2e
-E2E_API_PORT=8082
-E2E_API_BASE_PATH=http://localhost:${E2E_API_PORT}/v1
-
-.PHONY: default test clean setup tidy test build run local-db swagger-ui auth-server gen-client
 
 default: test
 
+.PHONY: clean
 clean:
 	@test ! -e bin || rm -r bin
+	@test ! -e vendor || rm -rf vendor
 
+.PHONY: setup
 setup:
+	@echo "Setting up tools..."
 	@test -x ${GOPATH}/bin/golint || go get -u golang.org/x/lint/golint
+	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 
+.PHONY: fmt
 fmt:
 	@echo "Formatting code..."
 	gofmt -s -w ${SRC_ROOT}
 
-dep-ci:
-	@echo "Getting CI dependencies..."
-	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
-
-lint:
+.PHONY: lint
+lint: setup
 	@echo "Linting code..."
-	golangci-lint -v run --timeout 3m
+	golangci-lint -v run --timeout 3m $(if $(filter true,$(fix)),--fix,)
 
-lint-fix:
-	@echo "Linting code..."
-	golangci-lint -v run --timeout 3m --fix
-
-lint-ci: dep-ci lint
-
+.PHONY: tidy
 tidy:
 	@echo "Fetching dependencies..."
 	go mod tidy
 
-vendor: setup
+.PHONY: vendor
+vendor:
 	@echo "Fetching dependencies..."
 	go mod vendor
 
+.PHONY: test
 test: tidy local-db
 	@echo "Running tests..."
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
 	go tool cover -func cover.out
 
+.PHONY: test-ci
 test-ci: tidy
 	echo "Running tests..."
 	DATABASE_HOST=$${POSTGRES_HOST} \
@@ -60,6 +52,56 @@ test-ci: tidy
 	DATABASE_NAME=$${POSTGRES_DB} \
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
 	go tool cover -func cover.out
+
+.PHONY: build
+build: tidy
+	@echo "Building binary..."
+	go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
+
+.PHONY: build-docker
+build-docker: vendor version
+	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER})
+	@echo "Building docker image: ${IMAGE_TAG}"
+	docker build --tag ${IMAGE_TAG} .
+
+.PHONY: run
+run: build local-db
+	./bin/${BIN_NAME} -config config-dev.yaml
+
+.PHONY: local-db
+local-db:
+	@docker-compose up -d postgres && docker-compose run migrations
+
+.PHONY: local-db
+swagger-ui:
+	@docker-compose up -d swagger-ui
+	@xdg-open 2>/dev/null http://localhost:8081 || open http://localhost:8081
+
+.PHONY: gen-client
+gen-client:
+	rm -rf turing/generated
+	@docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v5.1.1 generate \
+		--input-spec /local/api/openapi-sdk.yaml \
+		--generator-name go \
+		--output /local/turing/generated \
+		--config /local/openapi-codegen.yaml
+
+.PHONY: version
+version:
+	$(eval VERSION_NUMBER = $(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker)))
+
+
+
+
+#   R E V I E W   R E Q U I R E D
+#
+#   Following Makefile targets aren't expected to be working
+#   correctly and require further review and refactoring
+#
+
+E2E_TEST_ROOT=./e2e
+E2E_API_PORT=8082
+E2E_API_BASE_PATH=http://localhost:${E2E_API_PORT}/v1
 
 test-e2e-local: deploy_docker_stack
 	@$(eval include ./e2e/local/.env.testing)
@@ -70,20 +112,6 @@ test-e2e-local: deploy_docker_stack
 		go test -v -parallel=2 ${E2E_TEST_ROOT}/... -tags e2e -timeout 15m -run TestEndToEnd || true
 	make clean_docker_stack
 
-build: tidy
-	@echo "Building binary..."
-	go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
-
-run: build local-db
-	./bin/${BIN_NAME} -config config-dev.yaml
-
-local-db:
-	@docker-compose up -d postgres && docker-compose run migrations
-
-swagger-ui:
-	@docker-compose up -d swagger-ui
-	@xdg-open 2>/dev/null http://localhost:8081 || open http://localhost:8081
-
 auth-server:
 	@docker-compose up -d postgres-auth && docker-compose run keto-server migrate sql -e
 	@docker-compose up -d keto-server
@@ -93,15 +121,7 @@ clean-auth-server:
 	@docker stop keto-server && docker rm keto-server
 	@docker stop postgres-auth && docker rm postgres-auth
 
-build_image:
-	echo "Building docker image: $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER}"
-	CGO_ENABLED=0 GOOS=linux go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
-	docker build \
-		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER} .
-
-build_docker: vendor build_image clean
-
-deploy_docker_stack: build_docker
+deploy_docker_stack: build-docker version
 	@echo "Using default Google Application Credentials for Auth..."
 	@$(eval DEFAULT_CREDENTIALS=${HOME}/.config/gcloud/application_default_credentials.json)
 	@$(eval GOOGLE_APPLICATION_CREDENTIALS=$(or $(GOOGLE_APPLICATION_CREDENTIALS),$(DEFAULT_CREDENTIALS)))
@@ -125,11 +145,3 @@ clean_docker_stack:
 	@echo "Cleaning up local docker stack..."
 	@docker stack rm turing_api_stack
 	@docker secret rm google_app_creds
-
-gen-client:
-	rm -rf turing/generated
-	@docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v5.1.1 generate \
-		--input-spec /local/api/openapi-sdk.yaml \
-		--generator-name go \
-		--output /local/turing/generated \
-		--config /local/openapi-codegen.yaml

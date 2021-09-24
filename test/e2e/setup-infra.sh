@@ -183,13 +183,6 @@ function build_turing_apiserver_docker_image() {
     cd $workdir
 }
 
-function build_turing_swagger_docker_image() {
-    pushd "$script_dir/../../api/api"
-    docker build -t localhost:5000/turing-swagger .
-    docker push localhost:5000/turing-swagger
-    popd
-}
-
 function install_turing() {
     workdir=$(pwd)
     cd "$script_dir/../.."
