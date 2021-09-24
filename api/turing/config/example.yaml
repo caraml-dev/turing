@@ -146,6 +146,9 @@ RouterDefaults:
       endpoint: https://api.optimizely.com/v2
       timeout: 5s
 
+  # Note that {{.ClusterName}}, {{.RouterName}} and {{.Version}} is required
+  MonitoringURLFormat: "https://www.example.com/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+
 # Sentry application monitoring service configuration
 # https://docs.sentry.io/product/sentry-basics/dsn-explainer/
 Sentry:

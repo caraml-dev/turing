@@ -47,14 +47,16 @@ func TestRouterMarshalJSON(t *testing.T) {
 				Model: Model{
 					ID: 1,
 				},
-				ProjectID: 2,
-				Endpoint:  "test-endpoint",
+				ProjectID:     2,
+				Endpoint:      "test-endpoint",
+				MonitoringURL: "http://www.example.com",
 			},
 			expected: `{
 				"id": 1,
 				"created_at": "0001-01-01T00:00:00Z",
 				"updated_at": "0001-01-01T00:00:00Z",
 				"project_id": 2,
+				"monitoring_url": "http://www.example.com",
 				"environment_name": "",
 				"name": "",
 				"status": "",
@@ -75,7 +77,8 @@ func TestRouterMarshalJSON(t *testing.T) {
 				"project_id": 2,
 				"environment_name": "",
 				"name": "",
-				"status": ""
+				"status": "",
+				"monitoring_url": ""
 			}`,
 		},
 	}

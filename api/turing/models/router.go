@@ -35,6 +35,9 @@ type Router struct {
 	// The current version (may be deployed or undeployed)
 	CurrRouterVersionID sql.NullInt32  `json:"-"`
 	CurrRouterVersion   *RouterVersion `json:"config,omitempty" gorm:"foreignkey:CurrRouterVersionID"`
+
+	// MonitoringURL is for all router versions
+	MonitoringURL string `json:"monitoring_url" gorm:"-"`
 }
 
 func (r *Router) SetCurrRouterVersionID(routerVersionID ID) {

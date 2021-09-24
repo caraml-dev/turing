@@ -1,6 +1,5 @@
 import React from "react";
 import { PageNavigation } from "../../../../components/page_navigation/PageNavigation";
-import { useMonitoring } from "../../../../hooks/useMonitoring";
 import { EuiIcon } from "@elastic/eui";
 
 export const RouterVersionDetailsPageNavigation = ({
@@ -8,8 +7,6 @@ export const RouterVersionDetailsPageNavigation = ({
   actions,
   ...props
 }) => {
-  const [getMonitoringDashboardUrl] = useMonitoring();
-
   const tabs = [
     {
       id: "details",
@@ -23,11 +20,7 @@ export const RouterVersionDetailsPageNavigation = ({
           <EuiIcon className="eui-alignBaseline" type="popout" size="s" />
         </span>
       ),
-      href: getMonitoringDashboardUrl(
-        version.router.environment_name,
-        version.router.name,
-        version.version
-      ),
+      href: version.monitoring_url,
     },
   ];
 

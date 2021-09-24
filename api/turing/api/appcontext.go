@@ -139,10 +139,10 @@ func NewAppContext(
 	appContext := &AppContext{
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
-		RoutersService:        service.NewRoutersService(db),
+		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     service.NewEnsemblersService(db),
 		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(db),
+		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(db),
 		RouterDefaults:        cfg.RouterDefaults,
 		CryptoService:         cryptoService,

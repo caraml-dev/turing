@@ -72,10 +72,6 @@ export const resultLoggingConfig = {
   protoUrl: process.env.REACT_APP_RESULT_LOG_PROTO_URL,
 };
 
-export const monitoringConfig = {
-  dashboardUrl: process.env.REACT_APP_ROUTER_MONITORING_URL || "",
-};
-
 export const alertConfig = {
   environment:
     appConfig.environment === "dev" ? "development" : appConfig.environment,

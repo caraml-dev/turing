@@ -45,6 +45,8 @@ func TestNewAppContext(t *testing.T) {
 	executorCPURequest := "1"
 	executorMemoryRequest := "1Gi"
 
+	routerMonitoringURLFormat := "http://www.example.com"
+
 	testCfg := &config.Config{
 		Port: 8080,
 		BatchEnsemblingConfig: &config.BatchEnsemblingConfig{
@@ -138,6 +140,7 @@ func TestNewAppContext(t *testing.T) {
 				Tag:                  "turing-result.log",
 				FlushIntervalSeconds: 90,
 			},
+			MonitoringURLFormat: &routerMonitoringURLFormat,
 		},
 		KubernetesLabelConfigs: &config.KubernetesLabelConfigs{
 			Environment: "dev",
@@ -302,10 +305,10 @@ func TestNewAppContext(t *testing.T) {
 	assert.Equal(t, &AppContext{
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
-		RoutersService:        service.NewRoutersService(nil),
+		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     service.NewEnsemblersService(nil),
 		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(nil),
+		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,
 		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),

@@ -10,7 +10,6 @@ import {
   EuiToolTip,
   EuiSearchBar,
 } from "@elastic/eui";
-import { useMonitoring } from "../../hooks/useMonitoring";
 import { RouterEndpoint } from "../components/router_endpoint/RouterEndpoint";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { appConfig } from "../../config";
@@ -24,8 +23,6 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   const [config, setConfig] = useState({
     environments: [],
   });
-
-  const [getMonitoringDashboardUrl] = useMonitoring();
 
   useEffect(() => {
     if (isLoaded && items.length) {
@@ -123,17 +120,13 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       },
       width: "10%",
       render: (item) => {
-        const monitoringLink = item.config
-          ? getMonitoringDashboardUrl(item.environment_name, item.name)
-          : undefined;
-
         return (
           <EuiButtonEmpty
             onClick={(e) => {
               e.stopPropagation();
             }}
-            href={monitoringLink}
-            isDisabled={!monitoringLink}
+            href={item.monitoring_url}
+            isDisabled={!item.monitoring_url}
             iconType="visLine"
             size="xs"
             target="_blank">

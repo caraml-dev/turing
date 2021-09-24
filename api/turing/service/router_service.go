@@ -2,7 +2,11 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
+	"text/template"
+
+	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -30,12 +34,28 @@ type RoutersService interface {
 }
 
 // NewRoutersService creates a new router service
-func NewRoutersService(db *gorm.DB) RoutersService {
-	return &routersService{db: db}
+func NewRoutersService(db *gorm.DB, mlpService MLPService, monitoringURLFormat *string) RoutersService {
+	var monitoringURLTemplate *template.Template
+	if monitoringURLFormat != nil {
+		var err error
+		monitoringURLTemplate, err = template.New("monitoringURLTemplate").Parse(*monitoringURLFormat)
+		if err != nil {
+			log.Warnf("error parsing monitoring url template: %s", err)
+		}
+	}
+
+	return &routersService{
+		db: db,
+		routerMonitoringService: routerMonitoringService{
+			mlpService:            mlpService,
+			monitoringURLTemplate: monitoringURLTemplate,
+		},
+	}
 }
 
 type routersService struct {
 	db *gorm.DB
+	routerMonitoringService
 }
 
 func (service *routersService) query() *gorm.DB {
@@ -55,6 +75,20 @@ func (service *routersService) ListRouters(projectID models.ID, environmentName 
 		query = query.Where("routers.environment_name = ?", environmentName)
 	}
 	err := query.Find(&routers).Error
+
+	for _, router := range routers {
+		var err error
+		router.MonitoringURL, err = service.GenerateMonitoringURL(
+			router.ProjectID,
+			router.EnvironmentName,
+			router.Name,
+			nil,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to generate MonitoringURL for router: %s", err.Error())
+		}
+	}
+
 	return routers, err
 }
 
@@ -79,6 +113,19 @@ func (service *routersService) FindByID(routerID models.ID) (*models.Router, err
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+
+	var err error
+	router.MonitoringURL, err = service.GenerateMonitoringURL(
+		router.ProjectID,
+		router.EnvironmentName,
+		router.Name,
+		nil,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate MonitoringURL for router: %s", err.Error())
+	}
+
 	return &router, nil
 }
 
