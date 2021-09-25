@@ -34,5 +34,4 @@ COPY --chown=app:app --from=api-builder /app/api /app/api
 USER app
 WORKDIR /app
 
-ENTRYPOINT ["sh", "-c"]
-CMD ["./${API_BIN_NAME} \"$@\""]
+ENTRYPOINT ["sh", "-c", "./${API_BIN_NAME} \"$@\"", "--"]
