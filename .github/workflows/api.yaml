@@ -12,14 +12,28 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: api
     env:
-      POSTGRES_DB: turing
-      POSTGRES_USER: turing-admin
-      POSTGRES_PASSWORD: secret
+      GOPATH: ${{ github.workspace }}/api/.go
+
+    services:
+      postgres:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: turing
+          POSTGRES_USER: turing-admin
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
-
     - name: Check out code
       uses: actions/checkout@v2
 
@@ -28,19 +42,21 @@ jobs:
       with:
         go-version: "1.14"
 
-    - name: Install Postgres required for testing
-      run: |
-        docker run --name postgres -d -p 5432:5432 \
-          -e POSTGRES_DB=$POSTGRES_DB \
-          -e POSTGRES_USER=$POSTGRES_USER \
-          -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
-          postgres:13-alpine
-        timeout 30 bash -c "until docker exec postgres pg_isready; do sleep 2; done"
+    - name: Cache Dependencies
+      uses: actions/cache@v2
+      with:
+        path: api/.go/pkg/mod/
+        key: |
+          gomod-${{ hashFiles('api/go.mod') }}
+        restore-keys: gomod-
 
-    - name: Run test 
-      working-directory: api
-      run: make test-ci
+    - name: Run test
+      env:
+        DATABASE_HOST: localhost
+        DATABASE_NAME: turing
+        DATABASE_USER: turing-admin
+        DATABASE_PASSWORD: secret
+      run: make test
 
     - name: Lint code
-      working-directory: api
       run: make lint

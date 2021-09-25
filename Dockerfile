@@ -26,6 +26,6 @@ RUN yarn build
 
 FROM ${TURING_API_IMAGE}
 
-ENV TURING_UI_APP_DIRECTORY "./turing-ui"
+ENV TURINGUICONFIG_APPDIRECTORY "./turing-ui"
 
-COPY --from=ui-builder /opt/turing_ui/build ${TURING_UI_APP_DIRECTORY}/
+COPY --from=ui-builder /opt/turing_ui/build ${TURINGUICONFIG_APPDIRECTORY}/

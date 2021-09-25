@@ -15,7 +15,7 @@ import (
 )
 
 func connectionString(db string) string {
-	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password='%s' sslmode=disable", host, 5432, user, db, password)
+	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", host, 5432, user, db, password)
 }
 
 func create(conn *sql.DB, dbName string) (*sql.DB, error) {

@@ -14,8 +14,7 @@ clean:
 .PHONY: setup
 setup:
 	@echo "Setting up tools..."
-	@test -x ${GOPATH}/bin/golint || go get -u golang.org/x/lint/golint
-	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
+	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 
 .PHONY: fmt
 fmt:
@@ -38,18 +37,8 @@ vendor:
 	go mod vendor
 
 .PHONY: test
-test: tidy local-db
+test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
-	go tool cover -func cover.out
-
-.PHONY: test-ci
-test-ci: tidy
-	echo "Running tests..."
-	DATABASE_HOST=$${POSTGRES_HOST} \
-	DATABASE_USER=$${POSTGRES_USER} \
-	DATABASE_PASSWORD=$${POSTGRES_PASSWORD} \
-	DATABASE_NAME=$${POSTGRES_DB} \
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
 	go tool cover -func cover.out
 
