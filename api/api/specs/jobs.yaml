@@ -422,10 +422,7 @@ components:
         env:
           type: array
           items:
-            $ref: "#/components/schemas/EnvVar"
-
-    EnvVar:
-      $ref: "common.yaml#/components/schemas/EnvVar"
+            $ref: "common.yaml#/components/schemas/EnvVar"
 
     EnsemblingResources:
       type: "object"
