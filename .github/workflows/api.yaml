@@ -12,9 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: api
+
     env:
       GOPATH: ${{ github.workspace }}/api/.go
 
@@ -51,6 +49,7 @@ jobs:
         restore-keys: gomod-
 
     - name: Run test
+      working-directory: api
       env:
         DATABASE_HOST: localhost
         DATABASE_NAME: turing
@@ -59,4 +58,7 @@ jobs:
       run: make test
 
     - name: Lint code
-      run: make lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        working-directory: api
+        skip-go-installation: true
