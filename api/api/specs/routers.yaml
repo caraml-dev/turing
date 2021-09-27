@@ -793,14 +793,7 @@ components:
           type: "string"
 
     EnvVar:
-      type: "object"
-      required:
-        - name
-      properties:
-        name:
-          type: "string"
-        value:
-          type: "string"
+      $ref: "common.yaml#/components/schemas/EnvVar"
 
     BigQueryConfig:
       type: "object"

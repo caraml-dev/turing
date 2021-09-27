@@ -6,6 +6,7 @@ import (
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/models"
 	apicorev1 "k8s.io/api/core/v1"
 	apirbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -86,7 +87,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
-	EnvironmentVariables  map[string]string
+	EnvVars               models.EnvVars
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -129,18 +130,16 @@ func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkAppl
 	}, nil
 }
 
-func addEnvVars(request *CreateSparkRequest) []apicorev1.EnvVar {
-	allEnvVars := append([]apicorev1.EnvVar{}, defaultEnvVars...)
-
-	for key, value := range request.EnvironmentVariables {
-		envVar := apicorev1.EnvVar{
-			Name:  key,
-			Value: value,
-		}
-		allEnvVars = append(allEnvVars, envVar)
+func getEnvVarFromRequest(request *CreateSparkRequest) []apicorev1.EnvVar {
+	var envVars []apicorev1.EnvVar
+	for _, envVar := range request.EnvVars {
+		envVars = append(envVars, apicorev1.EnvVar{
+			Name:  envVar.Name,
+			Value: envVar.Value,
+		})
 	}
 
-	return allEnvVars
+	return envVars
 }
 
 func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.ExecutorSpec, error) {
@@ -176,7 +175,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    addEnvVars(request),
+			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
 			Labels: request.JobLabels,
 		},
 	}
@@ -226,7 +225,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    addEnvVars(request),
+			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
 			Labels: request.JobLabels,
 		},
 		ServiceAccount: &request.ServiceAccountName,

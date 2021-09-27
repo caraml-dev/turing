@@ -419,10 +419,13 @@ components:
           type: string
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
-        environment_variables:
-          type: object
-          additionalProperties:
-            type: string
+        env:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvVar"
+
+    EnvVar:
+      $ref: "common.yaml#/components/schemas/EnvVar"
 
     EnsemblingResources:
       type: "object"
