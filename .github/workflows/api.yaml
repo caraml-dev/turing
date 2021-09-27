@@ -60,6 +60,7 @@ jobs:
     - name: Lint code
       uses: golangci/golangci-lint-action@v2
       with:
+        version: v1.41.1
         working-directory: api
         skip-go-installation: true
         args: --timeout 3m --verbose
