@@ -29,6 +29,7 @@ func (c RouterVersionsController) ListRouterVersions(
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())
 	}
+
 	return Ok(routerVersions)
 }
 
@@ -40,9 +41,6 @@ func (c RouterVersionsController) GetRouterVersion(
 	// Parse request vars
 	var errResp *Response
 	var routerVersion *models.RouterVersion
-	if _, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
 	if routerVersion, errResp = c.getRouterVersionFromRequestVars(vars); errResp != nil {
 		return errResp
 	}

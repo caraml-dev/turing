@@ -74,6 +74,8 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
+	targetConcurrency int,
+	queueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -86,6 +88,8 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 				"env": envType,
 			},
 		},
+		TargetConcurrency:            targetConcurrency,
+		QueueProxyResourcePercentage: queueProxyResourcePercentage,
 	}, nil
 }
 
@@ -94,6 +98,8 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
+	targetConcurrency int,
+	queueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -106,6 +112,8 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 				"env": envType,
 			},
 		},
+		TargetConcurrency:            targetConcurrency,
+		QueueProxyResourcePercentage: queueProxyResourcePercentage,
 	}, nil
 }
 
@@ -119,6 +127,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	jaegerEndpoint string,
 	sentryEnabled bool,
 	sentryDSN string,
+	targetConcurrency int,
+	queueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -142,6 +152,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				Data: string(expConfig),
 			},
 		},
+		TargetConcurrency:            targetConcurrency,
+		QueueProxyResourcePercentage: queueProxyResourcePercentage,
 	}, nil
 }
 
@@ -200,6 +212,10 @@ func TestDeployEndpoint(t *testing.T) {
 		environmentType:           envType,
 		sentryEnabled:             true,
 		sentryDSN:                 "test:dsn",
+		knativeServiceConfig: &config.KnativeServiceDefaults{
+			TargetConcurrency:            1,
+			QueueProxyResourcePercentage: 20,
+		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
 		},
@@ -260,6 +276,8 @@ func TestDeployEndpoint(t *testing.T) {
 				"env": envType,
 			},
 		},
+		TargetConcurrency:            1,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
 		BaseService: &cluster.BaseService{
@@ -269,6 +287,8 @@ func TestDeployEndpoint(t *testing.T) {
 				"env": envType,
 			},
 		},
+		TargetConcurrency:            1,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "ApplyConfigMap", testNamespace,
 		&cluster.ConfigMap{Name: fmt.Sprintf("%s-fiber-config-%d", routerVersion.Router.Name, routerVersion.Version)})
@@ -293,6 +313,8 @@ func TestDeployEndpoint(t *testing.T) {
 				),
 			},
 		},
+		TargetConcurrency:            1,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "CreateSecret", mock.Anything, &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
@@ -347,6 +369,10 @@ func TestDeleteEndpoint(t *testing.T) {
 		jaegerCollectorEndpoint:   "jaeger-endpoint",
 		deploymentTimeout:         timeout,
 		deploymentDeletionTimeout: timeout,
+		knativeServiceConfig: &config.KnativeServiceDefaults{
+			TargetConcurrency:            1,
+			QueueProxyResourcePercentage: 20,
+		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
 		},

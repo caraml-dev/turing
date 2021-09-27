@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState } from "react";
 import { MetricPanel } from "./metric_panel/MetricPanel";
-import { ConfigSectionTitle } from "../../../../components/configuration/components/section";
+import { ConfigSectionTitle } from "../../../../../components/config_section";
 import { AccordionForm } from "../../../../../components/accordion_form";
 import { TeamPanel } from "./team_panel/TeamPanel";
 import { FormContext } from "../../../../../components/form/context";
@@ -37,11 +37,11 @@ export const EditAlertsForm = ({
   );
 
   const toggleExpanded = useCallback(
-    metric => {
+    (metric) => {
       return () =>
-        setIsExpanded(state => ({
+        setIsExpanded((state) => ({
           ...state,
-          [metric]: !state[metric]
+          [metric]: !state[metric],
         }));
     },
     [setIsExpanded]
@@ -64,7 +64,7 @@ export const EditAlertsForm = ({
           )}
         </FormValidationContext.Consumer>
       ),
-      validationSchema: schema["team"]
+      validationSchema: schema["team"],
     },
     ...supportedAlerts.map((alertType, idx) => ({
       title: alertType.title,
@@ -85,8 +85,9 @@ export const EditAlertsForm = ({
           )}
         </FormValidationContext.Consumer>
       ),
-      validationSchema: isExpanded[alertType.metric] && schema[alertType.metric]
-    }))
+      validationSchema:
+        isExpanded[alertType.metric] && schema[alertType.metric],
+    })),
   ];
 
   return (

@@ -6,7 +6,7 @@ export const ExperimentContextProvider = ({
   engineProps,
   clientId,
   experimentIds,
-  children
+  children,
 }) => {
   const engine = engineProps.name.toLowerCase();
 
@@ -81,11 +81,11 @@ export const ExperimentContextProvider = ({
     clientsValidated,
     experimentsValidated,
     variablesValidated,
-    fetchVariables
+    fetchVariables,
   ]);
 
   const isLoading = useCallback(
-    val => {
+    (val) => {
       switch (val) {
         case "clients":
           return clientsResponse.isLoading;
@@ -100,12 +100,12 @@ export const ExperimentContextProvider = ({
     [
       clientsResponse.isLoading,
       experimentsResponse.isLoading,
-      variablesResponse.isLoading
+      variablesResponse.isLoading,
     ]
   );
 
   const isLoaded = useCallback(
-    val => {
+    (val) => {
       switch (val) {
         case "clients":
           return clientsResponse.isLoaded;
@@ -120,7 +120,7 @@ export const ExperimentContextProvider = ({
     [
       clientsResponse.isLoaded,
       experimentsResponse.isLoaded,
-      variablesResponse.isLoaded
+      variablesResponse.isLoaded,
     ]
   );
 
@@ -134,8 +134,9 @@ export const ExperimentContextProvider = ({
         setExperimentsValidated,
         setVariablesValidated,
         isLoading,
-        isLoaded
-      }}>
+        isLoaded,
+      }}
+    >
       {children}
     </ExperimentContext.Provider>
   );

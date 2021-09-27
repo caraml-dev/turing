@@ -128,8 +128,8 @@ clean_docker_stack:
 
 gen-client:
 	rm -rf turing/generated
-	@openapi-generator generate \
-		--input-spec api/openapi-sdk.yaml \
+	@docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v5.1.1 generate \
+		--input-spec /local/api/openapi-sdk.yaml \
 		--generator-name go \
-		--output turing/generated \
-		--config openapi-codegen.yaml
+		--output /local/turing/generated \
+		--config /local/openapi-codegen.yaml

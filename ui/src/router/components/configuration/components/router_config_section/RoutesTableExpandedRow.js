@@ -5,7 +5,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel
+  EuiPanel,
 } from "@elastic/eui";
 import { TrafficRuleCondition } from "../../../traffic_rule_condition/TrafficRuleCondition";
 

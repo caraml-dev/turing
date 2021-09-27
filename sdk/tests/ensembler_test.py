@@ -100,7 +100,7 @@ def test_create_ensembler(
 @responses.activate
 @pytest.mark.parametrize(
     ('num_ensemblers', 'ensembler_name'),
-    [(3, "updated_ensembler")]
+    [(3, "updated")]
 )
 @pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
 def test_update_ensembler(

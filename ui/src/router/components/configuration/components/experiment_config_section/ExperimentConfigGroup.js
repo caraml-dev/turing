@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
-import { ConfigSectionPanel } from "../section";
+import { ConfigSectionPanel } from "../../../../../components/config_section";
 import { CredentialsConfigSection } from "./credentials/CredentialsConfigSection";
 import { ExperimentsConfigTable } from "./experiments/ExperimentsConfigTable";
 import { VariablesConfigTable } from "./variables/VariablesConfigTable";
@@ -17,7 +17,8 @@ export const ExperimentConfigGroup = ({ engineType, engineConfig }) => {
           <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
             <ConfigSectionPanel
               title="Experiment Engine"
-              className="experimentCredentials">
+              className="experimentCredentials"
+            >
               <CredentialsConfigSection
                 engineType={engineType}
                 deployment={engineConfig.deployment}

@@ -16,8 +16,8 @@ import (
 
 // EnsemblingJobPredictionSource struct for EnsemblingJobPredictionSource
 type EnsemblingJobPredictionSource struct {
-	Dataset Dataset  `json:"dataset"`
-	JoinOn  []string `json:"join_on"`
+	Dataset Dataset `json:"dataset"`
+	JoinOn []string `json:"join_on"`
 	Columns []string `json:"columns,omitempty"`
 }
 
@@ -53,7 +53,7 @@ func (o *EnsemblingJobPredictionSource) GetDataset() Dataset {
 // GetDatasetOk returns a tuple with the Dataset field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobPredictionSource) GetDatasetOk() (*Dataset, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Dataset, true
@@ -77,7 +77,7 @@ func (o *EnsemblingJobPredictionSource) GetJoinOn() []string {
 // GetJoinOnOk returns a tuple with the JoinOn field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobPredictionSource) GetJoinOnOk() (*[]string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.JoinOn, true
@@ -90,7 +90,7 @@ func (o *EnsemblingJobPredictionSource) SetJoinOn(v []string) {
 
 // GetColumns returns the Columns field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *EnsemblingJobPredictionSource) GetColumns() []string {
-	if o == nil {
+	if o == nil  {
 		var ret []string
 		return ret
 	}
@@ -170,3 +170,5 @@ func (v *NullableEnsemblingJobPredictionSource) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

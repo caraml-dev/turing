@@ -10,8 +10,8 @@ export const FormContextProvider = ({ data: initData, ...props }) => {
 
   const handleChanges = useCallback(
     (paths, value) => {
-      const path = paths.filter(part => !!part).join(".");
-      setData(data => {
+      const path = paths.filter((part) => !!part).join(".");
+      setData((data) => {
         set(data, path, value);
         return Object.assign(Object.create(data), data);
       });
@@ -19,7 +19,10 @@ export const FormContextProvider = ({ data: initData, ...props }) => {
     [setData]
   );
 
-  const rootHandler = useMemo(() => new StackableFunction([], handleChanges), [handleChanges])
+  const rootHandler = useMemo(
+    () => new StackableFunction([], handleChanges),
+    [handleChanges]
+  );
   const { onChangeHandler, onChange } = useOnChangeHandler(rootHandler);
 
   return (

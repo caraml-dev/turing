@@ -58,6 +58,9 @@ type deploymentService struct {
 	sentryEnabled           bool
 	sentryDSN               string
 
+	// Knative service configs
+	knativeServiceConfig *config.KnativeServiceDefaults
+
 	clusterControllers map[string]cluster.Controller
 	svcBuilder         servicebuilder.ClusterServiceBuilder
 }
@@ -82,6 +85,7 @@ func NewDeploymentService(
 		environmentType:           cfg.DeployConfig.EnvironmentType,
 		fluentdConfig:             cfg.RouterDefaults.FluentdConfig,
 		jaegerCollectorEndpoint:   cfg.RouterDefaults.JaegerCollectorEndpoint,
+		knativeServiceConfig:      cfg.KnativeServiceDefaults,
 		sentryEnabled:             cfg.Sentry.Enabled,
 		sentryDSN:                 cfg.Sentry.DSN,
 		clusterControllers:        clusterControllers,
@@ -164,6 +168,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, secretName, experimentConfig,
 		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
+		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
 	)
 	if err != nil {
 		return endpoint, err
@@ -216,6 +221,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, "", nil,
 		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
+		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
 	)
 	if err != nil {
 		return err
@@ -301,6 +307,8 @@ func (ds *deploymentService) createServices(
 	jaegerCollectorEndpoint string,
 	sentryEnabled bool,
 	sentryDSN string,
+	knativeTargetConcurrency int,
+	knativeQueueProxyResourcePercentage int,
 ) ([]*cluster.KnativeService, error) {
 	services := []*cluster.KnativeService{}
 
@@ -311,6 +319,8 @@ func (ds *deploymentService) createServices(
 			project,
 			envType,
 			secretName,
+			knativeTargetConcurrency,
+			knativeQueueProxyResourcePercentage,
 		)
 		if err != nil {
 			return services, err
@@ -325,6 +335,8 @@ func (ds *deploymentService) createServices(
 			project,
 			envType,
 			secretName,
+			knativeTargetConcurrency,
+			knativeQueueProxyResourcePercentage,
 		)
 		if err != nil {
 			return services, err
@@ -343,6 +355,8 @@ func (ds *deploymentService) createServices(
 		jaegerCollectorEndpoint,
 		sentryEnabled,
 		sentryDSN,
+		knativeTargetConcurrency,
+		knativeQueueProxyResourcePercentage,
 	)
 	if err != nil {
 		return services, err

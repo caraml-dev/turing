@@ -8,18 +8,40 @@ import (
 	"strings"
 	"time"
 
-	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	logger "github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// PodLogsV2 contains a list of logs in a kubernetes pod along with some extra information.
+// This is the new format for pod logs
+type PodLogsV2 struct {
+	// Environment name of the router running the container that produces this log
+	Environment string `json:"environment"`
+	// Kubernetes namespace where the pod running the container is created
+	Namespace string `json:"namespace"`
+	// URL to dashboard since pods might be deleted after use
+	// Since there are multiple pods, we will add the unique URLs here
+	LoggingURL string `json:"logging_url"`
+	// Logs is an array of logs, equivalent to one line of log
+	Logs []*PodLogV2 `json:"logs"`
+}
+
+// PodLogV2 represents a single log line from a container running in Kubernetes.
+type PodLogV2 struct {
+	// Log timestamp in RFC3339 format
+	Timestamp time.Time `json:"timestamp"`
+	// Pod name running the container that produces this log
+	PodName string `json:"pod_name"`
+	// Log in text format, either TextPayload or JSONPayload will be set but not both
+	TextPayload string `json:"text_payload,omitempty"`
+}
+
 // PodLog represents a single log line from a container running in Kubernetes.
 // If the log message is in JSON format, JSONPayload must be populated with the
 // structured JSON log message. Else, TextPayload must be populated with log text.
+// This is the legacy format, use PodLogs for newer features instead.
 type PodLog struct {
 	// Log timestamp in RFC3339 format
 	Timestamp time.Time `json:"timestamp"`
@@ -30,14 +52,62 @@ type PodLog struct {
 	// Pod name running the container that produces this log
 	PodName string `json:"pod_name"`
 	// Container name that produces this log
-	ContainerName string `json:"container_name"`
+	ContainerName string `json:"container_name,omitempty"`
 	// Log in text format, either TextPayload or JSONPayload will be set but not both
 	TextPayload string `json:"text_payload,omitempty"`
 	// Log in JSON format, either TextPayload or JSONPayload will be set but not both
 	JSONPayload map[string]interface{} `json:"json_payload,omitempty"`
 }
 
-type PodLogOptions struct {
+// PodLogService is an interface to retrieve logs from Kubernetes Pods
+type PodLogService interface {
+	ListPodLogs(request PodLogRequest) ([]*PodLog, error)
+}
+
+type podLogService struct {
+	clusterControllers map[string]cluster.Controller
+}
+
+// NewPodLogService creates a new PodLogService that deals with kubernetes pod logs
+func NewPodLogService(clusterControllers map[string]cluster.Controller) PodLogService {
+	return &podLogService{clusterControllers: clusterControllers}
+}
+
+// ConvertPodLogsToV2 converts to the new pod log format
+func ConvertPodLogsToV2(namespace string, environment string, loggingURL string, podLogs []*PodLog) *PodLogsV2 {
+	logs := &PodLogsV2{
+		Environment: environment,
+		Namespace:   namespace,
+	}
+
+	allLines := []*PodLogV2{}
+	for _, p := range podLogs {
+		line := &PodLogV2{
+			Timestamp:   p.Timestamp,
+			PodName:     p.PodName,
+			TextPayload: p.TextPayload,
+		}
+		allLines = append(allLines, line)
+	}
+
+	logs.Logs = allLines
+	logs.LoggingURL = loggingURL
+
+	return logs
+}
+
+// PodLogRequest is the request for logs for a particular set of pods.
+type PodLogRequest struct {
+	// Kubernetes Namespace, usually the same as the project name
+	Namespace string
+	// Picks the logs from a selected container in a pod.
+	DefaultContainer string
+	// Environment that the pod is in, used for the cluster controller selection
+	Environment string
+	// Labels for Kubernetes pods
+	LabelSelectors []LabelSelector
+	// This is the template used for persistent logs that are outside Kubernetes
+	LoggingURLTemplate *string
 	// Container to get the logs from, default to 'user-container', the default container name in Knative
 	Container string
 	// If true, return the logs from previous terminated container in all pods
@@ -53,46 +123,37 @@ type PodLogOptions struct {
 	HeadLines *int64
 }
 
-type PodLogService interface {
-	// ListPodLogs retrieves logs from user-container (default) container from all pods running the router.
-	ListPodLogs(
-		project *mlp.Project,
-		router *models.Router,
-		routerVersion *models.RouterVersion,
-		componentType string,
-		opts *PodLogOptions,
-	) ([]*PodLog, error)
+// LabelSelector refers to the label
+type LabelSelector struct {
+	Key   string
+	Value string
 }
 
-type podLogService struct {
-	clusterControllers map[string]cluster.Controller
+func (s *LabelSelector) formatLabel() string {
+	return fmt.Sprintf("%s=%s", s.Key, s.Value)
 }
 
-func NewPodLogService(clusterControllers map[string]cluster.Controller) PodLogService {
-	return &podLogService{clusterControllers: clusterControllers}
+func formatLabelSelector(labels []LabelSelector) string {
+	all := []string{}
+	for _, l := range labels {
+		all = append(all, l.formatLabel())
+	}
+	return strings.Join(all, ",")
 }
 
-func (s *podLogService) ListPodLogs(
-	project *mlp.Project,
-	router *models.Router,
-	routerVersion *models.RouterVersion,
-	componentType string,
-	opts *PodLogOptions,
-) ([]*PodLog, error) {
+func (s *podLogService) ListPodLogs(request PodLogRequest) ([]*PodLog, error) {
 	// If both TailLines and Headlines are set, TailLines is ignored
-	if opts.TailLines != nil && opts.HeadLines != nil {
-		opts.TailLines = nil
+	if request.TailLines != nil && request.HeadLines != nil {
+		request.TailLines = nil
 	}
 
-	controller, ok := s.clusterControllers[router.EnvironmentName]
+	controller, ok := s.clusterControllers[request.Environment]
 	if !ok {
-		return nil, fmt.Errorf("cluster controller for environment '%s' not found", router.EnvironmentName)
+		return nil, fmt.Errorf("cluster controller for environment '%s' not found", request.Environment)
 	}
 
-	namespace := servicebuilder.GetNamespace(project)
-	labelSelector := cluster.KnativeServiceLabelKey + "=" +
-		servicebuilder.GetComponentName(routerVersion, componentType)
-	pods, err := controller.ListPods(namespace, labelSelector)
+	labelSelector := formatLabelSelector(request.LabelSelectors)
+	pods, err := controller.ListPods(request.Namespace, labelSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -100,31 +161,31 @@ func (s *podLogService) ListPodLogs(
 	allPodLogs := make([]*PodLog, 0)
 	for _, p := range pods.Items {
 		logOpts := &v1.PodLogOptions{
-			Container:  opts.Container,
-			Previous:   opts.Previous,
+			Container:  request.Container,
+			Previous:   request.Previous,
 			Timestamps: true,
 		}
 
 		// Only send tailLines argument to Kube API server if sinceTime is not set because Kube API will prioritize
 		// tailLines over sinceTime and we want these options to be AND-ed together.
 		// The log items returned by Kube API will later be trimmed separately according to the tailLines argument.
-		if opts.SinceTime == nil && opts.TailLines != nil {
-			logOpts.TailLines = opts.TailLines
+		if request.SinceTime == nil && request.TailLines != nil {
+			logOpts.TailLines = request.TailLines
 		}
 
 		// Set default container if not set
 		if logOpts.Container == "" {
-			logOpts.Container = cluster.KnativeUserContainerName
+			logOpts.Container = request.DefaultContainer
 		}
 
-		if opts.SinceTime != nil {
+		if request.SinceTime != nil {
 			// Note that the requested sinceTime sent to Kubernetes API server is subtracted by 1 second
 			// because Kubernetes API server only accepts sinceTime granularity to the second so we will
 			// miss some logs within the second without this subtraction.
-			logOpts.SinceTime = &metav1.Time{Time: opts.SinceTime.Add(-time.Second)}
+			logOpts.SinceTime = &metav1.Time{Time: request.SinceTime.Add(-time.Second)}
 		}
 
-		stream, err := controller.ListPodLogs(namespace, p.Name, logOpts)
+		stream, err := controller.ListPodLogs(request.Namespace, p.Name, logOpts)
 		if err != nil {
 			// Error is handled here by logging it rather than returned because the caller usually does not know how to
 			// handle it. Example of what can trigger ListPodLogs error: while the container is being created/terminated
@@ -159,14 +220,14 @@ func (s *podLogService) ListPodLogs(
 			}
 
 			// We require this check because we send (SinceTime - 1sec) to Kube API Server
-			if opts.SinceTime != nil && (timestamp == *opts.SinceTime || timestamp.Before(*opts.SinceTime)) {
+			if request.SinceTime != nil && (timestamp == *request.SinceTime || timestamp.Before(*request.SinceTime)) {
 				continue
 			}
 
 			log := &PodLog{
 				Timestamp:     timestamp,
-				Environment:   router.EnvironmentName,
-				Namespace:     namespace,
+				Environment:   request.Environment,
+				Namespace:     request.Namespace,
 				PodName:       p.Name,
 				ContainerName: logOpts.Container,
 			}
@@ -183,17 +244,17 @@ func (s *podLogService) ListPodLogs(
 			podLogs = append(podLogs, log)
 		}
 
-		if opts.HeadLines != nil {
-			endIndex := *opts.HeadLines
+		if request.HeadLines != nil {
+			endIndex := *request.HeadLines
 			// Check against slice index out of bounds
-			if *opts.HeadLines > int64(len(podLogs)) {
+			if *request.HeadLines > int64(len(podLogs)) {
 				endIndex = int64(len(podLogs))
-			} else if *opts.HeadLines < 0 {
+			} else if *request.HeadLines < 0 {
 				endIndex = 0
 			}
 			allPodLogs = append(allPodLogs, podLogs[:endIndex]...)
-		} else if opts.TailLines != nil {
-			startIndex := int64(len(podLogs)) - *opts.TailLines
+		} else if request.TailLines != nil {
+			startIndex := int64(len(podLogs)) - *request.TailLines
 			// Check against slice index out of bounds
 			if startIndex < 0 {
 				startIndex = 0

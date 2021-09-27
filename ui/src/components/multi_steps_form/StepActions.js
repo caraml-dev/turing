@@ -3,21 +3,20 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from "@elastic/eui";
 
 export const StepActions = ({
-  currentStep = 0,
   onCancel,
   onPrevious,
   onSubmit,
   submitLabel,
-  isSubmitting
+  isSubmitting,
 }) => {
   return (
     <EuiFlexGroup direction="row" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        {currentStep === 0 ? (
+        {!!onCancel ? (
           <EuiButtonEmpty size="s" color="primary" onClick={onCancel}>
             Cancel
           </EuiButtonEmpty>
@@ -34,7 +33,8 @@ export const StepActions = ({
           color="primary"
           fill
           isLoading={isSubmitting}
-          onClick={onSubmit}>
+          onClick={onSubmit}
+        >
           {submitLabel}
         </EuiButton>
       </EuiFlexItem>

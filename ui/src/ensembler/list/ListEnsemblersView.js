@@ -6,7 +6,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
-  EuiPageHeaderSection
+  EuiPageHeaderSection,
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
@@ -18,9 +18,10 @@ const { defaultPageSize } = appConfig.pagination;
 export const ListEnsemblersView = ({ projectId, ...props }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
-  const filter = useMemo(() => parse(props.location.search), [
-    props.location.search
-  ]);
+  const filter = useMemo(
+    () => parse(props.location.search),
+    [props.location.search]
+  );
 
   const onQueryChange = ({ query }) => {
     const filter = {};
@@ -31,7 +32,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
 
     const searchClause = query.ast.getTermClauses();
     if (!!searchClause) {
-      filter["search"] = searchClause.map(c => c.value).join(" ");
+      filter["search"] = searchClause.map((c) => c.value).join(" ");
     }
 
     props.navigate(`${props.location.pathname}?${stringify(filter)}`);
@@ -44,9 +45,9 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
         ...filter,
         ...{
           page: page.index + 1,
-          page_size: page.size
-        }
-      }
+          page_size: page.size,
+        },
+      },
     },
     { results: [], paging: { total: 0 } }
   );
@@ -55,7 +56,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
     if (isLoaded && !error) {
       setResults({
         items: data.results,
-        totalItemCount: data.paging.total
+        totalItemCount: data.paging.total,
       });
     }
   }, [data, isLoaded, error]);
@@ -64,7 +65,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
     replaceBreadcrumbs([{ text: "Ensemblers" }]);
   }, []);
 
-  const onRowClick = item => {};
+  const onRowClick = (item) => {};
   // props.navigate(`./${item.id}/details`);
 
   return (

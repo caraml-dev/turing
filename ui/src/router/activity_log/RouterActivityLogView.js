@@ -3,15 +3,15 @@ import {
   EuiPanel,
   EuiTextAlign,
   EuiLoadingChart,
-  EuiCallOut
+  EuiCallOut,
 } from "@elastic/eui";
-import { ConfigSection } from "../components/configuration/components/section";
+import { ConfigSection } from "../../components/config_section";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { Status } from "../../services/status/Status";
 import { EventsList } from "./events_list/EventsList";
 import "./RouterActivityLogView.scss";
-import { usePollingTuringApi } from "../../hooks/usePollingTuringApi";
+import { useTuringPollingApi } from "../../hooks/useTuringPollingApi";
 
 const POLLING_INTERVAL = 5000;
 export const RouterActivityLogView = ({ projectId, routerId, router }) => {
@@ -19,12 +19,12 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
     {
       data: { events },
       isLoaded,
-      error
+      error,
     },
     startPollingEvents,
     stopPollingEvents,
-    fetchEventsOnce
-  ] = usePollingTuringApi(
+    fetchEventsOnce,
+  ] = useTuringPollingApi(
     `/projects/${projectId}/routers/${routerId}/events`,
     {},
     [],
@@ -32,9 +32,10 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
   );
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
-  const routerStatus = useMemo(() => Status.fromValue(router.status), [
-    router.status
-  ]);
+  const routerStatus = useMemo(
+    () => Status.fromValue(router.status),
+    [router.status]
+  );
 
   useEffect(() => {
     fetchEventsOnce();
@@ -58,13 +59,15 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert">
+            iconType="alert"
+          >
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
           <ScrollToBottom
             className="scrollToBottom--container"
-            followButtonClassName="followButton">
+            followButtonClassName="followButton"
+          >
             <EventsList events={events} status={routerStatus} />
           </ScrollToBottom>
         )}

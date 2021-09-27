@@ -11,12 +11,12 @@ export const useAlertsApi = (
 ) => {
   const [request, setRequest] = useState({
     alerts: [],
-    team: undefined
+    team: undefined,
   });
   const [sendingAlert, setSendingAlert] = useState({
     method: undefined,
     alertId: undefined,
-    submitBody: {}
+    submitBody: {},
   });
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(true);
 
@@ -24,7 +24,7 @@ export const useAlertsApi = (
     `/projects/${projectId}/routers/${routerId}/alerts`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -34,7 +34,7 @@ export const useAlertsApi = (
     `/projects/${projectId}/routers/${routerId}/alerts/${sendingAlert.alertId}`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -44,7 +44,7 @@ export const useAlertsApi = (
     `/projects/${projectId}/routers/${routerId}/alerts/${sendingAlert.alertId}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -54,25 +54,25 @@ export const useAlertsApi = (
     if (request.alerts.length > 0 && !sendingAlert.method) {
       const body = {
         environment: environmentName,
-        team: request.team
+        team: request.team,
       };
       const changedAlerts = [...request.alerts];
       const a = changedAlerts.pop();
       setRequest({
         ...request,
-        alerts: changedAlerts
+        alerts: changedAlerts,
       });
       const method = a.method;
       const alertId = a.id;
       let submitBody = {
         ...a,
-        ...body
+        ...body,
       };
       delete submitBody.method;
       setSendingAlert({
         method: method,
         alertId: alertId,
-        submitBody: submitBody
+        submitBody: submitBody,
       });
     }
   }, [request, sendingAlert.method, environmentName]);
@@ -108,10 +108,13 @@ export const useAlertsApi = (
       ) {
         setIsSubmitSuccess(false);
       }
-      deleteAlertResponse.isLoaded = createAlertResponse.isLoaded = updateAlertResponse.isLoaded = false;
+      deleteAlertResponse.isLoaded =
+        createAlertResponse.isLoaded =
+        updateAlertResponse.isLoaded =
+          false;
       setSendingAlert({
         ...sendingAlert,
-        method: undefined
+        method: undefined,
       });
       if (request.alerts.length === 0) {
         onSuccess(isSubmitSuccess);
@@ -125,7 +128,7 @@ export const useAlertsApi = (
     setIsSubmitSuccess,
     sendingAlert,
     request.alerts,
-    onSuccess
+    onSuccess,
   ]);
 
   const alertMethod = (oldAlert, newAlert, hasTeamChanged) => {
@@ -161,19 +164,19 @@ export const useAlertsApi = (
             changedAlerts.push({
               ...newAlert,
               method: "create",
-              metric: metric
+              metric: metric,
             });
             break;
           case "delete":
             changedAlerts.push({
               ...oldAlert,
-              method: "delete"
+              method: "delete",
             });
             break;
           case "update":
             changedAlerts.push({
               ...newAlert,
-              method: "update"
+              method: "update",
             });
             break;
           case "recreate":
@@ -181,11 +184,11 @@ export const useAlertsApi = (
               {
                 ...newAlert,
                 method: "create",
-                metric: metric
+                metric: metric,
               },
               {
                 ...oldAlert,
-                method: "delete"
+                method: "delete",
               }
             );
             break;
@@ -195,7 +198,7 @@ export const useAlertsApi = (
       if (changedAlerts.length > 0) {
         setRequest({
           team: newAlerts.team,
-          alerts: changedAlerts
+          alerts: changedAlerts,
         });
       } else {
         onCancel(); // Form not changed

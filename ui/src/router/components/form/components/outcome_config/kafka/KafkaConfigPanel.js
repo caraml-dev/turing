@@ -6,7 +6,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSpacer,
-  EuiSuperSelect
+  EuiSuperSelect,
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
@@ -15,7 +15,7 @@ import { resultLoggingConfig } from "../../../../../../config.js";
 const logSerializationFormatOptions = [
   {
     value: "json",
-    inputDisplay: "JSON"
+    inputDisplay: "JSON",
   },
   {
     value: "protobuf",
@@ -26,18 +26,18 @@ const logSerializationFormatOptions = [
       </EuiLink>
     ) : (
       ""
-    )
-  }
+    ),
+  },
 ];
 
 export const KafkaConfigPanel = ({
   kafkaConfig,
   onChangeHandler,
-  errors = {}
+  errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
   const selectedFormat = logSerializationFormatOptions.find(
-    option => option.value === kafkaConfig.serialization_format
+    (option) => option.value === kafkaConfig.serialization_format
   );
 
   return (
@@ -54,12 +54,13 @@ export const KafkaConfigPanel = ({
           }
           isInvalid={!!errors.brokers}
           error={errors.brokers}
-          display="row">
+          display="row"
+        >
           <EuiFieldText
             fullWidth
             placeholder="host:port"
             value={kafkaConfig.brokers || ""}
-            onChange={e => onChange("brokers")(e.target.value)}
+            onChange={(e) => onChange("brokers")(e.target.value)}
             isInvalid={!!errors.brokers}
             name="kafka-brokers"
           />
@@ -71,11 +72,12 @@ export const KafkaConfigPanel = ({
           fullWidth
           label="Topic *"
           isInvalid={!!errors.topic}
-          error={errors.topic}>
+          error={errors.topic}
+        >
           <EuiFieldText
             fullWidth
             value={kafkaConfig.topic || ""}
-            onChange={e => onChange("topic")(e.target.value)}
+            onChange={(e) => onChange("topic")(e.target.value)}
             isInvalid={!!errors.topic}
             name="kafka-topic"
           />
@@ -94,7 +96,8 @@ export const KafkaConfigPanel = ({
           isInvalid={!!errors.serialization_format}
           error={errors.serialization_format}
           helpText={(selectedFormat || {}).helpText || ""}
-          display="row">
+          display="row"
+        >
           <EuiSuperSelect
             fullWidth
             options={logSerializationFormatOptions}

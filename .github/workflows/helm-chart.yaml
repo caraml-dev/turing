@@ -15,20 +15,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Install Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: v3.4.0
-
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.1.0
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_RELEASE_NAME_TEMPLATE: "turing-chart-{{ .Version }}"
+        uses: stefanprodan/helm-gh-pages@v1.4.1
         with:
-          charts_dir: infra
+          token: "${{ secrets.GH_PAGES_TOKEN }}"
+          charts_url: https://turing-ml.github.io/charts
+          charts_dir: infra/charts
+          owner: turing-ml
+          repository: charts
+          commit_username: "$GITHUB_ACTOR"
+          commit_email: "$GITHUB_ACTOR@users.noreply.github.com"
+

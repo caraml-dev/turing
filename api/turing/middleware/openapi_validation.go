@@ -8,12 +8,14 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/getkin/kin-openapi/routers"
+	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
 )
 
 // OpenAPIValidation middleware validates HTTP requests against OpenAPI spec.
 type OpenAPIValidation struct {
-	router  *openapi3filter.Router
 	options *openapi3filter.Options
+	router  routers.Router
 }
 
 type OpenAPIValidationOptions struct {
@@ -30,34 +32,36 @@ func NewOpenAPIValidation(
 	openapiYamlFile string,
 	options OpenAPIValidationOptions,
 ) (*OpenAPIValidation, error) {
-	loader := &openapi3.SwaggerLoader{
+	// Get Swagger specs
+	loader := &openapi3.Loader{
 		IsExternalRefsAllowed: true,
 	}
-	swagger, err := loader.LoadSwaggerFromFile(openapiYamlFile)
+	swagger, err := loader.LoadFromFile(openapiYamlFile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error loading swagger spec\n: %s", err)
 	}
 
+	// Handle options
+	openAPIFilterOpts := &openapi3filter.Options{}
+	if options.IgnoreAuthentication {
+		openAPIFilterOpts.AuthenticationFunc = openapi3filter.NoopAuthenticationFunc
+	}
 	if options.IgnoreServers {
 		swagger.Servers = nil
 	}
-	router := openapi3filter.NewRouter().WithSwagger(swagger)
 
-	opts := &openapi3filter.Options{}
-
-	if options.IgnoreAuthentication {
-		// when IgnoreAuthentication is true, the authentication function always succeed i.e returns nil error.
-		opts.AuthenticationFunc = func(_ context.Context, _ *openapi3filter.AuthenticationInput) error {
-			return nil
-		}
+	// Create router
+	var router routers.Router
+	if router, err = legacyrouter.NewRouter(swagger); err != nil {
+		return nil, err
 	}
 
-	return &OpenAPIValidation{router: router, options: opts}, nil
+	return &OpenAPIValidation{openAPIFilterOpts, router}, nil
 }
 
 // Validate the request against the OpenAPI spec
 func (openapi *OpenAPIValidation) Validate(r *http.Request) error {
-	route, pathParams, _ := openapi.router.FindRoute(r.Method, r.URL)
+	route, pathParams, _ := openapi.router.FindRoute(r)
 	if route == nil {
 		return fmt.Errorf("route `%s %s` is not described in openapi spec", r.Method, r.URL)
 	}

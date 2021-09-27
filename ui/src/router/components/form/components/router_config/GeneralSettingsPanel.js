@@ -6,7 +6,7 @@ import {
   EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { Panel } from "../Panel";
 import EnvironmentsContext from "../../../../../providers/environments/context";
@@ -21,14 +21,16 @@ export const GeneralSettingsPanel = ({
   timeout,
   isEdit,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   const environments = useContext(EnvironmentsContext);
 
-  const environmentOptions = sortBy(environments, "name").map(environment => ({
-    value: environment.name,
-    inputDisplay: environment.name
-  }));
+  const environmentOptions = sortBy(environments, "name").map(
+    (environment) => ({
+      value: environment.name,
+      inputDisplay: environment.name,
+    })
+  );
 
   return (
     <Panel title="General">
@@ -43,7 +45,8 @@ export const GeneralSettingsPanel = ({
           }
           isInvalid={!!errors.environment_name}
           error={errors.environment_name}
-          display="row">
+          display="row"
+        >
           <EuiSuperSelect
             fullWidth
             options={environmentOptions}
@@ -70,12 +73,13 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!errors.name}
               error={errors.name}
-              display="row">
+              display="row"
+            >
               <EuiFieldText
                 fullWidth
                 placeholder="deployment-name"
                 value={name}
-                onChange={e => onChange("name")(e.target.value)}
+                onChange={(e) => onChange("name")(e.target.value)}
                 isInvalid={!!errors.name}
                 disabled={isEdit}
                 name="router-name"
@@ -94,7 +98,8 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!get(errors, "config.timeout")}
               error={get(errors, "config.timeout")}
-              display="row">
+              display="row"
+            >
               <EuiFieldDuration
                 fullWidth
                 placeholder="100"

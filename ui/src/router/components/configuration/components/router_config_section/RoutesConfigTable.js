@@ -5,12 +5,11 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiToolTip
+  EuiToolTip,
 } from "@elastic/eui";
 import { CurrentProjectContext } from "@gojek/mlp-ui";
 import { RoutesTableExpandedRow } from "./RoutesTableExpandedRow";
 import { ANNOTATIONS_MERLIN_MODEL_ID } from "../../../../../providers/endpoints/MerlinEndpointsProvider";
-import "./RoutesConfigTable.scss";
 
 const MerlinRouteId = ({ modelId, routeId }) => {
   const { projectId } = useContext(CurrentProjectContext);
@@ -38,7 +37,7 @@ const RouteId = ({ route }) => {
 export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
 
-  const toggleDetails = item => () => {
+  const toggleDetails = (item) => () => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
@@ -52,7 +51,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
 
   const routesWithRules = useMemo(() => {
     const routeRules = rules.reduce((acc, rule) => {
-      rule.routes.forEach(route => {
+      rule.routes.forEach((route) => {
         !!acc[route]
           ? (acc[route] = [...acc[route], rule.conditions])
           : (acc[route] = [rule.conditions]);
@@ -64,9 +63,9 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       .sort((r1, r2) =>
         r1.id === defaultRouteId ? -1 : r2.id === defaultRouteId ? 1 : 0
       )
-      .map(r => ({
+      .map((r) => ({
         ...r,
-        rules: routeRules[r.id]
+        rules: routeRules[r.id],
       }));
   }, [routes, defaultRouteId, rules]);
 
@@ -75,42 +74,44 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       width: "24px",
       render: () => (
         <EuiIcon type="graphApp" size="m" style={{ verticalAlign: "sub" }} />
-      )
+      ),
     },
     {
       field: "id",
       width: "15%",
       name: "Id",
-      render: (_, item) => <RouteId route={item} />
+      render: (_, item) => <RouteId route={item} />,
     },
     {
       field: "endpoint",
       width: "70%",
       name: "Endpoint",
       truncateText: true,
-      render: endpoint => (
+      render: (endpoint) => (
         <EuiCopy
           textToCopy={endpoint}
-          beforeMessage="Click to copy URL to clipboard">
-          {copy => (
+          beforeMessage="Click to copy URL to clipboard"
+        >
+          {(copy) => (
             <EuiLink onClick={copy}>
               <EuiIcon type={"copyClipboard"} size="s" />
+              &nbsp;
               {endpoint}
             </EuiLink>
           )}
         </EuiCopy>
-      )
+      ),
     },
     {
       field: "timeout",
       width: "10%",
-      name: "Timeout"
+      name: "Timeout",
     },
     {
       width: "5%",
       actions: [
         {
-          render: item =>
+          render: (item) =>
             !!item.rules ? (
               <EuiToolTip content="Show traffic rules">
                 <EuiButtonIcon
@@ -123,18 +124,18 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
               </EuiToolTip>
             ) : (
               <div />
-            )
-        }
-      ]
-    }
+            ),
+        },
+      ],
+    },
   ];
 
-  const getRowProps = item => {
+  const getRowProps = (item) => {
     const { id } = item;
     return id === defaultRouteId
       ? {
           className: "euiTableRow-isSelected",
-          title: "Default Route"
+          title: "Default Route",
         }
       : {};
   };
@@ -144,7 +145,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
     const { field } = column;
     return {
       "data-test-subj": `cell-${id}-${field}`,
-      textOnly: true
+      textOnly: true,
     };
   };
 

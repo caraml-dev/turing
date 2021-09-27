@@ -248,6 +248,7 @@ func TestRun(t *testing.T) {
 				10,
 				3,
 				10*time.Minute,
+				10*time.Second,
 			)
 			r.Run()
 		})

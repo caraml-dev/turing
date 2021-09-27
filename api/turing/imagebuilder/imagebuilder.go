@@ -87,29 +87,26 @@ type nameGenerator interface {
 }
 
 type imageBuilder struct {
-	clusterController cluster.Controller
-	imageConfig       config.ImageBuilderConfig
-	kanikoConfig      config.KanikoConfig
-	nameGenerator     nameGenerator
+	clusterController   cluster.Controller
+	imageBuildingConfig config.ImageBuildingConfig
+	nameGenerator       nameGenerator
 }
 
 // NewImageBuilder creates a new ImageBuilder
 func newImageBuilder(
 	clusterController cluster.Controller,
-	imageConfig config.ImageBuilderConfig,
-	kanikoConfig config.KanikoConfig,
+	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
 ) (ImageBuilder, error) {
-	err := checkParseResources(kanikoConfig.ResourceRequestsLimits)
+	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
 		return nil, ErrUnableToParseKanikoResource
 	}
 
 	return &imageBuilder{
-		clusterController: clusterController,
-		imageConfig:       imageConfig,
-		kanikoConfig:      kanikoConfig,
-		nameGenerator:     nameGenerator,
+		clusterController:   clusterController,
+		imageBuildingConfig: imageBuildingConfig,
+		nameGenerator:       nameGenerator,
 	}, nil
 }
 
@@ -134,7 +131,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		ib.imageConfig.BuildNamespace,
+		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
 
@@ -153,7 +150,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		// Only recreate when job has failed too many times, else no action required and just wait for it to finish
 		if job.Status.Failed != 0 {
 			// job already created before so we have to delete it first if it failed
-			err = ib.clusterController.DeleteJob(ib.imageConfig.BuildNamespace, job.Name)
+			err = ib.clusterController.DeleteJob(ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("error deleting job: %v", err)
 				return "", ErrDeleteFailedJob
@@ -176,7 +173,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 }
 
 func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
-	timeout := time.After(ib.imageConfig.BuildTimeoutDuration)
+	timeout := time.After(ib.imageBuildingConfig.BuildTimeoutDuration)
 	ticker := time.NewTicker(time.Second * tickDurationInSeconds)
 
 	for {
@@ -184,7 +181,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 		case <-timeout:
 			return ErrTimeoutBuildingImage
 		case <-ticker.C:
-			j, err := ib.clusterController.GetJob(ib.imageConfig.BuildNamespace, job.Name)
+			j, err := ib.clusterController.GetJob(ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
 				return ErrUnableToBuildImage
@@ -211,10 +208,10 @@ func (ib *imageBuilder) createKanikoJob(
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], service.EnsemblerFolder)
 
 	kanikoArgs := []string{
-		fmt.Sprintf("--dockerfile=%s", ib.imageConfig.DockerfileFilePath),
-		fmt.Sprintf("--context=%s", ib.imageConfig.BuildContextURI),
+		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
+		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageConfig.BaseImageRef),
+		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImageRef),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
 		"--cache=true",
@@ -223,7 +220,7 @@ func (ib *imageBuilder) createKanikoJob(
 
 	job := cluster.Job{
 		Name:                    kanikoJobName,
-		Namespace:               ib.imageConfig.BuildNamespace,
+		Namespace:               ib.imageBuildingConfig.BuildNamespace,
 		Labels:                  buildLabels,
 		Completions:             &jobCompletions,
 		BackOffLimit:            &jobBackOffLimit,
@@ -231,9 +228,13 @@ func (ib *imageBuilder) createKanikoJob(
 		RestartPolicy:           apicorev1.RestartPolicyNever,
 		Containers: []cluster.Container{
 			{
-				Name:  imageBuilderContainerName,
-				Image: fmt.Sprintf("%s:%s", ib.kanikoConfig.Image, ib.kanikoConfig.ImageVersion),
-				Args:  kanikoArgs,
+				Name: imageBuilderContainerName,
+				Image: fmt.Sprintf(
+					"%s:%s",
+					ib.imageBuildingConfig.KanikoConfig.Image,
+					ib.imageBuildingConfig.KanikoConfig.ImageVersion,
+				),
+				Args: kanikoArgs,
 				VolumeMounts: []cluster.VolumeMount{
 					{
 						Name:      kanikoSecretName,
@@ -248,12 +249,20 @@ func (ib *imageBuilder) createKanikoJob(
 				},
 				Resources: cluster.RequestLimitResources{
 					Request: cluster.Resource{
-						CPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.CPU),
-						Memory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Requests.Memory),
+						CPU: resource.MustParse(
+							ib.imageBuildingConfig.KanikoConfig.ResourceRequestsLimits.Requests.CPU,
+						),
+						Memory: resource.MustParse(
+							ib.imageBuildingConfig.KanikoConfig.ResourceRequestsLimits.Requests.Memory,
+						),
 					},
 					Limit: cluster.Resource{
-						CPU:    resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.CPU),
-						Memory: resource.MustParse(ib.kanikoConfig.ResourceRequestsLimits.Limits.Memory),
+						CPU: resource.MustParse(
+							ib.imageBuildingConfig.KanikoConfig.ResourceRequestsLimits.Limits.CPU,
+						),
+						Memory: resource.MustParse(
+							ib.imageBuildingConfig.KanikoConfig.ResourceRequestsLimits.Limits.Memory,
+						),
 					},
 				},
 			},
@@ -267,7 +276,7 @@ func (ib *imageBuilder) createKanikoJob(
 	}
 
 	return ib.clusterController.CreateJob(
-		ib.imageConfig.BuildNamespace,
+		ib.imageBuildingConfig.BuildNamespace,
 		job,
 	)
 }
@@ -275,7 +284,7 @@ func (ib *imageBuilder) createKanikoJob(
 func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (bool, error) {
 	keychain := authn.DefaultKeychain
 
-	if strings.Contains(ib.imageConfig.Registry, "gcr.io") {
+	if strings.Contains(ib.imageBuildingConfig.DestinationRegistry, "gcr.io") {
 		keychain = google.Keychain
 	}
 
@@ -340,7 +349,7 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		ib.imageConfig.BuildNamespace,
+		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
 	if err != nil {
@@ -373,7 +382,7 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		ib.imageConfig.BuildNamespace,
+		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
 	if err != nil {
@@ -381,6 +390,6 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 		return nil
 	}
 	// Delete job
-	err = ib.clusterController.DeleteJob(ib.imageConfig.BuildNamespace, job.Name)
+	err = ib.clusterController.DeleteJob(ib.imageBuildingConfig.BuildNamespace, job.Name)
 	return err
 }

@@ -3,7 +3,6 @@
 package cluster
 
 import (
-	"strconv"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -86,20 +85,23 @@ var testValidKnSvc = KnativeService{
 			},
 		},
 	},
-	ContainerPort:  8080,
-	MinReplicas:    1,
-	MaxReplicas:    2,
-	IsClusterLocal: true,
+	ContainerPort:                8080,
+	MinReplicas:                  1,
+	MaxReplicas:                  2,
+	IsClusterLocal:               true,
+	TargetConcurrency:            1,
+	QueueProxyResourcePercentage: 30,
 }
 
 func TestBuildKnativeServiceConfig(t *testing.T) {
 	// Build expected configuration
 	var timeout int64 = 30
 	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale": "1",
-		"autoscaling.knative.dev/maxScale": "2",
-		"autoscaling.knative.dev/target":   strconv.Itoa(knativeSvcDefaults.TargetConcurrency),
-		"autoscaling.knative.dev/class":    "kpa.autoscaling.knative.dev",
+		"autoscaling.knative.dev/minScale":                     "1",
+		"autoscaling.knative.dev/maxScale":                     "2",
+		"autoscaling.knative.dev/target":                       "1",
+		"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
+		"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
 	}
 	resources := corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{

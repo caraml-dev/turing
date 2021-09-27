@@ -5,7 +5,7 @@ import {
   EuiInMemoryTable,
   EuiLoadingChart,
   EuiText,
-  EuiTextAlign
+  EuiTextAlign,
 } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { FormLabelWithToolTip } from "../../../components/form/label_with_tooltip/FormLabelWithToolTip";
@@ -29,30 +29,30 @@ export const ListRouterVersionsTable = ({
   const [selection, setSelection] = useState([]);
 
   const isSelected = useCallback(
-    item => selectedIds.hasOwnProperty(item.version),
+    (item) => selectedIds.hasOwnProperty(item.version),
     [selectedIds]
   );
 
   const selectForComparison = useCallback(
-    item => {
-      setSelectedIds(ids => ({
+    (item) => {
+      setSelectedIds((ids) => ({
         ...ids,
-        [item.version]: selection.length
+        [item.version]: selection.length,
       }));
 
-      setSelection(items => [...items, item]);
+      setSelection((items) => [...items, item]);
     },
     [selection.length, setSelection, setSelectedIds]
   );
 
   const unselectFromComparison = useCallback(
-    item => {
-      setSelectedIds(items => {
+    (item) => {
+      setSelectedIds((items) => {
         delete items[item.version];
         return { ...items };
       });
 
-      setSelection(items => {
+      setSelection((items) => {
         items.splice(selectedIds[item.version], 1);
         return [...items];
       });
@@ -68,8 +68,8 @@ export const ListRouterVersionsTable = ({
         {
           state: {
             versionLeft: leftSelection,
-            versionRight: rightSelection
-          }
+            versionRight: rightSelection,
+          },
         }
       );
     }
@@ -82,13 +82,13 @@ export const ListRouterVersionsTable = ({
           onClick: !column.hasActions ? () => onRowClick(item) : undefined,
           className: column.hasActions
             ? "euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
-            : ""
+            : "",
         }
       : undefined;
   };
 
-  const rowProps = item => ({
-    className: isSelected(item) ? "euiTableRow-isSelected" : ""
+  const rowProps = (item) => ({
+    className: isSelected(item) ? "euiTableRow-isSelected" : "",
   });
 
   const columns = [
@@ -97,44 +97,45 @@ export const ListRouterVersionsTable = ({
       name: "Version",
       mobileOptions: {
         enlarge: true,
-        fullWidth: true
+        fullWidth: true,
       },
       sortable: true,
       width: "21%",
-      render: version => (
+      render: (version) => (
         <EuiText
           size={appConfig.tables.defaultTextSize}
-          style={{ display: "flex", alignItems: "center" }}>
+          style={{ display: "flex", alignItems: "center" }}
+        >
           {version}&nbsp;&nbsp;
           {version === deployedVersion && (
             <EuiBadge color="default">Current</EuiBadge>
           )}
         </EuiText>
-      )
+      ),
     },
     {
       field: "status",
       name: "Status",
       width: "26%",
-      render: status => (
+      render: (status) => (
         <DeploymentStatusHealth status={Status.fromValue(status)} />
-      )
+      ),
     },
     {
       field: "created_at",
       name: "Created",
       width: "23%",
-      render: date => (
+      render: (date) => (
         <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
-      )
+      ),
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "23%",
-      render: date => (
+      render: (date) => (
         <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
-      )
+      ),
     },
     {
       name: (
@@ -147,7 +148,7 @@ export const ListRouterVersionsTable = ({
       width: "110px",
       align: "right",
       hasActions: true,
-      render: item => {
+      render: (item) => {
         const isItemSelected = isSelected(item);
         const twoSelected = selection.length === 2;
 
@@ -162,7 +163,7 @@ export const ListRouterVersionsTable = ({
             onClick: () =>
               isItemSelected
                 ? unselectFromComparison(item)
-                : selectForComparison(item)
+                : selectForComparison(item),
           },
           ...(twoSelected && isItemSelected
             ? [
@@ -173,10 +174,10 @@ export const ListRouterVersionsTable = ({
                   color: "primary",
                   size: "xs",
                   available: () => true,
-                  enabled: () => true
-                }
+                  enabled: () => true,
+                },
               ]
-            : renderActions())
+            : renderActions()),
         ];
 
         return (
@@ -195,9 +196,9 @@ export const ListRouterVersionsTable = ({
                   key={idx}
                   action={{
                     ...action,
-                    onClick: item => {
+                    onClick: (item) => {
                       action.onClick(item);
-                    }
+                    },
                   }}
                   item={item}
                   enabled={enabled}
@@ -209,8 +210,8 @@ export const ListRouterVersionsTable = ({
             }, [])}
           </Fragment>
         );
-      }
-    }
+      },
+    },
   ];
 
   return !isLoaded ? (
@@ -221,7 +222,8 @@ export const ListRouterVersionsTable = ({
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert">
+      iconType="alert"
+    >
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

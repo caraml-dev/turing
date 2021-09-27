@@ -8,7 +8,7 @@ export class TuringAlerts {
       latency95p: undefined,
       error_rate: undefined,
       cpu_util: undefined,
-      memory_util: undefined
+      memory_util: undefined,
     };
   }
 

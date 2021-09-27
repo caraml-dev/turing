@@ -8,7 +8,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 
 export const RulesPanelFlyout = ({ onClose }) => {
@@ -17,7 +17,8 @@ export const RulesPanelFlyout = ({ onClose }) => {
       onClose={() => onClose()}
       aria-labelledby="traffic-rules-help"
       size="s"
-      ownFocus>
+      ownFocus
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="traffic-rules-help">Traffic Rules</h2>
@@ -59,7 +60,8 @@ export const RulesPanelFlyout = ({ onClose }) => {
             <EuiButtonEmpty
               iconType="cross"
               onClick={() => onClose()}
-              flush="left">
+              flush="left"
+            >
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>

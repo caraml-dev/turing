@@ -7,14 +7,13 @@ import { FormLabelWithToolTip } from "../../../../../../../components/form/label
 import sortBy from "lodash/sortBy";
 
 export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
-  const { clients, isLoading, isLoaded, setClientsValidated } = useContext(
-    ExperimentContext
-  );
+  const { clients, isLoading, isLoaded, setClientsValidated } =
+    useContext(ExperimentContext);
 
   const clientsOptions = useMemo(() => {
-    return sortBy(clients, "username").map(c => ({
+    return sortBy(clients, "username").map((c) => ({
       icon: "user",
-      label: c.username
+      label: c.username,
     }));
   }, [clients]);
 
@@ -23,7 +22,7 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
     if (isLoaded("clients")) {
       if (
         !!client.username &&
-        !clients.find(c => c.username === client.username)
+        !clients.find((c) => c.username === client.username)
       ) {
         onChangeHandler({});
       }
@@ -34,15 +33,15 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
     clients,
     isLoaded,
     setClientsValidated,
-    onChangeHandler
+    onChangeHandler,
   ]);
 
   // Define onchange handlers
   const onClientUsernameChange = useCallback(
-    clientUsername => {
+    (clientUsername) => {
       if (clientUsername !== client.username) {
         const clientInfo =
-          clients.find(c => c.username === clientUsername) || {};
+          clients.find((c) => c.username === clientUsername) || {};
         onChangeHandler({ ...clientInfo });
       }
     },
@@ -50,13 +49,14 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
   );
 
   const onPasskeyChange = useCallback(
-    event => {
+    (event) => {
       if (!client.passkey_set) {
         client.passkey = event.target.value;
       } else {
-        client.passkey_set = false;
         client.passkey = event.nativeEvent.data || "";
       }
+      client.passkey_set = false;
+
       onChangeHandler(client);
     },
     [client, onChangeHandler]
@@ -76,7 +76,8 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
           }
           isInvalid={!!errors.id}
           error={errors.id}
-          display="row">
+          display="row"
+        >
           <EuiComboBoxSelect
             fullWidth
             isLoading={isLoading("clients")}
@@ -94,7 +95,8 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
           fullWidth
           label="Passkey *"
           isInvalid={!!errors.passkey}
-          error={errors.passkey}>
+          error={errors.passkey}
+        >
           <EuiFieldText
             fullWidth
             placeholder="passkey"

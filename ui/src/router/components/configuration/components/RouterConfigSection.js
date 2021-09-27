@@ -1,7 +1,7 @@
 import React from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ResourcesConfigTable } from "./ResourcesConfigTable";
-import { ConfigSectionPanel } from "./section";
+import { ConfigSectionPanel } from "../../../../components/config_section";
 import { RoutesConfigTable } from "./router_config_section/RoutesConfigTable";
 
 export const RouterConfigSection = ({ config }) => {

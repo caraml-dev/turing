@@ -5,7 +5,7 @@ import { DescribedFormGroup } from "../../../../../components/form/described_for
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
 export const EngineTypePanel = ({ type, options, onChange, errors }) => {
-  const selectedOption = options.find(option => option.value === type);
+  const selectedOption = options.find((option) => option.value === type);
 
   return (
     <Panel title="Engine">
@@ -21,7 +21,8 @@ export const EngineTypePanel = ({ type, options, onChange, errors }) => {
             }
             isInvalid={!!errors}
             error={errors}
-            display="row">
+            display="row"
+          >
             <EuiSuperSelect
               fullWidth
               options={options}

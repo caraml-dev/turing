@@ -1,4 +1,4 @@
-const proxy = require("http-proxy-middleware");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 let expEnginePathRewrite = {};
 expEnginePathRewrite[
@@ -8,7 +8,7 @@ expEnginePathRewrite[
 module.exports = function (app) {
   app.use(
     "/api/mlp",
-    proxy({
+    createProxyMiddleware({
       target: process.env.REACT_APP_MLP_API,
       pathRewrite: { "^/api/mlp": "" },
       changeOrigin: true,
@@ -16,7 +16,7 @@ module.exports = function (app) {
   );
   app.use(
     "/api/merlin",
-    proxy({
+    createProxyMiddleware({
       target: process.env.REACT_APP_MERLIN_API,
       pathRewrite: { "^/api/merlin": "" },
       changeOrigin: true,
@@ -24,7 +24,7 @@ module.exports = function (app) {
   );
   app.use(
     "/api/turing",
-    proxy({
+    createProxyMiddleware({
       target: process.env.REACT_APP_TURING_API,
       pathRewrite: { "^/api/turing": "" },
       changeOrigin: true,
@@ -34,7 +34,7 @@ module.exports = function (app) {
      to bypass CORS */
   app.use(
     process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_UNROUTABLE_PATH,
-    proxy({
+    createProxyMiddleware({
       target: process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_API_HOST,
       pathRewrite: expEnginePathRewrite,
       changeOrigin: true,

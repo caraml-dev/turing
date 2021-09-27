@@ -13,7 +13,7 @@ export const UndeployRouterModal = ({ onSuccess, undeployRouterRef }) => {
     `/projects/${router.project_id}/routers/${router.id}/undeploy`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -25,7 +25,7 @@ export const UndeployRouterModal = ({ onSuccess, undeployRouterRef }) => {
         id: `submit-success-undeploy-${router.name}`,
         title: `Router ${router.name} has been undeployed!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess();
       closeModal();
@@ -44,8 +44,9 @@ export const UndeployRouterModal = ({ onSuccess, undeployRouterRef }) => {
         </p>
       }
       confirmButtonText="Undeploy"
-      confirmButtonColor="danger">
-      {onSubmit =>
+      confirmButtonColor="danger"
+    >
+      {(onSubmit) =>
         (undeployRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
       }

@@ -3,19 +3,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/eui";
 import { StepActions } from "../multi_steps_form/StepActions";
 import { Sticky, StickyContainer } from "react-sticky";
 import FormValidationContext, {
-  MultiSectionFormValidationContextProvider
+  MultiSectionFormValidationContextProvider,
 } from "../form/validation";
 import {
   AccordionFormScrollController,
   AccordionFormSection,
-  AccordionFormSideNav
+  AccordionFormSideNav,
 } from ".";
 
 import "./AccordionForm.scss";
 import useDimension from "../../hooks/useDimension";
 import { isEmpty } from "../../utils/object";
 
-export const isSectionInvalid = errors => !isEmpty(errors);
+export const isSectionInvalid = (errors) => !isEmpty(errors);
 
 export const AccordionForm = ({
   name,
@@ -23,7 +23,7 @@ export const AccordionForm = ({
   onCancel,
   onSubmit,
   submitLabel,
-  renderTitle
+  renderTitle,
 }) => {
   const lastSectionRef = useRef(null);
   const { height: lastSectionHeight } = useDimension(lastSectionRef);
@@ -44,14 +44,16 @@ export const AccordionForm = ({
         <EuiFlexItem grow={true} className="accordionForm--content">
           <MultiSectionFormValidationContextProvider
             onSubmit={onSubmit}
-            schemas={sections.map(s => s.validationSchema)}
-            contexts={sections.map(s => s.validationContext)}>
+            schemas={sections.map((s) => s.validationSchema)}
+            contexts={sections.map((s) => s.validationContext)}
+          >
             <FormValidationContext.Consumer>
               {({ errors, onSubmit, isSubmitting }) => (
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="none"
-                  alignItems="center">
+                  alignItems="center"
+                >
                   <AccordionFormScrollController sections={sections} />
 
                   {sections.map((section, idx) => (
@@ -61,7 +63,8 @@ export const AccordionForm = ({
                           idx === sections.length - 1
                             ? lastSectionRef
                             : undefined
-                        }>
+                        }
+                      >
                         <AccordionFormSection
                           section={section}
                           errors={errors[idx]}
@@ -76,10 +79,11 @@ export const AccordionForm = ({
                   <EuiFlexItem
                     // set the minHeight dynamically, based on the height of the last section
                     style={{
-                      minHeight: `calc(100vh - ${lastSectionHeight +
-                        24 +
-                        16}px)`
-                    }}>
+                      minHeight: `calc(100vh - ${
+                        lastSectionHeight + 24 + 16
+                      }px)`,
+                    }}
+                  >
                     <StepActions
                       submitLabel={submitLabel}
                       onCancel={onCancel}

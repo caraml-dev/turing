@@ -5,35 +5,35 @@ import { ExperimentConfigSection } from "./components/ExperimentConfigSection";
 import { EnricherConfigSection } from "./components/EnricherConfigSection";
 import { EnsemblerConfigSection } from "./components/EnsemblerConfigSection";
 import { LoggingConfigSection } from "./components/LoggingConfigSection";
-import { ConfigSection } from "./components/section";
+import { ConfigSection } from "../../../components/config_section";
 
 export const RouterConfigDetails = ({ config }) => {
   const sections = [
     {
       title: "Router",
       iconType: "bolt",
-      children: <RouterConfigSection config={config} />
+      children: <RouterConfigSection config={config} />,
     },
     {
       title: "Experiment",
       iconType: "beaker",
-      children: <ExperimentConfigSection config={config} />
+      children: <ExperimentConfigSection config={config} />,
     },
     {
       title: "Enricher",
       iconType: "package",
-      children: <EnricherConfigSection config={config} />
+      children: <EnricherConfigSection config={config} />,
     },
     {
       title: "Ensembler",
       iconType: "aggregate",
-      children: <EnsemblerConfigSection config={config} />
+      children: <EnsemblerConfigSection config={config} />,
     },
     {
       title: "Outcome Tracking",
       iconType: "visTagCloud",
-      children: <LoggingConfigSection config={config} />
-    }
+      children: <LoggingConfigSection config={config} />,
+    },
   ];
 
   return (

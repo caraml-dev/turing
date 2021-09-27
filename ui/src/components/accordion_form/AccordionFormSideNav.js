@@ -12,9 +12,9 @@ export const AccordionFormSideNav = ({ name, sections }) => {
       items: sections.map((section, idx) => ({
         id: idx,
         name: section.title,
-        renderItem: () => <AccordionFormSideNavItem section={section} />
-      }))
-    }
+        renderItem: () => <AccordionFormSideNavItem section={section} />,
+      })),
+    },
   ];
 
   return <EuiSideNav items={sideNav} />;
@@ -26,7 +26,8 @@ const AccordionFormSideNavItem = ({ section }) => (
     activeClass="euiSideNavItemButton-isSelected"
     to={`${slugify(section.title)}`}
     spy={true}
-    {...animatedScrollConfig}>
+    {...animatedScrollConfig}
+  >
     <span className="euiSideNavItemButton__content">
       {section.iconType && (
         <EuiIcon

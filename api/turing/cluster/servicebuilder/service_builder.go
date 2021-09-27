@@ -55,12 +55,16 @@ type ClusterServiceBuilder interface {
 		project *mlp.Project,
 		envType string,
 		secretName string,
+		knativeTargetConcurrency int,
+		knativeQueueProxyResourcePercentage int,
 	) (*cluster.KnativeService, error)
 	NewEnsemblerService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
 		envType string,
 		secretName string,
+		knativeTargetConcurrency int,
+		knativeQueueProxyResourcePercentage int,
 	) (*cluster.KnativeService, error)
 	NewRouterService(
 		ver *models.RouterVersion,
@@ -72,6 +76,8 @@ type ClusterServiceBuilder interface {
 		jaegerEndpoint string,
 		sentryEnabled bool,
 		sentryDSN string,
+		knativeTargetConcurrency int,
+		knativeQueueProxyResourcePercentage int,
 	) (*cluster.KnativeService, error)
 	NewFluentdService(
 		routerVersion *models.RouterVersion,
@@ -121,6 +127,8 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
+	knativeTargetConcurrency int,
+	knativeQueueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
 	enricher := routerVersion.Enricher
@@ -180,10 +188,12 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal: true,
-		ContainerPort:  int32(enricher.Port),
-		MinReplicas:    enricher.ResourceRequest.MinReplica,
-		MaxReplicas:    enricher.ResourceRequest.MaxReplica,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(enricher.Port),
+		MinReplicas:                  enricher.ResourceRequest.MinReplica,
+		MaxReplicas:                  enricher.ResourceRequest.MaxReplica,
+		TargetConcurrency:            knativeTargetConcurrency,
+		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
 	})
 }
 
@@ -194,6 +204,8 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
+	knativeTargetConcurrency int,
+	knativeQueueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
 	ensembler := routerVersion.Ensembler
@@ -254,10 +266,12 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal: true,
-		ContainerPort:  int32(docker.Port),
-		MinReplicas:    docker.ResourceRequest.MinReplica,
-		MaxReplicas:    docker.ResourceRequest.MaxReplica,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(docker.Port),
+		MinReplicas:                  docker.ResourceRequest.MinReplica,
+		MaxReplicas:                  docker.ResourceRequest.MaxReplica,
+		TargetConcurrency:            knativeTargetConcurrency,
+		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
 	})
 }
 

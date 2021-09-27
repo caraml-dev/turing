@@ -16,9 +16,9 @@ import { SecretsContextProvider } from "../../../../providers/secrets/context";
 export const EnricherStep = ({ projectId }) => {
   const {
     data: {
-      config: { enricher }
+      config: { enricher },
     },
-    onChangeHandler
+    onChangeHandler,
   } = useContext(FormContext);
 
   const { errors } = useContext(FormValidationContext);

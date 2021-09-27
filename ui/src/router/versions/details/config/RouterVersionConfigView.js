@@ -8,20 +8,20 @@ export const RouterVersionConfigView = ({ config }) => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: `../../../`
+        href: `../../../`,
       },
       {
         text: get(config, "router.name") || "",
-        href: `../../`
+        href: `../../`,
       },
       {
         text: "Versions",
-        href: `../`
+        href: `../`,
       },
       {
         text: `Version ${config.version}`,
-        href: `./`
-      }
+        href: `./`,
+      },
     ]);
   }, [config]);
 

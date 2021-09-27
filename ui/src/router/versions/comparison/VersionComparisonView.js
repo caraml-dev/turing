@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ConfigSection } from "../../components/configuration/components/section";
+import { ConfigSection } from "../../../components/config_section";
 import {
   EuiCallOut,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingChart,
   EuiPanel,
-  EuiSpacer,
-  EuiTextAlign
+  EuiTextAlign,
 } from "@elastic/eui";
-import ReactDiffViewer, { DiffMethod } from "react-diff-viewer";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { RouterVersion } from "../../../services/version/RouterVersion";
+import { VersionComparisonPanel } from "../components/version_diff/VersionComparisonPanel";
 
 export const VersionComparisonView = ({
   router,
@@ -27,7 +22,6 @@ export const VersionComparisonView = ({
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(undefined);
-  const [splitView, setSplitView] = useState(true);
 
   const [leftVersion] = useTuringApi(
     `/projects/${props.projectId}/routers/${props.routerId}/versions/${leftVersionNumber}`,
@@ -56,43 +50,25 @@ export const VersionComparisonView = ({
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: `../../../../`
+        href: `../../../../`,
       },
       {
         text: router.name,
-        href: `../../../`
+        href: `../../../`,
       },
       {
         text: "Versions",
-        href: `../../`
+        href: `../../`,
       },
       {
-        text: "Compare"
-      }
+        text: "Compare",
+      },
     ]);
   }, [router.name]);
 
   return (
     <ConfigSection title="Comparing Versions">
       <EuiPanel>
-        <EuiFlexGroup direction="row" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
-              <EuiFilterButton
-                hasActiveFilters={!splitView}
-                onClick={() => setSplitView(false)}>
-                Unified
-              </EuiFilterButton>
-              <EuiFilterButton
-                hasActiveFilters={splitView}
-                onClick={() => setSplitView(true)}>
-                Split
-              </EuiFilterButton>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-
         {!isLoaded ? (
           <EuiTextAlign textAlign="center">
             <EuiLoadingChart size="xl" mono />
@@ -101,23 +77,18 @@ export const VersionComparisonView = ({
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert">
+            iconType="alert"
+          >
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
-          <ReactDiffViewer
+          <VersionComparisonPanel
+            leftValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml()}
+            rightValue={RouterVersion.fromJson(
+              rightVersion.data
+            ).toPrettyYaml()}
             leftTitle={`Version ${leftVersionNumber}`}
             rightTitle={`Version ${rightVersionNumber}`}
-            oldValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml()}
-            newValue={RouterVersion.fromJson(rightVersion.data).toPrettyYaml()}
-            styles={{
-              line: {
-                wordBreak: "break-word",
-                fontSize: "0.775rem"
-              }
-            }}
-            compareMethod={DiffMethod.WORDS_WITH_SPACE}
-            splitView={splitView}
           />
         )}
       </EuiPanel>

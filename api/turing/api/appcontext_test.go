@@ -35,6 +35,7 @@ func (c *MockVaultClient) GetClusterSecret(clusterName string) (*vault.ClusterSe
 
 func TestNewAppContext(t *testing.T) {
 	// Create test config
+	tolerationName := "batch-job"
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
 
@@ -44,14 +45,58 @@ func TestNewAppContext(t *testing.T) {
 	executorCPURequest := "1"
 	executorMemoryRequest := "1Gi"
 
+	routerMonitoringURLFormat := "http://www.example.com"
+
 	testCfg := &config.Config{
 		Port: 8080,
+		BatchEnsemblingConfig: &config.BatchEnsemblingConfig{
+			Enabled: true,
+			JobConfig: config.JobConfig{
+				DefaultEnvironment: "dev",
+				DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
+					BatchEnsemblingJobResources: openapi.EnsemblingResources{
+						DriverCpuRequest:      &driverCPURequest,
+						DriverMemoryRequest:   &driverMemoryRequest,
+						ExecutorReplica:       &executorReplica,
+						ExecutorCpuRequest:    &executorCPURequest,
+						ExecutorMemoryRequest: &executorMemoryRequest,
+					},
+					SparkConfigAnnotations: map[string]string{
+						"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
+					},
+				},
+			},
+			RunnerConfig: config.RunnerConfig{
+				TimeInterval:                   3 * time.Minute,
+				RecordsToProcessInOneIteration: 10,
+				MaxRetryCount:                  3,
+			},
+			ImageBuildingConfig: config.ImageBuildingConfig{
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
+		},
 		AuthConfig: &config.AuthorizationConfig{
 			Enabled: true,
 			URL:     "test-auth-url",
-		},
-		BatchRunnerConfig: &config.BatchRunnerConfig{
-			TimeInterval: 3 * time.Minute,
 		},
 		DbConfig: &config.DatabaseConfig{
 			Host:     "turing-db-host",
@@ -68,45 +113,6 @@ func TestNewAppContext(t *testing.T) {
 			MaxCPU:          config.Quantity(resource.MustParse("200m")),
 			MaxMemory:       config.Quantity(resource.MustParse("100Mi")),
 		},
-		EnsemblingJobConfig: &config.EnsemblingJobConfig{
-			DefaultEnvironment:             "dev",
-			RecordsToProcessInOneIteration: 10,
-			MaxRetryCount:                  3,
-			ImageBuilderConfig: config.ImageBuilderConfig{
-				Registry:             "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
-				BuildNamespace:       "default",
-				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
-				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
-				BuildTimeoutDuration: 10 * time.Minute,
-			},
-			KanikoConfig: config.KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: config.ResourceRequestsLimits{
-					Requests: config.Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-					Limits: config.Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-				},
-			},
-			DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
-				BatchEnsemblingJobResources: openapi.EnsemblingResources{
-					DriverCpuRequest:      &driverCPURequest,
-					DriverMemoryRequest:   &driverMemoryRequest,
-					ExecutorReplica:       &executorReplica,
-					ExecutorCpuRequest:    &executorCPURequest,
-					ExecutorMemoryRequest: &executorMemoryRequest,
-				},
-				SparkConfigAnnotations: map[string]string{
-					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
-				},
-			},
-		},
 		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
 				"node-workload-type": "batch",
@@ -114,7 +120,7 @@ func TestNewAppContext(t *testing.T) {
 			CorePerCPURequest:              1.5,
 			CPURequestToCPULimit:           1.25,
 			SparkVersion:                   "2.4.5",
-			TolerationName:                 "batch-job",
+			TolerationName:                 &tolerationName,
 			SubmissionFailureRetries:       3,
 			SubmissionFailureRetryInterval: 10,
 			FailureRetries:                 3,
@@ -134,6 +140,7 @@ func TestNewAppContext(t *testing.T) {
 				Tag:                  "turing-result.log",
 				FlushIntervalSeconds: 90,
 			},
+			MonitoringURLFormat: &routerMonitoringURLFormat,
 		},
 		KubernetesLabelConfigs: &config.KubernetesLabelConfigs{
 			Environment: "dev",
@@ -266,15 +273,18 @@ func TestNewAppContext(t *testing.T) {
 
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
-		testCfg.EnsemblingJobConfig.ImageBuilderConfig,
-		testCfg.EnsemblingJobConfig.KanikoConfig,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
 	)
 	assert.Nil(t, err)
 
 	ensemblingJobService := service.NewEnsemblingJobService(
 		nil,
-		testCfg.EnsemblingJobConfig.DefaultEnvironment,
-		testCfg.EnsemblingJobConfig.DefaultConfigurations,
+		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+		testCfg.BatchEnsemblingConfig.LoggingURLFormat,
+		testCfg.BatchEnsemblingConfig.MonitoringURLFormat,
+		testCfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
+		mlpSvc,
 	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
@@ -286,26 +296,29 @@ func TestNewAppContext(t *testing.T) {
 		ensemblingJobService,
 		mlpSvc,
 		ensemblingImageBuilder,
-		testCfg.EnsemblingJobConfig.RecordsToProcessInOneIteration,
-		testCfg.EnsemblingJobConfig.MaxRetryCount,
-		testCfg.EnsemblingJobConfig.ImageBuilderConfig.BuildTimeoutDuration,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.MaxRetryCount,
+		testCfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildTimeoutDuration,
+		testCfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 	)
 
 	assert.Equal(t, &AppContext{
 		Authorizer:            testAuthorizer,
 		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
-		RoutersService:        service.NewRoutersService(nil),
+		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     service.NewEnsemblersService(nil),
 		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(nil),
+		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(nil),
 		RouterDefaults:        testCfg.RouterDefaults,
 		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
 		MLPService:            mlpService,
 		ExperimentsService:    experimentService,
-		PodLogService:         service.NewPodLogService(map[string]cluster.Controller{}),
-		AlertService:          alertService,
-		OpenAPIValidation:     &middleware.OpenAPIValidation{},
-		BatchRunners:          []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		PodLogService: service.NewPodLogService(
+			map[string]cluster.Controller{},
+		),
+		AlertService:      alertService,
+		OpenAPIValidation: &middleware.OpenAPIValidation{},
+		BatchRunners:      []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
 	}, appCtx)
 }

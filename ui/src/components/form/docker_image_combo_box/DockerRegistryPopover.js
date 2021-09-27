@@ -7,15 +7,15 @@ export const DockerRegistryPopover = ({ value, registryOptions, onChange }) => {
 
   const panels = flattenPanelTree({
     id: 0,
-    items: registryOptions.map(registry => ({
+    items: registryOptions.map((registry) => ({
       name: registry.inputDisplay,
       value: registry.value,
       icon: "logoDocker",
       onClick: () => {
         togglePopover();
         onChange(registry.value);
-      }
-    }))
+      },
+    })),
   });
 
   const togglePopover = () => setOpen(!isOpen);
@@ -27,13 +27,15 @@ export const DockerRegistryPopover = ({ value, registryOptions, onChange }) => {
           size="xs"
           iconType="arrowDown"
           iconSide="right"
-          onClick={togglePopover}>
-          {registryOptions.find(o => o.value === value).inputDisplay}
+          onClick={togglePopover}
+        >
+          {registryOptions.find((o) => o.value === value).inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s">
+      panelPaddingSize="s"
+    >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );

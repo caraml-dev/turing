@@ -13,7 +13,7 @@ export const RedeployRouterModal = ({ onSuccess, redeployRouterRef }) => {
     `/projects/${router.project_id}/routers/${router.id}/deploy`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     },
     {},
     false
@@ -25,7 +25,7 @@ export const RedeployRouterModal = ({ onSuccess, redeployRouterRef }) => {
         id: `submit-success-redeploy-${router.name}`,
         title: `Router ${router.name} version ${data.version} has been redeployed!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
       onSuccess();
       closeModal();
@@ -44,8 +44,9 @@ export const RedeployRouterModal = ({ onSuccess, redeployRouterRef }) => {
         </p>
       }
       confirmButtonText="Redeploy"
-      confirmButtonColor="primary">
-      {onSubmit =>
+      confirmButtonColor="primary"
+    >
+      {(onSubmit) =>
         (redeployRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
       }

@@ -10,29 +10,29 @@ export const EditAlertsView = ({ router, alerts, ...props }) => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: `../../../`
+        href: `../../../`,
       },
       {
         text: router.name,
-        href: `../`
+        href: `../`,
       },
       {
         text: "Alerts",
-        href: "./"
+        href: "./",
       },
       {
-        text: "Edit"
-      }
+        text: "Edit",
+      },
     ]);
   }, [router]);
 
-  const onSuccess = isSubmitSuccess => {
+  const onSuccess = (isSubmitSuccess) => {
     if (isSubmitSuccess) {
       addToast({
         id: `submit-success-alerts`,
         title: `Alerts have been updated!`,
         color: "success",
-        iconType: "check"
+        iconType: "check",
       });
     }
     props.navigate("../", { state: { refresh: true } });

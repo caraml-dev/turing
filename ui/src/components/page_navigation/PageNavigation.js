@@ -7,7 +7,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTab,
-  EuiTabs
+  EuiTabs,
 } from "@elastic/eui";
 
 import "./PageNavigation.scss";
@@ -28,7 +28,8 @@ export const PageNavigation = ({
               : { onClick: () => props.navigate(`./${tab.id}`) })}
             isSelected={selectedTab.startsWith(tab.id)}
             disabled={tab.disabled}
-            key={index}>
+            key={index}
+          >
             {tab.name}
           </EuiTab>
         ))}
@@ -44,10 +45,10 @@ export const PageNavigation = ({
 
 const MoreActionsButton = ({ actions }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const togglePopover = () => setPopover(isPopoverOpen => !isPopoverOpen);
+  const togglePopover = () => setPopover((isPopoverOpen) => !isPopoverOpen);
 
   const items = actions
-    .filter(item => !item.hidden)
+    .filter((item) => !item.hidden)
     .map((item, idx) => (
       <EuiContextMenuItem
         key={idx}
@@ -57,7 +58,8 @@ const MoreActionsButton = ({ actions }) => {
           item.onClick();
         }}
         disabled={item.disabled}
-        className={item.color ? `euiTextColor--${item.color}` : ""}>
+        className={item.color ? `euiTextColor--${item.color}` : ""}
+      >
         {item.name}
       </EuiContextMenuItem>
     ));
@@ -83,7 +85,8 @@ const MoreActionsButton = ({ actions }) => {
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
       panelPaddingSize="none"
-      anchorPosition="downRight">
+      anchorPosition="downRight"
+    >
       <EuiContextMenuPanel
         hasFocus={false}
         className="euiContextPanel--moreActions"

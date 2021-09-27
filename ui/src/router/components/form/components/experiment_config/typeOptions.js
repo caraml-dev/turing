@@ -9,16 +9,16 @@ const defaultExperimentEngineOptions = [
         Turing will send the original request to all of the configured routes,
         but response from Turing will depend on the Ensembler configuration.
       </Fragment>
-    )
-  }
+    ),
+  },
 ];
 
-export const getExperimentEngineOptions = engines => {
+export const getExperimentEngineOptions = (engines) => {
   return [
     ...defaultExperimentEngineOptions,
-    ...engines.map(item => ({
+    ...engines.map((item) => ({
       value: item.name.toLowerCase(),
-      inputDisplay: item.name
-    }))
+      inputDisplay: item.name,
+    })),
   ];
 };

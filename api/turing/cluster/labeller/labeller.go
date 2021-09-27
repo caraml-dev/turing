@@ -13,8 +13,8 @@ const (
 	teamLabel = "team"
 	// orchestratorLabel refers to the orchestrator that deployed the Kubernetes object
 	orchestratorLabel = "orchestrator"
-	// appLabel refers to application of the Kubernetes Object
-	appLabel = "app"
+	// AppLabel refers to application of the Kubernetes Object
+	AppLabel = "app"
 )
 
 var prefix string
@@ -33,13 +33,18 @@ type KubernetesLabelsRequest struct {
 	App    string
 }
 
+// GetLabelName prefixes the label with the config specified label and returns the formatted label name
+func GetLabelName(name string) string {
+	return fmt.Sprintf("%s%s", prefix, name)
+}
+
 // BuildLabels builds the labels for the Kubernetes object
 func BuildLabels(r KubernetesLabelsRequest) map[string]string {
 	return map[string]string{
-		fmt.Sprintf("%s%s", prefix, orchestratorLabel): orchestratorValue,
-		fmt.Sprintf("%s%s", prefix, streamLabel):       r.Stream,
-		fmt.Sprintf("%s%s", prefix, teamLabel):         r.Team,
-		fmt.Sprintf("%s%s", prefix, appLabel):          r.App,
-		fmt.Sprintf("%s%s", prefix, environmentLabel):  environment,
+		GetLabelName(orchestratorLabel): orchestratorValue,
+		GetLabelName(streamLabel):       r.Stream,
+		GetLabelName(teamLabel):         r.Team,
+		GetLabelName(AppLabel):          r.App,
+		GetLabelName(environmentLabel):  environment,
 	}
 }

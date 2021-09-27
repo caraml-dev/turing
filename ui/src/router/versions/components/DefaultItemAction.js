@@ -4,7 +4,7 @@ import {
   EuiButtonIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from "@elastic/eui";
 import isString from "lodash/isString";
 
@@ -68,7 +68,8 @@ export const DefaultItemAction = ({ action, enabled, item, className }) => {
         href={action.href}
         target={action.target}
         data-test-subj={action["data-test-subj"]}
-        flush="right">
+        flush="right"
+      >
         {actionContent}
       </EuiButtonEmpty>
     );

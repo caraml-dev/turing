@@ -5,15 +5,17 @@ export const RouterEndpoint = ({ endpoint, className }) => {
   return endpoint ? (
     <EuiCopy
       textToCopy={endpoint}
-      beforeMessage="Click to copy URL to clipboard">
-      {copy => (
+      beforeMessage="Click to copy URL to clipboard"
+    >
+      {(copy) => (
         <EuiLink
           className={className}
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             copy();
           }}
-          color="text">
+          color="text"
+        >
           <EuiText size="s">
             <EuiIcon
               type={"copyClipboard"}

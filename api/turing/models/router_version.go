@@ -55,6 +55,9 @@ type RouterVersion struct {
 	// The ensembler used by the router
 	EnsemblerID sql.NullInt32 `json:"-"`
 	Ensembler   *Ensembler    `json:"ensembler,omitempty"`
+
+	// Monitoring URL used in the monitoring tab
+	MonitoringURL string `json:"monitoring_url" gorm:"-"`
 }
 
 // SetEnsemblerID Sets the id of the associated Ensembler

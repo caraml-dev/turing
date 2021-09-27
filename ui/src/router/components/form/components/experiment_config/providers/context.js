@@ -3,7 +3,7 @@ import React from "react";
 const ExperimentContext = React.createContext({
   clients: [],
   experiments: [],
-  variables: {}
+  variables: {},
 });
 
 export default ExperimentContext;

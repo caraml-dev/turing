@@ -9,7 +9,7 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSpacer
+  EuiSpacer,
 } from "@elastic/eui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
@@ -27,14 +27,12 @@ export const RouterVersionDetailsView = ({
   versionId,
   ...props
 }) => {
-  const [
-    { data: version, isLoaded, error },
-    fetchVersionDetails
-  ] = useTuringApi(
-    `/projects/${projectId}/routers/${routerId}/versions/${versionId}`,
-    {},
-    { config: {} }
-  );
+  const [{ data: version, isLoaded, error }, fetchVersionDetails] =
+    useTuringApi(
+      `/projects/${projectId}/routers/${routerId}/versions/${versionId}`,
+      {},
+      { config: {} }
+    );
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   const [{ data: router }, fetchRouterDetails] = useTuringApi(
@@ -70,7 +68,8 @@ export const RouterVersionDetailsView = ({
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert">
+            iconType="alert"
+          >
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
@@ -86,7 +85,8 @@ export const RouterVersionDetailsView = ({
                       {isActiveConfig && (
                         <EuiBadge
                           color="default"
-                          style={{ letterSpacing: "initial" }}>
+                          style={{ letterSpacing: "initial" }}
+                        >
                           Current
                         </EuiBadge>
                       )}
@@ -103,15 +103,16 @@ export const RouterVersionDetailsView = ({
             <RouterVersionActions
               router={router}
               onDeploySuccess={refreshData}
-              onDeleteSuccess={() => props.navigate("../")}>
-              {actions => (
+              onDeleteSuccess={() => props.navigate("../")}
+            >
+              {(actions) => (
                 <RouterVersionDetailsPageNavigation
                   version={version}
-                  actions={actions.map(action => ({
+                  actions={actions.map((action) => ({
                     ...action,
                     onClick: () => action.onClick(version),
                     hidden: !action.available(version),
-                    disabled: !action.enabled(version)
+                    disabled: !action.enabled(version),
                   }))}
                   {...props}
                 />

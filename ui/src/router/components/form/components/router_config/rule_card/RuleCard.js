@@ -6,7 +6,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSpacer,
-  EuiSuperSelect
+  EuiSuperSelect,
 } from "@elastic/eui";
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
@@ -19,14 +19,14 @@ import "./RuleCard.scss";
 const noneRoute = {
   value: "_none_",
   inputDisplay: "Add a route to this rule...",
-  disabled: true
+  disabled: true,
 };
 
 const newCondition = () => ({
   field_source: "header",
   field: "",
   operator: "in",
-  values: []
+  values: [],
 });
 
 export const RuleCard = ({
@@ -35,16 +35,16 @@ export const RuleCard = ({
   defaultRouteId,
   onChangeHandler,
   onDelete,
-  errors
+  errors,
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const routesOptions = useCallback(
-    item => {
+    (item) => {
       return routes
-        .filter(route => route.id === item || !rule.routes.includes(route.id))
-        .filter(route => !!route.id && !!route.endpoint)
-        .map(route => ({
+        .filter((route) => route.id === item || !rule.routes.includes(route.id))
+        .filter((route) => !!route.id && !!route.endpoint)
+        .map((route) => ({
           value: route.id,
           inputDisplay: (
             <RuleCardRouteDropDownOption
@@ -52,18 +52,18 @@ export const RuleCard = ({
               isDefault={route.id === defaultRouteId}
             />
           ),
-          disabled: route.id === defaultRouteId
+          disabled: route.id === defaultRouteId,
         }));
     },
     [rule.routes, routes, defaultRouteId]
   );
 
-  const onDeleteCondition = idx => () => {
+  const onDeleteCondition = (idx) => () => {
     rule.conditions.splice(idx, 1);
     onChange("conditions")([...rule.conditions]);
   };
 
-  const onDeleteRoute = idx => () => {
+  const onDeleteRoute = (idx) => () => {
     rule.routes.splice(idx, 1);
     onChange("routes")([...rule.routes]);
   };
@@ -73,12 +73,14 @@ export const RuleCard = ({
       className="euiCard--routeCard"
       title=""
       description=""
-      textAlign="left">
+      textAlign="left"
+    >
       <EuiFlexGroup
         className="euiFlexGroup--removeButton"
         justifyContent="flexEnd"
         gutterSize="none"
-        direction="row">
+        direction="row"
+      >
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="cross"
@@ -96,7 +98,8 @@ export const RuleCard = ({
             ? get(errors, "conditions")
             : []
         }
-        fullWidth>
+        fullWidth
+      >
         <Fragment>
           {[...rule.conditions, newCondition()].map((condition, idx) => (
             <EuiFlexGroup
@@ -104,7 +107,8 @@ export const RuleCard = ({
               key={`rule-conditions-${idx}`}
               direction="row"
               gutterSize="m"
-              alignItems="flexStart">
+              alignItems="flexStart"
+            >
               <EuiFlexItem grow={true}>
                 <TrafficRuleCondition
                   condition={condition}
@@ -115,7 +119,8 @@ export const RuleCard = ({
 
               <EuiFlexItem
                 grow={false}
-                className="euiFlexItem--hasActions conditions">
+                className="euiFlexItem--hasActions conditions"
+              >
                 {idx < rule.conditions.length ? (
                   <EuiButtonIcon
                     size="s"
@@ -139,7 +144,8 @@ export const RuleCard = ({
         error={
           Array.isArray(get(errors, "routes")) ? get(errors, "routes") : []
         }
-        fullWidth>
+        fullWidth
+      >
         <Fragment>
           {[...rule.routes, "_none_"].map((route, idx) => (
             <Fragment key={`rule-routes-${idx}`}>
@@ -147,7 +153,8 @@ export const RuleCard = ({
                 className="euiFlexGroup--trafficRulesRow"
                 direction="row"
                 gutterSize="m"
-                alignItems="flexStart">
+                alignItems="flexStart"
+              >
                 <EuiFlexItem grow={true} className="euiFlexItem--content">
                   <EuiFormRow
                     isInvalid={!!get(errors, `routes.${idx}`)}
@@ -156,7 +163,8 @@ export const RuleCard = ({
                         ? get(errors, `routes.${idx}`)
                         : []
                     }
-                    fullWidth>
+                    fullWidth
+                  >
                     <EuiSuperSelect
                       fullWidth
                       hasDividers
@@ -174,7 +182,8 @@ export const RuleCard = ({
 
                 <EuiFlexItem
                   grow={false}
-                  className="euiFlexItem--hasActions routes">
+                  className="euiFlexItem--hasActions routes"
+                >
                   {idx < rule.routes.length ? (
                     <EuiButtonIcon
                       size="s"

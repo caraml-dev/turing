@@ -1,59 +1,78 @@
-import React, { Fragment, useRef } from "react";
-import { EuiButton, EuiFlexItem, EuiLink, EuiSpacer } from "@elastic/eui";
+import React from "react";
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from "@elastic/eui";
 import classNames from "classnames";
-import { useToggle } from "@gojek/mlp-ui";
+import useCollapse from "react-collapsed";
+import useDimensions from "react-use-dimensions";
+import "./ExpandableContainer.scss";
 
-import "./ExpandableDescriptionList.scss";
-import useDimension from "../../hooks/useDimension";
+const Content = React.forwardRef(({ children }, ref) => (
+  <div ref={ref}>{children}</div>
+));
 
-export const ExpandableContainer = ({
-  maxHeight = 300,
-  isScrollable = true,
-  toggleKind = "button", // "button" | "text"
-  children
+const ExpandableContainer = ({
+  collapsedHeight,
+  isScrollable,
+  toggleKind,
+  children,
 }) => {
-  const contentRef = useRef();
-  const [isExpanded, toggle] = useToggle();
-  const { height: contentHeight } = useDimension(contentRef);
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({
+    collapsedHeight,
+  });
+
+  const toggle =
+    toggleKind === "button" ? (
+      <EuiButton
+        fullWidth
+        {...getToggleProps()}
+        iconType={`arrow${isExpanded ? "Up" : "Right"}`}
+      >
+        {isExpanded ? "Collapse" : "Expand"}
+      </EuiButton>
+    ) : (
+      <EuiLink {...getToggleProps()}>
+        {isExpanded ? "Show less" : "Show more"}
+      </EuiLink>
+    );
 
   return (
-    <div
-      className={classNames("expandableContainer", {
-        "expandableContainer-isOpen": isExpanded
-      })}>
-      <EuiFlexItem grow={true} className="euiFlexItem--childFlexPanel">
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={true}>
         <div
-          className={classNames("expandableContainer__childWrapper", {
-            scrollableContainer: isScrollable
-          })}
-          style={{
-            height: isExpanded
-              ? contentHeight
-              : Math.min(contentHeight, maxHeight)
-          }}>
-          <div ref={contentRef}>{children}</div>
+          className={classNames({ scrollableContainer: isScrollable })}
+          {...getCollapseProps()}
+        >
+          {children}
         </div>
       </EuiFlexItem>
 
-      {contentHeight > maxHeight && (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <div className="expandableContainer__triggerWrapper">
-            {toggleKind === "button" ? (
-              <EuiButton
-                fullWidth
-                onClick={toggle}
-                iconType={`arrow${isExpanded ? "Up" : "Right"}`}>
-                {isExpanded ? "Collapse" : "Expand"}
-              </EuiButton>
-            ) : (
-              <EuiLink type="button" onClick={toggle}>
-                {isExpanded ? "Show less" : "Show more"}
-              </EuiLink>
-            )}
-          </div>
-        </Fragment>
-      )}
-    </div>
+      <EuiFlexItem>{toggle}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+const ExpandableContainerWrapper = ({
+  maxCollapsedHeight = 300,
+  isScrollable = true,
+  toggleKind = "button", // "button" | "text"
+  children,
+}) => {
+  const [contentRef, { height: contentHeight }] = useDimensions({
+    liveMeasure: false,
+  });
+
+  const content = <Content ref={contentRef}>{children}</Content>;
+
+  return contentHeight > maxCollapsedHeight ? (
+    <ExpandableContainer
+      collapsedHeight={maxCollapsedHeight}
+      isScrollable={isScrollable}
+      toggleKind={toggleKind}
+    >
+      {content}
+    </ExpandableContainer>
+  ) : (
+    content
+  );
+};
+
+export { ExpandableContainerWrapper as ExpandableContainer };

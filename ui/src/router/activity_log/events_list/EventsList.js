@@ -9,12 +9,12 @@ import "./EventsList.scss";
 const infoColor = "#abe095";
 
 export const EventsList = ({ events, status }) => {
-  const badge = event => {
+  const badge = (event) => {
     const color = event.event_type === "info" ? infoColor : "danger";
     return <EuiBadge color={color}>{event.stage}</EuiBadge>;
   };
 
-  const timelineIcon = event => {
+  const timelineIcon = (event) => {
     switch (event.event_type) {
       case "error":
         return "alert";
@@ -31,11 +31,13 @@ export const EventsList = ({ events, status }) => {
           username={badge(event)}
           timelineIcon={timelineIcon(event)}
           type="update"
-          timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
+          timestamp={<DateFromNow date={event.created_at} size={"s"} />}
+        >
           <ExpandableContainer
-            maxHeight={43}
+            maxCollapsedHeight={43}
             toggleKind="text"
-            isScrollable={false}>
+            isScrollable={false}
+          >
             <span className="activityLogEvent">{event.message}</span>
           </ExpandableContainer>
         </EuiComment>

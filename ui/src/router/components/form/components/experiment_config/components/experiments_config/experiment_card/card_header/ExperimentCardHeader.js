@@ -3,7 +3,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon
+  EuiIcon,
 } from "@elastic/eui";
 
 export const ExperimentCardHeader = ({ onDelete, dragHandleProps }) => (
@@ -13,7 +13,8 @@ export const ExperimentCardHeader = ({ onDelete, dragHandleProps }) => (
     alignItems="center"
     gutterSize="none"
     style={{ backgroundColor: "ghostwhite" }}
-    direction="row">
+    direction="row"
+  >
     <EuiFlexItem grow={false}>
       <EuiIcon type="empty" size="l" />
     </EuiFlexItem>

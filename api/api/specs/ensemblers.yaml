@@ -132,7 +132,7 @@ components:
       oneOf:
         - $ref: "#/components/schemas/PyFuncEnsembler"
       discriminator:
-        propertyName: type
+        propertyName: "type"
         mapping:
           pyfunc: '#/components/schemas/PyFuncEnsembler'
 
@@ -149,7 +149,7 @@ components:
         name:
           type: "string"
           minLength: 3
-          maxLength: 50
+          maxLength: 20
         created_at:
           type: "string"
           format: "date-time"

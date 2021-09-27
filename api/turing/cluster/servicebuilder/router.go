@@ -87,6 +87,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	jaegerCollectorEndpoint string,
 	sentryEnabled bool,
 	sentryDSN string,
+	knativeTargetConcurrency int,
+	knativeQueueProxyResourcePercentage int,
 ) (*cluster.KnativeService, error) {
 	// Create service name
 	name := sb.GetRouterServiceName(routerVersion)
@@ -121,10 +123,12 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Volumes:              volumes,
 			VolumeMounts:         volumeMounts,
 		},
-		IsClusterLocal: false,
-		ContainerPort:  routerPort,
-		MinReplicas:    routerVersion.ResourceRequest.MinReplica,
-		MaxReplicas:    routerVersion.ResourceRequest.MaxReplica,
+		IsClusterLocal:               false,
+		ContainerPort:                routerPort,
+		MinReplicas:                  routerVersion.ResourceRequest.MinReplica,
+		MaxReplicas:                  routerVersion.ResourceRequest.MaxReplica,
+		TargetConcurrency:            knativeTargetConcurrency,
+		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
 	}
 	return sb.validateKnativeService(svc)
 }

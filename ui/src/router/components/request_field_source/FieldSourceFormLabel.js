@@ -4,7 +4,7 @@ import {
   EuiButtonEmpty,
   EuiContextMenu,
   EuiFormLabel,
-  EuiPopover
+  EuiPopover,
 } from "@elastic/eui";
 
 import "./FieldSourceFormLabel.scss";
@@ -12,12 +12,12 @@ import "./FieldSourceFormLabel.scss";
 const fieldSourceOptions = [
   {
     value: "header",
-    inputDisplay: "Header"
+    inputDisplay: "Header",
   },
   {
     value: "payload",
-    inputDisplay: "Payload"
-  }
+    inputDisplay: "Payload",
+  },
 ];
 
 export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
@@ -25,18 +25,18 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
 
   const panels = flattenPanelTree({
     id: 0,
-    items: fieldSourceOptions.map(option => ({
+    items: fieldSourceOptions.map((option) => ({
       name: option.inputDisplay,
       value: option.value,
       onClick: () => {
         togglePopover();
         onChange(option.value);
-      }
-    }))
+      },
+    })),
   });
 
   const selectedOption = useMemo(
-    () => fieldSourceOptions.find(o => o.value === value),
+    () => fieldSourceOptions.find((o) => o.value === value),
     [value]
   );
 
@@ -52,13 +52,15 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
           iconType="arrowDown"
           iconSide="right"
           className="fieldSourceLabel"
-          onClick={togglePopover}>
+          onClick={togglePopover}
+        >
           {selectedOption.inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s">
+      panelPaddingSize="s"
+    >
       <EuiContextMenu
         className="fieldSourceDropdown"
         initialPanelId={0}

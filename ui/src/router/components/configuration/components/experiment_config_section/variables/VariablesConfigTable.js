@@ -4,7 +4,7 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiTextColor,
-  EuiTitle
+  EuiTitle,
 } from "@elastic/eui";
 import orderBy from "lodash/orderBy";
 import "./VariablesConfigTable.scss";
@@ -14,12 +14,12 @@ const makeListItems = (source, value) => {
   return [
     {
       title: "Field Source",
-      description: source
+      description: source,
     },
     {
       title: "Value",
-      description: <span title={fieldValue}>{fieldValue}</span>
-    }
+      description: <span title={fieldValue}>{fieldValue}</span>,
+    },
   ];
 };
 
@@ -29,7 +29,7 @@ export const VariablesConfigTable = ({ variables }) => {
       variables.config,
       ["required", "name"],
       ["desc", "asc"]
-    ).filter(v => !!v.field);
+    ).filter((v) => !!v.field);
   }, [variables.config]);
   return !!variables.config.length ? (
     <Fragment>

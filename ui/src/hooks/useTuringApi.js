@@ -16,7 +16,7 @@ export const useTuringApi = (
       baseApiUrl: apiConfig.turingApiUrl,
       timeout: apiConfig.apiTimeout,
       useMockData: apiConfig.useMockData,
-      ...options
+      ...options,
     },
     authCtx,
     result,

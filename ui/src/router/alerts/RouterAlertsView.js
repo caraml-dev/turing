@@ -11,15 +11,15 @@ export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
     replaceBreadcrumbs([
       {
         text: "Routers",
-        href: "../"
+        href: "../",
       },
       {
         text: router.name,
-        href: "./"
+        href: "./",
       },
       {
-        text: "Alerts"
-      }
+        text: "Alerts",
+      },
     ]);
   }, [projectId, routerId, router.name]);
 
@@ -37,10 +37,10 @@ export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
 
   const existingAlerts = useMemo(() => {
     let metricObj = {};
-    alerts.forEach(a => (metricObj[a.metric] = a));
+    alerts.forEach((a) => (metricObj[a.metric] = a));
     return {
       alerts: metricObj,
-      team: alerts.length > 0 ? alerts[0].team : undefined
+      team: alerts.length > 0 ? alerts[0].team : undefined,
     };
   }, [alerts]);
 
@@ -52,7 +52,8 @@ export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert">
+      iconType="alert"
+    >
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

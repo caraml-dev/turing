@@ -4,49 +4,49 @@ export const supportedAlerts = [
     iconType: "inputOutput",
     metric: "throughput",
     unit: "rps",
-    comparator: "lower"
+    comparator: "lower",
   },
   {
     title: "Latency",
     iconType: "clock",
     metric: "latency95p",
     unit: "ms",
-    comparator: "higher"
+    comparator: "higher",
   },
   {
     title: "Error Rate",
     iconType: "cross",
     metric: "error_rate",
     unit: "%",
-    comparator: "higher"
+    comparator: "higher",
   },
   {
     title: "CPU Utilisation",
     iconType: "indexMapping",
     metric: "cpu_util",
     unit: "%",
-    comparator: "higher"
+    comparator: "higher",
   },
   {
     title: "Memory Utilisation",
     iconType: "memory",
     metric: "memory_util",
     unit: "%",
-    comparator: "higher"
-  }
+    comparator: "higher",
+  },
 ];
 
 export const durationOptions = [
   {
     value: "s",
-    inputDisplay: "s"
+    inputDisplay: "s",
   },
   {
     value: "m",
-    inputDisplay: "m"
+    inputDisplay: "m",
   },
   {
     value: "h",
-    inputDisplay: "h"
-  }
+    inputDisplay: "h",
+  },
 ];

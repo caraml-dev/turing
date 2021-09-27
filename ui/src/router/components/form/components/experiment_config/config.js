@@ -6,17 +6,17 @@ export const initConfig = () => ({
   engine: {}, // Will be used for validation
   client: {},
   experiments: [],
-  variables: { config: [] }
+  variables: { config: [] },
 });
 
 export const newVariableConfig = () => ({
   field_source: "header",
   required: false,
   field: "",
-  name: ""
+  name: "",
 });
 
-export const resetVariableSelection = v => {
+export const resetVariableSelection = (v) => {
   v.field = "";
   delete v.selected;
 };

@@ -136,6 +136,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:          Quantity(resource.MustParse("4")),
 					MaxMemory:       Quantity(resource.MustParse("8Gi")),
 				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            1,
+					QueueProxyResourcePercentage: 30,
+				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
 					FluentdConfig: &FluentdConfig{
@@ -184,6 +188,10 @@ func TestLoad(t *testing.T) {
 					DeletionTimeout: 1 * time.Minute,
 					MaxCPU:          Quantity(resource.MustParse("500m")),
 					MaxMemory:       Quantity(resource.MustParse("4000Mi")),
+				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            2,
+					QueueProxyResourcePercentage: 20,
 				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
@@ -262,6 +270,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:          Quantity(resource.MustParse("500m")),
 					MaxMemory:       Quantity(resource.MustParse("12Gi")),
 				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            2,
+					QueueProxyResourcePercentage: 20,
+				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
 					FluentdConfig: &FluentdConfig{
@@ -322,20 +334,21 @@ func TestLoad(t *testing.T) {
 		"multiple files and environment variables": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			env: map[string]string{
-				"PORT":                                  "5000",
-				"ALLOWEDORIGINS":                        "http://baz.com,http://qux.com",
-				"AUTHCONFIG_ENABLED":                    "true",
-				"AUTHCONFIG_URL":                        "http://env.example.com",
-				"DBCONFIG_USER":                         "dbuser-env",
-				"DBCONFIG_PASSWORD":                     "dbpassword-env",
-				"DEPLOYCONFIG_TIMEOUT":                  "10m",
-				"DEPLOYCONFIG_MAXMEMORY":                "4500Mi",
-				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1": "fooval1-env",
-				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":    "quuxval-env",
-				"TURINGUICONFIG_APPDIRECTORY":           "appdir-env",
-				"TURINGUICONFIG_HOMEPAGE":               "/turing-env",
-				"EXPERIMENT_QUX_QUXKEY1":                "quxval1-env",
-				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":      "quxval2-1-env",
+				"PORT":                                     "5000",
+				"ALLOWEDORIGINS":                           "http://baz.com,http://qux.com",
+				"AUTHCONFIG_ENABLED":                       "true",
+				"AUTHCONFIG_URL":                           "http://env.example.com",
+				"DBCONFIG_USER":                            "dbuser-env",
+				"DBCONFIG_PASSWORD":                        "dbpassword-env",
+				"DEPLOYCONFIG_TIMEOUT":                     "10m",
+				"DEPLOYCONFIG_MAXMEMORY":                   "4500Mi",
+				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":    "fooval1-env",
+				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":       "quuxval-env",
+				"TURINGUICONFIG_APPDIRECTORY":              "appdir-env",
+				"TURINGUICONFIG_HOMEPAGE":                  "/turing-env",
+				"EXPERIMENT_QUX_QUXKEY1":                   "quxval1-env",
+				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":         "quxval2-1-env",
+				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY": "4",
 			},
 			want: &Config{
 				Port:           5000,
@@ -350,6 +363,10 @@ func TestLoad(t *testing.T) {
 					User:     "dbuser-env",
 					Password: "dbpassword-env",
 					Database: "turing",
+				},
+				KnativeServiceDefaults: &KnativeServiceDefaults{
+					TargetConcurrency:            4,
+					QueueProxyResourcePercentage: 20,
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",
@@ -509,11 +526,53 @@ func TestConfigValidate(t *testing.T) {
 	var executorReplica int32 = 2
 	executorCPURequest := "1"
 	executorMemoryRequest := "1Gi"
-
+	tolerationName := "batch-job"
 	validConfig := Config{
 		Port: 5000,
-		BatchRunnerConfig: &BatchRunnerConfig{
-			TimeInterval: 3 * time.Minute,
+		BatchEnsemblingConfig: &BatchEnsemblingConfig{
+			Enabled: true,
+			JobConfig: JobConfig{
+				DefaultEnvironment: "dev",
+				DefaultConfigurations: DefaultEnsemblingJobConfigurations{
+					BatchEnsemblingJobResources: openapi.EnsemblingResources{
+						DriverCpuRequest:      &driverCPURequest,
+						DriverMemoryRequest:   &driverMemoryRequest,
+						ExecutorReplica:       &executorReplica,
+						ExecutorCpuRequest:    &executorCPURequest,
+						ExecutorMemoryRequest: &executorMemoryRequest,
+					},
+					SparkConfigAnnotations: map[string]string{
+						"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
+					},
+				},
+			},
+			RunnerConfig: RunnerConfig{
+				TimeInterval:                   3 * time.Minute,
+				RecordsToProcessInOneIteration: 10,
+				MaxRetryCount:                  3,
+			},
+			ImageBuildingConfig: ImageBuildingConfig{
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
+				KanikoConfig: KanikoConfig{
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: ResourceRequestsLimits{
+						Requests: Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
 		},
 		DbConfig: &DatabaseConfig{
 			Host:     "localhost",
@@ -529,45 +588,6 @@ func TestConfigValidate(t *testing.T) {
 			MaxCPU:          Quantity(resource.MustParse("2")),
 			MaxMemory:       Quantity(resource.MustParse("8Gi")),
 		},
-		EnsemblingJobConfig: &EnsemblingJobConfig{
-			DefaultEnvironment:             "dev",
-			RecordsToProcessInOneIteration: 10,
-			MaxRetryCount:                  3,
-			ImageBuilderConfig: ImageBuilderConfig{
-				Registry:             "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
-				BuildNamespace:       "default",
-				BuildContextURI:      "git://github.com/gojek/turing.git#refs/heads/master",
-				DockerfileFilePath:   "engines/batch-ensembler/app.Dockerfile",
-				BuildTimeoutDuration: 10 * time.Minute,
-			},
-			KanikoConfig: KanikoConfig{
-				Image:        "gcr.io/kaniko-project/executor",
-				ImageVersion: "v1.5.2",
-				ResourceRequestsLimits: ResourceRequestsLimits{
-					Requests: Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-					Limits: Resource{
-						CPU:    "500m",
-						Memory: "1Gi",
-					},
-				},
-			},
-			DefaultConfigurations: DefaultEnsemblingJobConfigurations{
-				BatchEnsemblingJobResources: openapi.EnsemblingResources{
-					DriverCpuRequest:      &driverCPURequest,
-					DriverMemoryRequest:   &driverMemoryRequest,
-					ExecutorReplica:       &executorReplica,
-					ExecutorCpuRequest:    &executorCPURequest,
-					ExecutorMemoryRequest: &executorMemoryRequest,
-				},
-				SparkConfigAnnotations: map[string]string{
-					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
-				},
-			},
-		},
 		SparkAppConfig: &SparkAppConfig{
 			NodeSelector: map[string]string{
 				"node-workload-type": "batch",
@@ -575,7 +595,7 @@ func TestConfigValidate(t *testing.T) {
 			CorePerCPURequest:              1.5,
 			CPURequestToCPULimit:           1.25,
 			SparkVersion:                   "2.4.5",
-			TolerationName:                 "batch-job",
+			TolerationName:                 &tolerationName,
 			SubmissionFailureRetries:       3,
 			SubmissionFailureRetryInterval: 10,
 			FailureRetries:                 3,
@@ -673,7 +693,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing ensembling job default environment": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.EnsemblingJobConfig.DefaultEnvironment = ""
+				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
@@ -687,7 +707,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"missing batch runner config": {
 			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchRunnerConfig = nil
+				validConfig.BatchEnsemblingConfig = nil
 				return validConfig
 			},
 			wantErr: true,

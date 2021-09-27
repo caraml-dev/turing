@@ -13,6 +13,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const (
+	monitoringURL = "http://www.example.com"
+)
+
 func TestListRouterVersions(t *testing.T) {
 	// Create mock services
 	routerSvc := &mocks.RoutersService{}
@@ -22,7 +26,7 @@ func TestListRouterVersions(t *testing.T) {
 	routerSvc.
 		On("FindByID", models.ID(2)).
 		Return(&models.Router{Model: models.Model{ID: 2}}, nil)
-	testVersions := []*models.RouterVersion{{Version: 1}}
+	testVersions := []*models.RouterVersion{{Version: 1, MonitoringURL: monitoringURL}}
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
 		On("ListRouterVersions", models.ID(1)).
@@ -31,21 +35,24 @@ func TestListRouterVersions(t *testing.T) {
 		On("ListRouterVersions", models.ID(2)).
 		Return(testVersions, nil)
 
+	mlpSvc := &mocks.MLPService{}
+	mlpSvc.On("GetProject", models.ID(1)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)
+
 	// Define tests
 	tests := map[string]struct {
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     RequestVars{},
+			vars:     RequestVars{"project_id": {"1"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | list router versions": {
-			vars:     RequestVars{"router_id": {"1"}},
+			vars:     RequestVars{"router_id": {"1"}, "project_id": {"1"}},
 			expected: InternalServerError("unable to retrieve router versions", "test router versions error"),
 		},
 		"success": {
-			vars: RequestVars{"router_id": {"2"}},
+			vars: RequestVars{"router_id": {"2"}, "project_id": {"1"}},
 			expected: &Response{
 				code: 200,
 				data: testVersions,
@@ -62,6 +69,7 @@ func TestListRouterVersions(t *testing.T) {
 						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
+							MLPService:            mlpSvc,
 						},
 					},
 				},
@@ -79,7 +87,7 @@ func TestGetRouterVersion(t *testing.T) {
 	routerSvc.
 		On("FindByID", models.ID(1)).
 		Return(&models.Router{Model: models.Model{ID: 1}}, nil)
-	testVersion := &models.RouterVersion{Version: 1}
+	testVersion := &models.RouterVersion{Version: 1, MonitoringURL: monitoringURL}
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.
 		On("FindByRouterIDAndVersion", models.ID(1), uint(1)).
@@ -88,25 +96,28 @@ func TestGetRouterVersion(t *testing.T) {
 		On("FindByRouterIDAndVersion", models.ID(1), uint(2)).
 		Return(testVersion, nil)
 
+	mlpSvc := &mocks.MLPService{}
+	mlpSvc.On("GetProject", models.ID(1)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)
+
 	// Define tests
 	tests := map[string]struct {
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
-			vars:     RequestVars{},
+			vars:     RequestVars{"project_id": {"1"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | bad request (missing version)": {
-			vars:     RequestVars{"router_id": {"1"}},
+			vars:     RequestVars{"router_id": {"1"}, "project_id": {"1"}},
 			expected: BadRequest("invalid router version value", "key version not found in vars"),
 		},
 		"failure | get router version": {
-			vars:     RequestVars{"router_id": {"1"}, "version": {"1"}},
+			vars:     RequestVars{"router_id": {"1"}, "version": {"1"}, "project_id": {"1"}},
 			expected: NotFound("router version not found", "test router version error"),
 		},
 		"success": {
-			vars: RequestVars{"router_id": {"1"}, "version": {"2"}},
+			vars: RequestVars{"router_id": {"1"}, "version": {"2"}, "project_id": {"1"}},
 			expected: &Response{
 				code: 200,
 				data: testVersion,
@@ -123,6 +134,7 @@ func TestGetRouterVersion(t *testing.T) {
 						AppContext: &AppContext{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
+							MLPService:            mlpSvc,
 						},
 					},
 				},

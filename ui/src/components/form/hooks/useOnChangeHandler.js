@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-export const useOnChangeHandler = onChangeHandler => {
+export const useOnChangeHandler = (onChangeHandler) => {
   const nested = useRef({});
 
   // reset nested handlers when the parent handler is changed
@@ -9,7 +9,7 @@ export const useOnChangeHandler = onChangeHandler => {
   }, [onChangeHandler]);
 
   const onChange = useCallback(
-    arg => {
+    (arg) => {
       if (!nested.current[arg]) {
         nested.current[arg] = onChangeHandler.withArg(arg);
       }

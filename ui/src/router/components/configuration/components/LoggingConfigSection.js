@@ -1,16 +1,16 @@
 import React, { Fragment } from "react";
-import { ConfigSectionPanel } from "./section";
+import { ConfigSectionPanel } from "../../../../components/config_section";
 import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPanel
+  EuiPanel,
 } from "@elastic/eui";
-import { getBigQueryConsoleUrl } from "../../../../utils/bq";
+import { getBigQueryConsoleUrl } from "../../../../utils/gcp";
 
 const BigQueryConfigTable = ({
-  bigquery_config: { table, service_account_secret }
+  bigquery_config: { table, service_account_secret },
 }) => {
   const items = [
     {
@@ -19,12 +19,12 @@ const BigQueryConfigTable = ({
         <EuiLink href={getBigQueryConsoleUrl(table)} target="_blank" external>
           {table}
         </EuiLink>
-      )
+      ),
     },
     {
       title: "Service Account",
-      description: service_account_secret
-    }
+      description: service_account_secret,
+    },
   ];
 
   return (
@@ -40,21 +40,21 @@ const BigQueryConfigTable = ({
 };
 
 const KafkaConfigTable = ({
-  kafka_config: { brokers, topic, serialization_format }
+  kafka_config: { brokers, topic, serialization_format },
 }) => {
   const items = [
     {
       title: "Broker(s)",
-      description: brokers
+      description: brokers,
     },
     {
       title: "Topic",
-      description: topic
+      description: topic,
     },
     {
       title: "Serialization Format",
-      description: serialization_format
-    }
+      description: serialization_format,
+    },
   ];
 
   return (

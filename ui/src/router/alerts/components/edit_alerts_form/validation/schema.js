@@ -25,7 +25,7 @@ const atLeastOneThreshold = ({ path, options, createError }) => {
     !!alert.critical_threshold ||
     createError({
       message: "Alert must have at least 1 threshold value.",
-      path: `${path}.overall`
+      path: `${path}.overall`,
     })
   );
 };
@@ -35,13 +35,13 @@ const metricSchema = yup
   .shape({
     warning_threshold: individualThresholdSchema,
     critical_threshold: individualThresholdSchema,
-    duration: durationSchema
+    duration: durationSchema,
   })
   .test({
     name: "atLeast1",
-    test: function() {
+    test: function () {
       return atLeastOneThreshold(this);
-    }
+    },
   });
 
 const percentageMetricSchema = yup
@@ -49,44 +49,44 @@ const percentageMetricSchema = yup
   .shape({
     warning_threshold: individualPercentageThresholdSchema,
     critical_threshold: individualPercentageThresholdSchema,
-    duration: durationSchema
+    duration: durationSchema,
   })
   .test({
     name: "atLeast1",
-    test: function() {
+    test: function () {
       return atLeastOneThreshold(this);
-    }
+    },
   });
 
 const schema = {
   team: yup.object().shape({
-    team: yup.string().required("Team name is required.")
+    team: yup.string().required("Team name is required."),
   }),
   throughput: yup.object().shape({
     alerts: yup.object().shape({
-      throughput: metricSchema
-    })
+      throughput: metricSchema,
+    }),
   }),
   latency95p: yup.object().shape({
     alerts: yup.object().shape({
-      latency95p: metricSchema
-    })
+      latency95p: metricSchema,
+    }),
   }),
   error_rate: yup.object().shape({
     alerts: yup.object().shape({
-      error_rate: percentageMetricSchema
-    })
+      error_rate: percentageMetricSchema,
+    }),
   }),
   cpu_util: yup.object().shape({
     alerts: yup.object().shape({
-      cpu_util: percentageMetricSchema
-    })
+      cpu_util: percentageMetricSchema,
+    }),
   }),
   memory_util: yup.object().shape({
     alerts: yup.object().shape({
-      memory_util: percentageMetricSchema
-    })
-  })
+      memory_util: percentageMetricSchema,
+    }),
+  }),
 };
 
 export default schema;

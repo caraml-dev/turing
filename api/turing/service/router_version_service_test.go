@@ -7,16 +7,31 @@ import (
 	"encoding/json"
 	"testing"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestRouterVersionsServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
+		// Monitoring URL Deps
+		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
+		mlpService := &MockMLPService{}
+		mlpService.On(
+			"GetEnvironment",
+			mock.Anything,
+		).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
+		mlpService.On(
+			"GetProject",
+			mock.Anything,
+		).Return(&mlp.Project{Name: "project-name"}, nil)
+
 		// create router first
 		router := &models.Router{
 			ProjectID:       1,
@@ -24,11 +39,11 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 			Name:            "wooper",
 			Status:          models.RouterStatusPending,
 		}
-		router, err := NewRoutersService(db).Save(router)
+		router, err := NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 
 		// populate database
-		svc := NewRouterVersionsService(db)
+		svc := NewRouterVersionsService(db, mlpService, &monitoringURLFormat)
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
 			Status:   models.RouterVersionStatusPending,
@@ -124,6 +139,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		routerVersion.Version = found.Version
 		routerVersion.CreatedAt = found.CreatedAt
 		routerVersion.UpdatedAt = found.UpdatedAt
+		router.MonitoringURL = ""
 		routerVersion.Router = router
 		routerVersion.Router.CreatedAt = found.Router.CreatedAt
 		routerVersion.Router.UpdatedAt = found.Router.UpdatedAt
@@ -131,6 +147,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		routerVersion.Enricher.UpdatedAt = found.Enricher.UpdatedAt
 		routerVersion.Ensembler.CreatedAt = found.Ensembler.CreatedAt
 		routerVersion.Ensembler.UpdatedAt = found.Ensembler.UpdatedAt
+		routerVersion.MonitoringURL = "https://www.example.com/project-name/cluster-name/wooper/1"
 		if !cmp.Equal(routerVersion, found) {
 			routerVersionJson, _ := json.Marshal(routerVersion)
 			foundJson, _ := json.Marshal(found)
@@ -166,7 +183,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 
 		// delete with upstream reference
 		router.SetCurrRouterVersion(routerVersion)
-		_, err = NewRoutersService(db).Save(router)
+		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		assert.Error(t, err, "unable to delete router version - there exists a router that is currently using this version")
@@ -174,7 +191,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		// clear reference and delete
 		router.CurrRouterVersionID = sql.NullInt32{}
 		router.CurrRouterVersion = nil
-		_, err = NewRoutersService(db).Save(router)
+		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		found, err = svc.FindByID(1)
