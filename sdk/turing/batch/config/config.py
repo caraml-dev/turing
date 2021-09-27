@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Dict, Optional
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
+from turing.generated.model.env_var import EnvVar
 from .source import EnsemblingJobSource, EnsemblingJobPredictionSource
 from .sink import EnsemblingJobSink
 
@@ -115,5 +116,5 @@ class EnsemblingJobConfig:
         return turing.generated.models.EnsemblerInfraConfig(
             service_account_name=self.service_account,
             resources=self.resource_request,
-            environment_variables=self.env_vars,
+            env=[EnvVar(name=name, value=value) for name, value in self.env_vars.items()],
         )

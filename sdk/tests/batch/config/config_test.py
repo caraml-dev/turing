@@ -3,6 +3,8 @@ import turing.batch.config.source
 import turing.batch.config.sink
 import turing.generated.models
 
+from turing.generated.model.env_var import EnvVar
+
 
 @pytest.mark.parametrize(
     "source,predictions,result_config,sink,expected_fn", [
@@ -70,7 +72,7 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
                 turing.generated.models.EnsemblerInfraConfig(
                     service_account_name=service_account,
                     resources=resource_request,
-                    environment_variables=env_vars,
+                    env=[EnvVar(name=name, value=value) for name, value in env_vars.items()],
                 ),
             id="Initialize ensembling job infra spec"
         ),
@@ -84,7 +86,7 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
                 turing.generated.models.EnsemblerInfraConfig(
                     service_account_name=service_account,
                     resources=resource_request,
-                    environment_variables=env_vars,
+                    env=[EnvVar(name=name, value=value) for name, value in env_vars.items()],
                 ),
             id="Initialize ensembling job with default resource request"
         )
