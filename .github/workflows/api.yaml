@@ -62,3 +62,4 @@ jobs:
       with:
         working-directory: api
         skip-go-installation: true
+        args: --timeout 3m --verbose
