@@ -1,11 +1,21 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
-let expEnginePathRewrite = {};
-expEnginePathRewrite[
-  `^${process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_UNROUTABLE_PATH}`
-] = "";
-
 module.exports = function (app) {
+  // Proxy settings required for remote components' API calls.
+  const remoteProxyPaths = process.env.REMOTE_COMPONENTS_PROXY_PATHS
+    ? JSON.parse(process.env.REMOTE_COMPONENTS_PROXY_PATHS)
+    : {};
+  Object.keys(remoteProxyPaths).forEach((key) => {
+    app.use(
+      key,
+      createProxyMiddleware({
+        target: remoteProxyPaths[key],
+        pathRewrite: { ["^" + key]: "" },
+        changeOrigin: true,
+      })
+    );
+  });
+
   app.use(
     "/api/mlp",
     createProxyMiddleware({
@@ -30,13 +40,11 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   );
-  /* The experiment engine is expected to use "/api/exp" as the API path on local env,
-     to bypass CORS */
   app.use(
-    process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_UNROUTABLE_PATH,
+    "http://localhost:3002",
     createProxyMiddleware({
-      target: process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_API_HOST,
-      pathRewrite: expEnginePathRewrite,
+      target: "http://localhost:3002",
+      pathRewrite: { "^http://localhost:3002": "" },
       changeOrigin: true,
     })
   );

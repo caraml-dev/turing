@@ -47,8 +47,6 @@ export const ExperimentStep = ({ projectId }) => {
     }
   }, [experiment_engine.type, engineProps, onChange, ensemblerType]);
 
-  const View = React.lazy(() => import("expEngine/EditExperimentEngineConfig"));
-
   /* Check for xp should be replaced by a check for the default engine property. */
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -61,23 +59,13 @@ export const ExperimentStep = ({ projectId }) => {
         />
       </EuiFlexItem>
 
-      {experiment_engine.type === "xp" ? (
-        <React.Suspense fallback="Loading Experiments">
-          <View
-            projectId={projectId}
-            experimentConfig={experiment_engine.config}
-            onChangeHandler={onChange("config.experiment_engine.config")}
-          />
-        </React.Suspense>
-      ) : (
-        experiment_engine.type !== "nop" && (
-          <ExperimentConfigGroup
-            engineType={experiment_engine.type}
-            experimentConfig={experiment_engine.config}
-            onChangeHandler={onChange("config.experiment_engine.config")}
-            errors={get(errors, "config.experiment_engine.config")}
-          />
-        )
+      {experiment_engine.type !== "nop" && (
+        <ExperimentConfigGroup
+          engineType={experiment_engine.type}
+          experimentConfig={experiment_engine.config}
+          onChangeHandler={onChange("config.experiment_engine.config")}
+          errors={get(errors, "config.experiment_engine.config")}
+        />
       )}
     </EuiFlexGroup>
   );

@@ -3,17 +3,30 @@ const { ModuleFederationPlugin } = require("webpack").container;
 const { ["react-lazylog"]: undefined, ...sharedDeps } = require("./package.json").dependencies;
 
 module.exports = ({ env }) => ({
+    plugins: [
+        {
+            plugin: {
+                overrideWebpackConfig: ({ webpackConfig }) => {
+                    // Suppress source-map related warnings (currently, react-use-dimensions is problematic).
+                    // This is setting was applied by CRA4, but CRA5 doesn't.
+                    webpackConfig.ignoreWarnings = [
+                        ...(webpackConfig.ignoreWarnings || []),
+                        /Failed to parse source map/,
+                    ];
+                    return webpackConfig;
+                },
+            },
+        }
+    ],
     webpack: {
         plugins: {
             add: [
                 new ModuleFederationPlugin({
                     name: "turing",
-                    remotes: {
-                        expEngine: "xp@http://localhost:3002/xp/remoteEntry.js",
-                    },
                     shared: {
                         ...sharedDeps,
                         react: {
+                            shareScope: "default",
                             singleton: true,
                             requiredVersion: sharedDeps.react,
                         },
