@@ -10,7 +10,7 @@ import {
 import { DateFromNow } from "@gojek/mlp-ui";
 import { FormLabelWithToolTip } from "../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { DefaultItemAction } from "../components/DefaultItemAction";
-import { appConfig } from "../../../config";
+import { useConfig } from "../../../config";
 import { DeploymentStatusHealth } from "../../../components/status_health/DeploymentStatusHealth";
 import { Status } from "../../../services/status/Status";
 
@@ -23,6 +23,11 @@ export const ListRouterVersionsTable = ({
   onRowClick,
   ...props
 }) => {
+  const {
+    appConfig: {
+      tables: { defaultTextSize, defaultIconSize },
+    },
+  } = useConfig();
   // Map that holds a mapping between selected version number
   // and it's position in the `selection` array
   const [selectedIds, setSelectedIds] = useState({});
@@ -103,7 +108,7 @@ export const ListRouterVersionsTable = ({
       width: "21%",
       render: (version) => (
         <EuiText
-          size={appConfig.tables.defaultTextSize}
+          size={defaultTextSize}
           style={{ display: "flex", alignItems: "center" }}>
           {version}&nbsp;&nbsp;
           {version === deployedVersion && (
@@ -124,23 +129,19 @@ export const ListRouterVersionsTable = ({
       field: "created_at",
       name: "Created",
       width: "23%",
-      render: (date) => (
-        <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "23%",
-      render: (date) => (
-        <DateFromNow date={date} size={appConfig.tables.defaultTextSize} />
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       name: (
         <FormLabelWithToolTip
           label="Actions"
-          size={appConfig.tables.defaultIconSize}
+          size={defaultIconSize}
           content="Router version actions"
         />
       ),

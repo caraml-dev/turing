@@ -11,12 +11,15 @@ import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import { appConfig } from "../../config";
+import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
 
-const { defaultPageSize } = appConfig.pagination;
-
 export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
+  const {
+    appConfig: {
+      pagination: { defaultPageSize },
+    },
+  } = useConfig();
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(

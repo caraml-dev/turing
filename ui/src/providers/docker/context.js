@@ -1,9 +1,11 @@
 import React from "react";
-import { appConfig } from "../../config";
+import { useConfig } from "../../config";
 
 const DockerRegistriesContext = React.createContext([]);
 
 export const DockerRegistriesContextProvider = ({ children }) => {
+  const { appConfig } = useConfig();
+
   const registries = [
     ...appConfig.privateDockerRegistries.map((registry) => ({
       value: registry,
