@@ -11,12 +11,12 @@ import { PageTitle } from "../components/page/PageTitle";
 
 import useDynamicScript from "../hooks/useDynamicScript";
 import loadComponent from "../utils/remoteComponent";
-import { experimentEngineRemote } from "../config";
+import { defaultExperimentEngine } from "../config";
 
 export const ExperimentsRouter = ({ projectId }) => {
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
-    url: experimentEngineRemote.url,
+    url: defaultExperimentEngine.url,
   });
 
   if (!ready || failed) {
@@ -30,7 +30,7 @@ export const ExperimentsRouter = ({ projectId }) => {
           </EuiPageHeader>
           <EuiPageContent>
             <EuiText size="s" color="subdued">
-              {!experimentEngineRemote.url
+              {!defaultExperimentEngine.url
                 ? "No default Experiment Engine configured"
                 : !ready
                 ? "Loading Experiment Exgine ..."
@@ -44,7 +44,7 @@ export const ExperimentsRouter = ({ projectId }) => {
 
   // Load component from remote host
   const Component = React.lazy(
-    loadComponent(experimentEngineRemote.appName, "./ExperimentsLandingPage")
+    loadComponent(defaultExperimentEngine.appName, "./ExperimentsLandingPage")
   );
 
   return (

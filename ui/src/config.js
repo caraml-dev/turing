@@ -77,7 +77,7 @@ export const alertConfig = {
     appConfig.environment === "dev" ? "development" : appConfig.environment,
 };
 
-export const experimentEngineRemote = {
-  appName: process.env.REACT_APP_EXPERIMENT_ENGINE_REMOTE_APPNAME,
-  url: process.env.REACT_APP_EXPERIMENT_ENGINE_REMOTE_URL,
+export const defaultExperimentEngine = {
+  appName: process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_REMOTE_APPNAME,
+  url: process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE_REMOTE_URL,
 };

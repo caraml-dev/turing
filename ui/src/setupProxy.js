@@ -40,12 +40,4 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   );
-  app.use(
-    "http://localhost:3002",
-    createProxyMiddleware({
-      target: "http://localhost:3002",
-      pathRewrite: { "^http://localhost:3002": "" },
-      changeOrigin: true,
-    })
-  );
 };

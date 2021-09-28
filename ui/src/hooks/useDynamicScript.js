@@ -13,7 +13,8 @@ const useDynamicScript = (args) => {
 
     const element = document.createElement("script");
 
-    element.src = args.url;
+    // Append query string to prevent serving the cached version of the file
+    element.src = args.url + "?" + Math.floor(Date.now() / 1000);
     element.type = "text/javascript";
     element.async = true;
 

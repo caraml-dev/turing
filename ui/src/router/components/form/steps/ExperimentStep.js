@@ -10,7 +10,7 @@ import { ExperimentConfigGroup } from "../components/experiment_config/Experimen
 import { ensemblerTypeOptions } from "../components/ensembler_config/typeOptions";
 import { getExperimentEngineOptions } from "../components/experiment_config/typeOptions";
 
-export const ExperimentStep = ({ projectId }) => {
+export const ExperimentStep = () => {
   const {
     data: {
       config: {
@@ -47,7 +47,6 @@ export const ExperimentStep = ({ projectId }) => {
     }
   }, [experiment_engine.type, engineProps, onChange, ensemblerType]);
 
-  /* Check for xp should be replaced by a check for the default engine property. */
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>

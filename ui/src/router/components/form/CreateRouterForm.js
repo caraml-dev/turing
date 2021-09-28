@@ -50,7 +50,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     },
     {
       title: "Experiments",
-      children: <ExperimentStep projectId={projectId} />,
+      children: <ExperimentStep />,
       validationSchema: schema[1],
       validationContext: { experimentEngineOptions },
     },
@@ -78,7 +78,8 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary">
+      confirmButtonColor="primary"
+    >
       {(onSubmit) => (
         <StepsWizardHorizontal
           steps={steps}
