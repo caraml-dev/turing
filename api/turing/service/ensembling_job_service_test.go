@@ -87,12 +87,12 @@ func generateEnsemblingJobFixture(
 		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
 			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
-				ArtifactUri:   ref.String("gs://bucket/ensembler"),
-				EnsemblerName: ref.String("ensembler"),
-				Resources:     nullableEnsemblingResources,
-				Env:           &envVars,
+				ArtifactUri:        ref.String("gs://bucket/ensembler"),
+				EnsemblerName:      ref.String("ensembler"),
+				Resources:          nullableEnsemblingResources,
+				Env:                &envVars,
+				ServiceAccountName: ref.String(fmt.Sprintf("test-service-account-%d", i)),
 			},
-			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
 		},
 		JobConfig: &models.JobConfig{
 			Version: "v1",
@@ -472,7 +472,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				}
 
 				if tt.removeDriverCPURequest {
-					resources := tt.request.InfraConfig.GetResources()
+					resources := tt.request.InfraConfig.Resources.Get()
 					resources.DriverCpuRequest = nil
 				}
 
@@ -522,7 +522,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					assert.Equal(
 						t,
 						*defaultConfigurations.BatchEnsemblingJobResources.DriverCpuRequest,
-						*result.InfraConfig.GetResources().DriverCpuRequest,
+						*result.InfraConfig.Resources.Get().DriverCpuRequest,
 					)
 				}
 			})

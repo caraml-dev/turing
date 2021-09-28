@@ -66,11 +66,11 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
 			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
-				ArtifactUri:   ref.String("gs://bucket/ensembler"),
-				EnsemblerName: ref.String("ensembler"),
-				Resources:     nullableEnsemblingResources,
+				ArtifactUri:        ref.String("gs://bucket/ensembler"),
+				EnsemblerName:      ref.String("ensembler"),
+				Resources:          nullableEnsemblingResources,
+				ServiceAccountName: ref.String("test-service-account"),
 			},
-			ServiceAccountName: "test-service-account",
 		},
 		JobConfig: &models.JobConfig{
 			Version: "v1",

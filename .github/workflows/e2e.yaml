@@ -60,7 +60,6 @@ jobs:
           - "install_merlin" install_merlin \
           - "build_turing_router_docker_image" build_turing_router_docker_image \
           - "build_turing_apiserver_docker_image" build_turing_apiserver_docker_image \
-          - "build_turing_swagger_docker_image" build_turing_swagger_docker_image \
           --and-then \
           - "install_turing" install_turing
 

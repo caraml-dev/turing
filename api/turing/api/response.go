@@ -22,7 +22,7 @@ func (r *Response) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// WriteTo writes an Response to the provided http.ResponseWriter.
+// WriteTo writes a Response to the provided http.ResponseWriter.
 func (r *Response) WriteTo(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(r.code)

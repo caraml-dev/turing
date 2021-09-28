@@ -132,12 +132,12 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 
 	secretString, err := c.mlpService.GetSecret(
 		request.EnsemblingJob.ProjectID,
-		request.EnsemblingJob.InfraConfig.ServiceAccountName,
+		request.EnsemblingJob.InfraConfig.GetServiceAccountName(),
 	)
 	if err != nil {
 		return fmt.Errorf(
 			"service account %s is not found within %s project: %s",
-			request.EnsemblingJob.InfraConfig.ServiceAccountName,
+			request.EnsemblingJob.InfraConfig.GetServiceAccountName(),
 			request.Namespace,
 			err,
 		)

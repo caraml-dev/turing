@@ -95,34 +95,6 @@ spec:
         {{- with .Values.turing.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      - name: swagger-ui
-        image: {{ .Values.swaggerUi.image.registry }}{{ .Values.swaggerUi.image.repository }}:{{ .Values.swaggerUi.image.tag }}
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: {{ .Values.swaggerUi.service.internalPort }}
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 500m
-            memory: 128Mi
-        env:
-        - name: LAYOUT
-          value: "BaseLayout"
-        - name: SWAGGER_JSON
-          value: "/app/api/openapi.yaml"
-        - name: PORT
-          value: "{{ .Values.swaggerUi.service.internalPort }}"
-        - name: API_SERVER
-          value: "{{ .Values.swaggerUi.apiServer }}"
-        command: ['sh', '-c']
-        args:
-        - |
-          echo "Update Swagger config..."
-          sed -r -i 's%^((\s*)-(\s*)url\s*:).*$$%\1 "'$${API_SERVER}'"%' $${SWAGGER_JSON}
-          echo "Running Swagger UI..."
-          /usr/share/nginx/run.sh
       {{- with .Values.turing.extraContainers }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

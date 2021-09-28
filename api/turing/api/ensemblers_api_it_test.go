@@ -1,14 +1,18 @@
 // +build integration
 
-package api
+package api_test
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api"
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/server"
 	"github.com/gojek/turing/api/turing/service/mocks"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -33,7 +37,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 		parsed       models.EnsemblerLike
 		saved        models.EnsemblerLike
 		ensemblerSvc func(models.EnsemblerLike, models.EnsemblerLike) service.EnsemblersService
-		expected     func(models.EnsemblerLike) *Response
+		expected     func(models.EnsemblerLike) *api.Response
 	}{
 		"failure | project doesn't exist": {
 			method: http.MethodPost,
@@ -42,8 +46,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
  				"type": "pyfunc",
 				"name": "my-ensembler-1"
 			}`,
-			expected: func(_ models.EnsemblerLike) *Response {
-				return NotFound("project not found", "error")
+			expected: func(_ models.EnsemblerLike) *api.Response {
+				return api.NotFound("project not found", "error")
 			},
 		},
 
@@ -51,8 +55,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 			method: http.MethodPost,
 			path:   "/projects/1/ensemblers",
 			body:   "string",
-			expected: func(_ models.EnsemblerLike) *Response {
-				return BadRequest(
+			expected: func(_ models.EnsemblerLike) *api.Response {
+				return api.BadRequest(
 					"invalid request body",
 					"Failed to deserialize request body: invalid character 's' looking for beginning of value")
 			},
@@ -64,8 +68,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
  				"type": "unknown",
 				"name": "ensembler-unrecognized"
 			}`,
-			expected: func(_ models.EnsemblerLike) *Response {
-				return BadRequest(
+			expected: func(_ models.EnsemblerLike) *api.Response {
+				return api.BadRequest(
 					"invalid request body",
 					"Failed to deserialize request body: unsupported ensembler type: unknown")
 			},
@@ -77,8 +81,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
  				"type": "pyfunc",
 				"artifact_uri": "gs://unknown"
 			}`,
-			expected: func(_ models.EnsemblerLike) *Response {
-				return BadRequest(
+			expected: func(_ models.EnsemblerLike) *api.Response {
+				return api.BadRequest(
 					"invalid request body",
 					"Key: 'CreateOrUpdateEnsemblerRequest.EnsemblerLike.GenericEnsembler.Name' Error:Field validation for 'Name' failed on the 'required' tag")
 			},
@@ -106,8 +110,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 					Return(nil, fmt.Errorf(`ensembler with name "%s" already exists`, parsed.GetName()))
 				return mockSvc
 			},
-			expected: func(_ models.EnsemblerLike) *Response {
-				return InternalServerError(
+			expected: func(_ models.EnsemblerLike) *api.Response {
+				return api.InternalServerError(
 					"unable to save an ensembler",
 					`ensembler with name "new-ensembler" already exists`)
 			},
@@ -144,8 +148,8 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 					Return(saved, nil)
 				return mockSvc
 			},
-			expected: func(ensembler models.EnsemblerLike) *Response {
-				return Created(ensembler)
+			expected: func(ensembler models.EnsemblerLike) *api.Response {
+				return api.Created(ensembler)
 			},
 		},
 	}
@@ -156,10 +160,14 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 			if tt.ensemblerSvc != nil {
 				ensemblerSvc = tt.ensemblerSvc(tt.parsed, tt.saved)
 			}
-			router := NewRouter(&AppContext{
+
+			router := mux.NewRouter()
+
+			appCtx := &api.AppContext{
 				MLPService:        mlpSvc,
 				EnsemblersService: ensemblerSvc,
-			})
+			}
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
 
 			actual := httptest.NewRecorder()
 

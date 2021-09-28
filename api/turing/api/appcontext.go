@@ -1,8 +1,6 @@
 package api
 
 import (
-	"os"
-
 	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
@@ -19,9 +17,7 @@ import (
 
 // AppContext stores the entities relating to the application's context
 type AppContext struct {
-	Authorizer        *middleware.Authorizer
-	OpenAPIValidation *middleware.OpenAPIValidation
-
+	Authorizer *middleware.Authorizer
 	// DAO
 	DeploymentService     service.DeploymentService
 	RoutersService        service.RoutersService
@@ -159,28 +155,6 @@ func NewAppContext(
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}
-	}
-
-	// Initialize OpenAPI validation middleware
-	if _, err = os.Stat(cfg.SwaggerFile); os.IsExist(err) {
-		return nil, errors.Wrapf(err, "Swagger spec file not found")
-	}
-
-	appContext.OpenAPIValidation, err = middleware.NewOpenAPIValidation(
-		cfg.SwaggerFile,
-		middleware.OpenAPIValidationOptions{
-			// Authentication is ignored because it is handled by another middleware
-			IgnoreAuthentication: true,
-			// Servers declaration (e.g. validating the Host value in http request) in Swagger is
-			// ignored so that the configuration is simpler (since this server value can change depends on
-			// where Turing API is deployed, localhost or staging/production environment).
-			//
-			// Validating path parameters, request and response body is the most useful in typical cases.
-			IgnoreServers: true,
-		},
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to initialize OpenAPI Validation middleware")
 	}
 
 	return appContext, nil
