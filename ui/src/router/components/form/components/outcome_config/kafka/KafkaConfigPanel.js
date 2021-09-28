@@ -10,9 +10,9 @@ import {
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
-import { resultLoggingConfig } from "../../../../../../config.js";
+import { useConfig } from "../../../../../../config.js";
 
-const logSerializationFormatOptions = [
+const logSerializationFormatOptions = (protoUrl) => [
   {
     value: "json",
     inputDisplay: "JSON",
@@ -20,8 +20,8 @@ const logSerializationFormatOptions = [
   {
     value: "protobuf",
     inputDisplay: "Protobuf",
-    helpText: !!resultLoggingConfig.protoUrl ? (
-      <EuiLink href={resultLoggingConfig.protoUrl} target="_blank" external>
+    helpText: !!protoUrl ? (
+      <EuiLink href={protoUrl} target="_blank" external>
         TuringResultLog.proto
       </EuiLink>
     ) : (
@@ -35,8 +35,12 @@ export const KafkaConfigPanel = ({
   onChangeHandler,
   errors = {},
 }) => {
+  const {
+    resultLoggingConfig: { protoUrl: kafkaProtoUrl },
+  } = useConfig();
   const { onChange } = useOnChangeHandler(onChangeHandler);
-  const selectedFormat = logSerializationFormatOptions.find(
+
+  const selectedFormat = logSerializationFormatOptions(kafkaProtoUrl).find(
     (option) => option.value === kafkaConfig.serialization_format
   );
 
@@ -97,7 +101,7 @@ export const KafkaConfigPanel = ({
           display="row">
           <EuiSuperSelect
             fullWidth
-            options={logSerializationFormatOptions}
+            options={logSerializationFormatOptions(kafkaProtoUrl)}
             valueOfSelected={(selectedFormat || {}).value || ""}
             onChange={onChange("serialization_format")}
             isInvalid={!!errors.serialization_format}

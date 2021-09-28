@@ -5,7 +5,7 @@ import { get } from "../../../components/form/utils";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
 import { EuiPanel } from "@elastic/eui";
-import { appConfig } from "../../../config";
+import { useConfig } from "../../../config";
 import { useLogsEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsEmitter";
 
 const components = [
@@ -24,7 +24,9 @@ const components = [
 ];
 
 export const RouterLogsView = ({ router }) => {
-  const { podLogs: configOptions } = appConfig;
+  const {
+    appConfig: { podLogs: configOptions },
+  } = useConfig();
 
   useEffect(() => {
     replaceBreadcrumbs([
@@ -52,7 +54,8 @@ export const RouterLogsView = ({ router }) => {
     query,
     (entries) =>
       !!entries.length ? entries[entries.length - 1].timestamp : undefined,
-    (entries) => entries.map((entry) => LogEntry.fromJson(entry).toString())
+    (entries) => entries.map((entry) => LogEntry.fromJson(entry).toString()),
+    configOptions
   );
 
   const availableComponents = components.filter(

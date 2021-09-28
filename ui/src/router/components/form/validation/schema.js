@@ -1,7 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from "yup";
 import { get } from "@gojek/mlp-ui";
-import { appConfig } from "../../../../config";
 import { experimentConfigSchema } from "../components/experiment_config/validation/schema";
 import {
   fieldSchema,
@@ -113,34 +112,38 @@ const environmentVariableSchema = yup.object().shape({
   value: yup.string(),
 });
 
-const resourceRequestSchema = yup.object().shape({
-  cpu_request: yup
-    .string()
-    .matches(cpuRequestRegex, 'Valid CPU value is required, e.g "2" or "500m"'),
-  memory_request: yup
-    .string()
-    .matches(memRequestRegex, "Valid RAM value is required, e.g. 512Mi"),
-  min_replica: yup
-    .number()
-    .typeError("Min Replicas value is required")
-    .min(0, "Min Replicas can not be less than 0"),
-  max_replica: yup
-    .number()
-    .typeError("Max Replicas value is required")
-    .min(
-      yup.ref(`min_replica`),
-      "Max Replicas can not be less than Min Replicas"
-    )
-    .max(
-      appConfig.scaling.maxAllowedReplica,
-      "Max Replicas value has exceeded allowed number of replicas: ${max}"
-    )
-    .when("min_replica", (minReplica, schema) =>
-      minReplica === 0
-        ? schema.positive("Max Replica should be positive")
-        : schema
-    ),
-});
+const resourceRequestSchema = (maxAllowedReplica) =>
+  yup.object().shape({
+    cpu_request: yup
+      .string()
+      .matches(
+        cpuRequestRegex,
+        'Valid CPU value is required, e.g "2" or "500m"'
+      ),
+    memory_request: yup
+      .string()
+      .matches(memRequestRegex, "Valid RAM value is required, e.g. 512Mi"),
+    min_replica: yup
+      .number()
+      .typeError("Min Replicas value is required")
+      .min(0, "Min Replicas can not be less than 0"),
+    max_replica: yup
+      .number()
+      .typeError("Max Replicas value is required")
+      .min(
+        yup.ref(`min_replica`),
+        "Max Replicas can not be less than Min Replicas"
+      )
+      .max(
+        maxAllowedReplica,
+        "Max Replicas value has exceeded allowed number of replicas: ${max}"
+      )
+      .when("min_replica", (minReplica, schema) =>
+        minReplica === 0
+          ? schema.positive("Max Replica should be positive")
+          : schema
+      ),
+  });
 
 const enricherSchema = yup.object().shape({
   type: yup
@@ -156,18 +159,19 @@ const dockerImageSchema = yup
     "Valid Docker Image value should be provided, e.g. kennethreitz/httpbin:latest"
   );
 
-const dockerDeploymentSchema = yup.object().shape({
-  image: dockerImageSchema.required("Docker Image is required"),
-  endpoint: yup.string().required("Endpoint value is required"),
-  port: yup
-    .number()
-    .integer()
-    .typeError("Port value is required, e.g. 8080")
-    .required("Port value is required, e.g. 8080"),
-  timeout: timeoutSchema.required("Timeout is required"),
-  env: yup.array(environmentVariableSchema),
-  resource_request: resourceRequestSchema,
-});
+const dockerDeploymentSchema = (maxAllowedReplica) =>
+  yup.object().shape({
+    image: dockerImageSchema.required("Docker Image is required"),
+    endpoint: yup.string().required("Endpoint value is required"),
+    port: yup
+      .number()
+      .integer()
+      .typeError("Port value is required, e.g. 8080")
+      .required("Port value is required, e.g. 8080"),
+    timeout: timeoutSchema.required("Timeout is required"),
+    env: yup.array(environmentVariableSchema),
+    resource_request: resourceRequestSchema(maxAllowedReplica),
+  });
 
 const mappingSchema = yup.object().shape({
   experiment: yup.string().required("Experiment name is required"),
@@ -214,7 +218,7 @@ const kafkaConfigSchema = yup.object().shape({
     ),
 });
 
-const schema = [
+const schema = (maxAllowedReplica) => [
   yup.object().shape({
     name: yup
       .string()
@@ -237,7 +241,7 @@ const schema = [
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
       rules: yup.array(trafficRuleSchema),
-      resource_request: resourceRequestSchema,
+      resource_request: resourceRequestSchema(maxAllowedReplica),
     }),
   }),
   yup.object().shape({
@@ -261,7 +265,9 @@ const schema = [
       enricher: yup.lazy((value) => {
         switch (value.type) {
           case "docker":
-            return enricherSchema.concat(dockerDeploymentSchema);
+            return enricherSchema.concat(
+              dockerDeploymentSchema(maxAllowedReplica)
+            );
           default:
             return enricherSchema;
         }
@@ -280,7 +286,7 @@ const schema = [
           ),
         docker_config: yup.mixed().when("type", {
           is: "docker",
-          then: dockerDeploymentSchema,
+          then: dockerDeploymentSchema(maxAllowedReplica),
         }),
         standard_config: yup.mixed().when("type", {
           is: "standard",

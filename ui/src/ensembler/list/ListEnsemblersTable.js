@@ -7,14 +7,12 @@ import {
   EuiSearchBar,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from "@elastic/eui";
-import { appConfig } from "../../config";
+import { useConfig } from "../../config";
 import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
-
-const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
+import { DateFromNow } from "@gojek/mlp-ui";
 
 export const ListEnsemblersTable = ({
   items,
@@ -28,6 +26,11 @@ export const ListEnsemblersTable = ({
   onRowClick,
   ...props
 }) => {
+  const {
+    appConfig: {
+      tables: { defaultTextSize, defaultIconSize },
+    },
+  } = useConfig();
   const searchQuery = useMemo(() => {
     const parts = [];
     if (!!filter.search) {
@@ -79,29 +82,13 @@ export const ListEnsemblersTable = ({
       name: "Created",
       sortable: true,
       width: "20%",
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "20%",
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       field: "id",

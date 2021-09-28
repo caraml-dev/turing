@@ -14,8 +14,8 @@ clean:
 .PHONY: setup
 setup:
 	@echo "Setting up tools..."
-	@test -x ${GOPATH}/bin/golangci-lint || \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.41.1/install.sh | sh -s -- -b ${GOPATH}/bin v1.41.1
+	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.41.1/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
 .PHONY: fmt
 fmt:

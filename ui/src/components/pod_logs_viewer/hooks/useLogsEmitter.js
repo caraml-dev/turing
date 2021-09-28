@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { appConfig } from "../../../config";
 import { useTuringPollingApiEmitter } from "../../../hooks/useTuringPollingApiEmitter";
 import { useLogsApiEmitter } from "./useLogsApiEmitter";
 
@@ -7,9 +6,9 @@ export const useLogsEmitter = (
   apiEndpoint,
   query,
   extractTimestamp,
-  processLogs
+  processLogs,
+  configOptions
 ) => {
-  const { podLogs: configOptions } = appConfig;
   const [apiOptions, setApiOptions] = useState({ query });
 
   const setQuery = useCallback(

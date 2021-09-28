@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { AccordionForm } from "../../../components/accordion_form";
 import { RouterStep } from "./steps/RouterStep";
 import schema from "./validation/schema";
@@ -8,8 +8,20 @@ import { EnsemblerStep } from "./steps/EnsemblerStep";
 import { OutcomeStep } from "./steps/OutcomeStep";
 import { ConfigSectionTitle } from "../../../components/config_section";
 import ExperimentEngineContext from "../../../providers/experiments/context";
+import { useConfig } from "../../../config";
 
 export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
+  const {
+    appConfig: {
+      scaling: { maxAllowedReplica },
+    },
+  } = useConfig();
+
+  const validationSchema = useMemo(
+    () => schema(maxAllowedReplica),
+    [maxAllowedReplica]
+  );
+
   const { experimentEngineOptions } = useContext(ExperimentEngineContext);
 
   const sections = [
@@ -17,32 +29,32 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
       title: "Router",
       iconType: "bolt",
       children: <RouterStep projectId={projectId} />,
-      validationSchema: schema[0],
+      validationSchema: validationSchema[0],
     },
     {
       title: "Experiments",
       iconType: "beaker",
       children: <ExperimentStep />,
-      validationSchema: schema[1],
+      validationSchema: validationSchema[1],
       validationContext: { experimentEngineOptions },
     },
     {
       title: "Enricher",
       iconType: "package",
       children: <EnricherStep projectId={projectId} />,
-      validationSchema: schema[2],
+      validationSchema: validationSchema[2],
     },
     {
       title: "Ensembler",
       iconType: "aggregate",
       children: <EnsemblerStep projectId={projectId} />,
-      validationSchema: schema[3],
+      validationSchema: validationSchema[3],
     },
     {
       title: "Outcome Tracking",
       iconType: "visTagCloud",
       children: <OutcomeStep projectId={projectId} />,
-      validationSchema: schema[4],
+      validationSchema: validationSchema[4],
     },
   ];
 

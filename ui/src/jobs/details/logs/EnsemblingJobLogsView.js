@@ -11,7 +11,7 @@ import {
   EuiPanel,
   EuiText,
 } from "@elastic/eui";
-import { appConfig } from "../../../config";
+import { useConfig } from "../../../config";
 import { useLogsEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsEmitter";
 
 const components = [
@@ -30,7 +30,9 @@ const components = [
 ];
 
 export const EnsemblingJobLogsView = ({ job }) => {
-  const { podLogs: configOptions } = appConfig;
+  const {
+    appConfig: { podLogs: configOptions },
+  } = useConfig();
   const [loggingUrl, setLoggingUrl] = useState();
 
   useEffect(() => {
@@ -70,7 +72,8 @@ export const EnsemblingJobLogsView = ({ job }) => {
       return (data.logs || []).map((entry) =>
         LogEntry.fromJson(entry).toString()
       );
-    }
+    },
+    configOptions
   );
 
   return (

@@ -6,7 +6,7 @@ import { EnvVariablesPanel } from "../components/docker_config/EnvVariablesPanel
 import { EnricherTypePanel } from "../components/enricher_config/EnricherTypePanel";
 import { DockerDeploymentPanel } from "../components/docker_config/DockerDeploymentPanel";
 import { DockerRegistriesContextProvider } from "../../../../providers/docker/context";
-import { appConfig } from "../../../../config";
+import { useConfig } from "../../../../config";
 import FormValidationContext from "../../../../components/form/validation/context";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
@@ -14,6 +14,11 @@ import { enricherTypeOptions } from "../components/enricher_config/typeOptions";
 import { SecretsContextProvider } from "../../../../providers/secrets/context";
 
 export const EnricherStep = ({ projectId }) => {
+  const {
+    appConfig: {
+      scaling: { maxAllowedReplica },
+    },
+  } = useConfig();
   const {
     data: {
       config: { enricher },
@@ -62,7 +67,7 @@ export const EnricherStep = ({ projectId }) => {
             <ResourcesPanel
               resourcesConfig={enricher.resource_request}
               onChangeHandler={onChange("config.enricher.resource_request")}
-              maxAllowedReplica={appConfig.scaling.maxAllowedReplica}
+              maxAllowedReplica={maxAllowedReplica}
               errors={get(errors, "config.enricher.resource_request")}
             />
           </EuiFlexItem>
