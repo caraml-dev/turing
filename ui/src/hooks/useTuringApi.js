@@ -1,6 +1,6 @@
 import { AuthContext, useApi } from "@gojek/mlp-ui";
 import { useContext } from "react";
-import { apiConfig } from "../config";
+import { useConfig } from "../config";
 
 export const useTuringApi = (
   endpoint,
@@ -8,6 +8,7 @@ export const useTuringApi = (
   result,
   callImmediately = true
 ) => {
+  const { apiConfig } = useConfig();
   const authCtx = useContext(AuthContext);
 
   return useApi(

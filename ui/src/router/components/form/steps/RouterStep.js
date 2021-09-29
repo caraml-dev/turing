@@ -5,13 +5,18 @@ import { RoutesPanel } from "../components/router_config/RoutesPanel";
 import { ResourcesPanel } from "../components/ResourcesPanel";
 import { FormContext } from "../../../../components/form/context";
 import { MerlinEndpointsProvider } from "../../../../providers/endpoints/MerlinEndpointsProvider";
-import { appConfig } from "../../../../config";
+import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";
 import FormValidationContext from "../../../../components/form/validation/context";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { RulesPanel } from "../components/router_config/RulesPanel";
 
 export const RouterStep = ({ projectId }) => {
+  const {
+    appConfig: {
+      scaling: { maxAllowedReplica },
+    },
+  } = useConfig();
   const { data, onChangeHandler } = useContext(FormContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
   const { errors } = useContext(FormValidationContext);
@@ -53,7 +58,7 @@ export const RouterStep = ({ projectId }) => {
         <ResourcesPanel
           resourcesConfig={get(data, "config.resource_request")}
           onChangeHandler={onChange("config.resource_request")}
-          maxAllowedReplica={appConfig.scaling.maxAllowedReplica}
+          maxAllowedReplica={maxAllowedReplica}
           errors={get(errors, "config.resource_request")}
         />
       </EuiFlexItem>
