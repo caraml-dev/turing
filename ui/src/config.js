@@ -1,3 +1,4 @@
+import React from "react";
 import objectAssignDeep from "object-assign-deep";
 
 /*
@@ -87,8 +88,15 @@ const buildTimeConfig = {
   alertConfig,
 };
 
-export const useConfig = () => {
-  const runTimeConfig = window.config;
+const ConfigContext = React.createContext({});
 
-  return objectAssignDeep({}, buildTimeConfig, runTimeConfig);
+export const ConfigProvider = ({ children }) => {
+  const runTimeConfig = window.config;
+  const config = objectAssignDeep({}, buildTimeConfig, runTimeConfig);
+
+  return (
+    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
+  );
 };
+
+export const useConfig = () => React.useContext(ConfigContext);
