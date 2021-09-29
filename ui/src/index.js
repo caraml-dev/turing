@@ -4,9 +4,9 @@ import "./assets/style.scss";
 import * as serviceWorker from "./serviceWorker";
 import App from "./App";
 import * as Sentry from "@sentry/browser";
-import { useConfig } from "./config";
+import { ConfigProvider, useConfig } from "./config";
 
-const SentryApp = (App) => {
+const SentryApp = ({ children }) => {
   const {
     sentryConfig: { dsn, environment, tags },
   } = useConfig();
@@ -14,10 +14,18 @@ const SentryApp = (App) => {
   Sentry.init({ dsn, environment });
   Sentry.setTags(tags);
 
-  return <App />;
+  return children;
 };
 
-ReactDOM.render(SentryApp(App), document.getElementById("root"));
+const TuringUI = () => (
+  <ConfigProvider>
+    <SentryApp>
+      <App />
+    </SentryApp>
+  </ConfigProvider>
+);
+
+ReactDOM.render(TuringUI(), document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
