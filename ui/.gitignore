@@ -15,6 +15,3 @@ yarn-error.log*
 
 .env.development.local
 /.eslintcache
-
-# linting
-.husky/

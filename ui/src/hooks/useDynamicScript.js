@@ -7,10 +7,6 @@ const useDynamicScript = (args) => {
   const [failed, setFailed] = React.useState(false);
 
   React.useEffect(() => {
-    if (!args.url) {
-      return;
-    }
-
     const element = document.createElement("script");
 
     // Append query string to prevent serving the cached version of the file
