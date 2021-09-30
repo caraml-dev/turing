@@ -16,6 +16,7 @@ import { RouterDetailsView } from "./router/details/RouterDetailsView";
 import { RouterVersionDetailsView } from "./router/versions/details/RouterVersionDetailsView";
 import { PrivateLayout } from "./PrivateLayout";
 import { ListEnsemblersView } from "./ensembler/list/ListEnsemblersView";
+import { ExperimentsRouter } from "./experiment/ExperimentsRouter";
 import { EnsemblingJobsRouter } from "./jobs/EnsemblingJobsRouter";
 import { useConfig } from "./config";
 
@@ -56,6 +57,12 @@ const App = () => {
             <PrivateRoute
               path={`${appConfig.homepage}/projects/:projectId/ensemblers`}
               render={PrivateLayout(ListEnsemblersView)}
+            />
+
+            {/* EXPERIMENTS */}
+            <PrivateRoute
+              path={`${appConfig.homepage}/projects/:projectId/experiments/*`}
+              render={PrivateLayout(ExperimentsRouter)}
             />
 
             {/* CREATE ROUTER */}

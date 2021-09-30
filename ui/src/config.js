@@ -79,6 +79,10 @@ const alertConfig = {
     appConfig.environment === "dev" ? "development" : appConfig.environment,
 };
 
+const defaultExperimentEngine = process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE
+  ? JSON.parse(process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE)
+  : {};
+
 const buildTimeConfig = {
   apiConfig,
   authConfig,
@@ -86,6 +90,7 @@ const buildTimeConfig = {
   sentryConfig,
   resultLoggingConfig,
   alertConfig,
+  defaultExperimentEngine,
 };
 
 const ConfigContext = React.createContext({});
