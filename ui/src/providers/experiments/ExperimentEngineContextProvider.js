@@ -27,8 +27,7 @@ export const ExperimentEngineContextProvider = ({ children }) => {
         experimentEngines,
         experimentEngineOptions,
         getEngineProperties,
-      }}
-    >
+      }}>
       {children}
     </ExperimentEngineContext.Provider>
   );

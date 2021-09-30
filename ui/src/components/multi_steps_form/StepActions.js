@@ -33,8 +33,7 @@ export const StepActions = ({
           color="primary"
           fill
           isLoading={isSubmitting}
-          onClick={onSubmit}
-        >
+          onClick={onSubmit}>
           {submitLabel}
         </EuiButton>
       </EuiFlexItem>

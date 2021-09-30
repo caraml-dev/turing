@@ -52,15 +52,13 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
           iconType="arrowDown"
           iconSide="right"
           className="fieldSourceLabel"
-          onClick={togglePopover}
-        >
+          onClick={togglePopover}>
           {selectedOption.inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s"
-    >
+      panelPaddingSize="s">
       <EuiContextMenu
         className="fieldSourceDropdown"
         initialPanelId={0}

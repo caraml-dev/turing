@@ -54,8 +54,7 @@ export const KafkaConfigPanel = ({
           }
           isInvalid={!!errors.brokers}
           error={errors.brokers}
-          display="row"
-        >
+          display="row">
           <EuiFieldText
             fullWidth
             placeholder="host:port"
@@ -72,8 +71,7 @@ export const KafkaConfigPanel = ({
           fullWidth
           label="Topic *"
           isInvalid={!!errors.topic}
-          error={errors.topic}
-        >
+          error={errors.topic}>
           <EuiFieldText
             fullWidth
             value={kafkaConfig.topic || ""}
@@ -96,8 +94,7 @@ export const KafkaConfigPanel = ({
           isInvalid={!!errors.serialization_format}
           error={errors.serialization_format}
           helpText={(selectedFormat || {}).helpText || ""}
-          display="row"
-        >
+          display="row">
           <EuiSuperSelect
             fullWidth
             options={logSerializationFormatOptions}

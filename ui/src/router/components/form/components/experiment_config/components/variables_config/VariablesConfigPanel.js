@@ -116,8 +116,7 @@ export const VariablesConfigPanel = ({
           size="m"
           content="Specify how the required (and any optional) experiment variables may be parsed from the request."
         />
-      }
-    >
+      }>
       <EuiSpacer size="xs" />
       {!!selectedVariables.length ? (
         <EuiFlexItem>

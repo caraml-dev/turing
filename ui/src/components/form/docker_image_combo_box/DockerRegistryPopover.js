@@ -27,15 +27,13 @@ export const DockerRegistryPopover = ({ value, registryOptions, onChange }) => {
           size="xs"
           iconType="arrowDown"
           iconSide="right"
-          onClick={togglePopover}
-        >
+          onClick={togglePopover}>
           {registryOptions.find((o) => o.value === value).inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s"
-    >
+      panelPaddingSize="s">
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );

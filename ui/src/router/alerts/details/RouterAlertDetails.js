@@ -41,8 +41,7 @@ export const RouterAlertDetails = ({ alertsData, routerStatus, ...props }) => {
           <EuiButton
             size="s"
             onClick={() => props.navigate("./edit")}
-            disabled={status !== Status.DEPLOYED}
-          >
+            disabled={status !== Status.DEPLOYED}>
             Configure Alerts
           </EuiButton>
         </EuiFlexItem>

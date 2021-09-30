@@ -78,8 +78,7 @@ export const MultiSectionFormValidationContextProvider = ({
 
   return (
     <FormValidationContext.Provider
-      value={{ onSubmit: onStartSubmitting, isSubmitting, errors }}
-    >
+      value={{ onSubmit: onStartSubmitting, isSubmitting, errors }}>
       {children}
     </FormValidationContext.Provider>
   );

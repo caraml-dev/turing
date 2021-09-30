@@ -61,8 +61,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert"
-          >
+            iconType="alert">
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
@@ -86,8 +85,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
                   onEditRouter={() => props.navigate("./edit")}
                   onDeploySuccess={fetchRouterDetails}
                   onUndeploySuccess={fetchRouterDetails}
-                  onDeleteSuccess={() => props.navigate("../")}
-                >
+                  onDeleteSuccess={() => props.navigate("../")}>
                   {(getActions) => (
                     <RouterDetailsPageNavigation
                       router={router}

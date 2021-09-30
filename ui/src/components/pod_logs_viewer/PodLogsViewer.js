@@ -105,8 +105,7 @@ export const PodLogsViewer = ({
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      className="euiFlexGroup---logsContainer"
-    >
+      className="euiFlexGroup---logsContainer">
       <EuiFlexItem grow={false}>
         <EuiSearchBar {...search} />
       </EuiFlexItem>

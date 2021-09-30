@@ -90,8 +90,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       render: (endpoint) => (
         <EuiCopy
           textToCopy={endpoint}
-          beforeMessage="Click to copy URL to clipboard"
-        >
+          beforeMessage="Click to copy URL to clipboard">
           {(copy) => (
             <EuiLink onClick={copy}>
               <EuiIcon type={"copyClipboard"} size="s" />

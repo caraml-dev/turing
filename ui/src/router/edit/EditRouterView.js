@@ -48,8 +48,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary"
-    >
+      confirmButtonColor="primary">
       {(onSubmit) =>
         !showDiffView ? (
           <ExperimentEngineContextProvider>

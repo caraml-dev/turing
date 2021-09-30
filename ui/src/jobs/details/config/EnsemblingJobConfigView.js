@@ -54,8 +54,7 @@ export const EnsemblingJobConfigView = ({ job }) => {
           <EuiCallOut
             title="Ensembling job has failed"
             color="danger"
-            iconType="alert"
-          >
+            iconType="alert">
             <p>
               <b>Reason: </b>
               {job.error}

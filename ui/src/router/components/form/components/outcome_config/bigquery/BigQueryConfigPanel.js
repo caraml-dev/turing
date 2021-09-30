@@ -37,8 +37,7 @@ export const BigQueryConfigPanel = ({
           }
           isInvalid={!!errors.table}
           error={errors.table}
-          display="row"
-        >
+          display="row">
           <EuiFieldText
             fullWidth
             placeholder="project_name.dataset.table"
@@ -64,8 +63,7 @@ export const BigQueryConfigPanel = ({
                 <EuiLink
                   href={`/projects/${projectId}/settings/secrets-management`}
                   target="_blank"
-                  external
-                >
+                  external>
                   Secrets Management
                 </EuiLink>{" "}
                 page.
@@ -73,8 +71,7 @@ export const BigQueryConfigPanel = ({
             </EuiText>
           }
           isInvalid={!!errors.service_account_secret}
-          error={errors.service_account_secret}
-        >
+          error={errors.service_account_secret}>
           <ServiceAccountComboBox
             fullwidth
             value={bigQueryConfig.service_account_secret}

@@ -44,8 +44,7 @@ export const RedeployRouterModal = ({ onSuccess, redeployRouterRef }) => {
         </p>
       }
       confirmButtonText="Redeploy"
-      confirmButtonColor="primary"
-    >
+      confirmButtonColor="primary">
       {(onSubmit) =>
         (redeployRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />

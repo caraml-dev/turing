@@ -49,8 +49,7 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
           onDeploySuccess={() =>
             props.navigate("./", { state: { refresh: true } })
           }
-          onDeleteSuccess={fetchVersions}
-        >
+          onDeleteSuccess={fetchVersions}>
           {(actions) => (
             <ListRouterVersionsTable
               items={versions.data}

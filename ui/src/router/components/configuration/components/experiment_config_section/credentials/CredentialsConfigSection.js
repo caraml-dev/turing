@@ -33,8 +33,7 @@ export const CredentialsConfigSection = ({
       <EuiDescriptionList
         textStyle="reverse"
         type="responsiveColumn"
-        compressed
-      >
+        compressed>
         <EuiDescriptionListTitle>Timeout</EuiDescriptionListTitle>
         <EuiDescriptionListDescription title={deployment.timeout}>
           {deployment.timeout}

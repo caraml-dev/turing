@@ -12,13 +12,11 @@ export const FormValidationContextProvider = ({
   <MultiSectionFormValidationContextProvider
     onSubmit={onSubmit}
     schemas={[schema]}
-    contexts={[context]}
-  >
+    contexts={[context]}>
     <FormValidationContext.Consumer>
       {({ onSubmit, isSubmitting, errors }) => (
         <FormValidationContext.Provider
-          value={{ onSubmit, isSubmitting, errors: errors[0] }}
-        >
+          value={{ onSubmit, isSubmitting, errors: errors[0] }}>
           {children}
         </FormValidationContext.Provider>
       )}

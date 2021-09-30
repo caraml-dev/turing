@@ -43,8 +43,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert"
-          >
+            iconType="alert">
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (

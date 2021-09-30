@@ -89,8 +89,7 @@ export const ListEnsemblingJobsTable = ({
             onClick={(e) => {
               e.stopPropagation();
               props.navigate(`./?ensembler_id=${id}`);
-            }}
-          >
+            }}>
             <EuiIcon type={"aggregate"} size={defaultIconSize} />
             {ensemblers[id].name}
           </EuiLink>
@@ -113,8 +112,7 @@ export const ListEnsemblingJobsTable = ({
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -127,8 +125,7 @@ export const ListEnsemblingJobsTable = ({
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -201,8 +198,7 @@ export const ListEnsemblingJobsTable = ({
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert"
-    >
+      iconType="alert">
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

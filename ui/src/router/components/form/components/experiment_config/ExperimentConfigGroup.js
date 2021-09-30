@@ -58,8 +58,7 @@ export const ExperimentConfigGroup = ({
     <ExperimentContextProvider
       engineProps={experimentConfig.engine}
       clientId={experimentConfig.client.id || ""}
-      experimentIds={selectedExpIds.join()}
-    >
+      experimentIds={selectedExpIds.join()}>
       {experimentConfig.engine.client_selection_enabled && (
         <EuiFlexItem grow={false}>
           <ClientConfigPanel

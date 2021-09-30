@@ -68,8 +68,7 @@ export const DefaultItemAction = ({ action, enabled, item, className }) => {
         href={action.href}
         target={action.target}
         data-test-subj={action["data-test-subj"]}
-        flush="right"
-      >
+        flush="right">
         {actionContent}
       </EuiButtonEmpty>
     );

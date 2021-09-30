@@ -16,8 +16,9 @@ export const EnsemblingJobDetailsPageHeader = ({ job, ...props }) => {
         <EuiButtonEmpty
           size="s"
           isLoading={!ensemblersLoaded}
-          onClick={() => props.navigate(`../?ensembler_id=${job.ensembler_id}`)}
-        >
+          onClick={() =>
+            props.navigate(`../?ensembler_id=${job.ensembler_id}`)
+          }>
           {!!ensemblers[job.ensembler_id] ? (
             <EuiText size="s">
               <EuiIcon type={"aggregate"} size="s" />{" "}

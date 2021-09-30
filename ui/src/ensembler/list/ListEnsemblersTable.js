@@ -82,8 +82,7 @@ export const ListEnsemblersTable = ({
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -97,8 +96,7 @@ export const ListEnsemblersTable = ({
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -124,8 +122,7 @@ export const ListEnsemblersTable = ({
         <EuiButtonEmpty
           onClick={(_) => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
           iconType="storage"
-          size="xs"
-        >
+          size="xs">
           <EuiText size="xs">Batch Jobs</EuiText>
         </EuiButtonEmpty>
       ),
@@ -170,8 +167,7 @@ export const ListEnsemblersTable = ({
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert"
-    >
+      iconType="alert">
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

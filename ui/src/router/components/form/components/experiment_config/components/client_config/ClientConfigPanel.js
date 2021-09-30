@@ -76,8 +76,7 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
           }
           isInvalid={!!errors.id}
           error={errors.id}
-          display="row"
-        >
+          display="row">
           <EuiComboBoxSelect
             fullWidth
             isLoading={isLoading("clients")}
@@ -95,8 +94,7 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
           fullWidth
           label="Passkey *"
           isInvalid={!!errors.passkey}
-          error={errors.passkey}
-        >
+          error={errors.passkey}>
           <EuiFieldText
             fullWidth
             placeholder="passkey"

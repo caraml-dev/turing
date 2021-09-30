@@ -7,8 +7,7 @@ export const StatusBadge = ({ status }) =>
     <EuiBadge
       className="euiBadge--status"
       color={status.color}
-      iconType={status.iconType}
-    >
+      iconType={status.iconType}>
       {status.label}
     </EuiBadge>
   ) : null;

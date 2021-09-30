@@ -21,8 +21,7 @@ export const EngineTypePanel = ({ type, options, onChange, errors }) => {
             }
             isInvalid={!!errors}
             error={errors}
-            display="row"
-          >
+            display="row">
             <EuiSuperSelect
               fullWidth
               options={options}

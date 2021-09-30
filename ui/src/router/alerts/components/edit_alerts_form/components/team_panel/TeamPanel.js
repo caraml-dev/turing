@@ -35,14 +35,12 @@ export const TeamPanel = ({ team, onChange, errors }) => {
               <a
                 href="https://go-jek.atlassian.net/wiki/spaces/DSP/pages/1731037258/Model+Endpoint+Alert#What-is-my-Team-Name?-How-to-get-one?"
                 target="_blank"
-                rel="noopener noreferrer"
-              >
+                rel="noopener noreferrer">
                 this guide
               </a>
               .
             </Fragment>
-          }
-        >
+          }>
           <EuiFormRow hasEmptyLabelSpace isInvalid={!!errors} error={errors}>
             <EuiComboBoxSelect
               singleSelection={{ asPlainText: true }}

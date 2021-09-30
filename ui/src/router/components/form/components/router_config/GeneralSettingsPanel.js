@@ -45,8 +45,7 @@ export const GeneralSettingsPanel = ({
           }
           isInvalid={!!errors.environment_name}
           error={errors.environment_name}
-          display="row"
-        >
+          display="row">
           <EuiSuperSelect
             fullWidth
             options={environmentOptions}
@@ -73,8 +72,7 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!errors.name}
               error={errors.name}
-              display="row"
-            >
+              display="row">
               <EuiFieldText
                 fullWidth
                 placeholder="deployment-name"
@@ -98,8 +96,7 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!get(errors, "config.timeout")}
               error={get(errors, "config.timeout")}
-              display="row"
-            >
+              display="row">
               <EuiFieldDuration
                 fullWidth
                 placeholder="100"

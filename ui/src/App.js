@@ -25,8 +25,7 @@ const App = () => (
     <MlpApiContextProvider
       mlpApiUrl={apiConfig.mlpApiUrl}
       timeout={apiConfig.apiTimeout}
-      useMockData={apiConfig.useMockData}
-    >
+      useMockData={apiConfig.useMockData}>
       <AuthProvider clientId={authConfig.oauthClientId}>
         <Router role="group">
           <Login path="/login" />

@@ -23,8 +23,7 @@ export const CollapsibleBadgeGroup = ({
             <EuiBadge
               key={idx}
               color={color}
-              onClick={!!onClick ? () => onClick(item) : undefined}
-            >
+              onClick={!!onClick ? () => onClick(item) : undefined}>
               {item}
             </EuiBadge>
           )

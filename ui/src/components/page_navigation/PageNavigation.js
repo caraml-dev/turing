@@ -28,8 +28,7 @@ export const PageNavigation = ({
               : { onClick: () => props.navigate(`./${tab.id}`) })}
             isSelected={selectedTab.startsWith(tab.id)}
             disabled={tab.disabled}
-            key={index}
-          >
+            key={index}>
             {tab.name}
           </EuiTab>
         ))}
@@ -58,8 +57,7 @@ const MoreActionsButton = ({ actions }) => {
           item.onClick();
         }}
         disabled={item.disabled}
-        className={item.color ? `euiTextColor--${item.color}` : ""}
-      >
+        className={item.color ? `euiTextColor--${item.color}` : ""}>
         {item.name}
       </EuiContextMenuItem>
     ));
@@ -85,8 +83,7 @@ const MoreActionsButton = ({ actions }) => {
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
       panelPaddingSize="none"
-      anchorPosition="downRight"
-    >
+      anchorPosition="downRight">
       <EuiContextMenuPanel
         hasFocus={false}
         className="euiContextPanel--moreActions"

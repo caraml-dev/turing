@@ -59,15 +59,13 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert"
-          >
+            iconType="alert">
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
           <ScrollToBottom
             className="scrollToBottom--container"
-            followButtonClassName="followButton"
-          >
+            followButtonClassName="followButton">
             <EventsList events={events} status={routerStatus} />
           </ScrollToBottom>
         )}

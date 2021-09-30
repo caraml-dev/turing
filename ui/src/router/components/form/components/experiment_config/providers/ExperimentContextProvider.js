@@ -135,8 +135,7 @@ export const ExperimentContextProvider = ({
         setVariablesValidated,
         isLoading,
         isLoaded,
-      }}
-    >
+      }}>
       {children}
     </ExperimentContext.Provider>
   );

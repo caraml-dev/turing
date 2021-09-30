@@ -84,8 +84,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -99,8 +98,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       render: (date) => (
         <EuiToolTip
           position="top"
-          content={moment(date, dateFormat).toLocaleString()}
-        >
+          content={moment(date, dateFormat).toLocaleString()}>
           <EuiText size={defaultTextSize}>
             {moment(date, dateFormat).fromNow()}
           </EuiText>
@@ -131,8 +129,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
             isDisabled={!item.monitoring_url}
             iconType="visLine"
             size="xs"
-            target="_blank"
-          >
+            target="_blank">
             <EuiText size="xs">Monitoring</EuiText>
           </EuiButtonEmpty>
         );
@@ -184,8 +181,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert"
-    >
+      iconType="alert">
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

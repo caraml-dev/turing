@@ -40,8 +40,7 @@ export const DockerDeploymentPanel = ({
           isInvalid={!!errors.image}
           error={errors.image}
           fullWidth
-          display="row"
-        >
+          display="row">
           <SelectDockerImageComboBox
             fullWidth
             value={image || `${appConfig.defaultDockerRegistry}/`}
@@ -60,8 +59,7 @@ export const DockerDeploymentPanel = ({
             <EuiFormRow
               label="Endpoint *"
               isInvalid={!!errors.endpoint}
-              error={errors.endpoint}
-            >
+              error={errors.endpoint}>
               <EuiFieldText
                 fullWidth
                 placeholder="/preprocess"
@@ -76,8 +74,7 @@ export const DockerDeploymentPanel = ({
             <EuiFormRow
               label="Port *"
               isInvalid={!!errors.port}
-              error={errors.port}
-            >
+              error={errors.port}>
               <EuiFieldNumber
                 fullWidth
                 min={0}
@@ -96,8 +93,7 @@ export const DockerDeploymentPanel = ({
             <EuiFormRow
               label="Timeout *"
               isInvalid={!!errors.timeout}
-              error={errors.timeout}
-            >
+              error={errors.timeout}>
               <EuiFieldDuration
                 fullWidth
                 placeholder="100"
@@ -115,8 +111,7 @@ export const DockerDeploymentPanel = ({
           id="euiAccordion--serviceAccount"
           initialIsOpen={!!service_account}
           buttonContent="+ Service Account"
-          paddingSize="m"
-        >
+          paddingSize="m">
           <EuiFormRow
             fullWidth
             label="Service Account"
@@ -130,8 +125,7 @@ export const DockerDeploymentPanel = ({
                   <EuiLink
                     href={`/projects/${projectId}/settings/secrets-management`}
                     target="_blank"
-                    external
-                  >
+                    external>
                     Secrets Management
                   </EuiLink>{" "}
                   page.
@@ -139,8 +133,7 @@ export const DockerDeploymentPanel = ({
               </EuiText>
             }
             isInvalid={!!errors.service_account}
-            error={errors.service_account}
-          >
+            error={errors.service_account}>
             <ServiceAccountComboBox
               fullwidth
               value={service_account}

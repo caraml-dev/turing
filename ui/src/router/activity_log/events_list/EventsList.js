@@ -31,13 +31,11 @@ export const EventsList = ({ events, status }) => {
           username={badge(event)}
           timelineIcon={timelineIcon(event)}
           type="update"
-          timestamp={<DateFromNow date={event.created_at} size={"s"} />}
-        >
+          timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
           <ExpandableContainer
             maxCollapsedHeight={43}
             toggleKind="text"
-            isScrollable={false}
-          >
+            isScrollable={false}>
             <span className="activityLogEvent">{event.message}</span>
           </ExpandableContainer>
         </EuiComment>

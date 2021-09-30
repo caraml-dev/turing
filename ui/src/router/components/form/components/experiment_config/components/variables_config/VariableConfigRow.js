@@ -78,8 +78,7 @@ export const VariableConfigRow = ({
       direction="row"
       gutterSize="m"
       alignItems="center"
-      className="euiFlexGroup--experimentVariableConfigRow"
-    >
+      className="euiFlexGroup--experimentVariableConfigRow">
       <EuiFlexItem grow={1} className="eui-textTruncate">
         <EuiFormRow isInvalid={!!error.name} error={error.name}>
           <EuiSuperSelect

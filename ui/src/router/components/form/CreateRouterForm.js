@@ -78,8 +78,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary"
-    >
+      confirmButtonColor="primary">
       {(onSubmit) => (
         <StepsWizardHorizontal
           steps={steps}

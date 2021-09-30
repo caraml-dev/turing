@@ -104,8 +104,7 @@ export const ListRouterVersionsTable = ({
       render: (version) => (
         <EuiText
           size={appConfig.tables.defaultTextSize}
-          style={{ display: "flex", alignItems: "center" }}
-        >
+          style={{ display: "flex", alignItems: "center" }}>
           {version}&nbsp;&nbsp;
           {version === deployedVersion && (
             <EuiBadge color="default">Current</EuiBadge>
@@ -222,8 +221,7 @@ export const ListRouterVersionsTable = ({
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
-      iconType="alert"
-    >
+      iconType="alert">
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (

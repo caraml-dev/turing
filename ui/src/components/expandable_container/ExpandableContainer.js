@@ -24,8 +24,7 @@ const ExpandableContainer = ({
       <EuiButton
         fullWidth
         {...getToggleProps()}
-        iconType={`arrow${isExpanded ? "Up" : "Right"}`}
-      >
+        iconType={`arrow${isExpanded ? "Up" : "Right"}`}>
         {isExpanded ? "Collapse" : "Expand"}
       </EuiButton>
     ) : (
@@ -39,8 +38,7 @@ const ExpandableContainer = ({
       <EuiFlexItem grow={true}>
         <div
           className={classNames({ scrollableContainer: isScrollable })}
-          {...getCollapseProps()}
-        >
+          {...getCollapseProps()}>
           {children}
         </div>
       </EuiFlexItem>
@@ -66,8 +64,7 @@ const ExpandableContainerWrapper = ({
     <ExpandableContainer
       collapsedHeight={maxCollapsedHeight}
       isScrollable={isScrollable}
-      toggleKind={toggleKind}
-    >
+      toggleKind={toggleKind}>
       {content}
     </ExpandableContainer>
   ) : (

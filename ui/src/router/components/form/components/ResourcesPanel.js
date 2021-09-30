@@ -41,8 +41,7 @@ export const ResourcesPanel = ({
               }
               isInvalid={!!errors.cpu_request}
               error={errors.cpu_request}
-              fullWidth
-            >
+              fullWidth>
               <EuiFieldText
                 placeholder="500m"
                 value={resourcesConfig.cpu_request}
@@ -63,8 +62,7 @@ export const ResourcesPanel = ({
               }
               isInvalid={!!errors.memory_request}
               error={errors.memory_request}
-              fullWidth
-            >
+              fullWidth>
               <EuiFieldText
                 placeholder="500Mi"
                 value={resourcesConfig.memory_request}
@@ -87,8 +85,7 @@ export const ResourcesPanel = ({
           }
           isInvalid={!!replicasError.length}
           error={replicasError}
-          fullWidth
-        >
+          fullWidth>
           <EuiDualRange
             fullWidth
             min={0}

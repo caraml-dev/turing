@@ -31,8 +31,7 @@ export const TreatmentMappingCard = ({
         <EuiFormRow
           fullWidth
           isInvalid={!!getError(item.experiment, item.treatment)}
-          error={getError(item.experiment, item.treatment)}
-        >
+          error={getError(item.experiment, item.treatment)}>
           <EuiSuperSelect
             fullWidth
             hasDividers
@@ -63,8 +62,7 @@ export const TreatmentMappingCard = ({
           <EuiSpacer size="m" />
         </div>
       }
-      textAlign="left"
-    >
+      textAlign="left">
       <InMemoryTableForm
         columns={columns}
         items={items}

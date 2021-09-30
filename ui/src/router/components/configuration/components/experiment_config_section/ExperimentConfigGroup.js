@@ -17,8 +17,7 @@ export const ExperimentConfigGroup = ({ engineType, engineConfig }) => {
           <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
             <ConfigSectionPanel
               title="Experiment Engine"
-              className="experimentCredentials"
-            >
+              className="experimentCredentials">
               <CredentialsConfigSection
                 engineType={engineType}
                 deployment={engineConfig.deployment}

@@ -71,8 +71,7 @@ export const MetricPanel = ({
                   <EuiFormRow
                     label={"Warning threshold"}
                     isInvalid={!!errors.warning_threshold || !!errors.overall}
-                    error={errors.warning_threshold}
-                  >
+                    error={errors.warning_threshold}>
                     <EuiFieldNumber
                       min={0}
                       value={alert.warning_threshold || 0}
@@ -87,8 +86,7 @@ export const MetricPanel = ({
                   <EuiFormRow
                     label={"Critical threshold"}
                     isInvalid={!!errors.critical_threshold || !!errors.overall}
-                    error={errors.critical_threshold}
-                  >
+                    error={errors.critical_threshold}>
                     <EuiFieldNumber
                       min={0}
                       value={alert.critical_threshold || 0}
@@ -107,8 +105,7 @@ export const MetricPanel = ({
                 className="durationRow"
                 label={"Duration"}
                 isInvalid={!!errors.duration}
-                error={errors.duration}
-              >
+                error={errors.duration}>
                 <FieldDuration
                   value={alert.duration}
                   onChange={onChange("duration")}

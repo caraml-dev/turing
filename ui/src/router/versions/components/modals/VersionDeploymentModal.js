@@ -43,8 +43,7 @@ export const VersionDeploymentModal = ({
       isLoading={isLoading}
       content={<p>You are about to deploy Router version {version}.</p>}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary"
-    >
+      confirmButtonColor="primary">
       {(onSubmit) =>
         (deployVersionRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />

@@ -49,8 +49,7 @@ export const DeleteVersionModal = ({
         </p>
       }
       confirmButtonText="Delete"
-      confirmButtonColor="danger"
-    >
+      confirmButtonColor="danger">
       {(onSubmit) =>
         (deleteVersionRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />

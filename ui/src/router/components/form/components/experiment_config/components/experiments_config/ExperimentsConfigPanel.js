@@ -92,8 +92,7 @@ export const ExperimentsConfigPanel = ({
           size="m"
           content="Select one or more experiments. Drag and drop to re-order."
         />
-      }
-    >
+      }>
       <EuiSpacer size="s" />
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -104,8 +103,7 @@ export const ExperimentsConfigPanel = ({
                 index={idx}
                 draggableId={`${experiment.uuid || experiment.id}`}
                 customDragHandle={true}
-                disableInteractiveElementBlocking
-              >
+                disableInteractiveElementBlocking>
                 {(provided) => (
                   <EuiFlexItem>
                     <ExperimentCard
@@ -129,8 +127,7 @@ export const ExperimentsConfigPanel = ({
           <EuiFlexItem>
             <EuiButton
               onClick={onAddExperiment}
-              disabled={experiments.length >= allExperiments.length}
-            >
+              disabled={experiments.length >= allExperiments.length}>
               + Add Experiment
             </EuiButton>
           </EuiFlexItem>

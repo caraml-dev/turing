@@ -56,8 +56,7 @@ export const TreatmentMappingConfigSection = ({
                     experimentInfo[exp] || {}
                   )}
                   target="_blank"
-                  external
-                >
+                  external>
                   <code>{exp}</code>
                 </EuiLink>
               </EuiTextColor>

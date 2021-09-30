@@ -8,8 +8,7 @@ export const BigQueryDatasetQueryView = ({ query, maxHeight = 300 }) => (
     fontSize="m"
     paddingSize="m"
     overflowHeight={maxHeight}
-    isCopyable
-  >
+    isCopyable>
     {dedent(query)}
   </EuiCodeBlock>
 );

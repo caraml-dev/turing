@@ -44,8 +44,7 @@ export const DeleteRouterModal = ({ onSuccess, deleteRouterRef }) => {
         </p>
       }
       confirmButtonText="Delete"
-      confirmButtonColor="danger"
-    >
+      confirmButtonColor="danger">
       {(onSubmit) =>
         (deleteRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />

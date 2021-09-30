@@ -45,8 +45,7 @@ export const ExperimentCard = ({
             label="Experiment *"
             isInvalid={!!errors.name}
             error={errors.name}
-            fullWidth
-          >
+            fullWidth>
             <ExperimentContext.Consumer>
               {({ isLoading }) => (
                 <EuiComboBoxSelect

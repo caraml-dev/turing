@@ -54,8 +54,7 @@ export const RulesPanel = ({
             />
           </EuiLink>
         </Fragment>
-      }
-    >
+      }>
       <EuiFlexGroup direction="column" gutterSize="s">
         {rules.map((rule, idx) => (
           <EuiFlexItem key={`rule-${idx}`}>

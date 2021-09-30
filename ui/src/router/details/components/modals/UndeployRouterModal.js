@@ -44,8 +44,7 @@ export const UndeployRouterModal = ({ onSuccess, undeployRouterRef }) => {
         </p>
       }
       confirmButtonText="Undeploy"
-      confirmButtonColor="danger"
-    >
+      confirmButtonColor="danger">
       {(onSubmit) =>
         (undeployRouterRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />

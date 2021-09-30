@@ -47,15 +47,13 @@ export const RouteCard = ({
         children: isDefault ? "Default" : "Set Default",
         onClick: onSelect,
         isSelected: isDefault,
-      }}
-    >
+      }}>
       <EuiForm onClick={(e) => e.stopPropagation()}>
         <EuiFlexGroup
           className="euiFlexGroup--removeButton"
           justifyContent="flexEnd"
           gutterSize="none"
-          direction="row"
-        >
+          direction="row">
           <EuiFlexItem grow={false}>
             {!isDefault ? (
               <EuiButtonIcon
@@ -73,8 +71,7 @@ export const RouteCard = ({
           label="Endpoint *"
           isInvalid={!!get(errors, "endpoint")}
           error={get(errors, "endpoint")}
-          fullWidth
-        >
+          fullWidth>
           <SelectEndpointComboBox
             fullWidth
             placeholder="http://models.internal/predict"
@@ -98,8 +95,7 @@ export const RouteCard = ({
             <EuiFormRow
               label="Route Id *"
               isInvalid={!!get(errors, "id")}
-              error={get(errors, "id")}
-            >
+              error={get(errors, "id")}>
               <EuiFieldText
                 placeholder="control"
                 value={route.id}
@@ -113,8 +109,7 @@ export const RouteCard = ({
             <EuiFormRow
               label="Timeout *"
               isInvalid={!!get(errors, "timeout")}
-              error={get(errors, "timeout")}
-            >
+              error={get(errors, "timeout")}>
               <EuiFieldDuration
                 value={route.timeout}
                 max={10000}

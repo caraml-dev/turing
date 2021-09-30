@@ -26,8 +26,7 @@ const AccordionItem = ({ title, ...props }) => (
       <EuiTitle size="xxs">
         <EuiTextColor color="secondary">{title}</EuiTextColor>
       </EuiTitle>
-    }
-  >
+    }>
     <div className="childWrapper">{props.children}</div>
   </EuiAccordion>
 );

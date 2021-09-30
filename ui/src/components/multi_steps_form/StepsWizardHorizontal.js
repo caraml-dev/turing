@@ -27,8 +27,7 @@ export const StepsWizardHorizontal = ({
     <FormValidationContextProvider
       schema={steps[currentStep].validationSchema}
       context={steps[currentStep].validationContext}
-      onSubmit={isLastStep ? onSubmit : onNext}
-    >
+      onSubmit={isLastStep ? onSubmit : onNext}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiStepsHorizontal

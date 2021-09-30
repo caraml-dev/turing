@@ -30,14 +30,12 @@ export const VersionComparisonPanel = ({
             <EuiFilterGroup>
               <EuiFilterButton
                 hasActiveFilters={!splitView}
-                onClick={() => setSplitView(false)}
-              >
+                onClick={() => setSplitView(false)}>
                 Unified
               </EuiFilterButton>
               <EuiFilterButton
                 hasActiveFilters={splitView}
-                onClick={() => setSplitView(true)}
-              >
+                onClick={() => setSplitView(true)}>
                 Split
               </EuiFilterButton>
             </EuiFilterGroup>

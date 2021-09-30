@@ -26,8 +26,7 @@ const AccordionFormSideNavItem = ({ section }) => (
     activeClass="euiSideNavItemButton-isSelected"
     to={`${slugify(section.title)}`}
     spy={true}
-    {...animatedScrollConfig}
-  >
+    {...animatedScrollConfig}>
     <span className="euiSideNavItemButton__content">
       {section.iconType && (
         <EuiIcon

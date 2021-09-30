@@ -68,8 +68,7 @@ export const RouterVersionDetailsView = ({
           <EuiCallOut
             title="Sorry, there was an error"
             color="danger"
-            iconType="alert"
-          >
+            iconType="alert">
             <p>{error.message}</p>
           </EuiCallOut>
         ) : (
@@ -85,8 +84,7 @@ export const RouterVersionDetailsView = ({
                       {isActiveConfig && (
                         <EuiBadge
                           color="default"
-                          style={{ letterSpacing: "initial" }}
-                        >
+                          style={{ letterSpacing: "initial" }}>
                           Current
                         </EuiBadge>
                       )}
@@ -103,8 +101,7 @@ export const RouterVersionDetailsView = ({
             <RouterVersionActions
               router={router}
               onDeploySuccess={refreshData}
-              onDeleteSuccess={() => props.navigate("../")}
-            >
+              onDeleteSuccess={() => props.navigate("../")}>
               {(actions) => (
                 <RouterVersionDetailsPageNavigation
                   version={version}
