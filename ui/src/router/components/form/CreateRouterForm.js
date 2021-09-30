@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { RouterStep } from "./steps/RouterStep";
 import { StepsWizardHorizontal } from "../../../components/multi_steps_form/StepsWizardHorizontal";
 import { ExperimentStep } from "./steps/ExperimentStep";
@@ -12,8 +12,20 @@ import { ConfirmationModal } from "../../../components/confirmation_modal/Confir
 import { DeploymentSummary } from "./components/DeploymentSummary";
 import { addToast } from "@gojek/mlp-ui";
 import ExperimentEngineContext from "../../../providers/experiments/context";
+import { useConfig } from "../../../config";
 
 export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
+  const {
+    appConfig: {
+      scaling: { maxAllowedReplica },
+    },
+  } = useConfig();
+
+  const validationSchema = useMemo(
+    () => schema(maxAllowedReplica),
+    [maxAllowedReplica]
+  );
+
   const { data: router } = useContext(FormContext);
 
   const [submissionResponse, submitForm] = useTuringApi(
@@ -46,28 +58,28 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     {
       title: "Router",
       children: <RouterStep projectId={projectId} />,
-      validationSchema: schema[0],
+      validationSchema: validationSchema[0],
     },
     {
       title: "Experiments",
       children: <ExperimentStep />,
-      validationSchema: schema[1],
+      validationSchema: validationSchema[1],
       validationContext: { experimentEngineOptions },
     },
     {
       title: "Enricher",
       children: <EnricherStep projectId={projectId} />,
-      validationSchema: schema[2],
+      validationSchema: validationSchema[2],
     },
     {
       title: "Ensembler",
       children: <EnsemblerStep projectId={projectId} />,
-      validationSchema: schema[3],
+      validationSchema: validationSchema[3],
     },
     {
       title: "Outcome Tracking",
       children: <OutcomeStep projectId={projectId} />,
-      validationSchema: schema[4],
+      validationSchema: validationSchema[4],
     },
   ];
 

@@ -7,19 +7,23 @@ import {
   EuiLoadingChart,
   EuiText,
   EuiTextAlign,
-  EuiToolTip,
   EuiSearchBar,
 } from "@elastic/eui";
 import { RouterEndpoint } from "../components/router_endpoint/RouterEndpoint";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
-import { appConfig } from "../../config";
+import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
 import { Status } from "../../services/status/Status";
-
-const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
+import { DateFromNow } from "@gojek/mlp-ui";
 
 const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
+  const {
+    appConfig: {
+      tables: { defaultTextSize, defaultIconSize },
+    },
+  } = useConfig();
+
   const [config, setConfig] = useState({
     environments: [],
   });
@@ -81,29 +85,13 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
       name: "Created",
       sortable: true,
       width: "10%",
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       field: "updated_at",
       name: "Updated",
       width: "10%",
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       name: (

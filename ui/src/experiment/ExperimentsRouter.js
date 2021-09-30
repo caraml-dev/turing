@@ -11,7 +11,7 @@ import { PageTitle } from "../components/page/PageTitle";
 
 import useDynamicScript from "../hooks/useDynamicScript";
 import loadComponent from "../utils/remoteComponent";
-import { defaultExperimentEngine } from "../config";
+import { useConfig } from "../config";
 
 const FallbackView = ({ text }) => (
   <EuiPage>
@@ -31,6 +31,8 @@ const FallbackView = ({ text }) => (
 );
 
 const RemoteRouter = ({ projectId }) => {
+  const { defaultExperimentEngine } = useConfig();
+
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
     url: defaultExperimentEngine.url,
@@ -55,9 +57,11 @@ const RemoteRouter = ({ projectId }) => {
   );
 };
 
-export const ExperimentsRouter = ({ projectId }) =>
-  !!defaultExperimentEngine.url ? (
+export const ExperimentsRouter = ({ projectId }) => {
+  const { defaultExperimentEngine } = useConfig();
+  return !!defaultExperimentEngine.url ? (
     <RemoteRouter projectId />
   ) : (
     <FallbackView text="No default Experiment Engine configured" />
   );
+};

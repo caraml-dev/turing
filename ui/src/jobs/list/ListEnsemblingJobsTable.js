@@ -9,15 +9,13 @@ import {
   EuiSearchBar,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from "@elastic/eui";
-import { appConfig } from "../../config";
+import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
 import { JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
-
-const { defaultTextSize, defaultIconSize, dateFormat } = appConfig.tables;
+import { DateFromNow } from "@gojek/mlp-ui";
 
 export const ListEnsemblingJobsTable = ({
   items,
@@ -31,6 +29,11 @@ export const ListEnsemblingJobsTable = ({
   onRowClick,
   ...props
 }) => {
+  const {
+    appConfig: {
+      tables: { defaultTextSize, defaultIconSize },
+    },
+  } = useConfig();
   const { ensemblers } = useContext(EnsemblersContext);
 
   const searchQuery = useMemo(() => {
@@ -109,28 +112,12 @@ export const ListEnsemblingJobsTable = ({
       field: "created_at",
       name: "Created",
       sortable: true,
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       field: "updated_at",
       name: "Updated",
-      render: (date) => (
-        <EuiToolTip
-          position="top"
-          content={moment(date, dateFormat).toLocaleString()}>
-          <EuiText size={defaultTextSize}>
-            {moment(date, dateFormat).fromNow()}
-          </EuiText>
-        </EuiToolTip>
-      ),
+      render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
       name: "Actions",

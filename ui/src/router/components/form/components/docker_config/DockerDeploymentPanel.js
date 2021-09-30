@@ -18,7 +18,7 @@ import SecretsContext from "../../../../../providers/secrets/context";
 import DockerRegistriesContext from "../../../../../providers/docker/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { ServiceAccountComboBox } from "../../../../../components/form/service_account_combo_box/ServiceAccoutComboBox";
-import { appConfig } from "../../../../../config";
+import { useConfig } from "../../../../../config";
 
 const imageOptions = [];
 
@@ -28,6 +28,9 @@ export const DockerDeploymentPanel = ({
   onChangeHandler,
   errors = {},
 }) => {
+  const {
+    appConfig: { defaultDockerRegistry },
+  } = useConfig();
   const secrets = useContext(SecretsContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
   const registries = useContext(DockerRegistriesContext);
@@ -43,7 +46,7 @@ export const DockerDeploymentPanel = ({
           display="row">
           <SelectDockerImageComboBox
             fullWidth
-            value={image || `${appConfig.defaultDockerRegistry}/`}
+            value={image || `${defaultDockerRegistry}/`}
             placeholder="echo:1.0.2"
             registryOptions={registries}
             imageOptions={imageOptions}

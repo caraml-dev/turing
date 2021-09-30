@@ -18,13 +18,13 @@ yarn install
 ## Configuration
 
 The React application can be configured using environment variables. By default, 
-it will read from config values from `.env.development` file. Refer to 
+it will read from config values from `.env` file. Refer to 
 this [documentation](https://create-react-app.dev/docs/adding-custom-environment-variables/) for more details.
 
 ### Config Variables
 | Environment Variable            | Required | Default  | Description     |
 | ------------------------------- | -------- | -------- | --------------- |
-| `REACT_APP_API_TIMEOUT`         | No       | 5000     | Timeout (in milliseconds) for requests to API | 
+| `REACT_APP_API_TIMEOUT`         | No       | 10000    | Timeout (in milliseconds) for requests to API | 
 | `REACT_APP_TURING_API`          | Yes      |          | Endpoint of Turing API | 
 | `REACT_APP_MERLIN_API`          | Yes      |          | Endpoint of Merlin API | 
 | `REACT_APP_MLP_API`             | Yes      |          | Endpoint of MLP API | 

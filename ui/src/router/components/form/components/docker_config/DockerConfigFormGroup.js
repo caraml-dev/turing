@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "react";
 import { EuiFlexItem } from "@elastic/eui";
-import { appConfig } from "../../../../../config";
+import { useConfig } from "../../../../../config";
 import { DockerDeploymentPanel } from "./DockerDeploymentPanel";
 import { DockerEnsembler } from "../../../../../services/ensembler";
 import { DockerRegistriesContextProvider } from "../../../../../providers/docker/context";
@@ -15,6 +15,11 @@ export const DockerConfigFormGroup = ({
   onChangeHandler,
   errors = {},
 }) => {
+  const {
+    appConfig: {
+      scaling: { maxAllowedReplica },
+    },
+  } = useConfig();
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export const DockerConfigFormGroup = ({
             resourcesConfig={dockerConfig.resource_request}
             onChangeHandler={onChange("resource_request")}
             errors={errors.resource_request}
-            maxAllowedReplica={appConfig.scaling.maxAllowedReplica}
+            maxAllowedReplica={maxAllowedReplica}
           />
         </EuiFlexItem>
       </Fragment>

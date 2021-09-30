@@ -6,11 +6,13 @@ import {
   Header,
   ProjectsContextProvider,
 } from "@gojek/mlp-ui";
-import { appConfig } from "./config";
+import { useConfig } from "./config";
 import { EnvironmentsContextProvider } from "./providers/environments/context";
 import "./PrivateLayout.scss";
 
 export const PrivateLayout = (Component) => {
+  const { appConfig } = useConfig();
+
   return (props) => (
     <ApplicationsContextProvider>
       <ProjectsContextProvider>
