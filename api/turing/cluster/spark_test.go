@@ -6,7 +6,7 @@ import (
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/stretchr/testify/assert"
 	apicorev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -134,10 +134,11 @@ var (
 	serviceAccountName       = "service-account"
 	jobLabels                = make(map[string]string)
 	memoryResult, _          = toMegabyte(memoryValue)
-	envVars                  = models.EnvVars{
+	barString                = "bar"
+	envVars                  = []openapi.EnvVar{
 		{
 			Name:  "foo",
-			Value: "bar",
+			Value: &barString,
 		},
 	}
 	expectedEnvVars = []apicorev1.EnvVar{
@@ -147,7 +148,7 @@ var (
 		},
 		{
 			Name:  "foo",
-			Value: "bar",
+			Value: barString,
 		},
 	}
 )
@@ -167,7 +168,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
 		SparkInfraConfig:      sparkInfraConfig,
-		EnvVars:               envVars,
+		EnvVars:               &envVars,
 	}
 	expected := &apisparkv1beta2.SparkApplication{
 		ObjectMeta: apimetav1.ObjectMeta{

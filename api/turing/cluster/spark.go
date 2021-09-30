@@ -6,7 +6,7 @@ import (
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	apicorev1 "k8s.io/api/core/v1"
 	apirbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -87,7 +87,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
-	EnvVars               models.EnvVars
+	EnvVars               *[]openapi.EnvVar
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -131,11 +131,15 @@ func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkAppl
 }
 
 func getEnvVarFromRequest(request *CreateSparkRequest) []apicorev1.EnvVar {
-	var envVars []apicorev1.EnvVar
-	for _, envVar := range request.EnvVars {
+	envVars := []apicorev1.EnvVar{}
+	if request.EnvVars == nil {
+		return envVars
+	}
+
+	for _, envVar := range *request.EnvVars {
 		envVars = append(envVars, apicorev1.EnvVar{
-			Name:  envVar.Name,
-			Value: envVar.Value,
+			Name:  envVar.GetName(),
+			Value: envVar.GetValue(),
 		})
 	}
 

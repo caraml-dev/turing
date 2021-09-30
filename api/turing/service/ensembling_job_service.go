@@ -22,9 +22,6 @@ const (
 	// SparkHomeFolder is the home folder of the spark user in the Docker container
 	// used in engines/batch-ensembler/Dockerfile
 	SparkHomeFolder = "/home/spark"
-	// EnsemblerFolder is the folder created by the Turing SDK that contains
-	// the ensembler dependencies and pickled Python files.
-	EnsemblerFolder = "ensembler"
 
 	kubernetesSparkRoleLabel         = "spark-role"
 	kubernetesSparkRoleDriverValue   = "driver"
@@ -32,6 +29,10 @@ const (
 )
 
 var (
+	// EnsemblerFolder is the folder created by the Turing SDK that contains
+	// the ensembler dependencies and pickled Python files.
+	EnsemblerFolder = "ensembler"
+
 	loggingPodPostfixesInSearch = map[string]string{
 		batch.DriverPodType:       ".*-driver",
 		batch.ExecutorPodType:     ".*-exec-.*",
@@ -274,8 +275,8 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.EnvironmentName = s.defaultEnvironment
 
 	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
-	job.InfraConfig.ArtifactURI = ensembler.ArtifactURI
-	job.InfraConfig.EnsemblerName = ensembler.Name
+	job.InfraConfig.ArtifactUri = &ensembler.ArtifactURI
+	job.InfraConfig.EnsemblerName = &ensembler.Name
 
 	project, err := s.mlpService.GetProject(projectID)
 	if err != nil {
@@ -392,29 +393,31 @@ func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.Ensembling
 		}
 	}
 
-	if job.InfraConfig.Resources == nil {
+	if !job.InfraConfig.Resources.IsSet() {
 		configCopy := s.defaultConfig.BatchEnsemblingJobResources
-		job.InfraConfig.Resources = &configCopy
+		job.InfraConfig.Resources.Set(&configCopy)
 		return
 	}
 
-	if job.InfraConfig.Resources.DriverCpuRequest == nil {
-		job.InfraConfig.Resources.DriverCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCpuRequest
+	resources := job.InfraConfig.Resources.Get()
+
+	if resources.DriverCpuRequest == nil {
+		resources.DriverCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCpuRequest
 	}
 
-	if job.InfraConfig.Resources.DriverMemoryRequest == nil {
-		job.InfraConfig.Resources.DriverMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverMemoryRequest
+	if resources.DriverMemoryRequest == nil {
+		resources.DriverMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverMemoryRequest
 	}
 
-	if job.InfraConfig.Resources.ExecutorReplica == nil {
-		job.InfraConfig.Resources.ExecutorReplica = s.defaultConfig.BatchEnsemblingJobResources.ExecutorReplica
+	if resources.ExecutorReplica == nil {
+		resources.ExecutorReplica = s.defaultConfig.BatchEnsemblingJobResources.ExecutorReplica
 	}
 
-	if job.InfraConfig.Resources.ExecutorCpuRequest == nil {
-		job.InfraConfig.Resources.ExecutorCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorCpuRequest
+	if resources.ExecutorCpuRequest == nil {
+		resources.ExecutorCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorCpuRequest
 	}
 
-	if job.InfraConfig.Resources.ExecutorMemoryRequest == nil {
-		job.InfraConfig.Resources.ExecutorMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorMemoryRequest
+	if resources.ExecutorMemoryRequest == nil {
+		resources.ExecutorMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorMemoryRequest
 	}
 }

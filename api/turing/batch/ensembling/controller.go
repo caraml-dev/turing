@@ -191,14 +191,14 @@ func (c *ensemblingController) createSparkApplication(
 			fmt.Sprintf("%s%s", batch.JobConfigMount, batch.JobConfigFileName),
 		},
 		JobConfigMount:        batch.JobConfigMount,
-		DriverCPURequest:      *infraConfig.Resources.DriverCpuRequest,
-		DriverMemoryRequest:   *infraConfig.Resources.DriverMemoryRequest,
-		ExecutorCPURequest:    *infraConfig.Resources.ExecutorCpuRequest,
-		ExecutorMemoryRequest: *infraConfig.Resources.ExecutorMemoryRequest,
-		ExecutorReplica:       *infraConfig.Resources.ExecutorReplica,
+		DriverCPURequest:      *infraConfig.GetResources().DriverCpuRequest,
+		DriverMemoryRequest:   *infraConfig.GetResources().DriverMemoryRequest,
+		ExecutorCPURequest:    *infraConfig.GetResources().ExecutorCpuRequest,
+		ExecutorMemoryRequest: *infraConfig.GetResources().ExecutorMemoryRequest,
+		ExecutorReplica:       *infraConfig.GetResources().ExecutorReplica,
 		ServiceAccountName:    serviceAccount.Name,
 		SparkInfraConfig:      c.sparkInfraConfig,
-		EnvVars:               jobRequest.EnsemblingJob.InfraConfig.EnvVars,
+		EnvVars:               jobRequest.EnsemblingJob.InfraConfig.Env,
 	}
 	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
 }

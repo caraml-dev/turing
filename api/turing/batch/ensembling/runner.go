@@ -204,7 +204,7 @@ func (r *ensemblingJobRunner) processBuildingImage(
 ) {
 	status, err := r.imageBuilder.GetImageBuildingJobStatus(
 		mlpProject.Name,
-		ensemblingJob.InfraConfig.EnsemblerName,
+		*ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
 	)
 
@@ -331,7 +331,7 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 	// Delete building image job
 	jobErr := r.imageBuilder.DeleteImageBuildingJob(
 		mlpProject.Name,
-		ensemblingJob.InfraConfig.EnsemblerName,
+		*ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
 	)
 	// Delete spark resource
@@ -375,7 +375,7 @@ func (r *ensemblingJobRunner) buildLabels(
 	rq := labeller.KubernetesLabelsRequest{
 		Stream: mlpProject.Stream,
 		Team:   mlpProject.Team,
-		App:    ensemblingJob.InfraConfig.EnsemblerName,
+		App:    *ensemblingJob.InfraConfig.EnsemblerName,
 	}
 
 	return labeller.BuildLabels(rq)
@@ -411,9 +411,9 @@ func (r *ensemblingJobRunner) buildImage(
 ) (string, error) {
 	request := imagebuilder.BuildImageRequest{
 		ProjectName:  mlpProject.Name,
-		ResourceName: ensemblingJob.InfraConfig.EnsemblerName,
+		ResourceName: *ensemblingJob.InfraConfig.EnsemblerName,
 		VersionID:    ensemblingJob.EnsemblerID,
-		ArtifactURI:  ensemblingJob.InfraConfig.ArtifactURI,
+		ArtifactURI:  *ensemblingJob.InfraConfig.ArtifactUri,
 		BuildLabels:  buildLabels,
 	}
 	return r.imageBuilder.BuildImage(request)

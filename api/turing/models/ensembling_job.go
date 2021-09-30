@@ -40,7 +40,7 @@ func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	job.RunID = latest.RunID + 1
-	job.Name = fmt.Sprintf("%s-%d", job.InfraConfig.EnsemblerName, job.RunID)
+	job.Name = fmt.Sprintf("%s-%d", *job.InfraConfig.EnsemblerName, job.RunID)
 
 	return nil
 }
@@ -64,15 +64,13 @@ func (c *JobConfig) Scan(value interface{}) error {
 
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
-	ArtifactURI        string                       `json:"artifact_uri"`
-	EnsemblerName      string                       `json:"ensembler_name"`
-	ServiceAccountName string                       `json:"service_account_name" validate:"required"`
-	EnvVars            EnvVars                      `json:"env"`
-	Resources          *openapi.EnsemblingResources `json:"resources"`
+	openapi.EnsemblerInfraConfig
+	ServiceAccountName string `json:"service_account_name" validate:"required"`
 }
 
 // Value returns json value, implement driver.Valuer interface
 func (r *InfraConfig) Value() (driver.Value, error) {
+	// Some weird logic because gorm doesn't know how to marshal embedded structs
 	return json.Marshal(r)
 }
 
@@ -83,6 +81,31 @@ func (r *InfraConfig) Scan(value interface{}) error {
 		return errors.New("type assertion to []byte failed")
 	}
 	return json.Unmarshal(b, &r)
+}
+
+// MarshalJSON marshals the Go struct into a JSON, most of the code here is duplicated
+// but requires some treatment to the overridden name
+func (r *InfraConfig) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	toSerialize["service_account_name"] = r.ServiceAccountName
+
+	if r.ArtifactUri != nil {
+		toSerialize["artifact_uri"] = r.ArtifactUri
+	}
+
+	if r.EnsemblerName != nil {
+		toSerialize["ensembler_name"] = r.EnsemblerName
+	}
+
+	if r.Resources.IsSet() {
+		toSerialize["resources"] = r.Resources.Get()
+	}
+
+	if r.Env != nil {
+		toSerialize["env"] = r.Env
+	}
+
+	return json.Marshal(toSerialize)
 }
 
 // Status is the state of the finite machine ensembling job.
