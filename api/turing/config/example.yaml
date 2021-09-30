@@ -196,13 +196,16 @@ MLPConfig:
 
 # Turing UI configuration to set how the UI assets will be served
 TuringUIConfig:
-  AppDirectory: /ui
-  Homepage: /turing
+  ServingDirectory: /ui
+  ServingPath: /turing
  
 # Openapi validation configuration
 OpenapiConfig:
   ValidationEnabled: true
   SpecFile: "api/openapi.yaml"
+  SwaggerUIConfig:
+    ServingDirectory: static/swagger-ui
+    ServingPath: /api-docs
 
 # Experiment is a map of experiment engine name to configuration object.
 # This will be used to configure the corresponding experiment engines.

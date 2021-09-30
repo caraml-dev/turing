@@ -122,10 +122,18 @@ func main() {
 	}
 
 	// Serve Swagger UI
-	server.ServeSinglePageApplication(r, "/rest-api", "static/swagger-ui")
+	if spaCfg := cfg.OpenapiConfig.SwaggerUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
+		server.ServeSinglePageApplication(r,
+			cfg.OpenapiConfig.SwaggerUIConfig.ServingPath,
+			cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory)
+	}
 
 	// Serve Turing UI
-	server.ServeSinglePageApplication(r, cfg.TuringUIConfig.Homepage, cfg.TuringUIConfig.AppDirectory)
+	if spaCfg := cfg.TuringUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
+		server.ServeSinglePageApplication(r,
+			cfg.TuringUIConfig.ServingPath,
+			cfg.TuringUIConfig.ServingDirectory)
+	}
 
 	log.Infof("Listening on port %d", cfg.Port)
 	if err := http.ListenAndServe(cfg.ListenAddress(), r); err != nil {

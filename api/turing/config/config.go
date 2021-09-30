@@ -66,7 +66,7 @@ type Config struct {
 	TuringEncryptionKey    string       `validate:"required"`
 	AlertConfig            *AlertConfig
 	MLPConfig              *MLPConfig `validate:"required"`
-	TuringUIConfig         *TuringUIConfig
+	TuringUIConfig         *SinglePageApplicationConfig
 	OpenapiConfig          *OpenapiConfig
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
@@ -216,13 +216,12 @@ type KnativeServiceDefaults struct {
 	QueueProxyResourcePercentage int
 }
 
-// TuringUIConfig captures config related to serving Turing UI files
-type TuringUIConfig struct {
-	// Optional. If configured, turing-api will serve static files of the turing-ui React app
-	AppDirectory string
-	// Optional. Defines the relative path under which the app will be accessible.
-	// This should match `homepage` value from the `package.json` file of the CRA app
-	Homepage string
+// SinglePageApplicationConfig holds configuration required for serving SPAs
+type SinglePageApplicationConfig struct {
+	// Specifies the directory, that contains static files that will be served as an SPA
+	ServingDirectory string
+	// Defines the relative path under which the application will be accessible.
+	ServingPath string
 }
 
 // DatabaseConfig config captures the Turing database config
@@ -324,6 +323,8 @@ type OpenapiConfig struct {
 	ValidationEnabled bool
 	// SpecFile specifies the file path containing OpenAPI v3 spec
 	SpecFile string
+	// Optional. Defines a configuration to be used for serving Swagger UI as a single-page app
+	SwaggerUIConfig *SinglePageApplicationConfig
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -444,8 +445,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("MLPConfig::MLPURL", "")
 	v.SetDefault("MLPConfig::MLPEncryptionKey", "")
 
-	v.SetDefault("TuringUIConfig::AppDirectory", "")
-	v.SetDefault("TuringUIConfig::Homepage", "/turing")
+	v.SetDefault("TuringUIConfig::ServingDirectory", "")
+	v.SetDefault("TuringUIConfig::ServingPath", "/turing")
 
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
