@@ -70,7 +70,6 @@ type InfraConfig struct {
 
 // Value returns json value, implement driver.Valuer interface
 func (r *InfraConfig) Value() (driver.Value, error) {
-	// Some weird logic because gorm doesn't know how to marshal embedded structs
 	return json.Marshal(r)
 }
 
