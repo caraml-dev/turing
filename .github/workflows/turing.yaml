@@ -157,6 +157,8 @@ jobs:
         run: yarn lint
 
       - name: Build UI
+        env:
+          NODE_OPTIONS: --max_old_space_size=2048
         run: yarn build
 
       - name: Publish Artifact
