@@ -151,7 +151,7 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
 
       - name: Install
-        run: yarn install
+        run: yarn install --network-concurrency 1
 
       - name: Lint code
         run: yarn lint
