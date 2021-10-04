@@ -27,4 +27,4 @@ jobs:
 
     - name: Lint code
       working-directory: engines/router
-      run: make lint-ci
+      run: make lint

@@ -12,40 +12,38 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 NOW=$(shell date +'%FT%T%z')
 PROJECT_ROOT=github.com/gojek/turing/engines/router
 
-.PHONY: default clean setup fmt dep-ci lint lint-ci tidy vendor test test-unit test-all build_image build build_docker run
+.PHONY: default test test-unit test-all build_image build build_docker run
 
 default: test
 
+.PHONY: clean
 clean:
 	@test ! -e bin || rm -r bin
 	@test ! -d vendor || rm -r vendor
 
+.PHONY: setup
 setup:
-	@test -x ${GOPATH}/bin/golint || go get -u golang.org/x/lint/golint
+	@echo "Setting up tools..."
+	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.41.1/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
+.PHONY: fmt
 fmt:
-	@echo "Fmt code..."
+	@echo "Formatting code..."
 	gofmt -s -w ${SRC_ROOT}
 
-dep-ci:
-	@echo "Getting CI dependencies..."
-	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
-
-lint:
+.PHONY: lint
+lint: setup
 	@echo "Linting code..."
-	golangci-lint -v run
+	golangci-lint -v run --timeout 1m $(if $(filter true,$(fix)),--fix,)
 
-lint-fix:
-	@echo "Linting code..."
-	golangci-lint -v run --fix
-
-lint-ci: dep-ci lint
-
-tidy: setup
+.PHONY: tidy
+tidy:
 	@echo "Fetching dependencies..."
 	go mod tidy
 
-vendor: setup
+.PHONY: vendor
+vendor:
 	@echo "Fetching dependencies..."
 	go mod vendor
 
