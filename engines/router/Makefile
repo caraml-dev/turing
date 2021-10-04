@@ -12,7 +12,7 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 NOW=$(shell date +'%FT%T%z')
 PROJECT_ROOT=github.com/gojek/turing/engines/router
 
-.PHONY: default test test-unit test-all build_image build build_docker run
+.PHONY: default build_image build build_docker run
 
 default: test
 
@@ -47,21 +47,19 @@ vendor:
 	@echo "Fetching dependencies..."
 	go mod vendor
 
+.PHONY: test
 test: tidy
 	@echo "Running tests..."
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
 	go tool cover -func cover.out
 
-test-unit: tidy
-	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit
-	go tool cover -func cover.out
-
-test-all: tidy
-	@echo "Running all tests..."
-	go test -v -race -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
+.PHONY: benchmark
+benchmark: tidy
+	@echo "Running Benchmark..."
 	go test -bench=. -run=Bench ${SRC_ROOT}/...
-	go tool cover -func cover.out
+
+
+
 
 build: tidy fmt
 	@echo "Building binary..."

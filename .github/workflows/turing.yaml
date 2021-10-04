@@ -61,6 +61,9 @@ jobs:
 
   test-engines-router:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engines/router
     env:
       GOPATH: ${{ github.workspace }}/engines/router/.go
     steps:
@@ -81,8 +84,10 @@ jobs:
           restore-keys: gomod-
 
       - name: Run test
-        working-directory: engines/router
         run: make test
+
+      - name: Run Benchmark
+        run: make benchmark
 
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
@@ -92,9 +97,40 @@ jobs:
           skip-go-installation: true
           args: --verbose
 
-#  test-engines-experiment:
-#
-#  build-ui:
+  test-engines-experiment:
+    runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}/engines/experiment/.go
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.14"
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: engines/experiment/.go/pkg/mod/
+          key: |
+            gomod-${{ hashFiles('engines/experiment/go.mod') }}
+          restore-keys: gomod-
+
+      - name: Run test
+        working-directory: engines/experiment
+        run: make test
+
+      - name: Lint code
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41.1
+          working-directory: engines/experiment
+          skip-go-installation: true
+          args: --verbose
+
+  #build-ui:
 
   build-swagger-ui:
     runs-on: ubuntu-latest
@@ -112,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: swagger-ui-dist
-          path: swagger-ui-dist/
+          path: api/api/swagger-ui-dist/
 
 #  publish-api:
 #
