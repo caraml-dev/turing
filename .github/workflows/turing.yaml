@@ -130,7 +130,40 @@ jobs:
           skip-go-installation: true
           args: --verbose
 
-  #build-ui:
+  build-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Node 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ui/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
+
+      - name: Install
+        run: yarn install
+
+      - name: Lint code
+        run: yarn lint
+
+      - name: Build UI
+        run: yarn build
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: turing-ui-dist
+          path: ui/build/
 
   build-swagger-ui:
     runs-on: ubuntu-latest
@@ -144,7 +177,7 @@ jobs:
       - name: Build static Swagger UI dist
         run: make swagger-ui-dist
 
-      - name: Publish
+      - name: Publish Artifact
         uses: actions/upload-artifact@v2
         with:
           name: swagger-ui-dist
