@@ -8,11 +8,11 @@ bundle-openapi:
         	--additional-properties outputFile=openapi.bundle.yaml \
         	--output /local
 	@for f in ".openapi-generator" ".openapi-generator-ignore" "README.md" ; do \
-		rm -rf ${PWD}/api/$${f} ;\
+		rm -rf ${PWD}/$${f} ;\
 	done
 
 .PHONY: swagger-ui-dist
 swagger-ui-dist: bundle-openapi
-	@scripts/swagger-ui-generator/swagger-ui-cli.sh \
-		--spec-file api/openapi.bundle.yaml \
-		--output static/swagger-ui
+	@../../scripts/swagger-ui-generator/swagger-ui-generator.sh \
+		--spec-file openapi.bundle.yaml \
+		--output swagger-ui-dist

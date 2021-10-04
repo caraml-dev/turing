@@ -90,12 +90,30 @@ jobs:
           version: v1.41.1
           working-directory: engines/router
           skip-go-installation: true
-          args: --timeout --verbose
+          args: --verbose
 
 #  test-engines-experiment:
 #
 #  build-ui:
-#
+
+  build-swagger-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api/api
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build static Swagger UI dist
+        run: make swagger-ui-dist
+
+      - name: Publish
+        uses: actions/upload-artifact@v2
+        with:
+          name: swagger-ui-dist
+          path: swagger-ui-dist/
+
 #  publish-api:
 #
 #  publish-router:
