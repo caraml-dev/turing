@@ -123,16 +123,18 @@ func main() {
 
 	// Serve Swagger UI
 	if spaCfg := cfg.OpenapiConfig.SwaggerUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
+		log.Infof("Serving Swagger UI at: %s", spaCfg.ServingPath)
 		server.ServeSinglePageApplication(r,
-			cfg.OpenapiConfig.SwaggerUIConfig.ServingPath,
-			cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory)
+			spaCfg.ServingPath,
+			spaCfg.ServingDirectory)
 	}
 
 	// Serve Turing UI
 	if spaCfg := cfg.TuringUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
+		log.Infof("Serving Turing UI at: %s", spaCfg.ServingPath)
 		server.ServeSinglePageApplication(r,
-			cfg.TuringUIConfig.ServingPath,
-			cfg.TuringUIConfig.ServingDirectory)
+			spaCfg.ServingPath,
+			spaCfg.ServingDirectory)
 	}
 
 	log.Infof("Listening on port %d", cfg.Port)

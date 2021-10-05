@@ -41,13 +41,6 @@ function install_kubernetes_kind_cluster() {
     cd $workdir
 }
 
-function install_local_docker_registry() {
-    docker run --rm --network kind -d -p 5000:5000 --name kind-registry registry:2
-    for node in $(kind get nodes); do
-      kubectl annotate node "${node}" "kind.x-k8s.io/registry=localhost:5000";
-    done
-}
-
 function install_istio() {
     istio_version=${istio_version:-1.7.3}
 

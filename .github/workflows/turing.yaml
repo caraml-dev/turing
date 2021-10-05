@@ -271,6 +271,8 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
+    environment:
+      name: e2e
     needs:
       - publish-api
       - publish-router
@@ -311,7 +313,6 @@ jobs:
               --and-then \
               - "install_kubernetes_kind_cluster" install_kubernetes_kind_cluster \
               --and-then \
-              - "install_local_docker_registry" install_local_docker_registry \
               - "install_istio" install_istio \
               --and-then \
               - "install_knative_serving_with_istio_controller" install_knative_serving_with_istio_controller \
@@ -333,5 +334,46 @@ jobs:
           KUBECONFIG_USE_LOCAL: "true"
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
+  publish-app:
+    runs-on: ubuntu-latest
+    needs:
+      - build-ui
+      - build-swagger-ui
+      - publish-api
+      - test-e2e
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-#  publish-app:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Turing UI Dist
+        uses: actions/download-artifact@v2
+        with:
+          name: turing-ui-dist
+          path: ui/build
+
+      - name: Download Swagger UI Dist
+        uses: actions/download-artifact@v2
+        with:
+          name: swagger-ui-dist
+          path: api/api/swagger-ui-dist
+
+      - name: Build Docker image
+        id: build-image
+        env:
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+          TURING_API_IMAGE: ${{ needs.publish-api.outputs.TuringApiImage }}
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=TuringImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+
+      - name: Publish Docker Image
+        run: docker push ${{ steps.build-image.outputs.TuringImage }}
+
