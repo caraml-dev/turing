@@ -48,9 +48,9 @@ build: tidy
 	@echo "Building binary..."
 	go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
 
-.PHONY: build-docker
-build-docker: vendor version
-	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER})
+.PHONY: build-image
+build-image: vendor version
+	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION})
 	@echo "Building docker image: ${IMAGE_TAG}"
 	docker build --tag ${IMAGE_TAG} .
 
@@ -62,7 +62,7 @@ run: build local-db
 local-db:
 	@docker-compose up -d postgres && docker-compose run migrations
 
-.PHONY: local-db
+.PHONY: swagger-ui
 swagger-ui:
 	@docker-compose up -d swagger-ui
 	@xdg-open 2>/dev/null http://localhost:8081 || open http://localhost:8081
@@ -78,9 +78,8 @@ gen-client:
 
 .PHONY: version
 version:
-	$(eval VERSION_NUMBER = $(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker)))
-
-
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker)))
+	@echo "turing-api version:" $$VERSION
 
 
 #   R E V I E W   R E Q U I R E D
@@ -123,7 +122,7 @@ deploy_docker_stack: build-docker version
 	fi
 	@echo "Deploying local docker stack..."
 	@cp .env.development ./e2e/local/.env
-	@IMAGE_VERSION=${VERSION_NUMBER} \
+	@IMAGE_VERSION=${VERSION} \
 		API_PORT=${E2E_API_PORT} \
 		docker stack deploy --compose-file=./e2e/local/docker-compose.yaml turing_api_stack
 	@rm ./e2e/local/.env

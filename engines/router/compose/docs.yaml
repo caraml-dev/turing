@@ -4,9 +4,10 @@ services:
   swagger-ui:
     image: swaggerapi/swagger-ui:v3.52.0
     ports:
-      - 5555:8080
+      - 8081:5555
     volumes:
-      - ./doc:/app:ro
+      - ../api:/app:ro
     environment:
+      - PORT=5555
       - LAYOUT=BaseLayout
       - SWAGGER_JSON=/app/openapi.yaml
