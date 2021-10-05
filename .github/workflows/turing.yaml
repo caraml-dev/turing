@@ -190,14 +190,53 @@ jobs:
           name: swagger-ui-dist
           path: api/api/swagger-ui-dist/
 
-#  publish-api:
+  publish-api:
+    runs-on: ubuntu-latest
+    needs:
+      - test-api
+      - test-engines-experiment
+      - test-engines-router
+    outputs:
+      TuringApiImage: ${{ steps.build-image.outputs.TuringApiImage }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache vendor dependencies
+        uses: actions/cache@v2
+        with:
+          path: api
+          key: |
+            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
+          restore-keys: ${{ runner.os }}-vendor-
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: api
+        env:
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          make build-image | tee output.log
+          echo "::set-output name=TuringApiImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+
+      - name: Publish Docker Image
+        run: docker push ${{ steps.build-image.outputs.TuringApiImage }}
 
   publish-router:
     runs-on: ubuntu-latest
     needs:
       - test-engines-router
     outputs:
-      RouterImage: ${{ steps.build-image.outputs.RouterImage }}
+      TuringRouterImage: ${{ steps.build-image.outputs.TuringRouterImage }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -219,14 +258,16 @@ jobs:
 
       - name: Build Docker image
         id: build-image
+        working-directory: engines/router
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}
         run: |
+          set -o pipefail
           make build-image | tee output.log
-          echo "::set-output name=RouterImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+          echo "::set-output name=TuringRouterImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
 
       - name: Publish Docker Image
-        run: docker push ${{ steps.build-image.outputs.RouterImage }}
+        run: docker push ${{ steps.build-image.outputs.TuringRouterImage }}
 
 #  test-e2e:
 #
