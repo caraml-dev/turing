@@ -75,12 +75,6 @@ turing:
       MLPURL: http://mlp:8080/v1
       MLPEncryptionKey: secret
 
-swaggerUi:
-  image:
-    registry: localhost:5000/
-    repository: turing-swagger
-    tag: latest
-
 postgresql:
   resources:
     requests:

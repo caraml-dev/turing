@@ -159,36 +159,19 @@ function install_merlin() {
     cd $workdir
 }
 
-function build_turing_router_docker_image() {
-    workdir=$(pwd)
-    cd "$script_dir/../../engines/router"
-
-    go mod vendor
-    docker build -t localhost:5000/turing-router .
-    docker push localhost:5000/turing-router
-
-    rm -rf vendor
-    cd $workdir
-}
-
-function build_turing_apiserver_docker_image() {
-    workdir=$(pwd)
-    cd "$script_dir/../../api"
-
-    go mod vendor
-    docker build -t localhost:5000/turing .
-    docker push localhost:5000/turing
-
-    rm -rf vendor
-    cd $workdir
-}
-
 function install_turing() {
     workdir=$(pwd)
     cd "$script_dir/../.."
 
     kubectl apply -f ./test/e2e/turing.mockserver.yaml
-    helm install turing ./infra/charts/turing -f ./test/e2e/turing.helm-values.yaml --wait
+    helm install turing ./infra/charts/turing \
+      --set turing.image.registry=${turing_image_registry} \
+      --set turing.image.repository=${turing_image_repository} \
+      --set turing.image.tag=${turing_image_tag} \
+      --set turing.config.RouterDefaults.Image=${turing_router_image} \
+      --values ./test/e2e/turing.helm-values.yaml \
+      --wait
+
     kubectl apply -f ./test/e2e/turing.ingress.yaml
     kubectl wait --for=condition=Ready --timeout=1m pod/mockserver
 
