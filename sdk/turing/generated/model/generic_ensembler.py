@@ -60,7 +60,7 @@ class GenericEnsembler(ModelNormal):
 
     validations = {
         ('name',): {
-            'max_length': 15,
+            'max_length': 20,
             'min_length': 3,
         },
     }

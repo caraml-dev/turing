@@ -40,19 +40,33 @@ func generateEnsemblingJobFixture(
 	name string,
 	genExpected bool,
 ) *models.EnsemblingJob {
+	nullableEnsemblingResources := openapi.NullableEnsemblingResources{}
+	nullableEnsemblingResources.Set(&openapi.EnsemblingResources{
+		DriverCpuRequest:      ref.String("1"),
+		DriverMemoryRequest:   ref.String("1Gi"),
+		ExecutorReplica:       ref.Int32(10),
+		ExecutorCpuRequest:    ref.String("1"),
+		ExecutorMemoryRequest: ref.String("1Gi"),
+	})
+	barString := "bar"
+	envVars := []openapi.EnvVar{
+		{
+			Name:  "foo",
+			Value: &barString,
+		},
+	}
 	value := &models.EnsemblingJob{
 		Name:        name,
 		ProjectID:   projectID,
 		EnsemblerID: ensemblerID,
 		InfraConfig: &models.InfraConfig{
-			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			Resources: &openapi.EnsemblingResources{
-				DriverCpuRequest:      ref.String("1"),
-				DriverMemoryRequest:   ref.String("1Gi"),
-				ExecutorReplica:       ref.Int32(10),
-				ExecutorCpuRequest:    ref.String("1"),
-				ExecutorMemoryRequest: ref.String("1Gi"),
+			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
+				ArtifactUri:   ref.String("gs://bucket/ensembler"),
+				EnsemblerName: ref.String("ensembler"),
+				Resources:     nullableEnsemblingResources,
+				Env:           &envVars,
 			},
+			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
 		},
 		JobConfig: &models.JobConfig{
 			Version: "v1",
@@ -148,8 +162,8 @@ func generateEnsemblingJobFixture(
 		if name == "" {
 			value.Name = "test-ensembler-1"
 		}
-		value.InfraConfig.ArtifactURI = "gs://bucket/ensembler"
-		value.InfraConfig.EnsemblerName = "ensembler"
+		value.InfraConfig.ArtifactUri = ref.String("gs://bucket/ensembler")
+		value.InfraConfig.EnsemblerName = ref.String("ensembler")
 	}
 	return value
 }

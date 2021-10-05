@@ -14,9 +14,7 @@ export const ConfigurationConfigSection = ({ job: { infra_config = {} } }) => {
     },
     {
       title: "Environment Variables",
-      children: (
-        <EnvVariablesConfigTable variables={infra_config.env_vars || []} />
-      ),
+      children: <EnvVariablesConfigTable variables={infra_config.env || []} />,
     },
   ];
 

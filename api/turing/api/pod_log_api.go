@@ -119,7 +119,7 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 
 	namespace := c.EnsemblingJobService.GetNamespaceByComponent(options.ComponentType, project)
 	environment := c.EnsemblingJobService.GetDefaultEnvironment()
-	ensemblerName := ensemblingJob.InfraConfig.EnsemblerName
+	ensemblerName := *ensemblingJob.InfraConfig.EnsemblerName
 	request := service.PodLogRequest{
 		Namespace:   namespace,
 		Environment: environment,

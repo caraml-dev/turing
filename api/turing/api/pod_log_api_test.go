@@ -12,6 +12,8 @@ import (
 	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
+	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/gojek/turing/api/turing/internal/ref"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/validation"
 	"github.com/stretchr/testify/mock"
@@ -48,7 +50,9 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 	}
 	ensemblingJob := &models.EnsemblingJob{
 		InfraConfig: &models.InfraConfig{
-			EnsemblerName: "hello",
+			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
+				EnsemblerName: ref.String("hello"),
+			},
 		},
 	}
 

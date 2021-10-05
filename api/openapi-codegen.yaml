@@ -23,3 +23,5 @@ globalProperties:
     - EnsemblingJobSpec
     - EnsemblingResources
     - SaveMode
+    - EnsemblerInfraConfig
+    - EnvVar

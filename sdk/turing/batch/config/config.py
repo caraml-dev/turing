@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Dict, Optional
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
+from turing.generated.model.env_var import EnvVar
 from .source import EnsemblingJobSource, EnsemblingJobPredictionSource
 from .sink import EnsemblingJobSink
 
@@ -52,7 +53,7 @@ class EnsemblingJobConfig:
                  sink: EnsemblingJobSink,
                  service_account: str,
                  resource_request: ResourceRequest = None,
-                 env_vars: Dict[str, str] = None):
+                 env_vars: Dict[str, str] = {}):
         """
         Create new instance of batch ensembling job configuration
 
@@ -94,6 +95,10 @@ class EnsemblingJobConfig:
         return self._service_account
 
     @property
+    def env_vars(self) -> Dict[str, str]:
+        return self._env_vars
+
+    @property
     def resource_request(self) -> Optional['ResourceRequest']:
         return self._resource_request
 
@@ -110,5 +115,6 @@ class EnsemblingJobConfig:
     def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
         return turing.generated.models.EnsemblerInfraConfig(
             service_account_name=self.service_account,
-            resources=self.resource_request
+            resources=self.resource_request,
+            env=[EnvVar(name=name, value=value) for name, value in self.env_vars.items()],
         )
