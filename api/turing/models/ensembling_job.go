@@ -86,6 +86,7 @@ func (r *InfraConfig) Scan(value interface{}) error {
 // but requires some treatment to the overridden name
 func (r *InfraConfig) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	// This line is changed because we want the overriden service_account_name to be used
 	toSerialize["service_account_name"] = r.ServiceAccountName
 
 	if r.ArtifactUri != nil {
