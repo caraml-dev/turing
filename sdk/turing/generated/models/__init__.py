@@ -38,6 +38,7 @@ from turing.generated.model.ensembling_job_sink import EnsemblingJobSink
 from turing.generated.model.ensembling_job_source import EnsemblingJobSource
 from turing.generated.model.ensembling_job_spec import EnsemblingJobSpec
 from turing.generated.model.ensembling_resources import EnsemblingResources
+from turing.generated.model.env_var import EnvVar
 from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink

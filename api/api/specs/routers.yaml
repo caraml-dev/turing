@@ -678,7 +678,7 @@ components:
         env:
           type: "array"
           items:
-            $ref: "#/components/schemas/EnvVar"
+            $ref: "common.yaml#/components/schemas/EnvVar"
         service_account:
           type: "string"
           description: >
@@ -753,7 +753,7 @@ components:
         env:
           type: "array"
           items:
-            $ref: "#/components/schemas/EnvVar"
+            $ref: "common.yaml#/components/schemas/EnvVar"
         service_account:
           type: "string"
           description: >
@@ -772,16 +772,6 @@ components:
         cpu_request:
           type: "string"
         memory_request:
-          type: "string"
-
-    EnvVar:
-      type: "object"
-      required:
-        - name
-      properties:
-        name:
-          type: "string"
-        value:
           type: "string"
 
     BigQueryConfig:

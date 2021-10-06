@@ -81,6 +81,11 @@ def main(turing_api: str, project: str):
         executor_memory_request="800M"
     )
 
+    # (Optional) Configure environment variables here
+    env_vars = {
+        "SOME_VAR": "SOME_VALUE",
+    }
+
     # Submit the job for execution:
     job = ensembler.submit_job(
         turing.batch.config.EnsemblingJobConfig(
@@ -89,7 +94,8 @@ def main(turing_api: str, project: str):
             result_config=result_config,
             sink=sink,
             service_account=SERVICE_ACCOUNT_NAME,
-            resource_request=resource_request
+            resource_request=resource_request,
+            env_vars=env_vars,
         )
     )
     print(job)

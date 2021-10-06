@@ -34,6 +34,9 @@ func generateEnsemblingJobFixtureJSON() string {
 				"executor_replica": 10,
 				"executor_cpu_request": "1",
 				"executor_memory_request": "1Gi"
+			},
+			"environment_variables": {
+				"foo": "bar"
 			}
 		},
 		"job_config":{

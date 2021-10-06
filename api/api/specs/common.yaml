@@ -22,6 +22,16 @@ components:
         - "header"
         - "payload"
 
+    EnvVar:
+      type: "object"
+      required:
+        - name
+      properties:
+        name:
+          type: "string"
+        value:
+          type: "string"
+
     pagination.Paging:
       type: "object"
       properties:
