@@ -415,6 +415,7 @@ components:
           type: string
         service_account_name:
           type: string
+          x-go-custom-tag: validate:"required"
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
         env:
