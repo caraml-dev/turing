@@ -41,6 +41,13 @@ function install_kubernetes_kind_cluster() {
     cd $workdir
 }
 
+function install_local_docker_registry() {
+    docker run --rm --network kind -d -p 5000:5000 --name kind-registry registry:2
+    for node in $(kind get nodes); do
+      kubectl annotate node "${node}" "kind.x-k8s.io/registry=localhost:5000";
+    done
+}
+
 function install_istio() {
     istio_version=${istio_version:-1.7.3}
 
@@ -149,6 +156,30 @@ function install_merlin() {
     kubectl apply -f merlin.ingress.yaml
 
     rm -rf merlin
+    cd $workdir
+}
+
+function build_turing_router_docker_image() {
+    workdir=$(pwd)
+    cd "$script_dir/../../engines/router"
+
+    go mod vendor
+    docker build -t localhost:5000/turing-router .
+    docker push localhost:5000/turing-router
+
+    rm -rf vendor
+    cd $workdir
+}
+
+function build_turing_apiserver_docker_image() {
+    workdir=$(pwd)
+    cd "$script_dir/../../api"
+
+    go mod vendor
+    docker build -t localhost:5000/turing .
+    docker push localhost:5000/turing
+
+    rm -rf vendor
     cd $workdir
 }
 
