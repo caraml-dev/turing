@@ -125,7 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/IdObject"
+                $ref: "#/components/schemas/IdObject"
         400:
           description: "Invalid ensembling job"
         404:
@@ -133,6 +133,8 @@ paths:
 
 components:
   schemas:
+    IdObject:
+      $ref: "common.yaml#/components/schemas/IdObject"
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
       properties:
@@ -413,6 +415,7 @@ components:
           type: string
         service_account_name:
           type: string
+          x-go-custom-tag: validate:"required"
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
         env:

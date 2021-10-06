@@ -65,7 +65,6 @@ func (c *JobConfig) Scan(value interface{}) error {
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
 	openapi.EnsemblerInfraConfig
-	ServiceAccountName string `json:"service_account_name" validate:"required"`
 }
 
 // Value returns json value, implement driver.Valuer interface
@@ -80,32 +79,6 @@ func (r *InfraConfig) Scan(value interface{}) error {
 		return errors.New("type assertion to []byte failed")
 	}
 	return json.Unmarshal(b, &r)
-}
-
-// MarshalJSON marshals the Go struct into a JSON, most of the code here is duplicated
-// but requires some treatment to the overridden name
-func (r *InfraConfig) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	// This line is changed because we want the overridden service_account_name to be used
-	toSerialize["service_account_name"] = r.ServiceAccountName
-
-	if r.ArtifactUri != nil {
-		toSerialize["artifact_uri"] = r.ArtifactUri
-	}
-
-	if r.EnsemblerName != nil {
-		toSerialize["ensembler_name"] = r.EnsemblerName
-	}
-
-	if r.Resources.IsSet() {
-		toSerialize["resources"] = r.Resources.Get()
-	}
-
-	if r.Env != nil {
-		toSerialize["env"] = r.Env
-	}
-
-	return json.Marshal(toSerialize)
 }
 
 // Status is the state of the finite machine ensembling job.
