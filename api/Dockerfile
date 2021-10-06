@@ -19,19 +19,24 @@ RUN go build \
 # Clean image with turing-api binary and production build of turing-ui
 FROM alpine:3.12
 
-ARG API_BIN_NAME=turing-api
-ENV API_BIN_NAME ${API_BIN_NAME}
-
 ENV TURING_PORT "8080"
+ENV TURING_USER "turing"
+ENV TURING_USER_GROUP "app"
 
 EXPOSE ${TURING_PORT}
 
-RUN addgroup -S app && adduser -S app -G app && mkdir /app && chown -R app:app /app
+RUN addgroup -S ${TURING_USER_GROUP} \
+    && adduser -S ${TURING_USER} -G ${TURING_USER_GROUP} \
+    && mkdir /app \
+    && chown -R ${TURING_USER}:${TURING_USER_GROUP} /app
 
-COPY --chown=app:app --from=api-builder /app/bin/* /app
-COPY --chown=app:app --from=api-builder /app/api /app/api
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api /app/api
 
-USER app
+USER ${TURING_USER}
 WORKDIR /app
 
-ENTRYPOINT ["sh", "-c", "./${API_BIN_NAME} \"$@\"", "--"]
+ARG API_BIN_NAME=turing-api
+ENV TURING_API_BIN "./${API_BIN_NAME}"
+
+ENTRYPOINT ["sh", "-c", "${TURING_API_BIN} \"$@\"", "--"]
