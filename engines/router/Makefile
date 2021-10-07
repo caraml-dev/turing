@@ -1,97 +1,112 @@
 include .env.development
 export
 
-BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-router)
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker))
-ALL_PACKAGES=$(shell go list ./...)
-SRC_ROOT=.
-
 USER=$(shell whoami)
 HOST=$(shell hostname)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 NOW=$(shell date +'%FT%T%z')
+
+BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-router)
 PROJECT_ROOT=github.com/gojek/turing/engines/router
+SRC_ROOT=.
 
-.PHONY: default clean setup fmt dep-ci lint lint-ci tidy vendor test test-unit test-all build_image build build_docker run
-
+.PHONY: default
 default: test
 
+.PHONY: clean
 clean:
 	@test ! -e bin || rm -r bin
 	@test ! -d vendor || rm -r vendor
 
+.PHONY: setup
 setup:
-	@test -x ${GOPATH}/bin/golint || go get -u golang.org/x/lint/golint
+	@echo "Setting up tools..."
+	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.41.1/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
+.PHONY: fmt
 fmt:
-	@echo "Fmt code..."
+	@echo "Formatting code..."
 	gofmt -s -w ${SRC_ROOT}
 
-dep-ci:
-	@echo "Getting CI dependencies..."
-	@test -x ${GOPATH}/bin/golangci-lint || go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
-
-lint:
+.PHONY: lint
+lint: setup
 	@echo "Linting code..."
-	golangci-lint -v run
+	golangci-lint -v run --timeout 1m $(if $(filter true,$(fix)),--fix,)
 
-lint-fix:
-	@echo "Linting code..."
-	golangci-lint -v run --fix
-
-lint-ci: dep-ci lint
-
-tidy: setup
+.PHONY: tidy
+tidy:
 	@echo "Fetching dependencies..."
 	go mod tidy
 
-vendor: setup
+.PHONY: vendor
+vendor:
 	@echo "Fetching dependencies..."
 	go mod vendor
 
+.PHONY: test
 test: tidy
 	@echo "Running tests..."
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
 	go tool cover -func cover.out
 
-test-unit: tidy
-	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit
-	go tool cover -func cover.out
-
-test-all: tidy
-	@echo "Running all tests..."
-	go test -v -race -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
+.PHONY: benchmark
+benchmark: tidy
+	@echo "Running Benchmark..."
 	go test -bench=. -run=Bench ${SRC_ROOT}/...
-	go tool cover -func cover.out
 
-build: tidy fmt
+.PHONY: version
+version:
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker)))
+	@echo "turing-router version:" $$VERSION
+
+
+tmp: version
+	@echo "Docker image has been built: docker.io/library/turing-router:0.1.0-build.23-2852933"
+
+
+.PHONY: build
+build: tidy version
 	@echo "Building binary..."
 	go build \
 		-o ./bin/${BIN_NAME} \
 		-ldflags " \
-			-X ${PROJECT_ROOT}/missionctl/internal.Version=${VERSION_NUMBER} \
+			-X ${PROJECT_ROOT}/missionctl/internal.Version=${VERSION} \
 			-X ${PROJECT_ROOT}/missionctl/internal.Branch=${BRANCH} \
 			-X ${PROJECT_ROOT}/missionctl/internal.BuildUser=${USER}@${HOST} \
 			-X ${PROJECT_ROOT}/missionctl/internal.BuildDate=${NOW}" \
 		${SRC_ROOT}/missionctl/cmd/main.go
 
+.PHONY: run
 run: build
 	./bin/${BIN_NAME}
 
-build_image:
-	echo "Building docker image: $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER}"
+.PHONY: build-image
+build-image: vendor version
+	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION})
+	@echo "Building docker image: ${IMAGE_TAG}"
 	docker build \
-		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${BIN_NAME}:${VERSION_NUMBER} \
+		--tag ${IMAGE_TAG} \
 		--build-arg BIN_NAME \
-		--build-arg VERSION=${VERSION_NUMBER} \
+		--build-arg VERSION \
 		--build-arg USER \
 		--build-arg HOST \
 		--build-arg BRANCH \
 		--build-arg NOW \
 		.
 
-build_docker: vendor build_image clean
+.PHONY: swagger-ui
+swagger-ui:
+	@docker-compose -f compose/docs.yaml up -d
+	@xdg-open 2>/dev/null http://localhost:8081 || open http://localhost:8081
+
+
+
+#   R E V I E W   R E Q U I R E D
+#
+#   Following Makefile targets aren't expected to be working
+#   correctly and require further review and refactoring
+#
 
 deploy_docker_stack:
 	@echo "Using default Google Application Credentials for Auth..."
@@ -123,9 +138,6 @@ clean_docker_stack:
 	@docker secret rm google_app_creds
 	@echo "Removing fluentd logs..."
 	@rm -rf ./fluentd_logs
-
-swagger-ui:
-	@docker-compose -f compose/docs.yaml up -d
 
 jaeger-local:
 	@docker-compose -f compose/tracing.yaml up -d
