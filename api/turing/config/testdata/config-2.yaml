@@ -26,3 +26,7 @@ Experiment:
         quxkey2-3: quxval2-3-add
     quux: 
       quuxkey1: quuxval1
+OpenapiConfig:
+  SwaggerUIConfig:
+    ServingDirectory: static/swagger-ui
+    ServingPath: /api-docs

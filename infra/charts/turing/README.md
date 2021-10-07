@@ -14,11 +14,6 @@ Turing: ML Experimentation System
 | postgresql.postgresqlPassword | string | `nil` | Password for Turing Postgresql database (required) |
 | postgresql.postgresqlUsername | string | `"turing"` | Username for Turing Postgresql database |
 | postgresql.resources | object | `{}` | Resources requests and limits for Turing database. This should be set  according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| swaggerUi.apiHost | string | `"127.0.0.1"` | Host for the Swagger UI |
-| swaggerUi.basePath | string | `"/v1"` | Base URL path to serve the Swagger UI |
-| swaggerUi.image | object | `{"tag":"v3.24.3"}` | Docker tag for Swagger UI https://hub.docker.com/r/swaggerapi/swagger-ui |
-| swaggerUi.service.externalPort | int | `8080` | Swagger UI Kubernetes service port number |
-| swaggerUi.service.internalPort | int | `8081` | Swagger UI container port number |
 | turing.config | object | `{}` | Turing API server configuration.  Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |

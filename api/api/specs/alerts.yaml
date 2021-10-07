@@ -6,6 +6,10 @@ info:
 .tags: &tags
   - "Alerts"
 
+.id: &id
+  type: "integer"
+  format: "int32"
+
 paths:
   "/projects/{project_id}/routers/{router_id}/alerts":
     get:
@@ -16,13 +20,13 @@ paths:
           name: "project_id"
           description: "id of the project the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router for the alerts"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -47,13 +51,13 @@ paths:
           name: "project_id"
           description: "id of the project the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router for the alert"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: "alert specification"
@@ -85,19 +89,19 @@ paths:
           name: "project_id"
           description: "id of the project the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router for the alerts"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "alert_id"
           description: "id of the alert"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -120,19 +124,19 @@ paths:
           name: "project_id"
           description: "id of the project the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router for the alerts"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "alert_id"
           description: "id of the alert"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: "alert specification"
@@ -162,19 +166,19 @@ paths:
           name: "project_id"
           description: "id of the project the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router for the alerts"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "alert_id"
           description: "id of the alert"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -188,9 +192,6 @@ paths:
 
 components:
   schemas:
-    Id:
-      $ref: "common.yaml#/components/schemas/Id"
-
     AlertMetric:
       type: string
       enum:

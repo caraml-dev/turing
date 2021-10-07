@@ -90,7 +90,7 @@ func TestMarshalResponse(t *testing.T) {
 func TestWriteTo(t *testing.T) {
 	// Create test response
 	resp := &Response{
-		code: 10,
+		code: 103,
 		data: "test-data",
 	}
 	// Create test response writer
@@ -105,6 +105,6 @@ func TestWriteTo(t *testing.T) {
 	tu.FailOnNil(t, rr.Body)
 	defer resultResponse.Body.Close()
 	assert.Equal(t, "\"test-data\"\n", rr.Body.String())
-	assert.Equal(t, 10, rr.Code)
+	assert.Equal(t, 103, rr.Code)
 	assert.Equal(t, header, resultResponse.Header)
 }

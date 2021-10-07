@@ -6,6 +6,10 @@ info:
 .tags: &tags
   - "Ensembling Job"
 
+.id: &id
+  type: "integer"
+  format: "int32"
+
 paths:
   "/projects/{project_id}/jobs":
     get:
@@ -16,7 +20,7 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: query
           name: page
@@ -31,7 +35,7 @@ paths:
         - in: query
           name: ensembler_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
         - in: query
           name: search
           schema:
@@ -59,7 +63,7 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: A JSON object that contains the configuration of the ensembling job
@@ -84,12 +88,12 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: path
           name: job_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -108,12 +112,12 @@ paths:
         - in: path
           name: project_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: path
           name: job_id
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         202:
@@ -129,28 +133,22 @@ paths:
 
 components:
   schemas:
-    Id:
-      $ref: "common.yaml#/components/schemas/Id"
-
     IdObject:
-      properties:
-        id:
-          $ref: "#/components/schemas/Id"
-
+      $ref: "common.yaml#/components/schemas/IdObject"
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
       properties:
         id:
-          $ref: "#/components/schemas/Id"
+          $ref: "common.yaml#/components/schemas/Id"
         name:
           type: "string"
           minLength: 3
           maxLength: 50
           readOnly: true
         project_id:
-          $ref: "#/components/schemas/Id"
+          $ref: "common.yaml#/components/schemas/Id"
         ensembler_id:
-          $ref: "#/components/schemas/Id"
+          $ref: "common.yaml#/components/schemas/Id"
         environment_name:
           type: "string"
         infra_config:
@@ -417,6 +415,7 @@ components:
           type: string
         service_account_name:
           type: string
+          x-go-custom-tag: validate:"required"
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
         env:

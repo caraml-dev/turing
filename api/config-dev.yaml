@@ -61,5 +61,11 @@ MLPConfig:
   MLPURL: http://localhost:8081/v1
   MLPEncryptionKey: password
 TuringUIConfig:
-  AppDirectory: ../ui
-  Homepage: /turing
+  ServingDirectory: ../ui/build
+  ServingPath: /turing
+OpenapiConfig:
+  ValidationEnabled: true
+  SpecFile: api/openapi.yaml
+  SwaggerUIConfig:
+    ServingDirectory: api/swagger-ui-dist
+    ServingPath: /api-docs/
