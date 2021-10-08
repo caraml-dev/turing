@@ -23,8 +23,8 @@ jobs:
 
     - name: Run test 
       working-directory: engines/router
-      run: make test-unit
+      run: make test
 
     - name: Lint code
       working-directory: engines/router
-      run: make lint-ci
+      run: make lint
