@@ -1,0 +1,5 @@
+**
+
+!api/**
+!ui/build/**
+!entrypoint.sh
