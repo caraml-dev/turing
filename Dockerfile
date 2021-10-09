@@ -5,7 +5,6 @@ USER root
 RUN apk add --no-cache bash
 USER ${TURING_USER}
 
-
 ARG TURING_UI_DIST_PATH=ui/build
 ARG SWAGGER_UI_DIST_PATH=api/api/swagger-ui-dist
 

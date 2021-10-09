@@ -60,11 +60,6 @@ version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker)))
 	@echo "turing-router version:" $$VERSION
 
-
-tmp: version
-	@echo "Docker image has been built: docker.io/library/turing-router:0.1.0-build.23-2852933"
-
-
 .PHONY: build
 build: tidy version
 	@echo "Building binary..."

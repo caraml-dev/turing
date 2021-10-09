@@ -399,7 +399,7 @@ func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.Ensembling
 		return
 	}
 
-	resources := job.InfraConfig.Resources.Get()
+	resources := job.InfraConfig.GetResources()
 
 	if resources.DriverCpuRequest == nil {
 		resources.DriverCpuRequest = s.defaultConfig.BatchEnsemblingJobResources.DriverCpuRequest
