@@ -223,6 +223,7 @@ jobs:
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}
         run: |
+          cat Dockerfile
           set -o pipefail
           make build-image | tee output.log
           echo "::set-output name=TuringApiImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
