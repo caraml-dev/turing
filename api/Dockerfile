@@ -25,8 +25,8 @@ ENV TURING_USER_GROUP "app"
 
 EXPOSE ${TURING_PORT}
 
-RUN addgroup ${TURING_USER_GROUP} \
-    && adduser --system --ingroup ${TURING_USER_GROUP} ${TURING_USER} \
+RUN addgroup -S ${TURING_USER_GROUP} \
+    && adduser -S ${TURING_USER} -G ${TURING_USER_GROUP} -H \
     && mkdir /app \
     && chown -R ${TURING_USER}:${TURING_USER_GROUP} /app
 
