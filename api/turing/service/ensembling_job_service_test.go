@@ -472,7 +472,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				}
 
 				if tt.removeDriverCPURequest {
-					resources := tt.request.InfraConfig.Resources.Get()
+					resources := tt.request.InfraConfig.GetResources()
 					resources.DriverCpuRequest = nil
 				}
 
@@ -522,7 +522,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					assert.Equal(
 						t,
 						*defaultConfigurations.BatchEnsemblingJobResources.DriverCpuRequest,
-						*result.InfraConfig.Resources.Get().DriverCpuRequest,
+						*result.InfraConfig.GetResources().DriverCpuRequest,
 					)
 				}
 			})
