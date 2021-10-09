@@ -225,7 +225,6 @@ jobs:
         run: |
           set -o pipefail
           make build-image | tee output.log
-          make build-image | tee output.log
           echo "::set-output name=TuringApiImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
 
       - name: Publish Docker Image
