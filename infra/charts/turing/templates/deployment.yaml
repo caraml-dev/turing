@@ -78,10 +78,11 @@ spec:
           timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
         resources:
           {{- toYaml .Values.turing.resources | nindent 12 }}
-        command:
-        - /app/turing-api
         args:
         - -config=/etc/turing/config.yaml
+        {{- if .Values.turing.uiConfig }}
+        - -ui-config=/etc/turing/ui.config.json
+        {{- end }}
         {{- with .Values.turing.extraArgs }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
