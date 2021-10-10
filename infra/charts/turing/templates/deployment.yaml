@@ -79,9 +79,11 @@ spec:
         resources:
           {{- toYaml .Values.turing.resources | nindent 12 }}
         args:
-        - -config=/etc/turing/config.yaml
+        - -config
+        - /etc/turing/config.yaml
         {{- if .Values.turing.uiConfig }}
-        - -ui-config=/etc/turing/ui.config.json
+        - -ui-config
+        - /etc/turing/ui.config.json
         {{- end }}
         {{- with .Values.turing.extraArgs }}
         {{- toYaml . | nindent 8 }}

@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -e
 
 CMD=()
 TURING_UI_CONFIG_PATH=
@@ -27,6 +28,8 @@ main(){
     else
       echo "TURING_UI_DIST_DIR: Turing UI static build directory not provided. Skipping."
     fi
+  else
+    echo "Turing UI config is not provided. Skipping."
   fi
 }
 
@@ -62,5 +65,6 @@ parse_command_line(){
 
 main "$@"
 
+echo "Launching turing-api server: " "$TURING_API_BIN" "${CMD[@]}"
 exec "$TURING_API_BIN" "${CMD[@]}"
 
