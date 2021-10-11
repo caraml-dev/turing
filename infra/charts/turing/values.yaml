@@ -6,9 +6,9 @@ turing:
   image:
     # -- Docker registry for Turing API image. User is required to override
     # the registry for now as there is no publicly available Turing image
-    registry: docker.io/
+    registry: ghcr.io/
     # -- Docker image repository for Turing API
-    repository: turing
+    repository: gojek/turing
     # -- Docker image tag for Turing API
     tag: latest
   # -- Resources requests and limits for Turing API. This should be set 
@@ -42,6 +42,10 @@ turing:
   # -- Turing API server configuration. 
   # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
   config: {}
+
+  # -- Turing UI configuration.
+  # Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
+  uiConfig: {}
 
   # -- List of string containing additional Turing API server arguments. For
   # example, multiple "-config" can be specified to use multiple config files

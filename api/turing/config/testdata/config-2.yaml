@@ -28,5 +28,4 @@ Experiment:
       quuxkey1: quuxval1
 OpenapiConfig:
   SwaggerUIConfig:
-    ServingDirectory: static/swagger-ui
-    ServingPath: /api-docs
+    ServingPath: /swagger-ui

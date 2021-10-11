@@ -450,6 +450,8 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
+	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingDirectory", "")
+	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

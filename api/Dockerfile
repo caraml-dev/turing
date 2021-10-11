@@ -16,8 +16,8 @@ RUN go build \
     -o ./bin/${API_BIN_NAME} \
     -v ${PROJECT_ROOT}/cmd
 
-# Clean image with turing-api binary and production build of turing-ui
-FROM alpine:3.12
+# Clean image with turing-api binary
+FROM alpine:3.13
 
 ENV TURING_PORT "8080"
 ENV TURING_USER "turing"
@@ -26,7 +26,7 @@ ENV TURING_USER_GROUP "app"
 EXPOSE ${TURING_PORT}
 
 RUN addgroup -S ${TURING_USER_GROUP} \
-    && adduser -S ${TURING_USER} -G ${TURING_USER_GROUP} \
+    && adduser -S ${TURING_USER} -G ${TURING_USER_GROUP} -H \
     && mkdir /app \
     && chown -R ${TURING_USER}:${TURING_USER_GROUP} /app
 
