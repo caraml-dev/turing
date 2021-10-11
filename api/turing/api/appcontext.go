@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
@@ -74,6 +76,10 @@ func NewAppContext(
 	envClusterMap, err := getEnvironmentClusterMap(mlpSvc, cfg.DeployConfig.GcpProject)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service")
+	}
+
+	if cfg.ClusterConfig.InClusterConfig && len(envClusterMap) > 1 {
+		return nil, fmt.Errorf("There should only be one cluster if in cluster credentials are used")
 	}
 
 	// Initialise cluster controllers

@@ -99,6 +99,9 @@ turing:
   # # Example
   # - name: varlog
   #   mountPath: /var/log
+  clusterConfig:
+    useInClusterConfig: false
+    serviceAccountName: turing
 
 dbMigrations:
   image:

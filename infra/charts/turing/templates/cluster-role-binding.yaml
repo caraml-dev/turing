@@ -1,0 +1,14 @@
+{{- if .Values.turing.clusterConfig.useInClusterConfig -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.turing.clusterConfig.serviceAccountName }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.turing.clusterConfig.serviceAccountName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.turing.clusterConfig.serviceAccountName }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

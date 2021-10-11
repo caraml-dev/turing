@@ -30,6 +30,9 @@ spec:
 {{ toYaml .Values.turing.labels | indent 8 -}}
 {{- end }}
     spec:
+{{- if .Values.turing.clusterConfig.useInClusterConfig }}
+      serviceAccountName: {{ .Values.turing.clusterConfig.serviceAccountName }}
+{{- end }}
       initContainers:
       - name: migrations
         image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"

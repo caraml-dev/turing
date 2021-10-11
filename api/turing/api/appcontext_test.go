@@ -150,9 +150,12 @@ func TestNewAppContext(t *testing.T) {
 			DSN:     "",
 			Labels:  nil,
 		},
-		VaultConfig: &config.VaultConfig{
-			Address: "vault-addr",
-			Token:   "vault-token",
+		ClusterConfig: config.ClusterConfig{
+			InClusterConfig: false,
+			VaultConfig: &config.VaultConfig{
+				Address: "vault-addr",
+				Token:   "vault-token",
+			},
 		},
 		MLPConfig: &config.MLPConfig{
 			MerlinURL:        "http://mlp.example.com/api/merlin/v1",

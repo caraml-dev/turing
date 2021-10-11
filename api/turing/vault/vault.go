@@ -8,9 +8,13 @@ import (
 
 // NewClientFromConfig creates a vault client from the given config
 func NewClientFromConfig(cfg *config.Config) (vault.VaultClient, error) {
+	if !cfg.ClusterConfig.InClusterConfig {
+		// Here we don't need vault, we can use in cluster credentials
+		return nil, nil
+	}
 	vaultConfig := &vault.Config{
-		Address: cfg.VaultConfig.Address,
-		Token:   cfg.VaultConfig.Token,
+		Address: cfg.ClusterConfig.VaultConfig.Address,
+		Token:   cfg.ClusterConfig.VaultConfig.Token,
 	}
 	vaultClient, err := vault.NewVaultClient(vaultConfig)
 	if err != nil {

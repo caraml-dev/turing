@@ -62,8 +62,8 @@ type Config struct {
 	KnativeServiceDefaults *KnativeServiceDefaults
 	NewRelicConfig         newrelic.Config
 	Sentry                 sentry.Config
-	VaultConfig            *VaultConfig `validate:"required"`
-	TuringEncryptionKey    string       `validate:"required"`
+	ClusterConfig          ClusterConfig `validate:"required"`
+	TuringEncryptionKey    string        `validate:"required"`
 	AlertConfig            *AlertConfig
 	MLPConfig              *MLPConfig `validate:"required"`
 	TuringUIConfig         *SinglePageApplicationConfig
@@ -285,10 +285,18 @@ type AuthorizationConfig struct {
 	URL     string
 }
 
+type ClusterConfig struct {
+	// InClusterConfig is a flag if the service account is provided in Kubernetes
+	// and has the relevant credentials to handle all cluster operations.
+	InClusterConfig bool
+	// VaultConfig is required if InClusterConfig is false.
+	VaultConfig *VaultConfig
+}
+
 // VaultConfig captures the config for connecting to the Vault server
 type VaultConfig struct {
-	Address string `validate:"required"`
-	Token   string `validate:"required"`
+	Address string
+	Token   string
 }
 
 type AlertConfig struct {
@@ -429,8 +437,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("Sentry::Enabled", "false")
 	v.SetDefault("Sentry::DSN", "")
 
-	v.SetDefault("VaultConfig::Address", "http://localhost:8200")
-	v.SetDefault("VaultConfig::Token", "")
+	v.SetDefault("ClusterConfig::VaultConfig::Address", "http://localhost:8200")
+	v.SetDefault("ClusterConfig::VaultConfig::Token", "")
 
 	v.SetDefault("TuringEncryptionKey", "")
 

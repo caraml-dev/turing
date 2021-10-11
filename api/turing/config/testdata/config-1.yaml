@@ -33,8 +33,10 @@ Sentry:
   Enabled: true 
   Labels:
     foo: bar
-VaultConfig:
-  Token: root
+ClusterConfig:
+  InClusterConfig: false
+  VaultConfig:
+    Token: root
 Experiment:
     qux:
       quxkey1: quxval1
