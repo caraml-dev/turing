@@ -3,7 +3,6 @@ package server
 import (
 	"flag"
 	"fmt"
-	"github.com/gojek/turing/api/turing/config"
 	"net/http"
 	"strings"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/turing/api/turing/api"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
