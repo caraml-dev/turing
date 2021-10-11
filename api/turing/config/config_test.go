@@ -165,6 +165,10 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "",
+						ServingPath:      "/api-docs/",
+					},
 				},
 			},
 		},
@@ -237,6 +241,10 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "",
+						ServingPath:      "/api-docs/",
+					},
 				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
@@ -325,8 +333,8 @@ func TestLoad(t *testing.T) {
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
-						ServingDirectory: "static/swagger-ui",
-						ServingPath:      "/api-docs",
+						ServingDirectory: "",
+						ServingPath:      "/swagger-ui",
 					},
 				},
 				Experiment: map[string]interface{}{
@@ -347,22 +355,23 @@ func TestLoad(t *testing.T) {
 		"multiple files and environment variables": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			env: map[string]string{
-				"PORT":                                      "5000",
-				"ALLOWEDORIGINS":                            "http://baz.com,http://qux.com",
-				"AUTHCONFIG_ENABLED":                        "true",
-				"AUTHCONFIG_URL":                            "http://env.example.com",
-				"DBCONFIG_USER":                             "dbuser-env",
-				"DBCONFIG_PASSWORD":                         "dbpassword-env",
-				"DEPLOYCONFIG_TIMEOUT":                      "10m",
-				"DEPLOYCONFIG_MAXMEMORY":                    "4500Mi",
-				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":     "fooval1-env",
-				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":        "quuxval-env",
-				"TURINGUICONFIG_SERVINGDIRECTORY":           "appdir-env",
-				"TURINGUICONFIG_SERVINGPATH":                "/turing-env",
-				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH": "/swagger-ui",
-				"EXPERIMENT_QUX_QUXKEY1":                    "quxval1-env",
-				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":          "quxval2-1-env",
-				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY":  "4",
+				"PORT":                                           "5000",
+				"ALLOWEDORIGINS":                                 "http://baz.com,http://qux.com",
+				"AUTHCONFIG_ENABLED":                             "true",
+				"AUTHCONFIG_URL":                                 "http://env.example.com",
+				"DBCONFIG_USER":                                  "dbuser-env",
+				"DBCONFIG_PASSWORD":                              "dbpassword-env",
+				"DEPLOYCONFIG_TIMEOUT":                           "10m",
+				"DEPLOYCONFIG_MAXMEMORY":                         "4500Mi",
+				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":          "fooval1-env",
+				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":             "quuxval-env",
+				"TURINGUICONFIG_SERVINGDIRECTORY":                "appdir-env",
+				"TURINGUICONFIG_SERVINGPATH":                     "/turing-env",
+				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY": "static/swagger-ui",
+				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
+				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
+				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
+				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY":       "4",
 			},
 			want: &Config{
 				Port:           5000,
