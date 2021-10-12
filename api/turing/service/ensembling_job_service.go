@@ -420,4 +420,7 @@ func (s *ensemblingJobService) mergeDefaultConfigurations(job *models.Ensembling
 	if resources.ExecutorMemoryRequest == nil {
 		resources.ExecutorMemoryRequest = s.defaultConfig.BatchEnsemblingJobResources.ExecutorMemoryRequest
 	}
+
+	// Required as it returns a copy of resources and not the pointer address
+	job.InfraConfig.SetResources(resources)
 }
