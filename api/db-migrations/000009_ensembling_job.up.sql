@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS ensembling_jobs
     infra_config     jsonb NOT NULL,
     job_config       jsonb NOT NULL,
     retry_count      integer NOT NULL default 0,
-    run_id           integer NOT NULL,
     status           ensembling_job_status NOT NULL default 'pending',
     error            text,
     created_at       timestamp   NOT NULL default current_timestamp,
