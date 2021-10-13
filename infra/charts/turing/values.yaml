@@ -11,7 +11,7 @@ turing:
     repository: gojek/turing
     # -- Docker image tag for Turing API
     tag: latest
-  # -- Resources requests and limits for Turing API. This should be set 
+  # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources: {}
@@ -100,7 +100,9 @@ turing:
   # - name: varlog
   #   mountPath: /var/log
   clusterConfig:
+    # -- Configuration to use in cluster configuration or authenticate kubernetes with vault configuration
     useInClusterConfig: false
+    # -- Service account name for turing's kubernetes controller
     serviceAccountName: turing
 
 dbMigrations:
