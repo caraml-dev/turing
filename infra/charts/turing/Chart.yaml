@@ -1,4 +1,4 @@
 apiVersion: v1
 description: "Turing: ML Experimentation System"
 name: turing
-version: 0.1.9
+version: 0.1.7
