@@ -31,7 +31,7 @@ spec:
 {{- end }}
     spec:
 {{- if .Values.turing.clusterConfig.useInClusterConfig }}
-      serviceAccountName: {{ .Values.turing.clusterConfig.serviceAccountName }}
+      serviceAccountName: {{ template "turing.service-account" . }}
 {{- end }}
       initContainers:
       - name: migrations

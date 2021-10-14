@@ -285,18 +285,20 @@ type AuthorizationConfig struct {
 	URL     string
 }
 
+// ClusterConfig contains the cluster controller information.
+// Supported features are in cluster configuration and Kubernetes client CA certificates.
 type ClusterConfig struct {
 	// InClusterConfig is a flag if the service account is provided in Kubernetes
 	// and has the relevant credentials to handle all cluster operations.
 	InClusterConfig bool
 	// VaultConfig is required if InClusterConfig is false.
-	VaultConfig *VaultConfig
+	VaultConfig *VaultConfig `validate:"required_without=InClusterConfig"`
 }
 
 // VaultConfig captures the config for connecting to the Vault server
 type VaultConfig struct {
-	Address string
-	Token   string
+	Address string `validate:"required"`
+	Token   string `validate:"required"`
 }
 
 type AlertConfig struct {
@@ -436,9 +438,6 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("Sentry::Enabled", "false")
 	v.SetDefault("Sentry::DSN", "")
-
-	v.SetDefault("ClusterConfig::VaultConfig::Address", "http://localhost:8200")
-	v.SetDefault("ClusterConfig::VaultConfig::Token", "")
 
 	v.SetDefault("TuringEncryptionKey", "")
 

@@ -52,9 +52,11 @@ SparkAppConfig:
   TTLSecond: 86400
 RouterDefaults:
   Image: localhost:5000/turing-router
-VaultConfig:
-  Address: http://localhost:8200
-  Token: root
+ClusterConfig:
+  InClusterConfig: false
+  VaultConfig:
+    Address: http://localhost:8200
+    Token: root
 TuringEncryptionKey: password
 MLPConfig:
   MerlinURL: http://localhost:8082/v1

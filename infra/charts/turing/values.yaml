@@ -102,8 +102,6 @@ turing:
   clusterConfig:
     # -- Configuration to use in cluster configuration or authenticate kubernetes with vault configuration
     useInClusterConfig: false
-    # -- Service account name for turing's kubernetes controller
-    serviceAccountName: turing
 
 dbMigrations:
   image:

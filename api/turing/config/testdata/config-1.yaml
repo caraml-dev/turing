@@ -36,6 +36,7 @@ Sentry:
 ClusterConfig:
   InClusterConfig: false
   VaultConfig:
+    Address: "http://localhost:8200"
     Token: root
 Experiment:
     qux:

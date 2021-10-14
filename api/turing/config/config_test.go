@@ -150,9 +150,6 @@ func TestLoad(t *testing.T) {
 				Sentry: sentry.Config{},
 				ClusterConfig: ClusterConfig{
 					InClusterConfig: false,
-					VaultConfig: &VaultConfig{
-						Address: "http://localhost:8200",
-					},
 				},
 				AlertConfig: &AlertConfig{
 					GitLab: &GitlabConfig{
@@ -663,6 +660,7 @@ func TestConfigValidate(t *testing.T) {
 			InClusterConfig: false,
 			VaultConfig: &VaultConfig{
 				Address: "http://localhost:8200",
+				Token:   "root",
 			},
 		},
 		TuringEncryptionKey: "secret",
@@ -755,6 +753,29 @@ func TestConfigValidate(t *testing.T) {
 				return validConfig
 			},
 			wantErr: true,
+		},
+		"missing vault address": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig.Address = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing vaultconfig when InClusterConfig is false": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.InClusterConfig = false
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"valid in cluster config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.InClusterConfig = true
+				return validConfig
+			},
+			wantErr: false,
 		},
 	}
 	for name, tt := range tests {
