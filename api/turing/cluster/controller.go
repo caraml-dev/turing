@@ -47,6 +47,8 @@ var (
 
 // clusterConfig Model cluster authentication settings
 type clusterConfig struct {
+	// Use Kubernetes service account in cluster config
+	InClusterConfig bool
 	// Kubernetes API server endpoint
 	Host string
 	// CA Certificate to trust for TLS
@@ -57,8 +59,6 @@ type clusterConfig struct {
 	ClientKey string
 	// Cluster Name
 	ClusterName string
-	// GCP project where the cluster resides
-	GcpProject string
 }
 
 // Controller defines the operations supported by the cluster controller
@@ -103,14 +103,23 @@ type controller struct {
 
 // newController initializes a new cluster controller with the given cluster config
 func newController(clusterCfg clusterConfig) (Controller, error) {
-	cfg := &rest.Config{
-		Host: clusterCfg.Host,
-		TLSClientConfig: rest.TLSClientConfig{
-			Insecure: false,
-			CAData:   []byte(clusterCfg.CACert),
-			CertData: []byte(clusterCfg.ClientCert),
-			KeyData:  []byte(clusterCfg.ClientKey),
-		},
+	var cfg *rest.Config
+	if clusterCfg.InClusterConfig {
+		var err error
+		cfg, err = rest.InClusterConfig()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		cfg = &rest.Config{
+			Host: clusterCfg.Host,
+			TLSClientConfig: rest.TLSClientConfig{
+				Insecure: false,
+				CAData:   []byte(clusterCfg.CACert),
+				CertData: []byte(clusterCfg.ClientCert),
+				KeyData:  []byte(clusterCfg.ClientKey),
+			},
+		}
 	}
 
 	// Init the knative serving client
@@ -156,21 +165,26 @@ func InitClusterControllers(
 	// For each supported environment, init controller
 	controllers := make(map[string]Controller)
 	for envName, clusterName := range environmentClusterMap {
-		clusterSecret, err := vaultClient.GetClusterSecret(clusterName)
-		if err != nil {
-			return nil, errors.Wrapf(err,
-				"unable to get cluster secret for cluster: %s", clusterName)
+		clusterCfg := clusterConfig{
+			ClusterName: clusterName,
 		}
 
-		ctl, err := newController(clusterConfig{
-			Host:       clusterSecret.Endpoint,
-			CACert:     clusterSecret.CaCert,
-			ClientCert: clusterSecret.ClientCert,
-			ClientKey:  clusterSecret.ClientKey,
+		if cfg.ClusterConfig.InClusterConfig {
+			clusterCfg.InClusterConfig = true
+		} else {
+			clusterSecret, err := vaultClient.GetClusterSecret(clusterName)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"unable to get cluster secret for cluster: %s", clusterName)
+			}
 
-			ClusterName: clusterName,
-			GcpProject:  cfg.DeployConfig.GcpProject,
-		})
+			clusterCfg.Host = clusterSecret.Endpoint
+			clusterCfg.CACert = clusterSecret.CaCert
+			clusterCfg.ClientCert = clusterSecret.ClientCert
+			clusterCfg.ClientKey = clusterSecret.ClientKey
+		}
+
+		ctl, err := newController(clusterCfg)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to initialize cluster controller")
 		}

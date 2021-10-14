@@ -22,3 +22,7 @@
 {{- define "postgresql.host" -}}
 {{- printf "%s-postgresql.%s.svc.cluster.local" .Release.Name .Release.Namespace -}}
 {{- end -}}
+
+{{- define "turing.service-account" -}}
+{{- printf "turing-%s" .Release.Name -}}
+{{- end -}}

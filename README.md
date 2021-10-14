@@ -212,17 +212,25 @@ SparkAppConfig:
   TTLSecond: 86400
 RouterDefaults:
   Image: localhost:5000/turing-router
-VaultConfig:
-  Address: http://localhost:8200
-  Token: root
+ClusterConfig:
+  InClusterConfig: false
+  VaultConfig:
+    Address: http://localhost:8200
+    Token: root
 TuringEncryptionKey: password
 MLPConfig:
   MerlinURL: http://localhost:8082/v1
   MLPURL: http://localhost:8081/v1
   MLPEncryptionKey: password
 TuringUIConfig:
-  AppDirectory: ../ui
-  Homepage: /turing
+  ServingDirectory: ../ui/build
+  ServingPath: /turing
+OpenapiConfig:
+  ValidationEnabled: true
+  SpecFile: api/openapi.yaml
+  SwaggerUIConfig:
+    ServingDirectory: api/swagger-ui-dist
+    ServingPath: /api-docs/
 ```
 
 Now, start Turing API server with `go run` command,

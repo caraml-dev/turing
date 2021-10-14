@@ -33,8 +33,11 @@ Sentry:
   Enabled: true 
   Labels:
     foo: bar
-VaultConfig:
-  Token: root
+ClusterConfig:
+  InClusterConfig: false
+  VaultConfig:
+    Address: "http://localhost:8200"
+    Token: root
 Experiment:
     qux:
       quxkey1: quxval1
