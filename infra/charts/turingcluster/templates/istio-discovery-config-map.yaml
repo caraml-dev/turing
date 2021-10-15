@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "turingcluster.fullname" . }}-istio-discovery
+data:
+  discovery.yaml: |
+    {{- toYaml .Values.turingcluster.istioDiscoveryConfig | nindent 4 }}

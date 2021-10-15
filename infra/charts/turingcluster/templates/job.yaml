@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "turingcluster.fullname" . }}
+  labels:
+    {{- include "turingcluster.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ include "turingcluster.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+      - name: knative-istio-install
+        image: {{ .Values.turingcluster.image.registry }}{{ .Values.turingcluster.image.repository }}:{{ .Values.turingcluster.image.tag }}
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - /app/init.sh
+        env:
+        - name: ISTIO_BASE_HELM_VALUES_PATH
+          value: /etc/istio-base/base.yaml
+        - name: ISTIO_DISCOVERY_HELM_VALUES_PATH
+          value: /etc/istio-discovery/discovery.yaml
+        - name: ISTIO_INGRESS_HELM_VALUES_PATH
+          value: /etc/istio-ingress/ingress.yaml
+        - name: ISTIO_VERSION
+          value: {{ .Values.turingcluster.istioVersion }}
+        - name: KNATIVE_VERSION
+          value: {{ .Values.turingcluster.knativeVersion }}
+        - name: KNATIVE_ISTIO_VERSION
+          value: {{ .Values.turingcluster.knativeIstioVersion }}
+        imagePullPolicy: {{ .Values.turingcluster.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /etc/istio-base
+          name: istio-base
+        - mountPath: /etc/istio-discovery
+          name: istio-discovery
+        - mountPath: /etc/istio-ingress
+          name: istio-ingress
+      volumes:
+      - name: istio-base
+        configMap:
+          name: {{ include "turingcluster.fullname" . }}-istio-base
+      - name: istio-discovery
+        configMap:
+          name: {{ include "turingcluster.fullname" . }}-istio-discovery
+      - name: istio-ingress
+        configMap:
+          name: {{ include "turingcluster.fullname" . }}-istio-ingress
