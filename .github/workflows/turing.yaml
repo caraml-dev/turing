@@ -482,6 +482,35 @@ jobs:
           kubectl logs deployment/turing
           echo "::endgroup::"
 
+      - name: Setup MLP project
+        run: |
+          tee payload.json <<EOF
+          {
+            "name": "default",
+            "team": "myteam",
+            "stream": "mystream"
+          }
+          EOF
+
+          curl -v \
+            --header 'Content-Type: application/json' \
+            --request POST \
+            --data @payload.json \
+            http://mlp.127.0.0.1.nip.io/v1/projects
+
+      - name: Run End-to-End Test Suite
+        working-directory: api
+        env:
+          TEST_ID: ${{ github.run_id }}
+          MOCKSERVER_ENDPOINT: http://mockserver
+          API_BASE_PATH: http://turing.127.0.0.1.nip.io/v1
+          MODEL_CLUSTER_NAME: k3d-${{ env.CLUSTER_NAME }}
+          PROJECT_ID: "1"
+          PROJECT_NAME: default
+          VAULT_ADDRESS: http://vault.127.0.0.1.nip.io
+          VAULT_TOKEN: root
+        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+
 #      - name: Set variables
 #        id: variables
 #        run: |
@@ -518,18 +547,6 @@ jobs:
 #              --and-then \
 #              - "install_merlin" install_merlin \
 #              - "install_turing" install_turing
-#
-#      - name: Run test
-#        working-directory: api
-#        env:
-#          TEST_ID: "1"
-#          MOCKSERVER_ENDPOINT: http://mockserver
-#          API_BASE_PATH: http://turing.127.0.0.1.nip.io/v1
-#          MODEL_CLUSTER_NAME: kind
-#          PROJECT_ID: "1"
-#          PROJECT_NAME: default
-#          KUBECONFIG_USE_LOCAL: "true"
-#        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 #
 #  publish-app:
 #    runs-on: ubuntu-latest
