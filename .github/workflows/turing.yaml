@@ -464,7 +464,7 @@ jobs:
             deployment/mlp,
             deployment/merlin,
             deployment/turing
-          timeout: 150 #seconds
+          timeout: 300 #seconds
           max-restarts: -1
 
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
