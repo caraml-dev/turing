@@ -10,19 +10,6 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - run: |
-          cat api/turing/config/config.go
-
-      - working-directory: api
-        run: |
-          make version
-
   test-api:
     runs-on: ubuntu-latest
     env:
@@ -507,8 +494,7 @@ jobs:
           MODEL_CLUSTER_NAME: k3d-${{ env.CLUSTER_NAME }}
           PROJECT_ID: "1"
           PROJECT_NAME: default
-          VAULT_ADDRESS: http://vault.127.0.0.1.nip.io
-          VAULT_TOKEN: root
+          KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
 #      - name: Set variables
