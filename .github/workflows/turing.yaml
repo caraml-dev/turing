@@ -485,9 +485,18 @@ jobs:
             --data @payload.json \
             http://mlp.127.0.0.1.nip.io/v1/projects
 
+      - name: Cache Test Dependencies
+        uses: actions/cache@v2
+        with:
+          path: api/.go/pkg/mod/
+          key: |
+            gomod-${{ hashFiles('api/go.mod') }}
+          restore-keys: gomod-
+
       - name: Run End-to-End Test Suite
         working-directory: api
         env:
+          GOPATH: ${{ github.workspace }}/api/.go
           TEST_ID: ${{ github.run_id }}
           MOCKSERVER_ENDPOINT: http://mockserver
           API_BASE_PATH: http://turing.127.0.0.1.nip.io/v1
