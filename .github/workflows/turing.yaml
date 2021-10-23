@@ -528,4 +528,4 @@ jobs:
       router_version: ${{ needs.build-router.outputs.router-version }}
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-      environment: ${{ github.ref != 'refs/heads/main' && 'feature' }}
+      environment: ${{ github.ref != 'refs/heads/main' && 'e2e' }}
