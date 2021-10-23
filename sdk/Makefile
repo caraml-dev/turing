@@ -1,6 +1,6 @@
 .PHONY: evn dev gen-client build version test-unit
 
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -f pypi))
+VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -p sdk/ -y))
 
 env:
 	pip install -r requirements.txt

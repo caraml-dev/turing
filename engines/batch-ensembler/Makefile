@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 CONDA_ENV_NAME ?= batch-ensembler
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker))
+VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -p batch-ensembler/))
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./env/$(CONDA_ENV_NAME)
 
 .PHONY: setup
