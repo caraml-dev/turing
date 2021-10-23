@@ -283,6 +283,8 @@ jobs:
       MLP_VERSION: 1.4.14
       MERLIN_VERSION: 0.9.0
       VAULT_CHART_VERSION: 0.16.1
+      TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
+      TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
     needs:
       - build-api
       - build-router
@@ -344,31 +346,33 @@ jobs:
 
           kubectl apply -f infra/e2e/vault.ingress.yaml
 
-      - uses: actions/download-artifact@v2
+      - name: Download Turing API Docker tar archieve
+        uses: actions/download-artifact@v2
         with:
-          name: turing-api.${{ needs.build-api.outputs.api-version }}.tar
+          name: turing-api.${{ env.TURING_API_VERSION }}.tar
 
-      - uses: actions/download-artifact@v2
+      - name: Download Turing Router Docker tar archieve
+        uses: actions/download-artifact@v2
         with:
           name: turing-router.${{ needs.build-router.outputs.router-version }}.tar
 
       - name: Publish images to local registry
+        env:
+          DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
         run: |
           # Turing API
-          docker image load --input turing-api.${{ needs.build-api.outputs.api-version }}.tar
+          docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
           docker tag \
             turing-api:${{ needs.build-api.outputs.api-version }} \
-            ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-api:${{ needs.build-api.outputs.api-version }}
-          docker push \
-            ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-api:${{ needs.build-api.outputs.api-version }}
+            ${{ env.DOCKER_REPOSITORY }}/turing-api:v${{ env.TURING_API_VERSION }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/turing-api:v${{ env.TURING_API_VERSION }}
 
           # Turing Router
-          docker image load --input turing-router.${{ needs.build-router.outputs.router-version }}.tar
+          docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           docker tag \
-            turing-router:${{ needs.build-router.outputs.router-version }} \
-            ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ needs.build-router.outputs.router-version }}
-          docker push \
-            ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ needs.build-router.outputs.router-version }}
+            turing-router:${{ env.TURING_ROUTER_VERSION }} \
+            ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
 
       - name: Checkout MLP
         uses: actions/checkout@v2
@@ -396,8 +400,10 @@ jobs:
         env:
           VAULT_TOKEN: root
         run: |
+          echo "::group::Wait for Vault to become available"
           timeout --foreground 45 bash -c \
             'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
+          echo "::endgroup::"
 
           tee credentials.json <<EOF
           {
@@ -437,8 +443,8 @@ jobs:
           helm install turing ./infra/charts/turing \
             --set turing.image.registry=${{ env.LOCAL_REGISTRY }}/ \
             --set turing.image.repository=${{ github.repository }}/turing-api \
-            --set turing.image.tag=${{ needs.build-api.outputs.api-version }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ needs.build-router.outputs.router-version }} \
+            --set turing.image.tag=v${{ env.TURING_API_VERSION }} \
+            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:v${{ env.TURING_ROUTER_VERSION }} \
             --values infra/e2e/turing.helm-values.yaml
 
           kubectl apply -f infra/e2e/turing.ingress.yaml
@@ -510,55 +516,75 @@ jobs:
     runs-on: ubuntu-latest
     environment: e2e
     needs:
+      - build-router
       - test-e2e
+    env:
+      TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
     steps:
       - name: Log in to the Container registry
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-#  publish-app:
-#    runs-on: ubuntu-latest
-#    needs:
-#      - build-ui
-#      - build-swagger-ui
-#      - build-api
-#      - test-e2e
-#    steps:
-#      - name: Check out code
-#        uses: actions/checkout@v2
-#
-#      - name: Log in to the Container registry
-#        uses: docker/login-action@v1
-#        with:
-#          registry: ${{ env.REGISTRY }}
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
-#
-#      - name: Download Turing UI Dist
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: turing-ui-dist
-#          path: ui/build
-#
-#      - name: Download Swagger UI Dist
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: swagger-ui-dist
-#          path: api/api/swagger-ui-dist
-#
-#      - name: Build Docker image
-#        id: build-image
-#        env:
-#          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
-#          TURING_API_IMAGE: ${{ needs.build-api.outputs.TuringApiImage }}
-#        run: |
-#          set -o pipefail
-#          make build-image | tee output.log
-#          echo "::set-output name=TuringImage::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
-#
-#      - name: Publish Docker Image
-#        run: docker push ${{ steps.build-image.outputs.TuringImage }}
+      - name: Download Docker image tar
+        uses: actions/download-artifact@v2
+        with:
+          name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
 
+      - name: Publish Docker Image
+        env:
+          DOCKER_REPOSITORY: ${{ env.REGISTRY }}/${{ github.repository }}
+        run: |
+          docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
+          docker tag \
+            turing-router:${{ env.TURING_ROUTER_VERSION }} \
+            ${{ env.DOCKER_REGISTRY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
+
+          docker push ${{ env.DOCKER_REGISTRY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
+
+  publish-app:
+    runs-on: ubuntu-latest
+    environment: e2e
+    needs:
+      - build-ui
+      - build-swagger-ui
+      - build-api
+      - test-e2e
+    env:
+      TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Docker image tar
+        uses: actions/download-artifact@v2
+        with:
+          name: turing-api.${{ env.TURING_API_VERSION }}.tar
+
+      - name: Download Turing UI Dist
+        uses: actions/download-artifact@v2
+        with:
+          name: turing-ui-dist
+          path: ui/build
+
+      - name: Download Swagger UI Dist
+        uses: actions/download-artifact@v2
+        with:
+          name: swagger-ui-dist
+          path: api/api/swagger-ui-dist
+
+      - name: Build and Publish Turing Docker image
+        env:
+          DOCKER_REPOSITORY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+          TURING_API_IMAGE: turing-api:${{ env.TURING_API_VERSION }}
+          OVERWRITE_VERSION: v${{ env.TURING_API_VERSION }}
+        run: |
+          docker image load --input turing-api.${{ env.TURING_ROUTER_VERSION }}.tar
+          make build-image
+          docker push ${{ env.DOCKER_REGISTRY }}/turing:${{ env.OVERWRITE_VERSION }}
