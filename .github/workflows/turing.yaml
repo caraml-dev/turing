@@ -526,6 +526,6 @@ jobs:
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
       router_version: ${{ needs.build-router.outputs.router-version }}
+      environment: ${{ github.ref != 'refs/heads/main' && 'feature' }}
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-      environment: ${{ github.ref != 'refs/heads/main' && 'e2e' }}
