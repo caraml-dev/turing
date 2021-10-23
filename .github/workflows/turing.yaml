@@ -542,7 +542,7 @@ jobs:
             turing-router:${{ env.TURING_ROUTER_VERSION }} \
             ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
 
-          docker push ${{ env.DOCKER_REGISTRY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
 
   publish-app:
     runs-on: ubuntu-latest
@@ -555,6 +555,9 @@ jobs:
     env:
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
       - name: Log in to the Container registry
         uses: docker/login-action@v1
         with:
