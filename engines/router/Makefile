@@ -57,7 +57,7 @@ benchmark: tidy
 
 .PHONY: version
 version:
-	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../../scripts/vertagen/vertagen.sh -f docker)))
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -f docker)))
 	@echo "turing-router version:" $$VERSION
 
 .PHONY: build

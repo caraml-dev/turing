@@ -15,7 +15,6 @@
 set -e
 
 format=
-version_prefix=
 commit_count=
 main_branch_name="main"
 version_candidate="0.0.0"
@@ -66,29 +65,26 @@ function buildVersion() {
         local ref=`git log -n 1 --pretty=format:'%h'`
         local current_branch=`git branch --show-current`
         if [[ $format == "docker" ]]; then
-          vsn="${version_prefix}${version_candidate}-build.${commit_count}-${ref}"
+          vsn="${version_candidate}-build.${commit_count}-${ref}"
         elif [[ $format == "pypi" ]]; then
           local suffix=""
           if [[ $current_branch != "$main_branch_name" ]]; then
             suffix=".dev"
           fi
-          vsn="${version_prefix}${version_candidate}.post${commit_count}${suffix}"
+          vsn="${version_candidate}.post${commit_count}${suffix}"
         else
-          vsn="${version_prefix}${version_candidate}-build.${commit_count}+${ref}"
+          vsn="${version_candidate}-build.${commit_count}+${ref}"
         fi
     fi
 }
 
 
 function usage() {
-  echo "usage: vertagen [[-p <version_prefix>] | [-m <main_branch_name>] | [-f docker] ] | [-h]]"
+  echo "usage: vertagen [[[-m <main_branch_name>] | [-f docker|pypi] ] | [-h]]"
 }
 
 while [ "$1" != "" ]; do
     case $1 in
-        -p | --prefix )           shift
-                                  version_prefix=$1
-                                  ;;
         -f | --format )           shift
                                   format=$1
                                   ;;

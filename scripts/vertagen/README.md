@@ -4,7 +4,7 @@ version + tag + generator - tiny project that helps generating a semantic versio
 
 ### Usage
 ```bash
-$ vertagen [[-p <version_prefix>] | [-f docker]] | [-h]]
+$ vertagen [[-p <version_prefix>] | [-f docker|pypi ]] | [-h]]
 ```
 
 ### Fun Fact
