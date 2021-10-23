@@ -399,7 +399,6 @@ jobs:
       - name: Prepare Vault secret for Merlin
         env:
           VAULT_TOKEN: root
-          CLUSTER_NAME: k3d-${{ env.CLUSTER_NAME }}
         run: |
           echo "::group::Wait for Vault to become available"
           timeout --foreground 45 bash -c \
@@ -419,7 +418,7 @@ jobs:
             --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
             --request POST \
             --data @credentials.json \
-            http://vault.127.0.0.1.nip.io/v1/secret/${{ env.CLUSTER_NAME }}
+            http://vault.127.0.0.1.nip.io/v1/secret/k3d-${{ env.CLUSTER_NAME }}
 
           kubectl create secret generic vault-secret \
             --from-literal=address=http://vault:8200 \
