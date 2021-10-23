@@ -540,7 +540,7 @@ jobs:
           docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           docker tag \
             turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            ${{ env.DOCKER_REGISTRY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
+            ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
 
           docker push ${{ env.DOCKER_REGISTRY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
 
@@ -581,10 +581,10 @@ jobs:
 
       - name: Build and Publish Turing Docker image
         env:
-          DOCKER_REPOSITORY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
           TURING_API_IMAGE: turing-api:${{ env.TURING_API_VERSION }}
           OVERWRITE_VERSION: v${{ env.TURING_API_VERSION }}
         run: |
-          docker image load --input turing-api.${{ env.TURING_ROUTER_VERSION }}.tar
+          docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
           make build-image
           docker push ${{ env.DOCKER_REGISTRY }}/turing:${{ env.OVERWRITE_VERSION }}
