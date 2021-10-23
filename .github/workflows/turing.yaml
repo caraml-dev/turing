@@ -465,14 +465,6 @@ jobs:
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
         name: "Debug Deployment Failure"
         run: |
-          echo "::group::describe deployment/merlin"
-          kubectl describe deployment/merlin
-          echo "::endgroup::"
-
-          echo "::group::logs deployment/merlin"
-          kubectl logs deployment/merlin
-          echo "::endgroup::"
-
           echo "::group::describe deployment/turing"
           kubectl describe deployment/turing
           echo "::endgroup::"
