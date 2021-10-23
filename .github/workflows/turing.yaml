@@ -519,6 +519,7 @@ jobs:
       - build-ui
       - build-swagger-ui
       - test-e2e
+    environment: e2e
     uses: romanwozniak/turing/.github/workflows/turing-publish.yaml@rework_ci
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
