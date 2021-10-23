@@ -512,82 +512,16 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-  publish-router:
-    runs-on: ubuntu-latest
-    environment: e2e
+  publish:
     needs:
       - build-router
-      - test-e2e
-    env:
-      TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
-    steps:
-      - name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download Docker image tar
-        uses: actions/download-artifact@v2
-        with:
-          name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
-
-      - name: Publish Docker Image
-        env:
-          DOCKER_REPOSITORY: ${{ env.REGISTRY }}/${{ github.repository }}
-        run: |
-          docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
-          docker tag \
-            turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
-
-          docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:v${{ env.TURING_ROUTER_VERSION }}
-
-  publish-app:
-    runs-on: ubuntu-latest
-    environment: e2e
-    needs:
+      - build-api
       - build-ui
       - build-swagger-ui
-      - build-api
       - test-e2e
-    env:
-      TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download Docker image tar
-        uses: actions/download-artifact@v2
-        with:
-          name: turing-api.${{ env.TURING_API_VERSION }}.tar
-
-      - name: Download Turing UI Dist
-        uses: actions/download-artifact@v2
-        with:
-          name: turing-ui-dist
-          path: ui/build
-
-      - name: Download Swagger UI Dist
-        uses: actions/download-artifact@v2
-        with:
-          name: swagger-ui-dist
-          path: api/api/swagger-ui-dist
-
-      - name: Build and Publish Turing Docker image
-        env:
-          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository_owner }}
-          TURING_API_IMAGE: turing-api:${{ env.TURING_API_VERSION }}
-          OVERWRITE_VERSION: v${{ env.TURING_API_VERSION }}
-        run: |
-          docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
-          make build-image
-          docker push ${{ env.DOCKER_REGISTRY }}/turing:${{ env.OVERWRITE_VERSION }}
+    uses: romanwozniak/turing/.github/workflows/turing-publish.yaml@rework_ci
+    with:
+      api_version: ${{ needs.build-api.outputs.api-version }}
+      router_version: ${{ needs.build-router.outputs.router-version }}
+    secrets:
+      ghcr_token: ${{ secrets.GITHUB_TOKEN }}
