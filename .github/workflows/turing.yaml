@@ -447,7 +447,7 @@ jobs:
             --set turing.image.registry=${{ env.LOCAL_REGISTRY }}/ \
             --set turing.image.repository=${{ github.repository }}/turing-api \
             --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:v${{ env.TURING_ROUTER_VERSION }} \
+            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
             --values infra/e2e/turing.helm-values.yaml
 
           kubectl apply -f infra/e2e/turing.ingress.yaml
