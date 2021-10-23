@@ -506,43 +506,19 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-#      - name: Set variables
-#        id: variables
-#        run: |
-#          IFS=$'\t' read -r registry repositry tag \
-#            < <(perl -pe 's%^(((?:[a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])(?:(?:\.(?:[a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9]))+)?(?::[0-9]+)?/)?([a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?))(?::([\w][\w.-]{0,127}))?(?:@([a-z][a-z0-9]*(?:[-_+.][a-z][a-z0-9]*)*[:][[:xdigit:]]{32,}))?$%\2\t\3\t\4%ig' \
-#                  <<< ${{ needs.build-api.outputs.TuringApiImage }}
-#               )
-#          echo "::set-output name=TuringImageRegistry::${registry}"
-#          echo "::set-output name=TuringImageRepository::${repositry}"
-#          echo "::set-output name=TuringImageTag::${tag:-latest}"
+  publish-router:
+    runs-on: ubuntu-latest
+    environment: e2e
+    needs:
+      - test-e2e
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
 
-#      - name: Setup test infra
-#        working-directory: test/e2e
-#        env:
-#          CONCURRENT_NONINTERACTIVE: "1"
-#        run: |
-#          set -e
-#          source setup-infra.sh
-#
-#          turing_image_registry=${{ steps.variables.outputs.TuringImageRegistry }} \
-#          turing_image_repository=${{ steps.variables.outputs.TuringImageRepository }} \
-#          turing_image_tag=${{ steps.variables.outputs.TuringImageTag }} \
-#          turing_router_image=${{ needs.build-router.outputs.TuringRouterImage }} \
-#            concurrent \
-#              - "install_e2e_tools" install_e2e_tools \
-#              --and-then \
-#              - "install_kubernetes_kind_cluster" install_kubernetes_kind_cluster \
-#              --and-then \
-#              - "install_istio" install_istio \
-#              --and-then \
-#              - "install_knative_serving_with_istio_controller" install_knative_serving_with_istio_controller \
-#              - "install_mlp" install_mlp \
-#              - "install_vault" install_vault \
-#              --and-then \
-#              - "install_merlin" install_merlin \
-#              - "install_turing" install_turing
-#
 #  publish-app:
 #    runs-on: ubuntu-latest
 #    needs:
