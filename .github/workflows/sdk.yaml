@@ -62,8 +62,9 @@ jobs:
     # Dev builds can be released from the 'main' branch by
     # approving 'deployment' into the 'manual' environment
     if: >-
-      ( needs.release-rules.outputs.release-type != 'dev' ) ||
-        ( github.event_name != 'pull_request' )
+      contains('release,pre-release', needs.release-rules.outputs.release-type)
+        || ( github.event_name != 'pull_request' )
+        || ( github.event.pull_request.head.repo.full_name == github.repository )
     runs-on: ubuntu-latest
     needs:
       - release-rules

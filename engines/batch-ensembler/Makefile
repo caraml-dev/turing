@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
-CONDA_ENV_NAME ?= batch-ensembler
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../../scripts/vertagen/vertagen.sh -p batch-ensembler/))
+APP_NAME := batch-ensembler
+CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./env/$(CONDA_ENV_NAME)
 
 .PHONY: setup
@@ -19,8 +19,8 @@ type-check:
 		--allow-untyped-globals \
 		ensembler
 
-.PHONY: test-unit
-test-unit: type-check
+.PHONY: test
+test: type-check
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
 		--cov=ensembler \
@@ -28,13 +28,15 @@ test-unit: type-check
 		-W ignore
 
 .PHONY: build-image
-build-image:
-	mkdir -p temp-deps
-	cp -r ../../sdk temp-deps/
-	@docker build . \
-		--tag $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)turing/batch-ensembler:${VERSION_NUMBER}
-	rm -rf temp-deps
+build-image: version
+	@mkdir -p temp-deps
+	@cp -r ../../sdk temp-deps/
+	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${APP_NAME}:${VERSION})
+	@echo "Building docker image: ${IMAGE_TAG}"
+	@docker build . --tag ${IMAGE_TAG}
+	@rm -rf temp-deps
 
 .PHONY: version
 version:
-	@echo $(VERSION_NUMBER)
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
+	@echo "turing-batch-ensembler version:" $(VERSION)

@@ -19,10 +19,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Run chart-releaser
         uses: stefanprodan/helm-gh-pages@v1.4.1
         with:
