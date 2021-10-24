@@ -3,18 +3,18 @@ name: helm-chart
 on:
   push:
     paths:
-      - '.github/workflows/helm-chart.yaml'
-      - 'api/db-migrations/**'
-      - 'infra/charts/**'
+      - ".github/workflows/helm-chart.yaml"
+      - "api/db-migrations/**"
+      - "infra/charts/**"
     branches:
       - main
   pull_request:
     branches:
       - main
     paths:
-      - '.github/workflows/helm-chart.yaml'
-      - 'api/db-migrations/**'
-      - 'infra/charts/**'
+      - ".github/workflows/helm-chart.yaml"
+      - "api/db-migrations/**"
+      - "infra/charts/**"
 
 jobs:
   release:

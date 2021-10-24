@@ -1,17 +1,32 @@
 name: Turing CI
 
 on:
+  # Automatically run CI Release and Pre-Release tags and main branch (except changes to non-relevant paths)
   push:
-    # Automatically run CI on main branch
-    branches:
-      - main
-    # Automatically run CI Release and Pre-Release tags
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - main
+    paths-ignore:
+      - "docs/**"
+      - "engines/batch-ensembler/**"
+      - "sdk/**"
+      - ".github/workflows/batch-ensembler.yaml"
+      - ".github/workflows/sdk.yaml"
+      - ".github/workflows/helm-chart.yaml"
+
   # Automatically run CI on branches, that have active PR opened
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - "docs/**"
+      - "engines/batch-ensembler/**"
+      - "sdk/**"
+      - ".github/workflows/batch-ensembler.yaml"
+      - ".github/workflows/sdk.yaml"
+      - ".github/workflows/helm-chart.yaml"
+
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
 
