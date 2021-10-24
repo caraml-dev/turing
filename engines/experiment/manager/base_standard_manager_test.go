@@ -1,8 +1,6 @@
 package manager
 
 import (
-	"context"
-	"encoding/json"
 	"strings"
 	"testing"
 
@@ -10,17 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBaseExperimentManager(t *testing.T) {
-	em := &BaseExperimentManager{}
-	// Check that BaseExperimentManager implements ExperimentManager
-	_, ok := interface{}(em).(ExperimentManager)
-	assert.True(t, ok)
-}
-
-func TestBaseExperimentManagerMethods(t *testing.T) {
-	em := &BaseExperimentManager{}
+func TestBaseStandardExperimentManagerMethods(t *testing.T) {
+	em := &BaseStandardExperimentManager{}
 	assert.Equal(t, true, em.IsCacheEnabled())
-	assert.Equal(t, Engine{}, em.GetEngineInfo())
 
 	// Get clients
 	clients, err := em.ListClients()
@@ -42,15 +32,10 @@ func TestBaseExperimentManagerMethods(t *testing.T) {
 	expVars, err := em.ListVariablesForExperiments([]Experiment{})
 	assert.Equal(t, make(map[string][]Variable), expVars)
 	assert.NoError(t, err)
-
-	// Get Fiber config
-	rawMessage, err := em.GetExperimentRunnerConfig(TuringExperimentConfig{})
-	assert.Equal(t, json.RawMessage{}, rawMessage)
-	assert.NoError(t, err)
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	em := NewBaseExperimentManager()
+	em := NewBaseStandardExperimentManager()
 
 	// Define tests
 	tests := map[string]struct {
@@ -60,8 +45,10 @@ func TestValidateExperimentConfig(t *testing.T) {
 	}{
 		"failure | missing client info": {
 			engine: Engine{
-				ClientSelectionEnabled:     true,
-				ExperimentSelectionEnabled: false,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     true,
+					ExperimentSelectionEnabled: false,
+				},
 			},
 			cfg: TuringExperimentConfig{},
 			err: strings.Join([]string{
@@ -73,19 +60,20 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | no experiment": {
 			engine: Engine{
-				ClientSelectionEnabled:     false,
-				ExperimentSelectionEnabled: true,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     false,
+					ExperimentSelectionEnabled: true,
+				},
 			},
 			cfg: TuringExperimentConfig{},
-			err: strings.Join([]string{
-				"Key: 'TuringExperimentConfig.experiments' Error:",
-				"Field validation for 'experiments' failed on the 'no-experiment-selected' tag",
-			}, ""),
+			err: "Expected at least 1 experiment in the configuration",
 		},
 		"failure | client ID mismatch": {
 			engine: Engine{
-				ClientSelectionEnabled:     true,
-				ExperimentSelectionEnabled: true,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     true,
+					ExperimentSelectionEnabled: true,
+				},
 			},
 			cfg: TuringExperimentConfig{
 				Client: Client{
@@ -100,15 +88,14 @@ func TestValidateExperimentConfig(t *testing.T) {
 					},
 				},
 			},
-			err: strings.Join([]string{
-				"Key: 'TuringExperimentConfig.experiments' Error:",
-				"Field validation for 'experiments' failed on the 'client-id-mismatch' tag",
-			}, ""),
+			err: "Client information does not match with the experiment",
 		},
 		"failure | missing experiment info": {
 			engine: Engine{
-				ClientSelectionEnabled:     false,
-				ExperimentSelectionEnabled: true,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     false,
+					ExperimentSelectionEnabled: true,
+				},
 			},
 			cfg: TuringExperimentConfig{
 				Experiments: []Experiment{
@@ -124,8 +111,10 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | required variable not configured": {
 			engine: Engine{
-				ClientSelectionEnabled:     false,
-				ExperimentSelectionEnabled: false,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     false,
+					ExperimentSelectionEnabled: false,
+				},
 			},
 			cfg: TuringExperimentConfig{
 				Variables: Variables{
@@ -149,8 +138,10 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | bad field source": {
 			engine: Engine{
-				ClientSelectionEnabled:     false,
-				ExperimentSelectionEnabled: false,
+				StandardEngineConfig: &StandardExperimentEngineConfig{
+					ClientSelectionEnabled:     false,
+					ExperimentSelectionEnabled: false,
+				},
 			},
 			cfg: TuringExperimentConfig{
 				Variables: Variables{
@@ -183,19 +174,5 @@ func TestValidateExperimentConfig(t *testing.T) {
 				assert.NoError(t, err)
 			}
 		})
-	}
-}
-
-func TestValidateTuringExperimentConfigMissingContextKey(t *testing.T) {
-	em := NewBaseExperimentManager()
-	err := em.validate.StructFilteredCtx(context.Background(), TuringExperimentConfig{}, func(ns []byte) bool {
-		return true
-	})
-	assert.Error(t, err)
-	if err != nil {
-		assert.Equal(t, strings.Join([]string{
-			"Key: 'TuringExperimentConfig.experiment_config' Error:",
-			"Field validation for 'experiment_config' failed on the 'missing-context-info' tag",
-		}, ""), err.Error())
 	}
 }

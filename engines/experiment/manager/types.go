@@ -1,16 +1,17 @@
 package manager
 
 import (
-	"context"
-
-	"github.com/go-playground/validator"
 	common "github.com/gojek/turing/engines/experiment/common"
 )
 
-// Engine describes the properties of an experiment engine
-type Engine struct {
-	// Name is the display name used for the experiment engine.
-	Name string `json:"name"`
+type ExperimentEngineType string
+
+var (
+	StandardExperimentEngine ExperimentEngineType = "standard"
+	CustomExperimentEngine   ExperimentEngineType = "custom"
+)
+
+type StandardExperimentEngineConfig struct {
 	// ClientSelectionEnabled is set to true if the experiment engine has the concept of
 	// clients, that can be used to authenticate the experiment run requests.
 	ClientSelectionEnabled bool `json:"client_selection_enabled"`
@@ -21,6 +22,20 @@ type Engine struct {
 	// to the experiment engine's home page, to view more details on the experiment
 	// configured in Turing.
 	HomePageURL string `json:"home_page_url"`
+}
+
+// Engine describes the properties of an experiment engine
+type Engine struct {
+	// Name is the display name used for the experiment engine.
+	Name string `json:"name"`
+	// RunnerTimeout is applied to the router, at the time of deployment,
+	// to control the timeout on the calls to the Experiment Engine.
+	RunnerTimeout string `json:"runner_timeout"`
+	// Type describes the class of the experiment engine
+	Type ExperimentEngineType `json:"type"`
+	// StandardEngineConfig is expected to be set by a "standard" experiment engine and
+	// is used by the generic Turing experiment engine UI.
+	StandardEngineConfig *StandardExperimentEngineConfig `json:"standard_config,omitempty"`
 }
 
 // Client describes the properties of a client registered on an experiment engine
@@ -87,65 +102,10 @@ type Variables struct {
 	Config []VariableConfig `json:"config" validate:"dive"`
 }
 
-// TuringExperimentConfig is the saved experiment config on Turing, that captures the key pieces
-// of info on the experiment engine
+// TuringExperimentConfig is the saved experiment config on Turing, when using the generic UI,
+// that captures the key pieces of info about the experiment engine
 type TuringExperimentConfig struct {
-	Deployment struct {
-		Endpoint string `json:"endpoint"`
-		Timeout  string `json:"timeout"`
-	} `json:"deployment"`
 	Client      Client       `json:"client" validate:"dive"`
 	Experiments []Experiment `json:"experiments" validate:"dive"`
 	Variables   Variables    `json:"variables" validate:"dive"`
-}
-
-// ValidatorCtxKey is used to set values in the context object passed to the validator method,
-// for context based validation.
-type ValidatorCtxKey string
-
-// engineValidatorCtxKey is used to pass in the Engine properties in the context
-var engineValidatorCtxKey ValidatorCtxKey = "engine"
-
-// newExperimentConfigValidator returns a default validator for the TuringExperimentConfig
-func newExperimentConfigValidator() *validator.Validate {
-	v := validator.New()
-	// Register contextual validation method for TuringExperimentConfig
-	v.RegisterStructValidationCtx(validateTuringExperimentConfig, TuringExperimentConfig{})
-	// Field Source validation for expected values
-	_ = v.RegisterValidation("field-src", validateFieldSource)
-
-	return v
-}
-
-// validateTuringExperimentConfig is used to validate TuringExperimentConfig using the contextual
-// information passed to it
-func validateTuringExperimentConfig(ctx context.Context, sl validator.StructLevel) {
-	config := sl.Current().Interface().(TuringExperimentConfig)
-	engine, ok := ctx.Value(engineValidatorCtxKey).(Engine)
-	if !ok {
-		sl.ReportError("", "experiment_config", "Config", "missing-context-info", "")
-	}
-
-	if engine.ExperimentSelectionEnabled {
-		// Check that there is at least 1 experiment
-		if len(config.Experiments) < 1 {
-			sl.ReportError(config.Experiments, "experiments", "Experiments", "no-experiment-selected", "")
-		}
-		// If Client Selection is enabled, check that the ClientID in each experiment matches the
-		// client info passed in
-		if engine.ClientSelectionEnabled {
-			for _, e := range config.Experiments {
-				if e.ClientID != config.Client.ID {
-					sl.ReportError(config.Experiments, "experiments", "Experiments", "client-id-mismatch", "")
-				}
-			}
-		}
-	}
-}
-
-// validateFieldSource is used to check if the field source has an expected value
-func validateFieldSource(fl validator.FieldLevel) bool {
-	stringSrc := fl.Field().String()
-	_, err := common.GetFieldSource(stringSrc)
-	return err == nil
 }
