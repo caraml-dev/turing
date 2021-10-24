@@ -148,8 +148,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				Sentry: sentry.Config{},
-				VaultConfig: &VaultConfig{
-					Address: "http://localhost:8200",
+				ClusterConfig: ClusterConfig{
+					InClusterConfig: false,
 				},
 				AlertConfig: &AlertConfig{
 					GitLab: &GitlabConfig{
@@ -159,10 +159,17 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &TuringUIConfig{
-					Homepage: "/turing",
+				TuringUIConfig: &SinglePageApplicationConfig{
+					ServingPath: "/turing",
 				},
-				SwaggerFile: "api/openapi.yaml",
+				OpenapiConfig: &OpenapiConfig{
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "",
+						ServingPath:      "/api-docs/",
+					},
+				},
 			},
 		},
 		"single file": {
@@ -216,9 +223,12 @@ func TestLoad(t *testing.T) {
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				VaultConfig: &VaultConfig{
-					Address: "http://localhost:8200",
-					Token:   "root",
+				ClusterConfig: ClusterConfig{
+					InClusterConfig: false,
+					VaultConfig: &VaultConfig{
+						Address: "http://localhost:8200",
+						Token:   "root",
+					},
 				},
 				AlertConfig: &AlertConfig{
 					GitLab: &GitlabConfig{
@@ -228,10 +238,17 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &TuringUIConfig{
-					Homepage: "/turing",
+				TuringUIConfig: &SinglePageApplicationConfig{
+					ServingPath: "/turing",
 				},
-				SwaggerFile: "api/openapi.yaml",
+				OpenapiConfig: &OpenapiConfig{
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "",
+						ServingPath:      "/api-docs/",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
@@ -300,9 +317,12 @@ func TestLoad(t *testing.T) {
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				VaultConfig: &VaultConfig{
-					Address: "http://localhost:8200",
-					Token:   "root",
+				ClusterConfig: ClusterConfig{
+					InClusterConfig: false,
+					VaultConfig: &VaultConfig{
+						Address: "http://localhost:8200",
+						Token:   "root",
+					},
 				},
 				AlertConfig: &AlertConfig{
 					GitLab: &GitlabConfig{
@@ -312,10 +332,17 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &TuringUIConfig{
-					Homepage: "/turing",
+				TuringUIConfig: &SinglePageApplicationConfig{
+					ServingPath: "/turing",
 				},
-				SwaggerFile: "api/openapi.yaml",
+				OpenapiConfig: &OpenapiConfig{
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "",
+						ServingPath:      "/swagger-ui",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
@@ -334,21 +361,23 @@ func TestLoad(t *testing.T) {
 		"multiple files and environment variables": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			env: map[string]string{
-				"PORT":                                     "5000",
-				"ALLOWEDORIGINS":                           "http://baz.com,http://qux.com",
-				"AUTHCONFIG_ENABLED":                       "true",
-				"AUTHCONFIG_URL":                           "http://env.example.com",
-				"DBCONFIG_USER":                            "dbuser-env",
-				"DBCONFIG_PASSWORD":                        "dbpassword-env",
-				"DEPLOYCONFIG_TIMEOUT":                     "10m",
-				"DEPLOYCONFIG_MAXMEMORY":                   "4500Mi",
-				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":    "fooval1-env",
-				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":       "quuxval-env",
-				"TURINGUICONFIG_APPDIRECTORY":              "appdir-env",
-				"TURINGUICONFIG_HOMEPAGE":                  "/turing-env",
-				"EXPERIMENT_QUX_QUXKEY1":                   "quxval1-env",
-				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":         "quxval2-1-env",
-				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY": "4",
+				"PORT":                                           "5000",
+				"ALLOWEDORIGINS":                                 "http://baz.com,http://qux.com",
+				"AUTHCONFIG_ENABLED":                             "true",
+				"AUTHCONFIG_URL":                                 "http://env.example.com",
+				"DBCONFIG_USER":                                  "dbuser-env",
+				"DBCONFIG_PASSWORD":                              "dbpassword-env",
+				"DEPLOYCONFIG_TIMEOUT":                           "10m",
+				"DEPLOYCONFIG_MAXMEMORY":                         "4500Mi",
+				"ROUTERDEFAULTS_EXPERIMENT_FOO_FOOKEY1":          "fooval1-env",
+				"ROUTERDEFAULTS_EXPERIMENT_QUX_QUUX":             "quuxval-env",
+				"TURINGUICONFIG_SERVINGDIRECTORY":                "appdir-env",
+				"TURINGUICONFIG_SERVINGPATH":                     "/turing-env",
+				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY": "static/swagger-ui",
+				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
+				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
+				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
+				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY":       "4",
 			},
 			want: &Config{
 				Port:           5000,
@@ -402,9 +431,12 @@ func TestLoad(t *testing.T) {
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				VaultConfig: &VaultConfig{
-					Address: "http://localhost:8200",
-					Token:   "root",
+				ClusterConfig: ClusterConfig{
+					InClusterConfig: false,
+					VaultConfig: &VaultConfig{
+						Address: "http://localhost:8200",
+						Token:   "root",
+					},
 				},
 				AlertConfig: &AlertConfig{
 					GitLab: &GitlabConfig{
@@ -414,11 +446,18 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &TuringUIConfig{
-					AppDirectory: "appdir-env",
-					Homepage:     "/turing-env",
+				TuringUIConfig: &SinglePageApplicationConfig{
+					ServingDirectory: "appdir-env",
+					ServingPath:      "/turing-env",
 				},
-				SwaggerFile: "api/openapi.yaml",
+				OpenapiConfig: &OpenapiConfig{
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.yaml",
+					SwaggerUIConfig: &SinglePageApplicationConfig{
+						ServingDirectory: "static/swagger-ui",
+						ServingPath:      "/swagger-ui",
+					},
+				},
 				Experiment: map[string]interface{}{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
@@ -617,9 +656,12 @@ func TestConfigValidate(t *testing.T) {
 			License:           "test",
 			IgnoreStatusCodes: []int{403, 404},
 		},
-		VaultConfig: &VaultConfig{
-			Address: "http://localhost:8200",
-			Token:   "root",
+		ClusterConfig: ClusterConfig{
+			InClusterConfig: false,
+			VaultConfig: &VaultConfig{
+				Address: "http://localhost:8200",
+				Token:   "root",
+			},
 		},
 		TuringEncryptionKey: "secret",
 		AlertConfig:         nil,
@@ -659,13 +701,6 @@ func TestConfigValidate(t *testing.T) {
 		"missing deployment timeout": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.DeployConfig.Timeout = 0
-				return validConfig
-			},
-			wantErr: true,
-		},
-		"missing vault address": {
-			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.VaultConfig.Address = ""
 				return validConfig
 			},
 			wantErr: true,
@@ -718,6 +753,29 @@ func TestConfigValidate(t *testing.T) {
 				return validConfig
 			},
 			wantErr: true,
+		},
+		"missing vault address": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig.Address = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing vaultconfig when InClusterConfig is false": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.InClusterConfig = false
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"valid in cluster config": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.InClusterConfig = true
+				return validConfig
+			},
+			wantErr: false,
 		},
 	}
 	for name, tt := range tests {

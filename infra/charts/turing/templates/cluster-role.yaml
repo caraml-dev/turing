@@ -1,0 +1,36 @@
+{{- if .Values.turing.clusterConfig.useInClusterConfig -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "turing.service-account" . }}
+rules:
+- apiGroups: [""]
+  resources:
+  - service
+  - pod
+  - pod/log
+  - namespace
+  - configmap
+  - secret
+  - persistentvolumeclaim
+  - job
+  - serviceaccount
+  - role
+  - rolebinding
+  verbs: ["get", "list", "create", "delete", "update"]
+- apiGroups:
+  - "serving.knative.dev"
+  resources:
+  - service
+  verbs: ["get", "create", "delete", "update"]
+- apiGroups:
+  - "networking.istio.io"
+  resources:
+  - virtualservice
+  verbs: ["get", "create", "delete", "update"]
+- apiGroups:
+  - "sparkoperator.k8s.io"
+  resources:
+  - sparkapplication
+  verbs: ["get", "create", "delete", "update"]
+{{- end }}

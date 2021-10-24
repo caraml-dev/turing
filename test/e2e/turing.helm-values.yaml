@@ -1,7 +1,7 @@
 turing:
   image:
     registry: localhost:5000/
-    repository: turing
+    repository: turing-api
     tag: latest
   resources:
     requests:
@@ -66,20 +66,16 @@ turing:
       TTLSecond: 86400
     RouterDefaults:
       Image: localhost:5000/turing-router:latest
-    VaultConfig:
-      Address: http://vault:8200
-      Token: root
+    ClusterConfig:
+      InClusterConfig: false
+      VaultConfig:
+        Address: http://vault:8200
+        Token: root
     TuringEncryptionKey: secret
     MLPConfig:
       MerlinURL: http://merlin:8080/v1
       MLPURL: http://mlp:8080/v1
       MLPEncryptionKey: secret
-
-swaggerUi:
-  image:
-    registry: localhost:5000/
-    repository: turing-swagger
-    tag: latest
 
 postgresql:
   resources:

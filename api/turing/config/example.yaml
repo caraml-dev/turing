@@ -158,11 +158,15 @@ Sentry:
     labelkey1: labelvalue1
     labelkey2: labelvalue2
 
-# Vault server configuration. Vault is required by Turing API to retrieve
-# Kubernetes cluster credentials where the Turing router will be deployed.
-VaultConfig:
-  Address: http://localhost:8200
-  Token: root
+ClusterConfig:
+  # Set to true if you are deploying with a service account.
+  # See helm chart values (infra/charts/turing/values.yaml) for more information
+  InClusterConfig: false
+  # Vault server configuration. Vault is required by Turing API to retrieve
+  # Kubernetes cluster credentials where the Turing router will be deployed.
+  VaultConfig:
+    Address: http://localhost:8200
+    Token: root
 
 # Encryption key used by Turing API server when saving user-sensitive info
 # such as user provided service account keys
@@ -196,11 +200,16 @@ MLPConfig:
 
 # Turing UI configuration to set how the UI assets will be served
 TuringUIConfig:
-  AppDirectory: /ui
-  Homepage: /turing
+  ServingDirectory: /ui
+  ServingPath: /turing
  
-# File path to find OpenAPI v3 specification file
-SwaggerFile: "api/openapi.yaml"
+# Openapi validation configuration
+OpenapiConfig:
+  ValidationEnabled: true
+  SpecFile: "api/openapi.yaml"
+  SwaggerUIConfig:
+    ServingDirectory: static/swagger-ui
+    ServingPath: /api-docs
 
 # Experiment is a map of experiment engine name to configuration object.
 # This will be used to configure the corresponding experiment engines.

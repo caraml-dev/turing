@@ -39,8 +39,13 @@ jobs:
 
     - name: Run test 
       working-directory: api
-      run: make test-ci
+      env:
+        DATABASE_HOST: localhost
+        DATABASE_NAME: ${{ env.POSTGRES_DB }}
+        DATABASE_USER: ${{ env.POSTGRES_USER }}
+        DATABASE_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+      run: make test
 
     - name: Lint code
       working-directory: api
-      run: make lint-ci
+      run: make lint

@@ -6,6 +6,7 @@ import (
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	apicorev1 "k8s.io/api/core/v1"
 	apirbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -30,7 +31,7 @@ const (
 )
 
 var (
-	envVars = []apicorev1.EnvVar{
+	defaultEnvVars = []apicorev1.EnvVar{
 		{
 			Name:  envServiceAccountPathKey,
 			Value: envServiceAccountPath,
@@ -86,6 +87,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
+	EnvVars               *[]openapi.EnvVar
 }
 
 func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error) {
@@ -128,6 +130,22 @@ func createSparkRequest(request *CreateSparkRequest) (*apisparkv1beta2.SparkAppl
 	}, nil
 }
 
+func getEnvVarFromRequest(request *CreateSparkRequest) []apicorev1.EnvVar {
+	envVars := []apicorev1.EnvVar{}
+	if request.EnvVars == nil {
+		return envVars
+	}
+
+	for _, envVar := range *request.EnvVars {
+		envVars = append(envVars, apicorev1.EnvVar{
+			Name:  envVar.GetName(),
+			Value: envVar.GetValue(),
+		})
+	}
+
+	return envVars
+}
+
 func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.ExecutorSpec, error) {
 	userCPURequest, err := resource.ParseQuantity(request.ExecutorCPURequest)
 	if err != nil {
@@ -161,7 +179,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    envVars,
+			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
 			Labels: request.JobLabels,
 		},
 	}
@@ -193,13 +211,6 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 		return nil, fmt.Errorf("invalid driver memory request: %s", request.DriverMemoryRequest)
 	}
 
-	envVars := []apicorev1.EnvVar{
-		{
-			Name:  envServiceAccountPathKey,
-			Value: envServiceAccountPath,
-		},
-	}
-
 	s := &apisparkv1beta2.DriverSpec{
 		CoreRequest: cpuRequest,
 		SparkPodSpec: apisparkv1beta2.SparkPodSpec{
@@ -218,7 +229,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    envVars,
+			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
 			Labels: request.JobLabels,
 		},
 		ServiceAccount: &request.ServiceAccountName,

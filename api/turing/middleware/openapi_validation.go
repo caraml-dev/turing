@@ -14,8 +14,9 @@ import (
 
 // OpenAPIValidation middleware validates HTTP requests against OpenAPI spec.
 type OpenAPIValidation struct {
-	options *openapi3filter.Options
-	router  routers.Router
+	options   *openapi3filter.Options
+	router    routers.Router
+	apiPrefix string
 }
 
 type OpenAPIValidationOptions struct {
@@ -24,6 +25,8 @@ type OpenAPIValidationOptions struct {
 	// If true, ignore "server" declarations in openapi.yaml when validating requests paths. Only consider the paths
 	// relative to the server url versus checking the full paths (which include the server URL) in the requests.
 	IgnoreServers bool
+	// Must be set to path prefix, where API is deployed. E.g. "/v1"
+	APIPrefix string
 }
 
 // NewOpenAPIValidation creates OpenAPIValidation object from OAS3 spec file
@@ -56,7 +59,11 @@ func NewOpenAPIValidation(
 		return nil, err
 	}
 
-	return &OpenAPIValidation{openAPIFilterOpts, router}, nil
+	return &OpenAPIValidation{
+		openAPIFilterOpts,
+		router,
+		options.APIPrefix,
+	}, nil
 }
 
 // Validate the request against the OpenAPI spec
@@ -77,7 +84,7 @@ func (openapi *OpenAPIValidation) Validate(r *http.Request) error {
 
 // Middleware returns a middleware function
 func (openapi *OpenAPIValidation) Middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := openapi.Validate(r); err != nil {
 			var errMsg string
 			// err string returned can be very lengthy containing a lot of lines but the first line of error
@@ -93,4 +100,8 @@ func (openapi *OpenAPIValidation) Middleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+	if len(openapi.apiPrefix) > 0 {
+		return http.StripPrefix(openapi.apiPrefix, handlerFunc)
+	}
+	return handlerFunc
 }

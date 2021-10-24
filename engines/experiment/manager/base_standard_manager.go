@@ -40,34 +40,37 @@ func (*BaseStandardExperimentManager) ListVariablesForExperiments([]Experiment) 
 	return make(map[string][]Variable), nil
 }
 
-func (em *BaseStandardExperimentManager) ValidateExperimentConfig(engine Engine, cfg TuringExperimentConfig) error {
-	if engine.StandardEngineConfig == nil {
+func (em *BaseStandardExperimentManager) ValidateExperimentConfig(
+	engineCfg *StandardExperimentManagerConfig,
+	experimentCfg TuringExperimentConfig,
+) error {
+	if engineCfg == nil {
 		return errors.New("Missing Standard Engine configuration")
 	}
 
-	if engine.StandardEngineConfig.ExperimentSelectionEnabled {
+	if engineCfg.ExperimentSelectionEnabled {
 		// Check that there is at least 1 experiment
-		if len(cfg.Experiments) < 1 {
+		if len(experimentCfg.Experiments) < 1 {
 			return errors.New("Expected at least 1 experiment in the configuration")
 		}
 		// If Client Selection is enabled, check that the ClientID in each experiment matches the
 		// client info passed in
-		if engine.StandardEngineConfig.ClientSelectionEnabled {
-			for _, e := range cfg.Experiments {
-				if e.ClientID != cfg.Client.ID {
+		if engineCfg.ClientSelectionEnabled {
+			for _, e := range experimentCfg.Experiments {
+				if e.ClientID != experimentCfg.Client.ID {
 					return errors.New("Client information does not match with the experiment")
 				}
 			}
 		}
 	}
 
-	return em.validate.StructFilteredCtx(context.Background(), cfg, func(ns []byte) bool {
+	return em.validate.StructFilteredCtx(context.Background(), experimentCfg, func(ns []byte) bool {
 		// Determine the fields for validation
 		validateFields := []string{"TuringExperimentConfig.Variables"}
-		if engine.StandardEngineConfig.ClientSelectionEnabled {
+		if engineCfg.ClientSelectionEnabled {
 			validateFields = append(validateFields, "TuringExperimentConfig.Client")
 		}
-		if engine.StandardEngineConfig.ExperimentSelectionEnabled {
+		if engineCfg.ExperimentSelectionEnabled {
 			validateFields = append(validateFields, "TuringExperimentConfig.Experiments")
 		}
 

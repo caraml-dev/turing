@@ -25,9 +25,8 @@ type StandardExperimentManager interface {
 	// Experiment Runner expects.
 	GetExperimentRunnerConfig(TuringExperimentConfig) (json.RawMessage, error)
 
-	// The following methods are optional.
-	// BaseStandardExperimentManager provides default implementations for these methods that
-	// may be composed into the experiment engine.
+	// BaseStandardExperimentManager provides default implementations for the following methods
+	// that may be composed into the experiment engine.
 
 	// IsCacheEnabled returns whether the experiment engine wants to cache its responses in the Turing API cache
 	IsCacheEnabled() bool
@@ -44,7 +43,7 @@ type StandardExperimentManager interface {
 	ListVariablesForExperiments([]Experiment) (map[string][]Variable, error)
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format,
 	// based on the given engine's properties.
-	ValidateExperimentConfig(Engine, TuringExperimentConfig) error
+	ValidateExperimentConfig(*StandardExperimentManagerConfig, TuringExperimentConfig) error
 }
 
 type CustomExperimentManager interface {
@@ -53,9 +52,23 @@ type CustomExperimentManager interface {
 	// GetExperimentRunnerConfig converts the given config (as retrieved from the DB) into a format suitable
 	// for the Turing router (i.e., to be passed to the Experiment Runner). This interface method will be
 	// called at the time of router deployment.
-	GetExperimentRunnerConfig(json.RawMessage) (json.RawMessage, error)
+	GetExperimentRunnerConfig(interface{}) (json.RawMessage, error)
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
-	ValidateExperimentConfig(json.RawMessage) error
+	ValidateExperimentConfig(interface{}) error
+}
+
+func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {
+	var stdExpCfg TuringExperimentConfig
+
+	// Marshal to json
+	bytes, err := json.Marshal(cfg)
+	if err != nil {
+		return stdExpCfg, err
+	}
+
+	// Unmarshal using the TuringExperimentConfig type
+	err = json.Unmarshal(bytes, &stdExpCfg)
+	return stdExpCfg, err
 }
 
 var managersLock sync.Mutex

@@ -50,21 +50,26 @@ var (
 )
 
 func generateEnsemblingJobFixture() *models.EnsemblingJob {
+	nullableEnsemblingResources := openapi.NullableEnsemblingResources{}
+	nullableEnsemblingResources.Set(&openapi.EnsemblingResources{
+		DriverCpuRequest:      ref.String("1"),
+		DriverMemoryRequest:   ref.String("1Gi"),
+		ExecutorReplica:       ref.Int32(10),
+		ExecutorCpuRequest:    ref.String("1"),
+		ExecutorMemoryRequest: ref.String("1Gi"),
+	})
+
 	return &models.EnsemblingJob{
 		Name:            "test-ensembler-1",
 		ProjectID:       models.ID(1),
 		EnsemblerID:     models.ID(1),
 		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
-			ArtifactURI:        "gs://bucket/ensembler",
-			EnsemblerName:      "ensembler",
-			ServiceAccountName: "test-service-account",
-			Resources: &openapi.EnsemblingResources{
-				DriverCpuRequest:      ref.String("1"),
-				DriverMemoryRequest:   ref.String("1Gi"),
-				ExecutorReplica:       ref.Int32(10),
-				ExecutorCpuRequest:    ref.String("1"),
-				ExecutorMemoryRequest: ref.String("1Gi"),
+			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
+				ArtifactUri:        ref.String("gs://bucket/ensembler"),
+				EnsemblerName:      ref.String("ensembler"),
+				Resources:          nullableEnsemblingResources,
+				ServiceAccountName: ref.String("test-service-account"),
 			},
 		},
 		JobConfig: &models.JobConfig{

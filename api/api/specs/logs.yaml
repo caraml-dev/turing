@@ -6,6 +6,10 @@ info:
 .tags: &tags
   - "Logs"
 
+.id: &id
+  type: "integer"
+  format: "int32"
+  
 paths:
   "/projects/{project_id}/routers/{router_id}/logs":
     get:
@@ -16,13 +20,13 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "query"
           name: "component_type"
@@ -84,13 +88,13 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "version"
@@ -152,13 +156,13 @@ paths:
           name: "project_id"
           description: "id of the project that the ensembling job belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "job_id"
           description: "id of the ensembling job"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "query"
           name: "component_type"
@@ -207,9 +211,6 @@ paths:
 
 components:
   schemas:
-    Id:
-      $ref: "common.yaml#/components/schemas/Id"
-
     EnsemblingPodLog:
       type: object
       description: "EnsemblingPodLog object contains a log item from a container in an ensembling pod"

@@ -29,11 +29,11 @@ func (_m *CustomExperimentManager) GetEngineInfo() manager.Engine {
 }
 
 // GetExperimentRunnerConfig provides a mock function with given fields: _a0
-func (_m *CustomExperimentManager) GetExperimentRunnerConfig(_a0 json.RawMessage) (json.RawMessage, error) {
+func (_m *CustomExperimentManager) GetExperimentRunnerConfig(_a0 interface{}) (json.RawMessage, error) {
 	ret := _m.Called(_a0)
 
 	var r0 json.RawMessage
-	if rf, ok := ret.Get(0).(func(json.RawMessage) json.RawMessage); ok {
+	if rf, ok := ret.Get(0).(func(interface{}) json.RawMessage); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -42,7 +42,7 @@ func (_m *CustomExperimentManager) GetExperimentRunnerConfig(_a0 json.RawMessage
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(json.RawMessage) error); ok {
+	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -52,11 +52,11 @@ func (_m *CustomExperimentManager) GetExperimentRunnerConfig(_a0 json.RawMessage
 }
 
 // ValidateExperimentConfig provides a mock function with given fields: _a0
-func (_m *CustomExperimentManager) ValidateExperimentConfig(_a0 json.RawMessage) error {
+func (_m *CustomExperimentManager) ValidateExperimentConfig(_a0 interface{}) error {
 	ret := _m.Called(_a0)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(json.RawMessage) error); ok {
+	if rf, ok := ret.Get(0).(func(interface{}) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)

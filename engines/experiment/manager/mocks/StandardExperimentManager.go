@@ -181,11 +181,11 @@ func (_m *StandardExperimentManager) ListVariablesForExperiments(_a0 []manager.E
 }
 
 // ValidateExperimentConfig provides a mock function with given fields: _a0, _a1
-func (_m *StandardExperimentManager) ValidateExperimentConfig(_a0 manager.Engine, _a1 manager.TuringExperimentConfig) error {
+func (_m *StandardExperimentManager) ValidateExperimentConfig(_a0 *manager.StandardExperimentManagerConfig, _a1 manager.TuringExperimentConfig) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(manager.Engine, manager.TuringExperimentConfig) error); ok {
+	if rf, ok := ret.Get(0).(func(*manager.StandardExperimentManagerConfig, manager.TuringExperimentConfig) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

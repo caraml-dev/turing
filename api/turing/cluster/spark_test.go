@@ -6,6 +6,7 @@ import (
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/gojek/turing/api/turing/batch"
 	"github.com/gojek/turing/api/turing/config"
+	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/stretchr/testify/assert"
 	apicorev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -133,6 +134,23 @@ var (
 	serviceAccountName       = "service-account"
 	jobLabels                = make(map[string]string)
 	memoryResult, _          = toMegabyte(memoryValue)
+	barString                = "bar"
+	envVars                  = []openapi.EnvVar{
+		{
+			Name:  "foo",
+			Value: &barString,
+		},
+	}
+	expectedEnvVars = []apicorev1.EnvVar{
+		{
+			Name:  envServiceAccountPathKey,
+			Value: envServiceAccountPath,
+		},
+		{
+			Name:  "foo",
+			Value: barString,
+		},
+	}
 )
 
 func TestCreateSparkRequest(t *testing.T) {
@@ -150,6 +168,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
 		SparkInfraConfig:      sparkInfraConfig,
+		EnvVars:               &envVars,
 	}
 	expected := &apisparkv1beta2.SparkApplication{
 		ObjectMeta: apimetav1.ObjectMeta{
@@ -196,7 +215,7 @@ func TestCreateSparkRequest(t *testing.T) {
 							Path: serviceAccountMount,
 						},
 					},
-					Env:    envVars,
+					Env:    expectedEnvVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
 						{
@@ -229,7 +248,7 @@ func TestCreateSparkRequest(t *testing.T) {
 							Path: serviceAccountMount,
 						},
 					},
-					Env:    envVars,
+					Env:    expectedEnvVars,
 					Labels: jobLabels,
 					Tolerations: []apicorev1.Toleration{
 						{

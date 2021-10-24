@@ -13,7 +13,13 @@
         "artifact_uri": "gs://bucket-name/mlflow/343/f5fb1c8bdb3845648c02001c54a609d7/artifacts",
         "ensembler_name": "my-ensembler-updated",
         "service_account_name": "service-account@gcp-project.iam.gserviceaccount.com",
-        "resources": null
+        "resources": null,
+        "env": [
+            {
+                "name": "SOME_VAR",
+                "value": "SOME_VALUE"
+            }
+        ]
       },
       "job_config": {
         "version": "v1",
@@ -95,7 +101,13 @@
         "artifact_uri": "gs://bucket-name/mlflow/342/db2295decd4b455699aed0df6c9e5bcf/artifacts",
         "ensembler_name": "my-ensembler",
         "service_account_name": "service-account@gcp-project.iam.gserviceaccount.com",
-        "resources": null
+        "resources": null,
+        "env": [
+          {
+            "name": "SOME_VAR",
+            "value": "SOME_VALUE"
+          }
+        ]
       },
       "job_config": {
         "version": "v1",

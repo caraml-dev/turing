@@ -8,12 +8,8 @@ import (
 	"reflect"
 	"runtime"
 
-	val "github.com/go-playground/validator/v10"
-	"github.com/gojek/turing/api/turing/validation"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-
-	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 )
 
 // RequestVars is an alias of map[string][]string
@@ -40,6 +36,16 @@ type Route struct {
 	name    string
 }
 
+// Method returns HTTP method of this route
+func (route Route) Method() string {
+	return route.method
+}
+
+// Path returns path associated with this route
+func (route Route) Path() string {
+	return route.path
+}
+
 // Name returns the name of the route by either using Route's property `name`
 // or if it's empty – then by inferring it from the Route's `handler` function name
 func (route Route) Name() string {
@@ -52,7 +58,7 @@ func (route Route) Name() string {
 
 // HandlerFunc returns the HandlerFunc for this route, which validates the request and
 // executes the route's Handler on the request, returning its response.
-func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
+func (route Route) HandlerFunc(validator *validator.Validate) http.HandlerFunc {
 	var bodyType reflect.Type
 	if route.body != nil {
 		bodyType = reflect.TypeOf(route.body)
@@ -91,52 +97,4 @@ func (route Route) HandlerFunc(validator *val.Validate) http.HandlerFunc {
 
 		response.WriteTo(w)
 	}
-}
-
-// NewRouter instantiates a mux.Router for this application.
-func NewRouter(appCtx *AppContext) *mux.Router {
-	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
-	baseController := NewBaseController(appCtx, validator)
-	deploymentController := RouterDeploymentController{baseController}
-	controllers := []Controller{
-		AlertsController{baseController},
-		EnsemblersController{baseController},
-		EnsemblingJobController{baseController},
-		ExperimentsController{baseController},
-		PodLogController{baseController},
-		ProjectsController{baseController},
-		RoutersController{deploymentController},
-		RouterVersionsController{deploymentController},
-	}
-
-	var routes []Route
-	for _, c := range controllers {
-		routes = append(routes, c.Routes()...)
-	}
-
-	router := mux.NewRouter().StrictSlash(true)
-
-	for _, r := range routes {
-		_, handler := newrelic.WrapHandle(r.Name(), r.HandlerFunc(validator))
-
-		// Wrap with authz handler, if provided
-		if appCtx.Authorizer != nil {
-			handler = appCtx.Authorizer.Middleware(handler)
-		}
-
-		router.Name(r.Name()).
-			Methods(r.method).
-			Path(r.path).
-			Handler(handler)
-	}
-
-	if appCtx.OpenAPIValidation != nil {
-		router.Use(appCtx.OpenAPIValidation.Middleware)
-	}
-	router.Use(recoveryHandler)
-	return router
-}
-
-func recoveryHandler(next http.Handler) http.Handler {
-	return sentry.Recoverer(next)
 }

@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	driverCPURequest            = "100"
+	driverCPURequest            = "1"
 	driverMemoryRequest         = "1Gi"
 	executorReplica       int32 = 2
 	executorCPURequest          = "1"
@@ -66,18 +66,32 @@ func generateEnsemblingJobFixture(
 	projectID models.ID,
 	genExpected bool,
 ) *models.EnsemblingJob {
+	nullableEnsemblingResources := openapi.NullableEnsemblingResources{}
+	nullableEnsemblingResources.Set(&openapi.EnsemblingResources{
+		DriverCpuRequest:      &driverCPURequest,
+		DriverMemoryRequest:   &driverMemoryRequest,
+		ExecutorReplica:       &executorReplica,
+		ExecutorCpuRequest:    &executorCPURequest,
+		ExecutorMemoryRequest: &executorMemoryRequest,
+	})
+	barString := "bar"
+	envVars := []openapi.EnvVar{
+		{
+			Name:  "foo",
+			Value: &barString,
+		},
+	}
 	value := &models.EnsemblingJob{
 		EnsemblerID:     ensemblerID,
 		ProjectID:       projectID,
 		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
-			ServiceAccountName: fmt.Sprintf("test-service-account-%d", i),
-			Resources: &openapi.EnsemblingResources{
-				DriverCpuRequest:      ref.String("1"),
-				DriverMemoryRequest:   ref.String("1Gi"),
-				ExecutorReplica:       ref.Int32(10),
-				ExecutorCpuRequest:    ref.String("1"),
-				ExecutorMemoryRequest: ref.String("1Gi"),
+			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
+				ArtifactUri:        ref.String("gs://bucket/ensembler"),
+				EnsemblerName:      ref.String("ensembler"),
+				Resources:          nullableEnsemblingResources,
+				Env:                &envVars,
+				ServiceAccountName: ref.String(fmt.Sprintf("test-service-account-%d", i)),
 			},
 		},
 		JobConfig: &models.JobConfig{
@@ -175,8 +189,9 @@ func generateEnsemblingJobFixture(
 			EnsemblerFolder,
 		)
 		value.EnvironmentName = "dev"
-		value.InfraConfig.ArtifactURI = fmt.Sprintf("gs://bucket/%s", artifactFolder)
-		value.InfraConfig.EnsemblerName = EnsemblerFolder
+		artifactURI := fmt.Sprintf("gs://bucket/%s", artifactFolder)
+		value.InfraConfig.ArtifactUri = &artifactURI
+		value.InfraConfig.EnsemblerName = &EnsemblerFolder
 		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, EnsemblerFolder)
 	}
 
@@ -199,7 +214,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -211,13 +226,13 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			assert.NoError(t, err)
 
 			assert.NotEqual(t, found.ID, models.ID(0))
-			assert.Equal(t, found.Name, ensemblingJob.Name)
-			assert.Equal(t, found.EnsemblerID, ensemblingJob.EnsemblerID)
-			assert.Equal(t, found.ProjectID, ensemblingJob.ProjectID)
-			assert.Equal(t, found.EnvironmentName, ensemblingJob.EnvironmentName)
-			assert.Equal(t, models.JobPending, ensemblingJob.Status)
-			assert.Equal(t, found.InfraConfig, ensemblingJob.InfraConfig)
-			assert.Equal(t, found.JobConfig, ensemblingJob.JobConfig)
+			assert.Equal(t, ensemblingJob.Name, found.Name)
+			assert.Equal(t, ensemblingJob.EnsemblerID, found.EnsemblerID)
+			assert.Equal(t, ensemblingJob.ProjectID, found.ProjectID)
+			assert.Equal(t, ensemblingJob.EnvironmentName, found.EnvironmentName)
+			assert.Equal(t, models.JobPending, found.Status)
+			assert.Equal(t, ensemblingJob.InfraConfig, found.InfraConfig)
+			assert.Equal(t, ensemblingJob.JobConfig, found.JobConfig)
 			oldRunID := found.RunID
 			assert.NotEqual(t, oldRunID, 0)
 
@@ -226,7 +241,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 
 			// save again to test if RunID has incremented.
 			ensemblingJob = generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
 			err = ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -338,7 +353,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -453,11 +468,12 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				)
 
 				if tt.removeDefaultResources {
-					tt.request.InfraConfig.Resources = nil
+					tt.request.InfraConfig.Resources = openapi.NullableEnsemblingResources{}
 				}
 
 				if tt.removeDriverCPURequest {
-					tt.request.InfraConfig.Resources.DriverCpuRequest = nil
+					resources := tt.request.InfraConfig.GetResources()
+					resources.DriverCpuRequest = nil
 				}
 
 				result, err := ensemblingJobService.CreateEnsemblingJob(
@@ -484,7 +500,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 					expected.JobConfig.Spec.Ensembler.Uri,
 				)
 
-				assert.Equal(t, expected.InfraConfig.ArtifactURI, result.InfraConfig.ArtifactURI)
+				assert.Equal(t, expected.InfraConfig.ArtifactUri, result.InfraConfig.ArtifactUri)
 				assert.Equal(t, expected.InfraConfig.EnsemblerName, result.InfraConfig.EnsemblerName)
 
 				// Check if merging of spark config is done properly
@@ -505,8 +521,8 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				if tt.removeDriverCPURequest {
 					assert.Equal(
 						t,
-						defaultConfigurations.BatchEnsemblingJobResources.DriverCpuRequest,
-						result.InfraConfig.Resources.DriverCpuRequest,
+						*defaultConfigurations.BatchEnsemblingJobResources.DriverCpuRequest,
+						*result.InfraConfig.GetResources().DriverCpuRequest,
 					)
 				}
 			})
@@ -531,7 +547,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)

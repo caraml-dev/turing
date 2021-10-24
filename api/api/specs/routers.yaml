@@ -6,6 +6,10 @@ info:
 .tags: &tags
   - "Router"
 
+.id: &id
+  type: "integer"
+  format: "int32"
+  
 paths:
   "/projects/{project_id}/routers":
     get:
@@ -16,7 +20,7 @@ paths:
           name: "project_id"
           description: "project id of the project to retrieve routers from"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -26,7 +30,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Router"
+                  $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id"
         500:
@@ -39,7 +43,7 @@ paths:
           name: "project_id"
           description: "project id of the project to save router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: "router configuration to save"
@@ -54,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Router"
+                $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id or router configuration"
         500:
@@ -68,13 +72,13 @@ paths:
           name: "project_id"
           description: "project id of the project to retrieve routers from"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be retrieved"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -82,7 +86,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Router"
+                $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -95,13 +99,13 @@ paths:
           name: "project_id"
           description: "project id of the project of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to update"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       requestBody:
         description: "router configuration to save"
@@ -116,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Router"
+                $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id, router_id or router configuration"
         500:
@@ -130,13 +134,13 @@ paths:
           name: "project_id"
           description: "project id of the project of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to delete"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -147,7 +151,7 @@ paths:
                 type: "object"
                 properties:
                   router_id:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -164,13 +168,13 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be deployed"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         202:
@@ -181,9 +185,9 @@ paths:
                 type: object
                 properties:
                   router_id:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
                   version:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
         400:
           description: "Invalid project_id, router_id or deploy request"
         404:
@@ -198,13 +202,13 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to undeploy"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -215,7 +219,7 @@ paths:
                 type: object
                 properties:
                   router_id:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -232,13 +236,13 @@ paths:
           name: "project_id"
           description: "project id of the project to retrieve routers from"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be retrieved"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -263,19 +267,19 @@ paths:
           name: "project_id"
           description: "project id of the project to retrieve routers from"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be retrieved"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "version"
           description: "version of router configuration to be retrieved"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -297,19 +301,19 @@ paths:
           name: "project_id"
           description: "project id of the project of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "version"
           description: "version of router configuration to delete"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -320,9 +324,9 @@ paths:
                 type: "object"
                 properties:
                   router_id:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
                   version:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
         400:
           description: "Invalid project_id, router_id or version"
         404:
@@ -339,19 +343,19 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be deployed"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "version"
           description: "version of router configuration to be deployed"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         202:
@@ -362,9 +366,9 @@ paths:
                 type: object
                 properties:
                   router_id:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
                   version:
-                    $ref: "#/components/schemas/Id"
+                    <<: *id
         400:
           description: "Invalid project_id, router_id, version_id or deploy request"
         404:
@@ -379,13 +383,13 @@ paths:
           name: "project_id"
           description: "id of the project that the router belongs to"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
         - in: "path"
           name: "router_id"
           description: "id of the router to be deployed"
           schema:
-            $ref: "#/components/schemas/Id"
+            <<: *id
           required: true
       responses:
         200:
@@ -403,9 +407,6 @@ paths:
 
 components:
   schemas:
-    Id:
-      $ref: "common.yaml#/components/schemas/Id"
-
     Router:
       type: "object"
       properties:
@@ -433,15 +434,20 @@ components:
           readOnly: true
         status:
           $ref: "#/components/schemas/RouterStatus"
-        config:
-          $ref: "#/components/schemas/RouterVersion"
+
+    RouterDetails:
+      allOf:
+        - $ref: "#/components/schemas/Router"
+        - type: object
+          properties:
+            config:
+              $ref: "#/components/schemas/RouterVersion"
 
     RouterVersion:
       type: "object"
       properties:
         id:
-          type: "integer"
-          readOnly: true
+          $ref: "common.yaml#/components/schemas/Id"
         created_at:
           type: "string"
           format: "date-time"
@@ -451,31 +457,7 @@ components:
           format: "date-time"
           readOnly: true
         router:
-          type: "object"
-          properties:
-            Router:
-              type: "object"
-              properties:
-                id:
-                  type: "integer"
-                name:
-                  type: "string"
-                created_at:
-                  type: "string"
-                  format: "date-time"
-                  readOnly: true
-                updated_at:
-                  type: "string"
-                  format: "date-time"
-                  readOnly: true
-                project:
-                  type: "integer"
-                environment_name:
-                  type: "string"
-                endpoint:
-                  type: "string"
-                status:
-                  $ref: "#/components/schemas/RouterStatus"
+          $ref: "#/components/schemas/Router"
         version:
           type: "integer"
         status:
@@ -696,7 +678,7 @@ components:
         env:
           type: "array"
           items:
-            $ref: "#/components/schemas/EnvVar"
+            $ref: "common.yaml#/components/schemas/EnvVar"
         service_account:
           type: "string"
           description: >
@@ -771,7 +753,7 @@ components:
         env:
           type: "array"
           items:
-            $ref: "#/components/schemas/EnvVar"
+            $ref: "common.yaml#/components/schemas/EnvVar"
         service_account:
           type: "string"
           description: >
@@ -790,16 +772,6 @@ components:
         cpu_request:
           type: "string"
         memory_request:
-          type: "string"
-
-    EnvVar:
-      type: "object"
-      required:
-        - name
-      properties:
-        name:
-          type: "string"
-        value:
           type: "string"
 
     BigQueryConfig:

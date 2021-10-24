@@ -28,7 +28,9 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.ensembling_resources import EnsemblingResources
+    from turing.generated.model.env_var import EnvVar
     globals()['EnsemblingResources'] = EnsemblingResources
+    globals()['EnvVar'] = EnvVar
 
 
 class EnsemblerInfraConfig(ModelNormal):
@@ -81,6 +83,7 @@ class EnsemblerInfraConfig(ModelNormal):
             'ensembler_name': (str,),  # noqa: E501
             'service_account_name': (str,),  # noqa: E501
             'resources': (EnsemblingResources,),  # noqa: E501
+            'env': ([EnvVar],),  # noqa: E501
         }
 
     @cached_property
@@ -93,6 +96,7 @@ class EnsemblerInfraConfig(ModelNormal):
         'ensembler_name': 'ensembler_name',  # noqa: E501
         'service_account_name': 'service_account_name',  # noqa: E501
         'resources': 'resources',  # noqa: E501
+        'env': 'env',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -145,6 +149,7 @@ class EnsemblerInfraConfig(ModelNormal):
             ensembler_name (str): [optional]  # noqa: E501
             service_account_name (str): [optional]  # noqa: E501
             resources (EnsemblingResources): [optional]  # noqa: E501
+            env ([EnvVar]): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

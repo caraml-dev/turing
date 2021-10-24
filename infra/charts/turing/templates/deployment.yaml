@@ -30,6 +30,9 @@ spec:
 {{ toYaml .Values.turing.labels | indent 8 -}}
 {{- end }}
     spec:
+{{- if .Values.turing.clusterConfig.useInClusterConfig }}
+      serviceAccountName: {{ template "turing.service-account" . }}
+{{- end }}
       initContainers:
       - name: migrations
         image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
@@ -78,10 +81,13 @@ spec:
           timeoutSeconds: {{ default "5" .Values.turing.readinessProbe.timeoutSeconds }}
         resources:
           {{- toYaml .Values.turing.resources | nindent 12 }}
-        command:
-        - /app/turing-api
         args:
-        - -config=/etc/turing/config.yaml
+        - -config
+        - /etc/turing/config.yaml
+        {{- if .Values.turing.uiConfig }}
+        - -ui-config
+        - /etc/turing/ui.config.json
+        {{- end }}
         {{- with .Values.turing.extraArgs }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -95,34 +101,6 @@ spec:
         {{- with .Values.turing.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      - name: swagger-ui
-        image: {{ .Values.swaggerUi.image.registry }}{{ .Values.swaggerUi.image.repository }}:{{ .Values.swaggerUi.image.tag }}
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: {{ .Values.swaggerUi.service.internalPort }}
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 500m
-            memory: 128Mi
-        env:
-        - name: LAYOUT
-          value: "BaseLayout"
-        - name: SWAGGER_JSON
-          value: "/app/api/openapi.yaml"
-        - name: PORT
-          value: "{{ .Values.swaggerUi.service.internalPort }}"
-        - name: API_SERVER
-          value: "{{ .Values.swaggerUi.apiServer }}"
-        command: ['sh', '-c']
-        args:
-        - |
-          echo "Update Swagger config..."
-          sed -r -i 's%^((\s*)-(\s*)url\s*:).*$$%\1 "'$${API_SERVER}'"%' $${SWAGGER_JSON}
-          echo "Running Swagger UI..."
-          /usr/share/nginx/run.sh
       {{- with .Values.turing.extraContainers }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

@@ -40,7 +40,7 @@ func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	job.RunID = latest.RunID + 1
-	job.Name = fmt.Sprintf("%s-%d", job.InfraConfig.EnsemblerName, job.RunID)
+	job.Name = fmt.Sprintf("%s-%d", *job.InfraConfig.EnsemblerName, job.RunID)
 
 	return nil
 }
@@ -64,10 +64,7 @@ func (c *JobConfig) Scan(value interface{}) error {
 
 // InfraConfig stores the infrastructure related configurations required.
 type InfraConfig struct {
-	ArtifactURI        string                       `json:"artifact_uri"`
-	EnsemblerName      string                       `json:"ensembler_name"`
-	ServiceAccountName string                       `json:"service_account_name" validate:"required"`
-	Resources          *openapi.EnsemblingResources `json:"resources"`
+	openapi.EnsemblerInfraConfig
 }
 
 // Value returns json value, implement driver.Valuer interface

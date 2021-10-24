@@ -160,34 +160,27 @@ function install_merlin() {
 }
 
 function build_turing_router_docker_image() {
-    workdir=$(pwd)
-    cd "$script_dir/../../engines/router"
+    workdir="$script_dir/../../engines/router"
 
-    go mod vendor
-    docker build -t localhost:5000/turing-router .
+    OVERWRITE_VERSION=latest \
+    DOCKER_REGISTRY=localhost:5000 \
+      make -C "$workdir" build-image
+
     docker push localhost:5000/turing-router
 
-    rm -rf vendor
-    cd $workdir
+    make -C "$workdir" clean
 }
 
-function build_turing_apiserver_docker_image() {
-    workdir=$(pwd)
-    cd "$script_dir/../../api"
+function build_turing_api_docker_image() {
+    workdir="$script_dir/../../api"
 
-    go mod vendor
-    docker build -t localhost:5000/turing .
-    docker push localhost:5000/turing
+    OVERWRITE_VERSION=latest \
+    DOCKER_REGISTRY=localhost:5000 \
+      make -C "$workdir" build-image
 
-    rm -rf vendor
-    cd $workdir
-}
+    docker push localhost:5000/turing-api
 
-function build_turing_swagger_docker_image() {
-    pushd "$script_dir/../../api/api"
-    docker build -t localhost:5000/turing-swagger .
-    docker push localhost:5000/turing-swagger
-    popd
+    make -C "$workdir" clean
 }
 
 function install_turing() {

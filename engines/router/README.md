@@ -29,7 +29,7 @@ curl -X POST \
 Run `make test` to run all unit tests and integration tests.
 
 ### API Docs
-Run `make swagger-ui` to build the Swagger doc. This can then be acccessed at <http://localhost:5555/>
+Run `make swagger-ui` to build the Swagger doc. This can then be accessed at <http://localhost:8081/>
 
 ### Running all Services
 
@@ -42,7 +42,7 @@ Compose files under `compose/` define various services for the Turing Router app
 1. Set env var `GOOGLE_APPLICATION_CREDENTIALS` on the terminal if using BQ logging. For using Fluentd, the `GOOGLE_APPLICATION_CREDENTIALS` MUST belong to a service account.
 2. Run `make build_docker` to build the Turing app's image. This is a time consuming step and may be skipped on subsequent runs if the Golang app does not need to be re-built for its code changes and there are no new commits in the branch since the last time the image was built.
 3. Run `make deploy_docker_stack` to create the services. __Note:__ If not all services are required, simply remove the corresponding `-c <filename>` from the make target.
-4. Access the Swagger Docs at <http://localhost:5555/>
+4. Access the Swagger Docs at <http://localhost:8081/>
 5. Make a request to the Turing app at <http://localhost:8080/v1/predict>. If instrumentation is enabled (by `APP_CUSTOM_METRICS` in `.env.development`), the metrics exposed by the Prometheus client are available at <http://localhost:8080/metrics>.
 6. Query the metrics from the Prometheus web UI at <http://localhost:9090/>
 7. Test Fluentd `in_http` plugin by posting a request that matches, minimally, the required fields in the BigQuery output table schema. The logs would appear in the `./fluentd_logs` folder as they are being buffered. Eg: If `APP_FLUENTD_TAG` is set to `response.log`:

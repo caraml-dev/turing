@@ -45,7 +45,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 	}{
 		"failure | missing client info": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     true,
 					ExperimentSelectionEnabled: false,
 				},
@@ -60,7 +60,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | no experiment": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: true,
 				},
@@ -70,7 +70,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | client ID mismatch": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     true,
 					ExperimentSelectionEnabled: true,
 				},
@@ -92,7 +92,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | missing experiment info": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: true,
 				},
@@ -111,7 +111,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | required variable not configured": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: false,
 				},
@@ -138,7 +138,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | bad field source": {
 			engine: Engine{
-				StandardEngineConfig: &StandardExperimentEngineConfig{
+				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: false,
 				},
@@ -163,7 +163,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := em.ValidateExperimentConfig(data.engine, data.cfg)
+			err := em.ValidateExperimentConfig(data.engine.StandardExperimentManagerConfig, data.cfg)
 			if data.err != "" {
 				// Expect error
 				assert.Error(t, err)

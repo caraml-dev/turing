@@ -4,14 +4,14 @@ import (
 	common "github.com/gojek/turing/engines/experiment/common"
 )
 
-type ExperimentEngineType string
+type ExperimentManagerType string
 
 var (
-	StandardExperimentEngine ExperimentEngineType = "standard"
-	CustomExperimentEngine   ExperimentEngineType = "custom"
+	StandardExperimentManagerType ExperimentManagerType = "standard"
+	CustomExperimentManagerType   ExperimentManagerType = "custom"
 )
 
-type StandardExperimentEngineConfig struct {
+type StandardExperimentManagerConfig struct {
 	// ClientSelectionEnabled is set to true if the experiment engine has the concept of
 	// clients, that can be used to authenticate the experiment run requests.
 	ClientSelectionEnabled bool `json:"client_selection_enabled"`
@@ -28,14 +28,11 @@ type StandardExperimentEngineConfig struct {
 type Engine struct {
 	// Name is the display name used for the experiment engine.
 	Name string `json:"name"`
-	// RunnerTimeout is applied to the router, at the time of deployment,
-	// to control the timeout on the calls to the Experiment Engine.
-	RunnerTimeout string `json:"runner_timeout"`
-	// Type describes the class of the experiment engine
-	Type ExperimentEngineType `json:"type"`
-	// StandardEngineConfig is expected to be set by a "standard" experiment engine and
-	// is used by the generic Turing experiment engine UI.
-	StandardEngineConfig *StandardExperimentEngineConfig `json:"standard_config,omitempty"`
+	// Type describes the class of the experiment engine manager
+	Type ExperimentManagerType `json:"type"`
+	// StandardExperimentManagerConfig is expected to be set by a "standard" experiment engine manager
+	// and is used by the generic Turing experiment engine UI.
+	StandardExperimentManagerConfig *StandardExperimentManagerConfig `json:"standard_experiment_manager_config,omitempty"`
 }
 
 // Client describes the properties of a client registered on an experiment engine
