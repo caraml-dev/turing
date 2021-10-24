@@ -1,13 +1,8 @@
-.PHONY: evn dev gen-client build version test-unit
+.PHONY: setup
+setup:
+	pip install -r requirements.txt -r requirements.dev.txt
 
-VERSION_NUMBER=$(if $(VERSION),$(VERSION),$(shell ../scripts/vertagen/vertagen.sh -p sdk/ -y))
-
-env:
-	pip install -r requirements.txt
-
-dev: env
-	pip install -r requirements.dev.txt
-
+.PHONY: gen-client
 gen-client:
 	rm -rf turing/generated
 	@docker run --rm -v ${PWD}/..:/local openapitools/openapi-generator-cli:v5.1.1 generate \
@@ -16,13 +11,17 @@ gen-client:
 		--output /local/sdk/. \
 		--config /local/sdk/openapi-codegen.yaml
 
+.PHONY: version
 version:
-	@echo VERSION = \"$(VERSION_NUMBER)\" > turing/version.py
-	@echo $(VERSION_NUMBER)
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../scripts/vertagen/vertagen.sh -p sdk/ -y)))
+	@echo 'VERSION = "$(VERSION)"' > turing/version.py
+	@echo "turing-sdk version:" $(VERSION)
 
+.PHONY: build
 build: version
 	@rm -rf build dist
 	@python setup.py sdist bdist_wheel
 
-test-unit:
+.PHONY: test
+test:
 	@python -m pytest --cov=turing

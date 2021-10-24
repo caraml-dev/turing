@@ -2,12 +2,18 @@ name: Turing CI
 
 on:
   push:
+    # Automatically run CI on main branch
+    branches:
+      - main
+    # Automatically run CI Release and Pre-Release tags
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  # Automatically run CI on branches, that have active PR opened
   pull_request:
     branches:
       - main
-
-env:
-  REGISTRY: ghcr.io
+  # To make it possible to trigger e2e CI workflow for any arbitrary git ref
+  workflow_dispatch:
 
 jobs:
   test-api:
@@ -514,17 +520,37 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
+  release-rules:
+    runs-on: ubuntu-latest
+    outputs:
+      release-type: ${{ steps.release-rules.outputs.release-type }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: release-rules
+        uses: ./.github/actions/release-rules
+
   publish:
+    # Automatically publish release and pre-release artifacts.
+    #
+    # As for dev releases, make it possible to publish artifacts
+    # manually by approving 'deployment' in the 'manual' environment.
+    #
+    # Dev build can be released either from the 'main' branch or
+    # by running this workflow manually with `workflow_dispatch` event.
+    if: >-
+      ( needs.release-rules.outputs.release-type != 'dev' ) ||
+        ( github.event_name != 'pull_request' )
     needs:
       - build-router
       - build-api
       - build-ui
       - build-swagger-ui
+      - release-rules
       - test-e2e
     uses: romanwozniak/turing/.github/workflows/turing-publish.yaml@rework_ci
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
       router_version: ${{ needs.build-router.outputs.router-version }}
-      environment: ${{ github.ref != 'refs/heads/main' && 'feature' }}
+      environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}

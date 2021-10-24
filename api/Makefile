@@ -79,7 +79,7 @@ gen-client:
 .PHONY: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../scripts/vertagen/vertagen.sh)))
-	@echo "turing-api version:" $$VERSION
+	@echo "turing-api version:" $(VERSION)
 
 
 #   R E V I E W   R E Q U I R E D

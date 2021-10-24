@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/engines-batch-ensembler.yaml"
       - "engines/batch-ensembler/**"
+      - "sdk/**"
   pull_request:
     branches:
       - main
