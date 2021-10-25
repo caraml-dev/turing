@@ -3,7 +3,6 @@ package request
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
@@ -37,15 +36,8 @@ type RouterConfig struct {
 
 // ExperimentEngineConfig defines the experiment engine config
 type ExperimentEngineConfig struct {
-	Type   string            `json:"type" validate:"required,oneof=litmus nop xp"`
-	Config *ExperimentConfig `json:"config,omitempty" validate:"-"` // Skip validate to invoke custom validation
-}
-
-// ExperimentConfig captures the Turing Experiment config provided when creating/updating routers
-type ExperimentConfig struct {
-	Client      manager.Client       `json:"client"`
-	Experiments []manager.Experiment `json:"experiments"`
-	Variables   manager.Variables    `json:"variables"`
+	Type   string      `json:"type" validate:"required,oneof=litmus nop xp"`
+	Config interface{} `json:"config,omitempty" validate:"-"` // Skip validate to invoke custom validation
 }
 
 // LogConfig defines the logging configs
@@ -118,6 +110,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 	router *models.Router,
 	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
+	expSvc service.ExperimentsService,
 ) (*models.RouterVersion, error) {
 	if r.Config == nil {
 		return nil, errors.New("router config is empty")
@@ -171,7 +164,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		experimentConfig, err := r.BuildExperimentEngineConfig(router, rv.ExperimentEngine.Type, defaults, cryptoSvc)
+		experimentConfig, err := r.BuildExperimentEngineConfig(router, cryptoSvc, expSvc)
 		if err != nil {
 			return nil, err
 		}
@@ -182,61 +175,61 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 }
 
 // BuildExperimentEngineConfig creates the Experiment config from the given input properties
-// and defaults
 func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 	router *models.Router,
-	engineType models.ExperimentEngineType,
-	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
-) (*manager.TuringExperimentConfig, error) {
-	clientUsername := r.Config.ExperimentEngine.Config.Client.Username
-	clientPasskey := r.Config.ExperimentEngine.Config.Client.Passkey
-	currVer := router.CurrRouterVersion
+	expSvc service.ExperimentsService,
+) (interface{}, error) {
+	rawExpConfig := r.Config.ExperimentEngine.Config
 
-	if clientPasskey == "" {
-		// If passkey has not been set, and the client username matches current router
-		// version, use the current router version's passkey. Else, return error.
-		if currVer != nil &&
-			string(currVer.ExperimentEngine.Type) == r.Config.ExperimentEngine.Type &&
-			currVer.ExperimentEngine.Config.Client.Username == clientUsername {
-			clientPasskey = currVer.ExperimentEngine.Config.Client.Passkey
-		} else {
-			return nil, errors.New("Passkey must be configured")
-		}
-	} else {
-		// Passkey has been supplied, encrypt it
-		var err error
-		clientPasskey, err = cryptoSvc.Encrypt(clientPasskey)
+	// Handle missing passkey / encrypt it in Standard experiment config
+	if expSvc.IsStandardExperimentManager(r.Config.ExperimentEngine.Type) {
+		// Convert the new config to the standard type
+		expConfig, err := expSvc.GetStandardExperimentConfig(rawExpConfig)
 		if err != nil {
-			return nil, fmt.Errorf("Passkey could not be encrypted: %s", err.Error())
+			return nil, fmt.Errorf("Cannot parse standard experiment config: %v", err)
 		}
+		clientPasskey := expConfig.Client.Passkey
+
+		if clientPasskey == "" {
+			// Extract existing router version config
+			currVer := router.CurrRouterVersion
+			if currVer != nil &&
+				string(currVer.ExperimentEngine.Type) == r.Config.ExperimentEngine.Type {
+				currVerExpConfig, err := expSvc.GetStandardExperimentConfig(currVer.ExperimentEngine.Config)
+				if err != nil {
+					return nil, fmt.Errorf("Error parsing existing experiment config: %v", err)
+				}
+				if expConfig.Client.Username == currVerExpConfig.Client.Username {
+					// Copy the passkey
+					clientPasskey = currVerExpConfig.Client.Passkey
+				} else {
+					return nil, errors.New("Passkey must be configured")
+				}
+			} else {
+				return nil, errors.New("Passkey must be configured")
+			}
+		} else {
+			// Passkey has been supplied, encrypt it
+			var err error
+			clientPasskey, err = cryptoSvc.Encrypt(clientPasskey)
+			if err != nil {
+				return nil, fmt.Errorf("Passkey could not be encrypted: %s", err.Error())
+			}
+		}
+
+		// Build Experiment engine config
+		return &manager.TuringExperimentConfig{
+			Client: manager.Client{
+				ID:       expConfig.Client.ID,
+				Username: expConfig.Client.Username,
+				Passkey:  clientPasskey,
+			},
+			Experiments: expConfig.Experiments,
+			Variables:   expConfig.Variables,
+		}, nil
 	}
 
-	engineTypeLowerCase := strings.ToLower(string(engineType))
-	// The engine name (key in RouterDefaults.Experiment) is always lowercased due to our config
-	// loader implementation. Being always lowercased also helps with problem of not finding
-	// experiment engine due to case sensitivity.
-	experimentConfig, ok := defaults.Experiment[engineTypeLowerCase]
-	if !ok {
-		return nil, fmt.Errorf("experiment engine '%s' not found in router defaults experiment config", engineType)
-	}
-	experimentConfigMap := experimentConfig.(map[string]interface{})
-
-	// Build Experiment engine config
-	return &manager.TuringExperimentConfig{
-		Deployment: struct {
-			Endpoint string `json:"endpoint"`
-			Timeout  string `json:"timeout"`
-		}{
-			Endpoint: experimentConfigMap["endpoint"].(string),
-			Timeout:  experimentConfigMap["timeout"].(string),
-		},
-		Client: manager.Client{
-			ID:       r.Config.ExperimentEngine.Config.Client.ID,
-			Username: r.Config.ExperimentEngine.Config.Client.Username,
-			Passkey:  clientPasskey,
-		},
-		Experiments: r.Config.ExperimentEngine.Config.Experiments,
-		Variables:   r.Config.ExperimentEngine.Config.Variables,
-	}, nil
+	// Custom experiment manager config, return as is.
+	return rawExpConfig, nil
 }

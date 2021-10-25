@@ -188,10 +188,16 @@ func (c RouterDeploymentController) deployRouterVersion(
 		}
 	}
 
-	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
+	expSvc := c.BaseController.AppContext.ExperimentsService
+	if expSvc.IsStandardExperimentManager(string(routerVersion.ExperimentEngine.Type)) {
+		// Convert the config to the standard type
+		expConfig, err := expSvc.GetStandardExperimentConfig(routerVersion.ExperimentEngine.Config)
+		if err != nil {
+			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
+		}
 		// If passkey has been set, decrypt it
-		if routerVersion.ExperimentEngine.Config.Client.Passkey != "" {
-			experimentPasskey, err = c.CryptoService.Decrypt(routerVersion.ExperimentEngine.Config.Client.Passkey)
+		if expConfig.Client.Passkey != "" {
+			experimentPasskey, err = c.CryptoService.Decrypt(expConfig.Client.Passkey)
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}

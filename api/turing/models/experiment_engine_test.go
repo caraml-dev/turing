@@ -25,13 +25,6 @@ func TestExperimentEngineValue(t *testing.T) {
 			expEngine: ExperimentEngine{
 				Type: ExperimentEngineTypeXp,
 				Config: &manager.TuringExperimentConfig{
-					Deployment: struct {
-						Endpoint string `json:"endpoint"`
-						Timeout  string `json:"timeout"`
-					}{
-						Endpoint: "test-endpoint",
-						Timeout:  "600ms",
-					},
 					Client: manager.Client{
 						ID:       "1",
 						Username: "c1",
@@ -61,10 +54,6 @@ func TestExperimentEngineValue(t *testing.T) {
 			expected: string(`{
 				"type": "xp",
 				"config": {
-					"deployment": {
-						"endpoint": "test-endpoint",
-						"timeout": "600ms"
-					},
 					"client": {
 						"id": "1",
 						"username": "c1",

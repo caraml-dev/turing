@@ -172,7 +172,7 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 			name: "valid_exp_config",
 			input: request.ExperimentEngineConfig{
 				Type: "xp",
-				Config: &request.ExperimentConfig{
+				Config: manager.TuringExperimentConfig{
 					Client: client1,
 				},
 			},
@@ -181,8 +181,8 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 		{
 			name: "invalid_exp_config",
 			input: request.ExperimentEngineConfig{
-				Type: "xp",
-				Config: &request.ExperimentConfig{
+				Type: "unknown",
+				Config: manager.TuringExperimentConfig{
 					Client: client2,
 				},
 			},

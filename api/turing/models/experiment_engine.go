@@ -4,8 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-
-	"github.com/gojek/turing/engines/experiment/manager"
 )
 
 // EngineType is used to capture the types of the supported experimentation engines
@@ -25,7 +23,8 @@ type ExperimentEngine struct {
 	// Type of Experiment Engine. Currently supports "litmus", "xp" and "nop".
 	Type ExperimentEngineType `json:"type"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
-	Config *manager.TuringExperimentConfig `json:"config,omitempty"`
+	// For standard experiment engine managers, the config can be cast into TuringExperimentConfig type.
+	Config interface{} `json:"config,omitempty"`
 }
 
 func (eec ExperimentEngine) Value() (driver.Value, error) {
