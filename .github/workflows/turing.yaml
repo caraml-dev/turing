@@ -30,6 +30,9 @@ on:
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
 
+env:
+  ARTIFACT_RETENTION_DAYS: 7
+
 jobs:
   test-api:
     runs-on: ubuntu-latest
@@ -192,6 +195,7 @@ jobs:
         with:
           name: turing-ui-dist
           path: ui/build/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   build-swagger-ui:
     runs-on: ubuntu-latest
@@ -210,6 +214,7 @@ jobs:
         with:
           name: swagger-ui-dist
           path: api/api/swagger-ui-dist/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   build-api:
     runs-on: ubuntu-latest
@@ -252,6 +257,7 @@ jobs:
         with:
           name: turing-api.${{ steps.build-image.outputs.api-version }}.tar
           path: turing-api.${{ steps.build-image.outputs.api-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   build-router:
     runs-on: ubuntu-latest
@@ -292,6 +298,7 @@ jobs:
         with:
           name: turing-router.${{ steps.build-image.outputs.router-version }}.tar
           path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   test-e2e:
     runs-on: ubuntu-latest
