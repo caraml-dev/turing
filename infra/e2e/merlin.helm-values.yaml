@@ -3,7 +3,8 @@ merlin:
   image:
     registry: ghcr.io
     repository: gojek/merlin
-    tag: v0.7.0-alpha
+    # Value will be set at install time using helm --set command
+    tag:
   replicaCount: 1
   resources:
     requests:
@@ -26,7 +27,8 @@ merlin:
   environmentConfigs:
   - name: id-dev
     is_default: true
-    cluster: kind
+    # Value will be set at install time using helm --set command
+    cluster:
     region: id
     gcp_project: ""
     deployment_timeout: 10m
@@ -50,7 +52,8 @@ merlin:
       executor_memory_request: 128Mi
 
   imageBuilder:
-    clusterName: kind
+    # Value will be set at install time using helm --set command
+    clusterName:
 
 
 postgresql:

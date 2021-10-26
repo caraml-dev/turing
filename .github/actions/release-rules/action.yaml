@@ -1,0 +1,36 @@
+name: Release Rules Checker
+description: Determines release type based on the git ref and provided rules
+
+inputs:
+  release_tag_regex:
+    required: false
+    description: 'Regex to match the git tag to determine if this a release run of the workflow'
+    default: 'v[0-9]+(\.[0-9]+){0,2}'
+  prerelease_tag_regex:
+    required: false
+    description: 'Regex to match the git tag to determine if this a pre-release run of the workflow'
+    default: 'v[0-9]+(\.[0-9]+){0,2}(-([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?'
+  prefix:
+    required: false
+    description: "(Optional) prefix of git tags to use. Example: 'sdk/'"
+    default: ''
+outputs:
+  release-type:
+    description: 'Type of the release. One of: [dev, pre-release, release]'
+    value: ${{ steps.tag-check.outputs.release-type }}
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        release_regex='^refs/tags/${{ inputs.prefix }}${{ inputs.release_tag_regex }}$'
+        prerelease_regex='^refs/tags/${{ inputs.prefix }}${{ inputs.prerelease_tag_regex }}$'
+        if [[ '${{ github.event.ref }}' =~ ${release_regex} ]]; then
+          echo '::set-output name=release-type::release'
+        elif [[ '${{ github.event.ref }}' =~ ${prerelease_regex} ]]; then
+          echo '::set-output name=release-type::pre-release'
+        else
+          echo '::set-output name=release-type::dev'
+        fi
+      id: tag-check
+      shell: bash

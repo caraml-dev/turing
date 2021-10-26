@@ -1,0 +1,37 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  values:
+    global:
+      proxy:
+        autoInject: enabled
+      useMCP: false
+    # Patch to fix validation error: port http2/80 in gateway cluster-local-gateway
+    # invalid: targetPort is set to 0, which requires root
+    gateways:
+      istio-ingressgateway:
+        runAsRoot: true
+
+  addonComponents:
+    pilot:
+      enabled: true
+
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+      - name: cluster-local-gateway
+        enabled: true
+        label:
+          istio: cluster-local-gateway
+          app: cluster-local-gateway
+        k8s:
+          service:
+            type: ClusterIP
+            ports:
+              - port: 15020
+                name: status-port
+              - port: 80
+                name: http2
+              - port: 443
+                name: https
