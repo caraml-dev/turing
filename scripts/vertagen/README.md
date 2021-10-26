@@ -19,7 +19,7 @@ It's also possible to generate a semver, that is based on the git tags with a
 specific prefix. This can be useful for monorepos, where different components inside
 the repo can have different version numbers. For example if we want to get a semver 
 from tags with `sdk/` prefix (i.e. `sdk/v0.0.1`), then we can use run vertagen with a 
-`--preffix` argument:
+`--prefix` argument:
 ```shell
 vertagen --prefix sdk/
 ```

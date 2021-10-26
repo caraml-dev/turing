@@ -1,7 +1,8 @@
 name: sdk
 
 on:
-  # Automatically run CI Release and Pre-Release tags and main branch (only if there are changes to relevant paths)
+  # Automatically run CI on Release and Pre-Release tags and main branch
+  # (only if there are changes to relevant paths)
   push:
     tags:
       - "sdk/v[0-9]+.[0-9]+.[0-9]+*"

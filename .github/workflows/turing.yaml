@@ -1,7 +1,8 @@
 name: Turing CI
 
 on:
-  # Automatically run CI Release and Pre-Release tags and main branch (except changes to non-relevant paths)
+  # Automatically run CI on Release and Pre-Release tags and main branch
+  # (except changes to non-relevant paths)
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
@@ -570,7 +571,7 @@ jobs:
       - build-swagger-ui
       - release-rules
       - test-e2e
-    uses: romanwozniak/turing/.github/workflows/turing-publish.yaml@rework_ci
+    uses: gojek/turing/.github/workflows/turing-publish.yaml@main
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
       router_version: ${{ needs.build-router.outputs.router-version }}

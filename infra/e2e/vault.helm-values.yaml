@@ -1,6 +1,12 @@
 server:
   dev:
     enabled: true
+  # When running a Vault server in dev-mode, the v2 kv secrets engine is
+  # enabled by default at the path 'secret/' (for non-dev servers, it is currently v1).
+  #
+  # Merlin looks for cluster credentials under `secret/<cluster_name>` and it expects
+  # it to be stored as a KV v1 secret, hence we need to disable whatever secrets engine
+  # is enabled under 'secret/' and enable KV v1 secrets engine under this path.
   postStart:
   - /bin/sh
   - -c
