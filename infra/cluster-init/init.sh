@@ -24,7 +24,7 @@ function print_usage {
     echo "  Optional Environment Variables:"
     echo "    ISTIO_VERSION                     Istio version, default: 1.9.9."
     echo "    KNATIVE_VERSION                   Knative version, default: 0.18.3."
-    echo "    KNATIVE_ISTIO_VERSION             Knative version, default: 0.18.1."
+    echo "    KNATIVE_ISTIO_VERSION             Knative Istio version, default: 0.18.1."
 }
 
 function install_istio {
@@ -51,12 +51,11 @@ function install_knative {
     echo "Installing Knative."
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-v0.18.3}/serving-crds.yaml"
+        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-0.18.3}/serving-crds.yaml"
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-v0.18.3}/serving-core.yaml"
-    # TODO: Document need port 8443
+        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-0.18.3}/serving-core.yaml"
     kubectl apply \
-        -f "https://github.com/knative/net-istio/releases/download/v${KNATIVE_ISTIO_VERSION:-v0.18.1}/net-istio.yaml"
+        -f "https://github.com/knative/net-istio/releases/download/v${KNATIVE_ISTIO_VERSION:-0.18.1}/net-istio.yaml"
 }
 
 parse_args $@

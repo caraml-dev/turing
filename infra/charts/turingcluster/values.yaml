@@ -1,6 +1,9 @@
 # Do note that the following ports to the Kubernetes master must be open:
 # For Knative: 8443
 # For Spark operator: 8080
+# Other gotchas: Helm delete might take some time due to the deletion of knative namespace.
+#                Best to run it with an extended timeout, like helm delete <RELEASE> --timeout 15m
+
 turingcluster:
   image:
     # -- Docker registry for Turing cluster init
@@ -35,3 +38,8 @@ spark-operator:
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources: {}
+  image:
+    # -- repository of the spark operator
+    repository: gcr.io/spark-operator/spark-operator
+    # -- image tag of the spark operator
+    tag: v1beta2-1.2.3-3.1.1
