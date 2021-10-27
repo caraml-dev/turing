@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "turingcluster.fullname" . }}
+  name: {{ include "turingcluster.fullname" . }}-init
   labels:
     {{- include "turingcluster.labels" . | nindent 4 }}
 spec:

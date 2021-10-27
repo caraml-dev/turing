@@ -5,7 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-delete-policy": hook-succeeded
-    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-weight": "-10"
   labels:
     {{- include "turingcluster.labels" . | nindent 4 }}
 spec:

@@ -1,6 +1,6 @@
 # turingcluster
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
+![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -14,8 +14,7 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| spark-operator | object | `{"cleanupAnnotations":{"helm.sh/hook":"pre-delete, pre-upgrade","helm.sh/hook-delete-policy":"hook-succeeded","helm.sh/hook-weight":"1"},"image":{"repository":"gcr.io/spark-operator/spark-operator","tag":"v1beta2-1.2.3-3.1.1"},"replicas":1,"resources":{},"webhook":{"enable":true}}` | Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md |
-| spark-operator.cleanupAnnotations | object | `{"helm.sh/hook":"pre-delete, pre-upgrade","helm.sh/hook-delete-policy":"hook-succeeded","helm.sh/hook-weight":"1"}` | Hook weights need to be overridden in order to prevent race condition of the deletion of  the service account and cluster init |
+| spark-operator | object | `{"image":{"repository":"gcr.io/spark-operator/spark-operator","tag":"v1beta2-1.2.3-3.1.1"},"replicas":1,"resources":{},"webhook":{"enable":true}}` | Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md |
 | spark-operator.image.repository | string | `"gcr.io/spark-operator/spark-operator"` | repository of the spark operator |
 | spark-operator.image.tag | string | `"v1beta2-1.2.3-3.1.1"` | image tag of the spark operator |
 | spark-operator.replicas | int | `1` | number of replicas |
