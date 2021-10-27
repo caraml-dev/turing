@@ -43,3 +43,9 @@ spark-operator:
     repository: gcr.io/spark-operator/spark-operator
     # -- image tag of the spark operator
     tag: v1beta2-1.2.3-3.1.1
+  # -- Hook weights need to be overridden in order to prevent race condition of the deletion of 
+  # the service account and cluster init
+  cleanupAnnotations:
+    "helm.sh/hook": pre-delete, pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
