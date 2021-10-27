@@ -8,12 +8,18 @@ rules:
   resources:
   - services
   - pods
-  - pods/logs
+  - pods/log
   - namespaces
   - configmaps
   - secrets
   - persistentvolumeclaims
   - serviceaccounts
+  verbs:
+  - "*"
+- apiGroups:
+  - apps
+  resources:
+  - deployments
   verbs:
   - "*"
 - apiGroups:
