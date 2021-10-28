@@ -45,16 +45,19 @@ export const ExperimentContextProvider = ({
 
   useEffect(() => {
     // Clients, experiments and variables need an update if engine info changes
-    engineProps.client_selection_enabled && setClientsValidated(false);
-    engineProps.experiment_selection_enabled && setExperimentsValidated(false);
+    engineProps.standard_experiment_manager_config.client_selection_enabled &&
+      setClientsValidated(false);
+    engineProps.standard_experiment_manager_config
+      .experiment_selection_enabled && setExperimentsValidated(false);
     setVariablesValidated(false);
   }, [engineProps]);
 
   useEffect(() => {
     // Experiments and variables need an update if client info changes
-    engineProps.experiment_selection_enabled && setExperimentsValidated(false);
+    engineProps.standard_experiment_manager_config
+      .experiment_selection_enabled && setExperimentsValidated(false);
     setVariablesValidated(false);
-  }, [engineProps.experiment_selection_enabled, clientId]);
+  }, [engineProps, clientId]);
 
   useEffect(() => {
     // Variables need an update if experiment info changes

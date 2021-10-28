@@ -31,23 +31,31 @@ const experimentEngineVariableSchema = yup.object().shape({
 
 const experimentConfigSchema = yup.object().shape({
   engine: yup.object().shape({
-    client_selection_enabled: yup.boolean(),
-    experiment_selection_enabled: yup.boolean(),
+    standard_experiment_manager_config: yup.object().shape({
+      client_selection_enabled: yup.boolean(),
+      experiment_selection_enabled: yup.boolean(),
+    }),
   }),
   client: yup
     .object()
-    .when(["engine.client_selection_enabled"], (clientEnabled, schema) => {
-      return clientEnabled ? experimentEngineClientSchema : schema;
-    }),
+    .when(
+      ["engine.standard_experiment_manager_config.client_selection_enabled"],
+      (clientEnabled, schema) => {
+        return clientEnabled ? experimentEngineClientSchema : schema;
+      }
+    ),
   experiments: yup
     .array()
-    .when("engine.experiment_selection_enabled", (experimentEnabled, _) => {
-      return experimentEnabled
-        ? yup
-            .array(experimentEngineExperimentSchema)
-            .required("At least one experiment should be configured")
-        : yup.array(yup.object());
-    }),
+    .when(
+      "engine.standard_experiment_manager_config.experiment_selection_enabled",
+      (experimentEnabled, _) => {
+        return experimentEnabled
+          ? yup
+              .array(experimentEngineExperimentSchema)
+              .required("At least one experiment should be configured")
+          : yup.array(yup.object());
+      }
+    ),
   variables: yup.object().shape({
     client_variables: yup.array(),
     experiment_variables: yup.object(),

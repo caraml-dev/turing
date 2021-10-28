@@ -54,12 +54,14 @@ export const ExperimentConfigGroup = ({
 
   return !!experimentConfig &&
     !!experimentConfig.engine &&
-    !!experimentConfig.engine.name ? (
+    !!experimentConfig.engine.name &&
+    experimentConfig.engine.type === "standard" ? (
     <ExperimentContextProvider
       engineProps={experimentConfig.engine}
       clientId={experimentConfig.client.id || ""}
       experimentIds={selectedExpIds.join()}>
-      {experimentConfig.engine.client_selection_enabled && (
+      {experimentConfig.engine.standard_experiment_manager_config
+        .client_selection_enabled && (
         <EuiFlexItem grow={false}>
           <ClientConfigPanel
             client={experimentConfig.client}
@@ -69,7 +71,8 @@ export const ExperimentConfigGroup = ({
         </EuiFlexItem>
       )}
 
-      {experimentConfig.engine.experiment_selection_enabled && (
+      {experimentConfig.engine.standard_experiment_manager_config
+        .experiment_selection_enabled && (
         <EuiFlexItem grow={false}>
           <ExperimentsConfigPanel
             experiments={experimentConfig.experiments}

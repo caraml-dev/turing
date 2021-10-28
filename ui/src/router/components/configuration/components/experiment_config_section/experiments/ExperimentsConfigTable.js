@@ -43,7 +43,10 @@ export const ExperimentsConfigTable = ({ experiments, engineProps }) => {
     </Fragment>
   ) : (
     <EuiText size="s" color="subdued">
-      {engineProps.experiment_selection_enabled ? "None" : "N/A"}
+      {engineProps.standard_experiment_manager_config
+        .experiment_selection_enabled
+        ? "None"
+        : "N/A"}
     </EuiText>
   );
 };
