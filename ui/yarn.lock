@@ -1303,7 +1303,7 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@gojek/mlp-ui@^1.4.10":
+"@gojek/mlp-ui@~1.4.10":
   version "1.4.15"
   resolved "https://registry.yarnpkg.com/@gojek/mlp-ui/-/mlp-ui-1.4.15.tgz#76e825dc4844978ea3139aef70fa58926b9b1e0e"
   integrity sha512-xgtBElz4/AB+JDU8qe9IgUbbzpxGd28OcOc+w/O0hJGJN7BaTAZLDYjmnSJbTIirgDYodKbtZbLJNrNHKqJbkA==
