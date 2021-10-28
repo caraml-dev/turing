@@ -34,6 +34,10 @@ module.exports = ({ env }) => ({
                             singleton: true,
                             requiredVersion: sharedDeps["react-dom"],
                         },
+                        "@gojek/mlp-ui": {
+                            singleton: true,
+                            requiredVersion: sharedDeps["@gojek/mlp-ui"],
+                        }
                     },
                 }),
             ],
