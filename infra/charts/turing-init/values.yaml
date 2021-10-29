@@ -4,7 +4,7 @@
 # Other gotchas: Helm delete might take some time due to the deletion of knative namespace.
 #                Best to run it with an extended timeout, like helm delete <RELEASE> --timeout 15m
 
-turingcluster:
+turing-init:
   image:
     # -- Docker registry for Turing cluster init
     registry: ghcr.io/

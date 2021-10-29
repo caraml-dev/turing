@@ -33,7 +33,7 @@ jobs:
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
-          prefix: sdk/
+          prefix: cluster-init/
 
   publish:
     # Automatically publish release and pre-release artifacts.

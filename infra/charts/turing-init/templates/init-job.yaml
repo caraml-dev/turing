@@ -1,18 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "turingcluster.fullname" . }}-init
+  name: {{ include "turing-init.fullname" . }}-init
   labels:
-    {{- include "turingcluster.labels" . | nindent 4 }}
+    {{- include "turing-init.labels" . | nindent 4 }}
 spec:
   backoffLimit: 1
   template:
     spec:
-      serviceAccountName: {{ include "turingcluster.serviceAccountName" . }}
+      serviceAccountName: {{ include "turing-init.serviceAccountName" . }}
       restartPolicy: Never
       containers:
       - name: knative-istio-install
-        image: {{ .Values.turingcluster.image.registry }}{{ .Values.turingcluster.image.repository }}:{{ .Values.turingcluster.image.tag }}
+        image: {{ .Values.turing-init.image.registry }}{{ .Values.turing-init.image.repository }}:{{ .Values.turing-init.image.tag }}
         command:
         - /bin/bash
         - -c
@@ -26,12 +26,12 @@ spec:
         - name: ISTIO_INGRESS_HELM_VALUES_PATH
           value: /etc/istio-ingress/ingress.yaml
         - name: ISTIO_VERSION
-          value: {{ .Values.turingcluster.istioVersion }}
+          value: {{ .Values.turing-init.istioVersion }}
         - name: KNATIVE_VERSION
-          value: {{ .Values.turingcluster.knativeVersion }}
+          value: {{ .Values.turing-init.knativeVersion }}
         - name: KNATIVE_ISTIO_VERSION
-          value: {{ .Values.turingcluster.knativeIstioVersion }}
-        imagePullPolicy: {{ .Values.turingcluster.image.pullPolicy }}
+          value: {{ .Values.turing-init.knativeIstioVersion }}
+        imagePullPolicy: {{ .Values.turing-init.image.pullPolicy }}
         volumeMounts:
         - mountPath: /etc/istio-base
           name: istio-base
@@ -42,10 +42,10 @@ spec:
       volumes:
       - name: istio-base
         configMap:
-          name: {{ include "turingcluster.fullname" . }}-istio-base
+          name: {{ include "turing-init.fullname" . }}-istio-base
       - name: istio-discovery
         configMap:
-          name: {{ include "turingcluster.fullname" . }}-istio-discovery
+          name: {{ include "turing-init.fullname" . }}-istio-discovery
       - name: istio-ingress
         configMap:
-          name: {{ include "turingcluster.fullname" . }}-istio-ingress
+          name: {{ include "turing-init.fullname" . }}-istio-ingress

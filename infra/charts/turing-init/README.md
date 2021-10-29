@@ -1,4 +1,4 @@
-# turingcluster
+# turing-init
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
@@ -20,13 +20,13 @@ A Helm chart for Kubernetes
 | spark-operator.replicas | int | `1` | number of replicas |
 | spark-operator.resources | object | `{}` | Resources requests and limits for spark operator. This should be set  according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | spark-operator.webhook.enable | bool | `true` | this is needed to be set to true, if not the configmaps will not load |
-| turingcluster.image.pullPolicy | string | `"IfNotPresent"` |  |
-| turingcluster.image.registry | string | `"ghcr.io/"` | Docker registry for Turing cluster init |
-| turingcluster.image.repository | string | `"gojek/turing-cluster-init"` | Docker image repository for Turing cluster init |
-| turingcluster.image.tag | string | `"latest"` | Docker image tag for Turing cluster init |
-| turingcluster.istioBaseConfig | object | `{}` | Base config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/base/values.yaml |
-| turingcluster.istioDiscoveryConfig | object | `{}` | Discovery config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/istio-control/istio-discovery/values.yaml |
-| turingcluster.istioIngressConfig | object | `{}` | Ingress gateway config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/gateways/istio-ingress/values.yaml |
-| turingcluster.istioVersion | string | `"1.9.9"` | Istio version to use |
-| turingcluster.knativeIstioVersion | string | `"0.18.1"` |  |
-| turingcluster.knativeVersion | string | `"0.18.3"` | Knative Version to use |
+| turing-init.image.pullPolicy | string | `"IfNotPresent"` |  |
+| turing-init.image.registry | string | `"ghcr.io/"` | Docker registry for Turing cluster init |
+| turing-init.image.repository | string | `"gojek/turing-cluster-init"` | Docker image repository for Turing cluster init |
+| turing-init.image.tag | string | `"latest"` | Docker image tag for Turing cluster init |
+| turing-init.istioBaseConfig | object | `{}` | Base config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/base/values.yaml |
+| turing-init.istioDiscoveryConfig | object | `{}` | Discovery config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/istio-control/istio-discovery/values.yaml |
+| turing-init.istioIngressConfig | object | `{}` | Ingress gateway config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/gateways/istio-ingress/values.yaml |
+| turing-init.istioVersion | string | `"1.9.9"` | Istio version to use |
+| turing-init.knativeIstioVersion | string | `"0.18.1"` |  |
+| turing-init.knativeVersion | string | `"0.18.3"` | Knative Version to use |

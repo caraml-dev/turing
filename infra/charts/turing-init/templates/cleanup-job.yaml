@@ -1,22 +1,22 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "turingcluster.fullname" . }}-cleanup
+  name: {{ include "turing-init.fullname" . }}-cleanup
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "10"
   labels:
-    {{- include "turingcluster.labels" . | nindent 4 }}
+    {{- include "turing-init.labels" . | nindent 4 }}
 spec:
   backoffLimit: 1
   template:
     spec:
-      serviceAccountName: {{ include "turingcluster.serviceAccountName" . }}
+      serviceAccountName: {{ include "turing-init.serviceAccountName" . }}
       restartPolicy: Never
       containers:
       - name: knative-istio-cleanup
-        image: {{ .Values.turingcluster.image.registry }}{{ .Values.turingcluster.image.repository }}:{{ .Values.turingcluster.image.tag }}
+        image: {{ .Values.turing-init.image.registry }}{{ .Values.turing-init.image.repository }}:{{ .Values.turing-init.image.tag }}
         command:
         - /bin/bash
         - -c
@@ -24,11 +24,11 @@ spec:
         - /app/cleanup.sh
         env:
         - name: KNATIVE_VERSION
-          value: {{ .Values.turingcluster.knativeVersion }}
+          value: {{ .Values.turing-init.knativeVersion }}
         - name: KNATIVE_ISTIO_VERSION
-          value: {{ .Values.turingcluster.knativeIstioVersion }}
+          value: {{ .Values.turing-init.knativeIstioVersion }}
         - name: RELEASE_NAME
           value: {{ .Release.Name }}
         - name: RELEASE_NAMESPACE
           value: {{ .Release.Namespace }}
-        imagePullPolicy: {{ .Values.turingcluster.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.turing-init.image.pullPolicy }}
