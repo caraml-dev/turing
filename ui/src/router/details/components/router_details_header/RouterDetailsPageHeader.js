@@ -1,5 +1,5 @@
 import React from "react";
-import { EuiBadge } from "@elastic/eui";
+import { EuiBadge, EuiText } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { HorizontalDescriptionList } from "../../../../components/horizontal_description_list/HorizontalDescriptionList";
 import { PageSecondaryHeader } from "../../../components/page_header/PageSecondaryHeader";
@@ -20,6 +20,16 @@ export const RouterDetailsPageHeader = ({ router }) => {
       flexProps: {
         grow: true,
         className: "euiFlexItem--endpoint",
+      },
+    },
+    {
+      title: "Timeout",
+      description: <EuiText>{router.config.timeout}</EuiText>,
+      flexProps: {
+        grow: 1,
+        style: {
+          minWidth: "100px",
+        },
       },
     },
     {
