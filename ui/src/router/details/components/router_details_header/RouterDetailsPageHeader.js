@@ -24,7 +24,7 @@ export const RouterDetailsPageHeader = ({ router }) => {
     },
     {
       title: "Timeout",
-      description: <EuiText>{router.config.timeout}</EuiText>,
+      description: <EuiText size="s">{router.config.timeout}</EuiText>,
       flexProps: {
         grow: 1,
         style: {
