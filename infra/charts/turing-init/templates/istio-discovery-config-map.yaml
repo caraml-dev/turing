@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "turing-init.fullname" . }}-istio-discovery
-data:
-  discovery.yaml: |
-    {{- toYaml .Values.turing-init.istioDiscoveryConfig | nindent 4 }}

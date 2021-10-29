@@ -3,29 +3,60 @@
 # For Spark operator: 8080
 # Other gotchas: Helm delete might take some time due to the deletion of knative namespace.
 #                Best to run it with an extended timeout, like helm delete <RELEASE> --timeout 15m
+image:
+  # -- Docker registry for Turing cluster init
+  registry: ghcr.io/
+  # -- Docker image repository for Turing cluster init
+  repository: gojek/turing-cluster-init
+  # -- Docker image tag for Turing cluster init
+  tag: latest
+  pullPolicy: IfNotPresent
 
-turing-init:
-  image:
-    # -- Docker registry for Turing cluster init
-    registry: ghcr.io/
-    # -- Docker image repository for Turing cluster init
-    repository: gojek/turing-cluster-init
-    # -- Docker image tag for Turing cluster init
-    tag: latest
-    pullPolicy: IfNotPresent
+# -- Istio version to use
+istioVersion: 1.9.9
+# -- Knative Version to use
+knativeVersion: 0.18.3
+knativeIstioVersion: 0.18.1
 
-  # -- Istio version to use
-  istioVersion: 1.9.9
-  # -- Knative Version to use
-  knativeVersion: 0.18.3
-  knativeIstioVersion: 0.18.1
+# -- istio operator config, defaults are the minimum to run turing
+istioOperatorConfig:
+  apiVersion: install.istio.io/v1alpha1
+  kind: IstioOperator
+  spec:
+    values:
+      global:
+        proxy:
+          autoInject: enabled
+        useMCP: false
+      # Patch to fix validation error: port http2/80 in gateway cluster-local-gateway
+      # invalid: targetPort is set to 0, which requires root
+      gateways:
+        istio-ingressgateway:
+          runAsRoot: true
 
-  # -- Base config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/base/values.yaml
-  istioBaseConfig: {}
-  # -- Discovery config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/istio-control/istio-discovery/values.yaml
-  istioDiscoveryConfig: {}
-  # -- Ingress gateway config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/gateways/istio-ingress/values.yaml
-  istioIngressConfig: {}
+    addonComponents:
+      pilot:
+        enabled: true
+
+    components:
+      ingressGateways:
+        - name: istio-ingressgateway
+          enabled: true
+        - name: cluster-local-gateway
+          enabled: true
+          label:
+            istio: cluster-local-gateway
+            app: cluster-local-gateway
+          k8s:
+            service:
+              type: ClusterIP
+              ports:
+                - port: 15020
+                  name: status-port
+                - port: 80
+                  name: http2
+                - port: 443
+                  name: https
 
 # -- Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md
 spark-operator:

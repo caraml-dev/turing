@@ -16,19 +16,21 @@ spec:
       restartPolicy: Never
       containers:
       - name: knative-istio-cleanup
-        image: {{ .Values.turing-init.image.registry }}{{ .Values.turing-init.image.repository }}:{{ .Values.turing-init.image.tag }}
+        image: {{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
         command:
         - /bin/bash
         - -c
         args:
         - /app/cleanup.sh
         env:
+        - name: ISTIO_VERSION
+          value: {{ .Values.istioVersion }}
         - name: KNATIVE_VERSION
-          value: {{ .Values.turing-init.knativeVersion }}
+          value: {{ .Values.knativeVersion }}
         - name: KNATIVE_ISTIO_VERSION
-          value: {{ .Values.turing-init.knativeIstioVersion }}
+          value: {{ .Values.knativeIstioVersion }}
         - name: RELEASE_NAME
           value: {{ .Release.Name }}
         - name: RELEASE_NAMESPACE
           value: {{ .Release.Namespace }}
-        imagePullPolicy: {{ .Values.turing-init.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}

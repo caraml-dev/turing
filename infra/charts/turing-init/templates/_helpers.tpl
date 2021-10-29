@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "turingcluster.name" -}}
+{{- define "turing-init.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "turingcluster.fullname" -}}
+{{- define "turing-init.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "turingcluster.chart" -}}
+{{- define "turing-init.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "turingcluster.labels" -}}
-helm.sh/chart: {{ include "turingcluster.chart" . }}
-{{ include "turingcluster.selectorLabels" . }}
+{{- define "turing-init.labels" -}}
+helm.sh/chart: {{ include "turing-init.chart" . }}
+{{ include "turing-init.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,14 +46,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "turingcluster.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "turingcluster.name" . }}
+{{- define "turing-init.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "turing-init.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "turingcluster.serviceAccountName" -}}
-{{- printf "turingcluster-%s" .Release.Name | trunc 63 -}}
+{{- define "turing-init.serviceAccountName" -}}
+{{- printf "turing-init-%s" .Release.Name | trunc 63 -}}
 {{- end -}}

@@ -294,7 +294,7 @@ jobs:
         run: |
           docker image save \
             --output turing-router.${{ steps.build-image.outputs.router-version }}.tar \
-           turing-router:${{ steps.build-image.outputs.router-version }}
+            turing-router:${{ steps.build-image.outputs.router-version }}
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
@@ -303,9 +303,41 @@ jobs:
           path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
+  build-cluster-init:
+    runs-on: ubuntu-latest
+    outputs:
+      cluster-init-version: ${{ steps.build-image.outputs.cluster-init-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: infra/cluster-init
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
+
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
+            cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
+          path: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
   test-e2e:
     runs-on: ubuntu-latest
     env:
+      CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
       CLUSTER_NAME: turing-e2e
       ISTIO_VERSION: 1.9.9
       KNATIVE_VERSION: v0.18.3
@@ -319,6 +351,7 @@ jobs:
     needs:
       - build-api
       - build-router
+      - build-cluster-init
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -337,45 +370,7 @@ jobs:
             --servers 1
             --agents 3
             --port 80:80@loadbalancer
-            --k3s-server-arg "--no-deploy=traefik,metrics-server"
-
-      - name: "Install Istio"
-        run: |
-          # Installing Istio CLI
-          curl -L https://istio.io/downloadIstio | sh -
-          export PATH=$PWD/istio-${{ env.ISTIO_VERSION }}/bin:$PATH
-
-          # Installing Istio Operator
-          echo "y" | istioctl install -f infra/e2e/istio-minimal-operator.yaml
-
-      - name: "Install Knative with Istio Controller"
-        run: |
-          # Install Knative CRD and Serving core components
-          kubectl apply \
-            -f https://github.com/knative/serving/releases/download/${{ env.KNATIVE_VERSION }}/serving-crds.yaml
-          kubectl apply \
-            -f https://github.com/knative/serving/releases/download/${{ env.KNATIVE_VERSION }}/serving-core.yaml
-
-          # Install Knative Istio controller
-          kubectl apply \
-            -f https://github.com/knative/net-istio/releases/download/${{ env.KNATIVE_ISTIO_VERSION }}/net-istio.yaml
-
-          # Setting up DNS
-          kubectl -n knative-serving patch configmap/config-domain \
-            --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
-
-          # Ignore resolving tags for local Docker registry
-          kubectl -n knative-serving patch configmap/config-deployment \
-            --type merge -p '{"data":{"registriesSkippingTagResolving": "${{ env.LOCAL_REGISTRY }}"}}'
-
-      - name: "Install Vault"
-        run: |
-          helm repo add hashicorp https://helm.releases.hashicorp.com
-          helm install vault hashicorp/vault \
-            --version=${{ env.VAULT_CHART_VERSION }} \
-            --values infra/e2e/vault.helm-values.yaml
-
-          kubectl apply -f infra/e2e/vault.ingress.yaml
+            --k3s-server-arg "--no-deploy=traefik,metrics-server --advertise-port=8443,8080"
 
       - name: Download Turing API Docker tar archieve
         uses: actions/download-artifact@v2
@@ -386,6 +381,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: turing-router.${{ needs.build-router.outputs.router-version }}.tar
+
+      - name: Download Cluster Init Docker tar archieve
+        uses: actions/download-artifact@v2
+        with:
+          name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
 
       - name: Publish images to local registry
         env:
@@ -405,6 +405,48 @@ jobs:
             ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
 
+          # Cluster init
+          docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
+          docker tag \
+            cluster-init:${{ env.CLUSTER_INIT_VERSION }} \
+            ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
+
+      - name: "Install Infrastructure"
+        run: |
+          kubectl create ns infrastructure
+          helm upgrade -n infrastructure turing-init infra/charts/turing-init \
+            --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
+            --set image.repository=${{ github.repository }}/cluster-init \
+            --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
+            --values infra/e2e/init.helm-values.yaml \
+            --install \
+            --wait
+
+          # wait for install infra job to finish
+          kubectl logs -n infrastructure -f $(kubectl get po -n infrastructure | grep -v 'NAME' | grep -v 'spark' | head -n 1 | awk '{print $1}')
+          kubectl get po -A
+          kubectl get svc -A
+          kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/$(kubectl get job -n infrastructure | grep -v 'NAME' | head -n 1 | awk '{print $1}')
+
+          # Setting up DNS
+          kubectl -n knative-serving patch configmap/config-domain \
+            --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
+
+          # Ignore resolving tags for local Docker registry
+          kubectl -n knative-serving patch configmap/config-deployment \
+            --type merge -p '{"data":{"registriesSkippingTagResolving": "${{ env.LOCAL_REGISTRY }}"}}'
+
+      - name: "Install Vault"
+        run: |
+          helm repo add hashicorp https://helm.releases.hashicorp.com
+          helm install vault hashicorp/vault \
+            --version=${{ env.VAULT_CHART_VERSION }} \
+            --values infra/e2e/vault.helm-values.yaml \
+            --wait
+
+          kubectl apply -f infra/e2e/vault.ingress.yaml
+
       - name: Checkout MLP
         uses: actions/checkout@v2
         with:
@@ -416,7 +458,8 @@ jobs:
         run: |
           helm install mlp ./mlp/charts/mlp \
             --set mlp.image.tag=${{ env.MLP_VERSION }} \
-            --values infra/e2e/mlp.helm-values.yaml
+            --values infra/e2e/mlp.helm-values.yaml \
+            --wait
 
           kubectl apply -f infra/e2e/mlp.ingress.yaml
 
@@ -463,7 +506,8 @@ jobs:
             --set merlin.image.tag=${{ env.MERLIN_VERSION }} \
             --set merlin.environmentConfigs[0].cluster=${{ env.CLUSTER_NAME }} \
             --set merlin.imageBuilder.clusterName=${{ env.CLUSTER_NAME }} \
-            --values infra/e2e/merlin.helm-values.yaml
+            --values infra/e2e/merlin.helm-values.yaml \
+            --wait
 
           kubectl apply -f infra/e2e/merlin.ingress.yaml
 
@@ -478,7 +522,8 @@ jobs:
             --set turing.image.repository=${{ github.repository }}/turing-api \
             --set turing.image.tag=${{ env.TURING_API_VERSION }} \
             --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            --values infra/e2e/turing.helm-values.yaml
+            --values infra/e2e/turing.helm-values.yaml \
+            --wait
 
           kubectl apply -f infra/e2e/turing.ingress.yaml
 

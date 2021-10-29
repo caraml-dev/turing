@@ -2,6 +2,7 @@
 
 # Helper script to cleanup the infrastructure provisioned.
 # Environment Variables:
+#   ISTIO_VERSION         Istio Version, default 1.9.9
 #   KNATIVE_VERSION       Knative version, default: 0.18.3.
 #   KNATIVE_ISTIO_VERSION Knative istio version, default: 0.18.1.
 #   RELEASE_NAME          Name of the helm release (Must be filled in).
@@ -11,9 +12,9 @@
 [[ -z "${RELEASE_NAMESPACE}" ]] && echo "RELEASE_NAMESPACE environment variable is not set." && exit 1
 
 # Istio
-helm delete -n istio-system istio-base
-helm delete -n istio-system istiod
-helm delete -n istio-system istio-ingress
+local istio_version=${ISTIO_VERSION:-1.9.9}
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${istio_version} TARGET_ARCH=x86_64 sh -
+./istio-${istio_version}/bin/istioctl x uninstall --purge
 
 # Knative, this step might take some time
 kubectl delete ns knative-serving
