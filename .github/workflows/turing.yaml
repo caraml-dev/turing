@@ -12,9 +12,11 @@ on:
       - "docs/**"
       - "engines/batch-ensembler/**"
       - "sdk/**"
+      - "infra/cluster-init/**"
       - ".github/workflows/batch-ensembler.yaml"
       - ".github/workflows/sdk.yaml"
       - ".github/workflows/helm-chart.yaml"
+      - ".github/workflows/cluster-init.yaml"
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
