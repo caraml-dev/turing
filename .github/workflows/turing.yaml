@@ -370,7 +370,7 @@ jobs:
             --servers 1
             --agents 3
             --port 80:80@loadbalancer
-            --k3s-server-arg "--no-deploy=traefik,metrics-server --advertise-port=8443,8080"
+            --k3s-server-arg "--no-deploy=traefik,metrics-server"
 
       - name: Download Turing API Docker tar archieve
         uses: actions/download-artifact@v2
@@ -419,7 +419,6 @@ jobs:
             --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
             --set image.repository=${{ github.repository }}/cluster-init \
             --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
-            --values infra/e2e/init.helm-values.yaml \
             --install \
             --wait
 
@@ -590,7 +589,7 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-      # Test clean up job
+      # Invoke helm hooks on delete
       - name: Tear down infrastructure job
         run: |
           helm delete -n infrastructure turing-init --timeout 15m

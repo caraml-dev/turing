@@ -5,11 +5,6 @@
 #   ISTIO_VERSION         Istio Version, default 1.9.9
 #   KNATIVE_VERSION       Knative version, default: 0.18.3.
 #   KNATIVE_ISTIO_VERSION Knative istio version, default: 0.18.1.
-#   RELEASE_NAME          Name of the helm release (Must be filled in).
-#   RELEASE_NAMESPACE     Namespace of the helm release (Must be filled in).
-
-[[ -z "${RELEASE_NAME}" ]] && echo "RELEASE_NAME environment variable is not set." && exit 1
-[[ -z "${RELEASE_NAMESPACE}" ]] && echo "RELEASE_NAMESPACE environment variable is not set." && exit 1
 
 # Istio
 local istio_version=${ISTIO_VERSION:-1.9.9}

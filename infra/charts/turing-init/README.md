@@ -18,9 +18,7 @@ A Helm chart for Kubernetes
 | image.registry | string | `"ghcr.io/"` | Docker registry for Turing cluster init |
 | image.repository | string | `"gojek/turing-cluster-init"` | Docker image repository for Turing cluster init |
 | image.tag | string | `"latest"` | Docker image tag for Turing cluster init |
-| istioBaseConfig | object | `{}` | Base config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/base/values.yaml |
-| istioDiscoveryConfig | object | `{}` | Discovery config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/istio-control/istio-discovery/values.yaml |
-| istioIngressConfig | object | `{}` | Ingress gateway config, more can be seen here: https://github.com/istio/istio/blob/1.9.9/manifests/charts/gateways/istio-ingress/values.yaml |
+| istioOperatorConfig | object | `{"apiVersion":"install.istio.io/v1alpha1","kind":"IstioOperator","spec":{"addonComponents":{"pilot":{"enabled":true}},"components":{"ingressGateways":[{"enabled":true,"name":"istio-ingressgateway"},{"enabled":true,"k8s":{"service":{"ports":[{"name":"status-port","port":15020},{"name":"http2","port":80},{"name":"https","port":443}],"type":"ClusterIP"}},"label":{"app":"cluster-local-gateway","istio":"cluster-local-gateway"},"name":"cluster-local-gateway"}]},"values":{"gateways":{"istio-ingressgateway":{"runAsRoot":true}},"global":{"proxy":{"autoInject":"enabled"},"useMCP":false}}}}` | istio operator config, defaults are the minimum to run turing |
 | istioVersion | string | `"1.9.9"` | Istio version to use |
 | knativeIstioVersion | string | `"0.18.1"` |  |
 | knativeVersion | string | `"0.18.3"` | Knative Version to use |
