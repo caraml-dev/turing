@@ -14,6 +14,7 @@ import (
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
+	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -70,25 +71,29 @@ func Run() {
 	}
 	defer newrelic.Shutdown(5 * time.Second)
 
-	// Init auth enforcer, vault client
-	var authEnforcer *enforcer.Enforcer
+	// Init Authorizer
+	var authorizer *middleware.Authorizer
+	apiPathPrefix := "/v1"
 	if cfg.AuthConfig.Enabled {
 		// Use product mlp as the policies are shared across the mlp products.
-		ae, err := enforcer.NewEnforcerBuilder().Product("mlp").
-			URL(cfg.AuthConfig.URL).Build()
+		authEnforcer, err := enforcer.NewEnforcerBuilder().Product("mlp").URL(cfg.AuthConfig.URL).Build()
 		if err != nil {
 			log.Panicf("Failed initializing authorization enforcer %v", err)
 		}
-		authEnforcer = &ae
+		authorizer, err = middleware.NewAuthorizer(authEnforcer, apiPathPrefix)
+		if err != nil {
+			log.Panicf("Failed initializing Authorizer %v", err)
+		}
 	}
+
+	// Init Vault client
 	vaultClient, err := vault.NewClientFromConfig(cfg)
 	if err != nil {
 		log.Panicf("Failed initializing vault client: %v", err)
 	}
 
 	// Init app context
-	apiPathPrefix := "/v1"
-	appCtx, err := api.NewAppContext(db, cfg, apiPathPrefix, authEnforcer, vaultClient)
+	appCtx, err := api.NewAppContext(db, cfg, authorizer, vaultClient)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}

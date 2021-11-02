@@ -6,7 +6,6 @@ import (
 
 	"bou.ke/monkey"
 	merlin "github.com/gojek/merlin/client"
-	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
@@ -16,12 +15,10 @@ import (
 	openapi "github.com/gojek/turing/api/turing/generated"
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
-	"github.com/gojek/turing/api/turing/middleware/mocks"
 	"github.com/gojek/turing/api/turing/service"
 	svcmocks "github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/xanzy/go-gitlab"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -172,10 +169,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	}
 	// Create test auth enforcer and Vault client
-	me := &mocks.Enforcer{}
-	me.On("UpsertPolicy", mock.Anything, mock.Anything, mock.Anything,
-		mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
-	testEnforcer := enforcer.Enforcer(me)
+	testAuthorizer := &middleware.Authorizer{}
 	testVaultClient := &MockVaultClient{}
 	// Create mock MLP Service
 	mlpSvc := &svcmocks.MLPService{}
@@ -196,13 +190,6 @@ func TestNewAppContext(t *testing.T) {
 
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
-	monkey.Patch(middleware.NewAuthorizer,
-		func(enforcer enforcer.Enforcer, prefix string) (*middleware.Authorizer, error) {
-			assert.Equal(t, testEnforcer, enforcer)
-			assert.Equal(t, "/v1/", prefix)
-			return nil, nil
-		},
-	)
 	monkey.Patch(service.NewExperimentsService,
 		func(experimentConfig map[string]interface{}) (service.ExperimentsService, error) {
 			return nil, nil
@@ -252,8 +239,6 @@ func TestNewAppContext(t *testing.T) {
 	)
 
 	// Create expected components
-	testAuthorizer, err := middleware.NewAuthorizer(testEnforcer, "/v1/")
-	assert.NoError(t, err)
 	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
 		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
 	assert.NoError(t, err)
@@ -261,7 +246,7 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Validate
-	appCtx, err := NewAppContext(nil, testCfg, "/v1/", &testEnforcer, testVaultClient)
+	appCtx, err := NewAppContext(nil, testCfg, testAuthorizer, testVaultClient)
 	assert.NoError(t, err)
 
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
