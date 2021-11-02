@@ -197,8 +197,9 @@ func TestNewAppContext(t *testing.T) {
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(middleware.NewAuthorizer,
-		func(enforcer enforcer.Enforcer) (*middleware.Authorizer, error) {
+		func(enforcer enforcer.Enforcer, prefix string) (*middleware.Authorizer, error) {
 			assert.Equal(t, testEnforcer, enforcer)
+			assert.Equal(t, "/v1/", prefix)
 			return nil, nil
 		},
 	)
@@ -251,7 +252,7 @@ func TestNewAppContext(t *testing.T) {
 	)
 
 	// Create expected components
-	testAuthorizer, err := middleware.NewAuthorizer(testEnforcer)
+	testAuthorizer, err := middleware.NewAuthorizer(testEnforcer, "/v1/")
 	assert.NoError(t, err)
 	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
 		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
@@ -260,7 +261,7 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Validate
-	appCtx, err := NewAppContext(nil, testCfg, &testEnforcer, testVaultClient)
+	appCtx, err := NewAppContext(nil, testCfg, "/v1/", &testEnforcer, testVaultClient)
 	assert.NoError(t, err)
 
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)

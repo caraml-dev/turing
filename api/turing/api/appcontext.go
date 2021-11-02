@@ -43,6 +43,7 @@ type AppContext struct {
 func NewAppContext(
 	db *gorm.DB,
 	cfg *config.Config,
+	apiPathPrefix string,
 	authEnforcer *enforcer.Enforcer,
 	vaultClient vault.VaultClient,
 ) (*AppContext, error) {
@@ -50,7 +51,7 @@ func NewAppContext(
 	var authorizer *middleware.Authorizer
 	var err error
 	if authEnforcer != nil {
-		authorizer, err = middleware.NewAuthorizer(*authEnforcer)
+		authorizer, err = middleware.NewAuthorizer(*authEnforcer, apiPathPrefix)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing Authorizer")
 		}

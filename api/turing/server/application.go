@@ -87,7 +87,8 @@ func Run() {
 	}
 
 	// Init app context
-	appCtx, err := api.NewAppContext(db, cfg, authEnforcer, vaultClient)
+	apiPathPrefix := "/v1"
+	appCtx, err := api.NewAppContext(db, cfg, apiPathPrefix, authEnforcer, vaultClient)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}
@@ -114,7 +115,7 @@ func Run() {
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
 	// API Handler
-	err = AddAPIRoutesHandler(r, "/v1", appCtx, cfg)
+	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
 	if err != nil {
 		log.Panicf("Failed to configure API routes: %v", err)
 	}
