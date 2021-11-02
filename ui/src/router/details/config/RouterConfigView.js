@@ -36,7 +36,10 @@ export const RouterConfigView = ({ router }) => {
           {status === Status.PENDING && <EuiLoadingChart size="xl" mono />}
         </OverlayMask>
       )}
-      <RouterConfigDetails config={router.config} />
+      <RouterConfigDetails
+        projectId={router.project_id}
+        config={router.config}
+      />
     </div>
   ) : (
     <EuiEmptyPrompt

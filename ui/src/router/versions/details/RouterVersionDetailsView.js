@@ -119,7 +119,11 @@ export const RouterVersionDetailsView = ({
 
             <Router primary={false}>
               <Redirect from="/" to="details" noThrow />
-              <RouterVersionConfigView path="details" config={version} />
+              <RouterVersionConfigView
+                path="details"
+                projectId={projectId}
+                config={version}
+              />
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
           </Fragment>

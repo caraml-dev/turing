@@ -7,7 +7,7 @@ import { EnsemblerConfigSection } from "./components/EnsemblerConfigSection";
 import { LoggingConfigSection } from "./components/LoggingConfigSection";
 import { ConfigSection } from "../../../components/config_section";
 
-export const RouterConfigDetails = ({ config }) => {
+export const RouterConfigDetails = ({ projectId, config }) => {
   const sections = [
     {
       title: "Router",
@@ -17,7 +17,9 @@ export const RouterConfigDetails = ({ config }) => {
     {
       title: "Experiment",
       iconType: "beaker",
-      children: <ExperimentConfigSection config={config} />,
+      children: (
+        <ExperimentConfigSection projectId={projectId} config={config} />
+      ),
     },
     {
       title: "Enricher",

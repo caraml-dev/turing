@@ -8,7 +8,7 @@ import {
   EuiTitle,
 } from "@elastic/eui";
 import { ConfigSectionPanel } from "../../../../components/config_section";
-import getExperimentUrl from "./config";
+import { getExperimentUrl } from "./config";
 
 const TreatmentMappingConfigTable = ({ items }) => {
   const columns = [
