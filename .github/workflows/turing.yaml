@@ -590,6 +590,12 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
+      # Test clean up job
+      - name: Tear down infrastructure job
+        run: |
+          helm delete -n infrastructure turing-init --timeout 15m
+          kubectl get po -A
+
   release-rules:
     runs-on: ubuntu-latest
     outputs:
