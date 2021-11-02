@@ -3,7 +3,7 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { RouterConfigDetails } from "../../../components/configuration/RouterConfigDetails";
 import { get } from "../../../../components/form/utils";
 
-export const RouterVersionConfigView = ({ config }) => {
+export const RouterVersionConfigView = ({ projectId, config }) => {
   useEffect(() => {
     replaceBreadcrumbs([
       {
@@ -25,5 +25,5 @@ export const RouterVersionConfigView = ({ config }) => {
     ]);
   }, [config]);
 
-  return <RouterConfigDetails config={config} />;
+  return <RouterConfigDetails projectId={projectId} config={config} />;
 };

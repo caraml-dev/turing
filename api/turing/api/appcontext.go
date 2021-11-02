@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 
-	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
@@ -43,19 +42,9 @@ type AppContext struct {
 func NewAppContext(
 	db *gorm.DB,
 	cfg *config.Config,
-	authEnforcer *enforcer.Enforcer,
+	authorizer *middleware.Authorizer,
 	vaultClient vault.VaultClient,
 ) (*AppContext, error) {
-	// Init Authorizer
-	var authorizer *middleware.Authorizer
-	var err error
-	if authEnforcer != nil {
-		authorizer, err = middleware.NewAuthorizer(*authEnforcer)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Failed initializing Authorizer")
-		}
-	}
-
 	// Init Experiments Service
 	expSvc, err := service.NewExperimentsService(cfg.Experiment)
 	if err != nil {

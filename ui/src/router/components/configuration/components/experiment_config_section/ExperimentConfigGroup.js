@@ -6,7 +6,11 @@ import { ExperimentsConfigTable } from "./experiments/ExperimentsConfigTable";
 import { VariablesConfigTable } from "./variables/VariablesConfigTable";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
 
-export const ExperimentConfigGroup = ({ engineType, engineConfig }) => {
+export const ExperimentConfigGroup = ({
+  projectId,
+  engineType,
+  engineConfig,
+}) => {
   const { getEngineProperties } = useContext(ExperimentEngineContext);
   const engineProps = getEngineProperties(engineType);
 
@@ -19,6 +23,7 @@ export const ExperimentConfigGroup = ({ engineType, engineConfig }) => {
               title="Experiment Engine"
               className="experimentCredentials">
               <CredentialsConfigSection
+                projectId={projectId}
                 engineType={engineType}
                 deployment={engineConfig.deployment}
                 client={engineConfig.client}

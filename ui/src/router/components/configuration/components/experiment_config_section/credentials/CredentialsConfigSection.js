@@ -9,7 +9,10 @@ import {
 } from "@elastic/eui";
 import "./CredentialsConfigSection.scss";
 
+import { getHomePageUrl } from "../../../../../../router/components/configuration/components/config";
+
 export const CredentialsConfigSection = ({
+  projectId,
   engineType,
   deployment,
   client,
@@ -22,7 +25,10 @@ export const CredentialsConfigSection = ({
       <EuiTitle size="xs">
         {!!engineProps.home_page_url ? (
           <EuiTextColor color="secondary">
-            <EuiLink href={engineProps.home_page_url} target="_blank" external>
+            <EuiLink
+              href={getHomePageUrl(engineProps, projectId)}
+              target="_blank"
+              external>
               {engineProps.name}
             </EuiLink>
           </EuiTextColor>

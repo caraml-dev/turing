@@ -15,7 +15,7 @@ func TestBootstrapTuringPolicies(t *testing.T) {
 		mock.Anything, mock.Anything).Return(nil, nil)
 
 	// Create new authorizer
-	_, err := NewAuthorizer(authzEnforcer)
+	_, err := NewAuthorizer(authzEnforcer, "/")
 
 	// Validate
 	assert.NoError(t, err)
