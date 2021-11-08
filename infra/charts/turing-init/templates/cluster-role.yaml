@@ -8,6 +8,8 @@ rules:
   resources:
   - services
   - pods
+  - pods/exec
+  - pods/portforward
   - namespaces
   - configmaps
   - secrets
@@ -55,6 +57,12 @@ rules:
   - security.istio.io
   resources:
   - peerauthentications
+  verbs:
+  - "*"
+- apiGroups:
+  - install.istio.io
+  resources:
+  - istiooperators
   verbs:
   - "*"
 - apiGroups:

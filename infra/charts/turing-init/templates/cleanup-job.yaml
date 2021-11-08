@@ -29,4 +29,8 @@ spec:
           value: {{ .Values.knativeVersion }}
         - name: KNATIVE_ISTIO_VERSION
           value: {{ .Values.knativeIstioVersion }}
+        - name: RELEASE_NAME
+          value: {{ .Release.Name }}
+        - name: RELEASE_NAMESPACE
+          value: {{ .Release.Namespace }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}

@@ -43,14 +43,14 @@ function install_knative {
         -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-0.18.3}/serving-core.yaml"
     local core_apps=("activator" "autoscaler" "controller" "webhook")
     for app in ${core_apps[@]}; do
-        kubectl wait -n knative-serving --for=condition=ready pod -l app=${app}
+        kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
     done
 
     kubectl apply \
         -f "https://github.com/knative/net-istio/releases/download/v${KNATIVE_ISTIO_VERSION:-0.18.1}/net-istio.yaml"
     local istio_apps=("networking-istio" "istio-webhook")
     for app in ${istio_apps[@]}; do
-        kubectl wait -n knative-serving --for=condition=ready pod -l app=${app}
+        kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
     done
 
     echo "Finished installing Knative."
