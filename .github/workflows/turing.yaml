@@ -12,7 +12,6 @@ on:
       - "docs/**"
       - "engines/batch-ensembler/**"
       - "sdk/**"
-      - "infra/cluster-init/**"
       - ".github/workflows/batch-ensembler.yaml"
       - ".github/workflows/sdk.yaml"
       - ".github/workflows/helm-chart.yaml"
@@ -415,7 +414,8 @@ jobs:
       - name: "Install Infrastructure"
         run: |
           kubectl create ns infrastructure
-          helm upgrade -n infrastructure turing-init infra/charts/turing-init \
+          helm upgrade turing-init infra/charts/turing-init \
+            --namespace infrastructure \
             --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
             --set image.repository=${{ github.repository }}/cluster-init \
             --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
@@ -423,9 +423,9 @@ jobs:
             --wait
 
           # wait for install infra job to finish
-          kubectl logs -n infrastructure -f $(kubectl get po -n infrastructure | grep -v 'NAME' | grep -v 'spark' | head -n 1 | awk '{print $1}')
-          kubectl get po -A
-          kubectl get svc -A
+          kubectl logs -n infrastructure -f $(kubectl get pod --namespace infrastructure | grep -v 'NAME' | grep -v 'spark' | head -n 1 | awk '{print $1}')
+          kubectl get pod --all-namespaces
+          kubectl get svc --all-namespaces
           kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/$(kubectl get job -n infrastructure | grep -v 'NAME' | head -n 1 | awk '{print $1}')
 
           # Setting up DNS
@@ -526,17 +526,6 @@ jobs:
 
           kubectl apply -f infra/e2e/turing.ingress.yaml
 
-      - uses: jupyterhub/action-k8s-await-workloads@v1
-        id: wait-for-deployment
-        with:
-          workloads: >-
-            deployment/mockserver,
-            deployment/mlp,
-            deployment/merlin,
-            deployment/turing
-          timeout: 300 #seconds
-          max-restarts: -1
-
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
         name: "Debug Deployment Failure"
         run: |
@@ -591,9 +580,7 @@ jobs:
 
       # Invoke helm hooks on delete
       - name: Tear down infrastructure job
-        run: |
-          helm delete -n infrastructure turing-init --timeout 15m
-          kubectl get po -A
+        run: helm delete --namespace infrastructure turing-init --timeout 15m
 
   release-rules:
     runs-on: ubuntu-latest

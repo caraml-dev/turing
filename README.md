@@ -52,8 +52,6 @@ in these getting started guide.
 >
 > The following guides are tested on Linux and MacOS.
 
-For a Kubernetes based setup, see 
-
 ### Pre-requisites
 
 - [Docker](https://www.docker.com/get-started) v19.03
@@ -347,13 +345,31 @@ This is the recommended way to install the prerequisites on a production Kuberne
 To install the required components on your Kubernetes cluster, issue the following command:
 
 ```bash
-helm upgrade -n infrastructure turing-init infra/charts/turing-init \
+helm upgrade turing-init infra/charts/turing-init \
     --set image.registry="<image registry>/" \
     --set image.repository="<repository>" \
     --set image.tag="<tag version>" \
     --install \
     --wait
 ```
+
+For it to be completely installed, you should check the init job has run successfully.
+To check, issue the command `kubectl get pod` and you should see something like this:
+
+```
+NAME                                            READY   STATUS      RESTARTS   AGE
+turing-test-spark-operator-8bcb89d5d-nf2bq      1/1     Running     0          3m42s
+turing-test-spark-operator-webhook-init-ph8ds   0/1     Completed   0          3m44s
+turing-test-turing-init-init-pknvb              0/1     Completed   0          3m44s
+```
+
+The init job will also check if all the components have been installed properly so we can guarantee that
+if the init job has run successfully, it would also mean that all components are in order. But if you would like
+to check them, they are installed in the following namespaces:
+
+1. Istio: istio-system
+2. Knative: knative-serving
+3. Spark Operator: In the same namespace as the Helm chart.
 
 Alternatively, you could install the following components yourself with the following recommended versions:
 
