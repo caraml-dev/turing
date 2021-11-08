@@ -24,6 +24,19 @@ type StandardExperimentManagerConfig struct {
 	HomePageURL string `json:"home_page_url"`
 }
 
+type RemoteUI struct {
+	// Name is the name of the remote app declared in the Module Federation plugin
+	Name string `json:"name"`
+	// URL is the Host + Remote Entry file at which the remote UI can be found
+	URL string `json:"url"`
+}
+
+type CustomExperimentManagerConfig struct {
+	// RemoteUI specifies the information for the custom experiment engine UI to be
+	// consumed by the Turing app, using Module Federation
+	RemoteUI RemoteUI `json:"remote_ui"`
+}
+
 // Engine describes the properties of an experiment engine
 type Engine struct {
 	// Name is the display name used for the experiment engine.
@@ -33,6 +46,9 @@ type Engine struct {
 	// StandardExperimentManagerConfig is expected to be set by a "standard" experiment engine manager
 	// and is used by the generic Turing experiment engine UI.
 	StandardExperimentManagerConfig *StandardExperimentManagerConfig `json:"standard_experiment_manager_config,omitempty"`
+	// CustomExperimentManagerConfig is expected to be set by a "custom" experiment engine manager
+	// and is used to load the custom experiment engine UI.
+	CustomExperimentManagerConfig *CustomExperimentManagerConfig `json:"custom_experiment_manager_config,omitempty"`
 }
 
 // Client describes the properties of a client registered on an experiment engine
