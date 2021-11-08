@@ -43,6 +43,9 @@ func TestValidateExperimentConfig(t *testing.T) {
 		cfg    TuringExperimentConfig
 		err    string
 	}{
+		"failure | no engine info": {
+			err: "Missing Standard Engine configuration",
+		},
 		"failure | missing client info": {
 			engine: Engine{
 				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{

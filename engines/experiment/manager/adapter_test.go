@@ -3,6 +3,7 @@ package manager_test
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,82 @@ import (
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
 
+func TestStandardExperimentMethods(t *testing.T) {
+	stdExpMgrErr := "Method is only supported by standard experiment managers"
+
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("IsCacheEnabled").Return(true)
+	stdExpMgr.On("ListClients").Return([]manager.Client{manager.Client{}}, nil)
+	stdExpMgr.On("ListExperiments").Return([]manager.Experiment{manager.Experiment{}}, nil)
+	stdExpMgr.On("ListExperimentsForClient", manager.Client{ID: "1"}).
+		Return([]manager.Experiment{manager.Experiment{}}, nil)
+	stdExpMgr.On("ListVariablesForClient", manager.Client{ID: "1"}).
+		Return([]manager.Variable{manager.Variable{Name: "var-1"}}, nil)
+	stdExpMgr.On("ListVariablesForExperiments", []manager.Experiment{manager.Experiment{}}).
+		Return(map[string][]manager.Variable{
+			"test-exp": []manager.Variable{manager.Variable{Name: "var-1"}},
+		}, nil)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// IsCacheEnabled
+	assert.Equal(t, true, manager.IsCacheEnabled(stdExpMgr))
+	assert.Equal(t, false, manager.IsCacheEnabled(expMgr))
+
+	// ListClients
+	clients, err := manager.ListClients(stdExpMgr)
+	assert.Equal(t, []manager.Client{manager.Client{}}, clients)
+	assert.NoError(t, err)
+	clients, err = manager.ListClients(expMgr)
+	assert.Equal(t, []manager.Client{}, clients)
+	assert.EqualError(t, err, stdExpMgrErr)
+
+	// ListExperiments
+	experiments, err := manager.ListExperiments(stdExpMgr)
+	assert.Equal(t, []manager.Experiment{manager.Experiment{}}, experiments)
+	assert.NoError(t, err)
+	experiments, err = manager.ListExperiments(expMgr)
+	assert.Equal(t, []manager.Experiment{}, experiments)
+	assert.EqualError(t, err, stdExpMgrErr)
+
+	// ListExperimentsForClient
+	experiments, err = manager.ListExperimentsForClient(stdExpMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Experiment{manager.Experiment{}}, experiments)
+	assert.NoError(t, err)
+	experiments, err = manager.ListExperimentsForClient(expMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Experiment{}, experiments)
+	assert.EqualError(t, err, stdExpMgrErr)
+
+	// ListVariablesForClient
+	variables, err := manager.ListVariablesForClient(stdExpMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Variable{manager.Variable{Name: "var-1"}}, variables)
+	assert.NoError(t, err)
+	variables, err = manager.ListVariablesForClient(expMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Variable{}, variables)
+	assert.EqualError(t, err, stdExpMgrErr)
+
+	// ListVariablesForExperiments
+	variablesMap, err := manager.ListVariablesForExperiments(stdExpMgr, []manager.Experiment{manager.Experiment{}})
+	assert.Equal(t, map[string][]manager.Variable{
+		"test-exp": []manager.Variable{manager.Variable{Name: "var-1"}},
+	}, variablesMap)
+	assert.NoError(t, err)
+	variablesMap, err = manager.ListVariablesForExperiments(expMgr, []manager.Experiment{manager.Experiment{}})
+	assert.Equal(t, map[string][]manager.Variable{}, variablesMap)
+	assert.EqualError(t, err, stdExpMgrErr)
+}
+
 func TestGetExperimentRunnerConfig(t *testing.T) {
+	testStdExpConfig := manager.TuringExperimentConfig{
+		Client:      manager.Client{Username: "client_name"},
+		Experiments: []manager.Experiment{{Name: "exp_name"}},
+		Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
+	}
+
 	var testRawConfig interface{}
 	err := json.Unmarshal([]byte(`{
 		"client": {"username": "client_name"},
@@ -26,28 +102,80 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 	// Standard Exp Manager
 	stdExpMgr := &mocks.StandardExperimentManager{}
 	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
-	stdExpMgr.On("GetExperimentRunnerConfig", manager.TuringExperimentConfig{
-		Client:      manager.Client{Username: "client_name"},
-		Experiments: []manager.Experiment{{Name: "exp_name"}},
-		Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
-	}).Return(testSuccessResponse, nil)
+	stdExpMgr.On("GetExperimentRunnerConfig", testStdExpConfig).Return(testSuccessResponse, nil)
 	stdExpMgr.On("GetExperimentRunnerConfig", mock.Anything).Return(nil, errors.New("Unexpected Parameters"))
 	// Custom Exp Manager
 	customExpMgr := &mocks.CustomExperimentManager{}
 	customExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.CustomExperimentManagerType})
 	customExpMgr.On("GetExperimentRunnerConfig", testRawConfig).Return(testSuccessResponse, nil)
 	customExpMgr.On("GetExperimentRunnerConfig", mock.Anything).Return(nil, errors.New("Unexpected Parameters"))
+	// Bad Experiment Managers
+	badStdExpMgr := &mocks.ExperimentManager{}
+	badStdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	badCustomExpMgr := &mocks.ExperimentManager{}
+	badCustomExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.CustomExperimentManagerType})
+	badExpMgr := &mocks.ExperimentManager{}
+	badExpMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Set up tests
+	tests := map[string]struct {
+		mgr      manager.ExperimentManager
+		rawCfg   interface{}
+		expected json.RawMessage
+		err      string
+	}{
+		"success | standard": {
+			mgr:      stdExpMgr,
+			rawCfg:   testStdExpConfig,
+			expected: testSuccessResponse,
+		},
+		"success | custom": {
+			mgr:      customExpMgr,
+			rawCfg:   testRawConfig,
+			expected: testSuccessResponse,
+		},
+		"failure | std mismatched type": {
+			mgr: badStdExpMgr,
+			err: "Error casting  to standard experiment manager",
+		},
+		"failure | std config error": {
+			mgr:    stdExpMgr,
+			rawCfg: []int{},
+			err: strings.Join([]string{
+				"Unable to parse standard experiment config: ",
+				"json: cannot unmarshal array into Go value of type manager.TuringExperimentConfig"}, ""),
+		},
+		"failure | custom mismatched type": {
+			mgr: badCustomExpMgr,
+			err: "Error casting  to custom experiment manager",
+		},
+		"failure | unknown exp manager type": {
+			mgr: badExpMgr,
+			err: "Experiment Manager type  is not recognized",
+		},
+	}
 
 	// Test calls to the correct experiment manager method, based on the type
-	resp, err := manager.GetExperimentRunnerConfig(stdExpMgr, testRawConfig)
-	assert.NoError(t, err)
-	assert.Equal(t, testSuccessResponse, resp)
-	resp, err = manager.GetExperimentRunnerConfig(customExpMgr, testRawConfig)
-	assert.NoError(t, err)
-	assert.Equal(t, testSuccessResponse, resp)
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			resp, err := manager.GetExperimentRunnerConfig(data.mgr, data.rawCfg)
+			if data.err != "" {
+				assert.EqualError(t, err, data.err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, data.expected, resp)
+			}
+		})
+	}
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
+	testStdExpConfig := manager.TuringExperimentConfig{
+		Client:      manager.Client{Username: "client_name"},
+		Experiments: []manager.Experiment{{Name: "exp_name"}},
+		Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
+	}
+
 	var testRawConfig interface{}
 	err := json.Unmarshal([]byte(`{
 		"client": {"username": "client_name"},
@@ -64,14 +192,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		Type:                            manager.StandardExperimentManagerType,
 		StandardExperimentManagerConfig: testStdExpMgrConfig,
 	})
-	stdExpMgr.On("ValidateExperimentConfig",
-		testStdExpMgrConfig,
-		manager.TuringExperimentConfig{
-			Client:      manager.Client{Username: "client_name"},
-			Experiments: []manager.Experiment{{Name: "exp_name"}},
-			Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
-		},
-	).Return(nil)
+	stdExpMgr.On("ValidateExperimentConfig", testStdExpMgrConfig, testStdExpConfig).Return(nil)
 	stdExpMgr.On("ValidateExperimentConfig", mock.Anything).Return(errors.New("Unexpected Parameters"))
 	// Custom Exp Manager
 	customExpMgr := &mocks.CustomExperimentManager{}
@@ -79,9 +200,58 @@ func TestValidateExperimentConfig(t *testing.T) {
 	customExpMgr.On("ValidateExperimentConfig", testRawConfig).Return(nil)
 	customExpMgr.On("ValidateExperimentConfig", mock.Anything).Return(errors.New("Unexpected Parameters"))
 
+	// Bad Experiment Managers
+	badStdExpMgr := &mocks.ExperimentManager{}
+	badStdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	badCustomExpMgr := &mocks.ExperimentManager{}
+	badCustomExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.CustomExperimentManagerType})
+	badExpMgr := &mocks.ExperimentManager{}
+	badExpMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Set up tests
+	tests := map[string]struct {
+		mgr    manager.ExperimentManager
+		rawCfg interface{}
+		err    string
+	}{
+		"success | standard": {
+			mgr:    stdExpMgr,
+			rawCfg: testStdExpConfig,
+		},
+		"success | custom": {
+			mgr:    customExpMgr,
+			rawCfg: testRawConfig,
+		},
+		"failure | std mismatched type": {
+			mgr: badStdExpMgr,
+			err: "Error casting  to standard experiment manager",
+		},
+		"failure | std config error": {
+			mgr:    stdExpMgr,
+			rawCfg: []int{},
+			err: strings.Join([]string{
+				"Unable to parse standard experiment config: ",
+				"json: cannot unmarshal array into Go value of type manager.TuringExperimentConfig"}, ""),
+		},
+		"failure | custom mismatched type": {
+			mgr: badCustomExpMgr,
+			err: "Error casting  to custom experiment manager",
+		},
+		"failure | unknown exp manager type": {
+			mgr: badExpMgr,
+			err: "Experiment Manager type  is not recognized",
+		},
+	}
+
 	// Test calls to the correct experiment manager method, based on the type
-	err = manager.ValidateExperimentConfig(stdExpMgr, testRawConfig)
-	assert.NoError(t, err)
-	err = manager.ValidateExperimentConfig(customExpMgr, testRawConfig)
-	assert.NoError(t, err)
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := manager.ValidateExperimentConfig(data.mgr, data.rawCfg)
+			if data.err != "" {
+				assert.EqualError(t, err, data.err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

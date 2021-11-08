@@ -14,7 +14,10 @@ const (
 	experimentManagerCastingErr = "Error casting %s to %s experiment manager"
 	standardExperimentConfigErr = "Unable to parse standard experiment config: %v"
 	standardMethodErr           = "Method is only supported by standard experiment managers"
+	unknownManagerTypeErr       = "Experiment Manager type %s is not recognized"
 )
+
+// StandardExperimentManager methods ******************************************
 
 func IsCacheEnabled(expManager ExperimentManager) bool {
 	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
@@ -70,6 +73,8 @@ func ListVariablesForExperiments(expManager ExperimentManager, exps []Experiment
 	return map[string][]Variable{}, errors.New(standardMethodErr)
 }
 
+// Common methods *************************************************************
+
 func GetExperimentRunnerConfig(expManager ExperimentManager, expCfg interface{}) (json.RawMessage, error) {
 	engineInfo := expManager.GetEngineInfo()
 	// Call the appropriate validator method based on the type of the experiment manager
@@ -84,12 +89,14 @@ func GetExperimentRunnerConfig(expManager ExperimentManager, expCfg interface{})
 			return json.RawMessage{}, fmt.Errorf(standardExperimentConfigErr, err)
 		}
 		return stdMgr.GetExperimentRunnerConfig(stdExpConfig)
-	default:
+	case CustomExperimentManagerType:
 		customMgr, ok := expManager.(CustomExperimentManager)
 		if !ok {
 			return json.RawMessage{}, fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
 		}
 		return customMgr.GetExperimentRunnerConfig(expCfg)
+	default:
+		return nil, fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
 	}
 }
 
@@ -107,11 +114,13 @@ func ValidateExperimentConfig(expManager ExperimentManager, expCfg interface{}) 
 			return fmt.Errorf(standardExperimentConfigErr, err)
 		}
 		return stdMgr.ValidateExperimentConfig(engineInfo.StandardExperimentManagerConfig, stdExpConfig)
-	default:
+	case CustomExperimentManagerType:
 		customMgr, ok := expManager.(CustomExperimentManager)
 		if !ok {
 			return fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
 		}
 		return customMgr.ValidateExperimentConfig(expCfg)
+	default:
+		return fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
 	}
 }
