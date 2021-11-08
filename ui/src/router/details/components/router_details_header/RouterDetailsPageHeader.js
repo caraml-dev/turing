@@ -1,13 +1,15 @@
 import React from "react";
-import { EuiBadge } from "@elastic/eui";
+import { EuiBadge, EuiTextColor } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { HorizontalDescriptionList } from "../../../../components/horizontal_description_list/HorizontalDescriptionList";
 import { PageSecondaryHeader } from "../../../components/page_header/PageSecondaryHeader";
 import { RouterEndpoint } from "../../../components/router_endpoint/RouterEndpoint";
+import { Status } from "../../../../services/status/Status";
 
 import "./RouterDetailsPageHeader.scss";
 
 export const RouterDetailsPageHeader = ({ router }) => {
+  const isRouterUpdating = router.status === Status.PENDING.toString();
   const headerItems = [
     {
       title: "Endpoint",
@@ -23,9 +25,11 @@ export const RouterDetailsPageHeader = ({ router }) => {
       },
     },
     {
-      title: "Environment",
+      title: "Timeout",
       description: (
-        <EuiBadge color="default">{router.environment_name}</EuiBadge>
+        <EuiTextColor size="s" color={isRouterUpdating ? "subdued" : "default"}>
+          {isRouterUpdating ? "Not available" : router.config?.timeout}
+        </EuiTextColor>
       ),
       flexProps: {
         grow: 1,
@@ -47,6 +51,18 @@ export const RouterDetailsPageHeader = ({ router }) => {
     {
       title: "Updated At",
       description: <DateFromNow date={router.updated_at} size="s" />,
+      flexProps: {
+        grow: 1,
+        style: {
+          minWidth: "100px",
+        },
+      },
+    },
+    {
+      title: "Environment",
+      description: (
+        <EuiBadge color="default">{router.environment_name}</EuiBadge>
+      ),
       flexProps: {
         grow: 1,
         style: {

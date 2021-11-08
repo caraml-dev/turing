@@ -78,8 +78,8 @@ gen-client:
 
 .PHONY: version
 version:
-	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../scripts/vertagen/vertagen.sh -f docker)))
-	@echo "turing-api version:" $$VERSION
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../scripts/vertagen/vertagen.sh)))
+	@echo "turing-api version:" $(VERSION)
 
 
 #   R E V I E W   R E Q U I R E D

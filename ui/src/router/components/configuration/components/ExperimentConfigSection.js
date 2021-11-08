@@ -3,7 +3,10 @@ import { EuiPanel } from "@elastic/eui";
 import { ExperimentConfigGroup } from "./experiment_config_section/ExperimentConfigGroup";
 import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
 
-export const ExperimentConfigSection = ({ config: { experiment_engine } }) => {
+export const ExperimentConfigSection = ({
+  projectId,
+  config: { experiment_engine },
+}) => {
   return (
     <Fragment>
       {experiment_engine.type === "nop" ? (
@@ -11,6 +14,7 @@ export const ExperimentConfigSection = ({ config: { experiment_engine } }) => {
       ) : (
         <ExperimentEngineContextProvider>
           <ExperimentConfigGroup
+            projectId={projectId}
             engineType={experiment_engine.type}
             engineConfig={experiment_engine.config}
           />

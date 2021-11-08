@@ -1,8 +1,7 @@
 turing:
   image:
-    registry: localhost:5000/
-    repository: turing-api
-    tag: latest
+    # Value will be set at install time using helm --set command
+    tag:
   resources:
     requests:
       cpu: 100m
@@ -65,7 +64,8 @@ turing:
       PythonVersion: "3"
       TTLSecond: 86400
     RouterDefaults:
-      Image: localhost:5000/turing-router:latest
+      # Value will be set at install time using helm --set command
+      Image:
     ClusterConfig:
       InClusterConfig: false
       VaultConfig:

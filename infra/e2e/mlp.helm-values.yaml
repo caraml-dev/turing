@@ -2,7 +2,8 @@ mlp:
   image:
     registry: ghcr.io
     repository: gojek/mlp
-    tag: v1.1.0-alpha
+    # Value will be set at install time using helm --set command
+    tag:
   environment: dev
   resources:
     requests:

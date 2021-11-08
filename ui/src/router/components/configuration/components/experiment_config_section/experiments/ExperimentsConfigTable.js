@@ -8,7 +8,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from "@elastic/eui";
-import getExperimentUrl from "../../config";
+import { getExperimentUrl } from "../../config";
 import "./ExperimentsConfigTable.scss";
 
 export const ExperimentsConfigTable = ({ experiments, engineProps }) => {

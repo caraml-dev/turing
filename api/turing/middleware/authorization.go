@@ -16,18 +16,20 @@ const (
 
 // NewAuthorizer initialises the Turing specific policies on the given auth enforcer
 // and creates a new authorization middleware.
-func NewAuthorizer(enforcer enforcer.Enforcer) (*Authorizer, error) {
+func NewAuthorizer(enforcer enforcer.Enforcer, pathPrefix string) (*Authorizer, error) {
 	// Set up Turing API specific policies
 	err := upsertExperimentEnginesListAllPolicy(enforcer)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Authorizer{authEnforcer: enforcer}, nil
+	return &Authorizer{authEnforcer: enforcer, pathPrefix: pathPrefix}, nil
 }
 
 type Authorizer struct {
 	authEnforcer enforcer.Enforcer
+	// Must be set to path prefix, where API is deployed. E.g. "/v1"
+	pathPrefix string
 }
 
 var methodMapping = map[string]string{
@@ -45,7 +47,7 @@ var methodMapping = map[string]string{
 func (a *Authorizer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		resource := getResourceFromPath(r.URL.Path)
+		resource := getResourceFromPath(r.URL.Path, a.pathPrefix)
 		action := getActionFromMethod(r.Method)
 		user := r.Header.Get("User-Email")
 
@@ -93,8 +95,8 @@ func (a *Authorizer) FilterAuthorizedProjects(
 	return allowedProjects, nil
 }
 
-func getResourceFromPath(path string) string {
-	return strings.Replace(strings.TrimPrefix(path, "/"), "/", ":", -1)
+func getResourceFromPath(path string, prefix string) string {
+	return strings.Replace(strings.TrimPrefix(strings.TrimPrefix(path, prefix), "/"), "/", ":", -1)
 }
 
 func getActionFromMethod(method string) string {
