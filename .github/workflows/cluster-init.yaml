@@ -1,0 +1,77 @@
+name: infra/cluster-init
+
+on:
+  # Automatically run CI on Release and Pre-Release tags and main branch
+  # (only if there are changes to relevant paths)
+  push:
+    tags:
+      - "cluster-init/v[0-9]+.[0-9]+.[0-9]+*"
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cluster-init.yaml"
+      - "infra/cluster-init/**"
+
+  # Automatically run CI on branches, that have active PR opened
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cluster-init.yaml"
+      - "infra/cluster-init/**"
+
+  # To make it possible to trigger e2e CI workflow for any arbitrary git ref
+  workflow_dispatch:
+
+jobs:
+  release-rules:
+    runs-on: ubuntu-latest
+    outputs:
+      release-type: ${{ steps.release-rules.outputs.release-type }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: release-rules
+        uses: ./.github/actions/release-rules
+        with:
+          prefix: cluster-init/
+
+  publish:
+    # Automatically publish release and pre-release artifacts.
+    #
+    # As for dev releases, make it possible to publish artifacts
+    # manually by approving 'deployment' in the 'manual' environment.
+    #
+    # Dev build can be released either from the 'main' branch or
+    # by running this workflow manually with `workflow_dispatch` event.
+    if: >-
+      contains('release,pre-release', needs.release-rules.outputs.release-type)
+        || ( github.event_name != 'pull_request' )
+        || ( github.event.pull_request.head.repo.full_name == github.repository )
+    environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
+    runs-on: ubuntu-latest
+    needs:
+      - release-rules
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker Image
+        id: build
+        working-directory: infra/cluster-init
+        env:
+          DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=cluster-init-image::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+
+      - name: Publish Cluster Init Docker Image
+        run: docker push ${{ steps.build.outputs.cluster-init-image }}

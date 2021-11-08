@@ -6,31 +6,48 @@ metadata:
 rules:
 - apiGroups: [""]
   resources:
-  - service
-  - pod
-  - pod/log
-  - namespace
-  - configmap
-  - secret
-  - persistentvolumeclaim
-  - job
-  - serviceaccount
-  - role
-  - rolebinding
-  verbs: ["get", "list", "create", "delete", "update"]
+  - services
+  - pods
+  - pods/log
+  - namespaces
+  - configmaps
+  - secrets
+  - persistentvolumeclaims
+  - serviceaccounts
+  verbs:
+  - "*"
 - apiGroups:
-  - "serving.knative.dev"
+  - apps
   resources:
-  - service
+  - deployments
+  verbs:
+  - "*"
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - "*"
+- apiGroups:
+  - "batch"
+  resources:
+  - jobs
+  verbs:
+  - "*"
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - services
   verbs: ["get", "create", "delete", "update"]
 - apiGroups:
-  - "networking.istio.io"
+  - networking.istio.io
   resources:
-  - virtualservice
+  - virtualservices
   verbs: ["get", "create", "delete", "update"]
 - apiGroups:
-  - "sparkoperator.k8s.io"
+  - sparkoperator.k8s.io
   resources:
-  - sparkapplication
+  - sparkapplications
   verbs: ["get", "create", "delete", "update"]
 {{- end }}

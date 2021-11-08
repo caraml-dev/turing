@@ -48,6 +48,7 @@ in these getting started guide.
 > you will need to deploy the infrastructure using an approach that ensures
 > the services are scalable and reliable. For instance, using cloud provider
 > services such as Google Kubernetes Engine (GKE) for provisioning the Kubernetes cluster.
+> See "Installing prerequisites on Kubernetes using the init chart" section for a recommended production installation guide.
 >
 > The following guides are tested on Linux and MacOS.
 
@@ -332,6 +333,50 @@ The web UI allows you list, create, edit and delete your routers from the
 web browser.
 
 ![turing ui list router](./docs/assets/turing_ui_router_list.png)
+
+## Installing prerequisites on Kubernetes using the init chart
+
+This is the recommended way to install the prerequisites on a production Kubernetes cluster. The `turing-init` Helm chart will install the required software needed to run Turing, namely:
+
+1. [Knative Serving](https://knative.dev/docs/serving/)
+2. [Istio](https://istio.io/)
+3. [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)
+
+To install the required components on your Kubernetes cluster, issue the following command:
+
+```bash
+helm upgrade turing-init infra/charts/turing-init \
+    --set image.registry="<image registry>/" \
+    --set image.repository="<repository>" \
+    --set image.tag="<tag version>" \
+    --install \
+    --wait
+```
+
+For it to be completely installed, you should check the init job has run successfully.
+To check, issue the command `kubectl get pod` and you should see something like this:
+
+```
+NAME                                            READY   STATUS      RESTARTS   AGE
+turing-test-spark-operator-8bcb89d5d-nf2bq      1/1     Running     0          3m42s
+turing-test-spark-operator-webhook-init-ph8ds   0/1     Completed   0          3m44s
+turing-test-turing-init-init-pknvb              0/1     Completed   0          3m44s
+```
+
+The init job will also check if all the components have been installed properly so we can guarantee that
+if the init job has run successfully, it would also mean that all components are in order. But if you would like
+to check them, they are installed in the following namespaces:
+
+1. Istio: istio-system
+2. Knative: knative-serving
+3. Spark Operator: In the same namespace as the Helm chart.
+
+Alternatively, you could install the following components yourself with the following recommended versions:
+
+- Knative: v0.18.3
+- Knative Istio: v0.18.1
+- Istio: 1.9.9
+- Spark On K8s Operator: 1.1.7 Helm charts
 
 ## Turing Router Components
 
