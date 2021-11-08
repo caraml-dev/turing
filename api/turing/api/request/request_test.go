@@ -325,7 +325,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 		},
 	}
 	es := &mocks.ExperimentsService{}
-	es.On("IsStandardExperimentManager", mock.Anything).Return(true)
+	es.On("IsStandardExperimentManager", "litmus").Return(true)
+	es.On("IsStandardExperimentManager", "xp").Return(false)
 	es.On("GetStandardExperimentConfig", cfgWithPasskey).Return(*cfgWithPasskey, nil)
 	es.On("GetStandardExperimentConfig", cfgWithoutPasskey).Return(*cfgWithoutPasskey, nil)
 	es.On("GetStandardExperimentConfig", cfgWithBadPasskey).Return(*cfgWithBadPasskey, nil)
@@ -337,30 +338,11 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 		expected interface{}
 		err      string
 	}{
-		"success | use current version passkey": {
+		"failure | std engine | missing curr version passkey": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
-						Config: cfgWithoutPasskey,
-					},
-				},
-			},
-			router: &models.Router{
-				CurrRouterVersion: &models.RouterVersion{
-					ExperimentEngine: &models.ExperimentEngine{
-						Type:   "xp",
-						Config: cfgWithPasskey,
-					},
-				},
-			},
-			expected: cfgWithPasskey,
-		},
-		"failure | missing current version / passkey": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
+						Type:   "litmus",
 						Config: cfgWithoutPasskey,
 					},
 				},
@@ -368,11 +350,11 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			router: &models.Router{},
 			err:    "Passkey must be configured",
 		},
-		"failure | encrypt passkey error": {
+		"failure | std engine | encrypt passkey error": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
+						Type:   "litmus",
 						Config: cfgWithBadPasskey,
 					},
 				},
@@ -380,11 +362,30 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			router: &models.Router{},
 			err:    "Passkey could not be encrypted: test-encrypt-error",
 		},
-		"success | use new passkey": {
+		"success | std engine | use curr version passkey": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
+						Type:   "litmus",
+						Config: cfgWithoutPasskey,
+					},
+				},
+			},
+			router: &models.Router{
+				CurrRouterVersion: &models.RouterVersion{
+					ExperimentEngine: &models.ExperimentEngine{
+						Type:   "litmus",
+						Config: cfgWithPasskey,
+					},
+				},
+			},
+			expected: cfgWithPasskey,
+		},
+		"success | std engine | use new passkey": {
+			req: CreateOrUpdateRouterRequest{
+				Config: &RouterConfig{
+					ExperimentEngine: &ExperimentEngineConfig{
+						Type:   "litmus",
 						Config: cfgWithPasskey,
 					},
 				},
@@ -396,6 +397,18 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 					Passkey:  "xp-passkey-enc",
 				},
 			},
+		},
+		"success | custom engine": {
+			req: CreateOrUpdateRouterRequest{
+				Config: &RouterConfig{
+					ExperimentEngine: &ExperimentEngineConfig{
+						Type:   "xp",
+						Config: []int{1, 2},
+					},
+				},
+			},
+			router:   &models.Router{},
+			expected: []int{1, 2},
 		},
 	}
 

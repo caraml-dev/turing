@@ -18,6 +18,7 @@ import (
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
+var customExperimentManagerConfig = manager.Engine{Type: manager.CustomExperimentManagerType}
 
 func TestListEngines(t *testing.T) {
 	// Set up mock Experiment Managers
@@ -430,46 +431,58 @@ func TestListVariables(t *testing.T) {
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	// Create mock experiment manager
-	expMgr := &mocks.StandardExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{
+	// Create mock experiment managers
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{
 		Name: "Litmus",
 		Type: manager.StandardExperimentManagerType,
 		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 			ClientSelectionEnabled: true,
 		},
 	})
-	expMgr.On("ValidateExperimentConfig",
+	stdExpMgr.On("ValidateExperimentConfig",
 		&manager.StandardExperimentManagerConfig{
 			ClientSelectionEnabled: true,
 		},
 		manager.TuringExperimentConfig{},
 	).Return(nil)
+
+	customExpMgr := &mocks.CustomExperimentManager{}
+	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
+	customExpMgr.On("ValidateExperimentConfig", []int{1, 2}).Return(nil)
+
 	// Create test experiment service
 	expSvc := &experimentsService{
 		experimentManagers: map[string]manager.ExperimentManager{
-			"litmus": expMgr,
+			"litmus": stdExpMgr,
+			"xp":     customExpMgr,
 		},
 	}
 
 	// Define tests
 	tests := map[string]struct {
-		engine string
-		err    string
+		engine   string
+		inputCfg interface{}
+		err      string
 	}{
-		"success": {
-			engine: "litmus",
-		},
-		"failure": {
+		"failure | std exp mgr": {
 			engine: "test-engine",
 			err:    "Unknown experiment engine test-engine",
+		},
+		"success | std exp mgr": {
+			engine:   "litmus",
+			inputCfg: manager.TuringExperimentConfig{},
+		},
+		"success | custom exp mgr": {
+			engine:   "xp",
+			inputCfg: []int{1, 2},
 		},
 	}
 
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := expSvc.ValidateExperimentConfig(data.engine, &manager.TuringExperimentConfig{})
+			err := expSvc.ValidateExperimentConfig(data.engine, data.inputCfg)
 			if data.err == "" {
 				assert.NoError(t, err)
 			} else {
@@ -483,46 +496,57 @@ func TestValidateExperimentConfig(t *testing.T) {
 }
 
 func TestGetExperimentRunnerConfig(t *testing.T) {
-	testCfg := json.RawMessage([]byte(`{
-		"client": {"id": "1"}
-	}`))
-	expectedResult := json.RawMessage([]byte(`{"key": "value"}`))
-	// Create mock experiment manager
-	expMgr := &mocks.StandardExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(standardExperimentManagerConfig)
-	expMgr.On("GetExperimentRunnerConfig", manager.TuringExperimentConfig{
+	expectedResult1 := json.RawMessage([]byte(`{"key": "value1"}`))
+	expectedResult2 := json.RawMessage([]byte(`{"key": "value2"}`))
+	// Create mock experiment managers
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(standardExperimentManagerConfig)
+	stdExpMgr.On("GetExperimentRunnerConfig", manager.TuringExperimentConfig{
 		Client: manager.Client{
 			ID: "1",
 		},
-	}).Return(expectedResult, nil)
+	}).Return(expectedResult1, nil)
+
+	customExpMgr := &mocks.CustomExperimentManager{}
+	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
+	customExpMgr.On("GetExperimentRunnerConfig", json.RawMessage([]byte(`[1,2]`))).Return(expectedResult2, nil)
+
 	// Create test experiment service
 	expSvc := &experimentsService{
 		experimentManagers: map[string]manager.ExperimentManager{
-			"litmus": expMgr,
+			"litmus": stdExpMgr,
+			"xp":     customExpMgr,
 		},
 	}
 
 	// Define tests
 	tests := map[string]struct {
 		engine         string
+		inputCfg       json.RawMessage
 		expectedResult json.RawMessage
 		err            string
 	}{
-		"success": {
-			engine:         "litmus",
-			expectedResult: expectedResult,
-		},
-		"failure": {
+		"failure | std exp mgr": {
 			engine:         "test-engine",
 			expectedResult: json.RawMessage{},
 			err:            "Unknown experiment engine test-engine",
+		},
+		"success | std exp mgr": {
+			engine:         "litmus",
+			inputCfg:       json.RawMessage([]byte(`{"client": {"id": "1"}}`)),
+			expectedResult: expectedResult1,
+		},
+		"success | custom exp mgr": {
+			engine:         "xp",
+			inputCfg:       json.RawMessage([]byte(`[1,2]`)),
+			expectedResult: expectedResult2,
 		},
 	}
 
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			jsonCfg, err := expSvc.GetExperimentRunnerConfig(data.engine, testCfg)
+			jsonCfg, err := expSvc.GetExperimentRunnerConfig(data.engine, data.inputCfg)
 			assert.Equal(t, data.expectedResult, jsonCfg)
 			if data.err == "" {
 				assert.NoError(t, err)

@@ -193,20 +193,19 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 
 		if clientPasskey == "" {
 			// Extract existing router version config
-			currVer := router.CurrRouterVersion
-			if currVer != nil &&
-				string(currVer.ExperimentEngine.Type) == r.Config.ExperimentEngine.Type {
-				currVerExpConfig, err := expSvc.GetStandardExperimentConfig(currVer.ExperimentEngine.Config)
+			if router.CurrRouterVersion != nil &&
+				string(router.CurrRouterVersion.ExperimentEngine.Type) == r.Config.ExperimentEngine.Type {
+				currVerExpConfig, err := expSvc.GetStandardExperimentConfig(router.CurrRouterVersion.ExperimentEngine.Config)
 				if err != nil {
 					return nil, fmt.Errorf("Error parsing existing experiment config: %v", err)
 				}
 				if expConfig.Client.Username == currVerExpConfig.Client.Username {
 					// Copy the passkey
 					clientPasskey = currVerExpConfig.Client.Passkey
-				} else {
-					return nil, errors.New("Passkey must be configured")
 				}
-			} else {
+			}
+			// If the passkey is still empty, we cannot proceed
+			if clientPasskey == "" {
 				return nil, errors.New("Passkey must be configured")
 			}
 		} else {
