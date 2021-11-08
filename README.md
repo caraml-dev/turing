@@ -48,8 +48,11 @@ in these getting started guide.
 > you will need to deploy the infrastructure using an approach that ensures
 > the services are scalable and reliable. For instance, using cloud provider
 > services such as Google Kubernetes Engine (GKE) for provisioning the Kubernetes cluster.
+> See "Installing prerequisites on Kubernetes using the init chart" section for a recommended production installation guide.
 >
 > The following guides are tested on Linux and MacOS.
+
+For a Kubernetes based setup, see 
 
 ### Pre-requisites
 
@@ -332,6 +335,32 @@ The web UI allows you list, create, edit and delete your routers from the
 web browser.
 
 ![turing ui list router](./docs/assets/turing_ui_router_list.png)
+
+## Installing prerequisites on Kubernetes using the init chart
+
+This is the recommended way to install the prerequisites on a production Kubernetes cluster. The `turing-init` Helm chart will install the required software needed to run Turing, namely:
+
+1. [Knative Serving](https://knative.dev/docs/serving/)
+2. [Istio](https://istio.io/)
+3. [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)
+
+To install the required components on your Kubernetes cluster, issue the following command:
+
+```bash
+helm upgrade -n infrastructure turing-init infra/charts/turing-init \
+    --set image.registry="<image registry>/" \
+    --set image.repository="<repository>" \
+    --set image.tag="<tag version>" \
+    --install \
+    --wait
+```
+
+Alternatively, you could install the following components yourself with the following recommended versions:
+
+- Knative: v0.18.3
+- Knative Istio: v0.18.1
+- Istio: 1.9.9
+- Spark On K8s Operator: 1.1.7 Helm charts
 
 ## Turing Router Components
 
