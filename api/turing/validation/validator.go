@@ -25,7 +25,12 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 	}
 	// Register validators
 	instance.RegisterStructValidation(validateLogConfig, request.LogConfig{})
-	instance.RegisterStructValidation(newExperimentConfigValidator, request.ExperimentEngineConfig{})
+	if expSvc != nil {
+		instance.RegisterStructValidation(
+			newExperimentConfigValidator(expSvc),
+			request.ExperimentEngineConfig{},
+		)
+	}
 	instance.RegisterStructValidation(validateRouterConfig, request.RouterConfig{})
 
 	// register common.RuleConditionOperator type to use its String representation for validation
@@ -88,16 +93,22 @@ func validateLogConfig(sl validator.StructLevel) {
 	}
 }
 
-func newExperimentConfigValidator(sl validator.StructLevel) {
-	field := sl.Current().Interface().(request.ExperimentEngineConfig)
-	switch field.Type {
-	case string(models.ExperimentEngineTypeNop),
-		string(models.ExperimentEngineTypeLitmus),
-		string(models.ExperimentEngineTypeXp):
-		return
-	default:
-		sl.ReportError(field.Type, "type", "Type", "oneof", "litmus,xp,nop")
+func newExperimentConfigValidator(expSvc service.ExperimentsService) func(validator.StructLevel) {
+	validationFunc := func(sl validator.StructLevel) {
+		field := sl.Current().Interface().(request.ExperimentEngineConfig)
+		switch field.Type {
+		case string(models.ExperimentEngineTypeNop):
+			return
+		case string(models.ExperimentEngineTypeLitmus), string(models.ExperimentEngineTypeXp):
+			err := expSvc.ValidateExperimentConfig(field.Type, field.Config)
+			if err != nil {
+				sl.ReportError(field.Config, "config", "ExperimentEngineConfig.Config", err.Error(), "")
+			}
+		default:
+			sl.ReportError(field.Type, "type", "Type", "oneof", "litmus,xp,nop")
+		}
 	}
+	return validationFunc
 }
 
 func validateRouterConfig(sl validator.StructLevel) {
