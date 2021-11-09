@@ -39,9 +39,9 @@ const RemoteRouter = ({ projectId }) => {
   });
 
   if (!ready || failed) {
-    const text = !ready
-      ? "Loading Experiment Engine ..."
-      : "Failed to load Experiment Engine";
+    const text = failed
+      ? "Failed to load Experiment Engine"
+      : "Loading Experiment Engine ...";
     return <FallbackView text={text} />;
   }
 

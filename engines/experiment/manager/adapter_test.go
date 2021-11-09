@@ -20,15 +20,15 @@ func TestStandardExperimentMethods(t *testing.T) {
 	stdExpMgr := &mocks.StandardExperimentManager{}
 	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
 	stdExpMgr.On("IsCacheEnabled").Return(true)
-	stdExpMgr.On("ListClients").Return([]manager.Client{manager.Client{}}, nil)
-	stdExpMgr.On("ListExperiments").Return([]manager.Experiment{manager.Experiment{}}, nil)
+	stdExpMgr.On("ListClients").Return([]manager.Client{{}}, nil)
+	stdExpMgr.On("ListExperiments").Return([]manager.Experiment{{}}, nil)
 	stdExpMgr.On("ListExperimentsForClient", manager.Client{ID: "1"}).
-		Return([]manager.Experiment{manager.Experiment{}}, nil)
+		Return([]manager.Experiment{{}}, nil)
 	stdExpMgr.On("ListVariablesForClient", manager.Client{ID: "1"}).
-		Return([]manager.Variable{manager.Variable{Name: "var-1"}}, nil)
-	stdExpMgr.On("ListVariablesForExperiments", []manager.Experiment{manager.Experiment{}}).
+		Return([]manager.Variable{{Name: "var-1"}}, nil)
+	stdExpMgr.On("ListVariablesForExperiments", []manager.Experiment{{}}).
 		Return(map[string][]manager.Variable{
-			"test-exp": []manager.Variable{manager.Variable{Name: "var-1"}},
+			"test-exp": {{Name: "var-1"}},
 		}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
@@ -41,7 +41,7 @@ func TestStandardExperimentMethods(t *testing.T) {
 
 	// ListClients
 	clients, err := manager.ListClients(stdExpMgr)
-	assert.Equal(t, []manager.Client{manager.Client{}}, clients)
+	assert.Equal(t, []manager.Client{{}}, clients)
 	assert.NoError(t, err)
 	clients, err = manager.ListClients(expMgr)
 	assert.Equal(t, []manager.Client{}, clients)
@@ -49,7 +49,7 @@ func TestStandardExperimentMethods(t *testing.T) {
 
 	// ListExperiments
 	experiments, err := manager.ListExperiments(stdExpMgr)
-	assert.Equal(t, []manager.Experiment{manager.Experiment{}}, experiments)
+	assert.Equal(t, []manager.Experiment{{}}, experiments)
 	assert.NoError(t, err)
 	experiments, err = manager.ListExperiments(expMgr)
 	assert.Equal(t, []manager.Experiment{}, experiments)
@@ -57,7 +57,7 @@ func TestStandardExperimentMethods(t *testing.T) {
 
 	// ListExperimentsForClient
 	experiments, err = manager.ListExperimentsForClient(stdExpMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Experiment{manager.Experiment{}}, experiments)
+	assert.Equal(t, []manager.Experiment{{}}, experiments)
 	assert.NoError(t, err)
 	experiments, err = manager.ListExperimentsForClient(expMgr, manager.Client{ID: "1"})
 	assert.Equal(t, []manager.Experiment{}, experiments)
@@ -65,19 +65,19 @@ func TestStandardExperimentMethods(t *testing.T) {
 
 	// ListVariablesForClient
 	variables, err := manager.ListVariablesForClient(stdExpMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Variable{manager.Variable{Name: "var-1"}}, variables)
+	assert.Equal(t, []manager.Variable{{Name: "var-1"}}, variables)
 	assert.NoError(t, err)
 	variables, err = manager.ListVariablesForClient(expMgr, manager.Client{ID: "1"})
 	assert.Equal(t, []manager.Variable{}, variables)
 	assert.EqualError(t, err, stdExpMgrErr)
 
 	// ListVariablesForExperiments
-	variablesMap, err := manager.ListVariablesForExperiments(stdExpMgr, []manager.Experiment{manager.Experiment{}})
+	variablesMap, err := manager.ListVariablesForExperiments(stdExpMgr, []manager.Experiment{{}})
 	assert.Equal(t, map[string][]manager.Variable{
-		"test-exp": []manager.Variable{manager.Variable{Name: "var-1"}},
+		"test-exp": {{Name: "var-1"}},
 	}, variablesMap)
 	assert.NoError(t, err)
-	variablesMap, err = manager.ListVariablesForExperiments(expMgr, []manager.Experiment{manager.Experiment{}})
+	variablesMap, err = manager.ListVariablesForExperiments(expMgr, []manager.Experiment{{}})
 	assert.Equal(t, map[string][]manager.Variable{}, variablesMap)
 	assert.EqualError(t, err, stdExpMgrErr)
 }

@@ -114,20 +114,57 @@ paths:
 components:
   schemas:
     ExperimentEngine:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/StandardExperimentEngine"
+        - $ref: "#/components/schemas/CustomExperimentEngine"
+      discriminator:
+        propertyName: type
+        mapping:
+          standard: "#/components/schemas/StandardExperimentEngine"
+          custom: "#/components/schemas/CustomExperimentEngine"
+
+    GenericExperimentEngine:
       type: "object"
+      required:
+        - name
+        - type
       properties:
         name:
           type: "string"
         type:
           $ref: "#/components/schemas/ExperimentManagerType"
-        standard_experiment_manager_config:
-          type: "object"
-          nullable: true
+
+    StandardExperimentEngine:
+      allOf:
+        - $ref: '#/components/schemas/GenericExperimentEngine'
+        - type: "object"
           properties:
-            client_selection_enabled:
-              type: "boolean"
-            experiment_selection_enabled:
-              type: "boolean"
+            standard_experiment_manager_config:
+              type: "object"
+              nullable: true
+              properties:
+                client_selection_enabled:
+                  type: "boolean"
+                experiment_selection_enabled:
+                  type: "boolean"
+
+    CustomExperimentEngine:
+      allOf:
+        - $ref: '#/components/schemas/GenericExperimentEngine'
+        - type: "object"
+          properties:
+            custom_experiment_manager_config:
+              type: "object"
+              nullable: true
+              properties:
+                remote_ui:
+                  type: "object"
+                  properties:
+                    name:
+                      type: "string"
+                    url:
+                      type: "string"
 
     ExperimentClient:
       type: "object"
@@ -228,7 +265,7 @@ components:
         variables:
           $ref: "#/components/schemas/ExperimentVariables"
 
-    StandardExperimentConfigResponse:
+    StandardExperimentConfig:
       type: "object"
       properties:
         deployment:
@@ -238,7 +275,7 @@ components:
               type: "string"
             timeout:
               type: "string"
-              description: "timeout duration for responses from the XP API server"
+              description: "timeout duration for responses from the Experiment Engine API server"
               example: "60ms"
         client:
           $ref: "#/components/schemas/ExperimentClient"
@@ -249,14 +286,20 @@ components:
         variables:
           $ref: "#/components/schemas/ExperimentVariables"
 
-    CustomExperimentConfigResponse:
+    CustomExperimentConfig:
       type: "object"
-
-    ExperimentConfigResponse:
+  
+    ExperimentConfig:
       type: "object"
-      oneOf:
-        - $ref: "#/components/schemas/StandardExperimentConfigResponse"
-        - $ref: "#/components/schemas/CustomExperimentConfigResponse"
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/ExperimentEngineType"
+        config:
+          oneOf:
+            - $ref: "#/components/schemas/StandardExperimentConfig"
+            - $ref: "#/components/schemas/CustomExperimentConfig"
 
     # Enums
     ExperimentEngineType:

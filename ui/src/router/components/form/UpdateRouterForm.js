@@ -34,7 +34,7 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
     {
       title: "Experiments",
       iconType: "beaker",
-      children: <ExperimentStep />,
+      children: <ExperimentStep projectId={projectId} />,
       validationSchema: validationSchema[1],
       validationContext: { experimentEngineOptions },
     },

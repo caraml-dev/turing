@@ -9,7 +9,7 @@ import { ClientConfigPanel } from "./components/client_config/ClientConfigPanel"
 import { ExperimentsConfigPanel } from "./components/experiments_config/ExperimentsConfigPanel";
 import { VariablesConfigPanel } from "./components/variables_config/VariablesConfigPanel";
 
-export const ExperimentConfigGroup = ({
+export const StandardExperimentConfigGroup = ({
   engineType,
   experimentConfig,
   onChangeHandler,

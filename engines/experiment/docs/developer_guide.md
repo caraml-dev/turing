@@ -11,7 +11,7 @@ Experiment Engines have 2 main responsibilities – management of experiments (t
 
 ### Experiment Manager
 
-Experiment Managers in Turing can either be `Standard` or `Custom`.
+Experiment Managers in Turing can either be **Standard** or **Custom**.
 
 Standard Experiment Managers can take advantage of the default user interface offered by Turing (for configuring and viewing experiment info in routers), by implementing the Standard APIs. In turn, these APIs constrain the engine to adhere to the concepts and terminology defined by Turing.
 
@@ -77,8 +77,11 @@ type IExperimentConfig = { [key: string]: IJsonValue };
     errors: IValidationError
 }) => React.ReactElement
 
-// ViewExperimentEngineConfig component signature.
-({ config: IExperimentConfig }) => React.ReactElement
+// ExperimentEngineConfigDetails component signature.
+({
+    projectId: number,
+    config: IExperimentConfig
+}) => React.ReactElement
 ```
 
 ### Experiment Runner

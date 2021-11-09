@@ -6,7 +6,7 @@ import { ExperimentsConfigTable } from "./experiments/ExperimentsConfigTable";
 import { VariablesConfigTable } from "./variables/VariablesConfigTable";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
 
-export const ExperimentConfigGroup = ({
+export const StandardExperimentConfigGroup = ({
   projectId,
   engineType,
   engineConfig,

@@ -62,7 +62,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     },
     {
       title: "Experiments",
-      children: <ExperimentStep />,
+      children: <ExperimentStep projectId={projectId} />,
       validationSchema: validationSchema[1],
       validationContext: { experimentEngineOptions },
     },
