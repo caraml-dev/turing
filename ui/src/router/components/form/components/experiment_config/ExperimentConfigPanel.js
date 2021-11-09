@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { EuiFlexItem, EuiSpacer } from "@elastic/eui";
 
+import ExperimentEngineContext from "../../../../../providers/experiments/context";
 import useDynamicScript from "../../../../../hooks/useDynamicScript";
 import loadComponent from "../../../../../utils/remoteComponent";
 import { Panel } from "../Panel";
@@ -58,20 +59,29 @@ export const ExperimentConfigPanel = ({
   engine,
   onChangeHandler,
   errors,
-}) =>
-  !!engine.custom_experiment_manager_config ? (
-    <CustomExperimentEngineConfig
-      projectId={projectId}
-      remoteUi={engine.custom_experiment_manager_config.remote_ui}
-      config={engine.config}
-      onChangeHandler={onChangeHandler}
-      errors={errors}
-    />
+}) => {
+  // Get engine's properties
+  const { getEngineProperties, isLoaded } = useContext(ExperimentEngineContext);
+  const engineProps = getEngineProperties(engine.type);
+
+  return isLoaded ? (
+    engineProps.type === "custom" ? (
+      <CustomExperimentEngineConfig
+        projectId={projectId}
+        remoteUi={engine.custom_experiment_manager_config.remote_ui}
+        config={engine.config}
+        onChangeHandler={onChangeHandler}
+        errors={errors}
+      />
+    ) : (
+      <StandardExperimentConfigGroup
+        engineType={engine.type}
+        experimentConfig={engine.config}
+        onChangeHandler={onChangeHandler}
+        errors={errors}
+      />
+    )
   ) : (
-    <StandardExperimentConfigGroup
-      engineType={engine.type}
-      experimentConfig={engine.config}
-      onChangeHandler={onChangeHandler}
-      errors={errors}
-    />
+    <FallbackView text={"Loading ..."} />
   );
+};

@@ -54,8 +54,7 @@ export const StandardExperimentConfigGroup = ({
 
   return !!experimentConfig &&
     !!experimentConfig.engine &&
-    !!experimentConfig.engine.name &&
-    experimentConfig.engine.type === "standard" ? (
+    !!experimentConfig.engine.name ? (
     <ExperimentContextProvider
       engineProps={experimentConfig.engine}
       clientId={experimentConfig.client.id || ""}

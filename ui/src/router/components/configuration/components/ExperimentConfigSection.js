@@ -1,20 +1,18 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 
-import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
-import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
 import { ConfigSectionPanel } from "../../../../components/config_section";
+import ExperimentEngineContext from "../../../../providers/experiments/context";
+import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
 import useDynamicScript from "../../../../hooks/useDynamicScript";
 import loadComponent from "../../../../utils/remoteComponent";
 
-const StandardExperimentConfigView = ({ projectId, experiment_engine }) => (
-  <ExperimentEngineContextProvider>
-    <StandardExperimentConfigGroup
-      projectId={projectId}
-      engineType={experiment_engine.type}
-      engineConfig={experiment_engine.config}
-    />
-  </ExperimentEngineContextProvider>
+const StandardExperimentConfigView = ({ projectId, engine }) => (
+  <StandardExperimentConfigGroup
+    projectId={projectId}
+    engineType={engine.type}
+    engineConfig={engine.config}
+  />
 );
 
 const FallbackView = ({ text }) => (
@@ -54,21 +52,33 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
 export const ExperimentConfigSection = ({
   projectId,
   config: { experiment_engine },
-}) => (
-  <Fragment>
-    {experiment_engine.type === "nop" ? (
-      <EuiPanel>Not Configured</EuiPanel>
-    ) : !!experiment_engine.custom_experiment_manager_config ? (
-      <CustomExperimentConfigView
-        projectId={projectId}
-        remoteUi={experiment_engine.custom_experiment_manager_config.remote_ui}
-        config={experiment_engine.config}
-      />
-    ) : (
-      <StandardExperimentConfigView
-        projectId={projectId}
-        experiment_engine={experiment_engine}
-      />
-    )}
-  </Fragment>
-);
+}) => {
+  // Get engine's properties
+  const { getEngineProperties, isLoaded } = useContext(ExperimentEngineContext);
+  const engineProps = getEngineProperties(experiment_engine.type);
+
+  return (
+    <Fragment>
+      {experiment_engine.type === "nop" ? (
+        <EuiPanel>Not Configured</EuiPanel>
+      ) : isLoaded ? (
+        !!engineProps.type === "custom" ? (
+          <CustomExperimentConfigView
+            projectId={projectId}
+            remoteUi={
+              experiment_engine.custom_experiment_manager_config.remote_ui
+            }
+            config={experiment_engine.config}
+          />
+        ) : (
+          <StandardExperimentConfigView
+            projectId={projectId}
+            engine={experiment_engine}
+          />
+        )
+      ) : (
+        <EuiPanel>Loading ...</EuiPanel>
+      )}
+    </Fragment>
+  );
+};

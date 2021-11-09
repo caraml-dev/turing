@@ -4,7 +4,7 @@ import ExperimentEngineContext from "./context";
 import { getExperimentEngineOptions } from "../../router/components/form/components/experiment_config/typeOptions";
 
 export const ExperimentEngineContextProvider = ({ children }) => {
-  const [{ data: experimentEngines }] = useTuringApi(
+  const [{ data: experimentEngines, isLoaded }] = useTuringApi(
     `/experiment-engines`,
     {},
     []
@@ -26,6 +26,7 @@ export const ExperimentEngineContextProvider = ({ children }) => {
       value={{
         experimentEngines,
         experimentEngineOptions,
+        isLoaded,
         getEngineProperties,
       }}>
       {children}
