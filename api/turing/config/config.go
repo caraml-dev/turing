@@ -53,7 +53,7 @@ type Config struct {
 	Port                   int `validate:"required"`
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
-	BatchEnsemblingConfig  *BatchEnsemblingConfig  `validate:"required"`
+	BatchEnsemblingConfig  BatchEnsemblingConfig   `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
@@ -94,10 +94,14 @@ func (c *Config) Validate() error {
 
 // BatchEnsemblingConfig captures the config related to the running of batch runners
 type BatchEnsemblingConfig struct {
-	Enabled             bool                `validate:"required"`
-	JobConfig           JobConfig           `validate:"required"`
-	RunnerConfig        RunnerConfig        `validate:"required"`
-	ImageBuildingConfig ImageBuildingConfig `validate:"required"`
+	Enabled bool
+	// For JobConfig, RunnerConfig and ImageBuildingConfig, it is too difficult to enable custom logic
+	// where if it is enabled but all 3 are blank, then throw an error.
+	// This seems like the best effort for validating if enabled is set to false.
+	// Best case is to just detect if the user tried to fill in but filled some components wrongly.
+	JobConfig           *JobConfig           `validate:"omitempty,required_if=Enabled false"`
+	RunnerConfig        *RunnerConfig        `validate:"omitempty,required_if=Enabled false"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"omitempty,required_if=Enabled false"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
 }

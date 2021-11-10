@@ -83,26 +83,27 @@ func NewAppContext(
 		cfg.KubernetesLabelConfigs.Environment,
 	)
 
-	// Initialise Ensembling Job Service
-	ensemblingJobService := service.NewEnsemblingJobService(
-		db,
-		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
-		cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
-		cfg.BatchEnsemblingConfig.LoggingURLFormat,
-		cfg.BatchEnsemblingConfig.MonitoringURLFormat,
-		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		mlpSvc,
-	)
-
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
 
+	var ensemblingJobService service.EnsemblingJobService
 	if cfg.BatchEnsemblingConfig.Enabled {
+		// Initialise Ensembling Job Service
+		ensemblingJobService = service.NewEnsemblingJobService(
+			db,
+			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+			cfg.BatchEnsemblingConfig.LoggingURLFormat,
+			cfg.BatchEnsemblingConfig.MonitoringURLFormat,
+			cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
+			mlpSvc,
+		)
+
 		batchClusterController := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig,
+			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")

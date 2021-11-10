@@ -568,9 +568,9 @@ func TestConfigValidate(t *testing.T) {
 	tolerationName := "batch-job"
 	validConfig := Config{
 		Port: 5000,
-		BatchEnsemblingConfig: &BatchEnsemblingConfig{
+		BatchEnsemblingConfig: BatchEnsemblingConfig{
 			Enabled: true,
-			JobConfig: JobConfig{
+			JobConfig: &JobConfig{
 				DefaultEnvironment: "dev",
 				DefaultConfigurations: DefaultEnsemblingJobConfigurations{
 					BatchEnsemblingJobResources: openapi.EnsemblingResources{
@@ -585,12 +585,12 @@ func TestConfigValidate(t *testing.T) {
 					},
 				},
 			},
-			RunnerConfig: RunnerConfig{
+			RunnerConfig: &RunnerConfig{
 				TimeInterval:                   3 * time.Minute,
 				RecordsToProcessInOneIteration: 10,
 				MaxRetryCount:                  3,
 			},
-			ImageBuildingConfig: ImageBuildingConfig{
+			ImageBuildingConfig: &ImageBuildingConfig{
 				DestinationRegistry:  "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
@@ -740,13 +740,6 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		"missing batch runner config": {
-			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchEnsemblingConfig = nil
-				return validConfig
-			},
-			wantErr: true,
-		},
 		"missing kubernetes label config": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.KubernetesLabelConfigs = nil
@@ -776,6 +769,22 @@ func TestConfigValidate(t *testing.T) {
 				return validConfig
 			},
 			wantErr: false,
+		},
+		"valid batch ensembling disabled": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.BatchEnsemblingConfig = BatchEnsemblingConfig{
+					Enabled: false,
+				}
+				return validConfig
+			},
+			wantErr: false,
+		},
+		"valid batch ensembling enabled but missing settings": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
+				return validConfig
+			},
+			wantErr: true,
 		},
 	}
 	for name, tt := range tests {

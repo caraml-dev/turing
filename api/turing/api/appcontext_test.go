@@ -46,9 +46,9 @@ func TestNewAppContext(t *testing.T) {
 
 	testCfg := &config.Config{
 		Port: 8080,
-		BatchEnsemblingConfig: &config.BatchEnsemblingConfig{
+		BatchEnsemblingConfig: config.BatchEnsemblingConfig{
 			Enabled: true,
-			JobConfig: config.JobConfig{
+			JobConfig: &config.JobConfig{
 				DefaultEnvironment: "dev",
 				DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
 					BatchEnsemblingJobResources: openapi.EnsemblingResources{
@@ -63,12 +63,12 @@ func TestNewAppContext(t *testing.T) {
 					},
 				},
 			},
-			RunnerConfig: config.RunnerConfig{
+			RunnerConfig: &config.RunnerConfig{
 				TimeInterval:                   3 * time.Minute,
 				RecordsToProcessInOneIteration: 10,
 				MaxRetryCount:                  3,
 			},
-			ImageBuildingConfig: config.ImageBuildingConfig{
+			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry:  "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
@@ -254,7 +254,7 @@ func TestNewAppContext(t *testing.T) {
 
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
-		testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
+		*testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
 	)
 	assert.Nil(t, err)
 
