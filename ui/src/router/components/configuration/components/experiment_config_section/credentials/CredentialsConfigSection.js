@@ -9,24 +9,25 @@ import {
 } from "@elastic/eui";
 import "./CredentialsConfigSection.scss";
 
-import { getHomePageUrl } from "../../../../../../router/components/configuration/components/config";
+import { getFormattedHomepageUrl } from "../../../../../../router/components/configuration/components/config";
 
 export const CredentialsConfigSection = ({
   projectId,
   engineType,
-  deployment,
   client,
   engineProps,
 }) => {
   const username = client.username || "N/A";
+  const homepageUrl =
+    engineProps?.standard_experiment_manager_config?.home_page_url;
 
   return (
     <Fragment>
       <EuiTitle size="xs">
-        {!!engineProps.home_page_url ? (
+        {!!homepageUrl ? (
           <EuiTextColor color="secondary">
             <EuiLink
-              href={getHomePageUrl(engineProps, projectId)}
+              href={getFormattedHomepageUrl(homepageUrl, projectId)}
               target="_blank"
               external>
               {engineProps.name}
@@ -40,10 +41,6 @@ export const CredentialsConfigSection = ({
         textStyle="reverse"
         type="responsiveColumn"
         compressed>
-        <EuiDescriptionListTitle>Timeout</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription title={deployment.timeout}>
-          {deployment.timeout}
-        </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>Client</EuiDescriptionListTitle>
         <EuiDescriptionListDescription title={username}>
           {username}

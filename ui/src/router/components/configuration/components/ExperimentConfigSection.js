@@ -54,20 +54,18 @@ export const ExperimentConfigSection = ({
   config: { experiment_engine },
 }) => {
   // Get engine's properties
-  const { getEngineProperties, isLoaded } = useContext(ExperimentEngineContext);
+  const { getEngineProperties } = useContext(ExperimentEngineContext);
   const engineProps = getEngineProperties(experiment_engine.type);
 
   return (
     <Fragment>
       {experiment_engine.type === "nop" ? (
         <EuiPanel>Not Configured</EuiPanel>
-      ) : isLoaded ? (
-        !!engineProps.type === "custom" ? (
+      ) : !!engineProps.type ? (
+        engineProps.type === "custom" ? (
           <CustomExperimentConfigView
             projectId={projectId}
-            remoteUi={
-              experiment_engine.custom_experiment_manager_config.remote_ui
-            }
+            remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
             config={experiment_engine.config}
           />
         ) : (

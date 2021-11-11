@@ -25,7 +25,6 @@ export const StandardExperimentConfigGroup = ({
               <CredentialsConfigSection
                 projectId={projectId}
                 engineType={engineType}
-                deployment={engineConfig.deployment}
                 client={engineConfig.client}
                 engineProps={engineProps}
               />

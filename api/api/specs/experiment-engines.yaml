@@ -268,15 +268,6 @@ components:
     StandardExperimentConfig:
       type: "object"
       properties:
-        deployment:
-          type: "object"
-          properties:
-            endpoint:
-              type: "string"
-            timeout:
-              type: "string"
-              description: "timeout duration for responses from the Experiment Engine API server"
-              example: "60ms"
         client:
           $ref: "#/components/schemas/ExperimentClient"
         experiments:
@@ -288,6 +279,8 @@ components:
 
     CustomExperimentConfig:
       type: "object"
+      not:
+        $ref: "#/components/schemas/StandardExperimentConfig"
   
     ExperimentConfig:
       type: "object"

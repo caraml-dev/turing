@@ -17,7 +17,7 @@ const FallbackView = ({ text }) => (
   </EuiFlexItem>
 );
 
-const CustomExperimentEngineConfig = ({
+const CustomExperimentEngineConfigGroup = ({
   projectId,
   remoteUi,
   config,
@@ -66,9 +66,9 @@ export const ExperimentConfigPanel = ({
 
   return isLoaded ? (
     engineProps.type === "custom" ? (
-      <CustomExperimentEngineConfig
+      <CustomExperimentEngineConfigGroup
         projectId={projectId}
-        remoteUi={engine.custom_experiment_manager_config.remote_ui}
+        remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
         config={engine.config}
         onChangeHandler={onChangeHandler}
         errors={errors}
