@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
@@ -16,8 +17,7 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/log/resultlog"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/opentracing/opentracing-go"
-
-	"github.com/gojek/turing/engines/router/missionctl"
+	"go.uber.org/zap"
 )
 
 const turingReqIDHeaderKey = "Turing-Req-ID"
@@ -47,9 +47,7 @@ func (h *httpHandler) error(
 	logTuringRouterRequestError(ctx, err)
 }
 
-func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	var httpErr *errors.HTTPError
-
+func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 	// Measure the duration of handler function
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -62,14 +60,9 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			},
 		},
 	)()
+}
 
-	// Create context from the request context
-	ctx := turingctx.NewTuringContext(req.Context())
-	// Create context logger
-	ctxLogger := log.WithContext(ctx)
-	defer func() {
-		_ = ctxLogger.Sync()
-	}()
+func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) context.Context {
 	// Associate span to context, if applicable
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
@@ -78,42 +71,35 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			defer sp.Finish()
 		}
 	}
-	// Get the unique turing request id from the context
-	turingReqID, err := turingctx.GetRequestID(ctx)
-	if err != nil {
-		ctxLogger.Errorf("Could not retrieve Turing Request ID from context: %v",
-			err.Error())
-	}
+	return ctx
+}
 
+func (h *httpHandler) getPrediction(
+	ctx context.Context,
+	req *http.Request,
+	ctxLogger *zap.SugaredLogger,
+	requestBody []byte,
+) (mchttp.Response, *errors.HTTPError) {
 	// Create response channel to store the response from each step. Allocate buffer size = 4
 	// (max responses possible, from enricher, experiment engine, router and ensembler respectively).
 	respCh := make(chan routerResponse, 4)
 	defer close(respCh)
 
 	// Defer logging request summary
-	var requestBody []byte
 	defer func() {
 		go logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
 	}()
-
-	// Read the request body
-	requestBody, err = ioutil.ReadAll(req.Body)
-	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
-		return
-	}
 
 	// Enrich
 	var resp mchttp.Response
 	payload := requestBody
 	if h.IsEnricherEnabled() {
-		resp, httpErr = h.Enrich(ctx, req.Header, payload)
+		resp, httpErr := h.Enrich(ctx, req.Header, payload)
 		// Send enricher response/error for logging
 		copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Enricher, resp, httpErr)
 		// Check error
 		if httpErr != nil {
-			h.error(ctx, rw, httpErr)
-			return
+			return nil, httpErr
 		}
 		// No error, copy response body
 		payload = resp.Body()
@@ -121,7 +107,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	// Route
 	var expResp *experiment.Response
-	expResp, resp, httpErr = h.Route(ctx, req.Header, payload)
+	expResp, resp, httpErr := h.Route(ctx, req.Header, payload)
 	if expResp != nil {
 		var expErr *errors.HTTPError
 		if expResp.Error != "" {
@@ -133,8 +119,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, httpErr)
 	if httpErr != nil {
-		h.error(ctx, rw, httpErr)
-		return
+		return nil, httpErr
 	}
 	payload = resp.Body()
 
@@ -143,10 +128,45 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		resp, httpErr = h.Ensemble(ctx, req.Header, requestBody, payload)
 		copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Ensembler, resp, httpErr)
 		if httpErr != nil {
-			h.error(ctx, rw, httpErr)
-			return
+			return nil, httpErr
 		}
-		payload = resp.Body()
+	}
+	return resp, nil
+}
+
+func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	var httpErr *errors.HTTPError
+	h.measureRequestDuration(httpErr)
+
+	// Create context from the request context
+	ctx := turingctx.NewTuringContext(req.Context())
+	// Create context logger
+	ctxLogger := log.WithContext(ctx)
+	defer func() {
+		_ = ctxLogger.Sync()
+	}()
+
+	ctx = h.enableTracingSpan(ctx, req)
+
+	// Read the request body
+	requestBody, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		h.error(ctx, rw, errors.NewHTTPError(err))
+		return
+	}
+
+	resp, httpErr := h.getPrediction(ctx, req, ctxLogger, requestBody)
+	payload := resp.Body()
+	if httpErr != nil {
+		h.error(ctx, rw, httpErr)
+		return
+	}
+
+	// Get the unique turing request id from the context
+	turingReqID, err := turingctx.GetRequestID(ctx)
+	if err != nil {
+		ctxLogger.Errorf("Could not retrieve Turing Request ID from context: %v",
+			err.Error())
 	}
 
 	// Write the json response to the writer
