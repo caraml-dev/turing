@@ -38,7 +38,9 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     false
   );
 
-  const { experimentEngineOptions } = useContext(ExperimentEngineContext);
+  const { experimentEngineOptions, getEngineProperties } = useContext(
+    ExperimentEngineContext
+  );
 
   useEffect(() => {
     if (submissionResponse.isLoaded && !submissionResponse.error) {
@@ -64,7 +66,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       title: "Experiments",
       children: <ExperimentStep projectId={projectId} />,
       validationSchema: validationSchema[1],
-      validationContext: { experimentEngineOptions },
+      validationContext: { experimentEngineOptions, getEngineProperties },
     },
     {
       title: "Enricher",

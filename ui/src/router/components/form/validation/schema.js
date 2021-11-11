@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from "yup";
 import { get } from "@gojek/mlp-ui";
-import { experimentConfigSchema } from "../components/experiment_config/validation/schema";
+import { standardExperimentConfigSchema } from "../components/experiment_config/validation/schema";
 import {
   fieldSchema,
   fieldSourceSchema,
@@ -253,9 +253,17 @@ const schema = (maxAllowedReplica) => [
           .when("$experimentEngineOptions", (options, schema) =>
             schema.oneOf(options, "Valid Experiment Engine should be selected")
           ),
-        config: yup.mixed().when("type", {
-          is: "nop",
-          otherwise: experimentConfigSchema,
+        config: yup.mixed().when("type", (engine, schema) => {
+          return engine === "nop"
+            ? schema
+            : yup
+                .mixed()
+                .when("$getEngineProperties", (getEngineProperties) => {
+                  const engineProps = getEngineProperties(engine);
+                  return engineProps.type === "standard"
+                    ? standardExperimentConfigSchema(engineProps)
+                    : schema;
+                });
         }),
       }),
     }),

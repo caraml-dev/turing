@@ -54,14 +54,7 @@ The experiment managers are required to implement the methods in the `CustomExpe
 ##### UI
 The custom experiment manager should provide the following UI components for edit and view experiment engine configuration. The remote UI information should be set in `CustomExperimentManagerConfig` in the Experiment Engine properties.
 
-```javascript
-// Type ValidationError used by https://github.com/jquense/yup
-interface IValidationError {
-   errors: string | Array<string>;
-   value: any;
-   path: string;
-}
-
+```typescript
 // IExperimentConfig below represents a serializable JSON dictionary object
 type IJsonValue = string | number | boolean | null
    | IJsonValue[]
@@ -73,8 +66,7 @@ type IExperimentConfig = { [key: string]: IJsonValue };
 ({
     projectId: number,
     config: IExperimentConfig,
-    onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void,
-    errors: IValidationError
+    onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void
 }) => React.ReactElement
 
 // ExperimentEngineConfigDetails component signature.

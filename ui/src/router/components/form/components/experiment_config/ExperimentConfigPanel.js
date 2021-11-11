@@ -18,11 +18,10 @@ const FallbackView = ({ text }) => (
 );
 
 const CustomExperimentEngineConfigGroup = ({
-  projectId,
   remoteUi,
+  projectId,
   config,
   onChangeHandler,
-  errors,
 }) => {
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
@@ -48,7 +47,6 @@ const CustomExperimentEngineConfigGroup = ({
         projectId={projectId}
         config={config}
         onChangeHandler={onChangeHandler}
-        errors={errors}
       />
     </React.Suspense>
   );
@@ -67,11 +65,10 @@ export const ExperimentConfigPanel = ({
   return isLoaded ? (
     engineProps.type === "custom" ? (
       <CustomExperimentEngineConfigGroup
-        projectId={projectId}
         remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
+        projectId={projectId}
         config={engine.config}
         onChangeHandler={onChangeHandler}
-        errors={errors}
       />
     ) : (
       <StandardExperimentConfigGroup

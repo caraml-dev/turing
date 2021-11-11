@@ -23,6 +23,10 @@ export const ExperimentStep = ({ projectId }) => {
 
   const { errors } = useContext(FormValidationContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
+  const onChangeEngineType = (newType) => {
+    // Reset the experiment config if the engine type changed
+    onChange("config.experiment_engine")({ type: newType });
+  };
 
   const { experimentEngines, getEngineProperties } = useContext(
     ExperimentEngineContext
@@ -53,7 +57,7 @@ export const ExperimentStep = ({ projectId }) => {
         <EngineTypePanel
           type={experiment_engine.type}
           options={experimentEngineOptions}
-          onChange={onChange("config.experiment_engine.type")}
+          onChange={onChangeEngineType}
           errors={get(errors, "config.experiment_engine.type")}
         />
       </EuiFlexItem>
