@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ConfigSection } from "../../../components/config_section";
 import {
   EuiCallOut,
@@ -10,8 +10,10 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { RouterVersion } from "../../../services/version/RouterVersion";
 import { VersionComparisonPanel } from "../components/version_diff/VersionComparisonPanel";
+import { ExperimentEngineContextProvider } from "../../../providers/experiments/ExperimentEngineContextProvider";
+import ExperimentEngineContext from "../../../providers/experiments/context";
 
-export const VersionComparisonView = ({
+const VersionComparisonView = ({
   router,
   leftVersionNumber,
   rightVersionNumber,
@@ -36,6 +38,18 @@ export const VersionComparisonView = ({
     versionRight,
     !versionRight
   );
+
+  const { getEngineProperties } = useContext(ExperimentEngineContext);
+  const leftVersionContext = {
+    experiment_engine: getEngineProperties(
+      leftVersion.data.config?.experiment_engine?.type
+    ),
+  };
+  const rightVersionContext = {
+    experiment_engine: getEngineProperties(
+      rightVersion.data.config?.experiment_engine?.type
+    ),
+  };
 
   useEffect(() => {
     if (!!leftVersion.data && !!rightVersion.data) {
@@ -82,10 +96,12 @@ export const VersionComparisonView = ({
           </EuiCallOut>
         ) : (
           <VersionComparisonPanel
-            leftValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml()}
-            rightValue={RouterVersion.fromJson(
-              rightVersion.data
-            ).toPrettyYaml()}
+            leftValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml(
+              leftVersionContext
+            )}
+            rightValue={RouterVersion.fromJson(rightVersion.data).toPrettyYaml(
+              rightVersionContext
+            )}
             leftTitle={`Version ${leftVersionNumber}`}
             rightTitle={`Version ${rightVersionNumber}`}
           />
@@ -94,3 +110,11 @@ export const VersionComparisonView = ({
     </ConfigSection>
   );
 };
+
+const VersionComparisonViewWrapper = (props) => (
+  <ExperimentEngineContextProvider>
+    <VersionComparisonView {...props} />
+  </ExperimentEngineContextProvider>
+);
+
+export { VersionComparisonViewWrapper as VersionComparisonView };
