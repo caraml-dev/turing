@@ -156,11 +156,11 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	resp, httpErr := h.getPrediction(ctx, req, ctxLogger, requestBody)
-	payload := resp.Body()
 	if httpErr != nil {
 		h.error(ctx, rw, httpErr)
 		return
 	}
+	payload := resp.Body()
 
 	// Get the unique turing request id from the context
 	turingReqID, err := turingctx.GetRequestID(ctx)
