@@ -29,6 +29,8 @@ spec:
           value: {{ .Values.knativeIstioVersion }}
         - name: KNATIVE_DOMAINS
           value: "{{ .Values.knativeDomains }}"
+        - name: KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING
+          value: "{{ .Values.knativeRegistriesSkippingTagResolving }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /etc/istio-operator

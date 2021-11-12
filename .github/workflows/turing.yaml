@@ -420,6 +420,7 @@ jobs:
             --set image.repository=${{ github.repository }}/cluster-init \
             --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
             --set knativeDomains="127.0.0.1.nip.io" \
+            --set knative_registries_skipping_tag_resolving=${{ env.LOCAL_REGISTRY }} \
             --install \
             --wait
 
@@ -428,10 +429,6 @@ jobs:
           kubectl get pod --all-namespaces
           kubectl get svc --all-namespaces
           kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/$(kubectl get job -n infrastructure | grep -v 'NAME' | head -n 1 | awk '{print $1}')
-
-          # Ignore resolving tags for local Docker registry
-          kubectl -n knative-serving patch configmap/config-deployment \
-            --type merge -p '{"data":{"registriesSkippingTagResolving": "${{ env.LOCAL_REGISTRY }}"}}'
 
       - name: "Install Vault"
         run: |

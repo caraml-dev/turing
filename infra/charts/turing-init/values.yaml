@@ -20,6 +20,8 @@ knativeVersion: 0.18.3
 knativeIstioVersion: 0.18.1
 # -- Knative domains, comma seperated values, i.e. www.example.com,www.gojek.com
 knativeDomains: ""
+# -- Knative registries skipping tag resolving, comma seperated values, i.e. www.example.com,www.gojek.com
+knativeRegistriesSkippingTagResolving: ""
 
 # -- istio operator config, defaults are the minimum to run turing
 istioOperatorConfig:

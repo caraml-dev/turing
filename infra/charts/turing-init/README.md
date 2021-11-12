@@ -20,8 +20,10 @@ A Helm chart for Kubernetes
 | image.tag | string | `"latest"` | Docker image tag for Turing cluster init |
 | istioOperatorConfig | object | `{"apiVersion":"install.istio.io/v1alpha1","kind":"IstioOperator","spec":{"addonComponents":{"pilot":{"enabled":true}},"components":{"ingressGateways":[{"enabled":true,"name":"istio-ingressgateway"},{"enabled":true,"k8s":{"service":{"ports":[{"name":"status-port","port":15020},{"name":"http2","port":80},{"name":"https","port":443}],"type":"ClusterIP"}},"label":{"app":"cluster-local-gateway","istio":"cluster-local-gateway"},"name":"cluster-local-gateway"}]},"values":{"gateways":{"istio-ingressgateway":{"runAsRoot":true}},"global":{"proxy":{"autoInject":"enabled"},"useMCP":false}}}}` | istio operator config, defaults are the minimum to run turing |
 | istioVersion | string | `"1.9.9"` | Istio version to use |
-| knativeIstioVersion | string | `"0.18.1"` |  |
+| knativeDomains | string | `""` | Knative domains, comma seperated values, i.e. www.example.com,www.gojek.com |
+| knativeIstioVersion | string | `"0.18.1"` | Knative Istio Version to use |
 | knativeVersion | string | `"0.18.3"` | Knative Version to use |
+| knative_registries_skipping_tag_resolving | string | `""` | Knative registries skipping tag resolving, comma seperated values, i.e. www.example.com,www.gojek.com |
 | spark-operator | object | `{"image":{"repository":"gcr.io/spark-operator/spark-operator","tag":"v1beta2-1.2.3-3.1.1"},"replicas":1,"resources":{},"webhook":{"enable":true}}` | Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md |
 | spark-operator.image.repository | string | `"gcr.io/spark-operator/spark-operator"` | repository of the spark operator |
 | spark-operator.image.tag | string | `"v1beta2-1.2.3-3.1.1"` | image tag of the spark operator |
