@@ -89,6 +89,16 @@ func NewAppContext(
 
 	var ensemblingJobService service.EnsemblingJobService
 	if cfg.BatchEnsemblingConfig.Enabled {
+		if cfg.BatchEnsemblingConfig.JobConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.JobConfig was not set")
+		}
+		if cfg.BatchEnsemblingConfig.RunnerConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.RunnerConfig was not set")
+		}
+		if cfg.BatchEnsemblingConfig.ImageBuildingConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.ImageBuildingConfig was not set")
+		}
+
 		// Initialise Ensembling Job Service
 		ensemblingJobService = service.NewEnsemblingJobService(
 			db,

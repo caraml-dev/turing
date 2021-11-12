@@ -94,14 +94,15 @@ func (c *Config) Validate() error {
 
 // BatchEnsemblingConfig captures the config related to the running of batch runners
 type BatchEnsemblingConfig struct {
-	Enabled bool
-	// For JobConfig, RunnerConfig and ImageBuildingConfig, it is too difficult to enable custom logic
-	// where if it is enabled but all 3 are blank, then throw an error.
-	// This seems like the best effort for validating if enabled is set to false.
-	// Best case is to just detect if the user tried to fill in but filled some components wrongly.
-	JobConfig           *JobConfig           `validate:"omitempty,required_if=Enabled false"`
-	RunnerConfig        *RunnerConfig        `validate:"omitempty,required_if=Enabled false"`
-	ImageBuildingConfig *ImageBuildingConfig `validate:"omitempty,required_if=Enabled false"`
+	// Due to the limitations of the go-playground/validator,
+	// either a custom validator needs to be written or we check for nil during initialisation
+	// Nil checks are done in appcontext before using these values if enabled = True.
+	// Unfortunately if Enabled is false and user sets JobConfig/RunnerConfig/ImageBuildingConfig wrongly
+	// it will still be checked.
+	Enabled             bool
+	JobConfig           *JobConfig           `validate:"omitempty"`
+	RunnerConfig        *RunnerConfig        `validate:"omitempty"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"omitempty"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
 }
