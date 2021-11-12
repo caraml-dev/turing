@@ -21,6 +21,7 @@ function print_usage {
     echo "    ISTIO_VERSION          Istio version, default: 1.9.9."
     echo "    KNATIVE_VERSION        Knative version, default: 0.18.3."
     echo "    KNATIVE_ISTIO_VERSION  Knative Istio version, default: 0.18.1."
+    echo "    KNATIVE_DOMAINS        Knative domains that should be supported, comma seperated values"
 }
 
 function install_istio {
@@ -51,6 +52,14 @@ function install_knative {
     local istio_apps=("networking-istio" "istio-webhook")
     for app in ${istio_apps[@]}; do
         kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
+    done
+
+    echo "${KNATIVE_DOMAINS}" | tr ',' '\n' | while read URL; do
+        if [[ ! -z ${URL} ]]; then
+            local template='{"data":{"{URL_TO_CHANGE}":""}}'
+            local patch_data=$(echo ${template} | sed -e "s|{URL_TO_CHANGE}|${URL}|g")
+            kubectl -n knative-serving patch configmap/config-domain --type merge -p ${patch_data}
+        fi
     done
 
     echo "Finished installing Knative."

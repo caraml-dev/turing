@@ -16,7 +16,10 @@ image:
 istioVersion: 1.9.9
 # -- Knative Version to use
 knativeVersion: 0.18.3
+# -- Knative Istio Version to use
 knativeIstioVersion: 0.18.1
+# -- Knative domains, comma seperated values, i.e. www.example.com,www.gojek.com
+knativeDomains: ""
 
 # -- istio operator config, defaults are the minimum to run turing
 istioOperatorConfig:
