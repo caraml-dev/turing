@@ -94,11 +94,8 @@ func (c *Config) Validate() error {
 
 // BatchEnsemblingConfig captures the config related to the running of batch runners
 type BatchEnsemblingConfig struct {
-	// Due to the limitations of the go-playground/validator,
-	// either a custom validator needs to be written or we check for nil during initialisation
-	// Nil checks are done in appcontext before using these values if enabled = True.
 	// Unfortunately if Enabled is false and user sets JobConfig/RunnerConfig/ImageBuildingConfig wrongly
-	// it will still be checked.
+	// it will still error out.
 	Enabled             bool
 	JobConfig           *JobConfig           `validate:"required_if=Enabled True"`
 	RunnerConfig        *RunnerConfig        `validate:"required_if=Enabled True"`
