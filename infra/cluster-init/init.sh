@@ -60,16 +60,16 @@ function install_knative {
         if [[ ! -z ${URL} ]]; then
             local domain_template='{"data":{"{URL_TO_CHANGE}":""}}'
             local domain_patch_data=$(echo ${domain_template} | sed -e "s|{URL_TO_CHANGE}|${URL}|g")
-            kubectl -n knative-serving patch configmap/config-domain --type merge -p ${domain_patch_data}
+            kubectl -n knative-serving patch configmap/config-domain --type merge -p "${domain_patch_data}"
         fi
     done
 
     # Patch registries
     echo "${KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING}" | tr ',' '\n' | while read REGISTRY; do
         if [[ ! -z ${REGISTRY} ]]; then
-            local registry_template=''{"data":{"registriesSkippingTagResolving": "{REGISTRY_TO_CHANGE}"}}''
+            local registry_template='{"data":{"registriesSkippingTagResolving": "{REGISTRY_TO_CHANGE}"}}'
             local registry_patch_data=$(echo ${registry_template} | sed -e "s|{REGISTRY_TO_CHANGE}|${REGISTRY}|g")
-            kubectl -n knative-serving patch configmap/config-deployment --type merge -p ${registry_patch_data}
+            kubectl -n knative-serving patch configmap/config-deployment --type merge -p "${registry_patch_data}"
         fi
     done
 
