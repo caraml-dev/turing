@@ -30,9 +30,9 @@ spec:
 {{ toYaml .Values.turing.labels | indent 8 -}}
 {{- end }}
     spec:
-{{- if .Values.turing.clusterConfig.useInClusterConfig }}
-      serviceAccountName: {{ template "turing.service-account" . }}
-{{- end }}
+      {{- if include "turing.clusterConfig.useInClusterCredentials" . }}
+      serviceAccountName: {{ template "turing.serviceAccount.name" . }}
+      {{- end }}
       initContainers:
       - name: migrations
         image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
@@ -41,13 +41,13 @@ spec:
         - |
           /migrate \
           -path /migrations \
-          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "postgresql.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "turing.db.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
           up
         env:
         - name: PG_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-postgresql
+              name: {{ template "turing.postgresql.name" . }}
               key: postgresql-password
         volumeMounts:
           - mountPath: /migrations
@@ -57,7 +57,7 @@ spec:
       {{- end }}
       containers:
       - name: api
-        image: {{ .Values.turing.image.registry }}{{ .Values.turing.image.repository }}:{{ .Values.turing.image.tag }}
+        image: {{ template "turing.image" . }}
         imagePullPolicy: {{ .Values.turing.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.turing.service.internalPort }}
@@ -110,7 +110,7 @@ spec:
           secretName: {{ template "turing.fullname" .}}-api-config
       - name: db-migrations
         configMap:
-          name: {{ .Release.Name }}-db-migrations
+          name: {{ template "turing.fullname" .}}-db-migrations
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

@@ -1,4 +1,14 @@
 dependencies:
   - name: postgresql
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: https://charts.bitnami.com/bitnami
     version: 8.9.8
+  - name: mlp
+    version: 1.0.0
+    repository: file://subcharts/mlp
+    tags:
+      - mlp
+  - name: merlin
+    version: 0.7.0
+    repository: file://subcharts/merlin
+    tags:
+      - mlp

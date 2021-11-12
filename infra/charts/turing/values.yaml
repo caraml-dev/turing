@@ -1,16 +1,16 @@
-# This values.yaml file provides default configuration for Turing Helm chart. 
+# This values.yaml file provides default configuration for Turing Helm chart.
 # It is also currently used to generate README.md using helm-docs
 # https://github.com/norwoodj/helm-docs
-
 turing:
   image:
     # -- Docker registry for Turing API image. User is required to override
     # the registry for now as there is no publicly available Turing image
-    registry: ghcr.io/
+    registry: ghcr.io
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
     tag: latest
+  labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -41,11 +41,38 @@ turing:
 
   # -- Turing API server configuration. 
   # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
-  config: {}
+  config:
+    AlertConfig:
+      Enabled: false
+    BatchEnsemblingConfig:
+      Enabled: false
+
+    DeployConfig: {}
+    KubernetesLabelConfigs: {}
+    MLPConfig: {}
+    Sentry:
+      Enabled: false
+      DSN: ""
+    RouterDefaults:
+      Image: ghcr.io/gojek/turing/turing-router:latest
 
   # -- Turing UI configuration.
   # Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
-  uiConfig: {}
+  uiConfig:
+    alertConfig: {}
+    apiConfig:
+      turingApiUrl: /api/turing/v1
+      merlinApiUrl: /api/merlin/v1
+      mlpApiUrl: /api/v1
+    appConfig:
+      docsUrl:
+        - label: Turing User Guide
+          href: https://github.com/gojek/turing/tree/main/docs
+      scaling:
+        maxAllowedReplica: 20
+    authConfig:
+      oauthClientId: ""
+    sentryConfig: {}
 
   # -- List of string containing additional Turing API server arguments. For
   # example, multiple "-config" can be specified to use multiple config files
@@ -108,6 +135,9 @@ dbMigrations:
     # -- Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate
     tag: v4.7.1
 
+sentry:
+  dsn: ""
+
 postgresql:
   # -- Resources requests and limits for Turing database. This should be set 
   # according to your cluster capacity and service level objectives.
@@ -122,3 +152,67 @@ postgresql:
   postgresqlUsername: turing
   # -- Password for Turing Postgresql database (required)
   postgresqlPassword:
+
+mlp:
+  apiHost: /api/v1
+
+  extraEnvs:
+    - name: REACT_APP_MERLIN_UI_HOMEPAGE
+      value: "/merlin"
+    - name: REACT_APP_MERLIN_API
+      value: "/api/merlin/v1"
+    - name: REACT_APP_TURING_UI_HOMEPAGE
+      value: "/turing"
+    - name: REACT_APP_TURING_API
+      value: "/api/turing/v1"
+    # Temporarily required to be present or otherwise MLP's landing page fails
+    - name: REACT_APP_FEAST_CORE_API
+      value: "http://feast.dev/v1"
+
+  postgresql:
+    nameOverride: postgresql-mlp
+
+merlin:
+  apiHost: /api/merlin/v1
+  swagger:
+    enabled: false
+  authorization:
+    enabled: false
+  postgresql:
+    nameOverride: postgresql-merlin
+  mlpApi:
+    apiHost: "http://{{ .Release.Name }}-mlp:8080/v1"
+
+  environmentConfigs:
+    - name: "dev"
+      is_default: true
+      cluster: "dev"
+      region: ""
+      gcp_project: ""
+      deployment_timeout: "10m"
+      namespace_timeout: "2m"
+      min_replica: 0
+      max_replica: 1
+      max_cpu: "8"
+      max_memory: "8Gi"
+      cpu_request: "100m"
+      memory_request: "200Mi"
+      cpu_limit: "400m"
+      memory_limit: "500Mi"
+      queue_resource_percentage: "20"
+      is_prediction_job_enabled: false
+      is_default_prediction_job: true
+      prediction_job_config:
+        executor_replica: 3
+        driver_cpu_request: "2"
+        driver_memory_request: "2Gi"
+        executor_cpu_request: "2"
+        executor_memory_request: "2Gi"
+
+global:
+  mlp:
+    encryption: {}
+  sentry: {}
+
+tags:
+  mlp: true

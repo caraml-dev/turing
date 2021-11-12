@@ -75,6 +75,7 @@ const resultLoggingConfig = {
 };
 
 const alertConfig = {
+  enabled: true,
   environment:
     appConfig.environment === "dev" ? "development" : appConfig.environment,
 };

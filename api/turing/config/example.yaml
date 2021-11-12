@@ -1,6 +1,9 @@
 # Port number Turing API server listens to
 Port: 8080
 
+# Application's log level. Default to INFO
+LogLevel: DEBUG
+
 # Enable Cross-Origin Requests (CORS) for the following origins
 AllowedOrigins:
 - "*"
@@ -64,7 +67,6 @@ DbConfig:
 # Turing router deployment context
 DeployConfig:
   EnvironmentType: dev
-  GcpProject: gcp-project-001
   Timeout: "3m"
   DeletionTimeout: "1m"
   MaxCPU: "4"

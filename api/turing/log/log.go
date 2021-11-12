@@ -2,14 +2,31 @@ package log
 
 import (
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var globalLogger = NewLogger()
+var globalLogger = newLogger()
 
-// NewLogger create a new SugaredLogger
-func NewLogger() *zap.SugaredLogger {
-	logger, _ := zap.NewProduction(zap.AddCallerSkip(1))
+func newLogger(logLevel ...zapcore.Level) *zap.SugaredLogger {
+	cfg := zap.NewProductionConfig()
+
+	if len(logLevel) > 0 {
+		cfg.Level = zap.NewAtomicLevelAt(logLevel[0])
+	}
+
+	logger, _ := cfg.Build(zap.AddCallerSkip(1))
 	return logger.Sugar()
+}
+
+// SetLogLevelAt creates a new SugaredLogger with provided log level enabled
+// and assigns it as the global logger
+func SetLogLevelAt(level string) error {
+	var lvl zapcore.Level
+	if err := lvl.UnmarshalText([]byte(level)); err != nil {
+		return err
+	}
+	globalLogger = newLogger(lvl)
+	return nil
 }
 
 // Infof uses fmt.Sprintf to log a templated message.

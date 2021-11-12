@@ -1,8 +1,8 @@
-{{- if .Values.turing.clusterConfig.useInClusterConfig -}}
+{{- if include "turing.clusterConfig.useInClusterCredentials" . -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "turing.service-account" . }}
+  name: {{ template "turing.serviceAccount.name" . }}-cluster-role
 rules:
 - apiGroups: [""]
   resources:

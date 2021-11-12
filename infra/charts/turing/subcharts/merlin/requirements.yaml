@@ -1,0 +1,8 @@
+dependencies:
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 8.9.8
+  - name: vault
+    repository: https://helm.releases.hashicorp.com
+    version: 0.16.1
+    condition: vault.enabled
