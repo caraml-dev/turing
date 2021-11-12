@@ -779,9 +779,16 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"valid batch ensembling enabled but missing settings": {
+		"batch ensembling enabled but missing settings": {
 			validConfigUpdate: func(validConfig Config) Config {
 				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"batch ensembling enabled but one whole section missing": {
+			validConfigUpdate: func(validConfig Config) Config {
+				validConfig.BatchEnsemblingConfig.JobConfig = nil
 				return validConfig
 			},
 			wantErr: true,

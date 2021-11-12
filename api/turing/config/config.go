@@ -100,9 +100,9 @@ type BatchEnsemblingConfig struct {
 	// Unfortunately if Enabled is false and user sets JobConfig/RunnerConfig/ImageBuildingConfig wrongly
 	// it will still be checked.
 	Enabled             bool
-	JobConfig           *JobConfig           `validate:"omitempty"`
-	RunnerConfig        *RunnerConfig        `validate:"omitempty"`
-	ImageBuildingConfig *ImageBuildingConfig `validate:"omitempty"`
+	JobConfig           *JobConfig           `validate:"required_if=Enabled True"`
+	RunnerConfig        *RunnerConfig        `validate:"required_if=Enabled True"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"required_if=Enabled True"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
 }
