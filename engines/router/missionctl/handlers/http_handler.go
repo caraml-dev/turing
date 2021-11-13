@@ -146,6 +146,13 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		_ = ctxLogger.Sync()
 	}()
 
+	// Get the unique turing request id from the context
+	turingReqID, err := turingctx.GetRequestID(ctx)
+	if err != nil {
+		ctxLogger.Errorf("Could not retrieve Turing Request ID from context: %v",
+			err.Error())
+	}
+
 	ctx = h.enableTracingSpan(ctx, req)
 
 	// Read the request body
@@ -161,13 +168,6 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	payload := resp.Body()
-
-	// Get the unique turing request id from the context
-	turingReqID, err := turingctx.GetRequestID(ctx)
-	if err != nil {
-		ctxLogger.Errorf("Could not retrieve Turing Request ID from context: %v",
-			err.Error())
-	}
 
 	// Write the json response to the writer
 	rw.Header().Set("Content-Type", resp.Header().Get("Content-Type"))

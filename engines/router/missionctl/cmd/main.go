@@ -107,6 +107,7 @@ func main() {
 		}),
 	))
 	http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
+	http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl)))
 	// Register metrics handler
 	if cfg.AppConfig.CustomMetrics {
 		http.Handle("/metrics", promhttp.Handler())
