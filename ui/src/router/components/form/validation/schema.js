@@ -1,6 +1,5 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from "yup";
-import { transformAll } from "@overgear/yup-ast";
 import { get } from "@gojek/mlp-ui";
 import { standardExperimentConfigSchema } from "../components/experiment_config/validation/schema";
 import {
@@ -254,13 +253,8 @@ const schema = (maxAllowedReplica) => [
           .when("$experimentEngineOptions", (options, schema) =>
             schema.oneOf(options, "Valid Experiment Engine should be selected")
           ),
-        config: yup.mixed().when("type", (engine, schema) => {
-          const getCustomSchema = (customSchema) => {
-            try {
-              return transformAll(JSON.parse(customSchema));
-            } catch (_) {}
-          };
-          return engine === "nop"
+        config: yup.mixed().when("type", (engine, schema) =>
+          engine === "nop"
             ? schema
             : yup
                 .mixed()
@@ -268,12 +262,10 @@ const schema = (maxAllowedReplica) => [
                   const engineProps = getEngineProperties(engine);
                   return engineProps.type === "standard"
                     ? standardExperimentConfigSchema(engineProps)
-                    : getCustomSchema(
-                        engineProps.custom_experiment_manager_config
-                          ?.experiment_config_schema
-                      ) || schema;
-                });
-        }),
+                    : engineProps.custom_experiment_manager_config
+                        ?.parsed_experiment_config_schema || schema;
+                })
+        ),
       }),
     }),
   }),
