@@ -8,9 +8,9 @@ import {
   EuiText,
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
-
+import { RemoteComponent } from "../components/remote_component/RemoteComponent";
 import useDynamicScript from "../hooks/useDynamicScript";
-import useRemoteComponent from "../hooks/useRemoteComponent";
+
 import { useConfig } from "../config";
 
 const FallbackView = ({ text }) => (
@@ -29,16 +29,6 @@ const FallbackView = ({ text }) => (
     </EuiPageBody>
   </EuiPage>
 );
-
-const RemoteComponent = ({ name, projectId }) => {
-  const Component = useRemoteComponent(name, "./ExperimentsLandingPage");
-  return (
-    <React.Suspense
-      fallback={<FallbackView text="Loading Experiment Engine" />}>
-      <Component projectId={projectId} />
-    </React.Suspense>
-  );
-};
 
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
@@ -60,7 +50,9 @@ const RemoteRouter = ({ projectId }) => {
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
       <RemoteComponent
-        name={defaultExperimentEngine.name}
+        scope={defaultExperimentEngine.name}
+        name="./ExperimentsLandingPage"
+        fallback={<FallbackView text="Loading Experiment Engine" />}
         projectId={projectId}
       />
     </React.Suspense>
