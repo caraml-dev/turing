@@ -1,3 +1,8 @@
+global:
+  mlp:
+    encryption:
+      key: "encryption-key"
+
 turing:
   config:
     BatchEnsemblingConfig:
