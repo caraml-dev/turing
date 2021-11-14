@@ -528,9 +528,8 @@ jobs:
         id: wait-for-deployment
         with:
           workloads: >-
-            deployment/mockserver,
-            deployment/mlp,
-            deployment/merlin,
+            deployment/turing-mlp,
+            deployment/turing-merlin,
             deployment/turing
           timeout: 500 #seconds
           max-restarts: -1
