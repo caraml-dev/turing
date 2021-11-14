@@ -152,6 +152,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		ctxLogger.Errorf("Could not retrieve Turing Request ID from context: %v",
 			err.Error())
 	}
+	ctxLogger.Debugf("Received request for %v", turingReqID)
 
 	ctx = h.enableTracingSpan(ctx, req)
 
