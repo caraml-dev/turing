@@ -2,10 +2,11 @@ import React, { Fragment, useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 
 import { ConfigSectionPanel } from "../../../../components/config_section";
-import ExperimentEngineContext from "../../../../providers/experiments/context";
-import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
 import useDynamicScript from "../../../../hooks/useDynamicScript";
-import loadComponent from "../../../../utils/remoteComponent";
+import useRemoteComponent from "../../../../hooks/useRemoteComponent";
+import ExperimentEngineContext from "../../../../providers/experiments/context";
+
+import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
 
 const StandardExperimentConfigView = ({ projectId, engine }) => (
   <StandardExperimentConfigGroup
@@ -23,6 +24,16 @@ const FallbackView = ({ text }) => (
   </EuiFlexGroup>
 );
 
+const RemoteComponent = ({ name, projectId, config }) => {
+  const Component = useRemoteComponent(name, "./ExperimentEngineConfigDetails");
+  return (
+    <React.Suspense
+      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      <Component projectId={projectId} config={config} />
+    </React.Suspense>
+  );
+};
+
 const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
@@ -37,14 +48,14 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
   }
 
   // Load component from remote host
-  const ExperimentEngineConfigDetails = React.lazy(
-    loadComponent(remoteUi.name, "./ExperimentEngineConfigDetails")
-  );
-
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <ExperimentEngineConfigDetails projectId={projectId} config={config} />
+      <RemoteComponent
+        name={remoteUi.name}
+        projectId={projectId}
+        config={config}
+      />
     </React.Suspense>
   );
 };

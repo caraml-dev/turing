@@ -10,7 +10,7 @@ import {
 import { PageTitle } from "../components/page/PageTitle";
 
 import useDynamicScript from "../hooks/useDynamicScript";
-import loadComponent from "../utils/remoteComponent";
+import useRemoteComponent from "../hooks/useRemoteComponent";
 import { useConfig } from "../config";
 
 const FallbackView = ({ text }) => (
@@ -30,6 +30,16 @@ const FallbackView = ({ text }) => (
   </EuiPage>
 );
 
+const RemoteComponent = ({ name, projectId }) => {
+  const Component = useRemoteComponent(name, "./ExperimentsLandingPage");
+  return (
+    <React.Suspense
+      fallback={<FallbackView text="Loading Experiment Engine" />}>
+      <Component projectId={projectId} />
+    </React.Suspense>
+  );
+};
+
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
 
@@ -46,13 +56,13 @@ const RemoteRouter = ({ projectId }) => {
   }
 
   // Load component from remote host
-  const ExperimentsLandingPage = React.lazy(
-    loadComponent(defaultExperimentEngine.name, "./ExperimentsLandingPage")
-  );
-
   return (
-    <React.Suspense fallback={<FallbackView text="Loading Experiments" />}>
-      <ExperimentsLandingPage projectId={projectId} />
+    <React.Suspense
+      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      <RemoteComponent
+        name={defaultExperimentEngine.name}
+        projectId={projectId}
+      />
     </React.Suspense>
   );
 };
