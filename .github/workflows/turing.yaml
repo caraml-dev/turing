@@ -351,6 +351,9 @@ jobs:
 #      - build-api
 #      - build-router
 #      - build-cluster-init
+    strategy:
+      matrix:
+        useInClusterConfig: [false, true]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -437,15 +440,46 @@ jobs:
           kubectl -n knative-serving patch configmap/config-deployment \
             --type merge -p '{"data":{"registriesSkippingTagResolving": "${{ env.LOCAL_REGISTRY }}"}}'
 
-#      - name: "Install Vault"
-#        run: |
-#          helm repo add hashicorp https://helm.releases.hashicorp.com
-#          helm install vault hashicorp/vault \
-#            --version=${{ env.VAULT_CHART_VERSION }} \
-#            --values infra/e2e/vault.helm-values.yaml \
-#            --wait
-#
-#          kubectl apply -f infra/e2e/vault.ingress.yaml
+      - name: "Install Vault"
+        if: ${{ !matrix.useInClusterConfig }}
+        run: |
+          helm repo add hashicorp https://helm.releases.hashicorp.com
+          helm install vault hashicorp/vault \
+            --version=${{ env.VAULT_CHART_VERSION }} \
+            --values infra/e2e/vault.helm-values.yaml \
+            --wait
+
+          kubectl apply -f infra/e2e/vault.ingress.yaml
+
+      - name: Prepare cluster credentials
+        if: ${{ !matrix.useInClusterConfig }}
+        env:
+          VAULT_TOKEN: root
+        run: |
+          echo "::group::Wait for Vault to become available"
+          timeout --foreground 45 bash -c \
+            'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
+          echo "::endgroup::"
+
+          tee credentials.json <<EOF
+          {
+            "master_ip": "kubernetes:443",
+            "certs": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
+            "client_certificate": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
+            "client_key": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
+          }
+          EOF
+
+          curl -v \
+            --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
+            --request POST \
+            --data @credentials.json \
+            http://vault.127.0.0.1.nip.io/v1/secret/k3d-${{ env.CLUSTER_NAME }}
+
+          # Create a secret for Merlin with information on how to access Vault
+          kubectl create secret generic vault-secret \
+            --from-literal=vault-address=http://vault:8200 \
+            --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 #
 #      - name: Checkout MLP
 #        uses: actions/checkout@v2
@@ -469,34 +503,6 @@ jobs:
 #          repository: gojek/merlin
 #          ref: ${{ env.MERLIN_VERSION }}
 #          path: merlin
-#
-#      - name: Prepare Vault secret for Merlin
-#        env:
-#          VAULT_TOKEN: root
-#        run: |
-#          echo "::group::Wait for Vault to become available"
-#          timeout --foreground 45 bash -c \
-#            'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
-#          echo "::endgroup::"
-#
-#          tee credentials.json <<EOF
-#          {
-#            "master_ip": "kubernetes:443",
-#            "certs": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
-#            "client_certificate": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
-#            "client_key": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
-#          }
-#          EOF
-#
-#          curl -v \
-#            --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
-#            --request POST \
-#            --data @credentials.json \
-#            http://vault.127.0.0.1.nip.io/v1/secret/k3d-${{ env.CLUSTER_NAME }}
-#
-#          kubectl create secret generic vault-secret \
-#            --from-literal=address=http://vault:8200 \
-#            --from-literal=token=${{ env.VAULT_TOKEN }}
 #
 #      - name: Install Merlin
 #        env:
@@ -573,6 +579,12 @@ jobs:
       - name: Test Turing API
         run: |
           curl -v http://turing-gateway.127.0.0.1.nip.io/api/turing/v1/projects
+
+          curl -v \
+            --header 'Content-Type: application/json' \
+            --request POST \
+            --data @infra/e2e/create_router_nop_logger_nop_exp.json \
+            http://turing-gateway.127.0.0.1.nip.io/api/turing/v1/projects/1/routers
 
       - name: Cache Test Dependencies
         uses: actions/cache@v2

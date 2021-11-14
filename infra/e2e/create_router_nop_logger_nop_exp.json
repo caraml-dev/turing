@@ -1,12 +1,12 @@
 {
-    "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-experiment-{{.TestID}}",
+    "environment_name": "dev",
+    "name": "e2e-experiment-manual",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverEndpoint}}/control",
+                "endpoint": "http://mockserver/control",
                 "timeout": "5s"
             }
         ],
@@ -25,11 +25,11 @@
             "result_logger_type": "nop"
         },
         "enricher": {
-            "image": "{{.TestEchoImage}}",
+            "image": "kennethreitz/httpbin",
             "resource_request": {
                 "min_replica": 1,
                 "max_replica": 1,
-                "cpu_request": "10",
+                "cpu_request": "200m",
                 "memory_request": "1Gi"
             },
             "endpoint": "anything",
@@ -49,7 +49,7 @@
                 "resource_request": {
                     "min_replica": 2,
                     "max_replica": 2,
-                    "cpu_request": "200m",
+                    "cpu_request": "250m",
                     "memory_request": "256Mi"
                 },
                 "endpoint": "anything",

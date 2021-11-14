@@ -82,7 +82,7 @@
 
 {{- define "turing.defaultConfig" -}}
 ClusterConfig:
-  InClusterConfig: {{ include "turing.clusterConfig.useInClusterCredentials" . }}
+  InClusterConfig: {{ .Values.turing.clusterConfig.useInClusterConfig }}
 DbConfig:
   Host: {{ include "turing.db.host" . | quote }}
   Database: {{ .Values.postgresql.postgresqlDatabase }}

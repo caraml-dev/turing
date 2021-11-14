@@ -30,7 +30,7 @@ spec:
 {{ toYaml .Values.turing.labels | indent 8 -}}
 {{- end }}
     spec:
-      {{- if include "turing.clusterConfig.useInClusterCredentials" . }}
+      {{- if .Values.turing.clusterConfig.useInClusterConfig }}
       serviceAccountName: {{ template "turing.serviceAccount.name" . }}
       {{- end }}
       initContainers:
