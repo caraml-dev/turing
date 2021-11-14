@@ -51,6 +51,8 @@ turing:
       PythonVersion: "3"
       TTLSecond: 86400
 
+  uiConfig: null # Not needed as we only test API
+
 postgresql:
   persistence:
     enabled: false

@@ -109,17 +109,17 @@ Sentry:
 {{- end -}}
 
 {{- define "turing.ui.defaultConfig" -}}
-{{- $oauthClientId := .Values.global.oauthClientId | default .Values.turing.uiConfig.authConfig.oauthClientId -}}
-{{- $alertsEnabled := eq (quote .Values.turing.uiConfig.alertConfig.enabled) "" | ternary .Values.turing.config.AlertConfig.Enabled .Values.turing.uiConfig.alertConfig.enabled -}}
+{{- if .Values.turing.uiConfig -}}
 alertConfig:
-  enabled: {{ $alertsEnabled }}
+  enabled: {{ eq (quote .Values.turing.uiConfig.alertConfig.enabled) "" | ternary .Values.turing.config.AlertConfig.Enabled .Values.turing.uiConfig.alertConfig.enabled }}
 appConfig:
   environment: {{ .Values.turing.uiConfig.appConfig.environment | default (include "turing.environment" .) }}
 authConfig:
-  oauthClientId: {{ $oauthClientId | quote }}
+  oauthClientId: {{ .Values.global.oauthClientId | default .Values.turing.uiConfig.authConfig.oauthClientId | quote }}
 sentryConfig:
   environment: {{ .Values.turing.uiConfig.sentryConfig.environment | default (include "turing.environment" .) }}
   dsn: {{ .Values.turing.uiConfig.sentryConfig.dsn | default (include "turing.sentry.dsn" .) | quote }}
+{{- end -}}
 {{- end -}}
 
 {{- define "turing.ui.config" -}}
