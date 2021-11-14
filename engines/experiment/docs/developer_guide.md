@@ -62,11 +62,14 @@ type IJsonValue = string | number | boolean | null
 
 type IExperimentConfig = { [key: string]: IJsonValue };
 
-// EditExperimentEngineConfig component signature. config is {} on init.
+// EditExperimentEngineConfig component signature.
+// config is {} on init.
+// errors holds the validaton error(s), if any.
 ({
     projectId: number,
     config: IExperimentConfig,
-    onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void
+    onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void,
+    errors: yup.ValidationError,
 }) => React.ReactElement
 
 // ExperimentEngineConfigDetails component signature.

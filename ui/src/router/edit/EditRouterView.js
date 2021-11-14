@@ -51,14 +51,12 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       confirmButtonColor="primary">
       {(onSubmit) =>
         !showDiffView ? (
-          <ExperimentEngineContextProvider>
-            <UpdateRouterForm
-              projectId={projectId}
-              onCancel={() => props.navigate("../")}
-              onNext={toggleDiffView}
-              {...props}
-            />
-          </ExperimentEngineContextProvider>
+          <UpdateRouterForm
+            projectId={projectId}
+            onCancel={() => props.navigate("../")}
+            onNext={toggleDiffView}
+            {...props}
+          />
         ) : (
           <VersionComparisonView
             currentRouter={currentRouter}
@@ -92,7 +90,13 @@ const EditRouterViewWrapper = ({ projectId, router, ...props }) => {
 
   return (
     <FormContextProvider data={TuringRouter.fromJson(router)}>
-      <EditRouterView projectId={projectId} currentRouter={router} {...props} />
+      <ExperimentEngineContextProvider>
+        <EditRouterView
+          projectId={projectId}
+          currentRouter={router}
+          {...props}
+        />
+      </ExperimentEngineContextProvider>
     </FormContextProvider>
   );
 };

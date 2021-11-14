@@ -10,12 +10,9 @@ export const ExperimentEngineContextProvider = ({ children }) => {
     []
   );
 
-  const getEngineProperties = (engineType) => {
-    return (
-      experimentEngines.find((eng) => eng.name.toLowerCase() === engineType) ||
-      {}
-    );
-  };
+  const getEngineProperties = (engineType) =>
+    experimentEngines.find((eng) => eng.name.toLowerCase() === engineType) ||
+    {};
 
   const experimentEngineOptions = useMemo(() => {
     return getExperimentEngineOptions(experimentEngines).map((o) => o.value);

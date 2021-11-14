@@ -22,6 +22,7 @@ const CustomExperimentEngineConfigGroup = ({
   projectId,
   config,
   onChangeHandler,
+  errors,
 }) => {
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
@@ -47,6 +48,7 @@ const CustomExperimentEngineConfigGroup = ({
         projectId={projectId}
         config={config}
         onChangeHandler={onChangeHandler}
+        errors={errors}
       />
     </React.Suspense>
   );
@@ -69,6 +71,7 @@ export const ExperimentConfigPanel = ({
         projectId={projectId}
         config={engine.config}
         onChangeHandler={onChangeHandler}
+        errors={errors}
       />
     ) : (
       <StandardExperimentConfigGroup

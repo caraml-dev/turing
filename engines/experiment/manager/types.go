@@ -35,6 +35,9 @@ type CustomExperimentManagerConfig struct {
 	// RemoteUI specifies the information for the custom experiment engine UI to be
 	// consumed by the Turing app, using Module Federation
 	RemoteUI RemoteUI `json:"remote_ui"`
+	// ExperimentConfigSchema is the serialised schema as supported by https://github.com/WASD-Team/yup-ast.
+	// If set, it will be used by the UI to validate experiment engine configuration in the Turing router.
+	ExperimentConfigSchema string `json:"experiment_config_schema,omitempty"`
 }
 
 // Engine describes the properties of an experiment engine

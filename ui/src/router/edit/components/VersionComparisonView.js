@@ -4,10 +4,9 @@ import { ConfigSection } from "../../../components/config_section";
 import { VersionComparisonPanel } from "../../versions/components/version_diff/VersionComparisonPanel";
 import { RouterVersion } from "../../../services/version/RouterVersion";
 import { StepActions } from "../../../components/multi_steps_form/StepActions";
-import { ExperimentEngineContextProvider } from "../../../providers/experiments/ExperimentEngineContextProvider";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 
-const VersionComparisonView = ({
+export const VersionComparisonView = ({
   currentRouter,
   updatedRouter,
   onPrevious,
@@ -56,11 +55,3 @@ const VersionComparisonView = ({
     </EuiFlexGroup>
   );
 };
-
-const VersionComparisonViewWrapper = (props) => (
-  <ExperimentEngineContextProvider>
-    <VersionComparisonView {...props} />
-  </ExperimentEngineContextProvider>
-);
-
-export { VersionComparisonViewWrapper as VersionComparisonView };

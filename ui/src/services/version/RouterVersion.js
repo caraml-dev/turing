@@ -19,29 +19,32 @@ export class RouterVersion {
         ? {
             type: "none",
           }
-        : context.experiment_engine.type === "custom"
-        ? this.experiment_engine
         : {
             type: this.experiment_engine.type,
-            config: {
-              client: {
-                id: this.experiment_engine.config.client.username,
-                ...(this.experiment_engine.config.client.passkey_set
-                  ? {
-                      encrypted_passkey:
-                        this.experiment_engine.config.client.encrypted_passkey,
-                    }
-                  : {
-                      encrypted_passkey: "<to be computed>",
-                      passkey: this.experiment_engine.config.client.passkey,
-                    }),
-              },
-              experiments: this.experiment_engine.config.experiments,
-              variables: stripKeys(this.experiment_engine.config.variables, [
-                "idx",
-                "selected",
-              ]),
-            },
+            config:
+              context.experiment_engine.type === "custom"
+                ? this.experiment_engine.config
+                : {
+                    client: {
+                      id: this.experiment_engine.config.client.username,
+                      ...(this.experiment_engine.config.client.passkey_set
+                        ? {
+                            encrypted_passkey:
+                              this.experiment_engine.config.client
+                                .encrypted_passkey,
+                          }
+                        : {
+                            encrypted_passkey: "<to be computed>",
+                            passkey:
+                              this.experiment_engine.config.client.passkey,
+                          }),
+                    },
+                    experiments: this.experiment_engine.config.experiments,
+                    variables: stripKeys(
+                      this.experiment_engine.config.variables,
+                      ["idx", "selected"]
+                    ),
+                  },
           };
 
     const pretty = {

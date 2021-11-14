@@ -17,12 +17,12 @@ export class ExperimentEngine extends BaseExperimentEngine {
     const engine = new ExperimentEngine(type);
     engine.config = objectAssignDeep({}, json.config);
 
-    if (engine.config.client && engine.config.client.passkey) {
+    if (engine.config.client && engine.config.client?.passkey) {
       if (typeof engine.config.client.passkey_set === "undefined") {
         engine.config.client.passkey_set = true;
         engine.config.client.encrypted_passkey = engine.config.client.passkey;
         engine.config.client.passkey = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
-      } else if (engine.config.client.passkey_set === false) {
+      } else if (engine.config.client?.passkey_set === false) {
         delete engine.config.client.encrypted_passkey;
       }
     }
@@ -33,10 +33,12 @@ export class ExperimentEngine extends BaseExperimentEngine {
   toJSON() {
     const json = objectAssignDeep({}, this);
 
-    if (json.config.client.passkey_set) {
+    if (json.config?.client?.passkey_set) {
       delete json.config.client.passkey;
     }
-    delete json.config.client.passkey_set;
+    if (json.config?.client?.passkey_set) {
+      delete json.config.client.passkey_set;
+    }
 
     return json;
   }

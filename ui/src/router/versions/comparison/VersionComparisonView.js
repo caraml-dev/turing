@@ -39,26 +39,18 @@ const VersionComparisonView = ({
     !versionRight
   );
 
-  const { getEngineProperties } = useContext(ExperimentEngineContext);
-  const leftVersionContext = {
-    experiment_engine: getEngineProperties(
-      leftVersion.data.config?.experiment_engine?.type
-    ),
-  };
-  const rightVersionContext = {
-    experiment_engine: getEngineProperties(
-      rightVersion.data.config?.experiment_engine?.type
-    ),
-  };
+  const { getEngineProperties, isLoaded: isExpCtxLoaded } = useContext(
+    ExperimentEngineContext
+  );
 
   useEffect(() => {
-    if (!!leftVersion.data && !!rightVersion.data) {
+    if (!!leftVersion.data && !!rightVersion.data && isExpCtxLoaded) {
       setIsLoaded(true);
     } else if (!!leftVersion.error || !!rightVersion.error) {
       setIsLoaded(true);
       setError(leftVersion.error || rightVersion.error);
     }
-  }, [leftVersion, rightVersion]);
+  }, [leftVersion, rightVersion, isExpCtxLoaded]);
 
   useEffect(() => {
     replaceBreadcrumbs([
@@ -96,12 +88,16 @@ const VersionComparisonView = ({
           </EuiCallOut>
         ) : (
           <VersionComparisonPanel
-            leftValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml(
-              leftVersionContext
-            )}
-            rightValue={RouterVersion.fromJson(rightVersion.data).toPrettyYaml(
-              rightVersionContext
-            )}
+            leftValue={RouterVersion.fromJson(leftVersion.data).toPrettyYaml({
+              experiment_engine: getEngineProperties(
+                leftVersion.data?.experiment_engine?.type
+              ),
+            })}
+            rightValue={RouterVersion.fromJson(rightVersion.data).toPrettyYaml({
+              experiment_engine: getEngineProperties(
+                rightVersion.data?.experiment_engine?.type
+              ),
+            })}
             leftTitle={`Version ${leftVersionNumber}`}
             rightTitle={`Version ${rightVersionNumber}`}
           />
