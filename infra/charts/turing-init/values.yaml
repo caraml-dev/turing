@@ -7,7 +7,7 @@ image:
   # -- Docker registry for Turing cluster init
   registry: ghcr.io/
   # -- Docker image repository for Turing cluster init
-  repository: gojek/turing-cluster-init
+  repository: gojek/turing/cluster-init
   # -- Docker image tag for Turing cluster init
   tag: latest
   pullPolicy: IfNotPresent
