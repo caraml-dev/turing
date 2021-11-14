@@ -344,7 +344,6 @@ jobs:
       LOCAL_REGISTRY: registry.localhost:5000
       MLP_VERSION: v1.4.14
       MERLIN_VERSION: v0.9.0
-      VAULT_CHART_VERSION: 0.16.1
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
 #    needs:
@@ -352,8 +351,15 @@ jobs:
 #      - build-router
 #      - build-cluster-init
     strategy:
+      fail-fast: false
       matrix:
         useInClusterConfig: [false, true]
+        include:
+          - useInClusterConfig: true
+            valuesFile: "turing.values.in-cluster.yaml"
+          - useInClusterConfig: false
+            valuesFile: "turing.values.remote.yaml"
+
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -442,6 +448,8 @@ jobs:
 
       - name: "Install Vault"
         if: ${{ !matrix.useInClusterConfig }}
+        env:
+          VAULT_CHART_VERSION: 0.16.1
         run: |
           helm repo add hashicorp https://helm.releases.hashicorp.com
           helm install vault hashicorp/vault \
@@ -526,9 +534,8 @@ jobs:
           helm install turing ./infra/charts/turing \
             --set turing.image.tag=v0.0.0-build.109-8bd1b4b \
             --set turing.config.RouterDefaults.Image=ghcr.io/gojek/turing/turing-router:v0.0.0-build.109-8bd1b4b \
-            --values infra/e2e/turing.values.yaml
-#
-#          kubectl apply -f infra/e2e/turing.ingress.yaml
+            --values infra/e2e/turing.values.yaml \
+            --values infra/e2e/${{ matrix.valuesFile }}
 
       - name: Install mockserver
         run: |
@@ -542,7 +549,7 @@ jobs:
             deployment/turing-mlp,
             deployment/turing-merlin,
             deployment/turing
-          timeout: 500 #seconds
+          timeout: 300 #seconds
           max-restarts: -1
 
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
