@@ -347,7 +347,7 @@ jobs:
       VAULT_CHART_VERSION: 0.16.1
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
-    needs:
+#    needs:
 #      - build-api
 #      - build-router
 #      - build-cluster-init
