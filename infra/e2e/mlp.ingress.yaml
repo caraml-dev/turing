@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: mlp
+            name: turing-mlp
             port:
               number: 8080
