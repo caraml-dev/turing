@@ -555,12 +555,20 @@ jobs:
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
         name: "Debug Deployment Failure"
         run: |
+          echo "::group::describe deployment/turing-merlin"
+          kubectl describe deployment/turing-merlin
+          echo "::endgroup::"
+
           echo "::group::describe deployment/turing"
           kubectl describe deployment/turing
           echo "::endgroup::"
 
           echo "::group::secret/turing-api-config"
           kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing-merlin"
+          kubectl logs deployment/turing-merlin
           echo "::endgroup::"
 
           echo "::group::logs deployment/turing"
