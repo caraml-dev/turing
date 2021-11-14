@@ -35,7 +35,7 @@ export const RouterDetailsPageNavigation = ({
         </span>
       ),
       href: router.monitoring_url,
-      disabled: !item.monitoring_url || !config.version,
+      disabled: !router.monitoring_url || !config.version,
     },
   ];
 

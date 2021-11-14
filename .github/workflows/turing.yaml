@@ -412,13 +412,13 @@ jobs:
 #          docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
       - name: "Install Infrastructure"
+#            --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
+#            --set image.repository=${{ github.repository }}/cluster-init \
+#            --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
         run: |
           kubectl create ns infrastructure
           helm upgrade turing-init infra/charts/turing-init \
             --namespace infrastructure \
-#            --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
-#            --set image.repository=${{ github.repository }}/cluster-init \
-#            --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
             --set image.tag=v0.0.0-build.110-b8b8878 \
             --install \
             --wait
@@ -512,12 +512,12 @@ jobs:
 #          kubectl apply -f infra/e2e/merlin.ingress.yaml
 
       - name: Install Turing
-        run: |
-          helm install turing ./infra/charts/turing \
 #            --set turing.image.registry=${{ env.LOCAL_REGISTRY }}/ \
 #            --set turing.image.repository=${{ github.repository }}/turing-api \
 #            --set turing.image.tag=${{ env.TURING_API_VERSION }} \
 #            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+        run: |
+          helm install turing ./infra/charts/turing \
             --set turing.image.tag=v0.0.0-build.109-8bd1b4b \
             --set turing.config.RouterDefaults.Image=ghcr.io/gojek/turing/turing-router:v0.0.0-build.109-8bd1b4b \
             --values infra/e2e/turing.values.yaml \
