@@ -52,12 +52,24 @@ turing:
       TTLSecond: 86400
 
 postgresql:
+  persistence:
+    enabled: false
+  resources:
+    requests: &postgresqlRequests
+      cpu: 100m
+      memory: 128Mi
   postgresqlPassword: turing
 
 merlin:
   postgresql:
+    persistence:
+      enabled: false
+    requests: *postgresqlRequests
     postgresqlPassword: merlin
 
 mlp:
   postgresql:
+    persistence:
+      enabled: false
+    requests: *postgresqlRequests
     postgresqlPassword: mlp
