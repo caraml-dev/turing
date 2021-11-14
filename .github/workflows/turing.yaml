@@ -524,10 +524,15 @@ jobs:
 #
 #          kubectl apply -f infra/e2e/turing.ingress.yaml
 
+      - name: Install mockserver
+        run: |
+          kubectl apply -f infra/e2e/turing.mockserver.yaml
+
       - uses: jupyterhub/action-k8s-await-workloads@v1
         id: wait-for-deployment
         with:
           workloads: >-
+            deployment/mockserver,
             deployment/turing-mlp,
             deployment/turing-merlin,
             deployment/turing
@@ -549,11 +554,6 @@ jobs:
           kubectl logs deployment/turing
           echo "::endgroup::"
 
-
-      - name: Install mockserver
-        run: |
-          kubectl apply -f infra/e2e/turing.mockserver.yaml
-
       - name: Setup MLP project
         run: |
           tee payload.json <<EOF
@@ -569,6 +569,10 @@ jobs:
             --request POST \
             --data @payload.json \
             http://turing-gateway.127.0.0.1.nip.io/api/v1/projects
+
+      - name: Test Turing API
+        run: |
+          curl -v http://turing-gateway.127.0.0.1.nip.io/api/turing/v1/projects
 
       - name: Cache Test Dependencies
         uses: actions/cache@v2
