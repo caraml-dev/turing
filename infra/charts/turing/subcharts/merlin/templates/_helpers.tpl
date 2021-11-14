@@ -64,10 +64,6 @@ Usage:
     {{- end }}
 {{- end -}}
 
-
-{{- define "merlin.mlp.apiHost" -}}
-{{- end -}}
-
 {{- define "merlin.oauthClientId" -}}
 {{- .Values.global.oauthClientId | default .Values.oauthClientId -}}
 {{- end -}}
@@ -83,7 +79,7 @@ Usage:
 {{- define "merlin.alerts.envVars" -}}
 - name: ALERT_ENABLED
   value: {{ include "merlin.alerts.enabled" . | quote }}
-{{- if (include "merlin.alerts.enabled" .) }}
+{{- if eq (include "merlin.alerts.enabled" .) "true" }}
 - name: GITLAB_BASE_URL
   value: "{{ .Values.alert.gitlab.baseURL }}"
 - name: GITLAB_TOKEN
@@ -142,7 +138,7 @@ Usage:
 {{- define "merlin.monitoring.envVars" -}}
  - name: MONITORING_DASHBOARD_ENABLED
   value: {{ include "merlin.monitoring.enabled" . | quote }}
-{{- if (include "merlin.monitoring.enabled" .) }}
+{{- if eq (include "merlin.monitoring.enabled" .) "true" }}
 - name: MONITORING_DASHBOARD_BASE_URL
   value: "{{ .Values.monitoring.baseURL }}"
 - name: MONITORING_DASHBOARD_JOB_BASE_URL

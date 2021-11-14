@@ -95,8 +95,8 @@ KubernetesLabelConfigs:
 MLPConfig:
   MLPEncryptionKey: {{ include "turing.mlp.encryption.key" . | quote }}
 {{ if .Values.tags.mlp }}
-  MerlinURL: {{ printf "http://%s-%s:8080/v1" .Release.Name (include "turing.merlin.name" .) }}
-  MLPURL: {{ printf "http://%s-%s:8080/v1" .Release.Name (include "turing.mlp.name" .) }}
+  MerlinURL: {{ printf "http://%s:8080/v1" (include "turing.merlin.name" .) }}
+  MLPURL: {{ printf "http://%s:8080/v1" (include "turing.mlp.name" .) }}
 {{ end }}
 TuringEncryptionKey: {{ include "turing.encryption.key" . | quote }}
 Sentry:
