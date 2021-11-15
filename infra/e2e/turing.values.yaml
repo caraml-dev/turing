@@ -4,31 +4,14 @@ global:
       key: "encryption-key"
 
 turing:
-  config:
-    BatchEnsemblingConfig:
-      Enabled: false
-
   uiConfig: null # Not needed as we only test API
 
-postgresql:
+postgresql: &postgresql
   persistence:
     enabled: false
-  resources:
-    requests: &postgresqlRequests
-      cpu: 100m
-      memory: 128Mi
-  postgresqlPassword: turing
 
 merlin:
-  postgresql:
-    persistence:
-      enabled: false
-    requests: *postgresqlRequests
-    postgresqlPassword: merlin
+  postgresql: *postgresql
 
 mlp:
-  postgresql:
-    persistence:
-      enabled: false
-    requests: *postgresqlRequests
-    postgresqlPassword: mlp
+  postgresql: *postgresql

@@ -138,12 +138,14 @@ mlflow:
 postgresql:
   resources:
     requests:
-      memory: 2Gi
+      memory: 256Mi
       cpu: 500m
   persistence:
+    enabled: true
     size: 10Gi
   postgresqlUsername: merlin
   postgresqlDatabase: merlin
+  postgresqlPassword: merlin
   metrics:
     enabled: false
     serviceMonitor:
@@ -163,7 +165,7 @@ postgresql:
     applicationName: merlin
 
 swagger:
-  enabled: true
+  enabled: false
   image:
     tag: v3.23.5
   apiHost: "merlin.dev"

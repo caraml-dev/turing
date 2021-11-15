@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: v1.0.0
+    tag: v1.0.0-rc1
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -53,7 +53,7 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:v1.0.0
+      Image: ghcr.io/gojek/turing/turing-router:v1.0.0-rc1
 
   # -- Turing UI configuration.
   # Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
@@ -138,19 +138,41 @@ sentry:
   dsn: ""
 
 postgresql:
-  # -- Resources requests and limits for Turing database. This should be set 
+  # -- Resources requests and limits for Turing database. This should be set
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources: {}
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 500m
   persistence:
-    # -- Persist Postgresql data in a Persistent Volume Claim 
+    # -- Persist Postgresql data in a Persistent Volume Claim
     enabled: true
+    size: 10Gi
   # -- Database name for Turing Postgresql database
   postgresqlDatabase: turing
   # -- Username for Turing Postgresql database
   postgresqlUsername: turing
-  # -- Password for Turing Postgresql database (required)
-  postgresqlPassword:
+  # -- Password for Turing Postgresql database
+  postgresqlPassword: turing
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+    replication:
+      enabled: false
+      user: repl_user
+      password: repl_password
+      slaveReplicas: 2
+      # -- Set synchronous commit mode: on, off, remote_apply, remote_write and local
+      # ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL
+      synchronousCommit: "on"
+      # -- From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication
+      #
+      # NOTE: It cannot be > slaveReplicas
+      numSynchronousReplicas: 2
+      # -- Replication Cluster application name. Useful for defining multiple replication policies
+      applicationName: merlin
 
 mlp:
   apiHost: /api/v1
@@ -173,8 +195,6 @@ mlp:
 
 merlin:
   apiHost: /api/merlin/v1
-  swagger:
-    enabled: false
   postgresql:
     nameOverride: postgresql-merlin
   mlpApi:

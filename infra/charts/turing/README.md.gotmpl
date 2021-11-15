@@ -1,0 +1,78 @@
+{{ template "chart.header" . }}
+---
+{{ template "chart.versionBadge" . }}
+{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+## Introduction
+
+This Helm chart installs [Turing](https://github.com/gojek/turing) and all its dependencies in a Kubernetes cluster.
+
+## Prerequisites
+
+To use the charts here, [Helm](https://helm.sh/) must be configured for your
+Kubernetes cluster. Setting up Kubernetes and Helm is outside the scope of
+this README. Please refer to the Kubernetes and Helm documentation.
+
+- **Helm 3.0+** – This chart was tested with Helm v3.7.1, but it is also expected to work with earlier Helm versions
+- **Kubernetes 1.18+** – This chart was tested with GKE v1.20.x and with [k3d](https://github.com/rancher/k3d) v1.21.x,
+but it's possible it works with earlier k8s versions too
+- **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
+- **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
+
+It's recommended to use [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
+to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
+
+Configuration and installation of [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
+is out of scope of this README, please refer to [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
+for installation instructions.
+
+## Installation
+
+### Add Helm repository
+
+```shell
+$ helm repo add turing https://turing-ml.github.io/charts
+```
+
+### Installing the chart
+
+This command will install Turing in the `default` namespace and default
+chart values will be used for the installation:
+```shell
+$ helm install <release-name> turing/turing
+```
+
+You can (and most likely, should) override the default configuration with your own values.
+Refer to [Configuration](#-configuration) section for the detailed description of available configuration keys.
+
+### Uninstalling the chart
+
+To uninstall my-release:
+```shell
+$ helm uninstall my-release
+```
+
+
+This will create a release of `spark-operator` in the default namespace. To install in a different one:
+
+```shell
+$ helm install -n spark my-release spark-operator/spark-operator
+```
+
+Note that `helm` will fail to install if the namespace doesn't exist. Either create the namespace beforehand or pass the `--create-namespace` flag to the `helm install` command.
+
+## Uninstalling the chart
+
+To uninstall `my-release`:
+
+```shell
+$ helm uninstall my-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release, except for the `crds`, those will have to be removed manually.
+
+## Configuration
+---
+{{ template "chart.valuesTable" . }}
