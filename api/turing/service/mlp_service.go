@@ -3,17 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/antihax/optional"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/log"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2/google"
-
-	"github.com/gojek/turing/api/turing/models"
 )
 
 const (
@@ -88,7 +87,7 @@ func NewMLPService(
 	if err == nil {
 		httpClient = googleClient
 	} else {
-		log.Println("Google default credential not found. Fallback to HTTP default client")
+		log.Infof("Google default credential not found. Fallback to HTTP default client")
 	}
 
 	svc := &mlpService{

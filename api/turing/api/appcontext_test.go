@@ -104,7 +104,6 @@ func TestNewAppContext(t *testing.T) {
 		},
 		DeployConfig: &config.DeploymentConfig{
 			EnvironmentType: "dev",
-			GcpProject:      "gcp-project",
 			Timeout:         timeout,
 			DeletionTimeout: delTimeout,
 			MaxCPU:          config.Quantity(resource.MustParse("200m")),
@@ -219,6 +218,7 @@ func TestNewAppContext(t *testing.T) {
 			assert.Equal(t, testCfg, cfg)
 			assert.Equal(t, map[string]string{
 				"N1": "C1",
+				"N2": "C2",
 			}, environmentClusterMap)
 			assert.Equal(t, testVaultClient, vaultClient)
 			return map[string]cluster.Controller{}, nil

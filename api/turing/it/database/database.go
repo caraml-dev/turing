@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package database
@@ -5,13 +6,14 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"testing"
+	"time"
+
+	"github.com/gojek/turing/api/turing/log"
 	gomigrate "github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jinzhu/gorm"
-	"log"
-	"testing"
-	"time"
 )
 
 func connectionString(db string) string {
@@ -53,7 +55,7 @@ func CreateTestDatabase() (*gorm.DB, func(), error) {
 	testDbName := fmt.Sprintf("mlp_id_%d", time.Now().UnixNano())
 
 	connStr := connectionString(database)
-	log.Printf("connecting to test db: %s", connStr)
+	log.Infof("connecting to test db: %s", connStr)
 	conn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, nil, err

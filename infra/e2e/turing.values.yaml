@@ -1,19 +1,14 @@
+global:
+  mlp:
+    encryption:
+      key: "encryption-key"
+
 turing:
-  image:
-    # Value will be set at install time using helm --set command
-    tag:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 100m
-      memory: 128Mi
-  config: 
+  config:
     BatchEnsemblingConfig:
       Enabled: true
       JobConfig:
-        DefaultEnvironment: id-dev
+        DefaultEnvironment: dev
         DefaultConfigurations:
           SparkConfigAnnotations:
             "spark/spark.sql.execution.arrow.pyspark.enabled": "true"
@@ -44,14 +39,6 @@ turing:
             Limits:
               CPU: "1"
               Memory: 1Gi
-    DbConfig:
-      Host: turing-postgresql
-      User: turing 
-      Password: secret
-    DeployConfig:
-      EnvironmentType: id-dev
-    KubernetesLabelConfigs:
-      Environment: dev
     SparkAppConfig:
       CorePerCPURequest: 1.5
       CPURequestToCPULimit: 1.25
@@ -63,27 +50,28 @@ turing:
       FailureRetryInterval: 10
       PythonVersion: "3"
       TTLSecond: 86400
-    RouterDefaults:
-      # Value will be set at install time using helm --set command
-      Image:
-    ClusterConfig:
-      InClusterConfig: false
-      VaultConfig:
-        Address: http://vault:8200
-        Token: root
-    TuringEncryptionKey: secret
-    MLPConfig:
-      MerlinURL: http://merlin:8080/v1
-      MLPURL: http://mlp:8080/v1
-      MLPEncryptionKey: secret
+
+  uiConfig: null # Not needed as we only test API
 
 postgresql:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
   persistence:
     enabled: false
-  postgresqlUsername: turing
-  postgresqlDatabase: turing
-  postgresqlPassword: secret
+  resources:
+    requests: &postgresqlRequests
+      cpu: 100m
+      memory: 128Mi
+  postgresqlPassword: turing
+
+merlin:
+  postgresql:
+    persistence:
+      enabled: false
+    requests: *postgresqlRequests
+    postgresqlPassword: merlin
+
+mlp:
+  postgresql:
+    persistence:
+      enabled: false
+    requests: *postgresqlRequests
+    postgresqlPassword: mlp

@@ -1,0 +1,3 @@
+turing:
+  clusterConfig:
+    useInClusterConfig: true

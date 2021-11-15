@@ -342,15 +342,26 @@ jobs:
       KNATIVE_VERSION: v0.18.3
       KNATIVE_ISTIO_VERSION: v0.18.1
       LOCAL_REGISTRY: registry.localhost:5000
-      MLP_VERSION: v1.4.14
-      MERLIN_VERSION: v0.9.0
-      VAULT_CHART_VERSION: 0.16.1
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
     needs:
       - build-api
       - build-router
       - build-cluster-init
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          - "In-cluster credentials"
+          - "Remote cluster credentials"
+        include:
+          - name: "In-cluster credentials"
+            useInClusterConfig: true
+            valuesFile: "turing.values.in-cluster.yaml"
+          - name: "Remote cluster credentials"
+            useInClusterConfig: false
+            valuesFile: "turing.values.remote.yaml"
+
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -433,6 +444,9 @@ jobs:
           kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-init
 
       - name: "Install Vault"
+        if: ${{ !matrix.useInClusterConfig }}
+        env:
+          VAULT_CHART_VERSION: 0.16.1
         run: |
           helm repo add hashicorp https://helm.releases.hashicorp.com
           helm install vault hashicorp/vault \
@@ -442,30 +456,8 @@ jobs:
 
           kubectl apply -f infra/e2e/vault.ingress.yaml
 
-      - name: Checkout MLP
-        uses: actions/checkout@v2
-        with:
-          repository: gojek/mlp
-          ref: ${{ env.MLP_VERSION }}
-          path: mlp
-
-      - name: Install MLP
-        run: |
-          helm install mlp ./mlp/charts/mlp \
-            --set mlp.image.tag=${{ env.MLP_VERSION }} \
-            --values infra/e2e/mlp.helm-values.yaml \
-            --wait
-
-          kubectl apply -f infra/e2e/mlp.ingress.yaml
-
-      - name: Checkout Merlin
-        uses: actions/checkout@v2
-        with:
-          repository: gojek/merlin
-          ref: ${{ env.MERLIN_VERSION }}
-          path: merlin
-
-      - name: Prepare Vault secret for Merlin
+      - name: Prepare cluster credentials
+        if: ${{ !matrix.useInClusterConfig }}
         env:
           VAULT_TOKEN: root
         run: |
@@ -487,50 +479,55 @@ jobs:
             --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
             --request POST \
             --data @credentials.json \
-            http://vault.127.0.0.1.nip.io/v1/secret/k3d-${{ env.CLUSTER_NAME }}
+            http://vault.127.0.0.1.nip.io/v1/secret/dev
 
+          # Create a secret for Merlin with information on how to access Vault
           kubectl create secret generic vault-secret \
-            --from-literal=address=http://vault:8200 \
-            --from-literal=token=${{ env.VAULT_TOKEN }}
+            --from-literal=vault-address=http://vault:8200 \
+            --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 
-      - name: Install Merlin
-        env:
-          CLUSTER_NAME: k3d-${{ env.CLUSTER_NAME }}
+      - name: Install Turing
         run: |
-          helm install merlin ./merlin/charts/merlin \
-            --set merlin.image.tag=${{ env.MERLIN_VERSION }} \
-            --set merlin.environmentConfigs[0].cluster=${{ env.CLUSTER_NAME }} \
-            --set merlin.imageBuilder.clusterName=${{ env.CLUSTER_NAME }} \
-            --values infra/e2e/merlin.helm-values.yaml \
-            --wait
-
-          kubectl apply -f infra/e2e/merlin.ingress.yaml
+          helm install turing ./infra/charts/turing \
+            --values infra/e2e/turing.values.yaml \
+            --values infra/e2e/${{ matrix.valuesFile }} \
+            --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
+            --set turing.image.repository=${{ github.repository }}/turing-api \
+            --set turing.image.tag=${{ env.TURING_API_VERSION }} \
+            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
 
       - name: Install mockserver
         run: |
           kubectl apply -f infra/e2e/turing.mockserver.yaml
 
-      - name: Install Turing
-        run: |
-          helm install turing ./infra/charts/turing \
-            --set turing.image.registry=${{ env.LOCAL_REGISTRY }}/ \
-            --set turing.image.repository=${{ github.repository }}/turing-api \
-            --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            --values infra/e2e/turing.helm-values.yaml \
-            --wait
-
-          kubectl apply -f infra/e2e/turing.ingress.yaml
+      - uses: jupyterhub/action-k8s-await-workloads@v1
+        id: wait-for-deployment
+        with:
+          workloads: >-
+            deployment/mockserver,
+            deployment/turing-mlp,
+            deployment/turing-merlin,
+            deployment/turing
+          timeout: 300 #seconds
+          max-restarts: -1
 
       - if: steps.wait-for-deployment.outcome == 'failure' && always()
         name: "Debug Deployment Failure"
         run: |
+          echo "::group::describe deployment/turing-merlin"
+          kubectl describe deployment/turing-merlin
+          echo "::endgroup::"
+
           echo "::group::describe deployment/turing"
           kubectl describe deployment/turing
           echo "::endgroup::"
 
           echo "::group::secret/turing-api-config"
           kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing-merlin"
+          kubectl logs deployment/turing-merlin
           echo "::endgroup::"
 
           echo "::group::logs deployment/turing"
@@ -551,7 +548,7 @@ jobs:
             --header 'Content-Type: application/json' \
             --request POST \
             --data @payload.json \
-            http://mlp.127.0.0.1.nip.io/v1/projects
+            http://turing-gateway.127.0.0.1.nip.io/api/v1/projects
 
       - name: Cache Test Dependencies
         uses: actions/cache@v2
@@ -567,8 +564,8 @@ jobs:
           GOPATH: ${{ github.workspace }}/api/.go
           TEST_ID: ${{ github.run_id }}
           MOCKSERVER_ENDPOINT: http://mockserver
-          API_BASE_PATH: http://turing.127.0.0.1.nip.io/v1
-          MODEL_CLUSTER_NAME: k3d-${{ env.CLUSTER_NAME }}
+          API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/v1
+          MODEL_CLUSTER_NAME: "dev"
           PROJECT_ID: "1"
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true

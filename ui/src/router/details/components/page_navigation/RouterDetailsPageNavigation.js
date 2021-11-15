@@ -19,7 +19,7 @@ export const RouterDetailsPageNavigation = ({
     {
       id: "alerts",
       name: "Alerts",
-      disabled: !config.version,
+      disabled: !config.alerts.enabled || !config.version,
     },
     {
       id: "logs",
@@ -35,7 +35,7 @@ export const RouterDetailsPageNavigation = ({
         </span>
       ),
       href: router.monitoring_url,
-      disabled: !config.version,
+      disabled: !router.monitoring_url || !config.version,
     },
   ];
 

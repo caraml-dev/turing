@@ -50,6 +50,13 @@ func Run() {
 		log.Panicf("Failed validating config: %s", err)
 	}
 
+	// Configure global logger
+	if len(cfg.LogLevel) > 0 {
+		if err = log.SetLogLevelAt(cfg.LogLevel); err != nil {
+			log.Panicf("Failed to configure global logger: %s", err)
+		}
+	}
+
 	// Init db
 	db, err := gorm.Open(
 		"postgres",

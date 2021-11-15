@@ -62,7 +62,7 @@ func NewAppContext(
 	}
 
 	// Create a map of env name to cluster name for each supported deployment environment
-	envClusterMap, err := getEnvironmentClusterMap(mlpSvc, cfg.DeployConfig.GcpProject)
+	envClusterMap, err := getEnvironmentClusterMap(mlpSvc)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service")
 	}
@@ -155,12 +155,8 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// getEnvironmentClusterMap creates a map of the environment name to the
-// kubernetes cluster, that belong to the configured GCP project.
-func getEnvironmentClusterMap(
-	mlpSvc service.MLPService,
-	gcpProject string,
-) (map[string]string, error) {
+// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster
+func getEnvironmentClusterMap(mlpSvc service.MLPService) (map[string]string, error) {
 	envClusterMap := map[string]string{}
 	// Get all environments
 	environments, err := mlpSvc.GetEnvironments()
@@ -169,9 +165,7 @@ func getEnvironmentClusterMap(
 	}
 	// Create a map of the environment name to cluster id
 	for _, environment := range environments {
-		if environment.GcpProject == gcpProject {
-			envClusterMap[environment.Name] = environment.Cluster
-		}
+		envClusterMap[environment.Name] = environment.Cluster
 	}
 	return envClusterMap, nil
 }

@@ -1,3 +1,4 @@
+//go:build unit
 // +build unit
 
 package config
@@ -190,7 +191,6 @@ func TestLoad(t *testing.T) {
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",
-					GcpProject:      "gcp-001",
 					Timeout:         5 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
 					MaxCPU:          Quantity(resource.MustParse("500m")),
@@ -267,6 +267,7 @@ func TestLoad(t *testing.T) {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
 			want: &Config{
 				Port:           10000,
+				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://foo2.com"},
 				AuthConfig: &AuthorizationConfig{
 					Enabled: false,
@@ -281,7 +282,6 @@ func TestLoad(t *testing.T) {
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",
-					GcpProject:      "gcp-001",
 					Timeout:         5 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
 					MaxCPU:          Quantity(resource.MustParse("500m")),
@@ -381,6 +381,7 @@ func TestLoad(t *testing.T) {
 			},
 			want: &Config{
 				Port:           5000,
+				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://baz.com", "http://qux.com"},
 				AuthConfig: &AuthorizationConfig{
 					Enabled: true,
@@ -399,7 +400,6 @@ func TestLoad(t *testing.T) {
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",
-					GcpProject:      "gcp-001",
 					Timeout:         10 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
 					MaxCPU:          Quantity(resource.MustParse("500m")),

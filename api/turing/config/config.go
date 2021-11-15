@@ -51,6 +51,7 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 // Config is used to parse and store the environment configs
 type Config struct {
 	Port                   int `validate:"required"`
+	LogLevel               string
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
 	BatchEnsemblingConfig  *BatchEnsemblingConfig  `validate:"required"`
@@ -187,8 +188,7 @@ type SparkAppConfig struct {
 
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
-	EnvironmentType string `validate:"required"`
-	GcpProject      string
+	EnvironmentType string        `validate:"required"`
 	Timeout         time.Duration `validate:"required"`
 	DeletionTimeout time.Duration `validate:"required"`
 	MaxCPU          Quantity      `validate:"required"`
@@ -416,7 +416,6 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DbConfig::Database", "turing")
 
 	v.SetDefault("DeployConfig::EnvironmentType", "")
-	v.SetDefault("DeployConfig::GcpProject", "")
 	v.SetDefault("DeployConfig::Timeout", "3m")
 	v.SetDefault("DeployConfig::DeletionTimeout", "1m")
 	v.SetDefault("DeployConfig::MaxCPU", "4")
