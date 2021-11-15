@@ -63,70 +63,37 @@ except for postgresql PVC, those will have to be removed manually.
 
 ## Configuration
 
-The following tables lists the configurable parameters of the Turing chart and their default values.
+The following table lists the configurable parameters of the Turing chart and their default values.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | dbMigrations.image.tag | string | `"v4.7.1"` | Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate |
-| global.mlp.encryption.key | string | `""` |  |
-| global.sentry | object | `{}` |  |
-| merlin.apiHost | string | `"/api/merlin/v1"` |  |
-| merlin.environmentConfigs[0].cluster | string | `"dev"` |  |
-| merlin.environmentConfigs[0].cpu_limit | string | `"400m"` |  |
-| merlin.environmentConfigs[0].cpu_request | string | `"100m"` |  |
-| merlin.environmentConfigs[0].deployment_timeout | string | `"10m"` |  |
-| merlin.environmentConfigs[0].gcp_project | string | `""` |  |
-| merlin.environmentConfigs[0].is_default | bool | `true` |  |
-| merlin.environmentConfigs[0].is_default_prediction_job | bool | `true` |  |
-| merlin.environmentConfigs[0].is_prediction_job_enabled | bool | `false` |  |
-| merlin.environmentConfigs[0].max_cpu | string | `"8"` |  |
-| merlin.environmentConfigs[0].max_memory | string | `"8Gi"` |  |
-| merlin.environmentConfigs[0].max_replica | int | `1` |  |
-| merlin.environmentConfigs[0].memory_limit | string | `"500Mi"` |  |
-| merlin.environmentConfigs[0].memory_request | string | `"200Mi"` |  |
-| merlin.environmentConfigs[0].min_replica | int | `0` |  |
-| merlin.environmentConfigs[0].name | string | `"dev"` |  |
-| merlin.environmentConfigs[0].namespace_timeout | string | `"2m"` |  |
-| merlin.environmentConfigs[0].prediction_job_config.driver_cpu_request | string | `"2"` |  |
-| merlin.environmentConfigs[0].prediction_job_config.driver_memory_request | string | `"2Gi"` |  |
-| merlin.environmentConfigs[0].prediction_job_config.executor_cpu_request | string | `"2"` |  |
-| merlin.environmentConfigs[0].prediction_job_config.executor_memory_request | string | `"2Gi"` |  |
-| merlin.environmentConfigs[0].prediction_job_config.executor_replica | int | `3` |  |
-| merlin.environmentConfigs[0].queue_resource_percentage | string | `"20"` |  |
-| merlin.environmentConfigs[0].region | string | `""` |  |
-| merlin.mlpApi.apiHost | string | `"http://{{ .Release.Name }}-mlp:8080/v1"` |  |
-| merlin.postgresql.nameOverride | string | `"postgresql-merlin"` |  |
-| mlp.apiHost | string | `"/api/v1"` |  |
-| mlp.extraEnvs[0].name | string | `"REACT_APP_MERLIN_UI_HOMEPAGE"` |  |
-| mlp.extraEnvs[0].value | string | `"/merlin"` |  |
-| mlp.extraEnvs[1].name | string | `"REACT_APP_MERLIN_API"` |  |
-| mlp.extraEnvs[1].value | string | `"/api/merlin/v1"` |  |
-| mlp.extraEnvs[2].name | string | `"REACT_APP_TURING_UI_HOMEPAGE"` |  |
-| mlp.extraEnvs[2].value | string | `"/turing"` |  |
-| mlp.extraEnvs[3].name | string | `"REACT_APP_TURING_API"` |  |
-| mlp.extraEnvs[3].value | string | `"/api/turing/v1"` |  |
-| mlp.extraEnvs[4].name | string | `"REACT_APP_FEAST_CORE_API"` |  |
-| mlp.extraEnvs[4].value | string | `"http://feast.dev/v1"` |  |
-| mlp.postgresql.nameOverride | string | `"postgresql-mlp"` |  |
-| postgresql.metrics.enabled | bool | `false` |  |
-| postgresql.metrics.replication.applicationName | string | `"merlin"` | Replication Cluster application name. Useful for defining multiple replication policies |
-| postgresql.metrics.replication.enabled | bool | `false` |  |
-| postgresql.metrics.replication.numSynchronousReplicas | int | `2` | From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication NOTE: It cannot be > slaveReplicas |
-| postgresql.metrics.replication.password | string | `"repl_password"` |  |
-| postgresql.metrics.replication.slaveReplicas | int | `2` |  |
-| postgresql.metrics.replication.synchronousCommit | string | `"on"` | Set synchronous commit mode: on, off, remote_apply, remote_write and local ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL |
-| postgresql.metrics.replication.user | string | `"repl_user"` |  |
-| postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
+| global.mlp.encryption.key | string | `""` | (string) Global MLP Encryption Key to be used by all MLP components |
+| global.sentry.dsn | string | `nil` | Global Sentry DSN value |
+| merlin.environmentConfigs | list | <computed value> | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
+| merlin.mlpApi.apiHost | string | <computed value> | API endpoint to be used by Merlin to talk to MLP API |
+| merlin.postgresql | object | `{"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
+| merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
+| mlp.apiHost | string | `"/api/v1"` | MLP API endpoint, used by the MLP UI for fetching data |
+| mlp.extraEnvs | list | <computed value> | List of extra environment variables to add to MLP API container |
+| mlp.postgresql | object | `{"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
+| mlp.postgresql.postgresqlPassword | string | `"mlp"` | Password for MLP Postgresql database |
+| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
-| postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"turing"` | Database name for Turing Postgresql database |
 | postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
-| postgresql.postgresqlUsername | string | `"turing"` | Username for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| sentry.dsn | string | `""` |  |
-| tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
-| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to use in cluster configuration or authenticate kubernetes with vault configuration |
-| turing.config | object | `{"AlertConfig":{"Enabled":false},"BatchEnsemblingConfig":{"Enabled":false,"ImageBuildingConfig":{"BaseImageRef":"ghcr.io/gojek/turing/batch-ensembler:latest","BuildNamespace":"default","BuildTimeoutDuration":"20m","DestinationRegistry":"ghcr.io","KanikoConfig":{"BuildContextURI":"git://github.com/gojek/turing.git#refs/heads/main","DockerfileFilePath":"engines/batch-ensembler/app.Dockerfile","Image":"gcr.io/kaniko-project/executor","ImageVersion":"v1.6.0","ResourceRequestsLimits":{"Limits":{"CPU":"1","Memory":"1Gi"},"Requests":{"CPU":"1","Memory":"1Gi"}}}},"JobConfig":{"DefaultConfigurations":{"BatchEnsemblingJobResources":{"DriverCPURequest":"1","DriverMemoryRequest":"1Gi","ExecutorCPURequest":"1","ExecutorMemoryRequest":"1Gi","ExecutorReplica":2},"SparkConfigAnnotations":{"spark/spark.sql.execution.arrow.pyspark.enabled":"true"}},"DefaultEnvironment":"dev"},"RunnerConfig":{"MaxRetryCount":3,"RecordsToProcessInOneIteration":10,"TimeInterval":"10s"}},"DeployConfig":{},"KubernetesLabelConfigs":{},"MLPConfig":{},"RouterDefaults":{"Image":"ghcr.io/gojek/turing/turing-router:v1.0.0-rc1"},"Sentry":{"Enabled":false},"SparkAppConfig":{"CPURequestToCPULimit":1.25,"CorePerCPURequest":1.5,"FailureRetries":3,"FailureRetryInterval":10,"PythonVersion":"3","SparkVersion":"2.4.5","SubmissionFailureRetries":3,"SubmissionFailureRetryInterval":10,"TTLSecond":86400,"TolerationName":"batch-job"}}` | Turing API server configuration.  Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml |
+| sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
+| tags.mlp | bool | `true` | (bool) Specifies if the necessary MLP components needs to be installed together with Turing |
+| turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
+| turing.config.AlertConfig.Enabled | bool | `false` |  |
+| turing.config.BatchEnsemblingConfig.Enabled | bool | `false` |  |
+| turing.config.DeployConfig | object | `{}` |  |
+| turing.config.KubernetesLabelConfigs | object | `{}` |  |
+| turing.config.MLPConfig | object | `{}` |  |
+| turing.config.RouterDefaults.Image | string | `"ghcr.io/gojek/turing/turing-router:v1.0.0-rc1"` |  |
+| turing.config.Sentry.Enabled | bool | `false` |  |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
 | turing.extraEnvs | list | `[]` | List of extra environment variables to add to Turing API server container |
