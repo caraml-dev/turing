@@ -76,8 +76,8 @@ alert:
 
 monitoring:
   enabled: false
-  # baseURL: ""
-  # jobBaseURL: ""
+  baseURL: ""
+  jobBaseURL: ""
 
 # Google service account used to access GCP's resources.
 #

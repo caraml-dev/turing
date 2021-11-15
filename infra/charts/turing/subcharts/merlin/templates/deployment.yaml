@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "merlin.fullname" .}}
+  name: {{ template "merlin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "merlin.name" . }}
@@ -15,7 +15,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "merlin.name" .}}
+      app: {{ template "merlin.name" . }}
       release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
@@ -25,7 +25,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "merlin.name" .}}
+        app: {{ template "merlin.name" . }}
         release: {{ .Release.Name }}
       annotations:
         prometheus.io/scrape: 'true'
@@ -195,7 +195,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ template "merlin.fullname" .}}-environments
+          name: {{ template "merlin.fullname" . }}-environments
       {{- if .Values.gcpServiceAccount }}
       - name: gcp-service-account
         secret:

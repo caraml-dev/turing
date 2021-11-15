@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ template "merlin.fullname" .}}-environments
+  name: {{ template "merlin.fullname" . }}-environments
   labels:
     app: {{ include "merlin.name" . }}
     release: {{ .Release.Name }}

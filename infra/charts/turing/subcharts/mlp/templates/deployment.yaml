@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "mlp.fullname" .}}
+  name: {{ template "mlp.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "mlp.name" .}}
-    chart: {{ template "mlp.chart" .}}
+    app: {{ template "mlp.name" . }}
+    chart: {{ template "mlp.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "mlp.name" .}}
+      app: {{ template "mlp.name" . }}
       release: {{ .Release.Name | quote }}
   strategy:
     type: RollingUpdate
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "mlp.name" .}}
+        app: {{ template "mlp.name" . }}
         release: {{ .Release.Name | quote }}
     spec:
       initContainers:

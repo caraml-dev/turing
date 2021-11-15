@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "merlin.fullname" .}}-swagger
+  name: {{ template "merlin.fullname" . }}-swagger
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "merlin.name" . }}-swagger

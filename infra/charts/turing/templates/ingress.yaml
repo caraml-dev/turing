@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ template "turing.fullname" .}}
+  name: {{ template "turing.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     kubernetes.io/ingress.class: {{ .Values.turing.ingress.class }}

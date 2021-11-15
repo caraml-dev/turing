@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "turing.fullname" .}}-db-migrations
+  name: {{ template "turing.fullname" . }}-db-migrations
 data:
   {{- $root := . }}
   {{- range $path, $_ := .Files.Glob "db-migrations/*.sql" }}

@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "turing.fullname" .}}
+  name: {{ template "turing.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "turing.fullname" .}}
-    chart: {{ template "turing.chart" .}}
+    app: {{ template "turing.fullname" . }}
+    chart: {{ template "turing.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- if .Values.turing.labels }}
@@ -15,7 +15,7 @@ spec:
   replicas: {{ .Values.turing.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "turing.fullname" .}}
+      app: {{ template "turing.fullname" . }}
       release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
@@ -24,7 +24,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "turing.fullname" .}}
+        app: {{ template "turing.fullname" . }}
         release: {{ .Release.Name }}
 {{- if .Values.turing.labels }}
 {{ toYaml .Values.turing.labels | indent 8 -}}
@@ -107,10 +107,10 @@ spec:
       volumes:
       - name: config 
         secret:
-          secretName: {{ template "turing.fullname" .}}-api-config
+          secretName: {{ template "turing.fullname" . }}-api-config
       - name: db-migrations
         configMap:
-          name: {{ template "turing.fullname" .}}-db-migrations
+          name: {{ template "turing.fullname" . }}-db-migrations
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
