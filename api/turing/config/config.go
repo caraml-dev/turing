@@ -54,7 +54,7 @@ type Config struct {
 	LogLevel               string
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
-	BatchEnsemblingConfig  *BatchEnsemblingConfig  `validate:"required"`
+	BatchEnsemblingConfig  BatchEnsemblingConfig   `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
@@ -95,10 +95,12 @@ func (c *Config) Validate() error {
 
 // BatchEnsemblingConfig captures the config related to the running of batch runners
 type BatchEnsemblingConfig struct {
-	Enabled             bool                `validate:"required"`
-	JobConfig           JobConfig           `validate:"required"`
-	RunnerConfig        RunnerConfig        `validate:"required"`
-	ImageBuildingConfig ImageBuildingConfig `validate:"required"`
+	// Unfortunately if Enabled is false and user sets JobConfig/RunnerConfig/ImageBuildingConfig wrongly
+	// it will still error out.
+	Enabled             bool
+	JobConfig           *JobConfig           `validate:"required_if=Enabled True"`
+	RunnerConfig        *RunnerConfig        `validate:"required_if=Enabled True"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"required_if=Enabled True"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
 }

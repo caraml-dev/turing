@@ -9,7 +9,7 @@ require (
 	github.com/antihax/optional v1.0.0
 	github.com/getkin/kin-openapi v0.75.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-playground/validator/v10 v10.3.0
+	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
@@ -29,7 +29,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.7.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.5
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.15.0

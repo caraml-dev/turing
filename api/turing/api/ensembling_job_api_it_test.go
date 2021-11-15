@@ -284,7 +284,11 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				EnsemblingJobService: ensemblingJobService,
 				MLPService:           mlpService,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
+				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+					Enabled: true,
+				},
+			})
 
 			actual := httptest.NewRecorder()
 
@@ -351,7 +355,11 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			appCtx := &api.AppContext{
 				EnsemblingJobService: svc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
+				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+					Enabled: true,
+				},
+			})
 
 			actual := httptest.NewRecorder()
 			request, err := http.NewRequest(tt.method, tt.path, nil)
@@ -513,7 +521,11 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			appCtx := &api.AppContext{
 				EnsemblingJobService: svc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
+				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+					Enabled: true,
+				},
+			})
 
 			actual := httptest.NewRecorder()
 

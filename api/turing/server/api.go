@@ -41,12 +41,15 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	controllers := []api.Controller{
 		api.AlertsController{BaseController: baseController},
 		api.EnsemblersController{BaseController: baseController},
-		api.EnsemblingJobController{BaseController: baseController},
 		api.ExperimentsController{BaseController: baseController},
 		api.PodLogController{BaseController: baseController},
 		api.ProjectsController{BaseController: baseController},
 		api.RoutersController{RouterDeploymentController: deploymentController},
 		api.RouterVersionsController{RouterDeploymentController: deploymentController},
+	}
+
+	if cfg.BatchEnsemblingConfig.Enabled {
+		controllers = append(controllers, api.EnsemblingJobController{BaseController: baseController})
 	}
 
 	for _, c := range controllers {
