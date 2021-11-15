@@ -10,6 +10,14 @@ Turing: ML Experimentation System
 
 This Helm chart installs [Turing](https://github.com/gojek/turing) and all its dependencies in a Kubernetes cluster.
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| file://subcharts/merlin | merlin | 0.7.0 |
+| file://subcharts/mlp | mlp | 1.0.0 |
+| https://charts.bitnami.com/bitnami | postgresql | 8.9.8 |
+
 ## Prerequisites
 
 To use the charts here, [Helm](https://helm.sh/) must be configured for your
