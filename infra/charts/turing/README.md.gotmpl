@@ -47,6 +47,9 @@ $ helm install turing turing/turing
 You can (and most likely, should) override the default configuration with values suitable for your installation.
 Refer to [Configuration](#configuration) section for the detailed description of available configuration keys.
 
+You can also refer to [values.minimal.yaml](./values.minimal.yaml) to check a minimal configuration that needs
+to be provided for Turing installation.
+
 ### Uninstalling the chart
 
 To uninstall `turing` release:
@@ -58,5 +61,7 @@ The command removes all the Kubernetes components associated with the chart and 
 except for postgresql PVC, those will have to be removed manually.
 
 ## Configuration
+
+The following tables lists the configurable parameters of the Turing chart and their default values.
 
 {{ template "chart.valuesTable" . }}

@@ -48,6 +48,9 @@ $ helm install turing turing/turing
 You can (and most likely, should) override the default configuration with values suitable for your installation.
 Refer to [Configuration](#configuration) section for the detailed description of available configuration keys.
 
+You can also refer to [values.minimal.yaml](./values.minimal.yaml) to check a minimal configuration that needs
+to be provided for Turing installation.
+
 ### Uninstalling the chart
 
 To uninstall `turing` release:
@@ -60,10 +63,12 @@ except for postgresql PVC, those will have to be removed manually.
 
 ## Configuration
 
+The following tables lists the configurable parameters of the Turing chart and their default values.
+
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | dbMigrations.image.tag | string | `"v4.7.1"` | Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate |
-| global.mlp.encryption | object | `{}` |  |
+| global.mlp.encryption.key | string | `""` |  |
 | global.sentry | object | `{}` |  |
 | merlin.apiHost | string | `"/api/merlin/v1"` |  |
 | merlin.environmentConfigs[0].cluster | string | `"dev"` |  |
@@ -119,9 +124,9 @@ except for postgresql PVC, those will have to be removed manually.
 | postgresql.postgresqlUsername | string | `"turing"` | Username for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | sentry.dsn | string | `""` |  |
-| tags.mlp | bool | `true` |  |
+| tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to use in cluster configuration or authenticate kubernetes with vault configuration |
-| turing.config | object | `{"AlertConfig":{"Enabled":false},"BatchEnsemblingConfig":{"Enabled":false},"DeployConfig":{},"KubernetesLabelConfigs":{},"MLPConfig":{},"RouterDefaults":{"Image":"ghcr.io/gojek/turing/turing-router:v1.0.0-rc1"},"Sentry":{"Enabled":false}}` | Turing API server configuration.  Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml |
+| turing.config | object | `{"AlertConfig":{"Enabled":false},"BatchEnsemblingConfig":{"Enabled":false,"ImageBuildingConfig":{"BaseImageRef":"ghcr.io/gojek/turing/batch-ensembler:latest","BuildNamespace":"default","BuildTimeoutDuration":"20m","DestinationRegistry":"ghcr.io","KanikoConfig":{"BuildContextURI":"git://github.com/gojek/turing.git#refs/heads/main","DockerfileFilePath":"engines/batch-ensembler/app.Dockerfile","Image":"gcr.io/kaniko-project/executor","ImageVersion":"v1.6.0","ResourceRequestsLimits":{"Limits":{"CPU":"1","Memory":"1Gi"},"Requests":{"CPU":"1","Memory":"1Gi"}}}},"JobConfig":{"DefaultConfigurations":{"BatchEnsemblingJobResources":{"DriverCPURequest":"1","DriverMemoryRequest":"1Gi","ExecutorCPURequest":"1","ExecutorMemoryRequest":"1Gi","ExecutorReplica":2},"SparkConfigAnnotations":{"spark/spark.sql.execution.arrow.pyspark.enabled":"true"}},"DefaultEnvironment":"dev"},"RunnerConfig":{"MaxRetryCount":3,"RecordsToProcessInOneIteration":10,"TimeInterval":"10s"}},"DeployConfig":{},"KubernetesLabelConfigs":{},"MLPConfig":{},"RouterDefaults":{"Image":"ghcr.io/gojek/turing/turing-router:v1.0.0-rc1"},"Sentry":{"Enabled":false},"SparkAppConfig":{"CPURequestToCPULimit":1.25,"CorePerCPURequest":1.5,"FailureRetries":3,"FailureRetryInterval":10,"PythonVersion":"3","SparkVersion":"2.4.5","SubmissionFailureRetries":3,"SubmissionFailureRetryInterval":10,"TTLSecond":86400,"TolerationName":"batch-job"}}` | Turing API server configuration.  Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
 | turing.extraEnvs | list | `[]` | List of extra environment variables to add to Turing API server container |
