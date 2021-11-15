@@ -15,6 +15,7 @@ rules:
   - secrets
   - serviceaccounts
   - endpoints
+  - persistentvolumeclaims
   verbs:
   - "*"
 - apiGroups:
@@ -22,6 +23,7 @@ rules:
   resources:
   - deployments
   - replicasets
+  - daemonsets
   verbs:
   - "*"
 - apiGroups:
@@ -51,6 +53,7 @@ rules:
   - virtualservices
   - envoyfilters
   - gateways
+  - destinationrules
   verbs:
   - "*"
 - apiGroups:

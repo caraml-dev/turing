@@ -22,11 +22,15 @@ spec:
         - name: ISTIO_OPERATOR_PATH
           value: /etc/istio-operator/operator.yaml
         - name: ISTIO_VERSION
-          value: {{ .Values.istioVersion }}
+          value: {{ .Values.istio.version }}
         - name: KNATIVE_VERSION
-          value: {{ .Values.knativeVersion }}
+          value: {{ .Values.knative.version }}
         - name: KNATIVE_ISTIO_VERSION
-          value: {{ .Values.knativeIstioVersion }}
+          value: {{ .Values.knative.istioVersion }}
+        - name: KNATIVE_DOMAINS
+          value: "{{ .Values.knative.domains }}"
+        - name: KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING
+          value: "{{ .Values.knative.registriesSkippingTagResolving }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /etc/istio-operator

@@ -4,4 +4,4 @@ metadata:
   name: {{ include "turing-init.fullname" . }}-istio-operator
 data:
   operator.yaml: |
-    {{- toYaml .Values.istioOperatorConfig | nindent 4 }}
+    {{- toYaml .Values.istio.operatorConfig | nindent 4 }}
