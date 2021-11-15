@@ -24,11 +24,11 @@ spec:
         - /app/cleanup.sh
         env:
         - name: ISTIO_VERSION
-          value: {{ .Values.istioVersion }}
+          value: {{ .Values.istio.version }}
         - name: KNATIVE_VERSION
-          value: {{ .Values.knativeVersion }}
+          value: {{ .Values.knative.version }}
         - name: KNATIVE_ISTIO_VERSION
-          value: {{ .Values.knativeIstioVersion }}
+          value: {{ .Values.knative.istioVersion }}
         - name: RELEASE_NAME
           value: {{ .Release.Name }}
         - name: RELEASE_NAMESPACE
