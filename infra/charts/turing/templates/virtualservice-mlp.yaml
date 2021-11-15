@@ -26,6 +26,10 @@ spec:
     - {{ template "turing.fullname" . }}-gateway
   http:
     - match:
+        {{/*
+          See issue on Istio's repo:
+          https://github.com/istio/istio/issues/8076#issuecomment-427057691
+        */}}
         - uri:
             prefix: "/api/turing/"
         - uri:
