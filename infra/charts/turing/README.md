@@ -78,8 +78,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | dbMigrations.image.tag | string | `"v4.7.1"` | Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate |
 | global.mlp.encryption.key | string | `""` | (string) Global MLP Encryption Key to be used by all MLP components |
 | global.sentry.dsn | string | `nil` | Global Sentry DSN value |
-| merlin.environmentConfigs | list | <computed value> | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
-| merlin.mlpApi.apiHost | string | <computed value> | API endpoint to be used by Merlin to talk to MLP API |
+| merlin.environmentConfigs | list | computed value | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
+| merlin.mlpApi.apiHost | string | computed value | API endpoint to be used by Merlin to talk to MLP API |
 | merlin.postgresql | object | `{"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
 | merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
 | merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
@@ -95,13 +95,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
 | tags.mlp | bool | `true` | (bool) Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
-| turing.config.AlertConfig.Enabled | bool | `false` |  |
-| turing.config.BatchEnsemblingConfig.Enabled | bool | `false` |  |
-| turing.config.DeployConfig | object | `{}` |  |
-| turing.config.KubernetesLabelConfigs | object | `{}` |  |
-| turing.config.MLPConfig | object | `{}` |  |
-| turing.config.RouterDefaults.Image | string | `"ghcr.io/gojek/turing/turing-router:v1.0.0-rc1"` |  |
-| turing.config.Sentry.Enabled | bool | `false` |  |
+| turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
 | turing.extraEnvs | list | `[]` | List of extra environment variables to add to Turing API server container |
@@ -120,4 +114,4 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.resources | object | `{}` | Resources requests and limits for Turing API. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | turing.service.externalPort | int | `8080` | Turing API Kubernetes service port number |
 | turing.service.internalPort | int | `8080` | Turing API container port number |
-| turing.uiConfig | object | `{"alertConfig":{},"apiConfig":{"merlinApiUrl":"/api/merlin/v1","mlpApiUrl":"/api/v1","turingApiUrl":"/api/turing/v1"},"appConfig":{"docsUrl":[{"href":"https://github.com/gojek/turing/tree/main/docs","label":"Turing User Guide"}],"scaling":{"maxAllowedReplica":20}},"authConfig":{"oauthClientId":""},"sentryConfig":{}}` | Turing UI configuration. Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js |
+| turing.uiConfig | object | computed value | Turing UI configuration. Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js for the detailed explanation on Turing UI config options |

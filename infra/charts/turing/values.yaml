@@ -98,9 +98,10 @@ turing:
     # it requires cluster credentials to be stored in Vault's KV Secrets store.
     useInClusterConfig: false
 
-    # -- Turing API server configuration.
-    # Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
-    # for detailed explanation on Turing API config options
+  # -- Turing API server configuration.
+  # Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
+  # for the detailed explanation on Turing API config options
+  # @default -- computed value
   config:
     AlertConfig:
       Enabled: false
@@ -116,7 +117,9 @@ turing:
       Image: ghcr.io/gojek/turing/turing-router:v1.0.0-rc1
 
   # -- Turing UI configuration.
-  # Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
+  # Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
+  # for the detailed explanation on Turing UI config options
+  # @default -- computed value
   uiConfig:
     alertConfig: { }
     apiConfig:
@@ -214,13 +217,13 @@ merlin:
 
   mlpApi:
     # -- API endpoint to be used by Merlin to talk to MLP API
-    # @default -- <computed value>
+    # @default -- computed value
     apiHost: "http://{{ .Release.Name }}-mlp:8080/v1"
 
 
   # -- List of Merlin environment configs, available to Turing for deploying routers
   # By default, a new dev environment will automatically be created
-  # @default -- <computed value>
+  # @default -- computed value
   environmentConfigs:
     - name: "dev"
       is_default: true
