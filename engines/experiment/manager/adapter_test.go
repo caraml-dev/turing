@@ -3,29 +3,126 @@ package manager_test
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
 
-func TestStandardExperimentMethods(t *testing.T) {
+func TestStandardExperimentIsCacheEnabled(t *testing.T) {
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("IsCacheEnabled").Return(true)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// IsCacheEnabled
+	assert.Equal(t, true, manager.IsCacheEnabled(stdExpMgr))
+	assert.Equal(t, false, manager.IsCacheEnabled(expMgr))
+}
+
+func TestStandardExperimentListClients(t *testing.T) {
 	stdExpMgrErr := "Method is only supported by standard experiment managers"
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
 	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
-	stdExpMgr.On("IsCacheEnabled").Return(true)
 	stdExpMgr.On("ListClients").Return([]manager.Client{{}}, nil)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// ListClients
+	clients, err := manager.ListClients(stdExpMgr)
+	assert.Equal(t, []manager.Client{{}}, clients)
+	assert.NoError(t, err)
+	clients, err = manager.ListClients(expMgr)
+	assert.Equal(t, []manager.Client{}, clients)
+	assert.EqualError(t, err, stdExpMgrErr)
+}
+
+func TestStandardExperimentListExperiments(t *testing.T) {
+	stdExpMgrErr := "Method is only supported by standard experiment managers"
+
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
 	stdExpMgr.On("ListExperiments").Return([]manager.Experiment{{}}, nil)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// ListExperiments
+	experiments, err := manager.ListExperiments(stdExpMgr)
+	assert.Equal(t, []manager.Experiment{{}}, experiments)
+	assert.NoError(t, err)
+	experiments, err = manager.ListExperiments(expMgr)
+	assert.Equal(t, []manager.Experiment{}, experiments)
+	assert.EqualError(t, err, stdExpMgrErr)
+}
+
+func TestStandardExperimentListExperimentsForClient(t *testing.T) {
+	stdExpMgrErr := "Method is only supported by standard experiment managers"
+
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
 	stdExpMgr.On("ListExperimentsForClient", manager.Client{ID: "1"}).
 		Return([]manager.Experiment{{}}, nil)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// ListExperimentsForClient
+	experiments, err := manager.ListExperimentsForClient(stdExpMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Experiment{{}}, experiments)
+	assert.NoError(t, err)
+	experiments, err = manager.ListExperimentsForClient(expMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Experiment{}, experiments)
+	assert.EqualError(t, err, stdExpMgrErr)
+}
+
+func TestStandardExperimentListVariablesForClient(t *testing.T) {
+	stdExpMgrErr := "Method is only supported by standard experiment managers"
+
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
 	stdExpMgr.On("ListVariablesForClient", manager.Client{ID: "1"}).
 		Return([]manager.Variable{{Name: "var-1"}}, nil)
+
+	expMgr := &mocks.ExperimentManager{}
+	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+
+	// Validate
+	// ListVariablesForClient
+	variables, err := manager.ListVariablesForClient(stdExpMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Variable{{Name: "var-1"}}, variables)
+	assert.NoError(t, err)
+	variables, err = manager.ListVariablesForClient(expMgr, manager.Client{ID: "1"})
+	assert.Equal(t, []manager.Variable{}, variables)
+	assert.EqualError(t, err, stdExpMgrErr)
+}
+
+func TestStandardExperimentListVariablesForExperiments(t *testing.T) {
+	stdExpMgrErr := "Method is only supported by standard experiment managers"
+
+	// Set up mocks
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
 	stdExpMgr.On("ListVariablesForExperiments", []manager.Experiment{{}}).
 		Return(map[string][]manager.Variable{
 			"test-exp": {{Name: "var-1"}},
@@ -35,42 +132,6 @@ func TestStandardExperimentMethods(t *testing.T) {
 	expMgr.On("GetEngineInfo").Return(manager.Engine{})
 
 	// Validate
-	// IsCacheEnabled
-	assert.Equal(t, true, manager.IsCacheEnabled(stdExpMgr))
-	assert.Equal(t, false, manager.IsCacheEnabled(expMgr))
-
-	// ListClients
-	clients, err := manager.ListClients(stdExpMgr)
-	assert.Equal(t, []manager.Client{{}}, clients)
-	assert.NoError(t, err)
-	clients, err = manager.ListClients(expMgr)
-	assert.Equal(t, []manager.Client{}, clients)
-	assert.EqualError(t, err, stdExpMgrErr)
-
-	// ListExperiments
-	experiments, err := manager.ListExperiments(stdExpMgr)
-	assert.Equal(t, []manager.Experiment{{}}, experiments)
-	assert.NoError(t, err)
-	experiments, err = manager.ListExperiments(expMgr)
-	assert.Equal(t, []manager.Experiment{}, experiments)
-	assert.EqualError(t, err, stdExpMgrErr)
-
-	// ListExperimentsForClient
-	experiments, err = manager.ListExperimentsForClient(stdExpMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Experiment{{}}, experiments)
-	assert.NoError(t, err)
-	experiments, err = manager.ListExperimentsForClient(expMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Experiment{}, experiments)
-	assert.EqualError(t, err, stdExpMgrErr)
-
-	// ListVariablesForClient
-	variables, err := manager.ListVariablesForClient(stdExpMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Variable{{Name: "var-1"}}, variables)
-	assert.NoError(t, err)
-	variables, err = manager.ListVariablesForClient(expMgr, manager.Client{ID: "1"})
-	assert.Equal(t, []manager.Variable{}, variables)
-	assert.EqualError(t, err, stdExpMgrErr)
-
 	// ListVariablesForExperiments
 	variablesMap, err := manager.ListVariablesForExperiments(stdExpMgr, []manager.Experiment{{}})
 	assert.Equal(t, map[string][]manager.Variable{
@@ -89,12 +150,11 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 		Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
 	}
 
+	// Get test data
+	testData, err := os.ReadFile(filepath.Join("testdata", "experiment_runner_config.json"))
+	require.NoError(t, err)
 	var testRawConfig interface{}
-	err := json.Unmarshal([]byte(`{
-		"client": {"username": "client_name"},
-		"experiments": [{"name": "exp_name"}],
-		"variables": {"client_variables": [{"name": "var_name"}]}
-	}`), &testRawConfig)
+	err = json.Unmarshal(testData, &testRawConfig)
 	assert.NoError(t, err)
 	testSuccessResponse := json.RawMessage([]byte(`{}`))
 

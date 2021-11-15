@@ -26,8 +26,7 @@ export const StandardExperimentConfigGroup = ({
 
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
-  // Set engineProps to the experiment config (for validation and comparison of changes to engine type),
-  // if not already exists. Set experimentConfig if empty or reset it if the type has changed.
+  // Set experimentConfig if empty.
   useEffect(() => {
     if (!!engineProps.name && !experimentConfig) {
       onChangeHandler({
