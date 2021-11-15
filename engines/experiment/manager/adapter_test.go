@@ -3,7 +3,7 @@ package manager_test
 import (
 	"encoding/json"
 	"errors"
-	"os"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -151,7 +151,7 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 	}
 
 	// Get test data
-	testData, err := os.ReadFile(filepath.Join("testdata", "experiment_runner_config.json"))
+	testData, err := ioutil.ReadFile(filepath.Join("testdata", "experiment_runner_config.json"))
 	require.NoError(t, err)
 	var testRawConfig interface{}
 	err = json.Unmarshal(testData, &testRawConfig)
