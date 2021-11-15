@@ -183,7 +183,7 @@ mlp:
   apiHost: /api/v1
 
   # -- List of extra environment variables to add to MLP API container
-  # @default -- <computed value>
+  # @default -- computed value
   extraEnvs:
     - name: REACT_APP_MERLIN_UI_HOMEPAGE
       value: "/merlin"
@@ -258,10 +258,10 @@ global:
   mlp:
     encryption:
       # -- (string) Global MLP Encryption Key to be used by all MLP components
-      key: ""
+      key:
 
 
 # Tags are used to include/exclude chart dependencies
 tags:
-  # -- (bool) Specifies if the necessary MLP components needs to be installed together with Turing
+  # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true
