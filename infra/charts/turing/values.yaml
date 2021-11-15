@@ -176,8 +176,6 @@ merlin:
   apiHost: /api/merlin/v1
   swagger:
     enabled: false
-  authorization:
-    enabled: false
   postgresql:
     nameOverride: postgresql-merlin
   mlpApi:

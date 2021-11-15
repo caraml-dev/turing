@@ -121,7 +121,7 @@ newrelic:
   licenseSecretName: "newrelic-license-secret"
 
 authorization:
-  enabled: true
+  enabled: false
   serverUrl: http://mlp-authorization-keto
 
 mlflow:
