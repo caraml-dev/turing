@@ -351,11 +351,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        useInClusterConfig: [false, true]
+        name:
+          - "In-cluster credentials"
+          - "Remote cluster credentials"
         include:
-          - useInClusterConfig: true
+          - name: "In-cluster credentials"
+            useInClusterConfig: true
             valuesFile: "turing.values.in-cluster.yaml"
-          - useInClusterConfig: false
+          - name: "Remote cluster credentials"
+            useInClusterConfig: false
             valuesFile: "turing.values.remote.yaml"
 
     steps:
