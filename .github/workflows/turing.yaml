@@ -236,7 +236,8 @@ jobs:
         with:
           path: api
           key: |
-            ${{ runner.os }}-vendor2-${{ hashFiles('api/go.mod') }}
+            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
+          restore-keys: ${{ runner.os }}-vendor-
 
       - name: Build Docker image
         id: build-image

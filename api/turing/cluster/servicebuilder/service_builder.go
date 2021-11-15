@@ -286,18 +286,11 @@ func (sb *clusterSvcBuilder) NewSecret(
 	ensemblerServiceAccountKey string,
 	experimentPasskey string,
 ) *cluster.Secret {
-	data := map[string]string{}
-	if routerServiceAccountKey != "" {
-		data[secretKeyNameRouter] = routerServiceAccountKey
-	}
-	if enricherServiceAccountKey != "" {
-		data[secretKeyNameEnricher] = enricherServiceAccountKey
-	}
-	if ensemblerServiceAccountKey != "" {
-		data[secretKeyNameEnsembler] = ensemblerServiceAccountKey
-	}
-	if experimentPasskey != "" {
-		data[secretKeyNameExperiment] = experimentPasskey
+	data := map[string]string{
+		secretKeyNameRouter:     routerServiceAccountKey,
+		secretKeyNameEnricher:   enricherServiceAccountKey,
+		secretKeyNameEnsembler:  ensemblerServiceAccountKey,
+		secretKeyNameExperiment: experimentPasskey,
 	}
 	return &cluster.Secret{
 		Name: fmt.Sprintf(
