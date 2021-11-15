@@ -1,0 +1,27 @@
+global:
+  # -- Google OAuth2 Client ID used by the Turing UI to authenticate users.
+  # see: https://developers.google.com/adwords/api/docs/guides/authentication#generate_oauth2_credentials
+  oauthClientId: "your-oauth-client-id"
+
+  mlp:
+    encryption:
+      # -- Set MLP's encryption key that will be used to encrypt sensitive data retrieved from MLP API
+      key: "encryption-key"
+
+turing:
+
+postgresql:
+  # -- Password to access Turing DB
+  postgresqlPassword: "turing-db-password"
+
+
+merlin:
+  postgresql:
+    # -- Password to access Merlin DB
+    postgresqlPassword: "merlin-db-password"
+
+mlp:
+  postgresql:
+    # -- Password to access MLP DB
+    postgresqlPassword: "mlp-db-password"
+

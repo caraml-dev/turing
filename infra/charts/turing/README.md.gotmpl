@@ -38,41 +38,25 @@ $ helm repo add turing https://turing-ml.github.io/charts
 
 ### Installing the chart
 
-This command will install Turing in the `default` namespace and default
-chart values will be used for the installation:
+This command will install Turing release named `turing` in the `default` namespace.
+Default chart values will be used for the installation:
 ```shell
-$ helm install <release-name> turing/turing
+$ helm install turing turing/turing
 ```
 
-You can (and most likely, should) override the default configuration with your own values.
-Refer to [Configuration](#-configuration) section for the detailed description of available configuration keys.
+You can (and most likely, should) override the default configuration with values suitable for your installation.
+Refer to [Configuration](#configuration) section for the detailed description of available configuration keys.
 
 ### Uninstalling the chart
 
-To uninstall my-release:
+To uninstall `turing` release:
 ```shell
-$ helm uninstall my-release
+$ helm uninstall turing
 ```
 
-
-This will create a release of `spark-operator` in the default namespace. To install in a different one:
-
-```shell
-$ helm install -n spark my-release spark-operator/spark-operator
-```
-
-Note that `helm` will fail to install if the namespace doesn't exist. Either create the namespace beforehand or pass the `--create-namespace` flag to the `helm install` command.
-
-## Uninstalling the chart
-
-To uninstall `my-release`:
-
-```shell
-$ helm uninstall my-release
-```
-
-The command removes all the Kubernetes components associated with the chart and deletes the release, except for the `crds`, those will have to be removed manually.
+The command removes all the Kubernetes components associated with the chart and deletes the release,
+except for postgresql PVC, those will have to be removed manually.
 
 ## Configuration
----
+
 {{ template "chart.valuesTable" . }}
