@@ -4,53 +4,6 @@ global:
       key: "encryption-key"
 
 turing:
-  config:
-    BatchEnsemblingConfig:
-      Enabled: true
-      JobConfig:
-        DefaultEnvironment: dev
-        DefaultConfigurations:
-          SparkConfigAnnotations:
-            "spark/spark.sql.execution.arrow.pyspark.enabled": "true"
-          BatchEnsemblingJobResources:
-            DriverCPURequest: "1"
-            DriverMemoryRequest: "1Gi"
-            ExecutorReplica: 2
-            ExecutorCPURequest: "1"
-            ExecutorMemoryRequest: "1Gi"
-      RunnerConfig:
-        TimeInterval: 10s
-        RecordsToProcessInOneIteration: 10
-        MaxRetryCount: 3
-      ImageBuildingConfig:
-        BuildNamespace: default
-        BuildTimeoutDuration: 20m
-        DestinationRegistry: ghcr.io
-        BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
-        KanikoConfig:
-          BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
-          DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
-          Image: gcr.io/kaniko-project/executor
-          ImageVersion: v1.6.0
-          ResourceRequestsLimits:
-            Requests:
-              CPU: "1"
-              Memory: 1Gi
-            Limits:
-              CPU: "1"
-              Memory: 1Gi
-    SparkAppConfig:
-      CorePerCPURequest: 1.5
-      CPURequestToCPULimit: 1.25
-      SparkVersion: 2.4.5
-      TolerationName: batch-job
-      SubmissionFailureRetries: 3
-      SubmissionFailureRetryInterval: 10
-      FailureRetries: 3
-      FailureRetryInterval: 10
-      PythonVersion: "3"
-      TTLSecond: 86400
-
   uiConfig: null # Not needed as we only test API
 
 postgresql: &postgresql
