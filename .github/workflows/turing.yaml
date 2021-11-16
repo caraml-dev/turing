@@ -232,13 +232,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache vendor dependencies
-        uses: actions/cache@v2
-        with:
-          path: api
-          key: |
-            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
-          restore-keys: ${{ runner.os }}-vendor-
+#      - name: Cache vendor dependencies
+#        uses: actions/cache@v2
+#        with:
+#          path: api
+#          key: |
+#            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
+#          restore-keys: ${{ runner.os }}-vendor-
 
       - name: Build Docker image
         id: build-image
