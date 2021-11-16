@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: latest
+    tag: v1.0.0
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -39,41 +39,6 @@ turing:
     # useful when there are multiple ingress controllers installed
     class: ""
 
-  # -- Turing API server configuration. 
-  # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
-  config:
-    AlertConfig:
-      Enabled: false
-    BatchEnsemblingConfig:
-      Enabled: false
-
-    DeployConfig: {}
-    KubernetesLabelConfigs: {}
-    MLPConfig: {}
-    Sentry:
-      Enabled: false
-      DSN: ""
-    RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:latest
-
-  # -- Turing UI configuration.
-  # Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
-  uiConfig:
-    alertConfig: {}
-    apiConfig:
-      turingApiUrl: /api/turing/v1
-      merlinApiUrl: /api/merlin/v1
-      mlpApiUrl: /api/v1
-    appConfig:
-      docsUrl:
-        - label: Turing User Guide
-          href: https://github.com/gojek/turing/tree/main/docs
-      scaling:
-        maxAllowedReplica: 20
-    authConfig:
-      oauthClientId: ""
-    sentryConfig: {}
-
   # -- List of string containing additional Turing API server arguments. For
   # example, multiple "-config" can be specified to use multiple config files
   extraArgs: []
@@ -83,7 +48,7 @@ turing:
 
   # -- List of extra environment variables to add to Turing API server container
   extraEnvs: []
-  # # Example
+  # Example:
   # - name: DEMO_GREETING
   #   value: "Hello from the environment"
   # - name: DEMO_FAREWELL
@@ -92,7 +57,7 @@ turing:
   # -- List of extra initContainers to add to the Pod. For example, you
   # need to run some init scripts to fetch credentials from a remote server
   extraInitContainers: []
-  # # Example
+  # Example:
   # - name: init-myservice
   #   image: busybox:1.28
   #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
@@ -101,7 +66,7 @@ turing:
   # attach sidecar container that forward logs or dynamically update some 
   # configuration files.
   extraContainers: []
-  # Example
+  # Example:
   # - name: count-agent
   #   image: k8s.gcr.io/fluentd-gcp:1.30
   #   env:
@@ -116,46 +81,119 @@ turing:
   # -- Extra volumes to attach to the Pod. For example, you can mount 
   # additional secrets to these volumes
   extraVolumes: []
-  # # Example
+  # Example:
   # - name: varlog
   #   emptyDir: {}
 
   # -- Extra volume mounts to attach to Turing API server container. For example
   # to mount the extra volume containing secrets
   extraVolumeMounts: []
-  # # Example
+  # Example:
   # - name: varlog
   #   mountPath: /var/log
+
   clusterConfig:
-    # -- Configuration to use in cluster configuration or authenticate kubernetes with vault configuration
+    # -- (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster
+    # By default, Turing API expects to use a remote k8s cluster for deployment and to do so,
+    # it requires cluster credentials to be stored in Vault's KV Secrets store.
     useInClusterConfig: false
+
+  # -- Turing API server configuration.
+  # Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
+  # for the detailed explanation on Turing API config options
+  # @default -- computed value
+  config:
+    AlertConfig:
+      Enabled: false
+    BatchEnsemblingConfig:
+      Enabled: false
+    SparkAppConfig:
+      CorePerCPURequest: 1.5
+      CPURequestToCPULimit: 1.25
+      SparkVersion: 2.4.5
+      TolerationName: batch-job
+      SubmissionFailureRetries: 3
+      SubmissionFailureRetryInterval: 10
+      FailureRetries: 3
+      FailureRetryInterval: 10
+      PythonVersion: "3"
+      TTLSecond: 86400
+    DeployConfig: { }
+    KubernetesLabelConfigs: { }
+    MLPConfig: { }
+    Sentry:
+      Enabled: false
+    RouterDefaults:
+      Image: ghcr.io/gojek/turing/turing-router:v1.0.0
+
+  # -- Turing UI configuration.
+  # Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
+  # for the detailed explanation on Turing UI config options
+  # @default -- computed value
+  uiConfig:
+    alertConfig: { }
+    apiConfig:
+      turingApiUrl: /api/turing/v1
+      merlinApiUrl: /api/merlin/v1
+      mlpApiUrl: /api/v1
+    appConfig:
+      docsUrl:
+        - label: Turing User Guide
+          href: https://github.com/gojek/turing/tree/main/docs
+      scaling:
+        maxAllowedReplica: 20
+    authConfig:
+      oauthClientId: ""
+    sentryConfig: { }
 
 dbMigrations:
   image:
     # -- Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate
     tag: v4.7.1
 
+
 sentry:
+  # -- Sentry DSN value used by both Turing API and Turing UI
   dsn: ""
 
+# -- Postgresql configuration to be applied to Turing's postgresql database deployment
+# Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
 postgresql:
-  # -- Resources requests and limits for Turing database. This should be set 
+  # -- Resources requests and limits for Turing database. This should be set
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources: {}
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 500m
   persistence:
-    # -- Persist Postgresql data in a Persistent Volume Claim 
+    # -- Persist Postgresql data in a Persistent Volume Claim
     enabled: true
-  # -- Database name for Turing Postgresql database
+    size: 10Gi
   postgresqlDatabase: turing
-  # -- Username for Turing Postgresql database
   postgresqlUsername: turing
-  # -- Password for Turing Postgresql database (required)
-  postgresqlPassword:
+  # -- Password for Turing Postgresql database
+  postgresqlPassword: turing
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+    replication:
+      enabled: false
+      user: repl_user
+      password: repl_password
+      slaveReplicas: 2
+      synchronousCommit: "on"
+      numSynchronousReplicas: 2
+      applicationName: turing
+
 
 mlp:
+  # -- MLP API endpoint, used by the MLP UI for fetching data
   apiHost: /api/v1
 
+  # -- List of extra environment variables to add to MLP API container
+  # @default -- computed value
   extraEnvs:
     - name: REACT_APP_MERLIN_UI_HOMEPAGE
       value: "/merlin"
@@ -169,18 +207,33 @@ mlp:
     - name: REACT_APP_FEAST_CORE_API
       value: "http://feast.dev/v1"
 
+  # -- Postgresql configuration to be applied to MLP's postgresql database deployment
+  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
   postgresql:
+    # -- Name of MLP's Postgresql deployment
     nameOverride: postgresql-mlp
+    # -- Password for MLP Postgresql database
+    postgresqlPassword: mlp
+
 
 merlin:
-  apiHost: /api/merlin/v1
-  swagger:
-    enabled: false
+  # -- Postgresql configuration to be applied to Merlin's's postgresql database deployment
+  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
   postgresql:
+    # -- Name of Merlin's Postgresql deployment
     nameOverride: postgresql-merlin
+    # -- Password for Merlin Postgresql database
+    postgresqlPassword: merlin
+
   mlpApi:
+    # -- API endpoint to be used by Merlin to talk to MLP API
+    # @default -- computed value
     apiHost: "http://{{ .Release.Name }}-mlp:8080/v1"
 
+
+  # -- List of Merlin environment configs, available to Turing for deploying routers
+  # By default, a new dev environment will automatically be created
+  # @default -- computed value
   environmentConfigs:
     - name: "dev"
       is_default: true
@@ -208,9 +261,17 @@ merlin:
         executor_memory_request: "2Gi"
 
 global:
-  mlp:
-    encryption: {}
-  sentry: {}
+  sentry:
+    # -- (string) Global Sentry DSN value
+    dsn:
 
+  mlp:
+    encryption:
+      # -- (string) Global MLP Encryption Key to be used by all MLP components
+      key:
+
+
+# Tags are used to include/exclude chart dependencies
 tags:
+  # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true

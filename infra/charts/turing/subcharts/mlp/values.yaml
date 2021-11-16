@@ -1,5 +1,5 @@
 global:
-  mlp: {}
+  mlp: { }
 
 image:
   pullPolicy: IfNotPresent
@@ -10,13 +10,13 @@ replicaCount: 1
 
 ## Configure resource requests and limits
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-resources: {}
+resources: { }
 #   requests:
 #     cpu: 100m
 #     memory: 128Mi
 
 # -- List of extra environment variables to add to MLP API server container
-extraEnvs: []
+extraEnvs: [ ]
 
 livenessProbe:
   path: "/v1/internal/live"
@@ -54,16 +54,16 @@ streams:
 docs:
   [
     {
-     "label": "Merlin User Guide",
-     "href": "https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"
+      "label": "Merlin User Guide",
+      "href": "https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"
     },
     {
-     "label": "Turing User Guide",
-     "href": "https://github.com/gojek/turing"
+      "label": "Turing User Guide",
+      "href": "https://github.com/gojek/turing"
     },
     {
-     "label": "Feast User Guide",
-     "href": "https://docs.feast.dev/user-guide/overview"
+      "label": "Feast User Guide",
+      "href": "https://docs.feast.dev/user-guide/overview"
     },
   ]
 
@@ -80,31 +80,33 @@ gitlab:
   clientSecret: #clientSecret
 
 postgresql:
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ##
-  resources: {}
-  #   requests:
-  #     cpu: 100m
-  #     memory: 128Mi
+  # -- Configure resource requests and limits
+  # ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 500m
   persistence:
+    # -- Persist Postgresql data in a Persistent Volume Claim
+    enabled: true
     size: 10Gi
   postgresqlUsername: mlp
   postgresqlDatabase: mlp
-  # metrics:
-  #   enabled: true
-  #   serviceMonitor:
-  #     enabled: true
-  # replication:
-  #   enabled: true
-  #   user: repl_user
-  #   password: repl_password
-  #   slaveReplicas: 2
-  #   ## Set synchronous commit mode: on, off, remote_apply, remote_write and local
-  #   ## ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL
-  #   synchronousCommit: "on"
-  #   ## From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication
-  #   ## NOTE: It cannot be > slaveReplicas
-  #   numSynchronousReplicas: 2
-  #   ## Replication Cluster application name. Useful for defining multiple replication policies
-  #   applicationName: mlp
+  postgresqlPassword: mlp
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  replication:
+    enabled: false
+    user: repl_user
+    password: repl_password
+    slaveReplicas: 2
+    # -- Set synchronous commit mode: on, off, remote_apply, remote_write and local
+    # ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL
+    synchronousCommit: "on"
+    # -- From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication
+    # NOTE: It cannot be > slaveReplicas
+    numSynchronousReplicas: 2
+    # -- Replication Cluster application name. Useful for defining multiple replication policies
+    applicationName: mlp
