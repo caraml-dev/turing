@@ -1,5 +1,4 @@
 {{- if .Values.ingress.enabled }}
-apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ template "mlp.fullname" . }}
@@ -14,6 +13,20 @@ metadata:
     app.kubernetes.io/name: {{ include "mlp.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.ingress.useV1Beta1 }}
+apiVersion: networking.k8s.io/v1beta1
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ default "/" .Values.ingress.path }}
+            pathType: Prefix
+            backend:
+              serviceName: {{ template "mlp.fullname" . }}
+              servicePort: {{ .Values.service.externalPort }}
+{{- else }}
+apiVersion: networking.k8s.io/v1
 spec:
   rules:
     - host: {{ .Values.ingress.host }}
@@ -26,4 +39,5 @@ spec:
                 name: {{ template "mlp.fullname" . }}
                 port:
                   number: {{ .Values.service.externalPort }}
+{{- end }}
 {{- end }}
