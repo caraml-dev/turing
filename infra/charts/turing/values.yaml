@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: v1.0.0-rc1
+    tag: v1.0.0
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -124,7 +124,7 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:v1.0.0-rc1
+      Image: ghcr.io/gojek/turing/turing-router:v1.0.0
 
   # -- Turing UI configuration.
   # Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
