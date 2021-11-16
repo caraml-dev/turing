@@ -104,15 +104,25 @@ turing:
   # @default -- computed value
   config:
     AlertConfig:
-      Enabled: false
+      Enabled: "false"
     BatchEnsemblingConfig:
-      Enabled: false
-
+      Enabled: "false"
+    SparkAppConfig:
+      CorePerCPURequest: 1.5
+      CPURequestToCPULimit: 1.25
+      SparkVersion: 2.4.5
+      TolerationName: batch-job
+      SubmissionFailureRetries: 3
+      SubmissionFailureRetryInterval: 10
+      FailureRetries: 3
+      FailureRetryInterval: 10
+      PythonVersion: "3"
+      TTLSecond: 86400
     DeployConfig: { }
     KubernetesLabelConfigs: { }
     MLPConfig: { }
     Sentry:
-      Enabled: false
+      Enabled: "false"
     RouterDefaults:
       Image: ghcr.io/gojek/turing/turing-router:v1.0.0-rc1
 
