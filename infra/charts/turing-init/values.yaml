@@ -9,7 +9,7 @@ image:
   # -- Docker image repository for Turing cluster init
   repository: gojek/turing/cluster-init
   # -- Docker image tag for Turing cluster init
-  tag: latest
+  tag: v1.0.0
   pullPolicy: IfNotPresent
 
 knative:
