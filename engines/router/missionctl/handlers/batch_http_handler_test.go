@@ -17,45 +17,18 @@ import (
 )
 
 func TestNewBatchHTTPHandler(t *testing.T) {
-	//Create missionctl with route for testing
-	missionCtl, err := missionctl.NewMissionControl(
-		nil,
-		&config.EnrichmentConfig{
-			Endpoint: "",
-			Timeout:  time.Second,
-		},
-		&config.RouterConfig{
-			//ConfigFile: filepath.Join("../testdata", "nop_default_router.yaml"),
-			ConfigFile: filepath.Join("../testdata", "batch_router_test.yaml"),
-			Timeout:    3 * time.Second,
-		},
-		&config.EnsemblerConfig{
-			Endpoint: "",
-			Timeout:  time.Second,
-		},
-		&config.AppConfig{
-			FiberDebugLog: false,
-		},
-	)
-	assert.Nil(t, err)
-
-	//Create test routes endpoint. Route will write request body as response
+	missionCtl := createGenericMissionControl(t)
 	batchHTTPHandler := NewBatchHTTPHandler(missionCtl)
 	assert.NotNil(t, batchHTTPHandler)
+
+	//Create test routes endpoint. Route will write request body as response
 	testRouterHandler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		requestBody, err := ioutil.ReadAll(request.Body)
 		assert.NoError(t, err)
 		_, err = writer.Write(requestBody)
 		assert.NoError(t, err)
 	})
-	mux := http.NewServeMux()
-	mux.Handle("/route1", testRouterHandler)
-	server := httptest.NewUnstartedServer(mux)
-	listener, err := net.Listen("tcp", "127.0.0.1:8080")
-	if err != nil {
-		t.Fatal("Failed to start test http server: " + err.Error())
-	}
-	server.Listener = listener
+	server := createRouteServer(t, testRouterHandler)
 	server.Start()
 	defer server.Close()
 
@@ -63,9 +36,9 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 		payload              string
 		expectedResponseBody string
 		expectedStatusCode   int
-		expectedErrorMessage string
+		expectedContentType  string
 	}{
-		"batch request": {
+		"ok request": {
 			payload: `{"batch_request": [
 							{ "request1": "value1" },
 							{ "request2": "value2" }
@@ -78,7 +51,26 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 										  "data": {"request2": "value2"}
 										}
 									]}`,
-			expectedStatusCode: 200,
+			expectedStatusCode:  200,
+			expectedContentType: "application/json",
+		},
+		"invalid json": {
+			payload:              `{"batch_request": [{ : }]}`,
+			expectedResponseBody: "Invalid json request format\n",
+			expectedStatusCode:   400,
+			expectedContentType:  "text/plain; charset=utf-8",
+		},
+		"invalid json request": {
+			payload:              `{"key": "value1"}`,
+			expectedResponseBody: "Invalid json request\n",
+			expectedStatusCode:   400,
+			expectedContentType:  "text/plain; charset=utf-8",
+		},
+		"invalid json request, no batch_request key": {
+			payload:              `{"key": [{"key1":"value1"}]}`,
+			expectedResponseBody: "batch_request\" not found in request\n",
+			expectedStatusCode:   400,
+			expectedContentType:  "text/plain; charset=utf-8",
 		},
 	}
 
@@ -91,9 +83,95 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 			defer res.Body.Close()
 			result, _ := ioutil.ReadAll(res.Body)
 
-			assert.JSONEq(t, test.expectedResponseBody, string(result))
 			assert.Equal(t, test.expectedStatusCode, res.StatusCode)
-			assert.Equal(t, "application/json", res.Header.Get("Content-Type"))
+			assert.Equal(t, test.expectedContentType, res.Header.Get("Content-Type"))
+			if test.expectedContentType == "application/json" {
+				assert.JSONEq(t, test.expectedResponseBody, string(result))
+			} else {
+				assert.Equal(t, test.expectedResponseBody, string(result))
+			}
 		})
 	}
+}
+
+func TestNewBatchHTTPHandlerBadRoute(t *testing.T) {
+	missionCtl := &MockMissionControlBadRoute{BaseMockMissionControl: *createTestBaseMissionControl()}
+	batchHTTPHandler := NewBatchHTTPHandler(missionCtl)
+	assert.NotNil(t, batchHTTPHandler)
+
+	tests := map[string]struct {
+		payload              string
+		expectedResponseBody string
+		expectedStatusCode   int
+		expectedContentType  string
+	}{
+		"ok request": {
+			payload: `{"batch_request": [
+							{ "request1": "value1" },
+							{ "request2": "value2" }
+						]}`,
+			expectedResponseBody: `{"batch_result": [
+										{ "code": 500, 
+										  "error": "Bad Route Called"
+										},
+										{ "code": 500, 
+										  "error": "Bad Route Called"
+										}
+									]}`,
+			expectedStatusCode:  200,
+			expectedContentType: "application/json",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/v1/batch_predict", bytes.NewBuffer([]byte(test.payload)))
+			w := httptest.NewRecorder()
+			batchHTTPHandler.ServeHTTP(w, req)
+			res := w.Result()
+			defer res.Body.Close()
+			result, _ := ioutil.ReadAll(res.Body)
+
+			assert.Equal(t, test.expectedStatusCode, res.StatusCode)
+			assert.Equal(t, test.expectedContentType, res.Header.Get("Content-Type"))
+			assert.JSONEq(t, test.expectedResponseBody, string(result))
+		})
+	}
+}
+
+func createRouteServer(t *testing.T, testRouterHandler http.HandlerFunc) *httptest.Server {
+	mux := http.NewServeMux()
+	mux.Handle("/route1", testRouterHandler)
+	server := httptest.NewUnstartedServer(mux)
+	listener, err := net.Listen("tcp", "127.0.0.1:8080")
+	if err != nil {
+		t.Fatal("Failed to start test http server: " + err.Error())
+	}
+	server.Listener = listener
+	return server
+}
+
+func createGenericMissionControl(t *testing.T) missionctl.MissionControl {
+	//Create missionctl with route for testing
+	missionCtl, err := missionctl.NewMissionControl(
+		nil,
+		&config.EnrichmentConfig{
+			Endpoint: "",
+			Timeout:  time.Second,
+		},
+		&config.RouterConfig{
+			//ConfigFile: filepath.Join("../testdata", "nop_default_router.yaml"),
+			ConfigFile: filepath.Join("../testdata", "batch_router_test.yaml"),
+			Timeout:    10 * time.Second,
+		},
+		&config.EnsemblerConfig{
+			Endpoint: "",
+			Timeout:  time.Second,
+		},
+		&config.AppConfig{
+			FiberDebugLog: false,
+		},
+	)
+	assert.Nil(t, err)
+	return missionCtl
 }

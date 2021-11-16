@@ -19,7 +19,7 @@ type batchHTTPHandler struct {
 type batchResponse struct {
 	StatusCode int         `json:"code"`
 	ErrorMsg   string      `json:"error,omitempty"`
-	Data       interface{} `json:"data"`
+	Data       interface{} `json:"data,omitempty"`
 }
 
 type batchResult struct {
@@ -60,18 +60,26 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	//Valid request
+	if valid := json.Valid(requestBody); !valid {
+		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
+			`Invalid json request format`)))
+		return
+	}
+
 	//Split into batches
 	var batchRequests map[string][]interface{}
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
+		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
+			`Invalid json request`)))
 		return
 	}
 
 	//Validate request
 	if _, ok := batchRequests["batch_request"]; !ok {
 		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
-			`"batch_request" not found in request"`)))
+			`batch_request" not found in request`)))
 		return
 	}
 
@@ -85,6 +93,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		if httpErr != nil {
 			batchResponse.StatusCode = httpErr.Code
 			batchResponse.ErrorMsg = httpErr.Message
+			batchResponses = append(batchResponses, batchResponse)
 			continue
 		}
 		err = json.Unmarshal(resp.Body(), &batchResponse.Data)
