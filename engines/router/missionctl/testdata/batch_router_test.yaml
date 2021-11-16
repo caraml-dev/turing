@@ -1,0 +1,11 @@
+type: EAGER_ROUTER
+id: eager-router
+routes:
+  - id: route_id_1
+    type: PROXY
+    endpoint: "http://localhost:8080/route1"
+strategy:
+  type: fiber.DefaultTuringRoutingStrategy
+  properties:
+    default_route_id: route_id_1
+    experiment_engine: Nop

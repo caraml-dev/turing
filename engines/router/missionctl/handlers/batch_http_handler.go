@@ -1,26 +1,37 @@
 package handlers
 
 import (
-	"github.com/gojek/turing/engines/router/missionctl"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
+	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
 	"github.com/gojek/turing/engines/router/missionctl/log"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
-type batchHttpHandler struct {
+type batchHTTPHandler struct {
 	httpHandler
+}
+
+type batchResponse struct {
+	StatusCode int         `json:"code"`
+	ErrorMsg   string      `json:"error,omitempty"`
+	Data       interface{} `json:"data"`
+}
+
+type batchResult struct {
+	BatchResult []batchResponse `json:"batch_result"`
 }
 
 // NewBatchHTTPHandler creates an instance of the Mission Control's prediction request handler
 func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
-	return &batchHttpHandler{ httpHandler{mc}}
+	return &batchHTTPHandler{httpHandler{mc}}
 }
 
-func (h *batchHttpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-
+func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.HTTPError
 	h.measureRequestDuration(httpErr)
 
@@ -49,21 +60,50 @@ func (h *batchHttpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	resp, httpErr := h.getPrediction(ctx, req, ctxLogger, requestBody)
-	if httpErr != nil {
-		h.error(ctx, rw, httpErr)
+	//Split into batches
+	var batchRequests map[string][]interface{}
+	err = json.Unmarshal(requestBody, &batchRequests)
+	if err != nil {
+		h.error(ctx, rw, errors.NewHTTPError(err))
 		return
 	}
-	payload := resp.Body()
+
+	//Validate request
+	if _, ok := batchRequests["batch_request"]; !ok {
+		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
+			`"batch_request" not found in request"`)))
+		return
+	}
+
+	//Handle request
+	var resp mchttp.Response
+	var batchResponses []batchResponse
+	for _, v := range batchRequests["batch_request"] {
+		batchRequestBody, _ := json.Marshal(v)
+		var batchResponse batchResponse
+		resp, httpErr = h.getPrediction(ctx, req, ctxLogger, batchRequestBody)
+		if httpErr != nil {
+			batchResponse.StatusCode = httpErr.Code
+			batchResponse.ErrorMsg = httpErr.Message
+			continue
+		}
+		err = json.Unmarshal(resp.Body(), &batchResponse.Data)
+		if err != nil {
+			batchResponse.StatusCode = http.StatusInternalServerError
+			batchResponse.ErrorMsg = "Unable to marshall response into json"
+		}
+		batchResponse.StatusCode = http.StatusOK
+		batchResponses = append(batchResponses, batchResponse)
+	}
 
 	// Write the json response to the writer
-	rw.Header().Set("Content-Type", resp.Header().Get("Content-Type"))
+	rw.Header().Set("Content-Type", "application/json")
 	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
-	contentLength, err := rw.Write(payload)
+	batchResponseByte, _ := json.Marshal(batchResult{BatchResult: batchResponses})
+	contentLength, err := rw.Write(batchResponseByte)
 	if err != nil {
 		ctxLogger.Errorf("Error occurred when copying content: %v", err.Error())
 	}
 	ctxLogger.Debugf("Written %d bytes", contentLength)
 }
-

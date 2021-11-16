@@ -47,6 +47,7 @@ func (h *httpHandler) error(
 	logTuringRouterRequestError(ctx, err)
 }
 
+// measureRequestDuration measure the duration of the request
 func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 	// Measure the duration of handler function
 	defer metrics.Glob().MeasureDurationMs(
@@ -62,8 +63,8 @@ func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 	)()
 }
 
+// enableTracingSpan associates span to context, if applicable
 func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) context.Context {
-	// Associate span to context, if applicable
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
 		sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
@@ -74,6 +75,7 @@ func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) 
 	return ctx
 }
 
+// getPrediction takes in a request and owns the flow of the request - enrich, route, ensemble
 func (h *httpHandler) getPrediction(
 	ctx context.Context,
 	req *http.Request,
