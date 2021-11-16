@@ -104,9 +104,9 @@ turing:
   # @default -- computed value
   config:
     AlertConfig:
-      Enabled: "false"
+      Enabled: false
     BatchEnsemblingConfig:
-      Enabled: "false"
+      Enabled: false
     SparkAppConfig:
       CorePerCPURequest: 1.5
       CPURequestToCPULimit: 1.25
@@ -122,7 +122,7 @@ turing:
     KubernetesLabelConfigs: { }
     MLPConfig: { }
     Sentry:
-      Enabled: "false"
+      Enabled: false
     RouterDefaults:
       Image: ghcr.io/gojek/turing/turing-router:v1.0.0-rc1
 

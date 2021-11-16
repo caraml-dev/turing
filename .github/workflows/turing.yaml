@@ -232,6 +232,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug
+        run: |
+          cat api/turing/config/config.go
+
       - name: Cache vendor dependencies
         uses: actions/cache@v2
         with:
