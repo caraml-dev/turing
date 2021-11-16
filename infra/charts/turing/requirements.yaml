@@ -3,12 +3,12 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     version: 8.9.8
   - name: mlp
-    version: 1.0.0
+    version: 1.0.1
     repository: file://subcharts/mlp
     tags:
       - mlp
   - name: merlin
-    version: 0.7.0
+    version: 0.7.1
     repository: file://subcharts/merlin
     tags:
       - mlp
