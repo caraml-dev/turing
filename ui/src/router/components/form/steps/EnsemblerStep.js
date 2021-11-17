@@ -8,6 +8,7 @@ import FormValidationContext from "../../../../components/form/validation/contex
 import { get } from "../../../../components/form/utils";
 import { StandardEnsemblerFormGroup } from "../components/ensembler_config/standard_ensembler/StandardEnsemblerFormGroup";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
+import ExperimentEngineContext from "../../../../providers/experiments/context";
 
 export const EnsemblerStep = ({ projectId }) => {
   const {
@@ -16,13 +17,14 @@ export const EnsemblerStep = ({ projectId }) => {
     },
     onChangeHandler,
   } = useContext(FormContext);
-
   const { errors } = useContext(FormValidationContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
+
+  const { getEngineProperties } = useContext(ExperimentEngineContext);
   const engineProps =
     experiment_engine.type === "nop"
       ? {}
-      : (experiment_engine.config || {}).engine || {};
+      : getEngineProperties(experiment_engine.type);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

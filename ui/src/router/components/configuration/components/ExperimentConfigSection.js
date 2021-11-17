@@ -1,24 +1,84 @@
-import React, { Fragment } from "react";
-import { EuiPanel } from "@elastic/eui";
-import { ExperimentConfigGroup } from "./experiment_config_section/ExperimentConfigGroup";
-import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
+import React, { Fragment, useContext } from "react";
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
+
+import { ConfigSectionPanel } from "../../../../components/config_section";
+import { RemoteComponent } from "../../../../components/remote_component/RemoteComponent";
+import useDynamicScript from "../../../../hooks/useDynamicScript";
+import ExperimentEngineContext from "../../../../providers/experiments/context";
+
+import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
+
+const StandardExperimentConfigView = ({ projectId, engine }) => (
+  <StandardExperimentConfigGroup
+    projectId={projectId}
+    engineType={engine.type}
+    engineConfig={engine.config}
+  />
+);
+
+const FallbackView = ({ text }) => (
+  <EuiFlexGroup direction="row" wrap>
+    <EuiFlexItem grow={true}>
+      <ConfigSectionPanel title="Experiment Engine">{text}</ConfigSectionPanel>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
+  // Retrieve script from host dynamically
+  const { ready, failed } = useDynamicScript({
+    url: remoteUi.url,
+  });
+
+  if (!ready || failed) {
+    const text = failed
+      ? "Failed to load Experiment Engine"
+      : "Loading Experiment Engine ...";
+    return <FallbackView text={text} />;
+  }
+
+  // Load component from remote host
+  return (
+    <React.Suspense
+      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      <RemoteComponent
+        scope={remoteUi.name}
+        name="./ExperimentEngineConfigDetails"
+        fallback={<FallbackView text="Loading Experiment Engine config" />}
+        projectId={projectId}
+        config={config}
+      />
+    </React.Suspense>
+  );
+};
 
 export const ExperimentConfigSection = ({
   projectId,
   config: { experiment_engine },
 }) => {
+  // Get engine's properties
+  const { getEngineProperties } = useContext(ExperimentEngineContext);
+  const engineProps = getEngineProperties(experiment_engine.type);
+
   return (
     <Fragment>
       {experiment_engine.type === "nop" ? (
         <EuiPanel>Not Configured</EuiPanel>
-      ) : (
-        <ExperimentEngineContextProvider>
-          <ExperimentConfigGroup
+      ) : !!engineProps.type ? (
+        engineProps.type === "custom" ? (
+          <CustomExperimentConfigView
             projectId={projectId}
-            engineType={experiment_engine.type}
-            engineConfig={experiment_engine.config}
+            remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
+            config={experiment_engine.config}
           />
-        </ExperimentEngineContextProvider>
+        ) : (
+          <StandardExperimentConfigView
+            projectId={projectId}
+            engine={experiment_engine}
+          />
+        )
+      ) : (
+        <EuiPanel>Loading ...</EuiPanel>
       )}
     </Fragment>
   );

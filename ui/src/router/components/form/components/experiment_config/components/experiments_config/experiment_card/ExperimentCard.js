@@ -3,6 +3,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel } from "@elastic/eui";
 import { EuiComboBoxSelect } from "../../../../../../../../components/form/combo_box/EuiComboBoxSelect";
 import { ExperimentCardHeader } from "./card_header/ExperimentCardHeader";
 import ExperimentContext from "../../../providers/context";
+import { makeId } from "../../../config";
 import sortBy from "lodash/sortBy";
 
 export const ExperimentCard = ({
@@ -27,7 +28,7 @@ export const ExperimentCard = ({
     (expName) => {
       onChangeHandler({
         ...allExperiments.find((e) => e.name === expName),
-        uuid: experiment.uuid,
+        uuid: experiment.uuid || makeId(),
       });
     },
     [allExperiments, experiment.uuid, onChangeHandler]
@@ -52,7 +53,7 @@ export const ExperimentCard = ({
                   fullWidth
                   isLoading={isLoading("experiments")}
                   placeholder="Select Experiment..."
-                  value={experiment.name}
+                  value={experiment.name || ""}
                   options={experimentOptions}
                   onChange={onExperimentNameChange}
                   isInvalid={!!errors.name}

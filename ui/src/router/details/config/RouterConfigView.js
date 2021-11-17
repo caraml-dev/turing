@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef } from "react";
+import { EuiEmptyPrompt, EuiLoadingChart } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { RouterConfigDetails } from "../../components/configuration/RouterConfigDetails";
-import { EuiEmptyPrompt, EuiLoadingChart } from "@elastic/eui";
+import { ExperimentEngineContextProvider } from "../../../providers/experiments/ExperimentEngineContextProvider";
 import { OverlayMask } from "../../../components/overlay_mask/OverlayMask";
 import { Status } from "../../../services/status/Status";
 
@@ -36,10 +37,12 @@ export const RouterConfigView = ({ router }) => {
           {status === Status.PENDING && <EuiLoadingChart size="xl" mono />}
         </OverlayMask>
       )}
-      <RouterConfigDetails
-        projectId={router.project_id}
-        config={router.config}
-      />
+      <ExperimentEngineContextProvider>
+        <RouterConfigDetails
+          projectId={router.project_id}
+          config={router.config}
+        />
+      </ExperimentEngineContextProvider>
     </div>
   ) : (
     <EuiEmptyPrompt

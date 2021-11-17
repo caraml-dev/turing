@@ -20,6 +20,10 @@ const (
 // ExperimentsService provides functionality to work with experiment engines
 // supported by Turing
 type ExperimentsService interface {
+	// IsStandardExperimentManager checks if the experiment manager is of the standard type
+	IsStandardExperimentManager(engine string) bool
+	// GetStandardExperimentConfig converts the given generic config into the standard type, if possible
+	GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error)
 	// ListEngines returns a list of the experiment engines available
 	ListEngines() []manager.Engine
 	// ListClients returns a list of the clients registered on the given experiment engine
@@ -31,10 +35,10 @@ type ExperimentsService interface {
 	// for the given clientID and/or experiments
 	ListVariables(engine string, clientID string, experimentIDs []string) (manager.Variables, error)
 	// ValidateExperimentConfig validates the given experiment config for completeness
-	ValidateExperimentConfig(engine string, cfg manager.TuringExperimentConfig) error
-	// GetExperimentRunnerConfig converts the given generic manager.TuringExperimentConfig into the
-	// format compatible with the ExperimentRunner
-	GetExperimentRunnerConfig(engine string, cfg *manager.TuringExperimentConfig) (json.RawMessage, error)
+	ValidateExperimentConfig(engine string, cfg interface{}) error
+	// GetExperimentRunnerConfig converts the given experiment config compatible with the Experiment Manager
+	// into the format compatible with the ExperimentRunner
+	GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error)
 }
 
 type experimentsService struct {
@@ -79,22 +83,40 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 		cache:              cache.New(expCacheExpirySeconds*time.Second, expCacheCleanUpSeconds*time.Second),
 	}
 
-	// Populate the cache with the Clients / Experiments info
+	// Populate the cache with the Clients / Experiments info from Standard Engines
 	for expEngine, expManager := range svc.experimentManagers {
-		if expManager.GetEngineInfo().ClientSelectionEnabled {
-			_, err := svc.ListClients(expEngine)
-			if err != nil {
-				return nil, err
+		engineInfo := expManager.GetEngineInfo()
+		if engineInfo.Type == manager.StandardExperimentManagerType {
+			if engineInfo.StandardExperimentManagerConfig == nil {
+				return nil, fmt.Errorf("Standard Experiment Manager config missing for engine %s", engineInfo.Name)
 			}
-		} else if expManager.GetEngineInfo().ExperimentSelectionEnabled {
-			_, err := svc.ListExperiments(expEngine, "")
-			if err != nil {
-				return nil, err
+			if engineInfo.StandardExperimentManagerConfig.ClientSelectionEnabled {
+				_, err := svc.ListClients(expEngine)
+				if err != nil {
+					return nil, err
+				}
+			} else if engineInfo.StandardExperimentManagerConfig.ExperimentSelectionEnabled {
+				_, err := svc.ListExperiments(expEngine, "")
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
 
 	return svc, nil
+}
+
+func (es *experimentsService) IsStandardExperimentManager(engine string) bool {
+	expManager, err := es.getExperimentManager(engine)
+	if err != nil {
+		return false
+	}
+	return expManager.GetEngineInfo().Type == manager.StandardExperimentManagerType
+}
+
+func (*experimentsService) GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error) {
+	return manager.GetStandardExperimentConfig(config)
 }
 
 func (es *experimentsService) ListEngines() []manager.Engine {
@@ -174,27 +196,24 @@ func (es *experimentsService) ListVariables(
 	}, nil
 }
 
-func (es *experimentsService) ValidateExperimentConfig(engine string, cfg manager.TuringExperimentConfig) error {
+func (es *experimentsService) ValidateExperimentConfig(engine string, cfg interface{}) error {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {
 		return err
 	}
 
-	return expManager.ValidateExperimentConfig(expManager.GetEngineInfo(), cfg)
+	return manager.ValidateExperimentConfig(expManager, cfg)
 }
 
-func (es *experimentsService) GetExperimentRunnerConfig(
-	engine string,
-	cfg *manager.TuringExperimentConfig,
-) (json.RawMessage, error) {
+func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error) {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {
 		return json.RawMessage{}, err
 	}
 
-	return expManager.GetExperimentRunnerConfig(*cfg)
+	return manager.GetExperimentRunnerConfig(expManager, cfg)
 }
 
 func (es *experimentsService) getExperimentManager(
@@ -215,7 +234,7 @@ func (es *experimentsService) listClientsWithCache(engine string) ([]manager.Cli
 	}
 
 	cacheKey := fmt.Sprintf("engine:%s:clients", engine)
-	cacheEnabled := expManager.IsCacheEnabled()
+	cacheEnabled := manager.IsCacheEnabled(expManager)
 
 	if cacheEnabled {
 		// Attempt to retrieve info from cache
@@ -232,7 +251,7 @@ func (es *experimentsService) listClientsWithCache(engine string) ([]manager.Cli
 	}
 
 	// Cache disabled / not found in cache - invoke API
-	clients, err := expManager.ListClients()
+	clients, err := manager.ListClients(expManager)
 	if err != nil {
 		return []manager.Client{}, err
 	}
@@ -255,18 +274,18 @@ func (es *experimentsService) listExperimentsWithCache(
 
 	var cacheKey string
 	var listExperimentsMethod func() ([]manager.Experiment, error)
-	cacheEnabled := expManager.IsCacheEnabled()
+	cacheEnabled := manager.IsCacheEnabled(expManager)
 
 	// Set cache key and API method to be called, based on client info passed in
 	if client != nil {
 		cacheKey = fmt.Sprintf("engine:%s:clients:%s:experiments", engine, client.ID)
 		listExperimentsMethod = func() ([]manager.Experiment, error) {
-			return expManager.ListExperimentsForClient(*client)
+			return manager.ListExperimentsForClient(expManager, *client)
 		}
 	} else {
 		cacheKey = fmt.Sprintf("engine:%s:experiments", engine)
 		listExperimentsMethod = func() ([]manager.Experiment, error) {
-			return expManager.ListExperiments()
+			return manager.ListExperiments(expManager)
 		}
 	}
 
@@ -307,7 +326,7 @@ func (es *experimentsService) listClientVariablesWithCache(
 	}
 
 	cacheKey := fmt.Sprintf("engine:%s:clients:%s:variables", engine, client.ID)
-	cacheEnabled := expManager.IsCacheEnabled()
+	cacheEnabled := manager.IsCacheEnabled(expManager)
 
 	if cacheEnabled {
 		// Attempt to retrieve info from cache
@@ -324,7 +343,7 @@ func (es *experimentsService) listClientVariablesWithCache(
 	}
 
 	// Cache disabled / not found in cache - invoke API
-	variables, err := expManager.ListVariablesForClient(*client)
+	variables, err := manager.ListVariablesForClient(expManager, *client)
 	if err != nil {
 		return []manager.Variable{}, err
 	}
@@ -345,7 +364,7 @@ func (es *experimentsService) listExperimentVariablesWithCache(
 		return map[string][]manager.Variable{}, err
 	}
 
-	cacheEnabled := expManager.IsCacheEnabled()
+	cacheEnabled := manager.IsCacheEnabled(expManager)
 	// Store variables for each experiment (experiment_id -> variables map)
 	expVariables := map[string][]manager.Variable{}
 	// Save the experiments whose variables need to be queried
@@ -376,7 +395,7 @@ func (es *experimentsService) listExperimentVariablesWithCache(
 
 	// Get variables for filteredExperiments which could be an empty list if we got everything
 	// from the cache
-	filteredExpVariables, err := expManager.ListVariablesForExperiments(filteredExperiments)
+	filteredExpVariables, err := manager.ListVariablesForExperiments(expManager, filteredExperiments)
 	if err != nil {
 		return expVariables, err
 	}

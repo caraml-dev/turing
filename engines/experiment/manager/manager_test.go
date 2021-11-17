@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
@@ -70,6 +72,45 @@ func TestRegisterAndGet(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Get() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetStandardExperimentConfig(t *testing.T) {
+	tests := map[string]struct {
+		cfg      interface{}
+		expected manager.TuringExperimentConfig
+		err      string
+	}{
+		"failure | invalid json": {
+			cfg: func() {},
+			err: "json: unsupported type: func()",
+		},
+		"failure | invalid standard config": {
+			cfg: []int{1, 2},
+			err: "json: cannot unmarshal array into Go value of type manager.TuringExperimentConfig",
+		},
+		"success": {
+			cfg: struct {
+				Client      manager.Client       `json:"client,omitempty"`
+				Experiments []manager.Experiment `json:"experiments,omitempty"`
+				Variables   manager.Variables    `json:"variables,omitempty"`
+				Extra       int                  `json:"extra_value"`
+			}{},
+			expected: manager.TuringExperimentConfig{},
+		},
+	}
+
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			stdCfg, err := manager.GetStandardExperimentConfig(data.cfg)
+			if data.err != "" {
+				assert.EqualError(t, err, data.err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, data.expected, stdCfg)
 			}
 		})
 	}

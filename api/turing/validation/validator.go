@@ -13,7 +13,6 @@ import (
 	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/engines/experiment/manager"
 )
 
 var tableRegexString string = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
@@ -101,14 +100,7 @@ func newExperimentConfigValidator(expSvc service.ExperimentsService) func(valida
 		case string(models.ExperimentEngineTypeNop):
 			return
 		case string(models.ExperimentEngineTypeLitmus), string(models.ExperimentEngineTypeXp):
-			experimentConfig := field.Config
-			// Construct a TuringExperimentConfig object for validation
-			turingExpCfg := manager.TuringExperimentConfig{
-				Client:      experimentConfig.Client,
-				Experiments: experimentConfig.Experiments,
-				Variables:   experimentConfig.Variables,
-			}
-			err := expSvc.ValidateExperimentConfig(field.Type, turingExpCfg)
+			err := expSvc.ValidateExperimentConfig(field.Type, field.Config)
 			if err != nil {
 				sl.ReportError(field.Config, "config", "ExperimentEngineConfig.Config", err.Error(), "")
 			}
@@ -116,7 +108,6 @@ func newExperimentConfigValidator(expSvc service.ExperimentsService) func(valida
 			sl.ReportError(field.Type, "type", "Type", "oneof", "litmus,xp,nop")
 		}
 	}
-
 	return validationFunc
 }
 

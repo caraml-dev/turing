@@ -21,17 +21,10 @@ func TestExperimentEngineValue(t *testing.T) {
 				"type": "nop"
 			}`),
 		},
-		"xp": {
+		"litmus": {
 			expEngine: ExperimentEngine{
-				Type: ExperimentEngineTypeXp,
+				Type: ExperimentEngineTypeLitmus,
 				Config: &manager.TuringExperimentConfig{
-					Deployment: struct {
-						Endpoint string `json:"endpoint"`
-						Timeout  string `json:"timeout"`
-					}{
-						Endpoint: "test-endpoint",
-						Timeout:  "600ms",
-					},
 					Client: manager.Client{
 						ID:       "1",
 						Username: "c1",
@@ -59,12 +52,8 @@ func TestExperimentEngineValue(t *testing.T) {
 				},
 			},
 			expected: string(`{
-				"type": "xp",
+				"type": "litmus",
 				"config": {
-					"deployment": {
-						"endpoint": "test-endpoint",
-						"timeout": "600ms"
-					},
 					"client": {
 						"id": "1",
 						"username": "c1",
@@ -90,6 +79,16 @@ func TestExperimentEngineValue(t *testing.T) {
 						]
 					}
 				}
+			}`),
+		},
+		"xp": {
+			expEngine: ExperimentEngine{
+				Type:   ExperimentEngineTypeXp,
+				Config: []int{1, 2},
+			},
+			expected: string(`{
+				"type": "xp",
+				"config": [1,2]
 			}`),
 		},
 	}

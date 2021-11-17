@@ -14,9 +14,11 @@ func TestListExperimentEngines(t *testing.T) {
 	// Create mock experiment service
 	engines := []manager.Engine{
 		{
-			Name:                       "test-engine",
-			ClientSelectionEnabled:     true,
-			ExperimentSelectionEnabled: true,
+			Name: "test-engine",
+			StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+				ClientSelectionEnabled:     true,
+				ExperimentSelectionEnabled: true,
+			},
 		},
 	}
 	svc := &mocks.ExperimentsService{}

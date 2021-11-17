@@ -1,0 +1,17 @@
+{
+    "client": {
+        "username": "client_name"
+    },
+    "experiments": [
+        {
+            "name": "exp_name"
+        }
+    ],
+    "variables": {
+        "client_variables": [
+            {
+                "name": "var_name"
+            }
+        ]
+    }
+}

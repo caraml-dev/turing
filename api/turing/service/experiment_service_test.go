@@ -9,6 +9,7 @@ import (
 
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/engines/experiment/common"
@@ -16,17 +17,26 @@ import (
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
 
+var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
+var customExperimentManagerConfig = manager.Engine{Type: manager.CustomExperimentManagerType}
+
 func TestListEngines(t *testing.T) {
 	// Set up mock Experiment Managers
 	litmusEngineInfo := manager.Engine{
-		Name:                       "Litmus",
-		ClientSelectionEnabled:     true,
-		ExperimentSelectionEnabled: true,
+		Name: "Litmus",
+		Type: manager.StandardExperimentManagerType,
+		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+			ClientSelectionEnabled:     true,
+			ExperimentSelectionEnabled: true,
+		},
 	}
 	xpEngineInfo := manager.Engine{
-		Name:                       "XP",
-		ClientSelectionEnabled:     false,
-		ExperimentSelectionEnabled: false,
+		Name: "XP",
+		Type: manager.StandardExperimentManagerType,
+		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+			ClientSelectionEnabled:     false,
+			ExperimentSelectionEnabled: false,
+		},
 	}
 	expMgr1 := &mocks.ExperimentManager{}
 	expMgr1.On("GetEngineInfo").Return(litmusEngineInfo)
@@ -59,11 +69,13 @@ func TestListClients(t *testing.T) {
 		},
 	}
 	// Set up mock Experiment Managers
-	expMgrSuccess := &mocks.ExperimentManager{}
+	expMgrSuccess := &mocks.StandardExperimentManager{}
+	expMgrSuccess.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrSuccess.On("IsCacheEnabled").Return(true)
 	expMgrSuccess.On("ListClients").Return(clients, nil)
 
-	expMgrFailure := &mocks.ExperimentManager{}
+	expMgrFailure := &mocks.StandardExperimentManager{}
+	expMgrFailure.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure.On("IsCacheEnabled").Return(true)
 	expMgrFailure.On("ListClients").Return([]manager.Client{}, errors.New("List clients error"))
 
@@ -140,17 +152,20 @@ func TestListExperiments(t *testing.T) {
 		},
 	}
 	// Set up mock Experiment Managers
-	expMgrSuccess := &mocks.ExperimentManager{}
+	expMgrSuccess := &mocks.StandardExperimentManager{}
+	expMgrSuccess.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrSuccess.On("IsCacheEnabled").Return(true)
 	expMgrSuccess.On("ListClients").Return(clients, nil)
 	expMgrSuccess.On("ListExperiments").Return(experiments, nil)
 	expMgrSuccess.On("ListExperimentsForClient", client).Return(experiments, nil)
 
-	expMgrFailure1 := &mocks.ExperimentManager{}
+	expMgrFailure1 := &mocks.StandardExperimentManager{}
+	expMgrFailure1.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure1.On("IsCacheEnabled").Return(true)
 	expMgrFailure1.On("ListClients").Return([]manager.Client{}, errors.New("List clients error"))
 
-	expMgrFailure2 := &mocks.ExperimentManager{}
+	expMgrFailure2 := &mocks.StandardExperimentManager{}
+	expMgrFailure2.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure2.On("IsCacheEnabled").Return(true)
 	expMgrFailure2.On("ListClients").Return(clients, nil)
 	expMgrFailure2.On("ListExperimentsForClient", client).
@@ -267,7 +282,8 @@ func TestListVariables(t *testing.T) {
 	}
 
 	// Set up mock Experiment Managers
-	expMgrSuccess := &mocks.ExperimentManager{}
+	expMgrSuccess := &mocks.StandardExperimentManager{}
+	expMgrSuccess.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrSuccess.On("IsCacheEnabled").Return(true)
 	expMgrSuccess.On("ListClients").Return(clients, nil)
 	expMgrSuccess.On("ListVariablesForClient", client).Return(clientVariables, nil)
@@ -276,24 +292,28 @@ func TestListVariables(t *testing.T) {
 	expMgrSuccess.On("ListVariablesForExperiments", []manager.Experiment{}).
 		Return(map[string][]manager.Variable{}, nil)
 
-	expMgrFailure1 := &mocks.ExperimentManager{}
+	expMgrFailure1 := &mocks.StandardExperimentManager{}
+	expMgrFailure1.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure1.On("IsCacheEnabled").Return(true)
 	expMgrFailure1.On("ListClients").Return([]manager.Client{}, errors.New("List clients error"))
 
-	expMgrFailure2 := &mocks.ExperimentManager{}
+	expMgrFailure2 := &mocks.StandardExperimentManager{}
+	expMgrFailure2.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure2.On("IsCacheEnabled").Return(true)
 	expMgrFailure2.On("ListClients").Return(clients, nil)
 	expMgrFailure2.On("ListVariablesForClient", client).
 		Return([]manager.Variable{}, errors.New("List client vars error"))
 
-	expMgrFailure3 := &mocks.ExperimentManager{}
+	expMgrFailure3 := &mocks.StandardExperimentManager{}
+	expMgrFailure3.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure3.On("IsCacheEnabled").Return(true)
 	expMgrFailure3.On("ListClients").Return(clients, nil)
 	expMgrFailure3.On("ListVariablesForClient", client).Return(clientVariables, nil)
 	expMgrFailure3.On("ListExperimentsForClient", client).
 		Return([]manager.Experiment{}, errors.New("List experiments error"))
 
-	expMgrFailure4 := &mocks.ExperimentManager{}
+	expMgrFailure4 := &mocks.StandardExperimentManager{}
+	expMgrFailure4.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrFailure4.On("IsCacheEnabled").Return(true)
 	expMgrFailure4.On("ListClients").Return(clients, nil)
 	expMgrFailure4.On("ListVariablesForClient", client).Return(clientVariables, nil)
@@ -411,35 +431,58 @@ func TestListVariables(t *testing.T) {
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	// Create mock experiment manager
-	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{Name: "Litmus"})
-	expMgr.On("ValidateExperimentConfig", manager.Engine{Name: "Litmus"}, manager.TuringExperimentConfig{}).Return(nil)
+	// Create mock experiment managers
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{
+		Name: "Litmus",
+		Type: manager.StandardExperimentManagerType,
+		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+			ClientSelectionEnabled: true,
+		},
+	})
+	stdExpMgr.On("ValidateExperimentConfig",
+		&manager.StandardExperimentManagerConfig{
+			ClientSelectionEnabled: true,
+		},
+		manager.TuringExperimentConfig{},
+	).Return(nil)
+
+	customExpMgr := &mocks.CustomExperimentManager{}
+	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
+	customExpMgr.On("ValidateExperimentConfig", []int{1, 2}).Return(nil)
+
 	// Create test experiment service
 	expSvc := &experimentsService{
 		experimentManagers: map[string]manager.ExperimentManager{
-			"litmus": expMgr,
+			"litmus": stdExpMgr,
+			"xp":     customExpMgr,
 		},
 	}
 
 	// Define tests
 	tests := map[string]struct {
-		engine string
-		err    string
+		engine   string
+		inputCfg interface{}
+		err      string
 	}{
-		"success": {
-			engine: "litmus",
-		},
-		"failure": {
+		"failure | std exp mgr": {
 			engine: "test-engine",
 			err:    "Unknown experiment engine test-engine",
+		},
+		"success | std exp mgr": {
+			engine:   "litmus",
+			inputCfg: manager.TuringExperimentConfig{},
+		},
+		"success | custom exp mgr": {
+			engine:   "xp",
+			inputCfg: []int{1, 2},
 		},
 	}
 
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := expSvc.ValidateExperimentConfig(data.engine, manager.TuringExperimentConfig{})
+			err := expSvc.ValidateExperimentConfig(data.engine, data.inputCfg)
 			if data.err == "" {
 				assert.NoError(t, err)
 			} else {
@@ -453,41 +496,57 @@ func TestValidateExperimentConfig(t *testing.T) {
 }
 
 func TestGetExperimentRunnerConfig(t *testing.T) {
-	testCfg := &manager.TuringExperimentConfig{
-		Client: manager.Client{ID: "1"},
-	}
-	expectedResult := json.RawMessage([]byte(`{"key": "value"}`))
-	// Create mock experiment manager
-	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetExperimentRunnerConfig", *testCfg).Return(expectedResult, nil)
+	expectedResult1 := json.RawMessage([]byte(`{"key": "value1"}`))
+	expectedResult2 := json.RawMessage([]byte(`{"key": "value2"}`))
+	// Create mock experiment managers
+	stdExpMgr := &mocks.StandardExperimentManager{}
+	stdExpMgr.On("GetEngineInfo").Return(standardExperimentManagerConfig)
+	stdExpMgr.On("GetExperimentRunnerConfig", manager.TuringExperimentConfig{
+		Client: manager.Client{
+			ID: "1",
+		},
+	}).Return(expectedResult1, nil)
+
+	customExpMgr := &mocks.CustomExperimentManager{}
+	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
+	customExpMgr.On("GetExperimentRunnerConfig", json.RawMessage([]byte(`[1,2]`))).Return(expectedResult2, nil)
+
 	// Create test experiment service
 	expSvc := &experimentsService{
 		experimentManagers: map[string]manager.ExperimentManager{
-			"litmus": expMgr,
+			"litmus": stdExpMgr,
+			"xp":     customExpMgr,
 		},
 	}
 
 	// Define tests
 	tests := map[string]struct {
 		engine         string
+		inputCfg       json.RawMessage
 		expectedResult json.RawMessage
 		err            string
 	}{
-		"success": {
-			engine:         "litmus",
-			expectedResult: expectedResult,
-		},
-		"failure": {
+		"failure | std exp mgr": {
 			engine:         "test-engine",
 			expectedResult: json.RawMessage{},
 			err:            "Unknown experiment engine test-engine",
+		},
+		"success | std exp mgr": {
+			engine:         "litmus",
+			inputCfg:       json.RawMessage([]byte(`{"client": {"id": "1"}}`)),
+			expectedResult: expectedResult1,
+		},
+		"success | custom exp mgr": {
+			engine:         "xp",
+			inputCfg:       json.RawMessage([]byte(`[1,2]`)),
+			expectedResult: expectedResult2,
 		},
 	}
 
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			jsonCfg, err := expSvc.GetExperimentRunnerConfig(data.engine, testCfg)
+			jsonCfg, err := expSvc.GetExperimentRunnerConfig(data.engine, data.inputCfg)
 			assert.Equal(t, data.expectedResult, jsonCfg)
 			if data.err == "" {
 				assert.NoError(t, err)

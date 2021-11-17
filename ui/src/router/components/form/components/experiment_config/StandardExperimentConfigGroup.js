@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useRef } from "react";
+import React, { useEffect, useContext, useMemo, useRef } from "react";
 import { EuiFlexItem, EuiLoadingChart } from "@elastic/eui";
 import { initConfig } from "./config";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
@@ -9,7 +9,7 @@ import { ClientConfigPanel } from "./components/client_config/ClientConfigPanel"
 import { ExperimentsConfigPanel } from "./components/experiments_config/ExperimentsConfigPanel";
 import { VariablesConfigPanel } from "./components/variables_config/VariablesConfigPanel";
 
-export const ExperimentConfigGroup = ({
+export const StandardExperimentConfigGroup = ({
   engineType,
   experimentConfig,
   onChangeHandler,
@@ -19,30 +19,21 @@ export const ExperimentConfigGroup = ({
 
   // Get engine's properties
   const { getEngineProperties } = useContext(ExperimentEngineContext);
-  const engineProps = getEngineProperties(engineType);
+  const engineProps = useMemo(
+    () => getEngineProperties(engineType),
+    [engineType, getEngineProperties]
+  );
 
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
-  // Set engineProps to the experiment config (for validation and comparison of changes to engine type),
-  // if not already exists. Set experimentConfig if empty or reset it if the type has changed.
+  // Set experimentConfig if empty.
   useEffect(() => {
-    if (!!engineProps.name) {
-      if (
-        !experimentConfig ||
-        (experimentConfig.engine &&
-          experimentConfig.engine.name &&
-          experimentConfig.engine.name !== engineProps.name)
-      ) {
-        onChangeHandler({
-          ...initConfig(),
-          engine: engineProps,
-        });
-      } else if (!experimentConfig.engine || !experimentConfig.engine.name) {
-        // Set the engine props to the experiment config
-        onChange("engine")(engineProps);
-      }
+    if (!!engineProps.name && !experimentConfig) {
+      onChangeHandler({
+        ...initConfig(),
+      });
     }
-  }, [experimentConfig, engineProps, onChange, onChangeHandler]);
+  }, [experimentConfig, engineProps, onChangeHandler]);
 
   /* Not memoizing this because useMemo would check for the referential equality
      while the id property of each experiment will be set after the experiment
@@ -52,14 +43,13 @@ export const ExperimentConfigGroup = ({
     .map((exp) => exp.id)
     .sort((a, b) => (a > b ? 1 : -1));
 
-  return !!experimentConfig &&
-    !!experimentConfig.engine &&
-    !!experimentConfig.engine.name ? (
+  return !!experimentConfig && !!engineProps && !!engineProps.name ? (
     <ExperimentContextProvider
-      engineProps={experimentConfig.engine}
+      engineProps={engineProps}
       clientId={experimentConfig.client.id || ""}
       experimentIds={selectedExpIds.join()}>
-      {experimentConfig.engine.client_selection_enabled && (
+      {engineProps.standard_experiment_manager_config
+        .client_selection_enabled && (
         <EuiFlexItem grow={false}>
           <ClientConfigPanel
             client={experimentConfig.client}
@@ -69,7 +59,8 @@ export const ExperimentConfigGroup = ({
         </EuiFlexItem>
       )}
 
-      {experimentConfig.engine.experiment_selection_enabled && (
+      {engineProps.standard_experiment_manager_config
+        .experiment_selection_enabled && (
         <EuiFlexItem grow={false}>
           <ExperimentsConfigPanel
             experiments={experimentConfig.experiments}

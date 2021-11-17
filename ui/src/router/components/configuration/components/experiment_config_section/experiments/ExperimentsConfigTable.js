@@ -12,10 +12,13 @@ import { getExperimentUrl } from "../../config";
 import "./ExperimentsConfigTable.scss";
 
 export const ExperimentsConfigTable = ({ experiments, engineProps }) => {
+  const homepageUrl =
+    engineProps?.standard_experiment_manager_config?.home_page_url;
+
   return !!experiments.length ? (
     <Fragment>
       {experiments.map((experiment, idx) => {
-        const experimentUrl = getExperimentUrl(engineProps, experiment);
+        const experimentUrl = getExperimentUrl(homepageUrl, experiment);
         return (
           <Fragment key={experiment.name}>
             {!!experimentUrl ? (
@@ -43,7 +46,10 @@ export const ExperimentsConfigTable = ({ experiments, engineProps }) => {
     </Fragment>
   ) : (
     <EuiText size="s" color="subdued">
-      {engineProps.experiment_selection_enabled ? "None" : "N/A"}
+      {engineProps?.standard_experiment_manager_config
+        ?.experiment_selection_enabled
+        ? "None"
+        : "N/A"}
     </EuiText>
   );
 };

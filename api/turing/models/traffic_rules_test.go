@@ -18,7 +18,7 @@ func TestTrafficRules_Value(t *testing.T) {
 	suite := map[string]trafficRulesTestCase{
 		"success": {
 			trafficRules: models.TrafficRules{
-				{
+				&models.TrafficRule{
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "header",
@@ -71,7 +71,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 	suite := map[string]trafficRulesTestCase{
 		"success": {
 			trafficRules: models.TrafficRules{
-				{
+				&models.TrafficRule{
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "header",

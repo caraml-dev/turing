@@ -22,7 +22,9 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
     [maxAllowedReplica]
   );
 
-  const { experimentEngineOptions } = useContext(ExperimentEngineContext);
+  const { experimentEngineOptions, getEngineProperties } = useContext(
+    ExperimentEngineContext
+  );
 
   const sections = [
     {
@@ -34,9 +36,9 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
     {
       title: "Experiments",
       iconType: "beaker",
-      children: <ExperimentStep />,
+      children: <ExperimentStep projectId={projectId} />,
       validationSchema: validationSchema[1],
-      validationContext: { experimentEngineOptions },
+      validationContext: { experimentEngineOptions, getEngineProperties },
     },
     {
       title: "Enricher",

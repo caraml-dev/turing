@@ -41,14 +41,15 @@ func TestDeployVersionSuccess(t *testing.T) {
 	nopExpCfg := &models.ExperimentEngine{
 		Type: "nop",
 	}
-	expEnabledCfg := &models.ExperimentEngine{
-		Type: "xp",
-		Config: &manager.TuringExperimentConfig{
-			Client: manager.Client{
-				ID:      "1",
-				Passkey: "xp-passkey",
-			},
+	expCfg := &manager.TuringExperimentConfig{
+		Client: manager.Client{
+			ID:      "1",
+			Passkey: "xp-passkey",
 		},
+	}
+	expEnabledCfg := &models.ExperimentEngine{
+		Type:   "xp",
+		Config: expCfg,
 	}
 
 	// Define tests
@@ -133,12 +134,10 @@ func TestDeployVersionSuccess(t *testing.T) {
 	cs.On("Decrypt", "xp-passkey").Return("xp-passkey-dec", nil)
 
 	exps := &mocks.ExperimentsService{}
-	exps.On("GetExperimentRunnerConfig", "xp", &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			ID:      "1",
-			Passkey: "xp-passkey",
-		},
-	}).Return(json.RawMessage([]byte(`{"engine": "xp"}`)), nil)
+	exps.On("IsStandardExperimentManager", "nop").Return(false)
+	exps.On("IsStandardExperimentManager", mock.Anything).Return(true)
+	exps.On("GetStandardExperimentConfig", expCfg).Return(*expCfg, nil)
+	exps.On("GetExperimentRunnerConfig", "xp", expCfg).Return(json.RawMessage([]byte(`{"engine": "xp"}`)), nil)
 
 	// Run tests and validate
 	for name, data := range tests {
@@ -270,6 +269,9 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	es.On("ClearEvents", int(router.ID)).Return(nil)
 	es.On("Save", mock.Anything).Return(nil)
 
+	exps := &mocks.ExperimentsService{}
+	exps.On("IsStandardExperimentManager", "nop").Return(false)
+
 	// Create test controller
 	ctrl := RouterDeploymentController{
 		BaseController{
@@ -279,6 +281,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 				RoutersService:        rs,
 				RouterVersionsService: rvs,
 				EventService:          es,
+				ExperimentsService:    exps,
 			},
 		},
 	}

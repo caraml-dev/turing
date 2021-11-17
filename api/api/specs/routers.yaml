@@ -473,12 +473,7 @@ components:
         default_route:
           type: "string"
         experiment_engine:
-          type: "object"
-          properties:
-            type:
-              $ref: "experiment-engines.yaml#/components/schemas/ExperimentEngineType"
-            config:
-              $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfigResponse"
+          $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
@@ -574,12 +569,7 @@ components:
             default_route_id:
               type: "string"
             experiment_engine:
-              type: "object"
-              properties:
-                type:
-                  $ref: "experiment-engines.yaml#/components/schemas/ExperimentEngineType"
-                config:
-                  $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfigRequest"
+              $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
             resource_request:
               $ref: "#/components/schemas/ResourceRequest"
             timeout:
