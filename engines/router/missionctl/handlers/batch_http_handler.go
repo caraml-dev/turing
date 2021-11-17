@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"sync"
 
 	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
-	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
 	"github.com/gojek/turing/engines/router/missionctl/log"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
@@ -83,27 +83,33 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	//Handle request
-	var resp mchttp.Response
-	var batchResponses []batchResponse
-	for _, v := range batchRequests["batch_request"] {
-		batchRequestBody, _ := json.Marshal(v)
-		var batchResponse batchResponse
-		resp, httpErr = h.getPrediction(ctx, req, ctxLogger, batchRequestBody)
-		if httpErr != nil {
-			batchResponse.StatusCode = httpErr.Code
-			batchResponse.ErrorMsg = httpErr.Message
-			batchResponses = append(batchResponses, batchResponse)
-			continue
-		}
-		err = json.Unmarshal(resp.Body(), &batchResponse.Data)
-		if err != nil {
-			batchResponse.StatusCode = http.StatusInternalServerError
-			batchResponse.ErrorMsg = "Unable to marshall response into json"
-		}
-		batchResponse.StatusCode = http.StatusOK
-		batchResponses = append(batchResponses, batchResponse)
+	//Handle request asynchronously
+	var batchResponses = make([]batchResponse, len(batchRequests["batch_request"]))
+	var waitGroup sync.WaitGroup
+	for index, value := range batchRequests["batch_request"] {
+		waitGroup.Add(1)
+
+		go func(index int, jsonRequestBody interface{}) {
+			defer waitGroup.Done()
+			batchRequestBody, _ := json.Marshal(jsonRequestBody)
+			var batchResponse batchResponse
+			resp, httpErr := h.getPrediction(ctx, req, ctxLogger, batchRequestBody)
+			if httpErr != nil {
+				batchResponse.StatusCode = httpErr.Code
+				batchResponse.ErrorMsg = httpErr.Message
+				batchResponses[index] = batchResponse
+				return
+			}
+			err := json.Unmarshal(resp.Body(), &batchResponse.Data)
+			if err != nil {
+				batchResponse.StatusCode = http.StatusInternalServerError
+				batchResponse.ErrorMsg = "Unable to marshall response into json"
+			}
+			batchResponse.StatusCode = http.StatusOK
+			batchResponses[index] = batchResponse
+		}(index, value)
 	}
+	waitGroup.Wait()
 
 	// Write the json response to the writer
 	rw.Header().Set("Content-Type", "application/json")
