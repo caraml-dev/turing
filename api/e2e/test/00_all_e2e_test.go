@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2e
@@ -26,13 +27,14 @@ type testConfig struct {
 	TestID string `envconfig:"TEST_ID" required:"true"`
 	// MockserverEndpoint will be used as the router endpoints in the e2e tests.
 	// This endpoint is expected to handle POST request and returns a JSON object
-	MockserverEndpoint string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
-	KServiceDomain     string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
-	APIBasePath        string `envconfig:"API_BASE_PATH" required:"true"`
-	ClusterName        string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
-	ProjectID          int    `envconfig:"PROJECT_ID" required:"true"`
-	ProjectName        string `envconfig:"PROJECT_NAME" required:"true"`
-	TestEchoImage      string `envconfig:"TEST_ECHO_IMAGE" default:"kennethreitz/httpbin"`
+	MockserverEndpoint    string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
+	KServiceDomain        string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
+	APIBasePath           string `envconfig:"API_BASE_PATH" required:"true"`
+	ClusterName           string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
+	DeploymentEnvironment string `envconfig:"DEPLOYMENT_ENVIRONMENT" default:"dev"`
+	ProjectID             int    `envconfig:"PROJECT_ID" required:"true"`
+	ProjectName           string `envconfig:"PROJECT_NAME" required:"true"`
+	TestEchoImage         string `envconfig:"TEST_ECHO_IMAGE" default:"kennethreitz/httpbin"`
 	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
 	// If false, the helper will use the cluster credentials from the configured Vault environment.

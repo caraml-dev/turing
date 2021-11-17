@@ -62,7 +62,7 @@ func NewAppContext(
 	}
 
 	// Create a map of env name to cluster name for each supported deployment environment
-	envClusterMap, err := getEnvironmentClusterMap(mlpSvc, cfg.DeployConfig.GcpProject)
+	envClusterMap, err := getEnvironmentClusterMap(mlpSvc)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service")
 	}
@@ -83,26 +83,37 @@ func NewAppContext(
 		cfg.KubernetesLabelConfigs.Environment,
 	)
 
-	// Initialise Ensembling Job Service
-	ensemblingJobService := service.NewEnsemblingJobService(
-		db,
-		cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
-		cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
-		cfg.BatchEnsemblingConfig.LoggingURLFormat,
-		cfg.BatchEnsemblingConfig.MonitoringURLFormat,
-		cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
-		mlpSvc,
-	)
-
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
 
+	var ensemblingJobService service.EnsemblingJobService
 	if cfg.BatchEnsemblingConfig.Enabled {
+		if cfg.BatchEnsemblingConfig.JobConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.JobConfig was not set")
+		}
+		if cfg.BatchEnsemblingConfig.RunnerConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.RunnerConfig was not set")
+		}
+		if cfg.BatchEnsemblingConfig.ImageBuildingConfig == nil {
+			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.ImageBuildingConfig was not set")
+		}
+
+		// Initialise Ensembling Job Service
+		ensemblingJobService = service.NewEnsemblingJobService(
+			db,
+			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
+			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
+			cfg.BatchEnsemblingConfig.LoggingURLFormat,
+			cfg.BatchEnsemblingConfig.MonitoringURLFormat,
+			cfg.BatchEnsemblingConfig.JobConfig.DefaultConfigurations,
+			mlpSvc,
+		)
+
 		batchClusterController := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
-			cfg.BatchEnsemblingConfig.ImageBuildingConfig,
+			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -155,12 +166,8 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// getEnvironmentClusterMap creates a map of the environment name to the
-// kubernetes cluster, that belong to the configured GCP project.
-func getEnvironmentClusterMap(
-	mlpSvc service.MLPService,
-	gcpProject string,
-) (map[string]string, error) {
+// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster
+func getEnvironmentClusterMap(mlpSvc service.MLPService) (map[string]string, error) {
 	envClusterMap := map[string]string{}
 	// Get all environments
 	environments, err := mlpSvc.GetEnvironments()
@@ -169,9 +176,7 @@ func getEnvironmentClusterMap(
 	}
 	// Create a map of the environment name to cluster id
 	for _, environment := range environments {
-		if environment.GcpProject == gcpProject {
-			envClusterMap[environment.Name] = environment.Cluster
-		}
+		envClusterMap[environment.Name] = environment.Cluster
 	}
 	return envClusterMap, nil
 }

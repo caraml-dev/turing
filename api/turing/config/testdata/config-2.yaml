@@ -1,4 +1,5 @@
 Port: 10000
+LogLevel: DEBUG
 AllowedOrigins:
 - http://foo2.com
 AuthConfig:

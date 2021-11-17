@@ -1,0 +1,114 @@
+global:
+  mlp: { }
+
+image:
+  pullPolicy: IfNotPresent
+  registry: ghcr.io
+  repository: gojek/mlp
+  tag: v1.4.16
+replicaCount: 1
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+resources: { }
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
+
+# -- List of extra environment variables to add to MLP API server container
+extraEnvs: [ ]
+
+livenessProbe:
+  path: "/v1/internal/live"
+readinessProbe:
+  path: "/v1/internal/ready"
+service:
+  externalPort: 8080
+  internalPort: 8080
+
+ingress:
+  enabled: false
+  # -- Whether to use networking.k8s.io/v1 (k8s version >= 1.19) or networking.k8s.io/v1beta1 (1.16 >= k8s version >= 1.22)
+  useV1Beta1: false
+
+apiHost: "http://mlp/v1"
+mlflowTrackingUrl: "http://mlflow.mlp"
+environment: "production"
+encryption:
+  # encryption.key must be specified using --set flag.
+  key: ""
+
+authorization:
+  enabled: false
+  serverUrl: http://mlp-authorization-keto
+
+# Configure oAuthClientId to be used to login into MLP UI console
+oauthClientId: ""
+
+teams:
+  - marketing
+  - operation
+  - business
+streams:
+  - promotion-marketing
+  - operation-strategy
+  - business-analyst
+docs:
+  [
+    {
+      "label": "Merlin User Guide",
+      "href": "https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"
+    },
+    {
+      "label": "Turing User Guide",
+      "href": "https://github.com/gojek/turing"
+    },
+    {
+      "label": "Feast User Guide",
+      "href": "https://docs.feast.dev/user-guide/overview"
+    },
+  ]
+
+dbMigrations:
+  image:
+    tag: v4.7.1
+
+gitlab:
+  enabled: false
+  host: https://gitlab.com
+  redirectUrl: http://mlp/settings/connected-accounts
+  oauthScopes: read_user
+  clientId: #clientId
+  clientSecret: #clientSecret
+
+postgresql:
+  # -- Configure resource requests and limits
+  # ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 500m
+  persistence:
+    # -- Persist Postgresql data in a Persistent Volume Claim
+    enabled: true
+    size: 10Gi
+  postgresqlUsername: mlp
+  postgresqlDatabase: mlp
+  postgresqlPassword: mlp
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  replication:
+    enabled: false
+    user: repl_user
+    password: repl_password
+    slaveReplicas: 2
+    # -- Set synchronous commit mode: on, off, remote_apply, remote_write and local
+    # ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL
+    synchronousCommit: "on"
+    # -- From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication
+    # NOTE: It cannot be > slaveReplicas
+    numSynchronousReplicas: 2
+    # -- Replication Cluster application name. Useful for defining multiple replication policies
+    applicationName: mlp

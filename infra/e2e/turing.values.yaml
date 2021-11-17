@@ -1,0 +1,17 @@
+global:
+  mlp:
+    encryption:
+      key: "encryption-key"
+
+turing:
+  uiConfig: null # Not needed as we only test API
+
+postgresql: &postgresql
+  persistence:
+    enabled: false
+
+merlin:
+  postgresql: *postgresql
+
+mlp:
+  postgresql: *postgresql

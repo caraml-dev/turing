@@ -1,0 +1,44 @@
+{{- if .Values.ingress.enabled }}
+kind: Ingress
+metadata:
+  name: {{ template "merlin.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "{{ .Values.ingress.class }}"
+  labels:
+    app: {{ include "merlin.name" . }}
+    chart: {{ include "merlin.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "merlin.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+
+{{- if .Values.ingress.useV1Beta1 }}
+apiVersion: networking.k8s.io/v1beta1
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ default "/" .Values.ingress.path }}
+            pathType: Prefix
+            backend:
+              serviceName: {{ template "merlin.fullname" . }}
+              servicePort: {{ .Values.service.externalPort }}
+{{- else }}
+apiVersion: networking.k8s.io/v1
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ default "/" .Values.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "merlin.fullname" . }}
+                port:
+                  number: {{ .Values.service.externalPort }}
+{{- end }}
+{{- end }}

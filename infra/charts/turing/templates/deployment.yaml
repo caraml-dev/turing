@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "turing.fullname" .}}
+  name: {{ template "turing.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "turing.fullname" .}}
-    chart: {{ template "turing.chart" .}}
+    app: {{ template "turing.fullname" . }}
+    chart: {{ template "turing.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- if .Values.turing.labels }}
@@ -15,7 +15,7 @@ spec:
   replicas: {{ .Values.turing.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "turing.fullname" .}}
+      app: {{ template "turing.fullname" . }}
       release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
@@ -24,15 +24,15 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "turing.fullname" .}}
+        app: {{ template "turing.fullname" . }}
         release: {{ .Release.Name }}
 {{- if .Values.turing.labels }}
 {{ toYaml .Values.turing.labels | indent 8 -}}
 {{- end }}
     spec:
-{{- if .Values.turing.clusterConfig.useInClusterConfig }}
-      serviceAccountName: {{ template "turing.service-account" . }}
-{{- end }}
+      {{- if .Values.turing.clusterConfig.useInClusterConfig }}
+      serviceAccountName: {{ template "turing.serviceAccount.name" . }}
+      {{- end }}
       initContainers:
       - name: migrations
         image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
@@ -41,13 +41,13 @@ spec:
         - |
           /migrate \
           -path /migrations \
-          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "postgresql.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "turing.db.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
           up
         env:
         - name: PG_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-postgresql
+              name: {{ template "turing.postgresql.name" . }}
               key: postgresql-password
         volumeMounts:
           - mountPath: /migrations
@@ -57,7 +57,7 @@ spec:
       {{- end }}
       containers:
       - name: api
-        image: {{ .Values.turing.image.registry }}{{ .Values.turing.image.repository }}:{{ .Values.turing.image.tag }}
+        image: {{ template "turing.image" . }}
         imagePullPolicy: {{ .Values.turing.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.turing.service.internalPort }}
@@ -107,10 +107,10 @@ spec:
       volumes:
       - name: config 
         secret:
-          secretName: {{ template "turing.fullname" .}}-api-config
+          secretName: {{ template "turing.fullname" . }}-api-config
       - name: db-migrations
         configMap:
-          name: {{ .Release.Name }}-db-migrations
+          name: {{ template "turing.fullname" . }}-db-migrations
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

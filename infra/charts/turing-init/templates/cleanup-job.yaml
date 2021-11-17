@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "turing-init.fullname" . }}-cleanup
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "10"
+  labels:
+    {{- include "turing-init.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ include "turing-init.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+      - name: knative-istio-cleanup
+        image: {{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - /app/cleanup.sh
+        env:
+        - name: ISTIO_VERSION
+          value: {{ .Values.istio.version }}
+        - name: KNATIVE_VERSION
+          value: {{ .Values.knative.version }}
+        - name: KNATIVE_ISTIO_VERSION
+          value: {{ .Values.knative.istioVersion }}
+        - name: RELEASE_NAME
+          value: {{ .Release.Name }}
+        - name: RELEASE_NAMESPACE
+          value: {{ .Release.Namespace }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}

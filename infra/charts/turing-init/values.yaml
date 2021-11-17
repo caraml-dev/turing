@@ -1,0 +1,83 @@
+# Do note that the following ports to the Kubernetes master must be open:
+# For Knative: 8443
+# For Spark operator: 8080
+# Other gotchas: Helm delete might take some time due to the deletion of knative namespace.
+#                Best to run it with an extended timeout, like helm delete <RELEASE> --timeout 15m
+image:
+  # -- Docker registry for Turing cluster init
+  registry: ghcr.io/
+  # -- Docker image repository for Turing cluster init
+  repository: gojek/turing/cluster-init
+  # -- Docker image tag for Turing cluster init
+  tag: latest
+  pullPolicy: IfNotPresent
+
+knative:
+  # -- Knative Version to use
+  version: 0.18.3
+  # -- Knative Istio Version to use
+  istioVersion: 0.18.1
+  # -- Knative domains, comma seperated values, i.e. www.example.com,www.gojek.com
+  domains: ""
+  # -- Knative registries skipping tag resolving, comma seperated values, i.e. www.example.com,www.gojek.com
+  registriesSkippingTagResolving: ""
+
+istio:
+  # -- Istio version to use
+  version: 1.9.9
+  # -- istio operator config, defaults are the minimum to run turing, see https://istio.io/v1.9/docs/reference/config/istio.operator.v1alpha1/
+  operatorConfig:
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    spec:
+      values:
+        global:
+          proxy:
+            autoInject: enabled
+          useMCP: false
+        # Patch to fix validation error: port http2/80 in gateway cluster-local-gateway
+        # invalid: targetPort is set to 0, which requires root
+        gateways:
+          istio-ingressgateway:
+            runAsRoot: true
+
+      addonComponents:
+        pilot:
+          enabled: true
+
+      components:
+        ingressGateways:
+          - name: istio-ingressgateway
+            enabled: true
+          - name: cluster-local-gateway
+            enabled: true
+            label:
+              istio: cluster-local-gateway
+              app: cluster-local-gateway
+            k8s:
+              service:
+                type: ClusterIP
+                ports:
+                  - port: 15020
+                    name: status-port
+                  - port: 80
+                    name: http2
+                  - port: 443
+                    name: https
+
+# -- Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md
+spark-operator:
+  # -- number of replicas
+  replicas: 1
+  webhook:
+    # -- this is needed to be set to true, if not the configmaps will not load
+    enable: true
+  # -- Resources requests and limits for spark operator. This should be set 
+  # according to your cluster capacity and service level objectives.
+  # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources: {}
+  image:
+    # -- repository of the spark operator
+    repository: gcr.io/spark-operator/spark-operator
+    # -- image tag of the spark operator
+    tag: v1beta2-1.2.3-3.1.1

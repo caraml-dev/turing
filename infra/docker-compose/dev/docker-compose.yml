@@ -41,6 +41,21 @@ services:
       cp /.kube/kubeconfig.yaml /tmp/kubeconfig
       chmod 666 /tmp/kubeconfig
 
+  spark-operator-init:
+    image: alpine/helm:3.6.3
+    restart: on-failure
+    volumes:
+    - "kube:/.kube"
+    entrypoint: sh -ec
+    command: 
+    - |
+      [ -f "/.kube/kubeconfig.yaml" ] || exit 5
+      mkdir -p /.kube
+      cp /.kube/kubeconfig.yaml /.kube/config
+      sed -i 's/127.0.0.1/server/' /.kube/config
+      helm repo add spark-operator https://googlecloudplatform.github.io/spark-on-k8s-operator
+      helm install --insecure-skip-tls-verify spark spark-operator/spark-operator --version 1.1.6 --kubeconfig /.kube/config --wait
+
   # Kubernetes worker nodes
   agent:
     image: "rancher/k3s:v1.19.4-k3s1"

@@ -1,0 +1,13 @@
+turing:
+  clusterConfig:
+    useInClusterConfig: false
+
+  config:
+    ClusterConfig:
+      VaultConfig:
+        Address: http://vault:8200
+        Token: root
+
+merlin:
+  vault:
+    enabled: false

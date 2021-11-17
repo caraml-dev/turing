@@ -1,0 +1,92 @@
+{{- if .Values.tags.mlp -}}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ template "turing.fullname" . }}-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ template "turing.fullname" . }}-virtual-service
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - {{ template "turing.fullname" . }}-gateway
+  http:
+    - match:
+        {{/*
+          See issue on Istio's repo:
+          https://github.com/istio/istio/issues/8076#issuecomment-427057691
+        */}}
+        - uri:
+            prefix: "/api/turing/"
+        - uri:
+            prefix: "/api/turing"
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: {{ template "turing.fullname" . }}
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: "/api/merlin/"
+        - uri:
+            prefix: "/api/merlin"
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: {{ template "turing.merlin.name" . }}
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: "/api/"
+        - uri:
+            prefix: "/api"
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: {{ template "turing.mlp.name" . }}
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: "/turing"
+      route:
+        - destination:
+            host: {{ template "turing.fullname" . }}
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: "/merlin"
+      route:
+        - destination:
+            host: {{ template "turing.merlin.name" . }}
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: {{ template "turing.mlp.name" . }}
+            port:
+              number: 8080
+{{- end }}

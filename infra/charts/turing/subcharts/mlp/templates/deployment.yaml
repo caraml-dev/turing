@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "mlp.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "mlp.name" . }}
+    chart: {{ template "mlp.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "mlp.name" . }}
+      release: {{ .Release.Name | quote }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "mlp.name" . }}
+        release: {{ .Release.Name | quote }}
+    spec:
+      initContainers:
+      - name: migrations
+        image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
+        command: ['/bin/sh', '-c']
+        args:
+          - |
+            /migrate \
+            -path /migrations \
+            -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "mlp.db.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+            up
+        env:
+          - name: PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "mlp.postgresql.name" . }}
+                key: postgresql-password
+        volumeMounts:
+          - mountPath: /migrations
+            name: db-migrations
+      containers:
+        - name: api
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.service.internalPort }}
+              scheme: HTTP
+            initialDelaySeconds: {{ default "30" .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default "10" .Values.livenessProbe.periodSeconds }}
+            successThreshold: {{ default "1" .Values.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ default "5" .Values.livenessProbe.timeoutSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.service.internalPort }}
+              scheme: HTTP
+            initialDelaySeconds: {{ default "30" .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default "10" .Values.readinessProbe.periodSeconds }}
+            successThreshold: {{ default "1" .Values.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ default "5" .Values.readinessProbe.timeoutSeconds }}
+          {{- if .Values.resources }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+{{- if .Values.args }}
+          args:
+{{ toYaml .Values.args | indent 10 -}}
+{{ end }}
+{{- if .Values.command }}
+          command:
+{{ toYaml .Values.command | indent 10 -}}
+{{ end }}
+          env:
+            - name: ENVIRONMENT
+              value: "{{ .Values.environment }}"
+            - name: API_HOST
+              value: "{{ .Values.apiHost }}"
+            - name: PORT
+              value: "{{ .Values.service.internalPort }}"
+            - name: DATABASE_HOST
+              value: {{ template "mlp.db.host" . }}
+            - name: DATABASE_USER
+              value: "{{ .Values.postgresql.postgresqlUsername }}"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "mlp.postgresql.name" . }}
+                  key: postgresql-password
+            - name: DATABASE_NAME
+              value: "{{ .Values.postgresql.postgresqlDatabase }}"
+            - name: MLFLOW_TRACKING_URL
+              value: "{{ .Values.mlflowTrackingUrl }}"
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "mlp.fullname" . }}-secrets
+                  key: encryption-key
+            - name: AUTHORIZATION_ENABLED
+              value: "{{ .Values.authorization.enabled }}"
+            {{- if .Values.authorization.enabled }}
+            - name: AUTHORIZATION_SERVER_URL
+              value: "{{ .Values.authorization.serverUrl }}"
+            {{- end }}
+            - name: OAUTH_CLIENT_ID
+              value: "{{ template "mlp.oauthClientId" . }}"
+            - name: SENTRY_DSN
+              value: "{{ .Values.sentryDSN }}"
+            - name: TEAM_LIST
+              value: "{{ join "," .Values.teams }}"
+            - name: STREAM_LIST
+              value: "{{ join "," .Values.streams }}"
+            {{- if .Values.docs }}
+            - name: DOC_LIST
+              value: {{ .Values.docs | toJson | quote  }}
+            {{- end -}}
+            {{ include "mlp.gitlab.envVars" . | nindent 12 -}}
+            {{- with .Values.extraEnvs -}}
+            {{- toYaml . | nindent 12 -}}
+            {{- end }}
+      volumes:
+      - name: db-migrations
+        configMap:
+          name: {{ template "mlp.fullname" . }}-db-migrations
+
+{{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 6 }}
+{{- end }}
+
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

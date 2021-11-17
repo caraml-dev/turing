@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "turing-init.fullname" . }}-init
+  labels:
+    {{- include "turing-init.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ include "turing-init.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+      - name: knative-istio-install
+        image: {{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - /app/init.sh
+        env:
+        - name: ISTIO_OPERATOR_PATH
+          value: /etc/istio-operator/operator.yaml
+        - name: ISTIO_VERSION
+          value: {{ .Values.istio.version }}
+        - name: KNATIVE_VERSION
+          value: {{ .Values.knative.version }}
+        - name: KNATIVE_ISTIO_VERSION
+          value: {{ .Values.knative.istioVersion }}
+        - name: KNATIVE_DOMAINS
+          value: "{{ .Values.knative.domains }}"
+        - name: KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING
+          value: "{{ .Values.knative.registriesSkippingTagResolving }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /etc/istio-operator
+          name: istio-operator
+      volumes:
+      - name: istio-operator
+        configMap:
+          name: {{ include "turing-init.fullname" . }}-istio-operator
