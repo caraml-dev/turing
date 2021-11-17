@@ -105,7 +105,7 @@ func TestNewBatchHTTPHandlerBadRoute(t *testing.T) {
 		expectedStatusCode   int
 		expectedContentType  string
 	}{
-		"ok request": {
+		"bad route request": {
 			payload: `{"batch_request": [
 							{ "request1": "value1" },
 							{ "request2": "value2" }
