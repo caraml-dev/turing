@@ -1,12 +1,15 @@
 import React from "react";
 import { EuiIcon } from "@elastic/eui";
 import { PageNavigation } from "../../../../components/page_navigation/PageNavigation";
+import { useConfig } from "../../../../config";
 
 export const RouterDetailsPageNavigation = ({
   router: { config = {}, ...router },
   actions,
   ...props
 }) => {
+  const { alertConfig } = useConfig();
+
   const tabs = [
     {
       id: "details",
@@ -19,7 +22,7 @@ export const RouterDetailsPageNavigation = ({
     {
       id: "alerts",
       name: "Alerts",
-      disabled: !config.alerts.enabled || !config.version,
+      disabled: !alertConfig.enabled || !config.version,
     },
     {
       id: "logs",
