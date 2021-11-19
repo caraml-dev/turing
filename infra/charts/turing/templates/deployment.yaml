@@ -90,9 +90,6 @@ spec:
       - name: config 
         secret:
           secretName: {{ template "turing.fullname" . }}-api-config
-      - name: db-migrations
-        configMap:
-          name: {{ template "turing.fullname" . }}-db-migrations
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
