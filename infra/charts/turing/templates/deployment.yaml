@@ -33,26 +33,8 @@ spec:
       {{- if .Values.turing.clusterConfig.useInClusterConfig }}
       serviceAccountName: {{ template "turing.serviceAccount.name" . }}
       {{- end }}
-      initContainers:
-      - name: migrations
-        image: "migrate/migrate:{{ .Values.dbMigrations.image.tag }}"
-        command: ['/bin/sh', '-c']
-        args:
-        - |
-          /migrate \
-          -path /migrations \
-          -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "turing.db.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
-          up
-        env:
-        - name: PG_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "turing.postgresql.name" . }}
-              key: postgresql-password
-        volumeMounts:
-          - mountPath: /migrations
-            name: db-migrations
       {{- with .Values.turing.extraInitContainers }}
+      initContainers:
       {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:

@@ -16,6 +16,9 @@ import (
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/vault"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // required for gomigrate
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 )
@@ -55,6 +58,30 @@ func Run() {
 		if err = log.SetLogLevelAt(cfg.LogLevel); err != nil {
 			log.Panicf("Failed to configure global logger: %s", err)
 		}
+	}
+
+	// run db migrations
+	m, err := migrate.New(
+		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationScriptsFolderPath),
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			cfg.DbConfig.User,
+			cfg.DbConfig.Password,
+			cfg.DbConfig.Host,
+			cfg.DbConfig.Port,
+			cfg.DbConfig.Database,
+		),
+	)
+	if err != nil {
+		log.Panicf("Failed to open migrations folder: %s", err)
+	}
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Panicf("Failed to run migrations: %s", err)
+	}
+	if sourceErr, dbErr := m.Close(); sourceErr != nil {
+		log.Warnf("Failed to close source after migration")
+	} else if dbErr != nil {
+		log.Warnf("Failed to close database after migration")
 	}
 
 	// Init db
