@@ -60,43 +60,11 @@ func Run() {
 		}
 	}
 
-	// run db migrations
-	m, err := migrate.New(
-		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationScriptsFolderPath),
-		fmt.Sprintf(
-			"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-			cfg.DbConfig.User,
-			cfg.DbConfig.Password,
-			cfg.DbConfig.Host,
-			cfg.DbConfig.Port,
-			cfg.DbConfig.Database,
-		),
-	)
-	if err != nil {
-		log.Panicf("Failed to open migrations folder: %s", err)
-	}
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Panicf("Failed to run migrations: %s", err)
-	}
-	if sourceErr, dbErr := m.Close(); sourceErr != nil {
-		log.Warnf("Failed to close source after migration")
-	} else if dbErr != nil {
-		log.Warnf("Failed to close database after migration")
-	}
-
-	// Init db
-	db, err := gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
-			cfg.DbConfig.Host,
-			cfg.DbConfig.Port,
-			cfg.DbConfig.User,
-			cfg.DbConfig.Database,
-			cfg.DbConfig.Password))
+	// init db
+	db, err := initDB(cfg)
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(false)
 	defer db.Close()
 
 	// Initialise NewRelic
@@ -179,4 +147,50 @@ func Run() {
 	if err := http.ListenAndServe(cfg.ListenAddress(), r); err != nil {
 		log.Errorf("Failed to start turing-api: %s", err)
 	}
+}
+
+func initDB(cfg *config.Config) (*gorm.DB, error) {
+	// run db migrations
+	m, err := migrate.New(
+		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationScriptsFolderPath),
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			cfg.DbConfig.User,
+			cfg.DbConfig.Password,
+			cfg.DbConfig.Host,
+			cfg.DbConfig.Port,
+			cfg.DbConfig.Database,
+		),
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to open migrations folder: %s", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return nil, fmt.Errorf("Failed to run migrations: %s", err)
+	}
+
+	if sourceErr, dbErr := m.Close(); sourceErr != nil {
+		return nil, fmt.Errorf("Failed to close source after migration")
+	} else if dbErr != nil {
+		return nil, fmt.Errorf("Failed to close database after migration")
+	}
+
+	// Init db
+	db, err := gorm.Open(
+		"postgres",
+		fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
+			cfg.DbConfig.Host,
+			cfg.DbConfig.Port,
+			cfg.DbConfig.User,
+			cfg.DbConfig.Database,
+			cfg.DbConfig.Password))
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to start Gorm DB: %s", err)
+	}
+
+	db.LogMode(false)
+	return db, nil
 }
