@@ -18,9 +18,9 @@ type batchHTTPHandler struct {
 }
 
 type batchResponse struct {
-	StatusCode int         `json:"code"`
-	ErrorMsg   string      `json:"error,omitempty"`
-	Data       interface{} `json:"data,omitempty"`
+	StatusCode int             `json:"code"`
+	ErrorMsg   string          `json:"error,omitempty"`
+	Data       json.RawMessage `json:"data,omitempty"`
 }
 
 // NewBatchHTTPHandler creates an instance of the Mission Control's prediction request handler
@@ -60,7 +60,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	//Split into batches
-	var batchRequests []interface{}
+	var batchRequests []json.RawMessage
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
 		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
@@ -74,23 +74,18 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	for index, value := range batchRequests {
 		waitGroup.Add(1)
 
-		go func(index int, jsonRequestBody interface{}) {
+		go func(index int, jsonRequestBody json.RawMessage) {
 			defer waitGroup.Done()
-			batchRequestBody, _ := json.Marshal(jsonRequestBody)
 			var batchResponse batchResponse
-			resp, httpErr := h.getPrediction(ctx, req, ctxLogger, batchRequestBody)
+			resp, httpErr := h.getPrediction(ctx, req, ctxLogger, jsonRequestBody)
 			if httpErr != nil {
 				batchResponse.StatusCode = httpErr.Code
 				batchResponse.ErrorMsg = httpErr.Message
 				batchResponses[index] = batchResponse
 				return
 			}
-			err := json.Unmarshal(resp.Body(), &batchResponse.Data)
-			if err != nil {
-				batchResponse.StatusCode = http.StatusInternalServerError
-				batchResponse.ErrorMsg = "Unable to marshall response into json"
-			}
 			batchResponse.StatusCode = http.StatusOK
+			batchResponse.Data = resp.Body()
 			batchResponses[index] = batchResponse
 		}(index, value)
 	}
