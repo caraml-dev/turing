@@ -39,36 +39,30 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 		expectedContentType  string
 	}{
 		"ok request": {
-			payload: `{"batch_request": [
+			payload: `[
 							{ "request1": "value1" },
 							{ "request2": "value2" }
-						]}`,
-			expectedResponseBody: `{"batch_result": [
+					  ]`,
+			expectedResponseBody: `[
 										{ "code": 200, 
 										  "data": {"request1": "value1"}
 										},
 										{ "code": 200, 
 										  "data": {"request2": "value2"}
 										}
-									]}`,
+								  ]`,
 			expectedStatusCode:  200,
 			expectedContentType: "application/json",
 		},
 		"invalid json": {
-			payload:              `{"batch_request": [{ : }]}`,
-			expectedResponseBody: "Invalid json request format\n",
+			payload:              `[{ : }]`,
+			expectedResponseBody: "Invalid json request\n",
 			expectedStatusCode:   400,
 			expectedContentType:  "text/plain; charset=utf-8",
 		},
 		"invalid json request": {
 			payload:              `{"key": "value1"}`,
 			expectedResponseBody: "Invalid json request\n",
-			expectedStatusCode:   400,
-			expectedContentType:  "text/plain; charset=utf-8",
-		},
-		"invalid json request, no batch_request key": {
-			payload:              `{"key": [{"key1":"value1"}]}`,
-			expectedResponseBody: "batch_request\" not found in request\n",
 			expectedStatusCode:   400,
 			expectedContentType:  "text/plain; charset=utf-8",
 		},
@@ -106,18 +100,18 @@ func TestNewBatchHTTPHandlerBadRoute(t *testing.T) {
 		expectedContentType  string
 	}{
 		"bad route request": {
-			payload: `{"batch_request": [
+			payload: `[
 							{ "request1": "value1" },
 							{ "request2": "value2" }
-						]}`,
-			expectedResponseBody: `{"batch_result": [
+					  ]`,
+			expectedResponseBody: `[
 										{ "code": 500, 
 										  "error": "Bad Route Called"
 										},
 										{ "code": 500, 
 										  "error": "Bad Route Called"
 										}
-									]}`,
+								   ]`,
 			expectedStatusCode:  200,
 			expectedContentType: "application/json",
 		},
