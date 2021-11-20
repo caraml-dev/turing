@@ -65,11 +65,11 @@ func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 
 // enableTracingSpan associates span to context, if applicable
 func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) context.Context {
-		var sp opentracing.Span
-		sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
-		if sp != nil {
-			defer sp.Finish()
-		}
+	var sp opentracing.Span
+	sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
+	if sp != nil {
+		defer sp.Finish()
+	}
 	return ctx
 }
 

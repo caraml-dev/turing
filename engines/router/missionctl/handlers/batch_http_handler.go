@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
 	"io/ioutil"
 	"net/http"
 	"sync"
 
 	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
+	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/gojek/turing/engines/router/missionctl/log"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
