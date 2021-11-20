@@ -65,13 +65,11 @@ func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 
 // enableTracingSpan associates span to context, if applicable
 func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) context.Context {
-	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
 		sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
 		if sp != nil {
 			defer sp.Finish()
 		}
-	}
 	return ctx
 }
 
@@ -156,7 +154,9 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 	ctxLogger.Debugf("Received request for %v", turingReqID)
 
-	ctx = h.enableTracingSpan(ctx, req)
+	if tracing.Glob().IsEnabled() {
+		ctx = h.enableTracingSpan(ctx, req)
+	}
 
 	// Read the request body
 	requestBody, err := ioutil.ReadAll(req.Body)

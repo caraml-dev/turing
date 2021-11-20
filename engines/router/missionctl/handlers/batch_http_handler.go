@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -20,10 +21,6 @@ type batchResponse struct {
 	StatusCode int         `json:"code"`
 	ErrorMsg   string      `json:"error,omitempty"`
 	Data       interface{} `json:"data,omitempty"`
-}
-
-type batchResult struct {
-	BatchResult []batchResponse `json:"batch_result"`
 }
 
 // NewBatchHTTPHandler creates an instance of the Mission Control's prediction request handler
@@ -51,7 +48,9 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	}
 	ctxLogger.Debugf("Received batch request for %v", turingReqID)
 
-	ctx = h.enableTracingSpan(ctx, req)
+	if tracing.Glob().IsEnabled() {
+		ctx = h.enableTracingSpan(ctx, req)
+	}
 
 	// Read the request body
 	requestBody, err := ioutil.ReadAll(req.Body)
@@ -60,15 +59,8 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	//Valid request
-	if valid := json.Valid(requestBody); !valid {
-		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
-			`Invalid json request format`)))
-		return
-	}
-
 	//Split into batches
-	var batchRequests map[string][]interface{}
+	var batchRequests []interface{}
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
 		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
@@ -76,17 +68,10 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	//Validate request
-	if _, ok := batchRequests["batch_request"]; !ok {
-		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
-			`batch_request" not found in request`)))
-		return
-	}
-
 	//Handle request asynchronously
-	var batchResponses = make([]batchResponse, len(batchRequests["batch_request"]))
+	var batchResponses = make([]batchResponse, len(batchRequests))
 	var waitGroup sync.WaitGroup
-	for index, value := range batchRequests["batch_request"] {
+	for index, value := range batchRequests {
 		waitGroup.Add(1)
 
 		go func(index int, jsonRequestBody interface{}) {
@@ -115,7 +100,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
-	batchResponseByte, _ := json.Marshal(batchResult{BatchResult: batchResponses})
+	batchResponseByte, _ := json.Marshal(batchResponses)
 	contentLength, err := rw.Write(batchResponseByte)
 	if err != nil {
 		ctxLogger.Errorf("Error occurred when copying content: %v", err.Error())
