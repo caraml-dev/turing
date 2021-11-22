@@ -23,7 +23,7 @@ func TestBuildVirtualService(t *testing.T) {
 		Endpoint:        "test-svc-turing-router.models.example.com",
 		DestinationHost: "istio",
 		HostRewrite:     "test-svc-turing-router-1.models.example.com",
-		MatchURIPrefix:  "/v1/prefix",
+		MatchURIPrefix:  []string{"/v1/prefix"},
 	}
 	expected := v1alpha3.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{

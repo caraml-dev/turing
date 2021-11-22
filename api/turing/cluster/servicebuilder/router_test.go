@@ -5,6 +5,7 @@ package servicebuilder
 import (
 	"encoding/json"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -521,7 +522,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 		HostRewrite:     "test-svc-turing-router-1.models.example.com",
 		Gateway:         defaultGateway,
 		DestinationHost: defaultIstioGateway,
-		MatchURIPrefix:  defaultMatchURIPrefix,
+		MatchURIPrefix:  strings.Split(defaultMatchURIPrefix, ","),
 	}
 
 	got, err := sb.NewRouterEndpoint(&routerVersion, project, "test-env", versionEndpoint)

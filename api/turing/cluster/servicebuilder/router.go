@@ -72,7 +72,7 @@ const (
 const (
 	defaultIstioGateway   = "istio-ingressgateway.istio-system.svc.cluster.local"
 	defaultGateway        = "knative-ingress-gateway.knative-serving"
-	defaultMatchURIPrefix = "/v1/predict"
+	defaultMatchURIPrefix = "/v1/predict,/v1/batch_predict"
 )
 
 // NewRouterService creates a new cluster Service object with the required config
@@ -158,7 +158,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 		Endpoint:        host,
 		DestinationHost: defaultIstioGateway,
 		HostRewrite:     veURL.Hostname(),
-		MatchURIPrefix:  defaultMatchURIPrefix,
+		MatchURIPrefix:  strings.Split(defaultMatchURIPrefix, ","),
 	}, nil
 }
 
