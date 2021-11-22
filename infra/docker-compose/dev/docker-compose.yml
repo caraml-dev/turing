@@ -191,13 +191,4 @@ services:
       POSTGRESQL_USERNAME: turing
       POSTGRESQL_PASSWORD: turing
     ports: 
-    - "5432:5432"
-
-  turing-postgres-init:
-    image: migrate/migrate:v4.13.0
-    restart: on-failure
-    volumes:
-    - "./turing/db-migrations:/db-migrations"
-    entrypoint: sh -ec
-    command:
-    - migrate -path=/db-migrations -database=postgres://turing:turing@turing-postgres:5432/turing?sslmode=disable up
+      - "5432:5432"

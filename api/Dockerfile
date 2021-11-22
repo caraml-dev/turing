@@ -32,6 +32,7 @@ RUN addgroup -S ${TURING_USER_GROUP} \
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api /app/api
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/db-migrations /app/db-migrations
 
 USER ${TURING_USER}
 WORKDIR /app

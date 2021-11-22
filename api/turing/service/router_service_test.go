@@ -8,7 +8,7 @@ import (
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/it/database"
+	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"

@@ -2,7 +2,6 @@ package server
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -13,11 +12,11 @@ import (
 	"github.com/gojek/turing/api/turing/api"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 )
 
 type configFlags []string
@@ -57,19 +56,11 @@ func Run() {
 		}
 	}
 
-	// Init db
-	db, err := gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
-			cfg.DbConfig.Host,
-			cfg.DbConfig.Port,
-			cfg.DbConfig.User,
-			cfg.DbConfig.Database,
-			cfg.DbConfig.Password))
+	// init db
+	db, err := database.InitDB(cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(false)
 	defer db.Close()
 
 	// Initialise NewRelic

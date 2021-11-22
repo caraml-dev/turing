@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/internal/ref"
-	"github.com/gojek/turing/api/turing/it/database"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"

@@ -228,11 +228,12 @@ type SinglePageApplicationConfig struct {
 
 // DatabaseConfig config captures the Turing database config
 type DatabaseConfig struct {
-	Host     string `validate:"required"`
-	Port     int    `validate:"required"`
-	User     string `validate:"required"`
-	Password string `validate:"required"`
-	Database string `validate:"required"`
+	Host             string `validate:"required"`
+	Port             int    `validate:"required"`
+	User             string `validate:"required"`
+	Password         string `validate:"required"`
+	Database         string `validate:"required"`
+	MigrationsFolder string `validate:"required"`
 }
 
 // RouterDefaults contains default configuration for routers deployed
@@ -416,6 +417,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DbConfig::User", "")
 	v.SetDefault("DbConfig::Password", "")
 	v.SetDefault("DbConfig::Database", "turing")
+	v.SetDefault("DbConfig::MigrationsFolder", "db-migrations/")
 
 	v.SetDefault("DeployConfig::EnvironmentType", "")
 	v.SetDefault("DeployConfig::Timeout", "3m")
