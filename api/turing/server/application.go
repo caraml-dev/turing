@@ -12,7 +12,7 @@ import (
 	"github.com/gojek/turing/api/turing/api"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/db"
+	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/vault"
@@ -57,11 +57,11 @@ func Run() {
 	}
 
 	// init db
-	pgdb, err := db.InitDB(cfg.DbConfig)
+	db, err := database.InitDB(cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
-	defer pgdb.Close()
+	defer db.Close()
 
 	// Initialise NewRelic
 	if err := newrelic.InitNewRelic(cfg.NewRelicConfig); err != nil {
@@ -91,7 +91,7 @@ func Run() {
 	}
 
 	// Init app context
-	appCtx, err := api.NewAppContext(pgdb, cfg, authorizer, vaultClient)
+	appCtx, err := api.NewAppContext(db, cfg, authorizer, vaultClient)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}
@@ -115,7 +115,7 @@ func Run() {
 	r := mux.NewRouter()
 
 	// HealthCheck Handler
-	AddHealthCheckHandler(r, "/v1/internal", pgdb)
+	AddHealthCheckHandler(r, "/v1/internal", db)
 
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
