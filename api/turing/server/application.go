@@ -152,7 +152,7 @@ func Run() {
 func initDB(cfg *config.Config) (*gorm.DB, error) {
 	// run db migrations
 	m, err := migrate.New(
-		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationScriptsFolderPath),
+		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationsFolder),
 		fmt.Sprintf(
 			"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 			cfg.DbConfig.User,

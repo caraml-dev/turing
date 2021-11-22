@@ -63,7 +63,7 @@ DbConfig:
   Database: turing
   User: dbuser
   Password: dbpassword
-  MigrationScriptsFolderPath: db-migrations/
+  MigrationsFolder: db-migrations/
 
 # Turing router deployment context
 DeployConfig:
