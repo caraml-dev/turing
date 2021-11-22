@@ -9,15 +9,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/db"
 	"github.com/gojek/turing/api/turing/log"
-	gomigrate "github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jinzhu/gorm"
 )
 
 func connectionString(db string) string {
-	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", host, 5432, user, db, password)
+	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", host, port, user, db, password)
 }
 
 func create(conn *sql.DB, dbName string) (*sql.DB, error) {
@@ -31,22 +30,6 @@ func create(conn *sql.DB, dbName string) (*sql.DB, error) {
 	} else {
 		return testDb, nil
 	}
-}
-
-func migrate(db *sql.DB, dbName string) (*sql.DB, error) {
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return nil, err
-	}
-	defer driver.Close()
-
-	if migrations, err := gomigrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", migrationsFolder),
-		dbName, driver); err != nil {
-		return db, err
-	} else if err = migrations.Up(); err != nil {
-		return db, err
-	}
-	return sql.Open("postgres", connectionString(dbName))
 }
 
 // CreateTestDatabase connects to test postgreSQL instance (either local or the one
@@ -76,7 +59,15 @@ func CreateTestDatabase() (*gorm.DB, func(), error) {
 		}
 	}
 
-	if testDb, err = migrate(testDb, testDbName); err != nil {
+	dbCfg := &config.DatabaseConfig{
+		Host:             host,
+		Port:             port,
+		User:             user,
+		Password:         password,
+		Database:         testDbName,
+		MigrationsFolder: migrationsFolder,
+	}
+	if err = db.Migrate(dbCfg); err != nil {
 		cleanup()
 		return nil, nil, err
 	} else if gormDb, err := gorm.Open("postgres", testDb); err != nil {
@@ -87,6 +78,8 @@ func CreateTestDatabase() (*gorm.DB, func(), error) {
 	}
 }
 
+// WithTestDatabase handles the lifecycle of the database creation/migration/destruction
+// for a test case/suite.
 func WithTestDatabase(t *testing.T, test func(t *testing.T, db *gorm.DB)) {
 	if testDb, cleanupFn, err := CreateTestDatabase(); err != nil {
 		t.Fatalf("Fail to create an integration test database: \n%s", err)

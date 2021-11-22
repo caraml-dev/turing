@@ -2,10 +2,14 @@
 
 package database
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 var (
 	host             = getEnvOrDefault("DATABASE_HOST", "localhost")
+	port, _          = strconv.Atoi(getEnvOrDefault("DATABASE_PORT", "5432"))
 	user             = getEnvOrDefault("DATABASE_USER", "turing")
 	password         = getEnvOrDefault("DATABASE_PASSWORD", "turing")
 	database         = getEnvOrDefault("DATABASE_NAME", "turing")

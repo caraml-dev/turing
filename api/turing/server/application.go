@@ -2,7 +2,6 @@ package server
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -13,14 +12,11 @@ import (
 	"github.com/gojek/turing/api/turing/api"
 	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/db"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/vault"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres" // required for gomigrate
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 )
 
 type configFlags []string
@@ -61,11 +57,11 @@ func Run() {
 	}
 
 	// init db
-	db, err := initDB(cfg)
+	pgdb, err := db.InitDB(cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer pgdb.Close()
 
 	// Initialise NewRelic
 	if err := newrelic.InitNewRelic(cfg.NewRelicConfig); err != nil {
@@ -95,7 +91,7 @@ func Run() {
 	}
 
 	// Init app context
-	appCtx, err := api.NewAppContext(db, cfg, authorizer, vaultClient)
+	appCtx, err := api.NewAppContext(pgdb, cfg, authorizer, vaultClient)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}
@@ -119,7 +115,7 @@ func Run() {
 	r := mux.NewRouter()
 
 	// HealthCheck Handler
-	AddHealthCheckHandler(r, "/v1/internal", db)
+	AddHealthCheckHandler(r, "/v1/internal", pgdb)
 
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
@@ -147,50 +143,4 @@ func Run() {
 	if err := http.ListenAndServe(cfg.ListenAddress(), r); err != nil {
 		log.Errorf("Failed to start turing-api: %s", err)
 	}
-}
-
-func initDB(cfg *config.Config) (*gorm.DB, error) {
-	// run db migrations
-	m, err := migrate.New(
-		fmt.Sprintf("file://%s", cfg.DbConfig.MigrationsFolder),
-		fmt.Sprintf(
-			"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-			cfg.DbConfig.User,
-			cfg.DbConfig.Password,
-			cfg.DbConfig.Host,
-			cfg.DbConfig.Port,
-			cfg.DbConfig.Database,
-		),
-	)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to open migrations folder: %s", err)
-	}
-
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return nil, fmt.Errorf("Failed to run migrations: %s", err)
-	}
-
-	if sourceErr, dbErr := m.Close(); sourceErr != nil {
-		return nil, fmt.Errorf("Failed to close source after migration")
-	} else if dbErr != nil {
-		return nil, fmt.Errorf("Failed to close database after migration")
-	}
-
-	// Init db
-	db, err := gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
-			cfg.DbConfig.Host,
-			cfg.DbConfig.Port,
-			cfg.DbConfig.User,
-			cfg.DbConfig.Database,
-			cfg.DbConfig.Password))
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to start Gorm DB: %s", err)
-	}
-
-	db.LogMode(false)
-	return db, nil
 }
