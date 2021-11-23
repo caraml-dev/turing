@@ -10,7 +10,8 @@ export const HorizontalDescriptionList = ({
   <EuiFlexGroup
     direction="row"
     justifyContent="spaceBetween"
-    gutterSize={props.gutterSize || "m"}>
+    gutterSize={props.gutterSize || "m"}
+    wrap={true}>
     {listItems.map((item, idx) => (
       <EuiFlexItem {...item.flexProps} key={idx}>
         <EuiDescriptionList
