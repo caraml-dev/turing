@@ -66,6 +66,100 @@ Tests are placed in `e2e/tests/` directory, in the `e2e` package. The entrypoint
 1. As the `environment_name` is supposed to be set in the test data, these tests are currently only able to run in the `dev` environment. For running tests in `staging` / `production` environments, some changes will be required.
 2. Test runs are isolated by using different MLP projects and/or TEST_ID (see the [Local](#local) section below). This will prevent conflicts in the cluster resources, if tests are run simultaneously. However, the BQ outcome table is also shared and thus, tear down will not remove it.
 
+### Running End-to-end tests locally
+
+This is a work in progress and there changes required on this process as this is extremely clunky. A rough way of running the e2e tests are as follows:
+
+First, spin up k8s and other services required for Turing:
+
+```bash
+#!/bin/bash
+
+pushd ../infra/docker-compose/dev/
+{
+    docker-compose up -d
+}
+popd
+```
+
+Here we have to wait for all the pods to be ready.
+
+```bash
+watch KUBECONFIG=/tmp/kubeconfig kubectl get pod -A
+```
+
+An example of ready would look something like this:
+```
+NAMESPACE         NAME                                      READY   STATUS    RESTARTS   AGE
+kube-system       metrics-server-86cbb8457f-phdvp           1/1     Running   0          20m
+knative-serving   controller-66b8964655-88fxq               1/1     Running   0          20m
+knative-serving   istio-webhook-6cd54997b5-k4nsk            1/1     Running   0          20m
+knative-serving   webhook-7d44db89cc-m2vdp                  1/1     Running   0          20m
+kube-system       coredns-6488c6fcc6-chxtl                  1/1     Running   0          20m
+knative-serving   networking-istio-c57bb746-pqtl2           1/1     Running   0          20m
+default           mockserver-7844d797f7-8v6rr               1/1     Running   0          20m
+knative-serving   autoscaler-6f6d898c75-6qx6k               1/1     Running   0          20m
+kube-system       local-path-provisioner-5ff76fc89d-5m9fp   1/1     Running   0          20m
+istio-system      istiod-7684b696d6-fjf4z                   1/1     Running   0          19m
+knative-serving   activator-7fdbbcf6dc-jkcfn                1/1     Running   0          20m
+default           spark-spark-operator-59c685545-5mrtg      1/1     Running   0          20m
+istio-system      svclb-istio-ingressgateway-b9z82          4/4     Running   0          19m
+istio-system      svclb-istio-ingressgateway-n9zzk          4/4     Running   0          19m
+istio-system      svclb-istio-ingressgateway-77scg          4/4     Running   0          19m
+istio-system      svclb-istio-ingressgateway-l26k7          4/4     Running   0          19m
+istio-system      cluster-local-gateway-5bf54b4999-p2bv7    1/1     Running   0          19m
+istio-system      istio-ingressgateway-555bdcd566-xcn6h     1/1     Running   0          19m
+```
+
+Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/gojek/turing/pkgs/container/turing%2Fturing-router).
+
+```bash
+pushd ../engines/router
+{
+    go mod vendor
+    docker build -t localhost:5000/turing-router .
+    docker push localhost:5000/turing-router
+}
+popd
+```
+
+Now fire up the turing API server (as a daemon or tmux or some other terminal process).
+
+```
+go run turing/cmd/main.go -config=config-dev.yaml
+```
+
+Now run E2E tests.
+
+```
+TEST_ID=$(date +%Y%m%d%H%M) \
+MOCKSERVER_ENDPOINT=http://mockserver \
+API_BASE_PATH=http://localhost:8080/v1 \
+MODEL_CLUSTER_NAME="dev" \
+PROJECT_ID="1" \
+PROJECT_NAME=default \
+KUBECONFIG_USE_LOCAL=true \
+KUBECONFIG_FILE_PATH=/tmp/kubeconfig \
+go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+```
+
+To clean up the Kubernetes cluster:
+
+```bash
+#!/bin/bash
+
+pushd ../infra/docker-compose/dev/
+{
+    docker-compose down -v
+}
+popd
+```
+
+If this doesn't work, check the following:
+
+1. Have all the containers started properly, does `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` work? Check `docker ps -a` if containers have been deployed correctly.
+2. Are you out of disk space? Not enough CPU/Memory? Check `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` and describe the pods to see if there is some sort of pressure if it's being evicted.
+
 #### CI
 The `turing-integration-test` MLP project is used by the CI to exercise the end to end tests. This project is pre-configured with the secret `ci_e2e_test_secret` that has the necessary access (JobUser, DataEditor) to the `gcp-project-id.dataset_id` dataset, as required by the tests for BQ logging with Fluentd. The CI step creates a `turing-api` deployment with an ingress and authorization disabled, to run tests. Additionally, the Fluentd flush interval is lowered for testing. A valid Google service account key must be set in the CI variables (`${SERVICE_ACCOUNT}`) for the test runner to access relevant resources (such as BigQuery results table).
 

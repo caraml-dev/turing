@@ -39,6 +39,7 @@ type testConfig struct {
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
 	// If false, the helper will use the cluster credentials from the configured Vault environment.
 	KubeconfigUseLocal bool   `envconfig:"KUBECONFIG_USE_LOCAL" default:"false"`
+	KubeconfigFilePath string `envconfig:"KUBECONFIG_FILE_PATH" default:""`
 	VaultAddress       string `envconfig:"VAULT_ADDRESS"`
 	VaultToken         string `envconfig:"VAULT_TOKEN"`
 }

@@ -14,7 +14,7 @@ services:
 
   # Kubernetes control plane
   server:
-    image: "rancher/k3s:v1.19.4-k3s1"
+    image: "rancher/k3s:v1.20.12-k3s1"
     command: server --disable traefik
     privileged: true
     environment:
@@ -58,7 +58,7 @@ services:
 
   # Kubernetes worker nodes
   agent:
-    image: "rancher/k3s:v1.19.4-k3s1"
+    image: "rancher/k3s:v1.20.12-k3s1"
     deploy:
       replicas: 3
     privileged: true
@@ -192,3 +192,17 @@ services:
       POSTGRESQL_PASSWORD: turing
     ports: 
       - "5432:5432"
+
+  mockserver:
+    image: bitnami/kubectl:1.19.4
+    restart: on-failure
+    user: root:root
+    volumes:
+    - "../../e2e/turing.mockserver.yaml:/mockserver.yaml"
+    - "kube:/.kube"
+    entrypoint: bash -ec
+    command:
+    - |
+      cp /.kube/kubeconfig.yaml /.kube/config
+      sed -i 's/127.0.0.1/server/' /.kube/config
+      kubectl apply -f /mockserver.yaml

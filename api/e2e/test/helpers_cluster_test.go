@@ -35,8 +35,11 @@ func newClusterClients(cfg *testConfig) (*TestClusterClients, error) {
 	var clusterCfg *rest.Config
 
 	if cfg.KubeconfigUseLocal {
+		p := cfg.KubeconfigFilePath
+		if cfg.KubeconfigFilePath == "" {
+			p = filepath.Join(homedir.HomeDir(), ".kube", "config")
+		}
 		// Authenticate to Kube with local kubeconfig in $HOME/.kube/config
-		p := filepath.Join(homedir.HomeDir(), ".kube", "config")
 		cfg, err := clientcmd.BuildConfigFromFlags("", p)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to initialize Kube config from: "+p)
