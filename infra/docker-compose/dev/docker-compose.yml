@@ -198,7 +198,7 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-    - "./mockserver/turing.mockserver.yaml:/mockserver.yaml"
+    - "../../e2e/turing.mockserver.yaml:/mockserver.yaml"
     - "kube:/.kube"
     entrypoint: bash -ec
     command:
