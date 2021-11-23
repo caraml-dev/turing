@@ -1,9 +1,16 @@
-import * as React from "react";
-import { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+
+import debounce from "lodash/debounce";
+import zip from "lodash/zip";
+
 import { FormContext } from "../context";
 import FormValidationContext from ".";
 import { extractErrors } from "./errors";
-import zip from "lodash/zip";
+
+// Debounced method would only be run at most once every configured duration.
+// Setting a larger value improves the performance, however increases the
+// delay between form value changes and feedback to the user.
+const DEBOUNCE_INTERVAL_MS = 500;
 
 export const MultiSectionFormValidationContextProvider = ({
   schemas,
@@ -42,33 +49,37 @@ export const MultiSectionFormValidationContextProvider = ({
     onSubmit();
   }, [onSubmit]);
 
+  const debouncedValidate = debounce((schemas, contexts, formData) => {
+    Promise.all(
+      zip(schemas, contexts).map(([schema, ctx]) => {
+        return !!schema
+          ? new Promise((resolve, reject) => {
+              schema
+                .validate(formData, {
+                  abortEarly: false,
+                  context: ctx,
+                })
+                .then(
+                  () => resolve({}),
+                  (err) => resolve(extractErrors(err))
+                );
+            })
+          : Promise.resolve({});
+      })
+    )
+      .then(setErrors)
+      .then(() => setIsValidated(true));
+  }, DEBOUNCE_INTERVAL_MS);
+
   useEffect(() => {
     if (isTouched) {
       if (schemas) {
-        Promise.all(
-          zip(schemas, contexts).map(([schema, ctx]) => {
-            return !!schema
-              ? new Promise((resolve, reject) => {
-                  schema
-                    .validate(formData, {
-                      abortEarly: false,
-                      context: ctx,
-                    })
-                    .then(
-                      () => resolve({}),
-                      (err) => resolve(extractErrors(err))
-                    );
-                })
-              : Promise.resolve({});
-          })
-        )
-          .then(setErrors)
-          .then(() => setIsValidated(true));
+        debouncedValidate(schemas, contexts, formData);
       } else {
         setIsValidated(true);
       }
     }
-  }, [isTouched, schemas, contexts, formData]);
+  }, [isTouched, debouncedValidate, schemas, contexts, formData]);
 
   useEffect(() => {
     if (isSubmitting && isValidated) {
