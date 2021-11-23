@@ -111,10 +111,21 @@ istio-system      cluster-local-gateway-5bf54b4999-p2bv7    1/1     Running   0 
 istio-system      istio-ingressgateway-555bdcd566-xcn6h     1/1     Running   0          19m
 ```
 
+Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/gojek/turing/pkgs/container/turing%2Fturing-router).
+
+```bash
+pushd ../engines/router
+{
+    go mod vendor
+    docker build -t localhost:5000/turing-router .
+    docker push localhost:5000/turing-router
+}
+popd
+```
+
 Now fire up the turing API server (as a daemon or tmux or some other terminal process).
 
 ```
-# Run turing api server (either as a daemon or some other terminal):
 go run turing/cmd/main.go -config=config-dev.yaml
 ```
 
@@ -143,6 +154,11 @@ pushd ../infra/docker-compose/dev/
 }
 popd
 ```
+
+If this doesn't work, check the following:
+
+1. Have all the containers started properly, does `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` work? Check `docker ps -a` if containers have been deployed correctly.
+2. Are you out of disk space? Not enough CPU/Memory? Check `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` and describe the pods to see if there is some sort of pressure if it's being evicted.
 
 #### CI
 The `turing-integration-test` MLP project is used by the CI to exercise the end to end tests. This project is pre-configured with the secret `ci_e2e_test_secret` that has the necessary access (JobUser, DataEditor) to the `gcp-project-id.dataset_id` dataset, as required by the tests for BQ logging with Fluentd. The CI step creates a `turing-api` deployment with an ingress and authorization disabled, to run tests. Additionally, the Fluentd flush interval is lowered for testing. A valid Google service account key must be set in the CI variables (`${SERVICE_ACCOUNT}`) for the test runner to access relevant resources (such as BigQuery results table).
