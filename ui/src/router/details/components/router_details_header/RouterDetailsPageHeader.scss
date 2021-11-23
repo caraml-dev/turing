@@ -1,3 +1,8 @@
+.euiFlexGroup--justifyContentSpaceBetween {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .euiFlexItem--endpoint {
   max-width: calc(60% - 24px);
 

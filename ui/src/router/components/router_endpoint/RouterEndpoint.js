@@ -14,7 +14,7 @@ export const RouterEndpoint = ({ endpoint, className }) => {
             copy();
           }}
           color="text">
-          <EuiText size="s">
+          <EuiText className={className} size="s">
             <EuiIcon
               type={"copyClipboard"}
               size="s"
