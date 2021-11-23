@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/service"
-
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
 )
@@ -57,6 +57,47 @@ func TestCreateRouter(t *testing.T) {
 						}
 					  ]
 					}`
+					assert.JSONEq(t, expectedResponse, actualResponse)
+				})
+
+			batchEndpoint := strings.Replace(router.Endpoint, "/predict", "/batch_predict", -1)
+			t.Log("Testing router batch endpoint: POST " + batchEndpoint)
+			withRouterResponse(t,
+				http.MethodPost,
+				batchEndpoint,
+				nil,
+				"[{},{}]",
+				func(response *http.Response, responsePayload []byte) {
+					t.Log(string(responsePayload))
+					assert.Equal(t, http.StatusOK, response.StatusCode,
+						"Unexpected response (code %d): %s",
+						response.StatusCode, string(responsePayload))
+					actualResponse := gjson.GetBytes(responsePayload, "#.data.json.response").String()
+					expectedResponse := `[{
+					  "experiment": {},
+					  "route_responses": [
+						{
+						  "data": {
+							"version": "control"
+						  },
+						  "is_default": true,
+						  "route": "control"
+						}
+					  ]
+					},
+					{
+					  "experiment": {},
+					  "route_responses": [
+						{
+						  "data": {
+							"version": "control"
+						  },
+						  "is_default": true,
+						  "route": "control"
+						}
+					  ]
+					}
+					]`
 					assert.JSONEq(t, expectedResponse, actualResponse)
 				})
 
