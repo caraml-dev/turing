@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import debounce from "lodash/debounce";
 import zip from "lodash/zip";
@@ -49,27 +55,33 @@ export const MultiSectionFormValidationContextProvider = ({
     onSubmit();
   }, [onSubmit]);
 
-  const debouncedValidate = debounce((schemas, contexts, formData) => {
-    Promise.all(
-      zip(schemas, contexts).map(([schema, ctx]) => {
-        return !!schema
-          ? new Promise((resolve, reject) => {
-              schema
-                .validate(formData, {
-                  abortEarly: false,
-                  context: ctx,
+  // useMemo here so that debouncedValidate is not recreated frequently, causing the
+  // useEffect hook that initiates the validation to be triggered multiple times.
+  const debouncedValidate = useMemo(
+    () =>
+      debounce((schemas, contexts, formData) => {
+        Promise.all(
+          zip(schemas, contexts).map(([schema, ctx]) => {
+            return !!schema
+              ? new Promise((resolve, reject) => {
+                  schema
+                    .validate(formData, {
+                      abortEarly: false,
+                      context: ctx,
+                    })
+                    .then(
+                      () => resolve({}),
+                      (err) => resolve(extractErrors(err))
+                    );
                 })
-                .then(
-                  () => resolve({}),
-                  (err) => resolve(extractErrors(err))
-                );
-            })
-          : Promise.resolve({});
-      })
-    )
-      .then(setErrors)
-      .then(() => setIsValidated(true));
-  }, DEBOUNCE_INTERVAL_MS);
+              : Promise.resolve({});
+          })
+        )
+          .then(setErrors)
+          .then(() => setIsValidated(true));
+      }, DEBOUNCE_INTERVAL_MS),
+    []
+  );
 
   useEffect(() => {
     if (isTouched) {
