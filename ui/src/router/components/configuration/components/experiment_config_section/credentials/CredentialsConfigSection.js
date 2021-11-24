@@ -30,7 +30,7 @@ export const CredentialsConfigSection = ({
               href={getFormattedHomepageUrl(homepageUrl, projectId)}
               target="_blank"
               external>
-              {engineProps.name}
+              {engineProps.display_name || engineProps.name}
             </EuiLink>
           </EuiTextColor>
         ) : (
