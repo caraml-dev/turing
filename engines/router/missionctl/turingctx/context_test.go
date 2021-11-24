@@ -2,6 +2,7 @@ package turingctx
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,20 @@ func TestNewTuringContext(t *testing.T) {
 	// Check that a turing request id is present
 	reqID := turCtx.Value(turingReqIDKey)
 	assert.NotEmpty(t, reqID)
+}
+
+func TestNewTuringContextWithSuffix(t *testing.T) {
+	testReqID := "test-uuid"
+	turCtx := context.WithValue(context.Background(), turingReqIDKey, testReqID)
+	reqID, err := GetRequestID(turCtx)
+	assert.NoError(t, err)
+
+	turCtxWithSuffix := NewTuringContextWithSuffix(turCtx, "1")
+	reqIDWithSuffix, err := GetRequestID(turCtxWithSuffix)
+	assert.NoError(t, err)
+
+	expectedRedID := fmt.Sprintf("%s_%s", reqID, "1")
+	assert.Equal(t, expectedRedID, reqIDWithSuffix)
 }
 
 func TestGetRequestID(t *testing.T) {

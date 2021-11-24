@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"sync"
 
 	"github.com/gojek/turing/engines/router/missionctl"
@@ -76,8 +77,9 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 
 		go func(index int, jsonRequestBody json.RawMessage) {
 			defer waitGroup.Done()
+			requestContext := turingctx.NewTuringContextWithSuffix(ctx, strconv.Itoa(index))
 			var batchResponse batchResponse
-			resp, httpErr := h.getPrediction(ctx, req, ctxLogger, jsonRequestBody)
+			resp, httpErr := h.getPrediction(requestContext, req, ctxLogger, jsonRequestBody)
 			if httpErr != nil {
 				batchResponse.StatusCode = httpErr.Code
 				batchResponse.ErrorMsg = httpErr.Message

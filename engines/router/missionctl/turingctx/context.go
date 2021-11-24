@@ -2,6 +2,7 @@ package turingctx
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/google/uuid"
@@ -27,6 +28,13 @@ func NewTuringContext(parent context.Context) context.Context {
 // the given value
 func NewTestTuringContext(parent context.Context, turingReqID string) context.Context {
 	return context.WithValue(parent, turingReqIDKey, turingReqID)
+}
+
+// NewTuringContextWithSuffix returns a context for testing, with the Turing Request ID set to
+// with the given suffix
+func NewTuringContextWithSuffix(parent context.Context, suffix string) context.Context {
+	turingReqIDKeyWithSuffix := fmt.Sprintf("%s_%s", parent.Value(turingReqIDKey), suffix)
+	return context.WithValue(parent, turingReqIDKey, turingReqIDKeyWithSuffix)
 }
 
 // GetRequestID returns the request id from the input context
