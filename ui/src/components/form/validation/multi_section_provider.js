@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import debounce from "lodash/debounce";
 import zip from "lodash/zip";
@@ -16,7 +10,32 @@ import { extractErrors } from "./errors";
 // Debounced method would only be run at most once every configured duration.
 // Setting a larger value improves the performance, however increases the
 // delay between form value changes and feedback to the user.
-const DEBOUNCE_INTERVAL_MS = 500;
+const DEBOUNCE_INTERVAL_MS = 300;
+
+const debouncedValidate = debounce(
+  (schemas, contexts, formData, setErrors, setIsValidated) => {
+    Promise.all(
+      zip(schemas, contexts).map(([schema, ctx]) => {
+        return !!schema
+          ? new Promise((resolve, reject) => {
+              schema
+                .validate(formData, {
+                  abortEarly: false,
+                  context: ctx,
+                })
+                .then(
+                  () => resolve({}),
+                  (err) => resolve(extractErrors(err))
+                );
+            })
+          : Promise.resolve({});
+      })
+    )
+      .then(setErrors)
+      .then(() => setIsValidated(true));
+  },
+  DEBOUNCE_INTERVAL_MS
+);
 
 export const MultiSectionFormValidationContextProvider = ({
   schemas,
@@ -55,43 +74,21 @@ export const MultiSectionFormValidationContextProvider = ({
     onSubmit();
   }, [onSubmit]);
 
-  // useMemo here so that debouncedValidate is not recreated frequently, causing the
-  // useEffect hook that initiates the validation to be triggered multiple times.
-  const debouncedValidate = useMemo(
-    () =>
-      debounce((schemas, contexts, formData) => {
-        Promise.all(
-          zip(schemas, contexts).map(([schema, ctx]) => {
-            return !!schema
-              ? new Promise((resolve, reject) => {
-                  schema
-                    .validate(formData, {
-                      abortEarly: false,
-                      context: ctx,
-                    })
-                    .then(
-                      () => resolve({}),
-                      (err) => resolve(extractErrors(err))
-                    );
-                })
-              : Promise.resolve({});
-          })
-        )
-          .then(setErrors)
-          .then(() => setIsValidated(true));
-      }, DEBOUNCE_INTERVAL_MS),
-    []
-  );
-
   useEffect(() => {
     if (isTouched) {
       if (schemas) {
-        debouncedValidate(schemas, contexts, formData);
+        debouncedValidate(
+          schemas,
+          contexts,
+          formData,
+          setErrors,
+          setIsValidated
+        );
       } else {
         setIsValidated(true);
       }
     }
-  }, [isTouched, debouncedValidate, schemas, contexts, formData]);
+  }, [isTouched, schemas, contexts, formData]);
 
   useEffect(() => {
     if (isSubmitting && isValidated) {
