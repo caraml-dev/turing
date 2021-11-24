@@ -132,6 +132,9 @@ components:
       properties:
         name:
           type: "string"
+        display_name:
+          type: "string"
+          description: "Optional display name to be used in the UI"
         type:
           $ref: "#/components/schemas/ExperimentManagerType"
 

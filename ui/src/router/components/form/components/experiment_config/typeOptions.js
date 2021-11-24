@@ -18,7 +18,7 @@ export const getExperimentEngineOptions = (engines) => {
     ...defaultExperimentEngineOptions,
     ...engines.map((item) => ({
       value: item.name.toLowerCase(),
-      inputDisplay: item.name,
+      inputDisplay: item.display_name || item.name,
     })),
   ];
 };
