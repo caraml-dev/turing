@@ -42,8 +42,12 @@ type CustomExperimentManagerConfig struct {
 
 // Engine describes the properties of an experiment engine
 type Engine struct {
-	// Name is the display name used for the experiment engine.
+	// Name is the unique identifier for the experiment engine and will be used as
+	// the display name in the UI if the optional `DisplayName` field is not set.
 	Name string `json:"name"`
+	// DisplayName is the name of the experiment engine that will be used in the UI,
+	// solely for the purpose of display. The Turing API still relies on the `Name`.
+	DisplayName string `json:"display_name"`
 	// Type describes the class of the experiment engine manager
 	Type ExperimentManagerType `json:"type"`
 	// StandardExperimentManagerConfig is expected to be set by a "standard" experiment engine manager
