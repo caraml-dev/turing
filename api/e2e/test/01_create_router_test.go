@@ -68,7 +68,6 @@ func TestCreateRouter(t *testing.T) {
 				nil,
 				"[{},{}]",
 				func(response *http.Response, responsePayload []byte) {
-					t.Log(string(responsePayload))
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
