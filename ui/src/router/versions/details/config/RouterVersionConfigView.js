@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { RouterConfigDetails } from "../../../components/configuration/RouterConfigDetails";
 import { get } from "../../../../components/form/utils";
+import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
 
 export const RouterVersionConfigView = ({ projectId, config }) => {
   useEffect(() => {
@@ -25,5 +26,9 @@ export const RouterVersionConfigView = ({ projectId, config }) => {
     ]);
   }, [config]);
 
-  return <RouterConfigDetails projectId={projectId} config={config} />;
+  return (
+    <ExperimentEngineContextProvider>
+      <RouterConfigDetails projectId={projectId} config={config} />
+    </ExperimentEngineContextProvider>
+  );
 };

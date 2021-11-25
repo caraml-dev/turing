@@ -29,7 +29,7 @@ export const RouterActions = ({
           name: "Undeploy Router",
           icon: "exportAction",
           disabled: status === Status.PENDING,
-          hidden: status === Status.UNDEPLOYED,
+          hidden: [Status.UNDEPLOYED, Status.FAILED].includes(status),
           onClick: () => undeployRouterRef.current(router),
         },
         {
