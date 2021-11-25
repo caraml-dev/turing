@@ -70,10 +70,11 @@ const (
 
 // Router endpoint constants
 const (
-	defaultIstioGateway   = "istio-ingressgateway.istio-system.svc.cluster.local"
-	defaultGateway        = "knative-ingress-gateway.knative-serving"
-	defaultMatchURIPrefix = "/v1/predict,/v1/batch_predict"
+	defaultIstioGateway = "istio-ingressgateway.istio-system.svc.cluster.local"
+	defaultGateway      = "knative-ingress-gateway.knative-serving"
 )
+
+var defaultMatchURIPrefixes = []string{"/v1/predict", "/v1/batch_predict"}
 
 // NewRouterService creates a new cluster Service object with the required config
 // for the Turing router to be deployed.
@@ -151,14 +152,14 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	host := strings.Replace(veURL.Hostname(), routerName, routerEndpointName, 1)
 
 	return &cluster.VirtualService{
-		Name:            routerEndpointName,
-		Namespace:       project.Name,
-		Labels:          labels,
-		Gateway:         defaultGateway,
-		Endpoint:        host,
-		DestinationHost: defaultIstioGateway,
-		HostRewrite:     veURL.Hostname(),
-		MatchURIPrefix:  strings.Split(defaultMatchURIPrefix, ","),
+		Name:             routerEndpointName,
+		Namespace:        project.Name,
+		Labels:           labels,
+		Gateway:          defaultGateway,
+		Endpoint:         host,
+		DestinationHost:  defaultIstioGateway,
+		HostRewrite:      veURL.Hostname(),
+		MatchURIPrefixes: defaultMatchURIPrefixes,
 	}, nil
 }
 

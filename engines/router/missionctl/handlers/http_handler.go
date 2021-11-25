@@ -47,10 +47,10 @@ func (h *httpHandler) error(
 	logTuringRouterRequestError(ctx, err)
 }
 
-// measureRequestDuration measure the duration of the request
-func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
+// getMeasureDurationFunc return the func that measures the duration of the request
+func (h *httpHandler) getMeasureDurationFunc(httpErr *errors.HTTPError) func() {
 	// Measure the duration of handler function
-	defer metrics.Glob().MeasureDurationMs(
+	return metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
@@ -60,17 +60,16 @@ func (h *httpHandler) measureRequestDuration(httpErr *errors.HTTPError) {
 				return httpHandlerID
 			},
 		},
-	)()
+	)
 }
 
 // enableTracingSpan associates span to context, if applicable
-func (h *httpHandler) enableTracingSpan(ctx context.Context, req *http.Request) context.Context {
+func (h *httpHandler) enableTracingSpan(ctx context.Context,
+	req *http.Request,
+	httpHandlerID string) (context.Context, opentracing.Span) {
 	var sp opentracing.Span
 	sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
-	if sp != nil {
-		defer sp.Finish()
-	}
-	return ctx
+	return ctx, sp
 }
 
 // getPrediction takes in a request and owns the flow of the request - enrich, route, ensemble
@@ -136,7 +135,8 @@ func (h *httpHandler) getPrediction(
 
 func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.HTTPError
-	h.measureRequestDuration(httpErr)
+	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
+	defer measureDurationFunc()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())
@@ -155,7 +155,11 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ctxLogger.Debugf("Received request for %v", turingReqID)
 
 	if tracing.Glob().IsEnabled() {
-		ctx = h.enableTracingSpan(ctx, req)
+		var sp opentracing.Span
+		ctx, sp = h.enableTracingSpan(ctx, req, httpHandlerID)
+		if sp != nil {
+			defer sp.Finish()
+		}
 	}
 
 	// Read the request body

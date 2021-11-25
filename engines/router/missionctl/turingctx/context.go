@@ -30,8 +30,8 @@ func NewTestTuringContext(parent context.Context, turingReqID string) context.Co
 	return context.WithValue(parent, turingReqIDKey, turingReqID)
 }
 
-// NewTuringContextWithSuffix returns a context for testing, with the Turing Request ID set to
-// with the given suffix
+// NewTuringContextWithSuffix returns a context for batch request, with the Turing Request ID set to
+// with the given suffix and initial request context set as parent
 func NewTuringContextWithSuffix(parent context.Context, suffix string) context.Context {
 	turingReqIDKeyWithSuffix := fmt.Sprintf("%s_%s", parent.Value(turingReqIDKey), suffix)
 	return context.WithValue(parent, turingReqIDKey, turingReqIDKeyWithSuffix)

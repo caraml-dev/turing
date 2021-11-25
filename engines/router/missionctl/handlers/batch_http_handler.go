@@ -12,7 +12,10 @@ import (
 	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/gojek/turing/engines/router/missionctl/log"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
+	"github.com/opentracing/opentracing-go"
 )
+
+const batchHTTPHandlerID = "batch_http_handler"
 
 type batchHTTPHandler struct {
 	httpHandler
@@ -31,7 +34,8 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.HTTPError
-	h.measureRequestDuration(httpErr)
+	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
+	defer measureDurationFunc()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())
@@ -50,7 +54,11 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	ctxLogger.Debugf("Received batch request for %v", turingReqID)
 
 	if tracing.Glob().IsEnabled() {
-		ctx = h.enableTracingSpan(ctx, req)
+		var sp opentracing.Span
+		ctx, sp = h.enableTracingSpan(ctx, req, batchHTTPHandlerID)
+		if sp != nil {
+			defer sp.Finish()
+		}
 	}
 
 	// Read the request body
