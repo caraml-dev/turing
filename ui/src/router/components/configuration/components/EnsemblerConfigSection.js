@@ -2,11 +2,12 @@ import React, { Fragment } from "react";
 import { EuiPanel } from "@elastic/eui";
 import { DockerConfigViewGroup } from "./docker_config_section/DockerConfigViewGroup";
 import { TreatmentMappingConfigSection } from "./TreatmentMappingConfigSection";
+import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
 
 export const EnsemblerConfigSection = ({
   config: {
     ensembler,
-    experiment_engine: { config: experimentConfig },
+    experiment_engine: { type, config: experimentConfig },
   },
 }) => {
   return !ensembler ? (
@@ -20,11 +21,13 @@ export const EnsemblerConfigSection = ({
         />
       )}
       {ensembler.type === "standard" && (
-        <TreatmentMappingConfigSection
-          engineProps={(experimentConfig || {}).engine || {}}
-          experiments={(experimentConfig || {}).experiments || []}
-          mappings={ensembler.standard_config.experiment_mappings}
-        />
+        <ExperimentEngineContextProvider>
+          <TreatmentMappingConfigSection
+            engine={type}
+            experiments={(experimentConfig || {}).experiments || []}
+            mappings={ensembler.standard_config.experiment_mappings}
+          />
+        </ExperimentEngineContextProvider>
       )}
     </Fragment>
   );

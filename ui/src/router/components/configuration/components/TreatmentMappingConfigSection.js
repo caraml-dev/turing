@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -9,6 +9,7 @@ import {
 } from "@elastic/eui";
 import { ConfigSectionPanel } from "../../../../components/config_section";
 import { getExperimentUrl } from "./config";
+import ExperimentEngineContext from "../../../../providers/experiments/context";
 
 const TreatmentMappingConfigTable = ({ items }) => {
   const columns = [
@@ -30,14 +31,16 @@ const TreatmentMappingConfigTable = ({ items }) => {
 };
 
 export const TreatmentMappingConfigSection = ({
-  engineProps,
+  engine,
   experiments = [],
   mappings = [],
 }) => {
+  const { getEngineProperties } = useContext(ExperimentEngineContext);
+  const engineProps = getEngineProperties(engine);
+
   const experimentNames = [
     ...new Set(mappings.map((mapObj) => mapObj.experiment)),
   ];
-
   const experimentInfo = experiments.reduce((acc, exp) => {
     acc[exp.name] = exp;
     return acc;
@@ -52,7 +55,8 @@ export const TreatmentMappingConfigSection = ({
               <EuiTextColor color="secondary">
                 <EuiLink
                   href={getExperimentUrl(
-                    engineProps,
+                    engineProps?.standard_experiment_manager_config
+                      ?.home_page_url,
                     experimentInfo[exp] || {}
                   )}
                   target="_blank"
