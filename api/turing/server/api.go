@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -69,8 +70,15 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 
 func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
+		// Choose between bundled openapi yaml file or development files
+		specFile := cfg.OpenapiConfig.SpecFile
+		if cfg.OpenapiConfig.SwaggerUIConfig != nil {
+			// During build time, the script will generate a file called openapi.bundle.yaml in the serving directory
+			specFile = path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile)
+		}
+
 		// Initialize OpenAPI validation middleware
-		if _, err := os.Stat(cfg.OpenapiConfig.SpecFile); os.IsExist(err) {
+		if _, err := os.Stat(specFile); os.IsExist(err) {
 			return nil, errors.Wrapf(err, "Openapi spec file '%s' not found", cfg.OpenapiConfig.SpecFile)
 		}
 

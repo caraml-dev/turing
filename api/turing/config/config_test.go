@@ -168,10 +168,6 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
-						ServingDirectory: "",
-						ServingPath:      "/api-docs/",
-					},
 				},
 			},
 		},
@@ -248,10 +244,6 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
-						ServingDirectory: "",
-						ServingPath:      "/api-docs/",
-					},
 				},
 				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{
@@ -344,10 +336,6 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
-						ServingDirectory: "",
-						ServingPath:      "/swagger-ui",
-					},
 				},
 				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{
@@ -461,10 +449,6 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
-						ServingDirectory: "static/swagger-ui",
-						ServingPath:      "/swagger-ui",
-					},
 				},
 				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{

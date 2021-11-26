@@ -148,6 +148,11 @@ Experiment:
 {{ end }}
 {{ end }}
 {{ end }}
+OpenapiConfig:
+  ValidationEnabled: true
+  SwaggerUIConfig:
+    ServingDirectory: ""
+    ServingPath: /api-docs/
 {{- end -}}
 
 {{- define "turing.config" -}}

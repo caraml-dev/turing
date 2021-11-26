@@ -1,5 +1,48 @@
 package utils
 
+import (
+	"bufio"
+	"bytes"
+	"io/ioutil"
+	"os"
+
+	"gopkg.in/yaml.v3"
+)
+
+// MergeTwoYamls reads the original yaml file and overrides the original file with
+// the override file. This overriding will follow the rules in MergeMaps.
+func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
+	original, err := readYAML(originalYAMLFile)
+	if err != nil {
+		return err
+	}
+
+	override, err := readYAML(overrideYAMLFile)
+	if err != nil {
+		return err
+	}
+
+	merged, err := MergeMaps(original, override)
+	if err != nil {
+		return err
+	}
+
+	var output bytes.Buffer
+	yamlEncoder := yaml.NewEncoder(&output)
+	yamlEncoder.SetIndent(2)
+	yamlEncoder.Encode(merged)
+
+	f, err := os.OpenFile(originalYAMLFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+
+	w := bufio.NewWriter(f)
+	_, err = w.Write(output.Bytes())
+
+	return err
+}
+
 // MergeMaps takes two maps with any value and merges it recursively.
 // if the underlying value is also a map[string]interface{} it will replace only the values in that map
 // but if the value is any other format, it will replace it with the override value
@@ -37,4 +80,19 @@ func MergeMaps(originalMap, override map[string]interface{}) (map[string]interfa
 		}
 	}
 	return original, nil
+}
+
+func readYAML(filepath string) (map[string]interface{}, error) {
+	file, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	y := make(map[string]interface{})
+	err = yaml.Unmarshal(file, y)
+	if err != nil {
+		return nil, err
+	}
+
+	return y, nil
 }
