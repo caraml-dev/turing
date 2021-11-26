@@ -3,6 +3,7 @@ package server
 import (
 	"flag"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
+	"github.com/gojek/turing/api/turing/utils"
 	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
 )
@@ -116,6 +118,14 @@ func Run() {
 
 	// HealthCheck Handler
 	AddHealthCheckHandler(r, "/v1/internal", db)
+
+	// Override the bundle file with user specified overrides.
+	if cfg.OpenapiConfig.SwaggerUIConfig != nil && cfg.OpenapiConfig.SwaggerUIConfigOverrideFile != nil {
+		utils.MergeTwoYamls(
+			path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile),
+			*cfg.OpenapiConfig.SwaggerUIConfigOverrideFile,
+		)
+	}
 
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)

@@ -20,6 +20,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+// OpenapiBundleFile is the file name that is generated when the openapi bundle yaml file is generated.
+const OpenapiBundleFile = "openapi.bundle.yaml"
+
 // Quantity is an alias for resource.Quantity
 type Quantity resource.Quantity
 
@@ -337,7 +340,10 @@ type OpenapiConfig struct {
 	// SpecFile specifies the file path containing OpenAPI v3 spec
 	SpecFile string
 	// Optional. Defines a configuration to be used for serving Swagger UI as a single-page app
+	// If this is provided, it will use the bundled yaml instead.
 	SwaggerUIConfig *SinglePageApplicationConfig
+	// Optional. Overrides the file before running the Swagger UI.
+	SwaggerUIConfigOverrideFile *string
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -460,8 +466,6 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
-	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingDirectory", "")
-	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

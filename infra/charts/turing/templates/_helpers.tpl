@@ -101,6 +101,11 @@ MLPConfig:
 TuringEncryptionKey: {{ include "turing.encryption.key" . | quote }}
 Sentry:
   DSN: {{ .Values.turing.config.Sentry.DSN | default (include "turing.sentry.dsn" .) | quote }}
+OpenapiConfig:
+  ValidationEnabled: true
+  SwaggerUIConfig:
+    ServingDirectory: ""
+    ServingPath: /api-docs/
 {{- end -}}
 
 {{- define "turing.config" -}}
