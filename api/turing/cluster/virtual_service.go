@@ -7,14 +7,14 @@ import (
 )
 
 type VirtualService struct {
-	Name            string            `json:"name"`
-	Namespace       string            `json:"namespace"`
-	Labels          map[string]string `json:"labels"`
-	Gateway         string            `json:"gateway"`
-	Endpoint        string            `json:"endpoint"`
-	DestinationHost string            `json:"destination_host"`
-	HostRewrite     string            `json:"host_rewrite"`
-	MatchURIPrefix  string            `json:"match_uri_prefix"`
+	Name             string            `json:"name"`
+	Namespace        string            `json:"namespace"`
+	Labels           map[string]string `json:"labels"`
+	Gateway          string            `json:"gateway"`
+	Endpoint         string            `json:"endpoint"`
+	DestinationHost  string            `json:"destination_host"`
+	HostRewrite      string            `json:"host_rewrite"`
+	MatchURIPrefixes []string          `json:"match_uri_prefix"`
 }
 
 func (cfg VirtualService) BuildVirtualService() *v1alpha3.VirtualService {
@@ -29,6 +29,17 @@ func (cfg VirtualService) BuildVirtualService() *v1alpha3.VirtualService {
 		},
 		Weight: 100,
 	}
+	httpMatches := make([]*networking.HTTPMatchRequest, len(cfg.MatchURIPrefixes))
+	for index, prefix := range cfg.MatchURIPrefixes {
+		uri := networking.HTTPMatchRequest{
+			Uri: &networking.StringMatch{
+				MatchType: &networking.StringMatch_Prefix{
+					Prefix: prefix,
+				},
+			},
+		}
+		httpMatches[index] = &uri
+	}
 
 	return &v1alpha3.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
@@ -41,15 +52,7 @@ func (cfg VirtualService) BuildVirtualService() *v1alpha3.VirtualService {
 			Gateways: []string{cfg.Gateway},
 			Http: []*networking.HTTPRoute{
 				{
-					Match: []*networking.HTTPMatchRequest{
-						{
-							Uri: &networking.StringMatch{
-								MatchType: &networking.StringMatch_Prefix{
-									Prefix: cfg.MatchURIPrefix,
-								},
-							},
-						},
-					},
+					Match: httpMatches,
 					Route: []*networking.HTTPRouteDestination{
 						httpRouteDest,
 					},
