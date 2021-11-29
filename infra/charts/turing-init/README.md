@@ -1,8 +1,13 @@
 # turing-init
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+---
+![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes
+
+## Introduction
+
+This Helm chart installs the infrastructure components [Turing](https://github.com/gojek/turing) requires.
 
 ## Requirements
 
@@ -10,7 +15,36 @@ A Helm chart for Kubernetes
 |------------|------|---------|
 | https://googlecloudplatform.github.io/spark-on-k8s-operator | spark-operator | 1.1.7 |
 
-## Values
+## Installation
+
+### Add Helm repository
+
+```shell
+$ helm repo add turing https://turing-ml.github.io/charts
+```
+
+### Installing the chart
+
+This command will install turing-init named `turing-init` in the `default` namespace.
+Default chart values will be used for the installation:
+```shell
+$ helm install turing-init turing/turing-init
+```
+
+It is unlikely that you would need to change the values of the default configuration.
+
+### Uninstalling the chart
+
+To uninstall `turing-init` release:
+```shell
+$ helm uninstall turing-init
+```
+
+The command removes all the Kubernetes components associated with the chart.
+
+## Configuration
+
+The following table lists the configurable parameters of the Turing chart and their default values.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
