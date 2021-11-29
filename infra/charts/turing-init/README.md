@@ -9,12 +9,6 @@ A Helm chart for Kubernetes
 
 This Helm chart installs the infrastructure components [Turing](https://github.com/gojek/turing) requires.
 
-## Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://googlecloudplatform.github.io/spark-on-k8s-operator | spark-operator | 1.1.7 |
-
 ## Installation
 
 ### Add Helm repository
@@ -32,6 +26,12 @@ $ helm install turing-init turing/turing-init
 ```
 
 It is unlikely that you would need to change the values of the default configuration.
+
+After the chart has been installed, the init container must finishing running in order to consider this as installed.
+One way to check if it is completed is to run the following command:
+```bash
+kubectl wait --for=condition=complete --timeout=10m job/turing-init-init
+```
 
 ### Uninstalling the chart
 
