@@ -1,0 +1,49 @@
+{{ template "chart.header" . }}
+---
+{{ template "chart.versionBadge" . }}
+{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+## Introduction
+
+This Helm chart installs the infrastructure components [Turing](https://github.com/gojek/turing) requires.
+
+## Installation
+
+### Add Helm repository
+
+```shell
+$ helm repo add turing https://turing-ml.github.io/charts
+```
+
+### Installing the chart
+
+This command will install turing-init named `turing-init` in the `default` namespace.
+Default chart values will be used for the installation:
+```shell
+$ helm install turing-init turing/turing-init
+```
+
+It is unlikely that you would need to change the values of the default configuration.
+
+After the chart has been installed, the init container must finishing running in order to consider this as installed.
+One way to check if it is completed is to run the following command:
+```bash
+kubectl wait --for=condition=complete --timeout=10m job/turing-init-init
+```
+
+### Uninstalling the chart
+
+To uninstall `turing-init` release:
+```shell
+$ helm uninstall turing-init
+```
+
+The command removes all the Kubernetes components associated with the chart.
+
+## Configuration
+
+The following table lists the configurable parameters of the Turing chart and their default values.
+
+{{ template "chart.valuesTable" . }}

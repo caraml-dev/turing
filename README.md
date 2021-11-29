@@ -345,22 +345,27 @@ This is the recommended way to install the prerequisites on a production Kuberne
 To install the required components on your Kubernetes cluster, issue the following command:
 
 ```bash
-helm upgrade turing-init infra/charts/turing-init \
-    --set image.registry="<image registry>/" \
-    --set image.repository="<repository>" \
-    --set image.tag="<tag version>" \
+helm repo add turing https://turing-ml.github.io/charts
+helm upgrade turing-init turing/turing-init \
+    --namespace infrastructure \
     --install \
     --wait
 ```
 
 For it to be completely installed, you should check the init job has run successfully.
-To check, issue the command `kubectl get pod` and you should see something like this:
+To check, issue the command `kubectl get pod --namespace infrastructure` and you should see something like this:
 
 ```
 NAME                                            READY   STATUS      RESTARTS   AGE
 turing-test-spark-operator-8bcb89d5d-nf2bq      1/1     Running     0          3m42s
 turing-test-spark-operator-webhook-init-ph8ds   0/1     Completed   0          3m44s
 turing-test-turing-init-init-pknvb              0/1     Completed   0          3m44s
+```
+
+Programatically, you could check if the init job has run successfully with the following command:
+
+```bash
+kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-init
 ```
 
 The init job will also check if all the components have been installed properly so we can guarantee that
