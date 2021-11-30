@@ -103,6 +103,7 @@ Sentry:
   DSN: {{ .Values.turing.config.Sentry.DSN | default (include "turing.sentry.dsn" .) | quote }}
 OpenapiConfig:
   ValidationEnabled: true
+  SwaggerUIConfigOverrideFile: /etc/openapi/override.yaml
   SwaggerUIConfig:
     ServingDirectory: ""
     ServingPath: /api-docs/
