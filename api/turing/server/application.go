@@ -121,10 +121,13 @@ func Run() {
 
 	// Override the bundle file with user specified overrides.
 	if cfg.OpenapiConfig.SwaggerUIConfig != nil && cfg.OpenapiConfig.SwaggerUIConfigOverrideFile != nil {
-		utils.MergeTwoYamls(
+		err := utils.MergeTwoYamls(
 			path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile),
 			*cfg.OpenapiConfig.SwaggerUIConfigOverrideFile,
 		)
+		if err != nil {
+			log.Panicf("failed to merge openapi yamls.")
+		}
 	}
 
 	// API Handler
