@@ -83,7 +83,7 @@ func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.Middle
 		}
 
 		openapiValidation, err := middleware.NewOpenAPIValidation(
-			cfg.OpenapiConfig.SpecFile,
+			specFile,
 			middleware.OpenAPIValidationOptions{
 				// Authentication is ignored because it is handled by another middleware
 				IgnoreAuthentication: true,

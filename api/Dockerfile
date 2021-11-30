@@ -31,8 +31,8 @@ RUN addgroup -S ${TURING_USER_GROUP} \
     && chown -R ${TURING_USER}:${TURING_USER_GROUP} /app
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
-COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api /app/api
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/db-migrations /app/db-migrations
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api/swagger-ui-dist /app/swagger-ui
 
 USER ${TURING_USER}
 WORKDIR /app

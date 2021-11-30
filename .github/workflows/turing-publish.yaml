@@ -75,12 +75,6 @@ jobs:
           name: turing-ui-dist
           path: ui/build
 
-      - name: Download Swagger UI Dist
-        uses: actions/download-artifact@v2
-        with:
-          name: swagger-ui-dist
-          path: api/api/swagger-ui-dist
-
       - name: Build and Publish Turing Docker image
         env:
           DOCKER_REGISTRY: ${{ inputs.container_registry }}/${{ github.repository_owner }}

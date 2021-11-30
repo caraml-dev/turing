@@ -152,7 +152,7 @@ OpenapiConfig:
   ValidationEnabled: true
   SwaggerUIConfigOverrideFile: /etc/openapi/override.yaml
   SwaggerUIConfig:
-    ServingDirectory: ""
+    ServingDirectory: swagger-ui
     ServingPath: /api-docs/
 {{- end -}}
 
