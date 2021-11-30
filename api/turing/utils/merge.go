@@ -30,7 +30,10 @@ func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
 	var output bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&output)
 	yamlEncoder.SetIndent(2)
-	yamlEncoder.Encode(merged)
+	err = yamlEncoder.Encode(merged)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.OpenFile(originalYAMLFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
