@@ -65,9 +65,8 @@ MLPConfig:
 TuringUIConfig:
   ServingDirectory: ../ui/build
   ServingPath: /turing
-# TODO: Delete this whole section
 OpenapiConfig:
-  SwaggerUIConfigOverrideFile: api/override_sample.yaml
+  SwaggerUIConfigOverrideFile: api/override-sample.yaml
   SwaggerUIConfig:
     ServingDirectory: api/swagger-ui-dist
     ServingPath: /api-docs/

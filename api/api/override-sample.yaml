@@ -9,4 +9,4 @@ components:
     ExperimentEngineType:
       enum:
       - nop
-      - propietary
+      - proprietary

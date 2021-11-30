@@ -5,6 +5,14 @@ global:
 
 turing:
   uiConfig: null # Not needed as we only test API
+  # testing of openapi overriding feature
+  openApiComponentOverrides:
+    components:
+      schemas:
+        ExperimentEngineType:
+          enum:
+          - nop
+          - proprietary
 
 postgresql: &postgresql
   persistence:

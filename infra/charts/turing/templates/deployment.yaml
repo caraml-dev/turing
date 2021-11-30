@@ -81,6 +81,8 @@ spec:
           mountPath: /etc/turing
         - name: plugins-volume
           mountPath: {{ include "turing.plugins.directory" . }}
+        - name: openapi
+          mountPath: /etc/openapi
         {{- with .Values.turing.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -93,6 +95,9 @@ spec:
           secretName: {{ template "turing.fullname" . }}-api-config
       - name: plugins-volume
         emptyDir: {}
+      - name: openapi 
+        configMap:
+          name: {{ template "turing.fullname" . }}-openapi
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
