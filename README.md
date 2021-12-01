@@ -343,7 +343,7 @@ This is the recommended way to install the prerequisites on a production Kuberne
 3. [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)
 
 Note that if you are using a cloud provider based Kubernetes, by default for Google Kubernetes Engine, most ports are closed from master to nodes except TCP/443 and TCP/10250.
-You must allow TCP/8080 for spark operator and TCP/8443 for Knative Serving mutating webhooks to be reached from the master node or the installion will fail.
+You must allow TCP/8080 for spark operator mutating webhooks and TCP/8443 for Knative Serving mutating webhooks to be reached from the master node or the installion will fail.
 
 To install the required components on your Kubernetes cluster, issue the following command:
 
