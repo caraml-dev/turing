@@ -63,13 +63,13 @@ jobs:
         with:
           go-version: "1.14"
 
-      #- name: Cache Dependencies
-        #uses: actions/cache@v2
-        #with:
-          #path: api/.go/pkg/mod/
-          #key: |
-            #gomod-${{ hashFiles('api/go.mod') }}
-          #restore-keys: gomod-
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: api/.go/pkg/mod/
+          key: |
+            gomod-${{ hashFiles('api/go.mod') }}
+          restore-keys: gomod-
 
       - name: Run test
         working-directory: api
@@ -494,7 +494,8 @@ jobs:
             --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
             --set turing.image.repository=${{ github.repository }}/turing-api \
             --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
+            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+            --wait
 
       - name: Install mockserver
         run: |
