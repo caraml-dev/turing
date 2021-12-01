@@ -495,6 +495,7 @@ jobs:
             --set turing.image.repository=${{ github.repository }}/turing-api \
             --set turing.image.tag=${{ env.TURING_API_VERSION }} \
             --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+            --timeout=15m \
             --wait
 
       - name: Install mockserver
