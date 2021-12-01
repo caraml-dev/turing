@@ -63,13 +63,13 @@ jobs:
         with:
           go-version: "1.14"
 
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: api/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('api/go.mod') }}
-          restore-keys: gomod-
+      #- name: Cache Dependencies
+        #uses: actions/cache@v2
+        #with:
+          #path: api/.go/pkg/mod/
+          #key: |
+            #gomod-${{ hashFiles('api/go.mod') }}
+          #restore-keys: gomod-
 
       - name: Run test
         working-directory: api
