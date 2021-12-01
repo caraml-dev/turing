@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -14,17 +15,17 @@ import (
 func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
 	original, err := readYAML(originalYAMLFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading original yaml: %s", err)
 	}
 
 	override, err := readYAML(overrideYAMLFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading override yaml: %s", err)
 	}
 
 	merged, err := MergeMaps(original, override)
 	if err != nil {
-		return err
+		return fmt.Errorf("error merging maps: %s", err)
 	}
 
 	var output bytes.Buffer
@@ -32,12 +33,12 @@ func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
 	yamlEncoder.SetIndent(2)
 	err = yamlEncoder.Encode(merged)
 	if err != nil {
-		return err
+		return fmt.Errorf("error encoding: %s", err)
 	}
 
 	f, err := os.OpenFile(originalYAMLFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		return err
+		return fmt.Errorf("error writing to file: %s", err)
 	}
 
 	w := bufio.NewWriter(f)
