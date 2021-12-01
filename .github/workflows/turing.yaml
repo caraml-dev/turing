@@ -382,17 +382,17 @@ jobs:
             --port 80:80@loadbalancer
             --k3s-server-arg "--no-deploy=traefik,metrics-server"
 
-      - name: Download Turing API Docker tar archieve
+      - name: Download Turing API Docker tar archive
         uses: actions/download-artifact@v2
         with:
           name: turing-api.${{ env.TURING_API_VERSION }}.tar
 
-      - name: Download Turing Router Docker tar archieve
+      - name: Download Turing Router Docker tar archive
         uses: actions/download-artifact@v2
         with:
           name: turing-router.${{ needs.build-router.outputs.router-version }}.tar
 
-      - name: Download Cluster Init Docker tar archieve
+      - name: Download Cluster Init Docker tar archive
         uses: actions/download-artifact@v2
         with:
           name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar

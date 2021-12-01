@@ -126,7 +126,7 @@ func Run() {
 			*cfg.OpenapiConfig.SwaggerUIConfigOverrideFile,
 		)
 		if err != nil {
-			log.Panicf("failed to merge openapi yamls.")
+			log.Panicf("failed to merge openapi yamls: %s", err)
 		}
 	}
 
