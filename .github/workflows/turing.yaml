@@ -499,7 +499,7 @@ jobs:
           kubectl get deploy
           kubectl get pod
           kubectl get cm
-          kubectl logs $(kubectl get pod | grep -v -E 'turing-vault|turing-postgres|turing-mlp|turing-merlin')
+          kubectl logs $(kubectl get pod | grep -v -E 'turing-vault|turing-postgres|turing-mlp|turing-merlin' | awk '{print $1}')
           kubectl get cm turing-openapi -o yaml
 
       - name: Install mockserver
