@@ -65,8 +65,3 @@ MLPConfig:
 TuringUIConfig:
   ServingDirectory: ../ui/build
   ServingPath: /turing
-OpenapiConfig:
-  SwaggerUIConfigOverrideFile: api/override-sample.yaml
-  SwaggerUIConfig:
-    ServingDirectory: api/swagger-ui-dist
-    ServingPath: /api-docs/
