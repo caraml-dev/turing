@@ -141,7 +141,7 @@ turing:
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
   # See api/api/override-sample.yaml for an example.
-  openApiComponentOverrides: { }
+  openApiSpecOverrides: { }
 
   # -- Turing UI configuration.
   # Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js

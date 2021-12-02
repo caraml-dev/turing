@@ -5,4 +5,4 @@ metadata:
   name: {{ template "turing.fullname" . }}-openapi
 data:
   override.yaml: |
-    {{- toYaml .Values.turing.openApiComponentOverrides | nindent 4 -}}
+    {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
