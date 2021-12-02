@@ -3,8 +3,9 @@ package nop
 import (
 	"context"
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/runner"
 	"net/http"
+
+	"github.com/gojek/turing/engines/experiment/runner"
 )
 
 // treatment captures a dummy experiment treatment created by the ExperimentRunner

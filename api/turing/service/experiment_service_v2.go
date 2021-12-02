@@ -58,7 +58,10 @@ func (e experimentsServiceV2) ListExperiments(engine string, clientID string) ([
 	panic("implement me")
 }
 
-func (e experimentsServiceV2) ListVariables(engine string, clientID string, experimentIDs []string) (manager.Variables, error) {
+func (e experimentsServiceV2) ListVariables(
+	engine string,
+	clientID string,
+	experimentIDs []string) (manager.Variables, error) {
 	panic("implement me")
 }
 

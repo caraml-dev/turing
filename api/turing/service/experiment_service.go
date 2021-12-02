@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/patrickmn/go-cache"
 	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/manager"
