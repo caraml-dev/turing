@@ -2,13 +2,14 @@ package manager_test
 
 import (
 	"encoding/json"
+	"github.com/gojek/turing/engines/experiment/v2/manager/mocks"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	v1 "github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/v2/manager"
 )
 
 type fakeManager struct {
@@ -24,7 +25,7 @@ func TestRegisterAndGet(t *testing.T) {
 	tests := []struct {
 		name            string
 		managerName     string
-		managerFactory  manager.Factory
+		managerFactory  v1.Factory
 		managerConfig   json.RawMessage
 		skipRegister    bool
 		want            manager.ExperimentManager
@@ -56,7 +57,7 @@ func TestRegisterAndGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if !tt.skipRegister {
-				err := manager.Register(tt.managerName, tt.managerFactory)
+				err := v1.Register(tt.managerName, tt.managerFactory)
 
 				if (err != nil) != tt.wantRegisterErr {
 					t.Errorf("Register() error = %v, wantErr %v", err, tt.wantRegisterErr)
@@ -64,7 +65,7 @@ func TestRegisterAndGet(t *testing.T) {
 				}
 			}
 
-			got, err := manager.Get(tt.managerName, tt.managerConfig)
+			got, err := v1.Get(tt.managerName, tt.managerConfig)
 			if (err != nil) != tt.wantGetErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantGetErr)
 				return

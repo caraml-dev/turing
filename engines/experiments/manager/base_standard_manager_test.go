@@ -1,59 +1,60 @@
-package manager
+package manager_test
 
 import (
 	"strings"
 	"testing"
 
-	common "github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/experiment/v2"
+	"github.com/gojek/turing/engines/experiment/v2/manager"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBaseStandardExperimentManagerMethods(t *testing.T) {
-	em := &BaseStandardExperimentManager{}
+	em := &manager.BaseStandardExperimentManager{}
 	assert.Equal(t, true, em.IsCacheEnabled())
 
 	// Get clients
 	clients, err := em.ListClients()
-	assert.Equal(t, []Client{}, clients)
+	assert.Equal(t, []manager.Client{}, clients)
 	assert.NoError(t, err)
 
-	// Get experiments
-	experiments, err := em.ListExperiments()
-	assert.Equal(t, []Experiment{}, experiments)
+	// Get experimentsList
+	experimentsList, err := em.ListExperiments()
+	assert.Equal(t, []manager.Experiment{}, experimentsList)
 	assert.NoError(t, err)
-	experiments, err = em.ListExperimentsForClient(Client{})
-	assert.Equal(t, []Experiment{}, experiments)
+	experimentsList, err = em.ListExperimentsForClient(manager.Client{})
+	assert.Equal(t, []manager.Experiment{}, experimentsList)
 	assert.NoError(t, err)
 
 	// Get variables
-	variables, err := em.ListVariablesForClient(Client{})
-	assert.Equal(t, []Variable{}, variables)
+	variables, err := em.ListVariablesForClient(manager.Client{})
+	assert.Equal(t, []manager.Variable{}, variables)
 	assert.NoError(t, err)
-	expVars, err := em.ListVariablesForExperiments([]Experiment{})
-	assert.Equal(t, make(map[string][]Variable), expVars)
+	expVars, err := em.ListVariablesForExperiments([]manager.Experiment{})
+	assert.Equal(t, make(map[string][]manager.Variable), expVars)
 	assert.NoError(t, err)
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	em := NewBaseStandardExperimentManager()
+	em := manager.NewBaseStandardExperimentManager()
 
 	// Define tests
 	tests := map[string]struct {
-		engine Engine
-		cfg    TuringExperimentConfig
+		engine manager.Engine
+		cfg    manager.TuringExperimentConfig
 		err    string
 	}{
 		"failure | no engine info": {
 			err: "Missing Standard Engine configuration",
 		},
 		"failure | missing client info": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     true,
 					ExperimentSelectionEnabled: false,
 				},
 			},
-			cfg: TuringExperimentConfig{},
+			cfg: manager.TuringExperimentConfig{},
 			err: strings.Join([]string{
 				"Key: 'TuringExperimentConfig.Client.ID' Error:",
 				"Field validation for 'ID' failed on the 'required' tag\n",
@@ -62,28 +63,28 @@ func TestValidateExperimentConfig(t *testing.T) {
 			}, ""),
 		},
 		"failure | no experiment": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: true,
 				},
 			},
-			cfg: TuringExperimentConfig{},
+			cfg: manager.TuringExperimentConfig{},
 			err: "Expected at least 1 experiment in the configuration",
 		},
 		"failure | client ID mismatch": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     true,
 					ExperimentSelectionEnabled: true,
 				},
 			},
-			cfg: TuringExperimentConfig{
-				Client: Client{
+			cfg: manager.TuringExperimentConfig{
+				Client: manager.Client{
 					ID:       "1",
 					Username: "client-a",
 				},
-				Experiments: []Experiment{
+				Experiments: []manager.Experiment{
 					{
 						ID:       "1",
 						Name:     "test-exp",
@@ -94,14 +95,14 @@ func TestValidateExperimentConfig(t *testing.T) {
 			err: "Client information does not match with the experiment",
 		},
 		"failure | missing experiment info": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: true,
 				},
 			},
-			cfg: TuringExperimentConfig{
-				Experiments: []Experiment{
+			cfg: manager.TuringExperimentConfig{
+				Experiments: []manager.Experiment{
 					{
 						ID: "1",
 					},
@@ -113,23 +114,23 @@ func TestValidateExperimentConfig(t *testing.T) {
 			}, ""),
 		},
 		"failure | required variable not configured": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: false,
 				},
 			},
-			cfg: TuringExperimentConfig{
-				Variables: Variables{
-					Config: []VariableConfig{
+			cfg: manager.TuringExperimentConfig{
+				Variables: manager.Variables{
+					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: experiments.HeaderFieldSource,
 						},
 						{
 							Name:        "b",
 							Required:    true,
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: experiments.HeaderFieldSource,
 						},
 					},
 				},
@@ -140,18 +141,18 @@ func TestValidateExperimentConfig(t *testing.T) {
 			}, ""),
 		},
 		"failure | bad field source": {
-			engine: Engine{
-				StandardExperimentManagerConfig: &StandardExperimentManagerConfig{
+			engine: manager.Engine{
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled:     false,
 					ExperimentSelectionEnabled: false,
 				},
 			},
-			cfg: TuringExperimentConfig{
-				Variables: Variables{
-					Config: []VariableConfig{
+			cfg: manager.TuringExperimentConfig{
+				Variables: manager.Variables{
+					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: common.FieldSource("unknown"),
+							FieldSource: experiments.FieldSource("unknown"),
 						},
 					},
 				},

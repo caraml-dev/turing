@@ -78,6 +78,8 @@ type Config struct {
 	// For example:
 	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
 	Experiment map[string]interface{}
+
+	Experiments *ExperimentsConfig
 }
 
 // ListenAddress returns the Turing Api app's port
@@ -338,6 +340,11 @@ type OpenapiConfig struct {
 	SpecFile string
 	// Optional. Defines a configuration to be used for serving Swagger UI as a single-page app
 	SwaggerUIConfig *SinglePageApplicationConfig
+}
+
+type ExperimentsConfig struct {
+	PluginsDirectory string
+	Engines          map[string]interface{}
 }
 
 // Load creates a Config object from default config values, config files and environment variables.

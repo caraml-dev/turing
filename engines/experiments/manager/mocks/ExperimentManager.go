@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	manager "github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/v2/manager"
 	mock "github.com/stretchr/testify/mock"
 )
 

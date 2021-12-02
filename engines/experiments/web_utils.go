@@ -1,4 +1,4 @@
-package common
+package experiments
 
 import (
 	"fmt"

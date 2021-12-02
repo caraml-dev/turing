@@ -1,4 +1,4 @@
-package common
+package experiments
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ const (
 	HeaderFieldSource FieldSource = "header"
 )
 
-// GetFieldSoure converts the input string to a FieldSource
+// GetFieldSource converts the input string to a FieldSource
 func GetFieldSource(srcString string) (FieldSource, error) {
 	switch strings.ToLower(srcString) {
 	case "header":

@@ -1,17 +1,17 @@
-package common_test
+package experiments_test
 
 import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/experiment/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetValueFromRequest(t *testing.T) {
 	tests := map[string]struct {
 		field    string
-		fieldSrc common.FieldSource
+		fieldSrc experiments.FieldSource
 		header   http.Header
 		body     []byte
 		expected string
@@ -19,7 +19,7 @@ func TestGetValueFromRequest(t *testing.T) {
 	}{
 		"success | header": {
 			field:    "CustomerID",
-			fieldSrc: common.HeaderFieldSource,
+			fieldSrc: experiments.HeaderFieldSource,
 			header: func() http.Header {
 				header := http.Header{}
 				header.Set("CustomerID", "123")
@@ -29,31 +29,31 @@ func TestGetValueFromRequest(t *testing.T) {
 		},
 		"success | nested payload": {
 			field:    "customer.id",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"customer": {"id": "test_customer"}}`),
 			expected: "test_customer",
 		},
 		"success | payload integer field": {
 			field:    "customer.id",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"customer": {"id": 42}}`),
 			expected: "42",
 		},
 		"success | payload bool field": {
 			field:    "is_premium_customer",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"is_premium_customer": true}`),
 			expected: "true",
 		},
 		"success | payload null field": {
 			field:    "session_id",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"session_id": null}`),
 			expected: "",
 		},
 		"failure | header": {
 			field:    "CustomerID",
-			fieldSrc: common.HeaderFieldSource,
+			fieldSrc: experiments.HeaderFieldSource,
 			header: func() http.Header {
 				header := http.Header{}
 				header.Set("SessionID", "123")
@@ -63,24 +63,24 @@ func TestGetValueFromRequest(t *testing.T) {
 		},
 		"failure | payload": {
 			field:    "customer_id",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"customer": {"id": "test_customer"}}`),
 			err:      "Field customer_id not found in the request payload: Key path not found",
 		},
 		"failure | payload unsupported type": {
 			field:    "customer",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"customer": {"id": 42, "email": "test@test.com"}`),
 			err:      "Field customer can not be parsed as string value, unsupported type: object",
 		},
 		"failure | unknown source": {
 			field:    "CustomerID",
-			fieldSrc: common.FieldSource("unknown"),
+			fieldSrc: experiments.FieldSource("unknown"),
 			err:      "Unrecognized field source unknown",
 		},
 		"failure | malformed JSON": {
 			field:    "customer.id",
-			fieldSrc: common.PayloadFieldSource,
+			fieldSrc: experiments.PayloadFieldSource,
 			body:     []byte(`{"customer: {}"id"`),
 			err:      "Field customer.id not found in the request payload: Key path not found",
 		},
@@ -89,7 +89,7 @@ func TestGetValueFromRequest(t *testing.T) {
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			val, err := common.GetValueFromRequest(data.header, data.body, data.fieldSrc, data.field)
+			val, err := experiments.GetValueFromRequest(data.header, data.body, data.fieldSrc, data.field)
 			assert.Equal(t, data.expected, val)
 			// Check error
 			if data.err != "" {

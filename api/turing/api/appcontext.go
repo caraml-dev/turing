@@ -46,7 +46,15 @@ func NewAppContext(
 	vaultClient vault.VaultClient,
 ) (*AppContext, error) {
 	// Init Experiments Service
-	expSvc, err := service.NewExperimentsService(cfg.Experiment)
+	var (
+		expSvc service.ExperimentsService
+		err    error
+	)
+	if cfg.Experiments != nil {
+		expSvc, err = service.NewExperimentsServiceV2(*cfg.Experiments)
+	} else {
+		expSvc, err = service.NewExperimentsService(cfg.Experiment)
+	}
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing Experiments Service")
 	}

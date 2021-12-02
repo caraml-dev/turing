@@ -1,7 +1,7 @@
 package manager
 
 import (
-	common "github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/experiment/v2"
 )
 
 type ExperimentManagerType string
@@ -103,10 +103,10 @@ type Variable struct {
 
 // VariableConfig describes the request parsing configuration for a variable
 type VariableConfig struct {
-	Name        string             `json:"name" validate:"required"`
-	Required    bool               `json:"required"`
-	Field       string             `json:"field" validate:"required_with=Required"`
-	FieldSource common.FieldSource `json:"field_source" validate:"field-src"`
+	Name        string                  `json:"name" validate:"required"`
+	Required    bool                    `json:"required"`
+	Field       string                  `json:"field" validate:"required_with=Required"`
+	FieldSource experiments.FieldSource `json:"field_source" validate:"field-src"`
 }
 
 // Variables represents the configuration of all experiment variables

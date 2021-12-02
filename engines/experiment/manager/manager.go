@@ -5,71 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/gojek/turing/engines/experiment/v2/manager"
 )
-
-// ExperimentManager describes the minimal set of methods to be implemented by an
-// experiment engine's Manager, providing access to the information required to set up
-// experiments on Turing.
-type ExperimentManager interface {
-	// GetEngineInfo returns the configuration of the experiment engine
-	GetEngineInfo() Engine
-}
-
-type StandardExperimentManager interface {
-	ExperimentManager
-
-	// GetExperimentRunnerConfig converts the given TuringExperimentConfig into a format suitable for the
-	// Turing router. TuringExperimentConfig holds the experiment configuration in a format that is suitable
-	// for use with the Turing UI and this is the data that is saved to the Turing DB. This interface method
-	// will be called at the time of router deployment to convert the data into the format that the router, i.e.,
-	// Experiment Runner expects.
-	GetExperimentRunnerConfig(TuringExperimentConfig) (json.RawMessage, error)
-
-	// BaseStandardExperimentManager provides default implementations for the following methods
-	// that may be composed into the experiment engine.
-
-	// IsCacheEnabled returns whether the experiment engine wants to cache its responses in the Turing API cache
-	IsCacheEnabled() bool
-	// ListClients returns a list of the clients registered on the experiment engine
-	ListClients() ([]Client, error)
-	// ListExperiments returns a list of the experiments registered on the experiment engine
-	ListExperiments() ([]Experiment, error)
-	// ListExperimentsForClient returns a list of the experiments registered on the experiment engine,
-	// for the given client
-	ListExperimentsForClient(Client) ([]Experiment, error)
-	// ListVariablesForClient returns a list of the variables registered on the given client
-	ListVariablesForClient(Client) ([]Variable, error)
-	// ListVariablesForExperiments returns a list of the variables registered on the given experiments
-	ListVariablesForExperiments([]Experiment) (map[string][]Variable, error)
-	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format,
-	// based on the given engine's properties.
-	ValidateExperimentConfig(*StandardExperimentManagerConfig, TuringExperimentConfig) error
-}
-
-type CustomExperimentManager interface {
-	ExperimentManager
-
-	// GetExperimentRunnerConfig converts the given config (as retrieved from the DB) into a format suitable
-	// for the Turing router (i.e., to be passed to the Experiment Runner). This interface method will be
-	// called at the time of router deployment.
-	GetExperimentRunnerConfig(interface{}) (json.RawMessage, error)
-	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
-	ValidateExperimentConfig(interface{}) error
-}
-
-func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {
-	var stdExpCfg TuringExperimentConfig
-
-	// Marshal to json
-	bytes, err := json.Marshal(cfg)
-	if err != nil {
-		return stdExpCfg, err
-	}
-
-	// Unmarshal using the TuringExperimentConfig type
-	err = json.Unmarshal(bytes, &stdExpCfg)
-	return stdExpCfg, err
-}
 
 var managersLock sync.Mutex
 
@@ -81,7 +19,7 @@ var managers = make(map[string]Factory)
 // Config is a raw encoded JSON value. The experiment manager implementation
 // for each experiment engine should provide a schema and example
 // of the JSON value to explain the usage.
-type Factory func(config json.RawMessage) (ExperimentManager, error)
+type Factory func(config json.RawMessage) (manager.ExperimentManager, error)
 
 // Register an experiment manager with the provided name and factory function.
 //
@@ -107,7 +45,7 @@ func Register(name string, factory Factory) error {
 //
 // The manager will be initialized using the registered factory function with the provided config.
 // Retrieving an experiment manager that is not yet registered will return an error.
-func Get(name string, config json.RawMessage) (ExperimentManager, error) {
+func Get(name string, config json.RawMessage) (manager.ExperimentManager, error) {
 	managersLock.Lock()
 	defer managersLock.Unlock()
 

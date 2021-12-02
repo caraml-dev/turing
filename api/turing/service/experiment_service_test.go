@@ -9,12 +9,12 @@ import (
 
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
-	mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/engines/experiment/common"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/v2"
+	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment/v2/manager/mocks"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
@@ -144,7 +144,7 @@ func TestListExperiments(t *testing.T) {
 		Username: "test-client",
 	}
 	clients := []manager.Client{client}
-	experiments := []manager.Experiment{
+	experimentsList := []manager.Experiment{
 		{
 			ID:       "2",
 			ClientID: "1",
@@ -156,8 +156,8 @@ func TestListExperiments(t *testing.T) {
 	expMgrSuccess.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
 	expMgrSuccess.On("IsCacheEnabled").Return(true)
 	expMgrSuccess.On("ListClients").Return(clients, nil)
-	expMgrSuccess.On("ListExperiments").Return(experiments, nil)
-	expMgrSuccess.On("ListExperimentsForClient", client).Return(experiments, nil)
+	expMgrSuccess.On("ListExperiments").Return(experimentsList, nil)
+	expMgrSuccess.On("ListExperimentsForClient", client).Return(experimentsList, nil)
 
 	expMgrFailure1 := &mocks.StandardExperimentManager{}
 	expMgrFailure1.On("GetEngineInfo", mock.Anything).Return(standardExperimentManagerConfig)
@@ -182,13 +182,13 @@ func TestListExperiments(t *testing.T) {
 		"success | all experiments": {
 			expMgr:      expMgrSuccess,
 			useBadCache: false,
-			expected:    experiments,
+			expected:    experimentsList,
 		},
 		"success | experiments for client": {
 			expMgr:      expMgrSuccess,
 			clientID:    "1",
 			useBadCache: false,
-			expected:    experiments,
+			expected:    experimentsList,
 		},
 		"failure | list clients": {
 			expMgr:      expMgrFailure1,
@@ -259,7 +259,7 @@ func TestListVariables(t *testing.T) {
 			Type:     manager.UnitVariableType,
 		},
 	}
-	experiments := []manager.Experiment{
+	experimentsList := []manager.Experiment{
 		{
 			ID:       "2",
 			ClientID: "1",
@@ -287,8 +287,8 @@ func TestListVariables(t *testing.T) {
 	expMgrSuccess.On("IsCacheEnabled").Return(true)
 	expMgrSuccess.On("ListClients").Return(clients, nil)
 	expMgrSuccess.On("ListVariablesForClient", client).Return(clientVariables, nil)
-	expMgrSuccess.On("ListExperimentsForClient", client).Return(experiments, nil)
-	expMgrSuccess.On("ListVariablesForExperiments", experiments).Return(experimentVariables, nil)
+	expMgrSuccess.On("ListExperimentsForClient", client).Return(experimentsList, nil)
+	expMgrSuccess.On("ListVariablesForExperiments", experimentsList).Return(experimentVariables, nil)
 	expMgrSuccess.On("ListVariablesForExperiments", []manager.Experiment{}).
 		Return(map[string][]manager.Variable{}, nil)
 
@@ -317,8 +317,8 @@ func TestListVariables(t *testing.T) {
 	expMgrFailure4.On("IsCacheEnabled").Return(true)
 	expMgrFailure4.On("ListClients").Return(clients, nil)
 	expMgrFailure4.On("ListVariablesForClient", client).Return(clientVariables, nil)
-	expMgrFailure4.On("ListExperimentsForClient", client).Return(experiments, nil)
-	expMgrFailure4.On("ListVariablesForExperiments", experiments).
+	expMgrFailure4.On("ListExperimentsForClient", client).Return(experimentsList, nil)
+	expMgrFailure4.On("ListVariablesForExperiments", experimentsList).
 		Return(map[string][]manager.Variable{}, errors.New("List experiment vars error"))
 
 	// Define tests
@@ -341,12 +341,12 @@ func TestListVariables(t *testing.T) {
 					{
 						Name:        "var-1",
 						Required:    true,
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: experiments.HeaderFieldSource,
 					},
 					{
 						Name:        "var-2",
 						Required:    false,
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: experiments.HeaderFieldSource,
 					},
 				},
 			},

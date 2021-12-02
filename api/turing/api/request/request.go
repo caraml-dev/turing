@@ -7,7 +7,7 @@ import (
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/v2/manager"
 	routercfg "github.com/gojek/turing/engines/router/missionctl/config"
 )
 

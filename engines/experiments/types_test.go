@@ -1,31 +1,32 @@
-package common
+package experiments_test
 
 import (
 	"encoding/json"
 	"testing"
 
+	experiments "github.com/gojek/turing/engines/experiment/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetFieldSource(t *testing.T) {
 	// header
-	fieldSrc, err := GetFieldSource("header")
-	assert.Equal(t, HeaderFieldSource, fieldSrc)
+	fieldSrc, err := experiments.GetFieldSource("header")
+	assert.Equal(t, experiments.HeaderFieldSource, fieldSrc)
 	assert.NoError(t, err)
 	// payload
-	fieldSrc, err = GetFieldSource("payload")
-	assert.Equal(t, PayloadFieldSource, fieldSrc)
+	fieldSrc, err = experiments.GetFieldSource("payload")
+	assert.Equal(t, experiments.PayloadFieldSource, fieldSrc)
 	assert.NoError(t, err)
 	// unknown
-	_, err = GetFieldSource("test")
+	_, err = experiments.GetFieldSource("test")
 	assert.Error(t, err)
 }
 
 func TestUnmarshalJSONFieldSource(t *testing.T) {
-	var fieldSrc FieldSource
+	var fieldSrc experiments.FieldSource
 	// success
 	err := json.Unmarshal([]byte(`"header"`), &fieldSrc)
-	assert.Equal(t, HeaderFieldSource, fieldSrc)
+	assert.Equal(t, experiments.HeaderFieldSource, fieldSrc)
 	assert.NoError(t, err)
 	// unknown string
 	err = json.Unmarshal([]byte(`"test"`), &fieldSrc)

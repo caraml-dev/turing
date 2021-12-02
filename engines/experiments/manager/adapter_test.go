@@ -8,12 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment/v2/manager/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
 
 func TestStandardExperimentIsCacheEnabled(t *testing.T) {
@@ -229,7 +228,7 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 	}
 }
 
-func TestValidateExperimentConfig(t *testing.T) {
+func TestAdapterValidateExperimentConfig(t *testing.T) {
 	testStdExpConfig := manager.TuringExperimentConfig{
 		Client:      manager.Client{Username: "client_name"},
 		Experiments: []manager.Experiment{{Name: "exp_name"}},

@@ -12,6 +12,7 @@ require (
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
+	github.com/gojek/turing/engines/experiment/v2 v2.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
@@ -23,7 +24,7 @@ require (
 	github.com/pierrec/lz4 v2.4.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/tinylib/msgp v1.1.2 // indirect
 	github.com/uber/jaeger-client-go v2.23.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
@@ -33,4 +34,7 @@ require (
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )
 
-replace github.com/gojek/turing/engines/experiment => ../experiment
+replace (
+	github.com/gojek/turing/engines/experiment => ../experiment
+	github.com/gojek/turing/engines/experiment/v2 => ../experiments
+)

@@ -5,10 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
-
-	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/engines/experiment/v2"
 	"github.com/gojek/turing/engines/router"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -155,7 +154,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 	suite := map[string]trafficRuleConditionTestCase{
 		"success | header": {
 			condition: &router.TrafficRuleCondition{
-				FieldSource: common.HeaderFieldSource,
+				FieldSource: experiments.HeaderFieldSource,
 				Field:       "Content-Type",
 				Operator: makeMockOperator(
 					"application/json", []string{"application/json"}, true, nil),
@@ -168,7 +167,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 		},
 		"success | header not in": {
 			condition: &router.TrafficRuleCondition{
-				FieldSource: common.HeaderFieldSource,
+				FieldSource: experiments.HeaderFieldSource,
 				Field:       "Content-Type",
 				Operator: makeMockOperator(
 					"application/xml", []string{"application/json", "text/plain"}, false, nil),
@@ -181,7 +180,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 		},
 		"success | payload": {
 			condition: &router.TrafficRuleCondition{
-				FieldSource: common.PayloadFieldSource,
+				FieldSource: experiments.PayloadFieldSource,
 				Field:       "parent_field.nested",
 				Operator: makeMockOperator(
 					"foo", []string{"foo", "bar"}, true, nil),
@@ -192,7 +191,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 		},
 		"failure | header not found": {
 			condition: &router.TrafficRuleCondition{
-				FieldSource: common.HeaderFieldSource,
+				FieldSource: experiments.HeaderFieldSource,
 				Field:       "Session-ID",
 				Operator:    makeMockOperator(nil, nil, true, nil),
 				Values:      []string{"foo", "bar"},
@@ -204,7 +203,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 		},
 		"failure | key not found": {
 			condition: &router.TrafficRuleCondition{
-				FieldSource: common.PayloadFieldSource,
+				FieldSource: experiments.PayloadFieldSource,
 				Field:       "parent_field.bar",
 				Operator:    makeMockOperator(nil, nil, true, nil),
 				Values:      []string{"foo", "bar"},
