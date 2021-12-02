@@ -19,6 +19,9 @@ $ helm repo add turing https://turing-ml.github.io/charts
 
 ### Installing the chart
 
+Note that if you are using a cloud provider based Kubernetes, by default for Google Kubernetes Engine, most ports are closed from master to nodes except TCP/443 and TCP/10250.
+You must allow TCP/8080 for spark operator mutating webhooks and TCP/8443 for Knative Serving mutating webhooks to be reached from the master node or the installion will fail.
+
 This command will install turing-init named `turing-init` in the `default` namespace.
 Default chart values will be used for the installation:
 ```shell
