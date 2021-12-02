@@ -10,6 +10,7 @@ import (
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
 	"github.com/gojek/turing/engines/experiment/runner"
+	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	tfu "github.com/gojek/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
@@ -65,7 +66,7 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 
 			// Monkey patch functionality that is external to the current package and run
 			monkey.Patch(
-				runner.Get,
+				runnerV1.Get,
 				func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
@@ -79,7 +80,7 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			err := strategy.Initialize(data.properties)
 
 			monkey.Unpatch(experiment.NewExperimentRunner)
-			monkey.Unpatch(runner.Get)
+			monkey.Unpatch(runnerV1.Get)
 
 			// Test that there is no error and fanIn is initialised as expected
 			assert.Equal(t, data.success, err == nil)

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gojek/turing/api/turing/config"
-	experiments "github.com/gojek/turing/engines/experiment/v2"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/hashicorp/go-plugin"
 	"github.com/patrickmn/go-cache"
@@ -97,9 +97,9 @@ func NewExperimentsServiceV2(cfg config.ExperimentsConfig) (ExperimentsService, 
 
 func loadPlugin(path string, _ json.RawMessage) (*experimentManagerPlugin, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: experiments.HandshakeConfig,
+		HandshakeConfig: experiment.HandshakeConfig,
 		Plugins: plugin.PluginSet{
-			experiments.ManagerPluginIdentifier: &manager.ExperimentManagerPlugin{},
+			experiment.ManagerPluginIdentifier: &manager.ExperimentManagerPlugin{},
 		},
 		Cmd:     exec.Command(path),
 		Managed: true,
@@ -110,7 +110,7 @@ func loadPlugin(path string, _ json.RawMessage) (*experimentManagerPlugin, error
 		return nil, err
 	}
 
-	raw, err := rpcClient.Dispense(experiments.ManagerPluginIdentifier)
+	raw, err := rpcClient.Dispense(experiment.ManagerPluginIdentifier)
 	if err != nil {
 		return nil, err
 	}

@@ -2,14 +2,14 @@ package manager_test
 
 import (
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/v2/manager/mocks"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	v1 "github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	v1 "github.com/gojek/turing/engines/experiment/v1/manager"
 )
 
 type fakeManager struct {

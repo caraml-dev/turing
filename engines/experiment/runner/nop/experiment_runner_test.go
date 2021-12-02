@@ -14,11 +14,6 @@ func TestTreatmentGetters(t *testing.T) {
 	assert.Nil(t, treatment.GetConfig())
 }
 
-func TestNewExperimentRunner(t *testing.T) {
-	_, err := NewExperimentRunner(nil)
-	assert.NoError(t, err)
-}
-
 func TestGetTreatmentForRequest(t *testing.T) {
 	runner := ExperimentRunner{}
 	_, err := runner.GetTreatmentForRequest(context.Background(), nil, nil, nil)

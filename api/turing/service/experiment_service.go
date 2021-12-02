@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/patrickmn/go-cache"
 	"time"
 
-	"github.com/patrickmn/go-cache"
-
-	managerV1 "github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/v2"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/manager"
+	managerV1 "github.com/gojek/turing/engines/experiment/v1/manager"
 )
 
 const (
@@ -475,7 +474,7 @@ func reconcileVariables(
 				Name:     item.Name,
 				Required: item.Required,
 				// Set header field source by default
-				FieldSource: experiments.HeaderFieldSource,
+				FieldSource: experiment.HeaderFieldSource,
 			}
 		}
 	}

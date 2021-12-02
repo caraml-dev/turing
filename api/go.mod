@@ -14,7 +14,6 @@ require (
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
-	github.com/gojek/turing/engines/experiment/v2 v2.0.0
 	github.com/gojek/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.5
@@ -60,7 +59,6 @@ replace (
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
 
 	github.com/gojek/turing/engines/experiment => ../engines/experiment
-	github.com/gojek/turing/engines/experiment/v2 => ../engines/experiments/
 	github.com/gojek/turing/engines/router => ../engines/router
 
 	k8s.io/api => k8s.io/api v0.16.4

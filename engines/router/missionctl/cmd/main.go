@@ -10,7 +10,7 @@ import (
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	_ "github.com/gojek/turing/engines/experiment/runner/nop"
+	_ "github.com/gojek/turing/engines/experiment/v1/runner/nop"
 	"github.com/gojek/turing/engines/router/missionctl"
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/handlers"

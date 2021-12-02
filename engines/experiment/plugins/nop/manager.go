@@ -1,6 +1,6 @@
 package main
 
-import "github.com/gojek/turing/engines/experiment/v2/manager"
+import "github.com/gojek/turing/engines/experiment/manager"
 
 type ExperimentManager struct{}
 

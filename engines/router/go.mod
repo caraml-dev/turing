@@ -12,7 +12,6 @@ require (
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
-	github.com/gojek/turing/engines/experiment/v2 v2.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
@@ -34,7 +33,4 @@ require (
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )
 
-replace (
-	github.com/gojek/turing/engines/experiment => ../experiment
-	github.com/gojek/turing/engines/experiment/v2 => ../experiments
-)
+replace github.com/gojek/turing/engines/experiment => ../experiment

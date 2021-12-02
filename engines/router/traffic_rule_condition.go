@@ -6,18 +6,18 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/gojek/turing/engines/experiment/v2"
+	"github.com/gojek/turing/engines/experiment"
 )
 
 type TrafficRuleCondition struct {
-	FieldSource experiments.FieldSource `json:"field_source" validate:"required,oneof=header payload"`
-	Field       string                  `json:"field" validate:"required"`
-	Operator    RuleConditionOperator   `json:"operator" validate:"required,oneof=in"`
-	Values      []string                `json:"values" validate:"required,notBlank"`
+	FieldSource experiment.FieldSource `json:"field_source" validate:"required,oneof=header payload"`
+	Field       string                 `json:"field" validate:"required"`
+	Operator    RuleConditionOperator  `json:"operator" validate:"required,oneof=in"`
+	Values      []string               `json:"values" validate:"required,notBlank"`
 }
 
 func (c *TrafficRuleCondition) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
-	fieldValue, err := experiments.GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
+	fieldValue, err := experiment.GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
 	if err != nil {
 		return false, err
 	}

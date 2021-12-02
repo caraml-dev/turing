@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator"
-	"github.com/gojek/turing/engines/experiment/v2"
+	"github.com/gojek/turing/engines/experiment"
 )
 
 // BaseStandardExperimentManager provides dummy implementations for the optional
@@ -98,7 +98,7 @@ func newExperimentConfigValidator() *validator.Validate {
 	// Field Source validation for expected values
 	_ = v.RegisterValidation("field-src", func(fl validator.FieldLevel) bool {
 		stringSrc := fl.Field().String()
-		_, err := experiments.GetFieldSource(stringSrc)
+		_, err := experiment.GetFieldSource(stringSrc)
 		return err == nil
 	})
 	return v

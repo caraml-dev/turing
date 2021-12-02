@@ -5,7 +5,7 @@ package mocks
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/mock"
 )
 

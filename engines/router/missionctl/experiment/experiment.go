@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/gojek/turing/engines/experiment/runner"
+	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
 func NewExperimentRunner(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
-	return runner.Get(name, config)
+	return runnerV1.Get(name, config)
 }
 
 // Response holds the experiment configuration / error response,

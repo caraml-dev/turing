@@ -3,19 +3,9 @@ package nop
 import (
 	"context"
 	"encoding/json"
-	"log"
-	"net/http"
-
 	"github.com/gojek/turing/engines/experiment/runner"
+	"net/http"
 )
-
-// init ensures this runner is registered when the package is imported.
-func init() {
-	err := runner.Register("nop", NewExperimentRunner)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 // treatment captures a dummy experiment treatment created by the ExperimentRunner
 // and implements the runner.ExperimentRunner

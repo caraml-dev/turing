@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gojek/turing/api/turing/service/mocks"
-	"github.com/gojek/turing/engines/experiment/v2"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -200,7 +200,7 @@ func TestListExperimentEngineVariables(t *testing.T) {
 			{
 				Name:        "var-1",
 				Required:    true,
-				FieldSource: experiments.HeaderFieldSource,
+				FieldSource: experiment.HeaderFieldSource,
 			},
 		},
 	}

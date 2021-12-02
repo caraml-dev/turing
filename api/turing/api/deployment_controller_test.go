@@ -15,7 +15,7 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/utils"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

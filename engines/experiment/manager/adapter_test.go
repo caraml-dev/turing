@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/v2/manager"
-	"github.com/gojek/turing/engines/experiment/v2/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/manager/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

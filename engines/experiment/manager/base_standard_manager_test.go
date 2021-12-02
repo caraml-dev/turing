@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/v2"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,12 +18,12 @@ func TestBaseStandardExperimentManagerMethods(t *testing.T) {
 	assert.Equal(t, []manager.Client{}, clients)
 	assert.NoError(t, err)
 
-	// Get experimentsList
-	experimentsList, err := em.ListExperiments()
-	assert.Equal(t, []manager.Experiment{}, experimentsList)
+	// Get experiments
+	experiments, err := em.ListExperiments()
+	assert.Equal(t, []manager.Experiment{}, experiments)
 	assert.NoError(t, err)
-	experimentsList, err = em.ListExperimentsForClient(manager.Client{})
-	assert.Equal(t, []manager.Experiment{}, experimentsList)
+	experiments, err = em.ListExperimentsForClient(manager.Client{})
+	assert.Equal(t, []manager.Experiment{}, experiments)
 	assert.NoError(t, err)
 
 	// Get variables
@@ -125,12 +125,12 @@ func TestValidateExperimentConfig(t *testing.T) {
 					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: experiments.HeaderFieldSource,
+							FieldSource: experiment.HeaderFieldSource,
 						},
 						{
 							Name:        "b",
 							Required:    true,
-							FieldSource: experiments.HeaderFieldSource,
+							FieldSource: experiment.HeaderFieldSource,
 						},
 					},
 				},
@@ -152,7 +152,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: experiments.FieldSource("unknown"),
+							FieldSource: experiment.FieldSource("unknown"),
 						},
 					},
 				},

@@ -3,8 +3,8 @@ package models
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/v2"
-	"github.com/gojek/turing/engines/experiment/v2/manager"
+	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,7 +45,7 @@ func TestExperimentEngineValue(t *testing.T) {
 								Name:        "var-1",
 								Required:    true,
 								Field:       "field1",
-								FieldSource: experiments.HeaderFieldSource,
+								FieldSource: experiment.HeaderFieldSource,
 							},
 						},
 					},
