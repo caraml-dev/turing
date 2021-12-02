@@ -120,10 +120,10 @@ func Run() {
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
 	// Override the bundle file with user specified overrides.
-	if cfg.OpenapiConfig.SwaggerUIConfig != nil && cfg.OpenapiConfig.SwaggerUIConfigOverrideFile != nil {
+	if cfg.OpenapiConfig.SwaggerUIConfig != nil && cfg.OpenapiConfig.SpecOverrideFile != nil {
 		err := utils.MergeTwoYamls(
 			path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile),
-			*cfg.OpenapiConfig.SwaggerUIConfigOverrideFile,
+			*cfg.OpenapiConfig.SpecOverrideFile,
 		)
 		if err != nil {
 			log.Panicf("failed to merge openapi yamls: %s", err)

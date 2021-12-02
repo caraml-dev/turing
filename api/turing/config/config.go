@@ -346,7 +346,7 @@ type OpenapiConfig struct {
 	// If this is provided, it will use the bundled yaml instead.
 	SwaggerUIConfig *SinglePageApplicationConfig
 	// Optional. Overrides the file before running the Swagger UI.
-	SwaggerUIConfigOverrideFile *string
+	SpecOverrideFile *string
 }
 
 // Load creates a Config object from default config values, config files and environment variables.

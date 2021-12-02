@@ -1,5 +1,5 @@
 # Here it is possible to override the OpenAPI spec as long as it follows the OAS3 specifications.
-# Make sure to input the required configurations in .OpenapiConfig.SwaggerUIConfigOverrideFile
+# Make sure to input the required configurations in .OpenapiConfig.SpecOverrideFile
 # and ensure that .OpenapiConfig.SwaggerUIConfig is configured as well as it only overrides
 # the bundled yaml file.
 #
