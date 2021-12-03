@@ -221,10 +221,6 @@ jobs:
 #            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
 #          restore-keys: ${{ runner.os }}-vendor-
 
-      - name: Build static Swagger UI dist
-        working-directory: api/api
-        run: make swagger-ui-dist
-
       - name: Build Docker image
         id: build-image
         working-directory: api

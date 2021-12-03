@@ -149,11 +149,7 @@ Experiment:
 {{ end }}
 {{ end }}
 OpenapiConfig:
-  ValidationEnabled: true
   SpecOverrideFile: /etc/openapi/override.yaml
-  SwaggerUIConfig:
-    ServingDirectory: swagger-ui
-    ServingPath: /api-docs/
 {{- end -}}
 
 {{- define "turing.config" -}}

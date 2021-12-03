@@ -209,9 +209,10 @@ TuringUIConfig:
 # Openapi validation configuration
 OpenapiConfig:
   ValidationEnabled: true
-  # This file will be ignored if SwaggerUIConfig is filled.
-  SpecFile: "api/openapi.yaml"
-  SpecOverrideFile: "api/override-sample.yaml"
+  # This file will be ignored by the OpenAPI validator if SwaggerUIConfig is filled.
+  SpecFile: api/openapi.yaml
+  SpecOverrideFile: api/override-sample.yaml
+  OpenapiBundleFileName: openapi.bundle.yaml
   SwaggerUIConfig:
     ServingDirectory: static/swagger-ui
     ServingPath: /api-docs

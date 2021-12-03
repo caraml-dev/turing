@@ -20,9 +20,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-// OpenapiBundleFile is the file name that is generated when the openapi bundle yaml file is generated.
-const OpenapiBundleFile = "openapi.bundle.yaml"
-
 // Quantity is an alias for resource.Quantity
 type Quantity resource.Quantity
 
@@ -336,6 +333,7 @@ type MLPConfig struct {
 	MLPEncryptionKey string `validate:"required"`
 }
 
+// OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI
 type OpenapiConfig struct {
 	// ValidationEnabled specifies whether to use OpenAPI validation middleware,
 	// which validates HTTP requests against the spec.
@@ -347,6 +345,8 @@ type OpenapiConfig struct {
 	SwaggerUIConfig *SinglePageApplicationConfig
 	// Optional. Overrides the file before running the Swagger UI.
 	SpecOverrideFile *string
+	// Openapi bundle file name
+	OpenapiBundleFileName string
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -468,8 +468,12 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig::ServingDirectory", "")
 	v.SetDefault("TuringUIConfig::ServingPath", "/turing")
 
+	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingDirectory", "")
+	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
+	v.SetDefault("OpenapiConfig::OpenapiBundleFileName", "openapi.bundle.yaml")
+
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

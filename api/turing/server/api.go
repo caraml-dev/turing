@@ -72,9 +72,9 @@ func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.Middle
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
 		// Choose between bundled openapi yaml file or development files
 		specFile := cfg.OpenapiConfig.SpecFile
-		if cfg.OpenapiConfig.SwaggerUIConfig != nil {
+		if spaCfg := cfg.OpenapiConfig.SwaggerUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
 			// During build time, the script will generate a file called openapi.bundle.yaml in the serving directory
-			specFile = path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile)
+			specFile = path.Join(spaCfg.ServingDirectory, cfg.OpenapiConfig.OpenapiBundleFileName)
 		}
 
 		// Initialize OpenAPI validation middleware

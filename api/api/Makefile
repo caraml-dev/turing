@@ -1,5 +1,7 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
+all: swagger-ui-dist
+
 .PHONY: bundle-openapi
 bundle-openapi:
 	@docker run --rm \

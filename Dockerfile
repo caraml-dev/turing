@@ -3,19 +3,31 @@ FROM ${TURING_API_IMAGE}
 
 ARG TURING_USER=${TURING_USER:-turing}
 ARG TURING_USER_GROUP=${TURING_USER_GROUP:-app}
+ARG TURING_OPENAPI_BUNDLE_FILE=${TURING_OPENAPI_BUNDLE_FILE:-/app/openapi.bundle.yaml}
+
+ENV TURINGUICONFIG_SERVINGDIRECTORY "/app/turing-ui"
+ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app/swagger-ui"
 
 USER root
 RUN apk add --no-cache bash
+
+# Build swagger ui deps
+COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
+RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
+    --spec-file ${TURING_OPENAPI_BUNDLE_FILE} \
+    --output ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}
+RUN rm -rf /app/swagger-ui-generator
+
+# Switch back to turing user
 USER ${TURING_USER}
-
 ARG TURING_UI_DIST_PATH=ui/build
-
-ENV TURINGUICONFIG_SERVINGDIRECTORY "./turing-ui"
+ARG SWAGGER_UI_DIST_PATH=api/api/swagger-ui-dist
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} ${TURING_UI_DIST_PATH} ${TURINGUICONFIG_SERVINGDIRECTORY}/
 
 COPY ./docker-entrypoint.sh ./
 
 ENV TURING_UI_DIST_DIR ${TURINGUICONFIG_SERVINGDIRECTORY}
+
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

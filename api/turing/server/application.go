@@ -120,13 +120,15 @@ func Run() {
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
 	// Override the bundle file with user specified overrides.
-	if cfg.OpenapiConfig.SwaggerUIConfig != nil && cfg.OpenapiConfig.SpecOverrideFile != nil {
-		err := utils.MergeTwoYamls(
-			path.Join(cfg.OpenapiConfig.SwaggerUIConfig.ServingDirectory, config.OpenapiBundleFile),
-			*cfg.OpenapiConfig.SpecOverrideFile,
-		)
-		if err != nil {
-			log.Panicf("failed to merge openapi yamls: %s", err)
+	if spaCfg := cfg.OpenapiConfig.SwaggerUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
+		if cfg.OpenapiConfig.SpecOverrideFile != nil {
+			err := utils.MergeTwoYamls(
+				path.Join(spaCfg.ServingDirectory, cfg.OpenapiConfig.OpenapiBundleFileName),
+				*cfg.OpenapiConfig.SpecOverrideFile,
+			)
+			if err != nil {
+				log.Panicf("failed to merge openapi yamls: %s", err)
+			}
 		}
 	}
 
@@ -142,6 +144,8 @@ func Run() {
 		ServeSinglePageApplication(r,
 			spaCfg.ServingPath,
 			spaCfg.ServingDirectory)
+	} else {
+		log.Warnf("Swagger UI not configured to run.")
 	}
 
 	// Serve Turing UI
@@ -150,6 +154,8 @@ func Run() {
 		ServeSinglePageApplication(r,
 			spaCfg.ServingPath,
 			spaCfg.ServingDirectory)
+	} else {
+		log.Warnf("Turing UI not configured to run.")
 	}
 
 	log.Infof("Listening on port %d", cfg.Port)

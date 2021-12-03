@@ -3,3 +3,4 @@
 !api/**
 !ui/build/**
 !docker-entrypoint.sh
+!scripts/swagger-ui-generator/**
