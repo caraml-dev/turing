@@ -14,7 +14,7 @@ RUN apk add --no-cache bash
 # Build swagger ui deps
 COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
 RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
-    --spec-file ${OPENAPICONFIG_OPENAPIBUNDLEFILENAME} \
+    --spec-file /app/${OPENAPICONFIG_OPENAPIBUNDLEFILENAME} \
     --output ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}
 RUN rm -rf /app/swagger-ui-generator
 
