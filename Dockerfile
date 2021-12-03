@@ -3,10 +3,10 @@ FROM ${TURING_API_IMAGE}
 
 ARG TURING_USER=${TURING_USER:-turing}
 ARG TURING_USER_GROUP=${TURING_USER_GROUP:-app}
-ARG TURING_OPENAPI_BUNDLE_FILE=${TURING_OPENAPI_BUNDLE_FILE:-/app/openapi.bundle.yaml}
 
 ENV TURINGUICONFIG_SERVINGDIRECTORY "/app/turing-ui"
 ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app/swagger-ui"
+ENV OPENAPICONFIG_OPENAPIBUNDLEFILENAME "openapi.bundle.yaml"
 
 USER root
 RUN apk add --no-cache bash
@@ -14,7 +14,7 @@ RUN apk add --no-cache bash
 # Build swagger ui deps
 COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
 RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
-    --spec-file ${TURING_OPENAPI_BUNDLE_FILE} \
+    --spec-file ${OPENAPICONFIG_OPENAPIBUNDLEFILENAME} \
     --output ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}
 RUN rm -rf /app/swagger-ui-generator
 

@@ -33,6 +33,7 @@ ENV TURING_PORT "8080"
 ENV TURING_USER "turing"
 ENV TURING_USER_GROUP "app"
 ENV TURING_OPENAPI_BUNDLE_FILE "/app/openapi.bundle.yaml"
+ENV OPENAPICONFIG_OPENAPIBUNDLEFILENAME "openapi.bundle.yaml"
 
 EXPOSE ${TURING_PORT}
 
@@ -43,7 +44,7 @@ RUN addgroup -S ${TURING_USER_GROUP} \
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/db-migrations /app/db-migrations
-COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=openapi-bundler /local/openapi.bundle.yaml ${TURING_OPENAPI_BUNDLE_FILE}
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=openapi-bundler /local/${OPENAPICONFIG_OPENAPIBUNDLEFILENAME} ${TURING_OPENAPI_BUNDLE_FILE}
 
 USER ${TURING_USER}
 WORKDIR /app
