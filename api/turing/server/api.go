@@ -79,7 +79,7 @@ func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.Middle
 
 		// Initialize OpenAPI validation middleware
 		if _, err := os.Stat(specFile); os.IsExist(err) {
-			return nil, errors.Wrapf(err, "Openapi spec file '%s' not found", cfg.OpenapiConfig.SpecFile)
+			return nil, errors.Wrapf(err, "Openapi spec file '%s' not found", specFile)
 		}
 
 		openapiValidation, err := middleware.NewOpenAPIValidation(
