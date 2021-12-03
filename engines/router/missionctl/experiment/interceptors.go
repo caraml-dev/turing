@@ -46,12 +46,6 @@ func (i *MetricsInterceptor) AfterCompletion(
 	if engine, ok := ctx.Value(runner.ExperimentEngineKey).(string); ok {
 		labels["engine"] = engine
 	}
-	if experiment, ok := ctx.Value(runner.ExperimentNameKey).(string); ok {
-		labels["experiment"] = experiment
-	}
-	if treatment, ok := ctx.Value(runner.TreatmentNameKey).(string); ok {
-		labels["treatment"] = treatment
-	}
 
 	// Get start time
 	if startTime, ok := ctx.Value(startTimeKey).(time.Time); ok {

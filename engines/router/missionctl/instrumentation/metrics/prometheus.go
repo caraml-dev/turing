@@ -37,10 +37,10 @@ var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prome
 		Namespace: Namespace,
 		Subsystem: Subsystem,
 		Name:      string(ExperimentEngineRequestMs),
-		Help:      "Histogram for the runtime (in milliseconds) of Litmus requests.",
+		Help:      "Histogram for the runtime (in milliseconds) of Experiment Engine requests.",
 		Buckets:   requestLatencyBuckets,
 	},
-		[]string{"status", "engine", "experiment", "treatment"},
+		[]string{"status", "engine"},
 	),
 	RouteRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: Namespace,
