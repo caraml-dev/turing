@@ -37,20 +37,12 @@ func (i *MetricsInterceptor) AfterCompletion(
 	err error,
 ) {
 	labels := map[string]string{
-		"status":     metrics.GetStatusString(err == nil),
-		"engine":     "",
-		"experiment": "",
-		"treatment":  "",
+		"status": metrics.GetStatusString(err == nil),
+		"engine": "",
 	}
 
 	if engine, ok := ctx.Value(runner.ExperimentEngineKey).(string); ok {
 		labels["engine"] = engine
-	}
-	if experiment, ok := ctx.Value(runner.ExperimentNameKey).(string); ok {
-		labels["experiment"] = experiment
-	}
-	if treatment, ok := ctx.Value(runner.TreatmentNameKey).(string); ok {
-		labels["treatment"] = treatment
 	}
 
 	// Get start time
