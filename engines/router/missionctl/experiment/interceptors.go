@@ -39,8 +39,6 @@ func (i *MetricsInterceptor) AfterCompletion(
 	labels := map[string]string{
 		"status":     metrics.GetStatusString(err == nil),
 		"engine":     "",
-		"experiment": "",
-		"treatment":  "",
 	}
 
 	if engine, ok := ctx.Value(runner.ExperimentEngineKey).(string); ok {
