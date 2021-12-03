@@ -1,13 +1,30 @@
 package main
 
-import "github.com/gojek/turing/engines/experiment/manager"
+import (
+	"encoding/json"
+	"github.com/gojek/turing/engines/experiment/manager"
+)
 
-type ExperimentManager struct{}
+type ExperimentManager struct {
+	displayName string
+}
 
-func (ExperimentManager) GetEngineInfo() manager.Engine {
+func (m *ExperimentManager) Configure(rawCfg json.RawMessage) error {
+	cfg := struct {
+		DisplayName string `json:"display_name"`
+	}{}
+
+	if err := json.Unmarshal(rawCfg, &cfg); err != nil {
+		return err
+	}
+	m.displayName = cfg.DisplayName
+	return nil
+}
+
+func (m *ExperimentManager) GetEngineInfo() manager.Engine {
 	return manager.Engine{
 		Name:        "nop",
-		DisplayName: "None",
+		DisplayName: m.displayName,
 		Type:        manager.StandardExperimentManagerType,
 	}
 }

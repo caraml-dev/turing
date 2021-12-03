@@ -78,14 +78,14 @@ type Experiment struct {
 	Variants []Variant `json:"variants"`
 }
 
-// VariableType is used to describe experiment varibles
+// VariableType is used to describe experiment variables
 type VariableType string
 
 const (
 	// UnsupportedVariableType variable type is used when the experiment engine does not classify
 	// the variable (None) or the type is not known or relevant to the API
 	UnsupportedVariableType VariableType = "unsupported"
-	// UnitVariableType variable type is used for variables that as as experiment units (typically,
+	// UnitVariableType variable type is used for variables that as experiment units (typically,
 	// their hash is used to randomly assign variants / parameter values)
 	UnitVariableType VariableType = "unit"
 	// FilterVariableType variable type is used for variables that act as filters (i.e., if the
@@ -94,7 +94,7 @@ const (
 	FilterVariableType VariableType = "filter"
 )
 
-// Variable descibes the properties of a variable registered on a client / experiment
+// Variable describes the properties of a variable registered on a client / experiment
 type Variable struct {
 	Name     string       `json:"name" validate:"required"`
 	Required bool         `json:"required"`
@@ -117,8 +117,7 @@ type Variables struct {
 	// ExperimentVariables is a map of experiment_id -> []Variable, representing the
 	// variables configured on each experiment on the experiment engine
 	ExperimentVariables map[string][]Variable `json:"experiment_variables" validate:"dive,dive"`
-	// Config represents the request parsing configuration for all of the Turing experiment
-	// variables
+	// Config represents the request parsing configuration for all the Turing experiment variables
 	Config []VariableConfig `json:"config" validate:"dive"`
 }
 

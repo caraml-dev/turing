@@ -1,6 +1,8 @@
 package manager
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // ExperimentManager describes the minimal set of methods to be implemented by an
 // experiment engine's Manager, providing access to the information required to set up
