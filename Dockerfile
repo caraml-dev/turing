@@ -9,6 +9,9 @@ ENV TURINGUICONFIG_SERVINGDIRECTORY "/app/turing-ui"
 USER root
 RUN apk add --no-cache bash
 
+# Override the swagger ui config
+ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app/swagger-ui"
+
 # Build swagger ui deps
 COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
 RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
