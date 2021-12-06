@@ -10,6 +10,8 @@ import (
 	"github.com/gojek/turing/engines/experiment/manager"
 	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/manager"
 	"github.com/hashicorp/go-plugin"
+	"github.com/zaffka/zap-to-hclog"
+	"go.uber.org/zap"
 )
 
 const (
@@ -25,7 +27,7 @@ var (
 	}
 )
 
-var PluginMap = map[string]plugin.Plugin{
+var pluginMap = map[string]plugin.Plugin{
 	ManagerPluginIdentifier: &managerPlugin.ExperimentManagerPlugin{},
 }
 
@@ -35,18 +37,20 @@ type Services struct {
 
 type Configuration struct {
 	PluginBinary   string
-	PluginConfig   json.RawMessage
 	PluginLogLevel string
+	PluginConfig   json.RawMessage
 }
 
-func (c *Configuration) Build() (*Services, error) {
+func (c *Configuration) Build(logger *zap.Logger) (*Services, error) {
+	hcLogger := wrapper.Wrap(logger)
+
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  HandshakeConfig,
 		Cmd:              exec.Command(c.PluginBinary),
-		Plugins:          PluginMap,
+		Plugins:          pluginMap,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolNetRPC},
 		Managed:          true,
-		Logger:           nil,
+		Logger:           hcLogger,
 	})
 
 	runtime.SetFinalizer(client, func(c *plugin.Client) {

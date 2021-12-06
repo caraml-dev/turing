@@ -8,6 +8,7 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
+	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
@@ -66,7 +67,7 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
 	for name, config := range managerConfig {
-		factory, err := experiment.NewFactory(name, config)
+		factory, err := experiment.NewFactory(name, config, logger.Global())
 		if err != nil {
 			return nil, err
 		}

@@ -32,7 +32,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.5
 	github.com/xanzy/go-gitlab v0.31.0
-	go.uber.org/zap v1.15.0
+	go.uber.org/zap v1.19.1
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
