@@ -26,5 +26,10 @@ func (m *ExperimentManager) GetEngineInfo() manager.Engine {
 		Name:        "nop",
 		DisplayName: m.displayName,
 		Type:        manager.StandardExperimentManagerType,
+		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+			ClientSelectionEnabled:     false,
+			ExperimentSelectionEnabled: false,
+			HomePageURL:                "http://example.com",
+		},
 	}
 }

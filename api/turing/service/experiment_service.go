@@ -9,8 +9,8 @@ import (
 	"github.com/patrickmn/go-cache"
 
 	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
-	managerV1 "github.com/gojek/turing/engines/experiment/v1/manager"
 )
 
 const (
@@ -66,12 +66,12 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
 	for name, config := range managerConfig {
-		configJSON, err := json.Marshal(config)
+		factory, err := experiment.NewFactory(name, config)
 		if err != nil {
 			return nil, err
 		}
 
-		m, err := managerV1.Get(name, configJSON)
+		m, err := factory.GetExperimentManager()
 		if err != nil {
 			return nil, err
 		}
@@ -475,7 +475,7 @@ func reconcileVariables(
 				Name:     item.Name,
 				Required: item.Required,
 				// Set header field source by default
-				FieldSource: experiment.HeaderFieldSource,
+				FieldSource: request.HeaderFieldSource,
 			}
 		}
 	}

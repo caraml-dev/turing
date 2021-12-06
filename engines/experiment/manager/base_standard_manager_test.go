@@ -1,10 +1,10 @@
 package manager_test
 
 import (
+	"github.com/gojek/turing/engines/experiment/common/request"
 	"strings"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 )
@@ -125,12 +125,12 @@ func TestValidateExperimentConfig(t *testing.T) {
 					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: experiment.HeaderFieldSource,
+							FieldSource: request.HeaderFieldSource,
 						},
 						{
 							Name:        "b",
 							Required:    true,
-							FieldSource: experiment.HeaderFieldSource,
+							FieldSource: request.HeaderFieldSource,
 						},
 					},
 				},
@@ -152,7 +152,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 					Config: []manager.VariableConfig{
 						{
 							Name:        "a",
-							FieldSource: experiment.FieldSource("unknown"),
+							FieldSource: request.FieldSource("unknown"),
 						},
 					},
 				},

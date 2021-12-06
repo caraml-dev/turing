@@ -1,4 +1,4 @@
-package experiment
+package common
 
 import "encoding/json"
 

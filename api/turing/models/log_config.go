@@ -67,10 +67,10 @@ type LogConfig struct {
 	JaegerEnabled bool `json:"jaeger_enabled"`
 	// Result Logger type. The associated config must not be null.
 	ResultLoggerType ResultLogger `json:"result_logger_type"`
-	// Configuration necessary to log results to BigQuery. Cannot be empty if
+	// EngineConfiguration necessary to log results to BigQuery. Cannot be empty if
 	// ResultLoggerType is set to "bigquery".
 	BigQueryConfig *BigQueryConfig `json:"bigquery_config,omitempty"`
-	// Configuration necessary to log results to kafka. Cannot be empty if
+	// EngineConfiguration necessary to log results to kafka. Cannot be empty if
 	// ResultLoggerType is set to "kafka"
 	KafkaConfig *KafkaConfig `json:"kafka_config,omitempty"`
 }

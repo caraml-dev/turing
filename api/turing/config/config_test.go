@@ -512,48 +512,43 @@ func TestLoad(t *testing.T) {
 // https://github.com/mitchellh/mapstructure/blob/ce2ff0c13ce509e36e9254c08ea0bca90ed5af6c/decode_hooks_test.go#L128
 func TestStringToQuantityHookFunc(t *testing.T) {
 	hookFunc := StringToQuantityHookFunc()
-	strType := reflect.TypeOf("")
 	qtyType := reflect.TypeOf(Quantity{})
 
 	tests := []struct {
-		name     string
-		from, to reflect.Type
-		data     interface{}
-		want     interface{}
-		wantErr  bool
+		name    string
+		from    interface{}
+		to      reflect.Type
+		want    interface{}
+		wantErr bool
 	}{
 		{
 			name: "digit",
-			from: strType,
+			from: "5",
 			to:   qtyType,
-			data: "5",
 			want: Quantity(resource.MustParse("5")),
 		},
 		{
 			name: "digit with suffix",
-			from: strType,
+			from: "5Gi",
 			to:   qtyType,
-			data: "5Gi",
 			want: Quantity(resource.MustParse("5Gi")),
 		},
 		{
 			name:    "empty",
-			from:    strType,
+			from:    "",
 			to:      qtyType,
-			data:    "",
 			wantErr: true,
 		},
 		{
 			name:    "invalid format",
-			from:    strType,
+			from:    "5GGi",
 			to:      qtyType,
-			data:    "5GGi",
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := mapstructure.DecodeHookExec(hookFunc, tt.from, tt.to, tt.data)
+			got, err := mapstructure.DecodeHookExec(hookFunc, reflect.ValueOf(tt.from), reflect.Zero(tt.to))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("StringToQuantityHookFunc() error = %v, wantErr %v", err, tt.wantErr)
 				return

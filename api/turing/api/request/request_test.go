@@ -15,7 +15,7 @@ import (
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
-	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
 )
 
@@ -51,13 +51,13 @@ var expEngineConfig = manager.TuringExperimentConfig{
 				Name:        "customer",
 				Required:    true,
 				Field:       "customer_id",
-				FieldSource: experiment.HeaderFieldSource,
+				FieldSource: request.HeaderFieldSource,
 			},
 			{
 				Name:        "app_version",
 				Required:    false,
 				Field:       "test_field",
-				FieldSource: experiment.HeaderFieldSource,
+				FieldSource: request.HeaderFieldSource,
 			},
 		},
 	},
@@ -215,13 +215,13 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 							Name:        "customer",
 							Required:    true,
 							Field:       "customer_id",
-							FieldSource: experiment.HeaderFieldSource,
+							FieldSource: request.HeaderFieldSource,
 						},
 						{
 							Name:        "app_version",
 							Required:    false,
 							Field:       "test_field",
-							FieldSource: experiment.HeaderFieldSource,
+							FieldSource: request.HeaderFieldSource,
 						},
 					},
 				},

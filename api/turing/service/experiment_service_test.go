@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 )
@@ -341,12 +341,12 @@ func TestListVariables(t *testing.T) {
 					{
 						Name:        "var-1",
 						Required:    true,
-						FieldSource: experiment.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 					},
 					{
 						Name:        "var-2",
 						Required:    false,
-						FieldSource: experiment.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 					},
 				},
 			},
