@@ -3,8 +3,8 @@ package models
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
 )
 

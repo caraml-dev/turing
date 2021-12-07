@@ -1,4 +1,4 @@
-package main
+package nop
 
 import (
 	"encoding/json"

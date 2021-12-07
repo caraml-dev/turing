@@ -34,10 +34,10 @@ type testSuiteInitFanIn struct {
 var efi = &EnsemblingFanIn{
 	&experimentationPolicy{
 		experimentEngine: tfu.MockExperimentRunner{
-			TestTreatment: tfu.TestTreatment{
-				Name:      "test_experiment",
-				Treatment: "treatment-A",
-				Raw:       json.RawMessage(`{"test_config": "placeholder"}`),
+			Treatment: &runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder"}`),
 			},
 		},
 	},
@@ -103,7 +103,7 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 			)
 			monkey.Patch(
 				experiment.NewExperimentRunner,
-				func(_ string, _ json.RawMessage) (runner.ExperimentRunner, error) {
+				func(_ string, _ map[string]interface{}) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)

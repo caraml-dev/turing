@@ -3,10 +3,10 @@ package manager
 import (
 	"context"
 	"errors"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"strings"
 
 	"github.com/go-playground/validator"
-	"github.com/gojek/turing/engines/experiment/common/request"
 )
 
 // BaseStandardExperimentManager provides dummy implementations for the optional

@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
@@ -538,7 +538,7 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 		},
 		"success | custom exp mgr": {
 			engine:         "xp",
-			inputCfg:       json.RawMessage([]byte(`[1,2]`)),
+			inputCfg:       json.RawMessage(`[1,2]`),
 			expectedResult: expectedResult2,
 		},
 	}

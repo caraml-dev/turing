@@ -70,7 +70,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	var selectedRoute fiber.Component
 
 	for _, m := range r.experimentMappings {
-		if m.Experiment == expPlan.GetExperimentName() && m.Treatment == expPlan.GetName() {
+		if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
 			selectedRoute = routes[m.Route]
 			// stop matching on first match because only 1 selected route is required
 			break

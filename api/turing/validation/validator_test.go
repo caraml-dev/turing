@@ -16,8 +16,8 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/validation"
-	request2 "github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
+	request2 "github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 func TestValidateLogConfig(t *testing.T) {

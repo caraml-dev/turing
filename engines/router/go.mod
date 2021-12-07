@@ -23,12 +23,12 @@ require (
 	github.com/pierrec/lz4 v2.4.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tinylib/msgp v1.1.2 // indirect
 	github.com/uber/jaeger-client-go v2.23.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	go.einride.tech/protobuf-bigquery v0.7.0
-	go.uber.org/zap v1.15.0
+	go.uber.org/zap v1.19.1
 	google.golang.org/protobuf v1.26.0-rc.1
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )

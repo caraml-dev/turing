@@ -23,7 +23,7 @@ func newFakeRunner(config json.RawMessage) (runner.ExperimentRunner, error) {
 func (runner fakeRunner) GetTreatmentForRequest(
 	context.Context,
 	runner.Logger,
-	http.Header, []byte) (runner.Treatment, error) {
+	http.Header, []byte) (*runner.Treatment, error) {
 	return nil, nil
 }
 

@@ -4,18 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/common/request"
 	"net/http"
 	"testing"
 
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/gojek/turing/engines/router"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	tfu "github.com/gojek/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
-
 	"github.com/stretchr/testify/require"
 )
 

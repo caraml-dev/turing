@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/gojek/turing/engines/experiment/common/request"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 type TrafficRuleCondition struct {

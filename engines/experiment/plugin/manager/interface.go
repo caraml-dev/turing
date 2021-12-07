@@ -1,11 +1,11 @@
 package manager
 
 import (
-	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/types"
 )
 
 type ConfigurableExperimentManager interface {
-	common.Configurable
+	types.Configurable
 	manager.ExperimentManager
 }

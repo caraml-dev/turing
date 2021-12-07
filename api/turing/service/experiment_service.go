@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/patrickmn/go-cache"
-
 	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/engines/experiment"
-	"github.com/gojek/turing/engines/experiment/common/request"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/patrickmn/go-cache"
 )
 
 const (
@@ -76,6 +75,7 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 		if err != nil {
 			return nil, err
 		}
+
 		experimentManagers[name] = m
 	}
 
