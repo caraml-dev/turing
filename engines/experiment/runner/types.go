@@ -11,10 +11,6 @@ type ContextKey string
 const (
 	// ExperimentEngineKey represents the key for the experiment engine name, stored in the context
 	ExperimentEngineKey ContextKey = "experimentEngineKey"
-	// ExperimentNameKey represents the key for the experiment name, stored in the context
-	ExperimentNameKey ContextKey = "experimentNameKey"
-	// TreatmentNameKey represents the key for the treament name, stored in the context
-	TreatmentNameKey ContextKey = "treatmentNameKey"
 )
 
 // Logger interface defines a minimal set of methods expected to be implemented by

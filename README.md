@@ -342,25 +342,33 @@ This is the recommended way to install the prerequisites on a production Kuberne
 2. [Istio](https://istio.io/)
 3. [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)
 
+Note that if you are using a cloud provider based Kubernetes, by default for Google Kubernetes Engine, most ports are closed from master to nodes except TCP/443 and TCP/10250.
+You must allow TCP/8080 for spark operator mutating webhooks and TCP/8443 for Knative Serving mutating webhooks to be reached from the master node or the installion will fail.
+
 To install the required components on your Kubernetes cluster, issue the following command:
 
 ```bash
-helm upgrade turing-init infra/charts/turing-init \
-    --set image.registry="<image registry>/" \
-    --set image.repository="<repository>" \
-    --set image.tag="<tag version>" \
+helm repo add turing https://turing-ml.github.io/charts
+helm upgrade turing-init turing/turing-init \
+    --namespace infrastructure \
     --install \
     --wait
 ```
 
 For it to be completely installed, you should check the init job has run successfully.
-To check, issue the command `kubectl get pod` and you should see something like this:
+To check, issue the command `kubectl get pod --namespace infrastructure` and you should see something like this:
 
 ```
 NAME                                            READY   STATUS      RESTARTS   AGE
 turing-test-spark-operator-8bcb89d5d-nf2bq      1/1     Running     0          3m42s
 turing-test-spark-operator-webhook-init-ph8ds   0/1     Completed   0          3m44s
 turing-test-turing-init-init-pknvb              0/1     Completed   0          3m44s
+```
+
+Programatically, you could check if the init job has run successfully with the following command:
+
+```bash
+kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-init
 ```
 
 The init job will also check if all the components have been installed properly so we can guarantee that

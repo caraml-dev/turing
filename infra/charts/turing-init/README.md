@@ -1,16 +1,53 @@
 # turing-init
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+---
+![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
-## Requirements
+## Introduction
 
-| Repository | Name | Version |
-|------------|------|---------|
-| https://googlecloudplatform.github.io/spark-on-k8s-operator | spark-operator | 1.1.7 |
+This Helm chart installs the infrastructure components [Turing](https://github.com/gojek/turing) requires.
 
-## Values
+## Installation
+
+### Add Helm repository
+
+```shell
+$ helm repo add turing https://turing-ml.github.io/charts
+```
+
+### Installing the chart
+
+Note that if you are using a cloud provider based Kubernetes, by default for Google Kubernetes Engine, most ports are closed from master to nodes except TCP/443 and TCP/10250.
+You must allow TCP/8080 for spark operator mutating webhooks and TCP/8443 for Knative Serving mutating webhooks to be reached from the master node or the installion will fail.
+
+This command will install turing-init named `turing-init` in the `default` namespace.
+Default chart values will be used for the installation:
+```shell
+$ helm install turing-init turing/turing-init
+```
+
+It is unlikely that you would need to change the values of the default configuration.
+
+After the chart has been installed, the init container must finishing running in order to consider this as installed.
+One way to check if it is completed is to run the following command:
+```bash
+kubectl wait --for=condition=complete --timeout=10m job/turing-init-init
+```
+
+### Uninstalling the chart
+
+To uninstall `turing-init` release:
+```shell
+$ helm uninstall turing-init
+```
+
+The command removes all the Kubernetes components associated with the chart.
+
+## Configuration
+
+The following table lists the configurable parameters of the Turing chart and their default values.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
