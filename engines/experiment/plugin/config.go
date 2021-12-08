@@ -8,8 +8,6 @@ import (
 	"runtime"
 
 	"github.com/gojek/turing/engines/experiment/manager"
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/manager"
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
 	"github.com/zaffka/zap-to-hclog"
@@ -17,8 +15,7 @@ import (
 )
 
 const (
-	ManagerPluginIdentifier = "experiments_manager"
-	RunnerPluginIdentifier  = "experiments_runner"
+	ExperimentsEnginePluginIdentifier = "experiment_engine"
 )
 
 var (
@@ -30,13 +27,12 @@ var (
 )
 
 var pluginMap = map[string]plugin.Plugin{
-	ManagerPluginIdentifier: &managerPlugin.ExperimentManagerPlugin{},
-	RunnerPluginIdentifier:  &runnerPlugin.ExperimentRunnerPlugin{},
+	ExperimentsEnginePluginIdentifier: &ExperimentEnginePlugin{},
 }
 
 type Services struct {
-	Manager managerPlugin.ConfigurableExperimentManager
-	Runner  runnerPlugin.ConfigurableExperimentRunner
+	Manager ConfigurableExperimentManager
+	Runner  ConfigurableExperimentRunner
 }
 
 type Configuration struct {
@@ -65,40 +61,51 @@ func (c *Configuration) Build(logger *zap.Logger) (*Services, error) {
 		return nil, fmt.Errorf("error attempting to connect to plugin rpc client: %w", err)
 	}
 
-	rawManager, err := rpcClient.Dispense(ManagerPluginIdentifier)
+	raw, err := rpcClient.Dispense(ExperimentsEnginePluginIdentifier)
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve experiment manager plugin instance: %w", err)
+		return nil, fmt.Errorf("unable to retrieve plugin capabilities: %w", err)
 	}
 
-	experimentManager, ok := rawManager.(managerPlugin.ConfigurableExperimentManager)
+	pluginCapabilities, ok := raw.(PluginCapabilities)
 	if !ok {
-		return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
-			rawManager,
-			reflect.TypeOf((*manager.ExperimentManager)(nil)).Elem(),
-			ManagerPluginIdentifier)
+		return nil, fmt.Errorf("unable to cast %T to plugin.PluginCapabilities", raw)
 	}
 
-	err = experimentManager.Configure(c.PluginConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to configure experiment manager plugin instance: %w", err)
+	capabilities := pluginCapabilities.Capabilities()
+
+	var (
+		experimentManager ConfigurableExperimentManager
+		experimentRunner  ConfigurableExperimentRunner
+	)
+
+	if capabilities.Manager {
+		experimentManager, ok = raw.(ConfigurableExperimentManager)
+		if !ok {
+			return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
+				raw,
+				reflect.TypeOf((*manager.ExperimentManager)(nil)).Elem(),
+				ExperimentsEnginePluginIdentifier)
+		}
+
+		err = experimentManager.Configure(c.PluginConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to configure experiment manager plugin instance: %w", err)
+		}
 	}
 
-	rawRunner, err := rpcClient.Dispense(RunnerPluginIdentifier)
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve experiment manager plugin instance: %w", err)
-	}
+	if capabilities.Runner {
+		experimentRunner, ok = raw.(ConfigurableExperimentRunner)
+		if !ok {
+			return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
+				raw,
+				reflect.TypeOf((*runner.ExperimentRunner)(nil)).Elem(),
+				ExperimentsEnginePluginIdentifier)
+		}
 
-	experimentRunner, ok := rawRunner.(runnerPlugin.ConfigurableExperimentRunner)
-	if !ok {
-		return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
-			rawManager,
-			reflect.TypeOf((*runner.ExperimentRunner)(nil)).Elem(),
-			RunnerPluginIdentifier)
-	}
-
-	err = experimentRunner.Configure(c.PluginConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to configure experiment runner plugin instance: %w", err)
+		err = experimentRunner.Configure(c.PluginConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to configure experiment runner plugin instance: %w", err)
+		}
 	}
 
 	return &Services{

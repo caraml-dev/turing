@@ -8,5 +8,6 @@ import (
 func main() {
 	plugin.Serve(&plugin.Services{
 		Manager: &nop.ExperimentManager{},
+		Runner:  &nop.ExperimentRunner{},
 	})
 }

@@ -66,7 +66,7 @@ func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsSer
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
 	for name, config := range managerConfig {
-		factory, err := experiment.NewFactory(name, config, logger.Global())
+		factory, err := experiment.NewFactory(name, config, logger.Glob())
 		if err != nil {
 			return nil, err
 		}

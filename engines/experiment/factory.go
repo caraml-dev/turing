@@ -15,7 +15,7 @@ type Factory interface {
 	GetExperimentRunner() (runner.ExperimentRunner, error)
 }
 
-func NewFactory(name string, cfg interface{}, logger *zap.Logger) (Factory, error) {
+func NewFactory(name string, cfg interface{}, logger *zap.SugaredLogger) (Factory, error) {
 	var engineCfg EngineConfig
 	if err := mapstructure.Decode(cfg, &engineCfg); err != nil {
 		return nil, err
@@ -26,11 +26,13 @@ func NewFactory(name string, cfg interface{}, logger *zap.Logger) (Factory, erro
 		return nil, err
 	}
 
+	// plugin-based implementation of the experiment engine factory
 	if engineCfg.Plugin.PluginBinary != "" {
 		pluginCfg := engineCfg.Plugin
 		pluginCfg.PluginConfig = engineCfgJSON
 		return plugin.NewFactory(&pluginCfg, logger)
 	}
 
+	// compile-time implementation of the experiment engine factory
 	return v1.NewFactory(name, engineCfgJSON)
 }

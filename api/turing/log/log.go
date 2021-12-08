@@ -59,6 +59,6 @@ func Panicf(template string, args ...interface{}) {
 	globalLogger.Panicf(template, args...)
 }
 
-func Global() *zap.Logger {
-	return globalLogger.Desugar()
+func Glob() *zap.SugaredLogger {
+	return globalLogger
 }

@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"errors"
 	"go.uber.org/zap"
 
 	"github.com/gojek/turing/engines/experiment/manager"
@@ -17,11 +16,11 @@ func (f *factory) GetExperimentManager() (manager.ExperimentManager, error) {
 }
 
 func (f *factory) GetExperimentRunner() (runner.ExperimentRunner, error) {
-	return nil, errors.New("not implemented")
+	return f.Runner, nil
 }
 
-func NewFactory(builder *Configuration, logger *zap.Logger) (*factory, error) {
-	services, err := builder.Build(logger)
+func NewFactory(builder *Configuration, logger *zap.SugaredLogger) (*factory, error) {
+	services, err := builder.Build(logger.Desugar())
 	if err != nil {
 		return nil, err
 	}
