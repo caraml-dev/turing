@@ -1,13 +1,14 @@
-package plugin
+package runner
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"net/http"
 )
 
 type ConfigurableExperimentRunner interface {
-	Configurable
+	Configure(cfg json.RawMessage) error
 	runner.ExperimentRunner
 }
 

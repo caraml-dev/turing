@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	plugin.Serve(&plugin.Services{
+	plugin.Serve(&plugin.ClientServices{
 		Manager: &nop.ExperimentManager{},
 		Runner:  &nop.ExperimentRunner{},
 	})
