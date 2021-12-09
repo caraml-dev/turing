@@ -2,13 +2,14 @@ package manager
 
 import (
 	"encoding/json"
-	"net/rpc"
+	"fmt"
 
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/plugin/shared"
 )
 
 type rpcClient struct {
-	*rpc.Client
+	shared.RPCClient
 }
 
 func (c *rpcClient) Configure(cfg json.RawMessage) error {
@@ -19,9 +20,10 @@ func (c *rpcClient) GetEngineInfo() manager.Engine {
 	resp := manager.Engine{}
 	err := c.Call("Plugin.GetEngineInfo", new(interface{}), &resp)
 	if err != nil {
-		// You usually want your interfaces to return errors. If they don't,
-		// there isn't much other choice here.
-		panic(err)
+		// err should be propagated upstream, but it's currently not
+		// possible as GetEngineInfo() on the manager.ExperimentManager
+		// interface doesn't return errors
+		println(fmt.Sprintf("plugin errors: %v", err))
 	}
 
 	return resp

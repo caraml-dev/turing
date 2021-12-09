@@ -51,7 +51,7 @@ func buildConfig(jCfg *config.JaegerConfig) jaegercfg.Configuration {
 	}
 }
 
-// newJaegerTracer is a creator for the Jager Tracer
+// newJaegerTracer is a creator for the Jaeger Tracer
 func newJaegerTracer() Tracer {
 	return &JaegerTracer{
 		&baseTracer{

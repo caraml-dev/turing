@@ -22,7 +22,7 @@ func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	return runnerV1.Get(f.EngineName, f.EngineConfig)
 }
 
-func NewFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {
+func NewEngineFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {
 	return &EngineFactory{
 		EngineName:   name,
 		EngineConfig: cfg,

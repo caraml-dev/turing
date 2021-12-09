@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"net/rpc"
 
+	"github.com/gojek/turing/engines/experiment/plugin/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 )
 
 type rpcClient struct {
-	*rpc.Client
+	shared.RPCClient
 }
 
 func (c *rpcClient) Configure(cfg json.RawMessage) error {

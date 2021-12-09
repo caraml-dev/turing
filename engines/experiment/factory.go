@@ -40,5 +40,5 @@ func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.Sugar
 	}
 
 	// compile-time implementation of the experiment engine factory
-	return v1.NewFactory(name, engineCfgJSON)
+	return v1.NewEngineFactory(name, engineCfgJSON)
 }
