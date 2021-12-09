@@ -3,9 +3,10 @@ package runner
 import (
 	"context"
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/runner"
 	"net/http"
 	"net/rpc"
+
+	"github.com/gojek/turing/engines/experiment/runner"
 )
 
 type rpcClient struct {

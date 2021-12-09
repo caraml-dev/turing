@@ -1,11 +1,11 @@
 package manager_test
 
 import (
-	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"strings"
 	"testing"
 
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
 )
 

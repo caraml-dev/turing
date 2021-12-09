@@ -2,6 +2,7 @@ package manager
 
 import (
 	"encoding/json"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 )
 

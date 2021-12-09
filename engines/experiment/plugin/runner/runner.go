@@ -3,8 +3,9 @@ package runner
 import (
 	"context"
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/runner"
 	"net/http"
+
+	"github.com/gojek/turing/engines/experiment/runner"
 )
 
 type ConfigurableExperimentRunner interface {

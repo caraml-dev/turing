@@ -190,7 +190,7 @@ func TestNewAppContext(t *testing.T) {
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(service.NewExperimentsService,
-		func(experimentConfig map[string]interface{}) (service.ExperimentsService, error) {
+		func(experimentConfig map[string]config.EngineConfig) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)

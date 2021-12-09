@@ -1,16 +1,17 @@
 package experiment_test
 
 import (
-	"bou.ke/monkey"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"testing"
+
+	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/plugin"
 	v1 "github.com/gojek/turing/engines/experiment/v1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
-	"testing"
 )
 
 const serializationError = "unable to serialize struct"

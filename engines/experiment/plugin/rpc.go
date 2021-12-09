@@ -2,13 +2,14 @@ package plugin
 
 import (
 	"fmt"
+	"os/exec"
+	"runtime"
+
 	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/manager"
 	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/runner"
 	"github.com/hashicorp/go-plugin"
 	wrapper "github.com/zaffka/zap-to-hclog"
 	"go.uber.org/zap"
-	"os/exec"
-	"runtime"
 )
 
 type ClientServices struct {

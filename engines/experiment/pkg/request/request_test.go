@@ -2,10 +2,10 @@ package request_test
 
 import (
 	"encoding/json"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"net/http"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
 )
 

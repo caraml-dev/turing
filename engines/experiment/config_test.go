@@ -1,10 +1,11 @@
 package experiment_test
 
 import (
+	"testing"
+
 	"github.com/gojek/turing/engines/experiment"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_EngineConfigDecoding(t *testing.T) {
@@ -56,7 +57,8 @@ func Test_EngineConfigDecoding(t *testing.T) {
 					"Key2-1": "Value2-1",
 				},
 			},
-			err: "1 error(s) decoding:\n\n* 'PluginBinary' expected type 'string', got unconvertible type 'map[string]interface {}', value: 'map[Key2-1:Value2-1]'",
+			err: "1 error(s) decoding:\n\n* 'PluginBinary' expected type 'string', " +
+				"got unconvertible type 'map[string]interface {}', value: 'map[Key2-1:Value2-1]'",
 		},
 	}
 

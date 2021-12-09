@@ -251,7 +251,7 @@ func TestLoad(t *testing.T) {
 						ServingPath:      "/api-docs/",
 					},
 				},
-				Experiment: map[string]interface{}{
+				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
 						"quxkey2": map[string]interface{}{
@@ -346,7 +346,7 @@ func TestLoad(t *testing.T) {
 						ServingPath:      "/swagger-ui",
 					},
 				},
-				Experiment: map[string]interface{}{
+				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
 						"quxkey2": map[string]interface{}{
@@ -462,7 +462,7 @@ func TestLoad(t *testing.T) {
 						ServingPath:      "/swagger-ui",
 					},
 				},
-				Experiment: map[string]interface{}{
+				Experiment: map[string]EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
 						"quxkey2": map[string]interface{}{

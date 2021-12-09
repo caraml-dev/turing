@@ -1,8 +1,9 @@
 package manager
 
 import (
-	"github.com/hashicorp/go-plugin"
 	"net/rpc"
+
+	"github.com/hashicorp/go-plugin"
 )
 
 type ExperimentManagerPlugin struct {

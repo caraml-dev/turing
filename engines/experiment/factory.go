@@ -2,6 +2,7 @@ package experiment
 
 import (
 	"encoding/json"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/plugin"
 	"github.com/gojek/turing/engines/experiment/runner"
