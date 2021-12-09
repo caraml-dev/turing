@@ -16,12 +16,12 @@ type ClientServices struct {
 	Runner  runnerPlugin.ConfigurableExperimentRunner
 }
 
-func Connect(cfg *Configuration, logger *zap.Logger) (plugin.ClientProtocol, error) {
+func Connect(pluginBinary string, logger *zap.Logger) (plugin.ClientProtocol, error) {
 	hcLogger := wrapper.Wrap(logger)
 
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  handshakeConfig,
-		Cmd:              exec.Command(cfg.PluginBinary),
+		Cmd:              exec.Command(pluginBinary),
 		Plugins:          pluginMap,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolNetRPC},
 		Managed:          true,

@@ -10,12 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type Factory interface {
+// EngineFactory interface defines methods for accessing manager/runner
+// of a given experiment engine
+type EngineFactory interface {
 	GetExperimentManager() (manager.ExperimentManager, error)
 	GetExperimentRunner() (runner.ExperimentRunner, error)
 }
 
-func NewFactory(name string, cfg interface{}, logger *zap.SugaredLogger) (Factory, error) {
+// NewEngineFactory is a constructor method that creates a new instance of EngineFactory
+// The concrete implementation of EngineFactory can be either:
+// 	- experiment/v1/factory (for experiment engines implemented as compile-time plugins)
+//  - experiment/plugin/factory (for experiment engines implemented as external net/rpc plugins)
+// The actual implementation is determined based on provided engine configuration (passed via `cfg`)
+func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.SugaredLogger) (EngineFactory, error) {
 	var engineCfg EngineConfig
 	if err := mapstructure.Decode(cfg, &engineCfg); err != nil {
 		return nil, err
@@ -27,10 +34,8 @@ func NewFactory(name string, cfg interface{}, logger *zap.SugaredLogger) (Factor
 	}
 
 	// plugin-based implementation of the experiment engine factory
-	if engineCfg.Plugin.PluginBinary != "" {
-		pluginCfg := engineCfg.Plugin
-		pluginCfg.PluginConfig = engineCfgJSON
-		return plugin.NewFactory(&pluginCfg, logger)
+	if engineCfg.PluginBinary != "" {
+		return plugin.NewFactory(engineCfg.PluginBinary, engineCfgJSON, logger)
 	}
 
 	// compile-time implementation of the experiment engine factory

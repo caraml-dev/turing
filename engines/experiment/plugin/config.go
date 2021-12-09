@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"encoding/json"
 	"github.com/gojek/turing/engines/experiment/plugin/manager"
 	"github.com/gojek/turing/engines/experiment/plugin/runner"
 	"github.com/hashicorp/go-plugin"
@@ -24,8 +23,3 @@ var (
 		RunnerPluginIdentified:  &runner.ExperimentRunnerPlugin{},
 	}
 )
-
-type Configuration struct {
-	PluginBinary string
-	PluginConfig json.RawMessage
-}

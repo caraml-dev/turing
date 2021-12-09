@@ -14,7 +14,7 @@ import (
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
 func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.ExperimentRunner, error) {
-	factory, err := experiment.NewFactory(name, cfg, log.Glob())
+	factory, err := experiment.NewEngineFactory(name, cfg, log.Glob())
 	if err != nil {
 		return nil, err
 	}

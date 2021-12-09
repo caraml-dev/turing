@@ -9,22 +9,22 @@ import (
 	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 )
 
-type factory struct {
-	engineName string
-	cfg        json.RawMessage
+type EngineFactory struct {
+	EngineName   string
+	EngineConfig json.RawMessage
 }
 
-func (f *factory) GetExperimentManager() (manager.ExperimentManager, error) {
-	return managerV1.Get(f.engineName, f.cfg)
+func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error) {
+	return managerV1.Get(f.EngineName, f.EngineConfig)
 }
 
-func (f *factory) GetExperimentRunner() (runner.ExperimentRunner, error) {
-	return runnerV1.Get(f.engineName, f.cfg)
+func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
+	return runnerV1.Get(f.EngineName, f.EngineConfig)
 }
 
-func NewFactory(name string, cfg json.RawMessage) (*factory, error) {
-	return &factory{
-		engineName: name,
-		cfg:        cfg,
+func NewFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {
+	return &EngineFactory{
+		EngineName:   name,
+		EngineConfig: cfg,
 	}, nil
 }

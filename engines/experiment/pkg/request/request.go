@@ -32,7 +32,7 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 	return FieldSource(""), fmt.Errorf("Unknown field source %s", srcString)
 }
 
-// UnmarshalJSON unmarshals the data as a string and then creates the
+// UnmarshalJSON unmarshalls the data as a string and then creates the
 // appropriate FieldSource
 func (f *FieldSource) UnmarshalJSON(data []byte) error {
 	var s string

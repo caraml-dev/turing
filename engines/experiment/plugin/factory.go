@@ -14,15 +14,16 @@ import (
 	"go.uber.org/zap"
 )
 
-type factory struct {
+type EngineFactory struct {
 	sync.Mutex
 	rpcClient plugin.ClientProtocol
-	config    json.RawMessage
 	manager   manager.ExperimentManager
 	runner    runner.ExperimentRunner
+
+	EngineConfig json.RawMessage
 }
 
-func (f *factory) GetExperimentManager() (manager.ExperimentManager, error) {
+func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error) {
 	f.Lock()
 	defer f.Unlock()
 
@@ -40,7 +41,7 @@ func (f *factory) GetExperimentManager() (manager.ExperimentManager, error) {
 				ManagerPluginIdentified)
 		}
 
-		err = experimentManager.Configure(f.config)
+		err = experimentManager.Configure(f.EngineConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to configure experiment manager plugin instance: %w", err)
 		}
@@ -51,7 +52,7 @@ func (f *factory) GetExperimentManager() (manager.ExperimentManager, error) {
 	return f.manager, nil
 }
 
-func (f *factory) GetExperimentRunner() (runner.ExperimentRunner, error) {
+func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	f.Lock()
 	defer f.Unlock()
 
@@ -69,7 +70,7 @@ func (f *factory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 				RunnerPluginIdentified)
 		}
 
-		err = experimentRunner.Configure(f.config)
+		err = experimentRunner.Configure(f.EngineConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to configure experiment runner plugin instance: %w", err)
 		}
@@ -80,14 +81,14 @@ func (f *factory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	return f.runner, nil
 }
 
-func NewFactory(cfg *Configuration, logger *zap.SugaredLogger) (*factory, error) {
-	rpcClient, err := Connect(cfg, logger.Desugar())
+func NewFactory(pluginBinary string, engineCfg json.RawMessage, logger *zap.SugaredLogger) (*EngineFactory, error) {
+	rpcClient, err := Connect(pluginBinary, logger.Desugar())
 	if err != nil {
 		return nil, err
 	}
 
-	return &factory{
-		rpcClient: rpcClient,
-		config:    cfg.PluginConfig,
+	return &EngineFactory{
+		rpcClient:    rpcClient,
+		EngineConfig: engineCfg,
 	}, nil
 }

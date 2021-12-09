@@ -3,6 +3,7 @@ module github.com/gojek/turing/engines/experiment
 go 1.14
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/buger/jsonparser v1.1.1
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
