@@ -39,7 +39,7 @@ type RouterVersion struct {
 	DefaultRouteID string `json:"default_route_id"`
 	// Rules for activating some routes based on request conditions.
 	TrafficRules TrafficRules `json:"rules,omitempty"`
-	// EngineConfiguration for the experiment engine queried by the router.
+	// Configuration for the experiment engine queried by the router.
 	ExperimentEngine *ExperimentEngine `json:"experiment_engine"`
 	// Resource requests for deployment
 	ResourceRequest *ResourceRequest `json:"resource_request"`
