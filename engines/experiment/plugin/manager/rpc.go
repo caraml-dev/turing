@@ -8,6 +8,7 @@ import (
 	"github.com/gojek/turing/engines/experiment/plugin/shared"
 )
 
+// rpcClient implements ConfigurableExperimentManager interface
 type rpcClient struct {
 	shared.RPCClient
 }
@@ -23,12 +24,13 @@ func (c *rpcClient) GetEngineInfo() manager.Engine {
 		// err should be propagated upstream, but it's currently not
 		// possible as GetEngineInfo() on the manager.ExperimentManager
 		// interface doesn't return errors
-		println(fmt.Sprintf("plugin errors: %v", err))
+		fmt.Printf("plugin errors: %v", err)
 	}
 
 	return resp
 }
 
+// rpcServer serves the implementation of a ConfigurableExperimentManager
 type rpcServer struct {
 	Impl ConfigurableExperimentManager
 }

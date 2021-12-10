@@ -9,6 +9,7 @@ import (
 	"github.com/gojek/turing/engines/experiment/runner"
 )
 
+// rpcClient implements ConfigurableExperimentRunner interface
 type rpcClient struct {
 	shared.RPCClient
 }
@@ -39,6 +40,7 @@ func (c *rpcClient) GetTreatmentForRequest(
 	return &resp, nil
 }
 
+// rpcServer serves the implementation of a ConfigurableExperimentRunner
 type rpcServer struct {
 	Impl ConfigurableExperimentRunner
 }

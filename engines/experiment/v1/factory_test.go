@@ -9,7 +9,7 @@ import (
 	"github.com/gojek/turing/engines/experiment/manager"
 	mocksManager "github.com/gojek/turing/engines/experiment/manager/mocks"
 	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/experiment/runner/nop"
+	mocksRunner "github.com/gojek/turing/engines/experiment/runner/mocks"
 	v1 "github.com/gojek/turing/engines/experiment/v1"
 	managerV1 "github.com/gojek/turing/engines/experiment/v1/manager"
 	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
@@ -102,7 +102,7 @@ func TestEngineFactory_GetExperimentRunner(t *testing.T) {
 	}{
 		"success | experiment runner exists in the registry": {
 			engine:   "engine-1",
-			expected: &nop.ExperimentRunner{},
+			expected: &mocksRunner.ExperimentRunner{},
 		},
 		"failure | experiment runner doesn't exists in the registry": {
 			engine: "engine-1",

@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
+// ExperimentRunnerPlugin implements hashicorp/go-plugin's Plugin interface
+// for runner.ExperimentRunner
 type ExperimentRunnerPlugin struct {
 	Impl ConfigurableExperimentRunner
 }

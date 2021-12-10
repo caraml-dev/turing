@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/plugin/shared/mocks"
+	"github.com/gojek/turing/engines/experiment/plugin/mocks"
+
 	"github.com/gojek/turing/engines/experiment/runner"
 	runnerMocks "github.com/gojek/turing/engines/experiment/runner/mocks"
 	"github.com/stretchr/testify/assert"

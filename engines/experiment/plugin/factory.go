@@ -7,20 +7,41 @@ import (
 	"sync"
 
 	"github.com/gojek/turing/engines/experiment/manager"
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/manager"
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/runner"
+	"github.com/gojek/turing/engines/experiment/plugin/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
 )
 
+// EngineFactory implements experiment.EngineFactory and creates experiment manager/runner
+// backed by net/rpc plugin implementations
 type EngineFactory struct {
 	sync.Mutex
-	rpcClient plugin.ClientProtocol
-	manager   manager.ExperimentManager
-	runner    runner.ExperimentRunner
+	manager manager.ExperimentManager
+	runner  runner.ExperimentRunner
 
+	Client       plugin.ClientProtocol
 	EngineConfig json.RawMessage
+}
+
+func (f *EngineFactory) dispenseAndConfigure(id string) (interface{}, error) {
+	raw, err := f.Client.Dispense(id)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve \"%s\" plugin instance: %w", id, err)
+	}
+
+	configurable, ok := raw.(shared.Configurable)
+	if !ok {
+		return nil, fmt.Errorf(
+			"unable to cast %T to %s for plugin \"%s\"", raw,
+			reflect.TypeOf((*shared.Configurable)(nil)).Elem(), id)
+	}
+
+	err = configurable.Configure(f.EngineConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to configure \"%s\" plugin instance: %w", id, err)
+	}
+	return configurable, nil
 }
 
 func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error) {
@@ -28,25 +49,11 @@ func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error
 	defer f.Unlock()
 
 	if f.manager == nil {
-		raw, err := f.rpcClient.Dispense(ManagerPluginIdentified)
+		instance, err := f.dispenseAndConfigure(ManagerPluginIdentified)
 		if err != nil {
-			return nil, fmt.Errorf("unable to retrieve experiment manager plugin instance: %w", err)
+			return nil, err
 		}
-
-		experimentManager, ok := raw.(managerPlugin.ConfigurableExperimentManager)
-		if !ok {
-			return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
-				raw,
-				reflect.TypeOf((*manager.ExperimentManager)(nil)).Elem(),
-				ManagerPluginIdentified)
-		}
-
-		err = experimentManager.Configure(f.EngineConfig)
-		if err != nil {
-			return nil, fmt.Errorf("failed to configure experiment manager plugin instance: %w", err)
-		}
-
-		f.manager = experimentManager
+		f.manager = instance.(manager.ExperimentManager)
 	}
 
 	return f.manager, nil
@@ -57,25 +64,11 @@ func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	defer f.Unlock()
 
 	if f.runner == nil {
-		raw, err := f.rpcClient.Dispense(RunnerPluginIdentified)
+		instance, err := f.dispenseAndConfigure(RunnerPluginIdentified)
 		if err != nil {
-			return nil, fmt.Errorf("unable to retrieve experiment runner plugin instance: %w", err)
+			return nil, err
 		}
-
-		experimentRunner, ok := raw.(runnerPlugin.ConfigurableExperimentRunner)
-		if !ok {
-			return nil, fmt.Errorf("unable to cast %T to %s for plugin \"%s\"",
-				raw,
-				reflect.TypeOf((*runner.ExperimentRunner)(nil)).Elem(),
-				RunnerPluginIdentified)
-		}
-
-		err = experimentRunner.Configure(f.EngineConfig)
-		if err != nil {
-			return nil, fmt.Errorf("failed to configure experiment runner plugin instance: %w", err)
-		}
-
-		f.runner = experimentRunner
+		f.runner = instance.(runner.ExperimentRunner)
 	}
 
 	return f.runner, nil
@@ -88,7 +81,7 @@ func NewFactory(pluginBinary string, engineCfg json.RawMessage, logger *zap.Suga
 	}
 
 	return &EngineFactory{
-		rpcClient:    rpcClient,
+		Client:       rpcClient,
 		EngineConfig: engineCfg,
 	}, nil
 }

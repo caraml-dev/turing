@@ -5,29 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/plugin/mocks"
+
 	"github.com/gojek/turing/engines/experiment/manager"
-	managerMocks "github.com/gojek/turing/engines/experiment/manager/mocks"
-	"github.com/gojek/turing/engines/experiment/plugin/shared/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-type mockExperimentManager struct {
-	managerMocks.ExperimentManager
-}
-
-func (_m *mockExperimentManager) Configure(cfg json.RawMessage) error {
-	ret := _m.Called(cfg)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(error)
-	}
-
-	return r0
-}
 
 func TestRpcClient_Configure(t *testing.T) {
 	suite := map[string]struct {
@@ -130,7 +113,7 @@ func TestRpcServer_Configure(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := &mockExperimentManager{}
+			mockManager := &mocks.ConfigurableExperimentManager{}
 			mockManager.On("Configure", tt.cfg).Return(func() error {
 				if tt.err != "" {
 					return errors.New(tt.err)
@@ -165,7 +148,7 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := &mockExperimentManager{}
+			mockManager := &mocks.ConfigurableExperimentManager{}
 			mockManager.On("GetEngineInfo", mock.Anything).
 				Return(tt.expected)
 			rpcServer := &rpcServer{mockManager}

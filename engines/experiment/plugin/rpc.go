@@ -17,6 +17,8 @@ type ClientServices struct {
 	Runner  runnerPlugin.ConfigurableExperimentRunner
 }
 
+// Connect returns an instance of protocol client to be used to communicate
+// with a plugin, served over net/rpc
 func Connect(pluginBinary string, logger *zap.Logger) (plugin.ClientProtocol, error) {
 	hcLogger := wrapper.Wrap(logger)
 
@@ -25,7 +27,6 @@ func Connect(pluginBinary string, logger *zap.Logger) (plugin.ClientProtocol, er
 		Cmd:              exec.Command(pluginBinary),
 		Plugins:          pluginMap,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolNetRPC},
-		Managed:          true,
 		Logger:           hcLogger,
 	})
 
@@ -41,6 +42,7 @@ func Connect(pluginBinary string, logger *zap.Logger) (plugin.ClientProtocol, er
 	return rpcClient, nil
 }
 
+// Serve serves provided ClientServices via net/rpc
 func Serve(services *ClientServices) {
 	plugins := plugin.PluginSet{
 		ManagerPluginIdentified: &managerPlugin.ExperimentManagerPlugin{

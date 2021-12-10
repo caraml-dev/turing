@@ -9,6 +9,8 @@ import (
 	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 )
 
+// EngineFactory implements experiment.EngineFactory and creates experiment manager/runner
+// backed by compile-time plugins and registered within the application
 type EngineFactory struct {
 	EngineName   string
 	EngineConfig json.RawMessage
