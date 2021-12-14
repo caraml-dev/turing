@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
-	mocks2 "github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
 	goPlugin "github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -47,7 +47,7 @@ func TestNewFactory(t *testing.T) {
 
 	logger, _ := zap.NewDevelopment()
 	for name, tt := range suite {
-		mockClient := &mocks2.ClientProtocol{}
+		mockClient := &mocks.ClientProtocol{}
 
 		t.Run(name, func(t *testing.T) {
 			withPatchedConnect(mockClient, tt.err, func() {
@@ -77,7 +77,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		"success": {
 			cfg: json.RawMessage("{\"key_1\": \"value_1\"}"),
 			mockManager: func(cfg json.RawMessage) interface{} {
-				mockManager := &mocks2.ConfigurableExperimentManager{}
+				mockManager := &mocks.ConfigurableExperimentManager{}
 				mockManager.
 					On("Configure", cfg).
 					Return(func() error { return nil })
@@ -104,7 +104,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		},
 		"failure | failed to configure plugin": {
 			mockManager: func(cfg json.RawMessage) interface{} {
-				mockManager := &mocks2.ConfigurableExperimentManager{}
+				mockManager := &mocks.ConfigurableExperimentManager{}
 				mockManager.
 					On("Configure", cfg).
 					Return(func() error {
@@ -124,7 +124,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			mockManager := tt.mockManager(tt.cfg)
 
-			mockClient := &mocks2.ClientProtocol{}
+			mockClient := &mocks.ClientProtocol{}
 			mockClient.On("Dispense", rpc.ManagerPluginIdentifier).
 				Return(mockManager,
 					func(string) error {
@@ -151,7 +151,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 					assert.NoError(t, err)
 					assert.Same(t, actual, another)
 
-					mockManager.(*mocks2.ConfigurableExperimentManager).AssertExpectations(t)
+					mockManager.(*mocks.ConfigurableExperimentManager).AssertExpectations(t)
 				}
 			})
 

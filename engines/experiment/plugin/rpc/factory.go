@@ -3,11 +3,11 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"reflect"
 	"sync"
 
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
