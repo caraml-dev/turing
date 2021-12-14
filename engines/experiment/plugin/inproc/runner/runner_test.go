@@ -3,11 +3,11 @@ package runner_test
 import (
 	"context"
 	"encoding/json"
-	v1 "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"net/http"
 	"reflect"
 	"testing"
 
+	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/experiment/runner/mocks"
 )
@@ -31,7 +31,7 @@ func TestRegisterAndGet(t *testing.T) {
 	tests := []struct {
 		name            string
 		runnerName      string
-		runnerFactory   v1.Factory
+		runnerFactory   runnerPlugin.Factory
 		runnerConfig    json.RawMessage
 		interceptors    []runner.Interceptor
 		want            runner.ExperimentRunner
@@ -65,7 +65,7 @@ func TestRegisterAndGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if !tt.skipRegister {
-				err := v1.Register(tt.runnerName, tt.runnerFactory)
+				err := runnerPlugin.Register(tt.runnerName, tt.runnerFactory)
 
 				if (err != nil) != tt.wantRegisterErr {
 					t.Errorf("Register() error = %v, wantErr %v", err, tt.wantRegisterErr)
@@ -73,7 +73,7 @@ func TestRegisterAndGet(t *testing.T) {
 				}
 			}
 
-			got, err := v1.Get(tt.runnerName, tt.runnerConfig)
+			got, err := runnerPlugin.Get(tt.runnerName, tt.runnerConfig)
 			if (err != nil) != tt.wantGetErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantGetErr)
 				return

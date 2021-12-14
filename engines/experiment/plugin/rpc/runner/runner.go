@@ -2,9 +2,9 @@ package runner
 
 import (
 	"context"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"net/http"
 
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 )
 

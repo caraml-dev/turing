@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/manager"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/runner"
 	"os/exec"
 	"runtime"
 
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/manager"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/runner"
 	"github.com/hashicorp/go-plugin"
 	wrapper "github.com/zaffka/zap-to-hclog"
 	"go.uber.org/zap"

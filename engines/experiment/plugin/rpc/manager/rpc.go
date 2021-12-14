@@ -3,9 +3,9 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 )
 
 // rpcClient implements ConfigurableExperimentManager interface
