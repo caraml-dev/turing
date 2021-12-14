@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/patrickmn/go-cache"
-
-	"github.com/gojek/turing/engines/experiment/common"
+	"github.com/gojek/turing/api/turing/config"
+	logger "github.com/gojek/turing/api/turing/log"
+	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/patrickmn/go-cache"
 )
 
 const (
@@ -61,19 +63,20 @@ type Experiment struct {
 
 // NewExperimentsService creates a new experiment service from managerConfig.
 // managerConfig is a map of experiment manager name to the JSON string configuration.
-func NewExperimentsService(managerConfig map[string]interface{}) (ExperimentsService, error) {
+func NewExperimentsService(managerConfig map[string]config.EngineConfig) (ExperimentsService, error) {
 	experimentManagers := make(map[string]manager.ExperimentManager)
 
-	for name, config := range managerConfig {
-		configJSON, err := json.Marshal(config)
+	for name, engineConfig := range managerConfig {
+		factory, err := experiment.NewEngineFactory(name, engineConfig, logger.Glob())
 		if err != nil {
 			return nil, err
 		}
 
-		m, err := manager.Get(name, configJSON)
+		m, err := factory.GetExperimentManager()
 		if err != nil {
 			return nil, err
 		}
+
 		experimentManagers[name] = m
 	}
 
@@ -474,7 +477,7 @@ func reconcileVariables(
 				Name:     item.Name,
 				Required: item.Required,
 				// Set header field source by default
-				FieldSource: common.HeaderFieldSource,
+				FieldSource: request.HeaderFieldSource,
 			}
 		}
 	}

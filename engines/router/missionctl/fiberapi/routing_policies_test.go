@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/gojek/turing/engines/experiment/runner/nop"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"

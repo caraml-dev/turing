@@ -9,13 +9,12 @@ import (
 
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/gojek/turing/engines/router"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	tfu "github.com/gojek/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
-
-	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,13 +32,13 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 			rule: &fiberapi.TrafficSplittingStrategyRule{
 				Conditions: []*router.TrafficRuleCondition{
 					{
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 						Field:       "X-Region",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"region-a", "region-b"},
 					},
 					{
-						FieldSource: common.PayloadFieldSource,
+						FieldSource: request.PayloadFieldSource,
 						Field:       "foo.bar",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"foobar"},
@@ -56,19 +55,19 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 			rule: &fiberapi.TrafficSplittingStrategyRule{
 				Conditions: []*router.TrafficRuleCondition{
 					{
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 						Field:       "X-Region",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"region-a", "region-b"},
 					},
 					{
-						FieldSource: common.PayloadFieldSource,
+						FieldSource: request.PayloadFieldSource,
 						Field:       "another",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"42"},
 					},
 					{
-						FieldSource: common.PayloadFieldSource,
+						FieldSource: request.PayloadFieldSource,
 						Field:       "foo.bar",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"foobar"},
@@ -85,19 +84,19 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 			rule: &fiberapi.TrafficSplittingStrategyRule{
 				Conditions: []*router.TrafficRuleCondition{
 					{
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 						Field:       "X-Region",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"region-a", "region-b"},
 					},
 					{
-						FieldSource: common.PayloadFieldSource,
+						FieldSource: request.PayloadFieldSource,
 						Field:       "another",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"42"},
 					},
 					{
-						FieldSource: common.PayloadFieldSource,
+						FieldSource: request.PayloadFieldSource,
 						Field:       "foo.bar",
 						Operator:    router.InConditionOperator,
 						Values:      []string{"foobar"},
@@ -163,7 +162,7 @@ func TestTuringTrafficSplittingStrategy_Initialize(t *testing.T) {
 						RouteID: "ROUTE-A",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "Content-Type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"application/json"},
@@ -174,7 +173,7 @@ func TestTuringTrafficSplittingStrategy_Initialize(t *testing.T) {
 						RouteID: "ROUTE-B",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "Content-Type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"application/xml"},
@@ -230,13 +229,13 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-a",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "X-Region",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"region-a", "region-b"},
 							},
 							{
-								FieldSource: common.PayloadFieldSource,
+								FieldSource: request.PayloadFieldSource,
 								Field:       "service_type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"service-b"},
@@ -263,13 +262,13 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-a",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "X-Region",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"region-a", "region-b"},
 							},
 							{
-								FieldSource: common.PayloadFieldSource,
+								FieldSource: request.PayloadFieldSource,
 								Field:       "service_type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"service-b"},
@@ -280,7 +279,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-b",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.PayloadFieldSource,
+								FieldSource: request.PayloadFieldSource,
 								Field:       "service_type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"service-a", "service-b"},
@@ -305,13 +304,13 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-a",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "X-Region",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"region-a", "region-b"},
 							},
 							{
-								FieldSource: common.PayloadFieldSource,
+								FieldSource: request.PayloadFieldSource,
 								Field:       "service_type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"service-b"},
@@ -322,7 +321,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-b",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.PayloadFieldSource,
+								FieldSource: request.PayloadFieldSource,
 								Field:       "service_type",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"service-a", "service-b"},
@@ -349,7 +348,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-a",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "X-Region",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"region-a"},
@@ -375,7 +374,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 						RouteID: "route-a",
 						Conditions: []*router.TrafficRuleCondition{
 							{
-								FieldSource: common.HeaderFieldSource,
+								FieldSource: request.HeaderFieldSource,
 								Field:       "X-Region",
 								Operator:    router.InConditionOperator,
 								Values:      []string{"region-a"},

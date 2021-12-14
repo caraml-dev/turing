@@ -6,35 +6,14 @@ import (
 	"fmt"
 	"testing"
 
-	_ "github.com/gojek/turing/engines/experiment/runner/nop"
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 )
 
-// TestTreatment satisfies the Treatment interface
-type TestTreatment struct {
-	name      string
-	treatment string
-	raw       json.RawMessage // raw experiment config from the experiment engine
-}
-
-// GetExperimentName returns the name of the experiment
-func (ex TestTreatment) GetExperimentName() string {
-	return ex.name
-}
-
-// GetName retrives the treatment (or control) name
-func (ex TestTreatment) GetName() string {
-	return ex.treatment
-}
-
-// GetConfig returs the raw experiment config from the experiment engine
-func (ex TestTreatment) GetConfig() json.RawMessage {
-	return ex.raw
-}
-
 type testSuiteExperimentResponse struct {
-	treatment      TestTreatment
+	treatment      runner.Treatment
 	err            error
 	expectedConfig json.RawMessage
 	expectedError  string
@@ -43,7 +22,7 @@ type testSuiteExperimentResponse struct {
 func TestNewExperimentRunner(t *testing.T) {
 	tests := map[string]struct {
 		engineName               string
-		config                   json.RawMessage
+		config                   map[string]interface{}
 		litmusEnvValueForPassKey string // empty env value means the environment variable is unset
 		xpEnvValueForPasskey     string // empty env value means the environment variable is unset
 		wantErr                  bool
@@ -70,16 +49,16 @@ func TestNewExperimentRunner(t *testing.T) {
 func TestNewResponse(t *testing.T) {
 	tests := map[string]testSuiteExperimentResponse{
 		"success": {
-			treatment: TestTreatment{
-				raw: []byte(`{"key": "value"}`),
+			treatment: runner.Treatment{
+				Config: []byte(`{"key": "value"}`),
 			},
 			err:            nil,
 			expectedConfig: []byte(`{"key": "value"}`),
 			expectedError:  "",
 		},
 		"failure_error": {
-			treatment: TestTreatment{
-				raw: []byte(`{"key": "value"}`),
+			treatment: runner.Treatment{
+				Config: []byte(`{"key": "value"}`),
 			},
 			err:            fmt.Errorf("Test Error"),
 			expectedConfig: nil,
@@ -89,7 +68,7 @@ func TestNewResponse(t *testing.T) {
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			resp := NewResponse(data.treatment, data.err)
+			resp := NewResponse(&data.treatment, data.err)
 
 			// Validate
 			assert.Equal(t, data.expectedConfig, resp.Configuration)

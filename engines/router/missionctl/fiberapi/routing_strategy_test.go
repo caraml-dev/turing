@@ -9,6 +9,7 @@ import (
 	"bou.ke/monkey"
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
+	runnerV1 "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	tfu "github.com/gojek/turing/engines/router/missionctl/fiberapi/internal/testutils"
@@ -65,21 +66,21 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 
 			// Monkey patch functionality that is external to the current package and run
 			monkey.Patch(
-				runner.Get,
+				runnerV1.Get,
 				func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
 			monkey.Patch(
 				experiment.NewExperimentRunner,
-				func(_ string, _ json.RawMessage) (runner.ExperimentRunner, error) {
+				func(_ string, _ map[string]interface{}) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
 			err := strategy.Initialize(data.properties)
 
 			monkey.Unpatch(experiment.NewExperimentRunner)
-			monkey.Unpatch(runner.Get)
+			monkey.Unpatch(runnerV1.Get)
 
 			// Test that there is no error and fanIn is initialised as expected
 			assert.Equal(t, data.success, err == nil)
@@ -95,7 +96,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 	type testSuiteRouting struct {
 		endpoints []string
 		// treatment that the experiment runner will return
-		treatment tfu.TestTreatment
+		treatment runner.Treatment
 		// experimentMappings in routeSelectionPolicy to select a route from the treatment and experiment in the treatment
 		experimentMappings []experimentMapping
 		// if true, experiment runner will return an error when the caller calls GetTreatmentForRequest()
@@ -109,10 +110,10 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 	tests := map[string]testSuiteRouting{
 		"match for treatment and experiment in the mappings should select the correct route": {
 			endpoints: []string{"route-A", "route-B"},
-			treatment: tfu.TestTreatment{
-				Name:      "test_experiment",
-				Treatment: "treatment-A",
-				Raw:       json.RawMessage(`{"test_config": "placeholder"}`),
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder"}`),
 			},
 			experimentMappings: []experimentMapping{
 				{Experiment: "test_experiment", Treatment: "treatment-0", Route: "route-0"},
@@ -127,10 +128,10 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 		},
 		"no match for treatment and experiment in the mappings should select no route and fallback to default route": {
 			endpoints: []string{"route-A", "route-B", "control"},
-			treatment: tfu.TestTreatment{
-				Name:      "test_experiment",
-				Treatment: "treatment-A",
-				Raw:       json.RawMessage(`{"test_config": "placeholder"}`),
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder"}`),
 			},
 			experimentMappings: []experimentMapping{
 				{Experiment: "test_experiment", Treatment: "treatment-0", Route: "route-B"},
@@ -182,8 +183,8 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			strategy := DefaultTuringRoutingStrategy{
 				&experimentationPolicy{
 					experimentEngine: tfu.MockExperimentRunner{
-						TestTreatment: data.treatment,
-						WantErr:       data.experimentRunnerWantErr,
+						Treatment: &data.treatment,
+						WantErr:   data.experimentRunnerWantErr,
 					},
 				},
 				&routeSelectionPolicy{

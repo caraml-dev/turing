@@ -9,12 +9,12 @@ import (
 
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
-	mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
@@ -341,12 +341,12 @@ func TestListVariables(t *testing.T) {
 					{
 						Name:        "var-1",
 						Required:    true,
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 					},
 					{
 						Name:        "var-2",
 						Required:    false,
-						FieldSource: common.HeaderFieldSource,
+						FieldSource: request.HeaderFieldSource,
 					},
 				},
 			},
@@ -538,7 +538,7 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 		},
 		"success | custom exp mgr": {
 			engine:         "xp",
-			inputCfg:       json.RawMessage([]byte(`[1,2]`)),
+			inputCfg:       json.RawMessage(`[1,2]`),
 			expectedResult: expectedResult2,
 		},
 	}

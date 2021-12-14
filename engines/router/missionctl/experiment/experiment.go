@@ -5,14 +5,21 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
+	"github.com/gojek/turing/engines/router/missionctl/log"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
-func NewExperimentRunner(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
-	return runner.Get(name, config)
+func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.ExperimentRunner, error) {
+	factory, err := experiment.NewEngineFactory(name, cfg, log.Glob())
+	if err != nil {
+		return nil, err
+	}
+
+	return factory.GetExperimentRunner()
 }
 
 // Response holds the experiment configuration / error response,
@@ -36,14 +43,14 @@ func (r *Response) Header() http.Header {
 
 // NewResponse is a helper function to create an object of type Response
 // that holds the experiment treatment / appropriate error information
-func NewResponse(expPlan runner.Treatment, expPlanErr error) *Response {
+func NewResponse(expPlan *runner.Treatment, expPlanErr error) *Response {
 	// Create experiment response object
 	experimentResponse := &Response{}
 	if expPlanErr != nil {
 		// Failed retrieving experiment treatment, populate the error field
 		experimentResponse.Error = expPlanErr.Error()
 	} else {
-		experimentResponse.Configuration = expPlan.GetConfig()
+		experimentResponse.Configuration = expPlan.Config
 	}
 	return experimentResponse
 }

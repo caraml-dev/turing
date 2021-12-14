@@ -1,0 +1,32 @@
+package inproc
+
+import (
+	"encoding/json"
+
+	"github.com/gojek/turing/engines/experiment/manager"
+	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
+	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/gojek/turing/engines/experiment/runner"
+)
+
+// EngineFactory implements experiment.EngineFactory and creates experiment manager/runner
+// backed by compile-time plugins and registered within the application
+type EngineFactory struct {
+	EngineName   string
+	EngineConfig json.RawMessage
+}
+
+func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error) {
+	return managerPlugin.Get(f.EngineName, f.EngineConfig)
+}
+
+func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
+	return runnerPlugin.Get(f.EngineName, f.EngineConfig)
+}
+
+func NewEngineFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {
+	return &EngineFactory{
+		EngineName:   name,
+		EngineConfig: cfg,
+	}, nil
+}

@@ -190,7 +190,7 @@ func TestNewAppContext(t *testing.T) {
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(service.NewExperimentsService,
-		func(experimentConfig map[string]interface{}) (service.ExperimentsService, error) {
+		func(experimentConfig map[string]config.EngineConfig) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -201,10 +201,10 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewMLPService,
-		func(mlpBasePath string, mlpEncryptionkey string, merlinBasePath string,
+		func(mlpBasePath string, mlpEncryptionKey string, merlinBasePath string,
 		) (service.MLPService, error) {
 			assert.Equal(t, testCfg.MLPConfig.MLPURL, mlpBasePath)
-			assert.Equal(t, testCfg.MLPConfig.MLPEncryptionKey, mlpEncryptionkey)
+			assert.Equal(t, testCfg.MLPConfig.MLPEncryptionKey, mlpEncryptionKey)
 			assert.Equal(t, testCfg.MLPConfig.MerlinURL, merlinBasePath)
 			return mlpSvc, nil
 		},

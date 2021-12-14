@@ -17,8 +17,8 @@ type routeSelPolicyCfg struct {
 }
 
 type expPolicyCfg struct {
-	ExpEngine      string          `json:"experiment_engine,omitempty"`
-	ExpEngineProps json.RawMessage `json:"experiment_engine_properties,omitempty"`
+	ExpEngine      string                 `json:"experiment_engine,omitempty"`
+	ExpEngineProps map[string]interface{} `json:"experiment_engine_properties,omitempty"`
 }
 
 // ****************************************************************************

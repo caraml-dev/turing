@@ -16,8 +16,8 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/validation"
-	"github.com/gojek/turing/engines/experiment/common"
 	"github.com/gojek/turing/engines/experiment/manager"
+	request2 "github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 func TestValidateLogConfig(t *testing.T) {
@@ -244,7 +244,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: request2.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"region-a", "region-b"},
@@ -293,7 +293,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: request2.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"region-b"},
@@ -325,7 +325,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: request2.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.RuleConditionOperator{},
 							Values:      []string{"region-b"},
@@ -389,7 +389,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.HeaderFieldSource,
+							FieldSource: request2.HeaderFieldSource,
 							Field:       "",
 							Operator:    router.InConditionOperator,
 							Values:      []string{},
@@ -417,7 +417,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.PayloadFieldSource,
+							FieldSource: request2.PayloadFieldSource,
 							Field:       "some_property",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},
@@ -443,7 +443,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: common.PayloadFieldSource,
+							FieldSource: request2.PayloadFieldSource,
 							Field:       "some_property",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},

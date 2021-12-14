@@ -1,4 +1,4 @@
-include .env.development
+include .env.development*
 export
 
 USER=$(shell whoami)

@@ -3,38 +3,12 @@ package nop
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gojek/turing/engines/experiment/runner"
 )
 
-// init ensures this runner is registered when the package is imported.
-func init() {
-	err := runner.Register("nop", NewExperimentRunner)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// treatment captures a dummy experiment treatment created by the ExperimentRunner
-// and implements the runner.ExperimentRunner
-type treatment struct{}
-
-// GetExperimentName returns an empty string
-func (treatment) GetExperimentName() string {
-	return ""
-}
-
-// GetTreatmentName returns an empty string
-func (treatment) GetName() string {
-	return ""
-}
-
-// GetConfig returns an empty json object
-func (treatment) GetConfig() json.RawMessage {
-	return nil
-}
+var nopTreatment = &runner.Treatment{}
 
 // ExperimentRunner is a dummy experiment runner
 type ExperimentRunner struct{}
@@ -45,8 +19,8 @@ func (ExperimentRunner) GetTreatmentForRequest(
 	runner.Logger,
 	http.Header,
 	[]byte,
-) (runner.Treatment, error) {
-	return treatment{}, nil
+) (*runner.Treatment, error) {
+	return nopTreatment, nil
 }
 
 // NewExperimentRunner is a creator for the experiment runners

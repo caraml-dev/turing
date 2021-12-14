@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/gojek/turing/engines/experiment/runner/nop"
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"

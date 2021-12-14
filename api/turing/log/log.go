@@ -58,3 +58,7 @@ func Fatalf(template string, args ...interface{}) {
 func Panicf(template string, args ...interface{}) {
 	globalLogger.Panicf(template, args...)
 }
+
+func Glob() *zap.SugaredLogger {
+	return globalLogger
+}

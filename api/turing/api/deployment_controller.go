@@ -5,11 +5,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/gojek/turing/api/turing/utils"
-
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/utils"
 )
 
 // RouterDeploymentController handles the deployment of routers

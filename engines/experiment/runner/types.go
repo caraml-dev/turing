@@ -1,6 +1,9 @@
 package runner
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 // ContextKey is a type that represents a key in a Golang context
 type ContextKey string
@@ -24,4 +27,10 @@ type Logger interface {
 type Interceptor interface {
 	BeforeDispatch(ctx context.Context) context.Context
 	AfterCompletion(ctx context.Context, err error)
+}
+
+type Treatment struct {
+	ExperimentName string
+	Name           string
+	Config         json.RawMessage
 }

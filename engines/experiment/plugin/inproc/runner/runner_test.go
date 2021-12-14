@@ -1,12 +1,14 @@
-package runner
+package runner_test
 
 import (
 	"context"
 	"encoding/json"
+	v1 "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"net/http"
 	"reflect"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/experiment/runner/mocks"
 )
 
@@ -14,11 +16,14 @@ type fakeRunner struct {
 	config json.RawMessage
 }
 
-func newFakeRunner(config json.RawMessage) (ExperimentRunner, error) {
+func newFakeRunner(config json.RawMessage) (runner.ExperimentRunner, error) {
 	return fakeRunner{config: config}, nil
 }
 
-func (runner fakeRunner) GetTreatmentForRequest(context.Context, Logger, http.Header, []byte) (Treatment, error) {
+func (runner fakeRunner) GetTreatmentForRequest(
+	context.Context,
+	runner.Logger,
+	http.Header, []byte) (*runner.Treatment, error) {
 	return nil, nil
 }
 
@@ -26,10 +31,10 @@ func TestRegisterAndGet(t *testing.T) {
 	tests := []struct {
 		name            string
 		runnerName      string
-		runnerFactory   Factory
+		runnerFactory   v1.Factory
 		runnerConfig    json.RawMessage
-		interceptors    []Interceptor
-		want            ExperimentRunner
+		interceptors    []runner.Interceptor
+		want            runner.ExperimentRunner
 		wantRegisterErr bool
 		wantGetErr      bool
 		skipRegister    bool
@@ -39,7 +44,7 @@ func TestRegisterAndGet(t *testing.T) {
 			runnerName:    "fakeRunner",
 			runnerFactory: newFakeRunner,
 			runnerConfig:  []byte(`{"foo":"bar"}`),
-			interceptors:  []Interceptor{&mocks.Interceptor{}},
+			interceptors:  []runner.Interceptor{&mocks.Interceptor{}},
 			want:          fakeRunner{config: []byte(`{"foo":"bar"}`)},
 		},
 		{
@@ -60,7 +65,7 @@ func TestRegisterAndGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if !tt.skipRegister {
-				err := Register(tt.runnerName, tt.runnerFactory)
+				err := v1.Register(tt.runnerName, tt.runnerFactory)
 
 				if (err != nil) != tt.wantRegisterErr {
 					t.Errorf("Register() error = %v, wantErr %v", err, tt.wantRegisterErr)
@@ -68,7 +73,7 @@ func TestRegisterAndGet(t *testing.T) {
 				}
 			}
 
-			got, err := Get(tt.runnerName, tt.runnerConfig)
+			got, err := v1.Get(tt.runnerName, tt.runnerConfig)
 			if (err != nil) != tt.wantGetErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantGetErr)
 				return

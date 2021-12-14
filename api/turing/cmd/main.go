@@ -1,9 +1,6 @@
 package main
 
-import (
-	"github.com/gojek/turing/api/turing/server"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-)
+import "github.com/gojek/turing/api/turing/server"
 
 func main() {
 	server.Run()

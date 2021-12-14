@@ -48,6 +48,8 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 	return q.MarshalJSON()
 }
 
+type EngineConfig map[string]interface{}
+
 // Config is used to parse and store the environment configs
 type Config struct {
 	Port                   int `validate:"required"`
@@ -77,7 +79,7 @@ type Config struct {
 	//
 	// For example:
 	// { "experiment_engine_a": {"client": "foo"}, "experiment_engine_b": {"apikey": 12} }
-	Experiment map[string]interface{}
+	Experiment map[string]EngineConfig
 }
 
 // ListenAddress returns the Turing Api app's port

@@ -14,6 +14,7 @@ import (
 	"bou.ke/monkey"
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
+	runnerV1 "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	tfu "github.com/gojek/turing/engines/router/missionctl/fiberapi/internal/testutils"
@@ -33,10 +34,10 @@ type testSuiteInitFanIn struct {
 var efi = &EnsemblingFanIn{
 	&experimentationPolicy{
 		experimentEngine: tfu.MockExperimentRunner{
-			TestTreatment: tfu.TestTreatment{
-				Name:      "test_experiment",
-				Treatment: "treatment-A",
-				Raw:       json.RawMessage(`{"test_config": "placeholder"}`),
+			Treatment: &runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder"}`),
 			},
 		},
 	},
@@ -95,21 +96,21 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 
 			// Monkey patch functionality that is external to the current package and run
 			monkey.Patch(
-				runner.Get,
+				runnerV1.Get,
 				func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
 			monkey.Patch(
 				experiment.NewExperimentRunner,
-				func(_ string, _ json.RawMessage) (runner.ExperimentRunner, error) {
+				func(_ string, _ map[string]interface{}) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
 			err := fanIn.Initialize(data.properties)
 
 			monkey.Unpatch(experiment.NewExperimentRunner)
-			monkey.Unpatch(runner.Get)
+			monkey.Unpatch(runnerV1.Get)
 
 			// Test error and if fanIn is initialised as expected
 			assert.Equal(t, data.success, err == nil)
