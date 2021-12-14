@@ -1,4 +1,4 @@
-package v1_test
+package inproc_test
 
 import (
 	"encoding/json"
@@ -8,11 +8,11 @@ import (
 	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/experiment/manager"
 	mocksManager "github.com/gojek/turing/engines/experiment/manager/mocks"
+	plugin "github.com/gojek/turing/engines/experiment/plugin/inproc"
+	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
+	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
 	mocksRunner "github.com/gojek/turing/engines/experiment/runner/mocks"
-	v1 "github.com/gojek/turing/engines/experiment/v1"
-	managerV1 "github.com/gojek/turing/engines/experiment/v1/manager"
-	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +28,7 @@ func Test_NewEngineFactory(t *testing.T) {
 	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			factory, err := v1.NewEngineFactory(tt.engine, tt.cfg)
+			factory, err := plugin.NewEngineFactory(tt.engine, tt.cfg)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.engine, factory.EngineName)
 			assert.Equal(t, tt.cfg, factory.EngineConfig)
@@ -37,7 +37,7 @@ func Test_NewEngineFactory(t *testing.T) {
 }
 
 func withPatchedManagerRegistry(em manager.ExperimentManager, err string, fn func()) {
-	monkey.Patch(managerV1.Get,
+	monkey.Patch(managerPlugin.Get,
 		func(name string, config json.RawMessage) (manager.ExperimentManager, error) {
 			if err != "" {
 				return em, errors.New(err)
@@ -45,7 +45,7 @@ func withPatchedManagerRegistry(em manager.ExperimentManager, err string, fn fun
 			return em, nil
 		},
 	)
-	defer monkey.Unpatch(managerV1.Get)
+	defer monkey.Unpatch(managerPlugin.Get)
 	fn()
 }
 
@@ -67,7 +67,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			factory, _ := v1.NewEngineFactory(tt.engine, nil)
+			factory, _ := plugin.NewEngineFactory(tt.engine, nil)
 			withPatchedManagerRegistry(tt.expected, tt.err, func() {
 				actual, err := factory.GetExperimentManager()
 				if tt.err != "" {
@@ -82,7 +82,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 }
 
 func withPatchedRunnerRegistry(er runner.ExperimentRunner, err string, fn func()) {
-	monkey.Patch(runnerV1.Get,
+	monkey.Patch(runnerPlugin.Get,
 		func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
 			if err != "" {
 				return er, errors.New(err)
@@ -90,7 +90,7 @@ func withPatchedRunnerRegistry(er runner.ExperimentRunner, err string, fn func()
 			return er, nil
 		},
 	)
-	defer monkey.Unpatch(runnerV1.Get)
+	defer monkey.Unpatch(runnerPlugin.Get)
 	fn()
 }
 
@@ -112,7 +112,7 @@ func TestEngineFactory_GetExperimentRunner(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			factory, _ := v1.NewEngineFactory(tt.engine, nil)
+			factory, _ := plugin.NewEngineFactory(tt.engine, nil)
 			withPatchedRunnerRegistry(tt.expected, tt.err, func() {
 				actual, err := factory.GetExperimentRunner()
 				if tt.err != "" {

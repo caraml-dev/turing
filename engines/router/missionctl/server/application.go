@@ -16,7 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	// Turing router will support these experiment runners: nop
-	_ "github.com/gojek/turing/engines/experiment/v1/runner/nop"
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
 	// TODO: justify this
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
 	// TODO: justify this

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/gojek/turing/engines/experiment/runner"
-	_ "github.com/gojek/turing/engines/experiment/v1/runner/nop"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 )

@@ -3,13 +3,13 @@ package runner_test
 import (
 	"context"
 	"encoding/json"
+	v1 "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/experiment/runner/mocks"
-	v1 "github.com/gojek/turing/engines/experiment/v1/runner"
 )
 
 type fakeRunner struct {

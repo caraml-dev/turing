@@ -1,20 +1,20 @@
-package plugin
+package rpc
 
 import (
 	"fmt"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/manager"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/runner"
 	"os/exec"
 	"runtime"
 
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/manager"
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/runner"
 	"github.com/hashicorp/go-plugin"
 	wrapper "github.com/zaffka/zap-to-hclog"
 	"go.uber.org/zap"
 )
 
 type ClientServices struct {
-	Manager managerPlugin.ConfigurableExperimentManager
-	Runner  runnerPlugin.ConfigurableExperimentRunner
+	Manager manager.ConfigurableExperimentManager
+	Runner  runner.ConfigurableExperimentRunner
 }
 
 // Connect returns an instance of protocol client to be used to communicate
@@ -45,10 +45,10 @@ func Connect(pluginBinary string, logger *zap.Logger) (plugin.ClientProtocol, er
 // Serve serves provided ClientServices via net/rpc
 func Serve(services *ClientServices) {
 	plugins := plugin.PluginSet{
-		ManagerPluginIdentified: &managerPlugin.ExperimentManagerPlugin{
+		ManagerPluginIdentifier: &manager.ExperimentManagerPlugin{
 			Impl: services.Manager,
 		},
-		RunnerPluginIdentified: &runnerPlugin.ExperimentRunnerPlugin{
+		RunnerPluginIdentifier: &runner.ExperimentRunnerPlugin{
 			Impl: services.Runner,
 		},
 	}

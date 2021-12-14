@@ -3,9 +3,8 @@ package manager
 import (
 	"encoding/json"
 	"errors"
+	mocks2 "github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
 	"testing"
-
-	"github.com/gojek/turing/engines/experiment/plugin/mocks"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +27,7 @@ func TestRpcClient_Configure(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockClient := &mocks.RPCClient{}
+			mockClient := &mocks2.RPCClient{}
 			mockClient.On("Call", "Plugin.Configure", tt.cfg, mock.Anything).Return(
 				func() error {
 					if tt.err != "" {
@@ -69,7 +68,7 @@ func TestRpcClient_GetEngineInfo(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockClient := &mocks.RPCClient{}
+			mockClient := &mocks2.RPCClient{}
 			mockClient.
 				On("Call", "Plugin.GetEngineInfo", mock.Anything, mock.AnythingOfType("*manager.Engine")).
 				Run(func(args mock.Arguments) {
@@ -113,7 +112,7 @@ func TestRpcServer_Configure(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := &mocks.ConfigurableExperimentManager{}
+			mockManager := &mocks2.ConfigurableExperimentManager{}
 			mockManager.On("Configure", tt.cfg).Return(func() error {
 				if tt.err != "" {
 					return errors.New(tt.err)
@@ -148,7 +147,7 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := &mocks.ConfigurableExperimentManager{}
+			mockManager := &mocks2.ConfigurableExperimentManager{}
 			mockManager.On("GetEngineInfo", mock.Anything).
 				Return(tt.expected)
 			rpcServer := &rpcServer{mockManager}

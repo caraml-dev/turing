@@ -1,14 +1,14 @@
-package plugin_test
+package rpc_test
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc"
+	mocks2 "github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/gojek/turing/engines/experiment/plugin"
-	"github.com/gojek/turing/engines/experiment/plugin/mocks"
 	goPlugin "github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -20,14 +20,14 @@ const (
 )
 
 func withPatchedConnect(client goPlugin.ClientProtocol, err string, fn func()) {
-	monkey.Patch(plugin.Connect,
+	monkey.Patch(rpc.Connect,
 		func(pluginBinary string, logger *zap.Logger) (goPlugin.ClientProtocol, error) {
 			if err != "" {
 				return nil, errors.New(err)
 			}
 			return client, nil
 		})
-	defer monkey.Unpatch(plugin.Connect)
+	defer monkey.Unpatch(rpc.Connect)
 
 	fn()
 }
@@ -47,11 +47,11 @@ func TestNewFactory(t *testing.T) {
 
 	logger, _ := zap.NewDevelopment()
 	for name, tt := range suite {
-		mockClient := &mocks.ClientProtocol{}
+		mockClient := &mocks2.ClientProtocol{}
 
 		t.Run(name, func(t *testing.T) {
 			withPatchedConnect(mockClient, tt.err, func() {
-				actual, err := plugin.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
+				actual, err := rpc.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
 				if tt.err != "" {
 					assert.EqualError(t, err, tt.err)
 					assert.Nil(t, actual)
@@ -77,7 +77,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		"success": {
 			cfg: json.RawMessage("{\"key_1\": \"value_1\"}"),
 			mockManager: func(cfg json.RawMessage) interface{} {
-				mockManager := &mocks.ConfigurableExperimentManager{}
+				mockManager := &mocks2.ConfigurableExperimentManager{}
 				mockManager.
 					On("Configure", cfg).
 					Return(func() error { return nil })
@@ -92,7 +92,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 			failToDispense: true,
 			err: fmt.Sprintf(
 				"unable to retrieve \"%s\" plugin instance: %v",
-				plugin.ManagerPluginIdentified, dispenseError),
+				rpc.ManagerPluginIdentifier, dispenseError),
 		},
 		"failure | plugin doesn't meet interface requirements": {
 			mockManager: func(json.RawMessage) interface{} {
@@ -100,11 +100,11 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 			},
 			err: fmt.Sprintf(
 				"unable to cast *interface {} to shared.Configurable for plugin \"%s\"",
-				plugin.ManagerPluginIdentified),
+				rpc.ManagerPluginIdentifier),
 		},
 		"failure | failed to configure plugin": {
 			mockManager: func(cfg json.RawMessage) interface{} {
-				mockManager := &mocks.ConfigurableExperimentManager{}
+				mockManager := &mocks2.ConfigurableExperimentManager{}
 				mockManager.
 					On("Configure", cfg).
 					Return(func() error {
@@ -124,8 +124,8 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			mockManager := tt.mockManager(tt.cfg)
 
-			mockClient := &mocks.ClientProtocol{}
-			mockClient.On("Dispense", plugin.ManagerPluginIdentified).
+			mockClient := &mocks2.ClientProtocol{}
+			mockClient.On("Dispense", rpc.ManagerPluginIdentifier).
 				Return(mockManager,
 					func(string) error {
 						if tt.failToDispense {
@@ -136,7 +136,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 				).Once()
 
 			withPatchedConnect(mockClient, "", func() {
-				factory, _ := plugin.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
+				factory, _ := rpc.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
 				actual, err := factory.GetExperimentManager()
 
 				if tt.err != "" {
@@ -151,7 +151,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 					assert.NoError(t, err)
 					assert.Same(t, actual, another)
 
-					mockManager.(*mocks.ConfigurableExperimentManager).AssertExpectations(t)
+					mockManager.(*mocks2.ConfigurableExperimentManager).AssertExpectations(t)
 				}
 			})
 

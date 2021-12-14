@@ -3,9 +3,8 @@ package runner
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
 	"testing"
-
-	"github.com/gojek/turing/engines/experiment/plugin/mocks"
 
 	"github.com/gojek/turing/engines/experiment/runner"
 	runnerMocks "github.com/gojek/turing/engines/experiment/runner/mocks"

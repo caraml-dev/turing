@@ -1,12 +1,12 @@
-package v1
+package inproc
 
 import (
 	"encoding/json"
 
 	"github.com/gojek/turing/engines/experiment/manager"
+	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
+	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner"
-	managerV1 "github.com/gojek/turing/engines/experiment/v1/manager"
-	runnerV1 "github.com/gojek/turing/engines/experiment/v1/runner"
 )
 
 // EngineFactory implements experiment.EngineFactory and creates experiment manager/runner
@@ -17,11 +17,11 @@ type EngineFactory struct {
 }
 
 func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error) {
-	return managerV1.Get(f.EngineName, f.EngineConfig)
+	return managerPlugin.Get(f.EngineName, f.EngineConfig)
 }
 
 func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
-	return runnerV1.Get(f.EngineName, f.EngineConfig)
+	return runnerPlugin.Get(f.EngineName, f.EngineConfig)
 }
 
 func NewEngineFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {

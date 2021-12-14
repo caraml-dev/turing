@@ -8,8 +8,8 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/experiment"
-	"github.com/gojek/turing/engines/experiment/plugin"
-	v1 "github.com/gojek/turing/engines/experiment/v1"
+	"github.com/gojek/turing/engines/experiment/plugin/inproc"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -36,16 +36,16 @@ func Test_NewEngineFactory(t *testing.T) {
 				"PluginBinary": "path/to/binary",
 				"key_1":        "value_1",
 			},
-			expected: &plugin.EngineFactory{
+			expected: &rpc.EngineFactory{
 				EngineConfig: json.RawMessage("{\"key_1\":\"value_1\"}"),
 			},
 			withPatch: func(expected experiment.EngineFactory, fn func()) {
-				monkey.Patch(plugin.NewFactory,
-					func(string, json.RawMessage, *zap.SugaredLogger) (*plugin.EngineFactory, error) {
-						return expected.(*plugin.EngineFactory), nil
+				monkey.Patch(rpc.NewFactory,
+					func(string, json.RawMessage, *zap.SugaredLogger) (*rpc.EngineFactory, error) {
+						return expected.(*rpc.EngineFactory), nil
 					},
 				)
-				defer monkey.Unpatch(plugin.NewFactory)
+				defer monkey.Unpatch(rpc.NewFactory)
 				fn()
 			},
 		},
@@ -54,7 +54,7 @@ func Test_NewEngineFactory(t *testing.T) {
 			cfg: map[string]interface{}{
 				"key_1": "value_1",
 			},
-			expected: &v1.EngineFactory{
+			expected: &inproc.EngineFactory{
 				EngineName:   "compiled-engine",
 				EngineConfig: json.RawMessage("{\"key_1\":\"value_1\"}"),
 			},

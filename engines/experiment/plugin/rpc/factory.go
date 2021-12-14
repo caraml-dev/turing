@@ -1,13 +1,13 @@
-package plugin
+package rpc
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"reflect"
 	"sync"
 
 	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/plugin/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
@@ -49,7 +49,7 @@ func (f *EngineFactory) GetExperimentManager() (manager.ExperimentManager, error
 	defer f.Unlock()
 
 	if f.manager == nil {
-		instance, err := f.dispenseAndConfigure(ManagerPluginIdentified)
+		instance, err := f.dispenseAndConfigure(ManagerPluginIdentifier)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +64,7 @@ func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	defer f.Unlock()
 
 	if f.runner == nil {
-		instance, err := f.dispenseAndConfigure(RunnerPluginIdentified)
+		instance, err := f.dispenseAndConfigure(RunnerPluginIdentifier)
 		if err != nil {
 			return nil, err
 		}

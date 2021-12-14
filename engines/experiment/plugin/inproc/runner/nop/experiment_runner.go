@@ -3,13 +3,13 @@ package nop
 import (
 	"log"
 
+	plugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/gojek/turing/engines/experiment/runner/nop"
-	v1 "github.com/gojek/turing/engines/experiment/v1/runner"
 )
 
 // init ensures this runner is registered when the package is imported.
 func init() {
-	err := v1.Register("nop", nop.NewExperimentRunner)
+	err := plugin.Register("nop", nop.NewExperimentRunner)
 	if err != nil {
 		log.Fatal(err)
 	}

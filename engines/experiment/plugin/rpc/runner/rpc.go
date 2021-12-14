@@ -3,9 +3,9 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"net/http"
 
-	"github.com/gojek/turing/engines/experiment/plugin/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 )
 
