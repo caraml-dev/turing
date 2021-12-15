@@ -70,14 +70,10 @@ func (cfg *BaseService) buildResourceReqs() corev1.ResourceRequirements {
 		corev1.ResourceMemory: cfg.MemoryRequests,
 	}
 
-	// Set resource limits to twice the request
-	cpuLimit := cfg.CPURequests.DeepCopy()
-	cpuLimit.Add(cpuLimit)
-	memoryLimit := cfg.MemoryRequests.DeepCopy()
-	memoryLimit.Add(memoryLimit)
+	// Set resource limits to the same as request
 	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    cpuLimit,
-		corev1.ResourceMemory: memoryLimit,
+		corev1.ResourceCPU:    cfg.CPURequests,
+		corev1.ResourceMemory: cfg.MemoryRequests,
 	}
 
 	return corev1.ResourceRequirements{
