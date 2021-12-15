@@ -15,9 +15,9 @@ import (
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// Define a valid Service configuration for tests
-var testValidKnSvc = KnativeService{
-	BaseService: &BaseService{
+func TestBuildKnativeServiceConfig(t *testing.T) {
+	// Test configuration
+	baseSvc := &BaseService{
 		Name:                 "test-svc",
 		Namespace:            "test-namespace",
 		Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
@@ -84,25 +84,10 @@ var testValidKnSvc = KnativeService{
 				MountPath: "/var/secret",
 			},
 		},
-	},
-	ContainerPort:                8080,
-	MinReplicas:                  1,
-	MaxReplicas:                  2,
-	IsClusterLocal:               true,
-	TargetConcurrency:            1,
-	QueueProxyResourcePercentage: 30,
-}
-
-func TestBuildKnativeServiceConfig(t *testing.T) {
-	// Build expected configuration
-	var timeout int64 = 30
-	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale":                     "1",
-		"autoscaling.knative.dev/maxScale":                     "2",
-		"autoscaling.knative.dev/target":                       "1",
-		"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
-		"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
 	}
+
+	// Expected specs
+	var timeout int64 = 30
 	resources := corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("400m"),
@@ -161,42 +146,110 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 					TimeoutSeconds:      5,
 					FailureThreshold:    5,
 				},
-				VolumeMounts: testValidKnSvc.VolumeMounts,
+				VolumeMounts: baseSvc.VolumeMounts,
 				Env:          envs,
 			},
 		},
-		Volumes: testValidKnSvc.Volumes,
+		Volumes: baseSvc.Volumes,
 	}
-	expected := &knservingv1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-svc",
-			Namespace: "test-namespace",
-			Labels: map[string]string{
-				"labelKey":                       "labelVal",
-				"serving.knative.dev/visibility": "cluster-local",
+
+	tests := map[string]struct {
+		serviceCfg   KnativeService
+		expectedSpec knservingv1.Service
+	}{
+		"basic": {
+			serviceCfg: KnativeService{
+				BaseService:                  baseSvc,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				IsClusterLocal:               true,
+				TargetConcurrency:            1,
+				QueueProxyResourcePercentage: 30,
+			},
+			expectedSpec: knservingv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-svc",
+					Namespace: "test-namespace",
+					Labels: map[string]string{
+						"labelKey":                       "labelVal",
+						"serving.knative.dev/visibility": "cluster-local",
+					},
+				},
+				Spec: knservingv1.ServiceSpec{
+					ConfigurationSpec: knservingv1.ConfigurationSpec{
+						Template: knservingv1.RevisionTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: "test-svc-0",
+								Labels: map[string]string{
+									"labelKey": "labelVal",
+								},
+								Annotations: map[string]string{
+									"autoscaling.knative.dev/minScale":                     "1",
+									"autoscaling.knative.dev/maxScale":                     "2",
+									"autoscaling.knative.dev/target":                       "1",
+									"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
+									"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
+								},
+							},
+							Spec: knservingv1.RevisionSpec{
+								PodSpec:        podSpec,
+								TimeoutSeconds: &timeout,
+							},
+						},
+					},
+				},
 			},
 		},
-		Spec: knservingv1.ServiceSpec{
-			ConfigurationSpec: knservingv1.ConfigurationSpec{
-				Template: knservingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-svc-0",
-						Labels: map[string]string{
-							"labelKey": "labelVal",
-						},
-						Annotations: annotations,
+		"annotations": {
+			serviceCfg: KnativeService{
+				BaseService:       baseSvc,
+				ContainerPort:     8080,
+				MinReplicas:       5,
+				MaxReplicas:       6,
+				IsClusterLocal:    false,
+				TargetConcurrency: 4,
+			},
+			expectedSpec: knservingv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-svc",
+					Namespace: "test-namespace",
+					Labels: map[string]string{
+						"labelKey": "labelVal",
 					},
-					Spec: knservingv1.RevisionSpec{
-						PodSpec:        podSpec,
-						TimeoutSeconds: &timeout,
+				},
+				Spec: knservingv1.ServiceSpec{
+					ConfigurationSpec: knservingv1.ConfigurationSpec{
+						Template: knservingv1.RevisionTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: "test-svc-0",
+								Labels: map[string]string{
+									"labelKey": "labelVal",
+								},
+								Annotations: map[string]string{
+									"autoscaling.knative.dev/minScale": "5",
+									"autoscaling.knative.dev/maxScale": "6",
+									"autoscaling.knative.dev/target":   "4",
+									"autoscaling.knative.dev/class":    "kpa.autoscaling.knative.dev",
+								},
+							},
+							Spec: knservingv1.RevisionSpec{
+								PodSpec:        podSpec,
+								TimeoutSeconds: &timeout,
+							},
+						},
 					},
 				},
 			},
 		},
 	}
 
-	// Run test and validate
-	svc := testValidKnSvc.BuildKnativeServiceConfig()
-	err := tu.CompareObjects(svc, expected)
-	assert.NoError(t, err)
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Run test and validate
+			svc := data.serviceCfg.BuildKnativeServiceConfig()
+			err := tu.CompareObjects(*svc, data.expectedSpec)
+			assert.NoError(t, err)
+		})
+	}
 }
