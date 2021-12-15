@@ -87,11 +87,14 @@ func (cfg *KnativeService) buildSvcSpec(
 
 	// Build annotations, set target concurrency of 1
 	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale":                     strconv.Itoa(cfg.MinReplicas),
-		"autoscaling.knative.dev/maxScale":                     strconv.Itoa(cfg.MaxReplicas),
-		"autoscaling.knative.dev/target":                       strconv.Itoa(cfg.TargetConcurrency),
-		"autoscaling.knative.dev/class":                        knativeSvcDefaults.AutoscalingClass,
-		"queue.sidecar.serving.knative.dev/resourcePercentage": strconv.Itoa(cfg.QueueProxyResourcePercentage),
+		"autoscaling.knative.dev/minScale": strconv.Itoa(cfg.MinReplicas),
+		"autoscaling.knative.dev/maxScale": strconv.Itoa(cfg.MaxReplicas),
+		"autoscaling.knative.dev/target":   strconv.Itoa(cfg.TargetConcurrency),
+		"autoscaling.knative.dev/class":    knativeSvcDefaults.AutoscalingClass,
+	}
+
+	if cfg.QueueProxyResourcePercentage > 0 {
+		annotations["queue.sidecar.serving.knative.dev/resourcePercentage"] = strconv.Itoa(cfg.QueueProxyResourcePercentage)
 	}
 
 	// Revision name
