@@ -10,6 +10,8 @@ import (
 type ExperimentManager interface {
 	// GetEngineInfo returns the configuration of the experiment engine
 	GetEngineInfo() Engine
+	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
+	ValidateExperimentConfig(cfg json.RawMessage) error
 }
 
 type StandardExperimentManager interface {
@@ -40,7 +42,7 @@ type StandardExperimentManager interface {
 	ListVariablesForExperiments([]Experiment) (map[string][]Variable, error)
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format,
 	// based on the given engine's properties.
-	ValidateExperimentConfig(*StandardExperimentManagerConfig, TuringExperimentConfig) error
+	//ValidateExperimentConfig(*StandardExperimentManagerConfig, TuringExperimentConfig) error
 }
 
 type CustomExperimentManager interface {
@@ -51,7 +53,7 @@ type CustomExperimentManager interface {
 	// called at the time of router deployment.
 	GetExperimentRunnerConfig(interface{}) (json.RawMessage, error)
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
-	ValidateExperimentConfig(interface{}) error
+	//ValidateExperimentConfig(interface{}) error
 }
 
 func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {

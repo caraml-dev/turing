@@ -10,6 +10,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/engines/experiment/manager"
@@ -431,65 +432,80 @@ func TestListVariables(t *testing.T) {
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	// Create mock experiment managers
-	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{
-		Name: "Litmus",
-		Type: manager.StandardExperimentManagerType,
-		StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
-			ClientSelectionEnabled: true,
-		},
-	})
-	stdExpMgr.On("ValidateExperimentConfig",
-		&manager.StandardExperimentManagerConfig{
-			ClientSelectionEnabled: true,
-		},
-		manager.TuringExperimentConfig{},
-	).Return(nil)
-
-	customExpMgr := &mocks.CustomExperimentManager{}
-	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
-	customExpMgr.On("ValidateExperimentConfig", []int{1, 2}).Return(nil)
-
-	// Create test experiment service
-	expSvc := &experimentsService{
-		experimentManagers: map[string]manager.ExperimentManager{
-			"litmus": stdExpMgr,
-			"xp":     customExpMgr,
-		},
-	}
-
-	// Define tests
 	tests := map[string]struct {
 		engine   string
-		inputCfg interface{}
-		err      string
+		inputCfg json.RawMessage
+		managers func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager
+		err      error
 	}{
 		"failure | std exp mgr": {
 			engine: "test-engine",
-			err:    "Unknown experiment engine test-engine",
+			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
+				return map[string]manager.ExperimentManager{}
+			},
+			err: errors.New("Unknown experiment engine test-engine"),
 		},
 		"success | std exp mgr": {
-			engine:   "litmus",
-			inputCfg: manager.TuringExperimentConfig{},
+			engine: "standard",
+			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
+				stdExpMgr := &mocks.StandardExperimentManager{}
+				stdExpMgr.
+					On("ValidateExperimentConfig", cfg).
+					Return(err)
+
+				return map[string]manager.ExperimentManager{
+					engine: stdExpMgr,
+				}
+			},
+			inputCfg: json.RawMessage(`{
+				"client": {},
+				"experiments": [],
+				"variables": {}
+			}`),
 		},
 		"success | custom exp mgr": {
-			engine:   "xp",
-			inputCfg: []int{1, 2},
+			engine: "custom",
+			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
+				customExpMgr := &mocks.CustomExperimentManager{}
+				customExpMgr.
+					On("ValidateExperimentConfig", cfg).
+					Return(err)
+
+				return map[string]manager.ExperimentManager{
+					engine: customExpMgr,
+				}
+			},
+			inputCfg: json.RawMessage("[1, 2]"),
+		},
+		"failure | validation errors": {
+			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
+				customExpMgr := &mocks.CustomExperimentManager{}
+				customExpMgr.
+					On("ValidateExperimentConfig", cfg).
+					Return(err)
+
+				return map[string]manager.ExperimentManager{
+					engine: customExpMgr,
+				}
+			},
+			inputCfg: json.RawMessage("[3, 4]"),
+			err:      errors.New("validation error"),
 		},
 	}
 
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
+			expSvc := &experimentsService{
+				experimentManagers: data.managers(data.engine, data.inputCfg, data.err),
+			}
+
 			err := expSvc.ValidateExperimentConfig(data.engine, data.inputCfg)
-			if data.err == "" {
+			if data.err == nil {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
-				if err != nil {
-					assert.Equal(t, data.err, err.Error())
-				}
+				require.Error(t, err)
+				assert.EqualError(t, err, data.err.Error())
 			}
 		})
 	}

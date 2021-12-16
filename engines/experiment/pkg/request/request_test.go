@@ -1,7 +1,6 @@
 package request_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -20,20 +19,6 @@ func TestGetFieldSource(t *testing.T) {
 	assert.NoError(t, err)
 	// unknown
 	_, err = request.GetFieldSource("test")
-	assert.Error(t, err)
-}
-
-func TestUnmarshalJSONFieldSource(t *testing.T) {
-	var fieldSrc request.FieldSource
-	// success
-	err := json.Unmarshal([]byte(`"header"`), &fieldSrc)
-	assert.Equal(t, request.HeaderFieldSource, fieldSrc)
-	assert.NoError(t, err)
-	// unknown string
-	err = json.Unmarshal([]byte(`"test"`), &fieldSrc)
-	assert.Error(t, err)
-	// invalid data
-	err = json.Unmarshal([]byte(`0`), &fieldSrc)
 	assert.Error(t, err)
 }
 

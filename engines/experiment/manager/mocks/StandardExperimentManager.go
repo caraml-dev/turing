@@ -4,8 +4,8 @@ package mocks
 
 import (
 	json "encoding/json"
-	"github.com/gojek/turing/engines/experiment/manager"
 
+	manager "github.com/gojek/turing/engines/experiment/manager"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -180,13 +180,13 @@ func (_m *StandardExperimentManager) ListVariablesForExperiments(_a0 []manager.E
 	return r0, r1
 }
 
-// ValidateExperimentConfig provides a mock function with given fields: _a0, _a1
-func (_m *StandardExperimentManager) ValidateExperimentConfig(_a0 *manager.StandardExperimentManagerConfig, _a1 manager.TuringExperimentConfig) error {
-	ret := _m.Called(_a0, _a1)
+// ValidateExperimentConfig provides a mock function with given fields: cfg
+func (_m *StandardExperimentManager) ValidateExperimentConfig(cfg json.RawMessage) error {
+	ret := _m.Called(cfg)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*manager.StandardExperimentManagerConfig, manager.TuringExperimentConfig) error); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(json.RawMessage) error); ok {
+		r0 = rf(cfg)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -14,6 +15,11 @@ import (
 // implementations of the interface to provide the base behavior.
 type BaseStandardExperimentManager struct {
 	validate *validator.Validate
+	info     Engine
+}
+
+func (em *BaseStandardExperimentManager) GetEngineInfo() Engine {
+	return em.info
 }
 
 func (*BaseStandardExperimentManager) IsCacheEnabled() bool {
@@ -40,12 +46,15 @@ func (*BaseStandardExperimentManager) ListVariablesForExperiments([]Experiment) 
 	return make(map[string][]Variable), nil
 }
 
-func (em *BaseStandardExperimentManager) ValidateExperimentConfig(
-	engineCfg *StandardExperimentManagerConfig,
-	experimentCfg TuringExperimentConfig,
-) error {
+func (em *BaseStandardExperimentManager) ValidateExperimentConfig(cfg json.RawMessage) error {
+	engineCfg := em.info.StandardExperimentManagerConfig
 	if engineCfg == nil {
 		return errors.New("Missing Standard Engine configuration")
+	}
+
+	var experimentCfg TuringExperimentConfig
+	if err := json.Unmarshal(cfg, &experimentCfg); err != nil {
+		return err
 	}
 
 	if engineCfg.ExperimentSelectionEnabled {
@@ -86,8 +95,9 @@ func (em *BaseStandardExperimentManager) ValidateExperimentConfig(
 }
 
 // NewBaseStandardExperimentManager is a constructor for the base experiment manager
-func NewBaseStandardExperimentManager() *BaseStandardExperimentManager {
+func NewBaseStandardExperimentManager(info Engine) *BaseStandardExperimentManager {
 	return &BaseStandardExperimentManager{
+		info:     info,
 		validate: newExperimentConfigValidator(),
 	}
 }

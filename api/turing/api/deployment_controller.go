@@ -189,7 +189,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 	expSvc := c.BaseController.AppContext.ExperimentsService
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		if expSvc.IsStandardExperimentManager(string(routerVersion.ExperimentEngine.Type)) {
+
+		if expSvc.IsStandardExperimentManager(routerVersion.ExperimentEngine.Type) {
 			// Convert the config to the standard type
 			expConfig, err := expSvc.GetStandardExperimentConfig(routerVersion.ExperimentEngine.Config)
 			if err != nil {
@@ -206,7 +207,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 		// Get the deployable Router Config for the experiment
 		experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
-			string(routerVersion.ExperimentEngine.Type),
+			routerVersion.ExperimentEngine.Type,
 			routerVersion.ExperimentEngine.Config,
 		)
 		if err != nil {

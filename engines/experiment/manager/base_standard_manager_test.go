@@ -1,6 +1,7 @@
 package manager_test
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -36,9 +37,6 @@ func TestBaseStandardExperimentManagerMethods(t *testing.T) {
 }
 
 func TestValidateExperimentConfig(t *testing.T) {
-	em := manager.NewBaseStandardExperimentManager()
-
-	// Define tests
 	tests := map[string]struct {
 		engine manager.Engine
 		cfg    manager.TuringExperimentConfig
@@ -167,7 +165,10 @@ func TestValidateExperimentConfig(t *testing.T) {
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := em.ValidateExperimentConfig(data.engine.StandardExperimentManagerConfig, data.cfg)
+			em := manager.NewBaseStandardExperimentManager(data.engine)
+
+			cfg, _ := json.Marshal(data.cfg)
+			err := em.ValidateExperimentConfig(cfg)
 			if data.err != "" {
 				// Expect error
 				assert.Error(t, err)

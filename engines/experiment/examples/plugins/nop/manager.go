@@ -33,3 +33,7 @@ func (m *ExperimentManager) GetEngineInfo() manager.Engine {
 		},
 	}
 }
+
+func (*ExperimentManager) ValidateExperimentConfig(json.RawMessage) error {
+	return nil
+}

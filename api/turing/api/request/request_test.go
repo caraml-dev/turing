@@ -3,6 +3,7 @@
 package request
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -63,6 +64,8 @@ var expEngineConfig = manager.TuringExperimentConfig{
 	},
 }
 
+var expEngineConfigJSON, _ = json.Marshal(expEngineConfig)
+
 var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 	Environment: "env",
 	Name:        "router",
@@ -77,8 +80,8 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 		},
 		DefaultRouteID: "default",
 		ExperimentEngine: &ExperimentEngineConfig{
-			Type:   "litmus",
-			Config: &expEngineConfig,
+			Type:   "standard",
+			Config: expEngineConfigJSON,
 		},
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
@@ -160,7 +163,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Tag:   "fluentdtag",
 		},
 		Experiment: map[string]interface{}{
-			"litmus": map[string]interface{}{
+			"standard": map[string]interface{}{
 				"endpoint": "grpc://test",
 				"timeout":  "2s",
 			},
@@ -182,7 +185,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 		},
 		DefaultRouteID: "default",
 		ExperimentEngine: &models.ExperimentEngine{
-			Type: "litmus",
+			Type: "standard",
 			Config: &manager.TuringExperimentConfig{
 				Client: manager.Client{
 					ID:       "1",
@@ -292,7 +295,8 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	// Set up mock Experiment service
 	expSvc := &mocks.ExperimentsService{}
 	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
-	expSvc.On("GetStandardExperimentConfig", &expEngineConfig).Return(expEngineConfig, nil)
+	expSvc.On("GetStandardExperimentConfig", json.RawMessage(expEngineConfigJSON)).
+		Return(expEngineConfig, nil)
 
 	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc)
 	tu.FailOnError(t, err)
@@ -303,33 +307,45 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	// Set up mock Crypto service
 	cs := &mocks.CryptoService{}
-	cs.On("Encrypt", "xp-passkey-bad").Return("", errors.New("test-encrypt-error"))
-	cs.On("Encrypt", "xp-passkey").Return("xp-passkey-enc", nil)
+	cs.On("Encrypt", "passkey-bad").
+		Return("", errors.New("test-encrypt-error"))
+	cs.On("Encrypt", "passkey").
+		Return("passkey-enc", nil)
 
 	// Set up mock Experiment service
 	cfgWithPasskey := &manager.TuringExperimentConfig{
 		Client: manager.Client{
 			Username: "client-name",
-			Passkey:  "xp-passkey",
+			Passkey:  "passkey",
 		},
 	}
+	cfgWithPasskeyJSON, _ := json.Marshal(cfgWithPasskey)
+
 	cfgWithoutPasskey := &manager.TuringExperimentConfig{
 		Client: manager.Client{
 			Username: "client-name",
 		},
 	}
+	cfgWithoutPasskeyJSON, _ := json.Marshal(cfgWithoutPasskey)
+
 	cfgWithBadPasskey := &manager.TuringExperimentConfig{
 		Client: manager.Client{
 			Username: "client-name",
-			Passkey:  "xp-passkey-bad",
+			Passkey:  "passkey-bad",
 		},
 	}
+	cfgWithBadPasskeyJSON, _ := json.Marshal(cfgWithBadPasskey)
+
 	es := &mocks.ExperimentsService{}
-	es.On("IsStandardExperimentManager", "litmus").Return(true)
-	es.On("IsStandardExperimentManager", "xp").Return(false)
+	es.On("IsStandardExperimentManager", "standard-manager").Return(true)
+	es.On("IsStandardExperimentManager", "custom-manager").Return(false)
 	es.On("GetStandardExperimentConfig", cfgWithPasskey).Return(*cfgWithPasskey, nil)
-	es.On("GetStandardExperimentConfig", cfgWithoutPasskey).Return(*cfgWithoutPasskey, nil)
-	es.On("GetStandardExperimentConfig", cfgWithBadPasskey).Return(*cfgWithBadPasskey, nil)
+	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithPasskeyJSON)).
+		Return(*cfgWithPasskey, nil)
+	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithoutPasskeyJSON)).
+		Return(*cfgWithoutPasskey, nil)
+	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithBadPasskeyJSON)).
+		Return(*cfgWithBadPasskey, nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -342,8 +358,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithoutPasskey,
+						Type:   "standard-manager",
+						Config: cfgWithoutPasskeyJSON,
 					},
 				},
 			},
@@ -354,8 +370,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithBadPasskey,
+						Type:   "standard-manager",
+						Config: cfgWithBadPasskeyJSON,
 					},
 				},
 			},
@@ -366,15 +382,15 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithoutPasskey,
+						Type:   "standard-manager",
+						Config: cfgWithoutPasskeyJSON,
 					},
 				},
 			},
 			router: &models.Router{
 				CurrRouterVersion: &models.RouterVersion{
 					ExperimentEngine: &models.ExperimentEngine{
-						Type:   "litmus",
+						Type:   "standard-manager",
 						Config: cfgWithPasskey,
 					},
 				},
@@ -385,8 +401,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithPasskey,
+						Type:   "standard-manager",
+						Config: cfgWithPasskeyJSON,
 					},
 				},
 			},
@@ -394,7 +410,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			expected: &manager.TuringExperimentConfig{
 				Client: manager.Client{
 					Username: "client-name",
-					Passkey:  "xp-passkey-enc",
+					Passkey:  "passkey-enc",
 				},
 			},
 		},
@@ -402,13 +418,13 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
-						Config: []int{1, 2},
+						Type:   "custom-manager",
+						Config: json.RawMessage("[1, 2]"),
 					},
 				},
 			},
 			router:   &models.Router{},
-			expected: []int{1, 2},
+			expected: json.RawMessage("[1, 2]"),
 		},
 	}
 

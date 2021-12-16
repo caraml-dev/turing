@@ -99,28 +99,3 @@ func GetExperimentRunnerConfig(expManager ExperimentManager, expCfg interface{})
 		return nil, fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
 	}
 }
-
-func ValidateExperimentConfig(expManager ExperimentManager, expCfg interface{}) error {
-	engineInfo := expManager.GetEngineInfo()
-	// Call the appropriate validator method based on the type of the experiment manager
-	switch engineInfo.Type {
-	case StandardExperimentManagerType:
-		stdMgr, ok := expManager.(StandardExperimentManager)
-		if !ok {
-			return fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "standard")
-		}
-		stdExpConfig, err := GetStandardExperimentConfig(expCfg)
-		if err != nil {
-			return fmt.Errorf(standardExperimentConfigErr, err)
-		}
-		return stdMgr.ValidateExperimentConfig(engineInfo.StandardExperimentManagerConfig, stdExpConfig)
-	case CustomExperimentManagerType:
-		customMgr, ok := expManager.(CustomExperimentManager)
-		if !ok {
-			return fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
-		}
-		return customMgr.ValidateExperimentConfig(expCfg)
-	default:
-		return fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
-	}
-}

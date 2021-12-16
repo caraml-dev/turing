@@ -1,7 +1,6 @@
 package request
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -29,20 +28,7 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 	case "payload":
 		return PayloadFieldSource, nil
 	}
-	return FieldSource(""), fmt.Errorf("Unknown field source %s", srcString)
-}
-
-// UnmarshalJSON unmarshalls the data as a string and then creates the
-// appropriate FieldSource
-func (f *FieldSource) UnmarshalJSON(data []byte) error {
-	var s string
-	var err error
-	if err = json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	*f, err = GetFieldSource(s)
-	return err
+	return "", fmt.Errorf("Unknown field source %s", srcString)
 }
 
 // GetValueFromRequest parses the request header / payload to retrieve the value

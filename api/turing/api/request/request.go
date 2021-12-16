@@ -1,6 +1,7 @@
 package request
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -36,8 +37,8 @@ type RouterConfig struct {
 
 // ExperimentEngineConfig defines the experiment engine config
 type ExperimentEngineConfig struct {
-	Type   string      `json:"type" validate:"required,oneof=litmus nop xp"`
-	Config interface{} `json:"config,omitempty" validate:"-"` // Skip validate to invoke custom validation
+	Type   string          `json:"type" validate:"required"`
+	Config json.RawMessage `json:"config,omitempty" validate:"-"` // Skip validate to invoke custom validation
 }
 
 // LogConfig defines the logging configs
@@ -124,7 +125,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		DefaultRouteID: r.Config.DefaultRouteID,
 		TrafficRules:   r.Config.TrafficRules,
 		ExperimentEngine: &models.ExperimentEngine{
-			Type: models.ExperimentEngineType(r.Config.ExperimentEngine.Type),
+			Type: r.Config.ExperimentEngine.Type,
 		},
 		ResourceRequest: r.Config.ResourceRequest,
 		Timeout:         r.Config.Timeout,
@@ -133,7 +134,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
 			FiberDebugLogEnabled: defaults.FiberDebugLogEnabled,
 			JaegerEnabled:        defaults.JaegerEnabled,
-			ResultLoggerType:     models.ResultLogger(r.Config.LogConfig.ResultLoggerType),
+			ResultLoggerType:     r.Config.LogConfig.ResultLoggerType,
 		},
 	}
 	if r.Config.Enricher != nil {
@@ -194,7 +195,7 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 		if clientPasskey == "" {
 			// Extract existing router version config
 			if router.CurrRouterVersion != nil &&
-				string(router.CurrRouterVersion.ExperimentEngine.Type) == r.Config.ExperimentEngine.Type {
+				router.CurrRouterVersion.ExperimentEngine.Type == r.Config.ExperimentEngine.Type {
 				currVerExpConfig, err := expSvc.GetStandardExperimentConfig(router.CurrRouterVersion.ExperimentEngine.Config)
 				if err != nil {
 					return nil, fmt.Errorf("Error parsing existing experiment config: %v", err)

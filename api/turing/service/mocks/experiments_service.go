@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	"encoding/json"
+	json "encoding/json"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/mock"
@@ -156,11 +156,11 @@ func (_m *ExperimentsService) ListVariables(engine string, clientID string, expe
 }
 
 // ValidateExperimentConfig provides a mock function with given fields: engine, cfg
-func (_m *ExperimentsService) ValidateExperimentConfig(engine string, cfg interface{}) error {
+func (_m *ExperimentsService) ValidateExperimentConfig(engine string, cfg json.RawMessage) error {
 	ret := _m.Called(engine, cfg)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(string, json.RawMessage) error); ok {
 		r0 = rf(engine, cfg)
 	} else {
 		r0 = ret.Error(0)

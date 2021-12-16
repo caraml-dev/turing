@@ -6,24 +6,20 @@ import (
 	"errors"
 )
 
-// EngineType is used to capture the types of the supported experimentation engines
-// Need to expose this value in turing-router
-// engines/router/missionctl/experiment/experiment.go
-type ExperimentEngineType string
-
 const (
-	ExperimentEngineTypeNop    ExperimentEngineType = "nop"
-	ExperimentEngineTypeLitmus ExperimentEngineType = "litmus"
-	ExperimentEngineTypeXp     ExperimentEngineType = "xp"
+	ExperimentEngineTypeNop    string = "nop"
+	ExperimentEngineTypeLitmus string = "litmus"
+	ExperimentEngineTypeXp     string = "xp"
 )
 
 // ExperimentEngine contains the type and configuration for the
 // Experiment engine powering the router.
 type ExperimentEngine struct {
-	// Type of Experiment Engine. Currently supports "litmus", "xp" and "nop".
-	Type ExperimentEngineType `json:"type"`
+	// Type of Experiment Engine
+	Type string `json:"type"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
-	// For standard experiment engine managers, the config can be cast into TuringExperimentConfig type.
+	// For standard experiment engine managers, the config can be cast into
+	// manager.TuringExperimentConfig type.
 	Config interface{} `json:"config,omitempty"`
 }
 

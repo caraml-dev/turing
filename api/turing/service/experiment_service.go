@@ -37,7 +37,7 @@ type ExperimentsService interface {
 	// for the given clientID and/or experiments
 	ListVariables(engine string, clientID string, experimentIDs []string) (manager.Variables, error)
 	// ValidateExperimentConfig validates the given experiment config for completeness
-	ValidateExperimentConfig(engine string, cfg interface{}) error
+	ValidateExperimentConfig(engine string, cfg json.RawMessage) error
 	// GetExperimentRunnerConfig converts the given experiment config compatible with the Experiment Manager
 	// into the format compatible with the ExperimentRunner
 	GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error)
@@ -199,14 +199,13 @@ func (es *experimentsService) ListVariables(
 	}, nil
 }
 
-func (es *experimentsService) ValidateExperimentConfig(engine string, cfg interface{}) error {
+func (es *experimentsService) ValidateExperimentConfig(engine string, cfg json.RawMessage) error {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {
 		return err
 	}
-
-	return manager.ValidateExperimentConfig(expManager, cfg)
+	return expManager.ValidateExperimentConfig(cfg)
 }
 
 func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error) {

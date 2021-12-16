@@ -29,17 +29,3 @@ func (c *rpcClient) GetEngineInfo() manager.Engine {
 
 	return resp
 }
-
-// rpcServer serves the implementation of a ConfigurableExperimentManager
-type rpcServer struct {
-	Impl ConfigurableExperimentManager
-}
-
-func (s *rpcServer) Configure(cfg json.RawMessage, _ *interface{}) (err error) {
-	return s.Impl.Configure(cfg)
-}
-
-func (s *rpcServer) GetEngineInfo(_ interface{}, resp *manager.Engine) error {
-	*resp = s.Impl.GetEngineInfo()
-	return nil
-}
