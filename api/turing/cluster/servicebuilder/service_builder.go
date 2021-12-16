@@ -57,6 +57,7 @@ type ClusterServiceBuilder interface {
 		secretName string,
 		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
+		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
 	NewEnsemblerService(
 		ver *models.RouterVersion,
@@ -65,6 +66,7 @@ type ClusterServiceBuilder interface {
 		secretName string,
 		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
+		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
 	NewRouterService(
 		ver *models.RouterVersion,
@@ -78,6 +80,7 @@ type ClusterServiceBuilder interface {
 		sentryDSN string,
 		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
+		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
 	NewFluentdService(
 		routerVersion *models.RouterVersion,
@@ -129,6 +132,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	secretName string,
 	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
 	enricher := routerVersion.Enricher
@@ -188,12 +192,13 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:               true,
-		ContainerPort:                int32(enricher.Port),
-		MinReplicas:                  enricher.ResourceRequest.MinReplica,
-		MaxReplicas:                  enricher.ResourceRequest.MaxReplica,
-		TargetConcurrency:            knativeTargetConcurrency,
-		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
+		IsClusterLocal:                  true,
+		ContainerPort:                   int32(enricher.Port),
+		MinReplicas:                     enricher.ResourceRequest.MinReplica,
+		MaxReplicas:                     enricher.ResourceRequest.MaxReplica,
+		TargetConcurrency:               knativeTargetConcurrency,
+		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})
 }
 
@@ -206,6 +211,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	secretName string,
 	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
 	ensembler := routerVersion.Ensembler
@@ -266,12 +272,13 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:               true,
-		ContainerPort:                int32(docker.Port),
-		MinReplicas:                  docker.ResourceRequest.MinReplica,
-		MaxReplicas:                  docker.ResourceRequest.MaxReplica,
-		TargetConcurrency:            knativeTargetConcurrency,
-		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
+		IsClusterLocal:                  true,
+		ContainerPort:                   int32(docker.Port),
+		MinReplicas:                     docker.ResourceRequest.MinReplica,
+		MaxReplicas:                     docker.ResourceRequest.MaxReplica,
+		TargetConcurrency:               knativeTargetConcurrency,
+		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})
 }
 

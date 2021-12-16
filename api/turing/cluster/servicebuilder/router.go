@@ -90,6 +90,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	sentryDSN string,
 	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	// Create service name
 	name := sb.GetRouterServiceName(routerVersion)
@@ -124,12 +125,13 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Volumes:              volumes,
 			VolumeMounts:         volumeMounts,
 		},
-		IsClusterLocal:               false,
-		ContainerPort:                routerPort,
-		MinReplicas:                  routerVersion.ResourceRequest.MinReplica,
-		MaxReplicas:                  routerVersion.ResourceRequest.MaxReplica,
-		TargetConcurrency:            knativeTargetConcurrency,
-		QueueProxyResourcePercentage: knativeQueueProxyResourcePercentage,
+		IsClusterLocal:                  false,
+		ContainerPort:                   routerPort,
+		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
+		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
+		TargetConcurrency:               knativeTargetConcurrency,
+		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}
 	return sb.validateKnativeService(svc)
 }

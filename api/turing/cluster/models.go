@@ -1,6 +1,8 @@
 package cluster
 
 import (
+	"math"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -64,20 +66,16 @@ type BaseService struct {
 	VolumeMounts []corev1.VolumeMount `json:"volume_mounts"`
 }
 
-func (cfg *BaseService) buildResourceReqs() corev1.ResourceRequirements {
+func (cfg *BaseService) buildResourceReqs(userContainerLimitRequestFactor float64) corev1.ResourceRequirements {
 	reqs := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:    cfg.CPURequests,
 		corev1.ResourceMemory: cfg.MemoryRequests,
 	}
 
-	// Set resource limits to twice the request
-	cpuLimit := cfg.CPURequests.DeepCopy()
-	cpuLimit.Add(cpuLimit)
-	memoryLimit := cfg.MemoryRequests.DeepCopy()
-	memoryLimit.Add(memoryLimit)
+	// Set resource limits to request * userContainerLimitRequestFactor
 	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    cpuLimit,
-		corev1.ResourceMemory: memoryLimit,
+		corev1.ResourceCPU:    computeResource(cfg.CPURequests, userContainerLimitRequestFactor),
+		corev1.ResourceMemory: computeResource(cfg.MemoryRequests, userContainerLimitRequestFactor),
 	}
 
 	return corev1.ResourceRequirements{
@@ -129,4 +127,23 @@ type ConfigMap struct {
 	Name     string `json:"name"`
 	FileName string `json:"file_name"`
 	Data     string `json:"data"`
+}
+
+// Ref:
+// https://github.com/knative/serving/blob/release-0.14/pkg/reconciler/revision/resources/queue.go#L115
+func computeResource(resourceQuantity resource.Quantity, fraction float64) resource.Quantity {
+	scaledValue := resourceQuantity.Value()
+	scaledMilliValue := int64(math.MaxInt64 - 1)
+	if scaledValue < (math.MaxInt64 / 1000) {
+		scaledMilliValue = resourceQuantity.MilliValue()
+	}
+
+	percentageValue := float64(scaledMilliValue) * fraction
+	newValue := int64(math.MaxInt64)
+	if percentageValue < math.MaxInt64 {
+		newValue = int64(percentageValue)
+	}
+
+	newquantity := resource.NewMilliQuantity(newValue, resource.BinarySI)
+	return *newquantity
 }
