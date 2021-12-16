@@ -7,6 +7,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+// defaultLimitRequestFactor is the default multiplication factor applied to the resource request,
+// to be set as resource limit
+const defaultLimitRequestFactor = 1.0
+
 // KubernetesService defines the properties for Kubernetes services
 type KubernetesService struct {
 	*BaseService
@@ -57,7 +61,7 @@ func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.
 							Args:            cfg.Command,
 							Ports:           cfg.buildContainerPorts(),
 							Env:             cfg.Envs,
-							Resources:       cfg.buildResourceReqs(),
+							Resources:       cfg.buildResourceReqs(defaultLimitRequestFactor),
 							VolumeMounts:    cfg.VolumeMounts,
 							LivenessProbe:   cfg.buildContainerProbe(livenessProbeType, int(cfg.ProbePort)),
 							ReadinessProbe:  cfg.buildContainerProbe(readinessProbeType, int(cfg.ProbePort)),

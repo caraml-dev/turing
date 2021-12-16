@@ -169,6 +169,7 @@ func (ds *deploymentService) DeployRouterVersion(
 		routerVersion, project, ds.environmentType, secretName, experimentConfig,
 		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
+		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
 	)
 	if err != nil {
 		return endpoint, err
@@ -222,6 +223,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 		routerVersion, project, ds.environmentType, "", nil,
 		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
+		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
 	)
 	if err != nil {
 		return err
@@ -309,6 +311,7 @@ func (ds *deploymentService) createServices(
 	sentryDSN string,
 	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) ([]*cluster.KnativeService, error) {
 	services := []*cluster.KnativeService{}
 
@@ -321,6 +324,7 @@ func (ds *deploymentService) createServices(
 			secretName,
 			knativeTargetConcurrency,
 			knativeQueueProxyResourcePercentage,
+			userContainerLimitRequestFactor,
 		)
 		if err != nil {
 			return services, err
@@ -337,6 +341,7 @@ func (ds *deploymentService) createServices(
 			secretName,
 			knativeTargetConcurrency,
 			knativeQueueProxyResourcePercentage,
+			userContainerLimitRequestFactor,
 		)
 		if err != nil {
 			return services, err
@@ -357,6 +362,7 @@ func (ds *deploymentService) createServices(
 		sentryDSN,
 		knativeTargetConcurrency,
 		knativeQueueProxyResourcePercentage,
+		userContainerLimitRequestFactor,
 	)
 	if err != nil {
 		return services, err

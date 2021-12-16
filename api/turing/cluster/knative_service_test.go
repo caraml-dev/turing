@@ -90,8 +90,8 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	var timeout int64 = 30
 	resources := corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("400m"),
-			corev1.ResourceMemory: resource.MustParse("512Mi"),
+			corev1.ResourceCPU:    resource.MustParse("600m"),
+			corev1.ResourceMemory: resource.MustParse("768Mi"),
 		},
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("400m"),
@@ -159,13 +159,14 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	}{
 		"basic": {
 			serviceCfg: KnativeService{
-				BaseService:                  baseSvc,
-				ContainerPort:                8080,
-				MinReplicas:                  1,
-				MaxReplicas:                  2,
-				IsClusterLocal:               true,
-				TargetConcurrency:            1,
-				QueueProxyResourcePercentage: 30,
+				BaseService:                     baseSvc,
+				ContainerPort:                   8080,
+				MinReplicas:                     1,
+				MaxReplicas:                     2,
+				IsClusterLocal:                  true,
+				TargetConcurrency:               1,
+				QueueProxyResourcePercentage:    30,
+				UserContainerLimitRequestFactor: 1.5,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -203,12 +204,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 		"annotations": {
 			serviceCfg: KnativeService{
-				BaseService:       baseSvc,
-				ContainerPort:     8080,
-				MinReplicas:       5,
-				MaxReplicas:       6,
-				IsClusterLocal:    false,
-				TargetConcurrency: 4,
+				BaseService:                     baseSvc,
+				ContainerPort:                   8080,
+				MinReplicas:                     5,
+				MaxReplicas:                     6,
+				IsClusterLocal:                  false,
+				TargetConcurrency:               4,
+				UserContainerLimitRequestFactor: 1.5,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{

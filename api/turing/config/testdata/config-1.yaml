@@ -17,6 +17,7 @@ DeployConfig:
 KnativeServiceDefaults:
   TargetConcurrency: 2
   QueueProxyResourcePercentage: 20
+  UserContainerLimitRequestFactor: 1.25
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60
