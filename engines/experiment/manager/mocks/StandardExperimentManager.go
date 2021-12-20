@@ -29,11 +29,11 @@ func (_m *StandardExperimentManager) GetEngineInfo() manager.Engine {
 }
 
 // GetExperimentRunnerConfig provides a mock function with given fields: cfg
-func (_m *StandardExperimentManager) GetExperimentRunnerConfig(cfg interface{}) (json.RawMessage, error) {
+func (_m *StandardExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
 	ret := _m.Called(cfg)
 
 	var r0 json.RawMessage
-	if rf, ok := ret.Get(0).(func(interface{}) json.RawMessage); ok {
+	if rf, ok := ret.Get(0).(func(json.RawMessage) json.RawMessage); ok {
 		r0 = rf(cfg)
 	} else {
 		if ret.Get(0) != nil {
@@ -42,7 +42,7 @@ func (_m *StandardExperimentManager) GetExperimentRunnerConfig(cfg interface{}) 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
+	if rf, ok := ret.Get(1).(func(json.RawMessage) error); ok {
 		r1 = rf(cfg)
 	} else {
 		r1 = ret.Error(1)

@@ -1,7 +1,6 @@
 package manager_test
 
 import (
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -140,18 +139,10 @@ func TestExperimentManagerPlugin_ValidateExperimentConfig(t *testing.T) {
 
 func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 	suite := map[string]struct {
-		experimentConfig interface{}
+		experimentConfig json.RawMessage
 		expected         json.RawMessage
 		err              error
 	}{
-		"success | standard experiment config": {
-			experimentConfig: &manager.TuringExperimentConfig{
-				Client: manager.Client{
-					ID: "client-id",
-				},
-			},
-			expected: json.RawMessage(`{}`),
-		},
 		"success | custom experiment config": {
 			experimentConfig: json.RawMessage(`{
 				"client": {
@@ -161,7 +152,7 @@ func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 			expected: json.RawMessage(`{}`),
 		},
 		"failure": {
-			experimentConfig: "unexpected config",
+			experimentConfig: json.RawMessage("unexpected config"),
 			err:              errors.New("failed to retrieve runner's config"),
 		},
 	}
@@ -172,8 +163,6 @@ func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 			mockManager.On("GetExperimentRunnerConfig", tt.experimentConfig).Return(tt.expected, tt.err)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
-				gob.Register(tt.experimentConfig)
-
 				actual, err := em.GetExperimentRunnerConfig(tt.experimentConfig)
 				if tt.err != nil {
 					assert.EqualError(t, err, tt.err.Error())

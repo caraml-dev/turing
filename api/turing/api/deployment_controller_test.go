@@ -15,7 +15,6 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/utils"
-	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -40,14 +39,12 @@ func TestDeployVersionSuccess(t *testing.T) {
 	nopExpCfg := &models.ExperimentEngine{
 		Type: "nop",
 	}
-	expCfg := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			ID:      "1",
-			Passkey: "xp-passkey",
-		},
-	}
+	expCfg := json.RawMessage(`{"client": {"id": "1", "passkey": "test-passkey"}}`)
+
+	testEngineType := "test-manager"
+
 	expEnabledCfg := &models.ExperimentEngine{
-		Type:   "xp",
+		Type:   testEngineType,
 		Config: expCfg,
 	}
 
@@ -111,8 +108,8 @@ func TestDeployVersionSuccess(t *testing.T) {
 				ExperimentEngine: expEnabledCfg,
 				Status:           "deployed",
 			},
-			expCfg:           json.RawMessage([]byte(`{"engine": "xp"}`)),
-			decryptedPasskey: "xp-passkey-dec",
+			expCfg:           json.RawMessage(`{"engine": "test"}`),
+			decryptedPasskey: "test-passkey-dec",
 		},
 	}
 
@@ -130,13 +127,12 @@ func TestDeployVersionSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	cs := &mocks.CryptoService{}
-	cs.On("Decrypt", "xp-passkey").Return("xp-passkey-dec", nil)
+	cs.On("Decrypt", "test-passkey").Return("test-passkey-dec", nil)
 
 	exps := &mocks.ExperimentsService{}
 	exps.On("IsStandardExperimentManager", "nop").Return(false)
 	exps.On("IsStandardExperimentManager", mock.Anything).Return(true)
-	exps.On("GetStandardExperimentConfig", expCfg).Return(*expCfg, nil)
-	exps.On("GetExperimentRunnerConfig", "xp", expCfg).Return(json.RawMessage([]byte(`{"engine": "xp"}`)), nil)
+	exps.On("GetExperimentRunnerConfig", testEngineType, expCfg).Return(json.RawMessage(`{"engine": "test"}`), nil)
 
 	// Run tests and validate
 	for name, data := range tests {

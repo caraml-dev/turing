@@ -24,10 +24,7 @@ func (s *rpcServer) ValidateExperimentConfig(cfg json.RawMessage, _ *interface{}
 	return s.Impl.ValidateExperimentConfig(cfg)
 }
 
-func (s *rpcServer) GetExperimentRunnerConfig(
-	inConfig *GetExperimentRunnerConfigRequest,
-	outConfig *json.RawMessage,
-) (err error) {
-	*outConfig, err = s.Impl.GetExperimentRunnerConfig(inConfig.Data)
+func (s *rpcServer) GetExperimentRunnerConfig(inConfig json.RawMessage, outConfig *json.RawMessage) (err error) {
+	*outConfig, err = s.Impl.GetExperimentRunnerConfig(inConfig)
 	return
 }

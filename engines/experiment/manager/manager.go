@@ -22,7 +22,7 @@ type ExperimentManager interface {
 	// this is the data that is saved to the Turing DB.
 	//
 	// In case of StandardExperimentManager, cfg is expected to be unmarshalled into TuringExperimentConfig
-	GetExperimentRunnerConfig(cfg interface{}) (json.RawMessage, error)
+	GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error)
 }
 
 type StandardExperimentManager interface {
@@ -51,13 +51,15 @@ type StandardExperimentManager interface {
 	ListVariablesForClient(Client) ([]Variable, error)
 	// ListVariablesForExperiments returns a list of the variables registered on the given experiments
 	ListVariablesForExperiments([]Experiment) (map[string][]Variable, error)
-	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format,
-	// based on the given engine's properties.
-	//ValidateExperimentConfig(*StandardExperimentManagerConfig, TuringExperimentConfig) error
 }
 
 type CustomExperimentManager interface {
 	ExperimentManager
+}
+
+func ParseStandardExperimentConfig(raw json.RawMessage) (stdExpCfg TuringExperimentConfig, err error) {
+	err = json.Unmarshal(raw, &stdExpCfg)
+	return
 }
 
 func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {

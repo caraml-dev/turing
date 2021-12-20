@@ -18,9 +18,9 @@ type ExperimentEngine struct {
 	// Type of Experiment Engine
 	Type string `json:"type"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
-	// For standard experiment engine managers, the config can be cast into
+	// For standard experiment engine managers, the config can be unmarshalled into
 	// manager.TuringExperimentConfig type.
-	Config interface{} `json:"config,omitempty"`
+	Config json.RawMessage `json:"config,omitempty"`
 }
 
 func (eec ExperimentEngine) Value() (driver.Value, error) {

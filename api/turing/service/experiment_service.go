@@ -24,8 +24,6 @@ const (
 type ExperimentsService interface {
 	// IsStandardExperimentManager checks if the experiment manager is of the standard type
 	IsStandardExperimentManager(engine string) bool
-	// GetStandardExperimentConfig converts the given generic config into the standard type, if possible
-	GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error)
 	// ListEngines returns a list of the experiment engines available
 	ListEngines() []manager.Engine
 	// ListClients returns a list of the clients registered on the given experiment engine
@@ -40,7 +38,7 @@ type ExperimentsService interface {
 	ValidateExperimentConfig(engine string, cfg json.RawMessage) error
 	// GetExperimentRunnerConfig converts the given experiment config compatible with the Experiment Manager
 	// into the format compatible with the ExperimentRunner
-	GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error)
+	GetExperimentRunnerConfig(engine string, cfg json.RawMessage) (json.RawMessage, error)
 }
 
 type experimentsService struct {
@@ -116,10 +114,6 @@ func (es *experimentsService) IsStandardExperimentManager(engine string) bool {
 		return false
 	}
 	return expManager.GetEngineInfo().Type == manager.StandardExperimentManagerType
-}
-
-func (*experimentsService) GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error) {
-	return manager.GetStandardExperimentConfig(config)
 }
 
 func (es *experimentsService) ListEngines() []manager.Engine {
@@ -208,7 +202,7 @@ func (es *experimentsService) ValidateExperimentConfig(engine string, cfg json.R
 	return expManager.ValidateExperimentConfig(cfg)
 }
 
-func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error) {
+func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg json.RawMessage) (json.RawMessage, error) {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {

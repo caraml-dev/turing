@@ -20,51 +20,52 @@ import (
 	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
-var expEngineConfig = manager.TuringExperimentConfig{
-	Client: manager.Client{
-		ID:       "1",
-		Username: "client",
-		Passkey:  "dummy_passkey",
-	},
-	Experiments: []manager.Experiment{
-		{
-			ID:   "2",
-			Name: "test-exp",
+func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
+	expEngineConfig, _ := json.Marshal(manager.TuringExperimentConfig{
+		Client: manager.Client{
+			ID:       "1",
+			Username: "client",
+			Passkey:  clientPasskey,
 		},
-	},
-	Variables: manager.Variables{
-		ClientVariables: []manager.Variable{
+		Experiments: []manager.Experiment{
 			{
-				Name:     "app_version",
-				Required: false,
+				ID:   "2",
+				Name: "test-exp",
 			},
 		},
-		ExperimentVariables: map[string][]manager.Variable{
-			"2": {
+		Variables: manager.Variables{
+			ClientVariables: []manager.Variable{
 				{
-					Name:     "customer",
-					Required: true,
+					Name:     "app_version",
+					Required: false,
+				},
+			},
+			ExperimentVariables: map[string][]manager.Variable{
+				"2": {
+					{
+						Name:     "customer",
+						Required: true,
+					},
+				},
+			},
+			Config: []manager.VariableConfig{
+				{
+					Name:        "customer",
+					Required:    true,
+					Field:       "customer_id",
+					FieldSource: request.HeaderFieldSource,
+				},
+				{
+					Name:        "app_version",
+					Required:    false,
+					Field:       "test_field",
+					FieldSource: request.HeaderFieldSource,
 				},
 			},
 		},
-		Config: []manager.VariableConfig{
-			{
-				Name:        "customer",
-				Required:    true,
-				Field:       "customer_id",
-				FieldSource: request.HeaderFieldSource,
-			},
-			{
-				Name:        "app_version",
-				Required:    false,
-				Field:       "test_field",
-				FieldSource: request.HeaderFieldSource,
-			},
-		},
-	},
+	})
+	return expEngineConfig
 }
-
-var expEngineConfigJSON, _ = json.Marshal(expEngineConfig)
 
 var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 	Environment: "env",
@@ -81,7 +82,7 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 		DefaultRouteID: "default",
 		ExperimentEngine: &ExperimentEngineConfig{
 			Type:   "standard",
-			Config: expEngineConfigJSON,
+			Config: makeTuringExperimentConfig("dummy_passkey"),
 		},
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
@@ -171,6 +172,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	}
 	projectID := models.ID(1)
 	router := createOrUpdateRequest.BuildRouter(projectID)
+
 	expected := models.RouterVersion{
 		Router: router,
 		Status: "pending",
@@ -185,50 +187,8 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 		},
 		DefaultRouteID: "default",
 		ExperimentEngine: &models.ExperimentEngine{
-			Type: "standard",
-			Config: &manager.TuringExperimentConfig{
-				Client: manager.Client{
-					ID:       "1",
-					Username: "client",
-					Passkey:  "enc_passkey",
-				},
-				Experiments: []manager.Experiment{
-					{
-						ID:   "2",
-						Name: "test-exp",
-					},
-				},
-				Variables: manager.Variables{
-					ClientVariables: []manager.Variable{
-						{
-							Name:     "app_version",
-							Required: false,
-						},
-					},
-					ExperimentVariables: map[string][]manager.Variable{
-						"2": {
-							{
-								Name:     "customer",
-								Required: true,
-							},
-						},
-					},
-					Config: []manager.VariableConfig{
-						{
-							Name:        "customer",
-							Required:    true,
-							Field:       "customer_id",
-							FieldSource: request.HeaderFieldSource,
-						},
-						{
-							Name:        "app_version",
-							Required:    false,
-							Field:       "test_field",
-							FieldSource: request.HeaderFieldSource,
-						},
-					},
-				},
-			},
+			Type:   "standard",
+			Config: makeTuringExperimentConfig("enc_passkey"),
 		},
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
@@ -295,8 +255,6 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	// Set up mock Experiment service
 	expSvc := &mocks.ExperimentsService{}
 	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
-	expSvc.On("GetStandardExperimentConfig", json.RawMessage(expEngineConfigJSON)).
-		Return(expEngineConfig, nil)
 
 	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc)
 	tu.FailOnError(t, err)
@@ -312,46 +270,15 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 	cs.On("Encrypt", "passkey").
 		Return("passkey-enc", nil)
 
-	// Set up mock Experiment service
-	cfgWithPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-			Passkey:  "passkey",
-		},
-	}
-	cfgWithPasskeyJSON, _ := json.Marshal(cfgWithPasskey)
-
-	cfgWithoutPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-		},
-	}
-	cfgWithoutPasskeyJSON, _ := json.Marshal(cfgWithoutPasskey)
-
-	cfgWithBadPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-			Passkey:  "passkey-bad",
-		},
-	}
-	cfgWithBadPasskeyJSON, _ := json.Marshal(cfgWithBadPasskey)
-
 	es := &mocks.ExperimentsService{}
 	es.On("IsStandardExperimentManager", "standard-manager").Return(true)
 	es.On("IsStandardExperimentManager", "custom-manager").Return(false)
-	es.On("GetStandardExperimentConfig", cfgWithPasskey).Return(*cfgWithPasskey, nil)
-	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithPasskeyJSON)).
-		Return(*cfgWithPasskey, nil)
-	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithoutPasskeyJSON)).
-		Return(*cfgWithoutPasskey, nil)
-	es.On("GetStandardExperimentConfig", json.RawMessage(cfgWithBadPasskeyJSON)).
-		Return(*cfgWithBadPasskey, nil)
 
 	// Define tests
 	tests := map[string]struct {
 		req      CreateOrUpdateRouterRequest
 		router   *models.Router
-		expected interface{}
+		expected json.RawMessage
 		err      string
 	}{
 		"failure | std engine | missing curr version passkey": {
@@ -359,7 +286,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
 						Type:   "standard-manager",
-						Config: cfgWithoutPasskeyJSON,
+						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 					},
 				},
 			},
@@ -371,7 +298,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
 						Type:   "standard-manager",
-						Config: cfgWithBadPasskeyJSON,
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey-bad"}}`),
 					},
 				},
 			},
@@ -383,7 +310,7 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
 						Type:   "standard-manager",
-						Config: cfgWithoutPasskeyJSON,
+						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 					},
 				},
 			},
@@ -391,28 +318,23 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 				CurrRouterVersion: &models.RouterVersion{
 					ExperimentEngine: &models.ExperimentEngine{
 						Type:   "standard-manager",
-						Config: cfgWithPasskey,
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
 					},
 				},
 			},
-			expected: cfgWithPasskey,
+			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
 		},
 		"success | std engine | use new passkey": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
 						Type:   "standard-manager",
-						Config: cfgWithPasskeyJSON,
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
 					},
 				},
 			},
-			router: &models.Router{},
-			expected: &manager.TuringExperimentConfig{
-				Client: manager.Client{
-					Username: "client-name",
-					Passkey:  "passkey-enc",
-				},
-			},
+			router:   &models.Router{},
+			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey-enc"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
 		},
 		"success | custom engine": {
 			req: CreateOrUpdateRouterRequest{

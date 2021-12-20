@@ -180,54 +180,45 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 	router *models.Router,
 	cryptoSvc service.CryptoService,
 	expSvc service.ExperimentsService,
-) (interface{}, error) {
+) (json.RawMessage, error) {
 	rawExpConfig := r.Config.ExperimentEngine.Config
 
 	// Handle missing passkey / encrypt it in Standard experiment config
 	if expSvc.IsStandardExperimentManager(r.Config.ExperimentEngine.Type) {
 		// Convert the new config to the standard type
-		expConfig, err := expSvc.GetStandardExperimentConfig(rawExpConfig)
+		expConfig, err := manager.ParseStandardExperimentConfig(rawExpConfig)
 		if err != nil {
 			return nil, fmt.Errorf("Cannot parse standard experiment config: %v", err)
 		}
-		clientPasskey := expConfig.Client.Passkey
 
-		if clientPasskey == "" {
+		if expConfig.Client.Passkey == "" {
 			// Extract existing router version config
 			if router.CurrRouterVersion != nil &&
 				router.CurrRouterVersion.ExperimentEngine.Type == r.Config.ExperimentEngine.Type {
-				currVerExpConfig, err := expSvc.GetStandardExperimentConfig(router.CurrRouterVersion.ExperimentEngine.Config)
+				currVerExpConfig, err := manager.ParseStandardExperimentConfig(router.CurrRouterVersion.ExperimentEngine.Config)
 				if err != nil {
 					return nil, fmt.Errorf("Error parsing existing experiment config: %v", err)
 				}
 				if expConfig.Client.Username == currVerExpConfig.Client.Username {
 					// Copy the passkey
-					clientPasskey = currVerExpConfig.Client.Passkey
+					expConfig.Client.Passkey = currVerExpConfig.Client.Passkey
 				}
 			}
 			// If the passkey is still empty, we cannot proceed
-			if clientPasskey == "" {
+			if expConfig.Client.Passkey == "" {
 				return nil, errors.New("Passkey must be configured")
 			}
 		} else {
 			// Passkey has been supplied, encrypt it
 			var err error
-			clientPasskey, err = cryptoSvc.Encrypt(clientPasskey)
+			expConfig.Client.Passkey, err = cryptoSvc.Encrypt(expConfig.Client.Passkey)
 			if err != nil {
 				return nil, fmt.Errorf("Passkey could not be encrypted: %s", err.Error())
 			}
 		}
 
-		// Build Experiment engine config
-		return &manager.TuringExperimentConfig{
-			Client: manager.Client{
-				ID:       expConfig.Client.ID,
-				Username: expConfig.Client.Username,
-				Passkey:  clientPasskey,
-			},
-			Experiments: expConfig.Experiments,
-			Variables:   expConfig.Variables,
-		}, nil
+		// Marshal Experiment engine config
+		return json.Marshal(expConfig)
 	}
 
 	// Custom experiment manager config, return as is.

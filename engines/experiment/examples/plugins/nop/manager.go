@@ -38,6 +38,6 @@ func (*ExperimentManager) ValidateExperimentConfig(json.RawMessage) error {
 	return nil
 }
 
-func (*ExperimentManager) GetExperimentRunnerConfig(interface{}) (json.RawMessage, error) {
+func (*ExperimentManager) GetExperimentRunnerConfig(json.RawMessage) (json.RawMessage, error) {
 	return json.RawMessage{}, nil
 }
