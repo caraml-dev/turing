@@ -35,10 +35,13 @@ type KnativeService struct {
 	ContainerPort  int32 `json:"containerPort"`
 
 	// Autoscaling properties
-	MinReplicas                  int `json:"minReplicas"`
-	MaxReplicas                  int `json:"maxReplicas"`
-	TargetConcurrency            int `json:"targetConcurrency"`
-	QueueProxyResourcePercentage int `json:"queueProxyResourcePercentage"`
+	MinReplicas       int `json:"minReplicas"`
+	MaxReplicas       int `json:"maxReplicas"`
+	TargetConcurrency int `json:"targetConcurrency"`
+
+	// Resource properties
+	QueueProxyResourcePercentage    int     `json:"queueProxyResourcePercentage"`
+	UserContainerLimitRequestFactor float64 `json:"userContainerLimitRequestFactor"`
 }
 
 // Creates a new config object compatible with the knative serving API, from
@@ -87,18 +90,21 @@ func (cfg *KnativeService) buildSvcSpec(
 
 	// Build annotations, set target concurrency of 1
 	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale":                     strconv.Itoa(cfg.MinReplicas),
-		"autoscaling.knative.dev/maxScale":                     strconv.Itoa(cfg.MaxReplicas),
-		"autoscaling.knative.dev/target":                       strconv.Itoa(cfg.TargetConcurrency),
-		"autoscaling.knative.dev/class":                        knativeSvcDefaults.AutoscalingClass,
-		"queue.sidecar.serving.knative.dev/resourcePercentage": strconv.Itoa(cfg.QueueProxyResourcePercentage),
+		"autoscaling.knative.dev/minScale": strconv.Itoa(cfg.MinReplicas),
+		"autoscaling.knative.dev/maxScale": strconv.Itoa(cfg.MaxReplicas),
+		"autoscaling.knative.dev/target":   strconv.Itoa(cfg.TargetConcurrency),
+		"autoscaling.knative.dev/class":    knativeSvcDefaults.AutoscalingClass,
+	}
+
+	if cfg.QueueProxyResourcePercentage > 0 {
+		annotations["queue.sidecar.serving.knative.dev/resourcePercentage"] = strconv.Itoa(cfg.QueueProxyResourcePercentage)
 	}
 
 	// Revision name
 	revisionName := fmt.Sprintf("%s-0", cfg.Name)
 
 	// Build resource requirements for the user container
-	resourceReqs := cfg.buildResourceReqs()
+	resourceReqs := cfg.buildResourceReqs(cfg.UserContainerLimitRequestFactor)
 
 	// Build container spec
 	container := corev1.Container{

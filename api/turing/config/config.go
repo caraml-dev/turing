@@ -216,8 +216,9 @@ type KubernetesLabelConfigs struct {
 // KnativeServiceDefaults captures some of the configurable defaults specific to
 // Knative services
 type KnativeServiceDefaults struct {
-	TargetConcurrency            int
-	QueueProxyResourcePercentage int
+	TargetConcurrency               int
+	QueueProxyResourcePercentage    int
+	UserContainerLimitRequestFactor float64
 }
 
 // SinglePageApplicationConfig holds configuration required for serving SPAs
@@ -429,6 +430,7 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("KnativeServiceDefaults::TargetConcurrency", "1")
 	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
+	v.SetDefault("KnativeServiceDefaults::UserContainerLimitRequestFactor", "1")
 
 	v.SetDefault("RouterDefaults::Image", "")
 	v.SetDefault("RouterDefaults::FiberDebugLogEnabled", "false")

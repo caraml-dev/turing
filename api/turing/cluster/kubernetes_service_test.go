@@ -109,8 +109,8 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 									corev1.ResourceMemory: resource.MustParse("1"),
 								},
 								Limits: map[corev1.ResourceName]resource.Quantity{
-									corev1.ResourceCPU:    resource.MustParse("2"),
-									corev1.ResourceMemory: resource.MustParse("2"),
+									corev1.ResourceCPU:    resource.MustParse("1"),
+									corev1.ResourceMemory: resource.MustParse("1"),
 								},
 							},
 							VolumeMounts: svcConf.VolumeMounts,

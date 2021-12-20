@@ -139,8 +139,9 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       Quantity(resource.MustParse("8Gi")),
 				},
 				KnativeServiceDefaults: &KnativeServiceDefaults{
-					TargetConcurrency:            1,
-					QueueProxyResourcePercentage: 30,
+					TargetConcurrency:               1,
+					QueueProxyResourcePercentage:    30,
+					UserContainerLimitRequestFactor: 1,
 				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
@@ -199,8 +200,9 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       Quantity(resource.MustParse("4000Mi")),
 				},
 				KnativeServiceDefaults: &KnativeServiceDefaults{
-					TargetConcurrency:            2,
-					QueueProxyResourcePercentage: 20,
+					TargetConcurrency:               2,
+					QueueProxyResourcePercentage:    20,
+					UserContainerLimitRequestFactor: 1.25,
 				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
@@ -291,8 +293,9 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       Quantity(resource.MustParse("12Gi")),
 				},
 				KnativeServiceDefaults: &KnativeServiceDefaults{
-					TargetConcurrency:            2,
-					QueueProxyResourcePercentage: 20,
+					TargetConcurrency:               2,
+					QueueProxyResourcePercentage:    20,
+					UserContainerLimitRequestFactor: 1.25,
 				},
 				RouterDefaults: &RouterDefaults{
 					LogLevel: "INFO",
@@ -399,8 +402,9 @@ func TestLoad(t *testing.T) {
 					MigrationsFolder: "db-migrations/",
 				},
 				KnativeServiceDefaults: &KnativeServiceDefaults{
-					TargetConcurrency:            4,
-					QueueProxyResourcePercentage: 20,
+					TargetConcurrency:               4,
+					QueueProxyResourcePercentage:    20,
+					UserContainerLimitRequestFactor: 1.25,
 				},
 				DeployConfig: &DeploymentConfig{
 					EnvironmentType: "dev",

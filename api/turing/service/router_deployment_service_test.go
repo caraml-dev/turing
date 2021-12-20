@@ -76,6 +76,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 	secretName string,
 	targetConcurrency int,
 	queueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -88,8 +89,9 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 				"env": envType,
 			},
 		},
-		TargetConcurrency:            targetConcurrency,
-		QueueProxyResourcePercentage: queueProxyResourcePercentage,
+		TargetConcurrency:               targetConcurrency,
+		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}, nil
 }
 
@@ -100,6 +102,7 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	secretName string,
 	targetConcurrency int,
 	queueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -112,8 +115,9 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 				"env": envType,
 			},
 		},
-		TargetConcurrency:            targetConcurrency,
-		QueueProxyResourcePercentage: queueProxyResourcePercentage,
+		TargetConcurrency:               targetConcurrency,
+		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}, nil
 }
 
@@ -129,6 +133,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	sentryDSN string,
 	targetConcurrency int,
 	queueProxyResourcePercentage int,
+	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -152,8 +157,9 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				Data: string(expConfig),
 			},
 		},
-		TargetConcurrency:            targetConcurrency,
-		QueueProxyResourcePercentage: queueProxyResourcePercentage,
+		TargetConcurrency:               targetConcurrency,
+		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
+		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}, nil
 }
 
@@ -213,8 +219,9 @@ func TestDeployEndpoint(t *testing.T) {
 		sentryEnabled:             true,
 		sentryDSN:                 "test:dsn",
 		knativeServiceConfig: &config.KnativeServiceDefaults{
-			TargetConcurrency:            1,
-			QueueProxyResourcePercentage: 20,
+			TargetConcurrency:               1,
+			QueueProxyResourcePercentage:    20,
+			UserContainerLimitRequestFactor: 1.75,
 		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
@@ -276,8 +283,9 @@ func TestDeployEndpoint(t *testing.T) {
 				"env": envType,
 			},
 		},
-		TargetConcurrency:            1,
-		QueueProxyResourcePercentage: 20,
+		TargetConcurrency:               1,
+		QueueProxyResourcePercentage:    20,
+		UserContainerLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
 		BaseService: &cluster.BaseService{
@@ -287,8 +295,9 @@ func TestDeployEndpoint(t *testing.T) {
 				"env": envType,
 			},
 		},
-		TargetConcurrency:            1,
-		QueueProxyResourcePercentage: 20,
+		TargetConcurrency:               1,
+		QueueProxyResourcePercentage:    20,
+		UserContainerLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "ApplyConfigMap", testNamespace,
 		&cluster.ConfigMap{Name: fmt.Sprintf("%s-fiber-config-%d", routerVersion.Router.Name, routerVersion.Version)})
@@ -313,8 +322,9 @@ func TestDeployEndpoint(t *testing.T) {
 				),
 			},
 		},
-		TargetConcurrency:            1,
-		QueueProxyResourcePercentage: 20,
+		TargetConcurrency:               1,
+		QueueProxyResourcePercentage:    20,
+		UserContainerLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "CreateSecret", mock.Anything, &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
@@ -370,8 +380,9 @@ func TestDeleteEndpoint(t *testing.T) {
 		deploymentTimeout:         timeout,
 		deploymentDeletionTimeout: timeout,
 		knativeServiceConfig: &config.KnativeServiceDefaults{
-			TargetConcurrency:            1,
-			QueueProxyResourcePercentage: 20,
+			TargetConcurrency:               1,
+			QueueProxyResourcePercentage:    20,
+			UserContainerLimitRequestFactor: 1.75,
 		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
