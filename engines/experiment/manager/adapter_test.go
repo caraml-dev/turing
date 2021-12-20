@@ -1,18 +1,11 @@
 package manager_test
 
 import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/manager/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestStandardExperimentIsCacheEnabled(t *testing.T) {
@@ -140,90 +133,4 @@ func TestStandardExperimentListVariablesForExperiments(t *testing.T) {
 	variablesMap, err = manager.ListVariablesForExperiments(expMgr, []manager.Experiment{{}})
 	assert.Equal(t, map[string][]manager.Variable{}, variablesMap)
 	assert.EqualError(t, err, stdExpMgrErr)
-}
-
-func TestGetExperimentRunnerConfig(t *testing.T) {
-	testStdExpConfig := manager.TuringExperimentConfig{
-		Client:      manager.Client{Username: "client_name"},
-		Experiments: []manager.Experiment{{Name: "exp_name"}},
-		Variables:   manager.Variables{ClientVariables: []manager.Variable{{Name: "var_name"}}},
-	}
-
-	// Get test data
-	testData, err := ioutil.ReadFile(filepath.Join("testdata", "experiment_runner_config.json"))
-	require.NoError(t, err)
-	var testRawConfig interface{}
-	err = json.Unmarshal(testData, &testRawConfig)
-	assert.NoError(t, err)
-	testSuccessResponse := json.RawMessage([]byte(`{}`))
-
-	// Set up mock experiment managers
-	// Standard Exp Manager
-	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
-	stdExpMgr.On("GetExperimentRunnerConfig", testStdExpConfig).Return(testSuccessResponse, nil)
-	stdExpMgr.On("GetExperimentRunnerConfig", mock.Anything).Return(nil, errors.New("Unexpected Parameters"))
-	// Custom Exp Manager
-	customExpMgr := &mocks.CustomExperimentManager{}
-	customExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.CustomExperimentManagerType})
-	customExpMgr.On("GetExperimentRunnerConfig", testRawConfig).Return(testSuccessResponse, nil)
-	customExpMgr.On("GetExperimentRunnerConfig", mock.Anything).Return(nil, errors.New("Unexpected Parameters"))
-	// Bad Experiment Managers
-	badStdExpMgr := &mocks.ExperimentManager{}
-	badStdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
-	badCustomExpMgr := &mocks.ExperimentManager{}
-	badCustomExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.CustomExperimentManagerType})
-	badExpMgr := &mocks.ExperimentManager{}
-	badExpMgr.On("GetEngineInfo").Return(manager.Engine{})
-
-	// Set up tests
-	tests := map[string]struct {
-		mgr      manager.ExperimentManager
-		rawCfg   interface{}
-		expected json.RawMessage
-		err      string
-	}{
-		"success | standard": {
-			mgr:      stdExpMgr,
-			rawCfg:   testStdExpConfig,
-			expected: testSuccessResponse,
-		},
-		"success | custom": {
-			mgr:      customExpMgr,
-			rawCfg:   testRawConfig,
-			expected: testSuccessResponse,
-		},
-		"failure | std mismatched type": {
-			mgr: badStdExpMgr,
-			err: "Error casting  to standard experiment manager",
-		},
-		"failure | std config error": {
-			mgr:    stdExpMgr,
-			rawCfg: []int{},
-			err: strings.Join([]string{
-				"Unable to parse standard experiment config: ",
-				"json: cannot unmarshal array into Go value of type manager.TuringExperimentConfig"}, ""),
-		},
-		"failure | custom mismatched type": {
-			mgr: badCustomExpMgr,
-			err: "Error casting  to custom experiment manager",
-		},
-		"failure | unknown exp manager type": {
-			mgr: badExpMgr,
-			err: "Experiment Manager type  is not recognized",
-		},
-	}
-
-	// Test calls to the correct experiment manager method, based on the type
-	for name, data := range tests {
-		t.Run(name, func(t *testing.T) {
-			resp, err := manager.GetExperimentRunnerConfig(data.mgr, data.rawCfg)
-			if data.err != "" {
-				assert.EqualError(t, err, data.err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, data.expected, resp)
-			}
-		})
-	}
 }

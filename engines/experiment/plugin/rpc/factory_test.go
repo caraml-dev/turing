@@ -78,9 +78,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 			cfg: json.RawMessage("{\"key_1\": \"value_1\"}"),
 			mockManager: func(cfg json.RawMessage) interface{} {
 				mockManager := &mocks.ConfigurableExperimentManager{}
-				mockManager.
-					On("Configure", cfg).
-					Return(func() error { return nil })
+				mockManager.On("Configure", cfg).Return(nil)
 
 				return mockManager
 			},
@@ -105,11 +103,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 		"failure | failed to configure plugin": {
 			mockManager: func(cfg json.RawMessage) interface{} {
 				mockManager := &mocks.ConfigurableExperimentManager{}
-				mockManager.
-					On("Configure", cfg).
-					Return(func() error {
-						return errors.New(configError)
-					})
+				mockManager.On("Configure", cfg).Return(errors.New(configError))
 
 				return mockManager
 			},

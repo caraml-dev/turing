@@ -215,7 +215,7 @@ func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg inter
 		return json.RawMessage{}, err
 	}
 
-	return manager.GetExperimentRunnerConfig(expManager, cfg)
+	return expManager.GetExperimentRunnerConfig(cfg)
 }
 
 func (es *experimentsService) getExperimentManager(

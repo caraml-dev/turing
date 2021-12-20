@@ -10,19 +10,30 @@ import (
 type ExperimentManager interface {
 	// GetEngineInfo returns the configuration of the experiment engine
 	GetEngineInfo() Engine
+
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
 	ValidateExperimentConfig(cfg json.RawMessage) error
+
+	// GetExperimentRunnerConfig converts the given config (as retrieved from the DB) into a format suitable
+	// for the Turing router (i.e., to be passed to the Experiment Runner). This interface method will be
+	// called at the time of router deployment.
+	//
+	// cfg holds the experiment configuration in a format that is suitable for use with the Turing UI and
+	// this is the data that is saved to the Turing DB.
+	//
+	// In case of StandardExperimentManager, cfg is expected to be unmarshalled into TuringExperimentConfig
+	GetExperimentRunnerConfig(cfg interface{}) (json.RawMessage, error)
 }
 
 type StandardExperimentManager interface {
 	ExperimentManager
 
-	// GetExperimentRunnerConfig converts the given TuringExperimentConfig into a format suitable for the
-	// Turing router. TuringExperimentConfig holds the experiment configuration in a format that is suitable
-	// for use with the Turing UI and this is the data that is saved to the Turing DB. This interface method
-	// will be called at the time of router deployment to convert the data into the format that the router, i.e.,
-	// Experiment Runner expects.
-	GetExperimentRunnerConfig(TuringExperimentConfig) (json.RawMessage, error)
+	//// GetExperimentRunnerConfig converts the given TuringExperimentConfig into a format suitable for the
+	//// Turing router. TuringExperimentConfig holds the experiment configuration in a format that is suitable
+	//// for use with the Turing UI and this is the data that is saved to the Turing DB. This interface method
+	//// will be called at the time of router deployment to convert the data into the format that the router, i.e.,
+	//// Experiment Runner expects.
+	//GetExperimentRunnerConfig(TuringExperimentConfig) (json.RawMessage, error)
 
 	// BaseStandardExperimentManager provides default implementations for the following methods
 	// that may be composed into the experiment engine.
@@ -47,13 +58,6 @@ type StandardExperimentManager interface {
 
 type CustomExperimentManager interface {
 	ExperimentManager
-
-	// GetExperimentRunnerConfig converts the given config (as retrieved from the DB) into a format suitable
-	// for the Turing router (i.e., to be passed to the Experiment Runner). This interface method will be
-	// called at the time of router deployment.
-	GetExperimentRunnerConfig(interface{}) (json.RawMessage, error)
-	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
-	//ValidateExperimentConfig(interface{}) error
 }
 
 func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {

@@ -37,3 +37,7 @@ func (m *ExperimentManager) GetEngineInfo() manager.Engine {
 func (*ExperimentManager) ValidateExperimentConfig(json.RawMessage) error {
 	return nil
 }
+
+func (*ExperimentManager) GetExperimentRunnerConfig(interface{}) (json.RawMessage, error) {
+	return json.RawMessage{}, nil
+}

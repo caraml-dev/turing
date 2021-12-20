@@ -28,6 +28,29 @@ func (_m *ExperimentManager) GetEngineInfo() manager.Engine {
 	return r0
 }
 
+// GetExperimentRunnerConfig provides a mock function with given fields: cfg
+func (_m *ExperimentManager) GetExperimentRunnerConfig(cfg interface{}) (json.RawMessage, error) {
+	ret := _m.Called(cfg)
+
+	var r0 json.RawMessage
+	if rf, ok := ret.Get(0).(func(interface{}) json.RawMessage); ok {
+		r0 = rf(cfg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(json.RawMessage)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
+		r1 = rf(cfg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ValidateExperimentConfig provides a mock function with given fields: cfg
 func (_m *ExperimentManager) ValidateExperimentConfig(cfg json.RawMessage) error {
 	ret := _m.Called(cfg)

@@ -17,7 +17,7 @@ func (_m *ConfigurableExperimentManager) Configure(cfg json.RawMessage) error {
 	if rf, ok := ret.Get(0).(func() error); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(error)
+		r0 = ret.Error(0)
 	}
 
 	return r0

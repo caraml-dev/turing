@@ -29,3 +29,16 @@ func (c *rpcClient) GetEngineInfo() manager.Engine {
 
 	return resp
 }
+
+func (c *rpcClient) ValidateExperimentConfig(cfg json.RawMessage) error {
+	return c.Call("Plugin.ValidateExperimentConfig", cfg, new(interface{}))
+}
+
+func (c *rpcClient) GetExperimentRunnerConfig(cfg interface{}) (json.RawMessage, error) {
+	var resp json.RawMessage
+	req := &GetExperimentRunnerConfigRequest{
+		Data: cfg,
+	}
+	err := c.Call("Plugin.GetExperimentRunnerConfig", req, &resp)
+	return resp, err
+}

@@ -5,9 +5,7 @@ package manager
 */
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 const (
@@ -71,31 +69,4 @@ func ListVariablesForExperiments(expManager ExperimentManager, exps []Experiment
 		}
 	}
 	return map[string][]Variable{}, errors.New(standardMethodErr)
-}
-
-// Common methods *************************************************************
-
-func GetExperimentRunnerConfig(expManager ExperimentManager, expCfg interface{}) (json.RawMessage, error) {
-	engineInfo := expManager.GetEngineInfo()
-	// Call the appropriate validator method based on the type of the experiment manager
-	switch engineInfo.Type {
-	case StandardExperimentManagerType:
-		stdMgr, ok := expManager.(StandardExperimentManager)
-		if !ok {
-			return json.RawMessage{}, fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "standard")
-		}
-		stdExpConfig, err := GetStandardExperimentConfig(expCfg)
-		if err != nil {
-			return json.RawMessage{}, fmt.Errorf(standardExperimentConfigErr, err)
-		}
-		return stdMgr.GetExperimentRunnerConfig(stdExpConfig)
-	case CustomExperimentManagerType:
-		customMgr, ok := expManager.(CustomExperimentManager)
-		if !ok {
-			return json.RawMessage{}, fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
-		}
-		return customMgr.GetExperimentRunnerConfig(expCfg)
-	default:
-		return nil, fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
-	}
 }
