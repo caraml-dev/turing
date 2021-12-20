@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/gojek/turing/engines/experiment/plugin/rpc"
 	rpcManager "github.com/gojek/turing/engines/experiment/plugin/rpc/manager"
@@ -14,8 +15,15 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-func configuredMockManager() *mocks.ConfigurableExperimentManager {
+func configuredManagerMock() *mocks.ConfigurableExperimentManager {
 	mockManager := &mocks.ConfigurableExperimentManager{}
+	mockManager.On("Configure", json.RawMessage(nil)).Return(nil)
+
+	return mockManager
+}
+
+func configuredStandardManagerMock() *mocks.ConfigurableStandardExperimentManager {
+	mockManager := &mocks.ConfigurableStandardExperimentManager{}
 	mockManager.On("Configure", json.RawMessage(nil)).Return(nil)
 
 	return mockManager
@@ -23,12 +31,12 @@ func configuredMockManager() *mocks.ConfigurableExperimentManager {
 
 func withExperimentManager(
 	t *testing.T,
-	mock *mocks.ConfigurableExperimentManager,
+	impl rpcManager.ConfigurableExperimentManager,
 	testFn func(em manager.ExperimentManager, err error),
 ) {
 	plugins := map[string]plugin.Plugin{
 		rpc.ManagerPluginIdentifier: &rpcManager.ExperimentManagerPlugin{
-			Impl: mock,
+			Impl: impl,
 		},
 	}
 
@@ -40,8 +48,6 @@ func withExperimentManager(
 	}
 
 	testFn(factory.GetExperimentManager())
-
-	mock.AssertExpectations(t)
 }
 
 func TestExperimentManagerPlugin_Configure(t *testing.T) {
@@ -69,6 +75,8 @@ func TestExperimentManagerPlugin_Configure(t *testing.T) {
 					assert.NotNil(t, em)
 				}
 			})
+
+			mockManager.AssertExpectations(t)
 		})
 	}
 }
@@ -93,13 +101,15 @@ func TestExperimentManagerPlugin_GetEngineInfo(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := configuredMockManager()
+			mockManager := configuredManagerMock()
 			mockManager.On("GetEngineInfo").Return(tt.expected)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
 				actual := em.GetEngineInfo()
 				assert.Equal(t, tt.expected, actual)
 			})
+
+			mockManager.AssertExpectations(t)
 		})
 	}
 }
@@ -122,7 +132,7 @@ func TestExperimentManagerPlugin_ValidateExperimentConfig(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := configuredMockManager()
+			mockManager := configuredManagerMock()
 			mockManager.On("ValidateExperimentConfig", tt.experimentConfig).Return(tt.err)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
@@ -133,6 +143,8 @@ func TestExperimentManagerPlugin_ValidateExperimentConfig(t *testing.T) {
 					assert.NoError(t, err)
 				}
 			})
+
+			mockManager.AssertExpectations(t)
 		})
 	}
 }
@@ -159,7 +171,7 @@ func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockManager := configuredMockManager()
+			mockManager := configuredManagerMock()
 			mockManager.On("GetExperimentRunnerConfig", tt.experimentConfig).Return(tt.expected, tt.err)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
@@ -171,6 +183,258 @@ func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 					assert.Equal(t, tt.expected, actual)
 				}
 			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_IsCacheEnabled(t *testing.T) {
+	suite := map[string]struct {
+		cacheEnabled bool
+	}{
+		"success | enabled": {
+			cacheEnabled: true,
+		},
+		"success | disabled": {
+			cacheEnabled: false,
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("IsCacheEnabled").Return(tt.cacheEnabled)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual := em.(manager.StandardExperimentManager).IsCacheEnabled()
+				assert.Equal(t, tt.cacheEnabled, actual)
+			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_ListClients(t *testing.T) {
+	suite := map[string]struct {
+		expected []manager.Client
+		err      error
+	}{
+		"success": {
+			expected: []manager.Client{
+				{
+					ID:       "client-1",
+					Username: "username-1",
+				},
+			},
+		},
+		"failure": {
+			err: errors.New("failed to fetch clients"),
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("ListClients").Return(tt.expected, tt.err)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual, err := em.(manager.StandardExperimentManager).ListClients()
+
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
+			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_ListExperiments(t *testing.T) {
+	suite := map[string]struct {
+		expected []manager.Experiment
+		err      error
+	}{
+		"success": {
+			expected: []manager.Experiment{
+				{
+					ID:       "123-456-789",
+					Name:     "experiment-01",
+					ClientID: "client-01",
+				},
+			},
+		},
+		"failure": {
+			err: errors.New("failed to fetch experiments"),
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("ListExperiments").Return(tt.expected, tt.err)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual, err := em.(manager.StandardExperimentManager).ListExperiments()
+
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
+			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_ListExperimentsForClient(t *testing.T) {
+	suite := map[string]struct {
+		client   manager.Client
+		expected []manager.Experiment
+		err      error
+	}{
+		"success": {
+			client: manager.Client{
+				ID: "client-02",
+			},
+			expected: []manager.Experiment{
+				{
+					Name:     "experiment-02",
+					ClientID: "client-02",
+				},
+			},
+		},
+		"failure": {
+			err: errors.New("failed to fetch experiments for client"),
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("ListExperimentsForClient", tt.client).Return(tt.expected, tt.err)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual, err := em.(manager.StandardExperimentManager).ListExperimentsForClient(tt.client)
+
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
+			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_ListVariablesForClient(t *testing.T) {
+	suite := map[string]struct {
+		client   manager.Client
+		expected []manager.Variable
+		err      error
+	}{
+		"success": {
+			client: manager.Client{
+				ID: "client-03",
+			},
+			expected: []manager.Variable{
+				{
+					Name:     "sessionId",
+					Required: false,
+					Type:     manager.FilterVariableType,
+				},
+				{
+					Name:     "customerType",
+					Required: true,
+					Type:     manager.UnitVariableType,
+				},
+			},
+		},
+		"failure": {
+			client: manager.Client{
+				ID: "unknown",
+			},
+			err: errors.New("failed to fetch variables for client"),
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("ListVariablesForClient", tt.client).Return(tt.expected, tt.err)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual, err := em.(manager.StandardExperimentManager).ListVariablesForClient(tt.client)
+
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
+			})
+
+			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestExperimentManagerPlugin_ListVariablesForExperiments(t *testing.T) {
+	suite := map[string]struct {
+		experiments []manager.Experiment
+		expected    map[string][]manager.Variable
+		err         error
+	}{
+		"success": {
+			experiments: []manager.Experiment{
+				{
+					Name: "experiment-04",
+				},
+			},
+			expected: map[string][]manager.Variable{
+				"experiment-04": {
+					{
+						Name:     "customerType",
+						Required: true,
+						Type:     manager.UnitVariableType,
+					},
+				},
+			},
+		},
+		"failure": {
+			experiments: []manager.Experiment(nil),
+			err:         errors.New("failed to fetch variables for client"),
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockManager := configuredStandardManagerMock()
+			mockManager.On("ListVariablesForExperiments", tt.experiments).Return(tt.expected, tt.err)
+
+			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
+				actual, err := em.(manager.StandardExperimentManager).ListVariablesForExperiments(tt.experiments)
+
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
+			})
+
+			mockManager.AssertExpectations(t)
 		})
 	}
 }

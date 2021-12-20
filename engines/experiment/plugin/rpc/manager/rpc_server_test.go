@@ -63,8 +63,7 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockManager := &mocks.ConfigurableExperimentManager{}
-			mockManager.On("GetEngineInfo", mock.Anything).
-				Return(tt.expected)
+			mockManager.On("GetEngineInfo", mock.Anything).Return(tt.expected)
 			rpcServer := &rpcServer{mockManager}
 
 			var actual manager.Engine
@@ -77,6 +76,46 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 				assert.Equal(t, tt.expected, actual)
 			}
 			mockManager.AssertExpectations(t)
+		})
+	}
+}
+
+func TestRpcServer_IsCacheEnabled(t *testing.T) {
+	suite := map[string]struct {
+		managerMock func(expected bool) ConfigurableExperimentManager
+		expected    bool
+		err         string
+	}{
+		"success": {
+			managerMock: func(expected bool) ConfigurableExperimentManager {
+				mm := &mocks.ConfigurableStandardExperimentManager{}
+				mm.On("IsCacheEnabled").Return(expected)
+
+				return mm
+			},
+			expected: true,
+		},
+		"failure": {
+			managerMock: func(bool) ConfigurableExperimentManager {
+				return &mocks.ConfigurableExperimentManager{}
+			},
+			err: "not implemented",
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			rpcServer := &rpcServer{tt.managerMock(tt.expected)}
+
+			var actual bool
+			err := rpcServer.IsCacheEnabled(nil, &actual)
+
+			if tt.err != "" {
+				assert.EqualError(t, err, tt.err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, actual)
+			}
 		})
 	}
 }

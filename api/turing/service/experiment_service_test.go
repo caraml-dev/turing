@@ -466,10 +466,8 @@ func TestValidateExperimentConfig(t *testing.T) {
 		"success | custom exp mgr": {
 			engine: "custom",
 			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
-				customExpMgr := &mocks.CustomExperimentManager{}
-				customExpMgr.
-					On("ValidateExperimentConfig", cfg).
-					Return(err)
+				customExpMgr := &mocks.ExperimentManager{}
+				customExpMgr.On("ValidateExperimentConfig", cfg).Return(err)
 
 				return map[string]manager.ExperimentManager{
 					engine: customExpMgr,
@@ -479,7 +477,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 		},
 		"failure | validation errors": {
 			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
-				customExpMgr := &mocks.CustomExperimentManager{}
+				customExpMgr := &mocks.ExperimentManager{}
 				customExpMgr.
 					On("ValidateExperimentConfig", cfg).
 					Return(err)
@@ -521,7 +519,7 @@ func TestGetExperimentRunnerConfig(t *testing.T) {
 		On("GetExperimentRunnerConfig", json.RawMessage(`{"client": {"id": "1"}}`)).
 		Return(expectedResult1, nil)
 
-	customExpMgr := &mocks.CustomExperimentManager{}
+	customExpMgr := &mocks.ExperimentManager{}
 	customExpMgr.On("GetEngineInfo").Return(customExperimentManagerConfig)
 	customExpMgr.On("GetExperimentRunnerConfig", json.RawMessage(`[1,2]`)).Return(expectedResult2, nil)
 

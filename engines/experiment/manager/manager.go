@@ -27,17 +27,6 @@ type ExperimentManager interface {
 
 type StandardExperimentManager interface {
 	ExperimentManager
-
-	//// GetExperimentRunnerConfig converts the given TuringExperimentConfig into a format suitable for the
-	//// Turing router. TuringExperimentConfig holds the experiment configuration in a format that is suitable
-	//// for use with the Turing UI and this is the data that is saved to the Turing DB. This interface method
-	//// will be called at the time of router deployment to convert the data into the format that the router, i.e.,
-	//// Experiment Runner expects.
-	//GetExperimentRunnerConfig(TuringExperimentConfig) (json.RawMessage, error)
-
-	// BaseStandardExperimentManager provides default implementations for the following methods
-	// that may be composed into the experiment engine.
-
 	// IsCacheEnabled returns whether the experiment engine wants to cache its responses in the Turing API cache
 	IsCacheEnabled() bool
 	// ListClients returns a list of the clients registered on the experiment engine
@@ -60,18 +49,4 @@ type CustomExperimentManager interface {
 func ParseStandardExperimentConfig(raw json.RawMessage) (stdExpCfg TuringExperimentConfig, err error) {
 	err = json.Unmarshal(raw, &stdExpCfg)
 	return
-}
-
-func GetStandardExperimentConfig(cfg interface{}) (TuringExperimentConfig, error) {
-	var stdExpCfg TuringExperimentConfig
-
-	// Marshal to json
-	bytes, err := json.Marshal(cfg)
-	if err != nil {
-		return stdExpCfg, err
-	}
-
-	// Unmarshal using the TuringExperimentConfig type
-	err = json.Unmarshal(bytes, &stdExpCfg)
-	return stdExpCfg, err
 }

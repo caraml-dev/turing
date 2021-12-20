@@ -9,10 +9,7 @@ import (
 )
 
 const (
-	experimentManagerCastingErr = "Error casting %s to %s experiment manager"
-	standardExperimentConfigErr = "Unable to parse standard experiment config: %v"
-	standardMethodErr           = "Method is only supported by standard experiment managers"
-	unknownManagerTypeErr       = "Experiment Manager type %s is not recognized"
+	standardMethodErr = "Method is only supported by standard experiment managers"
 )
 
 // StandardExperimentManager methods ******************************************

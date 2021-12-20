@@ -53,7 +53,7 @@ func TestRpcClient_Configure(t *testing.T) {
 func TestRpcClient_GetEngineInfo(t *testing.T) {
 	suite := map[string]struct {
 		expected manager.Engine
-		err      string
+		err      error
 	}{
 		"success | get engine info": {
 			expected: manager.Engine{
@@ -62,7 +62,7 @@ func TestRpcClient_GetEngineInfo(t *testing.T) {
 			},
 		},
 		"failure | get engine info": {
-			err: "something's wrong",
+			err: errors.New("something's wrong"),
 		},
 	}
 
@@ -75,17 +75,12 @@ func TestRpcClient_GetEngineInfo(t *testing.T) {
 					resp := args.Get(2).(*manager.Engine)
 					*resp = tt.expected
 				}).
-				Return(func() error {
-					if tt.err != "" {
-						return errors.New(tt.err)
-					}
-					return nil
-				})
+				Return(tt.err)
 
 			rpcClient := rpcClient{RPCClient: mockClient}
 
 			actual := rpcClient.GetEngineInfo()
-			if tt.err != "" {
+			if tt.err != nil {
 				empty := manager.Engine{}
 				assert.Equal(t, actual, empty)
 			} else {

@@ -17,8 +17,7 @@ func (c *rpcClient) Configure(cfg json.RawMessage) error {
 	return c.Call("Plugin.Configure", cfg, new(interface{}))
 }
 
-func (c *rpcClient) GetEngineInfo() manager.Engine {
-	resp := manager.Engine{}
+func (c *rpcClient) GetEngineInfo() (resp manager.Engine) {
 	err := c.Call("Plugin.GetEngineInfo", new(interface{}), &resp)
 	if err != nil {
 		// err should be propagated upstream, but it's currently not
@@ -34,8 +33,39 @@ func (c *rpcClient) ValidateExperimentConfig(cfg json.RawMessage) error {
 	return c.Call("Plugin.ValidateExperimentConfig", cfg, new(interface{}))
 }
 
-func (c *rpcClient) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
-	var resp json.RawMessage
-	err := c.Call("Plugin.GetExperimentRunnerConfig", cfg, &resp)
-	return resp, err
+func (c *rpcClient) GetExperimentRunnerConfig(cfg json.RawMessage) (resp json.RawMessage, err error) {
+	err = c.Call("Plugin.GetExperimentRunnerConfig", cfg, &resp)
+	return
+}
+
+func (c *rpcClient) IsCacheEnabled() (resp bool) {
+	_ = c.Call("Plugin.IsCacheEnabled", new(interface{}), &resp)
+	return
+}
+
+func (c *rpcClient) ListClients() (resp []manager.Client, err error) {
+	err = c.Call("Plugin.ListClients", new(interface{}), &resp)
+	return
+}
+
+func (c *rpcClient) ListExperiments() (resp []manager.Experiment, err error) {
+	err = c.Call("Plugin.ListExperiments", new(interface{}), &resp)
+	return
+}
+
+func (c *rpcClient) ListExperimentsForClient(client manager.Client) (resp []manager.Experiment, err error) {
+	err = c.Call("Plugin.ListExperimentsForClient", client, &resp)
+	return
+}
+
+func (c *rpcClient) ListVariablesForClient(client manager.Client) (resp []manager.Variable, err error) {
+	err = c.Call("Plugin.ListVariablesForClient", client, &resp)
+	return
+}
+
+func (c *rpcClient) ListVariablesForExperiments(
+	experiments []manager.Experiment,
+) (resp map[string][]manager.Variable, err error) {
+	err = c.Call("Plugin.ListVariablesForExperiments", experiments, &resp)
+	return
 }
