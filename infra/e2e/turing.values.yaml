@@ -5,6 +5,20 @@ global:
 
 turing:
   uiConfig: null # Not needed as we only test API
+  # This is used to test the OpenAPI configuration.
+  # During the build, the openapi.bundle.yaml is generated but not packaged with the SwaggerUI bins
+  # Which is stored in /app/openapi.bundle.yaml
+  config:
+    OpenapiConfig:
+      SwaggerUIConfig:
+        ServingDirectory: /app
+  openApiSpecOverrides:
+    components:
+      schemas:
+        ExperimentEngineType:
+          enum:
+          - nop
+          - proprietary
 
 postgresql: &postgresql
   persistence:

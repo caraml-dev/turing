@@ -34,8 +34,6 @@ ENV TURING_USER "turing"
 ENV TURING_USER_GROUP "app"
 ENV TURING_OPENAPI_BUNDLE_FILE "/app/openapi.bundle.yaml"
 ENV OPENAPICONFIG_OPENAPIBUNDLEFILENAME "openapi.bundle.yaml"
-# there is no swaggerui but there will be minimum openapi.bundle.yaml there.
-ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app"
 
 EXPOSE ${TURING_PORT}
 
