@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	logger "github.com/gojek/turing/api/turing/log"
 	"github.com/gorilla/mux"
 )
 
@@ -84,6 +85,9 @@ func ServeSinglePageApplication(r *mux.Router, path string, appDir string) {
 
 func ServeOpenAPIYAML(r *mux.Router, url string, openAPISpecBytes []byte) {
 	r.HandleFunc(url, func(w http.ResponseWriter, _ *http.Request) {
-		w.Write(openAPISpecBytes)
+		_, err := w.Write(openAPISpecBytes)
+		if err != nil {
+			logger.Errorf("error writing openapi yaml: %s", err)
+		}
 	})
 }

@@ -14,7 +14,13 @@ import (
 	"github.com/rs/cors"
 )
 
-func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config, openAPISpecBytes []byte) error {
+func AddAPIRoutesHandler(
+	r *mux.Router,
+	path string,
+	appCtx *api.AppContext,
+	cfg *config.Config,
+	openAPISpecBytes []byte,
+) error {
 	apiRouter := r.PathPrefix(path).Subrouter().StrictSlash(true)
 
 	// Add Middleware
@@ -66,7 +72,11 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	return nil
 }
 
-func openapiValidationMiddleware(apiPath string, cfg *config.Config, openAPISpecBytes []byte) (mux.MiddlewareFunc, error) {
+func openapiValidationMiddleware(
+	apiPath string,
+	cfg *config.Config,
+	openAPISpecBytes []byte,
+) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
 		openapiValidation, err := middleware.NewOpenAPIValidation(
 			openAPISpecBytes,
