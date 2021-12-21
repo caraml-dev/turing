@@ -6,6 +6,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/api"
 	"github.com/gojek/turing/api/turing/config"
@@ -13,9 +17,6 @@ import (
 	"github.com/gojek/turing/api/turing/server"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gorilla/mux"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/stretchr/testify/assert"
@@ -167,7 +168,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 				MLPService:        mlpSvc,
 				EnsemblersService: ensemblerSvc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{}, make([]byte, 0))
 
 			actual := httptest.NewRecorder()
 

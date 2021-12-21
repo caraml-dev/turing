@@ -1,31 +1,29 @@
 package utils
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
 // MergeTwoYamls reads the original yaml file and overrides the original file with
 // the override file. This overriding will follow the rules in MergeMaps.
-func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
+func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) ([]byte, error) {
 	original, err := readYAML(originalYAMLFile)
 	if err != nil {
-		return fmt.Errorf("error reading original yaml: %s", err)
+		return nil, fmt.Errorf("error reading original yaml: %s", err)
 	}
 
 	override, err := readYAML(overrideYAMLFile)
 	if err != nil {
-		return fmt.Errorf("error reading override yaml: %s", err)
+		return nil, fmt.Errorf("error reading override yaml: %s", err)
 	}
 
 	merged, err := MergeMaps(original, override)
 	if err != nil {
-		return fmt.Errorf("error merging maps: %s", err)
+		return nil, fmt.Errorf("error merging maps: %s", err)
 	}
 
 	var output bytes.Buffer
@@ -33,25 +31,10 @@ func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) error {
 	yamlEncoder.SetIndent(2)
 	err = yamlEncoder.Encode(merged)
 	if err != nil {
-		return fmt.Errorf("error encoding: %s", err)
+		return nil, fmt.Errorf("error encoding: %s", err)
 	}
 
-	f, err := os.OpenFile(originalYAMLFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		return fmt.Errorf("error writing to file: %s", err)
-	}
-
-	w := bufio.NewWriter(f)
-
-	if _, err = w.Write(output.Bytes()); err != nil {
-		return fmt.Errorf("error writing: %s", err)
-	}
-
-	if err = w.Flush(); err != nil {
-		return fmt.Errorf("error flushing: %s", err)
-	}
-
-	return nil
+	return output.Bytes(), nil
 }
 
 // MergeMaps takes two maps with any value and merges it recursively.

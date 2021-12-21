@@ -5,13 +5,14 @@ package api_test
 import (
 	"bytes"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gojek/turing/api/turing/api"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/server"
 	"github.com/gorilla/mux"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
@@ -284,11 +285,17 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				EnsemblingJobService: ensemblingJobService,
 				MLPService:           mlpService,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
-				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
-					Enabled: true,
+			_ = server.AddAPIRoutesHandler(
+				router,
+				"/",
+				appCtx,
+				&config.Config{
+					BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+						Enabled: true,
+					},
 				},
-			})
+				make([]byte, 0),
+			)
 
 			actual := httptest.NewRecorder()
 
@@ -355,11 +362,17 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			appCtx := &api.AppContext{
 				EnsemblingJobService: svc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
-				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
-					Enabled: true,
+			_ = server.AddAPIRoutesHandler(
+				router,
+				"/",
+				appCtx,
+				&config.Config{
+					BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+						Enabled: true,
+					},
 				},
-			})
+				make([]byte, 0),
+			)
 
 			actual := httptest.NewRecorder()
 			request, err := http.NewRequest(tt.method, tt.path, nil)
@@ -521,11 +534,17 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			appCtx := &api.AppContext{
 				EnsemblingJobService: svc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{
-				BatchEnsemblingConfig: config.BatchEnsemblingConfig{
-					Enabled: true,
+			_ = server.AddAPIRoutesHandler(
+				router,
+				"/",
+				appCtx,
+				&config.Config{
+					BatchEnsemblingConfig: config.BatchEnsemblingConfig{
+						Enabled: true,
+					},
 				},
-			})
+				make([]byte, 0),
+			)
 
 			actual := httptest.NewRecorder()
 

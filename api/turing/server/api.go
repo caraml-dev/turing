@@ -2,8 +2,6 @@ package server
 
 import (
 	"net/http"
-	"os"
-	"path"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -16,7 +14,7 @@ import (
 	"github.com/rs/cors"
 )
 
-func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config) error {
+func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config, openAPISpecBytes []byte) error {
 	apiRouter := r.PathPrefix(path).Subrouter().StrictSlash(true)
 
 	// Add Middleware
@@ -29,7 +27,7 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 		apiRouter.Use(appCtx.Authorizer.Middleware)
 	}
 
-	openapiMiddleware, err := openapiValidationMiddleware(path, cfg)
+	openapiMiddleware, err := openapiValidationMiddleware(path, cfg, openAPISpecBytes)
 	if err != nil {
 		return err
 	}
@@ -68,22 +66,10 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	return nil
 }
 
-func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.MiddlewareFunc, error) {
+func openapiValidationMiddleware(apiPath string, cfg *config.Config, openAPISpecBytes []byte) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
-		// Choose between bundled openapi yaml file or development files
-		specFile := cfg.OpenapiConfig.SpecFile
-		if spaCfg := cfg.OpenapiConfig.SwaggerUIConfig; spaCfg != nil && len(spaCfg.ServingDirectory) > 0 {
-			// During build time, the script will generate a file called openapi.bundle.yaml in the serving directory
-			specFile = path.Join(spaCfg.ServingDirectory, cfg.OpenapiConfig.OpenapiBundleFileName)
-		}
-
-		// Initialize OpenAPI validation middleware
-		if _, err := os.Stat(specFile); os.IsExist(err) {
-			return nil, errors.Wrapf(err, "Openapi spec file '%s' not found", specFile)
-		}
-
 		openapiValidation, err := middleware.NewOpenAPIValidation(
-			specFile,
+			openAPISpecBytes,
 			middleware.OpenAPIValidationOptions{
 				// Authentication is ignored because it is handled by another middleware
 				IgnoreAuthentication: true,

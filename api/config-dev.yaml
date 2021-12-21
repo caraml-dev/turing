@@ -62,3 +62,11 @@ MLPConfig:
   MerlinURL: http://localhost:8082/v1
   MLPURL: http://localhost:8081/v1
   MLPEncryptionKey: password
+TuringUIConfig:
+  ServingDirectory: ../ui/build
+  ServingPath: /turing
+OpenapiConfig:
+  SpecOverrideFile: api/override-sample.yaml
+  SwaggerUIConfig:
+    ServingDirectory: api/swagger-ui-dist
+    ServingPath: /api-docs/

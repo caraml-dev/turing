@@ -18,5 +18,5 @@ bundle-openapi:
 .PHONY: swagger-ui-dist
 swagger-ui-dist: bundle-openapi
 	@../../scripts/swagger-ui-generator/swagger-ui-generator.sh \
-		--spec-file openapi.bundle.yaml \
+		--spec-url "/static/openapi.bundle.yaml" \
 		--output swagger-ui-dist

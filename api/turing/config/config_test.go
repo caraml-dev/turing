@@ -166,9 +166,9 @@ func TestLoad(t *testing.T) {
 					ServingPath: "/turing",
 				},
 				OpenapiConfig: &OpenapiConfig{
-					ValidationEnabled:     true,
-					SpecFile:              "api/openapi.yaml",
-					OpenapiBundleFileName: "openapi.bundle.yaml",
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingURL:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -247,9 +247,9 @@ func TestLoad(t *testing.T) {
 					ServingPath: "/turing",
 				},
 				OpenapiConfig: &OpenapiConfig{
-					ValidationEnabled:     true,
-					SpecFile:              "api/openapi.yaml",
-					OpenapiBundleFileName: "openapi.bundle.yaml",
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingURL:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -344,9 +344,9 @@ func TestLoad(t *testing.T) {
 					ServingPath: "/turing",
 				},
 				OpenapiConfig: &OpenapiConfig{
-					ValidationEnabled:     true,
-					SpecFile:              "api/openapi.yaml",
-					OpenapiBundleFileName: "openapi.bundle.yaml",
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingURL:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/swagger-ui",
@@ -462,9 +462,9 @@ func TestLoad(t *testing.T) {
 					ServingPath:      "/turing-env",
 				},
 				OpenapiConfig: &OpenapiConfig{
-					ValidationEnabled:     true,
-					SpecFile:              "api/openapi.yaml",
-					OpenapiBundleFileName: "openapi.bundle.yaml",
+					ValidationEnabled: true,
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingURL:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "static/swagger-ui",
 						ServingPath:      "/swagger-ui",

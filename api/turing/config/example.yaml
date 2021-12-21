@@ -212,10 +212,10 @@ OpenapiConfig:
   # This file will be ignored by the OpenAPI validator if SwaggerUIConfig is filled.
   SpecFile: api/openapi.yaml
   SpecOverrideFile: api/override-sample.yaml
-  OpenapiBundleFileName: openapi.bundle.yaml
   SwaggerUIConfig:
     ServingDirectory: static/swagger-ui
     ServingPath: /api-docs
+    YAMLServingURL: /static/openapi.bundle.yaml
 
 # Experiment is a map of experiment engine name to configuration object.
 # This will be used to configure the corresponding experiment engines.

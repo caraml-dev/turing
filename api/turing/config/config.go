@@ -343,10 +343,10 @@ type OpenapiConfig struct {
 	// Optional. Defines a configuration to be used for serving Swagger UI as a single-page app
 	// If this is provided, it will use the bundled yaml instead.
 	SwaggerUIConfig *SinglePageApplicationConfig
+	// Where the merged spec file yaml should be served.
+	YAMLServingURL string
 	// Optional. Overrides the file before running the Swagger UI.
 	SpecOverrideFile *string
-	// Openapi bundle file name
-	OpenapiBundleFileName string
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -471,8 +471,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingDirectory", "")
 	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
-	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
-	v.SetDefault("OpenapiConfig::OpenapiBundleFileName", "openapi.bundle.yaml")
+	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.bundle.yaml")
+	v.SetDefault("OpenapiConfig::YAMLServingURL", "/static/openapi.bundle.yaml")
 
 	v.SetDefault("Experiment", map[string]interface{}{})
 }

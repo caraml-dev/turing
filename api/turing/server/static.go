@@ -80,5 +80,10 @@ func (h SPAHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func ServeSinglePageApplication(r *mux.Router, path string, appDir string) {
 	r.PathPrefix(path).Handler(NewSinglePageApplicationHandler(path, appDir))
+}
 
+func ServeOpenAPIYAML(r *mux.Router, url string, openAPISpecBytes []byte) {
+	r.HandleFunc(url, func(w http.ResponseWriter, _ *http.Request) {
+		w.Write(openAPISpecBytes)
+	})
 }
