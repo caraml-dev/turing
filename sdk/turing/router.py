@@ -1,4 +1,5 @@
 from typing import Optional, List
+
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 
@@ -10,21 +11,29 @@ class Router(ApiObject):
     """
     def __init__(self,
                  id: int,
+                 name: str,
                  project_id: int,
                  environment_name: str,
                  endpoint: str,
+                 monitoring_url: str,
                  status: str,
                  **kwargs):
         super(Router, self).__init__(**kwargs)
         self._id = int(id)
+        self._name = name
         self._project_id = int(project_id)
         self._environment_name = environment_name
         self._endpoint = endpoint
+        self._monitoring_url = monitoring_url
         self._status = status
 
     @property
     def id(self) -> int:
         return self._id
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     @property
     def project_id(self) -> int:
@@ -37,6 +46,10 @@ class Router(ApiObject):
     @property
     def endpoint(self) -> str:
         return self._endpoint
+
+    @property
+    def monitoring_url(self) -> str:
+        return self._monitoring_url
 
     @property
     def status(self) -> str:
