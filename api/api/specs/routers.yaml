@@ -618,7 +618,11 @@ components:
         timeout:
           <<: *timeout
         annotations:
+<<<<<<< HEAD
           type: "object"
+=======
+          type: "string"
+>>>>>>> 3eb5e8c (Refactor swagger/openapi specs for sdk)
           nullable: true
 
     TrafficRule:
@@ -709,7 +713,11 @@ components:
         - type
       properties:
         id:
+<<<<<<< HEAD
           $ref: "common.yaml#/components/schemas/Id"
+=======
+          type: "integer"
+>>>>>>> 3eb5e8c (Refactor swagger/openapi specs for sdk)
         type:
           description: "type of ensembler"
           type: "string"
