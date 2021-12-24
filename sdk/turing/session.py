@@ -3,7 +3,7 @@ import mlflow
 from typing import List, Optional
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
-from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi
+from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
 from turing.generated.models import \
     Project, \
     Ensembler, \
@@ -11,7 +11,8 @@ from turing.generated.models import \
     EnsemblerJobStatus, \
     EnsemblersPaginatedResults, \
     EnsemblingJobPaginatedResults, \
-    IdObject
+    IdObject, \
+    Router
 
 
 def require_active_project(f):
@@ -196,3 +197,13 @@ class TuringSession:
             project_id=self.active_project.id,
             ensembling_job=job
         )
+
+    @require_active_project
+    def list_routers(self) -> List[Project]:
+        """
+        List all routers, that the current user has access to
+
+        :return: list of routers
+        """
+        kwargs = {}
+        return RouterApi(self._api_client).projects_project_id_routers_get(project_id=self.active_project.id, **kwargs)
