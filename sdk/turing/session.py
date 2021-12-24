@@ -12,7 +12,7 @@ from turing.generated.models import \
     EnsemblersPaginatedResults, \
     EnsemblingJobPaginatedResults, \
     IdObject, \
-    Router
+    RouterDetails
 
 
 def require_active_project(f):
@@ -199,7 +199,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def list_routers(self) -> List[Project]:
+    def list_routers(self) -> List[RouterDetails]:
         """
         List all routers, that the current user has access to
 
