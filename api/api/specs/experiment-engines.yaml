@@ -286,7 +286,7 @@ components:
       type: "object"
       not:
         $ref: "#/components/schemas/StandardExperimentConfig"
-  
+
     ExperimentConfig:
       type: "object"
       required:
@@ -304,6 +304,8 @@ components:
       type: "string"
       enum:
         - "nop"
+        - "xp"
+        - "litmus"
       default: "nop"
 
     ExperimentManagerType:

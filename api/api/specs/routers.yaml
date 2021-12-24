@@ -409,6 +409,7 @@ components:
   schemas:
     Router:
       type: "object"
+      nullable: true
       properties:
         id:
           type: "integer"
@@ -502,6 +503,12 @@ components:
         monitoring_url:
           type: "string"
           readOnly: true
+        default_route_id:
+          type: "string"
+        rules:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/TrafficRule"
 
     ResultLoggerType:
       type: "string"
@@ -604,6 +611,9 @@ components:
           type: "string"
         timeout:
           type: "string"
+        annotations:
+          type: "string"
+          nullable: true
 
     TrafficRule:
       type: "object"
@@ -682,6 +692,8 @@ components:
       required:
         - type
       properties:
+        id:
+          type: "integer"
         type:
           description: "type of ensembler"
           type: "string"

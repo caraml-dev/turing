@@ -21,3 +21,7 @@ paths:
     $ref: "specs/jobs.yaml#/paths/~1projects~1{project_id}~1jobs"
   "/projects/{project_id}/jobs/{job_id}":
     $ref: "specs/jobs.yaml#/paths/~1projects~1{project_id}~1jobs~1{job_id}"
+
+  # R O U T E R S
+  "/projects/{project_id}/routers":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers"
