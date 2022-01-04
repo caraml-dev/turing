@@ -167,3 +167,19 @@ def ensembling_job_config():
         service_account="service-account",
         resource_request=resource_request
     )
+
+
+@pytest.fixture
+def generic_routers(project, num_routers):
+    return [
+        turing.generated.models.RouterDetails(
+            id=i,
+            name=f"router_{i}",
+            endpoint=f"http://localhost:5000/endpoint_{i}",
+            environment_name=f"env_{i}",
+            monitoring_url=f"http://localhost:5000/dashboard_{i}",
+            project_id=project.id,
+            status=turing.generated.models.RouterStatus("deployed"),
+            created_at=datetime.now() + timedelta(seconds=i + 10),
+            updated_at=datetime.now() + timedelta(seconds=i + 10)
+        ) for i in range(1, num_routers + 1)]
