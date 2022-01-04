@@ -87,6 +87,8 @@ class Ensembler1(ModelNormal):
             'id': (int,),  # noqa: E501
             'standard_config': (EnsemblerStandardConfig,),  # noqa: E501
             'docker_config': (EnsemblerDockerConfig,),  # noqa: E501
+            'created_at': (datetime,),  # noqa: E501
+            'updated_at': (datetime,),  # noqa: E501
         }
 
     @cached_property
@@ -99,6 +101,8 @@ class Ensembler1(ModelNormal):
         'id': 'id',  # noqa: E501
         'standard_config': 'standard_config',  # noqa: E501
         'docker_config': 'docker_config',  # noqa: E501
+        'created_at': 'created_at',  # noqa: E501
+        'updated_at': 'updated_at',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -153,6 +157,8 @@ class Ensembler1(ModelNormal):
             id (int): [optional]  # noqa: E501
             standard_config (EnsemblerStandardConfig): [optional]  # noqa: E501
             docker_config (EnsemblerDockerConfig): [optional]  # noqa: E501
+            created_at (datetime): [optional]  # noqa: E501
+            updated_at (datetime): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

@@ -27,9 +27,9 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
-    from turing.generated.model.experiment_engine_type import ExperimentEngineType
+    from turing.generated.model.custom_experiment_config import CustomExperimentConfig
     from turing.generated.model.standard_experiment_config import StandardExperimentConfig
-    globals()['ExperimentEngineType'] = ExperimentEngineType
+    globals()['CustomExperimentConfig'] = CustomExperimentConfig
     globals()['StandardExperimentConfig'] = StandardExperimentConfig
 
 
@@ -79,18 +79,25 @@ class ExperimentConfig(ModelNormal):
         """
         lazy_import()
         return {
-            'type': (ExperimentEngineType,),  # noqa: E501
-            'config': (StandardExperimentConfig,),  # noqa: E501
+            'type': (str,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
-        return None
-
+        lazy_import()
+        val = {
+            'CustomExperimentConfig': CustomExperimentConfig,
+            'StandardExperimentConfig': StandardExperimentConfig,
+            'litmus': StandardExperimentConfig,
+            'nop': StandardExperimentConfig,
+            'xp': CustomExperimentConfig,
+        }
+        if not val:
+            return None
+        return {'type': val}
 
     attribute_map = {
         'type': 'type',  # noqa: E501
-        'config': 'config',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -105,13 +112,13 @@ class ExperimentConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, type, *args, **kwargs):  # noqa: E501
+    def __init__(self, *args, **kwargs):  # noqa: E501
         """ExperimentConfig - a model defined in OpenAPI
 
         Args:
-            type (ExperimentEngineType):
 
         Keyword Args:
+            type (str): defaults to "nop"  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
@@ -142,9 +149,9 @@ class ExperimentConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            config (StandardExperimentConfig): [optional]  # noqa: E501
         """
 
+        type = kwargs.get('type', "nop")
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)
         _path_to_item = kwargs.pop('_path_to_item', ())

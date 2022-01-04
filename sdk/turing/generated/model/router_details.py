@@ -28,9 +28,13 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.router import Router
+    from turing.generated.model.router_details_all_of import RouterDetailsAllOf
     from turing.generated.model.router_status import RouterStatus
+    from turing.generated.model.router_version import RouterVersion
     globals()['Router'] = Router
+    globals()['RouterDetailsAllOf'] = RouterDetailsAllOf
     globals()['RouterStatus'] = RouterStatus
+    globals()['RouterVersion'] = RouterVersion
 
 
 class RouterDetails(ModelComposed):
@@ -95,6 +99,7 @@ class RouterDetails(ModelComposed):
             'endpoint': (str,),  # noqa: E501
             'monitoring_url': (str,),  # noqa: E501
             'status': (RouterStatus,),  # noqa: E501
+            'config': (RouterVersion,),  # noqa: E501
         }
 
     @cached_property
@@ -112,6 +117,7 @@ class RouterDetails(ModelComposed):
         'endpoint': 'endpoint',  # noqa: E501
         'monitoring_url': 'monitoring_url',  # noqa: E501
         'status': 'status',  # noqa: E501
+        'config': 'config',  # noqa: E501
     }
 
     required_properties = set([
@@ -170,6 +176,7 @@ class RouterDetails(ModelComposed):
             endpoint (str): [optional]  # noqa: E501
             monitoring_url (str): [optional]  # noqa: E501
             status (RouterStatus): [optional]  # noqa: E501
+            config (RouterVersion): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -240,6 +247,7 @@ class RouterDetails(ModelComposed):
           ],
           'allOf': [
               Router,
+              RouterDetailsAllOf,
           ],
           'oneOf': [
           ],

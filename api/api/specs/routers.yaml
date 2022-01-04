@@ -702,6 +702,14 @@ components:
           $ref: "#/components/schemas/EnsemblerStandardConfig"
         docker_config:
           $ref: "#/components/schemas/EnsemblerDockerConfig"
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
 
     EnsemblerStandardConfig:
       description: "ensembler config when ensembler type is standard"
@@ -734,6 +742,7 @@ components:
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"
       type: "object"
+      nullable: true
       required:
         - image
         - resource_request

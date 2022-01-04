@@ -271,21 +271,28 @@ components:
           $ref: "#/components/schemas/ExperimentVariables"
 
     StandardExperimentConfig:
-      type: "object"
-      properties:
-        client:
-          $ref: "#/components/schemas/ExperimentClient"
-        experiments:
-          type: array
-          items:
-            $ref: "#/components/schemas/Experiment"
-        variables:
-          $ref: "#/components/schemas/ExperimentVariables"
+      allOf:
+        - $ref: "#/components/schemas/ExperimentConfig"
+        - type: "object"
+          properties:
+            config:
+              type: "object"
+              properties:
+                project_id:
+                  type: "integer"
+                client:
+                  $ref: "#/components/schemas/ExperimentClient"
+                experiments:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Experiment"
+                variables:
+                  $ref: "#/components/schemas/ExperimentVariables"
 
     CustomExperimentConfig:
-      type: "object"
-      not:
-        $ref: "#/components/schemas/StandardExperimentConfig"
+      allOf:
+        - $ref: "#/components/schemas/ExperimentConfig"
+        - type: "object"
 
     ExperimentConfig:
       type: "object"
@@ -294,18 +301,16 @@ components:
       properties:
         type:
           $ref: "#/components/schemas/ExperimentEngineType"
-        config:
-          oneOf:
-            - $ref: "#/components/schemas/StandardExperimentConfig"
-            - $ref: "#/components/schemas/CustomExperimentConfig"
+      discriminator:
+        propertyName: type
+        mapping:
+          'nop': "#/components/schemas/StandardExperimentConfig"
+          'xp': "#/components/schemas/CustomExperimentConfig"
+          'litmus': "#/components/schemas/StandardExperimentConfig"
 
     # Enums
     ExperimentEngineType:
       type: "string"
-      enum:
-        - "nop"
-        - "xp"
-        - "litmus"
       default: "nop"
 
     ExperimentManagerType:
