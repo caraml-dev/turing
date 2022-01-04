@@ -16,6 +16,7 @@ from turing.generated.model.big_query_dataset_config import BigQueryDatasetConfi
 from turing.generated.model.big_query_sink import BigQuerySink
 from turing.generated.model.big_query_sink_all_of import BigQuerySinkAllOf
 from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
+from turing.generated.model.custom_experiment_config import CustomExperimentConfig
 from turing.generated.model.dataset import Dataset
 from turing.generated.model.enricher import Enricher
 from turing.generated.model.ensembler import Ensembler
@@ -48,7 +49,6 @@ from turing.generated.model.env_var import EnvVar
 from turing.generated.model.experiment import Experiment
 from turing.generated.model.experiment_client import ExperimentClient
 from turing.generated.model.experiment_config import ExperimentConfig
-from turing.generated.model.experiment_engine_type import ExperimentEngineType
 from turing.generated.model.experiment_variable import ExperimentVariable
 from turing.generated.model.experiment_variable_config import ExperimentVariableConfig
 from turing.generated.model.experiment_variables import ExperimentVariables
@@ -60,6 +60,7 @@ from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label
+from turing.generated.model.log_level import LogLevel
 from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project
 from turing.generated.model.py_func_ensembler import PyFuncEnsembler
@@ -72,8 +73,14 @@ from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_config_config import RouterConfigConfig
 from turing.generated.model.router_config_config_log_config import RouterConfigConfigLogConfig
 from turing.generated.model.router_details import RouterDetails
+from turing.generated.model.router_details_all_of import RouterDetailsAllOf
 from turing.generated.model.router_status import RouterStatus
+from turing.generated.model.router_version import RouterVersion
+from turing.generated.model.router_version_log_config import RouterVersionLogConfig
+from turing.generated.model.router_version_status import RouterVersionStatus
 from turing.generated.model.save_mode import SaveMode
 from turing.generated.model.standard_experiment_config import StandardExperimentConfig
+from turing.generated.model.standard_experiment_config_all_of import StandardExperimentConfigAllOf
+from turing.generated.model.standard_experiment_config_all_of_config import StandardExperimentConfigAllOfConfig
 from turing.generated.model.traffic_rule import TrafficRule
 from turing.generated.model.traffic_rule_condition import TrafficRuleCondition

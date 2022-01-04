@@ -424,7 +424,7 @@ components:
           type: "string"
           format: "date-time"
           readOnly: true
-        project:
+        project_id:
           type: "integer"
         environment_name:
           type: "string"
