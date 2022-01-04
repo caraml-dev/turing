@@ -3,45 +3,40 @@
 package validation_test
 
 import (
+	"encoding/json"
 	"errors"
-	"strings"
+	"fmt"
 	"testing"
-
-	"github.com/gojek/turing/engines/router"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/api/turing/validation"
 	"github.com/gojek/turing/engines/experiment/manager"
-	request2 "github.com/gojek/turing/engines/experiment/pkg/request"
+	expRequest "github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/gojek/turing/engines/router"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateLogConfig(t *testing.T) {
-	tt := []struct {
-		name   string
+	tt := map[string]struct {
 		input  request.LogConfig
 		hasErr bool
 	}{
-		{
-			name: "valid_nop",
+		"valid_nop": {
 			input: request.LogConfig{
 				ResultLoggerType: "nop",
 			},
 			hasErr: false,
 		},
-		{
-			name: "invalid_type",
+		"invalid_type": {
 			input: request.LogConfig{
 				ResultLoggerType: "nope",
 			},
 			hasErr: true,
 		},
-		{
-			name: "valid_bq",
+		"valid_bq": {
 			input: request.LogConfig{
 				ResultLoggerType: "bigquery",
 				BigQueryConfig: &request.BigQueryConfig{
@@ -51,15 +46,13 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: false,
 		},
-		{
-			name: "bq_missing_config",
+		"bq_missing_config": {
 			input: request.LogConfig{
 				ResultLoggerType: "bigquery",
 			},
 			hasErr: true,
 		},
-		{
-			name: "bq_invalid_table",
+		"bq_invalid_table": {
 			input: request.LogConfig{
 				ResultLoggerType: "bigquery",
 				BigQueryConfig: &request.BigQueryConfig{
@@ -69,8 +62,7 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: true,
 		},
-		{
-			name: "bq_invalid_svc_account",
+		"bq_invalid_svc_account": {
 			input: request.LogConfig{
 				ResultLoggerType: "bigquery",
 				BigQueryConfig: &request.BigQueryConfig{
@@ -80,8 +72,7 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: true,
 		},
-		{
-			name: "kafka_valid_config",
+		"kafka_valid_config": {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
@@ -92,15 +83,13 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: false,
 		},
-		{
-			name: "kafka_missing_config",
+		"kafka_missing_config": {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 			},
 			hasErr: true,
 		},
-		{
-			name: "kafka_invalid_config_missing_brokers",
+		"kafka_invalid_config_missing_brokers": {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
@@ -110,8 +99,7 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: true,
 		},
-		{
-			name: "kafka_invalid_config_missing_topic",
+		"kafka_invalid_config_missing_topic": {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
@@ -121,8 +109,7 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: true,
 		},
-		{
-			name: "kafka_invalid_config_invalid_serialization",
+		"kafka_invalid_config_invalid_serialization": {
 			input: request.LogConfig{
 				ResultLoggerType: "kafka",
 				KafkaConfig: &request.KafkaConfig{
@@ -135,9 +122,11 @@ func TestValidateLogConfig(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			validate, err := validation.NewValidator(&mocks.ExperimentsService{})
+	for name, tc := range tt {
+		t.Run(name, func(t *testing.T) {
+			mockExperimentsService := &mocks.ExperimentsService{}
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			validate, err := validation.NewValidator(mockExperimentsService)
 			assert.NoError(t, err)
 			err = validate.Struct(&tc.input)
 			assert.Equal(t, tc.hasErr, err != nil)
@@ -146,56 +135,62 @@ func TestValidateLogConfig(t *testing.T) {
 }
 
 func TestValidateExperimentEngineConfig(t *testing.T) {
+	validationErr := "test-error"
 	// Create mock experiment service
-	client1 := manager.Client{ID: "1", Username: "1"}
-	client2 := manager.Client{ID: "2", Username: "2"}
+	config1 := json.RawMessage(`{"client": {"id": "1", "username": "1"}}`)
+	config2 := json.RawMessage(`{"client": {"id": "2", "username": "2"}}`)
 	expSvc := &mocks.ExperimentsService{}
-	expSvc.On("ValidateExperimentConfig", "xp", manager.TuringExperimentConfig{Client: client1}).
+	expSvc.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
+	expSvc.On("ValidateExperimentConfig", "custom", config1).
 		Return(nil)
-	expSvc.On("ValidateExperimentConfig", "xp", manager.TuringExperimentConfig{Client: client2}).
-		Return(errors.New("test-error"))
+	expSvc.On("ValidateExperimentConfig", "custom", config2).
+		Return(errors.New(validationErr))
 
 	// Define tests
-	tests := []struct {
-		name   string
-		input  request.ExperimentEngineConfig
-		hasErr bool
+	tests := map[string]struct {
+		input request.ExperimentEngineConfig
+		err   string
 	}{
-		{
-			name: "valid_nop",
+		"success | valid nop": {
 			input: request.ExperimentEngineConfig{
 				Type: "nop",
 			},
-			hasErr: false,
 		},
-		{
-			name: "valid_exp_config",
+		"success | valid experiment config": {
 			input: request.ExperimentEngineConfig{
-				Type: "xp",
-				Config: manager.TuringExperimentConfig{
-					Client: client1,
-				},
+				Type:   "custom",
+				Config: config1,
 			},
-			hasErr: false,
 		},
-		{
-			name: "invalid_exp_config",
+		"failure | unknown engine type": {
 			input: request.ExperimentEngineConfig{
-				Type: "unknown",
-				Config: manager.TuringExperimentConfig{
-					Client: client2,
-				},
+				Type:   "unknown",
+				Config: config2,
 			},
-			hasErr: true,
+			err: "Key: 'ExperimentEngineConfig.type' " +
+				"Error:Field validation for 'type' failed on the 'oneof' tag",
+		},
+		"failure | validation error": {
+			input: request.ExperimentEngineConfig{
+				Type:   "custom",
+				Config: config2,
+			},
+			err: fmt.Sprintf(
+				"Key: 'ExperimentEngineConfig.config' "+
+					"Error:Field validation for 'config' failed on the '%s' tag", validationErr),
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			validate, err := validation.NewValidator(expSvc)
 			assert.NoError(t, err)
 			err = validate.Struct(&tc.input)
-			assert.Equal(t, tc.hasErr, err != nil)
+			if tc.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.err)
+			}
 		})
 	}
 }
@@ -244,7 +239,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.HeaderFieldSource,
+							FieldSource: expRequest.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"region-a", "region-b"},
@@ -293,7 +288,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.HeaderFieldSource,
+							FieldSource: expRequest.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"region-b"},
@@ -325,7 +320,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.HeaderFieldSource,
+							FieldSource: expRequest.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.RuleConditionOperator{},
 							Values:      []string{"region-b"},
@@ -389,7 +384,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.HeaderFieldSource,
+							FieldSource: expRequest.HeaderFieldSource,
 							Field:       "",
 							Operator:    router.InConditionOperator,
 							Values:      []string{},
@@ -417,7 +412,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.PayloadFieldSource,
+							FieldSource: expRequest.PayloadFieldSource,
 							Field:       "some_property",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},
@@ -443,7 +438,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: request2.PayloadFieldSource,
+							FieldSource: expRequest.PayloadFieldSource,
 							Field:       "some_property",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"some_value"},
@@ -459,7 +454,9 @@ func TestValidateTrafficRules(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			validate, err := validation.NewValidator(&mocks.ExperimentsService{})
+			mockExperimentsService := &mocks.ExperimentsService{}
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			validate, err := validation.NewValidator(mockExperimentsService)
 			require.NoError(t, err)
 
 			err = validate.Struct(tt.RouterConfig())
@@ -470,17 +467,4 @@ func TestValidateTrafficRules(t *testing.T) {
 			}
 		})
 	}
-}
-
-type DNSTestStruct struct {
-	Name string `validate:"dns,lte=50,gte=3"`
-}
-
-func genString(length int) string {
-	var sb strings.Builder
-	for i := 0; i < length; i++ {
-		sb.WriteString("a")
-	}
-
-	return sb.String()
 }

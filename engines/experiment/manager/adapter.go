@@ -5,31 +5,35 @@ package manager
 */
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 const (
-	experimentManagerCastingErr = "Error casting %s to %s experiment manager"
-	standardExperimentConfigErr = "Unable to parse standard experiment config: %v"
-	standardMethodErr           = "Method is only supported by standard experiment managers"
-	unknownManagerTypeErr       = "Experiment Manager type %s is not recognized"
+	standardMethodErr = "Method is only supported by standard experiment managers"
 )
+
+func IsStandardExperimentManager(expManager ExperimentManager) bool {
+	engineInfo, err := expManager.GetEngineInfo()
+	return err == nil && engineInfo.Type == StandardExperimentManagerType
+}
 
 // StandardExperimentManager methods ******************************************
 
 func IsCacheEnabled(expManager ExperimentManager) bool {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
-			return stdMgr.IsCacheEnabled()
+			cacheEnabled, err := stdMgr.IsCacheEnabled()
+			if err != nil {
+				return false
+			}
+			return cacheEnabled
 		}
 	}
 	return false
 }
 
 func ListClients(expManager ExperimentManager) ([]Client, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListClients()
 		}
@@ -38,7 +42,7 @@ func ListClients(expManager ExperimentManager) ([]Client, error) {
 }
 
 func ListExperiments(expManager ExperimentManager) ([]Experiment, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListExperiments()
 		}
@@ -47,7 +51,7 @@ func ListExperiments(expManager ExperimentManager) ([]Experiment, error) {
 }
 
 func ListExperimentsForClient(expManager ExperimentManager, client Client) ([]Experiment, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListExperimentsForClient(client)
 		}
@@ -56,7 +60,7 @@ func ListExperimentsForClient(expManager ExperimentManager, client Client) ([]Ex
 }
 
 func ListVariablesForClient(expManager ExperimentManager, client Client) ([]Variable, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListVariablesForClient(client)
 		}
@@ -65,62 +69,10 @@ func ListVariablesForClient(expManager ExperimentManager, client Client) ([]Vari
 }
 
 func ListVariablesForExperiments(expManager ExperimentManager, exps []Experiment) (map[string][]Variable, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListVariablesForExperiments(exps)
 		}
 	}
 	return map[string][]Variable{}, errors.New(standardMethodErr)
-}
-
-// Common methods *************************************************************
-
-func GetExperimentRunnerConfig(expManager ExperimentManager, expCfg interface{}) (json.RawMessage, error) {
-	engineInfo := expManager.GetEngineInfo()
-	// Call the appropriate validator method based on the type of the experiment manager
-	switch engineInfo.Type {
-	case StandardExperimentManagerType:
-		stdMgr, ok := expManager.(StandardExperimentManager)
-		if !ok {
-			return json.RawMessage{}, fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "standard")
-		}
-		stdExpConfig, err := GetStandardExperimentConfig(expCfg)
-		if err != nil {
-			return json.RawMessage{}, fmt.Errorf(standardExperimentConfigErr, err)
-		}
-		return stdMgr.GetExperimentRunnerConfig(stdExpConfig)
-	case CustomExperimentManagerType:
-		customMgr, ok := expManager.(CustomExperimentManager)
-		if !ok {
-			return json.RawMessage{}, fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
-		}
-		return customMgr.GetExperimentRunnerConfig(expCfg)
-	default:
-		return nil, fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
-	}
-}
-
-func ValidateExperimentConfig(expManager ExperimentManager, expCfg interface{}) error {
-	engineInfo := expManager.GetEngineInfo()
-	// Call the appropriate validator method based on the type of the experiment manager
-	switch engineInfo.Type {
-	case StandardExperimentManagerType:
-		stdMgr, ok := expManager.(StandardExperimentManager)
-		if !ok {
-			return fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "standard")
-		}
-		stdExpConfig, err := GetStandardExperimentConfig(expCfg)
-		if err != nil {
-			return fmt.Errorf(standardExperimentConfigErr, err)
-		}
-		return stdMgr.ValidateExperimentConfig(engineInfo.StandardExperimentManagerConfig, stdExpConfig)
-	case CustomExperimentManagerType:
-		customMgr, ok := expManager.(CustomExperimentManager)
-		if !ok {
-			return fmt.Errorf(experimentManagerCastingErr, engineInfo.Name, "custom")
-		}
-		return customMgr.ValidateExperimentConfig(expCfg)
-	default:
-		return fmt.Errorf(unknownManagerTypeErr, engineInfo.Type)
-	}
 }

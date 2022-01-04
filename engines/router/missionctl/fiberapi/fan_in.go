@@ -45,7 +45,7 @@ func (fanIn *EnsemblingFanIn) Initialize(properties json.RawMessage) error {
 
 // Aggregate requests for the treatment parameters from the configured experiment engine,
 // collects the results from the fanout, dispatches the combined data to the configured
-// ensembling endpoint and returs the result
+// ensembling endpoint and returns the result
 func (fanIn *EnsemblingFanIn) Aggregate(
 	ctx context.Context,
 	req fiber.Request,

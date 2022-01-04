@@ -4,8 +4,8 @@ package mocks
 
 import (
 	json "encoding/json"
-	"github.com/gojek/turing/engines/experiment/manager"
 
+	manager "github.com/gojek/turing/engines/experiment/manager"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -15,7 +15,7 @@ type StandardExperimentManager struct {
 }
 
 // GetEngineInfo provides a mock function with given fields:
-func (_m *StandardExperimentManager) GetEngineInfo() manager.Engine {
+func (_m *StandardExperimentManager) GetEngineInfo() (manager.Engine, error) {
 	ret := _m.Called()
 
 	var r0 manager.Engine
@@ -25,16 +25,23 @@ func (_m *StandardExperimentManager) GetEngineInfo() manager.Engine {
 		r0 = ret.Get(0).(manager.Engine)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
-// GetExperimentRunnerConfig provides a mock function with given fields: _a0
-func (_m *StandardExperimentManager) GetExperimentRunnerConfig(_a0 manager.TuringExperimentConfig) (json.RawMessage, error) {
-	ret := _m.Called(_a0)
+// GetExperimentRunnerConfig provides a mock function with given fields: cfg
+func (_m *StandardExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
+	ret := _m.Called(cfg)
 
 	var r0 json.RawMessage
-	if rf, ok := ret.Get(0).(func(manager.TuringExperimentConfig) json.RawMessage); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(json.RawMessage) json.RawMessage); ok {
+		r0 = rf(cfg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(json.RawMessage)
@@ -42,8 +49,8 @@ func (_m *StandardExperimentManager) GetExperimentRunnerConfig(_a0 manager.Turin
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(manager.TuringExperimentConfig) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(json.RawMessage) error); ok {
+		r1 = rf(cfg)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -52,7 +59,7 @@ func (_m *StandardExperimentManager) GetExperimentRunnerConfig(_a0 manager.Turin
 }
 
 // IsCacheEnabled provides a mock function with given fields:
-func (_m *StandardExperimentManager) IsCacheEnabled() bool {
+func (_m *StandardExperimentManager) IsCacheEnabled() (bool, error) {
 	ret := _m.Called()
 
 	var r0 bool
@@ -62,7 +69,14 @@ func (_m *StandardExperimentManager) IsCacheEnabled() bool {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ListClients provides a mock function with given fields:
@@ -180,13 +194,13 @@ func (_m *StandardExperimentManager) ListVariablesForExperiments(_a0 []manager.E
 	return r0, r1
 }
 
-// ValidateExperimentConfig provides a mock function with given fields: _a0, _a1
-func (_m *StandardExperimentManager) ValidateExperimentConfig(_a0 *manager.StandardExperimentManagerConfig, _a1 manager.TuringExperimentConfig) error {
-	ret := _m.Called(_a0, _a1)
+// ValidateExperimentConfig provides a mock function with given fields: cfg
+func (_m *StandardExperimentManager) ValidateExperimentConfig(cfg json.RawMessage) error {
+	ret := _m.Called(cfg)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*manager.StandardExperimentManagerConfig, manager.TuringExperimentConfig) error); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(json.RawMessage) error); ok {
+		r0 = rf(cfg)
 	} else {
 		r0 = ret.Error(0)
 	}

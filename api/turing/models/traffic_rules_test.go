@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/gojek/turing/engines/router"
 	"github.com/stretchr/testify/require"
 )
@@ -74,7 +75,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 				&models.TrafficRule{
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: "header",
+							FieldSource: request.HeaderFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values: []string{
@@ -107,7 +108,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 			serialized:    100,
 			expectedError: "type assertion to []byte failed",
 		},
-		"failure | unknown field_source": {
+		"success | unknown field_source": {
 			serialized: []byte(`
 				[{
 				 	"conditions": [{
@@ -119,7 +120,21 @@ func TestTrafficRules_Scan(t *testing.T) {
 					"routes": []
 				}]
 			`),
-			expectedError: "Unknown field source unknown",
+			trafficRules: models.TrafficRules{
+				&models.TrafficRule{
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: "unknown",
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values: []string{
+								"region-a", "region-b",
+							},
+						},
+					},
+					Routes: []string{},
+				},
+			},
 		},
 	}
 

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/gojek/turing/engines/experiment/manager"
+
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
@@ -189,9 +191,10 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 	expSvc := c.BaseController.AppContext.ExperimentsService
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		if expSvc.IsStandardExperimentManager(string(routerVersion.ExperimentEngine.Type)) {
+
+		if expSvc.IsStandardExperimentManager(routerVersion.ExperimentEngine.Type) {
 			// Convert the config to the standard type
-			expConfig, err := expSvc.GetStandardExperimentConfig(routerVersion.ExperimentEngine.Config)
+			expConfig, err := manager.ParseStandardExperimentConfig(routerVersion.ExperimentEngine.Config)
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}
@@ -206,7 +209,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 		// Get the deployable Router Config for the experiment
 		experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
-			string(routerVersion.ExperimentEngine.Type),
+			routerVersion.ExperimentEngine.Type,
 			routerVersion.ExperimentEngine.Config,
 		)
 		if err != nil {

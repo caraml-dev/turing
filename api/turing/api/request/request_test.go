@@ -3,6 +3,7 @@
 package request
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -19,48 +20,51 @@ import (
 	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
-var expEngineConfig = manager.TuringExperimentConfig{
-	Client: manager.Client{
-		ID:       "1",
-		Username: "client",
-		Passkey:  "dummy_passkey",
-	},
-	Experiments: []manager.Experiment{
-		{
-			ID:   "2",
-			Name: "test-exp",
+func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
+	expEngineConfig, _ := json.Marshal(manager.TuringExperimentConfig{
+		Client: manager.Client{
+			ID:       "1",
+			Username: "client",
+			Passkey:  clientPasskey,
 		},
-	},
-	Variables: manager.Variables{
-		ClientVariables: []manager.Variable{
+		Experiments: []manager.Experiment{
 			{
-				Name:     "app_version",
-				Required: false,
+				ID:   "2",
+				Name: "test-exp",
 			},
 		},
-		ExperimentVariables: map[string][]manager.Variable{
-			"2": {
+		Variables: manager.Variables{
+			ClientVariables: []manager.Variable{
 				{
-					Name:     "customer",
-					Required: true,
+					Name:     "app_version",
+					Required: false,
+				},
+			},
+			ExperimentVariables: map[string][]manager.Variable{
+				"2": {
+					{
+						Name:     "customer",
+						Required: true,
+					},
+				},
+			},
+			Config: []manager.VariableConfig{
+				{
+					Name:        "customer",
+					Required:    true,
+					Field:       "customer_id",
+					FieldSource: request.HeaderFieldSource,
+				},
+				{
+					Name:        "app_version",
+					Required:    false,
+					Field:       "test_field",
+					FieldSource: request.HeaderFieldSource,
 				},
 			},
 		},
-		Config: []manager.VariableConfig{
-			{
-				Name:        "customer",
-				Required:    true,
-				Field:       "customer_id",
-				FieldSource: request.HeaderFieldSource,
-			},
-			{
-				Name:        "app_version",
-				Required:    false,
-				Field:       "test_field",
-				FieldSource: request.HeaderFieldSource,
-			},
-		},
-	},
+	})
+	return expEngineConfig
 }
 
 var createOrUpdateRequest = CreateOrUpdateRouterRequest{
@@ -77,8 +81,8 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 		},
 		DefaultRouteID: "default",
 		ExperimentEngine: &ExperimentEngineConfig{
-			Type:   "litmus",
-			Config: &expEngineConfig,
+			Type:   "standard",
+			Config: makeTuringExperimentConfig("dummy_passkey"),
 		},
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
@@ -160,7 +164,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Tag:   "fluentdtag",
 		},
 		Experiment: map[string]interface{}{
-			"litmus": map[string]interface{}{
+			"standard": map[string]interface{}{
 				"endpoint": "grpc://test",
 				"timeout":  "2s",
 			},
@@ -168,6 +172,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	}
 	projectID := models.ID(1)
 	router := createOrUpdateRequest.BuildRouter(projectID)
+
 	expected := models.RouterVersion{
 		Router: router,
 		Status: "pending",
@@ -182,50 +187,8 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 		},
 		DefaultRouteID: "default",
 		ExperimentEngine: &models.ExperimentEngine{
-			Type: "litmus",
-			Config: &manager.TuringExperimentConfig{
-				Client: manager.Client{
-					ID:       "1",
-					Username: "client",
-					Passkey:  "enc_passkey",
-				},
-				Experiments: []manager.Experiment{
-					{
-						ID:   "2",
-						Name: "test-exp",
-					},
-				},
-				Variables: manager.Variables{
-					ClientVariables: []manager.Variable{
-						{
-							Name:     "app_version",
-							Required: false,
-						},
-					},
-					ExperimentVariables: map[string][]manager.Variable{
-						"2": {
-							{
-								Name:     "customer",
-								Required: true,
-							},
-						},
-					},
-					Config: []manager.VariableConfig{
-						{
-							Name:        "customer",
-							Required:    true,
-							Field:       "customer_id",
-							FieldSource: request.HeaderFieldSource,
-						},
-						{
-							Name:        "app_version",
-							Required:    false,
-							Field:       "test_field",
-							FieldSource: request.HeaderFieldSource,
-						},
-					},
-				},
-			},
+			Type:   "standard",
+			Config: makeTuringExperimentConfig("enc_passkey"),
 		},
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
@@ -292,7 +255,6 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	// Set up mock Experiment service
 	expSvc := &mocks.ExperimentsService{}
 	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
-	expSvc.On("GetStandardExperimentConfig", &expEngineConfig).Return(expEngineConfig, nil)
 
 	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc)
 	tu.FailOnError(t, err)
@@ -303,47 +265,28 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	// Set up mock Crypto service
 	cs := &mocks.CryptoService{}
-	cs.On("Encrypt", "xp-passkey-bad").Return("", errors.New("test-encrypt-error"))
-	cs.On("Encrypt", "xp-passkey").Return("xp-passkey-enc", nil)
+	cs.On("Encrypt", "passkey-bad").
+		Return("", errors.New("test-encrypt-error"))
+	cs.On("Encrypt", "passkey").
+		Return("passkey-enc", nil)
 
-	// Set up mock Experiment service
-	cfgWithPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-			Passkey:  "xp-passkey",
-		},
-	}
-	cfgWithoutPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-		},
-	}
-	cfgWithBadPasskey := &manager.TuringExperimentConfig{
-		Client: manager.Client{
-			Username: "client-name",
-			Passkey:  "xp-passkey-bad",
-		},
-	}
 	es := &mocks.ExperimentsService{}
-	es.On("IsStandardExperimentManager", "litmus").Return(true)
-	es.On("IsStandardExperimentManager", "xp").Return(false)
-	es.On("GetStandardExperimentConfig", cfgWithPasskey).Return(*cfgWithPasskey, nil)
-	es.On("GetStandardExperimentConfig", cfgWithoutPasskey).Return(*cfgWithoutPasskey, nil)
-	es.On("GetStandardExperimentConfig", cfgWithBadPasskey).Return(*cfgWithBadPasskey, nil)
+	es.On("IsStandardExperimentManager", "standard-manager").Return(true)
+	es.On("IsStandardExperimentManager", "custom-manager").Return(false)
 
 	// Define tests
 	tests := map[string]struct {
 		req      CreateOrUpdateRouterRequest
 		router   *models.Router
-		expected interface{}
+		expected json.RawMessage
 		err      string
 	}{
 		"failure | std engine | missing curr version passkey": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithoutPasskey,
+						Type:   "standard-manager",
+						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 					},
 				},
 			},
@@ -354,8 +297,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithBadPasskey,
+						Type:   "standard-manager",
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey-bad"}}`),
 					},
 				},
 			},
@@ -366,49 +309,44 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithoutPasskey,
+						Type:   "standard-manager",
+						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 					},
 				},
 			},
 			router: &models.Router{
 				CurrRouterVersion: &models.RouterVersion{
 					ExperimentEngine: &models.ExperimentEngine{
-						Type:   "litmus",
-						Config: cfgWithPasskey,
+						Type:   "standard-manager",
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
 					},
 				},
 			},
-			expected: cfgWithPasskey,
+			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
 		},
 		"success | std engine | use new passkey": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "litmus",
-						Config: cfgWithPasskey,
+						Type:   "standard-manager",
+						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
 					},
 				},
 			},
-			router: &models.Router{},
-			expected: &manager.TuringExperimentConfig{
-				Client: manager.Client{
-					Username: "client-name",
-					Passkey:  "xp-passkey-enc",
-				},
-			},
+			router:   &models.Router{},
+			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey-enc"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
 		},
 		"success | custom engine": {
 			req: CreateOrUpdateRouterRequest{
 				Config: &RouterConfig{
 					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "xp",
-						Config: []int{1, 2},
+						Type:   "custom-manager",
+						Config: json.RawMessage("[1, 2]"),
 					},
 				},
 			},
 			router:   &models.Router{},
-			expected: []int{1, 2},
+			expected: json.RawMessage("[1, 2]"),
 		},
 	}
 

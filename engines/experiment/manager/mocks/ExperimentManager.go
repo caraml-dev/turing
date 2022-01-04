@@ -3,7 +3,9 @@
 package mocks
 
 import (
-	"github.com/gojek/turing/engines/experiment/manager"
+	json "encoding/json"
+
+	manager "github.com/gojek/turing/engines/experiment/manager"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,7 +15,7 @@ type ExperimentManager struct {
 }
 
 // GetEngineInfo provides a mock function with given fields:
-func (_m *ExperimentManager) GetEngineInfo() manager.Engine {
+func (_m *ExperimentManager) GetEngineInfo() (manager.Engine, error) {
 	ret := _m.Called()
 
 	var r0 manager.Engine
@@ -21,6 +23,50 @@ func (_m *ExperimentManager) GetEngineInfo() manager.Engine {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(manager.Engine)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetExperimentRunnerConfig provides a mock function with given fields: cfg
+func (_m *ExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
+	ret := _m.Called(cfg)
+
+	var r0 json.RawMessage
+	if rf, ok := ret.Get(0).(func(json.RawMessage) json.RawMessage); ok {
+		r0 = rf(cfg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(json.RawMessage)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(json.RawMessage) error); ok {
+		r1 = rf(cfg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ValidateExperimentConfig provides a mock function with given fields: cfg
+func (_m *ExperimentManager) ValidateExperimentConfig(cfg json.RawMessage) error {
+	ret := _m.Called(cfg)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(json.RawMessage) error); ok {
+		r0 = rf(cfg)
+	} else {
+		r0 = ret.Error(0)
 	}
 
 	return r0

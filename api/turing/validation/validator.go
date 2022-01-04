@@ -94,18 +94,25 @@ func validateLogConfig(sl validator.StructLevel) {
 }
 
 func newExperimentConfigValidator(expSvc service.ExperimentsService) func(validator.StructLevel) {
+	supportedEngines := make(map[string]bool)
+	supportedEnginesStr := models.ExperimentEngineTypeNop
+	for _, engine := range expSvc.ListEngines() {
+		supportedEnginesStr = fmt.Sprintf("%s,%s", supportedEnginesStr, engine.Name)
+		supportedEngines[engine.Name] = true
+	}
+
 	validationFunc := func(sl validator.StructLevel) {
 		field := sl.Current().Interface().(request.ExperimentEngineConfig)
-		switch field.Type {
-		case string(models.ExperimentEngineTypeNop):
+		switch {
+		case field.Type == models.ExperimentEngineTypeNop:
 			return
-		case string(models.ExperimentEngineTypeLitmus), string(models.ExperimentEngineTypeXp):
+		case supportedEngines[field.Type]:
 			err := expSvc.ValidateExperimentConfig(field.Type, field.Config)
 			if err != nil {
 				sl.ReportError(field.Config, "config", "ExperimentEngineConfig.Config", err.Error(), "")
 			}
 		default:
-			sl.ReportError(field.Type, "type", "Type", "oneof", "litmus,xp,nop")
+			sl.ReportError(field.Type, "type", "Type", "oneof", supportedEnginesStr)
 		}
 	}
 	return validationFunc

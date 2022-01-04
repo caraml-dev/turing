@@ -24,8 +24,6 @@ const (
 type ExperimentsService interface {
 	// IsStandardExperimentManager checks if the experiment manager is of the standard type
 	IsStandardExperimentManager(engine string) bool
-	// GetStandardExperimentConfig converts the given generic config into the standard type, if possible
-	GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error)
 	// ListEngines returns a list of the experiment engines available
 	ListEngines() []manager.Engine
 	// ListClients returns a list of the clients registered on the given experiment engine
@@ -37,10 +35,10 @@ type ExperimentsService interface {
 	// for the given clientID and/or experiments
 	ListVariables(engine string, clientID string, experimentIDs []string) (manager.Variables, error)
 	// ValidateExperimentConfig validates the given experiment config for completeness
-	ValidateExperimentConfig(engine string, cfg interface{}) error
+	ValidateExperimentConfig(engine string, cfg json.RawMessage) error
 	// GetExperimentRunnerConfig converts the given experiment config compatible with the Experiment Manager
 	// into the format compatible with the ExperimentRunner
-	GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error)
+	GetExperimentRunnerConfig(engine string, cfg json.RawMessage) (json.RawMessage, error)
 }
 
 type experimentsService struct {
@@ -88,10 +86,15 @@ func NewExperimentsService(managerConfig map[string]config.EngineConfig) (Experi
 
 	// Populate the cache with the Clients / Experiments info from Standard Engines
 	for expEngine, expManager := range svc.experimentManagers {
-		engineInfo := expManager.GetEngineInfo()
+		engineInfo, err := expManager.GetEngineInfo()
+		if err != nil {
+			logger.Warnf("failed to retrieve info for engine %s: %v", expEngine, err)
+			continue
+		}
+
 		if engineInfo.Type == manager.StandardExperimentManagerType {
 			if engineInfo.StandardExperimentManagerConfig == nil {
-				return nil, fmt.Errorf("Standard Experiment Manager config missing for engine %s", engineInfo.Name)
+				return nil, fmt.Errorf("Standard Experiment Manager config missing for engine %s", expEngine)
 			}
 			if engineInfo.StandardExperimentManagerConfig.ClientSelectionEnabled {
 				_, err := svc.ListClients(expEngine)
@@ -115,18 +118,18 @@ func (es *experimentsService) IsStandardExperimentManager(engine string) bool {
 	if err != nil {
 		return false
 	}
-	return expManager.GetEngineInfo().Type == manager.StandardExperimentManagerType
-}
-
-func (*experimentsService) GetStandardExperimentConfig(config interface{}) (manager.TuringExperimentConfig, error) {
-	return manager.GetStandardExperimentConfig(config)
+	return manager.IsStandardExperimentManager(expManager)
 }
 
 func (es *experimentsService) ListEngines() []manager.Engine {
 	engines := []manager.Engine{}
 
 	for _, expManager := range es.experimentManagers {
-		engines = append(engines, expManager.GetEngineInfo())
+		engineInfo, err := expManager.GetEngineInfo()
+		if err == nil {
+			engines = append(engines, engineInfo)
+		}
+
 	}
 	return engines
 }
@@ -199,24 +202,23 @@ func (es *experimentsService) ListVariables(
 	}, nil
 }
 
-func (es *experimentsService) ValidateExperimentConfig(engine string, cfg interface{}) error {
+func (es *experimentsService) ValidateExperimentConfig(engine string, cfg json.RawMessage) error {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {
 		return err
 	}
-
-	return manager.ValidateExperimentConfig(expManager, cfg)
+	return expManager.ValidateExperimentConfig(cfg)
 }
 
-func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg interface{}) (json.RawMessage, error) {
+func (es *experimentsService) GetExperimentRunnerConfig(engine string, cfg json.RawMessage) (json.RawMessage, error) {
 	// Get experiment manager
 	expManager, err := es.getExperimentManager(engine)
 	if err != nil {
 		return json.RawMessage{}, err
 	}
 
-	return manager.GetExperimentRunnerConfig(expManager, cfg)
+	return expManager.GetExperimentRunnerConfig(cfg)
 }
 
 func (es *experimentsService) getExperimentManager(
