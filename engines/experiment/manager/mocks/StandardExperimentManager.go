@@ -15,7 +15,7 @@ type StandardExperimentManager struct {
 }
 
 // GetEngineInfo provides a mock function with given fields:
-func (_m *StandardExperimentManager) GetEngineInfo() manager.Engine {
+func (_m *StandardExperimentManager) GetEngineInfo() (manager.Engine, error) {
 	ret := _m.Called()
 
 	var r0 manager.Engine
@@ -25,7 +25,14 @@ func (_m *StandardExperimentManager) GetEngineInfo() manager.Engine {
 		r0 = ret.Get(0).(manager.Engine)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetExperimentRunnerConfig provides a mock function with given fields: cfg
@@ -52,7 +59,7 @@ func (_m *StandardExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessa
 }
 
 // IsCacheEnabled provides a mock function with given fields:
-func (_m *StandardExperimentManager) IsCacheEnabled() bool {
+func (_m *StandardExperimentManager) IsCacheEnabled() (bool, error) {
 	ret := _m.Called()
 
 	var r0 bool
@@ -62,7 +69,14 @@ func (_m *StandardExperimentManager) IsCacheEnabled() bool {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ListClients provides a mock function with given fields:

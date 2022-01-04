@@ -11,16 +11,15 @@ import (
 func TestStandardExperimentIsCacheEnabled(t *testing.T) {
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
-	stdExpMgr.On("IsCacheEnabled").Return(true)
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
+	stdExpMgr.On("IsCacheEnabled").Return(true, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
-	// Validate
 	// IsCacheEnabled
-	assert.Equal(t, true, manager.IsCacheEnabled(stdExpMgr))
-	assert.Equal(t, false, manager.IsCacheEnabled(expMgr))
+	assert.True(t, manager.IsCacheEnabled(stdExpMgr))
+	assert.False(t, manager.IsCacheEnabled(expMgr))
 }
 
 func TestStandardExperimentListClients(t *testing.T) {
@@ -28,11 +27,11 @@ func TestStandardExperimentListClients(t *testing.T) {
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
 	stdExpMgr.On("ListClients").Return([]manager.Client{{}}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
 	// Validate
 	// ListClients
@@ -49,11 +48,11 @@ func TestStandardExperimentListExperiments(t *testing.T) {
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
 	stdExpMgr.On("ListExperiments").Return([]manager.Experiment{{}}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
 	// Validate
 	// ListExperiments
@@ -70,12 +69,12 @@ func TestStandardExperimentListExperimentsForClient(t *testing.T) {
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
 	stdExpMgr.On("ListExperimentsForClient", manager.Client{ID: "1"}).
 		Return([]manager.Experiment{{}}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
 	// Validate
 	// ListExperimentsForClient
@@ -92,12 +91,12 @@ func TestStandardExperimentListVariablesForClient(t *testing.T) {
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
 	stdExpMgr.On("ListVariablesForClient", manager.Client{ID: "1"}).
 		Return([]manager.Variable{{Name: "var-1"}}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
 	// Validate
 	// ListVariablesForClient
@@ -114,14 +113,14 @@ func TestStandardExperimentListVariablesForExperiments(t *testing.T) {
 
 	// Set up mocks
 	stdExpMgr := &mocks.StandardExperimentManager{}
-	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType})
+	stdExpMgr.On("GetEngineInfo").Return(manager.Engine{Type: manager.StandardExperimentManagerType}, nil)
 	stdExpMgr.On("ListVariablesForExperiments", []manager.Experiment{{}}).
 		Return(map[string][]manager.Variable{
 			"test-exp": {{Name: "var-1"}},
 		}, nil)
 
 	expMgr := &mocks.ExperimentManager{}
-	expMgr.On("GetEngineInfo").Return(manager.Engine{})
+	expMgr.On("GetEngineInfo").Return(manager.Engine{}, nil)
 
 	// Validate
 	// ListVariablesForExperiments

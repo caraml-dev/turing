@@ -79,7 +79,7 @@ func TestRpcClient_GetEngineInfo(t *testing.T) {
 
 			rpcClient := rpcClient{RPCClient: mockClient}
 
-			actual := rpcClient.GetEngineInfo()
+			actual, _ := rpcClient.GetEngineInfo()
 			if tt.err != nil {
 				empty := manager.Engine{}
 				assert.Equal(t, actual, empty)

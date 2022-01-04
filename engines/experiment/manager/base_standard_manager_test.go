@@ -12,7 +12,9 @@ import (
 
 func TestBaseStandardExperimentManagerMethods(t *testing.T) {
 	em := &manager.BaseStandardExperimentManager{}
-	assert.Equal(t, true, em.IsCacheEnabled())
+	actual, err := em.IsCacheEnabled()
+	assert.NoError(t, err)
+	assert.True(t, actual)
 
 	// Get clients
 	clients, err := em.ListClients()

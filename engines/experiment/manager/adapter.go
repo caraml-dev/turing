@@ -12,19 +12,28 @@ const (
 	standardMethodErr = "Method is only supported by standard experiment managers"
 )
 
+func IsStandardExperimentManager(expManager ExperimentManager) bool {
+	engineInfo, err := expManager.GetEngineInfo()
+	return err == nil && engineInfo.Type == StandardExperimentManagerType
+}
+
 // StandardExperimentManager methods ******************************************
 
 func IsCacheEnabled(expManager ExperimentManager) bool {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
-			return stdMgr.IsCacheEnabled()
+			cacheEnabled, err := stdMgr.IsCacheEnabled()
+			if err != nil {
+				return false
+			}
+			return cacheEnabled
 		}
 	}
 	return false
 }
 
 func ListClients(expManager ExperimentManager) ([]Client, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListClients()
 		}
@@ -33,7 +42,7 @@ func ListClients(expManager ExperimentManager) ([]Client, error) {
 }
 
 func ListExperiments(expManager ExperimentManager) ([]Experiment, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListExperiments()
 		}
@@ -42,7 +51,7 @@ func ListExperiments(expManager ExperimentManager) ([]Experiment, error) {
 }
 
 func ListExperimentsForClient(expManager ExperimentManager, client Client) ([]Experiment, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListExperimentsForClient(client)
 		}
@@ -51,7 +60,7 @@ func ListExperimentsForClient(expManager ExperimentManager, client Client) ([]Ex
 }
 
 func ListVariablesForClient(expManager ExperimentManager, client Client) ([]Variable, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListVariablesForClient(client)
 		}
@@ -60,7 +69,7 @@ func ListVariablesForClient(expManager ExperimentManager, client Client) ([]Vari
 }
 
 func ListVariablesForExperiments(expManager ExperimentManager, exps []Experiment) (map[string][]Variable, error) {
-	if expManager.GetEngineInfo().Type == StandardExperimentManagerType {
+	if IsStandardExperimentManager(expManager) {
 		if stdMgr, ok := expManager.(StandardExperimentManager); ok {
 			return stdMgr.ListVariablesForExperiments(exps)
 		}

@@ -9,7 +9,7 @@ import (
 // experiments on Turing.
 type ExperimentManager interface {
 	// GetEngineInfo returns the configuration of the experiment engine
-	GetEngineInfo() Engine
+	GetEngineInfo() (Engine, error)
 
 	// ValidateExperimentConfig validates the given Turing experiment config for the expected data and format
 	ValidateExperimentConfig(cfg json.RawMessage) error
@@ -28,7 +28,7 @@ type ExperimentManager interface {
 type StandardExperimentManager interface {
 	ExperimentManager
 	// IsCacheEnabled returns whether the experiment engine wants to cache its responses in the Turing API cache
-	IsCacheEnabled() bool
+	IsCacheEnabled() (bool, error)
 	// ListClients returns a list of the clients registered on the experiment engine
 	ListClients() ([]Client, error)
 	// ListExperiments returns a list of the experiments registered on the experiment engine

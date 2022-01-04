@@ -84,6 +84,7 @@ func TestExperimentManagerPlugin_Configure(t *testing.T) {
 func TestExperimentManagerPlugin_GetEngineInfo(t *testing.T) {
 	suite := map[string]struct {
 		expected manager.Engine
+		err      error
 	}{
 		"success": {
 			expected: manager.Engine{
@@ -102,11 +103,16 @@ func TestExperimentManagerPlugin_GetEngineInfo(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockManager := configuredManagerMock()
-			mockManager.On("GetEngineInfo").Return(tt.expected)
+			mockManager.On("GetEngineInfo").Return(tt.expected, tt.err)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
-				actual := em.GetEngineInfo()
-				assert.Equal(t, tt.expected, actual)
+				actual, err := em.GetEngineInfo()
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, actual)
+				}
 			})
 
 			mockManager.AssertExpectations(t)
@@ -192,9 +198,13 @@ func TestExperimentManagerPlugin_GetExperimentRunnerConfig(t *testing.T) {
 func TestExperimentManagerPlugin_IsCacheEnabled(t *testing.T) {
 	suite := map[string]struct {
 		cacheEnabled bool
+		err          error
 	}{
 		"success | enabled": {
 			cacheEnabled: true,
+		},
+		"failure | error": {
+			err: errors.New("failure"),
 		},
 		"success | disabled": {
 			cacheEnabled: false,
@@ -204,11 +214,17 @@ func TestExperimentManagerPlugin_IsCacheEnabled(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockManager := configuredStandardManagerMock()
-			mockManager.On("IsCacheEnabled").Return(tt.cacheEnabled)
+			mockManager.On("IsCacheEnabled").Return(tt.cacheEnabled, tt.err)
 
 			withExperimentManager(t, mockManager, func(em manager.ExperimentManager, _ error) {
-				actual := em.(manager.StandardExperimentManager).IsCacheEnabled()
-				assert.Equal(t, tt.cacheEnabled, actual)
+				actual, err := em.(manager.StandardExperimentManager).IsCacheEnabled()
+				if tt.err != nil {
+					assert.EqualError(t, err, tt.err.Error())
+					assert.False(t, actual)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.cacheEnabled, actual)
+				}
 			})
 
 			mockManager.AssertExpectations(t)

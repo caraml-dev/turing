@@ -21,7 +21,7 @@ func (m *ExperimentManager) Configure(rawCfg json.RawMessage) error {
 	return nil
 }
 
-func (m *ExperimentManager) GetEngineInfo() manager.Engine {
+func (m *ExperimentManager) GetEngineInfo() (manager.Engine, error) {
 	return manager.Engine{
 		Name:        "nop",
 		DisplayName: m.displayName,
@@ -31,7 +31,7 @@ func (m *ExperimentManager) GetEngineInfo() manager.Engine {
 			ExperimentSelectionEnabled: false,
 			HomePageURL:                "http://example.com",
 		},
-	}
+	}, nil
 }
 
 func (*ExperimentManager) ValidateExperimentConfig(json.RawMessage) error {

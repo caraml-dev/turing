@@ -16,9 +16,9 @@ func (s *rpcServer) Configure(cfg json.RawMessage, _ *interface{}) (err error) {
 	return s.Impl.Configure(cfg)
 }
 
-func (s *rpcServer) GetEngineInfo(_ interface{}, resp *manager.Engine) error {
-	*resp = s.Impl.GetEngineInfo()
-	return nil
+func (s *rpcServer) GetEngineInfo(_ interface{}, resp *manager.Engine) (err error) {
+	*resp, err = s.Impl.GetEngineInfo()
+	return
 }
 
 func (s *rpcServer) ValidateExperimentConfig(cfg json.RawMessage, _ *interface{}) (err error) {
@@ -33,9 +33,9 @@ func (s *rpcServer) GetExperimentRunnerConfig(inConfig json.RawMessage, outConfi
 // Methods of manager.StandardExperimentManager are served below this line
 
 func (s *rpcServer) IsCacheEnabled(_ interface{}, resp *bool) error {
-	return s.asStandardManager(func(sm manager.StandardExperimentManager) error {
-		*resp = sm.IsCacheEnabled()
-		return nil
+	return s.asStandardManager(func(sm manager.StandardExperimentManager) (err error) {
+		*resp, err = sm.IsCacheEnabled()
+		return
 	})
 }
 

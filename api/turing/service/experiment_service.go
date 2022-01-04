@@ -86,10 +86,15 @@ func NewExperimentsService(managerConfig map[string]config.EngineConfig) (Experi
 
 	// Populate the cache with the Clients / Experiments info from Standard Engines
 	for expEngine, expManager := range svc.experimentManagers {
-		engineInfo := expManager.GetEngineInfo()
+		engineInfo, err := expManager.GetEngineInfo()
+		if err != nil {
+			logger.Warnf("failed to retrieve info for engine %s: %v", expEngine, err)
+			continue
+		}
+
 		if engineInfo.Type == manager.StandardExperimentManagerType {
 			if engineInfo.StandardExperimentManagerConfig == nil {
-				return nil, fmt.Errorf("Standard Experiment Manager config missing for engine %s", engineInfo.Name)
+				return nil, fmt.Errorf("Standard Experiment Manager config missing for engine %s", expEngine)
 			}
 			if engineInfo.StandardExperimentManagerConfig.ClientSelectionEnabled {
 				_, err := svc.ListClients(expEngine)
@@ -113,14 +118,18 @@ func (es *experimentsService) IsStandardExperimentManager(engine string) bool {
 	if err != nil {
 		return false
 	}
-	return expManager.GetEngineInfo().Type == manager.StandardExperimentManagerType
+	return manager.IsStandardExperimentManager(expManager)
 }
 
 func (es *experimentsService) ListEngines() []manager.Engine {
 	engines := []manager.Engine{}
 
 	for _, expManager := range es.experimentManagers {
-		engines = append(engines, expManager.GetEngineInfo())
+		engineInfo, err := expManager.GetEngineInfo()
+		if err == nil {
+			engines = append(engines, engineInfo)
+		}
+
 	}
 	return engines
 }

@@ -50,7 +50,7 @@ func TestRpcServer_Configure(t *testing.T) {
 func TestRpcServer_GetEngineInfo(t *testing.T) {
 	suite := map[string]struct {
 		expected manager.Engine
-		err      string
+		err      error
 	}{
 		"success | get engine info": {
 			expected: manager.Engine{
@@ -63,14 +63,14 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockManager := &mocks.ConfigurableExperimentManager{}
-			mockManager.On("GetEngineInfo", mock.Anything).Return(tt.expected)
+			mockManager.On("GetEngineInfo", mock.Anything).Return(tt.expected, tt.err)
 			rpcServer := &rpcServer{mockManager}
 
 			var actual manager.Engine
 			err := rpcServer.GetEngineInfo(nil, &actual)
 
-			if tt.err != "" {
-				assert.EqualError(t, err, tt.err)
+			if tt.err != nil {
+				assert.EqualError(t, err, tt.err.Error())
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected, actual)
@@ -82,36 +82,36 @@ func TestRpcServer_GetEngineInfo(t *testing.T) {
 
 func TestRpcServer_IsCacheEnabled(t *testing.T) {
 	suite := map[string]struct {
-		managerMock func(expected bool) ConfigurableExperimentManager
+		managerMock func(expected bool, err error) ConfigurableExperimentManager
 		expected    bool
-		err         string
+		err         error
 	}{
 		"success": {
-			managerMock: func(expected bool) ConfigurableExperimentManager {
+			managerMock: func(expected bool, err error) ConfigurableExperimentManager {
 				mm := &mocks.ConfigurableStandardExperimentManager{}
-				mm.On("IsCacheEnabled").Return(expected)
+				mm.On("IsCacheEnabled").Return(expected, err)
 
 				return mm
 			},
 			expected: true,
 		},
 		"failure": {
-			managerMock: func(bool) ConfigurableExperimentManager {
+			managerMock: func(bool, error) ConfigurableExperimentManager {
 				return &mocks.ConfigurableExperimentManager{}
 			},
-			err: "not implemented",
+			err: errors.New("not implemented"),
 		},
 	}
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			rpcServer := &rpcServer{tt.managerMock(tt.expected)}
+			rpcServer := &rpcServer{tt.managerMock(tt.expected, tt.err)}
 
 			var actual bool
 			err := rpcServer.IsCacheEnabled(nil, &actual)
 
-			if tt.err != "" {
-				assert.EqualError(t, err, tt.err)
+			if tt.err != nil {
+				assert.EqualError(t, err, tt.err.Error())
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected, actual)

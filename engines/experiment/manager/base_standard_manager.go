@@ -18,12 +18,12 @@ type BaseStandardExperimentManager struct {
 	info     Engine
 }
 
-func (em *BaseStandardExperimentManager) GetEngineInfo() Engine {
-	return em.info
+func (em *BaseStandardExperimentManager) GetEngineInfo() (Engine, error) {
+	return em.info, nil
 }
 
-func (*BaseStandardExperimentManager) IsCacheEnabled() bool {
-	return true
+func (*BaseStandardExperimentManager) IsCacheEnabled() (bool, error) {
+	return true, nil
 }
 
 func (*BaseStandardExperimentManager) ListClients() ([]Client, error) {
