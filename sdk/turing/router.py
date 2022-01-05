@@ -25,9 +25,9 @@ class Router(ApiObject):
                  name: str,
                  project_id: int,
                  environment_name: str,
-                 endpoint: str,
                  monitoring_url: str,
                  status: RouterStatus,
+                 endpoint: str = None,
                  **kwargs):
         super(Router, self).__init__(**kwargs)
         self._id = int(id)

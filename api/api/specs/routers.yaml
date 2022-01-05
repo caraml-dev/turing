@@ -613,7 +613,7 @@ components:
         timeout:
           type: "string"
         annotations:
-          type: "string"
+          type: "object"
           nullable: true
 
     TrafficRule:
@@ -807,6 +807,9 @@ components:
           type: "string"
         service_account_secret:
           type: "string"
+        batch_load:
+          type: "boolean"
+          nullable: true
 
     KafkaConfig:
       type: "object"

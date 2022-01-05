@@ -74,6 +74,7 @@ class BigQueryConfig(ModelNormal):
         return {
             'table': (str,),  # noqa: E501
             'service_account_secret': (str,),  # noqa: E501
+            'batch_load': (bool, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -84,6 +85,7 @@ class BigQueryConfig(ModelNormal):
     attribute_map = {
         'table': 'table',  # noqa: E501
         'service_account_secret': 'service_account_secret',  # noqa: E501
+        'batch_load': 'batch_load',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -136,6 +138,7 @@ class BigQueryConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            batch_load (bool, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
