@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 import random
 import tests
-from turing import ensembler
+from turing.ensembler import PyFuncEnsembler
 import turing.generated.models
 import turing.batch.config
 import turing.batch.config.source
@@ -65,7 +65,7 @@ def generic_ensemblers(project, num_ensemblers):
         turing.generated.models.GenericEnsembler(
             id=i,
             project_id=project.id,
-            type=ensembler.PyFuncEnsembler.TYPE,
+            type=PyFuncEnsembler.TYPE,
             name=f"test_{i}",
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10)
@@ -102,7 +102,7 @@ def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_ur
     return turing.generated.models.PyFuncEnsembler(
         id=1,
         project_id=project.id,
-        type=ensembler.PyFuncEnsembler.TYPE,
+        type=PyFuncEnsembler.TYPE,
         name=ensembler_name,
         mlflow_experiment_id=experiment_id,
         mlflow_run_id=run_id,
