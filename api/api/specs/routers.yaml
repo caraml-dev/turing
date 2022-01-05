@@ -714,6 +714,7 @@ components:
     EnsemblerStandardConfig:
       description: "ensembler config when ensembler type is standard"
       type: "object"
+      nullable: true
       required:
         - "experiment_mappings"
       properties:
