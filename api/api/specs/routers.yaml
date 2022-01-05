@@ -619,10 +619,14 @@ components:
           <<: *timeout
         annotations:
 <<<<<<< HEAD
+<<<<<<< HEAD
           type: "object"
 =======
           type: "string"
 >>>>>>> 3eb5e8c (Refactor swagger/openapi specs for sdk)
+=======
+          type: "object"
+>>>>>>> 57020d0 (Add additional nullable fields to OpenAPI spec)
           nullable: true
 
     TrafficRule:
