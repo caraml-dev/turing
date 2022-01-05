@@ -12,7 +12,8 @@ from turing.generated.models import \
     EnsemblersPaginatedResults, \
     EnsemblingJobPaginatedResults, \
     IdObject, \
-    RouterDetails
+    RouterDetails, \
+    RouterConfig
 
 
 def require_active_project(f):
@@ -207,3 +208,13 @@ class TuringSession:
         """
         kwargs = {}
         return RouterApi(self._api_client).projects_project_id_routers_get(project_id=self.active_project.id, **kwargs)
+
+    @require_active_project
+    def create_router(self, router_config: RouterConfig) -> RouterDetails:
+        """
+        Create a router in the active project the user has access to
+
+        :return: details of router submitted
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_post(project_id=self.active_project.id,
+                                                                            router_config=router_config)

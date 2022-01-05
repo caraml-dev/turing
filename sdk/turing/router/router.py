@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
@@ -26,7 +26,8 @@ class Router(ApiObject):
                  project_id: int,
                  environment_name: str,
                  monitoring_url: str,
-                 status: RouterStatus,
+                 status: str,
+                 config: Dict,
                  endpoint: str = None,
                  **kwargs):
         super(Router, self).__init__(**kwargs)
@@ -37,6 +38,7 @@ class Router(ApiObject):
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
         self._status = RouterStatus(status)
+        self._config = config
 
     @property
     def id(self) -> int:
@@ -66,6 +68,10 @@ class Router(ApiObject):
     def status(self) -> RouterStatus:
         return self._status
 
+    @property
+    def config(self) -> Dict:
+        return self._config
+
     @classmethod
     def list(cls) -> List['Router']:
         """
@@ -75,3 +81,13 @@ class Router(ApiObject):
         """
         response = turing.active_session.list_routers()
         return [Router.from_open_api(item) for item in response]
+
+    @classmethod
+    def create(cls, config: turing.generated.models.RouterConfig) -> 'Router':
+        """
+        Create router with a given configuration
+
+        :param config: configuration of router
+        :return: instance of router created
+        """
+        return Router.from_open_api(turing.active_session.create_router(router_config=config))
