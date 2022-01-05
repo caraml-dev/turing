@@ -85,7 +85,10 @@ class Enricher(ModelNormal):
             'timeout': (str,),  # noqa: E501
             'port': (int,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
+            'id': (int,),  # noqa: E501
             'service_account': (str,),  # noqa: E501
+            'created_at': (datetime,),  # noqa: E501
+            'updated_at': (datetime,),  # noqa: E501
         }
 
     @cached_property
@@ -100,7 +103,10 @@ class Enricher(ModelNormal):
         'timeout': 'timeout',  # noqa: E501
         'port': 'port',  # noqa: E501
         'env': 'env',  # noqa: E501
+        'id': 'id',  # noqa: E501
         'service_account': 'service_account',  # noqa: E501
+        'created_at': 'created_at',  # noqa: E501
+        'updated_at': 'updated_at',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -157,7 +163,10 @@ class Enricher(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            id (int): [optional]  # noqa: E501
             service_account (str): (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file.\" . [optional]  # noqa: E501
+            created_at (datetime): [optional]  # noqa: E501
+            updated_at (datetime): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

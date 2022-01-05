@@ -83,7 +83,7 @@ class Router(ModelNormal):
             'updated_at': (datetime,),  # noqa: E501
             'project_id': (int,),  # noqa: E501
             'environment_name': (str,),  # noqa: E501
-            'endpoint': (str,),  # noqa: E501
+            'endpoint': (str, none_type,),  # noqa: E501
             'monitoring_url': (str,),  # noqa: E501
             'status': (RouterStatus,),  # noqa: E501
         }
@@ -157,7 +157,7 @@ class Router(ModelNormal):
             updated_at (datetime): [optional]  # noqa: E501
             project_id (int): [optional]  # noqa: E501
             environment_name (str): [optional]  # noqa: E501
-            endpoint (str): [optional]  # noqa: E501
+            endpoint (str, none_type): [optional]  # noqa: E501
             monitoring_url (str): [optional]  # noqa: E501
             status (RouterStatus): [optional]  # noqa: E501
         """

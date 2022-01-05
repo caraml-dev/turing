@@ -430,6 +430,7 @@ components:
           type: "string"
         endpoint:
           type: "string"
+          nullable: true
         monitoring_url:
           type: "string"
           readOnly: true
@@ -665,6 +666,8 @@ components:
         - port
         - env
       properties:
+        id:
+          type: "integer"
         image:
           type: "string"
         resource_request:
@@ -686,6 +689,14 @@ components:
             JSON key. This secret will be mounted as a file inside the container and the environment variable
             GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: "secret-name-for-google-service-account"
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
 
     Ensembler:
       type: "object"
