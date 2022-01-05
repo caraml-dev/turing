@@ -667,7 +667,7 @@ components:
         - env
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
         image:
           type: "string"
         resource_request:
