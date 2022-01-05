@@ -13,7 +13,7 @@ def _responses():
 
 
 @responses.activate
-@pytest.mark.parametrize('num_routers', [10])
+@pytest.mark.parametrize('num_routers', [2])
 def test_list_routers(turing_api, active_project, generic_routers, use_google_oauth):
     responses.add(
         method="GET",

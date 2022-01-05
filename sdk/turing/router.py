@@ -30,9 +30,9 @@ class Router(ApiObject):
                  endpoint: str = None,
                  **kwargs):
         super(Router, self).__init__(**kwargs)
-        self._id = int(id)
+        self._id = id
         self._name = name
-        self._project_id = int(project_id)
+        self._project_id = project_id
         self._environment_name = environment_name
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
