@@ -33,9 +33,9 @@ func (er *configurableExperimentRunner) Configure(cfg json.RawMessage) (err erro
 	return
 }
 
-// getTreatmentRequest is a struct, used to pass the data required by
+// GetTreatmentRequest is a struct, used to pass the data required by
 // ExperimentRunner.GetTreatmentForRequest() between RPC client and server
-type getTreatmentRequest struct {
+type GetTreatmentRequest struct {
 	Header  http.Header
 	Payload []byte
 	Options runner.GetTreatmentOptions

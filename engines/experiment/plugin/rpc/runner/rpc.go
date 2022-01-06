@@ -22,7 +22,7 @@ func (c *rpcClient) GetTreatmentForRequest(
 	payload []byte,
 	options runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
-	req := getTreatmentRequest{
+	req := GetTreatmentRequest{
 		Header:  header,
 		Payload: payload,
 		Options: options,
@@ -46,7 +46,7 @@ func (s *rpcServer) Configure(cfg json.RawMessage, _ *interface{}) (err error) {
 	return s.Impl.Configure(cfg)
 }
 
-func (s *rpcServer) GetTreatmentForRequest(req *getTreatmentRequest, resp *runner.Treatment) error {
+func (s *rpcServer) GetTreatmentForRequest(req *GetTreatmentRequest, resp *runner.Treatment) error {
 	treatment, err := s.Impl.GetTreatmentForRequest(req.Header, req.Payload, req.Options)
 	if err != nil {
 		return err

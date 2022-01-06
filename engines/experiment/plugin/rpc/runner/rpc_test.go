@@ -48,7 +48,7 @@ func TestRpcClient_GetTreatmentForRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			req := getTreatmentRequest{}
+			req := GetTreatmentRequest{}
 
 			mockClient := &mocks.RPCClient{}
 			mockClient.
@@ -112,7 +112,7 @@ func TestRpcServer_GetTreatmentForRequest(t *testing.T) {
 			rpcServer := &rpcServer{mockManager}
 
 			var actual runner.Treatment
-			err := rpcServer.GetTreatmentForRequest(&getTreatmentRequest{}, &actual)
+			err := rpcServer.GetTreatmentForRequest(&GetTreatmentRequest{}, &actual)
 
 			if tt.err != nil {
 				assert.EqualError(t, err, tt.err.Error())
