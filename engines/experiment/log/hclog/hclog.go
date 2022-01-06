@@ -92,3 +92,7 @@ func (l *hcLogger) Panicf(template string, args ...interface{}) {
 func (l *hcLogger) With(args ...interface{}) log.Logger {
 	return &hcLogger{l.Logger.With(args...)}
 }
+
+func (l *hcLogger) SetLevel(lvl log.Level) {
+	l.Logger.SetLevel(hclog.LevelFromString(lvl.String()))
+}

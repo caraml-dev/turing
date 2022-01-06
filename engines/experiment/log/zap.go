@@ -7,6 +7,7 @@ import (
 
 type zapLogger struct {
 	*zap.SugaredLogger
+	cfg *zap.Config
 }
 
 func newZapLogger(logLevel ...zapcore.Level) Logger {
@@ -17,10 +18,18 @@ func newZapLogger(logLevel ...zapcore.Level) Logger {
 	}
 
 	logger, _ := cfg.Build(zap.AddCallerSkip(1))
-	return &zapLogger{logger.Sugar()}
+	return &zapLogger{logger.Sugar(), &cfg}
 }
 
 func (l *zapLogger) With(args ...interface{}) Logger {
-	l.SugaredLogger.Desugar().WithOptions()
-	return &zapLogger{l.SugaredLogger.With(args...)}
+	return &zapLogger{l.SugaredLogger.With(args...), l.cfg}
+}
+
+func (l *zapLogger) SetLevel(lvl Level) {
+	var zapLvl zapcore.Level
+	if err := zapLvl.UnmarshalText([]byte(lvl.String())); err != nil {
+		l.Warnf("failed to set %s log level: %v", lvl.String(), err)
+	} else {
+		l.cfg.Level = zap.NewAtomicLevelAt(zapLvl)
+	}
 }
