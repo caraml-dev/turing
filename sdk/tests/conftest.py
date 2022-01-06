@@ -308,7 +308,7 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
 @pytest.fixture(params=["standard", "docker"])
 def ensembler(request, generic_ensembler_standard_config, generic_ensembler_docker_config):
     ensembler_type = request.param
-    return turing.generated.models.Ensembler1(
+    return turing.generated.models.RouterEnsemblerConfig(
         id=1,
         type=ensembler_type,
         standard_config=generic_ensembler_standard_config,

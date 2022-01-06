@@ -28,18 +28,18 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.enricher import Enricher
-    from turing.generated.model.ensembler1 import Ensembler1
     from turing.generated.model.experiment_config import ExperimentConfig
     from turing.generated.model.resource_request import ResourceRequest
     from turing.generated.model.route import Route
     from turing.generated.model.router_config_config_log_config import RouterConfigConfigLogConfig
+    from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
     from turing.generated.model.traffic_rule import TrafficRule
     globals()['Enricher'] = Enricher
-    globals()['Ensembler1'] = Ensembler1
     globals()['ExperimentConfig'] = ExperimentConfig
     globals()['ResourceRequest'] = ResourceRequest
     globals()['Route'] = Route
     globals()['RouterConfigConfigLogConfig'] = RouterConfigConfigLogConfig
+    globals()['RouterEnsemblerConfig'] = RouterEnsemblerConfig
     globals()['TrafficRule'] = TrafficRule
 
 
@@ -97,7 +97,7 @@ class RouterConfigConfig(ModelNormal):
             'rules': ([TrafficRule],),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
-            'ensembler': (Ensembler1,),  # noqa: E501
+            'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
         }
 
     @cached_property
@@ -173,7 +173,7 @@ class RouterConfigConfig(ModelNormal):
             rules ([TrafficRule]): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501
-            ensembler (Ensembler1): [optional]  # noqa: E501
+            ensembler (RouterEnsemblerConfig): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

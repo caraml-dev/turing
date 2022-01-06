@@ -19,7 +19,6 @@ from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
 from turing.generated.model.dataset import Dataset
 from turing.generated.model.enricher import Enricher
 from turing.generated.model.ensembler import Ensembler
-from turing.generated.model.ensembler1 import Ensembler1
 from turing.generated.model.ensembler_config import EnsemblerConfig
 from turing.generated.model.ensembler_config_kind import EnsemblerConfigKind
 from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
@@ -67,6 +66,7 @@ from turing.generated.model.router_config_config import RouterConfigConfig
 from turing.generated.model.router_config_config_log_config import RouterConfigConfigLogConfig
 from turing.generated.model.router_details import RouterDetails
 from turing.generated.model.router_details_all_of import RouterDetailsAllOf
+from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
 from turing.generated.model.router_status import RouterStatus
 from turing.generated.model.router_version import RouterVersion
 from turing.generated.model.router_version_log_config import RouterVersionLogConfig

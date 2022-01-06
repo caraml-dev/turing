@@ -500,7 +500,7 @@ components:
         enricher:
           $ref: "#/components/schemas/Enricher"
         ensembler:
-          $ref: "#/components/schemas/Ensembler"
+          $ref: "#/components/schemas/RouterEnsemblerConfig"
         monitoring_url:
           type: "string"
           readOnly: true
@@ -594,7 +594,7 @@ components:
             enricher:
               $ref: "#/components/schemas/Enricher"
             ensembler:
-              $ref: "#/components/schemas/Ensembler"
+              $ref: "#/components/schemas/RouterEnsemblerConfig"
 
     Route:
       type: "object"
@@ -698,7 +698,7 @@ components:
           format: "date-time"
           readOnly: true
 
-    Ensembler:
+    RouterEnsemblerConfig:
       type: "object"
       required:
         - type
