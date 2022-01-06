@@ -27,7 +27,7 @@ class Router(ApiObject):
                  environment_name: str,
                  monitoring_url: str,
                  status: str,
-                 config: Dict,
+                 config: Dict = None,
                  endpoint: str = None,
                  **kwargs):
         super(Router, self).__init__(**kwargs)
