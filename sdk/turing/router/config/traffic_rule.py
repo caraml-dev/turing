@@ -18,13 +18,13 @@ class TrafficRuleCondition:
                  operator: str,
                  values: List[str]):
         assert operator == "in"
-        self._field_source = field_source
+        self._field_source = FieldSource(field_source)
         self._field = field
         self._operator = operator
         self._values = values
 
     @property
-    def field_source(self) -> str:
+    def field_source(self) -> FieldSource:
         return self._field_source
 
     @property
@@ -39,45 +39,33 @@ class TrafficRuleCondition:
     def values(self) -> List[str]:
         return self._values
 
+    def to_open_api(self) -> OpenApiModel:
+        assert self.operator == "in"
+        return turing.generated.models.TrafficRuleCondition(
+            field_source=self.field_source.value,
+            field=self.field,
+            operator=self.operator,
+            values=self.values
+        )
 
-class Route:
+
+class TrafficRule:
     def __init__(self,
-                 id: str,
-                 type: str,
-                 endpoint: str,
-                 timeout: str,
-                 annotations: Dict = None):
-        self._id = id
-        self._type = type
-        self._endpoint = endpoint
-        self._timeout = timeout
-        self._annotations = annotations
+                 conditions: List[TrafficRuleCondition],
+                 routes: List[str]):
+        self._conditions = conditions
+        self._routes = routes
 
     @property
-    def id(self) -> str:
-        return self._id
+    def conditions(self) -> List[TrafficRuleCondition]:
+        return self._conditions
 
     @property
-    def type(self) -> str:
-        return self._type
-
-    @property
-    def endpoint(self) -> str:
-        return self._endpoint
-
-    @property
-    def timeout(self) -> str:
-        return self._timeout
-
-    @property
-    def annotations(self) -> Dict:
-        return self._annotations
+    def routes(self) -> List[str]:
+        return self._routes
 
     def to_open_api(self) -> OpenApiModel:
-        return turing.generated.models.Route(
-            id=self.id,
-            type=self.type,
-            endpoint=self.endpoint,
-            timeout=self.timeout,
-            annotations=self.annotations
+        return turing.generated.models.TrafficRule(
+            conditions=[traffic_rule_condition.to_open_api() for traffic_rule_condition in self.conditions],
+            routes=self.routes
         )
