@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 
 	"github.com/gojek/fiber"
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a
@@ -46,9 +48,12 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	}
 
 	// Get the experiment treatment
-	logger := log.WithContext(ctx)
+	turingReqID, _ := turingctx.GetRequestID(ctx)
+	options := runner.GetTreatmentOptions{
+		TuringRequestID: turingReqID,
+	}
 	expPlan, expErr := r.experimentEngine.
-		GetTreatmentForRequest(ctx, logger, req.Header(), req.Payload())
+		GetTreatmentForRequest(req.Header(), req.Payload(), options)
 
 	// Create experiment response object
 	experimentResponse := experiment.NewResponse(expPlan, expErr)

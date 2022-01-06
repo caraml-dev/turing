@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -19,16 +18,14 @@ func (c *rpcClient) Configure(cfg json.RawMessage) error {
 }
 
 func (c *rpcClient) GetTreatmentForRequest(
-	ctx context.Context,
-	log runner.Logger,
 	header http.Header,
 	payload []byte,
+	options runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
-	req := GetTreatmentRequest{
-		Context: ctx,
-		Logger:  log,
+	req := getTreatmentRequest{
 		Header:  header,
 		Payload: payload,
+		Options: options,
 	}
 	var resp runner.Treatment
 
@@ -49,10 +46,8 @@ func (s *rpcServer) Configure(cfg json.RawMessage, _ *interface{}) (err error) {
 	return s.Impl.Configure(cfg)
 }
 
-func (s *rpcServer) GetTreatmentForRequest(req *GetTreatmentRequest, resp *runner.Treatment) error {
-	treatment, err := s.Impl.GetTreatmentForRequest(
-		req.Context, req.Logger, req.Header, req.Payload,
-	)
+func (s *rpcServer) GetTreatmentForRequest(req *getTreatmentRequest, resp *runner.Treatment) error {
+	treatment, err := s.Impl.GetTreatmentForRequest(req.Header, req.Payload, req.Options)
 	if err != nil {
 		return err
 	}

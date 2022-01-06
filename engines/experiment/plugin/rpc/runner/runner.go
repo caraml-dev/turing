@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
@@ -15,11 +15,28 @@ type ConfigurableExperimentRunner interface {
 	runner.ExperimentRunner
 }
 
-// GetTreatmentRequest is a struct, used to pass the data required by
+func NewConfigurableExperimentRunner(
+	factory func(json.RawMessage) (runner.ExperimentRunner, error),
+) ConfigurableExperimentRunner {
+	return &configurableExperimentRunner{
+		factory: factory,
+	}
+}
+
+type configurableExperimentRunner struct {
+	runner.ExperimentRunner
+	factory func(cfg json.RawMessage) (runner.ExperimentRunner, error)
+}
+
+func (er *configurableExperimentRunner) Configure(cfg json.RawMessage) (err error) {
+	er.ExperimentRunner, err = er.factory(cfg)
+	return
+}
+
+// getTreatmentRequest is a struct, used to pass the data required by
 // ExperimentRunner.GetTreatmentForRequest() between RPC client and server
-type GetTreatmentRequest struct {
-	Context context.Context
-	Logger  runner.Logger
+type getTreatmentRequest struct {
 	Header  http.Header
 	Payload []byte
+	Options runner.GetTreatmentOptions
 }

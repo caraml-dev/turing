@@ -1,7 +1,6 @@
 package nop
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -15,10 +14,9 @@ type ExperimentRunner struct{}
 
 // GetTreatmentForRequest returns a dummy experiment treatment
 func (ExperimentRunner) GetTreatmentForRequest(
-	context.Context,
-	runner.Logger,
 	http.Header,
 	[]byte,
+	runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	return nopTreatment, nil
 }

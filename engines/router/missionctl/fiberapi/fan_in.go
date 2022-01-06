@@ -9,11 +9,12 @@ import (
 
 	"github.com/gojek/fiber"
 	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
-	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/opentracing/opentracing-go"
 )
@@ -65,9 +66,13 @@ func (fanIn *EnsemblingFanIn) Aggregate(
 	// Request for the experiment treatment and save it to expRespCh asynchronously
 	expRespCh := make(chan *experiment.Response, 1)
 	go func() {
-		logger := log.WithContext(ctx)
+		turingReqID, _ := turingctx.GetRequestID(ctx)
+		options := runner.GetTreatmentOptions{
+			TuringRequestID: turingReqID,
+		}
+
 		expPlan, expPlanErr := fanIn.experimentEngine.
-			GetTreatmentForRequest(ctx, logger, req.Header(), req.Payload())
+			GetTreatmentForRequest(req.Header(), req.Payload(), options)
 		// Write to channel
 		expRespCh <- experiment.NewResponse(expPlan, expPlanErr)
 		close(expRespCh)

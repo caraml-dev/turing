@@ -2,7 +2,6 @@
 package testutils
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -26,10 +25,9 @@ type MockExperimentRunner struct {
 // is initialized with TestTreatment.
 // If MockExperimentRunner.WantErr is true, GetTreatmentForRequest will return error.
 func (mp MockExperimentRunner) GetTreatmentForRequest(
-	ctx context.Context,
-	_ runner.Logger,
-	_ http.Header,
-	_ []byte,
+	http.Header,
+	[]byte,
+	runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	if mp.WantTimeout {
 		time.Sleep(mp.Timeout)
