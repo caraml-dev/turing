@@ -412,7 +412,7 @@ components:
       nullable: true
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
           readOnly: true
         name:
           type: "string"
@@ -704,7 +704,7 @@ components:
         - type
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
         type:
           description: "type of ensembler"
           type: "string"
@@ -833,7 +833,7 @@ components:
       type: "object"
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
           readOnly: true
         created_at:
           type: "string"
