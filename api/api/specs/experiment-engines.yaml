@@ -270,6 +270,23 @@ components:
         variables:
           $ref: "#/components/schemas/ExperimentVariables"
 
+    StandardExperimentConfig:
+      type: "object"
+      properties:
+        client:
+          $ref: "#/components/schemas/ExperimentClient"
+        experiments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Experiment"
+        variables:
+          $ref: "#/components/schemas/ExperimentVariables"
+
+    CustomExperimentConfig:
+      type: "object"
+      not:
+        $ref: "#/components/schemas/StandardExperimentConfig"
+
     ExperimentConfig:
       type: "object"
       required:
