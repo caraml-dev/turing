@@ -79,10 +79,13 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
-    outputs:
-      cluster-init-version: ${{ steps.build-image.outputs.cluster-init-version }}
     env:
+      CLUSTER_NAME: turing-e2e
+      ISTIO_VERSION: 1.9.9
+      KNATIVE_VERSION: v0.18.3
+      KNATIVE_ISTIO_VERSION: v0.18.1
       LOCAL_REGISTRY: registry.localhost:5000
+      CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
 
     steps:
       - name: Check out code
@@ -118,7 +121,6 @@ jobs:
       - name: Publish images to local registry
         env:
           DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
-          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           # Cluster init
           docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
@@ -128,8 +130,6 @@ jobs:
           docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
       - name: "Install Infrastructure"
-        env:
-          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           kubectl create ns infrastructure
           helm upgrade turing-init infra/charts/turing-init \
