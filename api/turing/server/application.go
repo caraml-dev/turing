@@ -126,7 +126,7 @@ func Run() {
 	if err != nil {
 		log.Panicf("failed to merge openapi yamls: %s", err)
 	}
-	ServeOpenAPIYAML(r, cfg.OpenapiConfig.YAMLServingURL, openAPISpecBytes)
+	ServeYAML(r, cfg.OpenapiConfig.YAMLServingPath, openAPISpecBytes)
 
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg, openAPISpecBytes)

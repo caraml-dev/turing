@@ -83,11 +83,16 @@ func ServeSinglePageApplication(r *mux.Router, path string, appDir string) {
 	r.PathPrefix(path).Handler(NewSinglePageApplicationHandler(path, appDir))
 }
 
-func ServeOpenAPIYAML(r *mux.Router, url string, openAPISpecBytes []byte) {
-	r.HandleFunc(url, func(w http.ResponseWriter, _ *http.Request) {
-		_, err := w.Write(openAPISpecBytes)
+func serveByteArray(r *mux.Router, path string, bytes []bytes, contentType string) {
+	r.HandleFunc(path, func(w http.ResponseWriter, _ *http.Request) {
+        w.Header().Set("Content-type", contentType)
+		_, err := w.Write(bytes)
 		if err != nil {
 			logger.Errorf("error writing openapi yaml: %s", err)
 		}
 	})
+}
+
+func ServeYAML(r *mux.Router, path string, bytes []byte) {
+    serveByteArray(r *mux.Router, path string, bytes []byte(), "application/x-yaml")
 }
