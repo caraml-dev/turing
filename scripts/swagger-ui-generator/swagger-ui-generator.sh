@@ -17,7 +17,7 @@ show_help() {
   cat <<EOF
 Usage: $(basename "$0") <options>
     -h, --help               Display help
-    -s, --spec-url          A file containing the API definition
+    -s, --spec-url           URL containing the API definition
     -o, --output             The output path for the generated Swagger UI files
     -v, --version            The Swagger-UI version to use (default: DEFAULT_SWAGGER_UI_VERSION)"
 EOF

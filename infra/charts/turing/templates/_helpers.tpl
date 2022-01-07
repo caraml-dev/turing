@@ -148,8 +148,10 @@ Experiment:
 {{ end }}
 {{ end }}
 {{ end }}
+{{- if .Values.turing.openApiSpecOverrides }}
 OpenapiConfig:
   SpecOverrideFile: /etc/openapi/override.yaml
+{{- end -}}
 {{- end -}}
 
 {{- define "turing.config" -}}

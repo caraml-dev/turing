@@ -1,3 +1,4 @@
+{{- if .Values.turing.openApiSpecOverrides }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,3 +7,4 @@ metadata:
 data:
   override.yaml: |
     {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
+{{- end }}
