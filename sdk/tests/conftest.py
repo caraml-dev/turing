@@ -244,18 +244,42 @@ def generic_route():
 
 
 @pytest.fixture
-def generic_field_source():
-    return turing.generated.models.FieldSource(random.choice(["header", "payload"]))
+def generic_traffic_rule_condition(generic_header_traffic_rule_condition, generic_payload_traffic_rule_condition):
+    field_source = random.choice(["header", "payload"])
+    if field_source == "header":
+        return generic_header_traffic_rule_condition
+    elif field_source == "payload":
+        return generic_payload_traffic_rule_condition
 
 
 @pytest.fixture
-def generic_traffic_rule_condition(generic_field_source):
+def generic_header_traffic_rule_condition():
     return turing.generated.models.TrafficRuleCondition(
-        field_source=generic_field_source,
-        field="taxi",
+        field_source=turing.generated.models.FieldSource("header"),
+        field="x-region",
         operator="in",
-        values=["departures", "arrivals"]
+        values=["region-a", "region-b"]
     )
+
+
+@pytest.fixture
+def generic_payload_traffic_rule_condition():
+    return turing.generated.models.TrafficRuleCondition(
+        field_source=turing.generated.models.FieldSource("payload"),
+        field="service_type.id",
+        operator="in",
+        values=["MyService", "YourService"]
+    )
+
+#
+# @pytest.fixture
+# def generic_traffic_rule_condition(generic_field_source):
+#     return turing.generated.models.TrafficRuleCondition(
+#         field_source=generic_field_source,
+#         field="taxi",
+#         operator="in",
+#         values=["departures", "arrivals"]
+#     )
 
 
 @pytest.fixture
