@@ -24,7 +24,7 @@ def test_create_route_with_valid_endpoint(id, endpoint, timeout, expected):
 
 @pytest.mark.parametrize(
     "id,endpoint,timeout,expected", [
-        (
+        pytest.param(
             "route_test_1",
             "http//test_this_route.com/",
             100,
