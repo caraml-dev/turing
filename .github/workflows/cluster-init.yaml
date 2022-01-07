@@ -177,7 +177,7 @@ jobs:
           timeout --foreground 120 bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
           kubectl get ksvc
 
-          curl --f http://helloworld-go.default.127.0.0.1.nip.io/
+          curl -f http://helloworld-go.default.127.0.0.1.nip.io/
           kubectl delete service helloworld-go 
       
       # Invoke helm hooks on delete
