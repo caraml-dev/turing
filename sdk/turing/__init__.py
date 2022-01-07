@@ -1,5 +1,6 @@
 from turing.ensembler import Ensembler, EnsemblerType, PyFuncEnsembler
 from turing.project import Project
+from turing.router import Router
 from turing.session import TuringSession
 from turing.version import VERSION as __version__
 

@@ -409,9 +409,10 @@ components:
   schemas:
     Router:
       type: "object"
+      nullable: true
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
           readOnly: true
         name:
           type: "string"
@@ -423,12 +424,13 @@ components:
           type: "string"
           format: "date-time"
           readOnly: true
-        project:
+        project_id:
           type: "integer"
         environment_name:
           type: "string"
         endpoint:
           type: "string"
+          readOnly: true
         monitoring_url:
           type: "string"
           readOnly: true
@@ -498,10 +500,16 @@ components:
         enricher:
           $ref: "#/components/schemas/Enricher"
         ensembler:
-          $ref: "#/components/schemas/Ensembler"
+          $ref: "#/components/schemas/RouterEnsemblerConfig"
         monitoring_url:
           type: "string"
           readOnly: true
+        default_route_id:
+          type: "string"
+        rules:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/TrafficRule"
 
     ResultLoggerType:
       type: "string"
@@ -586,7 +594,7 @@ components:
             enricher:
               $ref: "#/components/schemas/Enricher"
             ensembler:
-              $ref: "#/components/schemas/Ensembler"
+              $ref: "#/components/schemas/RouterEnsemblerConfig"
 
     Route:
       type: "object"
@@ -604,6 +612,9 @@ components:
           type: "string"
         timeout:
           type: "string"
+        annotations:
+          type: "object"
+          nullable: true
 
     TrafficRule:
       type: "object"
@@ -655,6 +666,8 @@ components:
         - port
         - env
       properties:
+        id:
+          $ref: "common.yaml#/components/schemas/Id"
         image:
           type: "string"
         resource_request:
@@ -676,12 +689,22 @@ components:
             JSON key. This secret will be mounted as a file inside the container and the environment variable
             GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: "secret-name-for-google-service-account"
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
 
-    Ensembler:
+    RouterEnsemblerConfig:
       type: "object"
       required:
         - type
       properties:
+        id:
+          $ref: "common.yaml#/components/schemas/Id"
         type:
           description: "type of ensembler"
           type: "string"
@@ -690,10 +713,19 @@ components:
           $ref: "#/components/schemas/EnsemblerStandardConfig"
         docker_config:
           $ref: "#/components/schemas/EnsemblerDockerConfig"
+        created_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
+        updated_at:
+          type: "string"
+          format: "date-time"
+          readOnly: true
 
     EnsemblerStandardConfig:
       description: "ensembler config when ensembler type is standard"
       type: "object"
+      nullable: true
       required:
         - "experiment_mappings"
       properties:
@@ -722,6 +754,7 @@ components:
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"
       type: "object"
+      nullable: true
       required:
         - image
         - resource_request
@@ -774,6 +807,9 @@ components:
           type: "string"
         service_account_secret:
           type: "string"
+        batch_load:
+          type: "boolean"
+          nullable: true
 
     KafkaConfig:
       type: "object"
@@ -797,7 +833,7 @@ components:
       type: "object"
       properties:
         id:
-          type: "integer"
+          $ref: "common.yaml#/components/schemas/Id"
           readOnly: true
         created_at:
           type: "string"

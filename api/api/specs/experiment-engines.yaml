@@ -286,7 +286,7 @@ components:
       type: "object"
       not:
         $ref: "#/components/schemas/StandardExperimentConfig"
-  
+
     ExperimentConfig:
       type: "object"
       required:
@@ -295,15 +295,11 @@ components:
         type:
           $ref: "#/components/schemas/ExperimentEngineType"
         config:
-          oneOf:
-            - $ref: "#/components/schemas/StandardExperimentConfig"
-            - $ref: "#/components/schemas/CustomExperimentConfig"
+          type: "object"
 
     # Enums
     ExperimentEngineType:
       type: "string"
-      enum:
-        - "nop"
       default: "nop"
 
     ExperimentManagerType:
