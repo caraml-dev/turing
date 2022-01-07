@@ -232,14 +232,10 @@ def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_c
 @pytest.fixture
 def generic_route():
     return turing.generated.models.Route(
-        id="route_1",
+        id="model-a",
         type="PROXY",
-        endpoint="http://models.internal/predict_1",
-        annotations={
-            "annotation_1": "value_1",
-            "annotation_2": ["value_2a", "value_2b"]
-        },
-        timeout="20ms"
+        endpoint="http://predict_this.io/model-a",
+        timeout="100ms"
     )
 
 
@@ -271,22 +267,14 @@ def generic_payload_traffic_rule_condition():
         values=["MyService", "YourService"]
     )
 
-#
-# @pytest.fixture
-# def generic_traffic_rule_condition(generic_field_source):
-#     return turing.generated.models.TrafficRuleCondition(
-#         field_source=generic_field_source,
-#         field="taxi",
-#         operator="in",
-#         values=["departures", "arrivals"]
-#     )
-
 
 @pytest.fixture
-def generic_traffic_rule(generic_traffic_rule_condition):
+def generic_traffic_rule(generic_header_traffic_rule_condition,
+                         generic_payload_traffic_rule_condition,
+                         generic_route):
     return turing.generated.models.TrafficRule(
-        conditions=[generic_traffic_rule_condition],
-        routes=["test"]
+        conditions=[generic_header_traffic_rule_condition, generic_payload_traffic_rule_condition],
+        routes=[generic_route.id]
     )
 
 
