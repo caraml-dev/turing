@@ -172,8 +172,7 @@ jobs:
 
 
           kubectl apply -f service.yaml
-          # kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.1.0/serving-default-domain.yaml
-          sleep 20
+          timeout --foreground 10s bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
           kubectl get ksvc
           curl -v http://helloworld-go.default.127.0.0.1.sslip.io
           kubectl delete service helloworld-go 
