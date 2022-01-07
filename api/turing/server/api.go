@@ -14,13 +14,7 @@ import (
 	"github.com/rs/cors"
 )
 
-func AddAPIRoutesHandler(
-	r *mux.Router,
-	path string,
-	appCtx *api.AppContext,
-	cfg *config.Config,
-	openAPISpecBytes []byte,
-) error {
+func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config) error {
 	apiRouter := r.PathPrefix(path).Subrouter().StrictSlash(true)
 
 	// Add Middleware
@@ -33,7 +27,7 @@ func AddAPIRoutesHandler(
 		apiRouter.Use(appCtx.Authorizer.Middleware)
 	}
 
-	openapiMiddleware, err := openapiValidationMiddleware(path, cfg, openAPISpecBytes)
+	openapiMiddleware, err := openapiValidationMiddleware(path, cfg)
 	if err != nil {
 		return err
 	}
@@ -75,11 +69,14 @@ func AddAPIRoutesHandler(
 func openapiValidationMiddleware(
 	apiPath string,
 	cfg *config.Config,
-	openAPISpecBytes []byte,
 ) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
+        spec, specErr := cfg.OpenapiConfig.SpecData()
+        if specErr != nil {
+            return nil, errors.Wrapf(specErr, "Failed to initialize OpenAPI Validation middleware")
+        }
 		openapiValidation, err := middleware.NewOpenAPIValidation(
-			openAPISpecBytes,
+            spec,
 			middleware.OpenAPIValidationOptions{
 				// Authentication is ignored because it is handled by another middleware
 				IgnoreAuthentication: true,

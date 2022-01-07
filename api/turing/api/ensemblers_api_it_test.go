@@ -168,7 +168,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 				MLPService:        mlpSvc,
 				EnsemblersService: ensemblerSvc,
 			}
-			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{}, make([]byte, 0))
+			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
 
 			actual := httptest.NewRecorder()
 

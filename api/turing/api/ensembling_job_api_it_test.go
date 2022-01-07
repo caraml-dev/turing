@@ -294,7 +294,6 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 						Enabled: true,
 					},
 				},
-				make([]byte, 0),
 			)
 
 			actual := httptest.NewRecorder()
@@ -371,7 +370,6 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 						Enabled: true,
 					},
 				},
-				make([]byte, 0),
 			)
 
 			actual := httptest.NewRecorder()
@@ -543,7 +541,6 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 						Enabled: true,
 					},
 				},
-				make([]byte, 0),
 			)
 
 			actual := httptest.NewRecorder()

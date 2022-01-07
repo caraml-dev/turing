@@ -11,6 +11,7 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/gojek/turing/api/turing/utils"
 	"github.com/mitchellh/mapstructure"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
@@ -346,6 +347,10 @@ type OpenapiConfig struct {
 	YAMLServingPath string
 	// Optional. Overrides the file before running the Swagger UI.
 	SpecOverrideFile *string
+}
+
+func (c * OpenapiConfig) SpecData() ([]byte, error) {
+  return utils.MergeTwoYamls(c.SpecFile, *c.SpecOverrideFile)
 }
 
 // Load creates a Config object from default config values, config files and environment variables.

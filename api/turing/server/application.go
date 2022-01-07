@@ -118,18 +118,14 @@ func Run() {
 	// HealthCheck Handler
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
-	// Override the bundle file with user specified overrides and serve files
-	openAPISpecBytes, err := utils.MergeTwoYamls(
-		cfg.OpenapiConfig.SpecFile,
-		*cfg.OpenapiConfig.SpecOverrideFile,
-	)
+	openAPISpecBytes, err := cfg.OpenapiConfig.SpecData()
 	if err != nil {
 		log.Panicf("failed to merge openapi yamls: %s", err)
 	}
 	ServeYAML(r, cfg.OpenapiConfig.YAMLServingPath, openAPISpecBytes)
 
 	// API Handler
-	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg, openAPISpecBytes)
+	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
 	if err != nil {
 		log.Panicf("Failed to configure API routes: %v", err)
 	}
