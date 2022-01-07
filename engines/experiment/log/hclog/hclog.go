@@ -6,20 +6,24 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
+// When this package is imported, the global logger is replaced with hcLogger,
+// which is recommended to be used in RPC plugins as it provides a structured
+// logging output in the host application, that calls the plugin implementation
 func init() {
 	log.SetGlobalLogger(newHCLogger())
 }
 
 func newHCLogger() log.Logger {
 	logger := hclog.New(&hclog.LoggerOptions{
-		Level:       hclog.Warn,
-		JSONFormat:  true,
-		DisableTime: true,
+		Level:      hclog.DefaultLevel,
+		JSONFormat: true,
 	})
 
 	return &hcLogger{logger}
 }
 
+// hcLogger implements log.Logger interface. The underlying implementation is
+// based on hashicorp/go-hclog logger
 type hcLogger struct {
 	hclog.Logger
 }
@@ -93,6 +97,6 @@ func (l *hcLogger) With(args ...interface{}) log.Logger {
 	return &hcLogger{l.Logger.With(args...)}
 }
 
-func (l *hcLogger) SetLevel(lvl log.Level) {
-	l.Logger.SetLevel(hclog.LevelFromString(lvl.String()))
+func (l *hcLogger) SetLevel(lvl string) {
+	l.Logger.SetLevel(hclog.LevelFromString(lvl))
 }

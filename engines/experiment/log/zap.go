@@ -25,10 +25,10 @@ func (l *zapLogger) With(args ...interface{}) Logger {
 	return &zapLogger{l.SugaredLogger.With(args...), l.cfg}
 }
 
-func (l *zapLogger) SetLevel(lvl Level) {
+func (l *zapLogger) SetLevel(lvl string) {
 	var zapLvl zapcore.Level
-	if err := zapLvl.UnmarshalText([]byte(lvl.String())); err != nil {
-		l.Warnf("failed to set %s log level: %v", lvl.String(), err)
+	if err := zapLvl.UnmarshalText([]byte(lvl)); err != nil {
+		l.Warnf("failed to set %s log level: %v", lvl, err)
 	} else {
 		l.cfg.Level = zap.NewAtomicLevelAt(zapLvl)
 	}
