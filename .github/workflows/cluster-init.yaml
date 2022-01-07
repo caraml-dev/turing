@@ -166,11 +166,13 @@ jobs:
                 containers:
                   - image: gcr.io/knative-samples/helloworld-go
                     env:
-                      - name: TARGET # The environment variable printed out by the sample app
-                        value: "Hello Knative Serving is up and running with Kourier!!"
+                      - name: TARGET
+                        value: "Hello Knative Serving is up and running!!"
           EOF
 
+
           kubectl apply -f service.yaml
+          kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.1.0/serving-default-domain.yaml
           kubectl get ksvc
           curl -v http://helloworld-go.default.127.0.0.1.sslip.io
           kubectl delete service helloworld-go 
