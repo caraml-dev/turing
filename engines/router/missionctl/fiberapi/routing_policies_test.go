@@ -2,14 +2,15 @@ package fiberapi
 
 import (
 	"encoding/json"
-	experimentrunner "github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	"testing"
 
-	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/gojek/turing/engines/experiment/runner/nop"
+	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
+
+	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
 )
 
 func TestNewRouteSelectionPolicy(t *testing.T) {
@@ -94,7 +95,7 @@ func TestNewExperimentationPolicy(t *testing.T) {
 				"experiment_engine": "Nop"
 			}`),
 			expectedPolicy: experimentationPolicy{
-				experimentEngine: experimentrunner.NewInterceptRunner(
+				experimentEngine: runner.NewInterceptRunner(
 					"Nop",
 					&nop.ExperimentRunner{},
 					&experiment.MetricsInterceptor{}),
