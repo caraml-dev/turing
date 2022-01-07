@@ -154,7 +154,7 @@ jobs:
 
       - name: Smoke Test
         run: |
-          cat > service.yaml <<EOF
+          cat <<EOF > service.yaml 
             apiVersion: serving.knative.dev/v1
             kind: Service
             metadata:
@@ -169,7 +169,7 @@ jobs:
                         - name: TARGET # The environment variable printed out by the sample app
                           value: "Hello Knative Serving is up and running with Kourier!!"
             EOF
-          kubectl apply --filename service.yaml
+          kubectl apply -f service.yaml
           kubectl get ksvc
           curl -v http://helloworld-go.default.127.0.0.1.sslip.io
           kubectl delete service helloworld-go 
