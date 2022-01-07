@@ -154,11 +154,25 @@ jobs:
 
       - name: Smoke Test
         run: |
-          kn service create hello \
-            --image gcr.io/knative-samples/helloworld-go \
-            --port 8080 
-          curl http://hello.default.127.0.0.1.sslip.io
-          kn service delete hello
+          cat > service.yaml <<EOF
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            metadata:
+              name: helloworld-go 
+              namespace: default
+            spec:
+              template:
+                spec:
+                  containers:
+                    - image: gcr.io/knative-samples/helloworld-go
+                      env:
+                        - name: TARGET # The environment variable printed out by the sample app
+                          value: "Hello Knative Serving is up and running with Kourier!!"
+            EOF
+          kubectl apply --filename service.yaml
+          kubectl get ksvc
+          curl -v http://helloworld-go.default.127.0.0.1.sslip.io
+          kubectl delete service helloworld-go 
       
       - name: Tear down infrastructure job
         run: helm delete --namespace infrastructure turing-init --timeout 15m
