@@ -154,6 +154,7 @@ jobs:
 
       - name: Smoke Test
         run: |
+          # Create hello world knative service
           tee service.yaml <<EOF 
           apiVersion: serving.knative.dev/v1
           kind: Service
@@ -170,12 +171,15 @@ jobs:
                         value: "Hello Knative Serving is up and running!!"
           EOF
 
-
           kubectl apply -f service.yaml
+
+          # wait till service is up
           timeout --foreground 120 bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
           kubectl get ksvc
-          curl -v http://helloworld-go.default.127.0.0.1.nip.io/
+
+          curl --f http://helloworld-go.default.127.0.0.1.nip.io/
           kubectl delete service helloworld-go 
       
+      # Invoke helm hooks on delete
       - name: Tear down infrastructure job
         run: helm delete --namespace infrastructure turing-init --timeout 15m

@@ -571,10 +571,6 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-      # Invoke helm hooks on delete
-      - name: Tear down infrastructure job
-        run: helm delete --namespace infrastructure turing-init --timeout 15m
-
   release-rules:
     runs-on: ubuntu-latest
     outputs:
