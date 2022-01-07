@@ -172,7 +172,7 @@ jobs:
 
 
           kubectl apply -f service.yaml
-          timeout --foreground 10s bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
+          timeout --foreground 120 bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
           kubectl get ksvc
           curl -v http://helloworld-go.default.127.0.0.1.sslip.io
           kubectl delete service helloworld-go 
