@@ -2,6 +2,7 @@ package hclog
 
 import (
 	"fmt"
+
 	"github.com/gojek/turing/engines/experiment/log"
 	"github.com/hashicorp/go-hclog"
 )

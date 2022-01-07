@@ -2,6 +2,8 @@ package fiberapi
 
 import (
 	"encoding/json"
+	experimentrunner "github.com/gojek/turing/engines/experiment/runner"
+	"github.com/gojek/turing/engines/router/missionctl/experiment"
 	"testing"
 
 	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
@@ -92,7 +94,10 @@ func TestNewExperimentationPolicy(t *testing.T) {
 				"experiment_engine": "Nop"
 			}`),
 			expectedPolicy: experimentationPolicy{
-				experimentEngine: &nop.ExperimentRunner{},
+				experimentEngine: experimentrunner.NewInterceptRunner(
+					"Nop",
+					&nop.ExperimentRunner{},
+					&experiment.MetricsInterceptor{}),
 			},
 			success: true,
 		},
@@ -115,7 +120,7 @@ func TestNewExperimentationPolicy(t *testing.T) {
 			actual, err := newExperimentationPolicy(data.props)
 			assert.Equal(t, data.success, err == nil)
 			if data.success {
-				tu.FailOnError(t, tu.CompareObjects(*actual, data.expectedPolicy))
+				assert.Equal(t, data.expectedPolicy, *actual)
 			} else {
 				tu.FailOnNil(t, err)
 				assert.Equal(t, data.err, err.Error())
