@@ -107,6 +107,7 @@ jobs:
       - name: Publish images to local registry
         env:
           DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
+          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           # Cluster init
           docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
@@ -127,6 +128,8 @@ jobs:
             --k3s-server-arg "--no-deploy=traefik,metrics-server"
 
       - name: "Install Infrastructure"
+        env:
+          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           kubectl create ns infrastructure
           helm upgrade turing-init infra/charts/turing-init \
