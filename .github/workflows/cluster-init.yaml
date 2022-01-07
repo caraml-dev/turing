@@ -79,6 +79,8 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
+    outputs:
+      cluster-init-version: ${{ steps.build-image.outputs.cluster-init-version }}
     env:
       LOCAL_REGISTRY: registry.localhost:5000
 
@@ -96,10 +98,15 @@ jobs:
           make build-image | tee output.log
           echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
 
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
+            cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
+
       - name: Publish images to local registry
         env:
           DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
-          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           # Cluster init
           docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
@@ -120,8 +127,6 @@ jobs:
             --k3s-server-arg "--no-deploy=traefik,metrics-server"
 
       - name: "Install Infrastructure"
-        env:
-          CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
           kubectl create ns infrastructure
           helm upgrade turing-init infra/charts/turing-init \
