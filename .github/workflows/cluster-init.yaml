@@ -129,7 +129,7 @@ jobs:
             ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: "Install Infrastructure"
+      - name: Install Infrastructure
         env:
           CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
         run: |
@@ -151,6 +151,14 @@ jobs:
           kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-spark-operator-webhook-init
           # Might fail the first time but the 2nd run should work, rarely fails on the first try though.
           kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-init
+
+      - name: Smoke Test
+        run: |
+          kn service create hello \
+            --image gcr.io/knative-samples/helloworld-go \
+            --port 8080 
+          curl http://hello.default.127.0.0.1.sslip.io
+          kn service delete hello
       
       - name: Tear down infrastructure job
         run: helm delete --namespace infrastructure turing-init --timeout 15m
