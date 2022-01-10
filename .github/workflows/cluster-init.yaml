@@ -93,6 +93,8 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
+    needs:
+      - cluster-init
     steps:
       - name: Smoke Test
         run: |
