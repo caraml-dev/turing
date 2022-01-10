@@ -23,14 +23,14 @@ def test_create_field_source(field_source, expected):
 @pytest.mark.parametrize(
     "field_source,field,operator,values,expected", [
         pytest.param(
-            "header",
+            turing.router.config.traffic_rule.FieldSource.HEADER,
             "x-region",
             "in",
             ["region-a", "region-b"],
             "generic_header_traffic_rule_condition"
         ),
         pytest.param(
-            "payload",
+            turing.router.config.traffic_rule.FieldSource.PAYLOAD,
             "service_type.id",
             "in",
             ["MyService", "YourService"],
@@ -50,7 +50,7 @@ def test_create_traffic_rule_condition(field_source, field, operator, values, ex
 @pytest.mark.parametrize(
     "field_source,field,operator,values,expected", [
         pytest.param(
-            "header",
+            turing.router.config.traffic_rule.FieldSource.HEADER,
             "x-region",
             "looks_like",
             ["region-a", "region-b"],

@@ -18,14 +18,14 @@ class FieldSource(Enum):
 
 class TrafficRuleCondition:
     def __init__(self,
-                 field_source: str,
+                 field_source: FieldSource,
                  field: str,
                  operator: str,
                  values: List[str]):
         """
         Method to create a new TrafficRuleCondition
 
-        :param field_source: the source of the field specified (either 'header' or 'payload')
+        :param field_source: the source of the field specified
         :param field: name of the field specified
         :param operator: name of the operator (fixed as 'in')
         :param values: values that are supposed to match those found in the field
@@ -35,7 +35,7 @@ class TrafficRuleCondition:
         except AssertionError:
             raise InvalidOperatorException(f"Invalid operator passed: {operator}")
 
-        self._field_source = FieldSource(field_source)
+        self._field_source = field_source
         self._field = field
         self._operator = operator
         self._values = values
@@ -79,7 +79,7 @@ class HeaderTrafficRuleCondition(TrafficRuleCondition):
         :param field: name of the field specified
         :param values: values that are supposed to match those found in the field
         """
-        super().__init__(field_source="header", field=field, operator="in", values=values)
+        super().__init__(field_source=FieldSource.HEADER, field=field, operator="in", values=values)
 
 
 class PayloadTrafficRuleCondition(TrafficRuleCondition):
@@ -92,7 +92,7 @@ class PayloadTrafficRuleCondition(TrafficRuleCondition):
         :param field: name of the field specified
         :param values: values that are supposed to match those found in the field
         """
-        super().__init__(field_source="payload", field=field, operator="in", values=values)
+        super().__init__(field_source=FieldSource.PAYLOAD, field=field, operator="in", values=values)
 
 
 class TrafficRule:
