@@ -34,7 +34,7 @@ runs:
     - name: "Setup local k8s cluster"
       uses: AbsaOSS/k3d-action@v1.5.0
       with:
-        cluster-name: ${{ input.cluster_name }}
+        cluster-name: ${{ inputs.cluster_name }}
         use-default-registry: true
         args: >-
           --servers 1
@@ -60,7 +60,7 @@ runs:
 
     - name: Publish images to local registry
       env:
-        DOCKER_REPOSITORY: ${{ input.local_registry }}/${{ github.repository }}
+        DOCKER_REPOSITORY: ${{ inputs.local_registry }}/${{ github.repository }}
         CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
       shell: bash
       run: |
@@ -79,11 +79,11 @@ runs:
         kubectl create ns infrastructure
         helm upgrade turing-init infra/charts/turing-init \
           --namespace infrastructure \
-          --set image.registry=${{ input.local_registry }}/ \
+          --set image.registry=${{ inputs.local_registry }}/ \
           --set image.repository=${{ github.repository }}/cluster-init \
           --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
           --set knative.domains="127.0.0.1.nip.io" \
-          --set knative.registriesSkippingTagResolving=${{ input.local_registry }} \
+          --set knative.registriesSkippingTagResolving=${{ inputs.local_registry }} \
           --install \
           --wait
 
