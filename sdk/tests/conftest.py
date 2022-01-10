@@ -202,16 +202,16 @@ def generic_result_logger_type():
 @pytest.fixture
 def generic_bigquery_config():
     return turing.generated.models.BigQueryConfig(
-        table="bigquerytable",
-        service_account_secret="abc123"
+        table="bigqueryproject.bigquerydataset.bigquerytable",
+        service_account_secret="my-little-secret"
     )
 
 
 @pytest.fixture
 def generic_kafka_config():
     return turing.generated.models.KafkaConfig(
-        brokers="1.1.1.1,2.2.2.2,3.3.3.3",
-        topic="new",
+        brokers="1.2.3.4:5678,9.0.1.2:3456",
+        topic="new_topics",
         serialization_format=random.choice(["json", "protobuf"])
     )
 
