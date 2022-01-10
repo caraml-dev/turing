@@ -2,7 +2,7 @@ import abc
 from enum import Enum
 from collections import Counter
 
-from typing import Iterable, MutableMapping, Optional, Dict, List
+from typing import List
 import turing.generated.models
 from turing.router.config.route import Route
 from turing.generated.model_utils import OpenApiModel
@@ -22,6 +22,14 @@ class TrafficRuleCondition:
                  field: str,
                  operator: str,
                  values: List[str]):
+        """
+        Method to create a new TrafficRuleCondition
+
+        :param field_source: the source of the field specified (either 'header' or 'payload')
+        :param field: name of the field specified
+        :param operator: name of the operator (fixed as 'in')
+        :param values: values that are supposed to match those found in the field
+        """
         try:
             assert operator == "in"
         except AssertionError:
@@ -65,6 +73,12 @@ class HeaderTrafficRuleCondition(TrafficRuleCondition):
     def __init__(self,
                  field: str,
                  values: List[str]):
+        """
+        Method to create a new TrafficRuleCondition that is defined on a request header
+
+        :param field: name of the field specified
+        :param values: values that are supposed to match those found in the field
+        """
         super().__init__(field_source="header", field=field, operator="in", values=values)
 
 
@@ -72,6 +86,12 @@ class PayloadTrafficRuleCondition(TrafficRuleCondition):
     def __init__(self,
                  field: str,
                  values: List[str]):
+        """
+        Method to create a new TrafficRuleCondition that is defined on a request payload
+
+        :param field: name of the field specified
+        :param values: values that are supposed to match those found in the field
+        """
         super().__init__(field_source="payload", field=field, operator="in", values=values)
 
 
@@ -79,6 +99,12 @@ class TrafficRule:
     def __init__(self,
                  conditions: List[TrafficRuleCondition],
                  routes: List[Route]):
+        """
+        Method to create a new TrafficRule based on a list of conditions and routes
+
+        :param conditions: list of TrafficRuleConditions that need to ALL be satisfied before routing to the given routes
+        :param routes: list of routes to send the request to should all the given conditions be met
+        """
         self._conditions = conditions
         self._routes = routes
 
