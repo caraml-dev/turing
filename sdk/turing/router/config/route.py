@@ -15,8 +15,7 @@ class Route:
         :param endpoint: endpoint of the route. Must be a valid URL
         :param timeout: timeout indicating the duration past which the request execution will end
         """
-        if not Route.is_valid_url(endpoint):
-            raise InvalidUrlException(f"Invalid url entered: {endpoint}")
+        Route._verify_endpoint(endpoint)
 
         timeout_string = str(timeout) + "ms"
 
@@ -32,19 +31,24 @@ class Route:
     def endpoint(self) -> str:
         return self._endpoint
 
+    @endpoint.setter
+    def endpoint(self, endpoint):
+        Route._verify_endpoint(endpoint)
+        self._endpoint = endpoint
+
     @property
     def timeout(self) -> str:
         return self._timeout
 
     @classmethod
-    def is_valid_url(cls, url):
+    def _verify_endpoint(cls, endpoint):
         """Rudimentary url checker """
-        parse_result = urlparse(url)
+        parse_result = urlparse(endpoint)
 
         if parse_result.scheme and parse_result.netloc:
-            return True
+            return
         else:
-            return False
+            raise InvalidUrlException(f"Invalid url entered: {endpoint}")
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.Route(
