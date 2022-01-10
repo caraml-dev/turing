@@ -45,12 +45,14 @@ runs:
     - name: Build Docker image
       id: build-image
       working-directory: infra/cluster-init
+      shell: bash
       run: |
         set -o pipefail
         make build-image | tee output.log
         echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
 
     - name: Save Docker image
+      shell: bash
       run: |
         docker image save \
           --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
@@ -60,6 +62,7 @@ runs:
       env:
         DOCKER_REPOSITORY: ${{ local.local_registry }}/${{ github.repository }}
         CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
+      shell: bash
       run: |
         # Cluster init
         docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
@@ -71,6 +74,7 @@ runs:
     - name: Install Infrastructure
       env:
         CLUSTER_INIT_VERSION: ${{ steps.build-image.outputs.cluster-init-version }}
+      shell: bash
       run: |
         kubectl create ns infrastructure
         helm upgrade turing-init infra/charts/turing-init \
