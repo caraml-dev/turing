@@ -163,6 +163,62 @@ def test_create_resource_request_with_invalid_memory_request_string(
 @pytest.mark.parametrize(
     "min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            2,
+            3,
+            "100m",
+            "512Mi",
+            "generic_resource_request"
+        )
+    ])
+def test_create_resource_request_with_valid_min_replica(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request,
+        expected,
+        request
+):
+    actual = turing.router.config.resource_request.ResourceRequest(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request
+    )
+    actual.min_replica = 1
+    assert actual.to_open_api() == request.getfixturevalue(expected)
+
+
+@pytest.mark.parametrize(
+    "min_replica,max_replica,cpu_request,memory_request,expected", [
+        pytest.param(
+            1,
+            6,
+            "100m",
+            "512Mi",
+            "generic_resource_request"
+        )
+    ])
+def test_create_resource_request_with_valid_max_replica(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request,
+        expected,
+        request
+):
+    actual = turing.router.config.resource_request.ResourceRequest(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request
+    )
+    actual.max_replica = 3
+    assert actual.to_open_api() == request.getfixturevalue(expected)
+
+
+@pytest.mark.parametrize(
+    "min_replica,max_replica,cpu_request,memory_request,expected", [
+        pytest.param(
             1,
             3,
             "100m",
@@ -273,6 +329,34 @@ def test_set_resource_request_with_max_replica_below_min_replica(
         pytest.param(
             1,
             3,
+            "150m",
+            "512Mi",
+            "generic_resource_request"
+        )
+    ])
+def test_create_resource_request_with_valid_cpu_request(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request,
+        expected,
+        request
+):
+    actual = turing.router.config.resource_request.ResourceRequest(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request
+    )
+    actual.cpu_request = "100m"
+    assert actual.to_open_api() == request.getfixturevalue(expected)
+
+
+@pytest.mark.parametrize(
+    "min_replica,max_replica,cpu_request,memory_request,expected", [
+        pytest.param(
+            1,
+            3,
             "100m",
             "512Mi",
             turing.router.config.resource_request.InvalidCPURequestException
@@ -293,6 +377,34 @@ def test_set_resource_request_with_invalid_cpu_request_string(
     )
     with pytest.raises(expected):
         actual.cpu_request = "3m"
+
+
+@pytest.mark.parametrize(
+    "min_replica,max_replica,cpu_request,memory_request,expected", [
+        pytest.param(
+            1,
+            3,
+            "100m",
+            "512Ki",
+            "generic_resource_request"
+        )
+    ])
+def test_create_resource_request_with_valid_memory_request(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request,
+        expected,
+        request
+):
+    actual = turing.router.config.resource_request.ResourceRequest(
+        min_replica,
+        max_replica,
+        cpu_request,
+        memory_request
+    )
+    actual.memory_request = "512Mi"
+    assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
