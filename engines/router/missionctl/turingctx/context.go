@@ -24,12 +24,6 @@ func NewTuringContext(parent context.Context) context.Context {
 	return context.WithValue(parent, turingReqIDKey, reqID.String())
 }
 
-// NewTestTuringContext returns a context for testing, with the Turing Request ID set to
-// the given value
-func NewTestTuringContext(parent context.Context, turingReqID string) context.Context {
-	return context.WithValue(parent, turingReqIDKey, turingReqID)
-}
-
 // NewTuringContextWithSuffix returns a context for batch request, with the Turing Request ID set to
 // with the given suffix and initial request context set as parent
 func NewTuringContextWithSuffix(parent context.Context, suffix string) context.Context {

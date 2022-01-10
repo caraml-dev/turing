@@ -1,15 +1,15 @@
 package nop
 
 import (
-	"context"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTreatmentForRequest(t *testing.T) {
-	runner := ExperimentRunner{}
-	treatment, err := runner.GetTreatmentForRequest(context.Background(), nil, nil, nil)
+	expRunner := ExperimentRunner{}
+	treatment, err := expRunner.GetTreatmentForRequest(nil, nil, runner.GetTreatmentOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, nopTreatment, treatment)
 }

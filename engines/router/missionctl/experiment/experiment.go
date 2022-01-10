@@ -19,7 +19,17 @@ func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.Experi
 		return nil, err
 	}
 
-	return factory.GetExperimentRunner()
+	engine, err := factory.GetExperimentRunner()
+	if err != nil {
+		return nil, err
+	}
+
+	interceptors := []runner.Interceptor{
+		NewMetricsInterceptor(),
+	}
+
+	return runner.NewInterceptRunner(name, engine, interceptors...), nil
+
 }
 
 // Response holds the experiment configuration / error response,

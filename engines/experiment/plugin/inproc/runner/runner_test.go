@@ -1,7 +1,6 @@
 package runner_test
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"reflect"
@@ -21,9 +20,8 @@ func newFakeRunner(config json.RawMessage) (runner.ExperimentRunner, error) {
 }
 
 func (runner fakeRunner) GetTreatmentForRequest(
-	context.Context,
-	runner.Logger,
-	http.Header, []byte) (*runner.Treatment, error) {
+	http.Header, []byte, runner.GetTreatmentOptions,
+) (*runner.Treatment, error) {
 	return nil, nil
 }
 

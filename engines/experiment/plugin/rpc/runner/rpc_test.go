@@ -71,7 +71,7 @@ func TestRpcClient_GetTreatmentForRequest(t *testing.T) {
 				})
 
 			rpcClient := rpcClient{RPCClient: mockClient}
-			actual, err := rpcClient.GetTreatmentForRequest(req.Context, req.Logger, req.Header, req.Payload)
+			actual, err := rpcClient.GetTreatmentForRequest(req.Header, req.Payload, req.Options)
 			if tt.err != "" {
 				assert.EqualError(t, err, tt.err)
 				assert.Nil(t, actual)
@@ -107,7 +107,7 @@ func TestRpcServer_GetTreatmentForRequest(t *testing.T) {
 			mockManager := &mockExperimentRunner{}
 			mockManager.On(
 				"GetTreatmentForRequest",
-				mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+				mock.Anything, mock.Anything, mock.Anything,
 			).Return(tt.expected, tt.err)
 			rpcServer := &rpcServer{mockManager}
 
