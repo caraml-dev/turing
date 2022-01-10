@@ -11,10 +11,10 @@ class ResourceRequest:
         """
         Method to create a new ResourceRequest object
 
-        :param min_replica: min number of replicas for the deployed router
-        :param max_replica: max number of replicas for the deployed router
-        :param cpu_request: total amount of CPU available for the router
-        :param memory_request: total amount of RAM available for the router
+        :param min_replica: min number of replicas available
+        :param max_replica: max number of replicas available
+        :param cpu_request: total amount of CPU available
+        :param memory_request: total amount of RAM available
         """
         ResourceRequest._verify_min_max_replica(min_replica, max_replica)
         ResourceRequest._verify_cpu_request(cpu_request)
