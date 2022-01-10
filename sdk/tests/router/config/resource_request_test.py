@@ -161,8 +161,9 @@ def test_create_resource_request_with_invalid_memory_request_string(
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_min_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            1,
             2,
             3,
             "100m",
@@ -171,6 +172,7 @@ def test_create_resource_request_with_invalid_memory_request_string(
         )
     ])
 def test_create_resource_request_with_valid_min_replica(
+        new_min_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -184,13 +186,14 @@ def test_create_resource_request_with_valid_min_replica(
         cpu_request,
         memory_request
     )
-    actual.min_replica = 1
+    actual.min_replica = new_min_replica
     assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_max_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            3,
             1,
             6,
             "100m",
@@ -199,6 +202,7 @@ def test_create_resource_request_with_valid_min_replica(
         )
     ])
 def test_create_resource_request_with_valid_max_replica(
+        new_max_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -212,13 +216,14 @@ def test_create_resource_request_with_valid_max_replica(
         cpu_request,
         memory_request
     )
-    actual.max_replica = 3
+    actual.max_replica = new_max_replica
     assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_min_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            -1,
             1,
             3,
             "100m",
@@ -227,6 +232,7 @@ def test_create_resource_request_with_valid_max_replica(
         )
     ])
 def test_set_resource_request_with_min_replica_below_min_allowed(
+        new_min_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -240,12 +246,13 @@ def test_set_resource_request_with_min_replica_below_min_allowed(
         memory_request
     )
     with pytest.raises(expected):
-        actual.min_replica = -1
+        actual.min_replica = new_min_replica
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_max_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            50,
             1,
             3,
             "100m",
@@ -254,6 +261,7 @@ def test_set_resource_request_with_min_replica_below_min_allowed(
         )
     ])
 def test_set_resource_request_with_max_replica_above_max_allowed(
+        new_max_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -267,12 +275,13 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
         memory_request
     )
     with pytest.raises(expected):
-        actual.max_replica = 50
+        actual.max_replica = new_max_replica
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_min_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            3,
             1,
             3,
             "100m",
@@ -281,6 +290,7 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
         )
     ])
 def test_set_resource_request_with_min_replica_geq_max_replica(
+        new_min_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -294,12 +304,13 @@ def test_set_resource_request_with_min_replica_geq_max_replica(
         memory_request
     )
     with pytest.raises(expected):
-        actual.min_replica = 3
+        actual.min_replica = new_min_replica
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_max_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            4,
             5,
             10,
             "100m",
@@ -308,6 +319,7 @@ def test_set_resource_request_with_min_replica_geq_max_replica(
         )
     ])
 def test_set_resource_request_with_max_replica_below_min_replica(
+        new_max_replica,
         min_replica,
         max_replica,
         cpu_request,
@@ -321,12 +333,13 @@ def test_set_resource_request_with_max_replica_below_min_replica(
         memory_request
     )
     with pytest.raises(expected):
-        actual.max_replica = 4
+        actual.max_replica = new_max_replica
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_cpu_request,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            "100m",
             1,
             3,
             "150m",
@@ -335,6 +348,7 @@ def test_set_resource_request_with_max_replica_below_min_replica(
         )
     ])
 def test_create_resource_request_with_valid_cpu_request(
+        new_cpu_request,
         min_replica,
         max_replica,
         cpu_request,
@@ -348,13 +362,14 @@ def test_create_resource_request_with_valid_cpu_request(
         cpu_request,
         memory_request
     )
-    actual.cpu_request = "100m"
+    actual.cpu_request = new_cpu_request
     assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_cpu_request,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            "3m",
             1,
             3,
             "100m",
@@ -363,6 +378,7 @@ def test_create_resource_request_with_valid_cpu_request(
         )
     ])
 def test_set_resource_request_with_invalid_cpu_request_string(
+        new_cpu_request,
         min_replica,
         max_replica,
         cpu_request,
@@ -376,12 +392,13 @@ def test_set_resource_request_with_invalid_cpu_request_string(
         memory_request
     )
     with pytest.raises(expected):
-        actual.cpu_request = "3m"
+        actual.cpu_request = new_cpu_request
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_memory_request, min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            "512Mi",
             1,
             3,
             "100m",
@@ -390,6 +407,7 @@ def test_set_resource_request_with_invalid_cpu_request_string(
         )
     ])
 def test_create_resource_request_with_valid_memory_request(
+        new_memory_request,
         min_replica,
         max_replica,
         cpu_request,
@@ -403,13 +421,14 @@ def test_create_resource_request_with_valid_memory_request(
         cpu_request,
         memory_request
     )
-    actual.memory_request = "512Mi"
+    actual.memory_request = new_memory_request
     assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "min_replica,max_replica,cpu_request,memory_request,expected", [
+    "new_memory_request,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
+            "512Ri",
             1,
             3,
             "100m",
@@ -418,6 +437,7 @@ def test_create_resource_request_with_valid_memory_request(
         )
     ])
 def test_set_resource_request_with_invalid_memory_request_string(
+        new_memory_request,
         min_replica,
         max_replica,
         cpu_request,
@@ -431,4 +451,4 @@ def test_set_resource_request_with_invalid_memory_request_string(
         memory_request
     )
     with pytest.raises(expected):
-        actual.memory_request = "512Ri"
+        actual.memory_request = new_memory_request
