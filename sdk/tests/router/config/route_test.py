@@ -6,8 +6,8 @@ import pytest
 @pytest.mark.parametrize(
     "id,endpoint,timeout,expected", [
         pytest.param(
-            "route_test_1",
-            "https://test_this_route.com/",
+            "model-a",
+            "http://predict_this.io/model-a",
             100,
             "generic_route"
         )

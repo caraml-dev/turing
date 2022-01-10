@@ -232,9 +232,9 @@ def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_c
 @pytest.fixture
 def generic_route():
     return turing.generated.models.Route(
-        id="route_test_1",
+        id="model-a",
         type="PROXY",
-        endpoint="https://test_this_route.com/",
+        endpoint="http://predict_this.io/model-a",
         timeout="100ms"
     )
 
