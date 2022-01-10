@@ -182,9 +182,9 @@ def generic_router_version_status():
 @pytest.fixture
 def generic_resource_request():
     return turing.generated.models.ResourceRequest(
-        min_replica=0,
-        max_replica=2,
-        cpu_request='500m',
+        min_replica=1,
+        max_replica=3,
+        cpu_request='100m',
         memory_request='512Mi'
     )
 
@@ -232,9 +232,9 @@ def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_c
 @pytest.fixture
 def generic_route():
     return turing.generated.models.Route(
-        id="model-a",
+        id="route_test_1",
         type="PROXY",
-        endpoint="http://predict_this.io/model-a",
+        endpoint="https://test_this_route.com/",
         timeout="100ms"
     )
 

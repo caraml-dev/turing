@@ -9,17 +9,12 @@ import pytest
             "route_test_1",
             "https://test_this_route.com/",
             100,
-            turing.generated.models.Route(
-                id="route_test_1",
-                type="PROXY",
-                endpoint="https://test_this_route.com/",
-                timeout="100ms"
-            )
+            "generic_route"
         )
     ])
-def test_create_route_with_valid_endpoint(id, endpoint, timeout, expected):
+def test_create_route_with_valid_endpoint(id, endpoint, timeout, expected, request):
     actual = turing.router.config.route.Route(id, endpoint, timeout).to_open_api()
-    assert actual == expected
+    assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
