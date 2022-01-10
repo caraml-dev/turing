@@ -78,7 +78,7 @@ jobs:
         run: docker push ${{ steps.build.outputs.cluster-init-image }}
 
 
-  cluster-init:
+  test-e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -90,12 +90,7 @@ jobs:
           knative_version: v0.18.3
           knative_istio_version: v0.18.1
           local_registry: registry.localhost:5000
-
-  test-e2e:
-    runs-on: ubuntu-latest
-    needs:
-      - cluster-init
-    steps:
+          
       - name: Smoke Test
         run: |
           # Create hello world knative service
