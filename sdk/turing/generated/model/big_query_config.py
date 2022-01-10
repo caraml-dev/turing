@@ -59,7 +59,7 @@ class BigQueryConfig(ModelNormal):
 
     additional_properties_type = None
 
-    _nullable = False
+    _nullable = True
 
     @cached_property
     def openapi_types():
