@@ -392,9 +392,10 @@ jobs:
           knative_version: ${{ env.KNATIVE_VERSION}}
           knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
           local_registry: ${{ env.LOCAL_REGISTRY}}
+          build-image: false
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: Publish images to local registry
+      - name: Publish Turing images to local registry
         env:
           DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
         run: |
@@ -411,13 +412,6 @@ jobs:
             turing-router:${{ env.TURING_ROUTER_VERSION }} \
             ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
-
-          # Cluster init
-          docker image load --input cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-          docker tag \
-            cluster-init:${{ env.CLUSTER_INIT_VERSION }} \
-            ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
-          docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
       - name: "Install Vault"
         if: ${{ !matrix.useInClusterConfig }}

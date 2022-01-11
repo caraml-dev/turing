@@ -81,7 +81,9 @@ jobs:
   test-e2e:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
+        
       - uses: ./.github/actions/cluster-init
         with:
           cluster_name: turing-e2e

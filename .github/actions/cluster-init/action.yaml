@@ -28,18 +28,13 @@ inputs:
     default: false
   cluster_init_version:
     required: false
-    description: '(Optional) Required if build_image is false, Version of cluster to install'
+    description: '(Optional) Required if build_image is false, Version of cluster to install  '
     default: ''
 
   
 runs:
   using: composite
   steps:
-    - name: Check out code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    
     - name: "Setup local k8s cluster"
       uses: AbsaOSS/k3d-action@v1.5.0
       with:
