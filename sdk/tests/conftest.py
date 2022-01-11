@@ -330,6 +330,26 @@ def ensembler(request, generic_ensembler_standard_config, generic_ensembler_dock
     )
 
 
+@pytest.fixture
+def generic_standard_router_ensembler_config(generic_ensembler_standard_config):
+    return turing.generated.models.RouterEnsemblerConfig(
+        id=1,
+        type="standard",
+        standard_config=generic_ensembler_standard_config,
+        docker_config=None
+    )
+
+
+@pytest.fixture
+def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
+    return turing.generated.models.RouterEnsemblerConfig(
+        id=1,
+        type="docker",
+        standard_config=None,
+        docker_config=generic_ensembler_docker_config
+    )
+
+
 @pytest.fixture(params=["nop", "random_engine"])
 def experiment_config(request):
     experiment_type = request.param
