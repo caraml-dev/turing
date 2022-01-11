@@ -386,7 +386,8 @@ jobs:
         with:
           go-version: "1.14"
 
-      - uses: ./.github/actions/cluster-init
+      - name: Run action cluster-init
+        uses: ./.github/actions/cluster-init
         with:
           cluster_name: ${{ env.CLUSTER_NAME}}
           istio_version: ${{ env.ISTIO_VERSION}}
@@ -471,7 +472,8 @@ jobs:
         run: |
           kubectl apply -f infra/e2e/turing.mockserver.yaml
 
-      - uses: jupyterhub/action-k8s-await-workloads@v1
+      - name: Run action await k8 workloads
+        uses: jupyterhub/action-k8s-await-workloads@v1
         id: wait-for-deployment
         with:
           workloads: >-
