@@ -17,6 +17,18 @@ class Enricher:
                  port: int,
                  env: List['EnvVar'],
                  service_account: str = None):
+        """
+        Method to create a new Enricher
+
+        :param id: id of the enricher
+        :param image: registry and name of the image
+        :param resource_request: ResourceRequest instance containing configs related to the resources required
+        :param endpoint: endpoint URL of the enricher
+        :param timeout: request timeout which when exceeded, the request to the enricher will be terminated
+        :param port: port number exposed by the container
+        :param env: environment variables required by the container
+        :param service_account: optional service account for the Docker deployment
+        """
         self.id = id
         self.image = image
         self.resource_request = resource_request

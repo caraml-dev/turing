@@ -1,4 +1,3 @@
-import re
 import turing.generated.models
 from typing import List, Dict
 from turing.generated.model_utils import OpenApiModel
@@ -86,6 +85,8 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param resource_request: ResourceRequest instance containing configs related to the resources required
         :param endpoint: endpoint URL of the ensembler
         :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
+        :param port: port number exposed by the container
+        :param env: environment variables required by the container
         :param service_account: optional service account for the Docker deployment
         """
         self.image = image
