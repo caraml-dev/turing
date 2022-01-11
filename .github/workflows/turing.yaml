@@ -418,26 +418,6 @@ jobs:
             ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
-        run: |
-          kubectl create ns infrastructure
-          helm upgrade turing-init infra/charts/turing-init \
-            --namespace infrastructure \
-            --set image.registry=${{ env.LOCAL_REGISTRY }}/ \
-            --set image.repository=${{ github.repository }}/cluster-init \
-            --set image.tag=${{ env.CLUSTER_INIT_VERSION }} \
-            --set knative.domains="127.0.0.1.nip.io" \
-            --set knative.registriesSkippingTagResolving=${{ env.LOCAL_REGISTRY }} \
-            --install \
-            --wait
-
-          # wait for install infra job to finish
-          kubectl logs -n infrastructure -f $(kubectl get pod --namespace infrastructure | grep -v 'NAME' | grep -v 'spark' | head -n 1 | awk '{print $1}')
-          kubectl get pod --all-namespaces
-          kubectl get svc --all-namespaces
-          kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-spark-operator-webhook-init
-          # Might fail the first time but the 2nd run should work, rarely fails on the first try though.
-          kubectl wait -n infrastructure --for=condition=complete --timeout=10m job/turing-init-init
-
       - name: "Install Vault"
         if: ${{ !matrix.useInClusterConfig }}
         env:
