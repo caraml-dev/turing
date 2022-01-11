@@ -57,7 +57,7 @@ runs:
         echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
 
     - name: Save Docker image
-      if: ${{ inputs.build_image }}
+      if: ${{ inputs.build_image == 'true' }}
       shell: bash
       run: |
         docker image save \

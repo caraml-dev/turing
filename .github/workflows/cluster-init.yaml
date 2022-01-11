@@ -77,7 +77,6 @@ jobs:
       - name: Publish Cluster Init Docker Image
         run: docker push ${{ steps.build.outputs.cluster-init-image }}
 
-
   test-e2e:
     runs-on: ubuntu-latest
     steps:
