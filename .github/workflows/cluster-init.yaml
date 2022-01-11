@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - id: release-rules
+      - id: cluster-init
         uses: ./.github/actions/cluster-init
         with:
           cluster_name: turing-e2e
@@ -90,7 +90,8 @@ jobs:
           knative_version: v0.18.3
           knative_istio_version: v0.18.1
           local_registry: registry.localhost:5000
-          
+          build_image: true
+
       - name: Smoke Test
         run: |
           # Create hello world knative service

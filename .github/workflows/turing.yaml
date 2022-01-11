@@ -363,25 +363,6 @@ jobs:
             valuesFile: "turing.values.remote.yaml"
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go 1.14
-        uses: actions/setup-go@v2
-        with:
-          go-version: "1.14"
-
-      - name: "Setup local k8s cluster"
-        uses: AbsaOSS/k3d-action@v1.5.0
-        with:
-          cluster-name: ${{ env.CLUSTER_NAME }}
-          use-default-registry: true
-          args: >-
-            --servers 1
-            --agents 3
-            --port 80:80@loadbalancer
-            --k3s-server-arg "--no-deploy=traefik,metrics-server"
-
       - name: Download Turing API Docker tar archieve
         uses: actions/download-artifact@v2
         with:
@@ -396,6 +377,22 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
+
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.14"
+
+      - id: cluster-init
+        uses: ./.github/actions/cluster-init
+        with:
+          cluster_name: turing-e2e
+          istio_version: 1.9.9
+          knative_version: v0.18.3
+          knative_istio_version: v0.18.1
+          local_registry: registry.localhost:5000
+          build_image: true
+          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Publish images to local registry
         env:
@@ -422,7 +419,6 @@ jobs:
             ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: "Install Infrastructure"
         run: |
           kubectl create ns infrastructure
           helm upgrade turing-init infra/charts/turing-init \
