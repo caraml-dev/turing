@@ -20,6 +20,13 @@ class LogConfig:
                  result_logger_type: ResultLoggerType,
                  bigquery_config: turing.generated.models.BigQueryConfig = None,
                  kafka_config: turing.generated.models.KafkaConfig = None):
+        """
+        Method to create a new LogConfig instance
+
+        :param result_logger_type: logging type
+        :param bigquery_config: config file for logging using BigQuery
+        :param kafka_config: config file for logging using Kafka
+        """
         self._result_logger_type = result_logger_type
         self._bigquery_config = bigquery_config
         self._kafka_config = kafka_config
@@ -49,6 +56,13 @@ class BigQueryLogConfig(LogConfig):
                  table: str,
                  service_account_secret: str,
                  batch_load: bool = None):
+        """
+        Method to create a new log config with a BigQuery config
+
+        :param table: name of the BigQuery table; if the table does not exist, it will be created automatically
+        :param service_account_secret: service account which has both JobUser and DataEditor privileges and write access
+        :param batch_load: optional parameter to indicate if batch loading is used
+        """
         BigQueryLogConfig._verify_table(table)
         self._table = table
         self._service_account_secret = service_account_secret
@@ -101,6 +115,13 @@ class KafkaLogConfig(LogConfig):
                  brokers: str,
                  topic: str,
                  serialization_format: KafkaConfigSerializationFormat):
+        """
+        Method to create a new log config with a Kafka config
+
+        :param brokers: comma-separated list of one or more Kafka brokers
+        :param topic: valid Kafka topic name on the server; data will be written to this topic
+        :param: serialization_format: message serialization format to be used
+        """
         KafkaLogConfig._verify_brokers(brokers)
         KafkaLogConfig._verify_topic(topic)
         self._brokers = brokers
