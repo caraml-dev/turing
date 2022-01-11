@@ -84,7 +84,7 @@ runs:
 
     - name: Install Infrastructure
       env:
-        CLUSTER_INIT_VERSION: ${{ cluster_init_version || steps.build-image.outputs.cluster-init-version }}
+        CLUSTER_INIT_VERSION: ${{ inputs.cluster_init_version || steps.build-image.outputs.cluster-init-version }}
       shell: bash
       run: |
         kubectl create ns infrastructure
