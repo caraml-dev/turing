@@ -3,7 +3,8 @@ import turing.generated.models
 from typing import List, Dict
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.common import EnvVar
+from turing.router.config.common.common import EnvVar
+from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 
 class RouterEnsemblerConfig:
@@ -21,26 +22,42 @@ class RouterEnsemblerConfig:
         :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
         """
         assert type in {'standard', 'docker'}
-        self._id = id
-        self._type = type
-        self._standard_config = standard_config
-        self._docker_config = docker_config
+        self.id = id
+        self.type = type
+        self.standard_config = standard_config
+        self.docker_config = docker_config
 
     @property
     def id(self) -> int:
         return self._id
 
+    @id.setter
+    def id(self, id: int):
+        self._id = id
+
     @property
     def type(self) -> str:
         return self._type
+
+    @type.setter
+    def type(self, type: str):
+        self._type = type
 
     @property
     def standard_config(self):
         return self._standard_config
 
+    @standard_config.setter
+    def standard_config(self, standard_config: turing.generated.models.EnsemblerStandardConfig):
+        self._standard_config = standard_config
+
     @property
     def docker_config(self):
         return self._docker_config
+
+    @docker_config.setter
+    def docker_config(self, docker_config: turing.generated.models.EnsemblerDockerConfig):
+        self._docker_config = docker_config
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.RouterEnsemblerConfig(
@@ -71,17 +88,13 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
         :param service_account: optional service account for the Docker deployment
         """
-        DockerRouterEnsemblerConfig._verify_image(image)
-        DockerRouterEnsemblerConfig._verify_timeout(timeout)
-        DockerRouterEnsemblerConfig._verify_env(env)
-
-        self._image = image
-        self._resource_request = resource_request
-        self._endpoint = endpoint
-        self._timeout = timeout
-        self._port = port
-        self._env = env
-        self._service_account = service_account
+        self.image = image
+        self.resource_request = resource_request
+        self.endpoint = endpoint
+        self.timeout = timeout
+        self.port = port
+        self.env = env
+        self.service_account = service_account
         super().__init__(id=id, type="docker")
 
     @property
@@ -89,17 +102,25 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         return self._image
 
     @image.setter
-    def image(self, image):
-        DockerRouterEnsemblerConfig._verify_image(image)
+    def image(self, image: str):
+        DockerImageSchema.verify_schema(image)
         self._image = image
 
     @property
     def resource_request(self) -> ResourceRequest:
         return self._resource_request
 
+    @resource_request.setter
+    def resource_request(self, resource_request):
+        self._resource_request = resource_request
+
     @property
     def endpoint(self) -> str:
         return self._endpoint
+
+    @endpoint.setter
+    def endpoint(self, endpoint: str):
+        self._endpoint = endpoint
 
     @property
     def timeout(self) -> str:
@@ -107,56 +128,37 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 
     @timeout.setter
     def timeout(self, timeout):
-        DockerRouterEnsemblerConfig._verify_timeout(timeout)
+        TimeoutSchema.verify_schema(timeout)
         self._timeout = timeout
 
     @property
     def port(self) -> int:
         return self._port
 
+    @port.setter
+    def port(self, port: int):
+        self._port = port
+
     @property
     def env(self) -> List['EnvVar']:
         return self._env
 
     @env.setter
-    def env(self, env):
-        DockerRouterEnsemblerConfig._verify_env(env)
+    def env(self, env: List['EnvVar']):
         self._env = env
 
     @property
     def service_account(self) -> str:
         return self._service_account
 
-    @classmethod
-    def _verify_image(cls, image):
-        matched = re.fullmatch(
-            r"^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$",
-            image,
-            re.IGNORECASE
-        )
-        if bool(matched) is False:
-            raise InvalidImageException(
-                f"Valid Docker Image value should be provided, e.g. kennethreitz/httpbin:latest; "
-                f"image passed: {image}"
-            )
-
-    @classmethod
-    def _verify_timeout(cls, timeout):
-        matched = re.fullmatch(r"^[0-9]+(ms|s|m|h)$", timeout)
-        if bool(matched) is False:
-            raise InvalidTimeoutException(
-                f"Valid duration is required; timeout passed: {timeout}"
-            )
-
-    @classmethod
-    def _verify_env(cls, env):
-        for env_var in env:
-            EnvVar.verify_name(env_var.name)
+    @service_account.setter
+    def service_account(self, service_account: str):
+        self._service_account = service_account
 
     def to_open_api(self) -> OpenApiModel:
-        DockerRouterEnsemblerConfig._verify_env(self.env)
+        assert all(isinstance(env_var, EnvVar) for env_var in self.env)
 
-        self._docker_config = turing.generated.models.EnsemblerDockerConfig(
+        self.docker_config = turing.generated.models.EnsemblerDockerConfig(
             image=self.image,
             resource_request=self.resource_request.to_open_api(),
             endpoint=self.endpoint,
@@ -166,14 +168,6 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             service_account=self.service_account
         )
         return super().to_open_api()
-
-
-class InvalidImageException(Exception):
-    pass
-
-
-class InvalidTimeoutException(Exception):
-    pass
 
 
 class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
@@ -186,8 +180,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param id: id of the ensembler
         :param experiment_mappings: configured mappings between routes and treatments
         """
-        StandardRouterEnsemblerConfig._verify_experiment_mappings(experiment_mappings)
-        self._experiment_mappings = experiment_mappings
+        self.experiment_mappings = experiment_mappings
         super().__init__(id=id, type="standard")
 
     @property
@@ -213,7 +206,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                 )
 
     def to_open_api(self) -> OpenApiModel:
-        self._standard_config = turing.generated.models.EnsemblerStandardConfig(
+        self.standard_config = turing.generated.models.EnsemblerStandardConfig(
             experiment_mappings=[
                 turing.generated.models.EnsemblerStandardConfigExperimentMappings(**experiment_mapping) \
                 for experiment_mapping in self.experiment_mappings
