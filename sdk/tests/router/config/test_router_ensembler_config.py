@@ -1,6 +1,7 @@
 import turing.generated.models
 import turing.router.config.router_ensembler_config
-import turing.router.config.common
+import turing.router.config.common.common
+import turing.router.config.common.schemas
 import turing.router.config.resource_request
 import pytest
 
@@ -77,7 +78,7 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -125,12 +126,12 @@ def test_create_docker_router_ensembler_config(
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.router_ensembler_config.InvalidImageException
+            turing.router.config.common.schemas.InvalidImageException
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_image(
@@ -173,12 +174,12 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.router_ensembler_config.InvalidImageException
+            turing.router.config.common.schemas.InvalidImageException
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_image(
@@ -223,7 +224,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -273,12 +274,12 @@ def test_set_docker_router_ensembler_config_with_valid_image(
             "500ks",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.router_ensembler_config.InvalidTimeoutException
+            turing.router.config.common.schemas.InvalidTimeoutException
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
@@ -321,12 +322,12 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.router_ensembler_config.InvalidTimeoutException
+            turing.router.config.common.schemas.InvalidTimeoutException
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_timeout(
@@ -371,7 +372,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
             "1000ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -407,111 +408,10 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
 
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "500ms",
-            5120,
-            [
-                turing.router.config.common.EnvVar(
-                    name="#@!#!",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            turing.router.config.common.InvalidEnvironmentVariableNameException
-        )
-    ])
-def test_create_docker_router_ensembler_config_with_invalid_env(
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected
-):
-    with pytest.raises(expected):
-        turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
-            id=id,
-            image=image,
-            resource_request=resource_request,
-            endpoint=endpoint,
-            timeout=timeout,
-            port=port,
-            env=env,
-            service_account=service_account
-        )
-
-
-@pytest.mark.parametrize(
     "new_env,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             [
-                turing.router.config.common.EnvVar(
-                    name="env_!@#$@%",
-                    value="env_val")
-            ],
-            1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "500ms",
-            5120,
-            [
-                turing.router.config.common.EnvVar(
-                    name="env_name",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            turing.router.config.common.InvalidEnvironmentVariableNameException
-        )
-    ])
-def test_set_docker_router_ensembler_config_with_invalid_env(
-        new_env,
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected
-):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
-    with pytest.raises(expected):
-        actual.env = new_env
-
-
-@pytest.mark.parametrize(
-    "new_env,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -527,7 +427,7 @@ def test_set_docker_router_ensembler_config_with_invalid_env(
             "500ms",
             5120,
             [
-                turing.router.config.common.EnvVar(
+                turing.router.config.common.common.EnvVar(
                     name="env_not_the_right_name",
                     value="env_val")
             ],
