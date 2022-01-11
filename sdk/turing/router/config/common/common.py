@@ -1,4 +1,3 @@
-import re
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.common.schemas import EnvVarNameSchema
