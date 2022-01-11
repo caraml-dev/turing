@@ -24,11 +24,11 @@ inputs:
     default: ''
   build_image:
     required: false
-    description: 'Flag to build image from code'
+    description: '(Optional) Flag to build image from code'
     default: false
   cluster_init_version:
     required: false
-    description: 'Version of cluster to build'
+    description: '(Optional) Required if build_image is false, Version of cluster to install'
     default: ''
 
   

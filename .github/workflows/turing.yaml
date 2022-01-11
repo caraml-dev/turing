@@ -386,12 +386,11 @@ jobs:
       - id: cluster-init
         uses: ./.github/actions/cluster-init
         with:
-          cluster_name: turing-e2e
-          istio_version: 1.9.9
-          knative_version: v0.18.3
-          knative_istio_version: v0.18.1
-          local_registry: registry.localhost:5000
-          build_image: true
+          cluster_name: ${{ env.CLUSTER_NAME}}
+          istio_version: ${{ env.ISTIO_VERSION}}
+          knative_version: ${{ env.KNATIVE_VERSION}}
+          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
+          local_registry: ${{ env.LOCAL_REGISTRY}}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Publish images to local registry
