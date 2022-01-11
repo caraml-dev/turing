@@ -363,7 +363,8 @@ jobs:
             valuesFile: "turing.values.remote.yaml"
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
 
       - name: Download Turing API Docker tar archieve
         uses: actions/download-artifact@v2

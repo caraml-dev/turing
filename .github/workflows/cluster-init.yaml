@@ -83,7 +83,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
         
-      - uses: ./.github/actions/cluster-init
+      - name: Run action cluster-init
+        uses: ./.github/actions/cluster-init
         with:
           cluster_name: turing-e2e
           istio_version: 1.9.9
