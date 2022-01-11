@@ -350,6 +350,20 @@ def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
     )
 
 
+@pytest.fixture
+def generic_enricher(generic_resource_request, generic_env_var):
+    return turing.generated.models.Enricher(
+        id=1,
+        image="test.io/gods-test/turing-enricher:0.0.0-build.0",
+        resource_request=generic_resource_request,
+        endpoint=f"http://localhost:5000/enricher_endpoint",
+        timeout="500ms",
+        port=5180,
+        env=[generic_env_var],
+        service_account="service-account",
+    )
+
+
 @pytest.fixture(params=["nop", "random_engine"])
 def experiment_config(request):
     experiment_type = request.param
@@ -392,7 +406,8 @@ def router_version(
         experiment_config,
         generic_resource_request,
         log_config,
-        ensembler
+        ensembler,
+        generic_enricher
 ):
     return turing.generated.models.RouterVersion(
         id=2,
@@ -412,7 +427,8 @@ def router_version(
         timeout="100ms",
         log_config=log_config,
         ensembler=ensembler,
-        monitoring_url="https://lookhere.io/"
+        monitoring_url="https://lookhere.io/",
+        enricher=generic_enricher
     )
 
 
