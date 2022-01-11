@@ -47,7 +47,7 @@ runs:
           --k3s-server-arg "--no-deploy=traefik,metrics-server"
 
     - name: Build Docker image
-      if: ${{ inputs.build_image }}
+      if: ${{ inputs.build_image == 'true' }}
       id: build-image
       working-directory: infra/cluster-init
       shell: bash
