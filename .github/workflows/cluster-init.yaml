@@ -82,8 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - id: cluster-init
-        uses: ./.github/actions/cluster-init
+      - uses: ./.github/actions/cluster-init
         with:
           cluster_name: turing-e2e
           istio_version: 1.9.9
