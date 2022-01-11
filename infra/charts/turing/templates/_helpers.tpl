@@ -80,6 +80,33 @@
 {{- .Values.global.sentry.dsn | default .Values.sentry.dsn -}}
 {{- end -}}
 
+{{- define "turing.pluginsInitContainers" -}}
+{{ if .Values.turing.experimentEngines }}
+initContainers:
+{{ range $expEngine := .Values.turing.experimentEngines }}
+{{ if eq (toString $expEngine.type) "rpc-plugin" }}
+- name: {{ $expEngine.name }}
+  image: {{ $expEngine.rpcPlugin.image }}
+  volumeMounts:
+  - name: plugins-volume
+    mountPath: /app/plugins
+{{ end }}
+{{ end }}
+{{ end }}
+{{- end -}}
+
+{{- define "turing.initContainers" -}}
+initContainers:
+{{ with (include "turing.pluginsInitContainers" . | fromYaml) -}}
+{{ if .initContainers }}
+{{- toYaml .initContainers -}}
+{{ end }}
+{{- end }}
+{{ with .Values.turing.extraInitContainers }}
+{{- toYaml . -}}
+{{- end }}
+{{- end -}}
+
 {{- define "turing.defaultConfig" -}}
 ClusterConfig:
   InClusterConfig: {{ .Values.turing.clusterConfig.useInClusterConfig }}
@@ -101,6 +128,16 @@ MLPConfig:
 TuringEncryptionKey: {{ include "turing.encryption.key" . | quote }}
 Sentry:
   DSN: {{ .Values.turing.config.Sentry.DSN | default (include "turing.sentry.dsn" .) | quote }}
+{{ if .Values.turing.experimentEngines }}
+Experiment:
+{{ range $expEngine := .Values.turing.experimentEngines }}
+{{ $expEngine.name | indent 2 }}:
+{{ toYaml $expEngine.options | indent 4 }}
+{{ if eq (toString $expEngine.type) "rpc-plugin" }}
+    PluginBinary: /app/plugins/{{ $expEngine.name }}
+{{ end }}
+{{ end }}
+{{ end }}
 {{- end -}}
 
 {{- define "turing.config" -}}
