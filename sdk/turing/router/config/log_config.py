@@ -154,9 +154,6 @@ class KafkaLogConfig(LogConfig):
             )
 
     def to_open_api(self) -> OpenApiModel:
-        KafkaLogConfig._verify_brokers(self._brokers)
-        KafkaLogConfig._verify_topic(self._topic)
-
         self._kafka_config = turing.generated.models.KafkaConfig(
             brokers=self.brokers,
             topic=self.topic,
