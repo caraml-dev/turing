@@ -35,43 +35,117 @@ jobs:
         with:
           prefix: cluster-init/
 
-  publish:
-    # Automatically publish release and pre-release artifacts.
-    #
-    # As for dev releases, make it possible to publish artifacts
-    # manually by approving 'deployment' in the 'manual' environment.
-    #
-    # Dev build can be released either from the 'main' branch or
-    # by running this workflow manually with `workflow_dispatch` event.
-    if: >-
-      contains('release,pre-release', needs.release-rules.outputs.release-type)
-        || ( github.event_name != 'pull_request' )
-        || ( github.event.pull_request.head.repo.full_name == github.repository )
-    environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
+  build-cluster-init:
     runs-on: ubuntu-latest
-    needs:
-      - release-rules
+    outputs:
+      cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          
+      - name: Run action build-cluster-init
+        id: build-cluster-init
+        uses: ./.github/actions/build-cluster-init
+ 
+  test-e2e:
+    runs-on: ubuntu-latest
+    env:
+      CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
+      CLUSTER_NAME: turing-e2e
+      ISTIO_VERSION: 1.9.9
+      KNATIVE_VERSION: v0.18.3
+      KNATIVE_ISTIO_VERSION: v0.18.1
+      LOCAL_REGISTRY: registry.localhost:5000
+    needs:
+      - build-cluster-init
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v1
+      - name: Download Cluster Init Docker tar archieve
+        uses: actions/download-artifact@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
+      
+      - name: Run action cluster-init
+        uses: ./.github/actions/run-cluster-init
+        with:
+          cluster_name: ${{ env.CLUSTER_NAME}}
+          istio_version: ${{ env.ISTIO_VERSION}}
+          knative_version: ${{ env.KNATIVE_VERSION}}
+          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
+          local_registry: ${{ env.LOCAL_REGISTRY}}
+          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: Build Docker Image
-        id: build
-        working-directory: infra/cluster-init
-        env:
-          DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
+      - name: Smoke Test
         run: |
-          set -o pipefail
-          make build-image | tee output.log
-          echo "::set-output name=cluster-init-image::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+          # Create hello world knative service
+          tee service.yaml <<EOF 
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          metadata:
+            name: helloworld-go 
+            namespace: default
+          spec:
+            template:
+              spec:
+                containers:
+                  - image: gcr.io/knative-samples/helloworld-go
+                    env:
+                      - name: TARGET
+                        value: "Hello Knative Serving is up and running!!"
+          EOF
 
-      - name: Publish Cluster Init Docker Image
-        run: docker push ${{ steps.build.outputs.cluster-init-image }}
+          kubectl apply -f service.yaml
+
+          # wait till service is up
+          timeout --foreground 120 bash -c 'until kubectl get service.serving.knative.dev/helloworld-go --output=jsonpath='{.status.conditions[1]}'  | grep "True"; do : ; done'
+          kubectl get ksvc
+
+          curl -f http://helloworld-go.default.127.0.0.1.nip.io/
+          kubectl delete service helloworld-go 
+      
+      # Invoke helm hooks on delete
+      - name: Tear down infrastructure job
+        run: helm delete --namespace infrastructure turing-init --timeout 15m
+
+  publish:
+      # Automatically publish release and pre-release artifacts.
+      #
+      # As for dev releases, make it possible to publish artifacts
+      # manually by approving 'deployment' in the 'manual' environment.
+      #
+      # Dev build can be released either from the 'main' branch or
+      # by running this workflow manually with `workflow_dispatch` event.
+      if: >-
+        contains('release,pre-release', needs.release-rules.outputs.release-type)
+          || ( github.event_name != 'pull_request' )
+          || ( github.event.pull_request.head.repo.full_name == github.repository )
+      environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
+      runs-on: ubuntu-latest
+      needs:
+        - release-rules
+        - build-cluster-init
+        - test-e2e
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+
+        - name: Log in to the Container registry
+          uses: docker/login-action@v1
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Download Cluster Init Docker tar archieve
+          uses: actions/download-artifact@v2
+          with:
+            name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
+
+        - name: Publish Cluster Init Docker Image
+          run: docker push ${{ steps.build.outputs.cluster-init-image }}
+
