@@ -24,6 +24,8 @@ class ExperimentConfig:
 
     @config.setter
     def config(self, config):
+        if config is not None and 'project_id' in config:
+            config['project_id'] = int(config['project_id'])
         self._config = config
 
     def to_open_api(self) -> OpenApiModel:
