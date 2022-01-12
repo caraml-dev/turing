@@ -260,18 +260,26 @@ class RouterConfig:
             self._ensembler = ensembler
 
     def to_open_api(self) -> OpenApiModel:
+        kwargs = {}
+
+        if self.rules is not None:
+            kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
+        if self.resource_request is not None:
+            kwargs['resource_request'] = self.resource_request.to_open_api()
+        if self.enricher is not None:
+            kwargs['enricher'] = self.enricher.to_open_api()
+        if self.ensembler is not None:
+            kwargs['ensembler'] = self.ensembler.to_open_api()
+
         return turing.generated.models.RouterConfig(
             environment_name=self.environment_name,
             name=self.name,
             config=turing.generated.models.RouterConfigConfig(
                 routes=[route.to_open_api() for route in self.routes],
-                rules=[rule.to_open_api() for rule in self.rules],
                 default_route_id=self.default_route_id,
                 experiment_engine=self.experiment_engine.to_open_api(),
-                resource_request=self.resource_request.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
-                enricher=self.enricher.to_open_api(),
-                ensembler=self.ensembler.to_open_api()
+                **kwargs
             )
         )
