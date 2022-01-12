@@ -1,0 +1,43 @@
+name: Build Cluster Init
+description: Set up Turing Cluster Init
+
+inputs:
+  artifact_retention_days: 
+    required: false
+    description: 'Artifact retention days'
+    default: 7
+outputs:
+  cluster-init-version:
+    description: 'Cluster Init Version built'
+    value: ${{ steps.build-image.outputs.cluster-init-version }}
+
+runs:
+  using: composite
+  env:
+    ARTIFACT_RETENTION_DAYS: 7
+  steps:
+    - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: infra/cluster-init
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
+
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
+            cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
+          path: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}

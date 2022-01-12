@@ -387,14 +387,13 @@ jobs:
           go-version: "1.14"
 
       - name: Run action cluster-init
-        uses: ./.github/actions/cluster-init
+        uses: ./.github/actions/run-cluster-init
         with:
           cluster_name: ${{ env.CLUSTER_NAME}}
           istio_version: ${{ env.ISTIO_VERSION}}
           knative_version: ${{ env.KNATIVE_VERSION}}
           knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
           local_registry: ${{ env.LOCAL_REGISTRY}}
-          build_image: false
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Publish Turing images to local registry

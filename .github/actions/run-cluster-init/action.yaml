@@ -1,4 +1,4 @@
-name: Cluster Init
+name: Run Cluster Init
 description: Set up Turing Cluster Init
 
 inputs:
@@ -22,16 +22,11 @@ inputs:
     required: true
     description: 'Endpoint of local registry'
     default: ''
-  build_image:
-    required: false
-    description: '(Optional) Flag to build image from code'
-    default: false
   cluster_init_version:
-    required: false
-    description: '(Optional) Required if build_image is false, Version of cluster to install  '
+    required: true
+    description: 'Version of cluster to install, tar file has to follow naming - cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar '
     default: ''
 
-  
 runs:
   using: composite
   steps:
@@ -45,24 +40,6 @@ runs:
           --agents 3
           --port 80:80@loadbalancer
           --k3s-server-arg "--no-deploy=traefik,metrics-server"
-
-    - name: Build Docker image
-      if: ${{ inputs.build_image == 'true' }}
-      id: build-image
-      working-directory: infra/cluster-init
-      shell: bash
-      run: |
-        set -o pipefail
-        make build-image | tee output.log
-        echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
-
-    - name: Save Docker image
-      if: ${{ inputs.build_image == 'true' }}
-      shell: bash
-      run: |
-        docker image save \
-          --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
-          cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
 
     - name: Publish images to local registry
       env:
