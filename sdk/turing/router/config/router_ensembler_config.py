@@ -16,12 +16,11 @@ class RouterEnsemblerConfig:
         """
         Method to create a new RouterEnsemblerConfig
 
-        :param id: id of the ensembler
         :param type: type of the ensembler; must be one of {'standard', 'docker'}
+        :param id: id of the ensembler
         :param standard_config: EnsemblerStandardConfig instance containing mappings between routes and treatments
         :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
         """
-        assert type in {'standard', 'docker'}
         self.id = id
         self.type = type
         self.standard_config = standard_config
@@ -37,6 +36,7 @@ class RouterEnsemblerConfig:
 
     @property
     def type(self) -> str:
+        assert type in {'standard', 'docker'}
         return self._type
 
     @type.setter
@@ -129,7 +129,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 
     @image.setter
     def image(self, image: str):
-        DockerImageSchema.verify_schema(image)
+        DockerImageSchema.verify_regex(image)
         self._image = image
 
     @property
@@ -137,7 +137,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         return self._resource_request
 
     @resource_request.setter
-    def resource_request(self, resource_request):
+    def resource_request(self, resource_request: ResourceRequest):
         self._resource_request = resource_request
 
     @property
@@ -153,8 +153,8 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         return self._timeout
 
     @timeout.setter
-    def timeout(self, timeout):
-        TimeoutSchema.verify_schema(timeout)
+    def timeout(self, timeout: str):
+        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @property
@@ -218,12 +218,12 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         return self._experiment_mappings
 
     @experiment_mappings.setter
-    def experiment_mappings(self, experiment_mappings):
+    def experiment_mappings(self, experiment_mappings: List[Dict[str, str]]):
         StandardRouterEnsemblerConfig._verify_experiment_mappings(experiment_mappings)
         self._experiment_mappings = experiment_mappings
 
     @classmethod
-    def _verify_experiment_mappings(cls, experiment_mappings):
+    def _verify_experiment_mappings(cls, experiment_mappings: List[Dict[str, str]]):
         for experiment_mapping in experiment_mappings:
             try:
                 assert isinstance(experiment_mapping["experiment"], str)

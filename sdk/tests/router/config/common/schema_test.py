@@ -18,7 +18,7 @@ from turing.router.config.common.schemas import DockerImageSchema, EnvVarNameSch
 )
 def test_invalid_docker_image_value(value, expected):
     with pytest.raises(expected):
-        DockerImageSchema.verify_schema(value)
+        DockerImageSchema.verify_regex(value)
 
 
 @pytest.mark.parametrize(
@@ -35,7 +35,7 @@ def test_invalid_docker_image_value(value, expected):
 )
 def test_invalid_env_var_name_value(value, expected):
     with pytest.raises(expected):
-        EnvVarNameSchema.verify_schema(value)
+        EnvVarNameSchema.verify_regex(value)
 
 
 @pytest.mark.parametrize(
@@ -52,4 +52,4 @@ def test_invalid_env_var_name_value(value, expected):
 )
 def test_invalid_timeout_value(value, expected):
     with pytest.raises(expected):
-        TimeoutSchema.verify_schema(value)
+        TimeoutSchema.verify_regex(value)

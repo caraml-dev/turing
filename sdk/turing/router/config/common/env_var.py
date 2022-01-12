@@ -7,7 +7,7 @@ class EnvVar:
     def __init__(self,
                  name: str,
                  value: str):
-        EnvVarNameSchema.verify_schema(name)
+        EnvVarNameSchema.verify_regex(name)
         self.name = name
         self.value = value
 
@@ -17,7 +17,7 @@ class EnvVar:
 
     @name.setter
     def name(self, name):
-        EnvVarNameSchema.verify_schema(name)
+        EnvVarNameSchema.verify_regex(name)
         self._name = name
 
     @property

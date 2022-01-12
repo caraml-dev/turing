@@ -1,5 +1,6 @@
 import turing.generated.models
 import turing.router.config.log_config
+import turing.router.config.common.schemas
 import pytest
 
 
@@ -115,7 +116,7 @@ def test_create_bigquery_log_config_with_valid_params(table, service_account_sec
             "bigqueryprojectownsbigquerydatasetownsbigquerytable",
             "my-little-secret",
             None,
-            turing.router.config.log_config.InvalidBigQueryTableException
+            turing.router.config.common.schemas.InvalidBigQueryTableException
         )
     ])
 def test_create_bigquery_log_config_with_invalid_table(table, service_account_secret, batch_load, expected):
@@ -161,7 +162,7 @@ def test_set_bigquery_log_config_with_valid_table(new_table, table, service_acco
             "bigqueryproject.bigquerydataset.bigquerytable",
             "my-little-secret",
             None,
-            turing.router.config.log_config.InvalidBigQueryTableException
+            turing.router.config.common.schemas.InvalidBigQueryTableException
         )
     ])
 def test_set_bigquery_log_config_with_invalid_table(new_table, table, service_account_secret, batch_load, expected):
@@ -218,13 +219,13 @@ def test_create_kafka_log_config_with_valid_params(brokers, topic, serialization
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
-            turing.router.config.log_config.InvalidKafkaBrokersException
+            turing.router.config.common.schemas.InvalidKafkaBrokersException
         ),
         pytest.param(
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
-            turing.router.config.log_config.InvalidKafkaBrokersException
+            turing.router.config.common.schemas.InvalidKafkaBrokersException
         )
     ])
 def test_create_kafka_log_config_with_invalid_brokers(brokers, topic, serialization_format, expected):
@@ -284,14 +285,14 @@ def test_set_kafka_log_config_with_valid_brokers(new_brokers, brokers, topic, se
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
-            turing.router.config.log_config.InvalidKafkaBrokersException
+            turing.router.config.common.schemas.InvalidKafkaBrokersException
         ),
         pytest.param(
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
-            turing.router.config.log_config.InvalidKafkaBrokersException
+            turing.router.config.common.schemas.InvalidKafkaBrokersException
         )
     ])
 def test_set_kafka_log_config_with_invalid_brokers(new_brokers, brokers, topic, serialization_format, expected):
@@ -310,13 +311,13 @@ def test_set_kafka_log_config_with_invalid_brokers(new_brokers, brokers, topic, 
             "1.2.3.4:5678,9.0.1.2:3456",
             "!@#$%^&*()",
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
-            turing.router.config.log_config.InvalidKafkaTopicException
+            turing.router.config.common.schemas.InvalidKafkaTopicException
         ),
         pytest.param(
             "1.2.3.4:5678,9.0.1.2:3456",
             "!@#$%^&*()",
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
-            turing.router.config.log_config.InvalidKafkaTopicException
+            turing.router.config.common.schemas.InvalidKafkaTopicException
         )
     ])
 def test_create_kafka_log_config_with_invalid_topic(brokers, topic, serialization_format, expected):
@@ -376,14 +377,14 @@ def test_set_kafka_log_config_with_valid_topic(new_topic, brokers, topic, serial
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
-            turing.router.config.log_config.InvalidKafkaTopicException
+            turing.router.config.common.schemas.InvalidKafkaTopicException
         ),
         pytest.param(
             "!@#$%^&*()",
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
-            turing.router.config.log_config.InvalidKafkaTopicException
+            turing.router.config.common.schemas.InvalidKafkaTopicException
         )
     ])
 def test_set_kafka_log_config_with_invalid_topic(new_topic, brokers, topic, serialization_format, expected):

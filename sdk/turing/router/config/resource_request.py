@@ -27,7 +27,7 @@ class ResourceRequest:
         return self._min_replica
 
     @min_replica.setter
-    def min_replica(self, min_replica):
+    def min_replica(self, min_replica: int):
         if hasattr(self, 'max_replica'):
             ResourceRequest._verify_min_max_replica(min_replica, self.max_replica)
         self._min_replica = min_replica
@@ -37,7 +37,7 @@ class ResourceRequest:
         return self._max_replica
 
     @max_replica.setter
-    def max_replica(self, max_replica):
+    def max_replica(self, max_replica: int):
         if hasattr(self, 'min_replica'):
             ResourceRequest._verify_min_max_replica(self.min_replica, max_replica)
         self._max_replica = max_replica
@@ -47,8 +47,8 @@ class ResourceRequest:
         return self._cpu_request
 
     @cpu_request.setter
-    def cpu_request(self, cpu_request):
-        CpuRequestSchema.verify_schema(cpu_request)
+    def cpu_request(self, cpu_request: str):
+        CpuRequestSchema.verify_regex(cpu_request)
         self._cpu_request = cpu_request
 
     @property
@@ -56,12 +56,12 @@ class ResourceRequest:
         return self._memory_request
 
     @memory_request.setter
-    def memory_request(self, memory_request):
-        MemoryRequestSchema.verify_schema(memory_request)
+    def memory_request(self, memory_request: str):
+        MemoryRequestSchema.verify_regex(memory_request)
         self._memory_request = memory_request
 
     @classmethod
-    def _verify_min_max_replica(cls, min_replica, max_replica):
+    def _verify_min_max_replica(cls, min_replica: int, max_replica: int):
         if min_replica < ResourceRequest.min_allowed_replica:
             raise InvalidReplicaCountException(
                 f"Min replica count must be >= {ResourceRequest.min_allowed_replica}; "

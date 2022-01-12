@@ -20,13 +20,13 @@ class Enricher:
         """
         Method to create a new Enricher
 
-        :param id: id of the enricher
         :param image: registry and name of the image
         :param resource_request: ResourceRequest instance containing configs related to the resources required
         :param endpoint: endpoint URL of the enricher
         :param timeout: request timeout which when exceeded, the request to the enricher will be terminated
         :param port: port number exposed by the container
         :param env: environment variables required by the container
+        :param id: id of the enricher
         :param service_account: optional service account for the Docker deployment
         """
         self.id = id
@@ -52,7 +52,7 @@ class Enricher:
 
     @image.setter
     def image(self, image: str):
-        DockerImageSchema.verify_schema(image)
+        DockerImageSchema.verify_regex(image)
         self._image = image
 
     @property
@@ -81,8 +81,8 @@ class Enricher:
         return self._timeout
 
     @timeout.setter
-    def timeout(self, timeout):
-        TimeoutSchema.verify_schema(timeout)
+    def timeout(self, timeout: str):
+        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @property

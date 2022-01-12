@@ -36,7 +36,7 @@ class Route:
         return self._endpoint
 
     @endpoint.setter
-    def endpoint(self, endpoint):
+    def endpoint(self, endpoint: str):
         Route._verify_endpoint(endpoint)
         self._endpoint = endpoint
 
@@ -46,11 +46,11 @@ class Route:
 
     @timeout.setter
     def timeout(self, timeout: str):
-        TimeoutSchema.verify_schema(timeout)
+        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @classmethod
-    def _verify_endpoint(cls, endpoint):
+    def _verify_endpoint(cls, endpoint: str):
         """Rudimentary url checker """
         parse_result = urlparse(endpoint)
 

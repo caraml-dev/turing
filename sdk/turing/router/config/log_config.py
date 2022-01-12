@@ -3,6 +3,7 @@ import turing.generated.models
 from enum import Enum
 from typing import Optional, Dict, Union
 from turing.generated.model_utils import OpenApiModel
+from turing.router.config.common.schemas import BigQueryTableSchema, KafkaBrokersSchema, KafkaTopicSchema
 
 
 class ResultLoggerType(Enum):
@@ -96,10 +97,9 @@ class BigQueryLogConfig(LogConfig):
         :param service_account_secret: service account which has both JobUser and DataEditor privileges and write access
         :param batch_load: optional parameter to indicate if batch loading is used
         """
-        BigQueryLogConfig._verify_table(table)
-        self._table = table
-        self._service_account_secret = service_account_secret
-        self._batch_load = batch_load
+        self.table = table
+        self.service_account_secret = service_account_secret
+        self.batch_load = batch_load
 
         super().__init__(result_logger_type=ResultLoggerType.BIGQUERY)
 
@@ -108,26 +108,25 @@ class BigQueryLogConfig(LogConfig):
         return self._table
 
     @table.setter
-    def table(self, table):
-        BigQueryLogConfig._verify_table(table)
+    def table(self, table: str):
+        BigQueryTableSchema.verify_regex(table)
         self._table = table
 
     @property
     def service_account_secret(self) -> str:
         return self._service_account_secret
 
+    @service_account_secret.setter
+    def service_account_secret(self, service_account_secret: str):
+        self._service_account_secret = service_account_secret
+
     @property
     def batch_load(self) -> Optional[bool]:
         return self._batch_load
 
-    @classmethod
-    def _verify_table(cls, table):
-        matched = re.fullmatch(r"^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$", table, re.IGNORECASE)
-        if bool(matched) is False:
-            raise InvalidBigQueryTableException(
-                f"Valid BQ table name is required, e.g. project_name.dataset.table; "
-                f"table passed: {table}"
-            )
+    @batch_load.setter
+    def batch_load(self, batch_load: bool):
+        self._batch_load = batch_load
 
     def to_open_api(self) -> OpenApiModel:
         self.bigquery_config = turing.generated.models.BigQueryConfig(
@@ -153,13 +152,11 @@ class KafkaLogConfig(LogConfig):
 
         :param brokers: comma-separated list of one or more Kafka brokers
         :param topic: valid Kafka topic name on the server; data will be written to this topic
-        :param: serialization_format: message serialization format to be used
+        :param serialization_format: message serialization format to be used
         """
-        KafkaLogConfig._verify_brokers(brokers)
-        KafkaLogConfig._verify_topic(topic)
-        self._brokers = brokers
-        self._topic = topic
-        self._serialization_format = serialization_format
+        self.brokers = brokers
+        self.topic = topic
+        self.serialization_format = serialization_format
 
         super().__init__(result_logger_type=ResultLoggerType.KAFKA)
 
@@ -169,7 +166,7 @@ class KafkaLogConfig(LogConfig):
 
     @brokers.setter
     def brokers(self, brokers):
-        KafkaLogConfig._verify_brokers(brokers)
+        KafkaBrokersSchema.verify_regex(brokers)
         self._brokers = brokers
 
     @property
@@ -178,34 +175,16 @@ class KafkaLogConfig(LogConfig):
 
     @topic.setter
     def topic(self, topic):
-        KafkaLogConfig._verify_topic(topic)
+        KafkaTopicSchema.verify_regex(topic)
         self._topic = topic
 
     @property
     def serialization_format(self) -> KafkaConfigSerializationFormat:
         return self._serialization_format
 
-    @classmethod
-    def _verify_brokers(cls, brokers):
-        matched = re.fullmatch(
-            r"^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$",
-            brokers,
-            re.IGNORECASE
-        )
-        if bool(matched) is False:
-            raise InvalidKafkaBrokersException(
-                f"One or more valid Kafka brokers is required, e.g. host1:port1,host2:port2; "
-                f"brokers passed: {brokers}"
-            )
-
-    @classmethod
-    def _verify_topic(cls, topic):
-        matched = re.fullmatch(r"^[A-Za-z0-9_.-]{1,249}", topic, re.IGNORECASE)
-        if bool(matched) is False:
-            raise InvalidKafkaTopicException(
-                f"A valid Kafka topic name may only contain letters, numbers, dot, hyphen or underscore; "
-                f"topic passed: {topic}"
-            )
+    @serialization_format.setter
+    def serialization_format(self, serialization_format: KafkaConfigSerializationFormat):
+        self._serialization_format = serialization_format
 
     def to_open_api(self) -> OpenApiModel:
         self.kafka_config = turing.generated.models.KafkaConfig(
@@ -214,15 +193,3 @@ class KafkaLogConfig(LogConfig):
             serialization_format=self.serialization_format.value
         )
         return super().to_open_api()
-
-
-class InvalidBigQueryTableException(Exception):
-    pass
-
-
-class InvalidKafkaBrokersException(Exception):
-    pass
-
-
-class InvalidKafkaTopicException(Exception):
-    pass
