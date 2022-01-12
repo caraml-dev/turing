@@ -87,7 +87,7 @@ def test_create_resource_request_with_max_replica_above_max_allowed(
     "min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
             5,
-            5,
+            4,
             "100m",
             "512Mi",
             turing.router.config.resource_request.InvalidReplicaCountException
@@ -282,7 +282,7 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
 @pytest.mark.parametrize(
     "new_min_replica,min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
-            3,
+            5,
             1,
             3,
             "100m",
