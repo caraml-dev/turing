@@ -24,7 +24,7 @@ inputs:
     default: ''
   cluster_init_version:
     required: true
-    description: 'Version of cluster to install, tar file has to follow naming - cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar '
+    description: 'Version of cluster to install, tar file has to follow naming - cluster-init.(CLUSTER_INIT_VERSION).tar '
     default: ''
 
 runs:
@@ -44,7 +44,7 @@ runs:
     - name: Publish images to local registry
       env:
         DOCKER_REPOSITORY: ${{ inputs.local_registry }}/${{ github.repository }}
-        CLUSTER_INIT_VERSION: ${{ inputs.cluster_init_version || steps.build-image.outputs.cluster-init-version }}
+        CLUSTER_INIT_VERSION: ${{ inputs.cluster_init_version }}
       shell: bash
       run: |
         # Cluster init
@@ -56,7 +56,7 @@ runs:
 
     - name: Install Infrastructure
       env:
-        CLUSTER_INIT_VERSION: ${{ inputs.cluster_init_version || steps.build-image.outputs.cluster-init-version }}
+        CLUSTER_INIT_VERSION: ${{ inputs.cluster_init_version }}
       shell: bash
       run: |
         kubectl create ns infrastructure
