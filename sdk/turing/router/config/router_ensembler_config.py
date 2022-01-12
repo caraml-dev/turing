@@ -1,5 +1,5 @@
 import turing.generated.models
-from typing import List, Dict
+from typing import List, Dict, Union
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.common import EnvVar
@@ -11,7 +11,8 @@ class RouterEnsemblerConfig:
                  id: int,
                  type: str,
                  standard_config: turing.generated.models.EnsemblerStandardConfig = None,
-                 docker_config: turing.generated.models.EnsemblerDockerConfig = None):
+                 docker_config: turing.generated.models.EnsemblerDockerConfig = None,
+                 **kwargs):
         """
         Method to create a new RouterEnsemblerConfig
 
@@ -43,27 +44,52 @@ class RouterEnsemblerConfig:
         self._type = type
 
     @property
-    def standard_config(self):
+    def standard_config(self) -> turing.generated.models.EnsemblerStandardConfig:
         return self._standard_config
 
     @standard_config.setter
-    def standard_config(self, standard_config: turing.generated.models.EnsemblerStandardConfig):
-        self._standard_config = standard_config
+    def standard_config(self, standard_config: Union[turing.generated.models.EnsemblerStandardConfig, Dict]):
+        if isinstance(standard_config, turing.generated.models.EnsemblerStandardConfig):
+            self._standard_config = standard_config
+        elif isinstance(standard_config, dict):
+            standard_config['experiment_mappings'] = [
+                turing.generated.models.EnsemblerStandardConfigExperimentMappings(**mapping)
+                for mapping in standard_config['experiment_mappings']
+            ]
+            self._standard_config = turing.generated.models.EnsemblerStandardConfig(**standard_config)
+        else:
+            self._standard_config = standard_config
 
     @property
-    def docker_config(self):
+    def docker_config(self) -> turing.generated.models.EnsemblerDockerConfig:
         return self._docker_config
 
     @docker_config.setter
     def docker_config(self, docker_config: turing.generated.models.EnsemblerDockerConfig):
-        self._docker_config = docker_config
+        if isinstance(docker_config, turing.generated.models.EnsemblerDockerConfig):
+            self._docker_config = docker_config
+        elif isinstance(docker_config, dict):
+            docker_config['resource_request'] = \
+                turing.generated.models.ResourceRequest(**docker_config['resource_request'])
+            self._docker_config = turing.generated.models.EnsemblerDockerConfig(
+                **docker_config
+            )
+        else:
+            self._docker_config = docker_config
 
     def to_open_api(self) -> OpenApiModel:
+        kwargs = {}
+
+        if self.id is not None:
+            kwargs["id"] = self.id
+        if self.standard_config is not None:
+            kwargs["standard_config"] = self.standard_config
+        if self.docker_config is not None:
+            kwargs["docker_config"] = self.docker_config
+
         return turing.generated.models.RouterEnsemblerConfig(
-            id=self.id,
             type=self.type,
-            standard_config=self.standard_config,
-            docker_config=self.docker_config,
+            **kwargs
         )
 
 

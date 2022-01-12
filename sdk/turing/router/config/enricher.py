@@ -1,6 +1,5 @@
-import re
 import turing.generated.models
-from typing import List, Dict
+from typing import List, Union, Dict
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.common import EnvVar
@@ -16,7 +15,8 @@ class Enricher:
                  timeout: str,
                  port: int,
                  env: List['EnvVar'],
-                 service_account: str = None):
+                 service_account: str = None,
+                 **kwargs):
         """
         Method to create a new Enricher
 
@@ -60,8 +60,13 @@ class Enricher:
         return self._resource_request
 
     @resource_request.setter
-    def resource_request(self, resource_request):
-        self._resource_request = resource_request
+    def resource_request(self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]):
+        if isinstance(resource_request, ResourceRequest):
+            self._resource_request = resource_request
+        elif isinstance(resource_request, dict):
+            self._resource_request = ResourceRequest(**resource_request)
+        else:
+            self._resource_request = resource_request
 
     @property
     def endpoint(self) -> str:
@@ -93,8 +98,16 @@ class Enricher:
         return self._env
 
     @env.setter
-    def env(self, env: List['EnvVar']):
-        self._env = env
+    def env(self, env: Union[List['EnvVar'], List[Dict[str, str]]]):
+        if isinstance(env, list):
+            if all(isinstance(env_var, EnvVar) for env_var in env):
+                self._env = env
+            elif all(isinstance(env_var, dict) for env_var in env):
+                self._env = [EnvVar(**env_var) for env_var in env]
+            else:
+                self._env = env
+        else:
+            self._env = env
 
     @property
     def service_account(self) -> str:

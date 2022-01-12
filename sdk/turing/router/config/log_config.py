@@ -1,7 +1,7 @@
 import re
 import turing.generated.models
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, Union
 from turing.generated.model_utils import OpenApiModel
 
 
@@ -19,7 +19,8 @@ class LogConfig:
     def __init__(self,
                  result_logger_type: ResultLoggerType,
                  bigquery_config: turing.generated.models.BigQueryConfig = None,
-                 kafka_config: turing.generated.models.KafkaConfig = None):
+                 kafka_config: turing.generated.models.KafkaConfig = None,
+                 **kwargs):
         """
         Method to create a new LogConfig instance
 
@@ -27,27 +28,59 @@ class LogConfig:
         :param bigquery_config: config file for logging using BigQuery
         :param kafka_config: config file for logging using Kafka
         """
-        self._result_logger_type = result_logger_type
-        self._bigquery_config = bigquery_config
-        self._kafka_config = kafka_config
+        self.result_logger_type = result_logger_type
+        self.bigquery_config = bigquery_config
+        self.kafka_config = kafka_config
 
     @property
     def result_logger_type(self) -> ResultLoggerType:
         return self._result_logger_type
 
+    @result_logger_type.setter
+    def result_logger_type(self, result_logger_type: Union[ResultLoggerType, str]):
+        if isinstance(result_logger_type, ResultLoggerType):
+            self._result_logger_type = result_logger_type
+        elif isinstance(result_logger_type, str):
+            self._result_logger_type = ResultLoggerType(result_logger_type)
+        else:
+            self._result_logger_type = result_logger_type
+
     @property
     def bigquery_config(self) -> turing.generated.models.BigQueryConfig:
         return self._bigquery_config
+
+    @bigquery_config.setter
+    def bigquery_config(self, bigquery_config: Union[turing.generated.models.BigQueryConfig, Dict]):
+        if isinstance(bigquery_config, turing.generated.models.BigQueryConfig):
+            self._bigquery_config = bigquery_config
+        elif isinstance(bigquery_config, dict):
+            self._bigquery_config = turing.generated.models.BigQueryConfig(**bigquery_config)
+        else:
+            self._bigquery_config = bigquery_config
 
     @property
     def kafka_config(self) -> turing.generated.models.KafkaConfig:
         return self._kafka_config
 
+    @kafka_config.setter
+    def kafka_config(self, kafka_config: Union[turing.generated.models.KafkaConfig, Dict]):
+        if isinstance(kafka_config, turing.generated.models.KafkaConfig):
+            self._kafka_config = kafka_config
+        elif isinstance(kafka_config, dict):
+            self._kafka_config = turing.generated.models.KafkaConfig(**kafka_config)
+        else:
+            self._kafka_config = kafka_config
+
     def to_open_api(self) -> OpenApiModel:
+        kwargs = {}
+        if self.bigquery_config is not None:
+            kwargs["bigquery_config"] = self.bigquery_config
+        if self.kafka_config is not None:
+            kwargs["kafka_config"] = self.kafka_config
+
         return turing.generated.models.RouterConfigConfigLogConfig(
             result_logger_type=self.result_logger_type.to_open_api(),
-            bigquery_config=self.bigquery_config,
-            kafka_config=self.kafka_config
+            **kwargs
         )
 
 
@@ -97,7 +130,7 @@ class BigQueryLogConfig(LogConfig):
             )
 
     def to_open_api(self) -> OpenApiModel:
-        self._bigquery_config = turing.generated.models.BigQueryConfig(
+        self.bigquery_config = turing.generated.models.BigQueryConfig(
             table=self.table,
             service_account_secret=self.service_account_secret,
             batch_load=self.batch_load
@@ -175,7 +208,7 @@ class KafkaLogConfig(LogConfig):
             )
 
     def to_open_api(self) -> OpenApiModel:
-        self._kafka_config = turing.generated.models.KafkaConfig(
+        self.kafka_config = turing.generated.models.KafkaConfig(
             brokers=self.brokers,
             topic=self.topic,
             serialization_format=self.serialization_format.value

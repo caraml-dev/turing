@@ -8,7 +8,7 @@ import pytest
         pytest.param(
             "model-a",
             "http://predict_this.io/model-a",
-            100,
+            "100ms",
             "generic_route"
         )
     ])
@@ -36,7 +36,7 @@ def test_create_route_with_invalid_endpoint(id, endpoint, timeout, expected):
         pytest.param(
             "model-a",
             "http://predict_this.io/model-b",
-            100,
+            "100ms",
             "generic_route"
         )
     ])
@@ -51,7 +51,7 @@ def test_set_route_with_valid_endpoint(id, endpoint, timeout, expected, request)
         pytest.param(
             "model-a",
             "http://predict_this.io/model-a",
-            100,
+            "100ms",
             turing.router.config.route.InvalidUrlException
         )
     ])

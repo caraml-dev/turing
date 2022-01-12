@@ -1,8 +1,17 @@
 from enum import Enum
-from typing import Optional, List, Dict
+from typing import List, Dict, Union
 
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
+from turing.generated.model_utils import OpenApiModel
+from turing.router.config.common.schemas import TimeoutSchema
+from turing.router.config.route import Route
+from turing.router.config.traffic_rule import TrafficRule
+from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.log_config import LogConfig
+from turing.router.config.enricher import Enricher
+from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
+from turing.experiment_engine import ExperimentConfig
 
 
 class RouterStatus(Enum):
@@ -38,7 +47,8 @@ class Router(ApiObject):
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
         self._status = RouterStatus(status)
-        self._config = config
+        if config is not None:
+            self._config = RouterConfig(name=name, environment_name=environment_name, **config)
 
     @property
     def id(self) -> int:
@@ -69,7 +79,7 @@ class Router(ApiObject):
         return self._status
 
     @property
-    def config(self) -> Dict:
+    def config(self) -> 'RouterConfig':
         return self._config
 
     @classmethod
@@ -91,3 +101,177 @@ class Router(ApiObject):
         :return: instance of router created
         """
         return Router.from_open_api(turing.active_session.create_router(router_config=config))
+
+
+class RouterConfig:
+    def __init__(self,
+                 environment_name: str,
+                 name: str,
+                 routes: Union[List[Route], List[Dict[str, str]]] = None,
+                 rules = None,
+                 default_route_id = None,
+                 experiment_engine = None,
+                 resource_request = None,
+                 timeout = None,
+                 log_config = None,
+                 enricher = None,
+                 ensembler = None,
+                 **kwargs):
+        self.environment_name = environment_name
+        self.name = name
+        self.routes = routes
+        self.rules = rules
+        self.default_route_id = default_route_id
+        self.experiment_engine = experiment_engine
+        self.resource_request = resource_request
+        self.timeout = timeout
+        self.log_config = log_config
+        self.enricher = enricher
+        self.ensembler = ensembler
+
+    @property
+    def environment_name(self) -> str:
+        return self._environment_name
+
+    @environment_name.setter
+    def environment_name(self, environment_name: str):
+        self._environment_name = environment_name
+        
+    @property
+    def name(self) -> str:
+        return self._name
+    
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+
+    @property
+    def routes(self) -> List[Route]:
+        return self._routes
+
+    @routes.setter
+    def routes(self, routes: Union[List[Route], List[Dict[str, str]]]):
+        if isinstance(routes, list):
+            if all(isinstance(route, Route) for route in routes):
+                self._routes = routes
+            elif all(isinstance(route, dict) for route in routes):
+                self._routes = [Route(**route) for route in routes]
+            else:
+                self._routes = routes
+        else:
+            self._routes = routes
+    
+    @property
+    def rules(self) -> List[TrafficRule]:
+        return self._rules
+    
+    @rules.setter
+    def rules(self, rules: Union[List[TrafficRule], List[Dict]]):
+        if isinstance(rules, list):
+            if all(isinstance(rule, TrafficRule) for rule in rules):
+                self._rules = rules
+            elif all(isinstance(rule, dict) for rule in rules):
+                self._rules = [TrafficRule(**rule) for rule in rules]
+            else:
+                self._rules = rules
+        else:
+            self._rules = rules
+
+    @property
+    def default_route_id(self) -> str:
+        return self._default_route_id
+    
+    @default_route_id.setter
+    def default_route_id(self, default_route_id: str):
+        self._default_route_id = default_route_id
+
+    @property
+    def experiment_engine(self) -> ExperimentConfig:
+        return self._experiment_engine
+    
+    @experiment_engine.setter
+    def experiment_engine(self, experiment_engine: Union[ExperimentConfig, Dict]):
+        if isinstance(experiment_engine, ExperimentConfig):
+            self._experiment_engine = experiment_engine
+        elif isinstance(experiment_engine, dict):
+            self._experiment_engine = ExperimentConfig(**experiment_engine)
+        else:
+            self._experiment_engine = experiment_engine
+
+    @property
+    def resource_request(self) -> ResourceRequest:
+        return self._resource_request
+    
+    @resource_request.setter
+    def resource_request(self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]):
+        if isinstance(resource_request, ResourceRequest):
+            self._resource_request = resource_request
+        elif isinstance(resource_request, dict):
+            self._resource_request = ResourceRequest(**resource_request)
+        else:
+            self._resource_request = resource_request
+            
+    @property
+    def timeout(self) -> str:
+        return self._timeout
+    
+    @timeout.setter
+    def timeout(self, timeout: str):
+        TimeoutSchema.verify_schema(timeout)
+        self._timeout = timeout
+
+    @property
+    def log_config(self) -> LogConfig:
+        return self._log_config
+    
+    @log_config.setter
+    def log_config(self, log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]]):
+        if isinstance(log_config, LogConfig):
+            self._log_config = log_config
+        elif isinstance(log_config, dict):
+            self._log_config = LogConfig(**log_config)
+        else:
+            self._log_config = log_config
+
+    @property
+    def enricher(self) -> Enricher:
+        return self._enricher
+    
+    @enricher.setter
+    def enricher(self, enricher: Union[Enricher, Dict]):
+        if isinstance(enricher, Enricher):
+            self._enricher = enricher
+        elif isinstance(enricher, dict):
+            self._enricher = Enricher(**enricher)
+        else:
+            self._enricher = enricher
+
+    @property
+    def ensembler(self) -> RouterEnsemblerConfig:
+        return self._ensembler
+
+    @ensembler.setter
+    def ensembler(self, ensembler: Union[RouterEnsemblerConfig, Dict]):
+        if isinstance(ensembler, RouterEnsemblerConfig):
+            self._ensembler = ensembler
+        elif isinstance(ensembler, dict):
+            self._ensembler = RouterEnsemblerConfig(**ensembler)
+        else:
+            self._ensembler = ensembler
+
+    def to_open_api(self) -> OpenApiModel:
+        return turing.generated.models.RouterConfig(
+            environment_name=self.environment_name,
+            name=self.name,
+            config=turing.generated.models.RouterConfigConfig(
+                routes=[route.to_open_api() for route in self.routes],
+                rules=[rule.to_open_api() for rule in self.rules],
+                default_route_id=self.default_route_id,
+                experiment_engine=self.experiment_engine.to_open_api(),
+                resource_request=self.resource_request.to_open_api(),
+                timeout=self.timeout,
+                log_config=self.log_config.to_open_api(),
+                enricher=self.enricher.to_open_api(),
+                ensembler=self.ensembler.to_open_api()
+            )
+        )

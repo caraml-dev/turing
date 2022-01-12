@@ -113,10 +113,7 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
                 )
             ],
             [
-                turing.router.config.route.Route(
-                    id="model-a",
-                    endpoint="http://predict_this.io/model-a",
-                    timeout=100)
+                "model-a"
             ],
             "generic_traffic_rule"
         )
@@ -143,14 +140,8 @@ def test_create_traffic_rule(conditions, routes, expected, request):
                 )
             ],
             [
-                turing.router.config.route.Route(
-                    id="model-a",
-                    endpoint="http://predict_this.io/model-a",
-                    timeout=100),
-                turing.router.config.route.Route(
-                    id="model-a",
-                    endpoint="http://predict_this.io/model-a1",
-                    timeout=100)
+                "model-a",
+                "model-a",
             ],
             turing.router.config.route.DuplicateRouteException
         )

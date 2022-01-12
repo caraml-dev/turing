@@ -1,5 +1,6 @@
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
+from turing.router.config.common.schemas import TimeoutSchema
 from urllib.parse import urlparse
 
 
@@ -7,7 +8,8 @@ class Route:
     def __init__(self,
                  id: str,
                  endpoint: str,
-                 timeout: int):
+                 timeout: str,
+                 **kwargs):
         """
         Method to create a new Route object
 
@@ -17,15 +19,17 @@ class Route:
         """
         Route._verify_endpoint(endpoint)
 
-        timeout_string = str(timeout) + "ms"
-
-        self._id = id
-        self._endpoint = endpoint
-        self._timeout = timeout_string
+        self.id = id
+        self.endpoint = endpoint
+        self.timeout = timeout
 
     @property
     def id(self) -> str:
         return self._id
+
+    @id.setter
+    def id(self, id: str):
+        self._id = id
 
     @property
     def endpoint(self) -> str:
@@ -39,6 +43,11 @@ class Route:
     @property
     def timeout(self) -> str:
         return self._timeout
+
+    @timeout.setter
+    def timeout(self, timeout: str):
+        TimeoutSchema.verify_schema(timeout)
+        self._timeout = timeout
 
     @classmethod
     def _verify_endpoint(cls, endpoint):
