@@ -80,16 +80,26 @@
 {{- .Values.global.sentry.dsn | default .Values.sentry.dsn -}}
 {{- end -}}
 
-{{- define "turing.pluginsInitContainers" -}}
+{{- define "turing.plugins.directory" -}}
+/app/plugins
+{{- end -}}
+
+{{- define "turing.plugins.initContainers" -}}
 {{ if .Values.turing.experimentEngines }}
 initContainers:
 {{ range $expEngine := .Values.turing.experimentEngines }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
-- name: {{ $expEngine.name }}
+- name: {{ $expEngine.name }}-plugin
   image: {{ $expEngine.rpcPlugin.image }}
+  imagePullPolicy: Always
+  env:
+  - name: PLUGIN_NAME
+    value: "{{ $expEngine.name }}"
+  - name: PLUGINS_DIR
+    value: {{ include "turing.plugins.directory" . }}
   volumeMounts:
   - name: plugins-volume
-    mountPath: /app/plugins
+    mountPath: {{ include "turing.plugins.directory" . }}
 {{ end }}
 {{ end }}
 {{ end }}
@@ -97,7 +107,7 @@ initContainers:
 
 {{- define "turing.initContainers" -}}
 initContainers:
-{{ with (include "turing.pluginsInitContainers" . | fromYaml) -}}
+{{ with (include "turing.plugins.initContainers" . | fromYaml) -}}
 {{ if .initContainers }}
 {{- toYaml .initContainers -}}
 {{ end }}
@@ -134,7 +144,7 @@ Experiment:
 {{ $expEngine.name | indent 2 }}:
 {{ toYaml $expEngine.options | indent 4 }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
-    PluginBinary: /app/plugins/{{ $expEngine.name }}
+    PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{ end }}
 {{ end }}
 {{ end }}
