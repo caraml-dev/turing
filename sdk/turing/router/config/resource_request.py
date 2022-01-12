@@ -70,9 +70,9 @@ class ResourceRequest:
             raise InvalidReplicaCountException(
                 f"Max replica count must be <= {ResourceRequest.max_allowed_replica}; "
                 f"min_replica passed: {max_replica}")
-        elif min_replica >= max_replica:
+        elif min_replica > max_replica:
             raise InvalidReplicaCountException(
-                f"Min replica must be < max_replica; "
+                f"Min replica must be <= max_replica; "
                 f"min_replica passed: {min_replica}, max_replica passed: {max_replica}"
             )
 
