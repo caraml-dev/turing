@@ -53,6 +53,30 @@ class TimeoutSchema(Schema):
             )
 
 
+class CpuRequestSchema(Schema):
+    regex_exp = r"^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$"
+
+    @classmethod
+    def verify_schema(cls, value):
+        matched = re.fullmatch(CpuRequestSchema.regex_exp, value)
+        if bool(matched) is False:
+            raise InvalidCPURequestException(
+                f'Valid CPU value is required, e.g "2" or "500m"; cpu_request passed: {value}'
+            )
+
+
+class MemoryRequestSchema(Schema):
+    regex_exp = r"^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$"
+
+    @classmethod
+    def verify_schema(cls, value):
+        matched = re.fullmatch(MemoryRequestSchema.regex_exp, value)
+        if bool(matched) is False:
+            raise InvalidMemoryRequestException(
+                f"Valid RAM value is required, e.g. 512Mi; memory_request passed: {value}"
+            )
+
+
 class InvalidImageException(Exception):
     pass
 
@@ -64,4 +88,11 @@ class InvalidEnvironmentVariableNameException(Exception):
 class InvalidTimeoutException(Exception):
     pass
 
+
+class InvalidCPURequestException(Exception):
+    pass
+
+
+class InvalidMemoryRequestException(Exception):
+    pass
 
