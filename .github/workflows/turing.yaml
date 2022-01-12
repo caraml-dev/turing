@@ -312,26 +312,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build Docker image
-        id: build-image
-        working-directory: infra/cluster-init
-        run: |
-          set -o pipefail
-          make build-image | tee output.log
-          echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
-
-      - name: Save Docker image
-        run: |
-          docker image save \
-            --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
-            cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
-
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+      - name: Run action build-cluster-init
+        id: build-cluster-init
+        uses: ./.github/actions/build-cluster-init
         with:
-          name: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
-          path: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          artifact_retention_days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+        
 
   test-e2e:
     runs-on: ubuntu-latest

@@ -13,14 +13,7 @@ outputs:
 
 runs:
   using: composite
-  env:
-    ARTIFACT_RETENTION_DAYS: 7
   steps:
-    - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
       - name: Build Docker image
         id: build-image
         working-directory: infra/cluster-init
@@ -40,4 +33,4 @@ runs:
         with:
           name: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
           path: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          retention-days: ${{ inputs.artifact_retention_days }}

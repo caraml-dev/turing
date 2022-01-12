@@ -40,6 +40,11 @@ jobs:
     outputs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
       - name: Run action build-cluster-init
         id: build-cluster-init
         uses: ./.github/actions/build-cluster-init
