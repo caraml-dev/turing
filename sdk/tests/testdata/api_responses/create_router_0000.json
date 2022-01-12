@@ -1,0 +1,123 @@
+{
+  "id": 191,
+  "created_at": "2022-01-12T09:22:22.516084Z",
+  "updated_at": "2022-01-12T09:22:54.328148Z",
+  "project_id": 102,
+  "environment_name": "id-dev",
+  "name": "router_1",
+  "status": "deployed",
+  "endpoint": "http://router-1-endpoint.io/v1/predict",
+  "config": {
+    "id": 620,
+    "created_at": "2022-01-12T09:22:22.544648Z",
+    "updated_at": "2022-01-12T09:22:54.327277Z",
+    "router": null,
+    "version": 1,
+    "status": "deployed",
+    "image": "asia.test.io/model-dev/turing-router:1.2.0-build.4-d6c960e",
+    "routes": [
+      {
+        "id": "model-a",
+        "type": "PROXY",
+        "endpoint": "http://predict-this.io/model-a",
+        "annotations": null,
+        "timeout": "100ms"
+      },
+      {
+        "id": "model-b",
+        "type": "PROXY",
+        "endpoint": "http://predict-this.io/model-b",
+        "annotations": null,
+        "timeout": "100ms"
+      }
+    ],
+    "default_route_id": "test",
+    "experiment_engine": {
+      "type": "xp",
+      "config": {
+        "variables": [
+          {
+            "name": "order_id",
+            "field": "fdsv",
+            "field_source": "header"
+          },
+          {
+            "name": "country_code",
+            "field": "dcsd",
+            "field_source": "header"
+          },
+          {
+            "name": "latitude",
+            "field": "d",
+            "field_source": "header"
+          },
+          {
+            "name": "longitude",
+            "field": "sdSDa",
+            "field_source": "header"
+          }
+        ],
+        "project_id": 102
+      }
+    },
+    "resource_request": {
+      "min_replica": 0,
+      "max_replica": 2,
+      "cpu_request": "500m",
+      "memory_request": "512Mi"
+    },
+    "timeout": "100ms",
+    "log_config": {
+      "log_level": "DEBUG",
+      "custom_metrics_enabled": true,
+      "fiber_debug_log_enabled": true,
+      "jaeger_enabled": true,
+      "result_logger_type": "nop"
+    },
+    "enricher": {
+      "id": 189,
+      "created_at": "2022-01-12T09:22:22.540551Z",
+      "updated_at": "2022-01-12T09:22:54.325664Z",
+      "image": "asia.test.io/model-dev/echo:1.0.2",
+      "resource_request": {
+        "min_replica": 0,
+        "max_replica": 2,
+        "cpu_request": "500m",
+        "memory_request": "512Mi"
+      },
+      "endpoint": "/",
+      "timeout": "60ms",
+      "port": 8080,
+      "env": [
+        {
+          "name": "test",
+          "value": "abc"
+        }
+      ],
+      "service_account": ""
+    },
+    "ensembler": {
+      "id": 362,
+      "created_at": "2022-01-12T09:22:22.539551Z",
+      "updated_at": "2022-01-12T09:22:54.326574Z",
+      "type": "docker",
+      "standard_config": null,
+      "docker_config": {
+        "image": "asia.test.io/gods-test/turing-ensembler:0.0.0-build.0",
+        "resource_request": {
+          "min_replica": 1,
+          "max_replica": 3,
+          "cpu_request": "500m",
+          "memory_request": "512Mi"
+        },
+        "endpoint": "http://localhost:5000/ensembler_endpoint",
+        "timeout": "500ms",
+        "port": 5120,
+        "env": [],
+        "service_account": ""
+      }
+    },
+    "monitoring_url": ""
+  },
+  "monitoring_url": "https://monitor-me.io"
+}

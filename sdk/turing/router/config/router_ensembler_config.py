@@ -184,6 +184,10 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
 
+        kwargs = {}
+        if self.service_account is not None:
+            kwargs['service_account'] = self.service_account
+
         self.docker_config = turing.generated.models.EnsemblerDockerConfig(
             image=self.image,
             resource_request=self.resource_request.to_open_api(),
@@ -191,7 +195,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             timeout=self.timeout,
             port=self.port,
             env=[env_var.to_open_api() for env_var in self.env],
-            service_account=self.service_account
+            **kwargs
         )
         return super().to_open_api()
 

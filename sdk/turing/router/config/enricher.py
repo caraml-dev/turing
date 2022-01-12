@@ -8,13 +8,13 @@ from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 class Enricher:
     def __init__(self,
-                 id: int,
                  image: str,
                  resource_request: ResourceRequest,
                  endpoint: str,
                  timeout: str,
                  port: int,
                  env: List['EnvVar'],
+                 id: int = None,
                  service_account: str = None,
                  **kwargs):
         """
@@ -120,13 +120,18 @@ class Enricher:
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
 
+        kwargs = {}
+        if self.id is not None:
+            kwargs['id'] = self.id
+        if self.service_account is not None:
+            kwargs['service_account'] = self.service_account
+
         return turing.generated.models.Enricher(
-            id=self.id,
             image=self.image,
             resource_request=self.resource_request.to_open_api(),
             endpoint=self.endpoint,
             timeout=self.timeout,
             port=self.port,
             env=[env_var.to_open_api() for env_var in self.env],
-            service_account=self.service_account
+            **kwargs
         )

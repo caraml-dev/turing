@@ -8,6 +8,15 @@ import turing.generated.models
 import turing.batch.config
 import turing.batch.config.source
 import turing.batch.config.sink
+import turing.router.config.route
+import turing.router.config.traffic_rule
+import turing.router.config.router_config
+import turing.router.config.resource_request
+import turing.router.config.log_config
+import turing.router.config.enricher
+import turing.router.config.router_ensembler_config
+import turing.router.config.common.env_var
+import turing.experiment_config
 import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
@@ -425,6 +434,101 @@ def router_version(
         ensembler=ensembler,
         monitoring_url="https://lookhere.io/",
         enricher=generic_enricher
+    )
+
+
+@pytest.fixture
+def generic_router_config():
+    return turing.router.config.router_config.RouterConfig(
+        environment_name="id-dev",
+        name="router_1",
+        routes=[
+            turing.router.config.route.Route(
+                id="model-a",
+                endpoint="http://predict-this.io/model-a",
+                timeout="100ms"
+            ),
+            turing.router.config.route.Route(
+                id="model-b",
+                endpoint="http://predict-this.io/model-b",
+                timeout="100ms"
+            )
+        ],
+        rules=None,
+        default_route_id="test",
+        experiment_engine=turing.experiment_config.ExperimentConfig(
+            type="xp",
+            config={
+                'variables':
+                        [
+                            {'name': 'order_id', 'field': 'fdsv', 'field_source': 'header'},
+                            {'name': 'country_code', 'field': 'dcsd', 'field_source': 'header'},
+                            {'name': 'latitude', 'field': 'd', 'field_source': 'header'},
+                            {'name': 'longitude', 'field': 'sdSDa', 'field_source': 'header'}
+                        ],
+                'project_id': 102
+            }
+        ),
+        resource_request=turing.router.config.resource_request.ResourceRequest(
+            min_replica=0,
+            max_replica=2,
+            cpu_request="500m",
+            memory_request="512Mi"
+        ),
+        timeout="100ms",
+        log_config=turing.router.config.log_config.LogConfig(
+            result_logger_type=turing.router.config.log_config.ResultLoggerType.NOP,
+            table="abc.dataset.table",
+            service_account_secret="not-a-secret"
+        ),
+        enricher=turing.router.config.enricher.Enricher(
+            image="asia.test.io/model-dev/echo:1.0.2",
+            resource_request=turing.router.config.resource_request.ResourceRequest(
+                min_replica=0,
+                max_replica=2,
+                cpu_request="500m",
+                memory_request="512Mi"
+            ),
+            endpoint="/",
+            timeout="60ms",
+            port=8080,
+            env=[
+                turing.router.config.common.env_var.EnvVar(
+                    name="test",
+                    value="abc"
+                )
+            ]
+        ),
+        ensembler=turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+            id=1,
+            image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            resource_request=turing.router.config.resource_request.ResourceRequest(
+                min_replica=1,
+                max_replica=3,
+                cpu_request="500m",
+                memory_request="512Mi"
+            ),
+            endpoint=f"http://localhost:5000/ensembler_endpoint",
+            timeout="500ms",
+            port=5120,
+            env=[],
+        )
+    )
+
+
+@pytest.fixture
+def generic_router(generic_router_status, router_version):
+    return turing.generated.models.RouterDetails(
+        id=1,
+        name=f"router_1",
+        endpoint=f"http://localhost:5000/endpoint_1",
+        environment_name=f"env_1",
+        monitoring_url=f"http://localhost:5000/dashboard_1",
+        project_id=project.id,
+        status=generic_router_status,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        config=router_version
     )
 
 

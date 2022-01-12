@@ -10,7 +10,7 @@ from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig
 from turing.router.config.enricher import Enricher
 from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
-from turing.experiment_engine import ExperimentConfig
+from turing.experiment_config import ExperimentConfig
 
 
 class RouterConfig:
