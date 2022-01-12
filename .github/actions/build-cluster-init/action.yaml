@@ -17,12 +17,14 @@ runs:
       - name: Build Docker image
         id: build-image
         working-directory: infra/cluster-init
+        shell: bash
         run: |
           set -o pipefail
           make build-image | tee output.log
           echo "::set-output name=cluster-init-version::$(sed -n 's%turing-cluster-init version: \(.*\)%\1%p' output.log)"
 
       - name: Save Docker image
+        shell: bash
         run: |
           docker image save \
             --output cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar \
