@@ -305,7 +305,7 @@ jobs:
   build-cluster-init:
     runs-on: ubuntu-latest
     outputs:
-      cluster-init-version: ${{ steps.build-image.outputs.cluster-init-version }}
+      cluster-init-version: ${{ steps.cluster-init-version.outputs.cluster-init-version }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -360,12 +360,12 @@ jobs:
       - name: Download Turing Router Docker tar archieve
         uses: actions/download-artifact@v2
         with:
-          name: turing-router.${{ needs.build-router.outputs.router-version }}.tar
+          name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
 
       - name: Download Cluster Init Docker tar archieve
         uses: actions/download-artifact@v2
         with:
-          name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
+          name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
 
       - name: Set up Go 1.14
         uses: actions/setup-go@v2
