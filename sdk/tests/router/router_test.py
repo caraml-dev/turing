@@ -74,23 +74,16 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
     actual_config = actual_response.config
 
     assert actual_config.environment_name == router_config.environment_name
-
     assert actual_config.name == router_config.name
-
     assert actual_config.rules == router_config.rules
-
     assert actual_config.default_route_id == router_config.default_route_id
-
-    assert actual_config.experiment_engine.type == router_config.experiment_engine.type
-    assert actual_config.experiment_engine.config == router_config.experiment_engine.config
-
+    assert actual_config.experiment_engine.to_open_api() == router_config.experiment_engine.to_open_api()
+    assert actual_config.resource_request.to_open_api() == router_config.resource_request.to_open_api()
     assert actual_config.timeout == router_config.timeout
-
-    assert actual_config.log_config.result_logger_type == router_config.log_config.result_logger_type
-    assert actual_config.log_config.bigquery_config == router_config.log_config.bigquery_config
-    assert actual_config.log_config.kafka_config == router_config.log_config.kafka_config
+    assert actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
 
     assert actual_config.enricher.image == router_config.enricher.image
+    assert actual_config.enricher.resource_request.to_open_api() == router_config.enricher.resource_request.to_open_api()
     assert actual_config.enricher.endpoint == router_config.enricher.endpoint
     assert actual_config.enricher.timeout == router_config.enricher.timeout
     assert actual_config.enricher.port == router_config.enricher.port

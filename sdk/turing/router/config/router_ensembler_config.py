@@ -36,11 +36,11 @@ class RouterEnsemblerConfig:
 
     @property
     def type(self) -> str:
-        assert type in {'standard', 'docker'}
         return self._type
 
     @type.setter
     def type(self, type: str):
+        assert type in {'standard', 'docker'}
         self._type = type
 
     @property
