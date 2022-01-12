@@ -1,5 +1,6 @@
 import turing.generated.models
 import turing.router.config.resource_request
+import turing.router.config.common.schemas
 import pytest
 
 
@@ -115,7 +116,7 @@ def test_create_resource_request_with_min_replica_geq_max_replica(
             5,
             "3m",
             "512Mi",
-            turing.router.config.resource_request.InvalidCPURequestException
+            turing.router.config.common.schemas.InvalidCPURequestException
         )
     ])
 def test_create_resource_request_with_invalid_cpu_request_string(
@@ -141,7 +142,7 @@ def test_create_resource_request_with_invalid_cpu_request_string(
             5,
             "33m",
             "512Ri",
-            turing.router.config.resource_request.InvalidMemoryRequestException
+            turing.router.config.common.schemas.InvalidMemoryRequestException
         )
     ])
 def test_create_resource_request_with_invalid_memory_request_string(
@@ -374,7 +375,7 @@ def test_create_resource_request_with_valid_cpu_request(
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidCPURequestException
+            turing.router.config.common.schemas.InvalidCPURequestException
         )
     ])
 def test_set_resource_request_with_invalid_cpu_request_string(
@@ -433,7 +434,7 @@ def test_create_resource_request_with_valid_memory_request(
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidMemoryRequestException
+            turing.router.config.common.schemas.InvalidMemoryRequestException
         )
     ])
 def test_set_resource_request_with_invalid_memory_request_string(

@@ -1,6 +1,6 @@
 import turing.generated.models
 import turing.router.config.router_ensembler_config
-import turing.router.config.common.common
+import turing.router.config.common.env_var
 import turing.router.config.common.schemas
 import turing.router.config.resource_request
 import pytest
@@ -78,7 +78,7 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -126,7 +126,7 @@ def test_create_docker_router_ensembler_config(
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -174,7 +174,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -224,7 +224,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -274,7 +274,7 @@ def test_set_docker_router_ensembler_config_with_valid_image(
             "500ks",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -322,7 +322,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -372,7 +372,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
             "1000ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -411,7 +411,7 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
     "new_env,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -427,7 +427,7 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
             "500ms",
             5120,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                     name="env_not_the_right_name",
                     value="env_val")
             ],

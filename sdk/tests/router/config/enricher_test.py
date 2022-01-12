@@ -1,6 +1,6 @@
 import turing.generated.models
 import turing.router.config.enricher
-import turing.router.config.common.common
+import turing.router.config.common.env_var
 import turing.router.config.common.schemas
 import turing.router.config.resource_request
 import pytest
@@ -21,7 +21,7 @@ import pytest
             "500ms",
             5180,
             [
-                turing.router.config.common.common.EnvVar(
+                turing.router.config.common.env_var.EnvVar(
                         name="env_name",
                         value="env_val"
                 )

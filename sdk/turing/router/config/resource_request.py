@@ -1,6 +1,6 @@
-import re
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
+from turing.router.config.common.schemas import CpuRequestSchema, MemoryRequestSchema
 
 
 class ResourceRequest:
@@ -17,13 +17,10 @@ class ResourceRequest:
         :param memory_request: total amount of RAM available
         """
         ResourceRequest._verify_min_max_replica(min_replica, max_replica)
-        ResourceRequest._verify_cpu_request(cpu_request)
-        ResourceRequest._verify_memory_request(memory_request)
-
-        self._min_replica = min_replica
-        self._max_replica = max_replica
-        self._cpu_request = cpu_request
-        self._memory_request = memory_request
+        self.min_replica = min_replica
+        self.max_replica = max_replica
+        self.cpu_request = cpu_request
+        self.memory_request = memory_request
 
     @property
     def min_replica(self) -> int:
@@ -31,7 +28,8 @@ class ResourceRequest:
 
     @min_replica.setter
     def min_replica(self, min_replica):
-        ResourceRequest._verify_min_max_replica(min_replica, self._max_replica)
+        if hasattr(self, 'max_replica'):
+            ResourceRequest._verify_min_max_replica(min_replica, self.max_replica)
         self._min_replica = min_replica
 
     @property
@@ -40,7 +38,8 @@ class ResourceRequest:
 
     @max_replica.setter
     def max_replica(self, max_replica):
-        ResourceRequest._verify_min_max_replica(self._min_replica, max_replica)
+        if hasattr(self, 'min_replica'):
+            ResourceRequest._verify_min_max_replica(self.min_replica, max_replica)
         self._max_replica = max_replica
 
     @property
@@ -49,7 +48,7 @@ class ResourceRequest:
 
     @cpu_request.setter
     def cpu_request(self, cpu_request):
-        ResourceRequest._verify_cpu_request(cpu_request)
+        CpuRequestSchema.verify_schema(cpu_request)
         self._cpu_request = cpu_request
 
     @property
@@ -58,7 +57,7 @@ class ResourceRequest:
 
     @memory_request.setter
     def memory_request(self, memory_request):
-        ResourceRequest._verify_memory_request(memory_request)
+        MemoryRequestSchema.verify_schema(memory_request)
         self._memory_request = memory_request
 
     @classmethod
@@ -77,22 +76,6 @@ class ResourceRequest:
                 f"min_replica passed: {min_replica}, max_replica passed: {max_replica}"
             )
 
-    @classmethod
-    def _verify_cpu_request(cls, cpu_request: str):
-        matched = re.fullmatch(r"^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$", cpu_request)
-        if bool(matched) is False:
-            raise InvalidCPURequestException(
-                f'Valid CPU value is required, e.g "2" or "500m"; cpu_request passed: {cpu_request}'
-            )
-
-    @classmethod
-    def _verify_memory_request(cls, memory_request: str):
-        matched = re.fullmatch(r"^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$", memory_request)
-        if bool(matched) is False:
-            raise InvalidMemoryRequestException(
-                f"Valid RAM value is required, e.g. 512Mi; memory_request passed: {memory_request}"
-            )
-
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.ResourceRequest(
             min_replica=self.min_replica,
@@ -103,12 +86,4 @@ class ResourceRequest:
 
 
 class InvalidReplicaCountException(Exception):
-    pass
-
-
-class InvalidCPURequestException(Exception):
-    pass
-
-
-class InvalidMemoryRequestException(Exception):
     pass

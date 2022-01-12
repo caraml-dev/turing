@@ -2,7 +2,7 @@ import turing.generated.models
 from typing import List, Dict, Union
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.common.common import EnvVar
+from turing.router.config.common.env_var import EnvVar
 from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 
