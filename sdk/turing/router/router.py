@@ -1,4 +1,5 @@
 from enum import Enum
+from collections import Counter
 from typing import List, Dict, Union
 
 import turing.generated.models
@@ -261,6 +262,7 @@ class RouterConfig:
 
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
+        self._verify_no_duplicate_routes()
 
         if self.rules is not None:
             kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
@@ -283,3 +285,12 @@ class RouterConfig:
                 **kwargs
             )
         )
+
+    def _verify_no_duplicate_routes(self):
+        route_id_counter = Counter(route.id for route in self.routes)
+        most_common_route_id, max_frequency = route_id_counter.most_common(n=1)[0]
+        if max_frequency > 1:
+            raise turing.router.config.route.DuplicateRouteException(
+                f"Routes with duplicate ids are specified for this traffic rule. Duplicate id: {most_common_route_id}"
+            )
+
