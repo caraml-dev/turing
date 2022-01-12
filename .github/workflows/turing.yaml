@@ -305,7 +305,7 @@ jobs:
   build-cluster-init:
     runs-on: ubuntu-latest
     outputs:
-      cluster-init-version: ${{ steps.cluster-init-version.outputs.cluster-init-version }}
+      cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
