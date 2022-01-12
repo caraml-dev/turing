@@ -8,8 +8,8 @@ from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 class RouterEnsemblerConfig:
     def __init__(self,
-                 id: int,
                  type: str,
+                 id: int = None,
                  standard_config: turing.generated.models.EnsemblerStandardConfig = None,
                  docker_config: turing.generated.models.EnsemblerDockerConfig = None,
                  **kwargs):
@@ -71,6 +71,7 @@ class RouterEnsemblerConfig:
         elif isinstance(docker_config, dict):
             docker_config['resource_request'] = \
                 turing.generated.models.ResourceRequest(**docker_config['resource_request'])
+            docker_config['env'] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config['env']]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
                 **docker_config
             )
@@ -80,8 +81,6 @@ class RouterEnsemblerConfig:
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
 
-        if self.id is not None:
-            kwargs["id"] = self.id
         if self.standard_config is not None:
             kwargs["standard_config"] = self.standard_config
         if self.docker_config is not None:

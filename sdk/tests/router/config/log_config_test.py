@@ -35,8 +35,6 @@ def test_create_result_logger_type(result_logger_type, expected):
             None,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('nop'),
-                bigquery_config=None,
-                kafka_config=None
             )
         ),
         pytest.param(
@@ -52,7 +50,6 @@ def test_create_result_logger_type(result_logger_type, expected):
                     table="bigqueryproject.bigquerydataset.bigquerytable",
                     service_account_secret="my-little-secret"
                 ),
-                kafka_config=None
             )
         ),
         pytest.param(
@@ -65,7 +62,6 @@ def test_create_result_logger_type(result_logger_type, expected):
             ),
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -101,7 +97,6 @@ def test_create_log_config_with_valid_params(
                     service_account_secret="my-little-secret",
                     batch_load=None
                 ),
-                kafka_config=None
             )
         )
     ])
@@ -146,7 +141,6 @@ def test_create_bigquery_log_config_with_invalid_table(table, service_account_se
                     service_account_secret="my-little-secret",
                     batch_load=None
                 ),
-                kafka_config=None
             )
         )
     ])
@@ -188,7 +182,6 @@ def test_set_bigquery_log_config_with_invalid_table(new_table, table, service_ac
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -202,7 +195,6 @@ def test_set_bigquery_log_config_with_invalid_table(new_table, table, service_ac
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -253,7 +245,6 @@ def test_create_kafka_log_config_with_invalid_brokers(brokers, topic, serializat
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -268,7 +259,6 @@ def test_create_kafka_log_config_with_invalid_brokers(brokers, topic, serializat
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -347,7 +337,6 @@ def test_create_kafka_log_config_with_invalid_topic(brokers, topic, serializatio
             turing.router.config.log_config.KafkaConfigSerializationFormat.JSON,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
@@ -362,7 +351,6 @@ def test_create_kafka_log_config_with_invalid_topic(brokers, topic, serializatio
             turing.router.config.log_config.KafkaConfigSerializationFormat.PROTOBUF,
             turing.generated.models.RouterConfigConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
-                bigquery_config=None,
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
                     topic="new_topics",
