@@ -1,9 +1,7 @@
-import turing.generated.models
-import turing.router.config.enricher
-import turing.router.config.common.env_var
-import turing.router.config.common.schemas
-import turing.router.config.resource_request
 import pytest
+from turing.router.config.enricher import Enricher
+from turing.router.config.common.env_var import EnvVar
+from turing.router.config.resource_request import ResourceRequest
 
 
 @pytest.mark.parametrize(
@@ -11,7 +9,7 @@ import pytest
         pytest.param(
             1,
             "test.io/gods-test/turing-enricher:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -21,7 +19,7 @@ import pytest
             "500ms",
             5180,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                         name="env_name",
                         value="env_val"
                 )
@@ -31,7 +29,7 @@ import pytest
         )
     ])
 def test_create_enricher(id, image, resource_request, endpoint, timeout, port, env, service_account, expected, request):
-    actual = turing.router.config.enricher.Enricher(
+    actual = Enricher(
         id=id,
         image=image,
         resource_request=resource_request,

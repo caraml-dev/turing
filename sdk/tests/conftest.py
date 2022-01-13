@@ -8,15 +8,14 @@ import turing.generated.models
 import turing.batch.config
 import turing.batch.config.source
 import turing.batch.config.sink
-import turing.router.config.route
-import turing.router.config.traffic_rule
-import turing.router.config.router_config
-import turing.router.config.resource_request
-import turing.router.config.log_config
-import turing.router.config.enricher
-import turing.router.config.router_ensembler_config
-import turing.router.config.common.env_var
-import turing.experiment_config
+from turing.router.config.route import Route
+from turing.router.config.router_config import RouterConfig
+from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.log_config import LogConfig, ResultLoggerType
+from turing.router.config.enricher import Enricher
+from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
+from turing.router.config.common.env_var import EnvVar
+from turing.experiment_config import ExperimentConfig
 import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
@@ -439,16 +438,16 @@ def router_version(
 
 @pytest.fixture
 def generic_router_config():
-    return turing.router.config.router_config.RouterConfig(
+    return RouterConfig(
         environment_name="id-dev",
         name="router_1",
         routes=[
-            turing.router.config.route.Route(
+            Route(
                 id="model-a",
                 endpoint="http://predict-this.io/model-a",
                 timeout="100ms"
             ),
-            turing.router.config.route.Route(
+            Route(
                 id="model-b",
                 endpoint="http://predict-this.io/model-b",
                 timeout="100ms"
@@ -456,7 +455,7 @@ def generic_router_config():
         ],
         rules=None,
         default_route_id="test",
-        experiment_engine=turing.experiment_config.ExperimentConfig(
+        experiment_engine=ExperimentConfig(
             type="xp",
             config={
                 'variables':
@@ -469,21 +468,21 @@ def generic_router_config():
                 'project_id': 102
             }
         ),
-        resource_request=turing.router.config.resource_request.ResourceRequest(
+        resource_request=ResourceRequest(
             min_replica=0,
             max_replica=2,
             cpu_request="500m",
             memory_request="512Mi"
         ),
         timeout="100ms",
-        log_config=turing.router.config.log_config.LogConfig(
-            result_logger_type=turing.router.config.log_config.ResultLoggerType.NOP,
+        log_config=LogConfig(
+            result_logger_type=ResultLoggerType.NOP,
             table="abc.dataset.table",
             service_account_secret="not-a-secret"
         ),
-        enricher=turing.router.config.enricher.Enricher(
+        enricher=Enricher(
             image="asia.test.io/model-dev/echo:1.0.2",
-            resource_request=turing.router.config.resource_request.ResourceRequest(
+            resource_request=ResourceRequest(
                 min_replica=0,
                 max_replica=2,
                 cpu_request="500m",
@@ -493,16 +492,16 @@ def generic_router_config():
             timeout="60ms",
             port=8080,
             env=[
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="test",
                     value="abc"
                 )
             ]
         ),
-        ensembler=turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+        ensembler=DockerRouterEnsemblerConfig(
             id=1,
             image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            resource_request=turing.router.config.resource_request.ResourceRequest(
+            resource_request=ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request="500m",

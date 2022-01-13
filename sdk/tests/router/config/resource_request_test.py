@@ -1,7 +1,7 @@
-import turing.generated.models
-import turing.router.config.resource_request
-import turing.router.config.common.schemas
 import pytest
+import turing.generated.models
+from turing.router.config.resource_request import (ResourceRequest, InvalidReplicaCountException)
+from turing.router.config.common.schemas import (InvalidCPURequestException, InvalidMemoryRequestException)
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,7 @@ def test_create_resource_request_with_valid_params(
         expected,
         request
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -34,11 +34,11 @@ def test_create_resource_request_with_valid_params(
 @pytest.mark.parametrize(
     "min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
-            turing.router.config.resource_request.ResourceRequest.min_allowed_replica - 1,
+            ResourceRequest.min_allowed_replica - 1,
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_create_resource_request_with_min_replica_below_min_allowed(
@@ -49,7 +49,7 @@ def test_create_resource_request_with_min_replica_below_min_allowed(
         expected,
 ):
     with pytest.raises(expected):
-        turing.router.config.resource_request.ResourceRequest(
+        ResourceRequest(
             min_replica,
             max_replica,
             cpu_request,
@@ -61,10 +61,10 @@ def test_create_resource_request_with_min_replica_below_min_allowed(
     "min_replica,max_replica,cpu_request,memory_request,expected", [
         pytest.param(
             1,
-            turing.router.config.resource_request.ResourceRequest.max_allowed_replica + 1,
+            ResourceRequest.max_allowed_replica + 1,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_create_resource_request_with_max_replica_above_max_allowed(
@@ -75,7 +75,7 @@ def test_create_resource_request_with_max_replica_above_max_allowed(
         expected,
 ):
     with pytest.raises(expected):
-        turing.router.config.resource_request.ResourceRequest(
+        ResourceRequest(
             min_replica,
             max_replica,
             cpu_request,
@@ -90,7 +90,7 @@ def test_create_resource_request_with_max_replica_above_max_allowed(
             4,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_create_resource_request_with_min_replica_greater_than_max_replica(
@@ -101,7 +101,7 @@ def test_create_resource_request_with_min_replica_greater_than_max_replica(
         expected,
 ):
     with pytest.raises(expected):
-        turing.router.config.resource_request.ResourceRequest(
+        ResourceRequest(
             min_replica,
             max_replica,
             cpu_request,
@@ -116,7 +116,7 @@ def test_create_resource_request_with_min_replica_greater_than_max_replica(
             5,
             "3m",
             "512Mi",
-            turing.router.config.common.schemas.InvalidCPURequestException
+            InvalidCPURequestException
         )
     ])
 def test_create_resource_request_with_invalid_cpu_request_string(
@@ -127,7 +127,7 @@ def test_create_resource_request_with_invalid_cpu_request_string(
         expected,
 ):
     with pytest.raises(expected):
-        turing.router.config.resource_request.ResourceRequest(
+        ResourceRequest(
             min_replica,
             max_replica,
             cpu_request,
@@ -142,7 +142,7 @@ def test_create_resource_request_with_invalid_cpu_request_string(
             5,
             "33m",
             "512Ri",
-            turing.router.config.common.schemas.InvalidMemoryRequestException
+            InvalidMemoryRequestException
         )
     ])
 def test_create_resource_request_with_invalid_memory_request_string(
@@ -153,7 +153,7 @@ def test_create_resource_request_with_invalid_memory_request_string(
         expected,
 ):
     with pytest.raises(expected):
-        turing.router.config.resource_request.ResourceRequest(
+        ResourceRequest(
             min_replica,
             max_replica,
             cpu_request,
@@ -181,7 +181,7 @@ def test_create_resource_request_with_valid_min_replica(
         expected,
         request
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -211,7 +211,7 @@ def test_create_resource_request_with_valid_max_replica(
         expected,
         request
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -229,7 +229,7 @@ def test_create_resource_request_with_valid_max_replica(
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_set_resource_request_with_min_replica_below_min_allowed(
@@ -240,7 +240,7 @@ def test_set_resource_request_with_min_replica_below_min_allowed(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -258,7 +258,7 @@ def test_set_resource_request_with_min_replica_below_min_allowed(
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_set_resource_request_with_max_replica_above_max_allowed(
@@ -269,7 +269,7 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -287,7 +287,7 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
             3,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_set_resource_request_with_min_replica_greater_than_max_replica(
@@ -298,7 +298,7 @@ def test_set_resource_request_with_min_replica_greater_than_max_replica(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -316,7 +316,7 @@ def test_set_resource_request_with_min_replica_greater_than_max_replica(
             10,
             "100m",
             "512Mi",
-            turing.router.config.resource_request.InvalidReplicaCountException
+            InvalidReplicaCountException
         )
     ])
 def test_set_resource_request_with_max_replica_below_min_replica(
@@ -327,7 +327,7 @@ def test_set_resource_request_with_max_replica_below_min_replica(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -357,7 +357,7 @@ def test_create_resource_request_with_valid_cpu_request(
         expected,
         request
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -375,7 +375,7 @@ def test_create_resource_request_with_valid_cpu_request(
             3,
             "100m",
             "512Mi",
-            turing.router.config.common.schemas.InvalidCPURequestException
+            InvalidCPURequestException
         )
     ])
 def test_set_resource_request_with_invalid_cpu_request_string(
@@ -386,7 +386,7 @@ def test_set_resource_request_with_invalid_cpu_request_string(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -416,7 +416,7 @@ def test_create_resource_request_with_valid_memory_request(
         expected,
         request
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,
@@ -434,7 +434,7 @@ def test_create_resource_request_with_valid_memory_request(
             3,
             "100m",
             "512Mi",
-            turing.router.config.common.schemas.InvalidMemoryRequestException
+            InvalidMemoryRequestException
         )
     ])
 def test_set_resource_request_with_invalid_memory_request_string(
@@ -445,7 +445,7 @@ def test_set_resource_request_with_invalid_memory_request_string(
         memory_request,
         expected
 ):
-    actual = turing.router.config.resource_request.ResourceRequest(
+    actual = ResourceRequest(
         min_replica,
         max_replica,
         cpu_request,

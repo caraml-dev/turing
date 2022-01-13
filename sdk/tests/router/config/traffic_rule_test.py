@@ -1,6 +1,8 @@
 import turing.generated.models
-import turing.router.config.route
-import turing.router.config.traffic_rule
+from turing.router.config.route import DuplicateRouteException
+from turing.router.config.traffic_rule import (FieldSource, TrafficRuleCondition, HeaderTrafficRuleCondition,
+                                               PayloadTrafficRuleCondition, TrafficRule,
+                                               InvalidOperatorException)
 import pytest
 
 
@@ -16,21 +18,21 @@ import pytest
         )
     ])
 def test_create_field_source(field_source, expected):
-    actual = turing.router.config.traffic_rule.FieldSource(field_source).to_open_api()
+    actual = FieldSource(field_source).to_open_api()
     assert actual == expected
 
 
 @pytest.mark.parametrize(
     "field_source,field,operator,values,expected", [
         pytest.param(
-            turing.router.config.traffic_rule.FieldSource.HEADER,
+            FieldSource.HEADER,
             "x-region",
             "in",
             ["region-a", "region-b"],
             "generic_header_traffic_rule_condition"
         ),
         pytest.param(
-            turing.router.config.traffic_rule.FieldSource.PAYLOAD,
+            FieldSource.PAYLOAD,
             "service_type.id",
             "in",
             ["MyService", "YourService"],
@@ -38,7 +40,7 @@ def test_create_field_source(field_source, expected):
         )
     ])
 def test_create_traffic_rule_condition(field_source, field, operator, values, expected, request):
-    actual = turing.router.config.traffic_rule.TrafficRuleCondition(
+    actual = TrafficRuleCondition(
         field_source=field_source,
         field=field,
         operator=operator,
@@ -50,16 +52,16 @@ def test_create_traffic_rule_condition(field_source, field, operator, values, ex
 @pytest.mark.parametrize(
     "field_source,field,operator,values,expected", [
         pytest.param(
-            turing.router.config.traffic_rule.FieldSource.HEADER,
+            FieldSource.HEADER,
             "x-region",
             "looks_like",
             ["region-a", "region-b"],
-            turing.router.config.traffic_rule.InvalidOperatorException
+            InvalidOperatorException
         )
     ])
 def test_create_traffic_rule_condition_with_invalid_operator(field_source, field, operator, values, expected):
     with pytest.raises(expected):
-        turing.router.config.traffic_rule.TrafficRuleCondition(
+        TrafficRuleCondition(
             field_source=field_source,
             field=field,
             operator=operator,
@@ -76,7 +78,7 @@ def test_create_traffic_rule_condition_with_invalid_operator(field_source, field
         )
     ])
 def test_create_header_traffic_rule_condition(field, values, expected, request):
-    actual = turing.router.config.traffic_rule.HeaderTrafficRuleCondition(
+    actual = HeaderTrafficRuleCondition(
         field=field,
         values=values
     ).to_open_api()
@@ -92,7 +94,7 @@ def test_create_header_traffic_rule_condition(field, values, expected, request):
         )
     ])
 def test_create_payload_traffic_rule_condition(field, values, expected, request):
-    actual = turing.router.config.traffic_rule.PayloadTrafficRuleCondition(
+    actual = PayloadTrafficRuleCondition(
         field=field,
         values=values
     ).to_open_api()
@@ -103,11 +105,11 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
     "conditions,routes,expected", [
         pytest.param(
             [
-                turing.router.config.traffic_rule.HeaderTrafficRuleCondition(
+                HeaderTrafficRuleCondition(
                     field="x-region",
                     values= ["region-a", "region-b"],
                 ),
-                turing.router.config.traffic_rule.PayloadTrafficRuleCondition(
+                PayloadTrafficRuleCondition(
                     field="service_type.id",
                     values=["MyService", "YourService"],
                 )
@@ -119,7 +121,7 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
         )
     ])
 def test_create_traffic_rule(conditions, routes, expected, request):
-    actual = turing.router.config.traffic_rule.TrafficRule(
+    actual = TrafficRule(
         conditions=conditions,
         routes=routes
     ).to_open_api()
@@ -130,11 +132,11 @@ def test_create_traffic_rule(conditions, routes, expected, request):
     "conditions,routes,expected", [
         pytest.param(
             [
-                turing.router.config.traffic_rule.HeaderTrafficRuleCondition(
+                HeaderTrafficRuleCondition(
                     field="x-region",
                     values= ["region-a", "region-b"],
                 ),
-                turing.router.config.traffic_rule.PayloadTrafficRuleCondition(
+                PayloadTrafficRuleCondition(
                     field="service_type.id",
                     values=["MyService", "YourService"],
                 )
@@ -143,12 +145,12 @@ def test_create_traffic_rule(conditions, routes, expected, request):
                 "model-a",
                 "model-a",
             ],
-            turing.router.config.route.DuplicateRouteException
+            DuplicateRouteException
         )
     ])
 def test_create_traffic_rule_with_duplicate_route_id(conditions, routes, expected):
     with pytest.raises(expected):
-        turing.router.config.traffic_rule.TrafficRule(
+        TrafficRule(
             conditions=conditions,
             routes=routes
         ).to_open_api()

@@ -1,9 +1,12 @@
-import turing.generated.models
-import turing.router.config.router_ensembler_config
-import turing.router.config.common.env_var
-import turing.router.config.common.schemas
-import turing.router.config.resource_request
 import pytest
+import turing.generated.models
+from turing.router.config.common.env_var import EnvVar
+from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.common.schemas import (InvalidImageException, InvalidTimeoutException)
+from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
+                                                          DockerRouterEnsemblerConfig,
+                                                          StandardRouterEnsemblerConfig,
+                                                          InvalidExperimentMappingException)
 
 
 @pytest.mark.parametrize(
@@ -54,7 +57,7 @@ import pytest
         )
     ])
 def test_create_router_ensembler_config(id, type, standard_config, docker_config, expected, request):
-    actual = turing.router.config.router_ensembler_config.RouterEnsemblerConfig(
+    actual = RouterEnsemblerConfig(
         id=id,
         type=type,
         standard_config=standard_config,
@@ -68,7 +71,7 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
         pytest.param(
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -78,7 +81,7 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -98,7 +101,7 @@ def test_create_docker_router_ensembler_config(
         expected,
         request
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -116,7 +119,7 @@ def test_create_docker_router_ensembler_config(
         pytest.param(
             1,
             "#@!#!@#@!",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -126,12 +129,12 @@ def test_create_docker_router_ensembler_config(
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.common.schemas.InvalidImageException
+            InvalidImageException
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_image(
@@ -146,7 +149,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
         expected
 ):
     with pytest.raises(expected):
-        turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+        DockerRouterEnsemblerConfig(
             id=id,
             image=image,
             resource_request=resource_request,
@@ -164,7 +167,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             "#@!#!@#@!",
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -174,12 +177,12 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.common.schemas.InvalidImageException
+            InvalidImageException
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_image(
@@ -194,7 +197,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
         service_account,
         expected
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -214,7 +217,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
             1,
             "test.io/gods-test/not-the-right-ensembler:0.0.0-build.1",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -224,7 +227,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -245,7 +248,7 @@ def test_set_docker_router_ensembler_config_with_valid_image(
         expected,
         request
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -264,7 +267,7 @@ def test_set_docker_router_ensembler_config_with_valid_image(
         pytest.param(
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -274,12 +277,12 @@ def test_set_docker_router_ensembler_config_with_valid_image(
             "500ks",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.common.schemas.InvalidTimeoutException
+            InvalidTimeoutException
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
@@ -294,7 +297,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
         expected
 ):
     with pytest.raises(expected):
-        turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+        DockerRouterEnsemblerConfig(
             id=id,
             image=image,
             resource_request=resource_request,
@@ -312,7 +315,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             "500ks",
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -322,12 +325,12 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            turing.router.config.common.schemas.InvalidTimeoutException
+            InvalidTimeoutException
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_timeout(
@@ -342,7 +345,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
         service_account,
         expected
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -362,7 +365,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
             "500ms",
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -372,7 +375,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
             "1000ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
@@ -393,7 +396,7 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
         expected,
         request
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -411,13 +414,13 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
     "new_env,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_name",
                     value="env_val")
             ],
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            turing.router.config.resource_request.ResourceRequest(
+            ResourceRequest(
                 min_replica=1,
                 max_replica=3,
                 cpu_request='100m',
@@ -427,7 +430,7 @@ def test_set_docker_router_ensembler_config_with_valid_timeout(
             "500ms",
             5120,
             [
-                turing.router.config.common.env_var.EnvVar(
+                EnvVar(
                     name="env_not_the_right_name",
                     value="env_val")
             ],
@@ -448,7 +451,7 @@ def test_set_docker_router_ensembler_config_with_valid_env(
         expected,
         request
 ):
-    actual = turing.router.config.router_ensembler_config.DockerRouterEnsemblerConfig(
+    actual = DockerRouterEnsemblerConfig(
         id=id,
         image=image,
         resource_request=resource_request,
@@ -482,7 +485,7 @@ def test_set_docker_router_ensembler_config_with_valid_env(
         )
     ])
 def test_create_standard_router_ensembler_config(id, experiment_mappings, expected, request):
-    actual = turing.router.config.router_ensembler_config.StandardRouterEnsemblerConfig(
+    actual = StandardRouterEnsemblerConfig(
         id=id,
         experiment_mappings=experiment_mappings
     ).to_open_api()
@@ -510,7 +513,7 @@ def test_create_standard_router_ensembler_config(id, experiment_mappings, expect
                     "route": "route-2"
                 },
             ],
-            turing.router.config.router_ensembler_config.InvalidExperimentMappingException
+            InvalidExperimentMappingException
         ),
         pytest.param(
             [
@@ -533,7 +536,7 @@ def test_create_standard_router_ensembler_config(id, experiment_mappings, expect
                     "route": "route-2"
                 },
             ],
-            turing.router.config.router_ensembler_config.InvalidExperimentMappingException
+            InvalidExperimentMappingException
         )
     ])
 def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
@@ -541,7 +544,7 @@ def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
         id,
         experiment_mappings,
         expected):
-    actual = turing.router.config.router_ensembler_config.StandardRouterEnsemblerConfig(
+    actual = StandardRouterEnsemblerConfig(
         id=id,
         experiment_mappings=experiment_mappings
     )
@@ -581,7 +584,7 @@ def test_set_standard_router_ensembler_config_with_valid_experiment_mappings(
         experiment_mappings,
         expected,
         request):
-    actual = turing.router.config.router_ensembler_config.StandardRouterEnsemblerConfig(
+    actual = StandardRouterEnsemblerConfig(
         id=id,
         experiment_mappings=experiment_mappings
     )
