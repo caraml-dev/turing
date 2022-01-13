@@ -147,7 +147,12 @@ jobs:
             name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
 
         - name: Publish Cluster Init Docker Image
+          env:
+            DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
           run: |
             docker image load --input cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
-            docker push cluster-init:${{ needs.build-cluster-init.outputs.cluster-init-version }}
+            docker tag \
+              cluster-init:${{ needs.build-cluster-init.outputs.cluster-init-version }} \
+              ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ needs.build-cluster-init.outputs.cluster-init-version }}
+            docker push ${{ env.DOCKER_REPOSITORY }}/cluster-init:${{ needs.build-cluster-init.outputs.cluster-init-version }}
 
