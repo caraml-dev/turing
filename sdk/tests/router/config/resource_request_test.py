@@ -93,7 +93,7 @@ def test_create_resource_request_with_max_replica_above_max_allowed(
             turing.router.config.resource_request.InvalidReplicaCountException
         )
     ])
-def test_create_resource_request_with_min_replica_geq_max_replica(
+def test_create_resource_request_with_min_replica_greater_than_max_replica(
         min_replica,
         max_replica,
         cpu_request,
@@ -290,7 +290,7 @@ def test_set_resource_request_with_max_replica_above_max_allowed(
             turing.router.config.resource_request.InvalidReplicaCountException
         )
     ])
-def test_set_resource_request_with_min_replica_geq_max_replica(
+def test_set_resource_request_with_min_replica_greater_than_max_replica(
         new_min_replica,
         min_replica,
         max_replica,
