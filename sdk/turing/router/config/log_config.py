@@ -73,6 +73,8 @@ class LogConfig:
             self._kafka_config = kafka_config
 
     def to_open_api(self) -> OpenApiModel:
+        self.verify_result_logger_type_and_config_combination()
+
         kwargs = {}
         if self.bigquery_config is not None:
             kwargs["bigquery_config"] = self.bigquery_config
@@ -83,6 +85,20 @@ class LogConfig:
             result_logger_type=self.result_logger_type.to_open_api(),
             **kwargs
         )
+
+    def verify_result_logger_type_and_config_combination(self):
+        if self.result_logger_type == ResultLoggerType.BIGQUERY and self.kafka_config is not None:
+            raise InvalidResultLoggerTypeAndConfigCombination(
+                f"kafka_config must be set to None when result_logger_type is: {self.result_logger_type}"
+            )
+        if self.result_logger_type == ResultLoggerType.KAFKA and self.bigquery_config is not None:
+            raise InvalidResultLoggerTypeAndConfigCombination(
+                f"bigquery_config must be set to None when result_logger_type is: {self.result_logger_type}"
+            )
+
+
+class InvalidResultLoggerTypeAndConfigCombination(Exception):
+    pass
 
 
 class BigQueryLogConfig(LogConfig):

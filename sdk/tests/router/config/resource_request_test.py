@@ -1,5 +1,4 @@
 import pytest
-import turing.generated.models
 from turing.router.config.resource_request import (ResourceRequest, InvalidReplicaCountException)
 from turing.router.config.common.schemas import (InvalidCPURequestException, InvalidMemoryRequestException)
 

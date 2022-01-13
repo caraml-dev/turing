@@ -1,7 +1,7 @@
 import pytest
 import turing.generated.models
 from turing.router.config.log_config import (ResultLoggerType, LogConfig, BigQueryLogConfig, KafkaLogConfig,
-                                             KafkaConfigSerializationFormat)
+                                             KafkaConfigSerializationFormat, InvalidResultLoggerTypeAndConfigCombination)
 from turing.router.config.common.schemas import (InvalidKafkaBrokersException, InvalidKafkaTopicException,
                                                  InvalidBigQueryTableException)
 
@@ -397,3 +397,39 @@ def test_set_kafka_log_config_with_invalid_topic(new_topic, brokers, topic, seri
     )
     with pytest.raises(expected):
         actual.topic = new_topic
+
+
+@pytest.mark.parametrize(
+    "result_logger_type,bigquery_config,kafka_config,expected", [
+        pytest.param(
+            ResultLoggerType.BIGQUERY,
+            None,
+            turing.generated.models.KafkaConfig(
+                brokers="1.2.3.4:5678,9.0.1.2:3456",
+                topic="new_topics",
+                serialization_format="json"
+            ),
+            InvalidResultLoggerTypeAndConfigCombination
+        ),
+        pytest.param(
+            ResultLoggerType.KAFKA,
+            turing.generated.models.BigQueryConfig(
+                table="bigqueryproject.bigquerydataset.bigquerytable",
+                service_account_secret="my-little-secret"
+            ),
+            None,
+            InvalidResultLoggerTypeAndConfigCombination
+        )
+    ])
+def test_create_log_config_with_conflicting_logger_type_and_config(
+        result_logger_type,
+        bigquery_config,
+        kafka_config,
+        expected
+):
+    with pytest.raises(expected):
+        LogConfig(
+            result_logger_type,
+            bigquery_config,
+            kafka_config,
+        ).to_open_api()
