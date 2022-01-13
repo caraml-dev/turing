@@ -1,15 +1,17 @@
+from dataclasses import dataclass, field
+
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.common.schemas import EnvVarNameSchema
 
 
+@dataclass
 class EnvVar:
-    def __init__(self,
-                 name: str,
-                 value: str):
-        EnvVarNameSchema.verify_regex(name)
-        self.name = name
-        self.value = value
+    name: str
+    value: str
+
+    _name: str = field(init=False, repr=False)
+    _value: str = field(init=False, repr=False)
 
     @property
     def name(self) -> str:

@@ -1,26 +1,24 @@
+from dataclasses import dataclass, field
+from typing import ClassVar
+
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.common.schemas import CpuRequestSchema, MemoryRequestSchema
 
 
+@dataclass
 class ResourceRequest:
-    min_allowed_replica = 0
-    max_allowed_replica = 20
+    min_allowed_replica: ClassVar[int] = 0
+    max_allowed_replica: ClassVar[int] = 20
+    min_replica: int
+    max_replica: int
+    cpu_request: str
+    memory_request: str
 
-    def __init__(self, min_replica: int, max_replica: int, cpu_request: str, memory_request: str):
-        """
-        Method to create a new ResourceRequest object
-
-        :param min_replica: min number of replicas available
-        :param max_replica: max number of replicas available
-        :param cpu_request: total amount of CPU available
-        :param memory_request: total amount of RAM available
-        """
-        ResourceRequest._verify_min_max_replica(min_replica, max_replica)
-        self.min_replica = min_replica
-        self.max_replica = max_replica
-        self.cpu_request = cpu_request
-        self.memory_request = memory_request
+    _min_replica: int = field(init=False, repr=False)
+    _max_replica: int = field(init=False, repr=False)
+    _cpu_request: str = field(init=False, repr=False)
+    _memory_request: str = field(init=False, repr=False)
 
     @property
     def min_replica(self) -> int:

@@ -17,8 +17,6 @@ class Route:
         :param endpoint: endpoint of the route. Must be a valid URL
         :param timeout: timeout indicating the duration past which the request execution will end
         """
-        Route._verify_endpoint(endpoint)
-
         self.id = id
         self.endpoint = endpoint
         self.timeout = timeout

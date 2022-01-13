@@ -1,8 +1,10 @@
 import abc
+import dataclasses
 from enum import Enum
 from collections import Counter
-
+from dataclasses import dataclass
 from typing import List, Union, Dict
+
 import turing.generated.models
 from turing.router.config.route import Route
 from turing.generated.model_utils import OpenApiModel
@@ -16,29 +18,25 @@ class FieldSource(Enum):
         return turing.generated.models.FieldSource(self.value)
 
 
+@dataclass
 class TrafficRuleCondition:
-    def __init__(self,
-                 field_source: FieldSource,
-                 field: str,
-                 operator: str,
-                 values: List[str]):
-        """
-        Method to create a new TrafficRuleCondition
+    """
+    Class to create a new TrafficRuleCondition
 
-        :param field_source: the source of the field specified
-        :param field: name of the field specified
-        :param operator: name of the operator (fixed as 'in')
-        :param values: values that are supposed to match those found in the field
-        """
-        try:
-            assert operator == "in"
-        except AssertionError:
-            raise InvalidOperatorException(f"Invalid operator passed: {operator}")
+    :param field_source: the source of the field specified
+    :param field: name of the field specified
+    :param operator: name of the operator (fixed as 'in')
+    :param values: values that are supposed to match those found in the field
+    """
+    field_source: FieldSource
+    field: str
+    operator: str
+    values: List[str]
 
-        self.field_source = field_source
-        self.field = field
-        self.operator = operator
-        self.values = values
+    _field_source: FieldSource = dataclasses.field(init=False, repr=False)
+    _field: str = dataclasses.field(init=False, repr=False)
+    _operator: str = dataclasses.field(init=False, repr=False)
+    _values: List[str] = dataclasses.field(init=False, repr=False)
 
     @property
     def field_source(self) -> FieldSource:
@@ -67,6 +65,7 @@ class TrafficRuleCondition:
 
     @operator.setter
     def operator(self, operator: str):
+        TrafficRuleCondition._verify_operator(operator)
         self._operator = operator
 
     @property
@@ -84,6 +83,11 @@ class TrafficRuleCondition:
             operator=self.operator,
             values=self.values
         )
+
+    @classmethod
+    def _verify_operator(cls, operator):
+        if operator != "in":
+            raise InvalidOperatorException(f"Invalid operator passed: {operator}")
 
 
 class InvalidOperatorException(Exception):
@@ -116,18 +120,19 @@ class PayloadTrafficRuleCondition(TrafficRuleCondition):
         super().__init__(field_source=FieldSource.PAYLOAD, field=field, operator="in", values=values)
 
 
+@dataclass
 class TrafficRule:
-    def __init__(self,
-                 conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]],
-                 routes: List[str]):
-        """
-        Method to create a new TrafficRule based on a list of conditions and routes
+    """
+    Class to create a new TrafficRule based on a list of conditions and routes
 
-        :param conditions: list of TrafficRuleConditions that need to ALL be satisfied before routing to the given routes
-        :param routes: list of routes to send the request to should all the given conditions be met
-        """
-        self.conditions = conditions
-        self.routes = routes
+    :param conditions: list of TrafficRuleConditions that need to ALL be satisfied before routing to the given routes
+    :param routes: list of routes to send the request to should all the given conditions be met
+    """
+    conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]
+    routes: List[str]
+
+    _conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]] = dataclasses.field(init=False, repr=False)
+    _routes: List[str] = dataclasses.field(init=False, repr=False)
 
     @property
     def conditions(self):
