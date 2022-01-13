@@ -1,4 +1,5 @@
 import turing.generated.models
+from dataclasses import dataclass
 from typing import List, Union, Dict
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
@@ -6,7 +7,29 @@ from turing.router.config.common.env_var import EnvVar
 from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 
+@dataclass
 class Enricher:
+    """
+    Class to create a new Enricher
+
+    :param image: registry and name of the image
+    :param resource_request: ResourceRequest instance containing configs related to the resources required
+    :param endpoint: endpoint URL of the enricher
+    :param timeout: request timeout which when exceeded, the request to the enricher will be terminated
+    :param port: port number exposed by the container
+    :param env: environment variables required by the container
+    :param id: id of the enricher
+    :param service_account: optional service account for the Docker deployment
+    """
+    image: str
+    resource_request: ResourceRequest
+    endpoint: str
+    timeout: str
+    port: int
+    env: List['EnvVar']
+    id: int = None
+    service_account: str = None
+
     def __init__(self,
                  image: str,
                  resource_request: ResourceRequest,
@@ -17,18 +40,6 @@ class Enricher:
                  id: int = None,
                  service_account: str = None,
                  **kwargs):
-        """
-        Method to create a new Enricher
-
-        :param image: registry and name of the image
-        :param resource_request: ResourceRequest instance containing configs related to the resources required
-        :param endpoint: endpoint URL of the enricher
-        :param timeout: request timeout which when exceeded, the request to the enricher will be terminated
-        :param port: port number exposed by the container
-        :param env: environment variables required by the container
-        :param id: id of the enricher
-        :param service_account: optional service account for the Docker deployment
-        """
         self.id = id
         self.image = image
         self.resource_request = resource_request

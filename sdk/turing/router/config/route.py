@@ -2,21 +2,27 @@ import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.common.schemas import TimeoutSchema
 from urllib.parse import urlparse
+from dataclasses import dataclass
 
 
+@dataclass
 class Route:
+    """
+    Class to create a new Route object
+
+    :param id: route's name
+    :param endpoint: endpoint of the route. Must be a valid URL
+    :param timeout: timeout indicating the duration past which the request execution will end
+    """
+    id: str
+    endpoint: str
+    timeout: str
+
     def __init__(self,
                  id: str,
                  endpoint: str,
                  timeout: str,
                  **kwargs):
-        """
-        Method to create a new Route object
-
-        :param id: route's name
-        :param endpoint: endpoint of the route. Must be a valid URL
-        :param timeout: timeout indicating the duration past which the request execution will end
-        """
         self.id = id
         self.endpoint = endpoint
         self.timeout = timeout

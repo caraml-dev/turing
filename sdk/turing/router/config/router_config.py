@@ -1,5 +1,6 @@
 from typing import List, Dict, Union
 from collections import Counter
+from dataclasses import dataclass
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
@@ -13,7 +14,36 @@ from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
 from turing.experiment_config import ExperimentConfig
 
 
+@dataclass
 class RouterConfig:
+    """
+    Class to create a new RouterConfig. Can be built up from its individual components or initialised instantly
+    from an appropriate API response
+
+    :param environment_name: name of the environment
+    :param name: name of the router
+    :param routes: list of routes used by the router
+    :param rules: list of rules used by the router
+    :param default_route_id: default route id to be used
+    :param experiment_engine: experiment engine config file
+    :param resource_request: resources to be provisioned for the router
+    :param timeout: request timeout which when exceeded, the request to the router will be terminated
+    :param log_config: logging config settings to be used with the router
+    :param enricher: enricher config settings to be used with the router
+    :param ensembler: ensembler config settings to be used with the router
+    """
+    environment_name: str
+    name: str
+    routes: Union[List[Route], List[Dict[str, str]]] = None
+    rules: Union[List[TrafficRule], List[Dict]] = None
+    default_route_id: str = None
+    experiment_engine: Union[ExperimentConfig, Dict] = None
+    resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None
+    timeout: str = None
+    log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None
+    enricher: Union[Enricher, Dict] = None
+    ensembler: Union[RouterEnsemblerConfig, Dict] = None
+
     def __init__(self,
                  environment_name: str,
                  name: str,
@@ -27,22 +57,6 @@ class RouterConfig:
                  enricher: Union[Enricher, Dict] = None,
                  ensembler: Union[RouterEnsemblerConfig, Dict] = None,
                  **kwargs):
-        """
-        Method to create a new RouterConfig. Can be built up from its individual components or initialised instantly
-        from an appropriate API response
-
-        :param environment_name: name of the environment
-        :param name: name of the router
-        :param routes: list of routes used by the router
-        :param rules: list of rules used by the router
-        :param default_route_id: default route id to be used
-        :param experiment_engine: experiment engine config file
-        :param resource_request: resources to be provisioned for the router
-        :param timeout: request timeout which when exceeded, the request to the router will be terminated
-        :param log_config: logging config settings to be used with the router
-        :param enricher: enricher config settings to be used with the router
-        :param ensembler: ensembler config settings to be used with the router
-        """
         self.environment_name = environment_name
         self.name = name
         self.routes = routes

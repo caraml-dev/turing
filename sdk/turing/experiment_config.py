@@ -1,14 +1,17 @@
+from dataclasses import dataclass, field
+from typing import Dict
+
 import turing.generated.models
-from typing import List, Dict
 from turing.generated.model_utils import OpenApiModel
 
 
+@dataclass
 class ExperimentConfig:
-    def __init__(self,
-                 type: str = "nop",
-                 config: Dict = None):
-        self.type = type
-        self.config = config
+    type: str = "nop",
+    config: Dict = None
+
+    _type: str = field(init=False, repr=False)
+    _config: str = field(init=False, repr=False)
 
     @property
     def type(self) -> str:

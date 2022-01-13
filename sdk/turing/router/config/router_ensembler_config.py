@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import turing.generated.models
 from typing import List, Dict, Union
 from turing.generated.model_utils import OpenApiModel
@@ -6,21 +8,27 @@ from turing.router.config.common.env_var import EnvVar
 from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 
+@dataclass
 class RouterEnsemblerConfig:
+    """
+    Class to create a new RouterEnsemblerConfig
+
+    :param type: type of the ensembler; must be one of {'standard', 'docker'}
+    :param id: id of the ensembler
+    :param standard_config: EnsemblerStandardConfig instance containing mappings between routes and treatments
+    :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
+    """
+    type: str
+    id: int = None
+    standard_config: turing.generated.models.EnsemblerStandardConfig = None
+    docker_config: turing.generated.models.EnsemblerDockerConfig = None
+
     def __init__(self,
                  type: str,
                  id: int = None,
                  standard_config: turing.generated.models.EnsemblerStandardConfig = None,
                  docker_config: turing.generated.models.EnsemblerDockerConfig = None,
                  **kwargs):
-        """
-        Method to create a new RouterEnsemblerConfig
-
-        :param type: type of the ensembler; must be one of {'standard', 'docker'}
-        :param id: id of the ensembler
-        :param standard_config: EnsemblerStandardConfig instance containing mappings between routes and treatments
-        :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
-        """
         self.id = id
         self.type = type
         self.standard_config = standard_config
