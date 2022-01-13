@@ -218,3 +218,13 @@ class TuringSession:
         """
         return RouterApi(self._api_client).projects_project_id_routers_post(project_id=self.active_project.id,
                                                                             router_config=router_config)
+
+    @require_active_project
+    def delete_router(self, router_id: int) -> IdObject:
+        """
+        Delete router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_delete(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )

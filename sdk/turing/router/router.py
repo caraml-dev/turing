@@ -94,3 +94,10 @@ class Router(ApiObject):
         :return: instance of router created
         """
         return Router.from_open_api(turing.active_session.create_router(router_config=config))
+
+    @classmethod
+    def delete(cls, router_id: int):
+        """
+        Delete specific router given its router ID
+        """
+        return turing.active_session.delete_router(router_id=router_id).id
