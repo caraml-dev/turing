@@ -162,108 +162,6 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
 
 
 @pytest.mark.parametrize(
-    "new_image,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            "#@!#!@#@!",
-            1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "500ms",
-            5120,
-            [
-                EnvVar(
-                    name="env_name",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            ApiValueError
-        )
-    ])
-def test_set_docker_router_ensembler_config_with_invalid_image(
-        new_image,
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected
-):
-    actual = DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
-    with pytest.raises(expected):
-        actual.image = new_image
-        actual.to_open_api()
-
-
-@pytest.mark.parametrize(
-    "new_image,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            1,
-            "test.io/gods-test/not-the-right-ensembler:0.0.0-build.1",
-            ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "500ms",
-            5120,
-            [
-                EnvVar(
-                    name="env_name",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            "generic_docker_router_ensembler_config"
-        )
-    ])
-def test_set_docker_router_ensembler_config_with_valid_image(
-        new_image,
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected,
-        request
-):
-    actual = DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
-    actual.image = new_image
-    assert actual.to_open_api() == request.getfixturevalue(expected)
-
-
-@pytest.mark.parametrize(
     "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             1,
@@ -311,9 +209,8 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
 
 
 @pytest.mark.parametrize(
-    "new_timeout,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
-            "500ks",
             1,
             "test.io/gods-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
@@ -327,15 +224,14 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             5120,
             [
                 EnvVar(
-                    name="env_name",
+                    name="env_!@#!@$!",
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
             ApiValueError
         )
     ])
-def test_set_docker_router_ensembler_config_with_invalid_timeout(
-        new_timeout,
+def test_create_docker_router_ensembler_config_with_invalid_env(
         id,
         image,
         resource_request,
@@ -344,127 +240,19 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
         port,
         env,
         service_account,
-        expected
+        expected,
 ):
-    actual = DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
     with pytest.raises(expected):
-        actual.timeout = new_timeout
-        actual.to_open_api()
-
-
-@pytest.mark.parametrize(
-    "new_timeout,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            "500ms",
-            1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "1000ms",
-            5120,
-            [
-                EnvVar(
-                    name="env_name",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            "generic_docker_router_ensembler_config"
-        )
-    ])
-def test_set_docker_router_ensembler_config_with_valid_timeout(
-        new_timeout,
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected,
-        request
-):
-    actual = DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
-    actual.timeout = new_timeout
-    assert actual.to_open_api() == request.getfixturevalue(expected)
-
-
-@pytest.mark.parametrize(
-    "new_env,id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
-        pytest.param(
-            [
-                EnvVar(
-                    name="env_name",
-                    value="env_val")
-            ],
-            1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
-            ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request='100m',
-                memory_request='512Mi'
-            ),
-            f"http://localhost:5000/ensembler_endpoint",
-            "500ms",
-            5120,
-            [
-                EnvVar(
-                    name="env_not_the_right_name",
-                    value="env_val")
-            ],
-            "secret-name-for-google-service-account",
-            "generic_docker_router_ensembler_config"
-        )
-    ])
-def test_set_docker_router_ensembler_config_with_valid_env(
-        new_env,
-        id,
-        image,
-        resource_request,
-        endpoint,
-        timeout,
-        port,
-        env,
-        service_account,
-        expected,
-        request
-):
-    actual = DockerRouterEnsemblerConfig(
-        id=id,
-        image=image,
-        resource_request=resource_request,
-        endpoint=endpoint,
-        timeout=timeout,
-        port=port,
-        env=env,
-        service_account=service_account
-    )
-    actual.env = new_env
-    assert actual.to_open_api() == request.getfixturevalue(expected)
+        DockerRouterEnsemblerConfig(
+            id=id,
+            image=image,
+            resource_request=resource_request,
+            endpoint=endpoint,
+            timeout=timeout,
+            port=port,
+            env=env,
+            service_account=service_account
+        ).to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -473,7 +261,7 @@ def test_set_docker_router_ensembler_config_with_valid_env(
             1,
             [
                 {
-                    "experiment":"experiment-1",
+                    "experiment": "experiment-1",
                     "treatment": "treatment-1",
                     "route": "route-1"
                 },
