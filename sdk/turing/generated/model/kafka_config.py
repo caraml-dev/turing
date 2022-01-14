@@ -68,6 +68,7 @@ class KafkaConfig(ModelNormal):
         ('topic',): {
             'regex': {
                 'pattern': r'^[A-Za-z0-9_.-]{1,249}',  # noqa: E501
+                'flags': (re.IGNORECASE)
             },
         },
     }

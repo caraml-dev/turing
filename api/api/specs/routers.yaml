@@ -770,7 +770,7 @@ components:
       properties:
         image:
           type: "string"
-          pattern: '^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$'
+          pattern: '/^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$/i'
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
         endpoint:
@@ -835,7 +835,7 @@ components:
           description: Comma-separated list of host and port pairs that are the addresses of the Kafka brokers.
         topic:
           type: "string"
-          pattern: '/^[A-Za-z0-9_.-]{1,249}/'
+          pattern: '/^[A-Za-z0-9_.-]{1,249}/i'
         serialization_format:
           type: "string"
           enum:

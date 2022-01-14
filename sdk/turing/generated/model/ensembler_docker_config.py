@@ -64,6 +64,7 @@ class EnsemblerDockerConfig(ModelNormal):
         ('image',): {
             'regex': {
                 'pattern': r'^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$',  # noqa: E501
+                'flags': (re.IGNORECASE)
             },
         },
         ('timeout',): {
