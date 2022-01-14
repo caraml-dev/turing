@@ -15,11 +15,10 @@ from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
 from turing.router.config.common.env_var import EnvVar
-from turing.experiment_config import ExperimentConfig
+from turing.router.config.experiment_config import ExperimentConfig
 import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
-
 
 @pytest.fixture
 def turing_api() -> str:
