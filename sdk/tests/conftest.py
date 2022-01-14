@@ -515,7 +515,7 @@ def generic_router_config():
 
 
 @pytest.fixture
-def generic_router(generic_router_status, router_version):
+def generic_router(project, generic_router_status, router_version):
     return turing.generated.models.RouterDetails(
         id=1,
         name=f"router-1",

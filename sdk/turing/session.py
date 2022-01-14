@@ -12,6 +12,7 @@ from turing.generated.models import \
     EnsemblersPaginatedResults, \
     EnsemblingJobPaginatedResults, \
     IdObject, \
+    Router, \
     RouterDetails, \
     RouterConfig
 
@@ -228,3 +229,22 @@ class TuringSession:
             project_id=self.active_project.id,
             router_id=router_id
         )
+
+    @require_active_project
+    def get_router(self, router_id: int) -> Router:
+        """
+        Fetch router by its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_get(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def update_router(self, router_id: int, router_config: RouterConfig) -> Router:
+        """
+        Update router in the active project the user has access to, with a router_config passed as a parameter
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_put(project_id=self.active_project.id,
+                                                                                     router_id=router_id,
+                                                                                     router_config=router_config)

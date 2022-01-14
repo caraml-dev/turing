@@ -96,8 +96,33 @@ class Router(ApiObject):
         return Router.from_open_api(turing.active_session.create_router(router_config=config))
 
     @classmethod
-    def delete(cls, router_id: int):
+    def delete(cls, router_id: int) -> int:
         """
         Delete specific router given its router ID
+
+        :param router_id: router_id of the router to be deleted
+        :return: router_id of the deleted router
         """
         return turing.active_session.delete_router(router_id=router_id).id
+
+    @classmethod
+    def get(cls, router_id: int) -> 'Router':
+        """
+        Fetch router by its router ID
+
+        :param router_id: router_id of the router to be fetched
+        :return: router with the corresponding id
+        """
+        return Router.from_open_api(
+            turing.active_session.get_router(router_id=router_id))
+
+    def update(self, config: turing.generated.models.RouterConfig):
+        """
+        Update the current router with a new set of configs specified in the RouterConfig argument
+
+        :param config: configuration of router
+        :return: instance of router created
+        """
+
+    def update_attributes(self, **kwargs):
+        pass
