@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
-from turing.router.config.common.schemas import EnvVarNameSchema
 
 
 @dataclass
@@ -19,7 +18,6 @@ class EnvVar:
 
     @name.setter
     def name(self, name):
-        EnvVarNameSchema.verify_regex(name)
         self._name = name
 
     @property

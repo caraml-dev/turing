@@ -1,6 +1,5 @@
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
-from turing.router.config.common.schemas import TimeoutSchema
 from urllib.parse import urlparse
 from dataclasses import dataclass
 
@@ -50,7 +49,6 @@ class Route:
 
     @timeout.setter
     def timeout(self, timeout: str):
-        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @classmethod

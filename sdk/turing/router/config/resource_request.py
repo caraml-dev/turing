@@ -3,7 +3,6 @@ from typing import ClassVar
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
-from turing.router.config.common.schemas import CpuRequestSchema, MemoryRequestSchema
 
 
 @dataclass
@@ -46,7 +45,6 @@ class ResourceRequest:
 
     @cpu_request.setter
     def cpu_request(self, cpu_request: str):
-        CpuRequestSchema.verify_regex(cpu_request)
         self._cpu_request = cpu_request
 
     @property
@@ -55,7 +53,6 @@ class ResourceRequest:
 
     @memory_request.setter
     def memory_request(self, memory_request: str):
-        MemoryRequestSchema.verify_regex(memory_request)
         self._memory_request = memory_request
 
     @classmethod

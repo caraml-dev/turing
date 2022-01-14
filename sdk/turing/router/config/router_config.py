@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
-from turing.router.config.common.schemas import TimeoutSchema
 from turing.router.config.route import Route
 from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
@@ -157,7 +156,6 @@ class RouterConfig:
 
     @timeout.setter
     def timeout(self, timeout: str):
-        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @property

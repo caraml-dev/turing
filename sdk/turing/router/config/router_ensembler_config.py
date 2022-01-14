@@ -5,7 +5,6 @@ from typing import List, Dict, Union
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
-from turing.router.config.common.schemas import DockerImageSchema, TimeoutSchema
 
 
 @dataclass
@@ -137,7 +136,6 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 
     @image.setter
     def image(self, image: str):
-        DockerImageSchema.verify_regex(image)
         self._image = image
 
     @property
@@ -162,7 +160,6 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 
     @timeout.setter
     def timeout(self, timeout: str):
-        TimeoutSchema.verify_regex(timeout)
         self._timeout = timeout
 
     @property

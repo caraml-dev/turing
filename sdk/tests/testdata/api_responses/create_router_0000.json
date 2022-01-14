@@ -4,7 +4,7 @@
   "updated_at": "2022-01-12T09:22:54.328148Z",
   "project_id": 102,
   "environment_name": "id-dev",
-  "name": "router_1",
+  "name": "router-1",
   "status": "deployed",
   "endpoint": "http://router-1-endpoint.io/v1/predict",
   "config": {

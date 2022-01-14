@@ -1,6 +1,6 @@
 import pytest
+from turing.generated.exceptions import ApiValueError
 from turing.router.config.resource_request import (ResourceRequest, InvalidReplicaCountException)
-from turing.router.config.common.schemas import (InvalidCPURequestException, InvalidMemoryRequestException)
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test_create_resource_request_with_min_replica_below_min_allowed(
             max_replica,
             cpu_request,
             memory_request
-        ).to_open_api()
+        )
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_create_resource_request_with_max_replica_above_max_allowed(
             max_replica,
             cpu_request,
             memory_request
-        ).to_open_api()
+        )
 
 
 @pytest.mark.parametrize(
@@ -105,7 +105,7 @@ def test_create_resource_request_with_min_replica_greater_than_max_replica(
             max_replica,
             cpu_request,
             memory_request
-        ).to_open_api()
+        )
 
 
 @pytest.mark.parametrize(
@@ -115,7 +115,7 @@ def test_create_resource_request_with_min_replica_greater_than_max_replica(
             5,
             "3m",
             "512Mi",
-            InvalidCPURequestException
+            ApiValueError
         )
     ])
 def test_create_resource_request_with_invalid_cpu_request_string(
@@ -141,7 +141,7 @@ def test_create_resource_request_with_invalid_cpu_request_string(
             5,
             "33m",
             "512Ri",
-            InvalidMemoryRequestException
+            ApiValueError
         )
     ])
 def test_create_resource_request_with_invalid_memory_request_string(
@@ -374,7 +374,7 @@ def test_create_resource_request_with_valid_cpu_request(
             3,
             "100m",
             "512Mi",
-            InvalidCPURequestException
+            ApiValueError
         )
     ])
 def test_set_resource_request_with_invalid_cpu_request_string(
@@ -393,6 +393,7 @@ def test_set_resource_request_with_invalid_cpu_request_string(
     )
     with pytest.raises(expected):
         actual.cpu_request = new_cpu_request
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -433,7 +434,7 @@ def test_create_resource_request_with_valid_memory_request(
             3,
             "100m",
             "512Mi",
-            InvalidMemoryRequestException
+            ApiValueError
         )
     ])
 def test_set_resource_request_with_invalid_memory_request_string(
@@ -452,3 +453,4 @@ def test_set_resource_request_with_invalid_memory_request_string(
     )
     with pytest.raises(expected):
         actual.memory_request = new_memory_request
+        actual.to_open_api()

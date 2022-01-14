@@ -59,6 +59,11 @@ class RouterConfig(ModelNormal):
     }
 
     validations = {
+        ('name',): {
+            'regex': {
+                'pattern': r'^[a-z0-9-]*$',  # noqa: E501
+            },
+        },
     }
 
     additional_properties_type = None

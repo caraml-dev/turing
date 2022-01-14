@@ -440,7 +440,7 @@ def router_version(
 def generic_router_config():
     return RouterConfig(
         environment_name="id-dev",
-        name="router_1",
+        name="router-1",
         routes=[
             Route(
                 id="model-a",
@@ -519,7 +519,7 @@ def generic_router_config():
 def generic_router(generic_router_status, router_version):
     return turing.generated.models.RouterDetails(
         id=1,
-        name=f"router_1",
+        name=f"router-1",
         endpoint=f"http://localhost:5000/endpoint_1",
         environment_name=f"env_1",
         monitoring_url=f"http://localhost:5000/dashboard_1",
@@ -536,7 +536,7 @@ def generic_routers(project, num_routers, generic_router_status, router_version)
     return [
         turing.generated.models.RouterDetails(
             id=i,
-            name=f"router_{i}",
+            name=f"router-{i}",
             endpoint=f"http://localhost:5000/endpoint_{i}",
             environment_name=f"env_{i}",
             monitoring_url=f"http://localhost:5000/dashboard_{i}",

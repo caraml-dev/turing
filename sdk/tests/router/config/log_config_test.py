@@ -1,9 +1,8 @@
 import pytest
 import turing.generated.models
+from turing.generated.exceptions import ApiValueError
 from turing.router.config.log_config import (ResultLoggerType, LogConfig, BigQueryLogConfig, KafkaLogConfig,
                                              KafkaConfigSerializationFormat, InvalidResultLoggerTypeAndConfigCombination)
-from turing.router.config.common.schemas import (InvalidKafkaBrokersException, InvalidKafkaTopicException,
-                                                 InvalidBigQueryTableException)
 
 
 @pytest.mark.parametrize(
@@ -118,7 +117,7 @@ def test_create_bigquery_log_config_with_valid_params(table, service_account_sec
             "bigqueryprojectownsbigquerydatasetownsbigquerytable",
             "my-little-secret",
             None,
-            InvalidBigQueryTableException
+            ApiValueError
         )
     ])
 def test_create_bigquery_log_config_with_invalid_table(table, service_account_secret, batch_load, expected):
@@ -164,7 +163,7 @@ def test_set_bigquery_log_config_with_valid_table(new_table, table, service_acco
             "bigqueryproject.bigquerydataset.bigquerytable",
             "my-little-secret",
             None,
-            InvalidBigQueryTableException
+            ApiValueError
         )
     ])
 def test_set_bigquery_log_config_with_invalid_table(new_table, table, service_account_secret, batch_load, expected):
@@ -175,6 +174,7 @@ def test_set_bigquery_log_config_with_invalid_table(new_table, table, service_ac
     )
     with pytest.raises(expected):
         actual.table = new_table
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -221,13 +221,13 @@ def test_create_kafka_log_config_with_valid_params(brokers, topic, serialization
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "new_topics",
             KafkaConfigSerializationFormat.JSON,
-            InvalidKafkaBrokersException
+            ApiValueError
         ),
         pytest.param(
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "new_topics",
             KafkaConfigSerializationFormat.PROTOBUF,
-            InvalidKafkaBrokersException
+            ApiValueError
         )
     ])
 def test_create_kafka_log_config_with_invalid_brokers(brokers, topic, serialization_format, expected):
@@ -236,7 +236,7 @@ def test_create_kafka_log_config_with_invalid_brokers(brokers, topic, serializat
             brokers=brokers,
             topic=topic,
             serialization_format=serialization_format
-        )
+        ).to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -287,14 +287,14 @@ def test_set_kafka_log_config_with_valid_brokers(new_brokers, brokers, topic, se
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.JSON,
-            InvalidKafkaBrokersException
+            ApiValueError
         ),
         pytest.param(
             "1.2.3.4:5.6.7.8,9.0.1.2:3.4.5.6",
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.PROTOBUF,
-            InvalidKafkaBrokersException
+            ApiValueError
         )
     ])
 def test_set_kafka_log_config_with_invalid_brokers(new_brokers, brokers, topic, serialization_format, expected):
@@ -305,6 +305,7 @@ def test_set_kafka_log_config_with_invalid_brokers(new_brokers, brokers, topic, 
     )
     with pytest.raises(expected):
         actual.brokers = new_brokers
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -313,13 +314,13 @@ def test_set_kafka_log_config_with_invalid_brokers(new_brokers, brokers, topic, 
             "1.2.3.4:5678,9.0.1.2:3456",
             "!@#$%^&*()",
             KafkaConfigSerializationFormat.JSON,
-            InvalidKafkaTopicException
+            ApiValueError
         ),
         pytest.param(
             "1.2.3.4:5678,9.0.1.2:3456",
             "!@#$%^&*()",
             KafkaConfigSerializationFormat.PROTOBUF,
-            InvalidKafkaTopicException
+            ApiValueError
         )
     ])
 def test_create_kafka_log_config_with_invalid_topic(brokers, topic, serialization_format, expected):
@@ -328,7 +329,7 @@ def test_create_kafka_log_config_with_invalid_topic(brokers, topic, serializatio
             brokers=brokers,
             topic=topic,
             serialization_format=serialization_format
-        )
+        ).to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -379,14 +380,14 @@ def test_set_kafka_log_config_with_valid_topic(new_topic, brokers, topic, serial
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.JSON,
-            InvalidKafkaTopicException
+            ApiValueError
         ),
         pytest.param(
             "!@#$%^&*()",
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.PROTOBUF,
-            InvalidKafkaTopicException
+            ApiValueError
         )
     ])
 def test_set_kafka_log_config_with_invalid_topic(new_topic, brokers, topic, serialization_format, expected):
@@ -397,6 +398,7 @@ def test_set_kafka_log_config_with_invalid_topic(new_topic, brokers, topic, seri
     )
     with pytest.raises(expected):
         actual.topic = new_topic
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(

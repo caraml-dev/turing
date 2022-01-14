@@ -1,8 +1,8 @@
 import pytest
 import turing.generated.models
+from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.common.schemas import (InvalidImageException, InvalidTimeoutException)
 from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
                                                           DockerRouterEnsemblerConfig,
                                                           StandardRouterEnsemblerConfig,
@@ -134,7 +134,7 @@ def test_create_docker_router_ensembler_config(
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            InvalidImageException
+            ApiValueError
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_image(
@@ -158,7 +158,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             port=port,
             env=env,
             service_account=service_account
-        )
+        ).to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -182,7 +182,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            InvalidImageException
+            ApiValueError
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_image(
@@ -209,6 +209,7 @@ def test_set_docker_router_ensembler_config_with_invalid_image(
     )
     with pytest.raises(expected):
         actual.image = new_image
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -282,7 +283,7 @@ def test_set_docker_router_ensembler_config_with_valid_image(
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            InvalidTimeoutException
+            ApiValueError
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
@@ -306,7 +307,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             port=port,
             env=env,
             service_account=service_account
-        )
+        ).to_open_api()
 
 
 @pytest.mark.parametrize(
@@ -330,7 +331,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
                     value="env_val")
             ],
             "secret-name-for-google-service-account",
-            InvalidTimeoutException
+            ApiValueError
         )
     ])
 def test_set_docker_router_ensembler_config_with_invalid_timeout(
@@ -357,6 +358,7 @@ def test_set_docker_router_ensembler_config_with_invalid_timeout(
     )
     with pytest.raises(expected):
         actual.timeout = new_timeout
+        actual.to_open_api()
 
 
 @pytest.mark.parametrize(

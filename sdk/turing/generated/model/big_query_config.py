@@ -55,6 +55,12 @@ class BigQueryConfig(ModelNormal):
     }
 
     validations = {
+        ('table',): {
+            'regex': {
+                'pattern': r'^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$',  # noqa: E501
+                'flags': (re.IGNORECASE)
+            },
+        },
     }
 
     additional_properties_type = None

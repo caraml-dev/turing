@@ -3,7 +3,6 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Dict, Union
 from turing.generated.model_utils import OpenApiModel
-from turing.router.config.common.schemas import BigQueryTableSchema, KafkaBrokersSchema, KafkaTopicSchema
 
 
 class ResultLoggerType(Enum):
@@ -130,7 +129,6 @@ class BigQueryLogConfig(LogConfig):
 
     @table.setter
     def table(self, table: str):
-        BigQueryTableSchema.verify_regex(table)
         self._table = table
 
     @property
@@ -187,7 +185,6 @@ class KafkaLogConfig(LogConfig):
 
     @brokers.setter
     def brokers(self, brokers):
-        KafkaBrokersSchema.verify_regex(brokers)
         self._brokers = brokers
 
     @property
@@ -196,7 +193,6 @@ class KafkaLogConfig(LogConfig):
 
     @topic.setter
     def topic(self, topic):
-        KafkaTopicSchema.verify_regex(topic)
         self._topic = topic
 
     @property
