@@ -63,8 +63,7 @@ class EnsemblerDockerConfig(ModelNormal):
     validations = {
         ('image',): {
             'regex': {
-                'pattern': r'^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$',  # noqa: E501
-                'flags': (re.IGNORECASE)
+                'pattern': r'^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$',  # noqa: E501
             },
         },
         ('timeout',): {
