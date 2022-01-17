@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
+import { StepActions } from "@gojek/mlp-ui";
 import { ConfigSection } from "../../../components/config_section";
 import { VersionComparisonPanel } from "../../versions/components/version_diff/VersionComparisonPanel";
 import { RouterVersion } from "../../../services/version/RouterVersion";
-import { StepActions } from "../../../components/multi_steps_form/StepActions";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 
 export const VersionComparisonView = ({
@@ -46,6 +46,7 @@ export const VersionComparisonView = ({
 
       <EuiFlexItem>
         <StepActions
+          currentStep={1}
           submitLabel="Deploy"
           onPrevious={onPrevious}
           onSubmit={onSubmit}

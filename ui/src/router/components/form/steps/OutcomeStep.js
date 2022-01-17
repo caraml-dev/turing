@@ -1,12 +1,11 @@
 import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ResultLoggingTypePanel } from "../components/outcome_config/ResultLoggingTypePanel";
-import { FormContext } from "../../../../components/form/context";
+import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
 import { get } from "../../../../components/form/utils";
 import { BigQueryConfigPanel } from "../components/outcome_config/bigquery/BigQueryConfigPanel";
 import { KafkaConfigPanel } from "../components/outcome_config/kafka/KafkaConfigPanel";
 import { SecretsContextProvider } from "../../../../providers/secrets/context";
-import FormValidationContext from "../../../../components/form/validation";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { resultLoggingOptions } from "../components/outcome_config/typeOptions";
 

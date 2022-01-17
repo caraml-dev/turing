@@ -1,16 +1,14 @@
 import React, { useContext, useEffect, useMemo } from "react";
 import { RouterStep } from "./steps/RouterStep";
-import { StepsWizardHorizontal } from "../../../components/multi_steps_form/StepsWizardHorizontal";
 import { ExperimentStep } from "./steps/ExperimentStep";
 import { EnricherStep } from "./steps/EnricherStep";
 import { EnsemblerStep } from "./steps/EnsemblerStep";
 import { OutcomeStep } from "./steps/OutcomeStep";
 import schema from "./validation/schema";
 import { useTuringApi } from "../../../hooks/useTuringApi";
-import { FormContext } from "../../../components/form/context";
 import { ConfirmationModal } from "../../../components/confirmation_modal/ConfirmationModal";
 import { DeploymentSummary } from "./components/DeploymentSummary";
-import { addToast } from "@gojek/mlp-ui";
+import { FormContext, StepsWizardHorizontal, addToast } from "@gojek/mlp-ui";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 import { useConfig } from "../../../config";
 
