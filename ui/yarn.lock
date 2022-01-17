@@ -1310,10 +1310,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@gojek/mlp-ui@1.4.15":
-  version "1.4.15"
-  resolved "https://registry.yarnpkg.com/@gojek/mlp-ui/-/mlp-ui-1.4.15.tgz#76e825dc4844978ea3139aef70fa58926b9b1e0e"
-  integrity sha512-xgtBElz4/AB+JDU8qe9IgUbbzpxGd28OcOc+w/O0hJGJN7BaTAZLDYjmnSJbTIirgDYodKbtZbLJNrNHKqJbkA==
+"@gojek/mlp-ui@1.4.19":
+  version "1.4.19"
+  resolved "https://registry.yarnpkg.com/@gojek/mlp-ui/-/mlp-ui-1.4.19.tgz#aea3aa9d97f6b3f5b0386423c8728e0f4214ecac"
+  integrity sha512-S7dvuTRj+2e7k2u3zWLyZbBjItCNBA3WfbcmXMamKEJ1cx395Sbig1gCwQQC1zSVSi9khI59gmjSxYZJDdDDdw==
   dependencies:
     classnames "^2.2.6"
     json-bigint "1.0.0"

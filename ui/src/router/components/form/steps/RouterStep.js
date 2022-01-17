@@ -3,11 +3,10 @@ import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { GeneralSettingsPanel } from "../components/router_config/GeneralSettingsPanel";
 import { RoutesPanel } from "../components/router_config/RoutesPanel";
 import { ResourcesPanel } from "../components/ResourcesPanel";
-import { FormContext } from "../../../../components/form/context";
+import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
 import { MerlinEndpointsProvider } from "../../../../providers/endpoints/MerlinEndpointsProvider";
 import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";
-import FormValidationContext from "../../../../components/form/validation/context";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { RulesPanel } from "../components/router_config/RulesPanel";
 

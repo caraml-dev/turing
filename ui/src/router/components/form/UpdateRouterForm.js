@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { AccordionForm } from "../../../components/accordion_form";
+import { AccordionForm } from "@gojek/mlp-ui";
 import { RouterStep } from "./steps/RouterStep";
 import schema from "./validation/schema";
 import { ExperimentStep } from "./steps/ExperimentStep";

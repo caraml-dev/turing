@@ -1,13 +1,12 @@
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ResourcesPanel } from "../components/ResourcesPanel";
 import React, { Fragment, useContext } from "react";
-import { FormContext } from "../../../../components/form/context";
+import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
 import { EnvVariablesPanel } from "../components/docker_config/EnvVariablesPanel";
 import { EnricherTypePanel } from "../components/enricher_config/EnricherTypePanel";
 import { DockerDeploymentPanel } from "../components/docker_config/DockerDeploymentPanel";
 import { DockerRegistriesContextProvider } from "../../../../providers/docker/context";
 import { useConfig } from "../../../../config";
-import FormValidationContext from "../../../../components/form/validation/context";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { enricherTypeOptions } from "../components/enricher_config/typeOptions";

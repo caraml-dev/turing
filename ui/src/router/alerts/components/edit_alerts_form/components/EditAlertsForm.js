@@ -1,13 +1,15 @@
 import React, { useCallback, useContext, useState } from "react";
 import { MetricPanel } from "./metric_panel/MetricPanel";
 import { ConfigSectionTitle } from "../../../../../components/config_section";
-import { AccordionForm } from "../../../../../components/accordion_form";
+import {
+  AccordionForm,
+  FormContext,
+  FormValidationContext,
+} from "@gojek/mlp-ui";
 import { TeamPanel } from "./team_panel/TeamPanel";
-import { FormContext } from "../../../../../components/form/context";
 import schema from "../validation/schema";
 import { TeamsProvider } from "../../../../../providers/teams/TeamsProvider";
 import { supportedAlerts } from "../../../config";
-import FormValidationContext from "../../../../../components/form/validation";
 import { get } from "../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { useAlertsApi } from "../hooks/useAlertsApi";
