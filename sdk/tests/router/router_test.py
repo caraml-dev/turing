@@ -212,3 +212,26 @@ def test_deploy_router(turing_api, active_project, generic_router, router_versio
     response = base_router.deploy()
     assert base_router.id == response['router_id']
     assert generic_router.config.version == response['version']
+
+
+@responses.activate
+def test_undeploy_router(turing_api, active_project, generic_router, router_version, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    expected = turing.generated.models.InlineResponse2001(
+        router_id=1,
+    )
+
+    responses.add(
+        method="POST",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/undeploy",
+        body=json.dumps(expected, default=tests.json_serializer),
+        status=200,
+        content_type="application/json"
+    )
+
+    response = base_router.undeploy()
+    assert base_router.id == response['router_id']
