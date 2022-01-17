@@ -349,8 +349,9 @@ type OpenapiConfig struct {
 	SpecOverrideFile *string
 }
 
+// SpecData returns a byte slice of the combined yaml files
 func (c *OpenapiConfig) SpecData() ([]byte, error) {
-	return utils.MergeTwoYamls(c.SpecFile, *c.SpecOverrideFile)
+	return utils.MergeTwoYamls(c.SpecFile, c.SpecOverrideFile)
 }
 
 // Load creates a Config object from default config values, config files and environment variables.

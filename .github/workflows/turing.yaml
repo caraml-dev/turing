@@ -338,17 +338,6 @@ jobs:
         with:
           go-version: "1.14"
 
-      - name: "Setup local k8s cluster"
-        uses: AbsaOSS/k3d-action@v1.5.0
-        with:
-          cluster-name: ${{ env.CLUSTER_NAME }}
-          use-default-registry: true
-          args: >-
-            --servers 1
-            --agents 3
-            --port 80:80@loadbalancer
-            --k3s-server-arg "--no-deploy=traefik,metrics-server"
-
       - name: Download Turing API Docker tar archive
         uses: actions/download-artifact@v2
         with:

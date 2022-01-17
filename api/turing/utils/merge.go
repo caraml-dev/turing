@@ -10,15 +10,20 @@ import (
 
 // MergeTwoYamls reads the original yaml file and overrides the original file with
 // the override file. This overriding will follow the rules in MergeMaps.
-func MergeTwoYamls(originalYAMLFile, overrideYAMLFile string) ([]byte, error) {
+func MergeTwoYamls(originalYAMLFile string, overrideYAMLFile *string) ([]byte, error) {
 	original, err := readYAML(originalYAMLFile)
 	if err != nil {
 		return nil, fmt.Errorf("error reading original yaml: %s", err)
 	}
 
-	override, err := readYAML(overrideYAMLFile)
-	if err != nil {
-		return nil, fmt.Errorf("error reading override yaml: %s", err)
+	// If override file is empty, we just have to leave the override as an empty map
+	var override map[string]interface{}
+	if overrideYAMLFile != nil {
+		var err error
+		override, err = readYAML(*overrideYAMLFile)
+		if err != nil {
+			return nil, fmt.Errorf("error reading override yaml: %s", err)
+		}
 	}
 
 	merged, err := MergeMaps(original, override)
