@@ -33,8 +33,7 @@ spec:
       {{- if .Values.turing.clusterConfig.useInClusterConfig }}
       serviceAccountName: {{ template "turing.serviceAccount.name" . }}
       {{- end }}
-      {{- with .Values.turing.extraInitContainers }}
-      initContainers:
+      {{- with (include "turing.initContainers" . | fromYaml) }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:
@@ -80,6 +79,8 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /etc/turing
+        - name: plugins-volume
+          mountPath: {{ include "turing.plugins.directory" . }}
         {{- with .Values.turing.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -90,6 +91,8 @@ spec:
       - name: config 
         secret:
           secretName: {{ template "turing.fullname" . }}-api-config
+      - name: plugins-volume
+        emptyDir: {}
       {{- with .Values.turing.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

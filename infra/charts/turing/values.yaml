@@ -100,6 +100,16 @@ turing:
     # it requires cluster credentials to be stored in Vault's KV Secrets store.
     useInClusterConfig: false
 
+  # -- Turing Experiment Engines configuration
+  experimentEngines: {}
+  # Example:
+  # - name: my-exp-engine
+  #   type: rpc-plugin
+  #   rpcPlugin:
+  #     image: ghcr.io/turing/my-exp-engine:latest
+  #   options:
+  #     key-1: value-1
+
   # -- Turing API server configuration.
   # Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
   # for the detailed explanation on Turing API config options
