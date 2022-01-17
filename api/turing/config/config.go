@@ -341,7 +341,7 @@ type OpenapiConfig struct {
 	ValidationEnabled bool
 	// SpecFile specifies the file path containing OpenAPI v3 spec
 	SpecFile string
-    // Config file to be used for serving swagger.
+	// Config file to be used for serving swagger.
 	SwaggerUIConfig *SinglePageApplicationConfig
 	// Where the merged spec file yaml should be served.
 	YAMLServingPath string
@@ -349,8 +349,8 @@ type OpenapiConfig struct {
 	SpecOverrideFile *string
 }
 
-func (c * OpenapiConfig) SpecData() ([]byte, error) {
-  return utils.MergeTwoYamls(c.SpecFile, *c.SpecOverrideFile)
+func (c *OpenapiConfig) SpecData() ([]byte, error) {
+	return utils.MergeTwoYamls(c.SpecFile, *c.SpecOverrideFile)
 }
 
 // Load creates a Config object from default config values, config files and environment variables.

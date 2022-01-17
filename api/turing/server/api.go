@@ -71,12 +71,12 @@ func openapiValidationMiddleware(
 	cfg *config.Config,
 ) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
-        spec, specErr := cfg.OpenapiConfig.SpecData()
-        if specErr != nil {
-            return nil, errors.Wrapf(specErr, "Failed to initialize OpenAPI Validation middleware")
-        }
+		spec, specErr := cfg.OpenapiConfig.SpecData()
+		if specErr != nil {
+			return nil, errors.Wrapf(specErr, "Failed to initialize OpenAPI Validation middleware")
+		}
 		openapiValidation, err := middleware.NewOpenAPIValidation(
-            spec,
+			spec,
 			middleware.OpenAPIValidationOptions{
 				// Authentication is ignored because it is handled by another middleware
 				IgnoreAuthentication: true,
