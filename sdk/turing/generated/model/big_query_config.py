@@ -55,11 +55,16 @@ class BigQueryConfig(ModelNormal):
     }
 
     validations = {
+        ('table',): {
+            'regex': {
+                'pattern': r'^[a-zA-Z][a-zA-Z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$',  # noqa: E501
+            },
+        },
     }
 
     additional_properties_type = None
 
-    _nullable = False
+    _nullable = True
 
     @cached_property
     def openapi_types():

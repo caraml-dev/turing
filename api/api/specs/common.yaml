@@ -29,6 +29,7 @@ components:
       properties:
         name:
           type: "string"
+          pattern: '^[a-zA-Z0-9_]*$'
         value:
           type: "string"
 

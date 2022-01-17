@@ -9,6 +9,10 @@ info:
 .id: &id
   type: "integer"
   format: "int32"
+
+.timeout: &timeout
+  type: "string"
+  pattern: '^[0-9]+(ms|s|m|h)$'
   
 paths:
   "/projects/{project_id}/routers":
@@ -479,7 +483,7 @@ components:
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
-          type: "string"
+          <<: *timeout
         log_config:
           type: "object"
           properties:
@@ -557,6 +561,7 @@ components:
           type: "string"
         name:
           type: "string"
+          pattern: '^[a-z0-9-]*$'
         config:
           type: "object"
           required:
@@ -581,7 +586,7 @@ components:
             resource_request:
               $ref: "#/components/schemas/ResourceRequest"
             timeout:
-              type: "string"
+              <<: *timeout
             log_config:
               type: "object"
               properties:
@@ -611,7 +616,7 @@ components:
         endpoint:
           type: "string"
         timeout:
-          type: "string"
+          <<: *timeout
         annotations:
           type: "object"
           nullable: true
@@ -675,7 +680,7 @@ components:
         endpoint:
           type: "string"
         timeout:
-          type: "string"
+          <<: *timeout
         port:
           type: "integer"
         env:
@@ -765,12 +770,13 @@ components:
       properties:
         image:
           type: "string"
+          pattern: '^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$'
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
         endpoint:
           type: "string"
         timeout:
-          type: "string"
+          <<: *timeout
         port:
           type: "integer"
         env:
@@ -794,17 +800,21 @@ components:
           type: "integer"
         cpu_request:
           type: "string"
+          pattern: '^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$'
         memory_request:
           type: "string"
+          pattern: '^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$'
 
     BigQueryConfig:
       type: "object"
+      nullable: true
       required:
         - table
         - service_account_secret
       properties:
         table:
           type: "string"
+          pattern: '^[a-zA-Z][a-zA-Z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$'
         service_account_secret:
           type: "string"
         batch_load:
@@ -813,6 +823,7 @@ components:
 
     KafkaConfig:
       type: "object"
+      nullable: true
       required:
         - brokers
         - topic
@@ -820,9 +831,11 @@ components:
       properties:
         brokers:
           type: "string"
+          pattern: '^([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$'
           description: Comma-separated list of host and port pairs that are the addresses of the Kafka brokers.
         topic:
           type: "string"
+          pattern: '^[A-Za-z0-9_.-]{1,249}$'
         serialization_format:
           type: "string"
           enum:

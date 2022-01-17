@@ -59,11 +59,21 @@ class KafkaConfig(ModelNormal):
     }
 
     validations = {
+        ('brokers',): {
+            'regex': {
+                'pattern': r'^([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$',  # noqa: E501
+            },
+        },
+        ('topic',): {
+            'regex': {
+                'pattern': r'^[A-Za-z0-9_.-]{1,249}$',  # noqa: E501
+            },
+        },
     }
 
     additional_properties_type = None
 
-    _nullable = False
+    _nullable = True
 
     @cached_property
     def openapi_types():

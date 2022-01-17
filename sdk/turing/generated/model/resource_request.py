@@ -55,6 +55,16 @@ class ResourceRequest(ModelNormal):
     }
 
     validations = {
+        ('cpu_request',): {
+            'regex': {
+                'pattern': r'^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$',  # noqa: E501
+            },
+        },
+        ('memory_request',): {
+            'regex': {
+                'pattern': r'^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$',  # noqa: E501
+            },
+        },
     }
 
     additional_properties_type = None
