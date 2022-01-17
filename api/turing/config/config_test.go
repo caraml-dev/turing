@@ -168,7 +168,7 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
-					YAMLServingPath:    "/static/openapi.bundle.yaml",
+					YAMLServingPath:   "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -211,18 +211,6 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
 					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "fooval1",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
-					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
@@ -249,7 +237,7 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
-					YAMLServingPath:    "/static/openapi.bundle.yaml",
+					YAMLServingPath:   "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -305,21 +293,6 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2-override",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
-						"qux": map[string]interface{}{
-							"quux": "quuxval",
-						},
-					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
@@ -346,7 +319,7 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
-					YAMLServingPath:    "/static/openapi.bundle.yaml",
+					YAMLServingPath:   "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/swagger-ui",
@@ -422,21 +395,6 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "fooval1-env",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2-override",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
-						"qux": map[string]interface{}{
-							"quux": "quuxval-env",
-						},
-					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
@@ -464,7 +422,7 @@ func TestLoad(t *testing.T) {
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
-					YAMLServingPath:    "/static/openapi.bundle.yaml",
+					YAMLServingPath:   "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "static/swagger-ui",
 						ServingPath:      "/swagger-ui",

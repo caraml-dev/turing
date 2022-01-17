@@ -19,7 +19,7 @@ import (
 const (
 	secretVolume    = "svc-acct-secret-volume"
 	secretMountPath = "/var/secret/"
-	// Kubernetes secret key name for usage in: router, ensembler, enricher, litmus.
+	// Kubernetes secret key name for usage in: router, ensembler, enricher, experiment-engine.
 	// They will share the same Kubernetes secret for every RouterVersion deployment.
 	// Hence, the key name should be used to retrieve different credentials.
 	secretKeyNameRouter     = "router-service-account.json"
@@ -282,9 +282,9 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	})
 }
 
-// NewSecret creates a new cluster.Secret secret from the given service accounts and/or litmus keys.
-// If [router/enricher/ensembler]ServiceAccountKey or litmusPasskey is empty no secret key will be created
-// for that component. This happens when user does not specify litmus pass key or service accounts.
+// NewSecret creates a new `cluster.Secret` secret from the given service accounts and/or experiment-engine keys.
+// If [router/enricher/ensembler]ServiceAccountKey or experimentPasskey is empty no secret key will be created
+// for that component. This happens when user does not specify experiment-engine pass key or service accounts.
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,

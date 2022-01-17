@@ -14,7 +14,7 @@ type MetricName string
 
 // Define all metric names for the Turing App
 const (
-	// ExperimentEngineRequestMs is the key to measure http requests to the Litmus API server
+	// ExperimentEngineRequestMs is the key to measure requests for fetching a treatment from the experiment-engine
 	ExperimentEngineRequestMs MetricName = "exp_engine_request_duration_ms"
 	// RouteRequestDurationMs is the key to measure http requests to individual Fiber routes
 	RouteRequestDurationMs MetricName = "route_request_duration_ms"

@@ -163,12 +163,6 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Image: "fluentdimage",
 			Tag:   "fluentdtag",
 		},
-		Experiment: map[string]interface{}{
-			"standard": map[string]interface{}{
-				"endpoint": "grpc://test",
-				"timeout":  "2s",
-			},
-		},
 	}
 	projectID := models.ID(1)
 	router := createOrUpdateRequest.BuildRouter(projectID)

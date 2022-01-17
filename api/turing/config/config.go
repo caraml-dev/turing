@@ -258,20 +258,6 @@ type RouterDefaults struct {
 	LogLevel string `validate:"required"`
 	// Fluentd config for the router
 	FluentdConfig *FluentdConfig
-	// Experiment specifies the default experiment JSON configuration for different experiment
-	// engines that Turing router supports.
-	//
-	// The JSON configuration follows the following format to support different experiment engines.
-	// { "<experiment_engine>": <experiment_engine_config>, ... }
-	//
-	// Currently the router defaults configuration for each experiment engine is expected to have
-	// "endpoint" and "timeout" fields with string value, in order to follow the configuration
-	// specification for routers.
-	//
-	// For example:
-	// {"experiment_engine_a": {"endpoint": "http://engine-a.com", "timeout": "500ms"},
-	//  "experiment_engine_b": {"endpoint": "http://engine-b.com", "timeout": "250ms"} }
-	Experiment map[string]interface{}
 
 	MonitoringURLFormat *string
 }

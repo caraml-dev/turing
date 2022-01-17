@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FieldSource is used to identify the source of the Litmus user data field
+// FieldSource is used to identify the source of the experiment-engine user data field
 type FieldSource string
 
 const (

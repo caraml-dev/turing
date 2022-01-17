@@ -11,14 +11,6 @@ DeployConfig:
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 90
-  Experiment:
-    foo:
-      fookey1: ""
-      fookey2: 
-        fookey2-1: fooval2-1
-        fookey2-2: fooval2-2-override
-    qux: 
-      quux: quuxval
 Experiment:
     qux:
       quxkey1: quxval1-override

@@ -27,7 +27,7 @@ func TestNewRouterService(t *testing.T) {
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
 	expRunnerConfig := `{
 		"client_id": "client_id",
-		"endpoint": "litmus.example.com:8012",
+		"endpoint": "exp-engine:8080",
 		"experiments": [
 			{
 				"experiment_name": "exp_exp_test_experiment_1",
