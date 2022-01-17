@@ -119,13 +119,29 @@ class Router(ApiObject):
         return Router.from_open_api(
             turing.active_session.get_router(router_id=router_id))
 
-    def update(self, config: RouterConfig):
+    def update(self, config: RouterConfig) -> 'Router':
         """
         Update the current router with a new set of configs specified in the RouterConfig argument
 
         :param config: configuration of router
-        :return: instance of router created
+        :return: instance of router updated (self)
         """
         self._config = config
         return Router.from_open_api(turing.active_session.update_router(router_id=self.id,
                                                                         router_config=config.to_open_api()))
+
+    def deploy(self) -> Dict[str, int]:
+        """
+        Deploy this router
+
+        :return: router_id and version of this router
+        """
+        return turing.active_session.deploy_router(router_id=self.id).to_dict()
+
+    def undeploy(self) -> Dict[str, int]:
+        """
+        Undeploy this router
+
+        :return: router_id of this router
+        """
+        return turing.active_session.undeploy_router(router_id=self.id).to_dict()

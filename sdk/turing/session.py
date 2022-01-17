@@ -248,3 +248,23 @@ class TuringSession:
         return RouterApi(self._api_client).projects_project_id_routers_router_id_put(project_id=self.active_project.id,
                                                                                      router_id=router_id,
                                                                                      router_config=router_config)
+
+    @require_active_project
+    def deploy_router(self, router_id: int) -> IdObject:
+        """
+        Deploy router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_deploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def undeploy_router(self, router_id: int) -> IdObject:
+        """
+        Undeploy router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_undeploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
