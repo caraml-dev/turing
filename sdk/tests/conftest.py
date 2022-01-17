@@ -518,10 +518,10 @@ def generic_router_config():
 def generic_router(project, generic_router_status, router_version):
     return turing.generated.models.RouterDetails(
         id=1,
-        name=f"router-1",
-        endpoint=f"http://localhost:5000/endpoint_1",
-        environment_name=f"env_1",
-        monitoring_url=f"http://localhost:5000/dashboard_1",
+        name="router-1",
+        endpoint="http://localhost:5000/endpoint_1",
+        environment_name="env_1",
+        monitoring_url="http://localhost:5000/dashboard_1",
         project_id=project.id,
         status=generic_router_status,
         created_at=datetime.now(),

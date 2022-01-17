@@ -40,8 +40,11 @@ class Router(ApiObject):
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
         self._status = RouterStatus(status)
+
         if config is not None:
             self._config = RouterConfig(name=name, environment_name=environment_name, **config)
+        else:
+            self._config = None
 
     @property
     def id(self) -> int:
@@ -86,14 +89,14 @@ class Router(ApiObject):
         return [Router.from_open_api(item) for item in response]
 
     @classmethod
-    def create(cls, config: turing.generated.models.RouterConfig) -> 'Router':
+    def create(cls, config: RouterConfig) -> 'Router':
         """
         Create router with a given configuration
 
         :param config: configuration of router
         :return: instance of router created
         """
-        return Router.from_open_api(turing.active_session.create_router(router_config=config))
+        return Router.from_open_api(turing.active_session.create_router(router_config=config.to_open_api()))
 
     @classmethod
     def delete(cls, router_id: int) -> int:
@@ -116,13 +119,13 @@ class Router(ApiObject):
         return Router.from_open_api(
             turing.active_session.get_router(router_id=router_id))
 
-    def update(self, config: turing.generated.models.RouterConfig):
+    def update(self, config: RouterConfig):
         """
         Update the current router with a new set of configs specified in the RouterConfig argument
 
         :param config: configuration of router
         :return: instance of router created
         """
-
-    def update_attributes(self, **kwargs):
-        pass
+        self._config = config
+        return Router.from_open_api(turing.active_session.update_router(router_id=self.id,
+                                                                        router_config=config.to_open_api()))
