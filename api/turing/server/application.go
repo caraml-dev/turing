@@ -15,7 +15,6 @@ import (
 	"github.com/gojek/turing/api/turing/database"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/middleware"
-	"github.com/gojek/turing/api/turing/utils"
 	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
 )
