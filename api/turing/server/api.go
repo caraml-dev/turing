@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -67,15 +66,17 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	return nil
 }
 
-func openapiValidationMiddleware(apiPath string, cfg *config.Config) (mux.MiddlewareFunc, error) {
+func openapiValidationMiddleware(
+	apiPath string,
+	cfg *config.Config,
+) (mux.MiddlewareFunc, error) {
 	if cfg.OpenapiConfig != nil && cfg.OpenapiConfig.ValidationEnabled {
-		// Initialize OpenAPI validation middleware
-		if _, err := os.Stat(cfg.OpenapiConfig.SpecFile); os.IsExist(err) {
-			return nil, errors.Wrapf(err, "Openapi spec file '%s' not found", cfg.OpenapiConfig.SpecFile)
+		spec, specErr := cfg.OpenapiConfig.SpecData()
+		if specErr != nil {
+			return nil, errors.Wrapf(specErr, "Failed to initialize OpenAPI Validation middleware")
 		}
-
 		openapiValidation, err := middleware.NewOpenAPIValidation(
-			cfg.OpenapiConfig.SpecFile,
+			spec,
 			middleware.OpenAPIValidationOptions{
 				// Authentication is ignored because it is handled by another middleware
 				IgnoreAuthentication: true,

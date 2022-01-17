@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -135,8 +136,12 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			d, err := ioutil.ReadFile("../../api/openapi.bundle.yaml")
+			if err != nil {
+				t.Error(err)
+			}
 			openapi, err := NewOpenAPIValidation(
-				"../../api/openapi.yaml",
+				d,
 				OpenAPIValidationOptions{
 					IgnoreAuthentication: true,
 					IgnoreServers:        true,
@@ -170,12 +175,12 @@ func TestNewOpenAPIValidation(t *testing.T) {
 	}{
 		{
 			name:            "default options",
-			openapiYamlFile: "../../api/openapi.yaml",
+			openapiYamlFile: "../../api/openapi.bundle.yaml",
 			options:         OpenAPIValidationOptions{},
 		},
 		{
 			name:            "ignore authentication and servers",
-			openapiYamlFile: "../../api/openapi.yaml",
+			openapiYamlFile: "../../api/openapi.bundle.yaml",
 			options: OpenAPIValidationOptions{
 				IgnoreAuthentication: true,
 				IgnoreServers:        true,
@@ -184,7 +189,11 @@ func TestNewOpenAPIValidation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oapi, err := NewOpenAPIValidation(tt.openapiYamlFile, tt.options)
+			d, err := ioutil.ReadFile(tt.openapiYamlFile)
+			if err != nil {
+				t.Error(err)
+			}
+			oapi, err := NewOpenAPIValidation(d, tt.options)
 			if err != nil {
 				t.Error(err)
 			}

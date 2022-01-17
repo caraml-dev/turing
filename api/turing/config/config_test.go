@@ -167,7 +167,8 @@ func TestLoad(t *testing.T) {
 				},
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
-					SpecFile:          "api/openapi.yaml",
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingPath:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -247,7 +248,8 @@ func TestLoad(t *testing.T) {
 				},
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
-					SpecFile:          "api/openapi.yaml",
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingPath:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
@@ -343,7 +345,8 @@ func TestLoad(t *testing.T) {
 				},
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
-					SpecFile:          "api/openapi.yaml",
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingPath:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/swagger-ui",
@@ -460,7 +463,8 @@ func TestLoad(t *testing.T) {
 				},
 				OpenapiConfig: &OpenapiConfig{
 					ValidationEnabled: true,
-					SpecFile:          "api/openapi.yaml",
+					SpecFile:          "api/openapi.bundle.yaml",
+					YAMLServingPath:    "/static/openapi.bundle.yaml",
 					SwaggerUIConfig: &SinglePageApplicationConfig{
 						ServingDirectory: "static/swagger-ui",
 						ServingPath:      "/swagger-ui",

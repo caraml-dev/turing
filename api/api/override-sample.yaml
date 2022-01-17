@@ -1,0 +1,12 @@
+# Here it is possible to override the OpenAPI spec as long as it follows the OAS3 specifications.
+# Make sure to input the required configurations in .OpenapiConfig.SpecOverrideFile
+# and ensure that .OpenapiConfig.SwaggerUIConfig is configured as well as it only overrides
+# the bundled yaml file.
+#
+# To generate the bundled file, run make swagger-ui-dist in this folder.
+components:
+  schemas:
+    ExperimentEngineType:
+      enum:
+      - nop
+      - proprietary

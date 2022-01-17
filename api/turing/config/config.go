@@ -11,6 +11,7 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/gojek/turing/api/turing/utils"
 	"github.com/mitchellh/mapstructure"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
@@ -333,14 +334,24 @@ type MLPConfig struct {
 	MLPEncryptionKey string `validate:"required"`
 }
 
+// OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI
 type OpenapiConfig struct {
 	// ValidationEnabled specifies whether to use OpenAPI validation middleware,
 	// which validates HTTP requests against the spec.
 	ValidationEnabled bool
 	// SpecFile specifies the file path containing OpenAPI v3 spec
 	SpecFile string
-	// Optional. Defines a configuration to be used for serving Swagger UI as a single-page app
+	// Config file to be used for serving swagger.
 	SwaggerUIConfig *SinglePageApplicationConfig
+	// Where the merged spec file yaml should be served.
+	YAMLServingPath string
+	// Optional. Overrides the file before running the Swagger UI.
+	SpecOverrideFile *string
+}
+
+// SpecData returns a byte slice of the combined yaml files
+func (c *OpenapiConfig) SpecData() ([]byte, error) {
+	return utils.MergeTwoYamls(c.SpecFile, c.SpecOverrideFile)
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -462,10 +473,12 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("TuringUIConfig::ServingDirectory", "")
 	v.SetDefault("TuringUIConfig::ServingPath", "/turing")
 
-	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
-	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.yaml")
 	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingDirectory", "")
 	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
+	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
+	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.bundle.yaml")
+	v.SetDefault("OpenapiConfig::YAMLServingPath", "/static/openapi.bundle.yaml")
+
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 

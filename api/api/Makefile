@@ -1,5 +1,7 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
+all: swagger-ui-dist
+
 .PHONY: bundle-openapi
 bundle-openapi:
 	@docker run --rm \
@@ -16,5 +18,5 @@ bundle-openapi:
 .PHONY: swagger-ui-dist
 swagger-ui-dist: bundle-openapi
 	@../../scripts/swagger-ui-generator/swagger-ui-generator.sh \
-		--spec-file openapi.bundle.yaml \
+		--spec-url "/static/openapi.bundle.yaml" \
 		--output swagger-ui-dist

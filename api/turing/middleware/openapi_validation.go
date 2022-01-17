@@ -32,14 +32,14 @@ type OpenAPIValidationOptions struct {
 // NewOpenAPIValidation creates OpenAPIValidation object from OAS3 spec file
 // and provided options
 func NewOpenAPIValidation(
-	openapiYamlFile string,
+	openAPISpecBytes []byte,
 	options OpenAPIValidationOptions,
 ) (*OpenAPIValidation, error) {
 	// Get Swagger specs
 	loader := &openapi3.Loader{
 		IsExternalRefsAllowed: true,
 	}
-	swagger, err := loader.LoadFromFile(openapiYamlFile)
+	swagger, err := loader.LoadFromData(openAPISpecBytes)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading swagger spec\n: %s", err)
 	}

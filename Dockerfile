@@ -4,21 +4,31 @@ FROM ${TURING_API_IMAGE}
 ARG TURING_USER=${TURING_USER:-turing}
 ARG TURING_USER_GROUP=${TURING_USER_GROUP:-app}
 
+ENV TURINGUICONFIG_SERVINGDIRECTORY "/app/turing-ui"
+
 USER root
 RUN apk add --no-cache bash
+
+# Override the swagger ui config
+ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app/swagger-ui"
+ENV OPENAPICONFIG_YAMLSERVINGURL "/static/openapi.bundle.yaml"
+
+# Build swagger ui deps
+COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
+RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
+    --spec-url ${OPENAPICONFIG_YAMLSERVINGURL} \
+    --output ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}
+RUN rm -rf /app/swagger-ui-generator
+
+# Switch back to turing user
 USER ${TURING_USER}
-
 ARG TURING_UI_DIST_PATH=ui/build
-ARG SWAGGER_UI_DIST_PATH=api/api/swagger-ui-dist
-
-ENV TURINGUICONFIG_SERVINGDIRECTORY "./turing-ui"
-ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "./swagger-ui"
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} ${TURING_UI_DIST_PATH} ${TURINGUICONFIG_SERVINGDIRECTORY}/
-COPY --chown=${TURING_USER}:${TURING_USER_GROUP} ${SWAGGER_UI_DIST_PATH} ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}/
 
 COPY ./docker-entrypoint.sh ./
 
 ENV TURING_UI_DIST_DIR ${TURINGUICONFIG_SERVINGDIRECTORY}
+
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

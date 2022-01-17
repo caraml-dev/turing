@@ -117,6 +117,12 @@ func Run() {
 	// HealthCheck Handler
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
+	openAPISpecBytes, err := cfg.OpenapiConfig.SpecData()
+	if err != nil {
+		log.Panicf("failed to merge openapi yamls: %s", err)
+	}
+	ServeYAML(r, cfg.OpenapiConfig.YAMLServingPath, openAPISpecBytes)
+
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
 	if err != nil {
@@ -129,6 +135,8 @@ func Run() {
 		ServeSinglePageApplication(r,
 			spaCfg.ServingPath,
 			spaCfg.ServingDirectory)
+	} else {
+		log.Warnf("Swagger UI not configured to run.")
 	}
 
 	// Serve Turing UI
@@ -137,6 +145,8 @@ func Run() {
 		ServeSinglePageApplication(r,
 			spaCfg.ServingPath,
 			spaCfg.ServingDirectory)
+	} else {
+		log.Warnf("Turing UI not configured to run.")
 	}
 
 	log.Infof("Listening on port %d", cfg.Port)

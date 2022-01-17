@@ -11,6 +11,7 @@ ENV PROJECT_ROOT=github.com/gojek/turing/api/turing
 WORKDIR /app
 COPY . .
 
+# Build Turing binary
 RUN go build \
     -mod=vendor \
     -o ./bin/${API_BIN_NAME} \
@@ -31,8 +32,8 @@ RUN addgroup -S ${TURING_USER_GROUP} \
     && chown -R ${TURING_USER}:${TURING_USER_GROUP} /app
 
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
-COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api /app/api
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/db-migrations /app/db-migrations
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api/openapi.bundle.yaml /app/api/openapi.bundle.yaml
 
 USER ${TURING_USER}
 WORKDIR /app

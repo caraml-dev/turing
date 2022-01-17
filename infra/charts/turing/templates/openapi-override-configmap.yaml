@@ -1,0 +1,10 @@
+{{- if .Values.turing.openApiSpecOverrides }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "turing.fullname" . }}-openapi
+data:
+  override.yaml: |
+    {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
+{{- end }}

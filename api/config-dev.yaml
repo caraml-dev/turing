@@ -66,8 +66,7 @@ TuringUIConfig:
   ServingDirectory: ../ui/build
   ServingPath: /turing
 OpenapiConfig:
-  ValidationEnabled: true
-  SpecFile: api/openapi.yaml
+  SpecOverrideFile: api/override-sample.yaml
   SwaggerUIConfig:
     ServingDirectory: api/swagger-ui-dist
     ServingPath: /api-docs/

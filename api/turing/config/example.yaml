@@ -209,7 +209,9 @@ TuringUIConfig:
 # Openapi validation configuration
 OpenapiConfig:
   ValidationEnabled: true
-  SpecFile: "api/openapi.yaml"
+  SpecFile: api/openapi.yaml
+  SpecOverrideFile: api/override-sample.yaml
+  YAMLServingPath: /static/openapi.bundle.yaml
   SwaggerUIConfig:
     ServingDirectory: static/swagger-ui
     ServingPath: /api-docs
