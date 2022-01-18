@@ -4,21 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
-
-	"k8s.io/apimachinery/pkg/api/resource"
-
-	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
-
-	"net/url"
 
 	"github.com/ghodss/yaml"
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/utils"
+	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // Define env var names for the router
@@ -69,9 +67,10 @@ const (
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
 
-	routerPluginsVolumeSize = "100Mi"
-	routerPluginsVolume     = "plugins-volume"
-	routerPluginsMountPath  = "/app/plugins"
+	routerPluginsVolumeSize     = "100Mi"
+	routerPluginsVolume         = "plugins-volume"
+	routerPluginsMountPath      = "/app/plugins"
+	routerPluginBinaryConfigKey = "PluginBinary"
 )
 
 const (
@@ -573,10 +572,24 @@ func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessag
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{
 		"default_route_id":  ver.DefaultRouteID,
-		"experiment_engine": string(ver.ExperimentEngine.Type),
+		"experiment_engine": ver.ExperimentEngine.Type,
 	}
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		propsMap["experiment_engine_properties"] = experimentCfg
+		expEngineProps := experimentCfg
+		// Tell router, that the experiment runner is implemented as RPC plugin
+		if ver.ExperimentEngine.PluginConfig != nil {
+			var err error
+			expEngineProps, err = utils.MergeJSON(
+				expEngineProps,
+				map[string]interface{}{
+					routerPluginBinaryConfigKey: fmt.Sprintf("%s/%s", routerPluginsMountPath, ver.ExperimentEngine.Type),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+		propsMap["experiment_engine_properties"] = expEngineProps
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {

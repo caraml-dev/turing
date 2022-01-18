@@ -246,7 +246,7 @@ type ExperimentEnginePlugin struct {
 }
 
 // RouterDefaults contains default configuration for routers deployed
-// by this isntance of the Turing API.
+// by this instance of the Turing API.
 type RouterDefaults struct {
 	// Turing router image, in the format registry/repository:version.
 	Image string `validate:"required"`
