@@ -147,9 +147,21 @@ class Router(ApiObject):
         """
         return turing.active_session.undeploy_router(router_id=self.id).to_dict()
 
+    def list_versions(self) -> List['RouterVersion']:
+        """
+        List router versions for this router
+
+        :return: list of router versions
+        """
+        response = turing.active_session.list_router_versions(router_id=self.id)
+        return [RouterVersion(environment_name=self.environment_name, name=self.name, **ver.to_dict())
+                for ver in response]
+
     def get_version(self, version: int) -> 'RouterVersion':
         """
         Fetch a version of this router given a version number
+
+        :return: list of router versions
         """
         version = turing.active_session.get_router_version(router_id=self.id, version=version)
         return RouterVersion(environment_name=self.environment_name, name=self.name, **version.to_dict())
@@ -157,18 +169,25 @@ class Router(ApiObject):
     def delete_version(self, version: int) -> Dict[str, int]:
         """
         Delete a version of this router given a version number
+
+
+        :return: router_id and deleted version of this router
         """
         return turing.active_session.delete_router_version(router_id=self.id, version=version).to_dict()
 
     def deploy_version(self, version: int) -> Dict[str, int]:
         """
         Deploy specific router version by its router ID and version
+
+        :return: router_id and version of this router
         """
         return turing.active_session.deploy_router_version(router_id=self.id, version=version).to_dict()
 
     def get_events(self) -> List[turing.generated.models.Event]:
         """
         Fetch deployment events associated with the router
+
+        :return: list of events involving this router
         """
         response = turing.active_session.get_router_events(router_id=self.id).get('events')
         return [event for event in response] if response else []

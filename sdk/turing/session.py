@@ -273,6 +273,16 @@ class TuringSession:
         )
 
     @require_active_project
+    def list_router_versions(self, router_id: int) -> List[RouterVersion]:
+        """
+        List all router versions, that the current user has access to, given the router ID specified
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_get(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
     def get_router_version(self, router_id: int, version: int) -> RouterVersion:
         """
         Fetch specific router version by its router ID and version

@@ -238,6 +238,35 @@ def test_undeploy_router(turing_api, active_project, generic_router, router_vers
 
 
 @responses.activate
+def test_list_versions(turing_api, active_project, generic_router, router_version, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    expected_versions = [router_version for _ in range(3)]
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions",
+        body=json.dumps(expected_versions, default=tests.json_serializer),
+        status=200,
+        content_type="application/json"
+    )
+
+    actual_versions = base_router.list_versions()
+
+    assert len(actual_versions) == len(expected_versions)
+
+    for actual, expected in zip(actual_versions, expected_versions):
+        assert actual.id == router_version.id
+        assert actual.monitoring_url == router_version.monitoring_url
+        assert actual.status == router_version.status.value
+        assert actual.created_at == router_version.created_at
+        assert actual.updated_at == router_version.updated_at
+
+
+@responses.activate
 def test_get_version(turing_api, active_project, generic_router, router_version, use_google_oauth):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
