@@ -91,8 +91,8 @@ func TestContainer(t *testing.T) {
 	assert.Equal(t, expected, c.Build())
 }
 
-func CreateSecretVolume() SecretVolume {
-	return SecretVolume{
+func CreateSecretVolume() *SecretVolume {
+	return &SecretVolume{
 		Name:       secretName,
 		SecretName: secretName,
 	}

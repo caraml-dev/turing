@@ -496,7 +496,7 @@ func TestCreateKanikoJob(t *testing.T) {
 		Containers: []Container{
 			CreateContainer(),
 		},
-		SecretVolumes: []SecretVolume{
+		Volumes: []Volume{
 			CreateSecretVolume(),
 		},
 	}

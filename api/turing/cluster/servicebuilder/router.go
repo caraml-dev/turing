@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 
 	"net/url"
@@ -66,6 +68,21 @@ const (
 	routerConfigStrategyTypeDefault          = "fiber.DefaultTuringRoutingStrategy"
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
+
+	routerPluginsVolumeSize = "100Mi"
+	routerPluginsVolume     = "plugins-volume"
+	routerPluginsMountPath  = "/app/plugins"
+)
+
+const (
+	envPluginName = "PLUGIN_NAME"
+	envPluginsDir = "PLUGINS_DIR"
+)
+
+var (
+	routerPluginsInitJobCompletions            int32 = 1
+	routerPluginsInitJobBackOffLimit           int32 = 3
+	routerPluginsInitJobTTLSecondAfterComplete int32 = 3600
 )
 
 // Router endpoint constants
@@ -102,6 +119,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		return nil, err
 	}
 
+	var pluginsVolumeClaim *cluster.PersistentVolumeClaim
+
 	volumes, volumeMounts := buildRouterVolumes(routerVersion, configMap.Name, secretName)
 
 	// Build env vars
@@ -122,8 +141,10 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Envs:                 envs,
 			Labels:               buildLabels(project, envType, routerVersion.Router),
 			ConfigMap:            configMap,
-			Volumes:              volumes,
-			VolumeMounts:         volumeMounts,
+
+			PersistentVolumeClaim: pluginsVolumeClaim,
+			Volumes:               volumes,
+			VolumeMounts:          volumeMounts,
 		},
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
@@ -163,6 +184,57 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 		HostRewrite:      veURL.Hostname(),
 		MatchURIPrefixes: defaultMatchURIPrefixes,
 	}, nil
+}
+
+func (sb *clusterSvcBuilder) NewRouterInitJob(
+	routerVersion *models.RouterVersion,
+	project *mlp.Project,
+) (*cluster.PersistentVolumeClaim, *cluster.Job) {
+	pvc := &cluster.PersistentVolumeClaim{
+		Name:        GetComponentName(routerVersion, ComponentTypes.PluginsVolume),
+		Namespace:   project.Name,
+		AccessModes: []string{string(corev1.ReadWriteOnce), string(corev1.ReadOnlyMany)},
+		Size:        resource.MustParse(routerPluginsVolumeSize),
+	}
+
+	initJob := &cluster.Job{
+		Name:                    GetComponentName(routerVersion, ComponentTypes.PluginsInitJob),
+		Namespace:               project.Name,
+		Completions:             &routerPluginsInitJobCompletions,
+		BackOffLimit:            &routerPluginsInitJobBackOffLimit,
+		TTLSecondsAfterFinished: &routerPluginsInitJobTTLSecondAfterComplete,
+		RestartPolicy:           corev1.RestartPolicyNever,
+		Containers: []cluster.Container{
+			{
+				Name:  fmt.Sprintf("%s-plugin", routerVersion.ExperimentEngine.Type),
+				Image: routerVersion.ExperimentEngine.PluginConfig.Image,
+				Envs: []cluster.Env{
+					{
+						Name:  envPluginName,
+						Value: routerVersion.ExperimentEngine.Type,
+					},
+					{
+						Name:  envPluginsDir,
+						Value: routerPluginsMountPath,
+					},
+				},
+				VolumeMounts: []cluster.VolumeMount{
+					{
+						Name:      routerPluginsVolume,
+						MountPath: routerPluginsMountPath,
+					},
+				},
+			},
+		},
+		Volumes: []cluster.Volume{
+			&cluster.PVCVolume{
+				Name:      routerPluginsVolume,
+				ClaimName: GetComponentName(routerVersion, ComponentTypes.PluginsVolume),
+			},
+		},
+	}
+
+	return pvc, initJob
 }
 
 // GetRouterServiceName returns the name of the Router component, used by the Service
@@ -327,6 +399,24 @@ func buildRouterVolumes(
 			MountPath: secretMountPath,
 		})
 	}
+
+	// Experiment Engine plugins
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		volumes = append(volumes, corev1.Volume{
+			Name: routerPluginsVolume,
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: GetComponentName(routerVersion, ComponentTypes.PluginsVolume),
+				},
+			},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      routerPluginsVolume,
+			MountPath: routerPluginsMountPath,
+			ReadOnly:  true,
+		})
+	}
+
 	return volumes, volumeMounts
 }
 

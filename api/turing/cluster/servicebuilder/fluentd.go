@@ -45,13 +45,11 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		{Name: "FLUENTD_BQ_TABLE", Value: tableSplit[2]},
 	}
 
-	volSize, _ := resource.ParseQuantity(cacheVolumeSize) // drop error since this volume size is a constant
-
 	persistentVolumeClaim := &cluster.PersistentVolumeClaim{
 		Name:        GetComponentName(routerVersion, ComponentTypes.CacheVolume),
 		Namespace:   project.Name,
 		AccessModes: []string{"ReadWriteOnce"},
-		Size:        volSize,
+		Size:        resource.MustParse(cacheVolumeSize),
 	}
 	volumes, volumeMounts := buildFluentdVolumes(serviceAccountSecretName, persistentVolumeClaim.Name)
 

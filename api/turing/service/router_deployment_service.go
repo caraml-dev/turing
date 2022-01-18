@@ -4,15 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/gojek/turing/api/turing/utils"
-
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
@@ -20,6 +14,9 @@ import (
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/utils"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // DeploymentService handles the deployment of the Turing routers and the related components.
@@ -164,6 +161,24 @@ func (ds *deploymentService) DeployRouterVersion(
 			models.EventStageDeployingDependencies, "successfully deployed fluentd service"))
 	}
 
+	// Initialize experiment engine plugins
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		reportErrorAndReturn := func(err error) (string, error) {
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to initialize router plugins: %s", err.Error()))
+			return endpoint, err
+		}
+		pvc, pluginsInitJob := ds.svcBuilder.NewRouterInitJob(routerVersion, project)
+		err = createPVC(ctx, controller, project.Name, pvc)
+		if err == nil {
+			return reportErrorAndReturn(err)
+		}
+		err = controller.RunJob(ctx, project.Name, pluginsInitJob)
+		if err == nil {
+			return reportErrorAndReturn(err)
+		}
+	}
+
 	// Construct service objects for each of the components and deploy
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, secretName, experimentConfig,
@@ -272,6 +287,28 @@ func (ds *deploymentService) UndeployRouterVersion(
 		return errors.New(strings.Join(errs, ". "))
 	}
 
+	// Delete router plugins volume
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		pvc, pluginsInitJob := ds.svcBuilder.NewRouterInitJob(routerVersion, project)
+		err = controller.DeleteJob(project.Name, pluginsInitJob.Name)
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
+		err = deletePVC(controller, project.Name, pvc)
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
+		if len(errs) == 0 {
+			eventsCh.Write(models.NewInfoEvent(
+				models.EventStageDeletingDependencies,
+				"successfully deleted plugins volume"))
+		} else {
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeletingDependencies,
+				"failed to delete plugins volume: %s", strings.Join(errs, ". ")))
+		}
+	}
+
 	return nil
 }
 
@@ -367,6 +404,7 @@ func (ds *deploymentService) createServices(
 	if err != nil {
 		return services, err
 	}
+
 	services = append(services, routerService)
 
 	return services, nil

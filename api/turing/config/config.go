@@ -240,6 +240,11 @@ type DatabaseConfig struct {
 	MigrationsFolder string `validate:"required"`
 }
 
+type ExperimentEnginePlugin struct {
+	Image        string `validate:"required"`
+	PluginBinary string `validate:"required"`
+}
+
 // RouterDefaults contains default configuration for routers deployed
 // by this isntance of the Turing API.
 type RouterDefaults struct {
@@ -257,9 +262,9 @@ type RouterDefaults struct {
 	// Router log level
 	LogLevel string `validate:"required"`
 	// Fluentd config for the router
-	FluentdConfig *FluentdConfig
-
+	FluentdConfig       *FluentdConfig
 	MonitoringURLFormat *string
+	Plugins             map[string]*ExperimentEnginePlugin `validate:"dive"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled

@@ -12,11 +12,18 @@ const (
 	ExperimentEngineTypeXp     string = "xp"
 )
 
+type PluginConfig struct {
+	Image string `json:"image"`
+}
+
 // ExperimentEngine contains the type and configuration for the
 // Experiment engine powering the router.
 type ExperimentEngine struct {
 	// Type of Experiment Engine
 	Type string `json:"type"`
+	// PluginConfig (Optional) contains necessary configuration, if experiment engine
+	// is implemented as RPC plugin
+	PluginConfig *PluginConfig `json:"plugin_config"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
 	// For standard experiment engine managers, the config can be unmarshalled into
 	// manager.TuringExperimentConfig type.
