@@ -5,7 +5,7 @@ from typing import List, Dict
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 from turing.router.config.router_config import RouterConfig
-from turing.router.router_version import RouterVersion
+from turing.router.config.router_version import RouterVersion
 
 
 class RouterStatus(Enum):
