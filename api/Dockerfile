@@ -18,7 +18,7 @@ RUN go build \
     -v ${PROJECT_ROOT}/cmd
 
 # Clean image with turing-api binary
-FROM bash:alpine3.14
+FROM alpine:3.13
 
 ENV TURING_PORT "8080"
 ENV TURING_USER "turing"
