@@ -254,14 +254,6 @@ jobs:
         with:
           fetch-depth: 0
 
-#      - name: Cache vendor dependencies
-#        uses: actions/cache@v2
-#        with:
-#          path: engines/router/vendor
-#          key: |
-#            ${{ runner.os }}-vendor-${{ hashFiles('engines/router/go.mod') }}
-#          restore-keys: ${{ runner.os }}-vendor-
-
       - name: Build Docker image
         id: build-image
         working-directory: engines/router

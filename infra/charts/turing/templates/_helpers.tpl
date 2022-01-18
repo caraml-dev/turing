@@ -146,11 +146,6 @@ Experiment:
     PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{ end }}
 {{ end }}
-{{ end }}
-{{- if .Values.turing.openApiSpecOverrides }}
-OpenapiConfig:
-  SpecOverrideFile: /etc/openapi/override.yaml
-{{- end -}}
 RouterDefaults:
   Plugins:
 {{ range $expEngine := .Values.turing.experimentEngines }}
@@ -159,6 +154,11 @@ RouterDefaults:
       Image: {{ $expEngine.rpcPlugin.image }}
       PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{- end -}}
+{{- end -}}
+{{ end }}
+{{- if .Values.turing.openApiSpecOverrides }}
+OpenapiConfig:
+  SpecOverrideFile: /etc/openapi/override.yaml
 {{- end -}}
 {{- end -}}
 
