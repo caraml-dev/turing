@@ -8,6 +8,7 @@ on:
       - "infra/charts/**"
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   release:
