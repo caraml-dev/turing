@@ -170,11 +170,11 @@ func (ds *deploymentService) DeployRouterVersion(
 		}
 		pvc, pluginsInitJob := ds.svcBuilder.NewRouterInitJob(routerVersion, project)
 		err = createPVC(ctx, controller, project.Name, pvc)
-		if err == nil {
+		if err != nil {
 			return reportErrorAndReturn(err)
 		}
 		err = controller.RunJob(ctx, project.Name, pluginsInitJob)
-		if err == nil {
+		if err != nil {
 			return reportErrorAndReturn(err)
 		}
 	}
