@@ -2,9 +2,10 @@ package utils_test
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/gojek/turing/api/turing/utils"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestMergeJSON(t *testing.T) {
