@@ -10,8 +10,9 @@ class ExperimentConfig:
     type: str = "nop",
     config: Dict = None
 
-    _type: str = field(init=False, repr=False)
-    _config: str = field(init=False, repr=False)
+    def __init__(self, type: str = "nop", config: Dict = None):
+        self.type = type
+        self.config = config
 
     @property
     def type(self) -> str:
@@ -32,7 +33,11 @@ class ExperimentConfig:
         self._config = config
 
     def to_open_api(self) -> OpenApiModel:
+        kwargs = {}
+        if self.config is not None:
+            kwargs['config'] = self.config
+
         return turing.generated.models.ExperimentConfig(
             type=self.type,
-            config=self.config
+            **kwargs
         )

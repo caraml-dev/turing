@@ -5,6 +5,7 @@ from typing import List, Dict
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 from turing.router.config.router_config import RouterConfig
+from turing.router.router_version import RouterVersion
 
 
 class RouterStatus(Enum):
@@ -145,3 +146,16 @@ class Router(ApiObject):
         :return: router_id of this router
         """
         return turing.active_session.undeploy_router(router_id=self.id).to_dict()
+
+    def get_version(self, version: int) -> 'RouterVersion':
+        """
+        Fetch a version of this router given a version number
+        """
+        version = turing.active_session.get_router_version(router_id=self.id, version=version)
+        return RouterVersion(environment_name=self.environment_name, name=self.name, **version.to_dict())
+
+    def delete_version(self, version: int):
+        """
+        Delete a version of this router given a version number
+        """
+        turing.active_session.delete_router_version(router_id=self.id, version=version)

@@ -14,7 +14,8 @@ from turing.generated.models import \
     IdObject, \
     Router, \
     RouterDetails, \
-    RouterConfig
+    RouterConfig, \
+    RouterVersion
 
 
 def require_active_project(f):
@@ -267,4 +268,26 @@ class TuringSession:
         return RouterApi(self._api_client).projects_project_id_routers_router_id_undeploy_post(
             project_id=self.active_project.id,
             router_id=router_id
+        )
+
+    @require_active_project
+    def get_router_version(self, router_id: int, version: int) -> RouterVersion:
+        """
+        Fetch specific router version by its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_get(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
+        )
+
+    @require_active_project
+    def delete_router_version(self, router_id: int, version: int) -> IdObject:
+        """
+        Delete specific router version given its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_delete(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
         )

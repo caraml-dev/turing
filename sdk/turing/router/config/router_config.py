@@ -1,3 +1,4 @@
+import inspect
 from typing import List, Dict, Union
 from collections import Counter
 from dataclasses import dataclass
@@ -230,3 +231,10 @@ class RouterConfig:
             raise turing.router.config.route.DuplicateRouteException(
                 f"Routes with duplicate ids are specified for this traffic rule. Duplicate id: {most_common_route_id}"
             )
+
+    def to_dict(self):
+        att_dict = {}
+        for m in inspect.getmembers(self):
+            if not inspect.ismethod(m[1]) and not m[0].startswith('_'):
+                att_dict[m[0]] = m[1]
+        return att_dict

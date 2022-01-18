@@ -210,3 +210,17 @@ class KafkaLogConfig(LogConfig):
             serialization_format=self.serialization_format.value
         )
         return super().to_open_api()
+
+
+class RouterVersionLogConfig(LogConfig):
+    def __init__(self,
+                 log_level: turing.generated.models.LogLevel = None,
+                 custom_metrics_enabled: bool = None,
+                 fiber_debug_log_enabled: bool = None,
+                 jaeger_enabled: bool = None,
+                 **kwargs):
+        self.log_level = log_level
+        self.custom_metrics_enabled = custom_metrics_enabled
+        self.fiber_debug_log_enabled = fiber_debug_log_enabled
+        self.jaeger_enabled = jaeger_enabled
+        super().__init__(**kwargs)
