@@ -154,8 +154,9 @@ class Router(ApiObject):
         version = turing.active_session.get_router_version(router_id=self.id, version=version)
         return RouterVersion(environment_name=self.environment_name, name=self.name, **version.to_dict())
 
-    def delete_version(self, version: int):
+    def delete_version(self, version: int) -> Dict[str, int]:
         """
         Delete a version of this router given a version number
         """
-        turing.active_session.delete_router_version(router_id=self.id, version=version)
+        return turing.active_session.delete_router_version(router_id=self.id, version=version).to_dict()
+

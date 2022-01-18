@@ -320,7 +320,7 @@ paths:
             <<: *id
           required: true
       responses:
-        200:
+        202:
           description: "OK"
           content:
             application/json:

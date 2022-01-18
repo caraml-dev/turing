@@ -235,3 +235,85 @@ def test_undeploy_router(turing_api, active_project, generic_router, router_vers
 
     response = base_router.undeploy()
     assert base_router.id == response['router_id']
+
+
+@responses.activate
+def test_get_version(turing_api, active_project, generic_router, router_version, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    actual_version = 1
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{actual_version}",
+        body=json.dumps(router_version, default=tests.json_serializer),
+        status=200,
+        content_type="application/json"
+    )
+
+    actual_response = base_router.get_version(actual_version)
+
+    assert actual_response.id == router_version.id
+    assert actual_response.monitoring_url == router_version.monitoring_url
+    assert actual_response.status == router_version.status.value
+    assert actual_response.created_at == router_version.created_at
+    assert actual_response.updated_at == router_version.updated_at
+
+
+@responses.activate
+def test_get_version_config(turing_api, active_project, generic_router, router_version, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    actual_version = 1
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{actual_version}",
+        body=json.dumps(router_version, default=tests.json_serializer),
+        status=200,
+        content_type="application/json"
+    )
+
+    actual_response = base_router.get_version(actual_version).get_config()
+
+    assert actual_response.environment_name == base_router.config.environment_name
+    assert actual_response.name == base_router.config.name
+    assert actual_response.rules == base_router.config.rules
+    assert actual_response.default_route_id == base_router.config.default_route_id
+    assert actual_response.experiment_engine.to_open_api() == base_router.config.experiment_engine.to_open_api()
+    assert actual_response.resource_request.to_open_api() == base_router.config.resource_request.to_open_api()
+    assert actual_response.timeout == base_router.config.timeout
+    assert actual_response.log_config.to_open_api() == base_router.config.log_config.to_open_api()
+
+
+@responses.activate
+def test_delete_router(turing_api, active_project, generic_router, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    expected_router_id = 1
+    expected_version = 1
+    expected = turing.generated.models.InlineResponse202(
+        router_id=expected_router_id,
+        version=expected_version
+    )
+
+    responses.add(
+        method="DELETE",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{expected_version}",
+        body=json.dumps(expected, default=tests.json_serializer),
+        status=202,
+        content_type="application/json"
+    )
+
+    response = base_router.delete_version(1)
+    assert base_router.id == response['router_id']
+    assert generic_router.config.version == response['version']
