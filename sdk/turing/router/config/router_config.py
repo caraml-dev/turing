@@ -8,7 +8,7 @@ from turing.generated.model_utils import OpenApiModel
 from turing.router.config.route import Route
 from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.log_config import LogConfig
+from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
 from turing.router.config.experiment_config import ExperimentConfig
@@ -53,7 +53,9 @@ class RouterConfig:
                  experiment_engine: Union[ExperimentConfig, Dict] = None,
                  resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
                  timeout: str = None,
-                 log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None,
+                 log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
+                     result_logger_type=ResultLoggerType.NOP
+                 ),
                  enricher: Union[Enricher, Dict] = None,
                  ensembler: Union[RouterEnsemblerConfig, Dict] = None,
                  **kwargs):

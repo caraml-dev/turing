@@ -6,6 +6,7 @@ from datetime import datetime
 class RouterVersion(RouterConfig):
     def __init__(self,
                  id: int,
+                 version: int,
                  created_at: datetime,
                  updated_at: datetime,
                  status: str,
@@ -14,6 +15,7 @@ class RouterVersion(RouterConfig):
                  monitoring_url: str,
                  **kwargs):
         self.id = id
+        self.version = version
         self.created_at = created_at
         self.updated_at = updated_at
         self.environment_name = environment_name
@@ -23,6 +25,5 @@ class RouterVersion(RouterConfig):
         self.log_config = RouterVersionLogConfig(**kwargs.get('log_config'))
         super().__init__(environment_name=environment_name, name=name, **kwargs)
 
-    def get_config(self):
-        a = self.to_dict()
-        return RouterConfig(**a)
+    def get_config(self) -> RouterConfig:
+        return RouterConfig(**self.to_dict())
