@@ -5,17 +5,21 @@ import "encoding/json"
 // MergeJSON adds (or overrides if such keys exist) key/value data from `overrides` map
 // into the `message` json.RawMessage and returns merged json data
 func MergeJSON(message json.RawMessage, overrides map[string]interface{}) (json.RawMessage, error) {
-	var original map[string]interface{}
-	err := json.Unmarshal(message, &original)
+	var result map[string]interface{}
+	if len(message) > 0 {
+		err := json.Unmarshal(message, &result)
 
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+
+		result, err = MergeMaps(result, overrides)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		result = overrides
 	}
 
-	mergedMaps, err := MergeMaps(original, overrides)
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(mergedMaps)
+	return json.Marshal(result)
 }

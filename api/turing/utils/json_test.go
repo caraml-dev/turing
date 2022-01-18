@@ -22,6 +22,36 @@ func TestMergeJSON(t *testing.T) {
 			},
 			expected: json.RawMessage(`{"key-1": "value-1", "key-2": "value-2"}`),
 		},
+		"success | override": {
+			original: json.RawMessage(`{"key-1": "value-1"}`),
+			overrides: map[string]interface{}{
+				"key-1": "value-3",
+				"key-2": "value-2",
+			},
+			expected: json.RawMessage(`{"key-1": "value-3", "key-2": "value-2"}`),
+		},
+		"success | nested": {
+			original: json.RawMessage(`{"key-1": "value-1"}`),
+			overrides: map[string]interface{}{
+				"key-1": json.RawMessage(`{"key-1-1": "value-1", "key-1-2": "value-2"}`),
+			},
+			expected: json.RawMessage(`{"key-1": {"key-1-1": "value-1", "key-1-2": "value-2"}}`),
+		},
+		"success | original json empty": {
+			original: json.RawMessage{},
+			overrides: map[string]interface{}{
+				"key-1": 1,
+			},
+			expected: json.RawMessage(`{"key-1": 1}`),
+		},
+		"success | overrides empty": {
+			original: json.RawMessage(`{"key-1": "value-1"}`),
+			expected: json.RawMessage(`{"key-1": "value-1"}`),
+		},
+		"failure": {
+			original: json.RawMessage(`1`),
+			err:      "json: cannot unmarshal number into Go value of type map[string]interface {}",
+		},
 	}
 
 	for name, tt := range tests {
