@@ -1757,15 +1757,16 @@ components:
       example:
         endpoint: endpoint
         updated_at: 2000-01-23T04:56:07.000+00:00
+        project_id: 1
         name: name
         created_at: 2000-01-23T04:56:07.000+00:00
-        project: 1
         id: 6
         monitoring_url: monitoring_url
         environment_name: environment_name
+      nullable: true
       properties:
         id:
-          readOnly: true
+          format: int32
           type: integer
         name:
           type: string
@@ -1777,11 +1778,12 @@ components:
           format: date-time
           readOnly: true
           type: string
-        project:
+        project_id:
           type: integer
         environment_name:
           type: string
         endpoint:
+          readOnly: true
           type: string
         monitoring_url:
           readOnly: true
@@ -1801,12 +1803,42 @@ components:
       example:
         image: image
         created_at: 2000-01-23T04:56:07.000+00:00
+        rules:
+        - routes:
+          - routes
+          - routes
+          conditions:
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+        - routes:
+          - routes
+          - routes
+          conditions:
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
         error: error
         default_route: default_route
         version: 5
         log_config:
           custom_metrics_enabled: true
           bigquery_config:
+            batch_load: true
             table: table
             service_account_secret: service_account_secret
           kafka_config:
@@ -1818,17 +1850,21 @@ components:
         timeout: timeout
         monitoring_url: monitoring_url
         experiment_engine:
-          config: ""
+          type: nop
+          config: '{}'
         enricher:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
-          port: 1
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          port: 5
+          created_at: 2000-01-23T04:56:07.000+00:00
           resource_request:
             min_replica: 0
             max_replica: 6
             memory_request: memory_request
             cpu_request: cpu_request
+          id: 1
           env:
           - name: name
             value: value
@@ -1837,23 +1873,26 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          annotations: '{}'
           id: id
           type: type
           timeout: timeout
         router:
           endpoint: endpoint
           updated_at: 2000-01-23T04:56:07.000+00:00
+          project_id: 1
           name: name
           created_at: 2000-01-23T04:56:07.000+00:00
-          project: 1
           id: 6
           monitoring_url: monitoring_url
           environment_name: environment_name
         updated_at: 2000-01-23T04:56:07.000+00:00
+        default_route_id: default_route_id
         resource_request:
           min_replica: 0
           max_replica: 6
@@ -1861,6 +1900,7 @@ components:
           cpu_request: cpu_request
         id: 0
         ensembler:
+          updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
             - treatment: treatment-1
@@ -1869,12 +1909,14 @@ components:
             - treatment: treatment-1
               route: route-1
               experiment: experiment-1
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 5
           type: standard
           docker_config:
             service_account: secret-name-for-google-service-account
             image: image
             endpoint: endpoint
-            port: 5
+            port: 2
             resource_request:
               min_replica: 0
               max_replica: 6
@@ -1925,10 +1967,16 @@ components:
         enricher:
           $ref: '#/components/schemas/Enricher'
         ensembler:
-          $ref: '#/components/schemas/Ensembler_1'
+          $ref: '#/components/schemas/RouterEnsemblerConfig'
         monitoring_url:
           readOnly: true
           type: string
+        default_route_id:
+          type: string
+        rules:
+          items:
+            $ref: '#/components/schemas/TrafficRule'
+          type: array
       type: object
     RouterVersionStatus:
       default: pending
@@ -1941,6 +1989,7 @@ components:
     Route:
       example:
         endpoint: endpoint
+        annotations: '{}'
         id: id
         type: type
         timeout: timeout
@@ -1953,6 +2002,9 @@ components:
           type: string
         timeout:
           type: string
+        annotations:
+          nullable: true
+          type: object
       required:
       - endpoint
       - id
@@ -1992,6 +2044,7 @@ components:
       type: string
     BigQueryConfig:
       example:
+        batch_load: true
         table: table
         service_account_secret: service_account_secret
       properties:
@@ -1999,6 +2052,9 @@ components:
           type: string
         service_account_secret:
           type: string
+        batch_load:
+          nullable: true
+          type: boolean
       required:
       - service_account_secret
       - table
@@ -2030,12 +2086,15 @@ components:
         service_account: secret-name-for-google-service-account
         image: image
         endpoint: endpoint
-        port: 1
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        port: 5
+        created_at: 2000-01-23T04:56:07.000+00:00
         resource_request:
           min_replica: 0
           max_replica: 6
           memory_request: memory_request
           cpu_request: cpu_request
+        id: 1
         env:
         - name: name
           value: value
@@ -2043,6 +2102,9 @@ components:
           value: value
         timeout: timeout
       properties:
+        id:
+          format: int32
+          type: integer
         image:
           type: string
         resource_request:
@@ -2062,6 +2124,14 @@ components:
             (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: secret-name-for-google-service-account
           type: string
+        created_at:
+          format: date-time
+          readOnly: true
+          type: string
+        updated_at:
+          format: date-time
+          readOnly: true
+          type: string
       required:
       - endpoint
       - env
@@ -2070,8 +2140,9 @@ components:
       - resource_request
       - timeout
       type: object
-    Ensembler_1:
+    RouterEnsemblerConfig:
       example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
           experiment_mappings:
           - treatment: treatment-1
@@ -2080,12 +2151,14 @@ components:
           - treatment: treatment-1
             route: route-1
             experiment: experiment-1
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: 5
         type: standard
         docker_config:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
-          port: 5
+          port: 2
           resource_request:
             min_replica: 0
             max_replica: 6
@@ -2098,6 +2171,9 @@ components:
             value: value
           timeout: timeout
       properties:
+        id:
+          format: int32
+          type: integer
         type:
           description: type of ensembler
           enum:
@@ -2108,6 +2184,14 @@ components:
           $ref: '#/components/schemas/EnsemblerStandardConfig'
         docker_config:
           $ref: '#/components/schemas/EnsemblerDockerConfig'
+        created_at:
+          format: date-time
+          readOnly: true
+          type: string
+        updated_at:
+          format: date-time
+          readOnly: true
+          type: string
       required:
       - type
       type: object
@@ -2121,6 +2205,7 @@ components:
         - treatment: treatment-1
           route: route-1
           experiment: experiment-1
+      nullable: true
       properties:
         experiment_mappings:
           items:
@@ -2135,7 +2220,7 @@ components:
         service_account: secret-name-for-google-service-account
         image: image
         endpoint: endpoint
-        port: 5
+        port: 2
         resource_request:
           min_replica: 0
           max_replica: 6
@@ -2147,6 +2232,7 @@ components:
         - name: name
           value: value
         timeout: timeout
+      nullable: true
       properties:
         image:
           type: string
@@ -2174,120 +2260,6 @@ components:
       - port
       - resource_request
       - timeout
-      type: object
-    RouterConfig:
-      example:
-        name: name
-        config:
-          enricher:
-            service_account: secret-name-for-google-service-account
-            image: image
-            endpoint: endpoint
-            port: 1
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            env:
-            - name: name
-              value: value
-            - name: name
-              value: value
-            timeout: timeout
-          routes:
-          - endpoint: endpoint
-            id: id
-            type: type
-            timeout: timeout
-          - endpoint: endpoint
-            id: id
-            type: type
-            timeout: timeout
-          default_route_id: default_route_id
-          rules:
-          - routes:
-            - routes
-            - routes
-            conditions:
-            - field: field
-              values:
-              - values
-              - values
-              operator: in
-            - field: field
-              values:
-              - values
-              - values
-              operator: in
-          - routes:
-            - routes
-            - routes
-            conditions:
-            - field: field
-              values:
-              - values
-              - values
-              operator: in
-            - field: field
-              values:
-              - values
-              - values
-              operator: in
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
-          ensembler:
-            standard_config:
-              experiment_mappings:
-              - treatment: treatment-1
-                route: route-1
-                experiment: experiment-1
-              - treatment: treatment-1
-                route: route-1
-                experiment: experiment-1
-            type: standard
-            docker_config:
-              service_account: secret-name-for-google-service-account
-              image: image
-              endpoint: endpoint
-              port: 5
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
-              env:
-              - name: name
-                value: value
-              - name: name
-                value: value
-              timeout: timeout
-          log_config:
-            bigquery_config:
-              table: table
-              service_account_secret: service_account_secret
-            kafka_config:
-              brokers: brokers
-              topic: topic
-              serialization_format: json
-          timeout: timeout
-          experiment_engine:
-            config: ""
-        environment_name: environment_name
-      properties:
-        environment_name:
-          type: string
-        name:
-          type: string
-        config:
-          $ref: '#/components/schemas/RouterConfig_config'
-      required:
-      - config
-      - environment_name
-      - name
       type: object
     TrafficRule:
       example:
@@ -2348,6 +2320,130 @@ components:
       - operator
       - values
       type: object
+    RouterConfig:
+      example:
+        name: name
+        config:
+          enricher:
+            service_account: secret-name-for-google-service-account
+            image: image
+            endpoint: endpoint
+            updated_at: 2000-01-23T04:56:07.000+00:00
+            port: 5
+            created_at: 2000-01-23T04:56:07.000+00:00
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            id: 1
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
+            timeout: timeout
+          routes:
+          - endpoint: endpoint
+            annotations: '{}'
+            id: id
+            type: type
+            timeout: timeout
+          - endpoint: endpoint
+            annotations: '{}'
+            id: id
+            type: type
+            timeout: timeout
+          default_route_id: default_route_id
+          rules:
+          - routes:
+            - routes
+            - routes
+            conditions:
+            - field: field
+              values:
+              - values
+              - values
+              operator: in
+            - field: field
+              values:
+              - values
+              - values
+              operator: in
+          - routes:
+            - routes
+            - routes
+            conditions:
+            - field: field
+              values:
+              - values
+              - values
+              operator: in
+            - field: field
+              values:
+              - values
+              - values
+              operator: in
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
+          ensembler:
+            updated_at: 2000-01-23T04:56:07.000+00:00
+            standard_config:
+              experiment_mappings:
+              - treatment: treatment-1
+                route: route-1
+                experiment: experiment-1
+              - treatment: treatment-1
+                route: route-1
+                experiment: experiment-1
+            created_at: 2000-01-23T04:56:07.000+00:00
+            id: 5
+            type: standard
+            docker_config:
+              service_account: secret-name-for-google-service-account
+              image: image
+              endpoint: endpoint
+              port: 2
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              env:
+              - name: name
+                value: value
+              - name: name
+                value: value
+              timeout: timeout
+          log_config:
+            bigquery_config:
+              batch_load: true
+              table: table
+              service_account_secret: service_account_secret
+            kafka_config:
+              brokers: brokers
+              topic: topic
+              serialization_format: json
+          timeout: timeout
+          experiment_engine:
+            type: nop
+            config: '{}'
+        environment_name: environment_name
+      properties:
+        environment_name:
+          type: string
+        name:
+          type: string
+        config:
+          $ref: '#/components/schemas/RouterConfig_config'
+      required:
+      - config
+      - environment_name
+      - name
+      type: object
     Event:
       example:
         event_type: info
@@ -2359,7 +2455,7 @@ components:
         version: 6
       properties:
         id:
-          readOnly: true
+          format: int32
           type: integer
         created_at:
           format: date-time
@@ -2679,37 +2775,20 @@ components:
       type: object
     ExperimentConfig:
       example:
-        config: ""
+        type: nop
+        config: '{}'
       properties:
         type:
-          $ref: '#/components/schemas/ExperimentEngineType'
+          default: nop
+          type: string
         config:
-          oneOf:
-          - $ref: '#/components/schemas/StandardExperimentConfig'
-          - $ref: '#/components/schemas/CustomExperimentConfig'
+          type: object
       required:
       - type
       type: object
     ExperimentEngineType:
       default: nop
-      enum:
-      - nop
       type: string
-    StandardExperimentConfig:
-      properties:
-        client:
-          $ref: '#/components/schemas/ExperimentClient'
-        experiments:
-          items:
-            $ref: '#/components/schemas/Experiment'
-          type: array
-        variables:
-          $ref: '#/components/schemas/ExperimentVariables'
-      type: object
-    CustomExperimentConfig:
-      not:
-        $ref: '#/components/schemas/StandardExperimentConfig'
-      type: object
     FieldSource:
       enum:
       - header
@@ -2810,6 +2889,7 @@ components:
       example:
         custom_metrics_enabled: true
         bigquery_config:
+          batch_load: true
           table: table
           service_account_secret: service_account_secret
         kafka_config:
@@ -2860,6 +2940,7 @@ components:
     RouterConfig_config_log_config:
       example:
         bigquery_config:
+          batch_load: true
           table: table
           service_account_secret: service_account_secret
         kafka_config:
@@ -2880,12 +2961,15 @@ components:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
-          port: 1
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          port: 5
+          created_at: 2000-01-23T04:56:07.000+00:00
           resource_request:
             min_replica: 0
             max_replica: 6
             memory_request: memory_request
             cpu_request: cpu_request
+          id: 1
           env:
           - name: name
             value: value
@@ -2894,10 +2978,12 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          annotations: '{}'
           id: id
           type: type
           timeout: timeout
@@ -2937,6 +3023,7 @@ components:
           memory_request: memory_request
           cpu_request: cpu_request
         ensembler:
+          updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
             - treatment: treatment-1
@@ -2945,12 +3032,14 @@ components:
             - treatment: treatment-1
               route: route-1
               experiment: experiment-1
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 5
           type: standard
           docker_config:
             service_account: secret-name-for-google-service-account
             image: image
             endpoint: endpoint
-            port: 5
+            port: 2
             resource_request:
               min_replica: 0
               max_replica: 6
@@ -2964,6 +3053,7 @@ components:
             timeout: timeout
         log_config:
           bigquery_config:
+            batch_load: true
             table: table
             service_account_secret: service_account_secret
           kafka_config:
@@ -2972,7 +3062,8 @@ components:
             serialization_format: json
         timeout: timeout
         experiment_engine:
-          config: ""
+          type: nop
+          config: '{}'
       properties:
         routes:
           items:
@@ -2995,7 +3086,7 @@ components:
         enricher:
           $ref: '#/components/schemas/Enricher'
         ensembler:
-          $ref: '#/components/schemas/Ensembler_1'
+          $ref: '#/components/schemas/RouterEnsemblerConfig'
       required:
       - default_route_id
       - experiment_engine

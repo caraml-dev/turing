@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -334,8 +336,8 @@ type OpenapiConfig struct {
 	SpecFile string
 	// Config file to be used for serving swagger.
 	SwaggerUIConfig *SinglePageApplicationConfig
-	// Where the merged spec file yaml should be served.
-	YAMLServingPath string
+	// Where the merged spec file yaml should be saved.
+	MergedSpecFile string
 	// Optional. Overrides the file before running the Swagger UI.
 	SpecOverrideFile *string
 }
@@ -343,6 +345,21 @@ type OpenapiConfig struct {
 // SpecData returns a byte slice of the combined yaml files
 func (c *OpenapiConfig) SpecData() ([]byte, error) {
 	return utils.MergeTwoYamls(c.SpecFile, c.SpecOverrideFile)
+}
+
+// GenerateSpecFile gets the spec data and writes to a file
+func (c *OpenapiConfig) GenerateSpecFile() error {
+	b, err := c.SpecData()
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0755)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteYAMLFile(b, c.MergedSpecFile)
 }
 
 // Load creates a Config object from default config values, config files and environment variables.
@@ -468,7 +485,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("OpenapiConfig::SwaggerUIConfig::ServingPath", "/api-docs/")
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.bundle.yaml")
-	v.SetDefault("OpenapiConfig::YAMLServingPath", "/static/openapi.bundle.yaml")
+	v.SetDefault("OpenapiConfig::MergedSpecFile", "api/swagger-ui-dist/openapi.bundle.yaml")
 
 	v.SetDefault("Experiment", map[string]interface{}{})
 }

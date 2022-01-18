@@ -17,7 +17,7 @@ show_help() {
   cat <<EOF
 Usage: $(basename "$0") <options>
     -h, --help               Display help
-    -s, --spec-url           URL containing the API definition
+    -s, --spec-file          A file containing the API definition
     -o, --output             The output path for the generated Swagger UI files
     -v, --version            The Swagger-UI version to use (default: DEFAULT_SWAGGER_UI_VERSION)"
 EOF
@@ -66,12 +66,12 @@ parse_command_line() {
           exit 1
         fi
         ;;
-      -s | --spec-url)
+      -s | --spec-file)
         if [[ -n "${2:-}" ]]; then
-          spec_url="$2"
+          spec_file="$2"
           shift
         else
-          echo "ERROR: '-s|--spec-url' cannot be empty." >&2
+          echo "ERROR: '-s|--spec-file' cannot be empty." >&2
           show_help
           exit 1
         fi
@@ -84,8 +84,8 @@ parse_command_line() {
     shift
   done
 
-  if [[ -z "$spec_url" ]]; then
-    echo "ERROR: '-s|--spec-url' is required." >&2
+  if [[ -z "$spec_file" ]]; then
+    echo "ERROR: '-s|--spec-file' is required." >&2
     show_help
     exit 1
   fi
@@ -133,7 +133,7 @@ make_swagger_config(){
   echo "Generating Swagger UI configuration..."
   cat <<EOF > "$output/$SWAGGER_CONFIG_FILENAME"
 deepLinking: true
-url: "$spec_url"
+url: $(basename "$spec_file")
 EOF
 }
 

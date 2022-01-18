@@ -117,11 +117,11 @@ func Run() {
 	// HealthCheck Handler
 	AddHealthCheckHandler(r, "/v1/internal", db)
 
-	openAPISpecBytes, err := cfg.OpenapiConfig.SpecData()
+	// Write to a file so that Swagger UI can use it
+	err = cfg.OpenapiConfig.GenerateSpecFile()
 	if err != nil {
-		log.Panicf("failed to merge openapi yamls: %s", err)
+		log.Panicf("failed to write openapi yaml file: %s", err)
 	}
-	ServeYAML(r, cfg.OpenapiConfig.YAMLServingPath, openAPISpecBytes)
 
 	// API Handler
 	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
