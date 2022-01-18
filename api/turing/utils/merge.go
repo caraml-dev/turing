@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -94,4 +95,24 @@ func readYAML(filepath string) (map[string]interface{}, error) {
 	}
 
 	return y, nil
+}
+
+// WriteYAMLFile takes a byte slice and writes to the path.
+func WriteYAMLFile(b []byte, path string) error {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening file for writing: %s", err)
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		return fmt.Errorf("error writing bytes into file: %s", err)
+	}
+
+	err = f.Sync()
+	if err != nil {
+		return fmt.Errorf("error syncing file to disk: %s", err)
+	}
+
+	return nil
 }

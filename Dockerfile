@@ -11,12 +11,12 @@ RUN apk add --no-cache bash
 
 # Override the swagger ui config
 ENV OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY "/app/swagger-ui"
-ENV OPENAPICONFIG_YAMLSERVINGURL "/static/openapi.bundle.yaml"
+ENV OPENAPICONFIG_MERGEDSPECFILE "/app/swagger-ui/openapi.bundle.yaml"
 
 # Build swagger ui deps
 COPY ./scripts/swagger-ui-generator /app/swagger-ui-generator
 RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
-    --spec-url ${OPENAPICONFIG_YAMLSERVINGURL} \
+    --spec-file ${OPENAPICONFIG_MERGEDSPECFILE} \
     --output ${OPENAPICONFIG_SWAGGERUICONFIG_SERVINGDIRECTORY}
 RUN rm -rf /app/swagger-ui-generator
 
