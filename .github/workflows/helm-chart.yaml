@@ -18,9 +18,9 @@ jobs:
         uses: stefanprodan/helm-gh-pages@v1.4.1
         with:
           token: "${{ secrets.GH_PAGES_TOKEN }}"
-          charts_url: https://turing-ml.github.io/charts
+          charts_url: https://dsp-tech.github.io/charts
           charts_dir: infra/charts
-          owner: turing-ml
+          owner: dsp-tech
           repository: charts
           commit_username: ${{ github.actor }}
           commit_email: "${{ github.actor }}@users.noreply.github.com"
