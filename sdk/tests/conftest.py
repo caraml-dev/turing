@@ -566,3 +566,29 @@ def generic_routers(project, num_routers, generic_router_status, router_version)
             updated_at=datetime.now() + timedelta(seconds=i + 10),
             config=router_version
         ) for i in range(1, num_routers + 1)]
+
+
+@pytest.fixture
+def generic_events():
+    return turing.generated.models.InlineResponse2002(
+        events=[
+            turing.generated.models.Event(
+                created_at=datetime.now(),
+                updated_at=datetime.now() + timedelta(seconds=1000),
+                event_type="info",
+                id=123,
+                message='successfully deployed router not-a-router version 5',
+                stage='deployment success',
+                version=5
+            ),
+            turing.generated.models.Event(
+                created_at=datetime.now() + timedelta(seconds=1500),
+                updated_at=datetime.now() + timedelta(seconds=2500),
+                event_type='error',
+                id=124,
+                message='failed to deploy router not-a-router version 5',
+                stage='deployment failure',
+                version=5
+            )
+        ]
+    )

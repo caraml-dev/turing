@@ -21,9 +21,9 @@ from turing.generated.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
-from turing.generated.model.event import Event
 from turing.generated.model.inline_response200 import InlineResponse200
 from turing.generated.model.inline_response2001 import InlineResponse2001
+from turing.generated.model.inline_response2002 import InlineResponse2002
 from turing.generated.model.inline_response202 import InlineResponse202
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
@@ -577,7 +577,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                [Event]
+                InlineResponse2002
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -608,7 +608,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_events_get = _Endpoint(
             settings={
-                'response_type': ([Event],),
+                'response_type': (InlineResponse2002,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/events',
                 'operation_id': 'projects_project_id_routers_router_id_events_get',

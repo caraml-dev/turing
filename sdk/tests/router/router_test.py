@@ -293,7 +293,7 @@ def test_get_version_config(turing_api, active_project, generic_router, router_v
 
 
 @responses.activate
-def test_delete_router(turing_api, active_project, generic_router, use_google_oauth):
+def test_delete_version(turing_api, active_project, generic_router, use_google_oauth):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -317,3 +317,60 @@ def test_delete_router(turing_api, active_project, generic_router, use_google_oa
     response = base_router.delete_version(1)
     assert base_router.id == response['router_id']
     assert generic_router.config.version == response['version']
+
+
+@responses.activate
+def test_deploy_version(turing_api, active_project, generic_router, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    expected_router_id = 1
+    expected_version = 1
+    expected = turing.generated.models.InlineResponse202(
+        router_id=expected_router_id,
+        version=expected_version
+    )
+
+    responses.add(
+        method="POST",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{expected_version}/deploy",
+        body=json.dumps(expected, default=tests.json_serializer),
+        status=202,
+        content_type="application/json"
+    )
+
+    response = base_router.deploy_version(1)
+    assert base_router.id == response['router_id']
+    assert generic_router.config.version == response['version']
+
+
+@responses.activate
+def test_get_events_list(turing_api, active_project, generic_router, generic_events, use_google_oauth):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    base_router = turing.Router.from_open_api(generic_router)
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/events",
+        body=json.dumps(generic_events, default=tests.json_serializer),
+        status=200,
+        content_type="application/json"
+    )
+
+    response = base_router.get_events()
+    expected_events = generic_events.get('events')
+
+    assert len(response) == len(expected_events)
+
+    for actual, expected in zip(response, expected_events):
+        assert actual.id == expected.id
+        assert actual.version == expected.version
+        assert actual.event_type == expected.event_type
+        assert actual.stage == expected.stage
+        assert actual.message == expected.message
+        assert actual.created_at == expected.created_at
+        assert actual.updated_at == expected.updated_at

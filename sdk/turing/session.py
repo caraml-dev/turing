@@ -1,6 +1,8 @@
 import os
 import mlflow
 from typing import List, Optional
+
+import turing.generated.models
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
@@ -290,4 +292,25 @@ class TuringSession:
             project_id=self.active_project.id,
             router_id=router_id,
             version=version
+        )
+
+    @require_active_project
+    def deploy_router_version(self, router_id: int, version: int) -> IdObject:
+        """
+        Deploy specific router version by its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_deploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
+        )
+
+    @require_active_project
+    def get_router_events(self, router_id: int) -> turing.generated.models.InlineResponse2002:
+        """
+        Fetch deployment events associated with the router with the given router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_events_get(
+            project_id=self.active_project.id,
+            router_id=router_id
         )

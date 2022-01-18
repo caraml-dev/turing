@@ -53,6 +53,7 @@ from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
 from turing.generated.model.inline_response200 import InlineResponse200
 from turing.generated.model.inline_response2001 import InlineResponse2001
+from turing.generated.model.inline_response2002 import InlineResponse2002
 from turing.generated.model.inline_response202 import InlineResponse202
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label

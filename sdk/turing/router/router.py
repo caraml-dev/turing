@@ -160,3 +160,15 @@ class Router(ApiObject):
         """
         return turing.active_session.delete_router_version(router_id=self.id, version=version).to_dict()
 
+    def deploy_version(self, version: int) -> Dict[str, int]:
+        """
+        Deploy specific router version by its router ID and version
+        """
+        return turing.active_session.deploy_router_version(router_id=self.id, version=version).to_dict()
+
+    def get_events(self) -> List[turing.generated.models.Event]:
+        """
+        Fetch deployment events associated with the router
+        """
+        response = turing.active_session.get_router_events(router_id=self.id).get('events')
+        return [event for event in response] if response else []
