@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -357,6 +359,11 @@ func (c *OpenapiConfig) SpecData() ([]byte, error) {
 // GenerateSpecFile gets the spec data and writes to a file
 func (c *OpenapiConfig) GenerateSpecFile() error {
 	b, err := c.SpecData()
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0755)
 	if err != nil {
 		return err
 	}
