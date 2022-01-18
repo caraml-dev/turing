@@ -18,8 +18,7 @@ build-image: version
 	docker build . \
 		--tag ${IMAGE_TAG} \
 		--build-arg TURING_API_IMAGE \
-		--build-arg TURING_UI_DIST_PATH \
-		--build-arg SWAGGER_UI_DIST_PATH
+		--build-arg TURING_UI_DIST_PATH
 
 .PHONY: version
 version:
