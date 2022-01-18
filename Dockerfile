@@ -14,11 +14,16 @@ RUN cd /app/swagger-ui-generator && ./swagger-ui-generator.sh \
 
 FROM ${TURING_API_IMAGE}
 
-ARG openapi_spec_file=/app/swagger-ui/openapi.bundle.yaml
-ARG turing_ui_dist_path=ui/build
-
 ARG TURING_USER=${TURING_USER:-turing}
 ARG TURING_USER_GROUP=${TURING_USER_GROUP:-app}
+
+# Install bash
+USER root
+RUN apk add --no-cache bash
+USER ${TURING_USER}
+
+ARG openapi_spec_file=/app/swagger-ui/openapi.bundle.yaml
+ARG turing_ui_dist_path=ui/build
 
 ENV TURINGUICONFIG_SERVINGDIRECTORY "/app/turing-ui"
 
