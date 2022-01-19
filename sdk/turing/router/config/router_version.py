@@ -4,6 +4,10 @@ from datetime import datetime
 
 
 class RouterVersion(RouterConfig):
+    """
+    Class to used to contain a RouterVersion. Used when returning a response containing a router's version from Turing
+    API. Not to be instantiated manually.
+    """
     def __init__(self,
                  id: int,
                  version: int,
@@ -26,4 +30,12 @@ class RouterVersion(RouterConfig):
         super().__init__(environment_name=environment_name, name=name, **kwargs)
 
     def get_config(self) -> RouterConfig:
+        """
+        Generates a RouterConfig instance from the attributes contained in this object; NOTE that the name and
+        environment_name of this version gets passed to the generated RouterConfig. This means that if you were to use
+        the generated RouterConfig for another instance, you would have to change its name, and also maybe its
+        environment_name
+
+        :return: a new RouterConfig instance containing attributes of this router version
+        """
         return RouterConfig(**self.to_dict())
