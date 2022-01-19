@@ -50,13 +50,13 @@ func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.Sugar
 			return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
 		}
 
-		filename := path.Base(downloadURL.Path)
+		filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
 		err = utils.DownloadFile(downloadURL, filename)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"failed to download plugin's binary from remote url: url=%s, %v", engineCfg.PluginURL, err)
 		}
-		return rpc.NewFactory(engineCfg.PluginBinary, engineCfgJSON, logger)
+		return rpc.NewFactory(filename, engineCfgJSON, logger)
 	}
 
 	// compile-time implementation of the experiment engine factory

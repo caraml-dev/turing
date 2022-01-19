@@ -243,8 +243,7 @@ type DatabaseConfig struct {
 }
 
 type ExperimentEnginePlugin struct {
-	Image        string `validate:"required"`
-	PluginBinary string `validate:"required"`
+	Image string `validate:"required"`
 }
 
 // RouterDefaults contains default configuration for routers deployed
