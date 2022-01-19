@@ -242,8 +242,8 @@ type DatabaseConfig struct {
 	MigrationsFolder string `validate:"required"`
 }
 
-type ExperimentEnginePlugin struct {
-	Image string `validate:"required"`
+type ExperimentEnginePluginConfig struct {
+	Image string `json:"image" validate:"required"`
 }
 
 // RouterDefaults contains default configuration for routers deployed
@@ -265,7 +265,7 @@ type RouterDefaults struct {
 	// Fluentd config for the router
 	FluentdConfig       *FluentdConfig
 	MonitoringURLFormat *string
-	Plugins             map[string]*ExperimentEnginePlugin `validate:"dive"`
+	Plugins             map[string]*ExperimentEnginePluginConfig `validate:"dive"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled

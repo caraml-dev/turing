@@ -14,7 +14,6 @@ import (
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/utils"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -30,13 +29,13 @@ type DeploymentService interface {
 		ensemblerServiceAccountKey string,
 		experimentConfig json.RawMessage,
 		experimentPasskey string,
-		eventsCh *utils.EventChannel,
+		eventsCh *models.EventChannel,
 	) (string, error)
 	UndeployRouterVersion(
 		project *mlp.Project,
 		environment *merlin.Environment,
 		routerVersion *models.RouterVersion,
-		eventsCh *utils.EventChannel,
+		eventsCh *models.EventChannel,
 	) error
 	DeleteRouterEndpoint(project *mlp.Project,
 		environment *merlin.Environment,
@@ -63,7 +62,7 @@ type deploymentService struct {
 }
 
 // uFunc is the function type accepted by the updateKnServices method
-type uFunc func(context.Context, *cluster.KnativeService, *sync.WaitGroup, chan<- error, *utils.EventChannel)
+type uFunc func(context.Context, *cluster.KnativeService, *sync.WaitGroup, chan<- error, *models.EventChannel)
 
 // NewDeploymentService initialises a new endpoints service
 func NewDeploymentService(
@@ -100,7 +99,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	ensemblerServiceAccountKey string,
 	experimentConfig json.RawMessage,
 	experimentPasskey string,
-	eventsCh *utils.EventChannel,
+	eventsCh *models.EventChannel,
 ) (string, error) {
 	var endpoint string
 
@@ -219,7 +218,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
-	eventsCh *utils.EventChannel,
+	eventsCh *models.EventChannel,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
 	defer cancel()
@@ -466,14 +465,14 @@ func deployKnServices(
 	ctx context.Context,
 	controller cluster.Controller,
 	services []*cluster.KnativeService,
-	eventsCh *utils.EventChannel,
+	eventsCh *models.EventChannel,
 ) error {
 	// Define deploy function
 	deployFunc := func(ctx context.Context,
 		svc *cluster.KnativeService,
 		wg *sync.WaitGroup,
 		errCh chan<- error,
-		eventsCh *utils.EventChannel,
+		eventsCh *models.EventChannel,
 	) {
 		defer wg.Done()
 		eventsCh.Write(models.NewInfoEvent(
@@ -516,14 +515,14 @@ func deleteKnServices(
 	controller cluster.Controller,
 	services []*cluster.KnativeService,
 	timeout time.Duration,
-	eventsCh *utils.EventChannel,
+	eventsCh *models.EventChannel,
 ) error {
 	// Define delete function
 	deleteFunc := func(_ context.Context,
 		svc *cluster.KnativeService,
 		wg *sync.WaitGroup,
 		errCh chan<- error,
-		eventsCh *utils.EventChannel,
+		eventsCh *models.EventChannel,
 	) {
 		defer wg.Done()
 		eventsCh.Write(models.NewInfoEvent(
@@ -556,7 +555,7 @@ func deleteKnServices(
 // given update function on the given services simultaneously and waits for a response,
 // within the supplied timeout.
 func updateKnServices(ctx context.Context, services []*cluster.KnativeService,
-	updateFunc uFunc, eventsCh *utils.EventChannel) error {
+	updateFunc uFunc, eventsCh *models.EventChannel) error {
 
 	// Init wait group to wait for all goroutines to return
 	var wg sync.WaitGroup

@@ -166,9 +166,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
 		if pluginConfig, ok := defaults.Plugins[rv.ExperimentEngine.Type]; ok {
-			rv.ExperimentEngine.PluginConfig = &models.PluginConfig{
-				Image: pluginConfig.Image,
-			}
+			rv.ExperimentEngine.PluginConfig = pluginConfig
 		}
 
 		rv.ExperimentEngine.Config, err = r.BuildExperimentEngineConfig(router, cryptoSvc, expSvc)

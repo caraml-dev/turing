@@ -5,12 +5,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/utils"
+	"github.com/gojek/turing/engines/experiment/manager"
 )
 
 // RouterDeploymentController handles the deployment of routers
@@ -36,7 +34,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		return err
 	}
 
-	eventsCh := utils.NewEventChannel()
+	eventsCh := models.NewEventChannel()
 	defer eventsCh.Close()
 	_ = c.EventService.ClearEvents(int(router.ID))
 	// Write events asynchronously
@@ -131,7 +129,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 }
 
 func (c RouterDeploymentController) writeDeploymentEvents(
-	eventsCh *utils.EventChannel, router *models.Router, version uint) {
+	eventsCh *models.EventChannel, router *models.Router, version uint) {
 	for {
 		event, done := eventsCh.Read()
 		if done {
@@ -151,7 +149,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
-	eventsCh *utils.EventChannel,
+	eventsCh *models.EventChannel,
 ) (string, error) {
 	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentPasskey string
 	var experimentConfig json.RawMessage
@@ -267,7 +265,7 @@ func (c RouterDeploymentController) undeployRouter(
 	var errorStrings []string
 
 	// Write events asynchronously
-	eventsCh := utils.NewEventChannel()
+	eventsCh := models.NewEventChannel()
 	defer eventsCh.Close()
 	var version uint
 	if router.CurrRouterVersion != nil {

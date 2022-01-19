@@ -39,3 +39,17 @@ func TestEventSetters(t *testing.T) {
 	assert.Equal(t, ID(1), event.RouterID)
 	assert.Equal(t, uint(10), event.Version)
 }
+
+func TestEventChannel(t *testing.T) {
+	ch := NewEventChannel()
+	event := Event{
+		RouterID: 1,
+		Message:  "hello",
+	}
+	go ch.Write(&event)
+	got, _ := ch.Read()
+	assert.Equal(t, *got, event)
+	ch.Close()
+	_, done := ch.Read()
+	assert.Equal(t, done, true)
+}
