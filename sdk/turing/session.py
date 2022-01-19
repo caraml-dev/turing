@@ -6,18 +6,9 @@ import turing.generated.models
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
-from turing.generated.models import \
-    Project, \
-    Ensembler, \
-    EnsemblingJob, \
-    EnsemblerJobStatus, \
-    EnsemblersPaginatedResults, \
-    EnsemblingJobPaginatedResults, \
-    IdObject, \
-    Router, \
-    RouterDetails, \
-    RouterConfig, \
-    RouterVersion
+from turing.generated.models import (Project, Ensembler, EnsemblingJob, EnsemblerJobStatus, EnsemblersPaginatedResults,
+                                     EnsemblingJobPaginatedResults, IdObject, Router, RouterDetails, RouterConfig,
+                                     RouterVersion)
 
 
 def require_active_project(f):
