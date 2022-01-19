@@ -51,7 +51,7 @@ func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.Sugar
 		}
 
 		filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
-		err = utils.DownloadFile(downloadURL, filename)
+		err = utils.DownloadFile(downloadURL, filename, 0744)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"failed to download plugin's binary from remote url: url=%s, %v", engineCfg.PluginURL, err)

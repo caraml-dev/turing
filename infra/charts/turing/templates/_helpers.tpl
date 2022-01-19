@@ -152,7 +152,6 @@ RouterDefaults:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
     {{ $expEngine.name }}:
       Image: {{ $expEngine.rpcPlugin.image }}
-      PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{- end -}}
 {{- end -}}
 {{ end }}

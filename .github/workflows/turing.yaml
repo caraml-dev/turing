@@ -36,10 +36,130 @@ env:
   ARTIFACT_RETENTION_DAYS: 7
 
 jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    outputs:
+      api-version: ${{ steps.build-image.outputs.api-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: api
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=api-version::$(sed -n 's%turing-api version: \(.*\)%\1%p' output.log)"
+
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output turing-api.${{ steps.build-image.outputs.api-version }}.tar \
+            turing-api:${{ steps.build-image.outputs.api-version }}
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: turing-api.${{ steps.build-image.outputs.api-version }}.tar
+          path: turing-api.${{ steps.build-image.outputs.api-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  build-router:
+    runs-on: ubuntu-latest
+    outputs:
+      router-version: ${{ steps.build-image.outputs.router-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: engines/router
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=router-version::$(sed -n 's%turing-router version: \(.*\)%\1%p' output.log)"
+
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output turing-router.${{ steps.build-image.outputs.router-version }}.tar \
+            turing-router:${{ steps.build-image.outputs.router-version }}
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: turing-router.${{ steps.build-image.outputs.router-version }}.tar
+          path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  build-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Node 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ui/node_modules
+          key: |
+            ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-modules-
+
+      - name: Install
+        run: yarn install --network-concurrency 1
+
+      - name: Lint code
+        run: yarn lint
+
+      - name: Build UI
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: yarn build
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: turing-ui-dist
+          path: ui/build/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  build-cluster-init:
+    runs-on: ubuntu-latest
+    outputs:
+      cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Run action build-cluster-init
+        id: build-cluster-init
+        uses: ./.github/actions/build-cluster-init
+        with:
+          artifact_retention_days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
   test-api:
     runs-on: ubuntu-latest
     env:
       GOPATH: ${{ github.workspace }}/api/.go
+    needs:
+      - build-api
     services:
       postgres:
         image: postgres:13-alpine
@@ -95,6 +215,8 @@ jobs:
         working-directory: engines/router
     env:
       GOPATH: ${{ github.workspace }}/engines/router/.go
+    needs:
+      - build-router
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -158,139 +280,6 @@ jobs:
           working-directory: engines/experiment
           skip-go-installation: true
           args: --verbose
-
-  build-ui:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ui
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Node 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ui/node_modules
-          key: |
-            ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-modules-
-
-      - name: Install
-        run: yarn install --network-concurrency 1
-
-      - name: Lint code
-        run: yarn lint
-
-      - name: Build UI
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
-        run: yarn build
-
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: turing-ui-dist
-          path: ui/build/
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-  build-api:
-    runs-on: ubuntu-latest
-    needs:
-      - test-api
-      - test-engines-experiment
-      - test-engines-router
-    outputs:
-      api-version: ${{ steps.build-image.outputs.api-version }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-#      - name: Cache vendor dependencies
-#        uses: actions/cache@v2
-#        with:
-#          path: api
-#          key: |
-#            ${{ runner.os }}-vendor-${{ hashFiles('api/go.mod') }}
-#          restore-keys: ${{ runner.os }}-vendor-
-
-      - name: Build Docker image
-        id: build-image
-        working-directory: api
-        run: |
-          set -o pipefail
-          make build-image | tee output.log
-          echo "::set-output name=api-version::$(sed -n 's%turing-api version: \(.*\)%\1%p' output.log)"
-
-      - name: Save Docker image
-        run: |
-          docker image save \
-            --output turing-api.${{ steps.build-image.outputs.api-version }}.tar \
-            turing-api:${{ steps.build-image.outputs.api-version }}
-
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: turing-api.${{ steps.build-image.outputs.api-version }}.tar
-          path: turing-api.${{ steps.build-image.outputs.api-version }}.tar
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-  build-router:
-    runs-on: ubuntu-latest
-    needs:
-      - test-engines-router
-    outputs:
-      router-version: ${{ steps.build-image.outputs.router-version }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Build Docker image
-        id: build-image
-        working-directory: engines/router
-        run: |
-          set -o pipefail
-          make build-image | tee output.log
-          echo "::set-output name=router-version::$(sed -n 's%turing-router version: \(.*\)%\1%p' output.log)"
-
-      - name: Save Docker image
-        run: |
-          docker image save \
-            --output turing-router.${{ steps.build-image.outputs.router-version }}.tar \
-            turing-router:${{ steps.build-image.outputs.router-version }}
-
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: turing-router.${{ steps.build-image.outputs.router-version }}.tar
-          path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-  build-cluster-init:
-    runs-on: ubuntu-latest
-    outputs:
-      cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Run action build-cluster-init
-        id: build-cluster-init
-        uses: ./.github/actions/build-cluster-init
-        with:
-          artifact_retention_days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-        
 
   test-e2e:
     runs-on: ubuntu-latest
@@ -534,6 +523,9 @@ jobs:
       - build-ui
       - release-rules
       - test-e2e
+      - test-api
+      - test-engines-router
+      - test-engines-experiment
     uses: gojek/turing/.github/workflows/turing-publish.yaml@main
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}

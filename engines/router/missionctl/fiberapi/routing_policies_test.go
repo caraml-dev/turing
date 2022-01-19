@@ -23,7 +23,7 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 		"success": {
 			props: json.RawMessage(`{
 				"default_route_id":  "route1",
-				"experiment_engine": "Litmus"
+				"experiment_engine": "Test"
 			}`),
 			expectedPolicy: routeSelectionPolicy{
 				defaultRoute: "route1",
@@ -33,7 +33,7 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 		"success | with experiment mappings": {
 			props: json.RawMessage(`{
 				"default_route_id":  "route-1",
-				"experiment_engine": "Litmus",
+				"experiment_engine": "Test",
 				"experiment_mappings": [
 					{
 					  "experiment": "experiment-1",
