@@ -89,6 +89,7 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{},
 					Containers: []corev1.Container{
 						{
 							Name:  "test-svc-fluentd-logger",

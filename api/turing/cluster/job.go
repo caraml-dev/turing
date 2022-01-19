@@ -16,7 +16,7 @@ type Job struct {
 	TTLSecondsAfterFinished *int32
 	RestartPolicy           corev1.RestartPolicy
 	Containers              []Container
-	Volumes                 []Volume
+	SecretVolumes           []SecretVolume
 }
 
 // Build converts the spec into a Kubernetes spec
@@ -27,7 +27,7 @@ func (j *Job) Build() *batchv1.Job {
 	}
 
 	volumes := []corev1.Volume{}
-	for _, v := range j.Volumes {
+	for _, v := range j.SecretVolumes {
 		volumes = append(volumes, v.Build())
 	}
 

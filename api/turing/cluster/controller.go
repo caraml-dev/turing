@@ -79,7 +79,6 @@ type Controller interface {
 	DeletePersistentVolumeClaim(pvcName string, namespace string) error
 	ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
-	RunJob(ctx context.Context, namespace string, job *Job) error
 	CreateJob(namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(namespace string, jobName string) error
@@ -514,15 +513,6 @@ func (c *controller) ListPodLogs(
 	return c.k8sCoreClient.Pods(namespace).GetLogs(podName, opts).Stream()
 }
 
-func (c *controller) RunJob(ctx context.Context, namespace string, job *Job) error {
-	j, err := c.k8sBatchClient.Jobs(namespace).Create(job.Build())
-	if err != nil {
-		return err
-	}
-
-	return c.waitForJobToFinish(ctx, namespace, j)
-}
-
 // CreateJob creates a Kubernetes job
 func (c *controller) CreateJob(namespace string, job Job) (*apibatchv1.Job, error) {
 	j := job.Build()
@@ -765,31 +755,6 @@ func (c *controller) waitDeploymentReady(
 
 			if deploymentReady(deployment) {
 				// Service is completely ready
-				return nil
-			}
-		}
-	}
-}
-
-func (c *controller) waitForJobToFinish(ctx context.Context, namespace string, job *apibatchv1.Job) error {
-	ticker := time.NewTicker(time.Second)
-
-	jobs := c.k8sBatchClient.Jobs(namespace)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for job %s to finish", job.Name)
-		case <-ticker.C:
-			j, err := jobs.Get(job.Name, metav1.GetOptions{})
-			if err != nil {
-				return fmt.Errorf("unable to get job status for job %s: %v", job.Name, err)
-			}
-
-			if j.Status.Failed >= 1 {
-				return fmt.Errorf("job %s failed: %v", job.Name, err)
-			}
-			if j.Status.Succeeded == 1 {
 				return nil
 			}
 		}

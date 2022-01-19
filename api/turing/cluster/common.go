@@ -51,27 +51,6 @@ func (vm *VolumeMount) Build() corev1.VolumeMount {
 	}
 }
 
-// Volume is a Kubernetes volume abstraction
-type Volume interface {
-	Build() corev1.Volume
-}
-
-type PVCVolume struct {
-	Name      string
-	ClaimName string
-}
-
-func (v *PVCVolume) Build() corev1.Volume {
-	return corev1.Volume{
-		Name: v.Name,
-		VolumeSource: corev1.VolumeSource{
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-				ClaimName: v.ClaimName,
-			},
-		},
-	}
-}
-
 // SecretVolume is a Kubernetes volume that mounted by a secret
 type SecretVolume struct {
 	Name       string

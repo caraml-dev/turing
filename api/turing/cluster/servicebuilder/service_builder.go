@@ -37,18 +37,16 @@ var ComponentTypes = struct {
 	ServiceAccountSecret string
 	CacheVolume          string
 	FiberConfig          string
-	PluginsInitJob       string
-	PluginsVolume        string
+	PluginsServer        string
 }{
-	Enricher:       "enricher",
-	Ensembler:      "ensembler",
-	Router:         "router",
-	FluentdLogger:  "fluentd-logger",
-	Secret:         "secret",
-	CacheVolume:    "cache-volume",
-	FiberConfig:    "fiber-config",
-	PluginsInitJob: "plugins-init-job",
-	PluginsVolume:  "plugins-volume",
+	Enricher:      "enricher",
+	Ensembler:     "ensembler",
+	Router:        "router",
+	FluentdLogger: "fluentd-logger",
+	Secret:        "secret",
+	CacheVolume:   "cache-volume",
+	FiberConfig:   "fiber-config",
+	PluginsServer: "plugins-server",
 }
 
 // ClusterServiceBuilder parses the Router Config to build a service definition
@@ -72,10 +70,6 @@ type ClusterServiceBuilder interface {
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
-	NewRouterInitJob(
-		ver *models.RouterVersion,
-		project *mlp.Project,
-	) (*cluster.PersistentVolumeClaim, *cluster.Job)
 	NewRouterService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
@@ -96,6 +90,11 @@ type ClusterServiceBuilder interface {
 		envType string,
 		secretName string,
 		fluentdConfig *config.FluentdConfig,
+	) *cluster.KubernetesService
+	NewPluginsServerService(
+		routerVersion *models.RouterVersion,
+		project *mlp.Project,
+		envType string,
 	) *cluster.KubernetesService
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,

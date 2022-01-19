@@ -161,22 +161,18 @@ func (ds *deploymentService) DeployRouterVersion(
 			models.EventStageDeployingDependencies, "successfully deployed fluentd service"))
 	}
 
-	// Initialize experiment engine plugins
+	// Deploy experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		reportErrorAndReturn := func(err error) (string, error) {
+		pluginsServerService := ds.svcBuilder.NewPluginsServerService(routerVersion, project, ds.environmentType)
+		err = deployK8sService(ctx, controller, pluginsServerService)
+		if err != nil {
 			eventsCh.Write(models.NewErrorEvent(
-				models.EventStageDeployingServices, "failed to initialize router plugins: %s", err.Error()))
+				models.EventStageDeployingDependencies, "failed to deploy plugins server: %s", err.Error()))
 			return endpoint, err
 		}
-		pvc, pluginsInitJob := ds.svcBuilder.NewRouterInitJob(routerVersion, project)
-		err = createPVC(ctx, controller, project.Name, pvc)
-		if err != nil {
-			return reportErrorAndReturn(err)
-		}
-		err = controller.RunJob(ctx, project.Name, pluginsInitJob)
-		if err != nil {
-			return reportErrorAndReturn(err)
-		}
+
+		eventsCh.Write(models.NewInfoEvent(
+			models.EventStageDeployingDependencies, "successfully deployed plugins server"))
 	}
 
 	// Construct service objects for each of the components and deploy
@@ -287,25 +283,18 @@ func (ds *deploymentService) UndeployRouterVersion(
 		return errors.New(strings.Join(errs, ". "))
 	}
 
-	// Delete router plugins volume
+	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		pvc, pluginsInitJob := ds.svcBuilder.NewRouterInitJob(routerVersion, project)
-		err = controller.DeleteJob(project.Name, pluginsInitJob.Name)
+		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project, ds.environmentType)
+		err = deleteK8sService(controller, pluginsServerSvc, ds.deploymentTimeout)
 		if err != nil {
-			errs = append(errs, err.Error())
-		}
-		err = deletePVC(controller, project.Name, pvc)
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
-		if len(errs) == 0 {
-			eventsCh.Write(models.NewInfoEvent(
-				models.EventStageDeletingDependencies,
-				"successfully deleted plugins volume"))
+			eventsCh.Write(
+				models.NewErrorEvent(
+					models.EventStageDeletingDependencies,
+					"failed to delete plugins server: %s", strings.Join(errs, ". ")))
 		} else {
-			eventsCh.Write(models.NewErrorEvent(
-				models.EventStageDeletingDependencies,
-				"failed to delete plugins volume: %s", strings.Join(errs, ". ")))
+			eventsCh.Write(models.NewInfoEvent(
+				models.EventStageDeletingDependencies, "successfully deleted plugins server"))
 		}
 	}
 

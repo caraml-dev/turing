@@ -163,11 +163,12 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	}, nil
 }
 
-func (msb *mockClusterServiceBuilder) NewRouterInitJob(
+func (msb *mockClusterServiceBuilder) NewPluginsServerService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-) (*cluster.PersistentVolumeClaim, *cluster.Job) {
-	return nil, nil
+	envType string,
+) *cluster.KubernetesService {
+	return nil
 }
 
 func (msb *mockClusterServiceBuilder) NewFluentdService(

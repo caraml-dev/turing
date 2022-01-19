@@ -61,7 +61,7 @@ func TestJob(t *testing.T) {
 		Containers: []Container{
 			CreateContainer(),
 		},
-		Volumes: []Volume{
+		SecretVolumes: []SecretVolume{
 			CreateSecretVolume(),
 		},
 	}

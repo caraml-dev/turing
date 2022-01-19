@@ -267,8 +267,8 @@ func (ib *imageBuilder) createKanikoJob(
 				},
 			},
 		},
-		Volumes: []cluster.Volume{
-			&cluster.SecretVolume{
+		SecretVolumes: []cluster.SecretVolume{
+			{
 				Name:       kanikoSecretName,
 				SecretName: kanikoSecretName,
 			},
