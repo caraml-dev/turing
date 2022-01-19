@@ -1,6 +1,18 @@
+from enum import Enum
+
 from turing.router.config.router_config import RouterConfig
 from turing.router.config.log_config import RouterVersionLogConfig
 from datetime import datetime
+
+
+class RouterStatus(Enum):
+    """
+    Status of router
+    """
+    DEPLOYED = "deployed"
+    UNDEPLOYED = "undeployed"
+    FAILED = "failed"
+    PENDING = "pending"
 
 
 class RouterVersion(RouterConfig):
@@ -23,7 +35,7 @@ class RouterVersion(RouterConfig):
         self.created_at = created_at
         self.updated_at = updated_at
         self.environment_name = environment_name
-        self.status = status
+        self.status = RouterStatus(status)
         self.name = name
         self.monitoring_url = monitoring_url
         self.log_config = RouterVersionLogConfig(**kwargs.get('log_config'))

@@ -155,7 +155,7 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
         project_id=active_project.id,
         environment_name = "id-dev",
         monitoring_url="http://localhost:5000/endpoint_1",
-        status=turing.router.router.RouterStatus.DEPLOYED,
+        status=turing.router.config.router_version.RouterStatus.DEPLOYED,
     )
 
     router_config = request.getfixturevalue(actual)
@@ -261,7 +261,7 @@ def test_list_versions(turing_api, active_project, generic_router, router_versio
     for actual, expected in zip(actual_versions, expected_versions):
         assert actual.id == router_version.id
         assert actual.monitoring_url == router_version.monitoring_url
-        assert actual.status == router_version.status.value
+        assert actual.status.value == router_version.status.value
         assert actual.created_at == router_version.created_at
         assert actual.updated_at == router_version.updated_at
 
@@ -287,7 +287,7 @@ def test_get_version(turing_api, active_project, generic_router, router_version,
 
     assert actual_response.id == router_version.id
     assert actual_response.monitoring_url == router_version.monitoring_url
-    assert actual_response.status == router_version.status.value
+    assert actual_response.status.value == router_version.status.value
     assert actual_response.created_at == router_version.created_at
     assert actual_response.updated_at == router_version.updated_at
 

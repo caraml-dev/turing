@@ -1,21 +1,15 @@
-from enum import Enum
+import time
+import logging
 
 from typing import List, Dict
 
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
 from turing.router.config.router_config import RouterConfig
-from turing.router.config.router_version import RouterVersion
+from turing.router.config.router_version import RouterVersion, RouterStatus
 
 
-class RouterStatus(Enum):
-    """
-    Status of router
-    """
-    DEPLOYED = "deployed"
-    UNDEPLOYED = "undeployed"
-    FAILED = "failed"
-    PENDING = "pending"
+logging.basicConfig(level=logging.INFO)
 
 
 @ApiObjectSpec(turing.generated.models.Router)
@@ -191,3 +185,29 @@ class Router(ApiObject):
         """
         response = turing.active_session.get_router_events(router_id=self.id).get('events')
         return [event for event in response] if response else []
+
+    def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: int = 10):
+        for i in range(1, max_tries + 1):
+            logging.info(f"Checking if router {self.id} is {status.value}...")
+            cur_status = Router.get(self.id).status
+            if cur_status == status:
+                return
+            else:
+                logging.info(f"Router {self.id} is {cur_status.value}.")
+                logging.info(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                time.sleep(duration)
+
+        raise TimeoutError
+
+    def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: int = 10):
+        for i in range(1, max_tries + 1):
+            logging.info(f"Checking if router {self.id} with version {version} is {status.value}...")
+            cur_status = self.get_version(version).status
+            if cur_status == status:
+                return
+            else:
+                logging.info(f"Router {self.id} with version {version} is {cur_status.value}.")
+                logging.info(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                time.sleep(duration)
+
+        raise TimeoutError
