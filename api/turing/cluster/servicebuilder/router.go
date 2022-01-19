@@ -13,7 +13,6 @@ import (
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/utils"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -490,18 +489,18 @@ func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessag
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
 		expEngineProps := experimentCfg
 		// Tell router, that the experiment runner is implemented as RPC plugin
-		if ver.ExperimentEngine.PluginConfig != nil {
-			var err error
-			expEngineProps, err = utils.MergeJSON(
-				expEngineProps,
-				map[string]interface{}{
-					routerPluginBinaryConfigKey: fmt.Sprintf("%s/%s", routerPluginsMountPath, ver.ExperimentEngine.Type),
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
+		//if ver.ExperimentEngine.PluginConfig != nil {
+		//	var err error
+		//	expEngineProps, err = utils.MergeJSON(
+		//		expEngineProps,
+		//		map[string]interface{}{
+		//			routerPluginBinaryConfigKey: fmt.Sprintf("%s/%s", routerPluginsMountPath, ver.ExperimentEngine.Type),
+		//		},
+		//	)
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//}
 		propsMap["experiment_engine_properties"] = expEngineProps
 	}
 
