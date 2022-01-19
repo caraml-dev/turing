@@ -273,15 +273,6 @@ func (ds *deploymentService) UndeployRouterVersion(
 		}
 	}
 
-	// Delete all components
-	err = deleteKnServices(ctx, controller, services, ds.deploymentDeletionTimeout, eventsCh)
-	if err != nil {
-		errs = append(errs, err.Error())
-	}
-	if len(errs) != 0 {
-		return errors.New(strings.Join(errs, ". "))
-	}
-
 	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
 		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project, ds.environmentType)
@@ -295,6 +286,15 @@ func (ds *deploymentService) UndeployRouterVersion(
 			eventsCh.Write(models.NewInfoEvent(
 				models.EventStageDeletingDependencies, "successfully deleted plugins server"))
 		}
+	}
+
+	// Delete all components
+	err = deleteKnServices(ctx, controller, services, ds.deploymentDeletionTimeout, eventsCh)
+	if err != nil {
+		errs = append(errs, err.Error())
+	}
+	if len(errs) != 0 {
+		return errors.New(strings.Join(errs, ". "))
 	}
 
 	return nil
