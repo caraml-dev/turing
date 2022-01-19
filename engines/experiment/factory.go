@@ -3,9 +3,10 @@ package experiment
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gojek/turing/engines/experiment/pkg/utils"
 	"net/url"
 	"path"
+
+	"github.com/gojek/turing/engines/experiment/pkg/utils"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/plugin/inproc"
@@ -44,13 +45,13 @@ func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.Sugar
 	}
 
 	if engineCfg.PluginURL != "" {
-		downloadUrl, err := url.Parse(engineCfg.PluginURL)
+		downloadURL, err := url.Parse(engineCfg.PluginURL)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
 		}
 
-		filename := path.Base(downloadUrl.Path)
-		err = utils.DownloadFile(downloadUrl, filename)
+		filename := path.Base(downloadURL.Path)
+		err = utils.DownloadFile(downloadURL, filename)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"failed to download plugin's binary from remote url: url=%s, %v", engineCfg.PluginURL, err)
