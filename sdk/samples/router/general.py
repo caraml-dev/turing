@@ -1,3 +1,4 @@
+import logging
 import turing
 import turing.batch
 import turing.batch.config
@@ -14,12 +15,20 @@ from turing.router.config.experiment_config import ExperimentConfig
 
 
 def main(turing_api: str, project: str):
+    # Create a basic logger for the purposes of this sample
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(format)
+    logger.addHandler(handler)
+
     # Initialize Turing client
     turing.set_url(turing_api)
     turing.set_project(project)
 
     # Build a router config in order to create a router
-    # # Create some routes
+    # Create some routes
     routes = [
         Route(
             id='meow',
@@ -48,13 +57,13 @@ def main(turing_api: str, project: str):
         )
     ]
 
-    # # Create some traffic rules
+    # Create some traffic rules
     rules = [
         TrafficRule(
             conditions=[
                 HeaderTrafficRuleCondition(
-                    field='cat',
-                    values=['name']
+                    field='name',
+                    values=['cat']
                 )
             ],
             routes=[
@@ -64,8 +73,8 @@ def main(turing_api: str, project: str):
         TrafficRule(
             conditions=[
                 HeaderTrafficRuleCondition(
-                    field='dog',
-                    values=['name']
+                    field='name',
+                    values=['dog']
                 )
             ],
             routes=[
@@ -75,8 +84,8 @@ def main(turing_api: str, project: str):
         TrafficRule(
             conditions=[
                 HeaderTrafficRuleCondition(
-                    field='sheep',
-                    values=['name']
+                    field='name',
+                    values=['sheep']
                 )
             ],
             routes=[
@@ -86,8 +95,8 @@ def main(turing_api: str, project: str):
         TrafficRule(
             conditions=[
                 HeaderTrafficRuleCondition(
-                    field='pig',
-                    values=['name']
+                    field='name',
+                    values=['pig']
                 )
             ],
             routes=[
@@ -97,8 +106,8 @@ def main(turing_api: str, project: str):
         TrafficRule(
             conditions=[
                 PayloadTrafficRuleCondition(
-                    field='sus',
-                    values=['body']
+                    field='body',
+                    values=['sus']
                 )
             ],
             routes=[
@@ -111,7 +120,7 @@ def main(turing_api: str, project: str):
         )
     ]
 
-    # # Create an experiment config (
+    # Create an experiment config (
     experiment_config = ExperimentConfig(
         type="xp",
         config={
@@ -126,7 +135,7 @@ def main(turing_api: str, project: str):
         }
     )
 
-    # # Create a resource request config for the router
+    # Create a resource request config for the router
     resource_request = ResourceRequest(
         min_replica=0,
         max_replica=2,
@@ -134,12 +143,12 @@ def main(turing_api: str, project: str):
         memory_request="512Mi"
     )
 
-    # # Create a log config for the router
+    # Create a log config for the router
     log_config = LogConfig(
         result_logger_type=ResultLoggerType.NOP
     )
 
-    # # Create an enricher for the router
+    # Create an enricher for the router
     enricher = Enricher(
         image="asia.gcr.io/gods-dev/echo:1.0.2",
         resource_request=ResourceRequest(
@@ -159,7 +168,7 @@ def main(turing_api: str, project: str):
         ]
     )
 
-    # # Create an ensembler for the router
+    # Create an ensembler for the router
     ensembler = DockerRouterEnsemblerConfig(
         id=1,
         image="asia.gcr.io/gods-dev/echo:1.0.2",
@@ -175,7 +184,7 @@ def main(turing_api: str, project: str):
         env=[],
     )
 
-    # # Create the RouterConfig instance
+    # Create the RouterConfig instance
     router_config = RouterConfig(
         environment_name="id-dev",
         name="what-does-the-fox-say",
@@ -198,7 +207,7 @@ def main(turing_api: str, project: str):
     for r in routers:
         if r.name == new_router.name:
             my_router_id = r.id
-        print(r)
+        logger.info(r)
 
     # 3. Get the router you just created using the router_id obtained
     my_router = turing.Router.get(my_router_id)
@@ -225,7 +234,7 @@ def main(turing_api: str, project: str):
             first_ver_no = ver.version
         if ver.status == "deployed":
             latest_ver_no = ver.version
-        print(ver)
+        logger.info(ver)
 
     # 6. Deploy a specific router config version (the first one we created)
     my_router.deploy_version(first_ver_no)
@@ -241,7 +250,7 @@ def main(turing_api: str, project: str):
 
     # 9. Get a specific router version of the router
     my_router_ver = my_router.get_version(first_ver_no)
-    print(my_router_ver)
+    logging.info(my_router_ver)
 
     # 10. Delete a specific router version of the router
     my_router.delete_version(latest_ver_no)
@@ -249,14 +258,14 @@ def main(turing_api: str, project: str):
     # 11. Get all deployment events associated with this router
     events = my_router.get_events()
     for e in events:
-        print(e)
+        logging.info(e)
 
     # 12. Delete this router (using its router_id)
     turing.Router.delete(my_router_id)
-    # # Check if the router still exists
+    # Check if the router still exists
     for r in turing.Router.list():
         if r.name == my_router_config.name:
-            print("Oh my, this router still exists!")
+            logging.info("Oh my, this router still exists!")
             break
 
 
