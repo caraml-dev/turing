@@ -91,7 +91,7 @@ func (c *Config) ListenAddress() string {
 }
 
 func (c *Config) Validate() error {
-	validate, err := newConfigValidator()
+	validate, err := NewConfigValidator()
 	if err != nil {
 		return err
 	}
@@ -489,7 +489,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 
-func newConfigValidator() (*validator.Validate, error) {
+func NewConfigValidator() (*validator.Validate, error) {
 	v := validator.New()
 	// Use struct level validation for AuthorizationConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {
