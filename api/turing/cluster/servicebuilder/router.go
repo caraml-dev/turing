@@ -65,8 +65,8 @@ const (
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
 
-	routerPluginBinaryConfigKey = "PluginBinary"
-	routerPluginsMountPath      = "/app/plugins"
+	//routerPluginBinaryConfigKey = "PluginBinary"
+	//routerPluginsMountPath      = "/app/plugins"
 )
 
 // Router endpoint constants
