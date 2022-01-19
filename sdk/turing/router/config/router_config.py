@@ -14,6 +14,10 @@ from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
 from turing.router.config.experiment_config import ExperimentConfig
 
 
+NAME_INDEX = 0
+VALUE_INDEX = 1
+
+
 @dataclass
 class RouterConfig:
     """
@@ -237,6 +241,6 @@ class RouterConfig:
     def to_dict(self):
         att_dict = {}
         for m in inspect.getmembers(self):
-            if not inspect.ismethod(m[1]) and not m[0].startswith('_'):
-                att_dict[m[0]] = m[1]
+            if not inspect.ismethod(m[VALUE_INDEX]) and not m[NAME_INDEX].startswith('_'):
+                att_dict[m[NAME_INDEX]] = m[VALUE_INDEX]
         return att_dict
