@@ -34,10 +34,15 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
-			Name:      GetComponentName(routerVersion, ComponentTypes.PluginsServer),
-			Namespace: project.Name,
-			Image:     nginxImage,
-			Labels:    buildLabels(project, envType, routerVersion.Router),
+			Name:                  GetComponentName(routerVersion, ComponentTypes.PluginsServer),
+			Namespace:             project.Name,
+			Image:                 nginxImage,
+			Labels:                buildLabels(project, envType, routerVersion.Router),
+			ProbePort:             80,
+			LivenessHTTPGetPath:   "/",
+			ReadinessHTTPGetPath:  "/",
+			ProbeInitDelaySeconds: 5,
+
 			VolumeMounts: []v1.VolumeMount{
 				{
 					Name:      pluginsVolumeName,
@@ -48,6 +53,7 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 				pluginsVolume,
 			},
 		},
+		Replicas: 1,
 		Ports: []cluster.Port{
 			{
 				Name:     "http",
@@ -78,4 +84,12 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 			},
 		},
 	}
+}
+
+func buildPluginsServerHost(
+	routerVersion *models.RouterVersion,
+	namespace string,
+) string {
+	componentName := GetComponentName(routerVersion, ComponentTypes.PluginsServer)
+	return fmt.Sprintf("%s.%s.svc.cluster.local", componentName, namespace)
 }

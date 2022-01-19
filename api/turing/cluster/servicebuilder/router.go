@@ -13,6 +13,7 @@ import (
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/utils"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -65,8 +66,7 @@ const (
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
 
-	//routerPluginBinaryConfigKey = "PluginBinary"
-	//routerPluginsMountPath      = "/app/plugins"
+	routerPluginURLConfigKey = "PluginURL"
 )
 
 // Router endpoint constants
@@ -98,7 +98,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	// Namespace is the name of the project
 	namespace := GetNamespace(project)
 
-	configMap, err := buildFiberConfigMap(routerVersion, experimentConfig)
+	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -480,7 +480,11 @@ func buildFiberConfig(
 	return routerConfig, nil
 }
 
-func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessage) (*cluster.ConfigMap, error) {
+func buildFiberConfigMap(
+	ver *models.RouterVersion,
+	project *mlp.Project,
+	experimentCfg json.RawMessage,
+) (*cluster.ConfigMap, error) {
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{
 		"default_route_id":  ver.DefaultRouteID,
@@ -489,18 +493,21 @@ func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessag
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
 		expEngineProps := experimentCfg
 		// Tell router, that the experiment runner is implemented as RPC plugin
-		//if ver.ExperimentEngine.PluginConfig != nil {
-		//	var err error
-		//	expEngineProps, err = utils.MergeJSON(
-		//		expEngineProps,
-		//		map[string]interface{}{
-		//			routerPluginBinaryConfigKey: fmt.Sprintf("%s/%s", routerPluginsMountPath, ver.ExperimentEngine.Type),
-		//		},
-		//	)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//}
+		if ver.ExperimentEngine.PluginConfig != nil {
+			var err error
+			expEngineProps, err = utils.MergeJSON(
+				expEngineProps,
+				map[string]interface{}{
+					routerPluginURLConfigKey: fmt.Sprintf(
+						"http://%s/plugins/%s",
+						buildPluginsServerHost(ver, project.Name),
+						ver.ExperimentEngine.Type),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
 		propsMap["experiment_engine_properties"] = expEngineProps
 	}
 

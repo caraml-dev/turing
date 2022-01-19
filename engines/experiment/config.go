@@ -6,5 +6,6 @@ package experiment
 // used to configure experiment manager/runner
 type EngineConfig struct {
 	PluginBinary        string
+	PluginURL           string
 	EngineConfiguration map[string]interface{} `mapstructure:",remain"`
 }
