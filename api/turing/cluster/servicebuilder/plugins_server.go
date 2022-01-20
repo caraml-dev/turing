@@ -15,9 +15,20 @@ const (
 )
 
 const (
-	nginxImage        = "nginx:1.21.5"
-	pluginsVolumeName = "plugins-volume"
-	pluginsMountPath  = "/usr/share/nginx/html/plugins"
+	nginxImage                = "nginx:1.21.5"
+	nginxServingRoot          = "/usr/share/nginx/html"
+	pluginsServingPath        = "plugins"
+	pluginsServerReplicaCount = 1
+)
+
+var (
+	pluginsMountPath = fmt.Sprintf("%s/%s", nginxServingRoot, pluginsServingPath)
+	pluginsVolume    = v1.Volume{
+		Name: "plugins-volume",
+		VolumeSource: v1.VolumeSource{
+			EmptyDir: &v1.EmptyDirVolumeSource{},
+		},
+	}
 )
 
 func (sb *clusterSvcBuilder) NewPluginsServerService(
@@ -25,13 +36,6 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 	project *mlp.Project,
 	envType string,
 ) *cluster.KubernetesService {
-	pluginsVolume := v1.Volume{
-		Name: pluginsVolumeName,
-		VolumeSource: v1.VolumeSource{
-			EmptyDir: &v1.EmptyDirVolumeSource{},
-		},
-	}
-
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  GetComponentName(routerVersion, ComponentTypes.PluginsServer),
@@ -42,18 +46,15 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 			LivenessHTTPGetPath:   "/",
 			ReadinessHTTPGetPath:  "/",
 			ProbeInitDelaySeconds: 5,
-
 			VolumeMounts: []v1.VolumeMount{
 				{
-					Name:      pluginsVolumeName,
+					Name:      pluginsVolume.Name,
 					MountPath: pluginsMountPath,
 				},
 			},
-			Volumes: []v1.Volume{
-				pluginsVolume,
-			},
+			Volumes: []v1.Volume{pluginsVolume},
 		},
-		Replicas: 1,
+		Replicas: pluginsServerReplicaCount,
 		Ports: []cluster.Port{
 			{
 				Name:     "http",
@@ -77,7 +78,7 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 				},
 				VolumeMounts: []cluster.VolumeMount{
 					{
-						Name:      pluginsVolumeName,
+						Name:      pluginsVolume.Name,
 						MountPath: pluginsMountPath,
 					},
 				},
@@ -86,10 +87,10 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 	}
 }
 
-func buildPluginsServerHost(
+func buildPluginsServerServingPath(
 	routerVersion *models.RouterVersion,
 	namespace string,
 ) string {
 	componentName := GetComponentName(routerVersion, ComponentTypes.PluginsServer)
-	return fmt.Sprintf("%s.%s.svc.cluster.local", componentName, namespace)
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local/%s", componentName, namespace, pluginsServingPath)
 }

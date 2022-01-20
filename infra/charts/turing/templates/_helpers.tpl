@@ -143,7 +143,7 @@ Experiment:
   {{ $expEngine.name }}:
 {{ toYaml $expEngine.options | indent 4 }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
-    PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
+    plugin_binary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{ end }}
 {{ end }}
 RouterDefaults:

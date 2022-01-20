@@ -1,5 +1,3 @@
-// +build unit
-
 package request
 
 import (
@@ -9,11 +7,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	assertgotest "gotest.tools/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/gojek/turing/api/turing/config"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gojek/turing/engines/experiment/manager"
@@ -251,7 +249,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
 
 	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc)
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	expected.Model = got.Model
 	assertgotest.DeepEqual(t, expected, *got)
 }
@@ -316,7 +314,11 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 					},
 				},
 			},
-			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
+			expected: json.RawMessage(`{
+				"client":{"id":"","username":"client-name","passkey":"passkey"},
+				"experiments":null,
+				"variables":{"client_variables":null,"experiment_variables":null,"config":null}
+			}`),
 		},
 		"success | std engine | use new passkey": {
 			req: CreateOrUpdateRouterRequest{
@@ -327,8 +329,12 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 					},
 				},
 			},
-			router:   &models.Router{},
-			expected: json.RawMessage(`{"client":{"id":"","username":"client-name","passkey":"passkey-enc"},"experiments":null,"variables":{"client_variables":null,"experiment_variables":null,"config":null}}`),
+			router: &models.Router{},
+			expected: json.RawMessage(`{
+				"client":{"id":"","username":"client-name","passkey":"passkey-enc"},
+				"experiments":null,
+				"variables":{"client_variables":null,"experiment_variables":null,"config":null}
+			}`),
 		},
 		"success | custom engine": {
 			req: CreateOrUpdateRouterRequest{
@@ -348,10 +354,10 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			result, err := data.req.BuildExperimentEngineConfig(data.router, cs, es)
-			assert.Equal(t, data.expected, result)
-			assert.Equal(t, data.err == "", err == nil)
-			if err != nil {
-				assert.Equal(t, data.err, err.Error())
+			if data.err == "" {
+				assert.JSONEq(t, string(data.expected), string(result))
+			} else {
+				assert.EqualError(t, err, data.err)
 			}
 		})
 	}

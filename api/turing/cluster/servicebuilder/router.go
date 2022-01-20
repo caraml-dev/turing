@@ -66,7 +66,7 @@ const (
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
 
-	routerPluginURLConfigKey = "PluginURL"
+	routerPluginURLConfigKey = "plugin_url"
 )
 
 // Router endpoint constants
@@ -495,14 +495,11 @@ func buildFiberConfigMap(
 		// Tell router, that the experiment runner is implemented as RPC plugin
 		if ver.ExperimentEngine.PluginConfig != nil {
 			var err error
+			pluginURL := fmt.Sprintf(
+				"%s/%s", buildPluginsServerServingPath(ver, project.Name), ver.ExperimentEngine.Type)
 			expEngineProps, err = utils.MergeJSON(
 				expEngineProps,
-				map[string]interface{}{
-					routerPluginURLConfigKey: fmt.Sprintf(
-						"http://%s/plugins/%s",
-						buildPluginsServerHost(ver, project.Name),
-						ver.ExperimentEngine.Type),
-				},
+				map[string]interface{}{routerPluginURLConfigKey: pluginURL},
 			)
 			if err != nil {
 				return nil, err
@@ -554,14 +551,6 @@ func buildFiberConfigMap(
 		FileName: routerConfigFileName,
 		Data:     string(configMapData),
 	}, nil
-}
-
-func buildFluentdHost(
-	routerVersion *models.RouterVersion,
-	namespace string,
-) string {
-	componentName := GetComponentName(routerVersion, ComponentTypes.FluentdLogger)
-	return fmt.Sprintf("%s.%s.svc.cluster.local", componentName, namespace)
 }
 
 func buildPrePostProcessorEndpoint(

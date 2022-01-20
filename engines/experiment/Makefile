@@ -27,5 +27,5 @@ lint: setup
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags unit,integration
+	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out

@@ -1,6 +1,7 @@
 package servicebuilder
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -136,4 +137,12 @@ func buildFluentdVolumes(
 	})
 
 	return volumes, volumeMounts
+}
+
+func buildFluentdHost(
+	routerVersion *models.RouterVersion,
+	namespace string,
+) string {
+	componentName := GetComponentName(routerVersion, ComponentTypes.FluentdLogger)
+	return fmt.Sprintf("%s.%s.svc.cluster.local", componentName, namespace)
 }

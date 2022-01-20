@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestResponses(t *testing.T) {
@@ -78,7 +78,7 @@ func TestMarshalResponse(t *testing.T) {
 
 	// Marshal into JSON
 	bytes, err := json.Marshal(resp)
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	assert.JSONEq(t, `
 		{
 			"code": 10,
@@ -102,7 +102,7 @@ func TestWriteTo(t *testing.T) {
 	// Validate
 	resp.WriteTo(rr)
 	resultResponse := rr.Result()
-	tu.FailOnNil(t, rr.Body)
+	require.NotNil(t, rr.Body)
 	defer resultResponse.Body.Close()
 	assert.Equal(t, "\"test-data\"\n", rr.Body.String())
 	assert.Equal(t, 103, rr.Code)

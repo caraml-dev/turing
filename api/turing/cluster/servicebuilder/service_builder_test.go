@@ -1,5 +1,3 @@
-// +build unit
-
 package servicebuilder
 
 import (
@@ -18,19 +16,19 @@ import (
 
 type testSuiteNewService struct {
 	filePath     string
-	expected     cluster.KnativeService
+	expected     *cluster.KnativeService
 	expRawConfig json.RawMessage
-	success      bool
 	err          string
 }
 
 func TestNewEnricherService(t *testing.T) {
 	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
+
 	tests := map[string]testSuiteNewService{
 		"success": {
 			filePath: filepath.Join(testDataBasePath, "router_version_success.json"),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:           "test-svc-turing-enricher-1",
 					Namespace:      "test-project",
@@ -67,11 +65,9 @@ func TestNewEnricherService(t *testing.T) {
 				QueueProxyResourcePercentage:    10,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
 		"failure": {
 			filePath: filepath.Join(testDataBasePath, "router_version_basic.json"),
-			success:  false,
 			err:      "Enricher reference is empty",
 		},
 	}
@@ -88,12 +84,11 @@ func TestNewEnricherService(t *testing.T) {
 				Team:   "test-team",
 			}
 			svc, err := sb.NewEnricherService(routerVersion, project, "test-env", "secret", 1, 10, 1.5)
-			if data.success {
+			if data.err == "" {
 				assert.NoError(t, err)
-				tu.FailOnError(t, tu.CompareObjects(*svc, data.expected))
+				assert.Equal(t, data.expected, svc)
 			} else {
-				assert.Error(t, err)
-				assert.Equal(t, data.err, err.Error())
+				assert.EqualError(t, err, data.err)
 			}
 		})
 	}
@@ -105,7 +100,7 @@ func TestNewEnsemblerService(t *testing.T) {
 	tests := map[string]testSuiteNewService{
 		"success": {
 			filePath: filepath.Join(testDataBasePath, "router_version_success.json"),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:           "test-svc-turing-ensembler-1",
 					Namespace:      "test-project",
@@ -142,11 +137,10 @@ func TestNewEnsemblerService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
 		"success with ensembler docker type": {
 			filePath: filepath.Join(testDataBasePath, "router_version_success_docker_ensembler.json"),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:           "test-svc-turing-ensembler-1",
 					Namespace:      "test-project",
@@ -183,11 +177,9 @@ func TestNewEnsemblerService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
 		"failure": {
 			filePath: filepath.Join(testDataBasePath, "router_version_basic.json"),
-			success:  false,
 			err:      "Ensembler reference is empty",
 		},
 	}
@@ -204,43 +196,60 @@ func TestNewEnsemblerService(t *testing.T) {
 				Team:   "test-team",
 			}
 			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret", 1, 20, 1.5)
-			if data.success {
+			if data.err == "" {
 				assert.NoError(t, err)
-				tu.FailOnError(t, tu.CompareObjects(*svc, data.expected))
+				assert.Equal(t, data.expected, svc)
 			} else {
-				assert.Error(t, err)
-				assert.Equal(t, data.err, err.Error())
+				assert.EqualError(t, err, data.err)
 			}
 		})
 	}
 }
 
 func TestNewSecret(t *testing.T) {
-	sb := &clusterSvcBuilder{}
-	expected := cluster.Secret{
-		Name:      "test-router-turing-secret-2",
-		Namespace: "test-project",
-		Data: map[string]string{
-			"router-service-account.json":    "router-key",
-			"enricher-service-account.json":  "enricher-key",
-			"ensembler-service-account.json": "ensembler-key",
-			"experiment_passkey":             "experiment-passkey",
-		},
-	}
-
-	// Run Tests
-	secret := sb.NewSecret(
-		&models.RouterVersion{
-			Version: 2,
-			Router:  &models.Router{Name: "test-router"},
-			ExperimentEngine: &models.ExperimentEngine{
-				Type: models.ExperimentEngineTypeLitmus,
+	tests := map[string]struct {
+		version           *models.RouterVersion
+		project           *mlp.Project
+		routerSvcKey      string
+		enricherSvcKey    string
+		ensemblerSvcKey   string
+		experimentPasskey string
+		expected          *cluster.Secret
+	}{
+		"success": {
+			version: &models.RouterVersion{
+				Version: 2,
+				Router:  &models.Router{Name: "test-router"},
+				ExperimentEngine: &models.ExperimentEngine{
+					Type: models.ExperimentEngineTypeLitmus,
+				},
+			},
+			project:           &mlp.Project{Name: "test-project"},
+			routerSvcKey:      "router-key",
+			enricherSvcKey:    "enricher-key",
+			ensemblerSvcKey:   "ensembler-key",
+			experimentPasskey: "experiment-passkey",
+			expected: &cluster.Secret{
+				Name:      "test-router-turing-secret-2",
+				Namespace: "test-project",
+				Data: map[string]string{
+					"router-service-account.json":    "router-key",
+					"enricher-service-account.json":  "enricher-key",
+					"ensembler-service-account.json": "ensembler-key",
+					"experiment_passkey":             "experiment-passkey",
+				},
 			},
 		},
-		&mlp.Project{Name: "test-project"},
-		"router-key", "enricher-key", "ensembler-key", "experiment-passkey",
-	)
-	assert.Equal(t, expected, *secret)
+	}
+	sb := &clusterSvcBuilder{}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			secret := sb.NewSecret(
+				tt.version, tt.project, tt.routerSvcKey,
+				tt.enricherSvcKey, tt.ensemblerSvcKey, tt.experimentPasskey)
+			assert.Equal(t, tt.expected, secret)
+		})
+	}
 }
 
 func TestValidateKnativeService(t *testing.T) {
@@ -282,13 +291,10 @@ func TestValidateKnativeService(t *testing.T) {
 			// Run test method and validate
 			svc, err := sb.validateKnativeService(testSvc)
 			if data.err == "" {
-				// Validate success
 				assert.Equal(t, testSvc, svc)
 				assert.NoError(t, err)
 			} else {
-				// Validate failure
-				assert.Error(t, err)
-				assert.Equal(t, data.err, err.Error())
+				assert.EqualError(t, err, data.err)
 			}
 		})
 	}

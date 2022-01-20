@@ -1,22 +1,19 @@
-// +build unit
-
 package api
 
 import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"testing"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDeployVersionSuccess(t *testing.T) {
@@ -382,10 +379,9 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	err := ctrl.undeployRouter(project, router)
 	// Test outcomes - no error, current version status is undeployed, empty endpoint
 	assert.NoError(t, err)
-	if router.CurrRouterVersion == nil {
-		tu.FailOnError(t, fmt.Errorf("Current Version is not expected to be nil"))
-	}
-	assert.Equal(t, "undeployed", string(router.CurrRouterVersion.Status))
+	require.NotNil(t, router.CurrRouterVersion, "Current Version is not expected to be nil")
+
+	assert.Equal(t, models.RouterVersionStatusUndeployed, router.CurrRouterVersion.Status)
 	assert.Equal(t, "", router.Endpoint)
 	// Assert calls
 	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, routerVersion, mock.Anything)

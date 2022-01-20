@@ -5,7 +5,7 @@ package experiment
 // as net/rpc plugin) and unstructured EngineConfiguration of key/value data, that is
 // used to configure experiment manager/runner
 type EngineConfig struct {
-	PluginBinary        string
-	PluginURL           string
+	PluginBinary        string                 `mapstructure:"plugin_binary"`
+	PluginURL           string                 `mapstructure:"plugin_url"`
 	EngineConfiguration map[string]interface{} `mapstructure:",remain"`
 }

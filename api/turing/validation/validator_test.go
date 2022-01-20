@@ -1,5 +1,3 @@
-// +build unit
-
 package validation_test
 
 import (

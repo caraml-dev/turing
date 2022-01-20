@@ -1,6 +1,3 @@
-//go:build unit
-// +build unit
-
 package config_test
 
 import (
@@ -13,10 +10,10 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/mitchellh/copystructure"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -90,7 +87,7 @@ func TestAuthConfigValidation(t *testing.T) {
 	}
 
 	validate, err := config.NewConfigValidator()
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {

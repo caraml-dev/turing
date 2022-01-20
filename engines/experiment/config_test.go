@@ -16,7 +16,7 @@ func Test_EngineConfigDecoding(t *testing.T) {
 	}{
 		"success | plugin": {
 			cfg: map[string]interface{}{
-				"PluginBinary": "path/to/binary",
+				"plugin_binary": "path/to/binary",
 			},
 			expected: experiment.EngineConfig{
 				PluginBinary:        "path/to/binary",
@@ -25,8 +25,8 @@ func Test_EngineConfigDecoding(t *testing.T) {
 		},
 		"success | plugin with extra config": {
 			cfg: map[string]interface{}{
-				"PluginBinary": "path/to/binary",
-				"Key1":         "Value1",
+				"plugin_binary": "path/to/binary",
+				"Key1":          "Value1",
 				"Key2": map[string]interface{}{
 					"Key2-1": "Value2-1",
 				},
@@ -53,11 +53,11 @@ func Test_EngineConfigDecoding(t *testing.T) {
 		},
 		"failure | invalid type": {
 			cfg: map[string]interface{}{
-				"PluginBinary": map[string]interface{}{
+				"plugin_binary": map[string]interface{}{
 					"Key2-1": "Value2-1",
 				},
 			},
-			err: "1 error(s) decoding:\n\n* 'PluginBinary' expected type 'string', " +
+			err: "1 error(s) decoding:\n\n* 'plugin_binary' expected type 'string', " +
 				"got unconvertible type 'map[string]interface {}', value: 'map[Key2-1:Value2-1]'",
 		},
 	}

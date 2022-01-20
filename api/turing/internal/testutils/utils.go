@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/stretchr/testify/require"
 )
 
 // ReadFile reads a file and returns the byte contents
@@ -30,12 +31,12 @@ func ReadFile(filepath string) ([]byte, error) {
 // the test s if an error is encountered.
 func GetRouterVersion(t *testing.T, filePath string) *models.RouterVersion {
 	fileBytes, err := ReadFile(filePath)
-	FailOnError(t, err)
+	require.NoError(t, err)
 
 	// Convert to RouterVersion type
 	var routerVersion models.RouterVersion
 	err = json.Unmarshal(fileBytes, &routerVersion)
-	FailOnError(t, err)
+	require.NoError(t, err)
 
 	return &routerVersion
 }

@@ -1,0 +1,48 @@
+{
+  "router": {
+    "project_id": 10,
+    "environment_name": "id-dev",
+    "name": "router-with-exp-engine"
+  },
+  "version": 1,
+  "status": "pending",
+  "image": "ghcr.io/gojek/turing/turing-router:latest",
+  "routes": [
+    {
+      "id": "control",
+      "type": "PROXY",
+      "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
+      "timeout": "2s"
+    },
+    {
+      "id": "treatment-a",
+      "type": "PROXY",
+      "endpoint": "http://localhost:8080/predict/treatment-a",
+      "timeout": "2s"
+    }
+  ],
+  "default_route_id": "control",
+  "experiment_engine": {
+    "type": "exp-engine",
+    "plugin_config": {
+      "image": "ghcr.io/myproject/exp-engine-plugin:latest"
+    },
+    "config": {
+      "key-1": "value-1"
+    }
+  },
+  "resource_request": {
+    "min_replica": 2,
+    "max_replica": 4,
+    "cpu_request": "400m",
+    "memory_request": "512Mi"
+  },
+  "timeout": "5s",
+  "log_config": {
+    "log_level": "INFO",
+    "custom_metrics_enabled": false,
+    "fiber_debug_log_enabled": false,
+    "jaeger_enabled": false,
+    "result_logger_type": "nop"
+  }
+}
