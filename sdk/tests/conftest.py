@@ -225,36 +225,24 @@ def generic_kafka_config():
 
 @pytest.fixture(params=["kafka", "bigquery", "others"])
 def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_config, generic_kafka_config, request):
+    result_logger_type = generic_result_logger_type.value if request.param == "others" else request.param
+
+    params = dict(
+        log_level=generic_log_level,
+        custom_metrics_enabled=True,
+        fiber_debug_log_enabled=True,
+        jaeger_enabled=True,
+        result_logger_type=turing.generated.models.ResultLoggerType(result_logger_type),
+        bigquery_config=None,
+        kafka_config=None
+    )
+
     if request.param == "kafka":
-        return turing.generated.models.RouterVersionLogConfig(
-            log_level=generic_log_level,
-            custom_metrics_enabled=True,
-            fiber_debug_log_enabled=True,
-            jaeger_enabled=True,
-            result_logger_type=turing.generated.models.ResultLoggerType("kafka"),
-            bigquery_config=None,
-            kafka_config=generic_kafka_config
-        )
-    elif request.param == "bigquery":
-        return turing.generated.models.RouterVersionLogConfig(
-            log_level=generic_log_level,
-            custom_metrics_enabled=True,
-            fiber_debug_log_enabled=True,
-            jaeger_enabled=True,
-            result_logger_type=turing.generated.models.ResultLoggerType("bigquery"),
-            bigquery_config=generic_bigquery_config,
-            kafka_config=None
-        )
-    else:
-        return turing.generated.models.RouterVersionLogConfig(
-            log_level=generic_log_level,
-            custom_metrics_enabled=True,
-            fiber_debug_log_enabled=True,
-            jaeger_enabled=True,
-            result_logger_type=generic_result_logger_type,
-            bigquery_config=None,
-            kafka_config=None
-        )
+        params["kafka_config"] = generic_kafka_config
+    elif request.param == "biggquery":
+        params["bigquery_config"] = generic_bigquery_config
+
+    return turing.generated.models.RouterVersionLogConfig(**params)
 
 
 @pytest.fixture
