@@ -250,6 +250,9 @@ def main(turing_api: str, project: str):
         raise Exception(f"Turing API is taking too long for router {my_router.id} with version {latest_ver_no} to get "
                         f"deployed.")
 
+    # Wait for the dependencies of the first version to be fully undeployed
+    time.sleep(10)
+
     # 6. Deploy a specific router config version (the first one we created)
     response = my_router.deploy_version(first_ver_no)
     print(f"6. You have deployed version {response['version']} of router {response['router_id']}.")
