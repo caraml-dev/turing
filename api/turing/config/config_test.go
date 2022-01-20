@@ -4,19 +4,18 @@
 package config_test
 
 import (
-	"github.com/gojek/turing/api/turing/config"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/mitchellh/copystructure"
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/mitchellh/copystructure"
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -294,6 +293,10 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
+						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
@@ -395,6 +398,10 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
+					},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
+						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
 					},
 				},
 				Sentry: sentry.Config{

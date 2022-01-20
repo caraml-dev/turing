@@ -11,6 +11,11 @@ DeployConfig:
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 90
+  ExperimentEnginePlugins:
+    red:
+      Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
+    blue:
+      Image: ghcr.io/myproject/blue-exp-engine-plugin:latest
 Experiment:
     qux:
       quxkey1: quxval1-override
