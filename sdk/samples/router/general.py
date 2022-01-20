@@ -194,9 +194,11 @@ def main(turing_api: str, project: str):
 
     # 1. Create a new router using the RouterConfig object
     new_router = turing.Router.create(router_config)
+    print(f"1. You have created a router with id: {new_router.id}")
 
     # 2. List all routers
     routers = turing.Router.list()
+    print(f"2. You have just retrieved a list of {len(routers)} routers:")
     for r in routers:
         if r.name == new_router.name:
             my_router = r
@@ -210,6 +212,7 @@ def main(turing_api: str, project: str):
 
     # 3. Get the router you just created using the router_id obtained
     my_router = turing.Router.get(my_router.id)
+    print(f"3. You have retrieved the router with name: {my_router.name}")
 
     # Access the router config from the returned Router object directly
     my_router_config = my_router.config
@@ -225,9 +228,11 @@ def main(turing_api: str, project: str):
 
     # 4. Update the router with the new router config
     my_router.update(my_router_config)
+    print(f"4. You have just updated your router with a new config.")
 
     # 5. List all the router config versions of your router
     my_router_versions = my_router.list_versions()
+    print(f"5. You have just retrieved a list of {len(my_router_versions)} versions for your router:")
     for ver in my_router_versions:
         print(ver)
 
@@ -238,12 +243,12 @@ def main(turing_api: str, project: str):
     # Get the version number of the latest version returned
     latest_ver_no = my_router_versions[-1].version
 
-    # Wait for the first version to get undeployed
+    # Wait for the latest version to get deployed
     try:
-        my_router.wait_for_version_status(RouterStatus.UNDEPLOYED, first_ver_no)
+        my_router.wait_for_version_status(RouterStatus.DEPLOYED, latest_ver_no)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {my_router.id} with version {first_ver_no} to get "
-                        f"undeployed.")
+        raise Exception(f"Turing API is taking too long for router {my_router.id} with version {latest_ver_no} to get "
+                        f"deployed.")
 
     # 6. Deploy a specific router config version (the first one we created)
     response = my_router.deploy_version(first_ver_no)
@@ -266,7 +271,9 @@ def main(turing_api: str, project: str):
     except TimeoutError:
         raise Exception(f"Turing API is taking too long for router {my_router.id} to get undeployed.")
 
-    time.sleep(30)
+    # Wait for the dependencies of the router to be fully undeployed
+    time.sleep(10)
+
     # 8. Deploy the router's *current* configuration (notice how it still deploys the *first* version)
     response = my_router.deploy()
     print(f"8. You have deployed version {response['version']} of router {response['router_id']}.")
@@ -283,7 +290,7 @@ def main(turing_api: str, project: str):
 
     # 9. Get a specific router version of the router
     my_router_ver = my_router.get_version(first_ver_no)
-    print(my_router_ver)
+    print(f"9. You have just retrieved version {my_router_ver.version} of your router.")
 
     # 10. Delete a specific router version of the router
     response = my_router.delete_version(latest_ver_no)
@@ -291,16 +298,18 @@ def main(turing_api: str, project: str):
 
     # 11. Get all deployment events associated with this router
     events = my_router.get_events()
+    print(f"11. You have just retrieved a list of {len(events)} events for your router:")
     for e in events:
         print(e)
 
     # 12. Delete this router (using its router_id)
-    turing.Router.delete(my_router.id)
+    deleted_router_id = turing.Router.delete(my_router.id)
+    print(f"12. You have just deleted the router with id: {deleted_router_id}")
+
     # Check if the router still exists
     for r in turing.Router.list():
         if r.name == my_router_config.name:
-            print("Oh my, this router still exists!")
-            break
+            raise Exception("Oh my, this router still exists!")
 
 
 if __name__ == '__main__':
