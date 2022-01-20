@@ -23,21 +23,22 @@ class ExperimentConfig:
         self._type = type
 
     @property
-    def config(self):
+    def config(self) -> Dict:
         return self._config
 
     @config.setter
-    def config(self, config):
+    def config(self, config: Dict):
         if config is not None and 'project_id' in config:
             config['project_id'] = int(config['project_id'])
         self._config = config
 
     def to_open_api(self) -> OpenApiModel:
-        kwargs = {}
-        if self.config is not None:
-            kwargs['config'] = self.config
+        if self.config is None:
+            config = {}
+        else:
+            config = self.config
 
         return turing.generated.models.ExperimentConfig(
             type=self.type,
-            **kwargs
+            config=config
         )
