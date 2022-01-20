@@ -94,6 +94,7 @@ class InvalidOperatorException(Exception):
     pass
 
 
+@dataclass
 class HeaderTrafficRuleCondition(TrafficRuleCondition):
     def __init__(self,
                  field: str,
@@ -107,6 +108,7 @@ class HeaderTrafficRuleCondition(TrafficRuleCondition):
         super().__init__(field_source=FieldSource.HEADER, field=field, operator="in", values=values)
 
 
+@dataclass
 class PayloadTrafficRuleCondition(TrafficRuleCondition):
     def __init__(self,
                  field: str,

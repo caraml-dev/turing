@@ -99,6 +99,7 @@ class RouterEnsemblerConfig:
         )
 
 
+@dataclass
 class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(self,
                  id: int,
@@ -205,6 +206,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         return super().to_open_api()
 
 
+@dataclass
 class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(self,
                  id: int,

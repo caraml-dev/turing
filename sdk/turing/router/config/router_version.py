@@ -1,3 +1,4 @@
+import dataclasses
 from enum import Enum
 
 from turing.router.config.router_config import RouterConfig
@@ -15,6 +16,7 @@ class RouterStatus(Enum):
     PENDING = "pending"
 
 
+@dataclasses.dataclass
 class RouterVersion(RouterConfig):
     """
     Class to used to contain a RouterVersion. Used when returning a response containing a router's version from Turing
