@@ -9,7 +9,16 @@ from turing.router.config.router_config import RouterConfig
 from turing.router.config.router_version import RouterVersion, RouterStatus
 
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('router_sdk_logger')
+logger.setLevel(level=logging.INFO)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
 
 
 @ApiObjectSpec(turing.generated.models.Router)
@@ -188,26 +197,26 @@ class Router(ApiObject):
 
     def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: int = 10):
         for i in range(1, max_tries + 1):
-            logging.info(f"Checking if router {self.id} is {status.value}...")
+            logger.debug(f"Checking if router {self.id} is {status.value}...")
             cur_status = Router.get(self.id).status
             if cur_status == status:
                 return
             else:
-                logging.info(f"Router {self.id} is {cur_status.value}.")
-                logging.info(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                logger.debug(f"Router {self.id} is {cur_status.value}.")
+                logger.debug(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
                 time.sleep(duration)
 
         raise TimeoutError
 
     def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: int = 10):
         for i in range(1, max_tries + 1):
-            logging.info(f"Checking if router {self.id} with version {version} is {status.value}...")
+            logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
             cur_status = self.get_version(version).status
             if cur_status == status:
                 return
             else:
-                logging.info(f"Router {self.id} with version {version} is {cur_status.value}.")
-                logging.info(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                logger.debug(f"Router {self.id} with version {version} is {cur_status.value}.")
+                logger.debug(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
                 time.sleep(duration)
 
         raise TimeoutError

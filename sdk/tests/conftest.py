@@ -411,7 +411,7 @@ def experiment_config(request):
 
 
 @pytest.fixture
-def router_version(
+def generic_router_version(
         generic_router_version_status,
         generic_route,
         generic_traffic_rule,
@@ -524,7 +524,7 @@ def generic_router_config():
 
 
 @pytest.fixture
-def generic_router(project, generic_router_status, router_version):
+def generic_router(project, generic_router_status, generic_router_version):
     return turing.generated.models.RouterDetails(
         id=1,
         name="router-1",
@@ -535,12 +535,12 @@ def generic_router(project, generic_router_status, router_version):
         status=generic_router_status,
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        config=router_version
+        config=generic_router_version
     )
 
 
 @pytest.fixture
-def generic_routers(project, num_routers, generic_router_status, router_version):
+def generic_routers(project, num_routers, generic_router_status, generic_router_version):
     return [
         turing.generated.models.RouterDetails(
             id=i,
@@ -552,7 +552,7 @@ def generic_routers(project, num_routers, generic_router_status, router_version)
             status=generic_router_status,
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10),
-            config=router_version
+            config=generic_router_version
         ) for i in range(1, num_routers + 1)]
 
 
