@@ -412,8 +412,8 @@ def test_get_events_list(turing_api, active_project, generic_router, generic_eve
     "status,max_tries,duration,expected", [
         pytest.param(
             RouterStatus.DEPLOYED,
-            1,
-            1,
+            5,
+            0.00001,
             TimeoutError
         )
     ]
@@ -452,8 +452,8 @@ def test_wait_for_status(
         pytest.param(
             1,
             RouterStatus.DEPLOYED,
-            1,
-            1,
+            5,
+            0.00001,
             TimeoutError
         )
     ]

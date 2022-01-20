@@ -195,7 +195,7 @@ class Router(ApiObject):
         response = turing.active_session.get_router_events(router_id=self.id).get('events')
         return [event for event in response] if response else []
 
-    def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: int = 10):
+    def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} is {status.value}...")
             cur_status = Router.get(self.id).status
@@ -208,7 +208,7 @@ class Router(ApiObject):
 
         raise TimeoutError
 
-    def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: int = 10):
+    def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
             cur_status = self.get_version(version).status
