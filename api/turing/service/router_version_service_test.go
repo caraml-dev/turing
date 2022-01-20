@@ -1,10 +1,12 @@
 // +build integration
 
-package service
+package service_test
 
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/service/mocks"
 	"testing"
 
 	merlin "github.com/gojek/merlin/client"
@@ -22,7 +24,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		// Monitoring URL Deps
 		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
-		mlpService := &MockMLPService{}
+		mlpService := &mocks.MLPService{}
 		mlpService.On(
 			"GetEnvironment",
 			mock.Anything,
@@ -39,11 +41,11 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 			Name:            "wooper",
 			Status:          models.RouterStatusPending,
 		}
-		router, err := NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
+		router, err := service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 
 		// populate database
-		svc := NewRouterVersionsService(db, mlpService, &monitoringURLFormat)
+		svc := service.NewRouterVersionsService(db, mlpService, &monitoringURLFormat)
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
 			Status:   models.RouterVersionStatusPending,
@@ -183,7 +185,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 
 		// delete with upstream reference
 		router.SetCurrRouterVersion(routerVersion)
-		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
+		_, err = service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		assert.Error(t, err, "unable to delete router version - there exists a router that is currently using this version")
@@ -191,7 +193,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		// clear reference and delete
 		router.CurrRouterVersionID = sql.NullInt32{}
 		router.CurrRouterVersion = nil
-		_, err = NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
+		_, err = service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
 		assert.NoError(t, err)
 		err = svc.Delete(routerVersion)
 		found, err = svc.FindByID(1)

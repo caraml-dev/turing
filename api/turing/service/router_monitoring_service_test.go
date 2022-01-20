@@ -1,8 +1,10 @@
 // +build integration
 
-package service
+package service_test
 
 import (
+	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/service/mocks"
 	"testing"
 	"text/template"
 
@@ -10,7 +12,7 @@ import (
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
-	mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestGenerateMonitoringURL(t *testing.T) {
@@ -18,7 +20,7 @@ func TestGenerateMonitoringURL(t *testing.T) {
 	var routerVersion uint = 10
 	tests := map[string]struct {
 		format          *string
-		mlpService      func() MLPService
+		mlpService      func() service.MLPService
 		environmentName string
 		projectID       models.ID
 		routerName      string
@@ -27,8 +29,8 @@ func TestGenerateMonitoringURL(t *testing.T) {
 	}{
 		"success | nominal": {
 			format: &monitoringURLFormat,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
+			mlpService: func() service.MLPService {
+				mlpService := &mocks.MLPService{}
 				mlpService.On(
 					"GetEnvironment",
 					mock.Anything,
@@ -47,8 +49,8 @@ func TestGenerateMonitoringURL(t *testing.T) {
 		},
 		"success | no router version provided": {
 			format: &monitoringURLFormat,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
+			mlpService: func() service.MLPService {
+				mlpService := &mocks.MLPService{}
 				mlpService.On(
 					"GetEnvironment",
 					mock.Anything,
@@ -67,8 +69,8 @@ func TestGenerateMonitoringURL(t *testing.T) {
 		},
 		"success | no format given": {
 			format: nil,
-			mlpService: func() MLPService {
-				mlpService := &MockMLPService{}
+			mlpService: func() service.MLPService {
+				mlpService := &mocks.MLPService{}
 				mlpService.On(
 					"GetEnvironment",
 					mock.Anything,
@@ -94,7 +96,7 @@ func TestGenerateMonitoringURL(t *testing.T) {
 				temp, err = template.New("monitoringURLTemplate").Parse(*tt.format)
 				assert.Nil(t, err)
 			}
-			svc := routerMonitoringService{tt.mlpService(), temp}
+			svc := service.NewRouterMonitoringService(tt.mlpService(), temp)
 			result, err := svc.GenerateMonitoringURL(tt.projectID, tt.environmentName, tt.routerName, tt.routerVersion)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expected, result)

@@ -20,6 +20,15 @@ type monitoringURLValues struct {
 	Version     string
 }
 
+func NewRouterMonitoringService(
+	mlpService MLPService,
+	monitoringURLTemplate *template.Template) *routerMonitoringService {
+	return &routerMonitoringService{
+		mlpService:            mlpService,
+		monitoringURLTemplate: monitoringURLTemplate,
+	}
+}
+
 // GenerateMonitoringURL generates the monitoring url based on the router version.
 func (service *routerMonitoringService) GenerateMonitoringURL(
 	projectID models.ID,

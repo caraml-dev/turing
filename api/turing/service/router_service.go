@@ -45,17 +45,14 @@ func NewRoutersService(db *gorm.DB, mlpService MLPService, monitoringURLFormat *
 	}
 
 	return &routersService{
-		db: db,
-		routerMonitoringService: routerMonitoringService{
-			mlpService:            mlpService,
-			monitoringURLTemplate: monitoringURLTemplate,
-		},
+		db:                      db,
+		routerMonitoringService: NewRouterMonitoringService(mlpService, monitoringURLTemplate),
 	}
 }
 
 type routersService struct {
+	*routerMonitoringService
 	db *gorm.DB
-	routerMonitoringService
 }
 
 func (service *routersService) query() *gorm.DB {
