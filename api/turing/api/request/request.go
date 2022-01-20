@@ -165,7 +165,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		if pluginConfig, ok := defaults.Plugins[rv.ExperimentEngine.Type]; ok {
+		if pluginConfig, ok := defaults.ExperimentEnginePlugins[rv.ExperimentEngine.Type]; ok {
 			rv.ExperimentEngine.PluginConfig = pluginConfig
 		}
 

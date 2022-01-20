@@ -13,6 +13,7 @@ import (
 	mlp "github.com/gojek/mlp/api/client"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -136,7 +137,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 	// Run tests and validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			eventsCh := models.NewEventChannel()
+			eventsCh := service.NewEventChannel()
 			defer eventsCh.Close()
 
 			// Set up test-specific mock services

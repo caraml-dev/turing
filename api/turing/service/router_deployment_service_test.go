@@ -235,7 +235,7 @@ func TestDeployEndpoint(t *testing.T) {
 		svcBuilder: svcBuilder,
 	}
 
-	eventsCh := models.NewEventChannel()
+	eventsCh := NewEventChannel()
 	go func() {
 		for {
 			_, done := eventsCh.Read()
@@ -396,7 +396,7 @@ func TestDeleteEndpoint(t *testing.T) {
 		svcBuilder: svcBuilder,
 	}
 
-	eventsCh := models.NewEventChannel()
+	eventsCh := NewEventChannel()
 	go func() {
 		for {
 			_, done := eventsCh.Read()

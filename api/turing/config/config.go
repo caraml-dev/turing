@@ -265,7 +265,16 @@ type RouterDefaults struct {
 	// Fluentd config for the router
 	FluentdConfig       *FluentdConfig
 	MonitoringURLFormat *string
-	Plugins             map[string]*ExperimentEnginePluginConfig `validate:"dive"`
+	// Configuration of experiment engine plugins, that consists of experiment engine name
+	// and the image that contains the plugin implementation.
+	//
+	// Example:
+	// ExperimentEnginePlugins:
+	// 	red-exp-engine:
+	//	  Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
+	// 	blue-exp-engine:
+	//	  Image: ghcr.io/myproject/blue-exp-engine-plugin:v0.0.1
+	ExperimentEnginePlugins map[string]*ExperimentEnginePluginConfig `validate:"dive"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled

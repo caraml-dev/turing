@@ -58,3 +58,17 @@ func TestEventServiceIntegration(t *testing.T) {
 		assert.Empty(t, gotEvents)
 	})
 }
+
+func TestEventChannel(t *testing.T) {
+	ch := NewEventChannel()
+	event := models.Event{
+		RouterID: 1,
+		Message:  "hello",
+	}
+	go ch.Write(&event)
+	got, _ := ch.Read()
+	assert.Equal(t, *got, event)
+	ch.Close()
+	_, done := ch.Read()
+	assert.Equal(t, done, true)
+}
