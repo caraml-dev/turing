@@ -91,7 +91,7 @@ func (c *Config) ListenAddress() string {
 }
 
 func (c *Config) Validate() error {
-	validate, err := newConfigValidator()
+	validate, err := NewConfigValidator()
 	if err != nil {
 		return err
 	}
@@ -242,8 +242,12 @@ type DatabaseConfig struct {
 	MigrationsFolder string `validate:"required"`
 }
 
+type ExperimentEnginePluginConfig struct {
+	Image string `json:"image" validate:"required"`
+}
+
 // RouterDefaults contains default configuration for routers deployed
-// by this isntance of the Turing API.
+// by this instance of the Turing API.
 type RouterDefaults struct {
 	// Turing router image, in the format registry/repository:version.
 	Image string `validate:"required"`
@@ -259,23 +263,18 @@ type RouterDefaults struct {
 	// Router log level
 	LogLevel string `validate:"required"`
 	// Fluentd config for the router
-	FluentdConfig *FluentdConfig
-	// Experiment specifies the default experiment JSON configuration for different experiment
-	// engines that Turing router supports.
-	//
-	// The JSON configuration follows the following format to support different experiment engines.
-	// { "<experiment_engine>": <experiment_engine_config>, ... }
-	//
-	// Currently the router defaults configuration for each experiment engine is expected to have
-	// "endpoint" and "timeout" fields with string value, in order to follow the configuration
-	// specification for routers.
-	//
-	// For example:
-	// {"experiment_engine_a": {"endpoint": "http://engine-a.com", "timeout": "500ms"},
-	//  "experiment_engine_b": {"endpoint": "http://engine-b.com", "timeout": "250ms"} }
-	Experiment map[string]interface{}
-
+	FluentdConfig       *FluentdConfig
 	MonitoringURLFormat *string
+	// Configuration of experiment engine plugins, that consists of experiment engine name
+	// and the image that contains the plugin implementation.
+	//
+	// Example:
+	// ExperimentEnginePlugins:
+	// 	red-exp-engine:
+	//	  Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
+	// 	blue-exp-engine:
+	//	  Image: ghcr.io/myproject/blue-exp-engine-plugin:v0.0.1
+	ExperimentEnginePlugins map[string]*ExperimentEnginePluginConfig `validate:"dive"`
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -499,7 +498,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("Experiment", map[string]interface{}{})
 }
 
-func newConfigValidator() (*validator.Validate, error) {
+func NewConfigValidator() (*validator.Validate, error) {
 	v := validator.New()
 	// Use struct level validation for AuthorizationConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {

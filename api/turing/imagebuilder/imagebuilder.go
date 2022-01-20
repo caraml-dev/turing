@@ -149,7 +149,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	} else {
 		// Only recreate when job has failed too many times, else no action required and just wait for it to finish
 		if job.Status.Failed != 0 {
-			// job already created before so we have to delete it first if it failed
+			// job already created before, so we have to delete it first if it failed
 			err = ib.clusterController.DeleteJob(ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("error deleting job: %v", err)

@@ -8,6 +8,15 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 )
 
+type RouterMonitoringService interface {
+	GenerateMonitoringURL(
+		projectID models.ID,
+		environmentName string,
+		routerName string,
+		routerVersion *uint,
+	) (string, error)
+}
+
 type routerMonitoringService struct {
 	mlpService            MLPService
 	monitoringURLTemplate *template.Template
@@ -18,6 +27,15 @@ type monitoringURLValues struct {
 	ProjectName string
 	RouterName  string
 	Version     string
+}
+
+func NewRouterMonitoringService(
+	mlpService MLPService,
+	monitoringURLTemplate *template.Template) RouterMonitoringService {
+	return &routerMonitoringService{
+		mlpService:            mlpService,
+		monitoringURLTemplate: monitoringURLTemplate,
+	}
 }
 
 // GenerateMonitoringURL generates the monitoring url based on the router version.

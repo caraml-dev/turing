@@ -8,15 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
@@ -127,12 +125,8 @@ func TestListClients(t *testing.T) {
 			response, err := svc.ListClients(expManagerName)
 			assert.Equal(t, data.expected, response)
 			if data.err != "" {
-				tu.FailOnNil(t, err)
-				assert.Equal(t, data.err, err.Error())
-			}
-
-			// Access cache
-			if data.err == "" {
+				assert.EqualError(t, err, data.err)
+			} else {
 				response, err := svc.ListClients(expManagerName)
 				assert.Equal(t, data.expected, response)
 				assert.NoError(t, err)
@@ -240,12 +234,8 @@ func TestListExperiments(t *testing.T) {
 			response, err := svc.ListExperiments(expManagerName, data.clientID)
 			assert.Equal(t, data.expected, response)
 			if data.err != "" {
-				tu.FailOnNil(t, err)
-				assert.Equal(t, data.err, err.Error())
-			}
-
-			// Access cache
-			if data.err == "" {
+				assert.EqualError(t, err, data.err)
+			} else {
 				response, err := svc.ListExperiments(expManagerName, "1")
 				assert.Equal(t, data.expected, response)
 				assert.NoError(t, err)
@@ -421,12 +411,8 @@ func TestListVariables(t *testing.T) {
 			})
 			assert.Equal(t, data.expected, response)
 			if data.err != "" {
-				tu.FailOnNil(t, err)
-				assert.Equal(t, data.err, err.Error())
-			}
-
-			// Access cache
-			if data.err == "" {
+				assert.EqualError(t, err, data.err)
+			} else {
 				response, err := svc.ListVariables(expManagerName, data.clientID, data.experimentIDs)
 				// Sort items
 				sort.SliceStable(response.Config, func(i, j int) bool {

@@ -4,18 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
-
-	"net/url"
 
 	"github.com/ghodss/yaml"
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/gojek/turing/api/turing/utils"
+	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -66,6 +65,8 @@ const (
 	routerConfigStrategyTypeDefault          = "fiber.DefaultTuringRoutingStrategy"
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
+
+	routerPluginURLConfigKey = "plugin_url"
 )
 
 // Router endpoint constants
@@ -97,7 +98,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	// Namespace is the name of the project
 	namespace := GetNamespace(project)
 
-	configMap, err := buildFiberConfigMap(routerVersion, experimentConfig)
+	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -479,14 +480,32 @@ func buildFiberConfig(
 	return routerConfig, nil
 }
 
-func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessage) (*cluster.ConfigMap, error) {
+func buildFiberConfigMap(
+	ver *models.RouterVersion,
+	project *mlp.Project,
+	experimentCfg json.RawMessage,
+) (*cluster.ConfigMap, error) {
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{
 		"default_route_id":  ver.DefaultRouteID,
-		"experiment_engine": string(ver.ExperimentEngine.Type),
+		"experiment_engine": ver.ExperimentEngine.Type,
 	}
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		propsMap["experiment_engine_properties"] = experimentCfg
+		expEngineProps := experimentCfg
+		// Tell router, that the experiment runner is implemented as RPC plugin
+		if ver.ExperimentEngine.PluginConfig != nil {
+			var err error
+			pluginURL := fmt.Sprintf(
+				"%s/%s", buildPluginsServerServingPath(ver, project.Name), ver.ExperimentEngine.Type)
+			expEngineProps, err = utils.MergeJSON(
+				expEngineProps,
+				map[string]interface{}{routerPluginURLConfigKey: pluginURL},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+		propsMap["experiment_engine_properties"] = expEngineProps
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {
@@ -532,14 +551,6 @@ func buildFiberConfigMap(ver *models.RouterVersion, experimentCfg json.RawMessag
 		FileName: routerConfigFileName,
 		Data:     string(configMapData),
 	}, nil
-}
-
-func buildFluentdHost(
-	routerVersion *models.RouterVersion,
-	namespace string,
-) string {
-	componentName := GetComponentName(routerVersion, ComponentTypes.FluentdLogger)
-	return fmt.Sprintf("%s.%s.svc.cluster.local", componentName, namespace)
 }
 
 func buildPrePostProcessorEndpoint(

@@ -21,14 +21,6 @@ KnativeServiceDefaults:
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60
-  Experiment:
-    foo:
-      fookey1: fooval1
-      fookey2: 
-        fookey2-1: fooval2-1
-        fookey2-2: fooval2-2
-    bar: 
-      barkey1: 8
 Sentry:
   Enabled: true 
   Labels:

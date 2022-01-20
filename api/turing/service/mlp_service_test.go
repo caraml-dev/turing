@@ -1,5 +1,3 @@
-// +build unit
-
 package service
 
 import (
@@ -14,11 +12,11 @@ import (
 	"bou.ke/monkey"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2/google"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
 )
 
 type mockCryptoService struct{}
@@ -83,7 +81,7 @@ func TestNewMLPService(t *testing.T) {
 
 	// Create test Google client
 	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	// Create test projects and environments
 	projects := []mlp.Project{{Id: 1}}
 	environments := []merlin.Environment{{Name: "dev"}}
@@ -137,13 +135,15 @@ func TestNewMLPService(t *testing.T) {
 	svc, err := NewMLPService("mlp-base-path", "mlp-enc-key", "merlin-base-path")
 	assert.NoError(t, err)
 	assert.NotNil(t, svc)
+
 	// Test side effects
 	proj, err := svc.GetProject(1)
-	tu.FailOnNil(t, proj)
+	require.NotNil(t, proj)
 	assert.Equal(t, projects[0], *proj)
 	assert.NoError(t, err)
+
 	env, err := svc.GetEnvironment("dev")
-	tu.FailOnNil(t, env)
+	require.NotNil(t, env)
 	assert.Equal(t, environments[0], *env)
 	assert.NoError(t, err)
 }
@@ -154,7 +154,7 @@ func TestNewMerlinClient(t *testing.T) {
 
 	// Create test Google client and Merlin Client
 	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	mc := &merlin.APIClient{}
 	// Create expected Merlin config
 	expectedCfg := merlin.NewConfiguration()
@@ -178,7 +178,7 @@ func TestNewMLPClient(t *testing.T) {
 
 	// Create test Google client and Merlin Client
 	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	// Create expected MLP config
 	cfg := mlp.NewConfiguration()
 	cfg.BasePath = "base-path"
@@ -186,7 +186,7 @@ func TestNewMLPClient(t *testing.T) {
 
 	// Test
 	resultClient := newMLPClient(gc, "base-path", "enc-key")
-	tu.FailOnNil(t, resultClient)
+	require.NotNil(t, resultClient)
 	assert.Equal(t, NewCryptoService("enc-key"), resultClient.CryptoService)
 	assert.Equal(t, mlp.NewAPIClient(cfg), resultClient.api)
 }

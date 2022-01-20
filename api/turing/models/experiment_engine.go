@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+
+	"github.com/gojek/turing/api/turing/config"
 )
 
 const (
@@ -17,6 +19,9 @@ const (
 type ExperimentEngine struct {
 	// Type of Experiment Engine
 	Type string `json:"type"`
+	// PluginConfig (Optional) contains necessary configuration, if experiment engine
+	// is implemented as RPC plugin
+	PluginConfig *config.ExperimentEnginePluginConfig `json:"plugin_config"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
 	// For standard experiment engine managers, the config can be unmarshalled into
 	// manager.TuringExperimentConfig type.

@@ -91,7 +91,6 @@ initContainers:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
 - name: {{ $expEngine.name }}-plugin
   image: {{ $expEngine.rpcPlugin.image }}
-  imagePullPolicy: Always
   env:
   - name: PLUGIN_NAME
     value: "{{ $expEngine.name }}"
@@ -141,12 +140,20 @@ Sentry:
 {{ if .Values.turing.experimentEngines }}
 Experiment:
 {{ range $expEngine := .Values.turing.experimentEngines }}
-{{ $expEngine.name | indent 2 }}:
+  {{ $expEngine.name }}:
 {{ toYaml $expEngine.options | indent 4 }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
-    PluginBinary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
+    plugin_binary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{ end }}
 {{ end }}
+RouterDefaults:
+  ExperimentEnginePlugins:
+{{ range $expEngine := .Values.turing.experimentEngines }}
+{{ if eq (toString $expEngine.type) "rpc-plugin" }}
+    {{ $expEngine.name }}:
+      Image: {{ $expEngine.rpcPlugin.image }}
+{{- end -}}
+{{- end -}}
 {{ end }}
 {{- if .Values.turing.openApiSpecOverrides }}
 OpenapiConfig:

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -34,20 +33,4 @@ func CompareObjects(actual interface{}, expected interface{}) error {
 			expectedString, actualString)
 	}
 	return nil
-}
-
-// FailOnError logs the error and terminates the test immediately
-func FailOnError(t *testing.T, err error) {
-	if err != nil {
-		t.Errorf("An error occurred: %v", err)
-		t.FailNow()
-	}
-}
-
-// FailOnNil terminates the test immediately if the argument is nil and logs the reason
-func FailOnNil(t *testing.T, obj interface{}) {
-	if obj == nil {
-		t.Errorf("Expected argument to be not nil")
-		t.FailNow()
-	}
 }

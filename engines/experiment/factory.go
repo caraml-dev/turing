@@ -2,6 +2,11 @@ package experiment
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/url"
+	"path"
+
+	"github.com/gojek/turing/engines/experiment/pkg/utils"
 
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/plugin/inproc"
@@ -37,6 +42,21 @@ func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.Sugar
 	// plugin-based implementation of the experiment engine factory
 	if engineCfg.PluginBinary != "" {
 		return rpc.NewFactory(engineCfg.PluginBinary, engineCfgJSON, logger)
+	}
+
+	if engineCfg.PluginURL != "" {
+		downloadURL, err := url.Parse(engineCfg.PluginURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
+		}
+
+		filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
+		err = utils.DownloadFile(downloadURL, filename, 0744)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to download plugin's binary from remote url: url=%s, %v", engineCfg.PluginURL, err)
+		}
+		return rpc.NewFactory(filename, engineCfgJSON, logger)
 	}
 
 	// compile-time implementation of the experiment engine factory

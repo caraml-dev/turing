@@ -112,11 +112,11 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
 	expSvc service.ExperimentsService,
-) (*models.RouterVersion, error) {
+) (rv *models.RouterVersion, err error) {
 	if r.Config == nil {
 		return nil, errors.New("router config is empty")
 	}
-	rv := &models.RouterVersion{
+	rv = &models.RouterVersion{
 		RouterID:       router.ID,
 		Router:         router,
 		Image:          defaults.Image,
@@ -165,11 +165,14 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		experimentConfig, err := r.BuildExperimentEngineConfig(router, cryptoSvc, expSvc)
+		if pluginConfig, ok := defaults.ExperimentEnginePlugins[rv.ExperimentEngine.Type]; ok {
+			rv.ExperimentEngine.PluginConfig = pluginConfig
+		}
+
+		rv.ExperimentEngine.Config, err = r.BuildExperimentEngineConfig(router, cryptoSvc, expSvc)
 		if err != nil {
 			return nil, err
 		}
-		rv.ExperimentEngine.Config = experimentConfig
 	}
 
 	return rv, nil

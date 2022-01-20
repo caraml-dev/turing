@@ -33,8 +33,8 @@ func Test_NewEngineFactory(t *testing.T) {
 		"success | plugin": {
 			engine: "plugin-engine",
 			cfg: map[string]interface{}{
-				"PluginBinary": "path/to/binary",
-				"key_1":        "value_1",
+				"plugin_binary": "path/to/binary",
+				"key_1":         "value_1",
 			},
 			expected: &rpc.EngineFactory{
 				EngineConfig: json.RawMessage("{\"key_1\":\"value_1\"}"),
@@ -61,9 +61,9 @@ func Test_NewEngineFactory(t *testing.T) {
 		},
 		"failure | invalid configuration": {
 			cfg: map[string]interface{}{
-				"PluginBinary": 123,
+				"plugin_binary": 123,
 			},
-			err: "1 error(s) decoding:\n\n* 'PluginBinary' expected type 'string', got unconvertible type 'int', value: '123'",
+			err: "1 error(s) decoding:\n\n* 'plugin_binary' expected type 'string', got unconvertible type 'int', value: '123'",
 		},
 		"failure | marshalling error": {
 			cfg: map[string]interface{}{

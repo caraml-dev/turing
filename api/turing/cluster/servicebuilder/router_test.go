@@ -1,13 +1,9 @@
-// +build unit
-
 package servicebuilder
 
 import (
 	"encoding/json"
 	"path/filepath"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -27,7 +23,7 @@ func TestNewRouterService(t *testing.T) {
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
 	expRunnerConfig := `{
 		"client_id": "client_id",
-		"endpoint": "litmus.example.com:8012",
+		"endpoint": "exp-engine:8080",
 		"experiments": [
 			{
 				"experiment_name": "exp_exp_test_experiment_1",
@@ -46,20 +42,22 @@ func TestNewRouterService(t *testing.T) {
 	}`
 	// Read configmap test data
 	cfgmapDefault, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_default.yml"))
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	cfgmapEnsembling, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_ensembling.yml"))
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	cfgmapStandardEnsemble, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_standard_ensembler.yml"))
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	cfgmapTrafficSplitting, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_traffic_splitting.yml"))
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
+	cfgmapExpEngine, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_exp_engine.yml"))
+	require.NoError(t, err)
 
 	// Define tests
 	tests := map[string]testSuiteNewService{
-		"success basic": {
+		"success | basic": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_basic.json"),
 			expRawConfig: json.RawMessage(expRunnerConfig),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:                 "test-svc-turing-router-1",
 					Namespace:            "test-project",
@@ -154,12 +152,11 @@ func TestNewRouterService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
-		"success all components": {
+		"success | all components": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_success.json"),
 			expRawConfig: json.RawMessage(`{}`),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:                 "test-svc-turing-router-1",
 					Namespace:            "test-project",
@@ -251,12 +248,11 @@ func TestNewRouterService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
-		"success with standard ensembler": {
+		"success | standard ensembler": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_success_standard_ensembler.json"),
 			expRawConfig: json.RawMessage(expRunnerConfig),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:                 "test-svc-turing-router-1",
 					Namespace:            "test-project",
@@ -351,12 +347,11 @@ func TestNewRouterService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
 		},
 		"success | traffic-splitting": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_success_traffic_splitting.json"),
 			expRawConfig: json.RawMessage(expRunnerConfig),
-			expected: cluster.KnativeService{
+			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:                 "test-svc-turing-router-1",
 					Namespace:            "test-project",
@@ -451,11 +446,85 @@ func TestNewRouterService(t *testing.T) {
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
-			success: true,
+		},
+		"success | experiment engine": {
+			filePath:     filepath.Join(testDataBasePath, "router_version_success_experiment_engine.json"),
+			expRawConfig: json.RawMessage(`{"key-1": "value-1"}`),
+			expected: &cluster.KnativeService{
+				BaseService: &cluster.BaseService{
+					Name:                 "router-with-exp-engine-turing-router-1",
+					Namespace:            "test-project",
+					Image:                "ghcr.io/gojek/turing/turing-router:latest",
+					CPURequests:          resource.MustParse("400m"),
+					MemoryRequests:       resource.MustParse("512Mi"),
+					LivenessHTTPGetPath:  "/v1/internal/live",
+					ReadinessHTTPGetPath: "/v1/internal/ready",
+					ConfigMap: &cluster.ConfigMap{
+						Name:     "router-with-exp-engine-turing-fiber-config-1",
+						FileName: "fiber.yml",
+						Data:     string(cfgmapExpEngine),
+					},
+					Envs: []corev1.EnvVar{
+						{Name: "APP_NAME", Value: "router-with-exp-engine-1.test-project"},
+						{Name: "APP_ENVIRONMENT", Value: "test-env"},
+						{Name: "ROUTER_TIMEOUT", Value: "5s"},
+						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
+						{Name: "APP_SENTRY_ENABLED", Value: "true"},
+						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "",
+							ValueFrom: &corev1.EnvVarSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "service-account",
+									},
+									Key: "experiment_passkey",
+								},
+							},
+						},
+						{Name: "APP_LOGLEVEL", Value: "INFO"},
+						{Name: "APP_CUSTOM_METRICS", Value: "false"},
+						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_RESULT_LOGGER", Value: "nop"},
+						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
+					},
+					Labels: map[string]string{
+						"app":          "router-with-exp-engine",
+						"environment":  "",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: routerConfigMapVolume,
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "router-with-exp-engine-turing-fiber-config-1",
+									},
+								},
+							},
+						},
+					},
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							Name:      routerConfigMapVolume,
+							MountPath: routerConfigMapMountPath,
+						},
+					},
+				},
+				ContainerPort:                   8080,
+				MinReplicas:                     2,
+				MaxReplicas:                     4,
+				TargetConcurrency:               1,
+				QueueProxyResourcePercentage:    20,
+				UserContainerLimitRequestFactor: 1.5,
+			},
 		},
 		"failure missing bigquery": {
 			filePath: filepath.Join(testDataBasePath, "router_version_missing_bigquery.json"),
-			success:  false,
 			err:      "Missing BigQuery logger config",
 		},
 	}
@@ -464,11 +533,11 @@ func TestNewRouterService(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Read router version test data
 			fileBytes, err := tu.ReadFile(data.filePath)
-			tu.FailOnError(t, err)
+			require.NoError(t, err)
 			// Convert to RouterVersion type
 			var routerVersion models.RouterVersion
 			err = json.Unmarshal(fileBytes, &routerVersion)
-			tu.FailOnError(t, err)
+			require.NoError(t, err)
 
 			// Run test
 			project := &mlp.Project{
@@ -479,15 +548,11 @@ func TestNewRouterService(t *testing.T) {
 			svc, err := sb.NewRouterService(&routerVersion, project, "test-env", "service-account",
 				data.expRawConfig, "fluentd-tag", "jaeger-endpoint", true, "sentry-dsn", 1, 20, 1.5)
 
-			if data.success {
-				require.Nil(t, err)
-				if !cmp.Equal(*svc, data.expected) {
-					t.Log(cmp.Diff(*svc, data.expected))
-					t.Errorf("err for input file: %s", data.filePath)
-				}
+			if data.err == "" {
+				require.NoError(t, err)
+				assert.Equal(t, data.expected, svc)
 			} else {
-				require.NotNil(t, err)
-				assert.Equal(t, data.err, err.Error())
+				assert.EqualError(t, err, data.err)
 			}
 		})
 	}
@@ -498,10 +563,10 @@ func TestNewRouterEndpoint(t *testing.T) {
 	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	fileBytes, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_version_success.json"))
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 	var routerVersion models.RouterVersion
 	err = json.Unmarshal(fileBytes, &routerVersion)
-	tu.FailOnError(t, err)
+	require.NoError(t, err)
 
 	project := &mlp.Project{
 		Name:   "test-project",
@@ -511,7 +576,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 
 	versionEndpoint := "http://test-svc-turing-router-1.models.example.com"
 
-	expected := cluster.VirtualService{
+	expected := &cluster.VirtualService{
 		Name:      "test-svc-turing-router",
 		Namespace: project.Name,
 		Labels: map[string]string{
@@ -530,5 +595,5 @@ func TestNewRouterEndpoint(t *testing.T) {
 
 	got, err := sb.NewRouterEndpoint(&routerVersion, project, "test-env", versionEndpoint)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, *got)
+	assert.Equal(t, expected, got)
 }

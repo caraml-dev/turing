@@ -1,5 +1,3 @@
-// +build unit
-
 package service
 
 import (
@@ -12,8 +10,6 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster/mocks"
-	"github.com/gojek/turing/api/turing/utils"
-
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/gojek/turing/api/turing/config"
@@ -163,6 +159,14 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	}, nil
 }
 
+func (msb *mockClusterServiceBuilder) NewPluginsServerService(
+	rv *models.RouterVersion,
+	project *mlp.Project,
+	envType string,
+) *cluster.KubernetesService {
+	return nil
+}
+
 func (msb *mockClusterServiceBuilder) NewFluentdService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
@@ -229,7 +233,7 @@ func TestDeployEndpoint(t *testing.T) {
 		svcBuilder: svcBuilder,
 	}
 
-	eventsCh := utils.NewEventChannel()
+	eventsCh := NewEventChannel()
 	go func() {
 		for {
 			_, done := eventsCh.Read()
@@ -390,7 +394,7 @@ func TestDeleteEndpoint(t *testing.T) {
 		svcBuilder: svcBuilder,
 	}
 
-	eventsCh := utils.NewEventChannel()
+	eventsCh := NewEventChannel()
 	go func() {
 		for {
 			_, done := eventsCh.Read()

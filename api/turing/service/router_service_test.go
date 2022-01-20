@@ -1,9 +1,11 @@
 // +build integration
 
-package service
+package service_test
 
 import (
 	"database/sql"
+	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/service/mocks"
 	"testing"
 
 	merlin "github.com/gojek/merlin/client"
@@ -19,7 +21,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		// Monitoring URL Deps
 		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
-		mlpService := &MockMLPService{}
+		mlpService := &mocks.MLPService{}
 		mlpService.On(
 			"GetEnvironment",
 			mock.Anything,
@@ -29,7 +31,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			mock.Anything,
 		).Return(&mlp.Project{Name: "project-name"}, nil)
 
-		svc := NewRoutersService(db, mlpService, &monitoringURLFormat)
+		svc := service.NewRoutersService(db, mlpService, &monitoringURLFormat)
 
 		// create routers
 		routers := []*models.Router{
@@ -103,7 +105,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			},
 		}
 
-		routerVersion, err := NewRouterVersionsService(db, nil, nil).Save(routerVersion)
+		routerVersion, err := service.NewRouterVersionsService(db, nil, nil).Save(routerVersion)
 		assert.NoError(t, err)
 		router.SetCurrRouterVersionID(routerVersion.ID)
 		saved, err := svc.Save(router)

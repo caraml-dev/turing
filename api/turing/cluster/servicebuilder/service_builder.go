@@ -19,7 +19,7 @@ import (
 const (
 	secretVolume    = "svc-acct-secret-volume"
 	secretMountPath = "/var/secret/"
-	// Kubernetes secret key name for usage in: router, ensembler, enricher, litmus.
+	// Kubernetes secret key name for usage in: router, ensembler, enricher, experiment-engine.
 	// They will share the same Kubernetes secret for every RouterVersion deployment.
 	// Hence, the key name should be used to retrieve different credentials.
 	secretKeyNameRouter     = "router-service-account.json"
@@ -37,6 +37,7 @@ var ComponentTypes = struct {
 	ServiceAccountSecret string
 	CacheVolume          string
 	FiberConfig          string
+	PluginsServer        string
 }{
 	Enricher:      "enricher",
 	Ensembler:     "ensembler",
@@ -45,6 +46,7 @@ var ComponentTypes = struct {
 	Secret:        "secret",
 	CacheVolume:   "cache-volume",
 	FiberConfig:   "fiber-config",
+	PluginsServer: "plugins-server",
 }
 
 // ClusterServiceBuilder parses the Router Config to build a service definition
@@ -88,6 +90,11 @@ type ClusterServiceBuilder interface {
 		envType string,
 		secretName string,
 		fluentdConfig *config.FluentdConfig,
+	) *cluster.KubernetesService
+	NewPluginsServerService(
+		routerVersion *models.RouterVersion,
+		project *mlp.Project,
+		envType string,
 	) *cluster.KubernetesService
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,
@@ -282,9 +289,9 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	})
 }
 
-// NewSecret creates a new cluster.Secret secret from the given service accounts and/or litmus keys.
-// If [router/enricher/ensembler]ServiceAccountKey or litmusPasskey is empty no secret key will be created
-// for that component. This happens when user does not specify litmus pass key or service accounts.
+// NewSecret creates a new `cluster.Secret` secret from the given service accounts and/or experiment-engine keys.
+// If [router/enricher/ensembler]ServiceAccountKey or experimentPasskey is empty no secret key will be created
+// for that component. This happens when user does not specify experiment-engine pass key or service accounts.
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,

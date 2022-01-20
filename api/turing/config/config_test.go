@@ -1,7 +1,4 @@
-//go:build unit
-// +build unit
-
-package config
+package config_test
 
 import (
 	"os"
@@ -9,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitchellh/copystructure"
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/mitchellh/copystructure"
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -44,11 +41,11 @@ func TestDecodeQuantity(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			// Run and validate
-			var qty Quantity
+			var qty config.Quantity
 			err := qty.Decode(data.value)
 			if data.success {
 				assert.NoError(t, err)
-				assert.Equal(t, Quantity(data.expected), qty)
+				assert.Equal(t, config.Quantity(data.expected), qty)
 			} else {
 				assert.Error(t, err)
 			}
@@ -57,7 +54,7 @@ func TestDecodeQuantity(t *testing.T) {
 }
 
 func TestGetters(t *testing.T) {
-	cfg := Config{
+	cfg := config.Config{
 		Port: 5000,
 	}
 	assert.Equal(t, ":5000", cfg.ListenAddress())
@@ -65,32 +62,32 @@ func TestGetters(t *testing.T) {
 
 func TestAuthConfigValidation(t *testing.T) {
 	tests := map[string]struct {
-		cfg     AuthorizationConfig
+		cfg     config.AuthorizationConfig
 		success bool
 	}{
 		"success auth disabled": {
-			cfg: AuthorizationConfig{
+			cfg: config.AuthorizationConfig{
 				Enabled: false,
 			},
 			success: true,
 		},
 		"success auth enabled": {
-			cfg: AuthorizationConfig{
+			cfg: config.AuthorizationConfig{
 				Enabled: true,
 				URL:     "url",
 			},
 			success: true,
 		},
 		"failure auth enabled no url": {
-			cfg: AuthorizationConfig{
+			cfg: config.AuthorizationConfig{
 				Enabled: true,
 			},
 			success: false,
 		},
 	}
 
-	validate, err := newConfigValidator()
-	tu.FailOnError(t, err)
+	validate, err := config.NewConfigValidator()
+	require.NoError(t, err)
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -118,58 +115,58 @@ func TestLoad(t *testing.T) {
 	tests := map[string]struct {
 		filepaths []string
 		env       map[string]string
-		want      *Config
+		want      *config.Config
 		wantErr   bool
 	}{
 		"default": {
-			want: &Config{
+			want: &config.Config{
 				Port:           8080,
 				AllowedOrigins: []string{"*"},
-				AuthConfig:     &AuthorizationConfig{},
-				DbConfig: &DatabaseConfig{
+				AuthConfig:     &config.AuthorizationConfig{},
+				DbConfig: &config.DatabaseConfig{
 					Host:             "localhost",
 					Port:             5432,
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
 				},
-				DeployConfig: &DeploymentConfig{
+				DeployConfig: &config.DeploymentConfig{
 					Timeout:         3 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
-					MaxCPU:          Quantity(resource.MustParse("4")),
-					MaxMemory:       Quantity(resource.MustParse("8Gi")),
+					MaxCPU:          config.Quantity(resource.MustParse("4")),
+					MaxMemory:       config.Quantity(resource.MustParse("8Gi")),
 				},
-				KnativeServiceDefaults: &KnativeServiceDefaults{
+				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					TargetConcurrency:               1,
 					QueueProxyResourcePercentage:    30,
 					UserContainerLimitRequestFactor: 1,
 				},
-				RouterDefaults: &RouterDefaults{
+				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
-					FluentdConfig: &FluentdConfig{
+					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
 				},
 				Sentry: sentry.Config{},
-				ClusterConfig: ClusterConfig{
+				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
 				},
-				AlertConfig: &AlertConfig{
-					GitLab: &GitlabConfig{
+				AlertConfig: &config.AlertConfig{
+					GitLab: &config.GitlabConfig{
 						BaseURL:    "https://gitlab.com",
 						Branch:     "master",
 						PathPrefix: "turing",
 					},
 				},
-				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &SinglePageApplicationConfig{
+				MLPConfig: &config.MLPConfig{},
+				TuringUIConfig: &config.SinglePageApplicationConfig{
 					ServingPath: "/turing",
 				},
-				OpenapiConfig: &OpenapiConfig{
+				OpenapiConfig: &config.OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
 					MergedSpecFile:    "api/swagger-ui-dist/openapi.bundle.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
+					SwaggerUIConfig: &config.SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
 					},
@@ -178,14 +175,14 @@ func TestLoad(t *testing.T) {
 		},
 		"single file": {
 			filepaths: []string{"testdata/config-1.yaml"},
-			want: &Config{
+			want: &config.Config{
 				Port:           9999,
 				AllowedOrigins: []string{"http://foo.com", "http://bar.com"},
-				AuthConfig: &AuthorizationConfig{
+				AuthConfig: &config.AuthorizationConfig{
 					Enabled: true,
 					URL:     "http://example.com",
 				},
-				DbConfig: &DatabaseConfig{
+				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
 					User:             "dbuser",
@@ -193,69 +190,57 @@ func TestLoad(t *testing.T) {
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
 				},
-				DeployConfig: &DeploymentConfig{
+				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType: "dev",
 					Timeout:         5 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
-					MaxCPU:          Quantity(resource.MustParse("500m")),
-					MaxMemory:       Quantity(resource.MustParse("4000Mi")),
+					MaxCPU:          config.Quantity(resource.MustParse("500m")),
+					MaxMemory:       config.Quantity(resource.MustParse("4000Mi")),
 				},
-				KnativeServiceDefaults: &KnativeServiceDefaults{
+				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					TargetConcurrency:               2,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
-				RouterDefaults: &RouterDefaults{
+				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
-					FluentdConfig: &FluentdConfig{
+					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
-					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "fooval1",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
 					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				ClusterConfig: ClusterConfig{
+				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
-					VaultConfig: &VaultConfig{
+					VaultConfig: &config.VaultConfig{
 						Address: "http://localhost:8200",
 						Token:   "root",
 					},
 				},
-				AlertConfig: &AlertConfig{
-					GitLab: &GitlabConfig{
+				AlertConfig: &config.AlertConfig{
+					GitLab: &config.GitlabConfig{
 						BaseURL:    "https://gitlab.com",
 						Branch:     "master",
 						PathPrefix: "turing",
 					},
 				},
-				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &SinglePageApplicationConfig{
+				MLPConfig: &config.MLPConfig{},
+				TuringUIConfig: &config.SinglePageApplicationConfig{
 					ServingPath: "/turing",
 				},
-				OpenapiConfig: &OpenapiConfig{
+				OpenapiConfig: &config.OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
 					MergedSpecFile:    "api/swagger-ui-dist/openapi.bundle.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
+					SwaggerUIConfig: &config.SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
 					},
 				},
-				Experiment: map[string]EngineConfig{
+				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1",
 						"quxkey2": map[string]interface{}{
@@ -271,15 +256,15 @@ func TestLoad(t *testing.T) {
 		},
 		"multiple files": {
 			filepaths: []string{"testdata/config-1.yaml", "testdata/config-2.yaml"},
-			want: &Config{
+			want: &config.Config{
 				Port:           10000,
 				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://foo2.com"},
-				AuthConfig: &AuthorizationConfig{
+				AuthConfig: &config.AuthorizationConfig{
 					Enabled: false,
 					URL:     "http://example.com",
 				},
-				DbConfig: &DatabaseConfig{
+				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
 					User:             "dbuser",
@@ -287,72 +272,61 @@ func TestLoad(t *testing.T) {
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
 				},
-				DeployConfig: &DeploymentConfig{
+				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType: "dev",
 					Timeout:         5 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
-					MaxCPU:          Quantity(resource.MustParse("500m")),
-					MaxMemory:       Quantity(resource.MustParse("12Gi")),
+					MaxCPU:          config.Quantity(resource.MustParse("500m")),
+					MaxMemory:       config.Quantity(resource.MustParse("12Gi")),
 				},
-				KnativeServiceDefaults: &KnativeServiceDefaults{
+				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					TargetConcurrency:               2,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
-				RouterDefaults: &RouterDefaults{
+				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
-					FluentdConfig: &FluentdConfig{
+					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2-override",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
-						"qux": map[string]interface{}{
-							"quux": "quuxval",
-						},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
+						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
 					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				ClusterConfig: ClusterConfig{
+				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
-					VaultConfig: &VaultConfig{
+					VaultConfig: &config.VaultConfig{
 						Address: "http://localhost:8200",
 						Token:   "root",
 					},
 				},
-				AlertConfig: &AlertConfig{
-					GitLab: &GitlabConfig{
+				AlertConfig: &config.AlertConfig{
+					GitLab: &config.GitlabConfig{
 						BaseURL:    "https://gitlab.com",
 						Branch:     "master",
 						PathPrefix: "turing",
 					},
 				},
-				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &SinglePageApplicationConfig{
+				MLPConfig: &config.MLPConfig{},
+				TuringUIConfig: &config.SinglePageApplicationConfig{
 					ServingPath: "/turing",
 				},
-				OpenapiConfig: &OpenapiConfig{
+				OpenapiConfig: &config.OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
 					MergedSpecFile:    "api/swagger-ui-dist/openapi.bundle.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
+					SwaggerUIConfig: &config.SinglePageApplicationConfig{
 						ServingDirectory: "",
 						ServingPath:      "/swagger-ui",
 					},
 				},
-				Experiment: map[string]EngineConfig{
+				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-override",
 						"quxkey2": map[string]interface{}{
@@ -388,15 +362,15 @@ func TestLoad(t *testing.T) {
 				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
 				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY":       "4",
 			},
-			want: &Config{
+			want: &config.Config{
 				Port:           5000,
 				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://baz.com", "http://qux.com"},
-				AuthConfig: &AuthorizationConfig{
+				AuthConfig: &config.AuthorizationConfig{
 					Enabled: true,
 					URL:     "http://env.example.com",
 				},
-				DbConfig: &DatabaseConfig{
+				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
 					User:             "dbuser-env",
@@ -404,73 +378,62 @@ func TestLoad(t *testing.T) {
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
 				},
-				KnativeServiceDefaults: &KnativeServiceDefaults{
+				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					TargetConcurrency:               4,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
-				DeployConfig: &DeploymentConfig{
+				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType: "dev",
 					Timeout:         10 * time.Minute,
 					DeletionTimeout: 1 * time.Minute,
-					MaxCPU:          Quantity(resource.MustParse("500m")),
-					MaxMemory:       Quantity(resource.MustParse("4500Mi")),
+					MaxCPU:          config.Quantity(resource.MustParse("500m")),
+					MaxMemory:       config.Quantity(resource.MustParse("4500Mi")),
 				},
-				RouterDefaults: &RouterDefaults{
+				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
-					FluentdConfig: &FluentdConfig{
+					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					Experiment: map[string]interface{}{
-						"foo": map[string]interface{}{
-							"fookey1": "fooval1-env",
-							"fookey2": map[string]interface{}{
-								"fookey2-1": "fooval2-1",
-								"fookey2-2": "fooval2-2-override",
-							},
-						},
-						"bar": map[string]interface{}{
-							"barkey1": 8,
-						},
-						"qux": map[string]interface{}{
-							"quux": "quuxval-env",
-						},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
+						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
 					},
 				},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
 				},
-				ClusterConfig: ClusterConfig{
+				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
-					VaultConfig: &VaultConfig{
+					VaultConfig: &config.VaultConfig{
 						Address: "http://localhost:8200",
 						Token:   "root",
 					},
 				},
-				AlertConfig: &AlertConfig{
-					GitLab: &GitlabConfig{
+				AlertConfig: &config.AlertConfig{
+					GitLab: &config.GitlabConfig{
 						BaseURL:    "https://gitlab.com",
 						Branch:     "master",
 						PathPrefix: "turing",
 					},
 				},
-				MLPConfig: &MLPConfig{},
-				TuringUIConfig: &SinglePageApplicationConfig{
+				MLPConfig: &config.MLPConfig{},
+				TuringUIConfig: &config.SinglePageApplicationConfig{
 					ServingDirectory: "appdir-env",
 					ServingPath:      "/turing-env",
 				},
-				OpenapiConfig: &OpenapiConfig{
+				OpenapiConfig: &config.OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
 					MergedSpecFile:    "api/swagger-ui-dist/openapi.bundle.yaml",
-					SwaggerUIConfig: &SinglePageApplicationConfig{
+					SwaggerUIConfig: &config.SinglePageApplicationConfig{
 						ServingDirectory: "static/swagger-ui",
 						ServingPath:      "/swagger-ui",
 					},
 				},
-				Experiment: map[string]EngineConfig{
+				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{
 						"quxkey1": "quxval1-env",
 						"quxkey2": map[string]interface{}{
@@ -506,7 +469,7 @@ func TestLoad(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			setupNewEnv(tt.env)
-			got, err := Load(tt.filepaths...)
+			got, err := config.Load(tt.filepaths...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FromFiles() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -519,8 +482,8 @@ func TestLoad(t *testing.T) {
 // Reference:
 // https://github.com/mitchellh/mapstructure/blob/ce2ff0c13ce509e36e9254c08ea0bca90ed5af6c/decode_hooks_test.go#L128
 func TestStringToQuantityHookFunc(t *testing.T) {
-	hookFunc := StringToQuantityHookFunc()
-	qtyType := reflect.TypeOf(Quantity{})
+	hookFunc := config.StringToQuantityHookFunc()
+	qtyType := reflect.TypeOf(config.Quantity{})
 
 	tests := []struct {
 		name    string
@@ -533,13 +496,13 @@ func TestStringToQuantityHookFunc(t *testing.T) {
 			name: "digit",
 			from: "5",
 			to:   qtyType,
-			want: Quantity(resource.MustParse("5")),
+			want: config.Quantity(resource.MustParse("5")),
 		},
 		{
 			name: "digit with suffix",
 			from: "5Gi",
 			to:   qtyType,
-			want: Quantity(resource.MustParse("5Gi")),
+			want: config.Quantity(resource.MustParse("5Gi")),
 		},
 		{
 			name:    "empty",
@@ -573,13 +536,13 @@ func TestConfigValidate(t *testing.T) {
 	executorCPURequest := "1"
 	executorMemoryRequest := "1Gi"
 	tolerationName := "batch-job"
-	validConfig := Config{
+	validConfig := config.Config{
 		Port: 5000,
-		BatchEnsemblingConfig: BatchEnsemblingConfig{
+		BatchEnsemblingConfig: config.BatchEnsemblingConfig{
 			Enabled: true,
-			JobConfig: &JobConfig{
+			JobConfig: &config.JobConfig{
 				DefaultEnvironment: "dev",
-				DefaultConfigurations: DefaultEnsemblingJobConfigurations{
+				DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
 					BatchEnsemblingJobResources: openapi.EnsemblingResources{
 						DriverCpuRequest:      &driverCPURequest,
 						DriverMemoryRequest:   &driverMemoryRequest,
@@ -592,27 +555,27 @@ func TestConfigValidate(t *testing.T) {
 					},
 				},
 			},
-			RunnerConfig: &RunnerConfig{
+			RunnerConfig: &config.RunnerConfig{
 				TimeInterval:                   3 * time.Minute,
 				RecordsToProcessInOneIteration: 10,
 				MaxRetryCount:                  3,
 			},
-			ImageBuildingConfig: &ImageBuildingConfig{
+			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry:  "ghcr.io",
 				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
-				KanikoConfig: KanikoConfig{
+				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
 					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: ResourceRequestsLimits{
-						Requests: Resource{
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
 							CPU:    "500m",
 							Memory: "1Gi",
 						},
-						Limits: Resource{
+						Limits: config.Resource{
 							CPU:    "500m",
 							Memory: "1Gi",
 						},
@@ -620,7 +583,7 @@ func TestConfigValidate(t *testing.T) {
 				},
 			},
 		},
-		DbConfig: &DatabaseConfig{
+		DbConfig: &config.DatabaseConfig{
 			Host:             "localhost",
 			Port:             5432,
 			User:             "user",
@@ -628,14 +591,14 @@ func TestConfigValidate(t *testing.T) {
 			Database:         "postgres",
 			MigrationsFolder: "db-migrations/",
 		},
-		DeployConfig: &DeploymentConfig{
+		DeployConfig: &config.DeploymentConfig{
 			EnvironmentType: "dev",
 			Timeout:         1 * time.Minute,
 			DeletionTimeout: 1 * time.Minute,
-			MaxCPU:          Quantity(resource.MustParse("2")),
-			MaxMemory:       Quantity(resource.MustParse("8Gi")),
+			MaxCPU:          config.Quantity(resource.MustParse("2")),
+			MaxMemory:       config.Quantity(resource.MustParse("8Gi")),
 		},
-		SparkAppConfig: &SparkAppConfig{
+		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
 				"node-workload-type": "batch",
 			},
@@ -650,11 +613,11 @@ func TestConfigValidate(t *testing.T) {
 			PythonVersion:                  "3",
 			TTLSecond:                      86400,
 		},
-		RouterDefaults: &RouterDefaults{
+		RouterDefaults: &config.RouterDefaults{
 			Image:    "turing-router:latest",
 			LogLevel: "DEBUG",
 		},
-		KubernetesLabelConfigs: &KubernetesLabelConfigs{
+		KubernetesLabelConfigs: &config.KubernetesLabelConfigs{
 			Environment: "dev",
 		},
 		Sentry: sentry.Config{},
@@ -664,16 +627,16 @@ func TestConfigValidate(t *testing.T) {
 			License:           "test",
 			IgnoreStatusCodes: []int{403, 404},
 		},
-		ClusterConfig: ClusterConfig{
+		ClusterConfig: config.ClusterConfig{
 			InClusterConfig: false,
-			VaultConfig: &VaultConfig{
+			VaultConfig: &config.VaultConfig{
 				Address: "http://localhost:8200",
 				Token:   "root",
 			},
 		},
 		TuringEncryptionKey: "secret",
 		AlertConfig:         nil,
-		MLPConfig: &MLPConfig{
+		MLPConfig: &config.MLPConfig{
 			MerlinURL:        "http://merlin.example.com",
 			MLPURL:           "http://mlp.example.com",
 			MLPEncryptionKey: "secret",
@@ -681,89 +644,89 @@ func TestConfigValidate(t *testing.T) {
 	}
 
 	// validConfigUpdate returns an updated config from a valid one
-	type validConfigUpdate func(validConfig Config) Config
+	type validConfigUpdate func(validConfig config.Config) config.Config
 
 	tests := map[string]struct {
 		validConfigUpdate validConfigUpdate
 		wantErr           bool
 	}{
 		"valid": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				return validConfig
 			},
 		},
 		"missing port": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.Port = 0
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing database password": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.DbConfig.Password = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing deployment timeout": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.DeployConfig.Timeout = 0
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing turing encryption key": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.TuringEncryptionKey = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing MLP URL": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.MLPConfig.MLPURL = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing Merlin URL": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.MLPConfig.MerlinURL = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing ensembling job default environment": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing spark infra config": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.SparkAppConfig = nil
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing kubernetes label config": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.KubernetesLabelConfigs = nil
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing vault address": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.ClusterConfig.VaultConfig.Address = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"missing vaultconfig when InClusterConfig is false": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.ClusterConfig.VaultConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = false
 				return validConfig
@@ -771,7 +734,7 @@ func TestConfigValidate(t *testing.T) {
 			wantErr: true,
 		},
 		"valid in cluster config": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.ClusterConfig.VaultConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = true
 				return validConfig
@@ -779,8 +742,8 @@ func TestConfigValidate(t *testing.T) {
 			wantErr: false,
 		},
 		"valid batch ensembling disabled": {
-			validConfigUpdate: func(validConfig Config) Config {
-				validConfig.BatchEnsemblingConfig = BatchEnsemblingConfig{
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.BatchEnsemblingConfig = config.BatchEnsemblingConfig{
 					Enabled: false,
 				}
 				return validConfig
@@ -788,14 +751,14 @@ func TestConfigValidate(t *testing.T) {
 			wantErr: false,
 		},
 		"batch ensembling enabled but missing settings": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig.JobConfig.DefaultEnvironment = ""
 				return validConfig
 			},
 			wantErr: true,
 		},
 		"batch ensembling enabled but one whole section missing": {
-			validConfigUpdate: func(validConfig Config) Config {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig.JobConfig = nil
 				return validConfig
 			},
@@ -805,7 +768,7 @@ func TestConfigValidate(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			validConfigCopy := copystructure.Must(copystructure.Copy(validConfig))
-			c := tt.validConfigUpdate(validConfigCopy.(Config))
+			c := tt.validConfigUpdate(validConfigCopy.(config.Config))
 			if err := c.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -62,7 +62,7 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 		"success": {
 			properties: json.RawMessage(`{
 				"default_route_id":  "route1",
-				"experiment_engine": "Litmus"
+				"experiment_engine": "Test"
 			}`),
 			success: true,
 			expected: EnsemblingFanIn{
@@ -81,7 +81,7 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 		},
 		"missing_route_policy": {
 			properties: json.RawMessage(`{
-				"experiment_engine": "Litmus"
+				"experiment_engine": "Test"
 			}`),
 			success: false,
 			err:     "Failed initializing route selection policy on FanIn: No default route defined",

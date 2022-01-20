@@ -15,6 +15,7 @@ const defaultLimitRequestFactor = 1.0
 type KubernetesService struct {
 	*BaseService
 
+	InitContainers  []Container                `json:"init_containers"`
 	Command         []string                   `json:"command"`
 	Args            []string                   `json:"args"`
 	Replicas        int                        `json:"replicas"`
@@ -32,6 +33,11 @@ func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.
 	replicas := int32(cfg.Replicas)
 
 	labels["app"] = cfg.Name
+
+	initContainers := make([]corev1.Container, len(cfg.InitContainers))
+	for idx, containerCfg := range cfg.InitContainers {
+		initContainers[idx] = containerCfg.Build()
+	}
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -53,6 +59,7 @@ func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: initContainers,
 					Containers: []corev1.Container{
 						{
 							Name:            cfg.Name,

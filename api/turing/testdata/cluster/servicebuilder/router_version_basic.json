@@ -20,7 +20,7 @@
         "type": "litmus",
         "config": {
             "deployment": {
-                "endpoint": "litmus.example.com:8012",
+                "endpoint": "exp-engine:8080",
                 "timeout": "500ms"
             },
             "client": {

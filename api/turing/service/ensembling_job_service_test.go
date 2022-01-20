@@ -1,9 +1,11 @@
 // +build integration
 
-package service
+package service_test
 
 import (
 	"fmt"
+	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/service/mocks"
 	"testing"
 
 	mlp "github.com/gojek/mlp/api/client"
@@ -51,8 +53,8 @@ var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
 	},
 }
 
-func createMLPService() MLPService {
-	mlpService := &MockMLPService{}
+func createMLPService() service.MLPService {
+	mlpService := &mocks.MLPService{}
 	mlpService.On(
 		"GetProject",
 		mock.Anything,
@@ -184,15 +186,15 @@ func generateEnsemblingJobFixture(
 	if genExpected {
 		value.JobConfig.Spec.Ensembler.Uri = fmt.Sprintf(
 			"%s/%s/%s",
-			SparkHomeFolder,
+			service.SparkHomeFolder,
 			artifactFolder,
-			EnsemblerFolder,
+			service.EnsemblerFolder,
 		)
 		value.EnvironmentName = "dev"
 		artifactURI := fmt.Sprintf("gs://bucket/%s", artifactFolder)
 		value.InfraConfig.ArtifactUri = &artifactURI
-		value.InfraConfig.EnsemblerName = &EnsemblerFolder
-		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, EnsemblerFolder)
+		value.InfraConfig.EnsemblerName = &service.EnsemblerFolder
+		value.MonitoringURL = fmt.Sprintf(dashboardURLStringFormat, mlpProjectName, service.EnsemblerFolder)
 	}
 
 	return value
@@ -201,7 +203,7 @@ func generateEnsemblingJobFixture(
 func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 	t.Run("success | insertion with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(
+			ensemblingJobService := service.NewEnsemblingJobService(
 				db,
 				"dev",
 				imageBuilderNamespace,
@@ -214,14 +216,14 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &service.EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
 
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
-				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				service.EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NoError(t, err)
 
@@ -241,7 +243,7 @@ func TestSaveAndFindByIDEnsemblingJobIntegration(t *testing.T) {
 
 			// save again to test if RunID has incremented.
 			ensemblingJob = generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &service.EnsemblerFolder
 			err = ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -297,7 +299,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-				ensemblingJobService := NewEnsemblingJobService(
+				ensemblingJobService := service.NewEnsemblingJobService(
 					db,
 					"dev",
 					imageBuilderNamespace,
@@ -318,8 +320,8 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 
 				// Query pending ensembling jobs
 				fetched, err := ensemblingJobService.List(
-					EnsemblingJobListOptions{
-						PaginationOptions: PaginationOptions{
+					service.EnsemblingJobListOptions{
+						PaginationOptions: service.PaginationOptions{
 							Page:     ref.Int(tt.pageNumber),
 							PageSize: &tt.queryQuantity,
 						},
@@ -339,7 +341,7 @@ func TestListEnsemblingJobIntegration(t *testing.T) {
 func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 	t.Run("success | find pending jobs and update with no errors", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(
+			ensemblingJobService := service.NewEnsemblingJobService(
 				db,
 				"dev",
 				imageBuilderNamespace,
@@ -353,7 +355,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &service.EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -362,8 +364,8 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			pageSize := 10
 			retryCountLessThan := 3
 			fetched, err := ensemblingJobService.List(
-				EnsemblingJobListOptions{
-					PaginationOptions: PaginationOptions{
+				service.EnsemblingJobListOptions{
+					PaginationOptions: service.PaginationOptions{
 						Page:     ref.Int(1),
 						PageSize: &pageSize,
 					},
@@ -387,7 +389,7 @@ func TestFindPendingJobsAndUpdateIntegration(t *testing.T) {
 			// Query back
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
-				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				service.EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobFailedSubmission, found.Status)
@@ -410,7 +412,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 		"success | name provided": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      EnsemblerFolder,
+					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
@@ -425,7 +427,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 		"success | default resources removed": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      EnsemblerFolder,
+					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
@@ -440,7 +442,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 		"success | remove 1 setting from resources": {
 			ensembler: &models.PyFuncEnsembler{
 				GenericEnsembler: &models.GenericEnsembler{
-					Name:      EnsemblerFolder,
+					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
 					Type:      models.EnsemblerTypePyFunc,
 					ProjectID: 1,
@@ -457,7 +459,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		for name, tt := range tests {
 			t.Run(name, func(t *testing.T) {
-				ensemblingJobService := NewEnsemblingJobService(
+				ensemblingJobService := service.NewEnsemblingJobService(
 					db,
 					"dev",
 					imageBuilderNamespace,
@@ -487,7 +489,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 
 				assert.NotEqual(t, models.ID(0), result.ID)
 
-				assert.Contains(t, result.Name, EnsemblerFolder)
+				assert.Contains(t, result.Name, service.EnsemblerFolder)
 				assert.Equal(t, expected.EnsemblerID, result.EnsemblerID)
 				assert.Equal(t, expected.ProjectID, result.ProjectID)
 				assert.Equal(t, expected.EnvironmentName, result.EnvironmentName)
@@ -533,7 +535,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 func TestMarkEnsemblingJobForTermination(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(
+			ensemblingJobService := service.NewEnsemblingJobService(
 				db,
 				"dev",
 				imageBuilderNamespace,
@@ -547,7 +549,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			projectID := models.ID(1)
 			ensemblerID := models.ID(1000)
 			ensemblingJob := generateEnsemblingJobFixture(1, ensemblerID, projectID, false)
-			ensemblingJob.InfraConfig.EnsemblerName = &EnsemblerFolder
+			ensemblingJob.InfraConfig.EnsemblerName = &service.EnsemblerFolder
 			err := ensemblingJobService.Save(ensemblingJob)
 			assert.NoError(t, err)
 			assert.NotEqual(t, models.ID(0), ensemblingJob.ID)
@@ -559,7 +561,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 			// Query back job to check if terminated
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
-				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				service.EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, models.JobTerminating, found.Status)
@@ -573,7 +575,7 @@ func TestMarkEnsemblingJobForTermination(t *testing.T) {
 func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 	t.Run("success | delete ensembling job", func(t *testing.T) {
 		database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-			ensemblingJobService := NewEnsemblingJobService(
+			ensemblingJobService := service.NewEnsemblingJobService(
 				db,
 				"dev",
 				imageBuilderNamespace,
@@ -598,7 +600,7 @@ func TestPhysicalDeleteEnsemblingJob(t *testing.T) {
 			// Query back job to check if job is no longer there
 			found, err := ensemblingJobService.FindByID(
 				ensemblingJob.ID,
-				EnsemblingJobFindByIDOptions{ProjectID: &projectID},
+				service.EnsemblingJobFindByIDOptions{ProjectID: &projectID},
 			)
 			assert.NotNil(t, err)
 			assert.Nil(t, found)
@@ -628,7 +630,7 @@ func TestGetNamespaceByComponent(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			svc := NewEnsemblingJobService(
+			svc := service.NewEnsemblingJobService(
 				nil,
 				"dev",
 				imageBuilderNamespace,
@@ -650,11 +652,11 @@ func TestCreatePodLabelSelector(t *testing.T) {
 	ensemblerName := "name"
 	tests := map[string]struct {
 		componentType string
-		expected      []LabelSelector
+		expected      []service.LabelSelector
 	}{
 		"success | image builder": {
 			componentType: batch.ImageBuilderPodType,
-			expected: []LabelSelector{
+			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
 					Value: ensemblerName,
@@ -663,34 +665,34 @@ func TestCreatePodLabelSelector(t *testing.T) {
 		},
 		"success | driver": {
 			componentType: batch.DriverPodType,
-			expected: []LabelSelector{
+			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
 					Value: ensemblerName,
 				},
 				{
-					Key:   kubernetesSparkRoleLabel,
-					Value: kubernetesSparkRoleDriverValue,
+					Key:   "spark-role",
+					Value: "driver",
 				},
 			},
 		},
 		"success | executor": {
 			componentType: batch.ExecutorPodType,
-			expected: []LabelSelector{
+			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
 					Value: ensemblerName,
 				},
 				{
-					Key:   kubernetesSparkRoleLabel,
-					Value: kubernetesSparkRoleExecutorValue,
+					Key:   "spark-role",
+					Value: "executor",
 				},
 			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			svc := NewEnsemblingJobService(
+			svc := service.NewEnsemblingJobService(
 				nil,
 				"dev",
 				imageBuilderNamespace,
@@ -730,7 +732,7 @@ func TestFormatLoggingURL(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			svc := NewEnsemblingJobService(
+			svc := service.NewEnsemblingJobService(
 				nil,
 				"dev",
 				imageBuilderNamespace,

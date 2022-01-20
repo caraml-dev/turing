@@ -1,10 +1,10 @@
-// +build unit
-
 package servicebuilder
 
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	mlp "github.com/gojek/mlp/api/client"
 
@@ -41,7 +41,7 @@ func TestNewFluentdService(t *testing.T) {
 
 	id := int64(999)
 	volSize, _ := resource.ParseQuantity(cacheVolumeSize)
-	expected := cluster.KubernetesService{
+	expected := &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  "test-svc-turing-fluentd-logger-1",
 			Namespace:             project.Name,
@@ -131,6 +131,6 @@ func TestNewFluentdService(t *testing.T) {
 		},
 	}
 
-	got := sb.NewFluentdService(routerVersion, project, "test-env", "service-account", &fluentdConfig)
-	tu.FailOnError(t, tu.CompareObjects(*got, expected))
+	actual := sb.NewFluentdService(routerVersion, project, "test-env", "service-account", &fluentdConfig)
+	assert.Equal(t, expected, actual)
 }

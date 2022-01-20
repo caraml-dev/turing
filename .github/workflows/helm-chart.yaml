@@ -8,6 +8,18 @@ on:
       - "infra/charts/**"
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: The GitHub user or org that owns this repository
+        type: string
+        required: true
+      repository:
+        description:  The GitHub repository
+        type: string
+        required: true
+        default: "charts"
+
 
 jobs:
   release:
@@ -18,10 +30,9 @@ jobs:
         uses: stefanprodan/helm-gh-pages@v1.4.1
         with:
           token: "${{ secrets.GH_PAGES_TOKEN }}"
-          charts_url: https://turing-ml.github.io/charts
           charts_dir: infra/charts
-          owner: turing-ml
-          repository: charts
+          owner: "${{ github.event.inputs.owner || 'turing-ml' }}"
+          repository: "${{ github.event.inputs.repository || 'charts' }}"
           commit_username: ${{ github.actor }}
           commit_email: "${{ github.actor }}@users.noreply.github.com"
 
