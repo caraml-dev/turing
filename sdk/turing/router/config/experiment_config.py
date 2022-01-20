@@ -7,7 +7,7 @@ from turing.generated.model_utils import OpenApiModel
 
 @dataclass
 class ExperimentConfig:
-    type: str = "nop",
+    type: str = "nop"
     config: Dict = None
 
     def __init__(self, type: str = "nop", config: Dict = None):
