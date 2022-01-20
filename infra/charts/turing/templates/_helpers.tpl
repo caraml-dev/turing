@@ -147,7 +147,7 @@ Experiment:
 {{ end }}
 {{ end }}
 RouterDefaults:
-  Plugins:
+  ExperimentEnginePlugins:
 {{ range $expEngine := .Values.turing.experimentEngines }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
     {{ $expEngine.name }}:
