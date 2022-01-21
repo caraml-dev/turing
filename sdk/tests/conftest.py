@@ -404,9 +404,13 @@ def experiment_config(request):
         }
     else:
         config = None
+
     return turing.generated.models.ExperimentConfig(
         type=experiment_type,
-        config=config
+        config=config,
+        plugin_config=turing.generated.models.ExperimentConfigPluginConfig(
+            image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0"
+        )
     )
 
 

@@ -296,6 +296,12 @@ components:
           $ref: "#/components/schemas/ExperimentEngineType"
         config:
           type: "object"
+        plugin_config:
+          type: "object"
+          nullable: true
+          properties:
+            image:
+              type: "string"
 
     # Enums
     ExperimentEngineType:

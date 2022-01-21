@@ -251,7 +251,7 @@ def main(turing_api: str, project: str):
                         f"deployed.")
 
     # Wait for the dependencies of the first version to be fully undeployed
-    time.sleep(10)
+    time.sleep(15)
 
     # 6. Deploy a specific router config version (the first one we created)
     response = my_router.deploy_version(first_ver_no)

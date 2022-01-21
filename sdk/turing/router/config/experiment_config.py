@@ -10,9 +10,10 @@ class ExperimentConfig:
     type: str = "nop"
     config: Dict = None
 
-    def __init__(self, type: str = "nop", config: Dict = None):
+    def __init__(self, type: str = "nop", config: Dict = None, plugin_config: Dict = None):
         self.type = type
         self.config = config
+        self.plugin_config = plugin_config
 
     @property
     def type(self) -> str:
@@ -32,13 +33,28 @@ class ExperimentConfig:
             config['project_id'] = int(config['project_id'])
         self._config = config
 
+    @property
+    def plugin_config(self) -> Dict:
+        return self._plugin_config
+
+    @plugin_config.setter
+    def plugin_config(self, plugin_config: Dict):
+        self._plugin_config = plugin_config
+
     def to_open_api(self) -> OpenApiModel:
         if self.config is None:
             config = {}
         else:
             config = self.config
 
+        if self.plugin_config is None:
+            plugin_config = {}
+        else:
+            plugin_config = self.plugin_config
+
         return turing.generated.models.ExperimentConfig(
             type=self.type,
-            config=config
+            config=config,
+            plugin_config=turing.generated.models.ExperimentConfigPluginConfig(**plugin_config)
         )
+
