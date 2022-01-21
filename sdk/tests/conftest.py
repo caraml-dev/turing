@@ -407,10 +407,7 @@ def experiment_config(request):
 
     return turing.generated.models.ExperimentConfig(
         type=experiment_type,
-        config=config,
-        plugin_config=turing.generated.models.ExperimentConfigPluginConfig(
-            image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0"
-        )
+        config=config
     )
 
 

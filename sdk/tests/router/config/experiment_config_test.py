@@ -7,7 +7,7 @@ from turing.router.config.resource_request import ResourceRequest
 
 
 @pytest.mark.parametrize(
-    "type,config,plugin_config,expected", [
+    "type,config,expected", [
         pytest.param(
             "nop",
             {
@@ -22,9 +22,6 @@ from turing.router.config.resource_request import ResourceRequest
                     }
                 ]
             },
-            {
-                "image": "asia.test.io/gods-test/turing-ensembler:0.0.0-build.0"
-            },
             turing.generated.models.ExperimentConfig(
                 type="nop",
                 config={
@@ -38,17 +35,13 @@ from turing.router.config.resource_request import ResourceRequest
                             "id": "random_variable"
                         }
                     ]
-                },
-                plugin_config=turing.generated.models.ExperimentConfigPluginConfig(
-                    image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0"
-                )
+                }
             ),
         )
     ])
-def test_create_experiment_config(type, config, plugin_config, expected):
+def test_create_experiment_config(type, config, expected):
     actual = ExperimentConfig(
         type=type,
-        config=config,
-        plugin_config=plugin_config
+        config=config
     ).to_open_api()
     assert actual == expected

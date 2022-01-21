@@ -46,7 +46,6 @@ from turing.generated.model.ensembling_resources import EnsemblingResources
 from turing.generated.model.env_var import EnvVar
 from turing.generated.model.event import Event
 from turing.generated.model.experiment_config import ExperimentConfig
-from turing.generated.model.experiment_config_plugin_config import ExperimentConfigPluginConfig
 from turing.generated.model.field_source import FieldSource
 from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
