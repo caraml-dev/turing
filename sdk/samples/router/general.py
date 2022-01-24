@@ -3,9 +3,9 @@ import turing
 import turing.batch
 import turing.batch.config
 import turing.router.config.router_config
-from turing.router.router import RouterStatus
 from turing.router.config.route import Route
 from turing.router.config.router_config import RouterConfig
+from turing.router.config.router_version import RouterStatus
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.traffic_rule import TrafficRule, HeaderTrafficRuleCondition, PayloadTrafficRuleCondition
@@ -143,7 +143,7 @@ def main(turing_api: str, project: str):
 
     # Create an enricher for the router
     enricher = Enricher(
-        image="asia.gcr.io/gods-dev/echo:1.0.2",
+        image="ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=0,
             max_replica=2,
@@ -152,7 +152,7 @@ def main(turing_api: str, project: str):
         ),
         endpoint="/",
         timeout="60ms",
-        port=8080,
+        port=3000,
         env=[
             EnvVar(
                 name="humans",
@@ -164,7 +164,7 @@ def main(turing_api: str, project: str):
     # Create an ensembler for the router
     ensembler = DockerRouterEnsemblerConfig(
         id=1,
-        image="asia.gcr.io/gods-dev/echo:1.0.2",
+        image="ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=1,
             max_replica=3,
@@ -173,7 +173,7 @@ def main(turing_api: str, project: str):
         ),
         endpoint="/echo",
         timeout="60ms",
-        port=8080,
+        port=3000,
         env=[],
     )
 
