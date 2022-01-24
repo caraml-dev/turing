@@ -323,7 +323,7 @@ def generic_env_var():
 @pytest.fixture
 def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
     return turing.generated.models.EnsemblerDockerConfig(
-        image="test.io/gods-test/turing-ensembler:0.0.0-build.0",
+        image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
         resource_request=generic_resource_request,
         endpoint=f"http://localhost:5000/ensembler_endpoint",
         timeout="500ms",
@@ -366,7 +366,7 @@ def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
 def generic_enricher(generic_resource_request, generic_env_var):
     return turing.generated.models.Enricher(
         id=1,
-        image="test.io/gods-test/turing-enricher:0.0.0-build.0",
+        image="test.io/just-a-test/turing-enricher:0.0.0-build.0",
         resource_request=generic_resource_request,
         endpoint=f"http://localhost:5000/enricher_endpoint",
         timeout="500ms",
@@ -430,7 +430,7 @@ def generic_router_version(
         version=1,
         status=generic_router_version_status,
         error="NONE",
-        image="test.io/gods-test/turing-router:0.0.0-build.0",
+        image="test.io/just-a-test/turing-router:0.0.0-build.0",
         routes=[generic_route for _ in range(2)],
         default_route="http://models.internal/default",
         default_route_id="control",
@@ -490,7 +490,7 @@ def generic_router_config():
             service_account_secret="not-a-secret"
         ),
         enricher=Enricher(
-            image="asia.test.io/model-dev/echo:1.0.2",
+            image="test.io/model-dev/echo:1.0.2",
             resource_request=ResourceRequest(
                 min_replica=0,
                 max_replica=2,
@@ -509,7 +509,7 @@ def generic_router_config():
         ),
         ensembler=DockerRouterEnsemblerConfig(
             id=1,
-            image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             resource_request=ResourceRequest(
                 min_replica=1,
                 max_replica=3,

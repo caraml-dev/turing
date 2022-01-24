@@ -8,7 +8,7 @@ from turing.router.config.resource_request import ResourceRequest
     "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             1,
-            "test.io/gods-test/turing-enricher:0.0.0-build.0",
+            "test.io/just-a-test/turing-enricher:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
                 max_replica=3,

@@ -155,7 +155,7 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
         id=1,
         name="router-1",
         project_id=active_project.id,
-        environment_name = "id-dev",
+        environment_name="id-dev",
         monitoring_url="http://localhost:5000/endpoint_1",
         status=turing.router.config.router_version.RouterStatus.DEPLOYED,
     )
