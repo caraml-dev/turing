@@ -131,8 +131,11 @@ class Router(ApiObject):
         :return: instance of router updated (self)
         """
         self._config = config
-        return Router.from_open_api(turing.active_session.update_router(router_id=self.id,
-                                                                        router_config=config.to_open_api()))
+        updated_router = Router.from_open_api(
+            turing.active_session.update_router(router_id=self.id, router_config=config.to_open_api())
+        )
+        self.__dict__ = updated_router.__dict__
+        return self
 
     def deploy(self) -> Dict[str, int]:
         """
