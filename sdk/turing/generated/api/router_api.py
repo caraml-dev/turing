@@ -21,8 +21,13 @@ from turing.generated.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
+from turing.generated.model.inline_response200 import InlineResponse200
+from turing.generated.model.inline_response2001 import InlineResponse2001
+from turing.generated.model.inline_response2002 import InlineResponse2002
+from turing.generated.model.inline_response202 import InlineResponse202
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
+from turing.generated.model.router_version import RouterVersion
 
 
 class RouterApi(object):
@@ -278,4 +283,1305 @@ class RouterApi(object):
             },
             api_client=api_client,
             callable=__projects_project_id_routers_post
+        )
+
+        def __projects_project_id_routers_router_id_delete(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """Delete router  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_delete(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project of the router
+                router_id (int): id of the router to delete
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse200
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_delete = _Endpoint(
+            settings={
+                'response_type': (InlineResponse200,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}',
+                'operation_id': 'projects_project_id_routers_router_id_delete',
+                'http_method': 'DELETE',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_delete
+        )
+
+        def __projects_project_id_routers_router_id_deploy_post(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """Deploy the current router configuration  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_deploy_post(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): id of the project that the router belongs to
+                router_id (int): id of the router to be deployed
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse202
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_deploy_post = _Endpoint(
+            settings={
+                'response_type': (InlineResponse202,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/deploy',
+                'operation_id': 'projects_project_id_routers_router_id_deploy_post',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_deploy_post
+        )
+
+        def __projects_project_id_routers_router_id_events_get(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """Get deployment events associated with this router  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_events_get(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): id of the project that the router belongs to
+                router_id (int): id of the router to be deployed
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse2002
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_events_get = _Endpoint(
+            settings={
+                'response_type': (InlineResponse2002,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/events',
+                'operation_id': 'projects_project_id_routers_router_id_events_get',
+                'http_method': 'GET',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_events_get
+        )
+
+        def __projects_project_id_routers_router_id_get(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """Get router belonging to project by ID  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_get(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project to retrieve routers from
+                router_id (int): id of the router to be retrieved
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                RouterDetails
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_get = _Endpoint(
+            settings={
+                'response_type': (RouterDetails,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}',
+                'operation_id': 'projects_project_id_routers_router_id_get',
+                'http_method': 'GET',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_get
+        )
+
+        def __projects_project_id_routers_router_id_put(
+            self,
+            project_id,
+            router_id,
+            router_config,
+            **kwargs
+        ):
+            """Update router  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_put(project_id, router_id, router_config, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project of the router
+                router_id (int): id of the router to update
+                router_config (RouterConfig): router configuration to save
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                RouterDetails
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            kwargs['router_config'] = \
+                router_config
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_put = _Endpoint(
+            settings={
+                'response_type': (RouterDetails,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}',
+                'operation_id': 'projects_project_id_routers_router_id_put',
+                'http_method': 'PUT',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                    'router_config',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                    'router_config',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                    'router_config':
+                        (RouterConfig,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                    'router_config': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_put
+        )
+
+        def __projects_project_id_routers_router_id_undeploy_post(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """Undeploy router configuration  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_undeploy_post(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): id of the project that the router belongs to
+                router_id (int): id of the router to undeploy
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse2001
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_undeploy_post = _Endpoint(
+            settings={
+                'response_type': (InlineResponse2001,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/undeploy',
+                'operation_id': 'projects_project_id_routers_router_id_undeploy_post',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_undeploy_post
+        )
+
+        def __projects_project_id_routers_router_id_versions_get(
+            self,
+            project_id,
+            router_id,
+            **kwargs
+        ):
+            """List router config versions  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_versions_get(project_id, router_id, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project to retrieve routers from
+                router_id (int): id of the router to be retrieved
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                [RouterVersion]
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_versions_get = _Endpoint(
+            settings={
+                'response_type': ([RouterVersion],),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions',
+                'operation_id': 'projects_project_id_routers_router_id_versions_get',
+                'http_method': 'GET',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_versions_get
+        )
+
+        def __projects_project_id_routers_router_id_versions_version_delete(
+            self,
+            project_id,
+            router_id,
+            version,
+            **kwargs
+        ):
+            """Delete router version  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_versions_version_delete(project_id, router_id, version, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project of the router
+                router_id (int): id of the router
+                version (int): version of router configuration to delete
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse202
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            kwargs['version'] = \
+                version
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_versions_version_delete = _Endpoint(
+            settings={
+                'response_type': (InlineResponse202,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions/{version}',
+                'operation_id': 'projects_project_id_routers_router_id_versions_version_delete',
+                'http_method': 'DELETE',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                    'version':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                    'version': 'version',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                    'version': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_versions_version_delete
+        )
+
+        def __projects_project_id_routers_router_id_versions_version_deploy_post(
+            self,
+            project_id,
+            router_id,
+            version,
+            **kwargs
+        ):
+            """Deploy specified version of router configuration  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_versions_version_deploy_post(project_id, router_id, version, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): id of the project that the router belongs to
+                router_id (int): id of the router to be deployed
+                version (int): version of router configuration to be deployed
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                InlineResponse202
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            kwargs['version'] = \
+                version
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_versions_version_deploy_post = _Endpoint(
+            settings={
+                'response_type': (InlineResponse202,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions/{version}/deploy',
+                'operation_id': 'projects_project_id_routers_router_id_versions_version_deploy_post',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                    'version':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                    'version': 'version',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                    'version': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_versions_version_deploy_post
+        )
+
+        def __projects_project_id_routers_router_id_versions_version_get(
+            self,
+            project_id,
+            router_id,
+            version,
+            **kwargs
+        ):
+            """Get specific router config version  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_versions_version_get(project_id, router_id, version, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): project id of the project to retrieve routers from
+                router_id (int): id of the router to be retrieved
+                version (int): version of router configuration to be retrieved
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                RouterVersion
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            kwargs['version'] = \
+                version
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_versions_version_get = _Endpoint(
+            settings={
+                'response_type': (RouterVersion,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions/{version}',
+                'operation_id': 'projects_project_id_routers_router_id_versions_version_get',
+                'http_method': 'GET',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                    'version',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                    'version':
+                        (int,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                    'version': 'version',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                    'version': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_versions_version_get
         )

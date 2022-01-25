@@ -154,7 +154,7 @@ paths:
               schema:
                 type: "object"
                 properties:
-                  router_id:
+                  id:
                     <<: *id
         400:
           description: "Invalid project_id or router_id"
@@ -320,7 +320,7 @@ paths:
             <<: *id
           required: true
       responses:
-        200:
+        202:
           description: "OK"
           content:
             application/json:
@@ -401,9 +401,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Event"
+                type: "object"
+                properties:
+                  events:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Event"
         400:
           description: "Invalid project_id or router_id"
         404:

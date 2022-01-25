@@ -36,7 +36,7 @@ from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
             "docker",
             None,
             turing.generated.models.EnsemblerDockerConfig(
-                image="test.io/gods-test/turing-ensembler:0.0.0-build.0",
+                image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
                 resource_request=turing.generated.models.ResourceRequest(
                     min_replica=1,
                     max_replica=3,
@@ -70,7 +70,7 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
     "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
                 max_replica=3,
@@ -165,7 +165,7 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
     "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
                 max_replica=3,
@@ -212,7 +212,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
     "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
             1,
-            "test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
                 max_replica=3,

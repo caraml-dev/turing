@@ -1,19 +1,14 @@
 import os
 import mlflow
 from typing import List, Optional
+
+import turing.generated.models
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
-from turing.generated.models import \
-    Project, \
-    Ensembler, \
-    EnsemblingJob, \
-    EnsemblerJobStatus, \
-    EnsemblersPaginatedResults, \
-    EnsemblingJobPaginatedResults, \
-    IdObject, \
-    RouterDetails, \
-    RouterConfig
+from turing.generated.models import (Project, Ensembler, EnsemblingJob, EnsemblerJobStatus, EnsemblersPaginatedResults,
+                                     EnsemblingJobPaginatedResults, IdObject, Router, RouterDetails, RouterConfig,
+                                     RouterVersion)
 
 
 def require_active_project(f):
@@ -218,3 +213,105 @@ class TuringSession:
         """
         return RouterApi(self._api_client).projects_project_id_routers_post(project_id=self.active_project.id,
                                                                             router_config=router_config)
+
+    @require_active_project
+    def delete_router(self, router_id: int) -> IdObject:
+        """
+        Delete router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_delete(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def get_router(self, router_id: int) -> Router:
+        """
+        Fetch router by its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_get(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def update_router(self, router_id: int, router_config: RouterConfig) -> Router:
+        """
+        Update router in the active project the user has access to, with a router_config passed as a parameter
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_put(project_id=self.active_project.id,
+                                                                                     router_id=router_id,
+                                                                                     router_config=router_config)
+
+    @require_active_project
+    def deploy_router(self, router_id: int) -> IdObject:
+        """
+        Deploy router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_deploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def undeploy_router(self, router_id: int) -> IdObject:
+        """
+        Undeploy router given its router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_undeploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def list_router_versions(self, router_id: int) -> List[RouterVersion]:
+        """
+        List all router versions, that the current user has access to, given the router ID specified
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_get(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )
+
+    @require_active_project
+    def get_router_version(self, router_id: int, version: int) -> RouterVersion:
+        """
+        Fetch specific router version by its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_get(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
+        )
+
+    @require_active_project
+    def delete_router_version(self, router_id: int, version: int) -> IdObject:
+        """
+        Delete specific router version given its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_delete(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
+        )
+
+    @require_active_project
+    def deploy_router_version(self, router_id: int, version: int) -> IdObject:
+        """
+        Deploy specific router version by its router ID and version
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_deploy_post(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            version=version
+        )
+
+    @require_active_project
+    def get_router_events(self, router_id: int) -> turing.generated.models.InlineResponse2002:
+        """
+        Fetch deployment events associated with the router with the given router ID
+        """
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_events_get(
+            project_id=self.active_project.id,
+            router_id=router_id
+        )

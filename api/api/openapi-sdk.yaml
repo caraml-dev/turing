@@ -25,3 +25,17 @@ paths:
   # R O U T E R S
   "/projects/{project_id}/routers":
     $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers"
+  "/projects/{project_id}/routers/{router_id}":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}"
+  "/projects/{project_id}/routers/{router_id}/deploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1deploy"
+  "/projects/{project_id}/routers/{router_id}/undeploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1undeploy"
+  "/projects/{project_id}/routers/{router_id}/versions":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions"
+  "/projects/{project_id}/routers/{router_id}/versions/{version}":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}"
+  "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}~1deploy"
+  "/projects/{project_id}/routers/{router_id}/events":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1events"

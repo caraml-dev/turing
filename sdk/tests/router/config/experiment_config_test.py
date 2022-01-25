@@ -2,8 +2,6 @@ import pytest
 
 import turing.generated.models
 from turing.router.config.experiment_config import ExperimentConfig
-from turing.router.config.common.env_var import EnvVar
-from turing.router.config.resource_request import ResourceRequest
 
 
 @pytest.mark.parametrize(

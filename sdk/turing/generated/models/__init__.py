@@ -44,12 +44,17 @@ from turing.generated.model.ensembling_job_source import EnsemblingJobSource
 from turing.generated.model.ensembling_job_spec import EnsemblingJobSpec
 from turing.generated.model.ensembling_resources import EnsemblingResources
 from turing.generated.model.env_var import EnvVar
+from turing.generated.model.event import Event
 from turing.generated.model.experiment_config import ExperimentConfig
 from turing.generated.model.field_source import FieldSource
 from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
+from turing.generated.model.inline_response200 import InlineResponse200
+from turing.generated.model.inline_response2001 import InlineResponse2001
+from turing.generated.model.inline_response2002 import InlineResponse2002
+from turing.generated.model.inline_response202 import InlineResponse202
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel

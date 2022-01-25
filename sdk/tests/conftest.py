@@ -223,17 +223,26 @@ def generic_kafka_config():
     )
 
 
-@pytest.fixture
-def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_config, generic_kafka_config):
-    return turing.generated.models.RouterVersionLogConfig(
+@pytest.fixture(params=["kafka", "bigquery", "others"])
+def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_config, generic_kafka_config, request):
+    result_logger_type = generic_result_logger_type.value if request.param == "others" else request.param
+
+    params = dict(
         log_level=generic_log_level,
         custom_metrics_enabled=True,
         fiber_debug_log_enabled=True,
         jaeger_enabled=True,
-        result_logger_type=generic_result_logger_type,
-        bigquery_config=generic_bigquery_config,
-        kafka_config=generic_kafka_config
+        result_logger_type=turing.generated.models.ResultLoggerType(result_logger_type),
+        bigquery_config=None,
+        kafka_config=None
     )
+
+    if request.param == "kafka":
+        params["kafka_config"] = generic_kafka_config
+    elif request.param == "biggquery":
+        params["bigquery_config"] = generic_bigquery_config
+
+    return turing.generated.models.RouterVersionLogConfig(**params)
 
 
 @pytest.fixture
@@ -314,7 +323,7 @@ def generic_env_var():
 @pytest.fixture
 def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
     return turing.generated.models.EnsemblerDockerConfig(
-        image="test.io/gods-test/turing-ensembler:0.0.0-build.0",
+        image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
         resource_request=generic_resource_request,
         endpoint=f"http://localhost:5000/ensembler_endpoint",
         timeout="500ms",
@@ -357,7 +366,7 @@ def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
 def generic_enricher(generic_resource_request, generic_env_var):
     return turing.generated.models.Enricher(
         id=1,
-        image="test.io/gods-test/turing-enricher:0.0.0-build.0",
+        image="test.io/just-a-test/turing-enricher:0.0.0-build.0",
         resource_request=generic_resource_request,
         endpoint=f"http://localhost:5000/enricher_endpoint",
         timeout="500ms",
@@ -395,6 +404,7 @@ def experiment_config(request):
         }
     else:
         config = None
+
     return turing.generated.models.ExperimentConfig(
         type=experiment_type,
         config=config
@@ -402,7 +412,7 @@ def experiment_config(request):
 
 
 @pytest.fixture
-def router_version(
+def generic_router_version(
         generic_router_version_status,
         generic_route,
         generic_traffic_rule,
@@ -420,7 +430,7 @@ def router_version(
         version=1,
         status=generic_router_version_status,
         error="NONE",
-        image="test.io/gods-test/turing-router:0.0.0-build.0",
+        image="test.io/just-a-test/turing-router:0.0.0-build.0",
         routes=[generic_route for _ in range(2)],
         default_route="http://models.internal/default",
         default_route_id="control",
@@ -480,7 +490,7 @@ def generic_router_config():
             service_account_secret="not-a-secret"
         ),
         enricher=Enricher(
-            image="asia.test.io/model-dev/echo:1.0.2",
+            image="test.io/model-dev/echo:1.0.2",
             resource_request=ResourceRequest(
                 min_replica=0,
                 max_replica=2,
@@ -499,7 +509,7 @@ def generic_router_config():
         ),
         ensembler=DockerRouterEnsemblerConfig(
             id=1,
-            image="asia.test.io/gods-test/turing-ensembler:0.0.0-build.0",
+            image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             resource_request=ResourceRequest(
                 min_replica=1,
                 max_replica=3,
@@ -515,23 +525,23 @@ def generic_router_config():
 
 
 @pytest.fixture
-def generic_router(generic_router_status, router_version):
+def generic_router(project, generic_router_status, generic_router_version):
     return turing.generated.models.RouterDetails(
         id=1,
-        name=f"router-1",
-        endpoint=f"http://localhost:5000/endpoint_1",
-        environment_name=f"env_1",
-        monitoring_url=f"http://localhost:5000/dashboard_1",
+        name="router-1",
+        endpoint="http://localhost:5000/endpoint_1",
+        environment_name="env_1",
+        monitoring_url="http://localhost:5000/dashboard_1",
         project_id=project.id,
         status=generic_router_status,
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        config=router_version
+        config=generic_router_version
     )
 
 
 @pytest.fixture
-def generic_routers(project, num_routers, generic_router_status, router_version):
+def generic_routers(project, num_routers, generic_router_status, generic_router_version):
     return [
         turing.generated.models.RouterDetails(
             id=i,
@@ -543,5 +553,31 @@ def generic_routers(project, num_routers, generic_router_status, router_version)
             status=generic_router_status,
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10),
-            config=router_version
+            config=generic_router_version
         ) for i in range(1, num_routers + 1)]
+
+
+@pytest.fixture
+def generic_events():
+    return turing.generated.models.InlineResponse2002(
+        events=[
+            turing.generated.models.Event(
+                created_at=datetime.now(),
+                updated_at=datetime.now() + timedelta(seconds=1000),
+                event_type="info",
+                id=123,
+                message='successfully deployed router not-a-router version 5',
+                stage='deployment success',
+                version=5
+            ),
+            turing.generated.models.Event(
+                created_at=datetime.now() + timedelta(seconds=1500),
+                updated_at=datetime.now() + timedelta(seconds=2500),
+                event_type='error',
+                id=124,
+                message='failed to deploy router not-a-router version 5',
+                stage='deployment failure',
+                version=5
+            )
+        ]
+    )

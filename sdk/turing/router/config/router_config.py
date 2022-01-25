@@ -1,3 +1,4 @@
+import inspect
 from typing import List, Dict, Union
 from collections import Counter
 from dataclasses import dataclass
@@ -7,10 +8,14 @@ from turing.generated.model_utils import OpenApiModel
 from turing.router.config.route import Route
 from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.log_config import LogConfig
+from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
 from turing.router.config.experiment_config import ExperimentConfig
+
+
+NAME_INDEX = 0
+VALUE_INDEX = 1
 
 
 @dataclass
@@ -52,7 +57,9 @@ class RouterConfig:
                  experiment_engine: Union[ExperimentConfig, Dict] = None,
                  resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
                  timeout: str = None,
-                 log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None,
+                 log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
+                     result_logger_type=ResultLoggerType.NOP
+                 ),
                  enricher: Union[Enricher, Dict] = None,
                  ensembler: Union[RouterEnsemblerConfig, Dict] = None,
                  **kwargs):
@@ -230,3 +237,10 @@ class RouterConfig:
             raise turing.router.config.route.DuplicateRouteException(
                 f"Routes with duplicate ids are specified for this traffic rule. Duplicate id: {most_common_route_id}"
             )
+
+    def to_dict(self):
+        att_dict = {}
+        for m in inspect.getmembers(self):
+            if not inspect.ismethod(m[VALUE_INDEX]) and not m[NAME_INDEX].startswith('_'):
+                att_dict[m[NAME_INDEX]] = m[VALUE_INDEX]
+        return att_dict
