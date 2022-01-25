@@ -1,4 +1,3 @@
-import time
 import turing
 import turing.batch
 import turing.batch.config
@@ -250,9 +249,6 @@ def main(turing_api: str, project: str):
         raise Exception(f"Turing API is taking too long for router {my_router.id} with version {latest_ver_no} to get "
                         f"deployed.")
 
-    # Wait for the dependencies of the first version to be fully undeployed
-    time.sleep(15)
-
     # 6. Deploy a specific router config version (the first one we created)
     response = my_router.deploy_version(first_ver_no)
     print(f"6. You have deployed version {response['version']} of router {response['router_id']}.")
@@ -273,9 +269,6 @@ def main(turing_api: str, project: str):
         my_router.wait_for_status(RouterStatus.UNDEPLOYED)
     except TimeoutError:
         raise Exception(f"Turing API is taking too long for router {my_router.id} to get undeployed.")
-
-    # Wait for the dependencies of the router to be fully undeployed
-    time.sleep(10)
 
     # 8. Deploy the router's *current* configuration (notice how it still deploys the *first* version)
     response = my_router.deploy()

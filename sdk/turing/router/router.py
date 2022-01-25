@@ -203,6 +203,9 @@ class Router(ApiObject):
             logger.debug(f"Checking if router {self.id} is {status.value}...")
             cur_status = Router.get(self.id).status
             if cur_status == status:
+                # Wait for backend components to fully resolve
+                time.sleep(5)
+                logger.debug(f"Router {self.id} is finally {status.value}.")
                 return
             else:
                 logger.debug(f"Router {self.id} is {cur_status.value}.")
@@ -216,6 +219,9 @@ class Router(ApiObject):
             logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
             cur_status = self.get_version(version).status
             if cur_status == status:
+                # Wait for backend components to fully resolve
+                time.sleep(5)
+                logger.debug(f"Router {self.id} with version {version} is finally {status.value}.")
                 return
             else:
                 logger.debug(f"Router {self.id} with version {version} is {cur_status.value}.")
