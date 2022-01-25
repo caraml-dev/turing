@@ -31,7 +31,7 @@ RUN chmod 644 -R /etc/metrics/conf/*
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # Install wget and other libraries required by Miniconda3
-RUN apt-get update -q && \
+RUN apt-get update --allow-releaseinfo-change-suite -q && \
     apt-get install -q -y \
         bzip2 \
         ca-certificates \
