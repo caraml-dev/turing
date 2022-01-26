@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	merlin "github.com/gojek/merlin/client"
@@ -11,6 +12,7 @@ import (
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
+	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -33,12 +35,15 @@ func TestDeployVersionSuccess(t *testing.T) {
 			ServiceAccountSecret: "svc-acct-secret",
 		},
 	}
-	nopExpCfg := &models.ExperimentEngine{
-		Type: "nop",
-	}
-	expCfg := json.RawMessage(`{"client": {"id": "1", "passkey": "test-passkey"}}`)
+	nopExpCfg := &models.ExperimentEngine{Type: "nop"}
 
 	testEngineType := "test-manager"
+	testPassKey := "test-passkey"
+	testDecPassKey := "test-passkey-dec"
+
+	expCfg := json.RawMessage(fmt.Sprintf(`{"client": {"id": "1", "passkey": "%s"}}`, testPassKey))
+	expWithPassKeyCfg, _ := json.Marshal(
+		manager.TuringExperimentConfig{Client: manager.Client{ID: "1", Passkey: testDecPassKey}})
 
 	expEnabledCfg := &models.ExperimentEngine{
 		Type:   testEngineType,
@@ -47,11 +52,12 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		routerVersion    *models.RouterVersion
-		pendingVersion   *models.RouterVersion
-		validVersion     *models.RouterVersion
-		expCfg           json.RawMessage
-		decryptedPasskey string
+		routerVersion     *models.RouterVersion
+		pendingVersion    *models.RouterVersion
+		validVersion      *models.RouterVersion
+		expCfgWithPassKey json.RawMessage
+		expRunnerCfg      json.RawMessage
+		decryptedPasskey  string
 	}{
 		"nop_experiment": {
 			routerVersion: &models.RouterVersion{
@@ -78,7 +84,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				ExperimentEngine: nopExpCfg,
 				Status:           "deployed",
 			},
-			expCfg: json.RawMessage(nil),
+			expRunnerCfg: json.RawMessage(nil),
 		},
 		"experiment_enabled": {
 			routerVersion: &models.RouterVersion{
@@ -105,8 +111,9 @@ func TestDeployVersionSuccess(t *testing.T) {
 				ExperimentEngine: expEnabledCfg,
 				Status:           "deployed",
 			},
-			expCfg:           json.RawMessage(`{"engine": "test"}`),
-			decryptedPasskey: "test-passkey-dec",
+			expCfgWithPassKey: expWithPassKeyCfg,
+			expRunnerCfg:      json.RawMessage(`{"engine": "test"}`),
+			decryptedPasskey:  testDecPassKey,
 		},
 	}
 
@@ -124,12 +131,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	cs := &mocks.CryptoService{}
-	cs.On("Decrypt", "test-passkey").Return("test-passkey-dec", nil)
-
-	exps := &mocks.ExperimentsService{}
-	exps.On("IsStandardExperimentManager", "nop").Return(false)
-	exps.On("IsStandardExperimentManager", mock.Anything).Return(true)
-	exps.On("GetExperimentRunnerConfig", testEngineType, expCfg).Return(json.RawMessage(`{"engine": "test"}`), nil)
+	cs.On("Decrypt", testPassKey).Return(testDecPassKey, nil)
 
 	// Run tests and validate
 	for name, data := range tests {
@@ -138,13 +140,26 @@ func TestDeployVersionSuccess(t *testing.T) {
 			defer eventsCh.Close()
 
 			// Set up test-specific mock services
+			exps := &mocks.ExperimentsService{}
+			exps.
+				On(
+					"IsStandardExperimentManager",
+					data.routerVersion.ExperimentEngine.Type,
+				).Return(true)
+			exps.
+				On(
+					"GetExperimentRunnerConfig",
+					data.routerVersion.ExperimentEngine.Type,
+					data.expCfgWithPassKey,
+				).Return(data.expRunnerCfg, nil)
+
 			rvs := &mocks.RouterVersionsService{}
 			rvs.On("Save", data.pendingVersion).Return(data.pendingVersion, nil)
 			rvs.On("Save", data.validVersion).Return(data.validVersion, nil)
 
 			ds := &mocks.DeploymentService{}
 			ds.On("DeployRouterVersion", project, environment, data.pendingVersion, "service-acct",
-				"", "", data.expCfg, data.decryptedPasskey, eventsCh).Return("test-url", nil)
+				"", "", data.expRunnerCfg, eventsCh).Return("test-url", nil)
 
 			// Create test controller
 			ctrl := RouterDeploymentController{
@@ -253,7 +268,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 
 	ds := &mocks.DeploymentService{}
 	ds.On("DeployRouterVersion", project, environment, newVer, testSvcAcct,
-		"", "", json.RawMessage(nil), "", mock.Anything).Return("", errors.New("error"))
+		"", "", json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
 	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything).
 		Return(nil)
 

@@ -7,7 +7,7 @@ routes:
 strategy:
   properties:
     default_route_id: control
-    experiment_engine: litmus
+    experiment_engine: exp-engine-2
     experiment_engine_properties:
       client_id: client_id
       endpoint: exp-engine:8080

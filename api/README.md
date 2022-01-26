@@ -166,7 +166,7 @@ The `turing-integration-test` MLP project is used by the CI to exercise the end 
 #### Local
 **Note:** Swarm mode must be enabled for this section.
 1. Set the required env vars in `.env.development`, namely the `MLP_ECRYPTION_KEY` and `VAULT_TOKEN`
-2. Set an MLP project id and the corresponding name in `e2e/local/.env.testing`. Set a unique `TEST_ID` (to prevent conflicts with CI runs / local runs triggered by other users). Set the `TEST_LITMUS_PASSKEY` and `TEST_XP_PASSKEY` values to the passkey of the client id in the Litmus/XP integration environment, respectively. The env var `MODEL_CLUSTER_NAME` is used to indicate the cluster in which resources are expected to be created, and will be used to initialise the cluster client for validation. Thus, this cluster name must correspond to the `environment_name` property in the test data (under `e2e/test/testdata`) and has been configured so.
+2. Set an MLP project id and the corresponding name in `e2e/local/.env.testing`. Set a unique `TEST_ID` (to prevent conflicts with CI runs / local runs triggered by other users). The env var `MODEL_CLUSTER_NAME` is used to indicate the cluster in which resources are expected to be created, and will be used to initialise the cluster client for validation. Thus, this cluster name must correspond to the `environment_name` property in the test data (under `e2e/test/testdata`) and has been configured so.
 3. Run `make test-e2e-local`. This will deploy a local docker swarm set up for serving the Turing API and will run the end to end tests from the local environment, against it. The local services are destroyed after the tests.
 
 ## Folder structure of Turing API

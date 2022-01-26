@@ -465,7 +465,7 @@ def generic_router_config():
         rules=None,
         default_route_id="test",
         experiment_engine=ExperimentConfig(
-            type="xp",
+            type="test-exp",
             config={
                 'variables':
                         [

@@ -19,13 +19,12 @@ import (
 const (
 	secretVolume    = "svc-acct-secret-volume"
 	secretMountPath = "/var/secret/"
-	// Kubernetes secret key name for usage in: router, ensembler, enricher, experiment-engine.
+	// Kubernetes secret key name for usage in: router, ensembler, enricher.
 	// They will share the same Kubernetes secret for every RouterVersion deployment.
 	// Hence, the key name should be used to retrieve different credentials.
-	secretKeyNameRouter     = "router-service-account.json"
-	secretKeyNameEnsembler  = "ensembler-service-account.json"
-	secretKeyNameEnricher   = "enricher-service-account.json"
-	secretKeyNameExperiment = "experiment_passkey"
+	secretKeyNameRouter    = "router-service-account.json"
+	secretKeyNameEnsembler = "ensembler-service-account.json"
+	secretKeyNameEnricher  = "enricher-service-account.json"
 )
 
 var ComponentTypes = struct {
@@ -108,7 +107,6 @@ type ClusterServiceBuilder interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
-		experimentPasskey string,
 	) *cluster.Secret
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
@@ -289,22 +287,20 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	})
 }
 
-// NewSecret creates a new `cluster.Secret` secret from the given service accounts and/or experiment-engine keys.
-// If [router/enricher/ensembler]ServiceAccountKey or experimentPasskey is empty no secret key will be created
-// for that component. This happens when user does not specify experiment-engine pass key or service accounts.
+// NewSecret creates a new `cluster.Secret` secret from the given service accounts.
+// If [router/enricher/ensembler]ServiceAccountKey is empty no secret key will be created
+// for that component. This happens when user does not specify service accounts.
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
-	experimentPasskey string,
 ) *cluster.Secret {
 	data := map[string]string{
-		secretKeyNameRouter:     routerServiceAccountKey,
-		secretKeyNameEnricher:   enricherServiceAccountKey,
-		secretKeyNameEnsembler:  ensemblerServiceAccountKey,
-		secretKeyNameExperiment: experimentPasskey,
+		secretKeyNameRouter:    routerServiceAccountKey,
+		secretKeyNameEnricher:  enricherServiceAccountKey,
+		secretKeyNameEnsembler: ensemblerServiceAccountKey,
 	}
 	return &cluster.Secret{
 		Name: fmt.Sprintf(

@@ -27,8 +27,6 @@ const (
 	envEnricherTimeout              = "ENRICHER_TIMEOUT"
 	envEnsemblerEndpoint            = "ENSEMBLER_ENDPOINT"
 	envEnsemblerTimeout             = "ENSEMBLER_TIMEOUT"
-	envLitmusPasskey                = "LITMUS_PASSKEY"
-	envXpPasskey                    = "XP_PASSKEY"
 	envLogLevel                     = "APP_LOGLEVEL"
 	envFiberDebugLog                = "APP_FIBER_DEBUG_LOG"
 	envCustomMetrics                = "APP_CUSTOM_METRICS"
@@ -212,29 +210,6 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envEnsemblerEndpoint, Value: endpoint},
 			{Name: envEnsemblerTimeout, Value: ver.Ensembler.DockerConfig.Timeout},
 		}...)
-	}
-
-	// Add Experiment Engine config
-	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		var envVarName string
-		switch ver.ExperimentEngine.Type {
-		case models.ExperimentEngineTypeLitmus:
-			envVarName = envLitmusPasskey
-		case models.ExperimentEngineTypeXp:
-			envVarName = envXpPasskey
-		}
-		// Add env var
-		envs = append(envs, corev1.EnvVar{
-			Name: envVarName,
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: secretName,
-					},
-					Key: secretKeyNameExperiment,
-				},
-			},
-		})
 	}
 
 	// Process Log config
