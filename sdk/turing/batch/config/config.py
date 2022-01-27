@@ -113,8 +113,13 @@ class EnsemblingJobConfig:
         )
 
     def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
+        if self.env_vars is None:
+            env_vars = []
+        else:
+            env_vars = [EnvVar(name=name, value=value) for name, value in self.env_vars.items()]\
+
         return turing.generated.models.EnsemblerInfraConfig(
             service_account_name=self.service_account,
             resources=self.resource_request,
-            env=[EnvVar(name=name, value=value) for name, value in self.env_vars.items()],
+            env=env_vars,
         )
