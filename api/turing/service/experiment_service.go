@@ -47,16 +47,13 @@ type experimentsService struct {
 	cache              *cache.Cache
 }
 
-// Experiment represents an experiment in Turing. The experiment info can come from different expriment engines
-// such as Litmus or XP but they will be represented with the same schema in this experiment object. For instance
-// in Litmus, the variation of the same experiment is called "variants" whereas in XP it is called "treament", but in
-// Turing the term "treatment" in an experiment is consistently used.
+// Experiment represents an experiment in Turing. The experiment info can come from different experiment engines.
 type Experiment struct {
 	ID         string   `json:"id"`
 	Name       string   `json:"name"`
 	ClientName string   `json:"client_name"`
 	UnitType   string   `json:"unit_type"`
-	Treatments []string `json:"treatments"` // List of treatment names (i.e variations) in the experiment.
+	Treatments []string `json:"treatments"` // List of treatment names (i.e. variations) in the experiment.
 }
 
 // NewExperimentsService creates a new experiment service from managerConfig.

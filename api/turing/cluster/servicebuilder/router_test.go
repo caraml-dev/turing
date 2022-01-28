@@ -79,17 +79,6 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
-						{
-							Name: "LITMUS_PASSKEY",
-							ValueFrom: &corev1.EnvVarSource{
-								SecretKeyRef: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "service-account",
-									},
-									Key: "experiment_passkey",
-								},
-							},
-						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
@@ -274,17 +263,6 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
-						{
-							Name: "LITMUS_PASSKEY",
-							ValueFrom: &corev1.EnvVarSource{
-								SecretKeyRef: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "service-account",
-									},
-									Key: "experiment_passkey",
-								},
-							},
-						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
@@ -373,17 +351,6 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
-						{
-							Name: "LITMUS_PASSKEY",
-							ValueFrom: &corev1.EnvVarSource{
-								SecretKeyRef: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "service-account",
-									},
-									Key: "experiment_passkey",
-								},
-							},
-						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
@@ -472,17 +439,6 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
-						{
-							Name: "",
-							ValueFrom: &corev1.EnvVarSource{
-								SecretKeyRef: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "service-account",
-									},
-									Key: "experiment_passkey",
-								},
-							},
-						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},

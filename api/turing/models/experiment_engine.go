@@ -9,9 +9,7 @@ import (
 )
 
 const (
-	ExperimentEngineTypeNop    string = "nop"
-	ExperimentEngineTypeLitmus string = "litmus"
-	ExperimentEngineTypeXp     string = "xp"
+	ExperimentEngineTypeNop string = "nop"
 )
 
 // ExperimentEngine contains the type and configuration for the
@@ -21,7 +19,7 @@ type ExperimentEngine struct {
 	Type string `json:"type"`
 	// PluginConfig (Optional) contains necessary configuration, if experiment engine
 	// is implemented as RPC plugin
-	PluginConfig *config.ExperimentEnginePluginConfig `json:"plugin_config"`
+	PluginConfig *config.ExperimentEnginePluginConfig `json:"plugin_config,omitempty"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
 	// For standard experiment engine managers, the config can be unmarshalled into
 	// manager.TuringExperimentConfig type.

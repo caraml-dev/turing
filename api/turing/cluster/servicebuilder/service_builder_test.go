@@ -208,27 +208,25 @@ func TestNewEnsemblerService(t *testing.T) {
 
 func TestNewSecret(t *testing.T) {
 	tests := map[string]struct {
-		version           *models.RouterVersion
-		project           *mlp.Project
-		routerSvcKey      string
-		enricherSvcKey    string
-		ensemblerSvcKey   string
-		experimentPasskey string
-		expected          *cluster.Secret
+		version         *models.RouterVersion
+		project         *mlp.Project
+		routerSvcKey    string
+		enricherSvcKey  string
+		ensemblerSvcKey string
+		expected        *cluster.Secret
 	}{
 		"success": {
 			version: &models.RouterVersion{
 				Version: 2,
 				Router:  &models.Router{Name: "test-router"},
 				ExperimentEngine: &models.ExperimentEngine{
-					Type: models.ExperimentEngineTypeLitmus,
+					Type: "exp-engine",
 				},
 			},
-			project:           &mlp.Project{Name: "test-project"},
-			routerSvcKey:      "router-key",
-			enricherSvcKey:    "enricher-key",
-			ensemblerSvcKey:   "ensembler-key",
-			experimentPasskey: "experiment-passkey",
+			project:         &mlp.Project{Name: "test-project"},
+			routerSvcKey:    "router-key",
+			enricherSvcKey:  "enricher-key",
+			ensemblerSvcKey: "ensembler-key",
 			expected: &cluster.Secret{
 				Name:      "test-router-turing-secret-2",
 				Namespace: "test-project",
@@ -236,7 +234,6 @@ func TestNewSecret(t *testing.T) {
 					"router-service-account.json":    "router-key",
 					"enricher-service-account.json":  "enricher-key",
 					"ensembler-service-account.json": "ensembler-key",
-					"experiment_passkey":             "experiment-passkey",
 				},
 			},
 		},
@@ -244,9 +241,7 @@ func TestNewSecret(t *testing.T) {
 	sb := &clusterSvcBuilder{}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			secret := sb.NewSecret(
-				tt.version, tt.project, tt.routerSvcKey,
-				tt.enricherSvcKey, tt.ensemblerSvcKey, tt.experimentPasskey)
+			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey)
 			assert.Equal(t, tt.expected, secret)
 		})
 	}

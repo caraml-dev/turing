@@ -28,7 +28,6 @@ type DeploymentService interface {
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
 		experimentConfig json.RawMessage,
-		experimentPasskey string,
 		eventsCh *EventChannel,
 	) (string, error)
 	UndeployRouterVersion(
@@ -98,7 +97,6 @@ func (ds *deploymentService) DeployRouterVersion(
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
 	experimentConfig json.RawMessage,
-	experimentPasskey string,
 	eventsCh *EventChannel,
 ) (string, error) {
 	var endpoint string
@@ -128,7 +126,6 @@ func (ds *deploymentService) DeployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
-		experimentPasskey,
 	)
 	err = createSecret(ctx, controller, secret)
 	if err != nil {
@@ -241,15 +238,11 @@ func (ds *deploymentService) UndeployRouterVersion(
 	var errs []string
 
 	// Delete secret
-	var secret *cluster.Secret
-	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger ||
-		routerVersion.ExperimentEngine.Type == models.ExperimentEngineTypeLitmus {
-		eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting service fluentd"))
-		secret = ds.svcBuilder.NewSecret(routerVersion, project, "", "", "", "")
-		err = deleteSecret(controller, secret)
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
+	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
+	err = deleteSecret(controller, secret)
+	if err != nil {
+		errs = append(errs, err.Error())
 	}
 
 	// Delete fluentd if required

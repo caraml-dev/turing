@@ -21,11 +21,9 @@ type testSuiteExperimentResponse struct {
 
 func TestNewExperimentRunner(t *testing.T) {
 	tests := map[string]struct {
-		engineName               string
-		config                   map[string]interface{}
-		litmusEnvValueForPassKey string // empty env value means the environment variable is unset
-		xpEnvValueForPasskey     string // empty env value means the environment variable is unset
-		wantErr                  bool
+		engineName string
+		config     map[string]interface{}
+		wantErr    bool
 	}{
 		"nop | success": {
 			engineName: "nop",

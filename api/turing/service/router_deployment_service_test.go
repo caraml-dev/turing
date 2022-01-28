@@ -51,16 +51,14 @@ func (msb *mockClusterServiceBuilder) NewSecret(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
-	experimentPasskey string,
 ) *cluster.Secret {
 	return &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: project.Name,
 		Data: map[string]string{
-			"SecretKeyNameRouter":     routerServiceAccountKey,
-			"SecretKeyNameEnricher":   enricherServiceAccountKey,
-			"SecretKeyNameEnsembler":  ensemblerServiceAccountKey,
-			"SecretKeyNameExperiment": experimentPasskey,
+			"SecretKeyNameRouter":    routerServiceAccountKey,
+			"SecretKeyNameEnricher":  enricherServiceAccountKey,
+			"SecretKeyNameEnsembler": ensemblerServiceAccountKey,
 		},
 	}
 }
@@ -253,7 +251,6 @@ func TestDeployEndpoint(t *testing.T) {
 		"enricher-service-account-key",
 		"ensembler-service-account-key",
 		nil,
-		"experiment-passkey",
 		eventsCh,
 	)
 
@@ -273,10 +270,9 @@ func TestDeployEndpoint(t *testing.T) {
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: testNamespace,
 		Data: map[string]string{
-			"SecretKeyNameRouter":     "router-service-account-key",
-			"SecretKeyNameEnricher":   "enricher-service-account-key",
-			"SecretKeyNameEnsembler":  "ensembler-service-account-key",
-			"SecretKeyNameExperiment": "experiment-passkey",
+			"SecretKeyNameRouter":    "router-service-account-key",
+			"SecretKeyNameEnricher":  "enricher-service-account-key",
+			"SecretKeyNameEnsembler": "ensembler-service-account-key",
 		},
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
@@ -334,10 +330,9 @@ func TestDeployEndpoint(t *testing.T) {
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: testNamespace,
 		Data: map[string]string{
-			"SecretKeyNameRouter":     "router-service-account-key",
-			"SecretKeyNameEnricher":   "enricher-service-account-key",
-			"SecretKeyNameEnsembler":  "ensembler-service-account-key",
-			"SecretKeyNameExperiment": "experiment-passkey",
+			"SecretKeyNameRouter":    "router-service-account-key",
+			"SecretKeyNameEnricher":  "enricher-service-account-key",
+			"SecretKeyNameEnsembler": "ensembler-service-account-key",
 		},
 	})
 	controller.AssertNumberOfCalls(t, "DeployKnativeService", 3)

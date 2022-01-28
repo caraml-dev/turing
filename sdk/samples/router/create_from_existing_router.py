@@ -62,7 +62,7 @@ def main(turing_api: str, project: str):
 
     # Create an experiment config (
     experiment_config = ExperimentConfig(
-        type="xp",
+        type="test-exp",
         config={
             'variables':
                 [

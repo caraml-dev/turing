@@ -152,7 +152,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 	routerVersion *models.RouterVersion,
 	eventsCh *service.EventChannel,
 ) (string, error) {
-	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentPasskey string
+	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey string
 	var experimentConfig json.RawMessage
 	var err error
 
@@ -190,16 +190,22 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 	expSvc := c.BaseController.AppContext.ExperimentsService
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-
+		experimentConfig = routerVersion.ExperimentEngine.Config
 		if expSvc.IsStandardExperimentManager(routerVersion.ExperimentEngine.Type) {
 			// Convert the config to the standard type
-			expConfig, err := manager.ParseStandardExperimentConfig(routerVersion.ExperimentEngine.Config)
+			standardExperimentConfig, err := manager.ParseStandardExperimentConfig(experimentConfig)
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}
 			// If passkey has been set, decrypt it
-			if expConfig.Client.Passkey != "" {
-				experimentPasskey, err = c.CryptoService.Decrypt(expConfig.Client.Passkey)
+			if standardExperimentConfig.Client.Passkey != "" {
+				standardExperimentConfig.Client.Passkey, err =
+					c.CryptoService.Decrypt(standardExperimentConfig.Client.Passkey)
+				if err != nil {
+					return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
+				}
+
+				experimentConfig, err = json.Marshal(standardExperimentConfig)
 				if err != nil {
 					return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 				}
@@ -209,7 +215,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		// Get the deployable Router Config for the experiment
 		experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
 			routerVersion.ExperimentEngine.Type,
-			routerVersion.ExperimentEngine.Config,
+			experimentConfig,
 		)
 		if err != nil {
 			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
@@ -234,7 +240,6 @@ func (c RouterDeploymentController) deployRouterVersion(
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
 		experimentConfig,
-		experimentPasskey,
 		eventsCh,
 	)
 

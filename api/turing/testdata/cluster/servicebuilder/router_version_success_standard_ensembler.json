@@ -17,7 +17,7 @@
   ],
   "default_route_id": "control",
   "experiment_engine": {
-    "type": "litmus",
+    "type": "exp-engine-2",
     "config": {
       "deployment": {
       "endpoint": "exp-engine:8080",
