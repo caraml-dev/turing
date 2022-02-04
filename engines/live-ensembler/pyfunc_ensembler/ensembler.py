@@ -22,4 +22,7 @@ class PyFuncEnsembler:
 
     @staticmethod
     def preprocess_input(inputs):
+        """
+        Dummy preprocessing method
+        """
         return inputs
