@@ -6,8 +6,7 @@ class PyFuncEnsembler:
     PyFunc ensembler used for real-time outputs
     """
 
-    def __init__(self, name: str, artifact_dir: str):
-        self.name = name
+    def __init__(self, artifact_dir: str):
         self.artifact_dir = artifact_dir
         self.ready = False
         self._ensembler = None
