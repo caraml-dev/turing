@@ -21,8 +21,8 @@ class PyFuncEnsembler:
 
     def predict(self, inputs: dict) -> dict:
         ensembler_inputs = PyFuncEnsembler.preprocess_input(inputs)
-        a = self._ensembler.predict(ensembler_inputs)
-        return a
+        output = self._ensembler.predict(ensembler_inputs).iloc[0].to_list()
+        return output
 
     @staticmethod
     def preprocess_input(inputs: dict):
