@@ -1,0 +1,104 @@
+{
+  "request": {
+    "type": 1,
+    "search_results": [
+      {
+        "place_id": "PEGASUS-1691840960",
+        "vendor": 3,
+        "distance": 20947,
+        "relevance_score": 296.15732,
+        "destination_popularity": 0,
+        "pickup_popularity": 0,
+        "popularity": 0,
+        "gates": [
+          {
+            "place_id": "PEGASUS-264985223",
+            "location_history": null,
+            "saved_address": null
+          }
+        ],
+        "location_history": null,
+        "saved_address": null
+      },
+      {
+        "place_id": "GOOG-ChIJ89pfdP3raS4RECsq-ovc6-o",
+        "vendor": 1,
+        "distance": 16272.597648460218,
+        "relevance_score": 0,
+        "destination_popularity": 0,
+        "pickup_popularity": 0,
+        "popularity": 0,
+        "gates": null,
+        "location_history": null,
+        "saved_address": null
+      }
+    ],
+    "country": 1
+  },
+  "response": {
+    "route_responses": [
+      {
+        "route": "distances-cls",
+        "data": {
+          "predictions": [
+            20947,
+            16272.597648460218
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "model-cls",
+        "data": {
+          "predictions": [
+            0.9989534700460942,
+            0.051541458539085795
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "relevance_scores",
+        "data": {
+          "predictions": [
+            296.15732,
+            0
+          ]
+        },
+        "is_default": true
+      },
+      {
+        "route": "model",
+        "data": {
+          "predictions": [
+            0.9989534700460942,
+            0.051541458539085795
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "distances",
+        "data": {
+          "predictions": [
+            20947,
+            16272.597648460218
+          ]
+        },
+        "is_default": false
+      }
+    ],
+    "experiment": {
+      "configuration": {
+        "name": "exp_carto_pickup_id_control_distance",
+        "version": 8,
+        "variant": "distances",
+        "properties": {
+          "in_experiment": "true",
+          "route": "distances"
+        }
+      },
+      "error": ""
+    }
+  }
+}

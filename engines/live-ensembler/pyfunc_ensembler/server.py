@@ -1,6 +1,6 @@
 import tornado.web
 
-from .handler import EnsemblerHandler
+from pyfunc_ensembler.handler import EnsemblerHandler
 
 
 class PyFuncEnsemblerServer:
@@ -9,5 +9,5 @@ class PyFuncEnsemblerServer:
 
     def create_application(self):
         return tornado.web.Application([
-            (r"/ensemble", EnsemblerHandler)
+            (r"/ensemble", EnsemblerHandler, dict(ensembler=self.ensembler))
         ])

@@ -1,6 +1,7 @@
 import argparse
+import tornado.ioloop
 
-from server import PyFuncEnsemblerServer
+from pyfunc_ensembler.server import PyFuncEnsemblerServer
 from pyfunc_ensembler import PyFuncEnsembler
 
 
@@ -18,4 +19,6 @@ if __name__ == "__main__":
     except Exception as e:
         print("fml")
 
-    PyFuncEnsemblerServer(ensembler)
+    app = PyFuncEnsemblerServer(ensembler).create_application()
+    app.listen(8080)
+    tornado.ioloop.IOLoop.current().start()
