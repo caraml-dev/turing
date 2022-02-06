@@ -12,9 +12,6 @@ from turing.batch.config import EnsemblingJobConfig
 
 class EnsemblerBase(abc.ABC):
 
-    def __init__(self):
-        self.treatment_config = None
-
     @abc.abstractmethod
     def ensemble(
             self,
@@ -43,12 +40,9 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
     Abstract implementation of PyFunc Ensembler.
     It leverages the contract of mlflow's PythonModel and implements its `predict` method.
     """
-
+    FEATURE_COLUMN_PREFIX = '__features__'
     PREDICTION_COLUMN_PREFIX = '__predictions__'
-
-    LIVE_REQUEST_FEATURE_KEY = 'request'
-    LIVE_REQUEST_PREDICTION_KEY = 'response'
-    LIVE_REQUEST_ROUTE_KEY = 'route_responses'
+    TREATMENT_CONFIG_COLUMN_PREFIX = '__treatment_config__'
 
     def load_context(self, context):
         self.initialize(context.artifacts)
@@ -62,32 +56,31 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
         """
         pass
 
-    def predict(self, context, model_input: Union[pandas.DataFrame, Dict[str, Any]]) -> \
+    def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
 
-        if isinstance(model_input, pandas.DataFrame):  # batch ensembling
-            prediction_columns = {
-                col: col[len(PyFunc.PREDICTION_COLUMN_PREFIX):]
-                for col in model_input.columns if col.startswith(PyFunc.PREDICTION_COLUMN_PREFIX)
-            }
+        feature_columns = PyFunc._get_columns_with_header(model_input, PyFunc.FEATURE_COLUMN_PREFIX)
+        prediction_columns = PyFunc._get_columns_with_header(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
+        treatment_config_columns = PyFunc._get_columns_with_header(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
 
-            return model_input \
-                .rename(columns=prediction_columns) \
-                .apply(lambda row:
-                       self.ensemble(
-                           features=row.drop(prediction_columns.values()),
-                           predictions=row[prediction_columns.values()],
-                           treatment_config=self.treatment_config
-                       ), axis=1, result_type='expand')
-        elif isinstance(model_input, dict):  # real-time ensembling
-            return self.ensemble(
-                features=model_input[PyFunc.LIVE_REQUEST_FEATURE_KEY],
-                predictions=[
-                    prediction for prediction \
-                    in model_input[PyFunc.LIVE_REQUEST_PREDICTION_KEY][PyFunc.LIVE_REQUEST_ROUTE_KEY]
-                ],
-                treatment_config=self.treatment_config
-            )
+        return model_input \
+            .rename(columns=feature_columns) \
+            .rename(columns=prediction_columns) \
+            .rename(columns=treatment_config_columns) \
+            .apply(lambda row:
+                   self.ensemble(
+                       features=row[feature_columns.values()],
+                       predictions=row[prediction_columns.values()],
+                       treatment_config=row[treatment_config_columns.values()]
+                   ), axis=1, result_type='expand')
+
+    @staticmethod
+    def _get_columns_with_header(df: pandas.DataFrame, header: str):
+        selected_columns = {
+            col: col[len(header):]
+            for col in df.columns if col.startswith(header)
+        }
+        return selected_columns
 
 
 @ApiObjectSpec(turing.generated.models.Ensembler)
