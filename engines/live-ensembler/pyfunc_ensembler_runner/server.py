@@ -1,6 +1,6 @@
 import tornado.web
 
-from pyfunc_ensembler.handler import EnsemblerHandler
+from pyfunc_ensembler_runner.handler import EnsemblerHandler
 
 
 class PyFuncEnsemblerServer:

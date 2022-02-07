@@ -1,8 +1,8 @@
 import argparse
 import tornado.ioloop
 
-from pyfunc_ensembler.server import PyFuncEnsemblerServer
-from pyfunc_ensembler import PyFuncEnsembler
+from pyfunc_ensembler_runner.server import PyFuncEnsemblerServer
+from pyfunc_ensembler_runner import PyFuncEnsembler
 
 
 parser = argparse.ArgumentParser()
