@@ -40,7 +40,6 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
     Abstract implementation of PyFunc Ensembler.
     It leverages the contract of mlflow's PythonModel and implements its `predict` method.
     """
-    FEATURE_COLUMN_PREFIX = '__features__'
     PREDICTION_COLUMN_PREFIX = '__predictions__'
     TREATMENT_CONFIG_COLUMN_PREFIX = '__treatment_config__'
 
@@ -58,18 +57,15 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
 
     def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
-        feature_columns = PyFunc._get_columns_with_header(model_input, PyFunc.FEATURE_COLUMN_PREFIX)
         prediction_columns = PyFunc._get_columns_with_header(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
         treatment_config_columns = PyFunc._get_columns_with_header(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
 
         return model_input \
-            .rename(columns=feature_columns) \
             .rename(columns=prediction_columns) \
             .rename(columns=treatment_config_columns) \
             .apply(lambda row:
                    self.ensemble(
-                       features=row[feature_columns.values()] if len(row[feature_columns.values()]) > 0 \
-                           else row.drop(prediction_columns.values()),
+                       features=row.drop(prediction_columns.values()).drop(treatment_config_columns.values()),
                        predictions=row[prediction_columns.values()],
                        treatment_config=row[treatment_config_columns.values()]
                    ), axis=1, result_type='expand')
