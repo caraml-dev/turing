@@ -1,4 +1,7 @@
 import argparse
+import logging
+import traceback
+
 import tornado.ioloop
 
 from pyfunc_ensembler_runner.server import PyFuncEnsemblerServer
@@ -17,7 +20,9 @@ if __name__ == "__main__":
     try:
         ensembler.load()
     except Exception as e:
-        print("fml")
+        logging.error("Unable to initialise PyFuncEnsemblerRunner from the MLflow URI provided.")
+        logging.error(traceback.format_exc())
+        exit(1)
 
     app = PyFuncEnsemblerServer(ensembler).create_application()
     app.listen(8080)

@@ -1,5 +1,6 @@
 import pandas as pd
 
+from typing import Dict, List, Any
 from turing.ensembler import PyFunc
 from mlflow import pyfunc
 
@@ -11,20 +12,18 @@ class PyFuncEnsemblerRunner:
 
     def __init__(self, artifact_dir: str):
         self.artifact_dir = artifact_dir
-        self.ready = False
         self._ensembler = None
 
     def load(self):
         self._ensembler = pyfunc.load_model(self.artifact_dir)
-        self.ready = True
 
-    def predict(self, inputs: dict) -> dict:
+    def predict(self, inputs: Dict[str, Any]) -> List[Any]:
         ensembler_inputs = PyFuncEnsemblerRunner.preprocess_input(inputs)
         output = self._ensembler.predict(ensembler_inputs).iloc[0].to_list()
         return output
 
     @staticmethod
-    def preprocess_input(inputs: dict):
+    def preprocess_input(inputs: Dict[str, Any]) -> pd.DataFrame:
         features = pd.Series(PyFuncEnsemblerRunner._get_features_from_inputs(inputs))
         predictions = pd.Series(PyFuncEnsemblerRunner._get_predictions_from_inputs(inputs))
         treatment_config = pd.Series(PyFuncEnsemblerRunner._get_treatment_config_from_inputs(inputs))
@@ -32,19 +31,19 @@ class PyFuncEnsemblerRunner:
         return preprocessed_input
 
     @staticmethod
-    def _get_features_from_inputs(inputs: dict) -> dict:
+    def _get_features_from_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         features = PyFuncEnsemblerRunner._flatten_json(inputs['request'])
         return features
 
     @staticmethod
-    def _get_predictions_from_inputs(inputs: dict) -> dict:
+    def _get_predictions_from_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         raw_predictions = PyFuncEnsemblerRunner._flatten_json(inputs['response']['route_responses'])
         predictions = PyFuncEnsemblerRunner._create_dict_with_headers(raw_predictions,
                                                                       PyFunc.PREDICTION_COLUMN_PREFIX)
         return predictions
 
     @staticmethod
-    def _get_treatment_config_from_inputs(inputs: dict) -> dict:
+    def _get_treatment_config_from_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         raw_predictions = PyFuncEnsemblerRunner._flatten_json(inputs['response']['experiment'])
 
         treatment_config = PyFuncEnsemblerRunner._create_dict_with_headers(raw_predictions,
@@ -52,7 +51,7 @@ class PyFuncEnsemblerRunner:
         return treatment_config
 
     @staticmethod
-    def _flatten_json(y):
+    def _flatten_json(y: Dict[str, Any]) -> Dict[str, Any]:
         """
         Helper function to normalise a nested dictionary into a dictionary of depth 1 with names following the
         convention: key_1.key_2.key_3..., with a period acting as a delimiter between nested keys
@@ -77,7 +76,7 @@ class PyFuncEnsemblerRunner:
         return out
 
     @staticmethod
-    def _create_dict_with_headers(input_dict: dict, header: str):
+    def _create_dict_with_headers(input_dict: Dict[str, Any], header: str) -> Dict[str, Any]:
         new_dict = {}
         for key, value in input_dict.items():
             new_dict[header + key] = value

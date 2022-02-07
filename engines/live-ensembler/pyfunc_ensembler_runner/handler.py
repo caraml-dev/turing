@@ -3,13 +3,13 @@ import orjson
 import json
 
 from http import HTTPStatus
+from typing import Any, Dict
+from pyfunc_ensembler_runner.ensembler_runner import PyFuncEnsemblerRunner
 
 
 class EnsemblerHandler(tornado.web.RequestHandler):
-    def initialize(self, ensembler):
+    def initialize(self, ensembler: PyFuncEnsemblerRunner):
         self.ensembler = ensembler
-        if not self.ensembler.ready:
-            self.ensembler.load()
 
     def post(self):
         request = EnsemblerHandler.validate_request(self.request)
@@ -20,7 +20,7 @@ class EnsemblerHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json; charset=UTF-8")
 
     @staticmethod
-    def validate_request(request):
+    def validate_request(request: Any) -> Dict[str, Any]:
         try:
             body = orjson.loads(request.body)
         except json.decoder.JSONDecodeError as e:
