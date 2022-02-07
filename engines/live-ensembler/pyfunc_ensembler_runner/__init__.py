@@ -1,2 +1,2 @@
-from .ensembler_runner import PyFuncEnsembler
+from .ensembler_runner import PyFuncEnsemblerRunner
 

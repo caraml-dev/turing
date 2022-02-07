@@ -2,7 +2,7 @@ import argparse
 import tornado.ioloop
 
 from pyfunc_ensembler_runner.server import PyFuncEnsemblerServer
-from pyfunc_ensembler_runner import PyFuncEnsembler
+from pyfunc_ensembler_runner import PyFuncEnsemblerRunner
 
 
 parser = argparse.ArgumentParser()
@@ -12,7 +12,7 @@ args, _ = parser.parse_known_args()
 
 
 if __name__ == "__main__":
-    ensembler = PyFuncEnsembler(args.mlflow_ensembler_uri)
+    ensembler = PyFuncEnsemblerRunner(args.mlflow_ensembler_uri)
 
     try:
         ensembler.load()
