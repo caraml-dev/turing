@@ -7,14 +7,14 @@ ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 .PHONY: setup
 setup: $(CONDA_ENV_NAME)
 $(CONDA_ENV_NAME):
-	@conda env update -p $(CONDA_ENV_NAME) -f environment.yaml --prune
+	@conda env update -f environment.yaml --prune
 	$(ACTIVATE_ENV) && pip install -r requirements.dev.txt
 
 .PHONY: test
 test:
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
-		--cov=ensembler \
+		--cov=pyfunc_ensembler_runner \
 		-W ignore
 
 .PHONY: build-image
