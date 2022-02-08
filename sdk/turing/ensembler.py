@@ -40,8 +40,8 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
     Abstract implementation of PyFunc Ensembler.
     It leverages the contract of mlflow's PythonModel and implements its `predict` method.
     """
-
     PREDICTION_COLUMN_PREFIX = '__predictions__'
+    TREATMENT_CONFIG_COLUMN_PREFIX = '__treatment_config__'
 
     def load_context(self, context):
         self.initialize(context.artifacts)
@@ -57,19 +57,26 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
 
     def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
-        prediction_columns = {
-            col: col[len(PyFunc.PREDICTION_COLUMN_PREFIX):]
-            for col in model_input.columns if col.startswith(PyFunc.PREDICTION_COLUMN_PREFIX)
-        }
+        prediction_columns = PyFunc._get_columns_with_header(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
+        treatment_config_columns = PyFunc._get_columns_with_header(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
 
         return model_input \
             .rename(columns=prediction_columns) \
+            .rename(columns=treatment_config_columns) \
             .apply(lambda row:
                    self.ensemble(
-                       features=row.drop(prediction_columns.values()),
+                       features=row.drop(prediction_columns.values()).drop(treatment_config_columns.values()),
                        predictions=row[prediction_columns.values()],
-                       treatment_config=None
+                       treatment_config=row[treatment_config_columns.values()]
                    ), axis=1, result_type='expand')
+
+    @staticmethod
+    def _get_columns_with_header(df: pandas.DataFrame, header: str):
+        selected_columns = {
+            col: col[len(header):]
+            for col in df.columns if col.startswith(header)
+        }
+        return selected_columns
 
 
 @ApiObjectSpec(turing.generated.models.Ensembler)
@@ -273,7 +280,7 @@ class PyFuncEnsembler(Ensembler):
             conda_env: Union[str, Dict[str, Any]],
             code_dir: Optional[List[str]] = None,
             artifacts: Dict[str, str] = None,
-            ) -> 'PyFuncEnsembler':
+    ) -> 'PyFuncEnsembler':
         """
         Save new pyfunc ensembler in the active project
 
