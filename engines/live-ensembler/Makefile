@@ -11,11 +11,10 @@ $(CONDA_ENV_NAME):
 	$(ACTIVATE_ENV) && pip install -r requirements.dev.txt
 
 .PHONY: test
-test: type-check
+test:
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
 		--cov=ensembler \
-		--ignore=env \
 		-W ignore
 
 .PHONY: build-image
@@ -30,4 +29,4 @@ build-image: version
 .PHONY: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
-	@echo "turing-batch-ensembler version:" $(VERSION)
+	@echo "turing-live-ensembler version:" $(VERSION)

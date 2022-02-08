@@ -4,9 +4,14 @@ PyFuncEnsemblerRunner is a tool for deploying user-defined ensemblers (for use w
 MLflow's `pyfunc` flavour.
 
 ## Usage
-
+To run the ensembler as a webservice:
 ```bash
-python -m pyfunc_ensembler_runner --mlflow_ensembler_uri $ENSEMBLER_URI
+python -m pyfunc_ensembler_runner --mlflow_ensembler_dir $ENSEMBLER_DIR [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+
+arguments: 
+  --mlflow_ensembler_dir <path/to/ensembler/dir/>       Path to the ensembler folder containing the mlflow files
+  --log-level <DEBUG||INFO||WARNING||ERROR||CRITICAL>   Set the logging level
+  -h, --help                                            Show this help message and exit
 ```
 
 ## Docker Image Building
@@ -18,10 +23,5 @@ gsutil cp -r gs://[bucket-name]/mlflow/[project_id]/[run_id]/artifacts/ensembler
 
 To build the docker image, run the following:
 ```bash
-docker build -t my_pyfunc_ensembler:latest -f Dockerfile .
-```
-
-To run the ensembler service
-```bash
-docker run -e 
+make build-image
 ```

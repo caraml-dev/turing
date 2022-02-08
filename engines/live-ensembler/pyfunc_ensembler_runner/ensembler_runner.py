@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 
 from typing import Dict, List, Any
@@ -18,8 +19,10 @@ class PyFuncEnsemblerRunner:
         self._ensembler = pyfunc.load_model(self.artifact_dir)
 
     def predict(self, inputs: Dict[str, Any]) -> List[Any]:
+        logging.info(f"Input request payload: {inputs}")
         ensembler_inputs = PyFuncEnsemblerRunner.preprocess_input(inputs)
         output = self._ensembler.predict(ensembler_inputs).iloc[0].to_list()
+        logging.info(f"Output response: {output}")
         return output
 
     @staticmethod
