@@ -20,13 +20,13 @@ class PyFuncEnsemblerRunner:
 
     def predict(self, inputs: Dict[str, Any]) -> List[Any]:
         logging.info(f"Input request payload: {inputs}")
-        ensembler_inputs = PyFuncEnsemblerRunner.preprocess_input(inputs)
+        ensembler_inputs = PyFuncEnsemblerRunner._preprocess_input(inputs)
         output = self._ensembler.predict(ensembler_inputs).iloc[0].to_list()
         logging.info(f"Output response: {output}")
         return output
 
     @staticmethod
-    def preprocess_input(inputs: Dict[str, Any]) -> pd.DataFrame:
+    def _preprocess_input(inputs: Dict[str, Any]) -> pd.DataFrame:
         features = pd.Series(PyFuncEnsemblerRunner._get_features_from_inputs(inputs))
         predictions = pd.Series(PyFuncEnsemblerRunner._get_predictions_from_inputs(inputs))
         treatment_config = pd.Series(PyFuncEnsemblerRunner._get_treatment_config_from_inputs(inputs))
