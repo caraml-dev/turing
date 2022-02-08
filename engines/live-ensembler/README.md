@@ -13,5 +13,15 @@ python -m pyfunc_ensembler_runner --mlflow_ensembler_uri $ENSEMBLER_URI
 
 To create a docker image locally, you'll need to first download the model artifacts from the MLflow's model registry:
 ```bash
-gsutil cp -r gs://[bucket-name]/mlflow/[project_id]/[run_id]/artifacts/model .
+gsutil cp -r gs://[bucket-name]/mlflow/[project_id]/[run_id]/artifacts/ensembler .
+```
+
+To build the docker image, run the following:
+```bash
+docker build -t my_pyfunc_ensembler:latest -f Dockerfile .
+```
+
+To run the ensembler service
+```bash
+docker run -e 
 ```

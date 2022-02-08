@@ -1,0 +1,4 @@
+argparse>=1.4.0
+cloudpickle==1.2.2
+orjson==2.6.8
+file:../../sdk
