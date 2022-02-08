@@ -11,7 +11,7 @@ with open(os.path.join(data_dir, "request_short.json")) as f:
 
 
 @pytest.mark.parametrize(
-    "input,expected", [
+    "inputs,expected", [
         pytest.param(
             dummy_short_request,
             pd.DataFrame(
@@ -30,7 +30,6 @@ with open(os.path.join(data_dir, "request_short.json")) as f:
             )
         )
     ])
-def test_preprocess_input(input, expected):
-    actual = PyFuncEnsemblerRunner._preprocess_input(input)
+def test_preprocess_input(inputs, expected):
+    actual = PyFuncEnsemblerRunner._preprocess_input(inputs)
     pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
-

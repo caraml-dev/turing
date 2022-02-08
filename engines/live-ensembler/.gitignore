@@ -1,5 +1,5 @@
-.pytest_cache/
-.idea/
-ensembler/
+.pytest_cache/*
+.idea/*
+ensembler/*
 
 .coverage

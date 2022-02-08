@@ -15,6 +15,7 @@ test:
 	@$(ACTIVATE_ENV) && \
 		python -m pytest \
 		--cov=pyfunc_ensembler_runner \
+		--cov-report term-missing \
 		-W ignore
 
 .PHONY: build-image
