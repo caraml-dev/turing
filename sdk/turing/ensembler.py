@@ -57,8 +57,8 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
 
     def predict(self, context, model_input: pandas.DataFrame) -> \
             Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
-        prediction_columns = PyFunc._get_columns_with_header(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
-        treatment_config_columns = PyFunc._get_columns_with_header(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
+        prediction_columns = PyFunc._get_columns_with_prefix(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
+        treatment_config_columns = PyFunc._get_columns_with_prefix(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
 
         return model_input \
             .rename(columns=prediction_columns) \
@@ -71,10 +71,10 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
                    ), axis=1, result_type='expand')
 
     @staticmethod
-    def _get_columns_with_header(df: pandas.DataFrame, header: str):
+    def _get_columns_with_prefix(df: pandas.DataFrame, prefix: str):
         selected_columns = {
-            col: col[len(header):]
-            for col in df.columns if col.startswith(header)
+            col: col[len(prefix):]
+            for col in df.columns if col.startswith(prefix)
         }
         return selected_columns
 
