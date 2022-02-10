@@ -17,7 +17,7 @@ class EnsemblerBase(abc.ABC):
             self,
             features: pandas.Series,
             predictions: pandas.Series,
-            treatment_config: Optional[dict]) -> Any:
+            treatment_config: Optional[pandas.Series]) -> Any:
         """
         Ensembler should have an ensemble method, that implements the logic on how to
         ensemble final prediction results from individual model predictions and a treatment
@@ -26,9 +26,16 @@ class EnsemblerBase(abc.ABC):
         :param features: pandas.Series, containing a single row with input features
         :param predictions: pandas.Series, containing a single row with all models predictions
                 `predictions['model-a']` will contain prediction results from the model-a
-        :param treatment_config: dictionary, representing the configuration of a treatment,
-                that should be applied to a given record. If the experiment engine is not configured
-                for this Batch experiment, then `treatment_config` will be `None`
+        :param treatment_config: Optional[pandas.Series], representing the configuration of a
+                treatment, that should be applied to a given record/payload.
+
+                For batch experiments, the `treatment_config` can be `None`. If an attribute
+                representing a treatment plan of all the treatments and their respective
+                configuration is set using the `initialize` method, the `treatment_config`
+                for any treatment can be accessed during all calls made to `ensemble`.
+
+                For real-time experiments, the `treatment_config` is either a pandas.Series
+                object, or None, if the experiment engine is not configured.
 
         :returns ensembling result (one of str, int, float, double or array)
         """
