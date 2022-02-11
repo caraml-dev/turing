@@ -24,4 +24,4 @@ gsutil cp -r gs://[bucket-name]/mlflow/[project_id]/[run_id]/artifacts/ensembler
 To build the docker image, run the following:
 ```bash
 make build-image
-```
+``

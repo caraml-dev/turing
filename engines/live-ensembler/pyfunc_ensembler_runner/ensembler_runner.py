@@ -48,7 +48,6 @@ class PyFuncEnsemblerRunner:
     @staticmethod
     def _get_treatment_config_from_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         raw_predictions = PyFuncEnsemblerRunner._flatten_json(inputs['response']['experiment'])
-
         treatment_config = PyFuncEnsemblerRunner._create_dict_with_headers(raw_predictions,
                                                                            PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
         return treatment_config
