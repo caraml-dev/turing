@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-APP_NAME := live-ensembler
+APP_NAME := real-time-ensembler
 CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)
 
@@ -30,4 +30,4 @@ build-image: version
 .PHONY: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
-	@echo "turing-live-ensembler version:" $(VERSION)
+	@echo "turing-real-time-ensembler version:" $(VERSION)

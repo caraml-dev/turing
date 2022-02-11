@@ -6,7 +6,7 @@ COPY . .
 COPY ./temp-deps/sdk ./../../sdk
 
 RUN conda env create -f ./environment.yaml &&  \
-    conda env update --name live-ensembler --file /ensembler/conda.yaml && \
+    conda env update --name real-time-ensembler --file /ensembler/conda.yaml && \
     rm -rf /root/.cache
 
 # Install conda-pack:
@@ -14,7 +14,7 @@ RUN conda install -c conda-forge conda-pack
 
 # Use conda-pack to create a standalone enviornment
 # in /venv:
-RUN conda-pack -n live-ensembler -o /tmp/env.tar && \
+RUN conda-pack -n real-time-ensembler -o /tmp/env.tar && \
   mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
   rm /tmp/env.tar
 
