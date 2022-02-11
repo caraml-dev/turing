@@ -32,7 +32,7 @@ if __name__ == "__main__":
     try:
         ensembler.load()
     except Exception as e:
-        logging.error("Unable to initialise PyFuncEnsemblerRunner from the MLflow URI provided.")
+        logging.error("Unable to initialise PyFuncEnsemblerRunner from the MLflow directory provided.")
         logging.error(traceback.format_exc())
         exit(1)
 
