@@ -1,0 +1,83 @@
+{
+  "request": {
+    "type": 1,
+    "search_results": [
+      {
+        "place_id": "place_1",
+        "gates": [
+          {
+            "place_id": "place_1",
+            "location_history": null,
+            "saved_address": null
+          }
+        ],
+        "location_history": null,
+        "saved_address": null
+      },
+      {
+        "place_id": "place_2",
+        "gates": null,
+        "location_history": null,
+        "saved_address": null
+      }
+    ],
+    "country": 1
+  },
+  "response": {
+    "route_responses": [
+      {
+        "route": "model_2",
+        "data": {
+          "predictions": [
+            20947,
+            16272.597648460218
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "model_3",
+        "data": {
+          "predictions": [
+            0.9989534700460942,
+            0.051541458539085795
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "control",
+        "data": {
+          "predictions": [
+            296.15732,
+            0
+          ]
+        },
+        "is_default": true
+      },
+      {
+        "route": "model_1",
+        "data": {
+          "predictions": [
+            0.9989534700460942,
+            0.051541458539085795
+          ]
+        },
+        "is_default": false
+      },
+      {
+        "route": "model_0",
+        "data": {
+          "predictions": [
+            20947,
+            16272.597648460218
+          ]
+        },
+        "is_default": false
+      }
+    ],
+    "experiment": {
+      "configurat
+    }
+  }
+}
