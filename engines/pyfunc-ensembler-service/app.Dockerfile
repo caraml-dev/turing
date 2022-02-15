@@ -11,7 +11,7 @@ RUN /bin/bash -c ". activate ${CONDA_ENVIRONMENT} && conda env update --name ${C
 
 # Use conda-pack to create a standalone environment
 # in /venv:
-RUN conda-pack -n real-time-ensembler -o /tmp/env.tar && \
+RUN conda-pack -n pyfunc-ensembler-service -o /tmp/env.tar && \
   mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
   rm /tmp/env.tar
 

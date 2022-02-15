@@ -6,7 +6,7 @@ COPY . .
 COPY ./temp-deps/sdk ./../../sdk
 
 RUN conda env create -f ./environment.yaml &&  \
-    conda env update --name real-time-ensembler --file /ensembler/conda.yaml && \
+    conda env update --name pyfunc-ensembler-service --file /ensembler/conda.yaml && \
     rm -rf /root/.cache
 
 # Install conda-pack:

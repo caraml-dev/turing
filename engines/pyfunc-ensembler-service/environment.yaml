@@ -1,4 +1,4 @@
-name: real-time-ensembler
+name: pyfunc-ensembler-service
 dependencies:
   - python=3.8
   - pip=21.0.1
