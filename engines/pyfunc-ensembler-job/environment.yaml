@@ -1,4 +1,4 @@
-name: batch-ensembler
+name: pyfunc-ensembler-job
 dependencies:
   - python=3.8
   - pip=21.0.1

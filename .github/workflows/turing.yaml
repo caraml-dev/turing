@@ -10,9 +10,9 @@ on:
       - main
     paths-ignore:
       - "docs/**"
-      - "engines/batch-ensembler/**"
+      - "engines/pyfunc-ensembler-job/**"
       - "sdk/**"
-      - ".github/workflows/batch-ensembler.yaml"
+      - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/sdk.yaml"
       - ".github/workflows/helm-chart.yaml"
       - ".github/workflows/cluster-init.yaml"
@@ -23,9 +23,9 @@ on:
       - main
     paths-ignore:
       - "docs/**"
-      - "engines/batch-ensembler/**"
+      - "engines/pyfunc-ensembler-job/**"
       - "sdk/**"
-      - ".github/workflows/batch-ensembler.yaml"
+      - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/sdk.yaml"
       - ".github/workflows/helm-chart.yaml"
 
