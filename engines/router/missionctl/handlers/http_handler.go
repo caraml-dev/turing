@@ -177,7 +177,9 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	payload := resp.Body()
 
 	// Write the json response to the writer
-	rw.Header().Set("Content-Type", resp.Header().Get("Content-Type"))
+	for key := range resp.Header() {
+		rw.Header().Set(key, resp.Header().Get(key))
+	}
 	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
 	contentLength, err := rw.Write(payload)
