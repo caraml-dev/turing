@@ -1,7 +1,6 @@
 import os
 import orjson
 import pytest
-import pandas as pd
 
 from tornado.testing import AsyncHTTPTestCase
 from tornado.httpclient import HTTPError

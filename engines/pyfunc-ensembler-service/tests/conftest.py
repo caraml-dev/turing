@@ -1,7 +1,6 @@
-import pandas
 import pytest
 
-from typing import Optional, Any, Dict
+from typing import Any, Dict
 from turing.ensembler import PyFunc
 
 
