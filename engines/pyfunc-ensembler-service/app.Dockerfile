@@ -17,7 +17,7 @@ RUN conda-pack -n pyfunc-ensembler-service -o /tmp/env.tar && \
 
 RUN /venv/bin/conda-unpack
 
-FROM debian:latest
+FROM debian:bullseye-slim
 
 COPY --from=builder /ensembler ./ensembler
 COPY --from=builder /pyfunc_ensembler_runner ./pyfunc_ensembler_runner
