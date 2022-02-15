@@ -26,6 +26,7 @@ COPY --from=builder /run.sh /run.sh
 COPY --from=builder /venv /venv
 
 RUN /bin/bash -c ". /venv/bin/activate & \
-    python -m ${CONDA_ENV_NAME} --mlflow_ensembler_dir /ensembler --dry_run"
+    python -m ${CONDA_ENV_NAME} --mlflow_ensembler_dir /ensembler --dry_run" \
 
-CMD ["/bin/bash", "./run.sh"]
+RUN /bin/bash -c ". /venv/bin/activate & \
+    python -m ${CONDA_ENV_NAME} --mlflow_ensembler_dir /ensembler -l INFO"
