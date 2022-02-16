@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-APP_NAME := batch-ensembler
+APP_NAME := pyfunc-ensembler-job
 CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./env/$(CONDA_ENV_NAME)
 
@@ -39,4 +39,4 @@ build-image: version
 .PHONY: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
-	@echo "turing-batch-ensembler version:" $(VERSION)
+	@echo "turing-pyfunc-ensembler-job version:" $(VERSION)

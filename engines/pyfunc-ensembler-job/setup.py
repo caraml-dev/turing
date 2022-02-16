@@ -18,7 +18,7 @@ with pathlib.Path('requirements.dev.txt').open() as dev_requirements_test:
     ]
 
 setuptools.setup(
-    name='batch-ensembler',
+    name='pyfunc-ensembler-job',
     packages=setuptools.find_packages(),
     install_requires=requirements,
     dev_requirements=dev_requirements,

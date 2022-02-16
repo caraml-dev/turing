@@ -55,20 +55,39 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
         """
         pass
 
-    def predict(self, context, model_input: pandas.DataFrame) -> \
-            Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
+    def predict(self, context, model_input: Union[pandas.DataFrame, Dict[str, Any]]) -> \
+            Union[numpy.ndarray, pandas.Series, pandas.DataFrame, Any]:
+        if isinstance(model_input, pandas.DataFrame):  # method called from a pyfunc ensembler job (batch ensembling)
+            return self._ensemble_batch(model_input)
+        elif isinstance(model_input, dict):  # method called from a pyfunc ensembler service (real-time ensembling)
+            return self._ensemble_request(model_input)
+
+    def _ensemble_batch(self, model_input: pandas.DataFrame) -> Union[numpy.ndarray, pandas.Series, pandas.DataFrame]:
+        """
+        Helper function to ensemble batches; works only on DataFrame arguments and has to output DataFrame objects in
+        order to fulfil the mlflow.pyfunc.spark_udf requirements that gets called in the pyfunc ensembler job engine
+        """
         prediction_columns = PyFunc._get_columns_with_prefix(model_input, PyFunc.PREDICTION_COLUMN_PREFIX)
-        treatment_config_columns = PyFunc._get_columns_with_prefix(model_input, PyFunc.TREATMENT_CONFIG_COLUMN_PREFIX)
 
         return model_input \
             .rename(columns=prediction_columns) \
-            .rename(columns=treatment_config_columns) \
             .apply(lambda row:
                    self.ensemble(
-                       features=row.drop(prediction_columns.values()).drop(treatment_config_columns.values()),
+                       features=row.drop(prediction_columns.values()),
                        predictions=row[prediction_columns.values()],
-                       treatment_config=row[treatment_config_columns.values()]
+                       treatment_config=None
                    ), axis=1, result_type='expand')
+
+    def _ensemble_request(self, model_input: Dict[str, Any]) -> Any:
+        """
+        Helper function to ensemble single requests; works on dictionary input in a single request made to the pyfunc
+        ensembler service (run by the pyfunc ensembler service engine)
+        """
+        return self.ensemble(
+            features=model_input['request'],
+            predictions=model_input['response']['route_responses'],
+            treatment_config=model_input['response']['experiment']
+        )
 
     @staticmethod
     def _get_columns_with_prefix(df: pandas.DataFrame, prefix: str):

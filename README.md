@@ -180,10 +180,10 @@ BatchEnsemblingConfig:
     BuildNamespace: default
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
-    BaseImageRef: ghcr.io/gojek/turing/batch-ensembler:latest
+    BaseImageRef: ghcr.io/gojek/turing/pyfunc-ensembler-job:latest
     KanikoConfig:
       BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
-      DockerfileFilePath: engines/batch-ensembler/app.Dockerfile
+      DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
       Image: gcr.io/kaniko-project/executor
       ImageVersion: v1.6.0
       ResourceRequestsLimits:

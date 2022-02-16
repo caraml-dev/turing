@@ -1,0 +1,30 @@
+{
+  "request": {
+    "feature_0": 0.12,
+    "feature_1": "a good feature"
+  },
+  "response": {
+    "route_responses": [
+      {
+        "route": "control",
+        "data": {
+          "predictions": 213
+        },
+        "is_default": true
+      },
+      {
+        "route": "route_1",
+        "data": {
+          "predictions": "a bad prediction"
+        },
+        "is_default": false
+      }
+    ],
+    "experiment": {
+      "configuration": {
+        "name": "configuration_0"
+      },
+      "error": ""
+    }
+  }
+}
