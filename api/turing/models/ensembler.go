@@ -54,6 +54,10 @@ type EnsemblerDockerConfig struct {
 type EnsemblerPyFuncRefConfig struct {
 	ProjectID   *ID `schema:"project_id" validate:"required"`
 	EnsemblerID *ID `schema:"ensembler_id" validate:"required"`
+	// Resource requests for ensembler container deployed
+	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
+	// Request timeout in duration format e.g. 60s
+	Timeout string `json:"timeout" validate:"required"`
 }
 
 type ExperimentMapping struct {
