@@ -9,9 +9,10 @@ import (
 // a Turing Router.
 type Ensembler struct {
 	Model
-	Type           EnsemblerType            `json:"type" validate:"required"`
-	StandardConfig *EnsemblerStandardConfig `json:"standard_config"` // Ensembler config when Type is "standard"
-	DockerConfig   *EnsemblerDockerConfig   `json:"docker_config"`   // Ensembler config when Type is "docker"
+	Type            EnsemblerType             `json:"type" validate:"required"`
+	StandardConfig  *EnsemblerStandardConfig  `json:"standard_config"`  // Ensembler config when Type is "standard"
+	DockerConfig    *EnsemblerDockerConfig    `json:"docker_config"`    // Ensembler config when Type is "docker"
+	PyFuncRefConfig *EnsemblerPyFuncRefConfig `json:"pyfuncref_config"` // Ensembler config when Type is "pyfunc"
 }
 
 // TableName returns the name of a table, where GORM should store/retrieve
@@ -50,6 +51,11 @@ type EnsemblerDockerConfig struct {
 	ServiceAccount string `json:"service_account"`
 }
 
+type EnsemblerPyFuncRefConfig struct {
+	ProjectID   *ID `schema:"project_id" validate:"required"`
+	EnsemblerID *ID `schema:"ensembler_id" validate:"required"`
+}
+
 type ExperimentMapping struct {
 	Experiment string `json:"experiment" validate:"required"` // Experiment name from the experiment engine
 	Treatment  string `json:"treatment" validate:"required"`  // Treatment name for the experiment
@@ -77,5 +83,17 @@ func (c EnsemblerDockerConfig) Value() (driver.Value, error) {
 // Scan implements sql.Scanner interface so database tools like go-orm knows how to de-serialize the struct object
 // from the database
 func (c *EnsemblerDockerConfig) Scan(value interface{}) error {
+	return json.Unmarshal(value.([]byte), &c)
+}
+
+// Value implements sql.driver.Valuer interface so database tools like go-orm knows how to serialize the struct object
+// for storage in the database
+func (c EnsemblerPyFuncRefConfig) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+// Scan implements sql.Scanner interface so database tools like go-orm knows how to de-serialize the struct object
+// from the database
+func (c *EnsemblerPyFuncRefConfig) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), &c)
 }
