@@ -148,6 +148,9 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		if r.Config.Ensembler.Type == models.EnsemblerStandardType && r.Config.Ensembler.StandardConfig == nil {
 			return nil, errors.New("missing ensembler standard config")
 		}
+		if r.Config.Ensembler.Type == models.EnsemblerTypePyFunc && r.Config.Ensembler.PyFuncRefConfig == nil {
+			return nil, errors.New("missing ensembler pyfunc reference config")
+		}
 		rv.Ensembler = r.Config.Ensembler
 	}
 	switch rv.LogConfig.ResultLoggerType {
