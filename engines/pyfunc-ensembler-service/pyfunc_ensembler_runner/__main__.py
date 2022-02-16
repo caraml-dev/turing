@@ -11,8 +11,8 @@ from pyfunc_ensembler_runner import PyFuncEnsemblerRunner
 parser = argparse.ArgumentParser()
 parser.add_argument('--mlflow_ensembler_dir', required=True, help='A dir pointing to the saved Mlflow Pyfunc ensembler')
 parser.add_argument('--dry_run', default=False, action='store_true', required=False,
-                    help="Dry run pyfunc server by loading the specified model "
-                         "in --model_dir without starting webserver")
+                    help="Dry run pyfunc ensembler by loading the specified ensembler "
+                         "in --mlflow_ensembler_dir without starting webserver")
 parser.add_argument('-l', '--log-level', dest='log_level',
                     choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                     help='Set the logging level', default=logging.DEBUG)
