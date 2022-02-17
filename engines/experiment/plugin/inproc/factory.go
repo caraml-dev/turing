@@ -3,6 +3,8 @@ package inproc
 import (
 	"encoding/json"
 
+	"github.com/gojek/turing/engines/experiment/config"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
 	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
@@ -24,9 +26,13 @@ func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	return runnerPlugin.Get(f.EngineName, f.EngineConfig)
 }
 
-func NewEngineFactory(name string, cfg json.RawMessage) (*EngineFactory, error) {
+func NewEngineFactory(name string, cfg config.EngineConfig) (*EngineFactory, error) {
+	engineCfg, err := cfg.RawEngineConfig()
+	if err != nil {
+		return nil, err
+	}
 	return &EngineFactory{
 		EngineName:   name,
-		EngineConfig: cfg,
+		EngineConfig: engineCfg,
 	}, nil
 }

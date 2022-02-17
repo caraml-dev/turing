@@ -1,4 +1,6 @@
-package experiment
+package config
+
+import "encoding/json"
 
 // EngineConfig is a struct used to decode engine's configuration into
 // It consists of an optional PluginBinary (if the experiment engine is implemented
@@ -8,4 +10,12 @@ type EngineConfig struct {
 	PluginBinary        string                 `mapstructure:"plugin_binary"`
 	PluginURL           string                 `mapstructure:"plugin_url"`
 	EngineConfiguration map[string]interface{} `mapstructure:",remain"`
+}
+
+func (c EngineConfig) IsPlugin() bool {
+	return c.PluginBinary != "" || c.PluginURL != ""
+}
+
+func (c EngineConfig) RawEngineConfig() (json.RawMessage, error) {
+	return json.Marshal(c.EngineConfiguration)
 }

@@ -82,12 +82,12 @@ build-image: vendor version
 	@echo "Building docker image: ${IMAGE_TAG}"
 	docker build \
 		--tag ${IMAGE_TAG} \
-		--build-arg BIN_NAME \
-		--build-arg VERSION \
-		--build-arg USER \
-		--build-arg HOST \
-		--build-arg BRANCH \
-		--build-arg NOW \
+		--build-arg BIN_NAME=$(BIN_NAME) \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg USER=$(USER) \
+		--build-arg HOST=$(HOST) \
+		--build-arg BRANCH=$(BRANCH) \
+		--build-arg NOW=$(NOW) \
 		.
 
 .PHONY: swagger-ui

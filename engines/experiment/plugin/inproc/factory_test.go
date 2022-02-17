@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/config"
+
 	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/experiment/manager"
 	mocksManager "github.com/gojek/turing/engines/experiment/manager/mocks"
@@ -19,11 +21,15 @@ import (
 func Test_NewEngineFactory(t *testing.T) {
 	suite := map[string]struct {
 		engine string
-		cfg    json.RawMessage
+		cfg    config.EngineConfig
 	}{
 		"success": {
 			engine: "engine-1",
-			cfg:    json.RawMessage("{\"my_config\": \"my_value\"}"),
+			cfg: config.EngineConfig{
+				EngineConfiguration: map[string]interface{}{
+					"my_config": "my_value",
+				},
+			},
 		},
 	}
 	for name, tt := range suite {
@@ -31,7 +37,9 @@ func Test_NewEngineFactory(t *testing.T) {
 			factory, err := plugin.NewEngineFactory(tt.engine, tt.cfg)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.engine, factory.EngineName)
-			assert.Equal(t, tt.cfg, factory.EngineConfig)
+
+			rawConfig, _ := tt.cfg.RawEngineConfig()
+			assert.Equal(t, rawConfig, factory.EngineConfig)
 		})
 	}
 }
@@ -67,7 +75,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			factory, _ := plugin.NewEngineFactory(tt.engine, nil)
+			factory, _ := plugin.NewEngineFactory(tt.engine, config.EngineConfig{})
 			withPatchedManagerRegistry(tt.expected, tt.err, func() {
 				actual, err := factory.GetExperimentManager()
 				if tt.err != "" {
@@ -112,7 +120,7 @@ func TestEngineFactory_GetExperimentRunner(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			factory, _ := plugin.NewEngineFactory(tt.engine, nil)
+			factory, _ := plugin.NewEngineFactory(tt.engine, config.EngineConfig{})
 			withPatchedRunnerRegistry(tt.expected, tt.err, func() {
 				actual, err := factory.GetExperimentRunner()
 				if tt.err != "" {

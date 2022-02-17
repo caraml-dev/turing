@@ -1,9 +1,10 @@
-package experiment_test
+package config_test
 
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment"
+	"github.com/gojek/turing/engines/experiment/config"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,14 +12,14 @@ import (
 func Test_EngineConfigDecoding(t *testing.T) {
 	var suite = map[string]struct {
 		cfg      interface{}
-		expected experiment.EngineConfig
+		expected config.EngineConfig
 		err      string
 	}{
 		"success | plugin": {
 			cfg: map[string]interface{}{
 				"plugin_binary": "path/to/binary",
 			},
-			expected: experiment.EngineConfig{
+			expected: config.EngineConfig{
 				PluginBinary:        "path/to/binary",
 				EngineConfiguration: nil,
 			},
@@ -31,7 +32,7 @@ func Test_EngineConfigDecoding(t *testing.T) {
 					"Key2-1": "Value2-1",
 				},
 			},
-			expected: experiment.EngineConfig{
+			expected: config.EngineConfig{
 				PluginBinary: "path/to/binary",
 				EngineConfiguration: map[string]interface{}{
 					"Key1": "Value1",
@@ -45,7 +46,7 @@ func Test_EngineConfigDecoding(t *testing.T) {
 			cfg: map[string]interface{}{
 				"Key1": "Value1",
 			},
-			expected: experiment.EngineConfig{
+			expected: config.EngineConfig{
 				EngineConfiguration: map[string]interface{}{
 					"Key1": "Value1",
 				},
@@ -64,7 +65,7 @@ func Test_EngineConfigDecoding(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			var actual experiment.EngineConfig
+			var actual config.EngineConfig
 			err := mapstructure.Decode(tt.cfg, &actual)
 
 			if tt.err != "" {
@@ -73,6 +74,44 @@ func Test_EngineConfigDecoding(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected, actual)
 			}
+		})
+	}
+}
+
+func TestEngineConfig_IsPlugin(t *testing.T) {
+	var suite = map[string]struct {
+		cfg      config.EngineConfig
+		expected bool
+	}{
+		"success | binary path provided": {
+			cfg: config.EngineConfig{
+				PluginBinary: "/app/plugins/my_plugin",
+			},
+			expected: true,
+		},
+		"success | download url provided": {
+			cfg: config.EngineConfig{
+				PluginURL: "http://localhost:8080/plugins/my_plugin",
+			},
+			expected: true,
+		},
+		"success | binary path and download url provided": {
+			cfg: config.EngineConfig{
+				PluginBinary: "/app/plugins/my_plugin",
+				PluginURL:    "http://localhost:8080/plugins/my_plugin",
+			},
+			expected: true,
+		},
+		"success | not provided": {
+			cfg:      config.EngineConfig{},
+			expected: false,
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			actual := tt.cfg.IsPlugin()
+			assert.Equal(t, tt.expected, actual)
 		})
 	}
 }

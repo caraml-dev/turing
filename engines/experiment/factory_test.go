@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gojek/turing/engines/experiment/config"
+
 	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/experiment"
 	"github.com/gojek/turing/engines/experiment/plugin/inproc"
@@ -41,7 +43,7 @@ func Test_NewEngineFactory(t *testing.T) {
 			},
 			withPatch: func(expected experiment.EngineFactory, fn func()) {
 				monkey.Patch(rpc.NewFactory,
-					func(string, json.RawMessage, *zap.SugaredLogger) (*rpc.EngineFactory, error) {
+					func(string, config.EngineConfig, *zap.SugaredLogger) (*rpc.EngineFactory, error) {
 						return expected.(*rpc.EngineFactory), nil
 					},
 				)

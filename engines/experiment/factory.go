@@ -1,13 +1,7 @@
 package experiment
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/url"
-	"path"
-
-	"github.com/gojek/turing/engines/experiment/pkg/utils"
-
+	"github.com/gojek/turing/engines/experiment/config"
 	"github.com/gojek/turing/engines/experiment/manager"
 	"github.com/gojek/turing/engines/experiment/plugin/inproc"
 	"github.com/gojek/turing/engines/experiment/plugin/rpc"
@@ -29,36 +23,16 @@ type EngineFactory interface {
 //  - experiment/plugin/rpc/factory (for experiment engines implemented as external net/rpc plugins)
 // The actual implementation is determined based on provided engine configuration (passed via `cfg`)
 func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.SugaredLogger) (EngineFactory, error) {
-	var engineCfg EngineConfig
+	var engineCfg config.EngineConfig
 	if err := mapstructure.Decode(cfg, &engineCfg); err != nil {
 		return nil, err
 	}
 
-	engineCfgJSON, err := json.Marshal(engineCfg.EngineConfiguration)
-	if err != nil {
-		return nil, err
-	}
-
 	// plugin-based implementation of the experiment engine factory
-	if engineCfg.PluginBinary != "" {
-		return rpc.NewFactory(engineCfg.PluginBinary, engineCfgJSON, logger)
-	}
-
-	if engineCfg.PluginURL != "" {
-		downloadURL, err := url.Parse(engineCfg.PluginURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
-		}
-
-		filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
-		err = utils.DownloadFile(downloadURL, filename, 0744)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"failed to download plugin's binary from remote url: url=%s, %v", engineCfg.PluginURL, err)
-		}
-		return rpc.NewFactory(filename, engineCfgJSON, logger)
+	if engineCfg.IsPlugin() {
+		return rpc.NewFactory(name, engineCfg, logger)
 	}
 
 	// compile-time implementation of the experiment engine factory
-	return inproc.NewEngineFactory(name, engineCfgJSON)
+	return inproc.NewEngineFactory(name, engineCfg)
 }
