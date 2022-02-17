@@ -3,15 +3,23 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"path"
 	"reflect"
 	"sync"
 
+	"github.com/gojek/turing/engines/experiment/config"
 	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/pkg/utils"
 	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
+	"github.com/mitchellh/hashstructure/v2"
 	"go.uber.org/zap"
 )
+
+var factoriesmu sync.Mutex
+var factories = make(map[string]*EngineFactory)
 
 // EngineFactory implements experiment.EngineFactory and creates experiment manager/runner
 // backed by net/rpc plugin implementations
@@ -74,7 +82,44 @@ func (f *EngineFactory) GetExperimentRunner() (runner.ExperimentRunner, error) {
 	return f.runner, nil
 }
 
-func NewFactory(pluginBinary string, engineCfg json.RawMessage, logger *zap.SugaredLogger) (*EngineFactory, error) {
+func NewFactory(name string, cfg config.EngineConfig, logger *zap.SugaredLogger) (*EngineFactory, error) {
+	factoriesmu.Lock()
+	defer factoriesmu.Unlock()
+
+	// get a hash of the engine's configuration and use it as a fingerprint
+	cfgHash, err := hashstructure.Hash(cfg, hashstructure.FormatV2, nil)
+	if err != nil {
+		return nil, err
+	}
+	factoryKey := fmt.Sprintf("%s-%d", name, cfgHash)
+
+	if engineFactory, ok := factories[factoryKey]; ok {
+		return engineFactory, nil
+	}
+
+	engineCfg, err := cfg.RawEngineConfig()
+	if err != nil {
+		return nil, err
+	}
+	if cfg.PluginBinary != "" {
+		factories[factoryKey], err = NewFactoryFromBinary(cfg.PluginBinary, engineCfg, logger)
+	} else if cfg.PluginURL != "" {
+		factories[factoryKey], err = NewFactoryFromURL(cfg.PluginURL, engineCfg, logger)
+	} else {
+		err = fmt.Errorf("either `plugin_url` or `plugin_binary` must be specified")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return factories[factoryKey], nil
+}
+
+func NewFactoryFromBinary(
+	pluginBinary string,
+	engineCfg json.RawMessage,
+	logger *zap.SugaredLogger,
+) (*EngineFactory, error) {
 	rpcClient, err := Connect(pluginBinary, logger.Desugar())
 	if err != nil {
 		return nil, err
@@ -84,4 +129,23 @@ func NewFactory(pluginBinary string, engineCfg json.RawMessage, logger *zap.Suga
 		Client:       rpcClient,
 		EngineConfig: engineCfg,
 	}, nil
+}
+
+func NewFactoryFromURL(
+	pluginURL string,
+	engineCfg json.RawMessage,
+	logger *zap.SugaredLogger,
+) (*EngineFactory, error) {
+	downloadURL, err := url.Parse(pluginURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
+	}
+
+	filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
+	err = utils.DownloadFile(downloadURL, filename, 0744)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to download plugin's binary from remote url: url=%s, %v", pluginURL, err)
+	}
+	return NewFactoryFromBinary(filename, engineCfg, logger)
 }

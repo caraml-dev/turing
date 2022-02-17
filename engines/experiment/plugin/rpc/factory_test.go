@@ -34,8 +34,9 @@ func withPatchedConnect(client goPlugin.ClientProtocol, err string, fn func()) {
 
 func TestNewFactory(t *testing.T) {
 	suite := map[string]struct {
-		cfg json.RawMessage
-		err string
+		name string
+		cfg  json.RawMessage
+		err  string
 	}{
 		"success": {
 			cfg: json.RawMessage("{\"key_1\": \"value_1\"}"),
@@ -51,7 +52,7 @@ func TestNewFactory(t *testing.T) {
 
 		t.Run(name, func(t *testing.T) {
 			withPatchedConnect(mockClient, tt.err, func() {
-				actual, err := rpc.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
+				actual, err := rpc.NewFactoryFromBinary("path/to/plugin", tt.cfg, logger.Sugar())
 				if tt.err != "" {
 					assert.EqualError(t, err, tt.err)
 					assert.Nil(t, actual)
@@ -130,7 +131,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 				).Once()
 
 			withPatchedConnect(mockClient, "", func() {
-				factory, _ := rpc.NewFactory("path/to/plugin", tt.cfg, logger.Sugar())
+				factory, _ := rpc.NewFactoryFromBinary("path/to/plugin", tt.cfg, logger.Sugar())
 				actual, err := factory.GetExperimentManager()
 
 				if tt.err != "" {
