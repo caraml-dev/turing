@@ -33,7 +33,6 @@ BatchEnsemblingConfig:
           CPU: "1"
           Memory: 1Gi
 EnsemblerServiceConfig:
-  Enabled: true
   JobConfig:
     DefaultEnvironment: dev
   RunnerConfig:

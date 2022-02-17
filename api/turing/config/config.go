@@ -60,6 +60,7 @@ type Config struct {
 	AllowedOrigins         []string
 	AuthConfig             *AuthorizationConfig
 	BatchEnsemblingConfig  BatchEnsemblingConfig   `validate:"required"`
+	EnsemblerServiceConfig EnsemblerServiceConfig  `validate:"required"`
 	DbConfig               *DatabaseConfig         `validate:"required"`
 	DeployConfig           *DeploymentConfig       `validate:"required"`
 	SparkAppConfig         *SparkAppConfig         `validate:"required"`
@@ -106,6 +107,15 @@ type BatchEnsemblingConfig struct {
 	JobConfig           *JobConfig           `validate:"required_if=Enabled True"`
 	RunnerConfig        *RunnerConfig        `validate:"required_if=Enabled True"`
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required_if=Enabled True"`
+	LoggingURLFormat    *string
+	MonitoringURLFormat *string
+}
+
+// EnsemblerServiceConfig caputres the config related to the build and running of ensembler services (real-time)
+type EnsemblerServiceConfig struct {
+	JobConfig           *JobConfig           `validate:"required"`
+	RunnerConfig        *RunnerConfig        `validate:"required"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
 }
