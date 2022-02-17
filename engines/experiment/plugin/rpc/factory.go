@@ -86,7 +86,7 @@ func NewFactory(name string, cfg config.EngineConfig, logger *zap.SugaredLogger)
 	factoriesmu.Lock()
 	defer factoriesmu.Unlock()
 
-	// get a hash of the engine's configuration and use it as a fingerprint
+	// get a hash of the engine's configuration and use it as a configuration's fingerprint
 	cfgHash, err := hashstructure.Hash(cfg, hashstructure.FormatV2, nil)
 	if err != nil {
 		return nil, err
