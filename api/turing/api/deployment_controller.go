@@ -3,6 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
+	"github.com/gojek/turing/api/turing/imagebuilder"
 	"strings"
 
 	merlin "github.com/gojek/merlin/client"
@@ -228,6 +231,60 @@ func (c RouterDeploymentController) deployRouterVersion(
 		_, err := c.RouterVersionsService.Save(routerVersion)
 		if err != nil {
 			return "", err
+		}
+	}
+
+	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
+	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerTypePyFunc {
+		ensembler, err := c.EnsemblersService.FindByID(
+			*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+			service.EnsemblersFindByIDOptions{
+				ProjectID: routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+			})
+		if err != nil {
+			return "", err
+		}
+
+		// Check if retrieved ensembler as a pyfunc ensembler
+		var pyFuncEnsembler *models.PyFuncEnsembler
+		switch v := ensembler.(type) {
+		case *models.PyFuncEnsembler:
+			pyFuncEnsembler = ensembler.(*models.PyFuncEnsembler)
+		default:
+			return "", errors.New(fmt.Sprintf("only pyfunc ensemblers allowed; ensembler type given: %T", v))
+		}
+
+		// Get metadata corresponding to retrieved ensembler
+		artifactUri := &pyFuncEnsembler.ArtifactURI
+		ensemblerName := &pyFuncEnsembler.Name
+
+		labelRequest := labeller.KubernetesLabelsRequest{
+			Stream: project.Stream,
+			Team:   project.Team,
+			App:    *ensemblerName,
+		}
+		labels := labeller.BuildLabels(labelRequest)
+
+		// Build image corresponding to the retrieved ensembler
+		request := imagebuilder.BuildImageRequest{
+			ProjectName:  project.Name,
+			ResourceName: *ensemblerName,
+			VersionID:    *routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+			ArtifactURI:  *artifactUri,
+			BuildLabels:  labels,
+		}
+		imageRef, imageBuildErr := c.AppContext.EnsemblerServiceBuilder.BuildImage(request)
+		if imageBuildErr != nil {
+			return "", errors.New("ensembler service image building failed")
+		}
+
+		// Create a new docker config for the ensembler with the newly generated image
+		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
+			Image:           imageRef,
+			ResourceRequest: routerVersion.Ensembler.PyFuncRefConfig.ResourceRequest,
+			Endpoint:        models.PyFuncEnsemblerServiceEndpoint,
+			Port:            models.PyFuncEnsemblerServicePort,
+			Timeout:         routerVersion.Ensembler.PyFuncRefConfig.Timeout,
 		}
 	}
 

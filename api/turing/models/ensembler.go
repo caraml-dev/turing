@@ -60,6 +60,11 @@ type EnsemblerPyFuncRefConfig struct {
 	Timeout string `json:"timeout" validate:"required"`
 }
 
+type EnsemblerContainerConfig struct {
+	// Resource requests for ensembler container deployed
+	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
+}
+
 type ExperimentMapping struct {
 	Experiment string `json:"experiment" validate:"required"` // Experiment name from the experiment engine
 	Treatment  string `json:"treatment" validate:"required"`  // Treatment name for the experiment
@@ -101,3 +106,10 @@ func (c EnsemblerPyFuncRefConfig) Value() (driver.Value, error) {
 func (c *EnsemblerPyFuncRefConfig) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), &c)
 }
+
+const (
+	// URL path for the endpoint, e.g "/"
+	PyFuncEnsemblerServiceEndpoint string = "/ensemble"
+	// Port number the container listens to for requests
+	PyFuncEnsemblerServicePort int = 8080
+)
