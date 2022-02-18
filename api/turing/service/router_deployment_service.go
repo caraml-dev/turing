@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -15,6 +14,7 @@ import (
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -354,16 +354,6 @@ func (ds *deploymentService) createServices(
 	if routerVersion.Ensembler != nil &&
 		(routerVersion.Ensembler.Type == models.EnsemblerTypePyFunc ||
 			routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerDockerType) {
-
-		// If pyfunc ensembler is specified, retrieve the image with the pyfunc ensembler service
-		if routerVersion.Ensembler.Type == models.EnsemblerTypePyFunc {
-			// Retrieve saved pyfunc ensembler
-
-			// Check if image exists else build new image
-
-			// Use that new image and run it
-		}
-
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion,
 			project,
