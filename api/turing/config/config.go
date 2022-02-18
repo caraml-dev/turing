@@ -55,26 +55,26 @@ type EngineConfig map[string]interface{}
 
 // Config is used to parse and store the environment configs
 type Config struct {
-	Port                   int `validate:"required"`
-	LogLevel               string
-	AllowedOrigins         []string
-	AuthConfig             *AuthorizationConfig
-	BatchEnsemblingConfig  BatchEnsemblingConfig   `validate:"required"`
-	EnsemblerServiceConfig EnsemblerServiceConfig  `validate:"required"`
-	DbConfig               *DatabaseConfig         `validate:"required"`
-	DeployConfig           *DeploymentConfig       `validate:"required"`
-	SparkAppConfig         *SparkAppConfig         `validate:"required"`
-	RouterDefaults         *RouterDefaults         `validate:"required"`
-	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
-	KnativeServiceDefaults *KnativeServiceDefaults
-	NewRelicConfig         newrelic.Config
-	Sentry                 sentry.Config
-	ClusterConfig          ClusterConfig `validate:"required"`
-	TuringEncryptionKey    string        `validate:"required"`
-	AlertConfig            *AlertConfig
-	MLPConfig              *MLPConfig `validate:"required"`
-	TuringUIConfig         *SinglePageApplicationConfig
-	OpenapiConfig          *OpenapiConfig
+	Port                          int `validate:"required"`
+	LogLevel                      string
+	AllowedOrigins                []string
+	AuthConfig                    *AuthorizationConfig
+	BatchEnsemblingConfig         BatchEnsemblingConfig         `validate:"required"`
+	EnsemblerServiceBuilderConfig EnsemblerServiceBuilderConfig `validate:"required"`
+	DbConfig                      *DatabaseConfig               `validate:"required"`
+	DeployConfig                  *DeploymentConfig             `validate:"required"`
+	SparkAppConfig                *SparkAppConfig               `validate:"required"`
+	RouterDefaults                *RouterDefaults               `validate:"required"`
+	KubernetesLabelConfigs        *KubernetesLabelConfigs       `validate:"required"`
+	KnativeServiceDefaults        *KnativeServiceDefaults
+	NewRelicConfig                newrelic.Config
+	Sentry                        sentry.Config
+	ClusterConfig                 ClusterConfig `validate:"required"`
+	TuringEncryptionKey           string        `validate:"required"`
+	AlertConfig                   *AlertConfig
+	MLPConfig                     *MLPConfig `validate:"required"`
+	TuringUIConfig                *SinglePageApplicationConfig
+	OpenapiConfig                 *OpenapiConfig
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -112,8 +112,8 @@ type BatchEnsemblingConfig struct {
 }
 
 // EnsemblerServiceConfig caputres the config related to the build and running of ensembler services (real-time)
-type EnsemblerServiceConfig struct {
-	JobConfig           *JobConfig           `validate:"required"`
+type EnsemblerServiceBuilderConfig struct {
+	BuilderConfig       *BuilderConfig       `validate:"required"`
 	RunnerConfig        *RunnerConfig        `validate:"required"`
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
 	LoggingURLFormat    *string
@@ -127,6 +127,12 @@ type JobConfig struct {
 	// DefaultConfigurations contains the default configurations applied to the ensembling job.
 	// The user (the person who calls the API) is free to override/append the default values.
 	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
+}
+
+// BuilderConfig captures the config related to the ensembling service building jobs.
+type BuilderConfig struct {
+	// DefaultEnvironment is the environment used for image building of the ensembler services.
+	DefaultEnvironment string `validate:"required"`
 }
 
 // DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.

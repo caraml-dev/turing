@@ -81,7 +81,7 @@ type ImageBuilder interface {
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderJobName(projectName string, modelName string, versionID models.ID) string
+	generateBuilderName(projectName string, modelName string, versionID models.ID) string
 	// generateDockerImageName generate image name based on project and model
 	generateDockerImageName(projectName string, modelName string) string
 }
@@ -125,7 +125,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	}
 
 	// Check if there is an existing build job
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		request.ProjectName,
 		request.ResourceName,
 		request.VersionID,
@@ -343,7 +343,7 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 	modelName string,
 	versionID models.ID,
 ) (JobStatus, error) {
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
 		versionID,
@@ -376,7 +376,7 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 	modelName string,
 	versionID models.ID,
 ) error {
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
 		versionID,

@@ -32,8 +32,8 @@ BatchEnsemblingConfig:
         Limits:
           CPU: "1"
           Memory: 1Gi
-EnsemblerServiceConfig:
-  JobConfig:
+EnsemblerServiceBuilderConfig:
+  BuilderConfig:
     DefaultEnvironment: dev
   RunnerConfig:
     TimeInterval: 10s
