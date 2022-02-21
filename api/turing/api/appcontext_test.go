@@ -1,6 +1,7 @@
 package api
 
 import (
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"testing"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
-	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"
@@ -70,12 +70,37 @@ func TestNewAppContext(t *testing.T) {
 			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry:  "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
-					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					DockerfileFilePath: "engines/pyfunc-ensembler-job/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
+		},
+		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
+			DefaultEnvironment: "dev",
+			ImageBuildingConfig: &config.ImageBuildingConfig{
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/pyfunc-ensembler-service/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",
 					ResourceRequestsLimits: config.ResourceRequestsLimits{
@@ -283,18 +308,24 @@ func TestNewAppContext(t *testing.T) {
 		testCfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 	)
 
+	ensemblerImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
+		nil,
+		*testCfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
+	)
+
 	assert.Equal(t, &AppContext{
-		Authorizer:            testAuthorizer,
-		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
-		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     service.NewEnsemblersService(nil),
-		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
-		EventService:          service.NewEventService(nil),
-		RouterDefaults:        testCfg.RouterDefaults,
-		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
-		MLPService:            mlpService,
-		ExperimentsService:    experimentService,
+		Authorizer:              testAuthorizer,
+		DeploymentService:       service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
+		RoutersService:          service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
+		EnsemblersService:       service.NewEnsemblersService(nil),
+		EnsemblingJobService:    ensemblingJobService,
+		RouterVersionsService:   service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
+		EventService:            service.NewEventService(nil),
+		RouterDefaults:          testCfg.RouterDefaults,
+		EnsemblerServiceBuilder: ensemblerImageBuilder,
+		CryptoService:           service.NewCryptoService(testCfg.TuringEncryptionKey),
+		MLPService:              mlpService,
+		ExperimentsService:      experimentService,
 		PodLogService: service.NewPodLogService(
 			map[string]cluster.Controller{},
 		),
