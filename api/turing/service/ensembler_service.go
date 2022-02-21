@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-	"strings"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -101,16 +99,4 @@ func (service *ensemblersService) Save(ensembler models.EnsemblerLike) (models.E
 		return nil, err
 	}
 	return service.FindByID(ensembler.GetID(), EnsemblersFindByIDOptions{})
-}
-
-func GetEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
-	// Ensembler URI will be a local directory
-	// Dockerfile will build copy the artifact into the local directory.
-	// See engines/batch-ensembler/app.Dockerfile
-	splitURI := strings.Split(ensembler.ArtifactURI, "/")
-	return fmt.Sprintf(
-		"%s/%s/ensembler",
-		SparkHomeFolder,
-		splitURI[len(splitURI)-1],
-	)
 }
