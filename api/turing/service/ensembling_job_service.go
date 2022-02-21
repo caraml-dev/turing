@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 	"time"
 
@@ -225,6 +226,18 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	return paginatedResults, nil
 }
 
+func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
+	// Ensembler URI will be a local directory
+	// Dockerfile will build copy the artifact into the local directory.
+	// See engines/batch-ensembler/app.Dockerfile
+	splitURI := strings.Split(ensembler.ArtifactURI, "/")
+	return fmt.Sprintf(
+		"%s/%s/ensembler",
+		SparkHomeFolder,
+		splitURI[len(splitURI)-1],
+	)
+}
+
 // EnsemblingMonitoringVariables the values supplied to BatchEnsemblingConfig.MonitoringURLTemplate
 type EnsemblingMonitoringVariables struct {
 	// Project is the MLP Project associated with the batch ensembler
@@ -261,7 +274,7 @@ func (s *ensemblingJobService) CreateEnsemblingJob(
 	job.ProjectID = projectID
 	job.EnvironmentName = s.defaultEnvironment
 
-	job.JobConfig.Spec.Ensembler.Uri = GetEnsemblerDirectory(ensembler)
+	job.JobConfig.Spec.Ensembler.Uri = getEnsemblerDirectory(ensembler)
 	job.InfraConfig.ArtifactUri = &ensembler.ArtifactURI
 	job.InfraConfig.EnsemblerName = &ensembler.Name
 
