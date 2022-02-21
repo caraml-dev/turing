@@ -33,12 +33,7 @@ BatchEnsemblingConfig:
           CPU: "1"
           Memory: 1Gi
 EnsemblerServiceBuilderConfig:
-  BuilderConfig:
-    DefaultEnvironment: dev
-  RunnerConfig:
-    TimeInterval: 10s
-    RecordsToProcessInOneIteration: 10
-    MaxRetryCount: 3
+  DefaultEnvironment: dev
   ImageBuildingConfig:
     BuildNamespace: default
     BuildTimeoutDuration: 20m

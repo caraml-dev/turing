@@ -143,7 +143,7 @@ func NewAppContext(
 
 	// Initialise EnsemblerServiceImageBuilder
 	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
-		clusterControllers[cfg.EnsemblerServiceBuilderConfig.BuilderConfig.DefaultEnvironment],
+		clusterControllers[cfg.EnsemblerServiceBuilderConfig.DefaultEnvironment],
 		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
 	)
 	if err != nil {

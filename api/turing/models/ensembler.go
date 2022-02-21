@@ -10,9 +10,9 @@ import (
 type Ensembler struct {
 	Model
 	Type            EnsemblerType             `json:"type" validate:"required"`
-	StandardConfig  *EnsemblerStandardConfig  `json:"standard_config"`  // Ensembler config when Type is "standard"
-	DockerConfig    *EnsemblerDockerConfig    `json:"docker_config"`    // Ensembler config when Type is "docker"
-	PyFuncRefConfig *EnsemblerPyFuncRefConfig `json:"pyfuncref_config"` // Ensembler config when Type is "pyfunc"
+	StandardConfig  *EnsemblerStandardConfig  `json:"standard_config"`    // Ensembler config when Type is "standard"
+	DockerConfig    *EnsemblerDockerConfig    `json:"docker_config"`      // Ensembler config when Type is "docker"
+	PyFuncRefConfig *EnsemblerPyFuncRefConfig `json:"py_func_ref_config"` // Ensembler config when Type is "pyfunc"
 }
 
 // TableName returns the name of a table, where GORM should store/retrieve

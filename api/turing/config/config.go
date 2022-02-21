@@ -113,11 +113,8 @@ type BatchEnsemblingConfig struct {
 
 // EnsemblerServiceConfig caputres the config related to the build and running of ensembler services (real-time)
 type EnsemblerServiceBuilderConfig struct {
-	BuilderConfig       *BuilderConfig       `validate:"required"`
-	RunnerConfig        *RunnerConfig        `validate:"required"`
+	DefaultEnvironment  string               `validate:"required"`
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
-	LoggingURLFormat    *string
-	MonitoringURLFormat *string
 }
 
 // JobConfig captures the config related to the ensembling batch jobs.
@@ -127,12 +124,6 @@ type JobConfig struct {
 	// DefaultConfigurations contains the default configurations applied to the ensembling job.
 	// The user (the person who calls the API) is free to override/append the default values.
 	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
-}
-
-// BuilderConfig captures the config related to the ensembling service building jobs.
-type BuilderConfig struct {
-	// DefaultEnvironment is the environment used for image building of the ensembler services.
-	DefaultEnvironment string `validate:"required"`
 }
 
 // DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.

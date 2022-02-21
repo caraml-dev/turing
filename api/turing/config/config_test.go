@@ -583,7 +583,32 @@ func TestConfigValidate(t *testing.T) {
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
-					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					DockerfileFilePath: "engines/pyfunc-ensembler-job/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
+		},
+		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
+			DefaultEnvironment: "dev",
+			ImageBuildingConfig: &config.ImageBuildingConfig{
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/pyfunc-ensembler-job/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",
 					ResourceRequestsLimits: config.ResourceRequestsLimits{
