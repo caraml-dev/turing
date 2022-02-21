@@ -1,6 +1,7 @@
 ALTER TABLE ensemblers ADD type text;
 ALTER TABLE ensemblers ADD standard_config jsonb;
 ALTER TABLE ensemblers ADD docker_config jsonb;
+ALTER TABLE ensemblers ADD py_func_ref_config jsonb;
 
 -- Migrate Ensembler rows data from old schema to new schema (with type: docker and docker_config populated
 -- from the columns in the old schema)
