@@ -31,7 +31,7 @@ func (n *ensemblerJobNameGenerator) generateBuilderName(
 	modelName string,
 	versionID models.ID,
 ) string {
-	return fmt.Sprintf("batch-%s-%s-%d", projectName, modelName, versionID)
+	return fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, versionID)
 }
 
 // generateDockerImageName generate the name of docker image of prediction job that will be created from given model
@@ -62,7 +62,7 @@ func (n *ensemblerServiceNameGenerator) generateBuilderName(
 	modelName string,
 	versionID models.ID,
 ) string {
-	return fmt.Sprintf("batch-%s-%s-%d", projectName, modelName, versionID)
+	return fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, versionID)
 }
 
 // generateServiceImageName generate the name of docker image of the ensembling service that will be created from given
