@@ -1,26 +1,17 @@
-ALTER TABLE ensemblers ADD image varchar(128) NOT NULL DEFAULT '';
-ALTER TABLE ensemblers ADD resource_request jsonb NOT NULL DEFAULT json_object('{}');
-ALTER TABLE ensemblers ADD endpoint varchar(128) NOT NULL DEFAULT '';
-ALTER TABLE ensemblers ADD timeout varchar(20) NOT NULL DEFAULT '';
-ALTER TABLE ensemblers ADD port integer NOT NULL DEFAULT '0';
-ALTER TABLE ensemblers ADD env jsonb;
-ALTER TABLE ensemblers ADD service_account text;
-
 -- Migrate Ensembler rows data from new schema to old schema.
--- Note that in the old schema the columns are referring to only docker config.
--- There is no config for "standard" type.
--- Hence, this migration involves data loss for ensembler with type that is not "docker"
+-- Note that in the old schema the docker_config column has resource_request and timeout as separate columns.
+-- There is no container_runtime_config for "standard" type so ensemblers with that type are unaffected.
+-- Hence, this migration involves data loss for ensemblers with type that is "pyfunc"
 UPDATE ensemblers
-SET image            = docker_config ->> 'image',
-    resource_request = (docker_config ->> 'resource_request')::jsonb,
-    endpoint         = docker_config ->> 'endpoint',
-    timeout          = docker_config ->> 'timeout',
-    port             = (docker_config ->> 'port')::int,
-    env              = (docker_config ->> 'env')::jsonb,
-    service_account  = docker_config ->> 'service_account'
-WHERE type = 'docker';
+SET docker_config = (SELECT json_build_object(
+        'image', image,
+        'resource_request', (docker_config -> 'container_runtime_config' ->> 'resource_request')::jsonb,
+        'endpoint', endpoint,
+        'timeout', (docker_config -> 'container_runtime_config' ->> 'timeout')::jsonb,
+        'port', port,
+        'env', env,
+        'service_account', service_account
+    ))
 
-ALTER TABLE ensemblers DROP COLUMN type;
-ALTER TABLE ensemblers DROP COLUMN standard_config;
-ALTER TABLE ensemblers DROP COLUMN docker_config;
+ALTER TABLE ensemblers DROP COLUMN py_func_ref_config;
 

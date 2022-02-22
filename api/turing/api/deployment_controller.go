@@ -280,11 +280,10 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 		// Create a new docker config for the ensembler with the newly generated image
 		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
-			Image:           imageRef,
-			ResourceRequest: routerVersion.Ensembler.PyFuncRefConfig.ResourceRequest,
-			Endpoint:        models.PyFuncEnsemblerServiceEndpoint,
-			Port:            models.PyFuncEnsemblerServicePort,
-			Timeout:         routerVersion.Ensembler.PyFuncRefConfig.Timeout,
+			Image:                           imageRef,
+			EnsemblerContainerRuntimeConfig: routerVersion.Ensembler.PyFuncRefConfig.EnsemblerContainerRuntimeConfig,
+			Endpoint:                        models.PyFuncEnsemblerServiceEndpoint,
+			Port:                            models.PyFuncEnsemblerServicePort,
 		}
 	}
 

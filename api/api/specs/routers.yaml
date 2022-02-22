@@ -716,11 +716,13 @@ components:
         type:
           description: "type of ensembler"
           type: "string"
-          enum: [ "standard", "docker" ]
+          enum: [ "standard", "docker", "pyfunc"]
         standard_config:
           $ref: "#/components/schemas/EnsemblerStandardConfig"
         docker_config:
           $ref: "#/components/schemas/EnsemblerDockerConfig"
+        py_func_ref_config:
+          $ref: "#/components/schemas/EnsemblerPyFuncRefConfig"
         created_at:
           type: "string"
           format: "date-time"
@@ -765,21 +767,18 @@ components:
       nullable: true
       required:
         - image
-        - resource_request
+        - container_runtime_config
         - endpoint
-        - timeout
         - port
         - env
       properties:
         image:
           type: "string"
           pattern: '^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$'
-        resource_request:
-          $ref: "#/components/schemas/ResourceRequest"
+        container_runtime_config:
+          $ref: "#/components/schemas/ContainerRuntimeConfig"
         endpoint:
           type: "string"
-        timeout:
-          <<: *timeout
         port:
           type: "integer"
         env:
@@ -793,6 +792,33 @@ components:
             JSON key. This secret will be mounted as a file inside the container and the environment variable
             GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: "secret-name-for-google-service-account"
+
+    EnsemblerPyFuncRefConfig:
+      description: "ensembler config when ensembler type is pyfunc"
+      type: "object"
+      nullable: true
+      required:
+        - project_id
+        - ensembler_id
+        - container_runtime_config
+      properties:
+        project_id:
+          type: "integer"
+        ensembler_id:
+          type: "integer"
+        container_runtime_config:
+          $ref: "#/components/schemas/ContainerRuntimeConfig"
+
+    ContainerRuntimeConfig:
+      type: "object"
+      required:
+        - resource_request
+        - timeout
+      properties:
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
+        timeout:
+          <<: *timeout
 
     ResourceRequest:
       type: "object"

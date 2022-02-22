@@ -210,7 +210,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		)
 		envs = append(envs, []corev1.EnvVar{
 			{Name: envEnsemblerEndpoint, Value: endpoint},
-			{Name: envEnsemblerTimeout, Value: ver.Ensembler.DockerConfig.Timeout},
+			{Name: envEnsemblerTimeout, Value: ver.Ensembler.DockerConfig.EnsemblerContainerRuntimeConfig.Timeout},
 		}...)
 	}
 

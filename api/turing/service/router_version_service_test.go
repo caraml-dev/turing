@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package service_test
@@ -104,18 +105,20 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				Type: "docker",
 				DockerConfig: &models.EnsemblerDockerConfig{
 					Image: "ensembler:1.0.0",
-					ResourceRequest: &models.ResourceRequest{
-						MinReplica: 0,
-						MaxReplica: 10,
-						CPURequest: resource.Quantity{
-							Format: "100m",
+					EnsemblerContainerRuntimeConfig: &models.EnsemblerContainerRuntimeConfig{
+						ResourceRequest: &models.ResourceRequest{
+							MinReplica: 0,
+							MaxReplica: 10,
+							CPURequest: resource.Quantity{
+								Format: "100m",
+							},
+							MemoryRequest: resource.Quantity{
+								Format: "1G",
+							},
 						},
-						MemoryRequest: resource.Quantity{
-							Format: "1G",
-						},
+						Timeout: "5s",
 					},
 					Endpoint: "/ensemble",
-					Timeout:  "5s",
 					Port:     8080,
 					Env: []*models.EnvVar{
 						{
