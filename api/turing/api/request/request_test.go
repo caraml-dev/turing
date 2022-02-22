@@ -126,11 +126,13 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 			Type: "docker",
 			DockerConfig: &models.EnsemblerDockerConfig{
 				Image: "nginx",
-				ResourceRequest: &models.ResourceRequest{
-					CPURequest:    resource.Quantity{Format: "500m"},
-					MemoryRequest: resource.Quantity{Format: "1Gi"},
+				EnsemblerContainerRuntimeConfig: &models.EnsemblerContainerRuntimeConfig{
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
+					Timeout: "5s",
 				},
-				Timeout: "5s",
 			},
 		},
 	},
@@ -398,11 +400,13 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 			Type: "docker",
 			DockerConfig: &models.EnsemblerDockerConfig{
 				Image: "nginx",
-				ResourceRequest: &models.ResourceRequest{
-					CPURequest:    resource.Quantity{Format: "500m"},
-					MemoryRequest: resource.Quantity{Format: "1Gi"},
+				EnsemblerContainerRuntimeConfig: &models.EnsemblerContainerRuntimeConfig{
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
+					Timeout: "5s",
 				},
-				Timeout: "5s",
 			},
 		},
 	}
