@@ -1,7 +1,6 @@
 package api
 
 import (
-	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"testing"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
 	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
+	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
 	"github.com/gojek/turing/api/turing/cluster"
 	"github.com/gojek/turing/api/turing/config"
 	openapi "github.com/gojek/turing/api/turing/generated"

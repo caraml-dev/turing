@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/imagebuilder"
-	"strings"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
