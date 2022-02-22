@@ -251,11 +251,11 @@ func (c RouterDeploymentController) deployRouterVersion(
 		case *models.PyFuncEnsembler:
 			pyFuncEnsembler = ensembler.(*models.PyFuncEnsembler)
 		default:
-			return "", errors.New(fmt.Sprintf("only pyfunc ensemblers allowed; ensembler type given: %T", v))
+			return "", fmt.Errorf("only pyfunc ensemblers allowed; ensembler type given: %T", v)
 		}
 
 		// Get metadata corresponding to retrieved ensembler
-		artifactUri := &pyFuncEnsembler.ArtifactURI
+		artifactURI := &pyFuncEnsembler.ArtifactURI
 		ensemblerName := &pyFuncEnsembler.Name
 
 		labelRequest := labeller.KubernetesLabelsRequest{
@@ -270,20 +270,20 @@ func (c RouterDeploymentController) deployRouterVersion(
 			ProjectName:  project.Name,
 			ResourceName: *ensemblerName,
 			VersionID:    *routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
-			ArtifactURI:  *artifactUri,
+			ArtifactURI:  *artifactURI,
 			BuildLabels:  labels,
 		}
 		imageRef, imageBuildErr := c.AppContext.EnsemblerServiceBuilder.BuildImage(request)
 		if imageBuildErr != nil {
-			return "", errors.New("ensembler service image building failed")
+			return "", fmt.Errorf("ensembler service image building failed")
 		}
 
 		// Create a new docker config for the ensembler with the newly generated image
 		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
-			Image:                           imageRef,
-			EnsemblerContainerRuntimeConfig: routerVersion.Ensembler.PyFuncRefConfig.EnsemblerContainerRuntimeConfig,
-			Endpoint:                        models.PyFuncEnsemblerServiceEndpoint,
-			Port:                            models.PyFuncEnsemblerServicePort,
+			Image:                  imageRef,
+			ContainerRuntimeConfig: routerVersion.Ensembler.PyFuncRefConfig.ContainerRuntimeConfig,
+			Endpoint:               models.PyFuncEnsemblerServiceEndpoint,
+			Port:                   models.PyFuncEnsemblerServicePort,
 		}
 	}
 

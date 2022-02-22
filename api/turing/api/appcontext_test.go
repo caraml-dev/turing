@@ -313,6 +313,8 @@ func TestNewAppContext(t *testing.T) {
 		*testCfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
 	)
 
+	assert.NoError(t, err)
+
 	assert.Equal(t, &AppContext{
 		Authorizer:              testAuthorizer,
 		DeploymentService:       service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),

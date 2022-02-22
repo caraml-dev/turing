@@ -97,7 +97,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				Type: "docker",
 				DockerConfig: &models.EnsemblerDockerConfig{
 					Image: "lalalala",
-					EnsemblerContainerRuntimeConfig: &models.EnsemblerContainerRuntimeConfig{
+					ContainerRuntimeConfig: &models.ContainerRuntimeConfig{
 						ResourceRequest: &models.ResourceRequest{},
 						Timeout:         "5s",
 					},

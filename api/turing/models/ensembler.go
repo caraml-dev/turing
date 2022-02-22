@@ -46,17 +46,17 @@ type EnsemblerDockerConfig struct {
 	// secret name in MLP containing service account key
 	ServiceAccount string `json:"service_account"`
 	// Container-related runtime config such as timeout and resource request
-	EnsemblerContainerRuntimeConfig *EnsemblerContainerRuntimeConfig `json:"container_runtime_config" validate:"required, dive"`
+	ContainerRuntimeConfig *ContainerRuntimeConfig `json:"container_runtime_config" validate:"required"`
 }
 
 type EnsemblerPyFuncRefConfig struct {
 	ProjectID   *ID `json:"project_id" validate:"required"`
 	EnsemblerID *ID `json:"ensembler_id" validate:"required"`
 	// Container-related runtime config such as timeout and resource request
-	EnsemblerContainerRuntimeConfig *EnsemblerContainerRuntimeConfig `json:"container_runtime_config" validate:"required, dive"`
+	ContainerRuntimeConfig *ContainerRuntimeConfig `json:"container_runtime_config" validate:"required"`
 }
 
-type EnsemblerContainerRuntimeConfig struct {
+type ContainerRuntimeConfig struct {
 	// Resource requests for ensembler container deployed
 	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
 	// Request timeout in duration format e.g. 60s

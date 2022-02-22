@@ -16,7 +16,7 @@ import (
 
 // BigQueryDataset struct for BigQueryDataset
 type BigQueryDataset struct {
-	Type string `json:"type"`
+	Type     string                `json:"type"`
 	BqConfig BigQueryDatasetConfig `json:"bq_config"`
 }
 
@@ -54,7 +54,7 @@ func (o *BigQueryDataset) GetType() string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *BigQueryDataset) GetTypeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Type, true
@@ -78,7 +78,7 @@ func (o *BigQueryDataset) GetBqConfig() BigQueryDatasetConfig {
 // GetBqConfigOk returns a tuple with the BqConfig field value
 // and a boolean to check if the value has been set.
 func (o *BigQueryDataset) GetBqConfigOk() (*BigQueryDatasetConfig, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BqConfig, true
@@ -135,5 +135,3 @@ func (v *NullableBigQueryDataset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

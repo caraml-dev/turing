@@ -16,8 +16,8 @@ import (
 
 // EnsemblingJobSource struct for EnsemblingJobSource
 type EnsemblingJobSource struct {
-	Dataset Dataset `json:"dataset"`
-	JoinOn []string `json:"join_on"`
+	Dataset Dataset  `json:"dataset"`
+	JoinOn  []string `json:"join_on"`
 }
 
 // NewEnsemblingJobSource instantiates a new EnsemblingJobSource object
@@ -52,7 +52,7 @@ func (o *EnsemblingJobSource) GetDataset() Dataset {
 // GetDatasetOk returns a tuple with the Dataset field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSource) GetDatasetOk() (*Dataset, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Dataset, true
@@ -76,7 +76,7 @@ func (o *EnsemblingJobSource) GetJoinOn() []string {
 // GetJoinOnOk returns a tuple with the JoinOn field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobSource) GetJoinOnOk() (*[]string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.JoinOn, true
@@ -133,5 +133,3 @@ func (v *NullableEnsemblingJobSource) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

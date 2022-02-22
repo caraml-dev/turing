@@ -111,7 +111,7 @@ type BatchEnsemblingConfig struct {
 	MonitoringURLFormat *string
 }
 
-// EnsemblerServiceConfig caputres the config related to the build and running of ensembler services (real-time)
+// EnsemblerServiceConfig captures the config related to the build and running of ensembler services (real-time)
 type EnsemblerServiceBuilderConfig struct {
 	DefaultEnvironment  string               `validate:"required"`
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
