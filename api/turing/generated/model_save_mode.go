@@ -21,9 +21,9 @@ type SaveMode string
 // List of SaveMode
 const (
 	SAVEMODE_ERRORIFEXISTS SaveMode = "ERRORIFEXISTS"
-	SAVEMODE_OVERWRITE SaveMode = "OVERWRITE"
-	SAVEMODE_APPEND SaveMode = "APPEND"
-	SAVEMODE_IGNORE SaveMode = "IGNORE"
+	SAVEMODE_OVERWRITE     SaveMode = "OVERWRITE"
+	SAVEMODE_APPEND        SaveMode = "APPEND"
+	SAVEMODE_IGNORE        SaveMode = "IGNORE"
 )
 
 var allowedSaveModeEnumValues = []SaveMode{
@@ -111,4 +111,3 @@ func (v *NullableSaveMode) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

@@ -106,7 +106,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				Type: "docker",
 				DockerConfig: &models.EnsemblerDockerConfig{
 					Image: "ensembler:1.0.0",
-					EnsemblerContainerRuntimeConfig: &models.EnsemblerContainerRuntimeConfig{
+					ContainerRuntimeConfig: &models.ContainerRuntimeConfig{
 						ResourceRequest: &models.ResourceRequest{
 							MinReplica: 0,
 							MaxReplica: 10,
