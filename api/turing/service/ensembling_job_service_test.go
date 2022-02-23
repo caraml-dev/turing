@@ -5,9 +5,10 @@ package service_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
-	"testing"
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/batch"
@@ -415,7 +416,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				GenericEnsembler: &models.GenericEnsembler{
 					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
-					Type:      models.EnsemblerTypePyFunc,
+					Type:      models.EnsemblerPyFuncType,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
@@ -430,7 +431,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				GenericEnsembler: &models.GenericEnsembler{
 					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
-					Type:      models.EnsemblerTypePyFunc,
+					Type:      models.EnsemblerPyFuncType,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),
@@ -445,7 +446,7 @@ func TestCreateEnsemblingJob(t *testing.T) {
 				GenericEnsembler: &models.GenericEnsembler{
 					Name:      service.EnsemblerFolder,
 					Model:     models.Model{ID: 1},
-					Type:      models.EnsemblerTypePyFunc,
+					Type:      models.EnsemblerPyFuncType,
 					ProjectID: 1,
 				},
 				ArtifactURI: fmt.Sprintf("gs://bucket/%s", artifactFolder),

@@ -25,7 +25,7 @@ func (r *CreateOrUpdateEnsemblerRequest) UnmarshalJSON(data []byte) error {
 
 	var ensembler models.EnsemblerLike
 	switch typeCheck.Type {
-	case models.EnsemblerTypePyFunc:
+	case models.EnsemblerPyFuncType:
 		ensembler = &models.PyFuncEnsembler{}
 	default:
 		return fmt.Errorf("unsupported ensembler type: %s", typeCheck.Type)

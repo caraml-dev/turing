@@ -235,8 +235,24 @@ func (c RouterDeploymentController) deployRouterVersion(
 		}
 	}
 
+	eventsCh.Write(
+		models.NewInfoEvent(
+			models.EventStageDeployingDependencies,
+			"checking if pyfunc_ensembler_exists: %s",
+			routerVersion.Ensembler,
+		),
+	)
+
 	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
-	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerTypePyFunc {
+	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerPyFuncType {
+		eventsCh.Write(
+			models.NewInfoEvent(
+				models.EventStageDeployingDependencies,
+				"looking for pyfunc ensembler with project_id: %d and ensembler_id: %d",
+				routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+			),
+		)
 		ensembler, err := c.EnsemblersService.FindByID(
 			*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			service.EnsemblersFindByIDOptions{
@@ -274,11 +290,27 @@ func (c RouterDeploymentController) deployRouterVersion(
 			ArtifactURI:  *artifactURI,
 			BuildLabels:  labels,
 		}
+		eventsCh.Write(
+			models.NewInfoEvent(
+				models.EventStageDeployingDependencies,
+				"building pyfunc ensembler with project_id: %d and ensembler_id: %d",
+				routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+			),
+		)
 		imageRef, imageBuildErr := c.AppContext.EnsemblerServiceBuilder.BuildImage(request)
 		if imageBuildErr != nil {
 			return "", fmt.Errorf("ensembler service image building failed")
 		}
 
+		eventsCh.Write(
+			models.NewInfoEvent(
+				models.EventStageDeployingDependencies,
+				"pyfunc ensembler with project_id: %d and ensembler_id: %d built successfully",
+				routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+			),
+		)
 		// Create a new docker config for the ensembler with the newly generated image
 		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
 			Image:                  imageRef,

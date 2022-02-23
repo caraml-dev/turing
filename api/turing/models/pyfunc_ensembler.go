@@ -22,7 +22,7 @@ type EnsemblerLike interface {
 func EnsemblerTable(ensembler EnsemblerLike) func(tx *gorm.DB) *gorm.DB {
 	return func(tx *gorm.DB) *gorm.DB {
 		switch ensembler.GetType() {
-		case EnsemblerTypePyFunc:
+		case EnsemblerPyFuncType:
 			return tx.Table("pyfunc_ensemblers")
 		default:
 			return tx.Table("ensemblers")
@@ -68,7 +68,7 @@ func (e *GenericEnsembler) Patch(other EnsemblerLike) error {
 
 func (e *GenericEnsembler) Instance() EnsemblerLike {
 	switch e.GetType() {
-	case EnsemblerTypePyFunc:
+	case EnsemblerPyFuncType:
 		return &PyFuncEnsembler{}
 	default:
 		return e
@@ -88,11 +88,11 @@ type PyFuncEnsembler struct {
 }
 
 func (*PyFuncEnsembler) BeforeCreate(scope *gorm.Scope) error {
-	return scope.SetColumn("type", EnsemblerTypePyFunc)
+	return scope.SetColumn("type", EnsemblerPyFuncType)
 }
 
 func (*PyFuncEnsembler) GetType() EnsemblerType {
-	return EnsemblerTypePyFunc
+	return EnsemblerPyFuncType
 }
 
 func (e *PyFuncEnsembler) Patch(other EnsemblerLike) error {

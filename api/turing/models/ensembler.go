@@ -28,7 +28,7 @@ type EnsemblerType string
 const (
 	EnsemblerStandardType EnsemblerType = "standard"
 	EnsemblerDockerType   EnsemblerType = "docker"
-	EnsemblerTypePyFunc   EnsemblerType = "pyfunc"
+	EnsemblerPyFuncType   EnsemblerType = "pyfunc"
 )
 
 type EnsemblerStandardConfig struct {

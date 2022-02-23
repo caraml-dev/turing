@@ -352,8 +352,8 @@ func (ds *deploymentService) createServices(
 
 	// Ensembler
 	if routerVersion.Ensembler != nil &&
-		(routerVersion.Ensembler.Type == models.EnsemblerTypePyFunc ||
-			routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerDockerType) {
+		(routerVersion.Ensembler.Type == models.EnsemblerPyFuncType ||
+			routerVersion.Ensembler.Type == models.EnsemblerDockerType) {
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion,
 			project,

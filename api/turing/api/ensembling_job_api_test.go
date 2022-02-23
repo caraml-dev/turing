@@ -174,7 +174,7 @@ func CreateEnsembler(id int, ensemblerType string) models.EnsemblerLike {
 			GenericEnsembler: &models.GenericEnsembler{
 				Name:      "ensembler",
 				Model:     models.Model{ID: models.ID(id)},
-				Type:      models.EnsemblerTypePyFunc,
+				Type:      models.EnsemblerPyFuncType,
 				ProjectID: 1,
 			},
 			ArtifactURI: "gs://bucket/ensembler",
@@ -183,7 +183,7 @@ func CreateEnsembler(id int, ensemblerType string) models.EnsemblerLike {
 	return &models.GenericEnsembler{
 		Name:      "ensembler",
 		Model:     models.Model{ID: 1},
-		Type:      models.EnsemblerTypePyFunc,
+		Type:      models.EnsemblerPyFuncType,
 		ProjectID: 1,
 	}
 }

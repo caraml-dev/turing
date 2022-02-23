@@ -35,7 +35,7 @@ func assertEqualEnsembler(
 	case *models.PyFuncEnsembler:
 		expectedConcrete := expected.(*models.PyFuncEnsembler)
 		actualConcrete := actual.(*models.PyFuncEnsembler)
-		assert.Equal(t, models.EnsemblerTypePyFunc, actualConcrete.GetType())
+		assert.Equal(t, models.EnsemblerPyFuncType, actualConcrete.GetType())
 		assert.Equal(t, expectedConcrete.ExperimentID, actualConcrete.ExperimentID)
 		assert.Equal(t, expectedConcrete.RunID, actualConcrete.RunID)
 		assert.Equal(t, expectedConcrete.ArtifactURI, actualConcrete.ArtifactURI)
@@ -175,7 +175,7 @@ func TestEnsemblersServiceIntegration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Fetch all of specific type
-		pyfunc := models.EnsemblerTypePyFunc
+		pyfunc := models.EnsemblerPyFuncType
 		fetched, err = svc.List(EnsemblersListOptions{
 			ProjectID:     &projectID,
 			EnsemblerType: &pyfunc,

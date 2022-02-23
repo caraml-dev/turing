@@ -682,7 +682,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/inline_response_200_1'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -751,7 +751,7 @@ paths:
           format: int32
           type: integer
       responses:
-        "200":
+        "202":
           content:
             application/json:
               schema:
@@ -863,9 +863,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Event'
-                type: array
+                $ref: '#/components/schemas/inline_response_200_2'
           description: Get events
         "400":
           description: Invalid project_id or router_id
@@ -1900,6 +1898,16 @@ components:
           cpu_request: cpu_request
         id: 0
         ensembler:
+          py_func_ref_config:
+            project_id: 7
+            container_runtime_config:
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              timeout: timeout
+            ensembler_id: 9
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
@@ -1917,17 +1925,18 @@ components:
             image: image
             endpoint: endpoint
             port: 2
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
+            container_runtime_config:
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              timeout: timeout
             env:
             - name: name
               value: value
             - name: name
               value: value
-            timeout: timeout
       properties:
         id:
           format: int32
@@ -1961,6 +1970,7 @@ components:
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
         timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         log_config:
           $ref: '#/components/schemas/RouterVersion_log_config'
@@ -2001,6 +2011,7 @@ components:
         endpoint:
           type: string
         timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         annotations:
           nullable: true
@@ -2023,8 +2034,10 @@ components:
         max_replica:
           type: integer
         cpu_request:
+          pattern: ^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$
           type: string
         memory_request:
+          pattern: ^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$
           type: string
       type: object
     LogLevel:
@@ -2047,8 +2060,10 @@ components:
         batch_load: true
         table: table
         service_account_secret: service_account_secret
+      nullable: true
       properties:
         table:
+          pattern: ^[a-zA-Z][a-zA-Z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$
           type: string
         service_account_secret:
           type: string
@@ -2064,12 +2079,15 @@ components:
         brokers: brokers
         topic: topic
         serialization_format: json
+      nullable: true
       properties:
         brokers:
           description: Comma-separated list of host and port pairs that are the addresses
             of the Kafka brokers.
+          pattern: ^([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-zA-Z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$
           type: string
         topic:
+          pattern: ^[A-Za-z0-9_.-]{1,249}$
           type: string
         serialization_format:
           enum:
@@ -2112,6 +2130,7 @@ components:
         endpoint:
           type: string
         timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         port:
           type: integer
@@ -2142,6 +2161,16 @@ components:
       type: object
     RouterEnsemblerConfig:
       example:
+        py_func_ref_config:
+          project_id: 7
+          container_runtime_config:
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            timeout: timeout
+          ensembler_id: 9
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
           experiment_mappings:
@@ -2159,17 +2188,18 @@ components:
           image: image
           endpoint: endpoint
           port: 2
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
+          container_runtime_config:
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            timeout: timeout
           env:
           - name: name
             value: value
           - name: name
             value: value
-          timeout: timeout
       properties:
         id:
           format: int32
@@ -2179,11 +2209,14 @@ components:
           enum:
           - standard
           - docker
+          - pyfunc
           type: string
         standard_config:
           $ref: '#/components/schemas/EnsemblerStandardConfig'
         docker_config:
           $ref: '#/components/schemas/EnsemblerDockerConfig'
+        py_func_ref_config:
+          $ref: '#/components/schemas/EnsemblerPyFuncRefConfig'
         created_at:
           format: date-time
           readOnly: true
@@ -2221,26 +2254,26 @@ components:
         image: image
         endpoint: endpoint
         port: 2
-        resource_request:
-          min_replica: 0
-          max_replica: 6
-          memory_request: memory_request
-          cpu_request: cpu_request
+        container_runtime_config:
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
+          timeout: timeout
         env:
         - name: name
           value: value
         - name: name
           value: value
-        timeout: timeout
       nullable: true
       properties:
         image:
+          pattern: ^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$
           type: string
-        resource_request:
-          $ref: '#/components/schemas/ResourceRequest'
+        container_runtime_config:
+          $ref: '#/components/schemas/ContainerRuntimeConfig'
         endpoint:
-          type: string
-        timeout:
           type: string
         port:
           type: integer
@@ -2254,12 +2287,54 @@ components:
           example: secret-name-for-google-service-account
           type: string
       required:
+      - container_runtime_config
       - endpoint
       - env
       - image
       - port
+      type: object
+    ContainerRuntimeConfig:
+      example:
+        resource_request:
+          min_replica: 0
+          max_replica: 6
+          memory_request: memory_request
+          cpu_request: cpu_request
+        timeout: timeout
+      properties:
+        resource_request:
+          $ref: '#/components/schemas/ResourceRequest'
+        timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
+          type: string
+      required:
       - resource_request
       - timeout
+      type: object
+    EnsemblerPyFuncRefConfig:
+      description: ensembler config when ensembler type is pyfunc
+      example:
+        project_id: 7
+        container_runtime_config:
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
+          timeout: timeout
+        ensembler_id: 9
+      nullable: true
+      properties:
+        project_id:
+          type: integer
+        ensembler_id:
+          type: integer
+        container_runtime_config:
+          $ref: '#/components/schemas/ContainerRuntimeConfig'
+      required:
+      - container_runtime_config
+      - ensembler_id
+      - project_id
       type: object
     TrafficRule:
       example:
@@ -2390,6 +2465,16 @@ components:
             memory_request: memory_request
             cpu_request: cpu_request
           ensembler:
+            py_func_ref_config:
+              project_id: 7
+              container_runtime_config:
+                resource_request:
+                  min_replica: 0
+                  max_replica: 6
+                  memory_request: memory_request
+                  cpu_request: cpu_request
+                timeout: timeout
+              ensembler_id: 9
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
               experiment_mappings:
@@ -2407,17 +2492,18 @@ components:
               image: image
               endpoint: endpoint
               port: 2
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
+              container_runtime_config:
+                resource_request:
+                  min_replica: 0
+                  max_replica: 6
+                  memory_request: memory_request
+                  cpu_request: cpu_request
+                timeout: timeout
               env:
               - name: name
                 value: value
               - name: name
                 value: value
-              timeout: timeout
           log_config:
             bigquery_config:
               batch_load: true
@@ -2436,6 +2522,7 @@ components:
         environment_name:
           type: string
         name:
+          pattern: ^[a-z0-9-]*$
           type: string
         config:
           $ref: '#/components/schemas/RouterConfig_config'
@@ -2767,6 +2854,7 @@ components:
         value: value
       properties:
         name:
+          pattern: ^[a-zA-Z0-9_]*$
           type: string
         value:
           type: string
@@ -2774,6 +2862,10 @@ components:
       - name
       type: object
     ExperimentConfig:
+      additionalProperties:
+        nullable: true
+        readOnly: true
+        type: object
       example:
         type: nop
         config: '{}'
@@ -2796,9 +2888,9 @@ components:
       type: string
     inline_response_200:
       example:
-        router_id: 0
+        id: 0
       properties:
-        router_id:
+        id:
           format: int32
           type: integer
       type: object
@@ -2813,6 +2905,37 @@ components:
         version:
           format: int32
           type: integer
+      type: object
+    inline_response_200_1:
+      example:
+        router_id: 0
+      properties:
+        router_id:
+          format: int32
+          type: integer
+      type: object
+    inline_response_200_2:
+      example:
+        events:
+        - event_type: info
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          stage: stage
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 0
+          message: message
+          version: 6
+        - event_type: info
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          stage: stage
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 0
+          message: message
+          version: 6
+      properties:
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
       type: object
     EnsemblersPaginatedResults_allOf:
       properties:
@@ -3023,6 +3146,16 @@ components:
           memory_request: memory_request
           cpu_request: cpu_request
         ensembler:
+          py_func_ref_config:
+            project_id: 7
+            container_runtime_config:
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              timeout: timeout
+            ensembler_id: 9
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
@@ -3040,17 +3173,18 @@ components:
             image: image
             endpoint: endpoint
             port: 2
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
+            container_runtime_config:
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              timeout: timeout
             env:
             - name: name
               value: value
             - name: name
               value: value
-            timeout: timeout
         log_config:
           bigquery_config:
             batch_load: true
@@ -3080,6 +3214,7 @@ components:
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
         timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         log_config:
           $ref: '#/components/schemas/RouterConfig_config_log_config'
