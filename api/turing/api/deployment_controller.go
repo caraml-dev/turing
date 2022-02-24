@@ -299,8 +299,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 			models.NewInfoEvent(
 				models.EventStageDeployingDependencies,
 				"pyfunc ensembler with project_id: %d and ensembler_id: %d built successfully",
-				routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
-				routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			),
 		)
 		// Create a new docker config for the ensembler with the newly generated image
