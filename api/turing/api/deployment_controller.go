@@ -285,7 +285,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		eventsCh.Write(
 			models.NewInfoEvent(
 				models.EventStageDeployingDependencies,
-				"building pyfunc ensembler with project_id: %d and ensembler_id: %d",
+				"building/retrieving pyfunc ensembler with project_id: %d and ensembler_id: %d",
 				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
 				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			),
@@ -298,7 +298,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		eventsCh.Write(
 			models.NewInfoEvent(
 				models.EventStageDeployingDependencies,
-				"pyfunc ensembler with project_id: %d and ensembler_id: %d built successfully",
+				"pyfunc ensembler with project_id: %d and ensembler_id: %d built/retrieved successfully",
 				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
 				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			),
