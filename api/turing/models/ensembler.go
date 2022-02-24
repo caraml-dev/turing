@@ -109,5 +109,5 @@ const (
 	// URL path for the endpoint, e.g "/"
 	PyFuncEnsemblerServiceEndpoint string = "/ensemble"
 	// Port number the container listens to for requests
-	PyFuncEnsemblerServicePort int = 8080
+	PyFuncEnsemblerServicePort int = 8083
 )
