@@ -21,9 +21,13 @@ RUN /venv/bin/conda-unpack
 
 FROM debian:bullseye-slim
 
+ARG FOLDER_NAME
+ENV FOLDER_NAME=$FOLDER_NAME
+
+COPY --from=builder /${FOLDER_NAME} ./${FOLDER_NAME}
 COPY --from=builder /pyfunc_ensembler_runner ./pyfunc_ensembler_runner
-COPY --from=builder /venv /venv
+COPY --from=builder /venv ./venv
 
-RUN /bin/bash -c ". /venv/bin/activate"
-
-ENTRYPOINT python -m pyfunc_ensembler_runner --mlflow_ensembler_dir /ensembler -l INFO
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT source /venv/bin/activate && \
+           python -m pyfunc_ensembler_runner --mlflow_ensembler_dir /${FOLDER_NAME} -l INFO
