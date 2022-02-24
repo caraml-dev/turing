@@ -251,7 +251,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 				ProjectID: routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
 			})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to find specified ensembler: %w", err)
 		}
 
 		// Check if retrieved ensembler as a pyfunc ensembler
