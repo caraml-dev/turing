@@ -138,6 +138,80 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 	},
 }
 
+var createOrUpdateInvalidRequest = CreateOrUpdateRouterRequest{
+	Environment: "env",
+	Name:        "router",
+	Config: &RouterConfig{
+		Routes: []*models.Route{
+			{
+				ID:       "default",
+				Type:     "PROXY",
+				Endpoint: "endpoint",
+				Timeout:  "6s",
+			},
+		},
+		DefaultRouteID: "default",
+		ExperimentEngine: &ExperimentEngineConfig{
+			Type:   "standard",
+			Config: makeTuringExperimentConfig("dummy_passkey"),
+		},
+		ResourceRequest: &models.ResourceRequest{
+			MinReplica: 0,
+			MaxReplica: 5,
+			CPURequest: resource.Quantity{
+				Format: "500M",
+			},
+			MemoryRequest: resource.Quantity{
+				Format: "1G",
+			},
+		},
+		Timeout: "10s",
+		LogConfig: &LogConfig{
+			ResultLoggerType: "bigquery",
+			BigQueryConfig: &BigQueryConfig{
+				Table:                "project.dataset.table",
+				ServiceAccountSecret: "service_account",
+			},
+		},
+		Enricher: &EnricherEnsemblerConfig{
+			Image: "lala",
+			ResourceRequest: &models.ResourceRequest{
+				MinReplica: 0,
+				MaxReplica: 5,
+				CPURequest: resource.Quantity{
+					Format: "500M",
+				},
+				MemoryRequest: resource.Quantity{
+					Format: "1G",
+				},
+			},
+			Endpoint: "endpoint",
+			Timeout:  "6s",
+			Port:     8080,
+			Env: []*models.EnvVar{
+				{
+					Name:  "key",
+					Value: "value",
+				},
+			},
+		},
+		Ensembler: &models.Ensembler{
+			Type: "pyfunc",
+			PyFuncRefConfig: &models.EnsemblerPyFuncRefConfig{
+				ProjectID:   models.NewID(11),
+				EnsemblerID: models.NewID(12),
+				ContainerRuntimeConfig: &models.ContainerRuntimeConfig{
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
+					Timeout: "5s",
+				},
+			},
+		},
+	},
+}
+
 func TestRequestBuildRouter(t *testing.T) {
 	projectID := models.ID(1)
 	expected := &models.Router{
@@ -353,6 +427,43 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	require.NoError(t, err)
 	expected.Model = got.Model
 	assertgotest.DeepEqual(t, expected, *got)
+}
+
+func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
+	defaults := config.RouterDefaults{
+		Image:                   "routerimage",
+		FiberDebugLogEnabled:    true,
+		CustomMetricsEnabled:    true,
+		JaegerEnabled:           true,
+		JaegerCollectorEndpoint: "jaegerendpoint",
+		LogLevel:                "DEBUG",
+		FluentdConfig: &config.FluentdConfig{
+			Image: "fluentdimage",
+			Tag:   "fluentdtag",
+		},
+	}
+	projectID := models.ID(1)
+
+	// Get a default working router
+	router := createOrUpdateRequest.BuildRouter(projectID)
+
+	// Set up mock Crypto service
+	cryptoSvc := &mocks.CryptoService{}
+	cryptoSvc.On("Encrypt", "dummy_passkey").Return("enc_passkey", nil)
+
+	// Set up mock Experiment service
+	expSvc := &mocks.ExperimentsService{}
+	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
+
+	// Set up mock Ensembler service
+	ensemblerSvc := &mocks.EnsemblersService{}
+	ensemblerSvc.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("record not found"))
+
+	// Update the router with an invalid request
+	got, err := createOrUpdateInvalidRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+
+	assert.EqualError(t, err, "failed to find specified ensembler: record not found")
+	assert.Nil(t, got)
 }
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
