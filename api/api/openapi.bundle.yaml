@@ -1900,14 +1900,13 @@ components:
         ensembler:
           py_func_ref_config:
             project_id: 7
-            container_runtime_config:
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
-              timeout: timeout
             ensembler_id: 9
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
@@ -1925,18 +1924,17 @@ components:
             image: image
             endpoint: endpoint
             port: 2
-            container_runtime_config:
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
-              timeout: timeout
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
             env:
             - name: name
               value: value
             - name: name
               value: value
+            timeout: timeout
       properties:
         id:
           format: int32
@@ -2163,14 +2161,13 @@ components:
       example:
         py_func_ref_config:
           project_id: 7
-          container_runtime_config:
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            timeout: timeout
           ensembler_id: 9
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
+          timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
           experiment_mappings:
@@ -2188,18 +2185,17 @@ components:
           image: image
           endpoint: endpoint
           port: 2
-          container_runtime_config:
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            timeout: timeout
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
           env:
           - name: name
             value: value
           - name: name
             value: value
+          timeout: timeout
       properties:
         id:
           format: int32
@@ -2254,26 +2250,28 @@ components:
         image: image
         endpoint: endpoint
         port: 2
-        container_runtime_config:
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
-          timeout: timeout
+        resource_request:
+          min_replica: 0
+          max_replica: 6
+          memory_request: memory_request
+          cpu_request: cpu_request
         env:
         - name: name
           value: value
         - name: name
           value: value
+        timeout: timeout
       nullable: true
       properties:
         image:
           pattern: ^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$
           type: string
-        container_runtime_config:
-          $ref: '#/components/schemas/ContainerRuntimeConfig'
+        resource_request:
+          $ref: '#/components/schemas/ResourceRequest'
         endpoint:
+          type: string
+        timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         port:
           type: integer
@@ -2287,27 +2285,10 @@ components:
           example: secret-name-for-google-service-account
           type: string
       required:
-      - container_runtime_config
       - endpoint
       - env
       - image
       - port
-      type: object
-    ContainerRuntimeConfig:
-      example:
-        resource_request:
-          min_replica: 0
-          max_replica: 6
-          memory_request: memory_request
-          cpu_request: cpu_request
-        timeout: timeout
-      properties:
-        resource_request:
-          $ref: '#/components/schemas/ResourceRequest'
-        timeout:
-          pattern: ^[0-9]+(ms|s|m|h)$
-          type: string
-      required:
       - resource_request
       - timeout
       type: object
@@ -2315,26 +2296,29 @@ components:
       description: ensembler config when ensembler type is pyfunc
       example:
         project_id: 7
-        container_runtime_config:
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
-          timeout: timeout
         ensembler_id: 9
+        resource_request:
+          min_replica: 0
+          max_replica: 6
+          memory_request: memory_request
+          cpu_request: cpu_request
+        timeout: timeout
       nullable: true
       properties:
         project_id:
           type: integer
         ensembler_id:
           type: integer
-        container_runtime_config:
-          $ref: '#/components/schemas/ContainerRuntimeConfig'
+        resource_request:
+          $ref: '#/components/schemas/ResourceRequest'
+        timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
+          type: string
       required:
-      - container_runtime_config
       - ensembler_id
       - project_id
+      - resource_request
+      - timeout
       type: object
     TrafficRule:
       example:
@@ -2467,14 +2451,13 @@ components:
           ensembler:
             py_func_ref_config:
               project_id: 7
-              container_runtime_config:
-                resource_request:
-                  min_replica: 0
-                  max_replica: 6
-                  memory_request: memory_request
-                  cpu_request: cpu_request
-                timeout: timeout
               ensembler_id: 9
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
+              timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
               experiment_mappings:
@@ -2492,18 +2475,17 @@ components:
               image: image
               endpoint: endpoint
               port: 2
-              container_runtime_config:
-                resource_request:
-                  min_replica: 0
-                  max_replica: 6
-                  memory_request: memory_request
-                  cpu_request: cpu_request
-                timeout: timeout
+              resource_request:
+                min_replica: 0
+                max_replica: 6
+                memory_request: memory_request
+                cpu_request: cpu_request
               env:
               - name: name
                 value: value
               - name: name
                 value: value
+              timeout: timeout
           log_config:
             bigquery_config:
               batch_load: true
@@ -3148,14 +3130,13 @@ components:
         ensembler:
           py_func_ref_config:
             project_id: 7
-            container_runtime_config:
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
-              timeout: timeout
             ensembler_id: 9
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
             experiment_mappings:
@@ -3173,18 +3154,17 @@ components:
             image: image
             endpoint: endpoint
             port: 2
-            container_runtime_config:
-              resource_request:
-                min_replica: 0
-                max_replica: 6
-                memory_request: memory_request
-                cpu_request: cpu_request
-              timeout: timeout
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
             env:
             - name: name
               value: value
             - name: name
               value: value
+            timeout: timeout
         log_config:
           bigquery_config:
             batch_load: true
