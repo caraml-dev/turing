@@ -63,16 +63,14 @@
     "type": "docker",
     "docker_config": {
       "image": "asia.gcr.io/gcp-project-id/echo:1.0.2",
-      "container_runtime_config": {
-        "resource_request": {
-          "min_replica": 2,
-          "max_replica": 3,
-          "cpu_request": "200m",
-          "memory_request": "1024Mi"
-        },
-        "timeout": "3s"
+      "resource_request": {
+        "min_replica": 2,
+        "max_replica": 3,
+        "cpu_request": "200m",
+        "memory_request": "1024Mi"
       },
       "endpoint": "echo?delay=20ms",
+      "timeout": "3s",
       "port": 8080,
       "env": [
         {

@@ -767,18 +767,21 @@ components:
       nullable: true
       required:
         - image
-        - container_runtime_config
+        - resource_request
         - endpoint
+        - timeout
         - port
         - env
       properties:
         image:
           type: "string"
           pattern: '^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$'
-        container_runtime_config:
-          $ref: "#/components/schemas/ContainerRuntimeConfig"
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
         endpoint:
           type: "string"
+        timeout:
+          <<: *timeout
         port:
           type: "integer"
         env:
@@ -800,21 +803,13 @@ components:
       required:
         - project_id
         - ensembler_id
-        - container_runtime_config
+        - resource_request
+        - timeout
       properties:
         project_id:
           type: "integer"
         ensembler_id:
           type: "integer"
-        container_runtime_config:
-          $ref: "#/components/schemas/ContainerRuntimeConfig"
-
-    ContainerRuntimeConfig:
-      type: "object"
-      required:
-        - resource_request
-        - timeout
-      properties:
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:

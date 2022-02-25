@@ -37,26 +37,23 @@ type EnsemblerStandardConfig struct {
 
 type EnsemblerDockerConfig struct {
 	Image string `json:"image" validate:"required"`
+	// Resource requests for ensembler container deployed
+	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
 	// URL path for the endpoint, e.g "/"
 	Endpoint string `json:"endpoint" validate:"required"`
+	// Request timeout in duration format e.g. 60s
+	Timeout string `json:"timeout" validate:"required"`
 	// Port number the container listens to for requests
 	Port int `json:"port" validate:"required"`
 	// Environment variables to set in the container
 	Env EnvVars `json:"env" validate:"required"`
 	// secret name in MLP containing service account key
 	ServiceAccount string `json:"service_account"`
-	// Container-related runtime config such as timeout and resource request
-	ContainerRuntimeConfig *ContainerRuntimeConfig `json:"container_runtime_config" validate:"required"`
 }
 
 type EnsemblerPyFuncRefConfig struct {
 	ProjectID   *ID `json:"project_id" validate:"required"`
 	EnsemblerID *ID `json:"ensembler_id" validate:"required"`
-	// Container-related runtime config such as timeout and resource request
-	ContainerRuntimeConfig *ContainerRuntimeConfig `json:"container_runtime_config" validate:"required"`
-}
-
-type ContainerRuntimeConfig struct {
 	// Resource requests for ensembler container deployed
 	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
 	// Request timeout in duration format e.g. 60s

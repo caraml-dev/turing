@@ -5,9 +5,10 @@ package service_test
 
 import (
 	"database/sql"
+	"testing"
+
 	"github.com/gojek/turing/api/turing/service"
 	"github.com/gojek/turing/api/turing/service/mocks"
-	"testing"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
@@ -96,14 +97,12 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			Ensembler: &models.Ensembler{
 				Type: "docker",
 				DockerConfig: &models.EnsemblerDockerConfig{
-					Image: "lalalala",
-					ContainerRuntimeConfig: &models.ContainerRuntimeConfig{
-						ResourceRequest: &models.ResourceRequest{},
-						Timeout:         "5s",
-					},
-					Endpoint: "fsaf",
-					Port:     8080,
-					Env:      []*models.EnvVar{},
+					Image:           "lalalala",
+					ResourceRequest: &models.ResourceRequest{},
+					Endpoint:        "fsaf",
+					Timeout:         "5s",
+					Port:            8080,
+					Env:             []*models.EnvVar{},
 				},
 			},
 		}
