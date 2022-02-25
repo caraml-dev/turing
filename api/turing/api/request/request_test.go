@@ -346,7 +346,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	expSvc := &mocks.ExperimentsService{}
 	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
 
-	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc)
+	// Set up mock Ensembler service
+	ensemblerSvc := &mocks.EnsemblersService{}
+
+	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 	require.NoError(t, err)
 	expected.Model = got.Model
 	assertgotest.DeepEqual(t, expected, *got)
