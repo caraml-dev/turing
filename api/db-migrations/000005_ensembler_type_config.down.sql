@@ -23,3 +23,4 @@ WHERE type = 'docker';
 ALTER TABLE ensemblers DROP COLUMN type;
 ALTER TABLE ensemblers DROP COLUMN standard_config;
 ALTER TABLE ensemblers DROP COLUMN docker_config;
+

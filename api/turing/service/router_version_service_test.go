@@ -106,20 +106,18 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				Type: "docker",
 				DockerConfig: &models.EnsemblerDockerConfig{
 					Image: "ensembler:1.0.0",
-					ContainerRuntimeConfig: &models.ContainerRuntimeConfig{
-						ResourceRequest: &models.ResourceRequest{
-							MinReplica: 0,
-							MaxReplica: 10,
-							CPURequest: resource.Quantity{
-								Format: "100m",
-							},
-							MemoryRequest: resource.Quantity{
-								Format: "1G",
-							},
+					ResourceRequest: &models.ResourceRequest{
+						MinReplica: 0,
+						MaxReplica: 10,
+						CPURequest: resource.Quantity{
+							Format: "100m",
 						},
-						Timeout: "5s",
+						MemoryRequest: resource.Quantity{
+							Format: "1G",
+						},
 					},
 					Endpoint: "/ensemble",
+					Timeout:  "5s",
 					Port:     8080,
 					Env: []*models.EnvVar{
 						{
