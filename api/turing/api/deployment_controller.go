@@ -263,24 +263,19 @@ func (c RouterDeploymentController) deployRouterVersion(
 			return "", fmt.Errorf("only pyfunc ensemblers allowed; ensembler type given: %T", v)
 		}
 
-		// Get metadata corresponding to retrieved ensembler
-		artifactURI := &pyFuncEnsembler.ArtifactURI
-		ensemblerName := &pyFuncEnsembler.Name
-
-		labelRequest := labeller.KubernetesLabelsRequest{
-			Stream: project.Stream,
-			Team:   project.Team,
-			App:    *ensemblerName,
-		}
-		labels := labeller.BuildLabels(labelRequest)
-
 		// Build image corresponding to the retrieved ensembler
 		request := imagebuilder.BuildImageRequest{
 			ProjectName:  project.Name,
-			ResourceName: *ensemblerName,
+			ResourceName: pyFuncEnsembler.Name + "-" + pyFuncEnsembler.RunID,
 			VersionID:    *routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
-			ArtifactURI:  *artifactURI,
-			BuildLabels:  labels,
+			ArtifactURI:  pyFuncEnsembler.ArtifactURI,
+			BuildLabels: labeller.BuildLabels(
+				labeller.KubernetesLabelsRequest{
+					Stream: project.Stream,
+					Team:   project.Team,
+					App:    pyFuncEnsembler.Name,
+				},
+			),
 		}
 		eventsCh.Write(
 			models.NewInfoEvent(
