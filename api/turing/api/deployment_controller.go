@@ -265,8 +265,9 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 		// Build image corresponding to the retrieved ensembler
 		request := imagebuilder.BuildImageRequest{
-			ProjectName:  project.Name,
-			ResourceName: pyFuncEnsembler.Name + "-" + pyFuncEnsembler.RunID,
+			ProjectName: project.Name,
+			// Create a unique resource name that contains partial versioning (part of the run_id hash)
+			ResourceName: pyFuncEnsembler.Name + "-" + pyFuncEnsembler.RunID[:5],
 			VersionID:    *routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			ArtifactURI:  pyFuncEnsembler.ArtifactURI,
 			BuildLabels: labeller.BuildLabels(
