@@ -64,16 +64,14 @@
             "type": "docker",
             "docker_config": {
                 "image": "{{.TestEchoImage}}",
-                "container_runtime_config": {
-                    "resource_request": {
-                        "min_replica": 2,
-                        "max_replica": 2,
-                        "cpu_request": "200m",
-                        "memory_request": "256Mi"
-                    },
-                    "timeout": "3s"
+                "resource_request": {
+                    "min_replica": 2,
+                    "max_replica": 2,
+                    "cpu_request": "200m",
+                    "memory_request": "256Mi"
                 },
                 "endpoint": "anything",
+                "timeout": "3s",
                 "port": 80,
                 "env": [
                     {
