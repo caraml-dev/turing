@@ -237,14 +237,6 @@ func (c RouterDeploymentController) deployRouterVersion(
 
 	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
 	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerPyFuncType {
-		eventsCh.Write(
-			models.NewInfoEvent(
-				models.EventStageDeployingDependencies,
-				"looking for pyfunc ensembler with project_id: %d and ensembler_id: %d",
-				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
-				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
-			),
-		)
 		ensembler, err := c.EnsemblersService.FindByID(
 			*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
 			service.EnsemblersFindByIDOptions{
@@ -254,14 +246,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 			return "", fmt.Errorf("failed to find specified ensembler: %w", err)
 		}
 
-		// Check if retrieved ensembler as a pyfunc ensembler
-		var pyFuncEnsembler *models.PyFuncEnsembler
-		switch v := ensembler.(type) {
-		case *models.PyFuncEnsembler:
-			pyFuncEnsembler = ensembler.(*models.PyFuncEnsembler)
-		default:
-			return "", fmt.Errorf("only pyfunc ensemblers allowed; ensembler type given: %T", v)
-		}
+		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
 
 		// Build image corresponding to the retrieved ensembler
 		request := imagebuilder.BuildImageRequest{
