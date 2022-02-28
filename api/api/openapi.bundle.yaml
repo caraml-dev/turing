@@ -551,7 +551,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/IdObject'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -651,7 +651,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_202'
+                $ref: '#/components/schemas/RouterIdAndVersion'
           description: Accepted
         "400":
           description: Invalid project_id, router_id or deploy request
@@ -682,7 +682,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_1'
+                $ref: '#/components/schemas/IdObject'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -755,7 +755,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_202'
+                $ref: '#/components/schemas/RouterIdAndVersion'
           description: OK
         "400":
           description: Invalid project_id, router_id or version
@@ -832,7 +832,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_202'
+                $ref: '#/components/schemas/RouterIdAndVersion'
           description: Accepted
         "400":
           description: Invalid project_id, router_id, version_id or deploy request
@@ -863,7 +863,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_2'
+                $ref: '#/components/schemas/Events'
           description: Get events
         "400":
           description: Invalid project_id or router_id
@@ -2513,6 +2513,22 @@ components:
       - environment_name
       - name
       type: object
+    RouterIdAndVersion:
+      example:
+        router_id: 0
+        version: 6
+      properties:
+        router_id:
+          format: int32
+          type: integer
+        version:
+          format: int32
+          type: integer
+      type: object
+    Events:
+      items:
+        $ref: '#/components/schemas/Event'
+      type: array
     Event:
       example:
         event_type: info
@@ -2868,57 +2884,6 @@ components:
       - header
       - payload
       type: string
-    inline_response_200:
-      example:
-        id: 0
-      properties:
-        id:
-          format: int32
-          type: integer
-      type: object
-    inline_response_202:
-      example:
-        router_id: 0
-        version: 6
-      properties:
-        router_id:
-          format: int32
-          type: integer
-        version:
-          format: int32
-          type: integer
-      type: object
-    inline_response_200_1:
-      example:
-        router_id: 0
-      properties:
-        router_id:
-          format: int32
-          type: integer
-      type: object
-    inline_response_200_2:
-      example:
-        events:
-        - event_type: info
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          stage: stage
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: 0
-          message: message
-          version: 6
-        - event_type: info
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          stage: stage
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: 0
-          message: message
-          version: 6
-      properties:
-        events:
-          items:
-            $ref: '#/components/schemas/Event'
-          type: array
-      type: object
     EnsemblersPaginatedResults_allOf:
       properties:
         paging:

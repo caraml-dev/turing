@@ -152,10 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  id:
-                    <<: *id
+                $ref: 'common.yaml#/components/schemas/IdObject'
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -186,12 +183,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id or deploy request"
         404:
@@ -220,10 +212,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
+                $ref: 'common.yaml#/components/schemas/IdObject'
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -325,12 +314,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id or version"
         404:
@@ -367,12 +351,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id, version_id or deploy request"
         404:
@@ -401,12 +380,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  events:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/Event"
+                $ref: "#/components/schemas/Events"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -414,6 +388,14 @@ paths:
 
 components:
   schemas:
+    RouterIdAndVersion:
+      type: object
+      properties:
+        router_id:
+          $ref: "common.yaml#/components/schemas/Id"
+        version:
+          $ref: "common.yaml#/components/schemas/Id"
+
     Router:
       type: "object"
       nullable: true
@@ -865,6 +847,11 @@ components:
           enum:
             - "json"
             - "protobuf"
+
+    Events:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Event"
 
     Event:
       type: "object"
