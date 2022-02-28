@@ -195,7 +195,7 @@ var createOrUpdateInvalidRequest = CreateOrUpdateRouterRequest{
 		},
 		Ensembler: &models.Ensembler{
 			Type: "pyfunc",
-			PyFuncRefConfig: &models.EnsemblerPyFuncRefConfig{
+			PyFuncConfig: &models.EnsemblerPyFuncConfig{
 				ProjectID:   models.NewID(11),
 				EnsemblerID: models.NewID(12),
 				ResourceRequest: &models.ResourceRequest{

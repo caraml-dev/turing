@@ -722,7 +722,7 @@ components:
         docker_config:
           $ref: "#/components/schemas/EnsemblerDockerConfig"
         py_func_ref_config:
-          $ref: "#/components/schemas/EnsemblerPyFuncRefConfig"
+          $ref: "#/components/schemas/EnsemblerPyFuncConfig"
         created_at:
           type: "string"
           format: "date-time"
@@ -796,7 +796,7 @@ components:
             GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: "secret-name-for-google-service-account"
 
-    EnsemblerPyFuncRefConfig:
+    EnsemblerPyFuncConfig:
       description: "ensembler config when ensembler type is pyfunc"
       type: "object"
       nullable: true

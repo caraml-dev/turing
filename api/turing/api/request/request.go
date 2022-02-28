@@ -150,15 +150,15 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 			return nil, errors.New("missing ensembler standard config")
 		}
 		if r.Config.Ensembler.Type == models.EnsemblerPyFuncType {
-			if r.Config.Ensembler.PyFuncRefConfig == nil {
+			if r.Config.Ensembler.PyFuncConfig == nil {
 				return nil, errors.New("missing ensembler pyfunc reference config")
 			}
 
 			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
 			ensembler, err := ensemblersSvc.FindByID(
-				*r.Config.Ensembler.PyFuncRefConfig.EnsemblerID,
+				*r.Config.Ensembler.PyFuncConfig.EnsemblerID,
 				service.EnsemblersFindByIDOptions{
-					ProjectID: r.Config.Ensembler.PyFuncRefConfig.ProjectID,
+					ProjectID: r.Config.Ensembler.PyFuncConfig.ProjectID,
 				})
 			if err != nil {
 				return nil, fmt.Errorf("failed to find specified ensembler: %w", err)

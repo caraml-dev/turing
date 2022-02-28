@@ -238,9 +238,9 @@ func (c RouterDeploymentController) deployRouterVersion(
 	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
 	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerPyFuncType {
 		ensembler, err := c.EnsemblersService.FindByID(
-			*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+			*routerVersion.Ensembler.PyFuncConfig.EnsemblerID,
 			service.EnsemblersFindByIDOptions{
-				ProjectID: routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
+				ProjectID: routerVersion.Ensembler.PyFuncConfig.ProjectID,
 			})
 		if err != nil {
 			return "", fmt.Errorf("failed to find specified ensembler: %w", err)
@@ -253,7 +253,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 			ProjectName: project.Name,
 			// Create a unique resource name that contains partial versioning (part of the run_id hash)
 			ResourceName: pyFuncEnsembler.Name + "-" + pyFuncEnsembler.RunID[:5],
-			VersionID:    *routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+			VersionID:    *routerVersion.Ensembler.PyFuncConfig.EnsemblerID,
 			ArtifactURI:  pyFuncEnsembler.ArtifactURI,
 			BuildLabels: labeller.BuildLabels(
 				labeller.KubernetesLabelsRequest{
@@ -267,8 +267,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 			models.NewInfoEvent(
 				models.EventStageDeployingDependencies,
 				"building/retrieving pyfunc ensembler with project_id: %d and ensembler_id: %d",
-				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
-				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				*routerVersion.Ensembler.PyFuncConfig.ProjectID,
+				*routerVersion.Ensembler.PyFuncConfig.EnsemblerID,
 			),
 		)
 		imageRef, imageBuildErr := c.AppContext.EnsemblerServiceBuilder.BuildImage(request)
@@ -280,15 +280,15 @@ func (c RouterDeploymentController) deployRouterVersion(
 			models.NewInfoEvent(
 				models.EventStageDeployingDependencies,
 				"pyfunc ensembler with project_id: %d and ensembler_id: %d built/retrieved successfully",
-				*routerVersion.Ensembler.PyFuncRefConfig.ProjectID,
-				*routerVersion.Ensembler.PyFuncRefConfig.EnsemblerID,
+				*routerVersion.Ensembler.PyFuncConfig.ProjectID,
+				*routerVersion.Ensembler.PyFuncConfig.EnsemblerID,
 			),
 		)
 		// Create a new docker config for the ensembler with the newly generated image
 		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
 			Image:           imageRef,
-			ResourceRequest: routerVersion.Ensembler.PyFuncRefConfig.ResourceRequest,
-			Timeout:         routerVersion.Ensembler.PyFuncRefConfig.Timeout,
+			ResourceRequest: routerVersion.Ensembler.PyFuncConfig.ResourceRequest,
+			Timeout:         routerVersion.Ensembler.PyFuncConfig.Timeout,
 			Endpoint:        models.PyFuncEnsemblerServiceEndpoint,
 			Port:            models.PyFuncEnsemblerServicePort,
 		}
