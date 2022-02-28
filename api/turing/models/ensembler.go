@@ -12,7 +12,7 @@ type Ensembler struct {
 	Type           EnsemblerType            `json:"type" validate:"required"`
 	StandardConfig *EnsemblerStandardConfig `json:"standard_config"` // Ensembler config when Type is "standard"
 	DockerConfig   *EnsemblerDockerConfig   `json:"docker_config"`   // Ensembler config when Type is "docker"
-	PyFuncConfig   *EnsemblerPyFuncConfig   `json:"pyfunc_config"`   // Ensembler config when Type is "pyfunc"
+	PyfuncConfig   *EnsemblerPyfuncConfig   `json:"pyfunc_config"`   // Ensembler config when Type is "pyfunc"
 }
 
 // TableName returns the name of a table, where GORM should store/retrieve
@@ -51,7 +51,7 @@ type EnsemblerDockerConfig struct {
 	ServiceAccount string `json:"service_account"`
 }
 
-type EnsemblerPyFuncConfig struct {
+type EnsemblerPyfuncConfig struct {
 	ProjectID   *ID `json:"project_id" validate:"required"`
 	EnsemblerID *ID `json:"ensembler_id" validate:"required"`
 	// Resource requests for ensembler container deployed
@@ -92,13 +92,13 @@ func (c *EnsemblerDockerConfig) Scan(value interface{}) error {
 
 // Value implements sql.driver.Valuer interface so database tools like go-orm knows how to serialize the struct object
 // for storage in the database
-func (c EnsemblerPyFuncConfig) Value() (driver.Value, error) {
+func (c EnsemblerPyfuncConfig) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }
 
 // Scan implements sql.Scanner interface so database tools like go-orm knows how to de-serialize the struct object
 // from the database
-func (c *EnsemblerPyFuncConfig) Scan(value interface{}) error {
+func (c *EnsemblerPyfuncConfig) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), &c)
 }
 
