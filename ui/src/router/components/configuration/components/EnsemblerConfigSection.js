@@ -23,7 +23,7 @@ export const EnsemblerConfigSection = ({
           ensemblerType={"pyfunc"}>
           <PyFuncConfigViewGroup
             componentName="Ensembler"
-            pyfuncConfig={ensembler.py_func_ref_config}
+            pyfuncConfig={ensembler.pyfunc_config}
             dockerConfig={ensembler.docker_config}
           />
         </EnsemblersContextContextProvider>

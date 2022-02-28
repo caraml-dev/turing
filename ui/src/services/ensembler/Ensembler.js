@@ -31,7 +31,7 @@ export class Ensembler {
       case "standard":
         return { type: this.type, standard_config: this.standard_config };
       case "pyfunc":
-        return { type: this.type, py_func_ref_config: this.pyfunc_config };
+        return { type: this.type, pyfunc_config: this.pyfunc_config };
       default:
         return { ...this };
     }

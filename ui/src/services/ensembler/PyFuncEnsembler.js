@@ -12,7 +12,7 @@ export class PyFuncEnsembler extends Ensembler {
 
   static fromJson(json = {}) {
     const ensembler = new PyFuncEnsembler();
-    ensembler.pyfunc_config = objectAssignDeep({}, json.py_func_ref_config);
+    ensembler.pyfunc_config = objectAssignDeep({}, json.pyfunc_config);
     return ensembler;
   }
 

@@ -89,7 +89,7 @@ export class RouterVersion {
                   }
                 : this.ensembler.type === "pyfunc"
                 ? {
-                    pyfunc_config: this.ensembler.py_func_ref_config,
+                    pyfunc_config: this.ensembler.pyfunc_config,
                   }
                 : undefined),
             }

@@ -18,9 +18,7 @@ export const PyFuncDeploymentPanel = ({
   onChangeHandler,
   errors = {},
 }) => {
-  const { ensemblers, isLoaded } = useContext(EnsemblersContext);
-  console.log(ensemblers);
-  console.log(isLoaded);
+  const { ensemblers } = useContext(EnsemblersContext);
 
   let options = Object.values(ensemblers).reduce((pyfunc_ensemblers, val) => {
     pyfunc_ensemblers.push({
@@ -34,9 +32,6 @@ export const PyFuncDeploymentPanel = ({
   const selectedOption = options.find(
     (option) => option.value === ensembler_id
   );
-
-  console.log(options);
-  console.log(errors);
 
   return (
     <Panel title="Deployment">
