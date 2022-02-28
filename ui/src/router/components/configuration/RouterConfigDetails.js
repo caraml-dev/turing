@@ -29,7 +29,9 @@ export const RouterConfigDetails = ({ projectId, config }) => {
     {
       title: "Ensembler",
       iconType: "aggregate",
-      children: <EnsemblerConfigSection config={config} />,
+      children: (
+        <EnsemblerConfigSection projectId={projectId} config={config} />
+      ),
     },
     {
       title: "Outcome Tracking",

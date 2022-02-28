@@ -87,6 +87,10 @@ export class RouterVersion {
                 ? {
                     docker_config: this.ensembler.docker_config,
                   }
+                : this.ensembler.type === "pyfunc"
+                ? {
+                    pyfunc_config: this.ensembler.py_func_ref_config,
+                  }
                 : undefined),
             }
           : {
