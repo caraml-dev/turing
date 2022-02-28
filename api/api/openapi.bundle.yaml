@@ -1898,7 +1898,7 @@ components:
           cpu_request: cpu_request
         id: 0
         ensembler:
-          py_func_ref_config:
+          pyfunc_config:
             project_id: 7
             ensembler_id: 9
             resource_request:
@@ -2159,7 +2159,7 @@ components:
       type: object
     RouterEnsemblerConfig:
       example:
-        py_func_ref_config:
+        pyfunc_config:
           project_id: 7
           ensembler_id: 9
           resource_request:
@@ -2211,8 +2211,8 @@ components:
           $ref: '#/components/schemas/EnsemblerStandardConfig'
         docker_config:
           $ref: '#/components/schemas/EnsemblerDockerConfig'
-        py_func_ref_config:
-          $ref: '#/components/schemas/EnsemblerPyFuncRefConfig'
+        pyfunc_config:
+          $ref: '#/components/schemas/EnsemblerPyfuncConfig'
         created_at:
           format: date-time
           readOnly: true
@@ -2292,7 +2292,7 @@ components:
       - resource_request
       - timeout
       type: object
-    EnsemblerPyFuncRefConfig:
+    EnsemblerPyfuncConfig:
       description: ensembler config when ensembler type is pyfunc
       example:
         project_id: 7
@@ -2449,7 +2449,7 @@ components:
             memory_request: memory_request
             cpu_request: cpu_request
           ensembler:
-            py_func_ref_config:
+            pyfunc_config:
               project_id: 7
               ensembler_id: 9
               resource_request:
@@ -3128,7 +3128,7 @@ components:
           memory_request: memory_request
           cpu_request: cpu_request
         ensembler:
-          py_func_ref_config:
+          pyfunc_config:
             project_id: 7
             ensembler_id: 9
             resource_request:
