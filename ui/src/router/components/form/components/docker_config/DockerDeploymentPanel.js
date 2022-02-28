@@ -17,7 +17,7 @@ import { EuiFieldDuration } from "../../../../../components/form/field_duration/
 import SecretsContext from "../../../../../providers/secrets/context";
 import DockerRegistriesContext from "../../../../../providers/docker/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
-import { ServiceAccountComboBox } from "../../../../../components/form/service_account_combo_box/ServiceAccoutComboBox";
+import { ServiceAccountComboBox } from "../../../../../components/form/service_account_combo_box/ServiceAccountComboBox";
 import { useConfig } from "../../../../../config";
 
 const imageOptions = [];
