@@ -290,7 +290,7 @@ const schema = (maxAllowedReplica) => [
           .mixed()
           .required("Valid Ensembler type should be selected")
           .oneOf(
-            ["nop", "docker", "standard"],
+            ["nop", "docker", "standard", "pyfunc"],
             "Valid Ensembler type should be selected"
           ),
         docker_config: yup.mixed().when("type", {
