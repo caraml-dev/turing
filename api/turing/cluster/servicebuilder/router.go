@@ -437,7 +437,7 @@ func buildFiberConfig(
 	// If ensembler is set and is of Docker type, use "combiner" router
 	// Else, "eager" router is used.
 	var routerConfig fiberconfig.Config
-	if ensembler != nil && ((ensembler.Type == models.EnsemblerPyFuncType && ensembler.DockerConfig != nil) ||
+	if ensembler != nil && ((ensembler.Type == models.EnsemblerPyFuncType) ||
 		ensembler.Type == models.EnsemblerDockerType) {
 		multiRouteConfig.Type = routerConfigTypeCombiner
 		routerConfig = &fiberconfig.CombinerConfig{
