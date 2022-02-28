@@ -380,7 +380,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Events"
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Event"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -847,11 +849,6 @@ components:
           enum:
             - "json"
             - "protobuf"
-
-    Events:
-      type: "array"
-      items:
-        $ref: "#/components/schemas/Event"
 
     Event:
       type: "object"
