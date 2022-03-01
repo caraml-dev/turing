@@ -4,10 +4,11 @@
 package service_test
 
 import (
-	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/api/turing/service/mocks"
 	"testing"
 	"text/template"
+
+	"github.com/gojek/turing/api/turing/service"
+	"github.com/gojek/turing/api/turing/service/mocks"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
