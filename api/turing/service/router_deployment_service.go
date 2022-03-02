@@ -417,10 +417,10 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 ) error {
 	// Build image corresponding to the retrieved ensembler
 	request := imagebuilder.BuildImageRequest{
-		ProjectName: project.Name,
-		// Create a unique resource name that contains partial versioning (part of the run_id hash)
-		ResourceName: ensembler.Name + "-" + ensembler.RunID[:5],
-		VersionID:    *routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
+		ProjectName:  project.Name,
+		ResourceName: ensembler.Name,
+		ResourceID:   *routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
+		VersionID:    ensembler.RunID,
 		ArtifactURI:  ensembler.ArtifactURI,
 		BuildLabels: labeller.BuildLabels(
 			labeller.KubernetesLabelsRequest{

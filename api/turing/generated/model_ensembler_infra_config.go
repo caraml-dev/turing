@@ -16,11 +16,12 @@ import (
 
 // EnsemblerInfraConfig struct for EnsemblerInfraConfig
 type EnsemblerInfraConfig struct {
-	ArtifactUri        *string                     `json:"artifact_uri,omitempty"`
-	EnsemblerName      *string                     `json:"ensembler_name,omitempty"`
-	ServiceAccountName *string                     `json:"service_account_name,omitempty" validate:"required"`
-	Resources          NullableEnsemblingResources `json:"resources,omitempty"`
-	Env                *[]EnvVar                   `json:"env,omitempty"`
+	ArtifactUri *string `json:"artifact_uri,omitempty"`
+	EnsemblerName *string `json:"ensembler_name,omitempty"`
+	ServiceAccountName *string `json:"service_account_name,omitempty" validate:"required"`
+	Resources NullableEnsemblingResources `json:"resources,omitempty"`
+	RunId *string `json:"run_id,omitempty"`
+	Env *[]EnvVar `json:"env,omitempty"`
 }
 
 // NewEnsemblerInfraConfig instantiates a new EnsemblerInfraConfig object
@@ -149,7 +150,7 @@ func (o *EnsemblerInfraConfig) GetResources() EnsemblingResources {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *EnsemblerInfraConfig) GetResourcesOk() (*EnsemblingResources, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return o.Resources.Get(), o.Resources.IsSet()
@@ -168,7 +169,6 @@ func (o *EnsemblerInfraConfig) HasResources() bool {
 func (o *EnsemblerInfraConfig) SetResources(v EnsemblingResources) {
 	o.Resources.Set(&v)
 }
-
 // SetResourcesNil sets the value for Resources to be an explicit nil
 func (o *EnsemblerInfraConfig) SetResourcesNil() {
 	o.Resources.Set(nil)
@@ -177,6 +177,38 @@ func (o *EnsemblerInfraConfig) SetResourcesNil() {
 // UnsetResources ensures that no value is present for Resources, not even an explicit nil
 func (o *EnsemblerInfraConfig) UnsetResources() {
 	o.Resources.Unset()
+}
+
+// GetRunId returns the RunId field value if set, zero value otherwise.
+func (o *EnsemblerInfraConfig) GetRunId() string {
+	if o == nil || o.RunId == nil {
+		var ret string
+		return ret
+	}
+	return *o.RunId
+}
+
+// GetRunIdOk returns a tuple with the RunId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EnsemblerInfraConfig) GetRunIdOk() (*string, bool) {
+	if o == nil || o.RunId == nil {
+		return nil, false
+	}
+	return o.RunId, true
+}
+
+// HasRunId returns a boolean if a field has been set.
+func (o *EnsemblerInfraConfig) HasRunId() bool {
+	if o != nil && o.RunId != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetRunId gets a reference to the given string and assigns it to the RunId field.
+func (o *EnsemblerInfraConfig) SetRunId(v string) {
+	o.RunId = &v
 }
 
 // GetEnv returns the Env field value if set, zero value otherwise.
@@ -225,6 +257,9 @@ func (o EnsemblerInfraConfig) MarshalJSON() ([]byte, error) {
 	if o.Resources.IsSet() {
 		toSerialize["resources"] = o.Resources.Get()
 	}
+	if o.RunId != nil {
+		toSerialize["run_id"] = o.RunId
+	}
 	if o.Env != nil {
 		toSerialize["env"] = o.Env
 	}
@@ -266,3 +301,5 @@ func (v *NullableEnsemblerInfraConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

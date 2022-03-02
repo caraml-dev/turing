@@ -29,14 +29,21 @@ type ensemblerJobNameGenerator struct {
 func (n *ensemblerJobNameGenerator) generateBuilderName(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) string {
-	return fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, versionID)
+	// Creates a unique resource name with partial versioning (part of the versionID hash) as max char count is limited
+	// by k8s pod name length (63)
+	partialVersionID := getPartialVersionID(versionID, 5)
+	return fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelID, partialVersionID)
 }
 
 // generateDockerImageName generate the name of docker image of prediction job that will be created from given model
-func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string, modelName string) string {
-	return fmt.Sprintf("%s/%s-%s-job", n.registry, projectName, modelName)
+func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string,
+	modelName string,
+	runID string,
+) string {
+	return fmt.Sprintf("%s/%s-%s-%s-job", n.registry, projectName, modelName, runID)
 }
 
 // NewEnsemblerServiceImageBuilder create ImageBuilder for building docker image of the ensembling service (real-time)
@@ -60,13 +67,28 @@ type ensemblerServiceNameGenerator struct {
 func (n *ensemblerServiceNameGenerator) generateBuilderName(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) string {
-	return fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, versionID)
+	// Creates a unique resource name with partial versioning (part of the versionID hash) as max char count is limited
+	// by k8s pod name length (63)
+	partialVersionID := getPartialVersionID(versionID, 5)
+	return fmt.Sprintf("service-%s-%s-%d-%s", projectName, modelName, modelID, partialVersionID)
 }
 
 // generateServiceImageName generate the name of docker image of the ensembling service that will be created from given
 // model
-func (n *ensemblerServiceNameGenerator) generateDockerImageName(projectName string, modelName string) string {
-	return fmt.Sprintf("%s/%s-%s-service", n.registry, projectName, modelName)
+func (n *ensemblerServiceNameGenerator) generateDockerImageName(
+	projectName string,
+	modelName string,
+	runID string,
+) string {
+	return fmt.Sprintf("%s/%s-%s-%s-service", n.registry, projectName, modelName, runID)
+}
+
+func getPartialVersionID(versionID string, numChar int) string {
+	if len(versionID) > numChar {
+		return versionID[:numChar]
+	}
+	return versionID
 }

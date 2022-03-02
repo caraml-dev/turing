@@ -25,6 +25,7 @@ const (
 	projectName                          = "test-project"
 	modelName                            = "mymodel"
 	modelVersion                         = models.ID(1)
+	runID                                = "abc123"
 	dockerRegistry                       = "ghcr.io"
 	artifactURI                          = "gs://bucket/ensembler"
 	pyFuncEnsemblerJobDockerfilePath     = "engines/pyfunc-ensembler-job/app.Dockerfile"
@@ -33,6 +34,7 @@ const (
 	pyFuncEnsemblerJobBaseImageRef       = "ghcr.io/gojek/turing/pyfunc-ensembler-job:v0.0.0-build.154-e108820"
 	pyFuncEnsemblerServiceBaseImageRef   = "ghcr.io/gojek/turing/pyfunc-ensembler-service:v0.0.0-build.154-e102280"
 	buildNamespace                       = "mlp"
+	ensemblerFolder                      = "ensembler"
 )
 
 func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
@@ -42,7 +44,8 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		projectName         string
 		modelName           string
 		artifactURI         string
-		versionID           models.ID
+		modelID             models.ID
+		versionID           string
 		inputDependencies   []string
 		namespace           string
 		imageBuildingConfig config.ImageBuildingConfig
@@ -51,10 +54,11 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		ensemblerFolder     string
 	}{
 		"success | no existing job": {
-			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
@@ -67,7 +71,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					nil,
 					k8serrors.NewNotFound(
 						schema.GroupResource{},
-						fmt.Sprintf("batch-%s-%s-%d", projectName, modelName, modelVersion),
+						fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 					),
 				).Once()
 
@@ -92,7 +96,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -125,13 +129,14 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 		"success: existing job is running": {
-			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
@@ -146,7 +151,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -173,7 +178,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -203,13 +208,14 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 		"success: existing job failed": {
-			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
@@ -221,7 +227,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 						Status: apibatchv1.JobStatus{
 							Failed: 1,
@@ -257,7 +263,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("batch-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -290,7 +296,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 	}
 
@@ -304,6 +310,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			buildImageRequest := BuildImageRequest{
 				tt.projectName,
 				tt.modelName,
+				tt.modelID,
 				tt.versionID,
 				tt.artifactURI,
 				tt.buildLabels,
@@ -323,7 +330,8 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		projectName         string
 		modelName           string
 		artifactURI         string
-		versionID           models.ID
+		modelID             models.ID
+		versionID           string
 		inputDependencies   []string
 		namespace           string
 		imageBuildingConfig config.ImageBuildingConfig
@@ -332,10 +340,11 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		ensemblerFolder     string
 	}{
 		"success | no existing job": {
-			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
@@ -348,7 +357,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					nil,
 					k8serrors.NewNotFound(
 						schema.GroupResource{},
-						fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+						fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 					),
 				).Once()
 
@@ -373,7 +382,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -406,13 +415,14 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 		"success: existing job is running": {
-			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
@@ -427,7 +437,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -454,7 +464,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -484,13 +494,14 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 		"success: existing job failed": {
-			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
+			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
 			projectName: projectName,
 			modelName:   modelName,
-			versionID:   modelVersion,
+			modelID:     modelVersion,
+			versionID:   runID,
 			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
@@ -502,7 +513,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 						Status: apibatchv1.JobStatus{
 							Failed: 1,
@@ -538,7 +549,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("service-builder-%s-%s-%d", projectName, modelName, modelVersion),
+							Name: fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
 						},
 					},
 					nil,
@@ -571,7 +582,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
-			ensemblerFolder: "ensembler",
+			ensemblerFolder: ensemblerFolder,
 		},
 	}
 
@@ -585,6 +596,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			buildImageRequest := BuildImageRequest{
 				tt.projectName,
 				tt.modelName,
+				tt.modelID,
 				tt.versionID,
 				tt.artifactURI,
 				tt.buildLabels,
@@ -875,7 +887,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
-			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1))
+			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
 
 			if tt.hasErr {
 				assert.NotNil(t, err)
@@ -1081,7 +1093,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerServiceImageBuilder(clusterController, tt.imageBuildingConfig)
-			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1))
+			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
 
 			if tt.hasErr {
 				assert.NotNil(t, err)
@@ -1142,7 +1154,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
-			err := ib.DeleteImageBuildingJob("", "", models.ID(1))
+			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
 			if tt.hasErr {
 				assert.NotNil(t, err)
@@ -1202,7 +1214,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
-			err := ib.DeleteImageBuildingJob("", "", models.ID(1))
+			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
 			if tt.hasErr {
 				assert.NotNil(t, err)

@@ -1346,6 +1346,7 @@ components:
         error: error
         infra_config:
           service_account_name: service_account_name
+          run_id: run_id
           ensembler_name: ensembler_name
           resources:
             driver_cpu_request: driver_cpu_request
@@ -1400,6 +1401,7 @@ components:
     EnsemblerInfraConfig:
       example:
         service_account_name: service_account_name
+        run_id: run_id
         ensembler_name: ensembler_name
         resources:
           driver_cpu_request: driver_cpu_request
@@ -1423,6 +1425,9 @@ components:
           x-go-custom-tag: validate:"required"
         resources:
           $ref: '#/components/schemas/EnsemblingResources'
+        run_id:
+          readOnly: true
+          type: string
         env:
           items:
             $ref: '#/components/schemas/EnvVar'

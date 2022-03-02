@@ -66,6 +66,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 		EnvironmentName: "dev",
 		InfraConfig: &models.InfraConfig{
 			EnsemblerInfraConfig: openapi.EnsemblerInfraConfig{
+				RunId:              ref.String("abc123"),
 				ArtifactUri:        ref.String("gs://bucket/ensembler"),
 				EnsemblerName:      ref.String("ensembler"),
 				Resources:          nullableEnsemblingResources,

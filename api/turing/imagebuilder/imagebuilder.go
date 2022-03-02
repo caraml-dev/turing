@@ -57,7 +57,8 @@ const (
 type BuildImageRequest struct {
 	ProjectName     string
 	ResourceName    string
-	VersionID       models.ID
+	ResourceID      models.ID
+	VersionID       string
 	ArtifactURI     string
 	BuildLabels     map[string]string
 	EnsemblerFolder string
@@ -70,20 +71,22 @@ type ImageBuilder interface {
 	GetImageBuildingJobStatus(
 		projectName string,
 		modelName string,
-		versionID models.ID,
+		modelID models.ID,
+		versionID string,
 	) (JobStatus, error)
 	DeleteImageBuildingJob(
 		projectName string,
 		modelName string,
-		versionID models.ID,
+		modelID models.ID,
+		versionID string,
 	) error
 }
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderName(projectName string, modelName string, versionID models.ID) string
+	generateBuilderName(projectName string, modelName string, modelID models.ID, versionID string) string
 	// generateDockerImageName generate image name based on project and model
-	generateDockerImageName(projectName string, modelName string) string
+	generateDockerImageName(projectName string, modelName string, versionID string) string
 }
 
 type imageBuilder struct {
@@ -111,9 +114,9 @@ func newImageBuilder(
 }
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
-	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName)
-	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.VersionID)))
-	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
+	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName, request.VersionID)
+	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.ResourceID)))
+	imageRef := fmt.Sprintf("%s:%d", imageName, request.ResourceID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
 		return "", ErrUnableToGetImageRef
@@ -128,6 +131,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		request.ProjectName,
 		request.ResourceName,
+		request.ResourceID,
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -344,11 +348,13 @@ func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) e
 func (ib *imageBuilder) GetImageBuildingJobStatus(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) (JobStatus, error) {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
+		modelID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -377,11 +383,13 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 func (ib *imageBuilder) DeleteImageBuildingJob(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) error {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
+		modelID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
