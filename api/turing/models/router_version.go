@@ -83,3 +83,11 @@ func (r *RouterVersion) BeforeCreate(tx *gorm.DB) error {
 	r.Version = latestVersion.Version + 1
 	return nil
 }
+
+func (r *RouterVersion) HasDockerConfig() bool {
+	if r.Ensembler != nil && r.Ensembler.DockerConfig != nil {
+		return true
+	} else {
+		return false
+	}
+}

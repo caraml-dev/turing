@@ -35,20 +35,20 @@ func (_m *DeploymentService) DeleteRouterEndpoint(project *client.Project, envir
 	return r0
 }
 
-// DeployRouterVersion provides a mock function with given fields: project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentConfig, eventsCh
-func (_m *DeploymentService) DeployRouterVersion(project *client.Project, environment *merlinclient.Environment, routerVersion *models.RouterVersion, routerServiceAccountKey string, enricherServiceAccountKey string, ensemblerServiceAccountKey string, experimentConfig json.RawMessage, eventsCh *service.EventChannel) (string, error) {
-	ret := _m.Called(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentConfig, eventsCh)
+// DeployRouterVersion provides a mock function with given fields: project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh
+func (_m *DeploymentService) DeployRouterVersion(project *client.Project, environment *merlinclient.Environment, routerVersion *models.RouterVersion, routerServiceAccountKey string, enricherServiceAccountKey string, ensemblerServiceAccountKey string, pyfuncEnsembler *models.PyFuncEnsembler, experimentConfig json.RawMessage, eventsCh *service.EventChannel) (string, error) {
+	ret := _m.Called(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string, json.RawMessage, *service.EventChannel) string); ok {
-		r0 = rf(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentConfig, eventsCh)
+	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) string); ok {
+		r0 = rf(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string, json.RawMessage, *service.EventChannel) error); ok {
-		r1 = rf(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, experimentConfig, eventsCh)
+	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string,  *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) error); ok {
+		r1 = rf(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	} else {
 		r1 = ret.Error(1)
 	}

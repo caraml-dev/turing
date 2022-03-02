@@ -415,6 +415,7 @@ func (r *ensemblingJobRunner) buildImage(
 		VersionID:    ensemblingJob.EnsemblerID,
 		ArtifactURI:  *ensemblingJob.InfraConfig.ArtifactUri,
 		BuildLabels:  buildLabels,
+		EnsemblerFolder: service.EnsemblerFolder,
 	}
 	return r.imageBuilder.BuildImage(request)
 }

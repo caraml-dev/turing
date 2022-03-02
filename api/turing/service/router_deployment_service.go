@@ -11,8 +11,10 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/config"
+	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -27,6 +29,7 @@ type DeploymentService interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
+		pyfuncEnsembler *models.PyFuncEnsembler,
 		experimentConfig json.RawMessage,
 		eventsCh *EventChannel,
 	) (string, error)
@@ -56,6 +59,9 @@ type deploymentService struct {
 	// Knative service configs
 	knativeServiceConfig *config.KnativeServiceDefaults
 
+	// Ensembler service image builder for real time ensemblers
+	ensemblerServiceImageBuilder imagebuilder.ImageBuilder
+
 	clusterControllers map[string]cluster.Controller
 	svcBuilder         servicebuilder.ClusterServiceBuilder
 }
@@ -67,6 +73,7 @@ type uFunc func(context.Context, *cluster.KnativeService, *sync.WaitGroup, chan<
 func NewDeploymentService(
 	cfg *config.Config,
 	clusterControllers map[string]cluster.Controller,
+	ensemblerServiceImageBuilder imagebuilder.ImageBuilder,
 ) DeploymentService {
 	// Create cluster service builder
 	sb := servicebuilder.NewClusterServiceBuilder(
@@ -75,16 +82,17 @@ func NewDeploymentService(
 	)
 
 	return &deploymentService{
-		deploymentTimeout:         cfg.DeployConfig.Timeout,
-		deploymentDeletionTimeout: cfg.DeployConfig.DeletionTimeout,
-		environmentType:           cfg.DeployConfig.EnvironmentType,
-		fluentdConfig:             cfg.RouterDefaults.FluentdConfig,
-		jaegerCollectorEndpoint:   cfg.RouterDefaults.JaegerCollectorEndpoint,
-		knativeServiceConfig:      cfg.KnativeServiceDefaults,
-		sentryEnabled:             cfg.Sentry.Enabled,
-		sentryDSN:                 cfg.Sentry.DSN,
-		clusterControllers:        clusterControllers,
-		svcBuilder:                sb,
+		deploymentTimeout:            cfg.DeployConfig.Timeout,
+		deploymentDeletionTimeout:    cfg.DeployConfig.DeletionTimeout,
+		environmentType:              cfg.DeployConfig.EnvironmentType,
+		fluentdConfig:                cfg.RouterDefaults.FluentdConfig,
+		jaegerCollectorEndpoint:      cfg.RouterDefaults.JaegerCollectorEndpoint,
+		knativeServiceConfig:         cfg.KnativeServiceDefaults,
+		ensemblerServiceImageBuilder: ensemblerServiceImageBuilder,
+		sentryEnabled:                cfg.Sentry.Enabled,
+		sentryDSN:                    cfg.Sentry.DSN,
+		clusterControllers:           clusterControllers,
+		svcBuilder:                   sb,
 	}
 }
 
@@ -96,10 +104,19 @@ func (ds *deploymentService) DeployRouterVersion(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	pyfuncEnsembler *models.PyFuncEnsembler,
 	experimentConfig json.RawMessage,
 	eventsCh *EventChannel,
 ) (string, error) {
 	var endpoint string
+
+	// If pyfunc ensembler is specified as an ensembler service, build/retrieve its image
+	if pyfuncEnsembler != nil {
+		err := ds.buildEnsemblerServiceImage(pyfuncEnsembler, project, routerVersion, eventsCh)
+		if err != nil {
+			return endpoint, err
+		}
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
 	defer cancel()
@@ -351,9 +368,7 @@ func (ds *deploymentService) createServices(
 	}
 
 	// Ensembler
-	if routerVersion.Ensembler != nil &&
-		((routerVersion.Ensembler.Type == models.EnsemblerPyFuncType && routerVersion.Ensembler.DockerConfig != nil) ||
-			routerVersion.Ensembler.Type == models.EnsemblerDockerType) {
+	if routerVersion.HasDockerConfig() {
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion,
 			project,
@@ -391,6 +406,62 @@ func (ds *deploymentService) createServices(
 	services = append(services, routerService)
 
 	return services, nil
+}
+
+// buildEnsemblerServiceImage builds the pyfunc ensembler as a service specified in a Docker image
+func (ds *deploymentService) buildEnsemblerServiceImage(
+	ensembler *models.PyFuncEnsembler,
+	project *mlp.Project,
+	routerVersion *models.RouterVersion,
+	eventsCh *EventChannel,
+) error {
+	// Build image corresponding to the retrieved ensembler
+	request := imagebuilder.BuildImageRequest{
+		ProjectName: project.Name,
+		// Create a unique resource name that contains partial versioning (part of the run_id hash)
+		ResourceName: ensembler.Name + "-" + ensembler.RunID[:5],
+		VersionID:    *routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
+		ArtifactURI:  ensembler.ArtifactURI,
+		BuildLabels: labeller.BuildLabels(
+			labeller.KubernetesLabelsRequest{
+				Stream: project.Stream,
+				Team:   project.Team,
+				App:    ensembler.Name,
+			},
+		),
+		EnsemblerFolder: EnsemblerFolder,
+	}
+	eventsCh.Write(
+		models.NewInfoEvent(
+			models.EventStageDeployingDependencies,
+			"building/retrieving pyfunc ensembler with project_id: %d and ensembler_id: %d",
+			*routerVersion.Ensembler.PyfuncConfig.ProjectID,
+			*routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
+		),
+	)
+	imageRef, imageBuildErr := ds.ensemblerServiceImageBuilder.BuildImage(request)
+	if imageBuildErr != nil {
+		return imageBuildErr
+	}
+
+	eventsCh.Write(
+		models.NewInfoEvent(
+			models.EventStageDeployingDependencies,
+			"pyfunc ensembler with project_id: %d and ensembler_id: %d built/retrieved successfully",
+			*routerVersion.Ensembler.PyfuncConfig.ProjectID,
+			*routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
+		),
+	)
+	// Create a new docker config for the ensembler with the newly generated image
+	routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
+		Image:           imageRef,
+		ResourceRequest: routerVersion.Ensembler.PyfuncConfig.ResourceRequest,
+		Timeout:         routerVersion.Ensembler.PyfuncConfig.Timeout,
+		Endpoint:        PyFuncEnsemblerServiceEndpoint,
+		Port:            PyFuncEnsemblerServicePort,
+	}
+
+	return nil
 }
 
 // deployK8sService deploys a kubernetes service.
@@ -587,3 +658,10 @@ func updateKnServices(ctx context.Context, services []*cluster.KnativeService,
 
 	return nil
 }
+
+const (
+	// PyFuncEnsemblerServiceEndpoint URL path for the endpoint, e.g "/"
+	PyFuncEnsemblerServiceEndpoint string = "/ensemble"
+	// PyFuncEnsemblerServicePort Port number the container listens to for requests
+	PyFuncEnsemblerServicePort int = 8083
+)

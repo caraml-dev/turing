@@ -22,7 +22,6 @@ import (
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 var (
@@ -61,6 +60,7 @@ type BuildImageRequest struct {
 	VersionID    models.ID
 	ArtifactURI  string
 	BuildLabels  map[string]string
+	EnsemblerFolder string
 }
 
 // ImageBuilder defines the operations on building and publishing OCI images.
@@ -141,7 +141,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			return "", ErrUnableToGetJobStatus
 		}
 
-		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
+		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels, request.EnsemblerFolder)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -156,7 +156,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 				return "", ErrDeleteFailedJob
 			}
 
-			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
+			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels, request.EnsemblerFolder)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -203,9 +203,10 @@ func (ib *imageBuilder) createKanikoJob(
 	imageRef string,
 	artifactURI string,
 	buildLabels map[string]string,
+	ensemblerFolder string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
-	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], service.EnsemblerFolder)
+	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),

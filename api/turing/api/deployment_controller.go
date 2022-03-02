@@ -3,11 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
-
-	"github.com/gojek/turing/api/turing/cluster/labeller"
-	"github.com/gojek/turing/api/turing/imagebuilder"
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
@@ -236,6 +232,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 	}
 
 	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
+	var pyfuncEnsembler *models.PyFuncEnsembler
 	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerPyFuncType {
 		ensembler, err := c.EnsemblersService.FindByID(
 			*routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
@@ -243,55 +240,10 @@ func (c RouterDeploymentController) deployRouterVersion(
 				ProjectID: routerVersion.Ensembler.PyfuncConfig.ProjectID,
 			})
 		if err != nil {
-			return "", fmt.Errorf("failed to find specified ensembler: %w", err)
+			return "", err
 		}
 
-		pyFuncEnsembler := ensembler.(*models.PyFuncEnsembler)
-
-		// Build image corresponding to the retrieved ensembler
-		request := imagebuilder.BuildImageRequest{
-			ProjectName: project.Name,
-			// Create a unique resource name that contains partial versioning (part of the run_id hash)
-			ResourceName: pyFuncEnsembler.Name + "-" + pyFuncEnsembler.RunID[:5],
-			VersionID:    *routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
-			ArtifactURI:  pyFuncEnsembler.ArtifactURI,
-			BuildLabels: labeller.BuildLabels(
-				labeller.KubernetesLabelsRequest{
-					Stream: project.Stream,
-					Team:   project.Team,
-					App:    pyFuncEnsembler.Name,
-				},
-			),
-		}
-		eventsCh.Write(
-			models.NewInfoEvent(
-				models.EventStageDeployingDependencies,
-				"building/retrieving pyfunc ensembler with project_id: %d and ensembler_id: %d",
-				*routerVersion.Ensembler.PyfuncConfig.ProjectID,
-				*routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
-			),
-		)
-		imageRef, imageBuildErr := c.AppContext.EnsemblerServiceBuilder.BuildImage(request)
-		if imageBuildErr != nil {
-			return "", imageBuildErr
-		}
-
-		eventsCh.Write(
-			models.NewInfoEvent(
-				models.EventStageDeployingDependencies,
-				"pyfunc ensembler with project_id: %d and ensembler_id: %d built/retrieved successfully",
-				*routerVersion.Ensembler.PyfuncConfig.ProjectID,
-				*routerVersion.Ensembler.PyfuncConfig.EnsemblerID,
-			),
-		)
-		// Create a new docker config for the ensembler with the newly generated image
-		routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
-			Image:           imageRef,
-			ResourceRequest: routerVersion.Ensembler.PyfuncConfig.ResourceRequest,
-			Timeout:         routerVersion.Ensembler.PyfuncConfig.Timeout,
-			Endpoint:        models.PyFuncEnsemblerServiceEndpoint,
-			Port:            models.PyFuncEnsemblerServicePort,
-		}
+		pyfuncEnsembler = ensembler.(*models.PyFuncEnsembler)
 	}
 
 	// Deploy the router version
@@ -302,6 +254,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
+		pyfuncEnsembler,
 		experimentConfig,
 		eventsCh,
 	)

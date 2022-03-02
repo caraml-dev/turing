@@ -31,9 +31,6 @@ type AppContext struct {
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
 
-	// Ensembler service image builder for real time ensemblers
-	EnsemblerServiceBuilder imagebuilder.ImageBuilder
-
 	BatchRunners       []batchrunner.BatchJobRunner
 	CryptoService      service.CryptoService
 	MLPService         service.MLPService
@@ -151,18 +148,17 @@ func NewAppContext(
 	}
 
 	appContext := &AppContext{
-		Authorizer:              authorizer,
-		DeploymentService:       service.NewDeploymentService(cfg, clusterControllers),
-		RoutersService:          service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:       service.NewEnsemblersService(db),
-		EnsemblingJobService:    ensemblingJobService,
-		EnsemblerServiceBuilder: ensemblerServiceImageBuilder,
-		RouterVersionsService:   service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EventService:            service.NewEventService(db),
-		RouterDefaults:          cfg.RouterDefaults,
-		CryptoService:           cryptoService,
-		MLPService:              mlpSvc,
-		ExperimentsService:      expSvc,
+		Authorizer:            authorizer,
+		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
+		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
+		EnsemblersService:     service.NewEnsemblersService(db),
+		EnsemblingJobService:  ensemblingJobService,
+		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
+		EventService:          service.NewEventService(db),
+		RouterDefaults:        cfg.RouterDefaults,
+		CryptoService:         cryptoService,
+		MLPService:            mlpSvc,
+		ExperimentsService:    expSvc,
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),

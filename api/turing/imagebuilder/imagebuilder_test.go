@@ -48,6 +48,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		buildLabels         map[string]string
 		clusterController   func() cluster.Controller
+		ensemblerFolder 	string
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -124,6 +125,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 		"success: existing job is running": {
 			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -201,6 +203,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 		"success: existing job failed": {
 			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -287,6 +290,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 	}
 
@@ -303,6 +307,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				tt.versionID,
 				tt.artifactURI,
 				tt.buildLabels,
+				tt.ensemblerFolder,
 			}
 			actual, err := ib.BuildImage(buildImageRequest)
 			assert.Nil(t, err)
@@ -324,6 +329,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		buildLabels         map[string]string
 		clusterController   func() cluster.Controller
+		ensemblerFolder 	string
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -400,6 +406,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 		"success: existing job is running": {
 			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -477,6 +484,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 		"success: existing job failed": {
 			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -563,6 +571,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					},
 				},
 			},
+			ensemblerFolder: "ensembler",
 		},
 	}
 
@@ -579,6 +588,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				tt.versionID,
 				tt.artifactURI,
 				tt.buildLabels,
+				tt.ensemblerFolder,
 			}
 			actual, err := ib.BuildImage(buildImageRequest)
 			assert.Nil(t, err)

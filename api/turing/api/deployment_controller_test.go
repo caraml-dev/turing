@@ -158,8 +158,9 @@ func TestDeployVersionSuccess(t *testing.T) {
 			rvs.On("Save", data.validVersion).Return(data.validVersion, nil)
 
 			ds := &mocks.DeploymentService{}
+
 			ds.On("DeployRouterVersion", project, environment, data.pendingVersion, "service-acct",
-				"", "", data.expRunnerCfg, eventsCh).Return("test-url", nil)
+				"", "", mock.Anything, data.expRunnerCfg, eventsCh).Return("test-url", nil)
 
 			// Create test controller
 			ctrl := RouterDeploymentController{
@@ -268,7 +269,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 
 	ds := &mocks.DeploymentService{}
 	ds.On("DeployRouterVersion", project, environment, newVer, testSvcAcct,
-		"", "", json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
+		"", "", mock.Anything, json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
 	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything).
 		Return(nil)
 

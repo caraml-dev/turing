@@ -101,10 +101,3 @@ func (c EnsemblerPyfuncConfig) Value() (driver.Value, error) {
 func (c *EnsemblerPyfuncConfig) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), &c)
 }
-
-const (
-	// URL path for the endpoint, e.g "/"
-	PyFuncEnsemblerServiceEndpoint string = "/ensemble"
-	// Port number the container listens to for requests
-	PyFuncEnsemblerServicePort int = 8083
-)

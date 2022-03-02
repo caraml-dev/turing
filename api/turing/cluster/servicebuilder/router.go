@@ -201,7 +201,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envEnricherTimeout, Value: ver.Enricher.Timeout},
 		}...)
 	}
-	if ver.Ensembler != nil && ver.Ensembler.DockerConfig != nil {
+	if ver.HasDockerConfig() {
 		endpoint := buildPrePostProcessorEndpoint(
 			ver,
 			namespace,
@@ -433,7 +433,7 @@ func buildFiberConfig(
 	}
 
 	// Select router type (eager or combiner) based on the ensembler config.
-	// If ensembler is set and uses a DockerConfig to run, use "combiner" router
+	// If ensembler uses a DockerConfig to run, use "combiner" router
 	// Else, "eager" router is used.
 	var routerConfig fiberconfig.Config
 	if ensembler != nil && ensembler.DockerConfig != nil {
