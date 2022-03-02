@@ -8,7 +8,6 @@ ARG FOLDER_NAME
 RUN gsutil -m cp -r ${MODEL_URL} .
 
 # Install dependencies required by the user-defined ensembler
-RUN /bin/bash -c ". activate ${CONDA_ENV_NAME}"
 RUN conda env update --name ${CONDA_ENV_NAME} --file ./${FOLDER_NAME}/conda.yaml
 
 # Use conda-pack to create a standalone environment
