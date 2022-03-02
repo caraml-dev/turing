@@ -55,11 +55,11 @@ const (
 
 // BuildImageRequest contains the information needed to build the OCI image
 type BuildImageRequest struct {
-	ProjectName  string
-	ResourceName string
-	VersionID    models.ID
-	ArtifactURI  string
-	BuildLabels  map[string]string
+	ProjectName     string
+	ResourceName    string
+	VersionID       models.ID
+	ArtifactURI     string
+	BuildLabels     map[string]string
 	EnsemblerFolder string
 }
 
@@ -141,7 +141,8 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			return "", ErrUnableToGetJobStatus
 		}
 
-		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels, request.EnsemblerFolder)
+		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
+			request.EnsemblerFolder)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -156,7 +157,8 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 				return "", ErrDeleteFailedJob
 			}
 
-			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels, request.EnsemblerFolder)
+			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
+				request.EnsemblerFolder)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage

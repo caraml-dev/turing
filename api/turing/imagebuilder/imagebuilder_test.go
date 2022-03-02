@@ -48,7 +48,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		buildLabels         map[string]string
 		clusterController   func() cluster.Controller
-		ensemblerFolder 	string
+		ensemblerFolder     string
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s-%s-job:%d", dockerRegistry, projectName, modelName, modelVersion),
@@ -329,7 +329,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		buildLabels         map[string]string
 		clusterController   func() cluster.Controller
-		ensemblerFolder 	string
+		ensemblerFolder     string
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s-%s-service:%d", dockerRegistry, projectName, modelName, modelVersion),

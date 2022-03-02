@@ -316,17 +316,21 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, &AppContext{
-		Authorizer:              testAuthorizer,
-		DeploymentService:       service.NewDeploymentService(testCfg, map[string]cluster.Controller{}, ensemblerImageBuilder),
-		RoutersService:          service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:       service.NewEnsemblersService(nil),
-		EnsemblingJobService:    ensemblingJobService,
-		RouterVersionsService:   service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
-		EventService:            service.NewEventService(nil),
-		RouterDefaults:          testCfg.RouterDefaults,
-		CryptoService:           service.NewCryptoService(testCfg.TuringEncryptionKey),
-		MLPService:              mlpService,
-		ExperimentsService:      experimentService,
+		Authorizer: testAuthorizer,
+		DeploymentService: service.NewDeploymentService(
+			testCfg,
+			map[string]cluster.Controller{},
+			ensemblerImageBuilder,
+		),
+		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
+		EnsemblersService:     service.NewEnsemblersService(nil),
+		EnsemblingJobService:  ensemblingJobService,
+		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
+		EventService:          service.NewEventService(nil),
+		RouterDefaults:        testCfg.RouterDefaults,
+		CryptoService:         service.NewCryptoService(testCfg.TuringEncryptionKey),
+		MLPService:            mlpService,
+		ExperimentsService:    experimentService,
 		PodLogService: service.NewPodLogService(
 			map[string]cluster.Controller{},
 		),

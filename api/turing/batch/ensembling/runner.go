@@ -410,11 +410,11 @@ func (r *ensemblingJobRunner) buildImage(
 	buildLabels map[string]string,
 ) (string, error) {
 	request := imagebuilder.BuildImageRequest{
-		ProjectName:  mlpProject.Name,
-		ResourceName: *ensemblingJob.InfraConfig.EnsemblerName,
-		VersionID:    ensemblingJob.EnsemblerID,
-		ArtifactURI:  *ensemblingJob.InfraConfig.ArtifactUri,
-		BuildLabels:  buildLabels,
+		ProjectName:     mlpProject.Name,
+		ResourceName:    *ensemblingJob.InfraConfig.EnsemblerName,
+		VersionID:       ensemblingJob.EnsemblerID,
+		ArtifactURI:     *ensemblingJob.InfraConfig.ArtifactUri,
+		BuildLabels:     buildLabels,
 		EnsemblerFolder: service.EnsemblerFolder,
 	}
 	return r.imageBuilder.BuildImage(request)
