@@ -333,14 +333,24 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
     )
 
 
-@pytest.fixture(params=["standard", "docker"])
-def ensembler(request, generic_ensembler_standard_config, generic_ensembler_docker_config):
+@pytest.fixture
+def generic_ensembler_pyfunc_config(generic_resource_request):
+    return turing.generated.models.EnsemblerPyfuncConfig(
+        project_id=77,
+        ensembler_id=11,
+        resource_request=generic_resource_request,
+        timeout="500ms"
+    )
+
+
+@pytest.fixture(params=["standard", "docker", "pyfunc"])
+def ensembler(request, generic_ensembler_standard_config, generic_ensembler_docker_config, generic_ensembler_pyfunc_config):
     ensembler_type = request.param
     return turing.generated.models.RouterEnsemblerConfig(
-        id=1,
         type=ensembler_type,
         standard_config=generic_ensembler_standard_config,
         docker_config=generic_ensembler_docker_config,
+        pyfunc_config=generic_ensembler_pyfunc_config,
         created_at=datetime.now() + timedelta(seconds=10),
         updated_at=datetime.now() + timedelta(seconds=10)
     )
@@ -359,6 +369,14 @@ def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
     return turing.generated.models.RouterEnsemblerConfig(
         type="docker",
         docker_config=generic_ensembler_docker_config
+    )
+
+
+@pytest.fixture
+def generic_pyfunc_router_ensembler_config(generic_ensembler_pyfunc_config):
+    return turing.generated.models.RouterEnsemblerConfig(
+        type="pyfunc",
+        pyfunc_config=generic_ensembler_pyfunc_config
     )
 
 
@@ -508,7 +526,6 @@ def generic_router_config():
             ]
         ),
         ensembler=DockerRouterEnsemblerConfig(
-            id=1,
             image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             resource_request=ResourceRequest(
                 min_replica=1,
@@ -559,25 +576,23 @@ def generic_routers(project, num_routers, generic_router_status, generic_router_
 
 @pytest.fixture
 def generic_events():
-    return turing.generated.models.InlineResponse2002(
-        events=[
-            turing.generated.models.Event(
-                created_at=datetime.now(),
-                updated_at=datetime.now() + timedelta(seconds=1000),
-                event_type="info",
-                id=123,
-                message='successfully deployed router not-a-router version 5',
-                stage='deployment success',
-                version=5
-            ),
-            turing.generated.models.Event(
-                created_at=datetime.now() + timedelta(seconds=1500),
-                updated_at=datetime.now() + timedelta(seconds=2500),
-                event_type='error',
-                id=124,
-                message='failed to deploy router not-a-router version 5',
-                stage='deployment failure',
-                version=5
-            )
-        ]
-    )
+    return [
+        turing.generated.models.Event(
+            created_at=datetime.now(),
+            updated_at=datetime.now() + timedelta(seconds=1000),
+            event_type="info",
+            id=123,
+            message='successfully deployed router not-a-router version 5',
+            stage='deployment success',
+            version=5
+        ),
+        turing.generated.models.Event(
+            created_at=datetime.now() + timedelta(seconds=1500),
+            updated_at=datetime.now() + timedelta(seconds=2500),
+            event_type='error',
+            id=124,
+            message='failed to deploy router not-a-router version 5',
+            stage='deployment failure',
+            version=5
+        )
+    ]

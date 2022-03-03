@@ -195,8 +195,8 @@ class Router(ApiObject):
 
         :return: list of events involving this router
         """
-        response = turing.active_session.get_router_events(router_id=self.id).get('events')
-        return [event for event in response] if response else []
+        response = turing.active_session.get_router_events(router_id=self.id)
+        return response
 
     def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
