@@ -28,8 +28,10 @@ from turing.generated.model_utils import (  # noqa: F401
 
 def lazy_import():
     from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
+    from turing.generated.model.ensembler_pyfunc_config import EnsemblerPyfuncConfig
     from turing.generated.model.ensembler_standard_config import EnsemblerStandardConfig
     globals()['EnsemblerDockerConfig'] = EnsemblerDockerConfig
+    globals()['EnsemblerPyfuncConfig'] = EnsemblerPyfuncConfig
     globals()['EnsemblerStandardConfig'] = EnsemblerStandardConfig
 
 
@@ -61,6 +63,7 @@ class RouterEnsemblerConfig(ModelNormal):
         ('type',): {
             'STANDARD': "standard",
             'DOCKER': "docker",
+            'PYFUNC': "pyfunc",
         },
     }
 
@@ -87,6 +90,7 @@ class RouterEnsemblerConfig(ModelNormal):
             'id': (int,),  # noqa: E501
             'standard_config': (EnsemblerStandardConfig,),  # noqa: E501
             'docker_config': (EnsemblerDockerConfig,),  # noqa: E501
+            'pyfunc_config': (EnsemblerPyfuncConfig,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
         }
@@ -101,6 +105,7 @@ class RouterEnsemblerConfig(ModelNormal):
         'id': 'id',  # noqa: E501
         'standard_config': 'standard_config',  # noqa: E501
         'docker_config': 'docker_config',  # noqa: E501
+        'pyfunc_config': 'pyfunc_config',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
     }
@@ -157,6 +162,7 @@ class RouterEnsemblerConfig(ModelNormal):
             id (int): [optional]  # noqa: E501
             standard_config (EnsemblerStandardConfig): [optional]  # noqa: E501
             docker_config (EnsemblerDockerConfig): [optional]  # noqa: E501
+            pyfunc_config (EnsemblerPyfuncConfig): [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
         """

@@ -21,12 +21,11 @@ from turing.generated.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
-from turing.generated.model.inline_response200 import InlineResponse200
-from turing.generated.model.inline_response2001 import InlineResponse2001
-from turing.generated.model.inline_response2002 import InlineResponse2002
-from turing.generated.model.inline_response202 import InlineResponse202
+from turing.generated.model.event import Event
+from turing.generated.model.id_object import IdObject
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
+from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_version import RouterVersion
 
 
@@ -325,7 +324,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse200
+                IdObject
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -356,7 +355,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_delete = _Endpoint(
             settings={
-                'response_type': (InlineResponse200,),
+                'response_type': (IdObject,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}',
                 'operation_id': 'projects_project_id_routers_router_id_delete',
@@ -451,7 +450,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse202
+                RouterIdAndVersion
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -482,7 +481,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_deploy_post = _Endpoint(
             settings={
-                'response_type': (InlineResponse202,),
+                'response_type': (RouterIdAndVersion,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/deploy',
                 'operation_id': 'projects_project_id_routers_router_id_deploy_post',
@@ -577,7 +576,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse2002
+                [Event]
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -608,7 +607,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_events_get = _Endpoint(
             settings={
-                'response_type': (InlineResponse2002,),
+                'response_type': ([Event],),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/events',
                 'operation_id': 'projects_project_id_routers_router_id_events_get',
@@ -966,7 +965,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse2001
+                IdObject
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -997,7 +996,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_undeploy_post = _Endpoint(
             settings={
-                'response_type': (InlineResponse2001,),
+                'response_type': (IdObject,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/undeploy',
                 'operation_id': 'projects_project_id_routers_router_id_undeploy_post',
@@ -1220,7 +1219,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse202
+                RouterIdAndVersion
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -1253,7 +1252,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_versions_version_delete = _Endpoint(
             settings={
-                'response_type': (InlineResponse202,),
+                'response_type': (RouterIdAndVersion,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions/{version}',
                 'operation_id': 'projects_project_id_routers_router_id_versions_version_delete',
@@ -1356,7 +1355,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                InlineResponse202
+                RouterIdAndVersion
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -1389,7 +1388,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_versions_version_deploy_post = _Endpoint(
             settings={
-                'response_type': (InlineResponse202,),
+                'response_type': (RouterIdAndVersion,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions/{version}/deploy',
                 'operation_id': 'projects_project_id_routers_router_id_versions_version_deploy_post',

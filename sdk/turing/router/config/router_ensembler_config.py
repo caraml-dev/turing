@@ -21,17 +21,20 @@ class RouterEnsemblerConfig:
     id: int = None
     standard_config: turing.generated.models.EnsemblerStandardConfig = None
     docker_config: turing.generated.models.EnsemblerDockerConfig = None
+    pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None
 
     def __init__(self,
                  type: str,
                  id: int = None,
                  standard_config: turing.generated.models.EnsemblerStandardConfig = None,
                  docker_config: turing.generated.models.EnsemblerDockerConfig = None,
+                 pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None,
                  **kwargs):
         self.id = id
         self.type = type
         self.standard_config = standard_config
         self.docker_config = docker_config
+        self.pyfunc_config = pyfunc_config
 
     @property
     def id(self) -> int:
@@ -47,7 +50,7 @@ class RouterEnsemblerConfig:
 
     @type.setter
     def type(self, type: str):
-        assert type in {'standard', 'docker'}
+        assert type in {'standard', 'docker', "pyfunc"}
         self._type = type
 
     @property
@@ -85,6 +88,23 @@ class RouterEnsemblerConfig:
         else:
             self._docker_config = docker_config
 
+    @property
+    def pyfunc_config(self) -> turing.generated.models.EnsemblerPyfuncConfig:
+        return self._pyfunc_config
+
+    @pyfunc_config.setter
+    def pyfunc_config(self, pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig):
+        if isinstance(pyfunc_config, turing.generated.models.EnsemblerPyfuncConfig):
+            self._pyfunc_config = pyfunc_config
+        elif isinstance(pyfunc_config, dict):
+            pyfunc_config['resource_request'] = \
+                turing.generated.models.ResourceRequest(**pyfunc_config['resource_request'])
+            self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
+                **pyfunc_config
+            )
+        else:
+            self._pyfunc_config = pyfunc_config
+
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
 
@@ -92,6 +112,8 @@ class RouterEnsemblerConfig:
             kwargs["standard_config"] = self.standard_config
         if self.docker_config is not None:
             kwargs["docker_config"] = self.docker_config
+        if self.pyfunc_config is not None:
+            kwargs["pyfunc_config"] = self.pyfunc_config
 
         return turing.generated.models.RouterEnsemblerConfig(
             type=self.type,
@@ -100,9 +122,71 @@ class RouterEnsemblerConfig:
 
 
 @dataclass
+class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
+    def __init__(self,
+                 project_id: int,
+                 ensembler_id: int,
+                 timeout: str,
+                 resource_request: ResourceRequest):
+        """
+        Method to create a new Pyfunc ensembler
+
+        :param project_id: project id of the current project
+        :param ensembler_id: ensembler_id of the ensembler
+        :param resource_request: ResourceRequest instance containing configs related to the resources required
+        :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
+        """
+        self.project_id = project_id
+        self.ensembler_id = ensembler_id
+        self.resource_request = resource_request
+        self.timeout = timeout
+        super().__init__(type="pyfunc")
+
+    @property
+    def project_id(self) -> int:
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, project_id: int):
+        self._project_id = project_id
+
+    @property
+    def ensembler_id(self) -> int:
+        return self._ensembler_id
+
+    @ensembler_id.setter
+    def ensembler_id(self, ensembler_id: int):
+        self._ensembler_id = ensembler_id
+
+    @property
+    def resource_request(self) -> ResourceRequest:
+        return self._resource_request
+
+    @resource_request.setter
+    def resource_request(self, resource_request: ResourceRequest):
+        self._resource_request = resource_request
+
+    @property
+    def timeout(self) -> str:
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, timeout: str):
+        self._timeout = timeout
+
+    def to_open_api(self) -> OpenApiModel:
+        self.pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
+            project_id=self.project_id,
+            ensembler_id=self.ensembler_id,
+            resource_request=self.resource_request.to_open_api(),
+            timeout=self.timeout,
+        )
+        return super().to_open_api()
+
+
+@dataclass
 class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(self,
-                 id: int,
                  image: str,
                  resource_request: ResourceRequest,
                  endpoint: str,
@@ -113,7 +197,6 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         """
         Method to create a new Docker ensembler
 
-        :param id: id of the ensembler
         :param image: registry and name of the image
         :param resource_request: ResourceRequest instance containing configs related to the resources required
         :param endpoint: endpoint URL of the ensembler
@@ -129,7 +212,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self.port = port
         self.env = env
         self.service_account = service_account
-        super().__init__(id=id, type="docker")
+        super().__init__(type="docker")
 
     @property
     def image(self) -> str:
@@ -209,16 +292,14 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 @dataclass
 class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(self,
-                 id: int,
                  experiment_mappings: List[Dict[str, str]]):
         """
         Method to create a new standard ensembler
 
-        :param id: id of the ensembler
         :param experiment_mappings: configured mappings between routes and treatments
         """
         self.experiment_mappings = experiment_mappings
-        super().__init__(id=id, type="standard")
+        super().__init__(type="standard")
 
     @property
     def experiment_mappings(self) -> List[Dict[str, str]]:
