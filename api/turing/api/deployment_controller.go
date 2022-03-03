@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	merlin "github.com/gojek/merlin/client"
@@ -240,10 +241,14 @@ func (c RouterDeploymentController) deployRouterVersion(
 				ProjectID: routerVersion.Ensembler.PyfuncConfig.ProjectID,
 			})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to find specified ensembler: %w", err)
 		}
 
-		pyfuncEnsembler = ensembler.(*models.PyFuncEnsembler)
+		castedEnsembler, ok := ensembler.(*models.PyFuncEnsembler)
+		if !ok {
+			return "", fmt.Errorf("failed to cast ensembler: %w", err)
+		}
+		pyfuncEnsembler = castedEnsembler
 	}
 
 	// Deploy the router version
