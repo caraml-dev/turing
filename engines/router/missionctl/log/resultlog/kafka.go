@@ -53,7 +53,11 @@ func newKafkaLogger(cfg *config.KafkaConfig) (*KafkaLogger, error) {
 }
 
 func newKafkaProducer(cfg *config.KafkaConfig) (kafkaProducer, error) {
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.Brokers, "message.max.bytes": 10485760})
+	producer, err := kafka.NewProducer(
+		&kafka.ConfigMap{
+			"bootstrap.servers": cfg.Brokers,
+			"message.max.bytes": cfg.MaxMessageBytes,
+			"compression.type":  cfg.CompressionType})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error initializing Kafka Producer")
 	}
