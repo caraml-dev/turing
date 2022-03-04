@@ -149,6 +149,100 @@ func TestRequestBuildRouter(t *testing.T) {
 	assert.Equal(t, *expected, *got)
 }
 
+func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
+
+	baseRequest := CreateOrUpdateRouterRequest{
+		Environment: "env",
+		Name:        "router",
+		Config: &RouterConfig{
+			ExperimentEngine: &ExperimentEngineConfig{
+				Type: "nop",
+			},
+		},
+	}
+
+	projectID := models.ID(1)
+	routerDefault := config.RouterDefaults{
+		KafkaConfig: &config.KafkaConfig{
+			MaxMessageBytes: 1110,
+			CompressionType: "gzip",
+		},
+	}
+
+	tests := []struct {
+		testName          string
+		logConfig         *LogConfig
+		expectedLogConfig *models.LogConfig
+	}{
+		{
+			testName: "Test Kafka Logger",
+			logConfig: &LogConfig{
+				ResultLoggerType: "kafka",
+				KafkaConfig: &KafkaConfig{
+					Brokers:             "10:11",
+					Topic:               "2222",
+					SerializationFormat: "json",
+				},
+			},
+			expectedLogConfig: &models.LogConfig{
+				LogLevel:             "",
+				CustomMetricsEnabled: false,
+				FiberDebugLogEnabled: false,
+				JaegerEnabled:        false,
+				ResultLoggerType:     "kafka",
+				KafkaConfig: &models.KafkaConfig{
+					Brokers:             "10:11",
+					Topic:               "2222",
+					SerializationFormat: "json",
+					MaxMessageBytes:     1110,
+					CompressionType:     "gzip",
+				},
+				BigQueryConfig: nil,
+			},
+		},
+		{
+			testName: "Test BQ Logger",
+			logConfig: &LogConfig{
+				ResultLoggerType: "bigquery",
+				BigQueryConfig: &BigQueryConfig{
+					Table:                "project.dataset.table",
+					ServiceAccountSecret: "service_account",
+				},
+			},
+			expectedLogConfig: &models.LogConfig{
+				LogLevel:             "",
+				CustomMetricsEnabled: false,
+				FiberDebugLogEnabled: false,
+				JaegerEnabled:        false,
+				ResultLoggerType:     "bigquery",
+				KafkaConfig:          nil,
+				BigQueryConfig: &models.BigQueryConfig{
+					Table:                "project.dataset.table",
+					ServiceAccountSecret: "service_account",
+					BatchLoad:            true,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			baseRequest.Config.LogConfig = tt.logConfig
+			router := baseRequest.BuildRouter(projectID)
+			// Set up mock Crypto service
+			cryptoSvc := &mocks.CryptoService{}
+			cryptoSvc.On("Encrypt", "dummy_passkey").Return("enc_passkey", nil)
+
+			// Set up mock Experiment service
+			expSvc := &mocks.ExperimentsService{}
+			expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
+
+			got, err := baseRequest.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc)
+			assert.NoError(t, err)
+			assert.Equal(t, got.LogConfig, tt.expectedLogConfig)
+		})
+	}
+}
+
 func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	defaults := config.RouterDefaults{
 		Image:                   "routerimage",

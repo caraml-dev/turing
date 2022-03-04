@@ -162,6 +162,8 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 			Brokers:             r.Config.LogConfig.KafkaConfig.Brokers,
 			Topic:               r.Config.LogConfig.KafkaConfig.Topic,
 			SerializationFormat: r.Config.LogConfig.KafkaConfig.SerializationFormat,
+			MaxMessageBytes:     defaults.KafkaConfig.MaxMessageBytes,
+			CompressionType:     defaults.KafkaConfig.CompressionType,
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
