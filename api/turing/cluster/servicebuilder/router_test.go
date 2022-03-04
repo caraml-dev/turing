@@ -503,6 +503,7 @@ func TestNewRouterService(t *testing.T) {
 			}
 			svc, err := sb.NewRouterService(&routerVersion, project, "test-env", "service-account",
 				data.expRawConfig, "fluentd-tag", "jaeger-endpoint", true, "sentry-dsn", 1, 20, 1.5)
+
 			if data.err == "" {
 				require.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
