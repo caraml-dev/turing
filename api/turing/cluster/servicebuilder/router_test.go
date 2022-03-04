@@ -554,7 +554,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
-func Test_clusterSvcBuilder_buildRouterEnvs_resultlogger(t *testing.T) {
+func TestBuildRouterEnvsResultLogger(t *testing.T) {
 	type args struct {
 		namespace               string
 		environmentType         string
