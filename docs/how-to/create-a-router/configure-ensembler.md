@@ -52,7 +52,7 @@ step by implementing a Python `mlflow`-based interface, and rely on Turing API t
 implementation as an entire web service automatically.
 
 To configure your router with a Pyfunc ensembler, simply select from the drop down list your desired ensembler 
-registered in your current project and indicate your desired timeout value and resource request values:
+registered in your current project. You'll also need to indicate your desired timeout value and resource request values:
 
 ![](../../.gitbook/assets/pyfunc_ensembler_config.png)
 
