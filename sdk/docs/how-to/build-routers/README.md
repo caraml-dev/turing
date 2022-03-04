@@ -1,15 +1,6 @@
-# Create a Router
+# Building Routers with Turing SDK
 
-The behaviour of a Turing router is defined by its configuration. To create a router, it is necessary to specify its 
-configuration, which itself is made up of various components. Some of these components must be defined, while others 
-such as the use of experiment engines, enrichers (pre-processors) or ensemblers (post-processors) are optional.  
-
-Hence to build a router using Turing SDK, you would need to incrementally define these components and build a 
-`RouterConfig` object (you can find more information on how these individual components need to be built in the 
-[Using Turing SDK Classes](../use-turing-sdk-classes) section).
-
-Using the example shown in the `README` of the Turing SDK documentation main page, you need to construct a 
-`RouterConfig` instance by specifying the various components as arguments:
+Turing SDK offers users a way to build router configuration incrementally as independent `python` objects: 
 
 ```python
 router_config = RouterConfig(
@@ -88,13 +79,20 @@ router_config = RouterConfig(
     )
 ```
 
-Once this `RouterConfig` instance is defined, you can simply create a new Router by running:
+The SDK classes also double as objects that automatically get created (as properties of Router instances) when users 
+receive responses from Turing API containing Router information, allow configuration stored in Turing API to be 
+readily reused for new router configuration:
 
 ```python
-# 1. Create a new router using the RouterConfig object
-new_router = turing.Router.create(router_config)
+# retrieving a router's version using the SDK get_version method
+latest_version = my_router.get_version(10)
+
+# extract the RouterConfig object beneath the returned RouterVersion object
+latest_config = latest_version.get_config()
+
+# manipulate the extracted RouterConfig object directly (from PR #152)
+latest_config.routes[0].timeout = "50ms"
+
+# reuse these RouterConfig objects with other SDK methods
+my_router.update(latest_config)
 ```
-
-The return value would be a `Router` object representing the router that has been created if Turing API has 
-created it successfully. Note that this does not necessarily mean that the router has been succesfully *deployed*.
-
