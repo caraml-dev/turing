@@ -110,6 +110,8 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Brokers:             "",
 				Topic:               "",
 				SerializationFormat: SerializationFormat(""),
+				MaxMessageBytes:     1048588,
+				CompressionType:     "none",
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{

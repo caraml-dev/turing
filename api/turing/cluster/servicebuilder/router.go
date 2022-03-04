@@ -254,8 +254,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
 			{Name: envKafkaSerializationFormat, Value: string(logConfig.KafkaConfig.SerializationFormat)},
-			{Name: envKafkaMaxMessageBytes, Value: logConfig.KafkaConfig.Topic},
-			{Name: envKafkaCompressionType, Value: string(logConfig.KafkaConfig.SerializationFormat)},
+			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(logConfig.KafkaConfig.MaxMessageBytes)},
+			{Name: envKafkaCompressionType, Value: string(logConfig.KafkaConfig.CompressionType)},
 		}...)
 	}
 
