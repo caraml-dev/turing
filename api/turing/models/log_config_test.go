@@ -72,9 +72,7 @@ func TestLogConfigValue(t *testing.T) {
 				"kafka_config": {
 					"brokers": "test-brokers",
 					"topic": "test-topic",
-					"serialization_format": "test-serialization",
-					"max_message_bytes" : 10000,
-					"compression_type" : "none"
+					"serialization_format": "test-serialization"
 				}
 			}`),
 		},
