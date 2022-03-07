@@ -6,7 +6,7 @@ such as the use of experiment engines, enrichers (pre-processors) or ensemblers 
 
 Hence to build a router using Turing SDK, you would need to incrementally define these components and build a 
 `RouterConfig` object (you can find more information on how these individual components need to be built in the 
-XXX section).
+[Using Turing SDK Classes](../use-turing-sdk-classes) section).
 
 Using the example shown in the `README` of the Turing SDK documentation main page, you need to construct a 
 `RouterConfig` instance by specifying the various components as arguments:
