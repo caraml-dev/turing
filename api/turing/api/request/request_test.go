@@ -308,7 +308,10 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 			expSvc := &mocks.ExperimentsService{}
 			expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
 
-			got, err := baseRequest.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc)
+			// Set up mock Ensembler service
+			ensemblerSvc := &mocks.EnsemblersService{}
+
+			got, err := baseRequest.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
 			assert.NoError(t, err)
 			assert.Equal(t, got.LogConfig, tt.expectedLogConfig)
 		})
