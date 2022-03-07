@@ -275,6 +275,8 @@ type RouterDefaults struct {
 	// 	blue-exp-engine:
 	//	  Image: ghcr.io/myproject/blue-exp-engine-plugin:v0.0.1
 	ExperimentEnginePlugins map[string]*ExperimentEnginePluginConfig `validate:"dive"`
+	// Kafka Configuration. If result logging is using Kafka
+	KafkaConfig *KafkaConfig
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -285,6 +287,14 @@ type FluentdConfig struct {
 	Tag string
 	// Flush interval seconds - value determined by load job frequency to BQ
 	FlushIntervalSeconds int
+}
+
+// KafkaConfig captures the defaults used by Turing Router when result logger is set to kafka
+type KafkaConfig struct {
+	// Producer Config - Max message byte to send to broker
+	MaxMessageBytes int
+	// Producer Config - Compression Type of message
+	CompressionType string
 }
 
 // AuthorizationConfig captures the config for auth using mlp authz
@@ -469,6 +479,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")
 	v.SetDefault("RouterDefaults::FluentdConfig::FlushIntervalSeconds", "90")
 	v.SetDefault("RouterDefaults::Experiment", map[string]interface{}{})
+	v.SetDefault("RouterDefaults::KafkaConfig::MaxMessageBytes", "1048588")
+	v.SetDefault("RouterDefaults::KafkaConfig::CompressionType", "none")
 
 	v.SetDefault("Sentry::Enabled", "false")
 	v.SetDefault("Sentry::DSN", "")

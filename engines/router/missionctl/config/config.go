@@ -95,6 +95,8 @@ type KafkaConfig struct {
 	Brokers             string
 	Topic               string
 	SerializationFormat SerializationFormat `split_words:"true"`
+	MaxMessageBytes     int                 `split_words:"true" default:"1048588"`
+	CompressionType     string              `split_words:"true" default:"none"`
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client

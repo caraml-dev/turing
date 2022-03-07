@@ -45,6 +45,8 @@ const (
 	envKafkaBrokers                 = "APP_KAFKA_BROKERS"
 	envKafkaTopic                   = "APP_KAFKA_TOPIC"
 	envKafkaSerializationFormat     = "APP_KAFKA_SERIALIZATION_FORMAT"
+	envKafkaMaxMessageBytes         = "APP_KAFKA_MAX_MESSAGE_BYTES"
+	envKafkaCompressionType         = "APP_KAFKA_COMPRESSION_TYPE"
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
 )
@@ -252,6 +254,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
 			{Name: envKafkaSerializationFormat, Value: string(logConfig.KafkaConfig.SerializationFormat)},
+			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(logConfig.KafkaConfig.MaxMessageBytes)},
+			{Name: envKafkaCompressionType, Value: logConfig.KafkaConfig.CompressionType},
 		}...)
 	}
 

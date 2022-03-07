@@ -146,6 +146,10 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1048588,
+						CompressionType: "none",
+					},
 				},
 				Sentry: sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
@@ -207,6 +211,10 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1048588,
+						CompressionType: "none",
 					},
 				},
 				Sentry: sentry.Config{
@@ -293,6 +301,10 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
 						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1234567,
+						CompressionType: "snappy",
 					},
 				},
 				Sentry: sentry.Config{
@@ -399,6 +411,10 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
 						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1234567,
+						CompressionType: "snappy",
 					},
 				},
 				Sentry: sentry.Config{
