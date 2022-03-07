@@ -23,13 +23,13 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 			&models.GenericEnsembler{
 				Model:     models.Model{ID: 1},
 				ProjectID: 3,
-				Type:      models.EnsemblerTypePyFunc,
+				Type:      models.EnsemblerPyFuncType,
 				Name:      "test-ensembler-1",
 			},
 			&models.GenericEnsembler{
 				Model:     models.Model{ID: 2},
 				ProjectID: 3,
-				Type:      models.EnsemblerTypePyFunc,
+				Type:      models.EnsemblerPyFuncType,
 				Name:      "test-ensembler-2",
 			},
 		},
@@ -142,7 +142,7 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 	ensembler := &models.PyFuncEnsembler{
 		GenericEnsembler: &models.GenericEnsembler{
 			Model:     models.Model{ID: 2},
-			Type:      models.EnsemblerTypePyFunc,
+			Type:      models.EnsemblerPyFuncType,
 			ProjectID: 1,
 		},
 	}
@@ -239,7 +239,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 		GenericEnsembler: &models.GenericEnsembler{
 			Model:     models.Model{ID: 2},
 			ProjectID: 2,
-			Type:      models.EnsemblerTypePyFunc,
+			Type:      models.EnsemblerPyFuncType,
 			Name:      "original-ensembler",
 		},
 		MlflowURL:    "http://localhost:5000/experiemnts/0/runs/1",
@@ -252,7 +252,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 		GenericEnsembler: &models.GenericEnsembler{
 			Model:     models.Model{ID: 2},
 			ProjectID: 2,
-			Type:      models.EnsemblerTypePyFunc,
+			Type:      models.EnsemblerPyFuncType,
 			Name:      "updated-ensembler",
 		},
 		MlflowURL:    "http://localhost:5000/experiemnts/0/runs/2",

@@ -15,12 +15,12 @@ BatchEnsemblingConfig:
     TimeInterval: 10s
     RecordsToProcessInOneIteration: 10
     MaxRetryCount: 3
-  ImageBuildingConfig:
+  ImageBuildingConfig: &imageBuildingConfig
     BuildNamespace: default
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
     BaseImageRef: ghcr.io/gojek/turing/pyfunc-ensembler-job:latest
-    KanikoConfig:
+    KanikoConfig: &kanikoConfig
       BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
       Image: gcr.io/kaniko-project/executor
@@ -32,6 +32,14 @@ BatchEnsemblingConfig:
         Limits:
           CPU: "1"
           Memory: 1Gi
+EnsemblerServiceBuilderConfig:
+  DefaultEnvironment: dev
+  ImageBuildingConfig:
+    <<: *imageBuildingConfig
+    BaseImageRef: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
+    KanikoConfig:
+      <<: *kanikoConfig
+      DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile
 DbConfig:
   User: turing
   Password: turing

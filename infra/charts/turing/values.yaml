@@ -119,6 +119,25 @@ turing:
       Enabled: false
     BatchEnsemblingConfig:
       Enabled: false
+    EnsemblerServiceBuilderConfig:
+      DefaultEnvironment: dev
+      ImageBuildingConfig:
+        BuildNamespace: default
+        BuildTimeoutDuration: 20m
+        DestinationRegistry: ghcr.io
+        BaseImageRef: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
+        KanikoConfig:
+          BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
+          DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile
+          Image: gcr.io/kaniko-project/executor
+          ImageVersion: v1.6.0
+          ResourceRequestsLimits:
+            Requests:
+              CPU: "1"
+              Memory: 1Gi
+            Limits:
+              CPU: "1"
+              Memory: 1Gi
     SparkAppConfig:
       CorePerCPURequest: 1.5
       CPURequestToCPULimit: 1.25

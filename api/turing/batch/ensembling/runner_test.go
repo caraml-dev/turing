@@ -122,6 +122,7 @@ func TestRun(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(imagebuilder.JobStatusFailed, nil)
 				return ib
 			},

@@ -12,6 +12,7 @@ type Ensembler struct {
 	Type           EnsemblerType            `json:"type" validate:"required"`
 	StandardConfig *EnsemblerStandardConfig `json:"standard_config"` // Ensembler config when Type is "standard"
 	DockerConfig   *EnsemblerDockerConfig   `json:"docker_config"`   // Ensembler config when Type is "docker"
+	PyfuncConfig   *EnsemblerPyfuncConfig   `json:"pyfunc_config"`   // Ensembler config when Type is "pyfunc"
 }
 
 // TableName returns the name of a table, where GORM should store/retrieve
@@ -27,7 +28,7 @@ type EnsemblerType string
 const (
 	EnsemblerStandardType EnsemblerType = "standard"
 	EnsemblerDockerType   EnsemblerType = "docker"
-	EnsemblerTypePyFunc   EnsemblerType = "pyfunc"
+	EnsemblerPyFuncType   EnsemblerType = "pyfunc"
 )
 
 type EnsemblerStandardConfig struct {
@@ -48,6 +49,15 @@ type EnsemblerDockerConfig struct {
 	Env EnvVars `json:"env" validate:"required"`
 	// secret name in MLP containing service account key
 	ServiceAccount string `json:"service_account"`
+}
+
+type EnsemblerPyfuncConfig struct {
+	ProjectID   *ID `json:"project_id" validate:"required"`
+	EnsemblerID *ID `json:"ensembler_id" validate:"required"`
+	// Resource requests for ensembler container deployed
+	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
+	// Request timeout in duration format e.g. 60s
+	Timeout string `json:"timeout" validate:"required"`
 }
 
 type ExperimentMapping struct {
@@ -77,5 +87,17 @@ func (c EnsemblerDockerConfig) Value() (driver.Value, error) {
 // Scan implements sql.Scanner interface so database tools like go-orm knows how to de-serialize the struct object
 // from the database
 func (c *EnsemblerDockerConfig) Scan(value interface{}) error {
+	return json.Unmarshal(value.([]byte), &c)
+}
+
+// Value implements sql.driver.Valuer interface so database tools like go-orm knows how to serialize the struct object
+// for storage in the database
+func (c EnsemblerPyfuncConfig) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+// Scan implements sql.Scanner interface so database tools like go-orm knows how to de-serialize the struct object
+// from the database
+func (c *EnsemblerPyfuncConfig) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), &c)
 }

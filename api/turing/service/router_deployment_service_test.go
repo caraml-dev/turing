@@ -251,6 +251,7 @@ func TestDeployEndpoint(t *testing.T) {
 		"enricher-service-account-key",
 		"ensembler-service-account-key",
 		nil,
+		nil,
 		eventsCh,
 	)
 
