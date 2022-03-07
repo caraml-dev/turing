@@ -92,35 +92,3 @@ func getPartialVersionID(versionID string, numChar int) string {
 	}
 	return versionID
 }
-
-// NewEnsemblerServiceImageBuilder create ImageBuilder for building docker image of the ensembling service (real-time)
-func NewEnsemblerServiceImageBuilder(
-	clusterController cluster.Controller,
-	imageBuildingConfig config.ImageBuildingConfig,
-) (ImageBuilder, error) {
-	return newImageBuilder(
-		clusterController,
-		imageBuildingConfig,
-		&ensemblerServiceNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
-	)
-}
-
-// ensemblerServiceNameGenerator is name generator that will be used for building docker image of the ensembling service
-type ensemblerServiceNameGenerator struct {
-	registry string
-}
-
-// generateBuilderServiceName generate pod name that will be used to build docker image of the ensembling service
-func (n *ensemblerServiceNameGenerator) generateBuilderName(
-	projectName string,
-	modelName string,
-	versionID models.ID,
-) string {
-	return fmt.Sprintf("batch-%s-%s-%d", projectName, modelName, versionID)
-}
-
-// generateServiceImageName generate the name of docker image of the ensembling service that will be created from given
-// model
-func (n *ensemblerServiceNameGenerator) generateDockerImageName(projectName string, modelName string) string {
-	return fmt.Sprintf("%s/%s-%s-service", n.registry, projectName, modelName)
-}
