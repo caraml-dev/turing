@@ -110,7 +110,7 @@ class Router(ApiObject):
         :param router_id: router_id of the router to be deleted
         :return: router_id of the deleted router
         """
-        return turing.active_session.delete_router(router_id=router_id).router_id
+        return turing.active_session.delete_router(router_id=router_id).id
 
     @classmethod
     def get(cls, router_id: int) -> 'Router':
@@ -195,8 +195,8 @@ class Router(ApiObject):
 
         :return: list of events involving this router
         """
-        response = turing.active_session.get_router_events(router_id=self.id)
-        return response
+        response = turing.active_session.get_router_events(router_id=self.id).get('events')
+        return [event for event in response] if response else []
 
     def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):

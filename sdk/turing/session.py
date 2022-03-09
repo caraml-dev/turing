@@ -307,7 +307,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def get_router_events(self, router_id: int) -> List[turing.generated.models.Event]:
+    def get_router_events(self, router_id: int) -> turing.generated.models.RouterEvents:
         """
         Fetch deployment events associated with the router with the given router ID
         """

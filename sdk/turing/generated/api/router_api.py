@@ -21,9 +21,10 @@ from turing.generated.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
-from turing.generated.model.event import Event
+from turing.generated.model.id_object import IdObject
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
+from turing.generated.model.router_events import RouterEvents
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_version import RouterVersion
@@ -324,7 +325,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                RouterIdObject
+                IdObject
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -355,7 +356,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_delete = _Endpoint(
             settings={
-                'response_type': (RouterIdObject,),
+                'response_type': (IdObject,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}',
                 'operation_id': 'projects_project_id_routers_router_id_delete',
@@ -576,7 +577,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                [Event]
+                RouterEvents
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -607,7 +608,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_events_get = _Endpoint(
             settings={
-                'response_type': ([Event],),
+                'response_type': (RouterEvents,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/events',
                 'operation_id': 'projects_project_id_routers_router_id_events_get',

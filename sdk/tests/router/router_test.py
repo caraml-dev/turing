@@ -99,7 +99,7 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
     "actual,expected", [
         pytest.param(
             1,
-            turing.generated.models.RouterIdObject(router_id=1)
+            turing.generated.models.IdObject(id=1)
         )
     ]
 )
@@ -393,10 +393,11 @@ def test_get_events_list(turing_api, active_project, generic_router, generic_eve
     )
 
     response = base_router.get_events()
+    expected_events = generic_events['events']
 
-    assert len(response) == len(generic_events)
+    assert len(response) == len(expected_events)
 
-    for actual, expected in zip(response, generic_events):
+    for actual, expected in zip(response, expected_events):
         assert actual.id == expected.id
         assert actual.version == expected.version
         assert actual.event_type == expected.event_type

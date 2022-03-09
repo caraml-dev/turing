@@ -152,7 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RouterIdObject"
+                $ref: "#/components/schemas/IdObject"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -380,9 +380,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Event"
+                $ref: "#/components/schemas/RouterEvents"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -390,11 +388,22 @@ paths:
 
 components:
   schemas:
+    IdObject:
+      $ref: "common.yaml#/components/schemas/IdObject"
+
     RouterIdObject:
       type: object
       properties:
         router_id:
           $ref: "common.yaml#/components/schemas/Id"
+
+    RouterEvents:
+      type: object
+      properties:
+        events:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Event"
 
     RouterIdAndVersion:
       type: object

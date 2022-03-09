@@ -52,6 +52,7 @@ from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
+from turing.generated.model.id_object1 import IdObject1
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel
@@ -69,6 +70,7 @@ from turing.generated.model.router_config_config_log_config import RouterConfigC
 from turing.generated.model.router_details import RouterDetails
 from turing.generated.model.router_details_all_of import RouterDetailsAllOf
 from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
+from turing.generated.model.router_events import RouterEvents
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_status import RouterStatus
