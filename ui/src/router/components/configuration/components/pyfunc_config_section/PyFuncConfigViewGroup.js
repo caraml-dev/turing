@@ -16,11 +16,14 @@ export const PyFuncConfigViewGroup = ({
       title: "Pyfunc Ensembler Details",
       children: <PyFuncRefConfigTable config={pyfuncConfig} />,
     },
-    {
+  ];
+
+  if (!!dockerConfig) {
+    items.push({
       title: "Container",
       children: <ContainerConfigTable config={dockerConfig} />,
-    },
-  ];
+    });
+  }
 
   return (
     <EuiFlexGroup direction="row" wrap>
