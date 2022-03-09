@@ -30,13 +30,17 @@ export const PyFuncConfigViewGroup = ({
       <EuiFlexItem grow={3} className="euiFlexItem--childFlexPanel">
         <ConfigMultiSectionPanel items={items} />
       </EuiFlexItem>
-      <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-        <ConfigSectionPanel title={`${componentName} Resources`}>
-          <ResourcesConfigTable
-            resourceRequest={dockerConfig.resource_request}
-          />
-        </ConfigSectionPanel>
-      </EuiFlexItem>
+      <div>
+        {!!dockerConfig ? (
+          <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
+            <ConfigSectionPanel title={`${componentName} Resources`}>
+              <ResourcesConfigTable
+                resourceRequest={dockerConfig.resource_request}
+              />
+            </ConfigSectionPanel>
+          </EuiFlexItem>
+        ) : null}
+      </div>
     </EuiFlexGroup>
   );
 };
