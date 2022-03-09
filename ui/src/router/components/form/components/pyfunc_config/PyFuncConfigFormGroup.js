@@ -22,7 +22,8 @@ export const PyFuncConfigFormGroup = ({
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   useEffect(() => {
-    !pyFuncConfig && onChangeHandler(PyFuncEnsembler.newConfig(projectId));
+    !pyFuncConfig &&
+      onChangeHandler(PyFuncEnsembler.newConfig(parseInt(projectId)));
   }, [pyFuncConfig, onChangeHandler, projectId]);
 
   return (
