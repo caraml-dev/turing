@@ -22,10 +22,10 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_and_convert_types
 )
 from turing.generated.model.event import Event
-from turing.generated.model.id_object import IdObject
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
+from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_version import RouterVersion
 
 
@@ -324,7 +324,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                IdObject
+                RouterIdObject
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -355,7 +355,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_delete = _Endpoint(
             settings={
-                'response_type': (IdObject,),
+                'response_type': (RouterIdObject,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}',
                 'operation_id': 'projects_project_id_routers_router_id_delete',
@@ -965,7 +965,7 @@ class RouterApi(object):
                 async_req (bool): execute request asynchronously
 
             Returns:
-                IdObject
+                RouterIdObject
                     If the method is called asynchronously, returns the request
                     thread.
             """
@@ -996,7 +996,7 @@ class RouterApi(object):
 
         self.projects_project_id_routers_router_id_undeploy_post = _Endpoint(
             settings={
-                'response_type': (IdObject,),
+                'response_type': (RouterIdObject,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/undeploy',
                 'operation_id': 'projects_project_id_routers_router_id_undeploy_post',

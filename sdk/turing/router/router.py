@@ -110,7 +110,7 @@ class Router(ApiObject):
         :param router_id: router_id of the router to be deleted
         :return: router_id of the deleted router
         """
-        return turing.active_session.delete_router(router_id=router_id).id
+        return turing.active_session.delete_router(router_id=router_id).router_id
 
     @classmethod
     def get(cls, router_id: int) -> 'Router':

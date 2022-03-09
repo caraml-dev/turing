@@ -99,7 +99,7 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
     "actual,expected", [
         pytest.param(
             1,
-            turing.generated.models.IdObject(id=1)
+            turing.generated.models.RouterIdObject(router_id=1)
         )
     ]
 )
@@ -223,8 +223,8 @@ def test_undeploy_router(turing_api, active_project, generic_router, generic_rou
 
     base_router = turing.Router.from_open_api(generic_router)
 
-    expected = turing.generated.models.IdObject(
-        id=1,
+    expected = turing.generated.models.RouterIdObject(
+        router_id=1,
     )
 
     responses.add(
@@ -236,7 +236,7 @@ def test_undeploy_router(turing_api, active_project, generic_router, generic_rou
     )
 
     response = base_router.undeploy()
-    assert base_router.id == response['id']
+    assert base_router.id == response['router_id']
 
 
 @responses.activate
