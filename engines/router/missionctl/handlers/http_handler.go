@@ -104,8 +104,8 @@ func (h *httpHandler) getPrediction(
 			return nil, httpErr
 		}
 		// Merge Enricher response headers with original request headers
-		for key, value := range resp.Header() {
-			postEnrichmentResponseHeader.Set(key, value[0])
+		for key := range resp.Header() {
+			postEnrichmentResponseHeader.Set(key, resp.Header().Get(key))
 		}
 		// No error, copy response body
 		payload = resp.Body()
