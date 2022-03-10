@@ -12,6 +12,7 @@ import (
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/utils"
@@ -524,10 +525,18 @@ func buildFiberConfigMap(
 		return nil, err
 	}
 
+	name := GetComponentName(ver, ComponentTypes.FiberConfig)
 	return &cluster.ConfigMap{
-		Name:     GetComponentName(ver, ComponentTypes.FiberConfig),
+		Name:     name,
 		FileName: routerConfigFileName,
 		Data:     string(configMapData),
+		Labels: labeller.BuildLabels(
+			labeller.KubernetesLabelsRequest{
+				Stream: project.Stream,
+				Team:   project.Team,
+				App:    name,
+			},
+		),
 	}, nil
 }
 

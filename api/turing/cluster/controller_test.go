@@ -973,15 +973,18 @@ func TestCreateNamespace(t *testing.T) {
 
 func TestCreateConfigMap(t *testing.T) {
 	namespace := "namespace"
+	labels := map[string]string{"key": "value"}
 	cmap := ConfigMap{
 		Name:     "my-data",
 		FileName: "key",
 		Data:     "value",
+		Labels:   labels,
 	}
 	k8scmap := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cmap.Name,
 			Namespace: namespace,
+			Labels:    labels,
 		},
 		Data: map[string]string{
 			cmap.FileName: cmap.Data,

@@ -218,6 +218,7 @@ func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) erro
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMap.Name,
 			Namespace: namespace,
+			Labels:    configMap.Labels,
 		},
 		Data: map[string]string{
 			configMap.FileName: configMap.Data,
@@ -491,7 +492,7 @@ func (c *controller) ApplyPersistentVolumeClaim(
 	return err
 }
 
-// ApplyPersistentVolumeClaim deletes the PVC in the given namespace.
+// DeletePersistentVolumeClaim deletes the PVC in the given namespace.
 func (c *controller) DeletePersistentVolumeClaim(pvcName string, namespace string) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
 	_, err := pvcs.Get(pvcName, metav1.GetOptions{})

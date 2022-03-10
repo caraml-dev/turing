@@ -124,9 +124,10 @@ type Port struct {
 
 // ConfigMap contains information to create a config map
 type ConfigMap struct {
-	Name     string `json:"name"`
-	FileName string `json:"file_name"`
-	Data     string `json:"data"`
+	Name     string            `json:"name"`
+	FileName string            `json:"file_name"`
+	Data     string            `json:"data"`
+	Labels   map[string]string `json:"labels"`
 }
 
 // Ref:

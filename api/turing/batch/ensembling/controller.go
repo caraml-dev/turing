@@ -153,7 +153,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		)
 	}
 
-	err = c.createJobConfigMap(request.EnsemblingJob, request.Namespace)
+	err = c.createJobConfigMap(request.EnsemblingJob, request.Namespace, request.Labels)
 	if err != nil {
 		return fmt.Errorf(
 			"failed creating job specification configmap for job %s in namespace %s: %v",
@@ -203,7 +203,7 @@ func (c *ensemblingController) createSparkApplication(
 	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
 }
 
-func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string) error {
+func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string, labels map[string]string) error {
 	jobConfigJSON, err := json.Marshal(ensemblingJob.JobConfig)
 	if err != nil {
 		return err
@@ -218,6 +218,7 @@ func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.Ensembli
 		Name:     ensemblingJob.Name,
 		FileName: batch.JobConfigFileName,
 		Data:     string(jobConfigYAML),
+		Labels:   labels,
 	}
 	err = c.clusterController.ApplyConfigMap(namespace, cm)
 	if err != nil {
