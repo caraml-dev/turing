@@ -49,7 +49,7 @@ export const EnsemblerStep = ({ projectId }) => {
       {ensembler.type === "pyfunc" && (
         <PyFuncConfigFormGroup
           projectId={projectId}
-          pyFuncConfig={ensembler.pyfunc_config}
+          pyfuncConfig={ensembler.pyfunc_config}
           onChangeHandler={onChange("config.ensembler.pyfunc_config")}
           errors={get(errors, "config.ensembler.pyfunc_config")}
         />

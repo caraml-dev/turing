@@ -19,7 +19,6 @@ export class PyFuncEnsembler extends Ensembler {
   static newConfig(project_id) {
     return {
       project_id: project_id,
-      ensembler_id: 1,
       resource_request: {
         cpu_request: "500m",
         memory_request: "512Mi",

@@ -10,7 +10,7 @@ import { EnsemblersContextContextProvider } from "../../../../../providers/ensem
 
 export const PyFuncConfigFormGroup = ({
   projectId,
-  pyFuncConfig,
+  pyfuncConfig,
   onChangeHandler,
   errors = {},
 }) => {
@@ -22,12 +22,12 @@ export const PyFuncConfigFormGroup = ({
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   useEffect(() => {
-    !pyFuncConfig &&
+    !pyfuncConfig &&
       onChangeHandler(PyFuncEnsembler.newConfig(parseInt(projectId)));
-  }, [pyFuncConfig, onChangeHandler, projectId]);
+  }, [pyfuncConfig, onChangeHandler, projectId]);
 
   return (
-    !!pyFuncConfig && (
+    !!pyfuncConfig && (
       <Fragment>
         <EuiFlexItem>
           <SecretsContextProvider projectId={projectId}>
@@ -35,7 +35,7 @@ export const PyFuncConfigFormGroup = ({
               projectId={projectId}
               ensemblerType={"pyfunc"}>
               <PyFuncDeploymentPanel
-                values={pyFuncConfig}
+                values={pyfuncConfig}
                 onChangeHandler={onChangeHandler}
                 errors={errors}
               />
@@ -45,7 +45,7 @@ export const PyFuncConfigFormGroup = ({
 
         <EuiFlexItem>
           <ResourcesPanel
-            resourcesConfig={pyFuncConfig.resource_request}
+            resourcesConfig={pyfuncConfig.resource_request}
             onChangeHandler={onChange("resource_request")}
             errors={errors.resource_request}
             maxAllowedReplica={maxAllowedReplica}
