@@ -135,7 +135,8 @@ class Router(ApiObject):
         Update the current router with a new set of configs specified in the RouterConfig argument
 
         :param config: configuration of router
-        :return: instance of router updated (self)
+        :return: instance of router (self); this router contains details of the currently deployed router; it contains
+            the details of the currently DEPLOYED router version
         """
         self._config = config
         updated_router = Router.from_open_api(
@@ -208,11 +209,13 @@ class Router(ApiObject):
     def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} is {status.value}...")
-            cur_status = Router.get(self.id).status
+            current_router = Router.get(self.id)
+            cur_status = current_router.status
             if cur_status == status:
                 # Wait for backend components to fully resolve
                 time.sleep(5)
                 logger.debug(f"Router {self.id} is finally {status.value}.")
+                self.__dict__ = current_router.__dict__
                 return
             else:
                 logger.debug(f"Router {self.id} is {cur_status.value}.")
@@ -224,11 +227,13 @@ class Router(ApiObject):
     def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
-            cur_status = self.get_version(version).status
+            current_router = Router.get(self.id)
+            cur_status = current_router.status
             if cur_status == status:
                 # Wait for backend components to fully resolve
                 time.sleep(5)
                 logger.debug(f"Router {self.id} with version {version} is finally {status.value}.")
+                self.__dict__ = current_router.__dict__
                 return
             else:
                 logger.debug(f"Router {self.id} with version {version} is {cur_status.value}.")
