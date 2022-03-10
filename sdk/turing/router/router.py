@@ -33,6 +33,7 @@ class Router(ApiObject):
                  environment_name: str,
                  monitoring_url: str,
                  status: str,
+                 version: int = None,
                  config: Dict = None,
                  endpoint: str = None,
                  **kwargs):
@@ -47,8 +48,10 @@ class Router(ApiObject):
 
         if config is not None:
             self._config = RouterConfig(name=name, environment_name=environment_name, **config)
+            self._version = config.get('version')
         else:
-            self._config = None
+            self._config = config
+            self._version = version
 
     @property
     def id(self) -> int:
@@ -81,6 +84,10 @@ class Router(ApiObject):
     @property
     def config(self) -> 'RouterConfig':
         return self._config
+
+    @property
+    def version(self) -> int:
+        return self._version
 
     @classmethod
     def list(cls) -> List['Router']:
