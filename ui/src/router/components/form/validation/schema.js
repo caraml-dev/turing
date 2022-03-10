@@ -173,6 +173,14 @@ const dockerDeploymentSchema = (maxAllowedReplica) =>
     resource_request: resourceRequestSchema(maxAllowedReplica),
   });
 
+const pyfuncDeploymentSchema = (maxAllowedReplica) =>
+  yup.object().shape({
+    project_id: yup.number().integer().required("Project ID is required"),
+    ensembler_id: yup.number().integer().required("Ensembler ID is required"),
+    timeout: timeoutSchema.required("Timeout is required"),
+    resource_request: resourceRequestSchema(maxAllowedReplica),
+  });
+
 const mappingSchema = yup.object().shape({
   experiment: yup.string().required("Experiment name is required"),
   treatment: yup.string().required("Treatment name is required"),
@@ -300,6 +308,10 @@ const schema = (maxAllowedReplica) => [
         standard_config: yup.mixed().when("type", {
           is: "standard",
           then: standardEnsemblerConfigSchema,
+        }),
+        pyfunc_config: yup.mixed().when("type", {
+          is: "pyfunc",
+          then: pyfuncDeploymentSchema(maxAllowedReplica),
         }),
       }),
     }),

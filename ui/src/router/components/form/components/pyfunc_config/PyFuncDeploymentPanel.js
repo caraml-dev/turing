@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import {
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiSuperSelect,
 } from "@elastic/eui";
 import { Panel } from "../Panel";
 import { EuiFieldDuration } from "../../../../../components/form/field_duration/EuiFieldDuration";
@@ -23,15 +23,20 @@ export const PyFuncDeploymentPanel = ({
   let options = Object.values(ensemblers).reduce((pyfunc_ensemblers, val) => {
     pyfunc_ensemblers.push({
       value: val["id"],
-      inputDisplay: val["name"],
+      label: val["name"],
     });
     return pyfunc_ensemblers;
   }, []);
 
   const { onChange } = useOnChangeHandler(onChangeHandler);
+
   const selectedOption = options.find(
     (option) => option.value === ensembler_id
   );
+
+  const onEnsemblerIdChange = (selected) => {
+    onChange("ensembler_id")(selected[0]?.value);
+  };
 
   return (
     <Panel title="Deployment">
@@ -46,17 +51,17 @@ export const PyFuncDeploymentPanel = ({
                   content="Select the Pyfunc Ensembler to be used in your deployment"
                 />
               }
-              // isInvalid={!!errors.pyfunc_config}
-              // error={errors}
+              isInvalid={!!errors.ensembler_id}
+              error={errors.ensembler_id}
               display="row">
-              <EuiSuperSelect
-                fullWidth
+              <EuiComboBox
+                placeholder="Select a Pyfunc Ensembler"
+                fullWidth={true}
+                singleSelection={{ asPlainText: true }}
                 options={options}
-                valueOfSelected={selectedOption ? selectedOption.value : ""}
-                onChange={onChange("ensembler_id")}
-                itemLayoutAlign="top"
-                hasDividers
-                // isInvalid={!!errors}
+                onChange={onEnsemblerIdChange}
+                selectedOptions={!!selectedOption ? [selectedOption] : []}
+                autoFocus
               />
             </EuiFormRow>
           </EuiFlexItem>
