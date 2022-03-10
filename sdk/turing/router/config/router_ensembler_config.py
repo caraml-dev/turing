@@ -50,7 +50,7 @@ class RouterEnsemblerConfig:
 
     @type.setter
     def type(self, type: str):
-        assert type in {'standard', 'docker', "pyfunc"}
+        assert type in {"standard", "docker", "pyfunc"}
         self._type = type
 
     @property
@@ -62,9 +62,9 @@ class RouterEnsemblerConfig:
         if isinstance(standard_config, turing.generated.models.EnsemblerStandardConfig):
             self._standard_config = standard_config
         elif isinstance(standard_config, dict):
-            standard_config['experiment_mappings'] = [
+            standard_config["experiment_mappings"] = [
                 turing.generated.models.EnsemblerStandardConfigExperimentMappings(**mapping)
-                for mapping in standard_config['experiment_mappings']
+                for mapping in standard_config["experiment_mappings"]
             ]
             self._standard_config = turing.generated.models.EnsemblerStandardConfig(**standard_config)
         else:
@@ -79,9 +79,9 @@ class RouterEnsemblerConfig:
         if isinstance(docker_config, turing.generated.models.EnsemblerDockerConfig):
             self._docker_config = docker_config
         elif isinstance(docker_config, dict):
-            docker_config['resource_request'] = \
-                turing.generated.models.ResourceRequest(**docker_config['resource_request'])
-            docker_config['env'] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config['env']]
+            docker_config["resource_request"] = \
+                turing.generated.models.ResourceRequest(**docker_config["resource_request"])
+            docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config["env"]]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
                 **docker_config
             )
@@ -97,8 +97,8 @@ class RouterEnsemblerConfig:
         if isinstance(pyfunc_config, turing.generated.models.EnsemblerPyfuncConfig):
             self._pyfunc_config = pyfunc_config
         elif isinstance(pyfunc_config, dict):
-            pyfunc_config['resource_request'] = \
-                turing.generated.models.ResourceRequest(**pyfunc_config['resource_request'])
+            pyfunc_config["resource_request"] = \
+                turing.generated.models.ResourceRequest(**pyfunc_config["resource_request"])
             self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
                 **pyfunc_config
             )
@@ -275,7 +275,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 
         kwargs = {}
         if self.service_account is not None:
-            kwargs['service_account'] = self.service_account
+            kwargs["service_account"] = self.service_account
 
         self.docker_config = turing.generated.models.EnsemblerDockerConfig(
             image=self.image,
