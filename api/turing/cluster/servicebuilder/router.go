@@ -45,6 +45,8 @@ const (
 	envKafkaBrokers                 = "APP_KAFKA_BROKERS"
 	envKafkaTopic                   = "APP_KAFKA_TOPIC"
 	envKafkaSerializationFormat     = "APP_KAFKA_SERIALIZATION_FORMAT"
+	envKafkaMaxMessageBytes         = "APP_KAFKA_MAX_MESSAGE_BYTES"
+	envKafkaCompressionType         = "APP_KAFKA_COMPRESSION_TYPE"
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
 )
@@ -199,7 +201,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envEnricherTimeout, Value: ver.Enricher.Timeout},
 		}...)
 	}
-	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerDockerType {
+	if ver.HasDockerConfig() {
 		endpoint := buildPrePostProcessorEndpoint(
 			ver,
 			namespace,
@@ -252,6 +254,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
 			{Name: envKafkaSerializationFormat, Value: string(logConfig.KafkaConfig.SerializationFormat)},
+			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(logConfig.KafkaConfig.MaxMessageBytes)},
+			{Name: envKafkaCompressionType, Value: logConfig.KafkaConfig.CompressionType},
 		}...)
 	}
 
@@ -429,10 +433,10 @@ func buildFiberConfig(
 	}
 
 	// Select router type (eager or combiner) based on the ensembler config.
-	// If ensembler is set and is of Docker type, use "combiner" router
+	// If ensembler uses a DockerConfig to run, use "combiner" router
 	// Else, "eager" router is used.
 	var routerConfig fiberconfig.Config
-	if ensembler != nil && ensembler.Type == models.EnsemblerDockerType {
+	if ensembler != nil && ensembler.DockerConfig != nil {
 		multiRouteConfig.Type = routerConfigTypeCombiner
 		routerConfig = &fiberconfig.CombinerConfig{
 			MultiRouteConfig: multiRouteConfig,

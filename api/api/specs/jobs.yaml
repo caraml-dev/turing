@@ -418,6 +418,9 @@ components:
           x-go-custom-tag: validate:"required"
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
+        run_id:
+          type: string
+          readOnly: true
         env:
           type: array
           items:

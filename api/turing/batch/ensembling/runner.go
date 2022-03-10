@@ -206,6 +206,7 @@ func (r *ensemblingJobRunner) processBuildingImage(
 		mlpProject.Name,
 		*ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
+		*ensemblingJob.InfraConfig.RunId,
 	)
 
 	if status == imagebuilder.JobStatusActive {
@@ -333,6 +334,7 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 		mlpProject.Name,
 		*ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
+		*ensemblingJob.InfraConfig.RunId,
 	)
 	// Delete spark resource
 	sparkErr := r.ensemblingController.Delete(mlpProject.Name, ensemblingJob)
@@ -410,11 +412,13 @@ func (r *ensemblingJobRunner) buildImage(
 	buildLabels map[string]string,
 ) (string, error) {
 	request := imagebuilder.BuildImageRequest{
-		ProjectName:  mlpProject.Name,
-		ResourceName: *ensemblingJob.InfraConfig.EnsemblerName,
-		VersionID:    ensemblingJob.EnsemblerID,
-		ArtifactURI:  *ensemblingJob.InfraConfig.ArtifactUri,
-		BuildLabels:  buildLabels,
+		ProjectName:     mlpProject.Name,
+		ResourceName:    *ensemblingJob.InfraConfig.EnsemblerName,
+		ResourceID:      ensemblingJob.EnsemblerID,
+		VersionID:       *ensemblingJob.InfraConfig.RunId,
+		ArtifactURI:     *ensemblingJob.InfraConfig.ArtifactUri,
+		BuildLabels:     buildLabels,
+		EnsemblerFolder: service.EnsemblerFolder,
 	}
 	return r.imageBuilder.BuildImage(request)
 }

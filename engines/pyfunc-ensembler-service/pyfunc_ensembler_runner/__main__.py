@@ -42,5 +42,5 @@ if __name__ == "__main__":
 
     app = PyFuncEnsemblerServer(ensembler).create_application()
     logging.info("Ensembler ready to serve requests!")
-    app.listen(8080)
+    app.listen(8083)
     tornado.ioloop.IOLoop.current().start()

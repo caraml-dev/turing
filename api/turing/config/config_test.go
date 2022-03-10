@@ -146,6 +146,10 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1048588,
+						CompressionType: "none",
+					},
 				},
 				Sentry: sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
@@ -207,6 +211,10 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1048588,
+						CompressionType: "none",
 					},
 				},
 				Sentry: sentry.Config{
@@ -293,6 +301,10 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
 						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1234567,
+						CompressionType: "snappy",
 					},
 				},
 				Sentry: sentry.Config{
@@ -399,6 +411,10 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
 						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+					},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 1234567,
+						CompressionType: "snappy",
 					},
 				},
 				Sentry: sentry.Config{
@@ -562,12 +578,37 @@ func TestConfigValidate(t *testing.T) {
 			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry:  "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/batch-ensembler:0.0.0-build.1-98b071d",
+				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
-					DockerfileFilePath: "engines/batch-ensembler/app.Dockerfile",
+					DockerfileFilePath: "engines/pyfunc-ensembler-job/app.Dockerfile",
+					Image:              "gcr.io/kaniko-project/executor",
+					ImageVersion:       "v1.5.2",
+					ResourceRequestsLimits: config.ResourceRequestsLimits{
+						Requests: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+						Limits: config.Resource{
+							CPU:    "500m",
+							Memory: "1Gi",
+						},
+					},
+				},
+			},
+		},
+		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
+			DefaultEnvironment: "dev",
+			ImageBuildingConfig: &config.ImageBuildingConfig{
+				DestinationRegistry:  "ghcr.io",
+				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
+				BuildNamespace:       "default",
+				BuildTimeoutDuration: 10 * time.Minute,
+				KanikoConfig: config.KanikoConfig{
+					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					DockerfileFilePath: "engines/pyfunc-ensembler-service/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",
 					ResourceRequestsLimits: config.ResourceRequestsLimits{

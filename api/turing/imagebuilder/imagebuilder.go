@@ -22,7 +22,6 @@ import (
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 var (
@@ -56,11 +55,13 @@ const (
 
 // BuildImageRequest contains the information needed to build the OCI image
 type BuildImageRequest struct {
-	ProjectName  string
-	ResourceName string
-	VersionID    models.ID
-	ArtifactURI  string
-	BuildLabels  map[string]string
+	ProjectName     string
+	ResourceName    string
+	ResourceID      models.ID
+	VersionID       string
+	ArtifactURI     string
+	BuildLabels     map[string]string
+	EnsemblerFolder string
 }
 
 // ImageBuilder defines the operations on building and publishing OCI images.
@@ -70,20 +71,22 @@ type ImageBuilder interface {
 	GetImageBuildingJobStatus(
 		projectName string,
 		modelName string,
-		versionID models.ID,
+		modelID models.ID,
+		versionID string,
 	) (JobStatus, error)
 	DeleteImageBuildingJob(
 		projectName string,
 		modelName string,
-		versionID models.ID,
+		modelID models.ID,
+		versionID string,
 	) error
 }
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderJobName(projectName string, modelName string, versionID models.ID) string
+	generateBuilderName(projectName string, modelName string, modelID models.ID, versionID string) string
 	// generateDockerImageName generate image name based on project and model
-	generateDockerImageName(projectName string, modelName string) string
+	generateDockerImageName(projectName string, modelName string, versionID string) string
 }
 
 type imageBuilder struct {
@@ -111,9 +114,9 @@ func newImageBuilder(
 }
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
-	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName)
-	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.VersionID)))
-	imageRef := fmt.Sprintf("%s:%d", imageName, request.VersionID)
+	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName, request.VersionID)
+	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.ResourceID)))
+	imageRef := fmt.Sprintf("%s:%d", imageName, request.ResourceID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
 		return "", ErrUnableToGetImageRef
@@ -125,9 +128,10 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	}
 
 	// Check if there is an existing build job
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		request.ProjectName,
 		request.ResourceName,
+		request.ResourceID,
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -141,7 +145,8 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			return "", ErrUnableToGetJobStatus
 		}
 
-		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
+		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
+			request.EnsemblerFolder)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -156,7 +161,8 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 				return "", ErrDeleteFailedJob
 			}
 
-			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels)
+			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
+				request.EnsemblerFolder)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -203,9 +209,10 @@ func (ib *imageBuilder) createKanikoJob(
 	imageRef string,
 	artifactURI string,
 	buildLabels map[string]string,
+	ensemblerFolder string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
-	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], service.EnsemblerFolder)
+	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
@@ -341,11 +348,13 @@ func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) e
 func (ib *imageBuilder) GetImageBuildingJobStatus(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) (JobStatus, error) {
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
+		modelID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -374,11 +383,13 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 func (ib *imageBuilder) DeleteImageBuildingJob(
 	projectName string,
 	modelName string,
-	versionID models.ID,
+	modelID models.ID,
+	versionID string,
 ) error {
-	kanikoJobName := ib.nameGenerator.generateBuilderJobName(
+	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
 		modelName,
+		modelID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
