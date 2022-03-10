@@ -2,7 +2,6 @@ package servicebuilder
 
 import (
 	"encoding/json"
-	"github.com/gojek/turing/api/turing/config"
 	"path/filepath"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/config"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
