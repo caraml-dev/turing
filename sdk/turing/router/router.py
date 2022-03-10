@@ -227,13 +227,11 @@ class Router(ApiObject):
     def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
-            current_router = Router.get(self.id)
-            cur_status = current_router.status
+            cur_status = self.get_version(version).status
             if cur_status == status:
                 # Wait for backend components to fully resolve
                 time.sleep(5)
                 logger.debug(f"Router {self.id} with version {version} is finally {status.value}.")
-                self.__dict__ = current_router.__dict__
                 return
             else:
                 logger.debug(f"Router {self.id} with version {version} is {cur_status.value}.")
