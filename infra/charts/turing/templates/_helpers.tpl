@@ -6,6 +6,13 @@
 {{- printf "%s-%s" .Chart.Name .Chart.Version -}}
 {{- end -}}
 
+{{- define "turing.labels" -}}
+app: {{ include "turing.fullname" . }}
+chart: {{ include "turing.chart" . }}
+release: {{ .Release.Name }}
+heritage: {{ .Release.Service }}
+{{- end -}}
+
 {{- define "turing.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}

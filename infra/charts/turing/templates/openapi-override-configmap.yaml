@@ -5,10 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ template "turing.fullname" . }}-openapi
   labels:
-    app: {{ template "turing.fullname" . }}
-    chart: {{ template "turing.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+{{ include "turing.labels" . | indent 4 }}
 {{- if .Values.turing.labels }}
 {{ toYaml .Values.turing.labels | indent 4 -}}
 {{- end }}
