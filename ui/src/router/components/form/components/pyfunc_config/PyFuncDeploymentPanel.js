@@ -19,6 +19,7 @@ export const PyFuncDeploymentPanel = ({
   errors = {},
 }) => {
   const { ensemblers } = useContext(EnsemblersContext);
+  const { onChange } = useOnChangeHandler(onChangeHandler);
 
   let options = Object.values(ensemblers).reduce((pyfunc_ensemblers, val) => {
     pyfunc_ensemblers.push({
@@ -27,8 +28,6 @@ export const PyFuncDeploymentPanel = ({
     });
     return pyfunc_ensemblers;
   }, []);
-
-  const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const selectedOption = options.find(
     (option) => option.value === ensembler_id
