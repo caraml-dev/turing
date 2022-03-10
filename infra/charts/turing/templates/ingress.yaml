@@ -13,6 +13,9 @@ metadata:
     app.kubernetes.io/name: {{ include "turing.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 4 -}}
+{{- end }}
 {{- if .Values.turing.ingress.useV1Beta1 }}
 apiVersion: networking.k8s.io/v1beta1
 spec:

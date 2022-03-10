@@ -4,6 +4,14 @@ kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ template "turing.fullname" . }}-openapi
+  labels:
+    app: {{ template "turing.fullname" . }}
+    chart: {{ template "turing.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- if .Values.turing.labels }}
+{{ toYaml .Values.turing.labels | indent 4 -}}
+{{- end }}
 data:
   override.yaml: |
     {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
