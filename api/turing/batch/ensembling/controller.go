@@ -203,7 +203,11 @@ func (c *ensemblingController) createSparkApplication(
 	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
 }
 
-func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string, labels map[string]string) error {
+func (c *ensemblingController) createJobConfigMap(
+	ensemblingJob *models.EnsemblingJob,
+	namespace string,
+	labels map[string]string,
+) error {
 	jobConfigJSON, err := json.Marshal(ensemblingJob.JobConfig)
 	if err != nil {
 		return err
