@@ -48,6 +48,7 @@ func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
 func (msb *mockClusterServiceBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
+	envType string,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,

@@ -193,7 +193,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			CPURequests:    enricher.ResourceRequest.CPURequest,
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
 			Envs:           enricher.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, envType, routerVersion.Router),
+			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -273,7 +273,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			CPURequests:    docker.ResourceRequest.CPURequest,
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
 			Envs:           docker.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, envType, routerVersion.Router),
+			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -312,7 +312,7 @@ func (sb *clusterSvcBuilder) NewSecret(
 		),
 		Namespace: project.Name,
 		Data:      data,
-		Labels:    buildLabels(project, envType, routerVersion.Router),
+		Labels:    buildLabels(project, routerVersion.Router),
 	}
 }
 
@@ -338,7 +338,6 @@ func GetNamespace(project *mlp.Project) string {
 
 func buildLabels(
 	project *mlp.Project,
-	envType string,
 	router *models.Router,
 ) map[string]string {
 	r := labeller.KubernetesLabelsRequest{

@@ -44,7 +44,6 @@ func TestClusterSvcBuilder_NewPluginsServerService(t *testing.T) {
 					ProbeInitDelaySeconds: 5,
 					Labels: buildLabels(
 						&mlp.Project{Name: "integration-test"},
-						"test",
 						&models.Router{Name: "router-1"}),
 					Volumes: []v1.Volume{
 						pluginsVolume,
