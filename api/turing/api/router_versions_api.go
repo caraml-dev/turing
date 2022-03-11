@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 )
@@ -31,6 +32,50 @@ func (c RouterVersionsController) ListRouterVersions(
 	}
 
 	return Ok(routerVersions)
+}
+
+// CreateRouterVersion creates a router version from the provided configuration. If no router exists
+// within the provided project with the provided id, this method will throw an error.
+// If the update is valid, a new RouterVersion will be created but NOT deployed.
+func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars RequestVars, body interface{}) *Response {
+	// Parse request vars
+	var errResp *Response
+	var router *models.Router
+	if _, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+
+	request := body.(*request.CreateOrUpdateRouterRequest)
+
+	// Check if the router environment and name are unchanged
+	if request.Environment != router.EnvironmentName || request.Name != router.Name {
+		return BadRequest("invalid router configuration",
+			"Router name and environment cannot be changed after creation")
+	}
+
+	// Check if any deployment is in progress, if yes, disallow the update
+	if router.Status == models.RouterStatusPending {
+		return BadRequest("invalid update request",
+			"another version is currently pending deployment")
+	}
+
+	// Create new version
+	var routerVersion *models.RouterVersion
+	rVersion, err := request.BuildRouterVersion(
+		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+	if err == nil {
+		// Save router version, re-assign the value of err
+		routerVersion, err = c.RouterVersionsService.Save(rVersion)
+	}
+
+	if err != nil {
+		return InternalServerError("unable to update router", err.Error())
+	}
+
+	return Ok(routerVersion)
 }
 
 // GetRouterVersion gets the router version for the provided router id and version number.
@@ -138,6 +183,12 @@ func (c RouterVersionsController) Routes() []Route {
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
 			handler: c.ListRouterVersions,
+		},
+		{
+			method:  http.MethodPut,
+			path:    "/projects/{project_id}/routers/{router_id}/versions",
+			body:    request.CreateOrUpdateRouterRequest{},
+			handler: c.CreateRouterVersion,
 		},
 		{
 			method:  http.MethodGet,
