@@ -12,7 +12,6 @@ import (
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/utils"
@@ -99,7 +98,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	// Namespace is the name of the project
 	namespace := GetNamespace(project)
 
-	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig)
+	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig, envType)
 	if err != nil {
 		return nil, err
 	}
@@ -463,6 +462,7 @@ func buildFiberConfigMap(
 	ver *models.RouterVersion,
 	project *mlp.Project,
 	experimentCfg json.RawMessage,
+	envType string,
 ) (*cluster.ConfigMap, error) {
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{
@@ -525,18 +525,11 @@ func buildFiberConfigMap(
 		return nil, err
 	}
 
-	name := GetComponentName(ver, ComponentTypes.FiberConfig)
 	return &cluster.ConfigMap{
-		Name:     name,
+		Name:     GetComponentName(ver, ComponentTypes.FiberConfig),
 		FileName: routerConfigFileName,
 		Data:     string(configMapData),
-		Labels: labeller.BuildLabels(
-			labeller.KubernetesLabelsRequest{
-				Stream: project.Stream,
-				Team:   project.Team,
-				App:    name,
-			},
-		),
+		Labels:   buildLabels(project, envType, ver.Router),
 	}, nil
 }
 

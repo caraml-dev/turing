@@ -78,6 +78,7 @@ func NewDeploymentService(
 	sb := servicebuilder.NewClusterServiceBuilder(
 		resource.Quantity(cfg.DeployConfig.MaxCPU),
 		resource.Quantity(cfg.DeployConfig.MaxMemory),
+		cfg.DeployConfig.EnvironmentType,
 	)
 
 	return &deploymentService{
@@ -138,6 +139,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	secret := ds.svcBuilder.NewSecret(
 		routerVersion,
 		project,
+		ds.environmentType,
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
@@ -254,7 +256,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Delete secret
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
-	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, ds.environmentType, "", "", "")
 	err = deleteSecret(controller, secret)
 	if err != nil {
 		errs = append(errs, err.Error())

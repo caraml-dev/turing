@@ -82,9 +82,9 @@ type Controller interface {
 	CreateJob(namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(namespace string, jobName string) error
-	CreateServiceAccount(namespace, serviceAccountName string) (*apicorev1.ServiceAccount, error)
-	CreateRole(namespace string, roleName string, policyRules []apirbacv1.PolicyRule) (*apirbacv1.Role, error)
-	CreateRoleBinding(namespace, roleBindingName, serviceAccountName, roleName string) (*apirbacv1.RoleBinding, error)
+	CreateServiceAccount(namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
+	CreateRole(namespace string, role *Role) (*apirbacv1.Role, error)
+	CreateRoleBinding(namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
 	CreateSparkApplication(namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
 	GetSparkApplication(namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
 	DeleteSparkApplication(namespace, appName string) error
@@ -530,28 +530,27 @@ func (c *controller) DeleteJob(namespace, jobName string) error {
 	return c.k8sBatchClient.Jobs(namespace).Delete(jobName, &metav1.DeleteOptions{})
 }
 
-func (c *controller) CreateServiceAccount(namespace, serviceAccountName string) (*apicorev1.ServiceAccount, error) {
-	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(serviceAccountName, metav1.GetOptions{})
+func (c *controller) CreateServiceAccount(
+	namespace string,
+	serviceAccount *ServiceAccount,
+) (*apicorev1.ServiceAccount, error) {
+	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(serviceAccount.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
 				"failed getting status of driver service account %s in namespace %s",
-				serviceAccountName,
+				serviceAccount.Name,
 				namespace,
 			)
 		}
 
-		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(
-			&apicorev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      serviceAccountName,
-					Namespace: namespace,
-				},
-			},
-		)
+		saCfg := serviceAccount.BuildServiceAccount()
+		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(saCfg)
 
 		if err != nil {
-			return nil, errors.Errorf("failed creating driver service account %s in namespace %s", serviceAccountName, namespace)
+			return nil, errors.Errorf(
+				"failed creating driver service account %s in namespace %s", serviceAccount.Name, namespace,
+			)
 		}
 	}
 
@@ -560,33 +559,25 @@ func (c *controller) CreateServiceAccount(namespace, serviceAccountName string) 
 
 func (c *controller) CreateRole(
 	namespace string,
-	roleName string,
-	policyRules []apirbacv1.PolicyRule,
+	r *Role,
 ) (*apirbacv1.Role, error) {
-	role, err := c.k8sRBACClient.Roles(namespace).Get(roleName, metav1.GetOptions{})
+	role, err := c.k8sRBACClient.Roles(namespace).Get(r.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
 				"failed getting status of driver role %s in namespace %s",
-				roleName,
+				r.Name,
 				namespace,
 			)
 		}
 
-		role, err = c.k8sRBACClient.Roles(namespace).Create(
-			&apirbacv1.Role{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      roleName,
-					Namespace: namespace,
-				},
-				Rules: policyRules,
-			},
-		)
+		roleCfg := r.BuildRole()
+		role, err = c.k8sRBACClient.Roles(namespace).Create(roleCfg)
 
 		if err != nil {
 			return nil, errors.Errorf(
 				"failed creating driver roles %s in namespace %s",
-				roleName,
+				r.Name,
 				namespace,
 			)
 		}
@@ -596,46 +587,26 @@ func (c *controller) CreateRole(
 }
 
 func (c *controller) CreateRoleBinding(
-	namespace,
-	roleBindingName,
-	serviceAccountName,
-	roleName string,
+	namespace string,
+	roleBinding *RoleBinding,
 ) (*apirbacv1.RoleBinding, error) {
-	rb, err := c.k8sRBACClient.RoleBindings(namespace).Get(roleBindingName, metav1.GetOptions{})
+	rb, err := c.k8sRBACClient.RoleBindings(namespace).Get(roleBinding.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
 				"failed getting status of driver rolebinding %s in namespace %s",
-				roleBindingName,
+				roleBinding.Name,
 				namespace,
 			)
 		}
 
-		rb, err = c.k8sRBACClient.RoleBindings(namespace).Create(
-			&apirbacv1.RoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      roleBindingName,
-					Namespace: namespace,
-				},
-				Subjects: []apirbacv1.Subject{
-					{
-						Kind:      "ServiceAccount",
-						Namespace: namespace,
-						Name:      serviceAccountName,
-					},
-				},
-				RoleRef: apirbacv1.RoleRef{
-					APIGroup: "rbac.authorization.k8s.io",
-					Kind:     "Role",
-					Name:     roleName,
-				},
-			},
-		)
+		rbConfig := roleBinding.BuildRoleBinding()
+		rb, err = c.k8sRBACClient.RoleBindings(namespace).Create(rbConfig)
 
 		if err != nil {
 			return nil, errors.Errorf(
 				"failed creating driver roles binding %s in namespace %s",
-				roleBindingName,
+				roleBinding.Name,
 				namespace,
 			)
 		}

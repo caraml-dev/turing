@@ -103,6 +103,7 @@ type ClusterServiceBuilder interface {
 	NewSecret(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
+		envType string,
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
@@ -292,6 +293,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
+	envType string,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
@@ -310,6 +312,7 @@ func (sb *clusterSvcBuilder) NewSecret(
 		),
 		Namespace: project.Name,
 		Data:      data,
+		Labels:    buildLabels(project, envType, routerVersion.Router),
 	}
 }
 

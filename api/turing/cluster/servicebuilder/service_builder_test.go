@@ -210,6 +210,7 @@ func TestNewSecret(t *testing.T) {
 	tests := map[string]struct {
 		version         *models.RouterVersion
 		project         *mlp.Project
+		envType         string
 		routerSvcKey    string
 		enricherSvcKey  string
 		ensemblerSvcKey string
@@ -224,6 +225,7 @@ func TestNewSecret(t *testing.T) {
 				},
 			},
 			project:         &mlp.Project{Name: "test-project"},
+			envType:         "test",
 			routerSvcKey:    "router-key",
 			enricherSvcKey:  "enricher-key",
 			ensemblerSvcKey: "ensembler-key",
@@ -235,13 +237,20 @@ func TestNewSecret(t *testing.T) {
 					"enricher-service-account.json":  "enricher-key",
 					"ensembler-service-account.json": "ensembler-key",
 				},
+				Labels: map[string]string{
+					"app":          "test-router",
+					"environment":  "",
+					"orchestrator": "turing",
+					"stream":       "",
+					"team":         "",
+				},
 			},
 		},
 	}
 	sb := &clusterSvcBuilder{}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey)
+			secret := sb.NewSecret(tt.version, tt.project, tt.envType, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey)
 			assert.Equal(t, tt.expected, secret)
 		})
 	}

@@ -76,7 +76,7 @@ func TestNewFluentdService(t *testing.T) {
 				AccessModes: []string{"ReadWriteOnce"},
 				Size:        volSize,
 				Labels: map[string]string{
-					"app":          "test-svc-turing-cache-volume-1",
+					"app":          "test-svc",
 					"environment":  "",
 					"orchestrator": "turing",
 					"stream":       "test-stream",

@@ -72,7 +72,7 @@ func TestNewRouterService(t *testing.T) {
 						FileName: "fiber.yml",
 						Data:     string(cfgmapDefault),
 						Labels: map[string]string{
-							"app":          "test-svc-turing-fiber-config-1",
+							"app":          "test-svc",
 							"environment":  "",
 							"orchestrator": "turing",
 							"stream":       "test-stream",
@@ -167,7 +167,7 @@ func TestNewRouterService(t *testing.T) {
 						FileName: "fiber.yml",
 						Data:     string(cfgmapEnsembling),
 						Labels: map[string]string{
-							"app":          "test-svc-turing-fiber-config-1",
+							"app":          "test-svc",
 							"environment":  "",
 							"orchestrator": "turing",
 							"stream":       "test-stream",
@@ -270,7 +270,7 @@ func TestNewRouterService(t *testing.T) {
 						FileName: "fiber.yml",
 						Data:     string(cfgmapStandardEnsemble),
 						Labels: map[string]string{
-							"app":          "test-svc-turing-fiber-config-1",
+							"app":          "test-svc",
 							"environment":  "",
 							"orchestrator": "turing",
 							"stream":       "test-stream",
@@ -365,7 +365,7 @@ func TestNewRouterService(t *testing.T) {
 						FileName: "fiber.yml",
 						Data:     string(cfgmapTrafficSplitting),
 						Labels: map[string]string{
-							"app":          "test-svc-turing-fiber-config-1",
+							"app":          "test-svc",
 							"environment":  "",
 							"orchestrator": "turing",
 							"stream":       "test-stream",
@@ -460,7 +460,7 @@ func TestNewRouterService(t *testing.T) {
 						FileName: "fiber.yml",
 						Data:     string(cfgmapExpEngine),
 						Labels: map[string]string{
-							"app":          "router-with-exp-engine-turing-fiber-config-1",
+							"app":          "router-with-exp-engine",
 							"environment":  "",
 							"orchestrator": "turing",
 							"stream":       "test-stream",

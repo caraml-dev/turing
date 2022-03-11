@@ -7,7 +7,6 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/cluster/labeller"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	corev1 "k8s.io/api/core/v1"
@@ -53,13 +52,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		Namespace:   project.Name,
 		AccessModes: []string{"ReadWriteOnce"},
 		Size:        resource.MustParse(cacheVolumeSize),
-		Labels: labeller.BuildLabels(
-			labeller.KubernetesLabelsRequest{
-				Stream: project.Stream,
-				Team:   project.Team,
-				App:    pvcName,
-			},
-		),
+		Labels:      buildLabels(project, envType, routerVersion.Router),
 	}
 	volumes, volumeMounts := buildFluentdVolumes(serviceAccountSecretName, persistentVolumeClaim.Name)
 
