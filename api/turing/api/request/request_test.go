@@ -194,8 +194,6 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 					Brokers:             "10:11",
 					Topic:               "2222",
 					SerializationFormat: "json",
-					MaxMessageBytes:     1110,
-					CompressionType:     "gzip",
 				},
 				BigQueryConfig: nil,
 			},

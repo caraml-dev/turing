@@ -139,7 +139,7 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 	mockSQL.ExpectBegin()
 	mockSQL.
 		ExpectQuery(`INSERT INTO "alerts"`).
-		WillReturnError(errors.New("insertion error"))
+		WillReturnError(errors.New("test mocked error - insertion error"))
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
@@ -260,7 +260,7 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
 		WithArgs(1).
-		WillReturnError(errors.New("select not found"))
+		WillReturnError(errors.New("test mocked error - select not found"))
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
@@ -364,7 +364,7 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 	mockSQL.ExpectBegin()
 	mockSQL.
 		ExpectExec(`UPDATE "alerts"`).
-		WillReturnError(errors.New("update error"))
+		WillReturnError(errors.New("test mocked error - update error"))
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,
@@ -477,7 +477,7 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 	mockSQL.ExpectBegin()
 	mockSQL.
 		ExpectExec(`DELETE FROM "alerts"`).
-		WillReturnError(errors.New("delete error"))
+		WillReturnError(errors.New("test mocked error - delete error"))
 
 	service, err := NewGitlabOpsAlertService(
 		mockDb,

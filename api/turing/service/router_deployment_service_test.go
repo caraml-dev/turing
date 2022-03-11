@@ -121,8 +121,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	envType string,
 	secretName string,
 	expConfig json.RawMessage,
-	fluentTag string,
-	jaegerEndpoint string,
+	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
 	targetConcurrency int,
@@ -137,8 +136,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 			Name:      fmt.Sprintf("%s-router-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: jaegerEndpoint},
-				{Name: "FLUENTD_TAG", Value: fluentTag},
+				{Name: "JAEGER_EP", Value: routerDefaults.JaegerCollectorEndpoint},
+				{Name: "FLUENTD_TAG", Value: routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: strconv.FormatBool(sentryEnabled)},
 				{Name: "SENTRY_DSN", Value: sentryDSN},
@@ -211,10 +210,10 @@ func TestDeployEndpoint(t *testing.T) {
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
-		fluentdConfig: &config.FluentdConfig{
-			Tag: "fluentd-tag",
+		routerDefaults: &config.RouterDefaults{
+			JaegerCollectorEndpoint: "jaeger-endpoint",
+			FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 		},
-		jaegerCollectorEndpoint:   "jaeger-endpoint",
 		deploymentTimeout:         time.Second * 5,
 		deploymentDeletionTimeout: time.Second * 5,
 		environmentType:           envType,
@@ -306,8 +305,8 @@ func TestDeployEndpoint(t *testing.T) {
 			Name:      fmt.Sprintf("%s-router-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: ds.jaegerCollectorEndpoint},
-				{Name: "FLUENTD_TAG", Value: ds.fluentdConfig.Tag},
+				{Name: "JAEGER_EP", Value: ds.routerDefaults.JaegerCollectorEndpoint},
+				{Name: "FLUENTD_TAG", Value: ds.routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: "true"},
 				{Name: "SENTRY_DSN", Value: "test:dsn"},
@@ -372,10 +371,10 @@ func TestDeleteEndpoint(t *testing.T) {
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
-		fluentdConfig: &config.FluentdConfig{
-			Tag: "fluentd-tag",
+		routerDefaults: &config.RouterDefaults{
+			JaegerCollectorEndpoint: "jaeger-endpoint",
+			FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 		},
-		jaegerCollectorEndpoint:   "jaeger-endpoint",
 		deploymentTimeout:         timeout,
 		deploymentDeletionTimeout: timeout,
 		knativeServiceConfig: &config.KnativeServiceDefaults{

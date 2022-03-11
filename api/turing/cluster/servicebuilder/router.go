@@ -12,6 +12,7 @@ import (
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/utils"
 	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
@@ -85,8 +86,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	envType string,
 	secretName string,
 	experimentConfig json.RawMessage,
-	fluentdTag string,
-	jaegerCollectorEndpoint string,
+	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
 	knativeTargetConcurrency int,
@@ -106,7 +106,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	volumes, volumeMounts := buildRouterVolumes(routerVersion, configMap.Name, secretName)
 
 	// Build env vars
-	envs, err := sb.buildRouterEnvs(namespace, envType, fluentdTag, jaegerCollectorEndpoint,
+	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
 		sentryEnabled, sentryDSN, secretName, routerVersion)
 	if err != nil {
 		return nil, err
@@ -174,8 +174,7 @@ func (sb *clusterSvcBuilder) GetRouterServiceName(routerVersion *models.RouterVe
 func (sb *clusterSvcBuilder) buildRouterEnvs(
 	namespace string,
 	environmentType string,
-	fluentdTag string,
-	jaegerCollectorEndpoint string,
+	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
 	secretName string,
@@ -186,7 +185,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
 		{Name: envAppEnvironment, Value: environmentType},
 		{Name: envRouterTimeout, Value: ver.Timeout},
-		{Name: envJaegerEndpoint, Value: jaegerCollectorEndpoint},
+		{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
 		{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
 		{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
 		{Name: envSentryDSN, Value: sentryDSN},
@@ -246,7 +245,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			envs = append(envs, []corev1.EnvVar{
 				{Name: envFluentdHost, Value: buildFluentdHost(ver, namespace)},
 				{Name: envFluentdPort, Value: strconv.Itoa(fluentdPort)},
-				{Name: envFluentdTag, Value: fluentdTag},
+				{Name: envFluentdTag, Value: routerDefaults.FluentdConfig.Tag},
 			}...)
 		}
 	case models.KafkaLogger:
@@ -254,8 +253,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
 			{Name: envKafkaSerializationFormat, Value: string(logConfig.KafkaConfig.SerializationFormat)},
-			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(logConfig.KafkaConfig.MaxMessageBytes)},
-			{Name: envKafkaCompressionType, Value: logConfig.KafkaConfig.CompressionType},
+			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},
+			{Name: envKafkaCompressionType, Value: routerDefaults.KafkaConfig.CompressionType},
 		}...)
 	}
 
