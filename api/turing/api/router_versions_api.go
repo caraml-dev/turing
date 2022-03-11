@@ -56,22 +56,15 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 			"Router name and environment cannot be changed after creation")
 	}
 
-	// Check if any deployment is in progress, if yes, disallow the update
-	if router.Status == models.RouterStatusPending {
-		return BadRequest("invalid update request",
-			"another version is currently pending deployment")
-	}
-
 	// Create new version
 	var routerVersion *models.RouterVersion
 	rVersion, err := request.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
 		// Save router version, re-assign the value of err
+		rVersion.Status = models.RouterVersionStatusUndeployed
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)
-	}
-
-	if err != nil {
+	} else {
 		return InternalServerError("unable to create router version", err.Error())
 	}
 

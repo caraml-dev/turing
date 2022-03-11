@@ -250,6 +250,40 @@ paths:
           description: "Invalid project_id or router_id"
         404:
           description: "No router versions found"
+    put:
+      tags: *tags
+      summary: "Create router version without deploying it"
+      parameters:
+        - in: "path"
+          name: "project_id"
+          description: "project id of the project of the router"
+          schema:
+            <<: *id
+          required: true
+        - in: "path"
+          name: "router_id"
+          description: "id of the router to create a new version for"
+          schema:
+            <<: *id
+          required: true
+      requestBody:
+        description: "router configuration to save"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouterConfig"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouterDetails"
+        400:
+          description: "Invalid project_id, router_id or router configuration"
+        500:
+          description: "Unable to save configuration"
 
   "/projects/{project_id}/routers/{router_id}/versions/{version}":
     get:

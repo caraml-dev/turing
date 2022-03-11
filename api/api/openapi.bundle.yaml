@@ -726,6 +726,43 @@ paths:
       summary: List router config versions
       tags:
       - Router
+    put:
+      parameters:
+      - description: project id of the project of the router
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: id of the router to create a new version for
+        in: path
+        name: router_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterConfig'
+        description: router configuration to save
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterDetails'
+          description: OK
+        "400":
+          description: Invalid project_id, router_id or router configuration
+        "500":
+          description: Unable to save configuration
+      summary: Create router version without deploying it
+      tags:
+      - Router
   /projects/{project_id}/routers/{router_id}/versions/{version}:
     delete:
       parameters:
