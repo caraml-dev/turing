@@ -72,7 +72,7 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 	}
 
 	if err != nil {
-		return InternalServerError("unable to update router", err.Error())
+		return InternalServerError("unable to create router version", err.Error())
 	}
 
 	return Ok(routerVersion)
