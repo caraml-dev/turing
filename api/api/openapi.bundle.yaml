@@ -242,7 +242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdObject'
+                $ref: '#/components/schemas/JobId'
           description: Accepted.
         "400":
           description: Invalid ensembling job
@@ -551,7 +551,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdObject_1'
+                $ref: '#/components/schemas/RouterId'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -682,7 +682,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdObject_1'
+                $ref: '#/components/schemas/RouterIdObject'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -863,9 +863,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Event'
-                type: array
+                $ref: '#/components/schemas/RouterEvents'
           description: Get events
         "400":
           description: Invalid project_id or router_id
@@ -1694,6 +1692,8 @@ components:
       - failed_submission
       - failed_building
       type: string
+    JobId:
+      $ref: '#/components/schemas/IdObject'
     IdObject:
       example:
         id: 0
@@ -1701,6 +1701,7 @@ components:
         id:
           format: int32
           type: integer
+      type: object
     Id:
       format: int32
       type: integer
@@ -2520,7 +2521,7 @@ components:
       - environment_name
       - name
       type: object
-    IdObject_1:
+    RouterId:
       $ref: '#/components/schemas/IdObject'
     RouterIdAndVersion:
       example:
@@ -2533,6 +2534,37 @@ components:
         version:
           format: int32
           type: integer
+      type: object
+    RouterIdObject:
+      example:
+        router_id: 0
+      properties:
+        router_id:
+          format: int32
+          type: integer
+      type: object
+    RouterEvents:
+      example:
+        events:
+        - event_type: info
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          stage: stage
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 0
+          message: message
+          version: 6
+        - event_type: info
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          stage: stage
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 0
+          message: message
+          version: 6
+      properties:
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
       type: object
     Event:
       example:

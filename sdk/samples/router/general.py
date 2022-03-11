@@ -162,7 +162,6 @@ def main(turing_api: str, project: str):
 
     # Create an ensembler for the router
     ensembler = DockerRouterEnsemblerConfig(
-        id=1,
         image="ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=1,

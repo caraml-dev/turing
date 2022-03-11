@@ -11,7 +11,7 @@ import {
 import SecretsContext from "../../../../../../providers/secrets/context";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
-import { ServiceAccountComboBox } from "../../../../../../components/form/service_account_combo_box/ServiceAccoutComboBox";
+import { ServiceAccountComboBox } from "../../../../../../components/form/service_account_combo_box/ServiceAccountComboBox";
 
 export const BigQueryConfigPanel = ({
   projectId,

@@ -4,6 +4,7 @@ from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
+                                                          PyfuncRouterEnsemblerConfig,
                                                           DockerRouterEnsemblerConfig,
                                                           StandardRouterEnsemblerConfig,
                                                           InvalidExperimentMappingException)
@@ -65,11 +66,72 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
+@pytest.mark.parametrize(
+    "project_id,ensembler_id,resource_request,timeout,expected", [
+        pytest.param(
+            77,
+            11,
+            ResourceRequest(
+                min_replica=1,
+                max_replica=3,
+                cpu_request='100m',
+                memory_request='512Mi'
+            ),
+            "500ms",
+            "generic_pyfunc_router_ensembler_config"
+        )
+    ])
+def test_create_pyfunc_router_ensembler_config(
+        project_id,
+        ensembler_id,
+        resource_request,
+        timeout,
+        expected,
+        request
+):
+    actual = PyfuncRouterEnsemblerConfig(
+        project_id=project_id,
+        ensembler_id=ensembler_id,
+        resource_request=resource_request,
+        timeout=timeout,
+    ).to_open_api()
+    assert actual == request.getfixturevalue(expected)
+
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+    "project_id,ensembler_id,resource_request,timeout,expected", [
         pytest.param(
-            1,
+            77,
+            11,
+            ResourceRequest(
+                min_replica=1,
+                max_replica=3,
+                cpu_request='100m',
+                memory_request='512Mi'
+            ),
+            "500ks",
+            ApiValueError
+        )
+    ])
+def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
+        project_id,
+        ensembler_id,
+        resource_request,
+        timeout,
+        expected
+):
+    with pytest.raises(expected):
+        PyfuncRouterEnsemblerConfig(
+            project_id=project_id,
+            ensembler_id=ensembler_id,
+            resource_request=resource_request,
+            timeout=timeout,
+        ).to_open_api()
+
+
+@pytest.mark.parametrize(
+    "image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+        pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
@@ -90,7 +152,6 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
         )
     ])
 def test_create_docker_router_ensembler_config(
-        id,
         image,
         resource_request,
         endpoint,
@@ -102,7 +163,6 @@ def test_create_docker_router_ensembler_config(
         request
 ):
     actual = DockerRouterEnsemblerConfig(
-        id=id,
         image=image,
         resource_request=resource_request,
         endpoint=endpoint,
@@ -115,9 +175,8 @@ def test_create_docker_router_ensembler_config(
 
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+    "image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
-            1,
             "#@!#!@#@!",
             ResourceRequest(
                 min_replica=1,
@@ -138,7 +197,6 @@ def test_create_docker_router_ensembler_config(
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_image(
-        id,
         image,
         resource_request,
         endpoint,
@@ -150,7 +208,6 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
-            id=id,
             image=image,
             resource_request=resource_request,
             endpoint=endpoint,
@@ -162,9 +219,8 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
 
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+    "image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
-            1,
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
@@ -185,7 +241,6 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
-        id,
         image,
         resource_request,
         endpoint,
@@ -197,7 +252,6 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
-            id=id,
             image=image,
             resource_request=resource_request,
             endpoint=endpoint,
@@ -209,9 +263,8 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
 
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected", [
+    "image,resource_request,endpoint,timeout,port,env,service_account,expected", [
         pytest.param(
-            1,
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1,
@@ -232,7 +285,6 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
         )
     ])
 def test_create_docker_router_ensembler_config_with_invalid_env(
-        id,
         image,
         resource_request,
         endpoint,
@@ -244,7 +296,6 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
-            id=id,
             image=image,
             resource_request=resource_request,
             endpoint=endpoint,
@@ -256,9 +307,8 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
 
 
 @pytest.mark.parametrize(
-    "id,experiment_mappings,expected", [
+    "experiment_mappings,expected", [
         pytest.param(
-            1,
             [
                 {
                     "experiment": "experiment-1",
@@ -274,23 +324,21 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
             "generic_standard_router_ensembler_config"
         )
     ])
-def test_create_standard_router_ensembler_config(id, experiment_mappings, expected, request):
+def test_create_standard_router_ensembler_config(experiment_mappings, expected, request):
     actual = StandardRouterEnsemblerConfig(
-        id=id,
         experiment_mappings=experiment_mappings
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "new_experiment_mappings, id,experiment_mappings,expected", [
+    "new_experiment_mappings,experiment_mappings,expected", [
         pytest.param(
             [
                 {
                     "experiment": "wrong-experiment"
                 }
             ],
-            1,
             [
                 {
                     "experiment": "experiment-1",
@@ -313,7 +361,6 @@ def test_create_standard_router_ensembler_config(id, experiment_mappings, expect
                     "route": 313
                 }
             ],
-            1,
             [
                 {
                     "experiment": "experiment-1",
@@ -331,11 +378,9 @@ def test_create_standard_router_ensembler_config(id, experiment_mappings, expect
     ])
 def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
         new_experiment_mappings,
-        id,
         experiment_mappings,
         expected):
     actual = StandardRouterEnsemblerConfig(
-        id=id,
         experiment_mappings=experiment_mappings
     )
     with pytest.raises(expected):
@@ -343,7 +388,7 @@ def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
 
 
 @pytest.mark.parametrize(
-    "new_experiment_mappings,id,experiment_mappings,expected", [
+    "new_experiment_mappings,experiment_mappings,expected", [
         pytest.param(
             [
                 {
@@ -357,7 +402,6 @@ def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
                     "route": "route-2"
                 },
             ],
-            1,
             [
                 {
                     "experiment": "wrong-experiment",
@@ -370,12 +414,10 @@ def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
     ])
 def test_set_standard_router_ensembler_config_with_valid_experiment_mappings(
         new_experiment_mappings,
-        id,
         experiment_mappings,
         expected,
         request):
     actual = StandardRouterEnsemblerConfig(
-        id=id,
         experiment_mappings=experiment_mappings
     )
     actual.experiment_mappings = new_experiment_mappings
