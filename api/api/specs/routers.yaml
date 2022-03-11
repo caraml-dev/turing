@@ -22,7 +22,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project to retrieve routers from"
+          description: "project id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -45,7 +45,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project to save router"
+          description: "project id of the project to save router"
           schema:
             <<: *id
           required: true
@@ -74,7 +74,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project to retrieve routers from"
+          description: "project id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -101,7 +101,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project of the router"
+          description: "project id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -136,7 +136,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project of the router"
+          description: "project id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -227,7 +227,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project to retrieve routers from"
+          description: "project id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -250,13 +250,13 @@ paths:
           description: "Invalid project_id or router_id"
         404:
           description: "No router versions found"
-    post:
+    put:
       tags: *tags
       summary: "Create router version without deploying it"
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project of the router"
+          description: "project id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -272,14 +272,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RouterVersionConfig"
+              $ref: "#/components/schemas/RouterConfig"
       responses:
         200:
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RouterVersion"
+                $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id, router_id or router configuration"
         500:
@@ -292,7 +292,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project to retrieve routers from"
+          description: "project id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -326,7 +326,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "id of the project of the router"
+          description: "project id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -599,46 +599,43 @@ components:
           type: "string"
           pattern: '^[a-z0-9-]*$'
         config:
-          $ref: "#/components/schemas/RouterVersionConfig"
-
-    RouterVersionConfig:
-      type: "object"
-      required:
-        - routes
-        - default_route_id
-        - experiment_engine
-        - timeout
-        - log_config
-      properties:
-        routes:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Route"
-        rules:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/TrafficRule"
-        default_route_id:
-          type: "string"
-        experiment_engine:
-          $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
-        resource_request:
-          $ref: "#/components/schemas/ResourceRequest"
-        timeout:
-          <<: *timeout
-        log_config:
           type: "object"
+          required:
+            - routes
+            - default_route_id
+            - experiment_engine
+            - timeout
+            - log_config
           properties:
-            result_logger_type:
-              $ref: "#/components/schemas/ResultLoggerType"
-            bigquery_config:
-              $ref: "#/components/schemas/BigQueryConfig"
-            kafka_config:
-              $ref: "#/components/schemas/KafkaConfig"
-        enricher:
-          $ref: "#/components/schemas/Enricher"
-        ensembler:
-          $ref: "#/components/schemas/RouterEnsemblerConfig"
+            routes:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Route"
+            rules:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/TrafficRule"
+            default_route_id:
+              type: "string"
+            experiment_engine:
+              $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
+            resource_request:
+              $ref: "#/components/schemas/ResourceRequest"
+            timeout:
+              <<: *timeout
+            log_config:
+              type: "object"
+              properties:
+                result_logger_type:
+                  $ref: "#/components/schemas/ResultLoggerType"
+                bigquery_config:
+                  $ref: "#/components/schemas/BigQueryConfig"
+                kafka_config:
+                  $ref: "#/components/schemas/KafkaConfig"
+            enricher:
+              $ref: "#/components/schemas/Enricher"
+            ensembler:
+              $ref: "#/components/schemas/RouterEnsemblerConfig"
 
     Route:
       type: "object"

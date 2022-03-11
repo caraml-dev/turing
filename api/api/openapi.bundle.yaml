@@ -476,7 +476,7 @@ paths:
   /projects/{project_id}/routers:
     get:
       parameters:
-      - description: id of the project to retrieve routers from
+      - description: project id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -501,7 +501,7 @@ paths:
       - Router
     post:
       parameters:
-      - description: id of the project to save router
+      - description: project id of the project to save router
         in: path
         name: project_id
         required: true
@@ -532,7 +532,7 @@ paths:
   /projects/{project_id}/routers/{router_id}:
     delete:
       parameters:
-      - description: id of the project of the router
+      - description: project id of the project of the router
         in: path
         name: project_id
         required: true
@@ -564,7 +564,7 @@ paths:
       - Router
     get:
       parameters:
-      - description: id of the project to retrieve routers from
+      - description: project id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -594,7 +594,7 @@ paths:
       - Router
     put:
       parameters:
-      - description: id of the project of the router
+      - description: project id of the project of the router
         in: path
         name: project_id
         required: true
@@ -696,7 +696,7 @@ paths:
   /projects/{project_id}/routers/{router_id}/versions:
     get:
       parameters:
-      - description: id of the project to retrieve routers from
+      - description: project id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -726,9 +726,9 @@ paths:
       summary: List router config versions
       tags:
       - Router
-    post:
+    put:
       parameters:
-      - description: id of the project of the router
+      - description: project id of the project of the router
         in: path
         name: project_id
         required: true
@@ -746,7 +746,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RouterVersionConfig'
+              $ref: '#/components/schemas/RouterConfig'
         description: router configuration to save
         required: true
       responses:
@@ -754,7 +754,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouterVersion'
+                $ref: '#/components/schemas/RouterDetails'
           description: OK
         "400":
           description: Invalid project_id, router_id or router configuration
@@ -766,7 +766,7 @@ paths:
   /projects/{project_id}/routers/{router_id}/versions/{version}:
     delete:
       parameters:
-      - description: id of the project of the router
+      - description: project id of the project of the router
         in: path
         name: project_id
         required: true
@@ -805,7 +805,7 @@ paths:
       - Router
     get:
       parameters:
-      - description: id of the project to retrieve routers from
+      - description: project id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -2552,160 +2552,11 @@ components:
           pattern: ^[a-z0-9-]*$
           type: string
         config:
-          $ref: '#/components/schemas/RouterVersionConfig'
+          $ref: '#/components/schemas/RouterConfig_config'
       required:
       - config
       - environment_name
       - name
-      type: object
-    RouterVersionConfig:
-      example:
-        enricher:
-          service_account: secret-name-for-google-service-account
-          image: image
-          endpoint: endpoint
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          port: 5
-          created_at: 2000-01-23T04:56:07.000+00:00
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
-          id: 1
-          env:
-          - name: name
-            value: value
-          - name: name
-            value: value
-          timeout: timeout
-        routes:
-        - endpoint: endpoint
-          annotations: '{}'
-          id: id
-          type: type
-          timeout: timeout
-        - endpoint: endpoint
-          annotations: '{}'
-          id: id
-          type: type
-          timeout: timeout
-        default_route_id: default_route_id
-        rules:
-        - routes:
-          - routes
-          - routes
-          conditions:
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-        - routes:
-          - routes
-          - routes
-          conditions:
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-        resource_request:
-          min_replica: 0
-          max_replica: 6
-          memory_request: memory_request
-          cpu_request: cpu_request
-        ensembler:
-          pyfunc_config:
-            project_id: 7
-            ensembler_id: 9
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            timeout: timeout
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          standard_config:
-            experiment_mappings:
-            - treatment: treatment-1
-              route: route-1
-              experiment: experiment-1
-            - treatment: treatment-1
-              route: route-1
-              experiment: experiment-1
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: 5
-          type: standard
-          docker_config:
-            service_account: secret-name-for-google-service-account
-            image: image
-            endpoint: endpoint
-            port: 2
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            env:
-            - name: name
-              value: value
-            - name: name
-              value: value
-            timeout: timeout
-        log_config:
-          bigquery_config:
-            batch_load: true
-            table: table
-            service_account_secret: service_account_secret
-          kafka_config:
-            brokers: brokers
-            topic: topic
-            serialization_format: json
-        timeout: timeout
-        experiment_engine:
-          type: nop
-          config: '{}'
-      properties:
-        routes:
-          items:
-            $ref: '#/components/schemas/Route'
-          type: array
-        rules:
-          items:
-            $ref: '#/components/schemas/TrafficRule'
-          type: array
-        default_route_id:
-          type: string
-        experiment_engine:
-          $ref: '#/components/schemas/ExperimentConfig'
-        resource_request:
-          $ref: '#/components/schemas/ResourceRequest'
-        timeout:
-          pattern: ^[0-9]+(ms|s|m|h)$
-          type: string
-        log_config:
-          $ref: '#/components/schemas/RouterVersionConfig_log_config'
-        enricher:
-          $ref: '#/components/schemas/Enricher'
-        ensembler:
-          $ref: '#/components/schemas/RouterEnsemblerConfig'
-      required:
-      - default_route_id
-      - experiment_engine
-      - log_config
-      - routes
-      - timeout
       type: object
     RouterId:
       $ref: '#/components/schemas/IdObject'
@@ -3230,7 +3081,7 @@ components:
       - route
       - treatment
       type: object
-    RouterVersionConfig_log_config:
+    RouterConfig_config_log_config:
       example:
         bigquery_config:
           batch_load: true
@@ -3247,6 +3098,155 @@ components:
           $ref: '#/components/schemas/BigQueryConfig'
         kafka_config:
           $ref: '#/components/schemas/KafkaConfig'
+      type: object
+    RouterConfig_config:
+      example:
+        enricher:
+          service_account: secret-name-for-google-service-account
+          image: image
+          endpoint: endpoint
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          port: 5
+          created_at: 2000-01-23T04:56:07.000+00:00
+          resource_request:
+            min_replica: 0
+            max_replica: 6
+            memory_request: memory_request
+            cpu_request: cpu_request
+          id: 1
+          env:
+          - name: name
+            value: value
+          - name: name
+            value: value
+          timeout: timeout
+        routes:
+        - endpoint: endpoint
+          annotations: '{}'
+          id: id
+          type: type
+          timeout: timeout
+        - endpoint: endpoint
+          annotations: '{}'
+          id: id
+          type: type
+          timeout: timeout
+        default_route_id: default_route_id
+        rules:
+        - routes:
+          - routes
+          - routes
+          conditions:
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+        - routes:
+          - routes
+          - routes
+          conditions:
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+          - field: field
+            values:
+            - values
+            - values
+            operator: in
+        resource_request:
+          min_replica: 0
+          max_replica: 6
+          memory_request: memory_request
+          cpu_request: cpu_request
+        ensembler:
+          pyfunc_config:
+            project_id: 7
+            ensembler_id: 9
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            timeout: timeout
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          standard_config:
+            experiment_mappings:
+            - treatment: treatment-1
+              route: route-1
+              experiment: experiment-1
+            - treatment: treatment-1
+              route: route-1
+              experiment: experiment-1
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 5
+          type: standard
+          docker_config:
+            service_account: secret-name-for-google-service-account
+            image: image
+            endpoint: endpoint
+            port: 2
+            resource_request:
+              min_replica: 0
+              max_replica: 6
+              memory_request: memory_request
+              cpu_request: cpu_request
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
+            timeout: timeout
+        log_config:
+          bigquery_config:
+            batch_load: true
+            table: table
+            service_account_secret: service_account_secret
+          kafka_config:
+            brokers: brokers
+            topic: topic
+            serialization_format: json
+        timeout: timeout
+        experiment_engine:
+          type: nop
+          config: '{}'
+      properties:
+        routes:
+          items:
+            $ref: '#/components/schemas/Route'
+          type: array
+        rules:
+          items:
+            $ref: '#/components/schemas/TrafficRule'
+          type: array
+        default_route_id:
+          type: string
+        experiment_engine:
+          $ref: '#/components/schemas/ExperimentConfig'
+        resource_request:
+          $ref: '#/components/schemas/ResourceRequest'
+        timeout:
+          pattern: ^[0-9]+(ms|s|m|h)$
+          type: string
+        log_config:
+          $ref: '#/components/schemas/RouterConfig_config_log_config'
+        enricher:
+          $ref: '#/components/schemas/Enricher'
+        ensembler:
+          $ref: '#/components/schemas/RouterEnsemblerConfig'
+      required:
+      - default_route_id
+      - experiment_engine
+      - log_config
+      - routes
+      - timeout
       type: object
     StandardExperimentEngine_allOf_standard_experiment_manager_config:
       nullable: true
