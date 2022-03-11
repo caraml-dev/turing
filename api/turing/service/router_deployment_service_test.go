@@ -121,7 +121,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	envType string,
 	secretName string,
 	expConfig json.RawMessage,
-	routerDefault *config.RouterDefaults,
+	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
 	targetConcurrency int,
@@ -136,8 +136,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 			Name:      fmt.Sprintf("%s-router-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: routerDefault.JaegerCollectorEndpoint},
-				{Name: "FLUENTD_TAG", Value: routerDefault.FluentdConfig.Tag},
+				{Name: "JAEGER_EP", Value: routerDefaults.JaegerCollectorEndpoint},
+				{Name: "FLUENTD_TAG", Value: routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: strconv.FormatBool(sentryEnabled)},
 				{Name: "SENTRY_DSN", Value: sentryDSN},
@@ -210,7 +210,7 @@ func TestDeployEndpoint(t *testing.T) {
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
-		routerDefault: &config.RouterDefaults{
+		routerDefaults: &config.RouterDefaults{
 			JaegerCollectorEndpoint: "jaeger-endpoint",
 			FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 		},
@@ -306,8 +306,8 @@ func TestDeployEndpoint(t *testing.T) {
 			Name:      fmt.Sprintf("%s-router-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: ds.routerDefault.JaegerCollectorEndpoint},
-				{Name: "FLUENTD_TAG", Value: ds.routerDefault.FluentdConfig.Tag},
+				{Name: "JAEGER_EP", Value: ds.routerDefaults.JaegerCollectorEndpoint},
+				{Name: "FLUENTD_TAG", Value: ds.routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: "true"},
 				{Name: "SENTRY_DSN", Value: "test:dsn"},
@@ -372,7 +372,7 @@ func TestDeleteEndpoint(t *testing.T) {
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
-		routerDefault: &config.RouterDefaults{
+		routerDefaults: &config.RouterDefaults{
 			JaegerCollectorEndpoint: "jaeger-endpoint",
 			FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 		},
