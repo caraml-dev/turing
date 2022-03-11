@@ -37,9 +37,9 @@ const typeOptions = [
     inputDisplay: "Pyfunc",
     description: (
       <Fragment>
-        Turing will deploy the selected pyfunc ensembler and will send to it
-        responses from all routes, together with the treatment configuration,
-        for ensembling
+        Turing will build and deploy the selected pyfunc ensembler and will send
+        to it responses from all routes, together with the treatment
+        configuration, for ensembling
       </Fragment>
     ),
   },
