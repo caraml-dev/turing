@@ -85,3 +85,38 @@ def ensemble(
         result = ['treatment-a', 'control']
     return "-ensembled-with-".join(result)
 ```
+
+You may wish to note that a general request sent to an ensembler by a Turing Router has a schema 
+that looks like the following:
+
+```json
+{
+  // original request payload unmodified
+  "request":{},
+  "response": {
+    "route_responses": [
+      {
+        "route": "control",
+        "data": {
+          //...
+        },
+        "is_default": true
+      },
+      {
+        "route": "xgboost-ordinal",
+        "data": {
+          //...
+        }
+      },
+    ],
+    "experiment": {
+      // response from Experiment Engine unmodified
+      "configuration": {
+          //...
+      },
+      // populated if error occurs
+      "error": "",
+    }
+  }
+}
+```
