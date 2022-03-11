@@ -572,7 +572,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 	type args struct {
 		namespace       string
 		environmentType string
-		routerDefault   *config.RouterDefaults
+		routerDefaults  *config.RouterDefaults
 		sentryEnabled   bool
 		sentryDSN       string
 		secretName      string
@@ -589,7 +589,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 			args: args{
 				namespace:       "testnamespace",
 				environmentType: "dev",
-				routerDefault: &config.RouterDefaults{
+				routerDefaults: &config.RouterDefaults{
 					JaegerCollectorEndpoint: "",
 					FluentdConfig:           &config.FluentdConfig{Tag: ""},
 					KafkaConfig: &config.KafkaConfig{
@@ -648,7 +648,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 			got, _ := sb.buildRouterEnvs(
 				namespace,
 				tt.args.environmentType,
-				tt.args.routerDefault,
+				tt.args.routerDefaults,
 				tt.args.sentryEnabled,
 				tt.args.sentryDSN,
 				tt.args.secretName,

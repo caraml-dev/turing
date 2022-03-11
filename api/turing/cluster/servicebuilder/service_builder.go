@@ -75,7 +75,7 @@ type ClusterServiceBuilder interface {
 		envType string,
 		secretName string,
 		experimentConfig json.RawMessage,
-		routerDefault *config.RouterDefaults,
+		routerDefaults *config.RouterDefaults,
 		sentryEnabled bool,
 		sentryDSN string,
 		knativeTargetConcurrency int,
