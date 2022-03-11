@@ -6,9 +6,6 @@ metadata:
   name: {{ template "turing.fullname" . }}-openapi
   labels:
 {{ include "turing.labels" . | indent 4 }}
-{{- if .Values.turing.labels }}
-{{ toYaml .Values.turing.labels | indent 4 -}}
-{{- end }}
 data:
   override.yaml: |
     {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
