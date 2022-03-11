@@ -48,25 +48,31 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 		return errResp
 	}
 
-	request := body.(*request.RouterConfig)
+	request := body.(*request.CreateOrUpdateRouterRequest)
+
+	// Check if the router environment and name are unchanged
+	if request.Environment != router.EnvironmentName || request.Name != router.Name {
+		return BadRequest("invalid router configuration",
+			"Router name and environment cannot be changed after creation")
+	}
+
+	// Check if any deployment is in progress, if yes, disallow the update
+	if router.Status == models.RouterStatusPending {
+		return BadRequest("invalid update request",
+			"another version is currently pending deployment")
+	}
 
 	// Create new version
 	var routerVersion *models.RouterVersion
-	if request == nil {
-		return InternalServerError("unable to create router version", "router config is empty")
-	}
-
-	routerVersion, err := request.BuildRouterVersion(
+	rVersion, err := request.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
-
 	if err == nil {
 		// Save router version, re-assign the value of err
-		routerVersion.Status = models.RouterVersionStatusUndeployed
-		routerVersion, err = c.RouterVersionsService.Save(routerVersion)
+		routerVersion, err = c.RouterVersionsService.Save(rVersion)
 	}
 
 	if err != nil {
-		return InternalServerError("unable to create router version", err.Error())
+		return InternalServerError("unable to update router", err.Error())
 	}
 
 	return Ok(routerVersion)
@@ -179,9 +185,9 @@ func (c RouterVersionsController) Routes() []Route {
 			handler: c.ListRouterVersions,
 		},
 		{
-			method:  http.MethodPost,
+			method:  http.MethodPut,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
-			body:    request.RouterConfig{},
+			body:    request.CreateOrUpdateRouterRequest{},
 			handler: c.CreateRouterVersion,
 		},
 		{
