@@ -1,7 +1,7 @@
 # Pyfunc Interface
 
 In order to build a pyfunc ensembler and register it with Turing API, you would need to implement the 
-`turing.ensembler.PyFunc` interface. This requires implementation 2 methods, `initialize` and `ensemble`.
+`turing.ensembler.PyFunc` interface. This requires implementation two methods, `initialize` and `ensemble`.
 
 ```python
 class MyEnsembler(turing.ensembler.PyFunc):
