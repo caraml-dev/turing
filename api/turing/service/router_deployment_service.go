@@ -78,7 +78,6 @@ func NewDeploymentService(
 	sb := servicebuilder.NewClusterServiceBuilder(
 		resource.Quantity(cfg.DeployConfig.MaxCPU),
 		resource.Quantity(cfg.DeployConfig.MaxMemory),
-		cfg.DeployConfig.EnvironmentType,
 	)
 
 	return &deploymentService{

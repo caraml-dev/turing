@@ -263,7 +263,10 @@ func (c *ensemblingController) cleanup(jobName string, namespace string) {
 	}
 }
 
-func (c *ensemblingController) createSparkDriverAuthorization(namespace string, labels map[string]string) (*apicorev1.ServiceAccount, error) {
+func (c *ensemblingController) createSparkDriverAuthorization(
+	namespace string,
+	labels map[string]string,
+) (*apicorev1.ServiceAccount, error) {
 	serviceAccountName, roleName, roleBindingName := createAuthorizationResourceNames(namespace)
 
 	saCfg := &cluster.ServiceAccount{
