@@ -52,10 +52,6 @@ type KafkaConfig struct {
 	Topic string `json:"topic"`
 	// Serialization Format used for the messages
 	SerializationFormat SerializationFormat `json:"serialization_format"`
-	// Producer Config - Max message byte to send to broker
-	MaxMessageBytes int `json:"-"`
-	// Producer Config - Compression Type of message
-	CompressionType string `json:"-"`
 }
 
 // LogConfig contains all log configuration necessary for a deployment

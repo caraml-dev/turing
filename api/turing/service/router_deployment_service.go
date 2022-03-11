@@ -51,10 +51,9 @@ type deploymentService struct {
 	environmentType           string
 
 	// Router configs
-	fluentdConfig           *config.FluentdConfig
-	jaegerCollectorEndpoint string
-	sentryEnabled           bool
-	sentryDSN               string
+	sentryEnabled  bool
+	sentryDSN      string
+	routerDefaults *config.RouterDefaults
 
 	// Knative service configs
 	knativeServiceConfig *config.KnativeServiceDefaults
@@ -85,8 +84,7 @@ func NewDeploymentService(
 		deploymentTimeout:            cfg.DeployConfig.Timeout,
 		deploymentDeletionTimeout:    cfg.DeployConfig.DeletionTimeout,
 		environmentType:              cfg.DeployConfig.EnvironmentType,
-		fluentdConfig:                cfg.RouterDefaults.FluentdConfig,
-		jaegerCollectorEndpoint:      cfg.RouterDefaults.JaegerCollectorEndpoint,
+		routerDefaults:               cfg.RouterDefaults,
 		knativeServiceConfig:         cfg.KnativeServiceDefaults,
 		ensemblerServiceImageBuilder: ensemblerServiceImageBuilder,
 		sentryEnabled:                cfg.Sentry.Enabled,
@@ -155,7 +153,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	// Deploy fluentd if enabled
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion, project,
-			ds.environmentType, secretName, ds.fluentdConfig)
+			ds.environmentType, secretName, ds.routerDefaults.FluentdConfig)
 		// Create pvc
 		err = createPVC(ctx, controller, project.Name, fluentdService.PersistentVolumeClaim)
 		if err != nil {
@@ -191,7 +189,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	// Construct service objects for each of the components and deploy
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, secretName, experimentConfig,
-		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
+		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
 		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
 	)
@@ -245,7 +243,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Construct service objects for each of the components to be deleted
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, "", nil,
-		ds.fluentdConfig.Tag, ds.jaegerCollectorEndpoint, ds.sentryEnabled, ds.sentryDSN,
+		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
 		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
 	)
@@ -265,7 +263,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Delete fluentd if required
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion,
-			project, ds.environmentType, "", ds.fluentdConfig)
+			project, ds.environmentType, "", ds.routerDefaults.FluentdConfig)
 		err = deleteK8sService(controller, fluentdService, ds.deploymentTimeout)
 		if err != nil {
 			errs = append(errs, err.Error())
@@ -340,8 +338,7 @@ func (ds *deploymentService) createServices(
 	envType string,
 	secretName string,
 	experimentConfig json.RawMessage,
-	fluentdTag string,
-	jaegerCollectorEndpoint string,
+	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
 	knativeTargetConcurrency int,
@@ -391,8 +388,7 @@ func (ds *deploymentService) createServices(
 		envType,
 		secretName,
 		experimentConfig,
-		fluentdTag,
-		jaegerCollectorEndpoint,
+		routerDefaults,
 		sentryEnabled,
 		sentryDSN,
 		knativeTargetConcurrency,
