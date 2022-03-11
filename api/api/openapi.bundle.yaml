@@ -242,7 +242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdObject'
+                $ref: '#/components/schemas/JobId'
           description: Accepted.
         "400":
           description: Invalid ensembling job
@@ -551,7 +551,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdObject_1'
+                $ref: '#/components/schemas/RouterId'
           description: OK
         "400":
           description: Invalid project_id or router_id
@@ -1692,6 +1692,8 @@ components:
       - failed_submission
       - failed_building
       type: string
+    JobId:
+      $ref: '#/components/schemas/IdObject'
     IdObject:
       example:
         id: 0
@@ -1699,6 +1701,7 @@ components:
         id:
           format: int32
           type: integer
+      type: object
     Id:
       format: int32
       type: integer
@@ -2518,7 +2521,7 @@ components:
       - environment_name
       - name
       type: object
-    IdObject_1:
+    RouterId:
       $ref: '#/components/schemas/IdObject'
     RouterIdAndVersion:
       example:
