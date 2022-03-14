@@ -207,6 +207,7 @@ postgresql:
     enabled: true
     size: 10Gi
   postgresqlDatabase: turing
+  postgresqlPort: 5432
   postgresqlUsername: turing
   # -- Password for Turing Postgresql database
   postgresqlPassword: turing
@@ -311,3 +312,4 @@ global:
 tags:
   # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true
+  db: true

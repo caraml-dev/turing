@@ -39,7 +39,43 @@
 {{- end -}}
 
 {{- define "turing.db.host" -}}
-{{- printf "%s.%s.svc.cluster.local" (include "turing.postgresql.name" .) .Release.Namespace -}}
+{{ if .Values.tags.db }}
+    {{- printf "%s.%s.svc.cluster.local" (include "turing.postgresql.name" .) .Release.Namespace -}}
+{{- else -}}
+    {{- .Values.turing.config.DbConfig.Host -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "turing.db.port" -}}
+{{ if .Values.tags.db }}
+    {{ .Values.postgresql.postgresqlPort }}
+{{- else -}}
+    {{- .Values.turing.config.DbConfig.Port -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "turing.db.user" -}}
+{{ if .Values.tags.db }}
+    {{ .Values.postgresql.postgresqlUsername }}
+{{- else -}}
+    {{- .Values.turing.config.DbConfig.User -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "turing.db.password" -}}
+{{ if .Values.tags.db }}
+    {{ .Values.postgresql.postgresqlPassword }}
+{{- else -}}
+    {{- .Values.turing.config.DbConfig.Password -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "turing.db.database" -}}
+{{ if .Values.tags.db }}
+    {{ .Values.postgresql.postgresqlDatabase }}
+{{- else -}}
+    {{- .Values.turing.config.DbConfig.Database -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "turing.encryption.key" -}}
@@ -121,9 +157,10 @@ ClusterConfig:
   InClusterConfig: {{ .Values.turing.clusterConfig.useInClusterConfig }}
 DbConfig:
   Host: {{ include "turing.db.host" . | quote }}
-  Database: {{ .Values.postgresql.postgresqlDatabase }}
-  User: {{ .Values.postgresql.postgresqlUsername }}
-  Password: {{ .Values.postgresql.postgresqlPassword }}
+  Port: {{ include "turing.db.port" . }}
+  Database:  {{ include "turing.db.database" . }}
+  User:  {{ include "turing.db.user" . }}
+  Password:  {{ include "turing.db.password" . }}
 DeployConfig:
   EnvironmentType: {{ .Values.turing.config.DeployConfig.EnvironmentType | default (include "turing.environment" .) }}
 KubernetesLabelConfigs:

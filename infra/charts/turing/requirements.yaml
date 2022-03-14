@@ -2,6 +2,8 @@ dependencies:
   - name: postgresql
     repository: https://charts.bitnami.com/bitnami
     version: 8.9.8
+    tags:
+      - db
   - name: mlp
     version: 1.0.1
     repository: file://subcharts/mlp
