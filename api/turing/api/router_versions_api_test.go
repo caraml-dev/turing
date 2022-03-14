@@ -6,6 +6,7 @@ import (
 
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/config"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service/mocks"
@@ -76,6 +77,135 @@ func TestListRouterVersions(t *testing.T) {
 			}
 			// Run test method and validate
 			response := ctrl.ListRouterVersions(nil, data.vars, nil)
+			assert.Equal(t, data.expected, response)
+		})
+	}
+}
+
+func TestCreateRouterVersion(t *testing.T) {
+	// Create mock services
+	// MLP service
+	mlpSvc := &mocks.MLPService{}
+	mlpSvc.On("GetProject", models.ID(1)).Return(nil, errors.New("test project error"))
+	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{Id: 2}, nil)
+	mlpSvc.On("GetEnvironment", "dev-invalid").Return(nil, errors.New("test env error"))
+	mlpSvc.On("GetEnvironment", "dev").Return(&merlin.Environment{}, nil)
+
+	// Router Service
+	router2 := &models.Router{
+		Name:            "router2",
+		ProjectID:       2,
+		EnvironmentName: "dev",
+		Model: models.Model{
+			ID: 2,
+		},
+	}
+	routerSvc := &mocks.RoutersService{}
+	routerSvc.On("FindByID", models.ID(1)).
+		Return(nil, errors.New("test router error"))
+	routerSvc.On("FindByID", models.ID(2)).Return(router2, nil)
+
+	// Router Version Service
+	routerVersion := &models.RouterVersion{
+		Router:   router2,
+		RouterID: 2,
+		ExperimentEngine: &models.ExperimentEngine{
+			Type: models.ExperimentEngineTypeNop,
+		},
+		LogConfig: &models.LogConfig{
+			ResultLoggerType: models.NopLogger,
+		},
+		Status: models.RouterVersionStatusUndeployed,
+	}
+	routerVersionSvc := &mocks.RouterVersionsService{}
+	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
+
+	// Define tests
+	tests := map[string]struct {
+		vars     RequestVars
+		expected *Response
+		body     *request.CreateOrUpdateRouterRequest
+	}{
+		"failure | bad request (missing project_id)": {
+			vars:     RequestVars{},
+			expected: BadRequest("invalid project id", "key project_id not found in vars"),
+		},
+		"failure | not found (project not found)": {
+			vars:     RequestVars{"project_id": {"1"}},
+			expected: NotFound("project not found", "test project error"),
+		},
+		"failure | bad request (missing router_id)": {
+			vars:     RequestVars{"project_id": {"2"}},
+			expected: BadRequest("invalid router id", "key router_id not found in vars"),
+		},
+		"failure | not found (router_id not found)": {
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
+			expected: NotFound("router not found", "test router error"),
+		},
+		"failure | bad request (invalid environment name)": {
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
+			body: &request.CreateOrUpdateRouterRequest{
+				Name:        "router2",
+				Environment: "invalid-dev",
+			},
+			expected: BadRequest("invalid router configuration",
+				"Router name and environment cannot be changed after creation"),
+		},
+		"failure | bad request (invalid router name)": {
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
+			body: &request.CreateOrUpdateRouterRequest{
+				Name:        "invalid-router2",
+				Environment: "dev",
+			},
+			expected: BadRequest("invalid router configuration",
+				"Router name and environment cannot be changed after creation"),
+		},
+		"failure | build router version": {
+			body: &request.CreateOrUpdateRouterRequest{
+				Name:        "router2",
+				Environment: "dev",
+			},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"2"}},
+			expected: InternalServerError("unable to create router version", "router config is empty"),
+		},
+		"success": {
+			body: &request.CreateOrUpdateRouterRequest{
+				Name:        "router2",
+				Environment: "dev",
+				Config: &request.RouterConfig{
+					ExperimentEngine: &request.ExperimentEngineConfig{
+						Type: "nop",
+					},
+					LogConfig: &request.LogConfig{
+						ResultLoggerType: models.NopLogger,
+					},
+				},
+			},
+			vars: RequestVars{"router_id": {"2"}, "project_id": {"2"}},
+			expected: &Response{
+				code: 200,
+				data: routerVersion,
+			},
+		},
+	}
+
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctrl := &RouterVersionsController{
+				RouterDeploymentController{
+					BaseController{
+						AppContext: &AppContext{
+							MLPService:            mlpSvc,
+							RoutersService:        routerSvc,
+							RouterVersionsService: routerVersionSvc,
+							RouterDefaults:        &config.RouterDefaults{},
+						},
+					},
+				},
+			}
+			// Run test method and validate
+			response := ctrl.CreateRouterVersion(nil, data.vars, data.body)
 			assert.Equal(t, data.expected, response)
 		})
 	}
