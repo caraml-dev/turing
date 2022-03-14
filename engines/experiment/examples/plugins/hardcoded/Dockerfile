@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.14-alpine as builder
 
 ARG binary_name="plugin"
 ARG project_root=github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded
