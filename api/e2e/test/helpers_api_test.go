@@ -231,7 +231,7 @@ func withDeployedRouter(
 	)
 
 	routerBytes, _ := json.Marshal(router)
-	t.Log(fmt.Sprintf("Router Config: \n%s", string(routerBytes)))
+	t.Logf("Router Config: \n%s", string(routerBytes))
 
 	require.NoError(t, err)
 	require.NotNil(t, router.CurrRouterVersion)

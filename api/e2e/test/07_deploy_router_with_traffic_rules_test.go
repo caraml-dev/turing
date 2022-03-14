@@ -61,6 +61,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 				http.MethodPost,
 				router.Endpoint,
 				http.Header{
+					"Content-Type":  {"application/json"},
 					"X-Region":      {"region-a"},
 					"X-Mirror-Body": {"true"},
 				},
@@ -98,7 +99,8 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				map[string][]string{
+				http.Header{
+					"Content-Type":  {"application/json"},
 					"X-Mirror-Body": {"true"},
 				},
 				`{"service_type": {"id": "service-type-b"}}`,
@@ -138,7 +140,8 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				map[string][]string{
+				http.Header{
+					"Content-Type":  {"application/json"},
 					"X-Mirror-Body": {"true"},
 				},
 				`{"service_type": {"id": "service-type-c"}}`,
