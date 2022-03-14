@@ -4,9 +4,8 @@ package e2e
 
 import (
 	"bytes"
-	"context"
 	"fmt"
-	"io/ioutil"
+	"github.com/tidwall/gjson"
 	"net/http"
 	"path/filepath"
 	"testing"
@@ -129,30 +128,37 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 		),
 		router.Endpoint,
 	)
-	req, err = http.NewRequestWithContext(
-		context.Background(),
+
+	withRouterResponse(t,
 		http.MethodPost,
 		router.Endpoint,
-		ioutil.NopCloser(bytes.NewReader([]byte(`{"client": {"id": 4}}`))),
-	)
-	require.NoError(t, err)
-	resp, err = globalTestContext.httpClient.Do(req)
-	require.NoError(t, err)
-	responseBytes, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	require.NoError(t, err)
-	actualResponse := string(responseBytes)
-	expectedResponse := `{
-	  "experiment": {},
-	  "route_responses": [
-		{
-		  "data": {
-			"version": "control"
-		  },
-		  "is_default": true,
-		  "route": "control"
-		}
-	  ]
-	}`
-	assert.JSONEq(t, expectedResponse, actualResponse)
+		http.Header{
+			"Content-Type":  {"application/json"},
+			"X-Mirror-Body": {"true"},
+		},
+		`{"client": {"id": 4}}`,
+		func(response *http.Response, responsePayload []byte) {
+			assert.Equal(t, http.StatusOK, response.StatusCode,
+				"Unexpected response (code %d): %s",
+				response.StatusCode, string(responsePayload))
+			t.Log(string(responsePayload))
+			actualResponse := gjson.GetBytes(responsePayload, "response").String()
+			expectedResponse := `{
+					  "experiment": {
+						"configuration": {
+							"foo":"bar"
+						}
+					  },
+					  "route_responses": [
+						{
+						  "data": {
+							"version": "control"
+						  },
+						  "is_default": true,
+						  "route": "control"
+						}
+					  ]
+					}`
+			assert.JSONEq(t, expectedResponse, actualResponse)
+		})
 }
