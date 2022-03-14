@@ -1,8 +1,7 @@
 FROM golang:1.14-alpine as builder
 
 ARG binary_name="plugin"
-ARG project_root=github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded
-ARG build_path=examples/plugins/hardcoded/cmd
+ARG project_root=github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded/cmd
 
 ENV GO111MODULE=on \
     GOOS=linux \
@@ -29,6 +28,5 @@ ENV PLUGIN_NAME ""
 ENV PLUGINS_DIR "/app/plugins"
 
 COPY --chown=${turing_user}:${turing_user_group} --from=builder /app/bin/${binary_name} /go/bin/plugin
-RUN chmod +x /go/bin/plugin
 
 CMD ["sh", "-c", "cp /go/bin/plugin ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]
