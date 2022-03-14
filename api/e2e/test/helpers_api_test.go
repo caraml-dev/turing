@@ -192,6 +192,9 @@ func withDeployedRouter(
 		globalTestContext.ProjectID,
 		int(created.ID),
 	)
+	routerBytes, _ := json.Marshal(router)
+	t.Log(fmt.Sprintf("Router Config: \n%s", string(routerBytes)))
+
 	require.NoError(t, err)
 	require.Nil(t, router.CurrRouterVersion)
 	require.Equal(t, "", router.Endpoint)
