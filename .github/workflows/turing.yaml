@@ -124,7 +124,7 @@ jobs:
         run: |
           docker image save \
             --output test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar \
-            test-experiment-engine-plugin:${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
+            plugin-example-engine-plugin:${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
@@ -412,7 +412,7 @@ jobs:
           # Experiment Engine Plugin
           docker image load --input test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
           docker tag \
-            test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
+            plugin-example-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
             ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
