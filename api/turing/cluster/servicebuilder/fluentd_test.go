@@ -53,7 +53,9 @@ func TestNewFluentdService(t *testing.T) {
 			ProbeInitDelaySeconds: 10,
 			ProbePort:             9880,
 			Labels: map[string]string{
-				"app":          "test-svc",
+				"app": "test-svc",
+				// environment is empty string because its value will only be injected
+				// when Singleton is initialized from turing/api/turing/cluster/labeller/labeller.go
 				"environment":  "",
 				"orchestrator": "turing",
 				"stream":       "test-stream",
@@ -138,6 +140,6 @@ func TestNewFluentdService(t *testing.T) {
 		},
 	}
 
-	actual := sb.NewFluentdService(routerVersion, project, "test-env", "service-account", &fluentdConfig)
+	actual := sb.NewFluentdService(routerVersion, project, "service-account", &fluentdConfig)
 	assert.Equal(t, expected, actual)
 }

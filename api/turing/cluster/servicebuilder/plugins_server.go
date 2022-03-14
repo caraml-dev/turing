@@ -34,7 +34,6 @@ var (
 func (sb *clusterSvcBuilder) NewPluginsServerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 ) *cluster.KubernetesService {
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{

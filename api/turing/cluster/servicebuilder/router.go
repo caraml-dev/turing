@@ -98,7 +98,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	// Namespace is the name of the project
 	namespace := GetNamespace(project)
 
-	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig, envType)
+	configMap, err := buildFiberConfigMap(routerVersion, project, experimentConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -462,7 +462,6 @@ func buildFiberConfigMap(
 	ver *models.RouterVersion,
 	project *mlp.Project,
 	experimentCfg json.RawMessage,
-	envType string,
 ) (*cluster.ConfigMap, error) {
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{

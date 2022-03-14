@@ -85,14 +85,12 @@ type ClusterServiceBuilder interface {
 	NewFluentdService(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		secretName string,
 		fluentdConfig *config.FluentdConfig,
 	) *cluster.KubernetesService
 	NewPluginsServerService(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 	) *cluster.KubernetesService
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,
@@ -103,7 +101,6 @@ type ClusterServiceBuilder interface {
 	NewSecret(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
@@ -293,7 +290,6 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,

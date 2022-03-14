@@ -26,7 +26,6 @@ const (
 func (sb *clusterSvcBuilder) NewFluentdService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	serviceAccountSecretName string,
 	fluentdConfig *config.FluentdConfig,
 ) *cluster.KubernetesService {
