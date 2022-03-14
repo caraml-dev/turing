@@ -77,7 +77,7 @@ func TestCreateRouter(t *testing.T) {
 					"Content-Type":  {"application/json"},
 					"X-Mirror-Body": {"true"},
 				},
-				`[{"client": {"id": 4}}, {"client": {"id": 14}}]`,
+				`[{"client": {"id": 4}}, {"client": {"id": 7}}]`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
@@ -102,7 +102,7 @@ func TestCreateRouter(t *testing.T) {
 					{
 					  "experiment": {
 						"configuration": {
-							"foo":"bar"
+							"bar": "baz"
 						}
 					  },
 					  "route_responses": [

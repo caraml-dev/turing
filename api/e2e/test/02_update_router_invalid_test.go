@@ -5,10 +5,11 @@ package e2e
 import (
 	"bytes"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"path/filepath"
 	"testing"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
