@@ -142,7 +142,6 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 			assert.Equal(t, http.StatusOK, response.StatusCode,
 				"Unexpected response (code %d): %s",
 				response.StatusCode, string(responsePayload))
-			t.Log(string(responsePayload))
 			actualResponse := gjson.GetBytes(responsePayload, "response").String()
 			expectedResponse := `{
 					  "experiment": {
