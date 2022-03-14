@@ -181,6 +181,8 @@ func withDeployedRouter(
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
 		require.NoError(t, err)
 	}
+	t.Log(fmt.Sprintf("Response Payload: \n%s", string(responsePayload)))
+
 	t.Log(fmt.Sprintf("Created router with name: %s, ID: %d", created.Name, created.ID))
 
 	t.Log("Ensure router has been created and current status is pending")
