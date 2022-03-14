@@ -467,7 +467,8 @@ jobs:
             --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
             --set turing.image.repository=${{ github.repository }}/turing-api \
             --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
+            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+            --set turing.experimentEngines[0].rpcPlugin.image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
       - name: Install mockserver
         run: |
