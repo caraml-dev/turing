@@ -7,8 +7,8 @@ from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
 from turing.generated.models import (Project, Ensembler, EnsemblingJob, EnsemblerJobStatus, EnsemblersPaginatedResults,
-                                     EnsemblingJobPaginatedResults, IdObject, Router, RouterDetails, RouterConfig,
-                                     RouterVersion)
+                                     EnsemblingJobPaginatedResults, JobId, RouterId, RouterIdObject, RouterIdAndVersion,
+                                     Router, RouterDetails, RouterConfig, RouterVersion)
 
 
 def require_active_project(f):
@@ -181,7 +181,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def terminate_ensembling_job(self, job_id: int) -> IdObject:
+    def terminate_ensembling_job(self, job_id: int) -> JobId:
         return EnsemblingJobApi(self._api_client).terminate_ensembling_job(
             project_id=self.active_project.id,
             job_id=job_id
@@ -215,7 +215,7 @@ class TuringSession:
                                                                             router_config=router_config)
 
     @require_active_project
-    def delete_router(self, router_id: int) -> IdObject:
+    def delete_router(self, router_id: int) -> RouterId:
         """
         Delete router given its router ID
         """
@@ -244,7 +244,7 @@ class TuringSession:
                                                                                      router_config=router_config)
 
     @require_active_project
-    def deploy_router(self, router_id: int) -> IdObject:
+    def deploy_router(self, router_id: int) -> RouterIdAndVersion:
         """
         Deploy router given its router ID
         """
@@ -254,7 +254,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def undeploy_router(self, router_id: int) -> IdObject:
+    def undeploy_router(self, router_id: int) -> RouterIdObject:
         """
         Undeploy router given its router ID
         """
@@ -285,7 +285,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def delete_router_version(self, router_id: int, version: int) -> IdObject:
+    def delete_router_version(self, router_id: int, version: int) -> RouterIdAndVersion:
         """
         Delete specific router version given its router ID and version
         """
@@ -296,7 +296,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def deploy_router_version(self, router_id: int, version: int) -> IdObject:
+    def deploy_router_version(self, router_id: int, version: int) -> RouterIdAndVersion:
         """
         Deploy specific router version by its router ID and version
         """
@@ -307,7 +307,7 @@ class TuringSession:
         )
 
     @require_active_project
-    def get_router_events(self, router_id: int) -> turing.generated.models.InlineResponse2002:
+    def get_router_events(self, router_id: int) -> turing.generated.models.RouterEvents:
         """
         Fetch deployment events associated with the router with the given router ID
         """

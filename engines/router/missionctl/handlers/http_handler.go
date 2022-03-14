@@ -91,6 +91,9 @@ func (h *httpHandler) getPrediction(
 
 	// Enrich
 	var resp mchttp.Response
+	// Creates a new map to represent the merged headers from the original request headers + enricher response headers
+	postEnrichmentResponseHeader := req.Header.Clone()
+
 	payload := requestBody
 	if h.IsEnricherEnabled() {
 		resp, httpErr := h.Enrich(ctx, req.Header, payload)
@@ -100,13 +103,17 @@ func (h *httpHandler) getPrediction(
 		if httpErr != nil {
 			return nil, httpErr
 		}
+		// Merge Enricher response headers with original request headers
+		for key := range resp.Header() {
+			postEnrichmentResponseHeader.Set(key, resp.Header().Get(key))
+		}
 		// No error, copy response body
 		payload = resp.Body()
 	}
 
 	// Route
 	var expResp *experiment.Response
-	expResp, resp, httpErr := h.Route(ctx, req.Header, payload)
+	expResp, resp, httpErr := h.Route(ctx, postEnrichmentResponseHeader, payload)
 	if expResp != nil {
 		var expErr *errors.HTTPError
 		if expResp.Error != "" {

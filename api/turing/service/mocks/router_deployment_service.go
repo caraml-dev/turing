@@ -47,7 +47,7 @@ func (_m *DeploymentService) DeployRouterVersion(project *client.Project, enviro
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string,  *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) error); ok {
+	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) error); ok {
 		r1 = rf(project, environment, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	} else {
 		r1 = ret.Error(1)

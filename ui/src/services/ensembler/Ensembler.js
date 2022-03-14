@@ -1,4 +1,9 @@
-import { DockerEnsembler, NopEnsembler, StandardEnsembler } from "./index";
+import {
+  DockerEnsembler,
+  NopEnsembler,
+  StandardEnsembler,
+  PyFuncEnsembler,
+} from "./index";
 
 export class Ensembler {
   constructor(type) {
@@ -12,6 +17,8 @@ export class Ensembler {
         return DockerEnsembler.fromJson(json);
       case "standard":
         return StandardEnsembler.fromJson(json);
+      case "pyfunc":
+        return PyFuncEnsembler.fromJson(json);
       default:
         return new NopEnsembler();
     }
@@ -23,6 +30,8 @@ export class Ensembler {
         return { type: this.type, docker_config: this.docker_config };
       case "standard":
         return { type: this.type, standard_config: this.standard_config };
+      case "pyfunc":
+        return { type: this.type, pyfunc_config: this.pyfunc_config };
       default:
         return { ...this };
     }

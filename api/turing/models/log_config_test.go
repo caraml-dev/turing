@@ -59,8 +59,6 @@ func TestLogConfigValue(t *testing.T) {
 					Brokers:             "test-brokers",
 					Topic:               "test-topic",
 					SerializationFormat: "test-serialization",
-					MaxMessageBytes:     10000,
-					CompressionType:     "none",
 				},
 			},
 			expected: string(`{

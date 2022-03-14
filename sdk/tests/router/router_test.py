@@ -99,7 +99,7 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
     "actual,expected", [
         pytest.param(
             1,
-            turing.generated.models.InlineResponse200(id=1)
+            turing.generated.models.IdObject(id=1)
         )
     ]
 )
@@ -198,7 +198,7 @@ def test_deploy_router(turing_api, active_project, generic_router, generic_route
 
     base_router = turing.Router.from_open_api(generic_router)
 
-    expected = turing.generated.models.InlineResponse202(
+    expected = turing.generated.models.RouterIdAndVersion(
         router_id=1,
         version=1
     )
@@ -223,7 +223,7 @@ def test_undeploy_router(turing_api, active_project, generic_router, generic_rou
 
     base_router = turing.Router.from_open_api(generic_router)
 
-    expected = turing.generated.models.InlineResponse2001(
+    expected = turing.generated.models.RouterIdObject(
         router_id=1,
     )
 
@@ -332,7 +332,7 @@ def test_delete_version(turing_api, active_project, generic_router, use_google_o
 
     expected_router_id = 1
     expected_version = 1
-    expected = turing.generated.models.InlineResponse202(
+    expected = turing.generated.models.RouterIdAndVersion(
         router_id=expected_router_id,
         version=expected_version
     )
@@ -359,7 +359,7 @@ def test_deploy_version(turing_api, active_project, generic_router, use_google_o
 
     expected_router_id = 1
     expected_version = 1
-    expected = turing.generated.models.InlineResponse202(
+    expected = turing.generated.models.RouterIdAndVersion(
         router_id=expected_router_id,
         version=expected_version
     )
@@ -393,7 +393,7 @@ def test_get_events_list(turing_api, active_project, generic_router, generic_eve
     )
 
     response = base_router.get_events()
-    expected_events = generic_events.get('events')
+    expected_events = generic_events['events']
 
     assert len(response) == len(expected_events)
 

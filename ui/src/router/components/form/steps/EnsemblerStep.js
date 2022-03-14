@@ -8,6 +8,7 @@ import { get } from "../../../../components/form/utils";
 import { StandardEnsemblerFormGroup } from "../components/ensembler_config/standard_ensembler/StandardEnsemblerFormGroup";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import ExperimentEngineContext from "../../../../providers/experiments/context";
+import { PyFuncConfigFormGroup } from "../components/pyfunc_config/PyFuncConfigFormGroup";
 
 export const EnsemblerStep = ({ projectId }) => {
   const {
@@ -42,6 +43,15 @@ export const EnsemblerStep = ({ projectId }) => {
           dockerConfig={ensembler.docker_config}
           onChangeHandler={onChange("config.ensembler.docker_config")}
           errors={get(errors, "config.ensembler.docker_config")}
+        />
+      )}
+
+      {ensembler.type === "pyfunc" && (
+        <PyFuncConfigFormGroup
+          projectId={projectId}
+          pyfuncConfig={ensembler.pyfunc_config}
+          onChangeHandler={onChange("config.ensembler.pyfunc_config")}
+          errors={get(errors, "config.ensembler.pyfunc_config")}
         />
       )}
 

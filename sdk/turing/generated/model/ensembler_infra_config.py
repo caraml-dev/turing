@@ -83,6 +83,7 @@ class EnsemblerInfraConfig(ModelNormal):
             'ensembler_name': (str,),  # noqa: E501
             'service_account_name': (str,),  # noqa: E501
             'resources': (EnsemblingResources,),  # noqa: E501
+            'run_id': (str,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
         }
 
@@ -96,6 +97,7 @@ class EnsemblerInfraConfig(ModelNormal):
         'ensembler_name': 'ensembler_name',  # noqa: E501
         'service_account_name': 'service_account_name',  # noqa: E501
         'resources': 'resources',  # noqa: E501
+        'run_id': 'run_id',  # noqa: E501
         'env': 'env',  # noqa: E501
     }
 
@@ -149,6 +151,7 @@ class EnsemblerInfraConfig(ModelNormal):
             ensembler_name (str): [optional]  # noqa: E501
             service_account_name (str): [optional]  # noqa: E501
             resources (EnsemblingResources): [optional]  # noqa: E501
+            run_id (str): [optional]  # noqa: E501
             env ([EnvVar]): [optional]  # noqa: E501
         """
 

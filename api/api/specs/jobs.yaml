@@ -125,7 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IdObject"
+                $ref: "#/components/schemas/JobId"
         400:
           description: "Invalid ensembling job"
         404:
@@ -133,7 +133,7 @@ paths:
 
 components:
   schemas:
-    IdObject:
+    JobId:
       $ref: "common.yaml#/components/schemas/IdObject"
     EnsemblingJob:
       description: A JSON object that represents an ensembling job for batch experiment use cases
