@@ -29,7 +29,7 @@ func TestCreateRouter(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
 	data := makeRouterPayload(
-		filepath.Join("testdata", "create_router_nop_logger_nop_exp.json.tmpl"),
+		filepath.Join("testdata", "create_router_nop_logger_proprietary_exp.json.tmpl"),
 		globalTestContext)
 
 	withDeployedRouter(t, data,
@@ -39,7 +39,7 @@ func TestCreateRouter(t *testing.T) {
 				http.MethodPost,
 				router.Endpoint,
 				nil,
-				"{}",
+				`{"client": {"id": 4}}`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
