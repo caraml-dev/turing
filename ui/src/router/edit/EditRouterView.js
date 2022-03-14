@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { FormContext, FormContextProvider } from "@gojek/mlp-ui";
 import { addToast, replaceBreadcrumbs, useToggle } from "@gojek/mlp-ui";
@@ -8,12 +8,16 @@ import { VersionComparisonView } from "./components/VersionComparisonView";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { DeploymentSummary } from "../components/form/components/DeploymentSummary";
 import { ConfirmationModal } from "../../components/confirmation_modal/ConfirmationModal";
+import { VersionCreationSummary } from "../components/form/components/VersionCreationSummary";
 
 const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   const { data: updatedRouter } = useContext(FormContext);
   const [showDiffView, toggleDiffView] = useToggle();
 
-  const [submissionResponse, submitForm] = useTuringApi(
+  const [
+    submissionCreateVersionWithDeploymentResponse,
+    submitCreateVersionWithDeploymentForm,
+  ] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}`,
     {
       method: "PUT",
@@ -23,31 +27,92 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     false
   );
 
+  const [
+    submissionCreateVersionWithoutDeploymentResponse,
+    submitCreateVersionWithoutDeploymentForm,
+  ] = useTuringApi(
+    `/projects/${projectId}/routers/${currentRouter.id}/versions`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    },
+    {},
+    false
+  );
+
   useEffect(() => {
-    if (submissionResponse.isLoaded && !submissionResponse.error) {
+    if (
+      submissionCreateVersionWithDeploymentResponse.isLoaded &&
+      !submissionCreateVersionWithDeploymentResponse.error
+    ) {
       addToast({
-        id: "submit-success-create",
-        title: "Router configuration is updated!",
+        id: "submit-success-create-version-with-deployment",
+        title: "Router configuration is created and sent for deployment!",
         color: "success",
         iconType: "check",
       });
 
       props.navigate("../", { state: { refresh: true } });
     }
-  }, [submissionResponse, props]);
+  }, [submissionCreateVersionWithDeploymentResponse, props]);
 
-  const onSubmit = () => submitForm({ body: JSON.stringify(updatedRouter) });
+  useEffect(() => {
+    if (
+      submissionCreateVersionWithoutDeploymentResponse.isLoaded &&
+      !submissionCreateVersionWithoutDeploymentResponse.error
+    ) {
+      addToast({
+        id: "submit-success-create-version-without-deployment",
+        title: "Router configuration is created (but not deployed)!",
+        color: "success",
+        iconType: "check",
+      });
+
+      props.navigate("../", { state: { refresh: true } });
+    }
+  }, [submissionCreateVersionWithoutDeploymentResponse, props]);
+
+  const onSubmitWithDeployment = () =>
+    submitCreateVersionWithDeploymentForm({
+      body: JSON.stringify(updatedRouter),
+    });
+
+  const onSubmitWithoutDeployment = () =>
+    submitCreateVersionWithoutDeploymentForm({
+      body: JSON.stringify(updatedRouter),
+    });
+
+  const [withDeployment, setWithDeployment] = useState(null);
+
+  const onSubmit = () => {
+    if (withDeployment === true) {
+      return onSubmitWithDeployment();
+    } else if (withDeployment === false) {
+      return onSubmitWithoutDeployment();
+    }
+  };
 
   return (
     <ConfirmationModal
       title="Update Turing Router"
-      content={<DeploymentSummary router={updatedRouter} />}
-      isLoading={submissionResponse.isLoading}
+      content={
+        withDeployment ? (
+          <DeploymentSummary router={updatedRouter} />
+        ) : (
+          <VersionCreationSummary router={updatedRouter} />
+        )
+      }
+      isLoading={
+        submissionCreateVersionWithDeploymentResponse.isLoading ||
+        submissionCreateVersionWithoutDeploymentResponse.isLoading
+      }
       onConfirm={onSubmit}
-      confirmButtonText="Deploy"
-      confirmButtonColor="primary">
-      {(onSubmit) =>
-        !showDiffView ? (
+      confirmButtonText={
+        withDeployment ? "Create and Deploy" : "Create without Deploying"
+      }
+      confirmButtonColor={withDeployment ? "primary" : "warning"}>
+      {(onSubmit) => {
+        return !showDiffView ? (
           <UpdateRouterForm
             projectId={projectId}
             onCancel={() => props.navigate("../")}
@@ -60,10 +125,14 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
             updatedRouter={updatedRouter}
             onPrevious={toggleDiffView}
             onSubmit={onSubmit}
-            isSubmitting={submissionResponse.isLoading}
+            isSubmitting={
+              submissionCreateVersionWithDeploymentResponse.isLoading ||
+              submissionCreateVersionWithoutDeploymentResponse.isLoading
+            }
+            setWithDeployment={setWithDeployment}
           />
-        )
-      }
+        );
+      }}
     </ConfirmationModal>
   );
 };

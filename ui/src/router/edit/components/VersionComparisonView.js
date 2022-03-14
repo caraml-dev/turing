@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
-import { StepActions } from "@gojek/mlp-ui";
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 import { ConfigSection } from "../../../components/config_section";
 import { VersionComparisonPanel } from "../../versions/components/version_diff/VersionComparisonPanel";
 import { RouterVersion } from "../../../services/version/RouterVersion";
@@ -12,6 +11,7 @@ export const VersionComparisonView = ({
   onPrevious,
   onSubmit,
   isSubmitting,
+  setWithDeployment,
 }) => {
   const { getEngineProperties } = useContext(ExperimentEngineContext);
   const currentVersionContext = {
@@ -45,13 +45,39 @@ export const VersionComparisonView = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <StepActions
-          currentStep={1}
-          submitLabel="Deploy"
-          onPrevious={onPrevious}
-          onSubmit={onSubmit}
-          isSubmitting={isSubmitting}
-        />
+        <EuiFlexGroup direction="row" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" color="primary" onClick={onPrevious}>
+              Previous
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="warning"
+              fill={true}
+              isLoading={isSubmitting}
+              onClick={() => {
+                setWithDeployment(false);
+                return onSubmit();
+              }}>
+              Create without Deploying
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="primary"
+              fill={true}
+              isLoading={isSubmitting}
+              onClick={() => {
+                setWithDeployment(true);
+                return onSubmit();
+              }}>
+              Create and Deploy
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
