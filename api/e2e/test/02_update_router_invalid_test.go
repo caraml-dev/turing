@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tidwall/gjson"
-
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -135,7 +133,7 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 		context.Background(),
 		http.MethodPost,
 		router.Endpoint,
-		ioutil.NopCloser(bytes.NewReader([]byte(`{}`))),
+		ioutil.NopCloser(bytes.NewReader([]byte(`{"client": {"id": 4}}`))),
 	)
 	require.NoError(t, err)
 	resp, err = globalTestContext.httpClient.Do(req)
@@ -143,7 +141,7 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	require.NoError(t, err)
-	actualResponse := gjson.GetBytes(responseBytes, "json.response").String()
+	actualResponse := string(responseBytes)
 	expectedResponse := `{
 	  "experiment": {},
 	  "route_responses": [

@@ -69,7 +69,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
 
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 					expectedResponse := `{
   "experiment": {},
   "route_responses": [
@@ -105,8 +105,8 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
-					actualRequest := gjson.GetBytes(payload, "json.request").String()
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualRequest := gjson.GetBytes(payload, "request").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 
 					expectedRequest := `{"service_type":{"id":"service-type-b"}}`
 					expectedResponse := `{
@@ -146,8 +146,8 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
 
-					actualRequest := gjson.GetBytes(payload, "json.request").String()
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualRequest := gjson.GetBytes(payload, "request").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 
 					expectedRequest := `{"service_type": {"id": "service-type-c"}}`
 					expectedResponse := `{

@@ -44,6 +44,7 @@ func TestCreateRouter(t *testing.T) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
+					t.Log(string(responsePayload))
 					actualResponse := gjson.GetBytes(responsePayload, "response").String()
 					expectedResponse := `{
 					  "experiment": {},
@@ -68,12 +69,12 @@ func TestCreateRouter(t *testing.T) {
 				map[string][]string{
 					"X-Mirror-Body": {"true"},
 				},
-				"[{},{}]",
+				`[{"client": {"id": 4}}, {"client": {"id": 5}}]`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "#.data.json.response").String()
+					actualResponse := gjson.GetBytes(responsePayload, "#.data.response").String()
 					expectedResponse := `[{
 					  "experiment": {},
 					  "route_responses": [
