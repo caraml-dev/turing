@@ -12,6 +12,7 @@ components:
       format: "int32"
 
     IdObject:
+      type: "object"
       properties:
         id:
           $ref: "#/components/schemas/Id"

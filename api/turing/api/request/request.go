@@ -112,6 +112,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
 	expSvc service.ExperimentsService,
+	ensemblersSvc service.EnsemblersService,
 ) (rv *models.RouterVersion, err error) {
 	if r.Config == nil {
 		return nil, errors.New("router config is empty")
@@ -147,6 +148,29 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 		}
 		if r.Config.Ensembler.Type == models.EnsemblerStandardType && r.Config.Ensembler.StandardConfig == nil {
 			return nil, errors.New("missing ensembler standard config")
+		}
+		if r.Config.Ensembler.Type == models.EnsemblerPyFuncType {
+			if r.Config.Ensembler.PyfuncConfig == nil {
+				return nil, errors.New("missing ensembler pyfunc reference config")
+			}
+
+			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
+			ensembler, err := ensemblersSvc.FindByID(
+				*r.Config.Ensembler.PyfuncConfig.EnsemblerID,
+				service.EnsemblersFindByIDOptions{
+					ProjectID: r.Config.Ensembler.PyfuncConfig.ProjectID,
+				})
+			if err != nil {
+				return nil, fmt.Errorf("failed to find specified ensembler: %w", err)
+			}
+
+			// Check if retrieved ensembler as a pyfunc ensembler
+			switch v := ensembler.(type) {
+			case *models.PyFuncEnsembler:
+				break
+			default:
+				return nil, fmt.Errorf("only pyfunc ensemblers allowed; ensembler type given: %T", v)
+			}
 		}
 		rv.Ensembler = r.Config.Ensembler
 	}

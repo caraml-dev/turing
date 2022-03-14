@@ -9,6 +9,7 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/turing/api/turing/cluster"
+	"github.com/gojek/turing/api/turing/config"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
@@ -501,8 +502,21 @@ func TestNewRouterService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewRouterService(&routerVersion, project, "test-env", "service-account",
-				data.expRawConfig, "fluentd-tag", "jaeger-endpoint", true, "sentry-dsn", 1, 20, 1.5)
+			svc, err := sb.NewRouterService(
+				&routerVersion,
+				project,
+				"test-env",
+				"service-account",
+				data.expRawConfig,
+				&config.RouterDefaults{
+					JaegerCollectorEndpoint: "jaeger-endpoint",
+					FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
+				},
+				true,
+				"sentry-dsn",
+				1,
+				20,
+				1.5)
 
 			if data.err == "" {
 				require.NoError(t, err)
@@ -552,4 +566,94 @@ func TestNewRouterEndpoint(t *testing.T) {
 	got, err := sb.NewRouterEndpoint(&routerVersion, project, "test-env", versionEndpoint)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, got)
+}
+
+func TestBuildRouterEnvsResultLogger(t *testing.T) {
+	type args struct {
+		namespace       string
+		environmentType string
+		routerDefaults  *config.RouterDefaults
+		sentryEnabled   bool
+		sentryDSN       string
+		secretName      string
+		ver             *models.RouterVersion
+	}
+	namespace := "testnamespace"
+	tests := []struct {
+		name string
+		args args
+		want []corev1.EnvVar
+	}{
+		{
+			name: "KafkaLogger",
+			args: args{
+				namespace:       "testnamespace",
+				environmentType: "dev",
+				routerDefaults: &config.RouterDefaults{
+					JaegerCollectorEndpoint: "",
+					FluentdConfig:           &config.FluentdConfig{Tag: ""},
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 123,
+						CompressionType: "gzip",
+					},
+				},
+				sentryEnabled: false,
+				sentryDSN:     "",
+				secretName:    "",
+				ver: &models.RouterVersion{
+					Router:  &models.Router{Name: "test1"},
+					Version: 1,
+					Timeout: "10s",
+					LogConfig: &models.LogConfig{
+						LogLevel:             "DEBUG",
+						CustomMetricsEnabled: false,
+						FiberDebugLogEnabled: false,
+						JaegerEnabled:        false,
+						ResultLoggerType:     "kafka",
+						KafkaConfig: &models.KafkaConfig{
+							Brokers:             "1.1.1.1:1111",
+							Topic:               "kafkatopic",
+							SerializationFormat: "protobuf",
+						},
+					},
+				},
+			},
+			want: []corev1.EnvVar{
+				{Name: "APP_NAME", Value: "test1-1.testnamespace"},
+				{Name: "APP_ENVIRONMENT", Value: "dev"},
+				{Name: "ROUTER_TIMEOUT", Value: "10s"},
+				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
+				{Name: "APP_SENTRY_ENABLED", Value: "false"},
+				{Name: "APP_SENTRY_DSN", Value: ""},
+				{Name: "APP_LOGLEVEL", Value: "DEBUG"},
+				{Name: "APP_CUSTOM_METRICS", Value: "false"},
+				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_RESULT_LOGGER", Value: "kafka"},
+				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
+				{Name: "APP_KAFKA_BROKERS", Value: "1.1.1.1:1111"},
+				{Name: "APP_KAFKA_TOPIC", Value: "kafkatopic"},
+				{Name: "APP_KAFKA_SERIALIZATION_FORMAT", Value: "protobuf"},
+				{Name: "APP_KAFKA_MAX_MESSAGE_BYTES", Value: "123"},
+				{Name: "APP_KAFKA_COMPRESSION_TYPE", Value: "gzip"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sb := &clusterSvcBuilder{
+				MaxCPU:    resource.MustParse("2"),
+				MaxMemory: resource.MustParse("2Gi"),
+			}
+			got, _ := sb.buildRouterEnvs(
+				namespace,
+				tt.args.environmentType,
+				tt.args.routerDefaults,
+				tt.args.sentryEnabled,
+				tt.args.sentryDSN,
+				tt.args.secretName,
+				tt.args.ver)
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }

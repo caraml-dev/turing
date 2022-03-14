@@ -152,10 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  id:
-                    <<: *id
+                $ref: "#/components/schemas/RouterId"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -186,12 +183,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id or deploy request"
         404:
@@ -220,10 +212,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdObject"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -325,12 +314,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id or version"
         404:
@@ -367,12 +351,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  router_id:
-                    <<: *id
-                  version:
-                    <<: *id
+                $ref: "#/components/schemas/RouterIdAndVersion"
         400:
           description: "Invalid project_id, router_id, version_id or deploy request"
         404:
@@ -401,12 +380,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  events:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/Event"
+                $ref: "#/components/schemas/RouterEvents"
         400:
           description: "Invalid project_id or router_id"
         404:
@@ -414,6 +388,31 @@ paths:
 
 components:
   schemas:
+    RouterId:
+      $ref: "./common.yaml#/components/schemas/IdObject"
+
+    RouterIdObject:
+      type: object
+      properties:
+        router_id:
+          $ref: "common.yaml#/components/schemas/Id"
+
+    RouterEvents:
+      type: object
+      properties:
+        events:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Event"
+
+    RouterIdAndVersion:
+      type: object
+      properties:
+        router_id:
+          $ref: "common.yaml#/components/schemas/Id"
+        version:
+          $ref: "common.yaml#/components/schemas/Id"
+
     Router:
       type: "object"
       nullable: true
@@ -713,14 +712,17 @@ components:
       properties:
         id:
           $ref: "common.yaml#/components/schemas/Id"
+          readOnly: true
         type:
           description: "type of ensembler"
           type: "string"
-          enum: [ "standard", "docker" ]
+          enum: [ "standard", "docker", "pyfunc"]
         standard_config:
           $ref: "#/components/schemas/EnsemblerStandardConfig"
         docker_config:
           $ref: "#/components/schemas/EnsemblerDockerConfig"
+        pyfunc_config:
+          $ref: "#/components/schemas/EnsemblerPyfuncConfig"
         created_at:
           type: "string"
           format: "date-time"
@@ -793,6 +795,25 @@ components:
             JSON key. This secret will be mounted as a file inside the container and the environment variable
             GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
           example: "secret-name-for-google-service-account"
+
+    EnsemblerPyfuncConfig:
+      description: "ensembler config when ensembler type is pyfunc"
+      type: "object"
+      nullable: true
+      required:
+        - project_id
+        - ensembler_id
+        - resource_request
+        - timeout
+      properties:
+        project_id:
+          type: "integer"
+        ensembler_id:
+          type: "integer"
+        resource_request:
+          $ref: "#/components/schemas/ResourceRequest"
+        timeout:
+          <<: *timeout
 
     ResourceRequest:
       type: "object"

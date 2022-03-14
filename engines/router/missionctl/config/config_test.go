@@ -110,6 +110,8 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				Brokers:             "",
 				Topic:               "",
 				SerializationFormat: SerializationFormat(""),
+				MaxMessageBytes:     1048588,
+				CompressionType:     "none",
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
@@ -172,6 +174,8 @@ func TestInitConfigEnv(t *testing.T) {
 				Brokers:             "localhost:9000",
 				Topic:               "kafka_topic",
 				SerializationFormat: JSONSerializationFormat,
+				MaxMessageBytes:     1048588,
+				CompressionType:     "none",
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{

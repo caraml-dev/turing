@@ -138,9 +138,18 @@ func NewAppContext(
 		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
 	}
 
+	// Initialise EnsemblerServiceImageBuilder
+	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
+		clusterControllers[cfg.EnsemblerServiceBuilderConfig.DefaultEnvironment],
+		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
+	}
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
-		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
+		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
 		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     service.NewEnsemblersService(db),
 		EnsemblingJobService:  ensemblingJobService,

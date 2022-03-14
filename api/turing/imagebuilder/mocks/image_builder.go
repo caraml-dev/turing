@@ -36,12 +36,13 @@ func (_m *ImageBuilder) BuildImage(request imagebuilder.BuildImageRequest) (stri
 }
 
 // DeleteImageBuildingJob provides a mock function with given fields: projectName, modelName, versionID
-func (_m *ImageBuilder) DeleteImageBuildingJob(projectName string, modelName string, versionID models.ID) error {
-	ret := _m.Called(projectName, modelName, versionID)
+func (_m *ImageBuilder) DeleteImageBuildingJob(projectName string, modelName string, modelID models.ID,
+	versionID string) error {
+	ret := _m.Called(projectName, modelName, modelID, versionID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, models.ID) error); ok {
-		r0 = rf(projectName, modelName, versionID)
+	if rf, ok := ret.Get(0).(func(string, string, models.ID, string) error); ok {
+		r0 = rf(projectName, modelName, modelID, versionID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -50,19 +51,20 @@ func (_m *ImageBuilder) DeleteImageBuildingJob(projectName string, modelName str
 }
 
 // GetImageBuildingJobStatus provides a mock function with given fields: projectName, modelName, versionID
-func (_m *ImageBuilder) GetImageBuildingJobStatus(projectName string, modelName string, versionID models.ID) (imagebuilder.JobStatus, error) {
-	ret := _m.Called(projectName, modelName, versionID)
+func (_m *ImageBuilder) GetImageBuildingJobStatus(projectName string, modelName string, modelID models.ID,
+	versionID string) (imagebuilder.JobStatus, error) {
+	ret := _m.Called(projectName, modelName, modelID, versionID)
 
 	var r0 imagebuilder.JobStatus
-	if rf, ok := ret.Get(0).(func(string, string, models.ID) imagebuilder.JobStatus); ok {
-		r0 = rf(projectName, modelName, versionID)
+	if rf, ok := ret.Get(0).(func(string, string, models.ID, string) imagebuilder.JobStatus); ok {
+		r0 = rf(projectName, modelName, modelID, versionID)
 	} else {
 		r0 = ret.Get(0).(imagebuilder.JobStatus)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, models.ID) error); ok {
-		r1 = rf(projectName, modelName, versionID)
+	if rf, ok := ret.Get(1).(func(string, string, models.ID, string) error); ok {
+		r1 = rf(projectName, modelName, modelID, versionID)
 	} else {
 		r1 = ret.Error(1)
 	}

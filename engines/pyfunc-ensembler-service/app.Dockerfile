@@ -8,7 +8,7 @@ ARG FOLDER_NAME
 RUN gsutil -m cp -r ${MODEL_URL} .
 
 # Install dependencies required by the user-defined ensembler
-RUN /bin/bash -c ". activate ${CONDA_ENV_NAME} && conda env update --name ${CONDA_ENV_NAME} --file /${HOME}/${FOLDER_NAME}/conda.yaml"
+RUN conda env update --name ${CONDA_ENV_NAME} --file ./${FOLDER_NAME}/conda.yaml
 
 # Use conda-pack to create a standalone environment
 # in /venv:
@@ -20,13 +20,13 @@ RUN /venv/bin/conda-unpack
 
 FROM debian:bullseye-slim
 
-COPY --from=builder /ensembler ./ensembler
+ARG FOLDER_NAME
+ENV FOLDER_NAME=$FOLDER_NAME
+
+COPY --from=builder /${FOLDER_NAME} ./${FOLDER_NAME}
 COPY --from=builder /pyfunc_ensembler_runner ./pyfunc_ensembler_runner
-COPY --from=builder /run.sh /run.sh
-COPY --from=builder /venv /venv
+COPY --from=builder /venv ./venv
 
-RUN /bin/bash -c ". /venv/bin/activate & \
-    python -m ${APP_NAME} --mlflow_ensembler_dir /ensembler --dry_run" \
-
-RUN /bin/bash -c ". /venv/bin/activate & \
-    python -m ${APP_NAME} --mlflow_ensembler_dir /ensembler -l INFO"
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT source /venv/bin/activate && \
+           python -m pyfunc_ensembler_runner --mlflow_ensembler_dir /${FOLDER_NAME} -l INFO

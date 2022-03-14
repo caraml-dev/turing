@@ -24,6 +24,7 @@ from turing.generated.model.ensembler_config_kind import EnsemblerConfigKind
 from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
 from turing.generated.model.ensembler_infra_config import EnsemblerInfraConfig
 from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
+from turing.generated.model.ensembler_pyfunc_config import EnsemblerPyfuncConfig
 from turing.generated.model.ensembler_standard_config import EnsemblerStandardConfig
 from turing.generated.model.ensembler_standard_config_experiment_mappings import EnsemblerStandardConfigExperimentMappings
 from turing.generated.model.ensembler_type import EnsemblerType
@@ -51,10 +52,7 @@ from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
-from turing.generated.model.inline_response200 import InlineResponse200
-from turing.generated.model.inline_response2001 import InlineResponse2001
-from turing.generated.model.inline_response2002 import InlineResponse2002
-from turing.generated.model.inline_response202 import InlineResponse202
+from turing.generated.model.job_id import JobId
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel
@@ -72,6 +70,10 @@ from turing.generated.model.router_config_config_log_config import RouterConfigC
 from turing.generated.model.router_details import RouterDetails
 from turing.generated.model.router_details_all_of import RouterDetailsAllOf
 from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
+from turing.generated.model.router_events import RouterEvents
+from turing.generated.model.router_id import RouterId
+from turing.generated.model.router_id_and_version import RouterIdAndVersion
+from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_status import RouterStatus
 from turing.generated.model.router_version import RouterVersion
 from turing.generated.model.router_version_log_config import RouterVersionLogConfig

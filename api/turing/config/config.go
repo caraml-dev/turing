@@ -55,25 +55,26 @@ type EngineConfig map[string]interface{}
 
 // Config is used to parse and store the environment configs
 type Config struct {
-	Port                   int `validate:"required"`
-	LogLevel               string
-	AllowedOrigins         []string
-	AuthConfig             *AuthorizationConfig
-	BatchEnsemblingConfig  BatchEnsemblingConfig   `validate:"required"`
-	DbConfig               *DatabaseConfig         `validate:"required"`
-	DeployConfig           *DeploymentConfig       `validate:"required"`
-	SparkAppConfig         *SparkAppConfig         `validate:"required"`
-	RouterDefaults         *RouterDefaults         `validate:"required"`
-	KubernetesLabelConfigs *KubernetesLabelConfigs `validate:"required"`
-	KnativeServiceDefaults *KnativeServiceDefaults
-	NewRelicConfig         newrelic.Config
-	Sentry                 sentry.Config
-	ClusterConfig          ClusterConfig `validate:"required"`
-	TuringEncryptionKey    string        `validate:"required"`
-	AlertConfig            *AlertConfig
-	MLPConfig              *MLPConfig `validate:"required"`
-	TuringUIConfig         *SinglePageApplicationConfig
-	OpenapiConfig          *OpenapiConfig
+	Port                          int `validate:"required"`
+	LogLevel                      string
+	AllowedOrigins                []string
+	AuthConfig                    *AuthorizationConfig
+	BatchEnsemblingConfig         BatchEnsemblingConfig         `validate:"required"`
+	EnsemblerServiceBuilderConfig EnsemblerServiceBuilderConfig `validate:"required"`
+	DbConfig                      *DatabaseConfig               `validate:"required"`
+	DeployConfig                  *DeploymentConfig             `validate:"required"`
+	SparkAppConfig                *SparkAppConfig               `validate:"required"`
+	RouterDefaults                *RouterDefaults               `validate:"required"`
+	KubernetesLabelConfigs        *KubernetesLabelConfigs       `validate:"required"`
+	KnativeServiceDefaults        *KnativeServiceDefaults
+	NewRelicConfig                newrelic.Config
+	Sentry                        sentry.Config
+	ClusterConfig                 ClusterConfig `validate:"required"`
+	TuringEncryptionKey           string        `validate:"required"`
+	AlertConfig                   *AlertConfig
+	MLPConfig                     *MLPConfig `validate:"required"`
+	TuringUIConfig                *SinglePageApplicationConfig
+	OpenapiConfig                 *OpenapiConfig
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -108,6 +109,12 @@ type BatchEnsemblingConfig struct {
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required_if=Enabled True"`
 	LoggingURLFormat    *string
 	MonitoringURLFormat *string
+}
+
+// EnsemblerServiceConfig captures the config related to the build and running of ensembler services (real-time)
+type EnsemblerServiceBuilderConfig struct {
+	DefaultEnvironment  string               `validate:"required"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
 }
 
 // JobConfig captures the config related to the ensembling batch jobs.
@@ -275,6 +282,8 @@ type RouterDefaults struct {
 	// 	blue-exp-engine:
 	//	  Image: ghcr.io/myproject/blue-exp-engine-plugin:v0.0.1
 	ExperimentEnginePlugins map[string]*ExperimentEnginePluginConfig `validate:"dive"`
+	// Kafka Configuration. If result logging is using Kafka
+	KafkaConfig *KafkaConfig
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -285,6 +294,14 @@ type FluentdConfig struct {
 	Tag string
 	// Flush interval seconds - value determined by load job frequency to BQ
 	FlushIntervalSeconds int
+}
+
+// KafkaConfig captures the defaults used by Turing Router when result logger is set to kafka
+type KafkaConfig struct {
+	// Producer Config - Max message byte to send to broker
+	MaxMessageBytes int
+	// Producer Config - Compression Type of message
+	CompressionType string
 }
 
 // AuthorizationConfig captures the config for auth using mlp authz
@@ -469,6 +486,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")
 	v.SetDefault("RouterDefaults::FluentdConfig::FlushIntervalSeconds", "90")
 	v.SetDefault("RouterDefaults::Experiment", map[string]interface{}{})
+	v.SetDefault("RouterDefaults::KafkaConfig::MaxMessageBytes", "1048588")
+	v.SetDefault("RouterDefaults::KafkaConfig::CompressionType", "none")
 
 	v.SetDefault("Sentry::Enabled", "false")
 	v.SetDefault("Sentry::DSN", "")
