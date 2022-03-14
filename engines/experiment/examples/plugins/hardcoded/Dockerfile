@@ -28,6 +28,7 @@ RUN addgroup -S ${turing_user_group} \
 ENV PLUGIN_NAME ""
 ENV PLUGINS_DIR "/app/plugins"
 
-COPY --chown=${turing_user}:${turing_user_group} --chmod=0744 --from=builder /app/bin/${binary_name} /go/bin/plugin
+COPY --chown=${turing_user}:${turing_user_group} --from=builder /app/bin/${binary_name} /go/bin/plugin
+RUN chmod +x /go/bin/plugin
 
 CMD ["sh", "-c", "cp /go/bin/plugin ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]
