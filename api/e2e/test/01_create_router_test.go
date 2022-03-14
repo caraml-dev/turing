@@ -65,7 +65,9 @@ func TestCreateRouter(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				batchEndpoint,
-				nil,
+				map[string][]string{
+					"X-Mirror-Body": {"true"},
+				},
 				"[{},{}]",
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,

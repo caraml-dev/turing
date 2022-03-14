@@ -60,7 +60,10 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				http.Header{"X-Region": []string{"region-a"}},
+				http.Header{
+					"X-Region":      {"region-a"},
+					"X-Mirror-Body": {"true"},
+				},
 				"{}",
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
@@ -95,7 +98,9 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
+				map[string][]string{
+					"X-Mirror-Body": {"true"},
+				},
 				`{"service_type": {"id": "service-type-b"}}`,
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
@@ -133,7 +138,9 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
+				map[string][]string{
+					"X-Mirror-Body": {"true"},
+				},
 				`{"service_type": {"id": "service-type-c"}}`,
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
