@@ -25,7 +25,6 @@ ARG binary_name="plugin"
 RUN addgroup -S ${turing_user_group} \
     && adduser -S ${turing_user} -G ${turing_user_group} -H
 
-
 ENV PLUGIN_NAME ""
 ENV PLUGINS_DIR "/app/plugins"
 

@@ -102,6 +102,37 @@ jobs:
           path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
+  build-test-experiment-engine-plugin:
+    runs-on: ubuntu-latest
+    outputs:
+      test-experiment-engine-plugin-version: ${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: engines/experiment/examples/plugins/hardcoded
+        env:
+          VERSION: latest
+        run: |
+          set -o pipefail
+          make build-image | tee output.log
+          echo "::set-output name=test-experiment-engine-plugin-version::${{ env.VERSION }}"
+
+      - name: Save Docker image
+        run: |
+          docker image save \
+            --output test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar \
+            test-experiment-engine-plugin:${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar
+          path: test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
   build-ui:
     runs-on: ubuntu-latest
     defaults:
@@ -296,9 +327,11 @@ jobs:
       LOCAL_REGISTRY: registry.localhost:5000
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
+      TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
     needs:
       - build-api
       - build-router
+      - build-test-experiment-engine-plugin
       - build-cluster-init
     strategy:
       fail-fast: false
@@ -332,6 +365,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
+
+      - name: Download Experiment Engine Plugin Docker tar archive
+        uses: actions/download-artifact@v2
+        with:
+          name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
 
       - name: Download Cluster Init Docker tar archive
         uses: actions/download-artifact@v2
@@ -370,6 +408,13 @@ jobs:
             turing-router:${{ env.TURING_ROUTER_VERSION }} \
             ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
           docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
+          
+          # Experiment Engine Plugin
+          docker image load --input test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
+          docker tag \
+            test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
+            ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
       - name: "Install Vault"
         if: ${{ !matrix.useInClusterConfig }}
