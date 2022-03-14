@@ -6,15 +6,18 @@ import { UpdateRouterForm } from "../components/form/UpdateRouterForm";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
 import { VersionComparisonView } from "./components/VersionComparisonView";
 import { useTuringApi } from "../../hooks/useTuringApi";
-import { RouterUpdateSummary } from "../components/form/components/RouterUpdateSummary";
+import { DeploymentSummary } from "../components/form/components/DeploymentSummary";
 import { ConfirmationModal } from "../../components/confirmation_modal/ConfirmationModal";
 import { VersionCreationSummary } from "../components/form/components/VersionCreationSummary";
 
 const EditRouterView = ({ projectId, currentRouter, ...props }) => {
-  const { data: routerConfig } = useContext(FormContext);
+  const { data: updatedRouter } = useContext(FormContext);
   const [showDiffView, toggleDiffView] = useToggle();
 
-  const [updateRouterResponse, submitUpdateRouter] = useTuringApi(
+  const [
+    submissionCreateVersionWithDeploymentResponse,
+    submitCreateVersionWithDeploymentForm,
+  ] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}`,
     {
       method: "PUT",
@@ -24,10 +27,13 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     false
   );
 
-  const [createRouterVersionResponse, submitCreateRouterVersion] = useTuringApi(
+  const [
+    submissionCreateVersionWithoutDeploymentResponse,
+    submitCreateVersionWithoutDeploymentForm,
+  ] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}/versions`,
     {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
     },
     {},
@@ -35,68 +41,76 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   );
 
   useEffect(() => {
-    if (updateRouterResponse.isLoaded && !updateRouterResponse.error) {
+    if (
+      submissionCreateVersionWithDeploymentResponse.isLoaded &&
+      !submissionCreateVersionWithDeploymentResponse.error
+    ) {
       addToast({
-        id: "submit-success-update-router",
-        title: "Router configuration is updated!",
+        id: "submit-success-create-version-with-deployment",
+        title: "Router configuration is created and sent for deployment!",
         color: "success",
         iconType: "check",
       });
 
       props.navigate("../", { state: { refresh: true } });
     }
-  }, [updateRouterResponse, props]);
+  }, [submissionCreateVersionWithDeploymentResponse, props]);
 
   useEffect(() => {
     if (
-      createRouterVersionResponse.isLoaded &&
-      !createRouterVersionResponse.error
+      submissionCreateVersionWithoutDeploymentResponse.isLoaded &&
+      !submissionCreateVersionWithoutDeploymentResponse.error
     ) {
       addToast({
-        id: "submit-success-create-router-version",
-        title: `Router version ${createRouterVersionResponse.data.version} is saved (but not deployed)!`,
+        id: "submit-success-create-version-without-deployment",
+        title: "Router configuration is created (but not deployed)!",
         color: "success",
         iconType: "check",
       });
 
       props.navigate("../", { state: { refresh: true } });
     }
-  }, [createRouterVersionResponse, props]);
+  }, [submissionCreateVersionWithoutDeploymentResponse, props]);
+
+  const onSubmitWithDeployment = () =>
+    submitCreateVersionWithDeploymentForm({
+      body: JSON.stringify(updatedRouter),
+    });
+
+  const onSubmitWithoutDeployment = () =>
+    submitCreateVersionWithoutDeploymentForm({
+      body: JSON.stringify(updatedRouter),
+    });
 
   const [withDeployment, setWithDeployment] = useState(null);
 
   const onSubmit = () => {
     if (withDeployment === true) {
-      return submitUpdateRouter({
-        body: JSON.stringify(routerConfig),
-      });
+      return onSubmitWithDeployment();
     } else if (withDeployment === false) {
-      return submitCreateRouterVersion({
-        body: JSON.stringify(routerConfig.toJSON().config),
-      });
+      return onSubmitWithoutDeployment();
     }
   };
 
   return (
     <ConfirmationModal
-      title={
-        withDeployment
-          ? "Deploy Turing Router Version"
-          : "Save Turing Router Version"
-      }
+      title="Update Turing Router"
       content={
         withDeployment ? (
-          <RouterUpdateSummary router={routerConfig} />
+          <DeploymentSummary router={updatedRouter} />
         ) : (
-          <VersionCreationSummary router={routerConfig} />
+          <VersionCreationSummary router={updatedRouter} />
         )
       }
       isLoading={
-        updateRouterResponse.isLoading || createRouterVersionResponse.isLoading
+        submissionCreateVersionWithDeploymentResponse.isLoading ||
+        submissionCreateVersionWithoutDeploymentResponse.isLoading
       }
       onConfirm={onSubmit}
-      confirmButtonText={withDeployment ? "Deploy" : "Save"}
-      confirmButtonColor={"primary"}>
+      confirmButtonText={
+        withDeployment ? "Create and Deploy" : "Create without Deploying"
+      }
+      confirmButtonColor={withDeployment ? "primary" : "warning"}>
       {(onSubmit) => {
         return !showDiffView ? (
           <UpdateRouterForm
@@ -108,20 +122,14 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         ) : (
           <VersionComparisonView
             currentRouter={currentRouter}
-            updatedRouter={routerConfig}
+            updatedRouter={updatedRouter}
             onPrevious={toggleDiffView}
+            onSubmit={onSubmit}
             isSubmitting={
-              updateRouterResponse.isLoading ||
-              createRouterVersionResponse.isLoading
+              submissionCreateVersionWithDeploymentResponse.isLoading ||
+              submissionCreateVersionWithoutDeploymentResponse.isLoading
             }
-            onDeploy={() => {
-              setWithDeployment(true);
-              return onSubmit();
-            }}
-            onSave={() => {
-              setWithDeployment(false);
-              return onSubmit();
-            }}
+            setWithDeployment={setWithDeployment}
           />
         );
       }}

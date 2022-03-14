@@ -5,13 +5,9 @@ export const VersionCreationSummary = ({ router }) => {
   return (
     <Fragment>
       <p>
-        You're about to <b>save your changes</b> as a new version for the Turing
-        router <b>{router.name}</b>.
-      </p>
-
-      <p>
-        The new version can be deployed at any time from the router history
-        page.
+        You're about to create a new version for the Turing router{" "}
+        <b>{router.name}</b> in the <b>{router.environment_name}</b> environment
+        without deploying it.
       </p>
 
       <EuiSpacer size="s" />
