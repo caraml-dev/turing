@@ -72,23 +72,17 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     }
   }, [submissionCreateVersionWithoutDeploymentResponse, props]);
 
-  const onSubmitWithDeployment = () =>
-    submitCreateVersionWithDeploymentForm({
-      body: JSON.stringify(updatedRouter),
-    });
-
-  const onSubmitWithoutDeployment = () =>
-    submitCreateVersionWithoutDeploymentForm({
-      body: JSON.stringify(updatedRouter),
-    });
-
   const [withDeployment, setWithDeployment] = useState(null);
 
   const onSubmit = () => {
     if (withDeployment === true) {
-      return onSubmitWithDeployment();
+      return submitCreateVersionWithDeploymentForm({
+        body: JSON.stringify(updatedRouter),
+      });
     } else if (withDeployment === false) {
-      return onSubmitWithoutDeployment();
+      return submitCreateVersionWithoutDeploymentForm({
+        body: JSON.stringify(updatedRouter),
+      });
     }
   };
 
