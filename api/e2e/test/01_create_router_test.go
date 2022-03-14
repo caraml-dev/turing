@@ -38,13 +38,13 @@ func TestCreateRouter(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
+				map[string][]string{"X-Mirror-Body": {"true"}},
 				`{"client": {"id": 4}}`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "json.response").String()
+					actualResponse := gjson.GetBytes(responsePayload, "response").String()
 					expectedResponse := `{
 					  "experiment": {},
 					  "route_responses": [

@@ -34,7 +34,7 @@ type testConfig struct {
 	DeploymentEnvironment string `envconfig:"DEPLOYMENT_ENVIRONMENT" default:"dev"`
 	ProjectID             int    `envconfig:"PROJECT_ID" required:"true"`
 	ProjectName           string `envconfig:"PROJECT_NAME" required:"true"`
-	TestEchoImage         string `envconfig:"TEST_ECHO_IMAGE" default:"kennethreitz/httpbin"`
+	TestEchoImage         string `envconfig:"TEST_ECHO_IMAGE" default:"eexit/mirror-http-server:1.1.3"`
 	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
 	// If false, the helper will use the cluster credentials from the configured Vault environment.
