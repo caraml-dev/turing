@@ -27,7 +27,9 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
+    from turing.generated.model.env_var import EnvVar
     from turing.generated.model.resource_request import ResourceRequest
+    globals()['EnvVar'] = EnvVar
     globals()['ResourceRequest'] = ResourceRequest
 
 
@@ -86,6 +88,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
             'ensembler_id': (int,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
+            'env': ([EnvVar],),  # noqa: E501
         }
 
     @cached_property
@@ -98,6 +101,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
         'ensembler_id': 'ensembler_id',  # noqa: E501
         'resource_request': 'resource_request',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
+        'env': 'env',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -152,6 +156,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            env ([EnvVar]): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

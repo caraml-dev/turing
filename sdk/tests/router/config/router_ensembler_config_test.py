@@ -66,8 +66,9 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
+
 @pytest.mark.parametrize(
-    "project_id,ensembler_id,resource_request,timeout,expected", [
+    "project_id,ensembler_id,resource_request,timeout,env,expected", [
         pytest.param(
             77,
             11,
@@ -78,6 +79,11 @@ def test_create_router_ensembler_config(id, type, standard_config, docker_config
                 memory_request='512Mi'
             ),
             "500ms",
+            [
+                EnvVar(
+                    name="env_name",
+                    value="env_val")
+            ],
             "generic_pyfunc_router_ensembler_config"
         )
     ])
@@ -86,6 +92,7 @@ def test_create_pyfunc_router_ensembler_config(
         ensembler_id,
         resource_request,
         timeout,
+        env,
         expected,
         request
 ):
@@ -94,12 +101,13 @@ def test_create_pyfunc_router_ensembler_config(
         ensembler_id=ensembler_id,
         resource_request=resource_request,
         timeout=timeout,
+        env=env
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "project_id,ensembler_id,resource_request,timeout,expected", [
+    "project_id,ensembler_id,resource_request,timeout,env,expected", [
         pytest.param(
             77,
             11,
@@ -110,6 +118,11 @@ def test_create_pyfunc_router_ensembler_config(
                 memory_request='512Mi'
             ),
             "500ks",
+            [
+                EnvVar(
+                    name="env_name",
+                    value="env_val")
+            ],
             ApiValueError
         )
     ])
@@ -118,6 +131,7 @@ def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
         ensembler_id,
         resource_request,
         timeout,
+        env,
         expected
 ):
     with pytest.raises(expected):
@@ -126,6 +140,7 @@ def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
             ensembler_id=ensembler_id,
             resource_request=resource_request,
             timeout=timeout,
+            env=env
         ).to_open_api()
 
 

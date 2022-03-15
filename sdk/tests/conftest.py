@@ -334,12 +334,13 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
 
 
 @pytest.fixture
-def generic_ensembler_pyfunc_config(generic_resource_request):
+def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
     return turing.generated.models.EnsemblerPyfuncConfig(
         project_id=77,
         ensembler_id=11,
         resource_request=generic_resource_request,
-        timeout="500ms"
+        timeout="500ms",
+        env=[generic_env_var]
     )
 
 
