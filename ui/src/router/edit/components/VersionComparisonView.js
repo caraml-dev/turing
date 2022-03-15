@@ -61,7 +61,7 @@ export const VersionComparisonView = ({
                 setWithDeployment(false);
                 return onSubmit();
               }}>
-              Create without Deploying
+              Save
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -74,7 +74,7 @@ export const VersionComparisonView = ({
                 setWithDeployment(true);
                 return onSubmit();
               }}>
-              Create and Deploy
+              Deploy
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

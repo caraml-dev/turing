@@ -101,9 +101,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         submissionCreateVersionWithoutDeploymentResponse.isLoading
       }
       onConfirm={onSubmit}
-      confirmButtonText={
-        withDeployment ? "Create and Deploy" : "Create without Deploying"
-      }
+      confirmButtonText={withDeployment ? "Deploy" : "Save"}
       confirmButtonColor={withDeployment ? "primary" : "warning"}>
       {(onSubmit) => {
         return !showDiffView ? (
