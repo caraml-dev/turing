@@ -1,11 +1,5 @@
 import React, { useContext } from "react";
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from "@elastic/eui";
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 import { ConfigSection } from "../../../components/config_section";
 import { VersionComparisonPanel } from "../../versions/components/version_diff/VersionComparisonPanel";
 import { RouterVersion } from "../../../services/version/RouterVersion";
@@ -53,15 +47,20 @@ export const VersionComparisonView = ({
       <EuiFlexItem>
         <EuiFlexGroup direction="row" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="primary" onClick={onPrevious}>
+            <EuiButton size="s" color="primary" onClick={onPrevious}>
               Previous
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
               color="primary"
               fill={false}
+              style={{
+                backgroundColor: "#c5e0f1",
+                borderColor: "#c5e0f1",
+                color: "#096bbe",
+              }}
               isLoading={isSubmitting}
               onClick={() => {
                 setWithDeployment(false);
