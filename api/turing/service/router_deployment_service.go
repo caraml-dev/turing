@@ -455,7 +455,7 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 		Timeout:         routerVersion.Ensembler.PyfuncConfig.Timeout,
 		Endpoint:        PyFuncEnsemblerServiceEndpoint,
 		Port:            PyFuncEnsemblerServicePort,
-		Env:             models.EnvVars{},
+		Env:             routerVersion.Ensembler.PyfuncConfig.Env,
 		ServiceAccount:  "",
 	}
 

@@ -896,6 +896,10 @@ components:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
           <<: *timeout
+        env:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/EnvVar"
 
     ResourceRequest:
       type: "object"
