@@ -71,6 +71,13 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "test-svc-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapDefault),
+						Labels: map[string]string{
+							"app":          "test-svc",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
@@ -159,6 +166,13 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "test-svc-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapEnsembling),
+						Labels: map[string]string{
+							"app":          "test-svc",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
@@ -255,6 +269,13 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "test-svc-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapStandardEnsemble),
+						Labels: map[string]string{
+							"app":          "test-svc",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
@@ -343,6 +364,13 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "test-svc-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapTrafficSplitting),
+						Labels: map[string]string{
+							"app":          "test-svc",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
@@ -431,6 +459,13 @@ func TestNewRouterService(t *testing.T) {
 						Name:     "router-with-exp-engine-turing-fiber-config-1",
 						FileName: "fiber.yml",
 						Data:     string(cfgmapExpEngine),
+						Labels: map[string]string{
+							"app":          "router-with-exp-engine",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
 					},
 					Envs: []corev1.EnvVar{
 						{Name: "APP_NAME", Value: "router-with-exp-engine-1.test-project"},

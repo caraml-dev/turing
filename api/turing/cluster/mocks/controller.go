@@ -106,13 +106,13 @@ func (_m *Controller) CreateNamespace(name string) error {
 	return r0
 }
 
-// CreateRole provides a mock function with given fields: namespace, roleName, policyRules
-func (_m *Controller) CreateRole(namespace string, roleName string, policyRules []rbacv1.PolicyRule) (*rbacv1.Role, error) {
-	ret := _m.Called(namespace, roleName, policyRules)
+// CreateRole provides a mock function with given fields: namespace, role
+func (_m *Controller) CreateRole(namespace string, role *cluster.Role) (*rbacv1.Role, error) {
+	ret := _m.Called(namespace, role)
 
 	var r0 *rbacv1.Role
-	if rf, ok := ret.Get(0).(func(string, string, []rbacv1.PolicyRule) *rbacv1.Role); ok {
-		r0 = rf(namespace, roleName, policyRules)
+	if rf, ok := ret.Get(0).(func(string, *cluster.Role) *rbacv1.Role); ok {
+		r0 = rf(namespace, role)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*rbacv1.Role)
@@ -120,8 +120,8 @@ func (_m *Controller) CreateRole(namespace string, roleName string, policyRules 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, []rbacv1.PolicyRule) error); ok {
-		r1 = rf(namespace, roleName, policyRules)
+	if rf, ok := ret.Get(1).(func(string, *cluster.Role) error); ok {
+		r1 = rf(namespace, role)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -129,13 +129,13 @@ func (_m *Controller) CreateRole(namespace string, roleName string, policyRules 
 	return r0, r1
 }
 
-// CreateRoleBinding provides a mock function with given fields: namespace, roleBindingName, serviceAccountName, roleName
-func (_m *Controller) CreateRoleBinding(namespace string, roleBindingName string, serviceAccountName string, roleName string) (*rbacv1.RoleBinding, error) {
-	ret := _m.Called(namespace, roleBindingName, serviceAccountName, roleName)
+// CreateRoleBinding provides a mock function with given fields: namespace, roleBinding
+func (_m *Controller) CreateRoleBinding(namespace string, roleBinding *cluster.RoleBinding) (*rbacv1.RoleBinding, error) {
+	ret := _m.Called(namespace, roleBinding)
 
 	var r0 *rbacv1.RoleBinding
-	if rf, ok := ret.Get(0).(func(string, string, string, string) *rbacv1.RoleBinding); ok {
-		r0 = rf(namespace, roleBindingName, serviceAccountName, roleName)
+	if rf, ok := ret.Get(0).(func(string, *cluster.RoleBinding) *rbacv1.RoleBinding); ok {
+		r0 = rf(namespace, roleBinding)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*rbacv1.RoleBinding)
@@ -143,8 +143,8 @@ func (_m *Controller) CreateRoleBinding(namespace string, roleBindingName string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, string) error); ok {
-		r1 = rf(namespace, roleBindingName, serviceAccountName, roleName)
+	if rf, ok := ret.Get(1).(func(string, *cluster.RoleBinding) error); ok {
+		r1 = rf(namespace, roleBinding)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -166,13 +166,13 @@ func (_m *Controller) CreateSecret(ctx context.Context, secret *cluster.Secret) 
 	return r0
 }
 
-// CreateServiceAccount provides a mock function with given fields: namespace, serviceAccountName
-func (_m *Controller) CreateServiceAccount(namespace string, serviceAccountName string) (*corev1.ServiceAccount, error) {
-	ret := _m.Called(namespace, serviceAccountName)
+// CreateServiceAccount provides a mock function with given fields: namespace, serviceAccount
+func (_m *Controller) CreateServiceAccount(namespace string, serviceAccount *cluster.ServiceAccount) (*corev1.ServiceAccount, error) {
+	ret := _m.Called(namespace, serviceAccount)
 
 	var r0 *corev1.ServiceAccount
-	if rf, ok := ret.Get(0).(func(string, string) *corev1.ServiceAccount); ok {
-		r0 = rf(namespace, serviceAccountName)
+	if rf, ok := ret.Get(0).(func(string, *cluster.ServiceAccount) *corev1.ServiceAccount); ok {
+		r0 = rf(namespace, serviceAccount)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*corev1.ServiceAccount)
@@ -180,8 +180,8 @@ func (_m *Controller) CreateServiceAccount(namespace string, serviceAccountName 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(namespace, serviceAccountName)
+	if rf, ok := ret.Get(1).(func(string, *cluster.ServiceAccount) error); ok {
+		r1 = rf(namespace, serviceAccount)
 	} else {
 		r1 = ret.Error(1)
 	}

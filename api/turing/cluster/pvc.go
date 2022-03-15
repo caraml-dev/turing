@@ -12,6 +12,7 @@ type PersistentVolumeClaim struct {
 	Namespace   string            `json:"namespace"`
 	AccessModes []string          `json:"access_modes"`
 	Size        resource.Quantity `json:"size"`
+	Labels      map[string]string `json:"labels"`
 }
 
 func (pvc *PersistentVolumeClaim) BuildPersistentVolumeClaim() *corev1.PersistentVolumeClaim {
@@ -24,6 +25,7 @@ func (pvc *PersistentVolumeClaim) BuildPersistentVolumeClaim() *corev1.Persisten
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pvc.Name,
 			Namespace: pvc.Namespace,
+			Labels:    pvc.Labels,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: accessModes,

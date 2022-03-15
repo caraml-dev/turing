@@ -34,14 +34,13 @@ var (
 func (sb *clusterSvcBuilder) NewPluginsServerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 ) *cluster.KubernetesService {
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  GetComponentName(routerVersion, ComponentTypes.PluginsServer),
 			Namespace:             project.Name,
 			Image:                 nginxImage,
-			Labels:                buildLabels(project, envType, routerVersion.Router),
+			Labels:                buildLabels(project, routerVersion.Router),
 			ProbePort:             80,
 			LivenessHTTPGetPath:   "/",
 			ReadinessHTTPGetPath:  "/",

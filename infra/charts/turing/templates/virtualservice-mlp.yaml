@@ -3,6 +3,8 @@ apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
   name: {{ template "turing.fullname" . }}-gateway
+  labels:
+{{ include "turing.labels" . | indent 4 }}
 spec:
   selector:
     istio: ingressgateway
@@ -19,6 +21,8 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: {{ template "turing.fullname" . }}-virtual-service
+  labels:
+{{ include "turing.labels" . | indent 4 }}
 spec:
   hosts:
     - "*"

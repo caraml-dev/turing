@@ -10,6 +10,7 @@ type Secret struct {
 	Name      string
 	Namespace string
 	Data      map[string]string
+	Labels    map[string]string
 }
 
 // BuildSecret builds a kubernetes secret from the given config.
@@ -22,6 +23,7 @@ func (cfg *Secret) BuildSecret() *corev1.Secret {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfg.Name,
 			Namespace: cfg.Namespace,
+			Labels:    cfg.Labels,
 		},
 		Data: data,
 		Type: corev1.SecretTypeOpaque,

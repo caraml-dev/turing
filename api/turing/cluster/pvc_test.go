@@ -13,17 +13,20 @@ func TestBuildPVC(t *testing.T) {
 	qty, err := resource.ParseQuantity("2Gi")
 	assert.NoError(t, err)
 	testNamespace := "namespace"
+	labels := map[string]string{"key": "value"}
 	pvcCfg := PersistentVolumeClaim{
 		Name:        "cache-volume",
 		Namespace:   testNamespace,
 		AccessModes: []string{"ReadWriteOnce"},
 		Size:        qty,
+		Labels:      labels,
 	}
 	volumeMode := corev1.PersistentVolumeFilesystem
 	expected := corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cache-volume",
 			Namespace: testNamespace,
+			Labels:    labels,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{

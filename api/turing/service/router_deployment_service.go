@@ -153,7 +153,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	// Deploy fluentd if enabled
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion, project,
-			ds.environmentType, secretName, ds.routerDefaults.FluentdConfig)
+			secretName, ds.routerDefaults.FluentdConfig)
 		// Create pvc
 		err = createPVC(ctx, controller, project.Name, fluentdService.PersistentVolumeClaim)
 		if err != nil {
@@ -174,7 +174,7 @@ func (ds *deploymentService) DeployRouterVersion(
 
 	// Deploy experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		pluginsServerService := ds.svcBuilder.NewPluginsServerService(routerVersion, project, ds.environmentType)
+		pluginsServerService := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
 		err = deployK8sService(ctx, controller, pluginsServerService)
 		if err != nil {
 			eventsCh.Write(models.NewErrorEvent(
@@ -263,7 +263,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Delete fluentd if required
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion,
-			project, ds.environmentType, "", ds.routerDefaults.FluentdConfig)
+			project, "", ds.routerDefaults.FluentdConfig)
 		err = deleteK8sService(controller, fluentdService, ds.deploymentTimeout)
 		if err != nil {
 			errs = append(errs, err.Error())
@@ -283,7 +283,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project, ds.environmentType)
+		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
 		err = deleteK8sService(controller, pluginsServerSvc, ds.deploymentTimeout)
 		if err != nil {
 			eventsCh.Write(
