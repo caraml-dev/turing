@@ -121,7 +121,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		return fmt.Errorf("failed creating namespace %s: %v", request.Namespace, err)
 	}
 
-	serviceAccount, err := c.createSparkDriverAuthorization(request.Namespace)
+	serviceAccount, err := c.createSparkDriverAuthorization(request.Namespace, request.Labels)
 	if err != nil {
 		return fmt.Errorf(
 			"failed creating spark driver authorization in namespace %s: %v",
@@ -153,7 +153,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		)
 	}
 
-	err = c.createJobConfigMap(request.EnsemblingJob, request.Namespace)
+	err = c.createJobConfigMap(request.EnsemblingJob, request.Namespace, request.Labels)
 	if err != nil {
 		return fmt.Errorf(
 			"failed creating job specification configmap for job %s in namespace %s: %v",
@@ -203,7 +203,11 @@ func (c *ensemblingController) createSparkApplication(
 	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
 }
 
-func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.EnsemblingJob, namespace string) error {
+func (c *ensemblingController) createJobConfigMap(
+	ensemblingJob *models.EnsemblingJob,
+	namespace string,
+	labels map[string]string,
+) error {
 	jobConfigJSON, err := json.Marshal(ensemblingJob.JobConfig)
 	if err != nil {
 		return err
@@ -218,6 +222,7 @@ func (c *ensemblingController) createJobConfigMap(ensemblingJob *models.Ensembli
 		Name:     ensemblingJob.Name,
 		FileName: batch.JobConfigFileName,
 		Data:     string(jobConfigYAML),
+		Labels:   labels,
 	}
 	err = c.clusterController.ApplyConfigMap(namespace, cm)
 	if err != nil {
@@ -234,6 +239,7 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 		Data: map[string]string{
 			cluster.ServiceAccountFileName: secretName,
 		},
+		Labels: request.Labels,
 	}
 	// I'm not sure why we need to pass in a context here but not other kubernetes cluster functions.
 	// Leaving a context.TODO() until we figure out what to do with this.
@@ -257,20 +263,41 @@ func (c *ensemblingController) cleanup(jobName string, namespace string) {
 	}
 }
 
-func (c *ensemblingController) createSparkDriverAuthorization(namespace string) (*apicorev1.ServiceAccount, error) {
+func (c *ensemblingController) createSparkDriverAuthorization(
+	namespace string,
+	labels map[string]string,
+) (*apicorev1.ServiceAccount, error) {
 	serviceAccountName, roleName, roleBindingName := createAuthorizationResourceNames(namespace)
 
-	sa, err := c.clusterController.CreateServiceAccount(namespace, serviceAccountName)
+	saCfg := &cluster.ServiceAccount{
+		Name:      serviceAccountName,
+		Namespace: namespace,
+		Labels:    labels,
+	}
+	sa, err := c.clusterController.CreateServiceAccount(namespace, saCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	r, err := c.clusterController.CreateRole(namespace, roleName, cluster.DefaultSparkDriverRoleRules)
+	roleCfg := &cluster.Role{
+		Name:        roleName,
+		Namespace:   namespace,
+		Labels:      labels,
+		PolicyRules: cluster.DefaultSparkDriverRoleRules,
+	}
+	r, err := c.clusterController.CreateRole(namespace, roleCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = c.clusterController.CreateRoleBinding(namespace, roleBindingName, sa.Name, r.Name)
+	roleBindingCfg := &cluster.RoleBinding{
+		Name:               roleBindingName,
+		Namespace:          namespace,
+		Labels:             labels,
+		RoleName:           r.Name,
+		ServiceAccountName: sa.Name,
+	}
+	_, err = c.clusterController.CreateRoleBinding(namespace, roleBindingCfg)
 	if err != nil {
 		return nil, err
 	}

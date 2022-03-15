@@ -26,7 +26,6 @@ const (
 func (sb *clusterSvcBuilder) NewFluentdService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	serviceAccountSecretName string,
 	fluentdConfig *config.FluentdConfig,
 ) *cluster.KubernetesService {
@@ -46,11 +45,13 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		{Name: "FLUENTD_BQ_TABLE", Value: tableSplit[2]},
 	}
 
+	pvcName := GetComponentName(routerVersion, ComponentTypes.CacheVolume)
 	persistentVolumeClaim := &cluster.PersistentVolumeClaim{
-		Name:        GetComponentName(routerVersion, ComponentTypes.CacheVolume),
+		Name:        pvcName,
 		Namespace:   project.Name,
 		AccessModes: []string{"ReadWriteOnce"},
 		Size:        resource.MustParse(cacheVolumeSize),
+		Labels:      buildLabels(project, routerVersion.Router),
 	}
 	volumes, volumeMounts := buildFluentdVolumes(serviceAccountSecretName, persistentVolumeClaim.Name)
 
@@ -68,7 +69,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 			LivenessHTTPGetPath:   fluentdHealthCheckPath,
 			ReadinessHTTPGetPath:  fluentdHealthCheckPath,
 			ProbeInitDelaySeconds: 10,
-			Labels:                buildLabels(project, envType, routerVersion.Router),
+			Labels:                buildLabels(project, routerVersion.Router),
 			Envs:                  envs,
 			PersistentVolumeClaim: persistentVolumeClaim,
 			Volumes:               volumes,

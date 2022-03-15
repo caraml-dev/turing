@@ -16,7 +16,6 @@ func TestClusterSvcBuilder_NewPluginsServerService(t *testing.T) {
 	tests := map[string]struct {
 		version  *models.RouterVersion
 		project  *mlp.Project
-		envType  string
 		expected *cluster.KubernetesService
 		panics   bool
 	}{
@@ -32,7 +31,6 @@ func TestClusterSvcBuilder_NewPluginsServerService(t *testing.T) {
 				},
 			},
 			project: &mlp.Project{Name: "integration-test"},
-			envType: "test",
 			expected: &cluster.KubernetesService{
 				BaseService: &cluster.BaseService{
 					Name:                  "router-1-turing-plugins-server-42",
@@ -44,7 +42,6 @@ func TestClusterSvcBuilder_NewPluginsServerService(t *testing.T) {
 					ProbeInitDelaySeconds: 5,
 					Labels: buildLabels(
 						&mlp.Project{Name: "integration-test"},
-						"test",
 						&models.Router{Name: "router-1"}),
 					Volumes: []v1.Volume{
 						pluginsVolume,
@@ -103,9 +100,9 @@ func TestClusterSvcBuilder_NewPluginsServerService(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			if tt.panics {
-				assert.Panics(t, func() { sb.NewPluginsServerService(tt.version, tt.project, tt.envType) })
+				assert.Panics(t, func() { sb.NewPluginsServerService(tt.version, tt.project) })
 			} else {
-				actual := sb.NewPluginsServerService(tt.version, tt.project, tt.envType)
+				actual := sb.NewPluginsServerService(tt.version, tt.project)
 				assert.Equal(t, tt.expected, actual)
 			}
 

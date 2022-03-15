@@ -626,6 +626,7 @@ func TestDeleteJob(t *testing.T) {
 func TestCreateServiceAccount(t *testing.T) {
 	namespace := "test-ns"
 	serviceAccountName := "bicycle"
+	labels := map[string]string{"key": "val"}
 	tests := map[string]struct {
 		reactors  []reactor
 		errNil    bool
@@ -677,7 +678,12 @@ func TestCreateServiceAccount(t *testing.T) {
 				k8sRBACClient:  cs.RbacV1(),
 				k8sCoreClient:  cs.CoreV1(),
 			}
-			svcAcc, err := c.CreateServiceAccount(namespace, serviceAccountName)
+			saCfg := &ServiceAccount{
+				Name:      serviceAccountName,
+				Namespace: namespace,
+				Labels:    labels,
+			}
+			svcAcc, err := c.CreateServiceAccount(namespace, saCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (svcAcc == nil) == tt.svcAccNil)
 		})
@@ -687,12 +693,13 @@ func TestCreateServiceAccount(t *testing.T) {
 func TestCreateRole(t *testing.T) {
 	namespace := "test-ns"
 	roleName := "bicycle"
+	labels := map[string]string{"key": "val"}
 	tests := map[string]struct {
 		reactors []reactor
 		errNil   bool
 		roleNil  bool
 	}{
-		"success | service account exists": {
+		"success | role exists": {
 			reactors: []reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -709,7 +716,7 @@ func TestCreateRole(t *testing.T) {
 			errNil:  true,
 			roleNil: false,
 		},
-		"success | service account created": {
+		"success | role created": {
 			reactors: []reactor{
 				{
 					verb:     reactorVerbs.Create,
@@ -738,7 +745,12 @@ func TestCreateRole(t *testing.T) {
 				k8sRBACClient:  cs.RbacV1(),
 				k8sCoreClient:  cs.CoreV1(),
 			}
-			role, err := c.CreateRole(namespace, roleName, DefaultSparkDriverRoleRules)
+			roleCfg := &Role{
+				Name:      roleName,
+				Namespace: namespace,
+				Labels:    labels,
+			}
+			role, err := c.CreateRole(namespace, roleCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (role == nil) == tt.roleNil)
 		})
@@ -750,6 +762,7 @@ func TestCreateRoleBinding(t *testing.T) {
 	roleName := "bicycle"
 	roleBindingName := "wd-40"
 	serviceAccountName := "bicycle-shop"
+	labels := map[string]string{"key": "val"}
 	tests := map[string]struct {
 		reactors []reactor
 		errNil   bool
@@ -801,7 +814,14 @@ func TestCreateRoleBinding(t *testing.T) {
 				k8sRBACClient:  cs.RbacV1(),
 				k8sCoreClient:  cs.CoreV1(),
 			}
-			role, err := c.CreateRoleBinding(namespace, roleBindingName, serviceAccountName, roleName)
+			roleBindingCfg := &RoleBinding{
+				Name:               roleBindingName,
+				Namespace:          namespace,
+				Labels:             labels,
+				RoleName:           roleName,
+				ServiceAccountName: serviceAccountName,
+			}
+			role, err := c.CreateRoleBinding(namespace, roleBindingCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (role == nil) == tt.roleNil)
 		})
@@ -973,15 +993,18 @@ func TestCreateNamespace(t *testing.T) {
 
 func TestCreateConfigMap(t *testing.T) {
 	namespace := "namespace"
+	labels := map[string]string{"key": "value"}
 	cmap := ConfigMap{
 		Name:     "my-data",
 		FileName: "key",
 		Data:     "value",
+		Labels:   labels,
 	}
 	k8scmap := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cmap.Name,
 			Namespace: namespace,
+			Labels:    labels,
 		},
 		Data: map[string]string{
 			cmap.FileName: cmap.Data,
@@ -1067,6 +1090,9 @@ func TestCreateSecret(t *testing.T) {
 		Name:      "secret",
 		Namespace: testNamespace,
 		Data: map[string]string{
+			"key": "value",
+		},
+		Labels: map[string]string{
 			"key": "value",
 		},
 	}
