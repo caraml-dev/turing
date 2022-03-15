@@ -8,7 +8,7 @@ from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
 from turing.generated.models import (Project, Ensembler, EnsemblingJob, EnsemblerJobStatus, EnsemblersPaginatedResults,
                                      EnsemblingJobPaginatedResults, JobId, RouterId, RouterIdObject, RouterIdAndVersion,
-                                     Router, RouterDetails, RouterConfig, RouterVersion, RouterVersionConfig)
+                                     Router, RouterDetails, RouterConfig, RouterVersion)
 
 
 def require_active_project(f):
@@ -274,11 +274,11 @@ class TuringSession:
         )
 
     @require_active_project
-    def create_router_version(self, router_id: int, router_version_config: RouterVersionConfig) -> RouterVersion:
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_post(
+    def create_router_version(self, router_id: int, router_config: RouterConfig) -> RouterVersion:
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_put(
             project_id=self.active_project.id,
             router_id=router_id,
-            router_version_config=router_version_config
+            router_config=router_config
         )
 
     @require_active_project

@@ -180,6 +180,16 @@ class Router(ApiObject):
         return [RouterVersion(environment_name=self.environment_name, name=self.name, **ver.to_dict())
                 for ver in response]
 
+    def create_version(self, config: RouterConfig) -> RouterVersion:
+        """
+        Creates a new router version WITHOUT deploying it
+
+        :param config: configuration of router
+        :return: the new router version
+        """
+        version = turing.active_session.create_router_version(router_id=self.id, router_config=config.to_open_api())
+        return RouterVersion(environment_name=self.environment_name, name=self.name, **version.to_dict())
+
     def get_version(self, version: int) -> 'RouterVersion':
         """
         Fetch a version of this router given a version number
