@@ -25,6 +25,7 @@ export class PyFuncEnsembler extends Ensembler {
         min_replica: 0,
         max_replica: 2,
       },
+      env: [],
       timeout: "60ms",
     };
   }
