@@ -102,7 +102,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       }
       onConfirm={onSubmit}
       confirmButtonText={withDeployment ? "Deploy" : "Save"}
-      confirmButtonColor={withDeployment ? "primary" : "warning"}>
+      confirmButtonColor={"primary"}>
       {(onSubmit) => {
         return !showDiffView ? (
           <UpdateRouterForm
