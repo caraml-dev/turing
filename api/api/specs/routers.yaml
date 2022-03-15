@@ -279,7 +279,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RouterDetails"
+                $ref: "#/components/schemas/RouterVersion"
         400:
           description: "Invalid project_id, router_id or router configuration"
         500:
