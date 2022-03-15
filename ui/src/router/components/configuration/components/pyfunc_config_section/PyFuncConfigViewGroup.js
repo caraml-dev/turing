@@ -20,10 +20,18 @@ export const PyFuncConfigViewGroup = ({
   ];
 
   if (!!dockerConfig) {
-    items.push({
-      title: "Container",
-      children: <ContainerConfigTable config={dockerConfig} />,
-    });
+    items.splice(
+      items.length,
+      0,
+      {
+        title: "Container",
+        children: <ContainerConfigTable config={dockerConfig} />,
+      },
+      {
+        title: "Environment Variables",
+        children: <EnvVariablesConfigTable variables={dockerConfig.env} />,
+      }
+    );
   } else {
     items.push({
       title: "Environment Variables",
