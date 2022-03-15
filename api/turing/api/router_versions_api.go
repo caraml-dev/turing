@@ -60,11 +60,14 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 	var routerVersion *models.RouterVersion
 	rVersion, err := request.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+
 	if err == nil {
 		// Save router version, re-assign the value of err
 		rVersion.Status = models.RouterVersionStatusUndeployed
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)
-	} else {
+	}
+
+	if err != nil {
 		return InternalServerError("unable to create router version", err.Error())
 	}
 
