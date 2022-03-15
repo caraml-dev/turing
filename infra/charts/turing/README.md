@@ -85,6 +85,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
+| tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
