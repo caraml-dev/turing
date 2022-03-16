@@ -26,10 +26,6 @@ func (e *ExperimentManager) Configure(cfg json.RawMessage) error {
 	return nil
 }
 
-func (e *ExperimentManager) ListClients() ([]manager.Client, error) {
-	return []manager.Client{}, nil
-}
-
 func (e *ExperimentManager) ListExperiments() ([]manager.Experiment, error) {
 	var experiments []manager.Experiment
 	for _, exp := range e.experiments {
@@ -41,16 +37,6 @@ func (e *ExperimentManager) ListExperiments() ([]manager.Experiment, error) {
 
 func (e *ExperimentManager) ListExperimentsForClient(manager.Client) ([]manager.Experiment, error) {
 	return e.ListExperiments()
-}
-
-func (e ExperimentManager) ListVariablesForClient(manager.Client) ([]manager.Variable, error) {
-	return []manager.Variable{}, nil
-}
-
-func (e ExperimentManager) ListVariablesForExperiments(
-	experiments []manager.Experiment,
-) (map[string][]manager.Variable, error) {
-	return map[string][]manager.Variable{}, nil
 }
 
 func (e ExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
