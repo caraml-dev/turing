@@ -150,6 +150,17 @@ func (ds *deploymentService) DeployRouterVersion(
 	}
 	secretName := secret.Name
 
+	// Construct service objects for each of the components and deploy
+	services, err := ds.createServices(
+		routerVersion, project, ds.environmentType, secretName, experimentConfig,
+		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
+		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
+		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
+	)
+	if err != nil {
+		return endpoint, err
+	}
+
 	// Deploy fluentd if enabled
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion, project,
@@ -184,17 +195,6 @@ func (ds *deploymentService) DeployRouterVersion(
 
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingDependencies, "successfully deployed plugins server"))
-	}
-
-	// Construct service objects for each of the components and deploy
-	services, err := ds.createServices(
-		routerVersion, project, ds.environmentType, secretName, experimentConfig,
-		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
-		ds.knativeServiceConfig.TargetConcurrency, ds.knativeServiceConfig.QueueProxyResourcePercentage,
-		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
-	)
-	if err != nil {
-		return endpoint, err
 	}
 
 	err = deployKnServices(ctx, controller, services, eventsCh)
@@ -240,6 +240,14 @@ func (ds *deploymentService) UndeployRouterVersion(
 		return err
 	}
 
+	// Delete secret
+	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
+	err = deleteSecret(controller, secret)
+	if err != nil {
+		return err
+	}
+
 	// Construct service objects for each of the components to be deleted
 	services, err := ds.createServices(
 		routerVersion, project, ds.environmentType, "", nil,
@@ -250,16 +258,8 @@ func (ds *deploymentService) UndeployRouterVersion(
 	if err != nil {
 		return err
 	}
+
 	var errs []string
-
-	// Delete secret
-	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
-	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
-	err = deleteSecret(controller, secret)
-	if err != nil {
-		errs = append(errs, err.Error())
-	}
-
 	// Delete fluentd if required
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion,
