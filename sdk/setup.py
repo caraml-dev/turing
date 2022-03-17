@@ -30,4 +30,6 @@ setuptools.setup(
         'dev': dev_requirements
     },
     python_requires='>=3.7',
+    long_description=pathlib.Path('./docs/README.md').read_text(),
+    long_description_content_type='text/markdown'
 )

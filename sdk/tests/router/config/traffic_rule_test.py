@@ -107,7 +107,7 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
             [
                 HeaderTrafficRuleCondition(
                     field="x-region",
-                    values= ["region-a", "region-b"],
+                    values=["region-a", "region-b"],
                 ),
                 PayloadTrafficRuleCondition(
                     field="service_type.id",
