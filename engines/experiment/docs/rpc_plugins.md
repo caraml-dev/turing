@@ -189,6 +189,44 @@ configuration and the traffic weights configured for each treatment can be found
 
 ### Plugin Configuration
 
+During the initialization, Turing Server/Router configures the plugin with the configuration data. 
+
+More specifically, Turing Server passes the arbitrary JSON configuration, defined in Turing config file during 
+the deployment, to the ExperimentManager's `Configure(cfg json.RawMessage) error` method. The specific implementation
+of the plugin can parse this JSON data into the expected data structure and use it to control ExperimentManager's logic.
+In the [provided example](../examples/plugins/hardcoded/manager.go), passed JSON configuration is parsed as an 
+instance of [ManagerConfig](../examples/plugins/hardcoded/config.go), which consists of the engine metadata and a
+list of experiments that this Experiment Manager should be aware of: 
+
+```go
+func (e *ExperimentManager) Configure(cfg json.RawMessage) error {
+	var config ManagerConfig
+
+	err := json.Unmarshal(cfg, &config)
+	if err != nil {
+		return err
+	}
+
+	e.BaseStandardExperimentManager = manager.NewBaseStandardExperimentManager(config.Engine)
+	e.experiments = make(map[string]Experiment)
+	for _, exp := range config.Experiments {
+		e.experiments[exp.Name] = exp
+	}
+	return nil
+}
+```
+Example configuration of this ExperimentManager can be found in the [`configs/plugin_config_example.yaml`](../examples/plugins/hardcoded/configs/plugin_config_example.yaml).
+Note that it's plugin's responsibility to set the expectations and define the contract for the plugin's configuration data.
+It's also possible that Experiment Engine plugin does not require any external configuration. In this case, `Configure` 
+method can be implemented as:
+```go
+func (e *ExperimentManager) Configure(json.RawMessage) error {
+	return nil
+}
+```
+
+ExperimentRunner 
+
 ### Logging
 
 ## Packaging 
