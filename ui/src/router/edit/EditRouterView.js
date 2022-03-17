@@ -11,13 +11,10 @@ import { ConfirmationModal } from "../../components/confirmation_modal/Confirmat
 import { VersionCreationSummary } from "../components/form/components/VersionCreationSummary";
 
 const EditRouterView = ({ projectId, currentRouter, ...props }) => {
-  const { data: updatedRouter } = useContext(FormContext);
+  const { data: routerConfig } = useContext(FormContext);
   const [showDiffView, toggleDiffView] = useToggle();
 
-  const [
-    submissionCreateVersionWithDeploymentResponse,
-    submitCreateVersionWithDeploymentForm,
-  ] = useTuringApi(
+  const [updateRouterResponse, updateRouterForm] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}`,
     {
       method: "PUT",
@@ -27,10 +24,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     false
   );
 
-  const [
-    submissionCreateVersionWithoutDeploymentResponse,
-    submitCreateVersionWithoutDeploymentForm,
-  ] = useTuringApi(
+  const [createRouterVersionResponse, createRouterVersionForm] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}/versions`,
     {
       method: "PUT",
@@ -41,47 +35,44 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   );
 
   useEffect(() => {
-    if (
-      submissionCreateVersionWithDeploymentResponse.isLoaded &&
-      !submissionCreateVersionWithDeploymentResponse.error
-    ) {
+    if (updateRouterResponse.isLoaded && !updateRouterResponse.error) {
       addToast({
-        id: "submit-success-create-version-with-deployment",
-        title: "Router configuration is created and sent for deployment!",
+        id: "submit-success-update-router",
+        title: "Router configuration is updated!",
         color: "success",
         iconType: "check",
       });
 
       props.navigate("../", { state: { refresh: true } });
     }
-  }, [submissionCreateVersionWithDeploymentResponse, props]);
+  }, [updateRouterResponse, props]);
 
   useEffect(() => {
     if (
-      submissionCreateVersionWithoutDeploymentResponse.isLoaded &&
-      !submissionCreateVersionWithoutDeploymentResponse.error
+      createRouterVersionResponse.isLoaded &&
+      !createRouterVersionResponse.error
     ) {
       addToast({
-        id: "submit-success-create-version-without-deployment",
-        title: "Router configuration is created (but not deployed)!",
+        id: "submit-success-create-router-version",
+        title: "Router configuration is created!",
         color: "success",
         iconType: "check",
       });
 
       props.navigate("../", { state: { refresh: true } });
     }
-  }, [submissionCreateVersionWithoutDeploymentResponse, props]);
+  }, [createRouterVersionResponse, props]);
 
   const [withDeployment, setWithDeployment] = useState(null);
 
   const onSubmit = () => {
     if (withDeployment === true) {
-      return submitCreateVersionWithDeploymentForm({
-        body: JSON.stringify(updatedRouter),
+      return updateRouterForm({
+        body: JSON.stringify(routerConfig),
       });
     } else if (withDeployment === false) {
-      return submitCreateVersionWithoutDeploymentForm({
-        body: JSON.stringify(updatedRouter),
+      return createRouterVersionForm({
+        body: JSON.stringify(routerConfig),
       });
     }
   };
@@ -91,14 +82,13 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       title="Update Turing Router"
       content={
         withDeployment ? (
-          <DeploymentSummary router={updatedRouter} />
+          <DeploymentSummary router={routerConfig} />
         ) : (
-          <VersionCreationSummary router={updatedRouter} />
+          <VersionCreationSummary router={routerConfig} />
         )
       }
       isLoading={
-        submissionCreateVersionWithDeploymentResponse.isLoading ||
-        submissionCreateVersionWithoutDeploymentResponse.isLoading
+        updateRouterResponse.isLoading || createRouterVersionResponse.isLoading
       }
       onConfirm={onSubmit}
       confirmButtonText={withDeployment ? "Deploy" : "Save"}
@@ -114,12 +104,12 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         ) : (
           <VersionComparisonView
             currentRouter={currentRouter}
-            updatedRouter={updatedRouter}
+            updatedRouter={routerConfig}
             onPrevious={toggleDiffView}
             onSubmit={onSubmit}
             isSubmitting={
-              submissionCreateVersionWithDeploymentResponse.isLoading ||
-              submissionCreateVersionWithoutDeploymentResponse.isLoading
+              updateRouterResponse.isLoading ||
+              createRouterVersionResponse.isLoading
             }
             setWithDeployment={setWithDeployment}
           />
