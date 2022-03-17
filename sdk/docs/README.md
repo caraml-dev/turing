@@ -12,7 +12,7 @@ The Turing SDK is entirely written in Python and acts as a wrapper, around the c
 API. These generated classes in turn act as an intermediary between raw JSON objects that are passed in HTTP 
 requests/responses made to/received from the Turing API.
 
-![Turing SDK Classes](./assets/turing-sdk-classes.png)
+![Turing SDK Classes](https://github.com/gojek/turing/blob/main/sdk/docs/assets/turing-sdk-classes.png?raw=true)
 
 If you're someone who has used Turing/the Turing UI and would like more control and power over router 
 management, the Turing SDK fits perfectly for your needs.

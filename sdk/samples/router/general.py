@@ -128,9 +128,9 @@ def main(turing_api: str, project: str):
     # experiments separately prior to specifying their configuration here.
     #
     # Also, notice that `ExperimentConfig` does not contain any fixed schema as it simply carries configuration for
-    # generic experiment engines, which are used as plug-ins for Turing. When building an `ExperimentConfig` from
-    # scratch, you would need to consider the underlying schema for the `config` attribute as well as the appropriate
-    # `type` that corresponds to your selected experiment engine.
+    # experiment engines, which are used as plug-ins for Turing. When building an `ExperimentConfig` from scratch, you
+    # would need to consider the underlying schema for the `config` attribute as well as the appropriate `type` that
+    # corresponds to your selected experiment engine.
     experiment_config = ExperimentConfig(
         type="test-exp",
         config={
@@ -267,7 +267,7 @@ def main(turing_api: str, project: str):
     # Note: A `RouterVersion` represents a single version (and configuration) of a Turing Router. Just as `Router`
     # objects, they should almost never be created manually by using their constructor.
     #
-    # Besides assessing attributes of a `RouterVersion` object directly, which will allow you to access basic
+    # Besides accessing attributes of a `RouterVersion` object directly, which will allow you to access basic
     # attributes, you may also consider retrieving the entire router configuration from a specific `RouterVersion`
     # object as a `RouterConfig` for further manipulation by performing something like:
     #
