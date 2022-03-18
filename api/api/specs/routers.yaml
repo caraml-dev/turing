@@ -13,7 +13,10 @@ info:
 .timeout: &timeout
   type: "string"
   pattern: '^[0-9]+(ms|s|m|h)$'
-  
+
+.deployFlag: &deployFlag
+  type: boolean
+
 paths:
   "/projects/{project_id}/routers":
     get:
@@ -111,6 +114,12 @@ paths:
           schema:
             <<: *id
           required: true
+        - in: "query"
+          name: "deploy"
+          description: "boolean indicating whether to deploy the new version once updated"
+          schema:
+            <<: *deployFlag
+          required: true
       requestBody:
         description: "router configuration to save"
         required: true
@@ -124,7 +133,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RouterDetails"
+                $ref: "#/components/schemas/RouterVersion"
         400:
           description: "Invalid project_id, router_id or router configuration"
         500:

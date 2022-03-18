@@ -133,10 +133,15 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	var errResp *Response
 	var project *mlp.Project
 	var router *models.Router
+	var toDeploy bool
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+	if toDeploy, errResp = c.getDeployFlagFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
 
@@ -149,7 +154,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	}
 
 	// Check if any deployment is in progress, if yes, disallow the update
-	if router.Status == models.RouterStatusPending {
+	if toDeploy && router.Status == models.RouterStatusPending {
 		return BadRequest("invalid update request",
 			"another version is currently pending deployment")
 	}
@@ -164,23 +169,34 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
 		// Save router version, re-assign the value of err
+		if !toDeploy {
+			rVersion.Status = models.RouterVersionStatusUndeployed
+		}
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)
 	}
 
 	if err != nil {
-		return InternalServerError("unable to update router", err.Error())
+		if toDeploy == true {
+			return InternalServerError("unable to update router", err.Error())
+		} else {
+			return InternalServerError("unable to save router version", err.Error())
+		}
 	}
 
 	// Deploy the new version
-	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
-		if err != nil {
-			log.Errorf("Error deploying router %s:%s:%d: %v",
-				project.Name, router.Name, routerVersion.Version, err)
-		}
-	}()
+	if toDeploy {
+		go func() {
+			err := c.deployOrRollbackRouter(project, router, routerVersion)
+			if err != nil {
+				log.Errorf("Error deploying router %s:%s:%d: %v",
+					project.Name, router.Name, routerVersion.Version, err)
+			}
+		}()
 
-	return Ok(router)
+		return Ok(rVersion)
+	} else {
+		return Ok(rVersion)
+	}
 }
 
 // DeleteRouter deletes a router and all its associated versions.

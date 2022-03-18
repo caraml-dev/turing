@@ -85,3 +85,11 @@ func (c BaseController) getRouterVersionFromRequestVars(
 	}
 	return routerVersion, nil
 }
+
+func (c BaseController) getDeployFlagFromRequestVars(vars RequestVars) (deployFlag bool, error *Response) {
+	deployFlag, err := getBoolFromVars(vars, "deploy")
+	if err != nil {
+		return false, BadRequest("invalid deploy flag value", err.Error())
+	}
+	return deployFlag, nil
+}
