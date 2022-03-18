@@ -176,11 +176,10 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	}
 
 	if err != nil {
-		if toDeploy == true {
+		if toDeploy {
 			return InternalServerError("unable to update router", err.Error())
-		} else {
-			return InternalServerError("unable to save router version", err.Error())
 		}
+		return InternalServerError("unable to save router version", err.Error())
 	}
 
 	// Deploy the new version
@@ -192,11 +191,9 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 					project.Name, router.Name, routerVersion.Version, err)
 			}
 		}()
-
-		return Ok(rVersion)
-	} else {
 		return Ok(rVersion)
 	}
+	return Ok(rVersion)
 }
 
 // DeleteRouter deletes a router and all its associated versions.
