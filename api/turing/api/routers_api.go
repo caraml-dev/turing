@@ -153,7 +153,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 			"Router name and environment cannot be changed after creation")
 	}
 
-	// Check if any deployment is in progress, if yes, disallow the update
+	// If the new version needs to be deployed, check if any deployment is in progress, if yes, disallow the update
 	if toDeploy && router.Status == models.RouterStatusPending {
 		return BadRequest("invalid update request",
 			"another version is currently pending deployment")
