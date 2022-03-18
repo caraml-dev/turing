@@ -168,7 +168,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	rVersion, err := request.Config.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
-		// Save router version, re-assign the value of err
+		// Save router version as undeployed if there is no need to deploy it
 		if !toDeploy {
 			rVersion.Status = models.RouterVersionStatusUndeployed
 		}
