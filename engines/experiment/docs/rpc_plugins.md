@@ -125,7 +125,7 @@ type Configurable interface {
 }
 ```
 More details about the plugin configuration and the role of `Configurable` method in it can be found in the 
-[Plugin Configuration](./rpc_plugins.md#plugin-configuration) section.
+[Plugin Configuration](./rpc_plugins.md#experiment-manager-configuration) section.
 
 Additionally, the Standard experiment manager should implement the StandardExperimentManager interface of:
 ```go
@@ -181,7 +181,7 @@ type Configurable interface {
 }
 ```
 More details about the plugin configuration and the role of `Configurable` method in it can be found in the
-[Plugin Configuration](./rpc_plugins.md#plugin-configuration) section.
+[Plugin Configuration](./rpc_plugins.md#experiment-runner-configuration) section.
 
 A simple `ExperimentRunner` implementation that assigns a treatment to the request based on the hardcoded experiment 
 configuration and the traffic weights configured for each treatment can be found in the 
@@ -190,6 +190,8 @@ configuration and the traffic weights configured for each treatment can be found
 ### Plugin Configuration
 
 During the initialization, Turing Server/Router configures the plugin with the configuration data. 
+
+#### Experiment Manager Configuration 
 
 More specifically, Turing Server passes the arbitrary JSON configuration, defined in Turing config file during 
 the deployment, to the ExperimentManager's `Configure(cfg json.RawMessage) error` method. The specific implementation
@@ -225,9 +227,98 @@ func (e *ExperimentManager) Configure(json.RawMessage) error {
 }
 ```
 
-ExperimentRunner 
+#### Experiment Runner Configuration
+
+Similarly to `ExperimentManager`, `ExperimentRunner` is also initialized with the configuration data passed 
+into it by the Turing Router. The exact format of the `ExperimentRunner` configuration is defined by the specific 
+implementation of the `ExperimentManager.GetExperimentRunnerConfig` method. In other words, the JSON data returned
+by the `GetExperimentRunnerConfig` method of the `ExperimentManager` is passed into the `Configure` method of the 
+`ExperimentRunner`. For example, if the ExperimentManager's `GetExperimentRunnerConfig` returns `{"foo": "bar"}`:
+```go
+type FooBarExperimentManager struct {}
+    
+func (*FooBarExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {
+	return json.RawMessage(`{"foo": "bar"}`), nil
+}
+```
+then the same JSON data will be passed into the ExperimentRunner's `Configure` method as an argument during the plugin
+initialization:
+```go
+type FooBarExperimentRunner struct {}
+
+func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
+	fmt.Println(string(cfg)) // ---> {"foo": "bar"}
+	return nil
+}
+```
+
+ExperimentRunner's configuration is stored in Turing database together with the rest of the Router configuration. I.e:
+
+**Router Configuration Stage:**
+  1. Turing Server calls `ExperimentEngine plugin`::`ExperimentManager`::`GetExperimentRunnerConfig` to retrieve  
+     ExperimentRunner's configuration
+  2. Turing Server saves this data into the database as part of the Router configuration 
+     (`router_versions.experiment_engine`) 
+
+**Router (Re-)Deployment Stage:**
+  1. Turing Server retrieves Router's configuration from the Database
+  2. Turing Server creates required resources in the k8s cluster (deployments, services, config maps and secrets)
+  3. Turing Router is being deployed and during the initialization, it establishes the connection with the 
+     ExperimentEngine plugin and passes the configuration into `ExperimentRunner`'s `Configure` method.
 
 ### Logging
+In order for Turing Server/Router to include log messages from the Experiment Engine plugin, you can use 
+`github.com/gojek/turing/engines/experiment/log` package:
+```go
+import (
+	"github.com/gojek/turing/engines/experiment/log"
+    _ "github.com/gojek/turing/engines/experiment/log/hclog"
+)
+
+type FooBarExperimentRunner struct {}
+
+func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
+	log.Infof("Configuration: %s", string(cfg))
+	return nil
+}
+```
+[`hashicorp/go-plugin`](https://github.com/hashicorp/go-plugin) uses [`hclog`](https://github.com/hashicorp/go-hclog) 
+library for logging, and it expects that the plugin's log stream will be written into the standard output as `hlog` 
+formatted entries. On other hand, Turing is relying on [`zap`](https://github.com/uber-go/zap) for logging, hence 
+`turing/engines/experiment` module provides a bridge between `zap` and `hlog` libraries. By default, `zap` logger is
+used for logging, so in order to enable `hlog` logger, it's required to import corresponding package for its 
+side effect:
+```go
+import (
+	_ "github.com/gojek/turing/engines/experiment/log/hclog"
+)
+```
+Such import statement will configure `github.com/gojek/turing/engines/experiment/log` to use `hlog` logger with the 
+default configuration. Alternatively, it's possible to configure `hlog` logger explicitly:
+
+```go
+package main
+
+import (
+     "github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded"
+     "github.com/gojek/turing/engines/experiment/log"
+     "github.com/gojek/turing/engines/experiment/plugin/rpc"
+     "github.com/hashicorp/go-hclog"
+)
+
+func main() {
+     log.SetGlobalLogger(hclog.New(&hclog.LoggerOptions{
+          Level:      hclog.Info,
+          Name:       "example-plugin",
+          JSONFormat: true,
+     }))
+
+     rpc.Serve(&rpc.ClientServices{
+          Manager: &hardcoded.ExperimentManager{},
+          Runner:  &hardcoded.ExperimentRunner{},
+     })
+}
+```
 
 ## Packaging 
 
