@@ -22,7 +22,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project to retrieve routers from"
+          description: "id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -45,7 +45,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project to save router"
+          description: "id of the project to save router"
           schema:
             <<: *id
           required: true
@@ -74,7 +74,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project to retrieve routers from"
+          description: "id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -101,7 +101,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project of the router"
+          description: "id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -136,7 +136,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project of the router"
+          description: "id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -227,7 +227,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project to retrieve routers from"
+          description: "id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -256,7 +256,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project of the router"
+          description: "id of the project of the router"
           schema:
             <<: *id
           required: true
@@ -292,7 +292,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project to retrieve routers from"
+          description: "id of the project to retrieve routers from"
           schema:
             <<: *id
           required: true
@@ -326,7 +326,7 @@ paths:
       parameters:
         - in: "path"
           name: "project_id"
-          description: "project id of the project of the router"
+          description: "id of the project of the router"
           schema:
             <<: *id
           required: true

@@ -476,7 +476,7 @@ paths:
   /projects/{project_id}/routers:
     get:
       parameters:
-      - description: project id of the project to retrieve routers from
+      - description: id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -501,7 +501,7 @@ paths:
       - Router
     post:
       parameters:
-      - description: project id of the project to save router
+      - description: id of the project to save router
         in: path
         name: project_id
         required: true
@@ -532,7 +532,7 @@ paths:
   /projects/{project_id}/routers/{router_id}:
     delete:
       parameters:
-      - description: project id of the project of the router
+      - description: id of the project of the router
         in: path
         name: project_id
         required: true
@@ -564,7 +564,7 @@ paths:
       - Router
     get:
       parameters:
-      - description: project id of the project to retrieve routers from
+      - description: id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -594,7 +594,7 @@ paths:
       - Router
     put:
       parameters:
-      - description: project id of the project of the router
+      - description: id of the project of the router
         in: path
         name: project_id
         required: true
@@ -696,7 +696,7 @@ paths:
   /projects/{project_id}/routers/{router_id}/versions:
     get:
       parameters:
-      - description: project id of the project to retrieve routers from
+      - description: id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
@@ -728,7 +728,7 @@ paths:
       - Router
     post:
       parameters:
-      - description: project id of the project of the router
+      - description: id of the project of the router
         in: path
         name: project_id
         required: true
@@ -766,7 +766,7 @@ paths:
   /projects/{project_id}/routers/{router_id}/versions/{version}:
     delete:
       parameters:
-      - description: project id of the project of the router
+      - description: id of the project of the router
         in: path
         name: project_id
         required: true
@@ -805,7 +805,7 @@ paths:
       - Router
     get:
       parameters:
-      - description: project id of the project to retrieve routers from
+      - description: id of the project to retrieve routers from
         in: path
         name: project_id
         required: true
