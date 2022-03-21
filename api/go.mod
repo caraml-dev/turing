@@ -1,6 +1,6 @@
 module github.com/gojek/turing/api
 
-go 1.14
+go 1.16
 
 require (
 	bou.ke/monkey v1.0.2
@@ -33,7 +33,7 @@ require (
 	github.com/tidwall/gjson v1.6.5
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.19.1
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	gotest.tools v2.2.0+incompatible
