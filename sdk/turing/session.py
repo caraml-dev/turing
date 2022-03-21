@@ -275,7 +275,7 @@ class TuringSession:
 
     @require_active_project
     def create_router_version(self, router_id: int, router_config: RouterConfig) -> RouterVersion:
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_put(
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_post(
             project_id=self.active_project.id,
             router_id=router_id,
             router_config=router_config

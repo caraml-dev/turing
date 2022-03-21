@@ -27,7 +27,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   const [createRouterVersionResponse, createRouterVersionForm] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}/versions`,
     {
-      method: "PUT",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
     },
     {},
@@ -54,7 +54,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     ) {
       addToast({
         id: "submit-success-create-router-version",
-        title: "Router configuration is created!",
+        title: `Router version ${createRouterVersionResponse.data.version} is saved (but not deployed)!`,
         color: "success",
         iconType: "check",
       });
@@ -79,7 +79,11 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
 
   return (
     <ConfirmationModal
-      title="Update Turing Router"
+      title={
+        withDeployment
+          ? "Deploy Turing Router Version"
+          : "Save Turing Router Version"
+      }
       content={
         withDeployment ? (
           <UpdateSummary router={routerConfig} />
