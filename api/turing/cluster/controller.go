@@ -24,7 +24,7 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
 
-	networkingv1alpha3 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1alpha3"
+	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
 
 	rest "k8s.io/client-go/rest"
 
@@ -98,7 +98,7 @@ type controller struct {
 	k8sBatchClient   batchv1.BatchV1Interface
 	k8sRBACClient    rbacv1.RbacV1Interface
 	k8sSparkOperator sparkoperatorv1beta2.SparkoperatorV1beta2Interface
-	istioClient      networkingv1alpha3.NetworkingV1alpha3Interface
+	istioClient      networkingv1beta1.NetworkingV1beta1Interface
 }
 
 // newController initializes a new cluster controller with the given cluster config
@@ -134,10 +134,11 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 		return nil, err
 	}
 
-	istioClientSet, err := networkingv1alpha3.NewForConfig(cfg)
+	istioClientSet, err := networkingv1beta1.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
+
 	sparkClient, err := sparkclient.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
@@ -428,6 +429,7 @@ func (c *controller) DeleteIstioVirtualService(
 	namespace string,
 	timeout time.Duration,
 ) error {
+	// It is safe to upgrade this to v1beta1 as it can delete v1alpha3 versions of VirtualService as well.
 	vservices := c.istioClient.VirtualServices(namespace)
 	_, err := vservices.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {

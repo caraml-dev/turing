@@ -1496,7 +1496,7 @@ func TestDeletePVC(t *testing.T) {
 func TestApplyIstioVirtualService(t *testing.T) {
 	virtualServiceResource := schema.GroupVersionResource{
 		Group:    "networking.istio.io",
-		Version:  "v1alpha3",
+		Version:  "v1beta1",
 		Resource: "virtualservices",
 	}
 	testNamespace := "namespace"
@@ -1589,7 +1589,7 @@ func TestApplyIstioVirtualService(t *testing.T) {
 func TestDeleteIstioVirtualService(t *testing.T) {
 	virtualServiceResource := schema.GroupVersionResource{
 		Group:    "networking.istio.io",
-		Version:  "v1alpha3",
+		Version:  "v1beta1",
 		Resource: "virtualservices",
 	}
 	testNamespace := "namespace"
@@ -1740,7 +1740,7 @@ func createTestIstioController(cs *istioclientset.Clientset, reactors []reactor)
 		cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
 	}
 	// Create clientset
-	client := cs.NetworkingV1alpha3()
+	client := cs.NetworkingV1beta1()
 	// Return test controller with a fake knative serving client
 	return &controller{istioClient: client}
 }
