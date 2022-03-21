@@ -2,6 +2,7 @@ package log
 
 import (
 	"errors"
+
 	"github.com/hashicorp/go-hclog"
 	"go.uber.org/zap"
 )
@@ -35,16 +36,16 @@ type Logger interface {
 }
 
 func SetGlobalLogger(l interface{}) {
-	switch l.(type) {
+	switch l := l.(type) {
 	case Logger:
-		global = l.(Logger)
+		global = l
 	case hclog.Logger:
 		global = &hcLogger{
-			Logger: l.(hclog.Logger),
+			Logger: l,
 		}
 	case *zap.SugaredLogger:
 		global = &zapLogger{
-			SugaredLogger: l.(*zap.SugaredLogger),
+			SugaredLogger: l,
 		}
 	default:
 		panic(errors.New("unsupported logger type"))
