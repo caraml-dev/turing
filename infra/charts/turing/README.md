@@ -1,7 +1,7 @@
 # turing
 
 ---
-![Version: 0.2.4](https://img.shields.io/badge/Version-0.2.4-informational?style=flat-square)
+![Version: 0.2.5](https://img.shields.io/badge/Version-0.2.5-informational?style=flat-square)
 ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
 Turing: ML Experimentation System
@@ -88,6 +88,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
+| turing.experimentEngines | object | `{}` | Turing Experiment Engines configuration |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
 | turing.extraEnvs | list | `[]` | List of extra environment variables to add to Turing API server container |
@@ -103,7 +104,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.ingress.useV1Beta1 | bool | `false` | Whether to use networking.k8s.io/v1 (k8s version >= 1.19) or networking.k8s.io/v1beta1 (1.16 >= k8s version >= 1.22) |
 | turing.labels | object | `{}` |  |
 | turing.livenessProbe.path | string | `"/v1/internal/live"` | HTTP path for liveness check |
-| turing.openApiComponentOverrides | object | `{}` | Override OpenAPI spec as long as it follows the OAS3 specifications. A common use for this is to set the enums of the ExperimentEngineType. See api/api/override-sample.yaml for an example. |
+| turing.openApiSpecOverrides | object | `{}` | Override OpenAPI spec as long as it follows the OAS3 specifications. A common use for this is to set the enums of the ExperimentEngineType. See api/api/override-sample.yaml for an example. |
 | turing.readinessProbe.path | string | `"/v1/internal/ready"` | HTTP path for readiness check |
 | turing.resources | object | `{}` | Resources requests and limits for Turing API. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | turing.service.externalPort | int | `8080` | Turing API Kubernetes service port number |
