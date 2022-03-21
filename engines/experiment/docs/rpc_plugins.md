@@ -294,7 +294,8 @@ import (
 )
 ```
 Such import statement will configure `github.com/gojek/turing/engines/experiment/log` to use `hlog` logger with the 
-default configuration. Alternatively, it's possible to configure `hlog` logger explicitly:
+default configuration. Alternatively, it's possible to configure `hlog` logger explicitly by calling `SetGlobalLogger`
+function:
 
 ```go
 package main
@@ -320,7 +321,51 @@ func main() {
 }
 ```
 
-## Packaging 
+## Packaging
+`hashicorp/go-plugin` requires 100% reliable network for the communication between the host application and the 
+plugin server, which is only possible with the local network. This means, that the location of the plugin's binary 
+should be accessible from the host application and that both host app binary and plugin binary should be built for 
+the same OS/architecture. For example, if the Turing Server/Router is built for macOS (Intel) (`darwin/amd64`) then 
+the Experiment Engine plugin should be built for `darwin/amd64` too.
+
+Turing is generally expected to be deployed as a container application and existing Turing releases are using 
+`alpine` Linux distribution as a base image for running Turing Server/Router. So, in order to publish the Experiment
+Engine plugin, which would be compatible with the pre-built Turing releases, the plugin's binary must be compiled for 
+`linux/amd64` distribution too:
+```shell
+$ GOOS=linux GOARCH=amd64 \
+    go build -o ./bin/example-plugin ./cmd/main.go
+```
+
+Then, since Turing is running inside a container, the plugin binary must be transferred into the same container 
+before Turing's process is started. For production deployments, this is achieved with [`initContainers`](
+https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) and a shared `emptyDir` volume: 
+ * The Experiment Engine plugin is packaged as OCI image and deployed with Turing as `initContainer`   
+ * When deployed, the Experiment Engine image copies the plugin's binary into a shared volume accessible by the Turing app
+ * Turing Server/Router process starts and launches the plugin as its child process
+
+hence, it's expected that the Experiment Engine plugin is distributed as an OCI image (versioned and published into
+the image registry) with its entrypoint/command being defined as:
+```docker
+CMD ["sh", "-c", "cp <path_to_plugin_binary> ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]
+```
+Note: Environment variables `PLUGINS_DIR` and `PLUGIN_NAME` combined define the path to where the plugin's binary 
+should be copied. They are passed into the plugin's image at the deployment time.
+
+The end-to-end example of a multistep Dockerfile, that builds the plugin's binary and then packages it according 
+to the Turing contract can be found at [`Dockerfile`](../examples/plugins/hardcoded/Dockerfile).
+
+Alternatively, you can use provided [`plugin.Dockerfile`](../plugin.Dockerfile) to package the plugin's binary:
+```shell
+# Build 
+$ GOOS=linux GOARCH=amd64 go build -o ./bin/example-plugin ./cmd/main.go
+
+# Package
+$ docker build . \
+  --build-arg=PLUGIN_BINARY=bin/example-plugin \
+  --tag example-engine-plugin:latest \
+  --file ../../../plugin.Dockerfile
+```
 
 ## Deployment 
 
