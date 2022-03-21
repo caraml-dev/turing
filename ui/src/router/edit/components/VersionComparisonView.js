@@ -15,9 +15,9 @@ export const VersionComparisonView = ({
   currentRouter,
   updatedRouter,
   onPrevious,
-  onSubmit,
   isSubmitting,
-  setWithDeployment,
+  onDeploy,
+  onSave,
 }) => {
   const { getEngineProperties } = useContext(ExperimentEngineContext);
   const currentVersionContext = {
@@ -63,10 +63,7 @@ export const VersionComparisonView = ({
               color="primary"
               fill={false}
               isLoading={isSubmitting}
-              onClick={() => {
-                setWithDeployment(false);
-                return onSubmit();
-              }}>
+              onClick={onSave}>
               Save
             </EuiButton>
           </EuiFlexItem>
@@ -76,10 +73,7 @@ export const VersionComparisonView = ({
               color="primary"
               fill={true}
               isLoading={isSubmitting}
-              onClick={() => {
-                setWithDeployment(true);
-                return onSubmit();
-              }}>
+              onClick={onDeploy}>
               Deploy
             </EuiButton>
           </EuiFlexItem>
