@@ -7,7 +7,6 @@ https://github.com/hashicorp/go-plugin) library.
 
 ## Implement a plugin
 
----
 [Experiment Engine](./developer_guide.md#adding-a-new-experiment-engine) plugin serves the role of an adapter 
 between the Experiment Engine backend and Turing Server/Turing Router. It's also possible to support an 
 Experiment Engine, that doesn't have a backend at all. In this case, the plugin must implement the logic for 
