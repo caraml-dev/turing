@@ -1,7 +1,7 @@
  # RPC Experiment Engine Plugins
 
-It's possible to integrate external experiment engines with Turing by implementing experiment engine plugin 
-and deploying it together with Turing app. Turing supports RPC experiment engine plugins via [Hashicorp go-plugin](
+It's possible to integrate external experiment engines with Turing by implementing an experiment engine plugin 
+and deploying it together with the Turing app. Turing supports RPC experiment engine plugins via [Hashicorp go-plugin](
 https://github.com/hashicorp/go-plugin) library.
 
 
@@ -39,7 +39,7 @@ experiment treatment to each incoming request to the router.
 This repository contains a simple serverless Experiment Engine plugin, which can be used as a reference for the plugin
 implementation. 
 
-First clone the Turing repo and change the workdir to the reference plugin root directory: 
+First, clone the Turing repo and change the workdir to the reference plugin root directory: 
 ```shell
 $ git clone https://github.com/gojek/turing.git
 $ cd turing/engines/experiment/examples/plugins/hardcoded
@@ -79,7 +79,7 @@ require github.com/gojek/turing/engines/experiment v1.0.0
 replace github.com/gojek/turing/engines/experiment => ../../../
 ```
 NOTE: Since this example plugin module and the `engines/experiment` library belong to the same repository, the plugin
-resolves `engines/experiment` package locally and that's the reason why the `replace ...` line in added to the 
+resolves `engines/experiment` package locally and that's the reason why the `replace ...` line is added to the 
 bottom of `go.mod`.
 
 A plugin needs to serve the implementation of [Experiment Manager](./developer_guide.md#experiment-manager) (either 
@@ -218,7 +218,7 @@ func (e *ExperimentManager) Configure(cfg json.RawMessage) error {
 }
 ```
 Example configuration of this ExperimentManager can be found in the [`configs/plugin_config_example.yaml`](../examples/plugins/hardcoded/configs/plugin_config_example.yaml).
-Note that it's plugin's responsibility to set the expectations and define the contract for the plugin's configuration data.
+Note that it's the plugin's responsibility to set the expectations and define the contract for the plugin's configuration data.
 It's also possible that Experiment Engine plugin does not require any external configuration. In this case, `Configure` 
 method can be implemented as:
 ```go
@@ -229,7 +229,7 @@ func (e *ExperimentManager) Configure(json.RawMessage) error {
 
 #### Experiment Runner Configuration
 
-Similarly to `ExperimentManager`, `ExperimentRunner` is also initialized with the configuration data passed 
+Similar to `ExperimentManager`, `ExperimentRunner` is also initialized with the configuration data passed 
 into it by the Turing Router. The exact format of the `ExperimentRunner` configuration is defined by the specific 
 implementation of the `ExperimentManager.GetExperimentRunnerConfig` method. In other words, the JSON data returned
 by the `GetExperimentRunnerConfig` method of the `ExperimentManager` is passed into the `Configure` method of the 
@@ -252,7 +252,7 @@ func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
 }
 ```
 
-ExperimentRunner's configuration is stored in Turing database together with the rest of the Router configuration. I.e:
+ExperimentRunner's configuration is stored in the Turing database together with the rest of the Router configuration. I.e:
 
 **Router Configuration Stage:**
   1. Turing Server calls `ExperimentEngine plugin`::`ExperimentManager`::`GetExperimentRunnerConfig` to retrieve  
@@ -286,7 +286,7 @@ func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
 library for logging, and it expects that the plugin's log stream will be written into the standard output as `hlog` 
 formatted entries. On other hand, Turing is relying on [`zap`](https://github.com/uber-go/zap) for logging, hence 
 `turing/engines/experiment` module provides a bridge between `zap` and `hlog` libraries. By default, `zap` logger is
-used for logging, so in order to enable `hlog` logger, it's required to import corresponding package for its 
+used for logging, so in order to enable `hlog` logger, it's required to import the corresponding package for its 
 side effect:
 ```go
 import (
@@ -322,7 +322,7 @@ func main() {
 ```
 
 ## Packaging
-`hashicorp/go-plugin` requires 100% reliable network for the communication between the host application and the 
+`hashicorp/go-plugin` requires a 100% reliable network for the communication between the host application and the 
 plugin server, which is only possible with the local network. This means, that the location of the plugin's binary 
 should be accessible from the host application and that both host app binary and plugin binary should be built for 
 the same OS/architecture. For example, if the Turing Server/Router is built for macOS (Intel) (`darwin/amd64`) then 
@@ -349,7 +349,7 @@ the image registry) with its entrypoint/command being defined as:
 ```docker
 CMD ["sh", "-c", "cp <path_to_plugin_binary> ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]
 ```
-Note: Environment variables `PLUGINS_DIR` and `PLUGIN_NAME` combined define the path to where the plugin's binary 
+Note: Environment variables `PLUGINS_DIR` and `PLUGIN_NAME` combined are defining the path to where the plugin's binary 
 should be copied. They are passed into the plugin's image at the deployment time.
 
 The end-to-end example of a multistep Dockerfile, that builds the plugin's binary and then packages it according 
@@ -388,7 +388,7 @@ turing:
 * `type` – (*required*) – experiment engine type. Currently, the only supported option is `rpc-plugin`
 * `rpcPlugin.image` – (*required*) – image that contains plugin's binary. See [Packaging](.#packaging)
 * `options` – (*optional*) – arbitrary YAML structure, that contains this plugin's configuration. 
-              This data, serialized as JSON object will be passed into the [`ExperimentManager.Configure`](
+              This data, serialized as a JSON object will be passed into the [`ExperimentManager.Configure`](
               .#experiment-manager-configuration) method during the initialization stage.
 
 Then this configuration can be used for the deployment. Check the helm chart [README.md](
