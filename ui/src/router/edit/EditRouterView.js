@@ -110,12 +110,18 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
             currentRouter={currentRouter}
             updatedRouter={routerConfig}
             onPrevious={toggleDiffView}
-            onSubmit={onSubmit}
             isSubmitting={
               updateRouterResponse.isLoading ||
               createRouterVersionResponse.isLoading
             }
-            setWithDeployment={setWithDeployment}
+            onDeploy={() => {
+              setWithDeployment(true);
+              return onSubmit();
+            }}
+            onSave={() => {
+              setWithDeployment(false);
+              return onSubmit();
+            }}
           />
         );
       }}
