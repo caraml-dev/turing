@@ -250,7 +250,7 @@ paths:
           description: "Invalid project_id or router_id"
         404:
           description: "No router versions found"
-    put:
+    post:
       tags: *tags
       summary: "Create router version without deploying it"
       parameters:

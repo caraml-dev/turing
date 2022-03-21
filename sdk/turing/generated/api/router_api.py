@@ -1178,7 +1178,7 @@ class RouterApi(object):
             callable=__projects_project_id_routers_router_id_versions_get
         )
 
-        def __projects_project_id_routers_router_id_versions_put(
+        def __projects_project_id_routers_router_id_versions_post(
             self,
             project_id,
             router_id,
@@ -1190,7 +1190,7 @@ class RouterApi(object):
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True
 
-            >>> thread = api.projects_project_id_routers_router_id_versions_put(project_id, router_id, router_config, async_req=True)
+            >>> thread = api.projects_project_id_routers_router_id_versions_post(project_id, router_id, router_config, async_req=True)
             >>> result = thread.get()
 
             Args:
@@ -1251,13 +1251,13 @@ class RouterApi(object):
                 router_config
             return self.call_with_http_info(**kwargs)
 
-        self.projects_project_id_routers_router_id_versions_put = _Endpoint(
+        self.projects_project_id_routers_router_id_versions_post = _Endpoint(
             settings={
                 'response_type': (RouterVersion,),
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions',
-                'operation_id': 'projects_project_id_routers_router_id_versions_put',
-                'http_method': 'PUT',
+                'operation_id': 'projects_project_id_routers_router_id_versions_post',
+                'http_method': 'POST',
                 'servers': None,
             },
             params_map={
@@ -1312,7 +1312,7 @@ class RouterApi(object):
                 ]
             },
             api_client=api_client,
-            callable=__projects_project_id_routers_router_id_versions_put
+            callable=__projects_project_id_routers_router_id_versions_post
         )
 
         def __projects_project_id_routers_router_id_versions_version_delete(

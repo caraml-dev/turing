@@ -726,7 +726,7 @@ paths:
       summary: List router config versions
       tags:
       - Router
-    put:
+    post:
       parameters:
       - description: project id of the project of the router
         in: path

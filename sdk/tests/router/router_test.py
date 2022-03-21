@@ -283,7 +283,7 @@ def test_create_version(turing_api, active_project, generic_router_config, gener
     )
 
     responses.add(
-        method="PUT",
+        method="POST",
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions",
         body=json.dumps(generic_router_version, default=tests.json_serializer),
         status=200,

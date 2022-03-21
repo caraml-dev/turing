@@ -181,7 +181,7 @@ func (c RouterVersionsController) Routes() []Route {
 			handler: c.ListRouterVersions,
 		},
 		{
-			method:  http.MethodPut,
+			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
 			body:    request.CreateOrUpdateRouterRequest{},
 			handler: c.CreateRouterVersion,
