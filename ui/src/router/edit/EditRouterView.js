@@ -14,7 +14,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   const { data: routerConfig } = useContext(FormContext);
   const [showDiffView, toggleDiffView] = useToggle();
 
-  const [updateRouterResponse, updateRouterForm] = useTuringApi(
+  const [updateRouterResponse, submitUpdateRouter] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}`,
     {
       method: "PUT",
@@ -24,7 +24,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
     false
   );
 
-  const [createRouterVersionResponse, createRouterVersionForm] = useTuringApi(
+  const [createRouterVersionResponse, submitCreateRouterVersion] = useTuringApi(
     `/projects/${projectId}/routers/${currentRouter.id}/versions`,
     {
       method: "POST",
@@ -67,11 +67,11 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
 
   const onSubmit = () => {
     if (withDeployment === true) {
-      return updateRouterForm({
+      return submitUpdateRouter({
         body: JSON.stringify(routerConfig),
       });
     } else if (withDeployment === false) {
-      return createRouterVersionForm({
+      return submitCreateRouterVersion({
         body: JSON.stringify(routerConfig),
       });
     }
