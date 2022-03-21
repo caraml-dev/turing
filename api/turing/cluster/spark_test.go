@@ -258,8 +258,8 @@ func TestCreateSparkRequest(t *testing.T) {
 							Effect:   apicorev1.TaintEffectNoSchedule,
 						},
 					},
+					ServiceAccount: &serviceAccountName,
 				},
-				ServiceAccount: &serviceAccountName,
 			},
 		},
 	}

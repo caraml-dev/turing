@@ -67,7 +67,7 @@ func NewBatchEnsemblingController(
 }
 
 func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.EnsemblingJob) error {
-	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	sa, err := c.clusterController.GetSparkApplication(context.TODO(), namespace, ensemblingJob.Name)
 	if err != nil {
 		c.cleanup(ensemblingJob.Name, namespace)
 		// Not found, we do not consider this as an error because its just no further
@@ -75,14 +75,14 @@ func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.En
 		return nil
 	}
 	c.cleanup(ensemblingJob.Name, namespace)
-	return c.clusterController.DeleteSparkApplication(namespace, sa.Name)
+	return c.clusterController.DeleteSparkApplication(context.TODO(), namespace, sa.Name)
 }
 
 func (c *ensemblingController) GetStatus(
 	namespace string,
 	ensemblingJob *models.EnsemblingJob,
 ) (SparkApplicationState, error) {
-	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	sa, err := c.clusterController.GetSparkApplication(context.TODO(), namespace, ensemblingJob.Name)
 	if err != nil {
 		return SparkApplicationStateUnknown, fmt.Errorf("failed to retrieve spark application %v", err)
 	}
@@ -111,7 +111,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		}
 	}()
 
-	err = c.clusterController.CreateNamespace(request.Namespace)
+	err = c.clusterController.CreateNamespace(context.TODO(), request.Namespace)
 	if errors.Is(err, cluster.ErrNamespaceAlreadyExists) {
 		// This error is ok to ignore because we just need the namespace.
 		err = nil
@@ -200,7 +200,7 @@ func (c *ensemblingController) createSparkApplication(
 		SparkInfraConfig:      c.sparkInfraConfig,
 		EnvVars:               jobRequest.EnsemblingJob.InfraConfig.Env,
 	}
-	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
+	return c.clusterController.CreateSparkApplication(context.TODO(), jobRequest.Namespace, request)
 }
 
 func (c *ensemblingController) createJobConfigMap(
@@ -224,7 +224,7 @@ func (c *ensemblingController) createJobConfigMap(
 		Data:     string(jobConfigYAML),
 		Labels:   labels,
 	}
-	err = c.clusterController.ApplyConfigMap(namespace, cm)
+	err = c.clusterController.ApplyConfigMap(context.TODO(), namespace, cm)
 	if err != nil {
 		return err
 	}
@@ -252,12 +252,12 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 }
 
 func (c *ensemblingController) cleanup(jobName string, namespace string) {
-	err := c.clusterController.DeleteSecret(jobName, namespace)
+	err := c.clusterController.DeleteSecret(context.TODO(), jobName, namespace)
 	if err != nil {
 		log.Warnf("failed deleting secret %s in namespace %s: %v", jobName, namespace, err)
 	}
 
-	err = c.clusterController.DeleteConfigMap(jobName, namespace)
+	err = c.clusterController.DeleteConfigMap(context.TODO(), jobName, namespace)
 	if err != nil {
 		log.Warnf("failed deleting job spec %s in namespace %s: %v", jobName, namespace, err)
 	}
@@ -274,7 +274,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		Namespace: namespace,
 		Labels:    labels,
 	}
-	sa, err := c.clusterController.CreateServiceAccount(namespace, saCfg)
+	sa, err := c.clusterController.CreateServiceAccount(context.TODO(), namespace, saCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		Labels:      labels,
 		PolicyRules: cluster.DefaultSparkDriverRoleRules,
 	}
-	r, err := c.clusterController.CreateRole(namespace, roleCfg)
+	r, err := c.clusterController.CreateRole(context.TODO(), namespace, roleCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		RoleName:           r.Name,
 		ServiceAccountName: sa.Name,
 	}
-	_, err = c.clusterController.CreateRoleBinding(namespace, roleBindingCfg)
+	_, err = c.clusterController.CreateRoleBinding(context.TODO(), namespace, roleBindingCfg)
 	if err != nil {
 		return nil, err
 	}

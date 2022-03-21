@@ -229,10 +229,10 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
-			Labels: request.JobLabels,
+			Env:            append(defaultEnvVars, getEnvVarFromRequest(request)...),
+			Labels:         request.JobLabels,
+			ServiceAccount: &request.ServiceAccountName,
 		},
-		ServiceAccount: &request.ServiceAccountName,
 	}
 	if request.SparkInfraConfig.TolerationName != nil {
 		s.SparkPodSpec.Tolerations = []apicorev1.Toleration{

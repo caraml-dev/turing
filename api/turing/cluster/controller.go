@@ -64,30 +64,30 @@ type clusterConfig struct {
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
-	DeleteKnativeService(svcName string, namespace string, timeout time.Duration) error
-	GetKnativeServiceURL(svcName string, namespace string) string
+	DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
+	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
-	DeleteIstioVirtualService(svcName string, namespace string, timeout time.Duration) error
+	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
-	DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error
-	CreateNamespace(name string) error
-	ApplyConfigMap(namespace string, configMap *ConfigMap) error
-	DeleteConfigMap(name, namespace string) error
+	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
+	CreateNamespace(ctx context.Context, name string) error
+	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
+	DeleteConfigMap(ctx context.Context, name, namespace string) error
 	CreateSecret(ctx context.Context, secret *Secret) error
-	DeleteSecret(secretName string, namespace string) error
+	DeleteSecret(ctx context.Context, secretName string, namespace string) error
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
-	DeletePersistentVolumeClaim(pvcName string, namespace string) error
-	ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error)
-	ListPodLogs(namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
-	CreateJob(namespace string, job Job) (*apibatchv1.Job, error)
-	GetJob(namespace string, jobName string) (*apibatchv1.Job, error)
-	DeleteJob(namespace string, jobName string) error
-	CreateServiceAccount(namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
-	CreateRole(namespace string, role *Role) (*apirbacv1.Role, error)
-	CreateRoleBinding(namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
-	CreateSparkApplication(namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
-	GetSparkApplication(namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
-	DeleteSparkApplication(namespace, appName string) error
+	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error
+	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
+	ListPodLogs(ctx context.Context, namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
+	CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error)
+	GetJob(ctx context.Context, namespace string, jobName string) (*apibatchv1.Job, error)
+	DeleteJob(ctx context.Context, namespace string, jobName string) error
+	CreateServiceAccount(ctx context.Context, namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
+	CreateRole(ctx context.Context, namespace string, role *Role) (*apirbacv1.Role, error)
+	CreateRoleBinding(ctx context.Context, namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
+	CreateSparkApplication(ctx context.Context, namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
+	GetSparkApplication(ctx context.Context, namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
+	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
 }
 
 // controller implements the Controller interface
@@ -196,8 +196,8 @@ func InitClusterControllers(
 }
 
 // CreateNamespace creates a namespace. If the namespace already exists, will throw an error.
-func (c *controller) CreateNamespace(name string) error {
-	_, err := c.k8sCoreClient.Namespaces().Get(name, metav1.GetOptions{})
+func (c *controller) CreateNamespace(ctx context.Context, name string) error {
+	_, err := c.k8sCoreClient.Namespaces().Get(ctx, name, metav1.GetOptions{})
 	if err == nil {
 		return ErrNamespaceAlreadyExists
 	}
@@ -206,14 +206,14 @@ func (c *controller) CreateNamespace(name string) error {
 			Name: name,
 		},
 	}
-	_, err = c.k8sCoreClient.Namespaces().Create(&ns)
+	_, err = c.k8sCoreClient.Namespaces().Create(ctx, &ns, metav1.CreateOptions{})
 	return err
 }
 
 // ApplyConfigMap creates a config map in the namespace given the configuration if not exists.
 // If the config map already exists, ApplyConfigMap will update the configuration with the given
 // data.
-func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) error {
+func (c *controller) ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error {
 	cm := apicorev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMap.Name,
@@ -224,23 +224,23 @@ func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) erro
 			configMap.FileName: configMap.Data,
 		},
 	}
-	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(cm.Name, metav1.GetOptions{})
+	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(ctx, cm.Name, metav1.GetOptions{})
 	if err == nil {
 		// exists, we update instead
-		_, err = c.k8sCoreClient.ConfigMaps(namespace).Update(&cm)
+		_, err = c.k8sCoreClient.ConfigMaps(namespace).Update(ctx, &cm, metav1.UpdateOptions{})
 		return err
 	}
-	_, err = c.k8sCoreClient.ConfigMaps(namespace).Create(&cm)
+	_, err = c.k8sCoreClient.ConfigMaps(namespace).Create(ctx, &cm, metav1.CreateOptions{})
 	return err
 }
 
 // DeleteConfigMap deletes a configmap if exists.
-func (c *controller) DeleteConfigMap(name, namespace string) error {
-	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+func (c *controller) DeleteConfigMap(ctx context.Context, name, namespace string) error {
+	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	return c.k8sCoreClient.ConfigMaps(namespace).Delete(name, &metav1.DeleteOptions{})
+	return c.k8sCoreClient.ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{})
 }
 
 // Deploy creates / updates a Kubernetes/Knative service with the given specs
@@ -255,11 +255,11 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 	services := c.knServingClient.Services(svcConf.Namespace)
 
 	// Check if service already exists. If exists, update it. If not, create.
-	existingSvc, err = services.Get(svcConf.Name, metav1.GetOptions{})
+	existingSvc, err = services.Get(ctx, svcConf.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create new service
-			_, err = services.Create(desiredSvc)
+			_, err = services.Create(ctx, desiredSvc, metav1.CreateOptions{})
 		} else {
 			// Unexpected error, return it
 			return err
@@ -277,7 +277,7 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 			// Update the existing service with the new config
 			existingSvc.Spec.ConfigurationSpec = desiredSvc.Spec.ConfigurationSpec
 			existingSvc.ObjectMeta.Labels = desiredSvc.ObjectMeta.Labels
-			_, err = services.Update(existingSvc)
+			_, err = services.Update(ctx, existingSvc, metav1.UpdateOptions{})
 		}
 	}
 
@@ -291,6 +291,7 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 
 // Delete removes the Kubernetes/Knative service and all related artifacts
 func (c *controller) DeleteKnativeService(
+	ctx context.Context,
 	svcName string,
 	namespace string,
 	timeout time.Duration,
@@ -299,18 +300,18 @@ func (c *controller) DeleteKnativeService(
 	services := c.knServingClient.Services(namespace)
 
 	// Get the service
-	_, err := services.Get(svcName, metav1.GetOptions{})
+	_, err := services.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
 	// Delete the service
 	gracePeriod := int64(timeout.Seconds())
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriod,
 	}
 
-	return services.Delete(svcName, delOptions)
+	return services.Delete(ctx, svcName, delOptions)
 }
 
 // DeployKubernetesService deploys a kubernetes service and deployment
@@ -326,11 +327,11 @@ func (c *controller) DeployKubernetesService(
 	// Check if deployment already exists. If exists, update it. If not, create.
 	var existingDeployment *apiappsv1.Deployment
 	var err error
-	existingDeployment, err = deployments.Get(svcConf.Name, metav1.GetOptions{})
+	existingDeployment, err = deployments.Get(ctx, svcConf.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create new deployment
-			_, err = deployments.Create(desiredDeployment)
+			_, err = deployments.Create(ctx, desiredDeployment, metav1.CreateOptions{})
 		} else {
 			// Unexpected error, return it
 			return err
@@ -341,7 +342,7 @@ func (c *controller) DeployKubernetesService(
 			// Update the existing service with the new config
 			existingDeployment.Spec.Template = desiredDeployment.Spec.Template
 			existingDeployment.ObjectMeta.Labels = desiredDeployment.ObjectMeta.Labels
-			_, err = deployments.Update(existingDeployment)
+			_, err = deployments.Update(ctx, existingDeployment, metav1.UpdateOptions{})
 		}
 	}
 	if err != nil {
@@ -352,11 +353,11 @@ func (c *controller) DeployKubernetesService(
 	services := c.k8sCoreClient.Services(svcConf.Namespace)
 	// Check if service already exists. If exists, update it. If not, create.
 	var existingSvc *apicorev1.Service
-	existingSvc, err = services.Get(svcConf.Name, metav1.GetOptions{})
+	existingSvc, err = services.Get(ctx, svcConf.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create new service
-			_, err = services.Create(desiredSvc)
+			_, err = services.Create(ctx, desiredSvc, metav1.CreateOptions{})
 		} else {
 			// Unexpected error, return it
 			return err
@@ -364,7 +365,7 @@ func (c *controller) DeployKubernetesService(
 	} else {
 		// Check for differences between current and new specs
 		if !k8sServiceSemanticEquals(desiredSvc, existingSvc) {
-			_, err = services.Update(desiredSvc)
+			_, err = services.Update(ctx, desiredSvc, metav1.UpdateOptions{})
 		}
 	}
 	if err != nil {
@@ -376,94 +377,104 @@ func (c *controller) DeployKubernetesService(
 }
 
 // DeleteKubernetesService deletes a kubernetes service an deployment
-func (c *controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
+func (c *controller) DeleteKubernetesService(
+	ctx context.Context,
+	svcName string,
+	namespace string,
+	timeout time.Duration,
+) error {
 	gracePeriod := int64(timeout.Seconds())
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriod,
 	}
 
 	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(svcName, metav1.GetOptions{})
+	_, err := deployments.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	err = deployments.Delete(svcName, delOptions)
+	err = deployments.Delete(ctx, svcName, delOptions)
 	if err != nil {
 		return err
 	}
 
 	services := c.k8sCoreClient.Services(namespace)
-	_, err = services.Get(svcName, metav1.GetOptions{})
+	_, err = services.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	return services.Delete(svcName, delOptions)
+	return services.Delete(ctx, svcName, delOptions)
 }
 
 // ApplyIstioVirtualService creates a virtual service if not exists, if exists, updates the
 // existing service with the new configuration
 func (c *controller) ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error {
 	vservices := c.istioClient.VirtualServices(routerEndpoint.Namespace)
-	existingVsvc, err := vservices.Get(routerEndpoint.Name, metav1.GetOptions{})
+	existingVsvc, err := vservices.Get(ctx, routerEndpoint.Name, metav1.GetOptions{})
 	if err == nil {
 		// patch
 		existingVsvc.Spec.Http = routerEndpoint.BuildVirtualService().Spec.Http
-		_, err := vservices.Update(existingVsvc)
+		_, err := vservices.Update(ctx, existingVsvc, metav1.UpdateOptions{})
 		return err
 	}
-	_, err = vservices.Create(routerEndpoint.BuildVirtualService())
+	_, err = vservices.Create(ctx, routerEndpoint.BuildVirtualService(), metav1.CreateOptions{})
 	return err
 }
 
 // DeleteIstioVirtualService deletes an istio virtual service.
-func (c *controller) DeleteIstioVirtualService(svcName string, namespace string, timeout time.Duration) error {
+func (c *controller) DeleteIstioVirtualService(
+	ctx context.Context,
+	svcName string,
+	namespace string,
+	timeout time.Duration,
+) error {
 	vservices := c.istioClient.VirtualServices(namespace)
-	_, err := vservices.Get(svcName, metav1.GetOptions{})
+	_, err := vservices.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("unable to retrieve virtual service %s: %s", svcName, err.Error())
 	}
 	gracePeriod := int64(timeout.Seconds())
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriod,
 	}
-	return vservices.Delete(svcName, delOptions)
+	return vservices.Delete(ctx, svcName, delOptions)
 }
 
 // CreateSecret creates a secret. If the secret already exists, the existing secret will be updated.
 func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 	secrets := c.k8sCoreClient.Secrets(secret.Namespace)
-	_, err := secrets.Get(secret.Name, metav1.GetOptions{})
+	_, err := secrets.Get(ctx, secret.Name, metav1.GetOptions{})
 	if err == nil {
-		_, err = secrets.Update(secret.BuildSecret())
+		_, err = secrets.Update(ctx, secret.BuildSecret(), metav1.UpdateOptions{})
 		return err
 	}
-	_, err = secrets.Create(secret.BuildSecret())
+	_, err = secrets.Create(ctx, secret.BuildSecret(), metav1.CreateOptions{})
 	return err
 }
 
 // DeleteSecret deletes a secret
-func (c *controller) DeleteSecret(secretName string, namespace string) error {
+func (c *controller) DeleteSecret(ctx context.Context, secretName string, namespace string) error {
 	secrets := c.k8sCoreClient.Secrets(namespace)
-	_, err := secrets.Get(secretName, metav1.GetOptions{})
+	_, err := secrets.Get(ctx, secretName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
 	}
-	return secrets.Delete(secretName, &metav1.DeleteOptions{})
+	return secrets.Delete(ctx, secretName, metav1.DeleteOptions{})
 }
 
 // GetKnativeServiceURL returns the URL at which the given service is accessible, if found.
 // Else, an empty string is returned.
-func (c *controller) GetKnativeServiceURL(svcName string, namespace string) string {
+func (c *controller) GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string {
 	var url string
 
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(namespace)
 
 	// Get the service
-	svc, err := services.Get(svcName, metav1.GetOptions{})
+	svc, err := services.Get(ctx, svcName, metav1.GetOptions{})
 
 	// If the service is ready, get its url
-	if err == nil && svc.Status.IsReady() {
+	if err == nil && svc.IsReady() {
 		url = svc.Status.URL.String()
 	}
 
@@ -478,63 +489,64 @@ func (c *controller) ApplyPersistentVolumeClaim(
 	pvcCfg *PersistentVolumeClaim,
 ) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
-	existingPVC, err := pvcs.Get(pvcCfg.Name, metav1.GetOptions{})
+	existingPVC, err := pvcs.Get(ctx, pvcCfg.Name, metav1.GetOptions{})
 	pvc := pvcCfg.BuildPersistentVolumeClaim()
 
 	// If not exists, create
 	if err != nil {
-		_, err := pvcs.Create(pvc)
+		_, err := pvcs.Create(ctx, pvc, metav1.CreateOptions{})
 		return err
 	}
 	// If exists, update
 	existingPVC.Spec.Resources = pvc.Spec.Resources
-	_, err = pvcs.Update(existingPVC)
+	_, err = pvcs.Update(ctx, existingPVC, metav1.UpdateOptions{})
 	return err
 }
 
 // DeletePersistentVolumeClaim deletes the PVC in the given namespace.
-func (c *controller) DeletePersistentVolumeClaim(pvcName string, namespace string) error {
+func (c *controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
-	_, err := pvcs.Get(pvcName, metav1.GetOptions{})
+	_, err := pvcs.Get(ctx, pvcName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("unable to get pvc with name %s: %s", pvcName, err.Error())
 	}
-	return pvcs.Delete(pvcName, &metav1.DeleteOptions{})
+	return pvcs.Delete(ctx, pvcName, metav1.DeleteOptions{})
 }
 
-func (c *controller) ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error) {
-	return c.k8sCoreClient.Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+func (c *controller) ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error) {
+	return c.k8sCoreClient.Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
 }
 
 func (c *controller) ListPodLogs(
+	ctx context.Context,
 	namespace string,
 	podName string,
 	opts *apicorev1.PodLogOptions,
 ) (io.ReadCloser, error) {
-	return c.k8sCoreClient.Pods(namespace).GetLogs(podName, opts).Stream()
+	return c.k8sCoreClient.Pods(namespace).GetLogs(podName, opts).Stream(ctx)
 }
 
 // CreateJob creates a Kubernetes job
-func (c *controller) CreateJob(namespace string, job Job) (*apibatchv1.Job, error) {
-	j := job.Build()
-	return c.k8sBatchClient.Jobs(namespace).Create(j)
+func (c *controller) CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error) {
+	return c.k8sBatchClient.Jobs(namespace).Create(ctx, job.Build(), metav1.CreateOptions{})
 }
 
 // GetJob gets the Kubernetes job
-func (c *controller) GetJob(namespace, jobName string) (*apibatchv1.Job, error) {
-	return c.k8sBatchClient.Jobs(namespace).Get(jobName, metav1.GetOptions{})
+func (c *controller) GetJob(ctx context.Context, namespace, jobName string) (*apibatchv1.Job, error) {
+	return c.k8sBatchClient.Jobs(namespace).Get(ctx, jobName, metav1.GetOptions{})
 }
 
 // DeleteJob deletes the Kubernetes job
-func (c *controller) DeleteJob(namespace, jobName string) error {
-	return c.k8sBatchClient.Jobs(namespace).Delete(jobName, &metav1.DeleteOptions{})
+func (c *controller) DeleteJob(ctx context.Context, namespace, jobName string) error {
+	return c.k8sBatchClient.Jobs(namespace).Delete(ctx, jobName, metav1.DeleteOptions{})
 }
 
 func (c *controller) CreateServiceAccount(
+	ctx context.Context,
 	namespace string,
 	serviceAccount *ServiceAccount,
 ) (*apicorev1.ServiceAccount, error) {
-	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(serviceAccount.Name, metav1.GetOptions{})
+	sa, err := c.k8sCoreClient.ServiceAccounts(namespace).Get(ctx, serviceAccount.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
@@ -545,7 +557,7 @@ func (c *controller) CreateServiceAccount(
 		}
 
 		saCfg := serviceAccount.BuildServiceAccount()
-		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(saCfg)
+		sa, err = c.k8sCoreClient.ServiceAccounts(namespace).Create(ctx, saCfg, metav1.CreateOptions{})
 
 		if err != nil {
 			return nil, errors.Errorf(
@@ -558,10 +570,11 @@ func (c *controller) CreateServiceAccount(
 }
 
 func (c *controller) CreateRole(
+	ctx context.Context,
 	namespace string,
 	r *Role,
 ) (*apirbacv1.Role, error) {
-	role, err := c.k8sRBACClient.Roles(namespace).Get(r.Name, metav1.GetOptions{})
+	role, err := c.k8sRBACClient.Roles(namespace).Get(ctx, r.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
@@ -572,7 +585,7 @@ func (c *controller) CreateRole(
 		}
 
 		roleCfg := r.BuildRole()
-		role, err = c.k8sRBACClient.Roles(namespace).Create(roleCfg)
+		role, err = c.k8sRBACClient.Roles(namespace).Create(ctx, roleCfg, metav1.CreateOptions{})
 
 		if err != nil {
 			return nil, errors.Errorf(
@@ -587,10 +600,11 @@ func (c *controller) CreateRole(
 }
 
 func (c *controller) CreateRoleBinding(
+	ctx context.Context,
 	namespace string,
 	roleBinding *RoleBinding,
 ) (*apirbacv1.RoleBinding, error) {
-	rb, err := c.k8sRBACClient.RoleBindings(namespace).Get(roleBinding.Name, metav1.GetOptions{})
+	rb, err := c.k8sRBACClient.RoleBindings(namespace).Get(ctx, roleBinding.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
@@ -601,7 +615,7 @@ func (c *controller) CreateRoleBinding(
 		}
 
 		rbConfig := roleBinding.BuildRoleBinding()
-		rb, err = c.k8sRBACClient.RoleBindings(namespace).Create(rbConfig)
+		rb, err = c.k8sRBACClient.RoleBindings(namespace).Create(ctx, rbConfig, metav1.CreateOptions{})
 
 		if err != nil {
 			return nil, errors.Errorf(
@@ -616,6 +630,7 @@ func (c *controller) CreateRoleBinding(
 }
 
 func (c *controller) CreateSparkApplication(
+	ctx context.Context,
 	namespace string,
 	request *CreateSparkRequest,
 ) (*apisparkv1beta2.SparkApplication, error) {
@@ -624,15 +639,19 @@ func (c *controller) CreateSparkApplication(
 		return nil, err
 	}
 
-	return c.k8sSparkOperator.SparkApplications(namespace).Create(s)
+	return c.k8sSparkOperator.SparkApplications(namespace).Create(ctx, s, metav1.CreateOptions{})
 }
 
-func (c *controller) GetSparkApplication(namespace, appName string) (*apisparkv1beta2.SparkApplication, error) {
-	return c.k8sSparkOperator.SparkApplications(namespace).Get(appName, metav1.GetOptions{})
+func (c *controller) GetSparkApplication(
+	ctx context.Context,
+	namespace string,
+	appName string,
+) (*apisparkv1beta2.SparkApplication, error) {
+	return c.k8sSparkOperator.SparkApplications(namespace).Get(ctx, appName, metav1.GetOptions{})
 }
 
-func (c *controller) DeleteSparkApplication(namespace, appName string) error {
-	return c.k8sSparkOperator.SparkApplications(namespace).Delete(appName, &metav1.DeleteOptions{})
+func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appName string) error {
+	return c.k8sSparkOperator.SparkApplications(namespace).Delete(ctx, appName, metav1.DeleteOptions{})
 }
 
 // waitKnativeServiceReady waits for the given knative service to become ready, until the
@@ -652,10 +671,10 @@ func (c *controller) waitKnativeServiceReady(
 	for {
 		select {
 		case <-ctx.Done():
-			terminationMessage := c.getKnativePodTerminationMessage(svcName, namespace)
+			terminationMessage := c.getKnativePodTerminationMessage(ctx, svcName, namespace)
 			if terminationMessage == "" {
 				// Pod was not created (as with invalid image names), get status messages from the knative service.
-				svc, err := services.Get(svcName, metav1.GetOptions{})
+				svc, err := services.Get(ctx, svcName, metav1.GetOptions{})
 				if err != nil {
 					terminationMessage = err.Error()
 				} else {
@@ -664,12 +683,12 @@ func (c *controller) waitKnativeServiceReady(
 			}
 			return fmt.Errorf("timeout waiting for service %s to be ready:\n%s", svcName, terminationMessage)
 		case <-ticker.C:
-			svc, err := services.Get(svcName, metav1.GetOptions{})
+			svc, err := services.Get(ctx, svcName, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("unable to get service status for %s: %v", svcName, err)
 			}
 
-			if svc.Status.IsReady() {
+			if svc.IsReady() {
 				// Service is completely ready
 				return nil
 			}
@@ -679,9 +698,9 @@ func (c *controller) waitKnativeServiceReady(
 
 // getKnativePodTerminationMessage retrieves the termination message of the user container
 // in the pod, which will be returned for logging as a part of the deployment failure error.
-func (c *controller) getKnativePodTerminationMessage(svcName string, namespace string) string {
+func (c *controller) getKnativePodTerminationMessage(ctx context.Context, svcName string, namespace string) string {
 	labelSelector := KnativeServiceLabelKey + "=" + svcName
-	podList, err := c.ListPods(namespace, labelSelector)
+	podList, err := c.ListPods(ctx, namespace, labelSelector)
 	if err != nil {
 		return err.Error()
 	}
@@ -720,7 +739,7 @@ func (c *controller) waitDeploymentReady(
 		case <-ctx.Done():
 			return fmt.Errorf("timeout waiting for deployment %s to be ready", deploymentName)
 		case <-ticker.C:
-			deployment, err := deployments.Get(deploymentName, metav1.GetOptions{})
+			deployment, err := deployments.Get(ctx, deploymentName, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("unable to get deployment status for %s: %v", deploymentName, err)
 			}

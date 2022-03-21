@@ -67,6 +67,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					nil,
 					k8serrors.NewNotFound(
@@ -80,6 +81,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -91,6 +93,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -148,6 +151,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
@@ -162,6 +166,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -173,6 +178,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -224,6 +230,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
@@ -241,6 +248,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -254,10 +262,12 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					"DeleteJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(nil).Once()
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -353,6 +363,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					nil,
 					k8serrors.NewNotFound(
@@ -366,6 +377,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -377,6 +389,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -434,6 +447,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
@@ -448,6 +462,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -459,6 +474,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -510,6 +526,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
@@ -527,6 +544,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"GetJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
@@ -540,10 +558,12 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					"DeleteJob",
 					mock.Anything,
 					mock.Anything,
+					mock.Anything,
 				).Return(nil).Once()
 
 				ctlr.On(
 					"CreateJob",
+					mock.Anything,
 					mock.Anything,
 					mock.Anything,
 				).Return(
@@ -725,7 +745,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Active: 1,
@@ -763,7 +783,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Succeeded: 1,
@@ -801,7 +821,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Failed: 1,
@@ -839,7 +859,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{},
 					nil,
 				)
@@ -873,7 +893,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,
 					fmt.Errorf("hello"),
 				)
@@ -931,7 +951,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Active: 1,
@@ -969,7 +989,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Succeeded: 1,
@@ -1007,7 +1027,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						Status: apibatchv1.JobStatus{
 							Failed: 1,
@@ -1045,7 +1065,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{},
 					nil,
 				)
@@ -1079,7 +1099,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,
 					fmt.Errorf("hello"),
 				)
@@ -1136,7 +1156,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: "bicycle",
@@ -1144,7 +1164,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 					},
 					nil,
 				)
-				ctlr.On("DeleteJob", mock.Anything, mock.Anything).Return(nil)
+				ctlr.On("DeleteJob", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctlr
 			},
 			hasErr: false,
@@ -1196,7 +1216,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 			},
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
-				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
+				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: "bicycle",
@@ -1204,7 +1224,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 					},
 					nil,
 				)
-				ctlr.On("DeleteJob", mock.Anything, mock.Anything).Return(nil)
+				ctlr.On("DeleteJob", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctlr
 			},
 			hasErr: false,
