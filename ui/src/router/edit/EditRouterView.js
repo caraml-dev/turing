@@ -6,7 +6,7 @@ import { UpdateRouterForm } from "../components/form/UpdateRouterForm";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
 import { VersionComparisonView } from "./components/VersionComparisonView";
 import { useTuringApi } from "../../hooks/useTuringApi";
-import { UpdateSummary } from "../components/form/components/UpdateSummary";
+import { RouterUpdateSummary } from "../components/form/components/RouterUpdateSummary";
 import { ConfirmationModal } from "../../components/confirmation_modal/ConfirmationModal";
 import { VersionCreationSummary } from "../components/form/components/VersionCreationSummary";
 
@@ -86,7 +86,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       }
       content={
         withDeployment ? (
-          <UpdateSummary router={routerConfig} />
+          <RouterUpdateSummary router={routerConfig} />
         ) : (
           <VersionCreationSummary router={routerConfig} />
         )
