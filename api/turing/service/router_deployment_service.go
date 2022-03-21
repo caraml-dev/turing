@@ -481,7 +481,7 @@ func deleteK8sService(
 	service *cluster.KubernetesService,
 	timeout time.Duration,
 ) error {
-	return controller.DeleteKubernetesService(context.TODO(), service.Name, service.Namespace, timeout)
+	return controller.DeleteKubernetesService(context.Background(), service.Name, service.Namespace, timeout)
 }
 
 // createSecret creates a secret.
@@ -500,7 +500,7 @@ func createSecret(
 
 // deleteSecret deletes a secret.
 func deleteSecret(controller cluster.Controller, secret *cluster.Secret) error {
-	return controller.DeleteSecret(context.TODO(), secret.Name, secret.Namespace)
+	return controller.DeleteSecret(context.Background(), secret.Name, secret.Namespace)
 }
 
 func createPVC(
@@ -522,7 +522,7 @@ func deletePVC(
 	namespace string,
 	pvc *cluster.PersistentVolumeClaim,
 ) error {
-	return controller.DeletePersistentVolumeClaim(context.TODO(), pvc.Name, namespace)
+	return controller.DeletePersistentVolumeClaim(context.Background(), pvc.Name, namespace)
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -545,7 +545,7 @@ func deployKnServices(
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying service %s", svc.Name))
 		if svc.ConfigMap != nil {
-			err := controller.ApplyConfigMap(context.TODO(), svc.Namespace, svc.ConfigMap)
+			err := controller.ApplyConfigMap(context.Background(), svc.Namespace, svc.ConfigMap)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to apply config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(

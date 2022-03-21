@@ -427,8 +427,12 @@ func TestDeleteKnativeService(t *testing.T) {
 
 	// Create test controller
 	c := createTestKnController(knservingclientset.NewSimpleClientset(), reactors)
+
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+	defer cancel()
+
 	// Run tests
-	err := c.DeleteKnativeService(context.TODO(), testName, testNamespace, time.Second*5)
+	err := c.DeleteKnativeService(ctx, testName, testNamespace, time.Second*5)
 	// Validate no error
 	assert.NoError(t, err)
 }
@@ -488,8 +492,12 @@ func TestDeleteK8sService(t *testing.T) {
 
 	// Create test controller
 	c := createTestK8sController(fake.NewSimpleClientset(), reactors)
+
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+	defer cancel()
+
 	// Run tests
-	err := c.DeleteKubernetesService(context.TODO(), testName, testNamespace, time.Second*5)
+	err := c.DeleteKubernetesService(ctx, testName, testNamespace, time.Second*5)
 	// Validate no error
 	assert.NoError(t, err)
 }
@@ -524,7 +532,11 @@ func TestCreateKanikoJob(t *testing.T) {
 		c := &controller{
 			k8sBatchClient: cs.BatchV1(),
 		}
-		job, err := c.CreateJob(context.TODO(), namespace, j)
+
+		ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+		defer cancel()
+
+		job, err := c.CreateJob(ctx, namespace, j)
 		assert.Nil(t, err)
 		assert.NotNil(t, job)
 	})
@@ -578,7 +590,11 @@ func TestGetJob(t *testing.T) {
 			c := &controller{
 				k8sBatchClient: cs.BatchV1(),
 			}
-			job, err := c.GetJob(context.TODO(), namespace, jobName)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			job, err := c.GetJob(ctx, namespace, jobName)
 			assert.True(t, (job == nil) == tt.jobNil)
 			assert.True(t, (err == nil) == tt.errNil)
 		})
@@ -627,7 +643,11 @@ func TestDeleteJob(t *testing.T) {
 			c := &controller{
 				k8sBatchClient: cs.BatchV1(),
 			}
-			err := c.DeleteJob(context.TODO(), namespace, jobName)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			err := c.DeleteJob(ctx, namespace, jobName)
 			assert.True(t, (err == nil) == tt.errNil)
 		})
 	}
@@ -693,7 +713,11 @@ func TestCreateServiceAccount(t *testing.T) {
 				Namespace: namespace,
 				Labels:    labels,
 			}
-			svcAcc, err := c.CreateServiceAccount(context.TODO(), namespace, saCfg)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			svcAcc, err := c.CreateServiceAccount(ctx, namespace, saCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (svcAcc == nil) == tt.svcAccNil)
 		})
@@ -760,7 +784,11 @@ func TestCreateRole(t *testing.T) {
 				Namespace: namespace,
 				Labels:    labels,
 			}
-			role, err := c.CreateRole(context.TODO(), namespace, roleCfg)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			role, err := c.CreateRole(ctx, namespace, roleCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (role == nil) == tt.roleNil)
 		})
@@ -831,7 +859,11 @@ func TestCreateRoleBinding(t *testing.T) {
 				RoleName:           roleName,
 				ServiceAccountName: serviceAccountName,
 			}
-			role, err := c.CreateRoleBinding(context.TODO(), namespace, roleBindingCfg)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			role, err := c.CreateRoleBinding(ctx, namespace, roleBindingCfg)
 			assert.True(t, (err == nil) == tt.errNil)
 			assert.True(t, (role == nil) == tt.roleNil)
 		})
@@ -875,7 +907,11 @@ func TestCreateSparkApplication(t *testing.T) {
 			ServiceAccountName:    serviceAccountName,
 			SparkInfraConfig:      sparkInfraConfig,
 		}
-		sparkApp, err := c.CreateSparkApplication(context.TODO(), namespace, req)
+
+		ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+		defer cancel()
+
+		sparkApp, err := c.CreateSparkApplication(ctx, namespace, req)
 		assert.NotNil(t, sparkApp)
 		assert.Nil(t, err)
 	})
@@ -901,7 +937,11 @@ func TestGetSparkApplication(t *testing.T) {
 		c := &controller{
 			k8sSparkOperator: sparkClientSet.SparkoperatorV1beta2(),
 		}
-		app, err := c.GetSparkApplication(context.TODO(), namespace, appName)
+
+		ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+		defer cancel()
+
+		app, err := c.GetSparkApplication(ctx, namespace, appName)
 		assert.NotNil(t, app)
 		assert.Nil(t, err)
 	})
@@ -923,7 +963,11 @@ func TestDeleteSparkApplication(t *testing.T) {
 		c := &controller{
 			k8sSparkOperator: sparkClientSet.SparkoperatorV1beta2(),
 		}
-		err := c.DeleteSparkApplication(context.TODO(), namespace, appName)
+
+		ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+		defer cancel()
+
+		err := c.DeleteSparkApplication(ctx, namespace, appName)
 		assert.Nil(t, err)
 	})
 }
@@ -990,7 +1034,11 @@ func TestCreateNamespace(t *testing.T) {
 				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
 			}
 			c := &controller{k8sCoreClient: cs.CoreV1()}
-			err := c.CreateNamespace(context.TODO(), namespace)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
+			err := c.CreateNamespace(ctx, namespace)
 			if tc.expectedError == nil {
 				// Validate no error
 				assert.NoError(t, err)
@@ -1081,8 +1129,12 @@ func TestCreateConfigMap(t *testing.T) {
 			for _, reactor := range tc.reactors {
 				cs.PrependReactor(reactor.verb, reactor.resource, reactor.rFunc)
 			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
 			c := &controller{k8sCoreClient: cs.CoreV1()}
-			err := c.ApplyConfigMap(context.TODO(), namespace, &cmap)
+			err := c.ApplyConfigMap(ctx, namespace, &cmap)
 			assert.NoError(t, err)
 		})
 	}
@@ -1250,8 +1302,12 @@ func TestDeleteSecret(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
 			// Run test
-			err := c.DeleteSecret(context.TODO(), secretName, testNamespace)
+			err := c.DeleteSecret(ctx, secretName, testNamespace)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -1425,8 +1481,12 @@ func TestDeletePVC(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
+
+			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+			defer cancel()
+
 			// Run test
-			err := c.DeletePersistentVolumeClaim(context.TODO(), pvcConf.Name, testNamespace)
+			err := c.DeletePersistentVolumeClaim(ctx, pvcConf.Name, testNamespace)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
 		})
@@ -1568,8 +1628,12 @@ func TestDeleteIstioVirtualService(t *testing.T) {
 	}
 
 	c := createTestIstioController(cs, reactors)
+
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+	defer cancel()
+
 	// Run test
-	err := c.DeleteIstioVirtualService(context.TODO(), vsConf.Name, testNamespace, time.Second*5)
+	err := c.DeleteIstioVirtualService(ctx, vsConf.Name, testNamespace, time.Second*5)
 	// Validate no error
 	assert.NoError(t, err)
 }
@@ -1613,8 +1677,11 @@ func TestGetKnativePodTerminationMessage(t *testing.T) {
 		},
 	}), []reactor{})
 
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+	defer cancel()
+
 	// Run test
-	msg := c.getKnativePodTerminationMessage(context.TODO(), testName, testNamespace)
+	msg := c.getKnativePodTerminationMessage(ctx, testName, testNamespace)
 	assert.Equal(t, "Test Termination Message", msg)
 }
 

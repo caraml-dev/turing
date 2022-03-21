@@ -15,6 +15,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const podLogTimeout = 10 * time.Second
+
 // PodLogsV2 contains a list of logs in a kubernetes pod along with some extra information.
 // This is the new format for pod logs
 type PodLogsV2 struct {
@@ -154,7 +156,10 @@ func (s *podLogService) ListPodLogs(request PodLogRequest) ([]*PodLog, error) {
 	}
 
 	labelSelector := formatLabelSelector(request.LabelSelectors)
-	pods, err := controller.ListPods(context.TODO(), request.Namespace, labelSelector)
+	ctx, cancel := context.WithTimeout(context.Background(), podLogTimeout)
+	defer cancel()
+
+	pods, err := controller.ListPods(ctx, request.Namespace, labelSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +191,7 @@ func (s *podLogService) ListPodLogs(request PodLogRequest) ([]*PodLog, error) {
 			logOpts.SinceTime = &metav1.Time{Time: request.SinceTime.Add(-time.Second)}
 		}
 
-		stream, err := controller.ListPodLogs(context.TODO(), request.Namespace, p.Name, logOpts)
+		stream, err := controller.ListPodLogs(ctx, request.Namespace, p.Name, logOpts)
 		if err != nil {
 			// Error is handled here by logging it rather than returned because the caller usually does not know how to
 			// handle it. Example of what can trigger ListPodLogs error: while the container is being created/terminated

@@ -136,7 +136,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		request.VersionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		context.TODO(),
+		context.Background(),
 		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
@@ -157,7 +157,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		// Only recreate when job has failed too many times, else no action required and just wait for it to finish
 		if job.Status.Failed != 0 {
 			// job already created before, so we have to delete it first if it failed
-			err = ib.clusterController.DeleteJob(context.TODO(), ib.imageBuildingConfig.BuildNamespace, job.Name)
+			err = ib.clusterController.DeleteJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("error deleting job: %v", err)
 				return "", ErrDeleteFailedJob
@@ -189,7 +189,7 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 		case <-timeout:
 			return ErrTimeoutBuildingImage
 		case <-ticker.C:
-			j, err := ib.clusterController.GetJob(context.TODO(), ib.imageBuildingConfig.BuildNamespace, job.Name)
+			j, err := ib.clusterController.GetJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
 				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
 				return ErrUnableToBuildImage
@@ -285,7 +285,7 @@ func (ib *imageBuilder) createKanikoJob(
 	}
 
 	return ib.clusterController.CreateJob(
-		context.TODO(),
+		context.Background(),
 		ib.imageBuildingConfig.BuildNamespace,
 		job,
 	)
@@ -361,7 +361,7 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		context.TODO(),
+		context.Background(),
 		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
@@ -397,7 +397,7 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
-		context.TODO(),
+		context.Background(),
 		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
@@ -406,6 +406,6 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 		return nil
 	}
 	// Delete job
-	err = ib.clusterController.DeleteJob(context.TODO(), ib.imageBuildingConfig.BuildNamespace, job.Name)
+	err = ib.clusterController.DeleteJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 	return err
 }
