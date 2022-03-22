@@ -67,7 +67,6 @@ func TestCreateRouterVersion(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Equal(t, models.RouterVersionStatusUndeployed, routerVersion.Status)
-	assert.NotEmpty(t, routerVersion.Error)
 
 	t.Log("Ensure existing router did not update the version to the new version i.e. the version still unchanged at 1")
 	router, err := getRouter(
