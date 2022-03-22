@@ -28,6 +28,7 @@ from turing.generated.model.router_events import RouterEvents
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_version import RouterVersion
+from turing.generated.model.router_version_config import RouterVersionConfig
 
 
 class RouterApi(object):
@@ -56,7 +57,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
 
             Keyword Args:
                 _return_http_data_only (bool): response data without head status
@@ -173,7 +174,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to save router
+                project_id (int): id of the project to save router
                 router_config (RouterConfig): router configuration to save
 
             Keyword Args:
@@ -300,7 +301,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router to delete
 
             Keyword Args:
@@ -678,7 +679,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
 
             Keyword Args:
@@ -805,7 +806,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router to update
                 router_config (RouterConfig): router configuration to save
 
@@ -1067,7 +1068,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
 
             Keyword Args:
@@ -1182,7 +1183,7 @@ class RouterApi(object):
             self,
             project_id,
             router_id,
-            router_config,
+            router_version_config,
             **kwargs
         ):
             """Create router version without deploying it  # noqa: E501
@@ -1190,13 +1191,13 @@ class RouterApi(object):
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True
 
-            >>> thread = api.projects_project_id_routers_router_id_versions_post(project_id, router_id, router_config, async_req=True)
+            >>> thread = api.projects_project_id_routers_router_id_versions_post(project_id, router_id, router_version_config, async_req=True)
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router to create a new version for
-                router_config (RouterConfig): router configuration to save
+                router_version_config (RouterVersionConfig): router configuration to save
 
             Keyword Args:
                 _return_http_data_only (bool): response data without head status
@@ -1247,8 +1248,8 @@ class RouterApi(object):
                 project_id
             kwargs['router_id'] = \
                 router_id
-            kwargs['router_config'] = \
-                router_config
+            kwargs['router_version_config'] = \
+                router_version_config
             return self.call_with_http_info(**kwargs)
 
         self.projects_project_id_routers_router_id_versions_post = _Endpoint(
@@ -1264,12 +1265,12 @@ class RouterApi(object):
                 'all': [
                     'project_id',
                     'router_id',
-                    'router_config',
+                    'router_version_config',
                 ],
                 'required': [
                     'project_id',
                     'router_id',
-                    'router_config',
+                    'router_version_config',
                 ],
                 'nullable': [
                 ],
@@ -1288,8 +1289,8 @@ class RouterApi(object):
                         (int,),
                     'router_id':
                         (int,),
-                    'router_config':
-                        (RouterConfig,),
+                    'router_version_config':
+                        (RouterVersionConfig,),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
@@ -1298,7 +1299,7 @@ class RouterApi(object):
                 'location_map': {
                     'project_id': 'path',
                     'router_id': 'path',
-                    'router_config': 'body',
+                    'router_version_config': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -1331,7 +1332,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router
                 version (int): version of router configuration to delete
 
@@ -1603,7 +1604,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
                 version (int): version of router configuration to be retrieved
 

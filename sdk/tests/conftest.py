@@ -444,7 +444,10 @@ def generic_router_version(
         id=2,
         created_at=datetime.now() + timedelta(seconds=20),
         updated_at=datetime.now() + timedelta(seconds=20),
-        router=None,
+        router=turing.generated.models.Router(
+            environment_name="test_env",
+            name="test_router"
+        ),
         version=1,
         status=generic_router_version_status,
         error="NONE",
