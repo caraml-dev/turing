@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: v1.0.0
+    tag: v1.3.4
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -156,7 +156,7 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:v1.0.0
+      Image: ghcr.io/gojek/turing/turing-router:v1.3.4
 
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
@@ -182,12 +182,6 @@ turing:
     authConfig:
       oauthClientId: ""
     sentryConfig: { }
-
-dbMigrations:
-  image:
-    # -- Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate
-    tag: v4.7.1
-
 
 sentry:
   # -- Sentry DSN value used by both Turing API and Turing UI
@@ -313,4 +307,5 @@ global:
 tags:
   # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true
+  # -- Specifies if Postgresql database needs to be installed together with Turing
   db: true
