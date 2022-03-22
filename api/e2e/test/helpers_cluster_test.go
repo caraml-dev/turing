@@ -13,7 +13,7 @@ import (
 
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
-	networkingv1alpha3 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1alpha3"
+	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -29,7 +29,7 @@ type TestClusterClients struct {
 	KnServingClient       knservingclient.ServingV1Interface
 	K8sCoreClient         corev1.CoreV1Interface
 	K8sAppsClient         appsv1.AppsV1Interface
-	IstioNetworkingClient networkingv1alpha3.NetworkingV1alpha3Interface
+	IstioNetworkingClient networkingv1beta1.NetworkingV1beta1Interface
 }
 
 // newClusterClients is a creator for the TestClusterClients
@@ -81,7 +81,7 @@ func newClusterClients(cfg *testConfig) (*TestClusterClients, error) {
 	if err != nil {
 		return nil, err
 	}
-	istioClientset, err := networkingv1alpha3.NewForConfig(clusterCfg)
+	istioClientset, err := networkingv1beta1.NewForConfig(clusterCfg)
 	if err != nil {
 		return nil, err
 	}

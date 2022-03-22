@@ -18,9 +18,9 @@ function print_usage {
     echo "    ISTIO_OPERATOR_PATH                        Helm values of Istio Operator."
     echo
     echo "  Optional Environment Variables:"
-    echo "    ISTIO_VERSION                              Istio version, default: 1.9.9."
-    echo "    KNATIVE_VERSION                            Knative version, default: 0.18.3."
-    echo "    KNATIVE_ISTIO_VERSION                      Knative Istio version, default: 0.18.1."
+    echo "    ISTIO_VERSION                              Istio version, default: 1.12.5."
+    echo "    KNATIVE_VERSION                            Knative version, default: 1.0.1."
+    echo "    KNATIVE_ISTIO_VERSION                      Knative Istio version, default: 1.0.0."
     echo "    KNATIVE_DOMAINS                            Knative domains that should be supported, comma seperated values"
     echo "    KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING  Knative domains that should be supported, comma seperated values"
 }
@@ -28,7 +28,7 @@ function print_usage {
 function install_istio {
     echo "Installing Istio."
 
-    local istio_version=${ISTIO_VERSION:-1.9.9}
+    local istio_version=${ISTIO_VERSION:-1.12.5}
     curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${istio_version} TARGET_ARCH=x86_64 sh -
     kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
     ./istio-${istio_version}/bin/istioctl install -y -f ${ISTIO_OPERATOR_PATH}
@@ -39,18 +39,20 @@ function install_knative {
     echo "Installing Knative."
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-0.18.3}/serving-crds.yaml"
+        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.0.1}/serving-crds.yaml"
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/v${KNATIVE_VERSION:-0.18.3}/serving-core.yaml"
+        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.0.1}/serving-core.yaml"
+
     local core_apps=("activator" "autoscaler" "controller" "webhook")
     for app in ${core_apps[@]}; do
         kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
     done
 
     kubectl apply \
-        -f "https://github.com/knative/net-istio/releases/download/v${KNATIVE_ISTIO_VERSION:-0.18.1}/net-istio.yaml"
-    local istio_apps=("networking-istio" "istio-webhook")
+        -f "https://github.com/knative-sandbox/net-istio/releases/download/knative-v${KNATIVE_ISTIO_VERSION:-1.0.0}/net-istio.yaml"
+
+    local istio_apps=("net-istio-controller" "net-istio-webhook")
     for app in ${istio_apps[@]}; do
         kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
     done

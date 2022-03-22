@@ -37,7 +37,7 @@ runs:
         args: >-
           --servers 1
           --agents 3
-          --api-port 0.0.0.0:80
+          --port 80:80@agent:*
           --registry-create ${{inputs.local_registry}}
           --k3s-arg "--no-deploy=traefik,metrics-server@server:*"
 

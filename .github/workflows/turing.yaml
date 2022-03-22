@@ -433,7 +433,9 @@ jobs:
           VAULT_TOKEN: root
         run: |
           echo "::group::Wait for Vault to become available"
-          timeout --foreground 45 bash -c \
+          # TODO: remove
+          curl -v -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts
+          timeout --foreground 100 bash -c \
             'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
           echo "::endgroup::"
 
@@ -445,6 +447,8 @@ jobs:
             "client_key": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
           }
           EOF
+
+          echo credentials.json
 
           curl -v \
             --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
@@ -481,7 +485,7 @@ jobs:
             deployment/turing-mlp,
             deployment/turing-merlin,
             deployment/turing
-          timeout: 300 #seconds
+          timeout: 600 # seconds
           max-restarts: -1
 
       - name: Setup MLP project
