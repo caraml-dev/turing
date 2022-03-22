@@ -133,15 +133,10 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	var errResp *Response
 	var project *mlp.Project
 	var router *models.Router
-	var toDeploy bool
-
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
-		return errResp
-	}
-	if toDeploy, errResp = c.getDeployFlagFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
 
@@ -153,8 +148,8 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 			"Router name and environment cannot be changed after creation")
 	}
 
-	// If the new version needs to be deployed, check if any deployment is in progress, if yes, disallow the update
-	if toDeploy && router.Status == models.RouterStatusPending {
+	// Check if any deployment is in progress, if yes, disallow the update
+	if router.Status == models.RouterStatusPending {
 		return BadRequest("invalid update request",
 			"another version is currently pending deployment")
 	}
@@ -168,32 +163,24 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	rVersion, err := request.Config.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
-		// Save router version as undeployed if there is no need to deploy it
-		if !toDeploy {
-			rVersion.Status = models.RouterVersionStatusUndeployed
-		}
+		// Save router version, re-assign the value of err
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)
 	}
 
 	if err != nil {
-		if toDeploy {
-			return InternalServerError("unable to update router", err.Error())
-		}
-		return InternalServerError("unable to save router version", err.Error())
+		return InternalServerError("unable to update router", err.Error())
 	}
 
 	// Deploy the new version
-	if toDeploy {
-		go func() {
-			err := c.deployOrRollbackRouter(project, router, routerVersion)
-			if err != nil {
-				log.Errorf("Error deploying router %s:%s:%d: %v",
-					project.Name, router.Name, routerVersion.Version, err)
-			}
-		}()
-		return Ok(rVersion)
-	}
-	return Ok(rVersion)
+	go func() {
+		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		if err != nil {
+			log.Errorf("Error deploying router %s:%s:%d: %v",
+				project.Name, router.Name, routerVersion.Version, err)
+		}
+	}()
+
+	return Ok(router)
 }
 
 // DeleteRouter deletes a router and all its associated versions.

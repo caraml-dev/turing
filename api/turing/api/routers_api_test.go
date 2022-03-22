@@ -359,7 +359,7 @@ func TestUpdateRouter(t *testing.T) {
 	routerSvc.On("Save", mock.Anything).
 		Return(nil, errors.New("test router deployment failure"))
 	// Router Version Service
-	routerVersionToUpdate := &models.RouterVersion{
+	routerVersion := &models.RouterVersion{
 		RouterID: 4,
 		Router:   router4,
 		ExperimentEngine: &models.ExperimentEngine{
@@ -370,20 +370,8 @@ func TestUpdateRouter(t *testing.T) {
 		},
 		Status: models.RouterVersionStatusPending,
 	}
-	routerVersionToSave := &models.RouterVersion{
-		RouterID: 3,
-		Router:   router3,
-		ExperimentEngine: &models.ExperimentEngine{
-			Type: models.ExperimentEngineTypeNop,
-		},
-		LogConfig: &models.LogConfig{
-			ResultLoggerType: models.NopLogger,
-		},
-		Status: models.RouterVersionStatusUndeployed,
-	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("Save", routerVersionToUpdate).Return(routerVersionToUpdate, nil)
-	routerVersionSvc.On("Save", routerVersionToSave).Return(routerVersionToSave, nil)
+	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -396,11 +384,11 @@ func TestUpdateRouter(t *testing.T) {
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
-			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}, "deploy": {"true"}},
+			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
-			vars:     RequestVars{"project_id": {"2"}, "deploy": {"true"}},
+			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
@@ -410,15 +398,11 @@ func TestUpdateRouter(t *testing.T) {
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
-		"failure | bad request (missing deploy flag)": {
-			vars:     RequestVars{"project_id": {"2"}, "router_id": {"2"}},
-			expected: BadRequest("invalid deploy flag value", "key deploy not found in vars"),
-		},
 		"failure | invalid router config": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}, "deploy": {"true"}},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid router configuration",
 				"Router name and environment cannot be changed after creation",
@@ -429,29 +413,21 @@ func TestUpdateRouter(t *testing.T) {
 				Name:        "router2",
 				Environment: "dev",
 			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}, "deploy": {"true"}},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid update request",
 				"another version is currently pending deployment",
 			),
 		},
-		"failure | update router version": {
+		"failure | build router version": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
 			},
-			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}, "deploy": {"true"}},
+			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
-		"failure | save router version": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router3",
-				Environment: "dev",
-			},
-			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}, "deploy": {"false"}},
-			expected: InternalServerError("unable to save router version", "router config is empty"),
-		},
-		"success | update router": {
+		"success": {
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router4",
 				Environment: "dev",
@@ -464,29 +440,10 @@ func TestUpdateRouter(t *testing.T) {
 					},
 				},
 			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}, "deploy": {"true"}},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
 			expected: &Response{
 				code: 200,
-				data: routerVersionToUpdate,
-			},
-		},
-		"success | save router version": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router3",
-				Environment: "dev",
-				Config: &request.RouterConfig{
-					ExperimentEngine: &request.ExperimentEngineConfig{
-						Type: "nop",
-					},
-					LogConfig: &request.LogConfig{
-						ResultLoggerType: models.NopLogger,
-					},
-				},
-			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"3"}, "deploy": {"false"}},
-			expected: &Response{
-				code: 200,
-				data: routerVersionToSave,
+				data: router4,
 			},
 		},
 	}
