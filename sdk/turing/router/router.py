@@ -145,6 +145,15 @@ class Router(ApiObject):
         self.__dict__ = updated_router.__dict__
         return self
 
+    def create_version(self, config: RouterConfig) -> 'RouterVersion':
+        """
+        Creates a new router version for the router WITHOUT deploying it
+
+        :param config: configuration of router
+        :return: the new router version
+        """
+        return RouterVersion.create(config=config, router_id=self.id)
+
     def deploy(self) -> Dict[str, int]:
         """
         Deploy this router

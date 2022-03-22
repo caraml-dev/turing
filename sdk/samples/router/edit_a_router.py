@@ -47,13 +47,16 @@ def main(turing_api: str, project: str):
     new_router_config_to_save = router_1.config
     new_router_config_to_save.resource_request.min_replica = 0
 
-    new_undeployed_version = turing.router.config.router_version.RouterVersion.create(new_router_config_to_deploy,
-                                                                                      router_id=1)
+    router_1.create_version(new_router_config_to_save)
 
     # Notice that the latest router version is undeployed (Turing has created the new version without deploying it)
     versions = router_1.list_versions()
     for v in versions:
         print(v)
+
+    # Alternatively, you may also do the following to create a new version for your router without deploying it.
+    new_undeployed_version = turing.router.config.router_version.RouterVersion.create(new_router_config_to_save,
+                                                                                      router_id=1)
 
 
 if __name__ == '__main__':
