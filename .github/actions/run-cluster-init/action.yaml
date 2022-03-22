@@ -31,15 +31,15 @@ runs:
   using: composite
   steps:
     - name: "Setup local k8s cluster"
-      uses: AbsaOSS/k3d-action@v1.6.2
+      uses: AbsaOSS/k3d-action@v2.0.0
       with:
         cluster-name: ${{ inputs.cluster_name }}
-        use-default-registry: true
         args: >-
           --servers 1
           --agents 3
-          --port 80:80@loadbalancer
-          --k3s-server-arg "--no-deploy=traefik,metrics-server"
+          --api-port 0.0.0.0:80
+          --registry-create ${{inputs.local_registry}}
+          --k3s-arg "--no-deploy=traefik,metrics-server@server:*"
 
     - name: Publish images to local registry
       env:

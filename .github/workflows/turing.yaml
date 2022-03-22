@@ -522,25 +522,33 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-      - if: (steps.wait-for-deployment.outcome == 'failure' || steps.run-e2e-test.outcome == 'failure') && always()
+      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
+          echo "::group::describe deployment/turing-mlp"
+          kubectl describe deployment/turing-mlp
+          echo "::endgroup::"
+
           echo "::group::describe deployment/turing-merlin"
           kubectl describe deployment/turing-merlin
           echo "::endgroup::"
-          
+
           echo "::group::describe deployment/turing"
           kubectl describe deployment/turing
           echo "::endgroup::"
-          
+
           echo "::group::secret/turing-api-config"
           kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
           echo "::endgroup::"
-          
+
           echo "::group::logs deployment/turing-merlin"
           kubectl logs deployment/turing-merlin
           echo "::endgroup::"
-          
+
+          echo "::group::logs deployment/turing-mlp"
+          kubectl logs deployment/turing-mlp
+          echo "::endgroup::"
+
           echo "::group::logs deployment/turing"
           kubectl logs deployment/turing
           echo "::endgroup::"
