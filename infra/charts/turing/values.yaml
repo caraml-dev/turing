@@ -307,4 +307,5 @@ global:
 tags:
   # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true
+  # -- Specifies if Postgresql database needs to be installed together with Turing
   db: true
