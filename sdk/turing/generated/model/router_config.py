@@ -27,8 +27,8 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
-    from turing.generated.model.router_config_config import RouterConfigConfig
-    globals()['RouterConfigConfig'] = RouterConfigConfig
+    from turing.generated.model.router_version_config import RouterVersionConfig
+    globals()['RouterVersionConfig'] = RouterVersionConfig
 
 
 class RouterConfig(ModelNormal):
@@ -84,7 +84,7 @@ class RouterConfig(ModelNormal):
         return {
             'environment_name': (str,),  # noqa: E501
             'name': (str,),  # noqa: E501
-            'config': (RouterConfigConfig,),  # noqa: E501
+            'config': (RouterVersionConfig,),  # noqa: E501
         }
 
     @cached_property
@@ -116,7 +116,7 @@ class RouterConfig(ModelNormal):
         Args:
             environment_name (str):
             name (str):
-            config (RouterConfigConfig):
+            config (RouterVersionConfig):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types

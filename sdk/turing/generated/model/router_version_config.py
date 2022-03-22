@@ -31,15 +31,15 @@ def lazy_import():
     from turing.generated.model.experiment_config import ExperimentConfig
     from turing.generated.model.resource_request import ResourceRequest
     from turing.generated.model.route import Route
-    from turing.generated.model.router_config_config_log_config import RouterConfigConfigLogConfig
     from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
+    from turing.generated.model.router_version_config_log_config import RouterVersionConfigLogConfig
     from turing.generated.model.traffic_rule import TrafficRule
     globals()['Enricher'] = Enricher
     globals()['ExperimentConfig'] = ExperimentConfig
     globals()['ResourceRequest'] = ResourceRequest
     globals()['Route'] = Route
-    globals()['RouterConfigConfigLogConfig'] = RouterConfigConfigLogConfig
     globals()['RouterEnsemblerConfig'] = RouterEnsemblerConfig
+    globals()['RouterVersionConfigLogConfig'] = RouterVersionConfigLogConfig
     globals()['TrafficRule'] = TrafficRule
 
 
@@ -98,7 +98,7 @@ class RouterVersionConfig(ModelNormal):
             'default_route_id': (str,),  # noqa: E501
             'experiment_engine': (ExperimentConfig,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
-            'log_config': (RouterConfigConfigLogConfig,),  # noqa: E501
+            'log_config': (RouterVersionConfigLogConfig,),  # noqa: E501
             'rules': ([TrafficRule],),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
@@ -142,7 +142,7 @@ class RouterVersionConfig(ModelNormal):
             default_route_id (str):
             experiment_engine (ExperimentConfig):
             timeout (str):
-            log_config (RouterConfigConfigLogConfig):
+            log_config (RouterVersionConfigLogConfig):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types

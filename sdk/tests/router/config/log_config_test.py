@@ -35,7 +35,7 @@ def test_create_result_logger_type(result_logger_type, expected):
             ResultLoggerType.NOP,
             None,
             None,
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('nop'),
             )
         ),
@@ -46,7 +46,7 @@ def test_create_result_logger_type(result_logger_type, expected):
                 service_account_secret="my-little-secret"
             ),
             None,
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('bigquery'),
                 bigquery_config=turing.generated.models.BigQueryConfig(
                     table="bigqueryproject.bigquerydataset.bigquerytable",
@@ -62,7 +62,7 @@ def test_create_result_logger_type(result_logger_type, expected):
                 topic="new_topics",
                 serialization_format="json"
             ),
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
@@ -92,7 +92,7 @@ def test_create_log_config_with_valid_params(
             "bigqueryproject.bigquerydataset.bigquerytable",
             "my-little-secret",
             None,
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('bigquery'),
                 bigquery_config=turing.generated.models.BigQueryConfig(
                     table="bigqueryproject.bigquerydataset.bigquerytable",
@@ -135,7 +135,7 @@ def test_create_bigquery_log_config_with_invalid_table(table, service_account_se
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.JSON,
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
@@ -148,7 +148,7 @@ def test_create_bigquery_log_config_with_invalid_table(table, service_account_se
             "1.2.3.4:5678,9.0.1.2:3456",
             "new_topics",
             KafkaConfigSerializationFormat.PROTOBUF,
-            turing.generated.models.RouterConfigConfigLogConfig(
+            turing.generated.models.RouterVersionConfigLogConfig(
                 result_logger_type=turing.generated.models.ResultLoggerType('kafka'),
                 kafka_config=turing.generated.models.KafkaConfig(
                     brokers="1.2.3.4:5678,9.0.1.2:3456",
