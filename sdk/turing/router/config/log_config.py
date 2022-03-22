@@ -85,7 +85,7 @@ class LogConfig:
         if self.kafka_config is not None:
             kwargs["kafka_config"] = self.kafka_config
 
-        return turing.generated.models.RouterConfigConfigLogConfig(
+        return turing.generated.models.RouterVersionConfigLogConfig(
             result_logger_type=self.result_logger_type.to_open_api(),
             **kwargs
         )

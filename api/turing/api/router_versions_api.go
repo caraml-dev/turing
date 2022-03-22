@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/turing/api/turing/api/request"
 	"github.com/gojek/turing/api/turing/log"
 	"github.com/gojek/turing/api/turing/models"
 )
@@ -31,6 +32,44 @@ func (c RouterVersionsController) ListRouterVersions(
 	}
 
 	return Ok(routerVersions)
+}
+
+// CreateRouterVersion creates a router version from the provided configuration. If no router exists
+// within the provided project with the provided id, this method will throw an error.
+// If the update is valid, a new RouterVersion will be created but NOT deployed.
+func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars RequestVars, body interface{}) *Response {
+	// Parse request vars
+	var errResp *Response
+	var router *models.Router
+	if _, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
+		return errResp
+	}
+
+	request := body.(*request.RouterConfig)
+
+	// Create new version
+	var routerVersion *models.RouterVersion
+	if request == nil {
+		return InternalServerError("unable to create router version", "router config is empty")
+	}
+
+	routerVersion, err := request.BuildRouterVersion(
+		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+
+	if err == nil {
+		// Save router version, re-assign the value of err
+		routerVersion.Status = models.RouterVersionStatusUndeployed
+		routerVersion, err = c.RouterVersionsService.Save(routerVersion)
+	}
+
+	if err != nil {
+		return InternalServerError("unable to create router version", err.Error())
+	}
+
+	return Ok(routerVersion)
 }
 
 // GetRouterVersion gets the router version for the provided router id and version number.
@@ -138,6 +177,12 @@ func (c RouterVersionsController) Routes() []Route {
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
 			handler: c.ListRouterVersions,
+		},
+		{
+			method:  http.MethodPost,
+			path:    "/projects/{project_id}/routers/{router_id}/versions",
+			body:    request.RouterConfig{},
+			handler: c.CreateRouterVersion,
 		},
 		{
 			method:  http.MethodGet,

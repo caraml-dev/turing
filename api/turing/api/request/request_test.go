@@ -65,23 +65,40 @@ func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
 	return expEngineConfig
 }
 
-var createOrUpdateRequest = CreateOrUpdateRouterRequest{
-	Environment: "env",
-	Name:        "router",
-	Config: &RouterConfig{
-		Routes: []*models.Route{
-			{
-				ID:       "default",
-				Type:     "PROXY",
-				Endpoint: "endpoint",
-				Timeout:  "6s",
-			},
+var validRouterConfig = RouterConfig{
+	Routes: []*models.Route{
+		{
+			ID:       "default",
+			Type:     "PROXY",
+			Endpoint: "endpoint",
+			Timeout:  "6s",
 		},
-		DefaultRouteID: "default",
-		ExperimentEngine: &ExperimentEngineConfig{
-			Type:   "standard",
-			Config: makeTuringExperimentConfig("dummy_passkey"),
+	},
+	DefaultRouteID: "default",
+	ExperimentEngine: &ExperimentEngineConfig{
+		Type:   "standard",
+		Config: makeTuringExperimentConfig("dummy_passkey"),
+	},
+	ResourceRequest: &models.ResourceRequest{
+		MinReplica: 0,
+		MaxReplica: 5,
+		CPURequest: resource.Quantity{
+			Format: "500M",
 		},
+		MemoryRequest: resource.Quantity{
+			Format: "1G",
+		},
+	},
+	Timeout: "10s",
+	LogConfig: &LogConfig{
+		ResultLoggerType: "bigquery",
+		BigQueryConfig: &BigQueryConfig{
+			Table:                "project.dataset.table",
+			ServiceAccountSecret: "service_account",
+		},
+	},
+	Enricher: &EnricherEnsemblerConfig{
+		Image: "lala",
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
 			MaxReplica: 5,
@@ -92,67 +109,63 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 				Format: "1G",
 			},
 		},
-		Timeout: "10s",
-		LogConfig: &LogConfig{
-			ResultLoggerType: "bigquery",
-			BigQueryConfig: &BigQueryConfig{
-				Table:                "project.dataset.table",
-				ServiceAccountSecret: "service_account",
+		Endpoint: "endpoint",
+		Timeout:  "6s",
+		Port:     8080,
+		Env: []*models.EnvVar{
+			{
+				Name:  "key",
+				Value: "value",
 			},
 		},
-		Enricher: &EnricherEnsemblerConfig{
-			Image: "lala",
+	},
+	Ensembler: &models.Ensembler{
+		Type: "docker",
+		DockerConfig: &models.EnsemblerDockerConfig{
+			Image: "nginx",
 			ResourceRequest: &models.ResourceRequest{
-				MinReplica: 0,
-				MaxReplica: 5,
-				CPURequest: resource.Quantity{
-					Format: "500M",
-				},
-				MemoryRequest: resource.Quantity{
-					Format: "1G",
-				},
+				CPURequest:    resource.Quantity{Format: "500m"},
+				MemoryRequest: resource.Quantity{Format: "1Gi"},
 			},
-			Endpoint: "endpoint",
-			Timeout:  "6s",
-			Port:     8080,
-			Env: []*models.EnvVar{
-				{
-					Name:  "key",
-					Value: "value",
-				},
-			},
-		},
-		Ensembler: &models.Ensembler{
-			Type: "docker",
-			DockerConfig: &models.EnsemblerDockerConfig{
-				Image: "nginx",
-				ResourceRequest: &models.ResourceRequest{
-					CPURequest:    resource.Quantity{Format: "500m"},
-					MemoryRequest: resource.Quantity{Format: "1Gi"},
-				},
-				Timeout: "5s",
-			},
+			Timeout: "5s",
 		},
 	},
 }
 
-var createOrUpdateInvalidRequest = CreateOrUpdateRouterRequest{
-	Environment: "env",
-	Name:        "router",
-	Config: &RouterConfig{
-		Routes: []*models.Route{
-			{
-				ID:       "default",
-				Type:     "PROXY",
-				Endpoint: "endpoint",
-				Timeout:  "6s",
-			},
+var invalidRouterConfig = RouterConfig{
+	Routes: []*models.Route{
+		{
+			ID:       "default",
+			Type:     "PROXY",
+			Endpoint: "endpoint",
+			Timeout:  "6s",
 		},
-		DefaultRouteID: "default",
-		ExperimentEngine: &ExperimentEngineConfig{
-			Type:   "standard",
-			Config: makeTuringExperimentConfig("dummy_passkey"),
+	},
+	DefaultRouteID: "default",
+	ExperimentEngine: &ExperimentEngineConfig{
+		Type:   "standard",
+		Config: makeTuringExperimentConfig("dummy_passkey"),
+	},
+	ResourceRequest: &models.ResourceRequest{
+		MinReplica: 0,
+		MaxReplica: 5,
+		CPURequest: resource.Quantity{
+			Format: "500M",
 		},
+		MemoryRequest: resource.Quantity{
+			Format: "1G",
+		},
+	},
+	Timeout: "10s",
+	LogConfig: &LogConfig{
+		ResultLoggerType: "bigquery",
+		BigQueryConfig: &BigQueryConfig{
+			Table:                "project.dataset.table",
+			ServiceAccountSecret: "service_account",
+		},
+	},
+	Enricher: &EnricherEnsemblerConfig{
+		Image: "lala",
 		ResourceRequest: &models.ResourceRequest{
 			MinReplica: 0,
 			MaxReplica: 5,
@@ -163,49 +176,34 @@ var createOrUpdateInvalidRequest = CreateOrUpdateRouterRequest{
 				Format: "1G",
 			},
 		},
-		Timeout: "10s",
-		LogConfig: &LogConfig{
-			ResultLoggerType: "bigquery",
-			BigQueryConfig: &BigQueryConfig{
-				Table:                "project.dataset.table",
-				ServiceAccountSecret: "service_account",
-			},
-		},
-		Enricher: &EnricherEnsemblerConfig{
-			Image: "lala",
-			ResourceRequest: &models.ResourceRequest{
-				MinReplica: 0,
-				MaxReplica: 5,
-				CPURequest: resource.Quantity{
-					Format: "500M",
-				},
-				MemoryRequest: resource.Quantity{
-					Format: "1G",
-				},
-			},
-			Endpoint: "endpoint",
-			Timeout:  "6s",
-			Port:     8080,
-			Env: []*models.EnvVar{
-				{
-					Name:  "key",
-					Value: "value",
-				},
-			},
-		},
-		Ensembler: &models.Ensembler{
-			Type: "pyfunc",
-			PyfuncConfig: &models.EnsemblerPyfuncConfig{
-				ProjectID:   models.NewID(11),
-				EnsemblerID: models.NewID(12),
-				ResourceRequest: &models.ResourceRequest{
-					CPURequest:    resource.Quantity{Format: "500m"},
-					MemoryRequest: resource.Quantity{Format: "1Gi"},
-				},
-				Timeout: "5s",
+		Endpoint: "endpoint",
+		Timeout:  "6s",
+		Port:     8080,
+		Env: []*models.EnvVar{
+			{
+				Name:  "key",
+				Value: "value",
 			},
 		},
 	},
+	Ensembler: &models.Ensembler{
+		Type: "pyfunc",
+		PyfuncConfig: &models.EnsemblerPyfuncConfig{
+			ProjectID:   models.NewID(11),
+			EnsemblerID: models.NewID(12),
+			ResourceRequest: &models.ResourceRequest{
+				CPURequest:    resource.Quantity{Format: "500m"},
+				MemoryRequest: resource.Quantity{Format: "1Gi"},
+			},
+			Timeout: "5s",
+		},
+	},
+}
+
+var createOrUpdateRequest = CreateOrUpdateRouterRequest{
+	Environment: "env",
+	Name:        "router",
+	Config:      &validRouterConfig,
 }
 
 func TestRequestBuildRouter(t *testing.T) {
@@ -309,7 +307,7 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 			// Set up mock Ensembler service
 			ensemblerSvc := &mocks.EnsemblersService{}
 
-			got, err := baseRequest.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
+			got, err := baseRequest.Config.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
 			assert.NoError(t, err)
 			assert.Equal(t, got.LogConfig, tt.expectedLogConfig)
 		})
@@ -418,7 +416,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
 
-	got, err := createOrUpdateRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	got, err := validRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 	require.NoError(t, err)
 	expected.Model = got.Model
 	assertgotest.DeepEqual(t, expected, *got)
@@ -455,7 +453,7 @@ func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
 	ensemblerSvc.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("record not found"))
 
 	// Update the router with an invalid request
-	got, err := createOrUpdateInvalidRequest.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	got, err := invalidRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 
 	assert.EqualError(t, err, "failed to find specified ensembler: record not found")
 	assert.Nil(t, got)
@@ -475,42 +473,36 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		req      CreateOrUpdateRouterRequest
+		req      RouterConfig
 		router   *models.Router
 		expected json.RawMessage
 		err      string
 	}{
 		"failure | std engine | missing curr version passkey": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "standard-manager",
-						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
-					},
+			req: RouterConfig{
+				ExperimentEngine: &ExperimentEngineConfig{
+					Type:   "standard-manager",
+					Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 				},
 			},
 			router: &models.Router{},
 			err:    "Passkey must be configured",
 		},
 		"failure | std engine | encrypt passkey error": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "standard-manager",
-						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey-bad"}}`),
-					},
+			req: RouterConfig{
+				ExperimentEngine: &ExperimentEngineConfig{
+					Type:   "standard-manager",
+					Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey-bad"}}`),
 				},
 			},
 			router: &models.Router{},
 			err:    "Passkey could not be encrypted: test-encrypt-error",
 		},
 		"success | std engine | use curr version passkey": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "standard-manager",
-						Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
-					},
+			req: RouterConfig{
+				ExperimentEngine: &ExperimentEngineConfig{
+					Type:   "standard-manager",
+					Config: json.RawMessage(`{"client": {"username": "client-name"}}`),
 				},
 			},
 			router: &models.Router{
@@ -528,12 +520,10 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			}`),
 		},
 		"success | std engine | use new passkey": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "standard-manager",
-						Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
-					},
+			req: RouterConfig{
+				ExperimentEngine: &ExperimentEngineConfig{
+					Type:   "standard-manager",
+					Config: json.RawMessage(`{"client": {"username": "client-name", "passkey": "passkey"}}`),
 				},
 			},
 			router: &models.Router{},
@@ -544,12 +534,10 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			}`),
 		},
 		"success | custom engine": {
-			req: CreateOrUpdateRouterRequest{
-				Config: &RouterConfig{
-					ExperimentEngine: &ExperimentEngineConfig{
-						Type:   "custom-manager",
-						Config: json.RawMessage("[1, 2]"),
-					},
+			req: RouterConfig{
+				ExperimentEngine: &ExperimentEngineConfig{
+					Type:   "custom-manager",
+					Config: json.RawMessage("[1, 2]"),
 				},
 			},
 			router:   &models.Router{},
