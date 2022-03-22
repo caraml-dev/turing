@@ -599,43 +599,7 @@ components:
           type: "string"
           pattern: '^[a-z0-9-]*$'
         config:
-          type: "object"
-          required:
-            - routes
-            - default_route_id
-            - experiment_engine
-            - timeout
-            - log_config
-          properties:
-            routes:
-              type: "array"
-              items:
-                $ref: "#/components/schemas/Route"
-            rules:
-              type: "array"
-              items:
-                $ref: "#/components/schemas/TrafficRule"
-            default_route_id:
-              type: "string"
-            experiment_engine:
-              $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
-            resource_request:
-              $ref: "#/components/schemas/ResourceRequest"
-            timeout:
-              <<: *timeout
-            log_config:
-              type: "object"
-              properties:
-                result_logger_type:
-                  $ref: "#/components/schemas/ResultLoggerType"
-                bigquery_config:
-                  $ref: "#/components/schemas/BigQueryConfig"
-                kafka_config:
-                  $ref: "#/components/schemas/KafkaConfig"
-            enricher:
-              $ref: "#/components/schemas/Enricher"
-            ensembler:
-              $ref: "#/components/schemas/RouterEnsemblerConfig"
+          $ref: "#/components/schemas/RouterVersionConfig"
 
     RouterVersionConfig:
       type: "object"
@@ -887,6 +851,10 @@ components:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
           <<: *timeout
+        env:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/EnvVar"
 
     ResourceRequest:
       type: "object"

@@ -68,7 +68,7 @@ class RouterVersion(RouterConfig):
         """
         version = turing.active_session.create_router_version(
             router_id=router_id,
-            router_version_config=config.to_open_api(use_generic_config=True)
+            router_version_config=config.to_open_api().config
         )
         return RouterVersion(
             environment_name=version.router.environment_name,

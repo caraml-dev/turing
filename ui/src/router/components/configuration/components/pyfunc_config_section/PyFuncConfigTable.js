@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { EuiDescriptionList } from "@elastic/eui";
 import EnsemblersContext from "../../../../../providers/ensemblers/context";
 
-export const PyFuncRefConfigTable = ({ config: { ensembler_id } }) => {
+export const PyFuncConfigTable = ({ config: { ensembler_id } }) => {
   const { ensemblers } = useContext(EnsemblersContext);
 
   const ensembler_name = Object.values(ensemblers)

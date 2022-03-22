@@ -4,7 +4,7 @@ import { ConfigSectionPanel } from "../../../../../components/config_section";
 import { ContainerConfigTable } from "../docker_config_section/ContainerConfigTable";
 import { ResourcesConfigTable } from "../ResourcesConfigTable";
 import { ConfigMultiSectionPanel } from "../../../../../components/config_multi_section_panel/ConfigMultiSectionPanel";
-import { PyFuncRefConfigTable } from "./PyFuncRefConfigTable";
+import { PyFuncConfigTable } from "./PyFuncConfigTable";
 import { EnvVariablesConfigTable } from "../docker_config_section/EnvVariablesConfigTable";
 
 export const PyFuncConfigViewGroup = ({
@@ -15,10 +15,11 @@ export const PyFuncConfigViewGroup = ({
   const items = [
     {
       title: "Pyfunc Ensembler Details",
-      children: <PyFuncRefConfigTable config={pyfuncConfig} />,
+      children: <PyFuncConfigTable config={pyfuncConfig} />,
     },
   ];
-
+  console.log(dockerConfig);
+  console.log(pyfuncConfig);
   if (!!dockerConfig) {
     items.splice(
       items.length,

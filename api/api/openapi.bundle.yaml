@@ -1951,6 +1951,11 @@ components:
               max_replica: 6
               memory_request: memory_request
               cpu_request: cpu_request
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
@@ -2212,6 +2217,11 @@ components:
             max_replica: 6
             memory_request: memory_request
             cpu_request: cpu_request
+          env:
+          - name: name
+            value: value
+          - name: name
+            value: value
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
@@ -2347,6 +2357,11 @@ components:
           max_replica: 6
           memory_request: memory_request
           cpu_request: cpu_request
+        env:
+        - name: name
+          value: value
+        - name: name
+          value: value
         timeout: timeout
       nullable: true
       properties:
@@ -2359,6 +2374,10 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        env:
+          items:
+            $ref: '#/components/schemas/EnvVar'
+          type: array
       required:
       - ensembler_id
       - project_id
@@ -2502,6 +2521,11 @@ components:
                 max_replica: 6
                 memory_request: memory_request
                 cpu_request: cpu_request
+              env:
+              - name: name
+                value: value
+              - name: name
+                value: value
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
@@ -2552,33 +2576,11 @@ components:
           pattern: ^[a-z0-9-]*$
           type: string
         config:
-          $ref: '#/components/schemas/RouterConfig_config'
+          $ref: '#/components/schemas/RouterVersionConfig'
       required:
       - config
       - environment_name
       - name
-      type: object
-    RouterId:
-      $ref: '#/components/schemas/IdObject'
-    RouterIdAndVersion:
-      example:
-        router_id: 0
-        version: 6
-      properties:
-        router_id:
-          format: int32
-          type: integer
-        version:
-          format: int32
-          type: integer
-      type: object
-    RouterIdObject:
-      example:
-        router_id: 0
-      properties:
-        router_id:
-          format: int32
-          type: integer
       type: object
     RouterVersionConfig:
       example:
@@ -2656,6 +2658,11 @@ components:
               max_replica: 6
               memory_request: memory_request
               cpu_request: cpu_request
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
@@ -2717,7 +2724,7 @@ components:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         log_config:
-          $ref: '#/components/schemas/RouterConfig_config_log_config'
+          $ref: '#/components/schemas/RouterVersionConfig_log_config'
         enricher:
           $ref: '#/components/schemas/Enricher'
         ensembler:
@@ -2728,6 +2735,28 @@ components:
       - log_config
       - routes
       - timeout
+      type: object
+    RouterId:
+      $ref: '#/components/schemas/IdObject'
+    RouterIdAndVersion:
+      example:
+        router_id: 0
+        version: 6
+      properties:
+        router_id:
+          format: int32
+          type: integer
+        version:
+          format: int32
+          type: integer
+      type: object
+    RouterIdObject:
+      example:
+        router_id: 0
+      properties:
+        router_id:
+          format: int32
+          type: integer
       type: object
     RouterEvents:
       example:
@@ -3230,7 +3259,7 @@ components:
       - route
       - treatment
       type: object
-    RouterConfig_config_log_config:
+    RouterVersionConfig_log_config:
       example:
         bigquery_config:
           batch_load: true
@@ -3247,155 +3276,6 @@ components:
           $ref: '#/components/schemas/BigQueryConfig'
         kafka_config:
           $ref: '#/components/schemas/KafkaConfig'
-      type: object
-    RouterConfig_config:
-      example:
-        enricher:
-          service_account: secret-name-for-google-service-account
-          image: image
-          endpoint: endpoint
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          port: 5
-          created_at: 2000-01-23T04:56:07.000+00:00
-          resource_request:
-            min_replica: 0
-            max_replica: 6
-            memory_request: memory_request
-            cpu_request: cpu_request
-          id: 1
-          env:
-          - name: name
-            value: value
-          - name: name
-            value: value
-          timeout: timeout
-        routes:
-        - endpoint: endpoint
-          annotations: '{}'
-          id: id
-          type: type
-          timeout: timeout
-        - endpoint: endpoint
-          annotations: '{}'
-          id: id
-          type: type
-          timeout: timeout
-        default_route_id: default_route_id
-        rules:
-        - routes:
-          - routes
-          - routes
-          conditions:
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-        - routes:
-          - routes
-          - routes
-          conditions:
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-          - field: field
-            values:
-            - values
-            - values
-            operator: in
-        resource_request:
-          min_replica: 0
-          max_replica: 6
-          memory_request: memory_request
-          cpu_request: cpu_request
-        ensembler:
-          pyfunc_config:
-            project_id: 7
-            ensembler_id: 9
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            timeout: timeout
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          standard_config:
-            experiment_mappings:
-            - treatment: treatment-1
-              route: route-1
-              experiment: experiment-1
-            - treatment: treatment-1
-              route: route-1
-              experiment: experiment-1
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: 5
-          type: standard
-          docker_config:
-            service_account: secret-name-for-google-service-account
-            image: image
-            endpoint: endpoint
-            port: 2
-            resource_request:
-              min_replica: 0
-              max_replica: 6
-              memory_request: memory_request
-              cpu_request: cpu_request
-            env:
-            - name: name
-              value: value
-            - name: name
-              value: value
-            timeout: timeout
-        log_config:
-          bigquery_config:
-            batch_load: true
-            table: table
-            service_account_secret: service_account_secret
-          kafka_config:
-            brokers: brokers
-            topic: topic
-            serialization_format: json
-        timeout: timeout
-        experiment_engine:
-          type: nop
-          config: '{}'
-      properties:
-        routes:
-          items:
-            $ref: '#/components/schemas/Route'
-          type: array
-        rules:
-          items:
-            $ref: '#/components/schemas/TrafficRule'
-          type: array
-        default_route_id:
-          type: string
-        experiment_engine:
-          $ref: '#/components/schemas/ExperimentConfig'
-        resource_request:
-          $ref: '#/components/schemas/ResourceRequest'
-        timeout:
-          pattern: ^[0-9]+(ms|s|m|h)$
-          type: string
-        log_config:
-          $ref: '#/components/schemas/RouterConfig_config_log_config'
-        enricher:
-          $ref: '#/components/schemas/Enricher'
-        ensembler:
-          $ref: '#/components/schemas/RouterEnsemblerConfig'
-      required:
-      - default_route_id
-      - experiment_engine
-      - log_config
-      - routes
-      - timeout
       type: object
     StandardExperimentEngine_allOf_standard_experiment_manager_config:
       nullable: true
