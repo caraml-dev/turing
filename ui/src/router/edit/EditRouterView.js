@@ -72,7 +72,7 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
       });
     } else if (withDeployment === false) {
       return submitCreateRouterVersion({
-        body: JSON.stringify(routerConfig),
+        body: JSON.stringify(routerConfig.toJSON().config),
       });
     }
   };
