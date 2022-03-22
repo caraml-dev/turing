@@ -18,7 +18,7 @@ communication (IPC) between the parent (Turing Server/Router) and the child (Exp
 is done through the local unix socket. For more information about the `hashicorp/go-plugin`'s internals, please 
 check its [official documentation](https://github.com/hashicorp/go-plugin#readme).
 
-For the correct work, the Experiment Engine plugin must implement both [Experiment Manager](developer_guide.md#experiment-manager)
+For it to work correctly, the Experiment Engine plugin must implement both [Experiment Manager](developer_guide.md#experiment-manager)
 and [Experiment Runner](./developer_guide.md#experiment-runner) interfaces.
 
 Turing Server interacts with the Experiment Manager interface of the plugin to fetch the information about 
@@ -126,7 +126,7 @@ type Configurable interface {
 More details about the plugin configuration and the role of `Configurable` method in it can be found in the 
 [Plugin Configuration](./rpc_plugins.md#experiment-manager-configuration) section.
 
-Additionally, the Standard experiment manager should implement the StandardExperimentManager interface of:
+Additionally, the Standard experiment manager should implement the `StandardExperimentManager` interface of:
 ```go
 type StandardExperimentManager interface {
 	ExperimentManager
@@ -282,18 +282,18 @@ func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
 }
 ```
 [`hashicorp/go-plugin`](https://github.com/hashicorp/go-plugin) uses [`hclog`](https://github.com/hashicorp/go-hclog) 
-library for logging, and it expects that the plugin's log stream will be written into the standard output as `hlog` 
+library for logging, and it expects that the plugin's log stream will be written into the standard output as `hclog` 
 formatted entries. On other hand, Turing is relying on [`zap`](https://github.com/uber-go/zap) for logging, hence 
-`turing/engines/experiment` module provides a bridge between `zap` and `hlog` libraries. By default, `zap` logger is
-used for logging, so in order to enable `hlog` logger, it's required to import the corresponding package for its 
+`turing/engines/experiment` module provides a bridge between `zap` and `hclog` libraries. By default, `zap` logger is
+used for logging, so in order to enable `hclog` logger, it's required to import the corresponding package for its 
 side effect:
 ```go
 import (
 	_ "github.com/gojek/turing/engines/experiment/log/hclog"
 )
 ```
-Such import statement will configure `github.com/gojek/turing/engines/experiment/log` to use `hlog` logger with the 
-default configuration. Alternatively, it's possible to configure `hlog` logger explicitly by calling `SetGlobalLogger`
+Such import statement will configure `github.com/gojek/turing/engines/experiment/log` to use `hclog` logger with the 
+default configuration. Alternatively, it's possible to configure `hclog` logger explicitly by calling `SetGlobalLogger`
 function:
 
 ```go
@@ -343,7 +343,7 @@ https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) and a share
  * When deployed, the Experiment Engine image copies the plugin's binary into a shared volume accessible by the Turing app
  * Turing Server/Router process starts and launches the plugin as its child process
 
-hence, it's expected that the Experiment Engine plugin is distributed as an OCI image (versioned and published into
+Hence, it's expected that the Experiment Engine plugin is distributed as an OCI image (versioned and published into
 the image registry) with its entrypoint/command being defined as:
 ```docker
 CMD ["sh", "-c", "cp <path_to_plugin_binary> ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]

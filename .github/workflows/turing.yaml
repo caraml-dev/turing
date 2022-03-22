@@ -104,33 +104,31 @@ jobs:
 
   build-test-experiment-engine-plugin:
     runs-on: ubuntu-latest
+    env:
+      VERSION: latest
     outputs:
-      test-experiment-engine-plugin-version: ${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
+      test-experiment-engine-plugin-version: ${{ env.VERSION }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
       - name: Build Docker image
-        id: build-image
         working-directory: engines/experiment/examples/plugins/hardcoded
-        env:
-          VERSION: latest
         run: |
           set -o pipefail
-          make build-image | tee output.log
-          echo "::set-output name=test-experiment-engine-plugin-version::${{ env.VERSION }}"
+          make build-image
 
       - name: Save Docker image
         run: |
           docker image save \
-            --output test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar \
-            plugin-example-engine-plugin:${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}
+            --output test-experiment-engine-plugin.${{ env.VERSION }}.tar \
+            plugin-example-engine-plugin:${{ env.VERSION }}
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar
-          path: test-experiment-engine-plugin.${{ steps.build-image.outputs.test-experiment-engine-plugin-version }}.tar
+          name: test-experiment-engine-plugin.${{ env.VERSION }}.tar
+          path: test-experiment-engine-plugin.${{ env.VERSION }}.tar
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   build-ui:
