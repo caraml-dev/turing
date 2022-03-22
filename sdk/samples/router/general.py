@@ -20,6 +20,10 @@ def main(turing_api: str, project: str):
     turing.set_project(project)
 
     # Build a router config in order to create a router
+    # Note: When constructing a `RouterConfig` object from scratch, it is **highly recommended** that you construct each
+    # individual component using the Turing SDK classes provided instead of using `dict` objects which do not perform
+    # any schema validation.
+
     # Create some routes
     routes = [
         Route(
@@ -50,6 +54,12 @@ def main(turing_api: str, project: str):
     ]
 
     # Create some traffic rules
+    # Note: Each traffic rule is defined by at least one `TrafficRuleCondition` and one route. Routes are essentially
+    # the `id`s of `Route` objects that you intend to specify for the entire `TrafficRule`.
+    #
+    # When defining a traffic rule, one would need to decide between using a `HeaderTrafficRuleCondition` or a
+    # `PayloadTrafficRuleCondition`. These subclasses can be used to build a `TrafficRuleCondition` without having to
+    # manually set attributes such as `field_source` or `operator`.
     rules = [
         TrafficRule(
             conditions=[
@@ -112,7 +122,15 @@ def main(turing_api: str, project: str):
         )
     ]
 
-    # Create an experiment config (
+    # Create an experiment config
+    # The `ExperimentConfig` class is a simple container to carry configuration related to an experiment to be used by a
+    # Turing Router. Note that as Turing does not create experiments automatically, you would need to create your
+    # experiments separately prior to specifying their configuration here.
+    #
+    # Also, notice that `ExperimentConfig` does not contain any fixed schema as it simply carries configuration for
+    # experiment engines, which are used as plug-ins for Turing. When building an `ExperimentConfig` from scratch, you
+    # would need to consider the underlying schema for the `config` attribute as well as the appropriate `type` that
+    # corresponds to your selected experiment engine.
     experiment_config = ExperimentConfig(
         type="test-exp",
         config={
@@ -128,6 +146,9 @@ def main(turing_api: str, project: str):
     )
 
     # Create a resource request config for the router
+    # Note: The units for CPU and memory requests are measured in cpu units and bytes respectively. You may wish to
+    # read more about how these are measured here:
+    # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
     resource_request = ResourceRequest(
         min_replica=0,
         max_replica=2,
@@ -136,6 +157,12 @@ def main(turing_api: str, project: str):
     )
 
     # Create a log config for the router
+    # Note: Logging for Turing Routers is done through BigQuery or Kafka, and its configuration is managed by the
+    # `LogConfig` class. Two helper classes (child classes of `LogConfig`) have been created to assist you in
+    # constructing these objects - `BigQueryLogConfig` and `KafkaLogConfig`.
+    #
+    # If you do not intend to use any logging, simply create a regular `LogConfig` object with `result_loggger_type` set
+    # as `ResultLoggerType.NOP`, without defining the other arguments.
     log_config = LogConfig(
         result_logger_type=ResultLoggerType.NOP
     )
@@ -161,6 +188,10 @@ def main(turing_api: str, project: str):
     )
 
     # Create an ensembler for the router
+    # Note: Ensembling for Turing Routers is done through Standard, Docker or Pyfunc ensemblers, and its configuration
+    # is managed by the `RouterEnsemblerConfig` class. Three helper classes (child classes of `RouterEnsemblerConfig`)
+    # have been created to assist you in constructing these objects - `StandardRouterEnsemblerConfig`,
+    # `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
     ensembler = DockerRouterEnsemblerConfig(
         image="ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
@@ -191,6 +222,10 @@ def main(turing_api: str, project: str):
     )
 
     # 1. Create a new router using the RouterConfig object
+    # Note: A `Router` object represents a router that is created on Turing API. It does not (and should not) ever be
+    # created manually by using its constructor directly. Instead, you should only be manipulating with `Router`
+    # instances that get returned as a result of using the various `Router` class and instance methods that interact
+    # with Turing API, such as the one below.
     new_router = turing.Router.create(router_config)
     print(f"1. You have created a router with id: {new_router.id}")
 
@@ -229,6 +264,14 @@ def main(turing_api: str, project: str):
     print(f"4. You have just updated your router with a new config.")
 
     # 5. List all the router config versions of your router
+    # Note: A `RouterVersion` represents a single version (and configuration) of a Turing Router. Just as `Router`
+    # objects, they should almost never be created manually by using their constructor.
+    #
+    # Besides accessing attributes of a `RouterVersion` object directly, which will allow you to access basic
+    # attributes, you may also consider retrieving the entire router configuration from a specific `RouterVersion`
+    # object as a `RouterConfig` for further manipulation by performing something like:
+    #
+    # `my_config = router_version.get_config()`
     my_router_versions = my_router.list_versions()
     print(f"5. You have just retrieved a list of {len(my_router_versions)} versions for your router:")
     for ver in my_router_versions:

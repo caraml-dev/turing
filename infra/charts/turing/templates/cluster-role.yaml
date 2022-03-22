@@ -3,6 +3,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ template "turing.serviceAccount.name" . }}-cluster-role
+  labels:
+{{ include "turing.labels" . | indent 4 }}
 rules:
 - apiGroups: [""]
   resources:

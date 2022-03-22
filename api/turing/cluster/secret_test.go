@@ -16,11 +16,17 @@ func TestBuildSecret(t *testing.T) {
 		Data: map[string]string{
 			"key.json": "asdf",
 		},
+		Labels: map[string]string{
+			"key": "val",
+		},
 	}
 	expected := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "svc-account",
 			Namespace: "test-project",
+			Labels: map[string]string{
+				"key": "val",
+			},
 		},
 		Data: map[string][]byte{
 			"key.json": []byte("asdf"),

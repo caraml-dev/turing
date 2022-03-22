@@ -1,7 +1,7 @@
 # turing
 
 ---
-![Version: 0.2.5](https://img.shields.io/badge/Version-0.2.5-informational?style=flat-square)
+![Version: 0.2.7](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square)
 ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
 Turing: ML Experimentation System
@@ -67,7 +67,6 @@ The following table lists the configurable parameters of the Turing chart and th
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| dbMigrations.image.tag | string | `"v4.7.1"` | Docker tag for golang-migrate Docker image https://hub.docker.com/r/migrate/migrate |
 | global.mlp.encryption.key | string | `nil` | Global MLP Encryption Key to be used by all MLP components |
 | global.sentry.dsn | string | `nil` | Global Sentry DSN value |
 | merlin.environmentConfigs | list | computed value | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
@@ -80,11 +79,12 @@ The following table lists the configurable parameters of the Turing chart and th
 | mlp.postgresql | object | `{"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
 | mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
 | mlp.postgresql.postgresqlPassword | string | `"mlp"` | Password for MLP Postgresql database |
-| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlPort":5432,"postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
 | postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
+| tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
@@ -97,7 +97,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.extraVolumes | list | `[]` | Extra volumes to attach to the Pod. For example, you can mount  additional secrets to these volumes |
 | turing.image.registry | string | `"ghcr.io"` | Docker registry for Turing API image. User is required to override the registry for now as there is no publicly available Turing image |
 | turing.image.repository | string | `"gojek/turing"` | Docker image repository for Turing API |
-| turing.image.tag | string | `"v1.0.0"` | Docker image tag for Turing API |
+| turing.image.tag | string | `"v1.3.4"` | Docker image tag for Turing API |
 | turing.ingress.class | string | `""` | Ingress class annotation to add to this Ingress rule,  useful when there are multiple ingress controllers installed |
 | turing.ingress.enabled | bool | `false` | Enable ingress to provision Ingress resource for external access to Turing API |
 | turing.ingress.host | string | `""` | Set host value to enable name based virtual hosting. This allows routing HTTP traffic to multiple host names at the same IP address. If no host is specified, the ingress rule applies to all inbound HTTP traffic through  the IP address specified. https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting |

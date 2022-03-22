@@ -210,6 +210,7 @@ func TestNewSecret(t *testing.T) {
 	tests := map[string]struct {
 		version         *models.RouterVersion
 		project         *mlp.Project
+		envType         string
 		routerSvcKey    string
 		enricherSvcKey  string
 		ensemblerSvcKey string
@@ -224,6 +225,7 @@ func TestNewSecret(t *testing.T) {
 				},
 			},
 			project:         &mlp.Project{Name: "test-project"},
+			envType:         "test",
 			routerSvcKey:    "router-key",
 			enricherSvcKey:  "enricher-key",
 			ensemblerSvcKey: "ensembler-key",
@@ -234,6 +236,13 @@ func TestNewSecret(t *testing.T) {
 					"router-service-account.json":    "router-key",
 					"enricher-service-account.json":  "enricher-key",
 					"ensembler-service-account.json": "ensembler-key",
+				},
+				Labels: map[string]string{
+					"app":          "test-router",
+					"environment":  "",
+					"orchestrator": "turing",
+					"stream":       "",
+					"team":         "",
 				},
 			},
 		},

@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ template "turing.fullname" . }}-openapi
+  labels:
+{{ include "turing.labels" . | indent 4 }}
 data:
   override.yaml: |
     {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}

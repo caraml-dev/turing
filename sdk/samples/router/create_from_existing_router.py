@@ -150,6 +150,9 @@ def main(turing_api: str, project: str):
     router_1 = turing.Router.get(router.id)
 
     # Now we'd like to create a new router that's similar to router_1, but with some configs modified
+    # Reminder: When trying to replicate configuration from an existing router, always retrieve the underlying
+    # `RouterConfig` from the `Router` instance by accessing its `config` attribute.
+
     # Get the router config from router_1
     router_config = router_1.config
 
