@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2e
@@ -38,7 +39,7 @@ func TestCreateRouterVersion(t *testing.T) {
 	require.NoError(t, err)
 
 	// Read router config test data
-	data := makeRouterPayload(filepath.Join("testdata", "update_router_high_cpu.json.tmpl"), globalTestContext)
+	data := makeRouterPayload(filepath.Join("testdata", "create_router_version.json.tmpl"), globalTestContext)
 
 	// Update router
 	url := fmt.Sprintf(
