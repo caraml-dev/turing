@@ -206,12 +206,6 @@ var createOrUpdateRequest = CreateOrUpdateRouterRequest{
 	Config:      &validRouterConfig,
 }
 
-var createOrUpdateInvalidRequest = CreateOrUpdateRouterRequest{
-	Environment: "env",
-	Name:        "router",
-	Config:      &invalidRouterConfig,
-}
-
 func TestRequestBuildRouter(t *testing.T) {
 	projectID := models.ID(1)
 	expected := &models.Router{
