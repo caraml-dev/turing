@@ -193,7 +193,7 @@ During the initialization, Turing Server/Router configures the plugin with the c
 #### Experiment Manager Configuration 
 
 More specifically, Turing Server passes the arbitrary JSON configuration, defined in Turing [config file during 
-the deployment](.#deployment), to the ExperimentManager's `Configure(cfg json.RawMessage) error` method. 
+the deployment](./rpc_plugins.md#deployment), to the ExperimentManager's `Configure(cfg json.RawMessage) error` method. 
 The specific implementation of the plugin can parse this JSON data into the expected data structure and use it 
 to control ExperimentManager's logic. In the [provided example](../examples/plugins/hardcoded/manager.go), passed 
 JSON configuration is parsed as an instance of [ManagerConfig](../examples/plugins/hardcoded/config.go), which 
@@ -385,10 +385,10 @@ turing:
 ```
 * `name` – (*required*) – experiment engine name
 * `type` – (*required*) – experiment engine type. Currently, the only supported option is `rpc-plugin`
-* `rpcPlugin.image` – (*required*) – image that contains plugin's binary. See [Packaging](.#packaging)
+* `rpcPlugin.image` – (*required*) – image that contains plugin's binary. See [Packaging](./rpc_plugins.md#packaging)
 * `options` – (*optional*) – arbitrary YAML structure, that contains this plugin's configuration. 
               This data, serialized as a JSON object will be passed into the [`ExperimentManager.Configure`](
-              .#experiment-manager-configuration) method during the initialization stage.
+              ./rpc_plugins.md#experiment-manager-configuration) method during the initialization stage.
 
 Then this configuration can be used for the deployment. Check the helm chart [README.md](
 ../../../infra/charts/turing/README.md) for more details. 
