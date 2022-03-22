@@ -29,7 +29,7 @@ func TestCreateRouter(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
 	data := makeRouterPayload(
-		filepath.Join("testdata", "create_router_nop_logger_nop_exp.json.tmpl"),
+		filepath.Join("testdata", "create_router_nop_logger_proprietary_exp.json.tmpl"),
 		globalTestContext)
 
 	withDeployedRouter(t, data,
@@ -38,15 +38,22 @@ func TestCreateRouter(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
-				"{}",
+				http.Header{
+					"Content-Type":  {"application/json"},
+					"X-Mirror-Body": {"true"},
+				},
+				`{"client": {"id": 4}}`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "json.response").String()
+					actualResponse := gjson.GetBytes(responsePayload, "response").String()
 					expectedResponse := `{
-					  "experiment": {},
+					  "experiment": {
+						"configuration": {
+							"foo":"bar"
+						}
+					  },
 					  "route_responses": [
 						{
 						  "data": {
@@ -65,15 +72,22 @@ func TestCreateRouter(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				batchEndpoint,
-				nil,
-				"[{},{}]",
+				http.Header{
+					"Content-Type":  {"application/json"},
+					"X-Mirror-Body": {"true"},
+				},
+				`[{"client": {"id": 4}}, {"client": {"id": 7}}]`,
 				func(response *http.Response, responsePayload []byte) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "#.data.json.response").String()
+					actualResponse := gjson.GetBytes(responsePayload, "#.data.response").String()
 					expectedResponse := `[{
-					  "experiment": {},
+					  "experiment": {
+						"configuration": {
+							"foo":"bar"
+						}
+					  },
 					  "route_responses": [
 						{
 						  "data": {
@@ -85,7 +99,11 @@ func TestCreateRouter(t *testing.T) {
 					  ]
 					},
 					{
-					  "experiment": {},
+					  "experiment": {
+						"configuration": {
+							"bar": "baz"
+						}
+					  },
 					  "route_responses": [
 						{
 						  "data": {
@@ -95,8 +113,7 @@ func TestCreateRouter(t *testing.T) {
 						  "route": "control"
 						}
 					  ]
-					}
-					]`
+					}]`
 					assert.JSONEq(t, expectedResponse, actualResponse)
 				})
 

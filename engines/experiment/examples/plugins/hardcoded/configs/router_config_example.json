@@ -1,0 +1,27 @@
+{
+  "experiments": [
+    {
+      "id": "001",
+      "name": "exp_1"
+    }
+  ],
+  "variables": {
+    "experiment_variables": {
+      "001": [
+        {
+          "name": "client_id",
+          "type": "unit",
+          "required": true
+        }
+      ]
+    },
+    "config": [
+      {
+        "name": "client_id",
+        "required": true,
+        "field": "client.id",
+        "field_source": "payload"
+      }
+    ]
+  }
+}

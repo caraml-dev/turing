@@ -190,6 +190,7 @@ func withDeployedRouter(
 		globalTestContext.ProjectID,
 		int(created.ID),
 	)
+
 	require.NoError(t, err)
 	require.Nil(t, router.CurrRouterVersion)
 	require.Equal(t, "", router.Endpoint)
@@ -226,6 +227,7 @@ func withDeployedRouter(
 		globalTestContext.ProjectID,
 		int(router.ID),
 	)
+
 	require.NoError(t, err)
 	require.NotNil(t, router.CurrRouterVersion)
 

@@ -1,5 +1,12 @@
 package log
 
+import (
+	"errors"
+
+	"github.com/hashicorp/go-hclog"
+	"go.uber.org/zap"
+)
+
 var global = newZapLogger()
 
 // Logger interface defines the common set of logging methods.
@@ -28,8 +35,21 @@ type Logger interface {
 	SetLevel(lvl string)
 }
 
-func SetGlobalLogger(l Logger) {
-	global = l
+func SetGlobalLogger(l interface{}) {
+	switch l := l.(type) {
+	case Logger:
+		global = l
+	case hclog.Logger:
+		global = &hcLogger{
+			Logger: l,
+		}
+	case *zap.SugaredLogger:
+		global = &zapLogger{
+			SugaredLogger: l,
+		}
+	default:
+		panic(errors.New("unsupported logger type"))
+	}
 }
 
 func Glob() Logger {

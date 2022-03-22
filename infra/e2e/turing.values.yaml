@@ -12,6 +12,35 @@ turing:
           enum:
           - nop
           - proprietary
+  # Deploy Turing with a proprietary experiment engine implemented as RPC plugin
+  experimentEngines:
+  - name: proprietary
+    type: rpc-plugin
+    rpcPlugin:
+      image:  # Value will be set at install time using helm --set command
+    options:
+      engine:
+        name: proprietary
+        display_name: Plugin Example
+        type: standard
+        standard_experiment_manager_config:
+          client_selection_enabled: false
+          experiment_selection_enabled: false
+      experiments:
+        - id: '001'
+          name: exp_1
+          variants:
+            - name: control
+            - name: treatment-1
+          variants_configuration:
+            control:
+              traffic: 0.85
+              treatment_configuration:
+                foo: bar
+            treatment-1:
+              traffic: 0.15
+              treatment_configuration:
+                bar: baz
 
 postgresql: &postgresql
   persistence:

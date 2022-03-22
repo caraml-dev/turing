@@ -30,6 +30,10 @@ func (l *zapLogger) SetLevel(lvl string) {
 	if err := zapLvl.UnmarshalText([]byte(lvl)); err != nil {
 		l.Warnf("failed to set %s log level: %v", lvl, err)
 	} else {
-		l.cfg.Level = zap.NewAtomicLevelAt(zapLvl)
+		if l.cfg == nil {
+			l.Warnf("failed to set %s log level: operation not supported", lvl)
+		} else {
+			l.cfg.Level = zap.NewAtomicLevelAt(zapLvl)
+		}
 	}
 }

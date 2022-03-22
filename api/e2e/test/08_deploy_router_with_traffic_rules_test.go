@@ -60,13 +60,17 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				http.Header{"X-Region": []string{"region-a"}},
+				http.Header{
+					"Content-Type":  {"application/json"},
+					"X-Region":      {"region-a"},
+					"X-Mirror-Body": {"true"},
+				},
 				"{}",
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
 
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 					expectedResponse := `{
   "experiment": {},
   "route_responses": [
@@ -95,13 +99,16 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
+				http.Header{
+					"Content-Type":  {"application/json"},
+					"X-Mirror-Body": {"true"},
+				},
 				`{"service_type": {"id": "service-type-b"}}`,
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
-					actualRequest := gjson.GetBytes(payload, "json.request").String()
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualRequest := gjson.GetBytes(payload, "request").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 
 					expectedRequest := `{"service_type":{"id":"service-type-b"}}`
 					expectedResponse := `{
@@ -133,14 +140,17 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,
-				nil,
+				http.Header{
+					"Content-Type":  {"application/json"},
+					"X-Mirror-Body": {"true"},
+				},
 				`{"service_type": {"id": "service-type-c"}}`,
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
 
-					actualRequest := gjson.GetBytes(payload, "json.request").String()
-					actualResponse := gjson.GetBytes(payload, "json.response").String()
+					actualRequest := gjson.GetBytes(payload, "request").String()
+					actualResponse := gjson.GetBytes(payload, "response").String()
 
 					expectedRequest := `{"service_type": {"id": "service-type-c"}}`
 					expectedResponse := `{
