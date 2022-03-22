@@ -7,7 +7,7 @@ import { OutcomeStep } from "./steps/OutcomeStep";
 import schema from "./validation/schema";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { ConfirmationModal } from "../../../components/confirmation_modal/ConfirmationModal";
-import { DeploymentSummary } from "./components/DeploymentSummary";
+import { RouterCreationSummary } from "./components/RouterCreationSummary";
 import { FormContext, StepsWizardHorizontal, addToast } from "@gojek/mlp-ui";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 import { useConfig } from "../../../config";
@@ -86,7 +86,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
   return (
     <ConfirmationModal
       title="Deploy Turing Router"
-      content={<DeploymentSummary router={router} />}
+      content={<RouterCreationSummary router={router} />}
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"

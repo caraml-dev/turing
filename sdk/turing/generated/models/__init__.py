@@ -65,8 +65,6 @@ from turing.generated.model.result_logger_type import ResultLoggerType
 from turing.generated.model.route import Route
 from turing.generated.model.router import Router
 from turing.generated.model.router_config import RouterConfig
-from turing.generated.model.router_config_config import RouterConfigConfig
-from turing.generated.model.router_config_config_log_config import RouterConfigConfigLogConfig
 from turing.generated.model.router_details import RouterDetails
 from turing.generated.model.router_details_all_of import RouterDetailsAllOf
 from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
@@ -76,6 +74,8 @@ from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_status import RouterStatus
 from turing.generated.model.router_version import RouterVersion
+from turing.generated.model.router_version_config import RouterVersionConfig
+from turing.generated.model.router_version_config_log_config import RouterVersionConfigLogConfig
 from turing.generated.model.router_version_log_config import RouterVersionLogConfig
 from turing.generated.model.router_version_status import RouterVersionStatus
 from turing.generated.model.save_mode import SaveMode

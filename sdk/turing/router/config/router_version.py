@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import turing
+import turing.generated.models
 import dataclasses
 from enum import Enum
 
@@ -53,3 +57,22 @@ class RouterVersion(RouterConfig):
         :return: a new RouterConfig instance containing attributes of this router version
         """
         return RouterConfig(**self.to_dict())
+
+    @classmethod
+    def create(cls, config: RouterConfig, router_id: int) -> RouterVersion:
+        """
+        Creates a new router version for the router with the given router_id WITHOUT deploying it
+
+        :param config: configuration of router
+        :param router_id: router id of the router for which this router version will be created
+        :return: the new router version
+        """
+        version = turing.active_session.create_router_version(
+            router_id=router_id,
+            router_version_config=config.to_open_api().config
+        )
+        return RouterVersion(
+            environment_name=version.router.environment_name,
+            name=version.router.name,
+            **version.to_dict()
+        )

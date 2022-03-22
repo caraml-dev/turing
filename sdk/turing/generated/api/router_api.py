@@ -28,6 +28,7 @@ from turing.generated.model.router_events import RouterEvents
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
 from turing.generated.model.router_version import RouterVersion
+from turing.generated.model.router_version_config import RouterVersionConfig
 
 
 class RouterApi(object):
@@ -56,7 +57,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
 
             Keyword Args:
                 _return_http_data_only (bool): response data without head status
@@ -173,7 +174,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to save router
+                project_id (int): id of the project to save router
                 router_config (RouterConfig): router configuration to save
 
             Keyword Args:
@@ -300,7 +301,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router to delete
 
             Keyword Args:
@@ -678,7 +679,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
 
             Keyword Args:
@@ -805,7 +806,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router to update
                 router_config (RouterConfig): router configuration to save
 
@@ -1067,7 +1068,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
 
             Keyword Args:
@@ -1178,6 +1179,143 @@ class RouterApi(object):
             callable=__projects_project_id_routers_router_id_versions_get
         )
 
+        def __projects_project_id_routers_router_id_versions_post(
+            self,
+            project_id,
+            router_id,
+            router_version_config,
+            **kwargs
+        ):
+            """Create router version without deploying it  # noqa: E501
+
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.projects_project_id_routers_router_id_versions_post(project_id, router_id, router_version_config, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                project_id (int): id of the project of the router
+                router_id (int): id of the router to create a new version for
+                router_version_config (RouterVersionConfig): router configuration to save
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                RouterVersion
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['project_id'] = \
+                project_id
+            kwargs['router_id'] = \
+                router_id
+            kwargs['router_version_config'] = \
+                router_version_config
+            return self.call_with_http_info(**kwargs)
+
+        self.projects_project_id_routers_router_id_versions_post = _Endpoint(
+            settings={
+                'response_type': (RouterVersion,),
+                'auth': [],
+                'endpoint_path': '/projects/{project_id}/routers/{router_id}/versions',
+                'operation_id': 'projects_project_id_routers_router_id_versions_post',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'project_id',
+                    'router_id',
+                    'router_version_config',
+                ],
+                'required': [
+                    'project_id',
+                    'router_id',
+                    'router_version_config',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'project_id':
+                        (int,),
+                    'router_id':
+                        (int,),
+                    'router_version_config':
+                        (RouterVersionConfig,),
+                },
+                'attribute_map': {
+                    'project_id': 'project_id',
+                    'router_id': 'router_id',
+                },
+                'location_map': {
+                    'project_id': 'path',
+                    'router_id': 'path',
+                    'router_version_config': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__projects_project_id_routers_router_id_versions_post
+        )
+
         def __projects_project_id_routers_router_id_versions_version_delete(
             self,
             project_id,
@@ -1194,7 +1332,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project of the router
+                project_id (int): id of the project of the router
                 router_id (int): id of the router
                 version (int): version of router configuration to delete
 
@@ -1466,7 +1604,7 @@ class RouterApi(object):
             >>> result = thread.get()
 
             Args:
-                project_id (int): project id of the project to retrieve routers from
+                project_id (int): id of the project to retrieve routers from
                 router_id (int): id of the router to be retrieved
                 version (int): version of router configuration to be retrieved
 

@@ -36,8 +36,8 @@ class RouterConfig:
     :param enricher: enricher config settings to be used with the router
     :param ensembler: ensembler config settings to be used with the router
     """
-    environment_name: str
-    name: str
+    environment_name: str = ""
+    name: str = ""
     routes: Union[List[Route], List[Dict[str, str]]] = None
     rules: Union[List[TrafficRule], List[Dict]] = None
     default_route_id: str = None
@@ -49,8 +49,8 @@ class RouterConfig:
     ensembler: Union[RouterEnsemblerConfig, Dict] = None
 
     def __init__(self,
-                 environment_name: str,
-                 name: str,
+                 environment_name: str = "",
+                 name: str = "",
                  routes: Union[List[Route], List[Dict[str, str]]] = None,
                  rules: Union[List[TrafficRule], List[Dict]] = None,
                  default_route_id: str = None,
@@ -220,7 +220,7 @@ class RouterConfig:
         return turing.generated.models.RouterConfig(
             environment_name=self.environment_name,
             name=self.name,
-            config=turing.generated.models.RouterConfigConfig(
+            config=turing.generated.models.RouterVersionConfig(
                 routes=[route.to_open_api() for route in self.routes],
                 default_route_id=self.default_route_id,
                 experiment_engine=self.experiment_engine.to_open_api(),

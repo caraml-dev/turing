@@ -1,6 +1,11 @@
 import React, { useContext } from "react";
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
-import { StepActions } from "@gojek/mlp-ui";
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+} from "@elastic/eui";
 import { ConfigSection } from "../../../components/config_section";
 import { VersionComparisonPanel } from "../../versions/components/version_diff/VersionComparisonPanel";
 import { RouterVersion } from "../../../services/version/RouterVersion";
@@ -10,8 +15,9 @@ export const VersionComparisonView = ({
   currentRouter,
   updatedRouter,
   onPrevious,
-  onSubmit,
   isSubmitting,
+  onDeploy,
+  onSave,
 }) => {
   const { getEngineProperties } = useContext(ExperimentEngineContext);
   const currentVersionContext = {
@@ -45,13 +51,33 @@ export const VersionComparisonView = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <StepActions
-          currentStep={1}
-          submitLabel="Deploy"
-          onPrevious={onPrevious}
-          onSubmit={onSubmit}
-          isSubmitting={isSubmitting}
-        />
+        <EuiFlexGroup direction="row" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" color="primary" onClick={onPrevious}>
+              Previous
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="primary"
+              fill={false}
+              isLoading={isSubmitting}
+              onClick={onSave}>
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="primary"
+              fill={true}
+              isLoading={isSubmitting}
+              onClick={onDeploy}>
+              Deploy
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

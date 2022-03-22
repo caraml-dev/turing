@@ -152,7 +152,7 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
     turing.set_project(active_project.name)
 
     base_router = turing.Router(
-        id=1,
+        id=191,
         name="router-1",
         project_id=active_project.id,
         environment_name="id-dev",

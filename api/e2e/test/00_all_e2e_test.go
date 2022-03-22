@@ -70,6 +70,7 @@ func TestEndToEnd(t *testing.T) {
 		t.Parallel()
 		t.Run("CreateRouter_KnativeServices", TestCreateRouter)
 		t.Run("UpdateRouter_InvalidConfig", TestUpdateRouterInvalidConfig)
+		t.Run("CreateRouterVersion", TestCreateRouterVersion)
 		t.Run("UndeployRouter", TestUndeployRouter)
 		t.Run("DeployRouterVersion_InvalidConfig", TestDeployRouterInvalidConfig)
 		t.Run("DeployRouter", TestDeployValidConfig)

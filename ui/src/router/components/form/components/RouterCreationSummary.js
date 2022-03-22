@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { EuiSpacer } from "@elastic/eui";
 
-export const DeploymentSummary = ({ router }) => {
+export const RouterCreationSummary = ({ router }) => {
   return (
     <Fragment>
       <p>
