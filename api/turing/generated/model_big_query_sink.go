@@ -16,9 +16,9 @@ import (
 
 // BigQuerySink struct for BigQuerySink
 type BigQuerySink struct {
-	Type string `json:"type"`
-	Columns []string `json:"columns,omitempty"`
-	SaveMode SaveMode `json:"save_mode"`
+	Type     string             `json:"type"`
+	Columns  []string           `json:"columns,omitempty"`
+	SaveMode SaveMode           `json:"save_mode"`
 	BqConfig BigQuerySinkConfig `json:"bq_config"`
 }
 
@@ -57,7 +57,7 @@ func (o *BigQuerySink) GetType() string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *BigQuerySink) GetTypeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Type, true
@@ -70,7 +70,7 @@ func (o *BigQuerySink) SetType(v string) {
 
 // GetColumns returns the Columns field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BigQuerySink) GetColumns() []string {
-	if o == nil  {
+	if o == nil {
 		var ret []string
 		return ret
 	}
@@ -114,7 +114,7 @@ func (o *BigQuerySink) GetSaveMode() SaveMode {
 // GetSaveModeOk returns a tuple with the SaveMode field value
 // and a boolean to check if the value has been set.
 func (o *BigQuerySink) GetSaveModeOk() (*SaveMode, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.SaveMode, true
@@ -138,7 +138,7 @@ func (o *BigQuerySink) GetBqConfig() BigQuerySinkConfig {
 // GetBqConfigOk returns a tuple with the BqConfig field value
 // and a boolean to check if the value has been set.
 func (o *BigQuerySink) GetBqConfigOk() (*BigQuerySinkConfig, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BqConfig, true
@@ -201,5 +201,3 @@ func (v *NullableBigQuerySink) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

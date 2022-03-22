@@ -78,14 +78,20 @@ type Controller interface {
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
 	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
-	ListPodLogs(ctx context.Context, namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
+	ListPodLogs(
+		ctx context.Context, namespace string, podName string, opts *apicorev1.PodLogOptions,
+	) (io.ReadCloser, error)
 	CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(ctx context.Context, namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(ctx context.Context, namespace string, jobName string) error
-	CreateServiceAccount(ctx context.Context, namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
+	CreateServiceAccount(
+		ctx context.Context, namespace string, serviceAccount *ServiceAccount,
+	) (*apicorev1.ServiceAccount, error)
 	CreateRole(ctx context.Context, namespace string, role *Role) (*apirbacv1.Role, error)
 	CreateRoleBinding(ctx context.Context, namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
-	CreateSparkApplication(ctx context.Context, namespace string, request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
+	CreateSparkApplication(
+		ctx context.Context, namespace string, request *CreateSparkRequest,
+	) (*apisparkv1beta2.SparkApplication, error)
 	GetSparkApplication(ctx context.Context, namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
 	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
 }

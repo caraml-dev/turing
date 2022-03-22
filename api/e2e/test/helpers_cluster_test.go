@@ -1,8 +1,10 @@
+//go:build e2e
 // +build e2e
 
 package e2e
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
@@ -98,7 +100,7 @@ func isConfigMapExists(
 ) bool {
 	_, err := clusterClients.K8sCoreClient.
 		ConfigMaps(projectName).
-		Get(name, metav1.GetOptions{})
+		Get(context.Background(), name, metav1.GetOptions{})
 	return err == nil
 }
 
@@ -108,7 +110,7 @@ func isPersistentVolumeClaimExists(clusterClients *TestClusterClients,
 ) bool {
 	_, err := clusterClients.K8sCoreClient.
 		PersistentVolumeClaims(projectName).
-		Get(name, metav1.GetOptions{})
+		Get(context.Background(), name, metav1.GetOptions{})
 	return err == nil
 }
 
@@ -119,12 +121,15 @@ func isDeploymentExists(
 ) bool {
 	_, err := clusterClients.K8sAppsClient.
 		Deployments(projectName).
-		Get(name, metav1.GetOptions{})
+		Get(context.Background(), name, metav1.GetOptions{})
 	return err == nil
 }
 
 func getRouterDownstream(clusterClients *TestClusterClients, projectName string, routerName string) (string, error) {
-	vs, err := clusterClients.IstioNetworkingClient.VirtualServices(projectName).Get(routerName, metav1.GetOptions{})
+	vs, err := clusterClients.
+		IstioNetworkingClient.
+		VirtualServices(projectName).
+		Get(context.Background(), routerName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -189,13 +194,13 @@ func deleteServices(
 	serviceNames []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	services := clusterClients.K8sCoreClient.Services(projectName)
 	for _, name := range serviceNames {
-		err := services.Delete(name, delOptions)
+		err := services.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting service %s: %v\n", name, err)
 		}
@@ -208,13 +213,13 @@ func deleteDeployments(
 	deploymentNames []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	deployments := clusterClients.K8sAppsClient.Deployments(projectName)
 	for _, name := range deploymentNames {
-		err := deployments.Delete(name, delOptions)
+		err := deployments.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting deployment %s: %v\n", name, err)
 		}
@@ -227,13 +232,13 @@ func deleteKnServices(
 	knServiceNames []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	services := clusterClients.KnServingClient.Services(projectName)
 	for _, name := range knServiceNames {
-		err := services.Delete(name, delOptions)
+		err := services.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting Knative service %s: %v\n", name, err)
 		}
@@ -246,13 +251,13 @@ func deleteSecrets(
 	secretNames []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	secrets := clusterClients.K8sCoreClient.Secrets(projectName)
 	for _, name := range secretNames {
-		err := secrets.Delete(name, delOptions)
+		err := secrets.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting secret %s: %v\n", name, err)
 		}
@@ -265,13 +270,13 @@ func deleteConfigmaps(
 	cfgMapNames []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	configMaps := clusterClients.K8sCoreClient.ConfigMaps(projectName)
 	for _, name := range cfgMapNames {
-		err := configMaps.Delete(name, delOptions)
+		err := configMaps.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting configmap %s: %v\n", name, err)
 		}
@@ -284,13 +289,13 @@ func deletePVCs(
 	pvcs []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	clusterPVCs := clusterClients.K8sCoreClient.PersistentVolumeClaims(projectName)
 	for _, name := range pvcs {
-		err := clusterPVCs.Delete(name, delOptions)
+		err := clusterPVCs.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting PVC %s: %v\n", name, err)
 		}
@@ -303,13 +308,13 @@ func deleteIstioVirtualServices(
 	svcs []string,
 ) {
 	gracePeriodSeconds := int64(deleteTimeoutSeconds)
-	delOptions := &metav1.DeleteOptions{
+	delOptions := metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 	}
 
 	vservices := clusterClients.IstioNetworkingClient.VirtualServices(projectName)
 	for _, name := range svcs {
-		err := vservices.Delete(name, delOptions)
+		err := vservices.Delete(context.Background(), name, delOptions)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			fmt.Printf("Error deleting Istio Virtual Service %s: %v\n", name, err)
 		}

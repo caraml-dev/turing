@@ -16,7 +16,7 @@ import (
 
 // EnvVar struct for EnvVar
 type EnvVar struct {
-	Name string `json:"name"`
+	Name  string  `json:"name"`
 	Value *string `json:"value,omitempty"`
 }
 
@@ -51,7 +51,7 @@ func (o *EnvVar) GetName() string {
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *EnvVar) GetNameOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Name, true
@@ -140,5 +140,3 @@ func (v *NullableEnvVar) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
