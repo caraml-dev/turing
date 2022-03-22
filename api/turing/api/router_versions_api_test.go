@@ -124,7 +124,7 @@ func TestCreateRouterVersion(t *testing.T) {
 	tests := map[string]struct {
 		vars     RequestVars
 		expected *Response
-		body     *request.CreateOrUpdateRouterRequest
+		body     *request.RouterConfig
 	}{
 		"failure | bad request (missing project_id)": {
 			vars:     RequestVars{},
@@ -142,43 +142,18 @@ func TestCreateRouterVersion(t *testing.T) {
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
-		"failure | bad request (invalid environment name)": {
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router2",
-				Environment: "invalid-dev",
-			},
-			expected: BadRequest("invalid router configuration",
-				"Router name and environment cannot be changed after creation"),
-		},
-		"failure | bad request (invalid router name)": {
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "invalid-router2",
-				Environment: "dev",
-			},
-			expected: BadRequest("invalid router configuration",
-				"Router name and environment cannot be changed after creation"),
-		},
 		"failure | build router version": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router2",
-				Environment: "dev",
-			},
+			body:     nil,
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: InternalServerError("unable to create router version", "router config is empty"),
 		},
 		"success": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router2",
-				Environment: "dev",
-				Config: &request.RouterConfig{
-					ExperimentEngine: &request.ExperimentEngineConfig{
-						Type: "nop",
-					},
-					LogConfig: &request.LogConfig{
-						ResultLoggerType: models.NopLogger,
-					},
+			body: &request.RouterConfig{
+				ExperimentEngine: &request.ExperimentEngineConfig{
+					Type: "nop",
+				},
+				LogConfig: &request.LogConfig{
+					ResultLoggerType: models.NopLogger,
 				},
 			},
 			vars: RequestVars{"router_id": {"2"}, "project_id": {"2"}},

@@ -48,17 +48,18 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 		return errResp
 	}
 
-	request := body.(*request.CreateOrUpdateRouterRequest)
+	requestConfig := body.(*request.RouterConfig)
 
-	// Check if the router environment and name are unchanged
-	if request.Environment != router.EnvironmentName || request.Name != router.Name {
-		return BadRequest("invalid router configuration",
-			"Router name and environment cannot be changed after creation")
+	// This is used temporarily in order to reuse the BuildRouterVersion method
+	dummyRouterRequest := request.CreateOrUpdateRouterRequest{
+		Environment: "",
+		Name:        "",
+		Config:      requestConfig,
 	}
 
 	// Create new version
 	var routerVersion *models.RouterVersion
-	rVersion, err := request.BuildRouterVersion(
+	rVersion, err := dummyRouterRequest.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 
 	if err == nil {
@@ -183,7 +184,7 @@ func (c RouterVersionsController) Routes() []Route {
 		{
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/versions",
-			body:    request.CreateOrUpdateRouterRequest{},
+			body:    request.RouterConfig{},
 			handler: c.CreateRouterVersion,
 		},
 		{
