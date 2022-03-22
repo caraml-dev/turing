@@ -91,7 +91,11 @@ func (c RoutersController) CreateRouter(
 
 	// then create the new version
 	var routerVersion *models.RouterVersion
-	rVersion, err := request.BuildRouterVersion(
+	if request.Config == nil {
+		return InternalServerError("unable to create router", "router config is empty")
+	}
+
+	rVersion, err := request.Config.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
 		// Save router version
@@ -152,7 +156,11 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 
 	// Create new version
 	var routerVersion *models.RouterVersion
-	rVersion, err := request.BuildRouterVersion(
+	if request.Config == nil {
+		return InternalServerError("unable to update router", "router config is empty")
+	}
+
+	rVersion, err := request.Config.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
 		// Save router version, re-assign the value of err

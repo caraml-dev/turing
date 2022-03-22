@@ -107,58 +107,55 @@ func (r CreateOrUpdateRouterRequest) BuildRouter(projectID models.ID) *models.Ro
 }
 
 // BuildRouterVersion builds the router version model from the entire request payload
-func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
+func (r RouterConfig) BuildRouterVersion(
 	router *models.Router,
 	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
 	expSvc service.ExperimentsService,
 	ensemblersSvc service.EnsemblersService,
 ) (rv *models.RouterVersion, err error) {
-	if r.Config == nil {
-		return nil, errors.New("router config is empty")
-	}
 	rv = &models.RouterVersion{
 		RouterID:       router.ID,
 		Router:         router,
 		Image:          defaults.Image,
 		Status:         models.RouterVersionStatusPending,
-		Routes:         r.Config.Routes,
-		DefaultRouteID: r.Config.DefaultRouteID,
-		TrafficRules:   r.Config.TrafficRules,
+		Routes:         r.Routes,
+		DefaultRouteID: r.DefaultRouteID,
+		TrafficRules:   r.TrafficRules,
 		ExperimentEngine: &models.ExperimentEngine{
-			Type: r.Config.ExperimentEngine.Type,
+			Type: r.ExperimentEngine.Type,
 		},
-		ResourceRequest: r.Config.ResourceRequest,
-		Timeout:         r.Config.Timeout,
+		ResourceRequest: r.ResourceRequest,
+		Timeout:         r.Timeout,
 		LogConfig: &models.LogConfig{
 			LogLevel:             routercfg.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
 			FiberDebugLogEnabled: defaults.FiberDebugLogEnabled,
 			JaegerEnabled:        defaults.JaegerEnabled,
-			ResultLoggerType:     r.Config.LogConfig.ResultLoggerType,
+			ResultLoggerType:     r.LogConfig.ResultLoggerType,
 		},
 	}
-	if r.Config.Enricher != nil {
-		rv.Enricher = r.Config.Enricher.BuildEnricher()
+	if r.Enricher != nil {
+		rv.Enricher = r.Enricher.BuildEnricher()
 	}
-	if r.Config.Ensembler != nil {
+	if r.Ensembler != nil {
 		// Ensure ensembler config is set based on the ensembler type
-		if r.Config.Ensembler.Type == models.EnsemblerDockerType && r.Config.Ensembler.DockerConfig == nil {
+		if r.Ensembler.Type == models.EnsemblerDockerType && r.Ensembler.DockerConfig == nil {
 			return nil, errors.New("missing ensembler docker config")
 		}
-		if r.Config.Ensembler.Type == models.EnsemblerStandardType && r.Config.Ensembler.StandardConfig == nil {
+		if r.Ensembler.Type == models.EnsemblerStandardType && r.Ensembler.StandardConfig == nil {
 			return nil, errors.New("missing ensembler standard config")
 		}
-		if r.Config.Ensembler.Type == models.EnsemblerPyFuncType {
-			if r.Config.Ensembler.PyfuncConfig == nil {
+		if r.Ensembler.Type == models.EnsemblerPyFuncType {
+			if r.Ensembler.PyfuncConfig == nil {
 				return nil, errors.New("missing ensembler pyfunc reference config")
 			}
 
 			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
 			ensembler, err := ensemblersSvc.FindByID(
-				*r.Config.Ensembler.PyfuncConfig.EnsemblerID,
+				*r.Ensembler.PyfuncConfig.EnsemblerID,
 				service.EnsemblersFindByIDOptions{
-					ProjectID: r.Config.Ensembler.PyfuncConfig.ProjectID,
+					ProjectID: r.Ensembler.PyfuncConfig.ProjectID,
 				})
 			if err != nil {
 				return nil, fmt.Errorf("failed to find specified ensembler: %w", err)
@@ -172,20 +169,20 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 				return nil, fmt.Errorf("only pyfunc ensemblers allowed; ensembler type given: %T", v)
 			}
 		}
-		rv.Ensembler = r.Config.Ensembler
+		rv.Ensembler = r.Ensembler
 	}
 	switch rv.LogConfig.ResultLoggerType {
 	case models.BigQueryLogger:
 		rv.LogConfig.BigQueryConfig = &models.BigQueryConfig{
-			Table:                r.Config.LogConfig.BigQueryConfig.Table,
-			ServiceAccountSecret: r.Config.LogConfig.BigQueryConfig.ServiceAccountSecret,
+			Table:                r.LogConfig.BigQueryConfig.Table,
+			ServiceAccountSecret: r.LogConfig.BigQueryConfig.ServiceAccountSecret,
 			BatchLoad:            true, // default for now
 		}
 	case models.KafkaLogger:
 		rv.LogConfig.KafkaConfig = &models.KafkaConfig{
-			Brokers:             r.Config.LogConfig.KafkaConfig.Brokers,
-			Topic:               r.Config.LogConfig.KafkaConfig.Topic,
-			SerializationFormat: r.Config.LogConfig.KafkaConfig.SerializationFormat,
+			Brokers:             r.LogConfig.KafkaConfig.Brokers,
+			Topic:               r.LogConfig.KafkaConfig.Topic,
+			SerializationFormat: r.LogConfig.KafkaConfig.SerializationFormat,
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
@@ -203,15 +200,15 @@ func (r CreateOrUpdateRouterRequest) BuildRouterVersion(
 }
 
 // BuildExperimentEngineConfig creates the Experiment config from the given input properties
-func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
+func (r RouterConfig) BuildExperimentEngineConfig(
 	router *models.Router,
 	cryptoSvc service.CryptoService,
 	expSvc service.ExperimentsService,
 ) (json.RawMessage, error) {
-	rawExpConfig := r.Config.ExperimentEngine.Config
+	rawExpConfig := r.ExperimentEngine.Config
 
 	// Handle missing passkey / encrypt it in Standard experiment config
-	if expSvc.IsStandardExperimentManager(r.Config.ExperimentEngine.Type) {
+	if expSvc.IsStandardExperimentManager(r.ExperimentEngine.Type) {
 		// Convert the new config to the standard type
 		expConfig, err := manager.ParseStandardExperimentConfig(rawExpConfig)
 		if err != nil {
@@ -221,7 +218,7 @@ func (r CreateOrUpdateRouterRequest) BuildExperimentEngineConfig(
 		if expConfig.Client.Passkey == "" {
 			// Extract existing router version config
 			if router.CurrRouterVersion != nil &&
-				router.CurrRouterVersion.ExperimentEngine.Type == r.Config.ExperimentEngine.Type {
+				router.CurrRouterVersion.ExperimentEngine.Type == r.ExperimentEngine.Type {
 				currVerExpConfig, err := manager.ParseStandardExperimentConfig(router.CurrRouterVersion.ExperimentEngine.Config)
 				if err != nil {
 					return nil, fmt.Errorf("Error parsing existing experiment config: %v", err)

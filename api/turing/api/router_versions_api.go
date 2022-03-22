@@ -48,24 +48,21 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 		return errResp
 	}
 
-	requestConfig := body.(*request.RouterConfig)
-
-	// This is used temporarily in order to reuse the BuildRouterVersion method
-	dummyRouterRequest := request.CreateOrUpdateRouterRequest{
-		Environment: "",
-		Name:        "",
-		Config:      requestConfig,
-	}
+	request := body.(*request.RouterConfig)
 
 	// Create new version
 	var routerVersion *models.RouterVersion
-	rVersion, err := dummyRouterRequest.BuildRouterVersion(
+	if request == nil {
+		return InternalServerError("unable to create router version", "router config is empty")
+	}
+
+	routerVersion, err := request.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 
 	if err == nil {
 		// Save router version, re-assign the value of err
-		rVersion.Status = models.RouterVersionStatusUndeployed
-		routerVersion, err = c.RouterVersionsService.Save(rVersion)
+		routerVersion.Status = models.RouterVersionStatusUndeployed
+		routerVersion, err = c.RouterVersionsService.Save(routerVersion)
 	}
 
 	if err != nil {
