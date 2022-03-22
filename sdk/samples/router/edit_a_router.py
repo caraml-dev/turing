@@ -2,6 +2,7 @@ import turing
 import turing.batch
 import turing.batch.config
 import turing.router.config.router_config
+import turing.router.config.router_version
 from turing.router.config.common.env_var import EnvVar
 
 
@@ -32,7 +33,7 @@ def main(turing_api: str, project: str):
     new_router_config_to_deploy.resource_request.max_replica = 5
 
     # When editing a router, you can either 1. UPDATE the router, which would create a new router version and deploy it
-    # immediately, or 2. SAVE the router version, which would only create a new router version without deploying it
+    # immediately, or 2. CREATE the router version, which would only create a new router version without deploying it
 
     # 1. When you UPDATE a router, Turing will save the new version and attempt to deploy it immediately
     router_1.update(new_router_config_to_deploy)
@@ -42,11 +43,12 @@ def main(turing_api: str, project: str):
     for v in versions:
         print(v)
 
-    # 2. When you SAVE a router, Turing will save the new version, but not deploy it.
+    # 2. When you CREATE a router version, Turing will save the new version, but not deploy it.
     new_router_config_to_save = router_1.config
     new_router_config_to_save.resource_request.min_replica = 0
 
-    router_1.save_version(new_router_config_to_deploy)
+    new_undeployed_version = turing.router.config.router_version.RouterVersion.create(new_router_config_to_deploy,
+                                                                                      router_id=1)
 
     # Notice that the latest router version is undeployed (Turing has created the new version without deploying it)
     versions = router_1.list_versions()
