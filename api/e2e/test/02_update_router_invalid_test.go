@@ -9,11 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tidwall/gjson"
-
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
 
 /*
