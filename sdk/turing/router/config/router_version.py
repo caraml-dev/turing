@@ -69,36 +69,10 @@ class RouterVersion(RouterConfig):
         """
         version = turing.active_session.create_router_version(
             router_id=router_id,
-            router_version_config=RouterVersion._get_open_api_router_version_config(config)
+            router_version_config=config.to_open_api().config
         )
         return RouterVersion(
             environment_name=version.router.environment_name,
             name=version.router.name,
             **version.to_dict()
-        )
-
-    @classmethod
-    def _get_open_api_router_version_config(cls, config: RouterConfig) -> turing.generated.models.RouterVersionConfig:
-        """
-        Temporary method to construct the OpenAPI RouterVersionConfig object as opposed to using the to_open_api()
-        method. To be removed once the Turing API update router endpoint has been refactored.
-        """
-        kwargs = {}
-
-        if config.rules is not None:
-            kwargs['rules'] = [rule.to_open_api() for rule in config.rules]
-        if config.resource_request is not None:
-            kwargs['resource_request'] = config.resource_request.to_open_api()
-        if config.enricher is not None:
-            kwargs['enricher'] = config.enricher.to_open_api()
-        if config.ensembler is not None:
-            kwargs['ensembler'] = config.ensembler.to_open_api()
-
-        return turing.generated.models.RouterVersionConfig(
-            routes=[route.to_open_api() for route in config.routes],
-            default_route_id=config.default_route_id,
-            experiment_engine=config.experiment_engine.to_open_api(),
-            timeout=config.timeout,
-            log_config=config.log_config.to_open_api(),
-            **kwargs
         )
