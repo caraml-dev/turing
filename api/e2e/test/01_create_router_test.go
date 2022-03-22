@@ -113,8 +113,7 @@ func TestCreateRouter(t *testing.T) {
 						  "route": "control"
 						}
 					  ]
-					}
-					]`
+					}]`
 					assert.JSONEq(t, expectedResponse, actualResponse)
 				})
 

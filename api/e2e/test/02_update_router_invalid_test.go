@@ -143,21 +143,21 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 				response.StatusCode, string(responsePayload))
 			actualResponse := gjson.GetBytes(responsePayload, "response").String()
 			expectedResponse := `{
-					  "experiment": {
-						"configuration": {
-							"foo":"bar"
-						}
-					  },
-					  "route_responses": [
-						{
-						  "data": {
-							"version": "control"
-						  },
-						  "is_default": true,
-						  "route": "control"
-						}
-					  ]
-					}`
+			  "experiment": {
+				"configuration": {
+					"foo":"bar"
+				}
+			  },
+			  "route_responses": [
+				{
+				  "data": {
+					"version": "control"
+				  },
+				  "is_default": true,
+				  "route": "control"
+				}
+			  ]
+			}`
 			assert.JSONEq(t, expectedResponse, actualResponse)
 		})
 }

@@ -124,24 +124,28 @@ func TestCreateRouterVersion(t *testing.T) {
 			"Content-Type":  {"application/json"},
 			"X-Mirror-Body": {"true"},
 		},
-		`{}`,
+		`{"client": {"id": 4}}`,
 		func(response *http.Response, responsePayload []byte) {
 			assert.Equal(t, http.StatusOK, response.StatusCode,
 				"Unexpected response (code %d): %s",
 				response.StatusCode, string(responsePayload))
 			actualResponse := gjson.GetBytes(responsePayload, "response").String()
 			expectedResponse := `{
-					  "experiment": {},
-					  "route_responses": [
-						{
-						  "data": {
-							"version": "control"
-						  },
-						  "is_default": true,
-						  "route": "control"
-						}
-					  ]
-					}`
+			  "experiment": {
+				"configuration": {
+					"foo":"bar"
+				}
+			  },
+			  "route_responses": [
+				{
+				  "data": {
+					"version": "control"
+				  },
+				  "is_default": true,
+				  "route": "control"
+				}
+			  ]
+			}`
 			assert.JSONEq(t, expectedResponse, actualResponse)
 		})
 }
