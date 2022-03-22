@@ -14,9 +14,6 @@ info:
   type: "string"
   pattern: '^[0-9]+(ms|s|m|h)$'
 
-.deployFlag: &deployFlag
-  type: boolean
-
 paths:
   "/projects/{project_id}/routers":
     get:
@@ -114,12 +111,6 @@ paths:
           schema:
             <<: *id
           required: true
-        - in: "query"
-          name: "deploy"
-          description: "boolean indicating whether to deploy the new version once updated"
-          schema:
-            <<: *deployFlag
-          required: true
       requestBody:
         description: "router configuration to save"
         required: true
@@ -133,7 +124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RouterVersion"
+                $ref: "#/components/schemas/RouterDetails"
         400:
           description: "Invalid project_id, router_id or router configuration"
         500:
@@ -896,10 +887,6 @@ components:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
           <<: *timeout
-        env:
-          type: "array"
-          items:
-            $ref: "common.yaml#/components/schemas/EnvVar"
 
     ResourceRequest:
       type: "object"
