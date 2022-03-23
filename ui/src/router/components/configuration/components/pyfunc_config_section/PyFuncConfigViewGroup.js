@@ -20,41 +20,29 @@ export const PyFuncConfigViewGroup = ({
   ];
 
   if (!!dockerConfig) {
-    items.splice(
-      items.length,
-      0,
-      {
-        title: "Container",
-        children: <ContainerConfigTable config={dockerConfig} />,
-      },
-      {
-        title: "Environment Variables",
-        children: <EnvVariablesConfigTable variables={dockerConfig.env} />,
-      }
-    );
-  } else {
     items.push({
-      title: "Environment Variables",
-      children: <EnvVariablesConfigTable variables={pyfuncConfig.env} />,
+      title: "Container",
+      children: <ContainerConfigTable config={dockerConfig} />,
     });
   }
+
+  items.push({
+    title: "Environment Variables",
+    children: <EnvVariablesConfigTable variables={pyfuncConfig.env} />,
+  });
 
   return (
     <EuiFlexGroup direction="row" wrap>
       <EuiFlexItem grow={3} className="euiFlexItem--childFlexPanel">
         <ConfigMultiSectionPanel items={items} />
       </EuiFlexItem>
-      <div>
-        {!!dockerConfig ? (
-          <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-            <ConfigSectionPanel title={`${componentName} Resources`}>
-              <ResourcesConfigTable
-                resourceRequest={dockerConfig.resource_request}
-              />
-            </ConfigSectionPanel>
-          </EuiFlexItem>
-        ) : null}
-      </div>
+      <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
+        <ConfigSectionPanel title={`${componentName} Resources`}>
+          <ResourcesConfigTable
+            resourceRequest={pyfuncConfig.resource_request}
+          />
+        </ConfigSectionPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
