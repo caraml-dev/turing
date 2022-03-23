@@ -148,7 +148,7 @@ func (r RouterConfig) BuildRouterVersion(
 		}
 		if r.Ensembler.Type == models.EnsemblerPyFuncType {
 			if r.Ensembler.PyfuncConfig == nil {
-				return nil, errors.New("missing ensembler pyfunc reference config")
+				return nil, errors.New("missing ensembler pyfunc config")
 			}
 
 			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
