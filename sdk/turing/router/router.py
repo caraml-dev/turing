@@ -44,11 +44,7 @@ class Router(ApiObject):
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
         self._status = RouterStatus(status)
-
-        if config is not None:
-            self._config = RouterConfig(name=name, environment_name=environment_name, **config)
-        else:
-            self._config = None
+        self._config = config
 
     @property
     def id(self) -> int:
@@ -80,7 +76,11 @@ class Router(ApiObject):
 
     @property
     def config(self) -> 'RouterConfig':
-        return self._config
+        return RouterConfig(name=self.name, environment_name=self.environment_name, **self._config)
+
+    @property
+    def version(self) -> int:
+        return self._config.get('version') if self._config else None
 
     @classmethod
     def list(cls) -> List['Router']:
@@ -128,7 +128,7 @@ class Router(ApiObject):
         Update the current router with a new set of configs specified in the RouterConfig argument
 
         :param config: configuration of router
-        :return: instance of router updated (self)
+        :return: instance of router (self); this router contains details of the router and its currently deployed version
         """
         self._config = config
         updated_router = Router.from_open_api(
@@ -201,11 +201,13 @@ class Router(ApiObject):
     def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} is {status.value}...")
-            cur_status = Router.get(self.id).status
+            current_router = Router.get(self.id)
+            cur_status = current_router.status
             if cur_status == status:
                 # Wait for backend components to fully resolve
                 time.sleep(5)
                 logger.debug(f"Router {self.id} is finally {status.value}.")
+                self.__dict__ = current_router.__dict__
                 return
             else:
                 logger.debug(f"Router {self.id} is {cur_status.value}.")
