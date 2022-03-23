@@ -33,7 +33,6 @@ class Router(ApiObject):
                  environment_name: str,
                  monitoring_url: str,
                  status: str,
-                 version: int = None,
                  config: Dict = None,
                  endpoint: str = None,
                  **kwargs):
@@ -45,13 +44,7 @@ class Router(ApiObject):
         self._endpoint = endpoint
         self._monitoring_url = monitoring_url
         self._status = RouterStatus(status)
-
-        if config is not None:
-            self._config = RouterConfig(name=name, environment_name=environment_name, **config)
-            self._version = config.get('version')
-        else:
-            self._config = config
-            self._version = version
+        self._config = config
 
     @property
     def id(self) -> int:
@@ -83,11 +76,11 @@ class Router(ApiObject):
 
     @property
     def config(self) -> 'RouterConfig':
-        return self._config
+        return RouterConfig(name=self.name, environment_name=self.environment_name, **self._config)
 
     @property
     def version(self) -> int:
-        return self._version
+        return self._config.get('version') if self._config else None
 
     @classmethod
     def list(cls) -> List['Router']:
@@ -135,8 +128,7 @@ class Router(ApiObject):
         Update the current router with a new set of configs specified in the RouterConfig argument
 
         :param config: configuration of router
-        :return: instance of router (self); this router contains details of the currently deployed router; it contains
-            the details of the currently DEPLOYED router version
+        :return: instance of router (self); this router contains details of the router and its currently deployed version
         """
         self._config = config
         updated_router = Router.from_open_api(
