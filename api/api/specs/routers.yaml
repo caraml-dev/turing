@@ -13,7 +13,7 @@ info:
 .timeout: &timeout
   type: "string"
   pattern: '^[0-9]+(ms|s|m|h)$'
-  
+
 paths:
   "/projects/{project_id}/routers":
     get:
@@ -851,6 +851,10 @@ components:
           $ref: "#/components/schemas/ResourceRequest"
         timeout:
           <<: *timeout
+        env:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/EnvVar"
 
     ResourceRequest:
       type: "object"

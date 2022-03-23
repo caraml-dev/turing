@@ -62,11 +62,12 @@ class RouterEnsemblerConfig:
         if isinstance(standard_config, turing.generated.models.EnsemblerStandardConfig):
             self._standard_config = standard_config
         elif isinstance(standard_config, dict):
-            standard_config["experiment_mappings"] = [
+            openapi_standard_config = standard_config.copy()
+            openapi_standard_config["experiment_mappings"] = [
                 turing.generated.models.EnsemblerStandardConfigExperimentMappings(**mapping)
                 for mapping in standard_config["experiment_mappings"]
             ]
-            self._standard_config = turing.generated.models.EnsemblerStandardConfig(**standard_config)
+            self._standard_config = turing.generated.models.EnsemblerStandardConfig(**openapi_standard_config)
         else:
             self._standard_config = standard_config
 
@@ -79,11 +80,12 @@ class RouterEnsemblerConfig:
         if isinstance(docker_config, turing.generated.models.EnsemblerDockerConfig):
             self._docker_config = docker_config
         elif isinstance(docker_config, dict):
-            docker_config["resource_request"] = \
-                turing.generated.models.ResourceRequest(**docker_config["resource_request"])
-            docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config["env"]]
+            openapi_docker_config = docker_config.copy()
+            openapi_docker_config["resource_request"] = \
+                turing.generated.models.ResourceRequest(**openapi_docker_config['resource_request'])
+            openapi_docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config['env']]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
-                **docker_config
+                **openapi_docker_config
             )
         else:
             self._docker_config = docker_config
@@ -97,10 +99,12 @@ class RouterEnsemblerConfig:
         if isinstance(pyfunc_config, turing.generated.models.EnsemblerPyfuncConfig):
             self._pyfunc_config = pyfunc_config
         elif isinstance(pyfunc_config, dict):
-            pyfunc_config["resource_request"] = \
+            openapi_pyfunc_config = pyfunc_config.copy()
+            openapi_pyfunc_config["resource_request"] = \
                 turing.generated.models.ResourceRequest(**pyfunc_config["resource_request"])
+            openapi_pyfunc_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in pyfunc_config["env"]]
             self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
-                **pyfunc_config
+                **openapi_pyfunc_config
             )
         else:
             self._pyfunc_config = pyfunc_config
@@ -127,7 +131,8 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
                  project_id: int,
                  ensembler_id: int,
                  timeout: str,
-                 resource_request: ResourceRequest):
+                 resource_request: ResourceRequest,
+                 env: List['EnvVar']):
         """
         Method to create a new Pyfunc ensembler
 
@@ -135,11 +140,13 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param ensembler_id: ensembler_id of the ensembler
         :param resource_request: ResourceRequest instance containing configs related to the resources required
         :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
+        :param env: environment variables required by the container
         """
         self.project_id = project_id
         self.ensembler_id = ensembler_id
         self.resource_request = resource_request
         self.timeout = timeout
+        self.env = env
         super().__init__(type="pyfunc")
 
     @property
@@ -174,12 +181,23 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
     def timeout(self, timeout: str):
         self._timeout = timeout
 
+    @property
+    def env(self) -> List['EnvVar']:
+        return self._env
+
+    @env.setter
+    def env(self, env: List['EnvVar']):
+        self._env = env
+
     def to_open_api(self) -> OpenApiModel:
+        assert all(isinstance(env_var, EnvVar) for env_var in self.env)
+
         self.pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
             project_id=self.project_id,
             ensembler_id=self.ensembler_id,
             resource_request=self.resource_request.to_open_api(),
             timeout=self.timeout,
+            env=[env_var.to_open_api() for env_var in self.env],
         )
         return super().to_open_api()
 

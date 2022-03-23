@@ -58,6 +58,8 @@ type EnsemblerPyfuncConfig struct {
 	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
 	// Request timeout in duration format e.g. 60s
 	Timeout string `json:"timeout" validate:"required"`
+	// Environment variables to set in the container
+	Env EnvVars `json:"env" validate:"required"`
 }
 
 type ExperimentMapping struct {

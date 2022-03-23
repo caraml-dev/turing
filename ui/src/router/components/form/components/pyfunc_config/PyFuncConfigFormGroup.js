@@ -7,6 +7,7 @@ import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnCh
 import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
 import { EnsemblersContextContextProvider } from "../../../../../providers/ensemblers/context";
+import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
 
 export const PyFuncConfigFormGroup = ({
   projectId,
@@ -41,6 +42,14 @@ export const PyFuncConfigFormGroup = ({
               />
             </EnsemblersContextContextProvider>
           </SecretsContextProvider>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EnvVariablesPanel
+            variables={pyfuncConfig.env}
+            onChangeHandler={onChange("env")}
+            errors={errors.env}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>

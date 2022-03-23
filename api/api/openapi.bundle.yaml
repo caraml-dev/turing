@@ -1951,6 +1951,11 @@ components:
               max_replica: 6
               memory_request: memory_request
               cpu_request: cpu_request
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
@@ -2212,6 +2217,11 @@ components:
             max_replica: 6
             memory_request: memory_request
             cpu_request: cpu_request
+          env:
+          - name: name
+            value: value
+          - name: name
+            value: value
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
@@ -2347,6 +2357,11 @@ components:
           max_replica: 6
           memory_request: memory_request
           cpu_request: cpu_request
+        env:
+        - name: name
+          value: value
+        - name: name
+          value: value
         timeout: timeout
       nullable: true
       properties:
@@ -2359,6 +2374,10 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        env:
+          items:
+            $ref: '#/components/schemas/EnvVar'
+          type: array
       required:
       - ensembler_id
       - project_id
@@ -2502,6 +2521,11 @@ components:
                 max_replica: 6
                 memory_request: memory_request
                 cpu_request: cpu_request
+              env:
+              - name: name
+                value: value
+              - name: name
+                value: value
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
@@ -2634,6 +2658,11 @@ components:
               max_replica: 6
               memory_request: memory_request
               cpu_request: cpu_request
+            env:
+            - name: name
+              value: value
+            - name: name
+              value: value
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:

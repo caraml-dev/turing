@@ -4,7 +4,8 @@ import { ConfigSectionPanel } from "../../../../../components/config_section";
 import { ContainerConfigTable } from "../docker_config_section/ContainerConfigTable";
 import { ResourcesConfigTable } from "../ResourcesConfigTable";
 import { ConfigMultiSectionPanel } from "../../../../../components/config_multi_section_panel/ConfigMultiSectionPanel";
-import { PyFuncRefConfigTable } from "./PyFuncRefConfigTable";
+import { PyFuncConfigTable } from "./PyFuncConfigTable";
+import { EnvVariablesConfigTable } from "../docker_config_section/EnvVariablesConfigTable";
 
 export const PyFuncConfigViewGroup = ({
   componentName,
@@ -14,7 +15,7 @@ export const PyFuncConfigViewGroup = ({
   const items = [
     {
       title: "Pyfunc Ensembler Details",
-      children: <PyFuncRefConfigTable config={pyfuncConfig} />,
+      children: <PyFuncConfigTable config={pyfuncConfig} />,
     },
   ];
 
@@ -25,22 +26,23 @@ export const PyFuncConfigViewGroup = ({
     });
   }
 
+  items.push({
+    title: "Environment Variables",
+    children: <EnvVariablesConfigTable variables={pyfuncConfig.env} />,
+  });
+
   return (
     <EuiFlexGroup direction="row" wrap>
       <EuiFlexItem grow={3} className="euiFlexItem--childFlexPanel">
         <ConfigMultiSectionPanel items={items} />
       </EuiFlexItem>
-      <div>
-        {!!dockerConfig ? (
-          <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-            <ConfigSectionPanel title={`${componentName} Resources`}>
-              <ResourcesConfigTable
-                resourceRequest={dockerConfig.resource_request}
-              />
-            </ConfigSectionPanel>
-          </EuiFlexItem>
-        ) : null}
-      </div>
+      <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
+        <ConfigSectionPanel title={`${componentName} Resources`}>
+          <ResourcesConfigTable
+            resourceRequest={pyfuncConfig.resource_request}
+          />
+        </ConfigSectionPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

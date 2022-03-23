@@ -179,6 +179,7 @@ const pyfuncDeploymentSchema = (maxAllowedReplica) =>
     ensembler_id: yup.number().integer().required("Ensembler ID is required"),
     timeout: timeoutSchema.required("Timeout is required"),
     resource_request: resourceRequestSchema(maxAllowedReplica),
+    env: yup.array(environmentVariableSchema),
   });
 
 const mappingSchema = yup.object().shape({

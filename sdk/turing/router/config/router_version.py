@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import turing
-import turing.generated.models
 import dataclasses
 from enum import Enum
 
