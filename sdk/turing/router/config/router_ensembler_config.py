@@ -62,11 +62,12 @@ class RouterEnsemblerConfig:
         if isinstance(standard_config, turing.generated.models.EnsemblerStandardConfig):
             self._standard_config = standard_config
         elif isinstance(standard_config, dict):
-            standard_config["experiment_mappings"] = [
+            openapi_standard_config = standard_config.copy()
+            openapi_standard_config["experiment_mappings"] = [
                 turing.generated.models.EnsemblerStandardConfigExperimentMappings(**mapping)
                 for mapping in standard_config["experiment_mappings"]
             ]
-            self._standard_config = turing.generated.models.EnsemblerStandardConfig(**standard_config)
+            self._standard_config = turing.generated.models.EnsemblerStandardConfig(**openapi_standard_config)
         else:
             self._standard_config = standard_config
 
@@ -79,11 +80,12 @@ class RouterEnsemblerConfig:
         if isinstance(docker_config, turing.generated.models.EnsemblerDockerConfig):
             self._docker_config = docker_config
         elif isinstance(docker_config, dict):
-            docker_config["resource_request"] = \
-                turing.generated.models.ResourceRequest(**docker_config["resource_request"])
-            docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config["env"]]
+            openapi_docker_config = docker_config.copy()
+            openapi_docker_config["resource_request"] = \
+                turing.generated.models.ResourceRequest(**openapi_docker_config['resource_request'])
+            openapi_docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in openapi_docker_config['env']]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
-                **docker_config
+                **openapi_docker_config
             )
         else:
             self._docker_config = docker_config
