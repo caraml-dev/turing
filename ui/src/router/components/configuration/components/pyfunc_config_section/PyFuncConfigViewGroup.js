@@ -18,8 +18,7 @@ export const PyFuncConfigViewGroup = ({
       children: <PyFuncConfigTable config={pyfuncConfig} />,
     },
   ];
-  console.log(dockerConfig);
-  console.log(pyfuncConfig);
+
   if (!!dockerConfig) {
     items.splice(
       items.length,
