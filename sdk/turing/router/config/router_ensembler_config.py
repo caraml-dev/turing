@@ -83,7 +83,7 @@ class RouterEnsemblerConfig:
             openapi_docker_config = docker_config.copy()
             openapi_docker_config["resource_request"] = \
                 turing.generated.models.ResourceRequest(**openapi_docker_config['resource_request'])
-            openapi_docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in openapi_docker_config['env']]
+            openapi_docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config['env']]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
                 **openapi_docker_config
             )
@@ -99,11 +99,12 @@ class RouterEnsemblerConfig:
         if isinstance(pyfunc_config, turing.generated.models.EnsemblerPyfuncConfig):
             self._pyfunc_config = pyfunc_config
         elif isinstance(pyfunc_config, dict):
-            pyfunc_config["resource_request"] = \
+            openapi_pyfunc_config = pyfunc_config.copy()
+            openapi_pyfunc_config["resource_request"] = \
                 turing.generated.models.ResourceRequest(**pyfunc_config["resource_request"])
-            pyfunc_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in pyfunc_config["env"]]
+            openapi_pyfunc_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in pyfunc_config["env"]]
             self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
-                **pyfunc_config
+                **openapi_pyfunc_config
             )
         else:
             self._pyfunc_config = pyfunc_config
