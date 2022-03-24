@@ -29,11 +29,11 @@ class MyTestEnsembler(turing.ensembler.PyFunc):
 
     def ensemble(
             self,
-            features: pandas.Series,
+            input: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]
     ) -> Any:
-        if features["treatment"] in predictions:
-            return predictions[features["treatment"]]
+        if input["treatment"] in predictions:
+            return predictions[input["treatment"]]
         else:
             return self._default

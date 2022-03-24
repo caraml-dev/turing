@@ -42,7 +42,7 @@ class SampleEnsembler(turing.ensembler.PyFunc):
     # The return value of `ensemble` will then be returned as a `json` payload to the Turing router.
     def ensemble(
             self,
-            features: dict,
+            input: dict,
             predictions: List[dict],
             treatment_config: dict) -> Any:
         # Get a mapping between route names and their corresponding responses
@@ -50,8 +50,8 @@ class SampleEnsembler(turing.ensembler.PyFunc):
         for prediction in predictions:
             routes_to_response[prediction["route"]] = prediction
 
-        if "version" in features:
-            return routes_to_response[features["version"]]["data"]["value"]
+        if "version" in input:
+            return routes_to_response[input["version"]]["data"]["value"]
         else:
             return sum(response["data"]["value"] for response in routes_to_response.values())
 

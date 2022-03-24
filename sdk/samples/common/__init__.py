@@ -14,10 +14,10 @@ class MyEnsembler(turing.ensembler.PyFunc):
 
     def ensemble(
             self,
-            features: pandas.Series,
+            input: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]) -> Any:
-        customer_id = features["customer_id"]
+        customer_id = input["customer_id"]
         if (customer_id % 2) == 0:
             return predictions['model_even']
         else:
