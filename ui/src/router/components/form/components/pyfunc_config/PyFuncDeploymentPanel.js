@@ -80,7 +80,7 @@ export const PyFuncDeploymentPanel = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
       </EuiForm>
     </Panel>
   );
