@@ -16,7 +16,7 @@ class EnsemblerBase(abc.ABC):
     def ensemble(
             self,
             input: Union[pandas.Series, Dict[str, Any]],
-            predictions: Union[pandas.Series, List[Dict[str, Any]]],
+            predictions: Union[pandas.Series, Dict[str, Any]],
             treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]]) -> Any:
         """
         Ensembler should have an ensemble method, that implements the logic on how to
@@ -24,12 +24,8 @@ class EnsemblerBase(abc.ABC):
         configuration.
 
         :param input: Union[pandas.Series, Dict[str, Any]], containing a single row or dict with input features
-        :param predictions: Union[pandas.Series, List[Dict[str, Any]]], containing a single row or list of dict with all
-            models' predictions:
-                When predictions is a pandas.Series object, `predictions['model-a']` will contain prediction results
-                    from the model-a
-                When predictions is a List of dictionaries, 'predictions[0], predictions[1], ... will contain the
-                    prediction results from different route responses
+        :param predictions: Union[pandas.Series, Dict[str, Any]], containing a single row or dict with all
+            models' predictions: `predictions['model-a']` will contain prediction results from the model-a
         :param treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]], representing the configuration of a
                 treatment, that should be applied to a given record/payload. If the experiment
                 engine is not configured, then `treatment_config` will be `None`
@@ -87,9 +83,16 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
         Helper function to ensemble single requests; works on dictionary input in a single request made to the pyfunc
         ensembler service (run by the pyfunc ensembler service engine)
         """
+        # Get a mapping between route names and their corresponding responses
+        routes_to_response = dict()
+        for prediction in model_input['response']['route_responses']:
+            routes_to_response[prediction["route"]] = prediction.copy()
+            # Deletes route from the dictionary as it is a duplicate of the key
+            del routes_to_response[prediction["route"]]["route"]
+
         return self.ensemble(
             input=model_input['request'],
-            predictions=model_input['response']['route_responses'],
+            predictions=routes_to_response,
             treatment_config=model_input['response']['experiment']
         )
 
