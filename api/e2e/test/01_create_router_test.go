@@ -84,6 +84,7 @@ func TestCreateRouter(t *testing.T) {
 					t.Logf("Response Payload:\n%s", string(responsePayload))
 					expectedResponse := `[
 					{
+						"code": 200,
 						"data": {
 							"request": {
 								"customer": {
@@ -107,10 +108,10 @@ func TestCreateRouter(t *testing.T) {
 									}
 								]
 							},
-							"status_code": 200
 						}
 					},
 					{
+						"code": 200
 						"data": {
 							"request": {
 								"customer": {
@@ -133,8 +134,7 @@ func TestCreateRouter(t *testing.T) {
 										"route": "control"
 									}
 								]
-							},
-							"status_code": 200
+							}
 						}
 					}]`
 					assert.JSONEq(t, expectedResponse, string(responsePayload))
