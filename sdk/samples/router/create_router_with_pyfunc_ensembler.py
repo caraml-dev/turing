@@ -43,17 +43,12 @@ class SampleEnsembler(turing.ensembler.PyFunc):
     def ensemble(
             self,
             input: dict,
-            predictions: List[dict],
+            predictions: dict,
             treatment_config: dict) -> Any:
-        # Get a mapping between route names and their corresponding responses
-        routes_to_response = dict()
-        for prediction in predictions:
-            routes_to_response[prediction["route"]] = prediction
-
         if "version" in input:
-            return routes_to_response[input["version"]]["data"]["value"]
+            return predictions[input["version"]]["data"]["value"]
         else:
-            return sum(response["data"]["value"] for response in routes_to_response.values())
+            return sum(prediction["data"]["value"] for prediction in predictions.values())
 
 
 def main(turing_api: str, project: str):
