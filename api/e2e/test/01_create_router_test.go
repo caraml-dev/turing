@@ -83,60 +83,59 @@ func TestCreateRouter(t *testing.T) {
 						response.StatusCode, string(responsePayload))
 					t.Logf("Response Payload:\n%s", string(responsePayload))
 					expectedResponse := `[
-					{
-						"code": 200,
-						"data": {
-							"request": {
-								"client": {
-									"id": 4
-								}
-							},
-							"response": {
-								"experiment": {
-									"configuration": {
-										"foo": "bar"
+						{
+							"code": 200,
+							"data": {
+								"request": {
+									"client": {
+										"id": 4
 									}
 								},
-								"route_responses":
-								[
-									{
-										"data": {
-											"version": "control"
-										},
-										"is_default": true,
-										"route": "control"
-									}
-								]
-							},
-						}
-					},
-					{
-						"code": 200,
-						"data": {
-							"request": {
-								"client": {
-									"id": 7
+								"response": {
+									"experiment": {
+										"configuration": {
+											"foo": "bar"
+										}
+									},
+									"route_responses": [
+										{
+											"data": {
+												"version": "control"
+											},
+											"is_default": true,
+											"route": "control"
+										}
+									]
 								}
-							},
-							"response": {
-								"experiment": {
-									"configuration": {
-										"bar": "baz"
+							}
+						},
+						{
+							"code": 200,
+							"data": {
+								"request": {
+									"client": {
+										"id": 7
 									}
 								},
-								"route_responses":
-								[
-									{
-										"data": {
-											"version": "control"
-										},
-										"is_default": true,
-										"route": "control"
-									}
-								]
+								"response": {
+									"experiment": {
+										"configuration": {
+											"bar": "baz"
+										}
+									},
+									"route_responses": [
+										{
+											"data": {
+												"version": "control"
+											},
+											"is_default": true,
+											"route": "control"
+										}
+									]
+								}
 							}
 						}
-					}]`
+					]`
 					assert.JSONEq(t, expectedResponse, string(responsePayload))
 				})
 
