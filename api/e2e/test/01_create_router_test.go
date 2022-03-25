@@ -81,40 +81,63 @@ func TestCreateRouter(t *testing.T) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "#.data.response").String()
-					expectedResponse := `[{
-					  "experiment": {
-						"configuration": {
-							"foo":"bar"
+					t.Logf("Response Payload:\n%s", string(responsePayload))
+					expectedResponse := `[
+					{
+						"data": {
+							"request": {
+								"customer": {
+									"id": 4
+								}
+							},
+							"response": {
+								"experiment": {
+									"configuration": {
+										"foo": "bar"
+									}
+								},
+								"route_responses":
+								[
+									{
+										"data": {
+											"version": "control"
+										},
+										"is_default": true,
+										"route": "control"
+									}
+								]
+							},
+							"status_code": 200
 						}
-					  },
-					  "route_responses": [
-						{
-						  "data": {
-							"version": "control"
-						  },
-						  "is_default": true,
-						  "route": "control"
-						}
-					  ]
 					},
 					{
-					  "experiment": {
-						"configuration": {
-							"bar": "baz"
+						"data": {
+							"request": {
+								"customer": {
+									"id": 7
+								}
+							},
+							"response": {
+								"experiment": {
+									"configuration": {
+										"bar": "baz"
+									}
+								},
+								"route_responses":
+								[
+									{
+										"data": {
+											"version": "control"
+										},
+										"is_default": true,
+										"route": "control"
+									}
+								]
+							},
+							"status_code": 200
 						}
-					  },
-					  "route_responses": [
-						{
-						  "data": {
-							"version": "control"
-						  },
-						  "is_default": true,
-						  "route": "control"
-						}
-					  ]
 					}]`
-					assert.JSONEq(t, expectedResponse, actualResponse)
+					assert.JSONEq(t, expectedResponse, string(responsePayload))
 				})
 
 			t.Log("Test endpoints for router logs")
