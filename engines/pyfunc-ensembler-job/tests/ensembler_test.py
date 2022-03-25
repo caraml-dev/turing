@@ -60,7 +60,7 @@ class TestEnsembler(PyFunc):
 
     def ensemble(
             self,
-            features: pandas.Series,
+            input: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]):
         return predictions[f'model_{self.result_type.name.lower()}']
@@ -93,7 +93,7 @@ class ArrayEnsembler(PyFunc):
 
     def ensemble(
             self,
-            features: pandas.Series,
+            input: pandas.Series,
             predictions: pandas.Series,
             treatment_config: Optional[dict]) -> Any:
         return predictions[['model_a', 'model_b']].to_numpy() * 2
