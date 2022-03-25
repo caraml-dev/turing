@@ -17,25 +17,25 @@ from typing import List, Any
 class SampleEnsembler(turing.ensembler.PyFunc):
     """
     A simple ensembler, that returns the value corresponding to the version that has been specified in the
-    `features` in each request. This value if obtained from the route responses found in the `predictions` in each
+    `input` in each request. This value if obtained from the route responses found in the `predictions` in each
     request.
 
-    If no version is specified in `features`, return the sum of all the values of all the route responses in
+    If no version is specified in `input`, return the sum of all the values of all the route responses in
     `predictions` instead.
 
     e.g. The values in the route responses (`predictions`) corresponding to the versions, `a`, `b` and `c` are 1, 2
          and 3 respectively.
 
-         For a given request, if the version specified in `features` is "a", the ensembler would return the value 1.
+         For a given request, if the version specified in `input` is "a", the ensembler would return the value 1.
 
-         If no version is specified in `features`, the ensembler would return the value 6 (1 + 2 + 3).
+         If no version is specified in `input`, the ensembler would return the value 6 (1 + 2 + 3).
     """
     # `initialize` is essentially a method that gets called when an object of your implemented class gets instantiated
     def initialize(self, artifacts: dict):
         pass
 
     # Each time a Turing Router sends a request to a pyfunc ensembler, ensemble will be called, with the request payload
-    # being passed as the `features` argument, and the route responses as the `predictions` argument.
+    # being passed as the `input` argument, and the route responses as the `predictions` argument.
     #
     # If an experiment has been set up, the experiment returned would also be passed as the `treatment_config` argument.
     #
