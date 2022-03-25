@@ -87,7 +87,7 @@ func TestCreateRouter(t *testing.T) {
 						"code": 200,
 						"data": {
 							"request": {
-								"customer": {
+								"client": {
 									"id": 4
 								}
 							},
@@ -114,7 +114,7 @@ func TestCreateRouter(t *testing.T) {
 						"code": 200
 						"data": {
 							"request": {
-								"customer": {
+								"client": {
 									"id": 7
 								}
 							},
