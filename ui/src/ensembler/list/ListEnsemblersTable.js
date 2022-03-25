@@ -4,6 +4,7 @@ import {
   EuiBasicTable,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiSearchBar,
   EuiSpacer,
   EuiText,
 } from "@elastic/eui";
@@ -148,7 +149,7 @@ export const ListEnsemblersTable = ({
           onClick: () => onRowClick(item),
         }
       : undefined;
-  console.log(search);
+
   return error ? (
     <EuiCallOut
       title="Sorry, there was an error"
@@ -158,6 +159,7 @@ export const ListEnsemblersTable = ({
     </EuiCallOut>
   ) : (
     <Fragment>
+      <EuiSearchBar {...search} />
       <EuiSpacer size="l" />
       <EuiBasicTable
         items={items}
