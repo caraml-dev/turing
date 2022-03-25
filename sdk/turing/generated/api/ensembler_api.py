@@ -310,7 +310,7 @@ class EnsemblerApi(object):
             Keyword Args:
                 page (int): [optional] if omitted the server will use the default value of 1
                 page_size (int): [optional] if omitted the server will use the default value of 10
-                search (str): [optional]
+                search (str): Searches ensembler name for a partial match of the search text. [optional]
                 type (EnsemblerType): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.

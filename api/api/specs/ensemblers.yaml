@@ -34,6 +34,7 @@ paths:
             default: 10
         - in: query
           name: search
+          description: Searches ensembler name for a partial match of the search text
           schema:
             type: string
         - in: query
