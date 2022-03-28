@@ -34,11 +34,11 @@ turing:
             - name: treatment-1
           variants_configuration:
             control:
-              traffic: 1.0
+              traffic: 0.85
               treatment_configuration:
                 foo: bar
             treatment-1:
-              traffic: 0.0
+              traffic: 0.15
               treatment_configuration:
                 bar: baz
 
