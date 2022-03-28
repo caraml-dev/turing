@@ -48,6 +48,11 @@ paths:
         schema:
           default: 10
           type: integer
+      - description: Searches ensembler name for a partial match of the search text
+        in: query
+        name: search
+        schema:
+          type: string
       - in: query
         name: type
         schema:
@@ -172,7 +177,9 @@ paths:
         schema:
           format: int32
           type: integer
-      - in: query
+      - description: Searches ensembling job name used for a partial match of the
+          search text
+        in: query
         name: search
         schema:
           type: string

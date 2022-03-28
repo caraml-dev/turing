@@ -20,7 +20,7 @@ type SegmenterConfig struct {
 
 type Experiment struct {
 	manager.Experiment
-	SegmentationConfig SegmenterConfig
+	SegmentationConfig SegmenterConfig            `json:"segmentation_configuration"`
 	VariantsConfig     map[string]TreatmentConfig `json:"variants_configuration"`
 }
 

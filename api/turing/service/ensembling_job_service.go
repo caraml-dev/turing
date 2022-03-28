@@ -180,7 +180,7 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 	}
 
 	if options.Search != nil && len(*options.Search) > 0 {
-		query = query.Where("name like ?", fmt.Sprintf("%%%s%%", *options.Search))
+		query = query.Where("name ilike ?", fmt.Sprintf("%%%s%%", *options.Search))
 	}
 
 	if options.Statuses != nil {

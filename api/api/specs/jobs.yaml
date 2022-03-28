@@ -38,6 +38,7 @@ paths:
             <<: *id
         - in: query
           name: search
+          description: Searches ensembling job name used for a partial match of the search text
           schema:
             type: string
         - in: query

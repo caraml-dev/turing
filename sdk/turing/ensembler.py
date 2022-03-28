@@ -15,18 +15,18 @@ class EnsemblerBase(abc.ABC):
     @abc.abstractmethod
     def ensemble(
             self,
-            features: pandas.Series,
-            predictions: pandas.Series,
-            treatment_config: Optional[pandas.Series]) -> Any:
+            input: Union[pandas.Series, Dict[str, Any]],
+            predictions: Union[pandas.Series, Dict[str, Any]],
+            treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]]) -> Any:
         """
         Ensembler should have an ensemble method, that implements the logic on how to
         ensemble final prediction results from individual model predictions and a treatment
         configuration.
 
-        :param features: pandas.Series, containing a single row with input features
-        :param predictions: pandas.Series, containing a single row with all models predictions
-                `predictions['model-a']` will contain prediction results from the model-a
-        :param treatment_config: Optional[pandas.Series], representing the configuration of a
+        :param input: Union[pandas.Series, Dict[str, Any]], containing a single row or dict with input features
+        :param predictions: Union[pandas.Series, Dict[str, Any]], containing a single row or dict with all
+            models' predictions: `predictions['model-a']` will contain prediction results from the model-a
+        :param treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]], representing the configuration of a
                 treatment, that should be applied to a given record/payload. If the experiment
                 engine is not configured, then `treatment_config` will be `None`
 
@@ -73,7 +73,7 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
             .rename(columns=prediction_columns) \
             .apply(lambda row:
                    self.ensemble(
-                       features=row.drop(prediction_columns.values()),
+                       input=row.drop(prediction_columns.values()),
                        predictions=row[prediction_columns.values()],
                        treatment_config=None
                    ), axis=1, result_type='expand')
@@ -83,9 +83,16 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
         Helper function to ensemble single requests; works on dictionary input in a single request made to the pyfunc
         ensembler service (run by the pyfunc ensembler service engine)
         """
+        # Get a mapping between route names and their corresponding responses
+        routes_to_response = dict()
+        for prediction in model_input['response']['route_responses']:
+            routes_to_response[prediction["route"]] = prediction.copy()
+            # Deletes route from the dictionary as it is a duplicate of the key
+            del routes_to_response[prediction["route"]]["route"]
+
         return self.ensemble(
-            features=model_input['request'],
-            predictions=model_input['response']['route_responses'],
+            input=model_input['request'],
+            predictions=routes_to_response,
             treatment_config=model_input['response']['experiment']
         )
 

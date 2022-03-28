@@ -5,56 +5,50 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestExperimentRunner_GetTreatmentForRequest(t *testing.T) {
-	experiments := []Experiment{
-		{
-			Experiment: manager.Experiment{
-				ID:   "001",
-				Name: "exp_1",
-				Variants: []manager.Variant{
-					{
-						Name: "control",
+	runnerConfig := json.RawMessage(`{
+		"experiments": [
+			{
+				"id": "001",
+				"name": "exp_1",
+				"variants": [
+					{"name": "control"}, 
+					{"name": "treatment-1"}
+				],
+				"segmentation_configuration": {
+					"name": "client_id",
+					"source": "payload",
+					"value": "client.id"
+				},
+				"variants_configuration": {
+					"control": {
+						"traffic": 0.85,
+						"treatment_configuration": {"foo": "bar"}
 					},
-					{
-						Name: "treatment-1",
-					},
-				},
-			},
-			SegmentationConfig: SegmenterConfig{
-				Name:            "customer_id",
-				SegmenterSource: request.PayloadFieldSource,
-				SegmenterValue:  "client.id",
-			},
-			VariantsConfig: map[string]TreatmentConfig{
-				"control": {
-					Traffic: 0.85,
-					Data:    json.RawMessage(`{"foo": "bar"}`),
-				},
-				"treatment-1": {
-					Traffic: 0.15,
-					Data:    json.RawMessage(`{"bar": "baz"}`),
-				},
-			},
-		},
-	}
+					"treatment-1": {
+						"traffic": 0.15,
+						"treatment_configuration": {"bar": "baz"}
+					}
+				}
+			}
+		]
+	}`)
 
 	suite := map[string]struct {
-		experiments []Experiment
-		header      http.Header
-		payload     json.RawMessage
-		expected    *runner.Treatment
-		err         string
+		runnerConfig json.RawMessage
+		header       http.Header
+		payload      json.RawMessage
+		expected     *runner.Treatment
+		err          string
 	}{
 		"success | client_id:4": {
-			experiments: experiments,
-			payload:     json.RawMessage(`{"client": {"id": 4}}`),
+			runnerConfig: runnerConfig,
+			payload:      json.RawMessage(`{"client": {"id": 4}}`),
 			expected: &runner.Treatment{
 				ExperimentName: "exp_1",
 				Name:           "control",
@@ -62,8 +56,8 @@ func TestExperimentRunner_GetTreatmentForRequest(t *testing.T) {
 			},
 		},
 		"success | client_id:7": {
-			experiments: experiments,
-			payload:     json.RawMessage(`{"client": {"id": 7}}`),
+			runnerConfig: runnerConfig,
+			payload:      json.RawMessage(`{"client": {"id": 7}}`),
 			expected: &runner.Treatment{
 				ExperimentName: "exp_1",
 				Name:           "treatment-1",
@@ -71,15 +65,17 @@ func TestExperimentRunner_GetTreatmentForRequest(t *testing.T) {
 			},
 		},
 		"failure": {
-			experiments: experiments,
-			payload:     json.RawMessage(`{}`),
-			err:         "no experiment configured for the unit",
+			runnerConfig: runnerConfig,
+			payload:      json.RawMessage(`{}`),
+			err:          "no experiment configured for the unit",
 		},
 	}
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			expRunner := ExperimentRunner{experiments: tt.experiments}
+			expRunner := &ExperimentRunner{}
+			err := expRunner.Configure(tt.runnerConfig)
+			require.NoError(t, err)
 
 			actual, err := expRunner.GetTreatmentForRequest(tt.header, tt.payload, runner.GetTreatmentOptions{})
 			if tt.err != "" {

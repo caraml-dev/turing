@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
@@ -23,6 +25,7 @@ type EnsemblersFindByIDOptions struct {
 type EnsemblersListOptions struct {
 	PaginationOptions
 	ProjectID     *models.ID            `schema:"project_id" validate:"required"`
+	Search        *string               `schema:"search"`
 	EnsemblerType *models.EnsemblerType `schema:"type" validate:"omitempty,oneof=pyfunc docker"`
 }
 
@@ -66,6 +69,10 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 	query := service.db
 	if options.ProjectID != nil {
 		query = query.Where("project_id = ?", options.ProjectID)
+	}
+
+	if options.Search != nil && len(*options.Search) > 0 {
+		query = query.Where("name ilike ?", fmt.Sprintf("%%%s%%", *options.Search))
 	}
 
 	if options.EnsemblerType != nil {
