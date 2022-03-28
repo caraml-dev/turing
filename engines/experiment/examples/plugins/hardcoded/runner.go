@@ -7,10 +7,12 @@ import (
 	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/gojek/turing/engines/experiment/runner"
 	"net/http"
+	"sort"
 )
 
 type ExperimentRunner struct {
-	experiments []Experiment
+	experiments      []Experiment
+	sortedTreatments map[string][]string
 }
 
 func (e *ExperimentRunner) Configure(cfg json.RawMessage) error {
@@ -19,8 +21,22 @@ func (e *ExperimentRunner) Configure(cfg json.RawMessage) error {
 	if err != nil {
 		return err
 	}
-
 	e.experiments = config.Experiments
+	e.sortedTreatments = make(map[string][]string)
+
+	for _, exp := range e.experiments {
+		var variants []string
+
+		for name := range exp.VariantsConfig {
+			variants = append(variants, name)
+		}
+
+		sort.Slice(variants, func(i, j int) bool {
+			return exp.VariantsConfig[variants[i]].Traffic > exp.VariantsConfig[variants[j]].Traffic
+		})
+
+		e.sortedTreatments[exp.ID] = variants
+	}
 	return nil
 }
 
@@ -42,7 +58,8 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 		bucket := utils.Hash(segmentationUnit) % 10000
 
 		var total uint32 = 0
-		for name, variant := range exp.VariantsConfig {
+		for _, name := range e.sortedTreatments[exp.ID] {
+			variant := exp.VariantsConfig[name]
 			total += uint32(variant.Traffic * 10000)
 			if bucket <= total {
 				return &runner.Treatment{
