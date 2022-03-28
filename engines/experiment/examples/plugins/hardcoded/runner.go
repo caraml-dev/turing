@@ -44,7 +44,7 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 		var total uint32 = 0
 		for name, variant := range exp.VariantsConfig {
 			total += uint32(variant.Traffic * 10000)
-			if bucket < total {
+			if bucket <= total {
 				return &runner.Treatment{
 					ExperimentName: exp.Name,
 					Name:           name,
