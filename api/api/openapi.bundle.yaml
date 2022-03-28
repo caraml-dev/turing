@@ -177,8 +177,8 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: Searches ensembler name used for the ensembling job for a partial
-          match of the search text
+      - description: Searches ensembling job name used for a partial match of the
+          search text
         in: query
         name: search
         schema:

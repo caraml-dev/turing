@@ -312,7 +312,7 @@ class EnsemblingJobApi(object):
                 page (int): [optional] if omitted the server will use the default value of 1
                 page_size (int): [optional] if omitted the server will use the default value of 10
                 ensembler_id (int): [optional]
-                search (str): Searches ensembler name used for the ensembling job for a partial match of the search text. [optional]
+                search (str): Searches ensembling job name used for a partial match of the search text. [optional]
                 status ([EnsemblerJobStatus]): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
