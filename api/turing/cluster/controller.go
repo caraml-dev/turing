@@ -586,9 +586,10 @@ func (c *controller) CreateRole(
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
-				"failed getting status of driver role %s in namespace %s",
+				"failed getting status of driver role %s in namespace %s: %s",
 				r.Name,
 				namespace,
+				err.Error(),
 			)
 		}
 
@@ -597,9 +598,10 @@ func (c *controller) CreateRole(
 
 		if err != nil {
 			return nil, errors.Errorf(
-				"failed creating driver roles %s in namespace %s",
+				"failed creating driver roles %s in namespace %s: %s",
 				r.Name,
 				namespace,
+				err.Error(),
 			)
 		}
 	}
@@ -616,9 +618,10 @@ func (c *controller) CreateRoleBinding(
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
-				"failed getting status of driver rolebinding %s in namespace %s",
+				"failed getting status of driver rolebinding %s in namespace %s: %s",
 				roleBinding.Name,
 				namespace,
+				err.Error(),
 			)
 		}
 
@@ -627,9 +630,10 @@ func (c *controller) CreateRoleBinding(
 
 		if err != nil {
 			return nil, errors.Errorf(
-				"failed creating driver roles binding %s in namespace %s",
+				"failed creating driver roles binding %s in namespace %s: %s",
 				roleBinding.Name,
 				namespace,
+				err.Error(),
 			)
 		}
 	}
