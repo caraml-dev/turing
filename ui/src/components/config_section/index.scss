@@ -11,7 +11,7 @@
 .euiPanel--configSection {
   .euiDescriptionList.euiDescriptionList--responsiveColumn {
     > * {
-      @include euiTextBreakWord;
+      @include euiTextTruncate;
 
       line-height: 2.1 !important;
       margin-top: 2px !important;
