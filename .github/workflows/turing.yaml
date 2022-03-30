@@ -209,10 +209,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.16
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: "1.16"
+          go-version: "1.18"
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -252,10 +252,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.16
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: "1.16"
+          go-version: "1.18"
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -287,10 +287,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.16
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: "1.16"
+          go-version: "1.18"
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -347,10 +347,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.16
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: "1.16"
+          go-version: "1.18"
 
       - name: Download Turing API Docker tar archive
         uses: actions/download-artifact@v2
