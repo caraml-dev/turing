@@ -21,8 +21,6 @@ on:
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
-    branches:
-      - main
     paths-ignore:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"

@@ -14,8 +14,6 @@ on:
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
-    branches:
-      - main
     paths:
       - ".github/workflows/cluster-init.yaml"
       - "infra/cluster-init/**"
