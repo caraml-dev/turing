@@ -7,7 +7,16 @@ export const ContainerConfigTable = ({
   const items = [
     {
       title: "Image",
-      description: image,
+      description: (
+        <span
+          style={{
+            wordBreak: "break-word",
+            textOverflow: "unset",
+            whiteSpace: "break-spaces",
+          }}>
+          {image}
+        </span>
+      ),
     },
     {
       title: "Endpoint",
