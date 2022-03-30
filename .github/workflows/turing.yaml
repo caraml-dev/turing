@@ -374,11 +374,6 @@ jobs:
         with:
           name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
 
-      - name: Set up Go 1.16
-        uses: actions/setup-go@v2
-        with:
-          go-version: "1.16"
-
       - name: Run action cluster-init
         uses: ./.github/actions/run-cluster-init
         with:
