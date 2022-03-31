@@ -14,6 +14,9 @@ on:
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
+    branches:
+      - main
+      - upgrade-knative
     paths:
       - ".github/workflows/sdk.yaml"
       - "sdk/**"

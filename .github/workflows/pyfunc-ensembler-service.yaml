@@ -15,6 +15,9 @@ on:
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
+    branches:
+      - main
+      - upgrade-knative
     paths:
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - "engines/pyfunc-ensembler-service/**"

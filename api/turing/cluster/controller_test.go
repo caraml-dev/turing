@@ -100,7 +100,6 @@ func TestDeployKnativeService(t *testing.T) {
 	// Define tests
 	cs := knservingclientset.NewSimpleClientset()
 	tests := map[string][]reactor{
-		// TODO: problematic for new_service
 		"new_service": {
 			{
 				verb:     reactorVerbs.Get,
