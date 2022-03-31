@@ -195,10 +195,10 @@ func TestDeployEndpoint(t *testing.T) {
 	// Create mock controller
 	controller := &mocks.Controller{}
 	controller.On("DeployKnativeService", mock.Anything, mock.Anything).Return(nil)
-	controller.On("GetKnativeServiceURL", mock.Anything, mock.Anything).Return("test-endpoint")
+	controller.On("GetKnativeServiceURL", mock.Anything, mock.Anything, mock.Anything).Return("test-endpoint")
 	controller.On("DeployKubernetesService", mock.Anything, mock.Anything).Return(nil)
-	controller.On("CreateNamespace", mock.Anything).Return(nil)
-	controller.On("ApplyConfigMap", mock.Anything, mock.Anything).Return(nil)
+	controller.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+	controller.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("CreateSecret", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyPersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyIstioVirtualService", mock.Anything, mock.Anything).Return(nil)
@@ -254,7 +254,7 @@ func TestDeployEndpoint(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com", routerVersion.Router.Name), endpoint)
-	controller.AssertCalled(t, "CreateNamespace", testNamespace)
+	controller.AssertCalled(t, "CreateNamespace", mock.Anything, testNamespace)
 	controller.AssertCalled(t, "ApplyPersistentVolumeClaim", mock.Anything,
 		testNamespace, &cluster.PersistentVolumeClaim{Name: "pvc"})
 	controller.AssertCalled(t, "DeployKubernetesService", mock.Anything, &cluster.KubernetesService{
@@ -297,7 +297,7 @@ func TestDeployEndpoint(t *testing.T) {
 		QueueProxyResourcePercentage:    20,
 		UserContainerLimitRequestFactor: 1.75,
 	})
-	controller.AssertCalled(t, "ApplyConfigMap", testNamespace,
+	controller.AssertCalled(t, "ApplyConfigMap", mock.Anything, testNamespace,
 		&cluster.ConfigMap{Name: fmt.Sprintf("%s-fiber-config-%d", routerVersion.Router.Name, routerVersion.Version)})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
 		BaseService: &cluster.BaseService{
@@ -334,7 +334,7 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 	})
 	controller.AssertNumberOfCalls(t, "DeployKnativeService", 3)
-	controller.AssertCalled(t, "GetKnativeServiceURL", "test-router-svc", testNamespace)
+	controller.AssertCalled(t, "GetKnativeServiceURL", mock.Anything, "test-router-svc", testNamespace)
 	controller.AssertCalled(t, "ApplyIstioVirtualService", mock.Anything, &cluster.VirtualService{
 		Name:      "test-svc-turing-router",
 		Namespace: "test-namespace",
@@ -357,8 +357,8 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller.On("DeleteKubernetesService", mock.Anything, mock.Anything,
 		mock.Anything, mock.Anything).Return(nil)
 	controller.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-	controller.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
-	controller.On("DeletePersistentVolumeClaim", mock.Anything, mock.Anything).Return(nil)
+	controller.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	controller.On("DeletePersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	// Create test router version
 	filePath := filepath.Join("..", "testdata", "cluster",
@@ -406,12 +406,12 @@ func TestDeleteEndpoint(t *testing.T) {
 		eventsCh,
 	)
 	assert.NoError(t, err)
-	controller.AssertCalled(t, "DeleteKubernetesService", "test-svc-fluentd-logger-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteConfigMap", "test-svc-fiber-config-1", testNs)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-enricher-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-ensembler-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-router-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteSecret", "test-svc-svc-acct-secret-1", testNs)
-	controller.AssertCalled(t, "DeletePersistentVolumeClaim", "pvc", testNs)
+	controller.AssertCalled(t, "DeleteKubernetesService", mock.Anything, "test-svc-fluentd-logger-1", testNs, timeout)
+	controller.AssertCalled(t, "DeleteConfigMap", mock.Anything, "test-svc-fiber-config-1", testNs)
+	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-enricher-1", testNs, timeout)
+	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-ensembler-1", testNs, timeout)
+	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-router-1", testNs, timeout)
+	controller.AssertCalled(t, "DeleteSecret", mock.Anything, "test-svc-svc-acct-secret-1", testNs)
+	controller.AssertCalled(t, "DeletePersistentVolumeClaim", mock.Anything, "pvc", testNs)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
 }

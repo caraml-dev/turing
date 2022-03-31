@@ -169,8 +169,8 @@ func TestCreate(t *testing.T) {
 			expected: nil,
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -191,11 +191,10 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-					mock.Anything,
 				).Return(nil, nil)
 				ctrler.On("CreateSecret", mock.Anything, mock.Anything).Return(nil, nil)
-				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("CreateSparkApplication", mock.Anything, mock.Anything).Return(nil, nil)
+				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -218,9 +217,9 @@ func TestCreate(t *testing.T) {
 			expected: fmt.Errorf("failed creating namespace %s: %v", namespace, fmt.Errorf("hi")),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(fmt.Errorf("hi"))
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -246,13 +245,13 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,
 					fmt.Errorf("hi"),
 				)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -278,8 +277,8 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -291,8 +290,8 @@ func TestCreate(t *testing.T) {
 					nil,
 					fmt.Errorf("hi"),
 				)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -318,8 +317,8 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -340,10 +339,9 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-					mock.Anything,
 				).Return(nil, fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -370,8 +368,8 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -392,10 +390,9 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-					mock.Anything,
 				).Return(nil, nil)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -422,8 +419,8 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -444,12 +441,11 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-					mock.Anything,
 				).Return(nil, nil)
 				ctrler.On("CreateSecret", mock.Anything, mock.Anything).Return(nil, nil)
-				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything).Return(fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("hi"))
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -477,8 +473,8 @@ func TestCreate(t *testing.T) {
 			),
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("CreateNamespace", mock.Anything).Return(nil)
-				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apicorev1.ServiceAccount{
 						ObjectMeta: apimetav1.ObjectMeta{
 							Name: fmt.Sprintf("%s-driver-sa", namespace),
@@ -499,13 +495,12 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-					mock.Anything,
 				).Return(nil, nil)
 				ctrler.On("CreateSecret", mock.Anything, mock.Anything).Return(nil, nil)
-				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("CreateSparkApplication", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("hi"))
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -553,7 +548,7 @@ func TestGetStatus(t *testing.T) {
 		"failure | unable to get spark app": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					// Important to note that spark always returns a object rather than nil!!!
 					&apisparkv1beta2.SparkApplication{},
 					fmt.Errorf("hello"),
@@ -566,7 +561,7 @@ func TestGetStatus(t *testing.T) {
 		"success | completed job": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{
 						Status: apisparkv1beta2.SparkApplicationStatus{
 							AppState: apisparkv1beta2.ApplicationState{
@@ -584,7 +579,7 @@ func TestGetStatus(t *testing.T) {
 		"success | failed job": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{
 						Status: apisparkv1beta2.SparkApplicationStatus{
 							AppState: apisparkv1beta2.ApplicationState{
@@ -602,7 +597,7 @@ func TestGetStatus(t *testing.T) {
 		"success | unknown state": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{
 						Status: apisparkv1beta2.SparkApplicationStatus{
 							AppState: apisparkv1beta2.ApplicationState{
@@ -620,7 +615,7 @@ func TestGetStatus(t *testing.T) {
 		"success | other cases": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{
 						Status: apisparkv1beta2.SparkApplicationStatus{
 							AppState: apisparkv1beta2.ApplicationState{
@@ -661,14 +656,14 @@ func TestDelete(t *testing.T) {
 		"success | delete spark application": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{},
 					nil,
 				)
-				ctrler.On("DeleteSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("DeleteSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,
 				)
 				return ctrler
@@ -678,10 +673,10 @@ func TestDelete(t *testing.T) {
 		"success | no such job": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything).Return(
+				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,
 					fmt.Errorf("hello"),
 				)

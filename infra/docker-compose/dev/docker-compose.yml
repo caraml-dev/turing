@@ -14,7 +14,7 @@ services:
 
   # Kubernetes control plane
   server:
-    image: "rancher/k3s:v1.20.12-k3s1"
+    image: "rancher/k3s:v1.22.7-k3s1"
     command: server --disable traefik
     privileged: true
     environment:
@@ -58,7 +58,7 @@ services:
 
   # Kubernetes worker nodes
   agent:
-    image: "rancher/k3s:v1.20.12-k3s1"
+    image: "rancher/k3s:v1.22.7-k3s1"
     deploy:
       replicas: 3
     privileged: true
@@ -70,7 +70,7 @@ services:
 
   # Install Istio on Kubernetes 
   istio:
-    image: bitnami/kubectl:1.19.4
+    image: bitnami/kubectl:1.22.7
     restart: on-failure
     user: root:root
     volumes:
@@ -82,12 +82,12 @@ services:
       cp /.kube/kubeconfig.yaml /.kube/config
       sed -i 's/127.0.0.1/server/' /.kube/config
       kubectl cluster-info
-      curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.7.3 sh -
-      /.istioctl/bin/istioctl install -f /minimal-operator.yaml
+      curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.12.4 sh -
+      /.istioctl/bin/istioctl install -y -f /minimal-operator.yaml
 
   # Install Knative serving on Kubernetes
   knative:
-    image: bitnami/kubectl:1.19.4
+    image: bitnami/kubectl:1.22.7
     restart: on-failure
     user: root:root
     volumes:
@@ -97,11 +97,11 @@ services:
     - |
       cp /.kube/kubeconfig.yaml /.kube/config
       sed -i 's/127.0.0.1/server/' /.kube/config
-      kubectl apply -f https://github.com/knative/serving/releases/download/v0.16.0/serving-crds.yaml
-      kubectl apply -f https://github.com/knative/serving/releases/download/v0.16.0/serving-core.yaml
+      kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-crds.yaml
+      kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-core.yaml
       kubectl -n knative-serving patch configmap/config-deployment --type merge -p '{"data":{"registriesSkippingTagResolving": "localhost:5000"}}'
       kubectl -n knative-serving patch configmap/config-domain --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
-      kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.16.0/release.yaml
+      kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/knative-v1.0.0/net-istio.yaml
   
   mlp-postgres:
     image: bitnami/postgresql:13.0.0
@@ -194,7 +194,7 @@ services:
       - "5432:5432"
 
   mockserver:
-    image: bitnami/kubectl:1.19.4
+    image: bitnami/kubectl:1.22.7
     restart: on-failure
     user: root:root
     volumes:

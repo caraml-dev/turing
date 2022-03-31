@@ -3,7 +3,7 @@
 ## Local Development
 
 ### Requirements
-- Golang 1.14
+- Golang 1.18
 
 ## Adding a new Experiment Engine
 

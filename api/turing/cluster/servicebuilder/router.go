@@ -72,8 +72,9 @@ const (
 
 // Router endpoint constants
 const (
-	defaultIstioGateway = "istio-ingressgateway.istio-system.svc.cluster.local"
-	defaultGateway      = "knative-ingress-gateway.knative-serving"
+	defaultIstioGatewayDestination = "istio-ingressgateway.istio-system.svc.cluster.local"
+	// Warning given when using FQDN as Gateway
+	defaultGateway = "knative-serving/knative-ingress-gateway"
 )
 
 var defaultMatchURIPrefixes = []string{"/v1/predict", "/v1/batch_predict"}
@@ -160,7 +161,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 		Labels:           labels,
 		Gateway:          defaultGateway,
 		Endpoint:         host,
-		DestinationHost:  defaultIstioGateway,
+		DestinationHost:  defaultIstioGatewayDestination,
 		HostRewrite:      veURL.Hostname(),
 		MatchURIPrefixes: defaultMatchURIPrefixes,
 	}, nil

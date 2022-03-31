@@ -16,6 +16,7 @@ on:
   pull_request:
     branches:
       - main
+      - upgrade-knative
     paths:
       - ".github/workflows/cluster-init.yaml"
       - "infra/cluster-init/**"

@@ -5,8 +5,8 @@ import (
 
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
 	"gotest.tools/assert"
-	networking "istio.io/api/networking/v1alpha3"
-	"istio.io/client-go/pkg/apis/networking/v1alpha3"
+	networking "istio.io/api/networking/v1beta1"
+	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -23,7 +23,7 @@ func TestBuildVirtualService(t *testing.T) {
 		HostRewrite:      "test-svc-turing-router-1.models.example.com",
 		MatchURIPrefixes: []string{"/v1/prefix"},
 	}
-	expected := v1alpha3.VirtualService{
+	expected := v1beta1.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfg.Name,
 			Namespace: cfg.Namespace,

@@ -16,9 +16,9 @@ import (
 
 // EnsemblingJobEnsemblerSpecResult struct for EnsemblingJobEnsemblerSpecResult
 type EnsemblingJobEnsemblerSpecResult struct {
-	Type EnsemblingJobResultType `json:"type"`
-	ItemType *EnsemblingJobResultType `json:"item_type,omitempty"`
-	ColumnName string `json:"column_name"`
+	Type       EnsemblingJobResultType  `json:"type"`
+	ItemType   *EnsemblingJobResultType `json:"item_type,omitempty"`
+	ColumnName string                   `json:"column_name"`
 }
 
 // NewEnsemblingJobEnsemblerSpecResult instantiates a new EnsemblingJobEnsemblerSpecResult object
@@ -53,7 +53,7 @@ func (o *EnsemblingJobEnsemblerSpecResult) GetType() EnsemblingJobResultType {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobEnsemblerSpecResult) GetTypeOk() (*EnsemblingJobResultType, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Type, true
@@ -109,7 +109,7 @@ func (o *EnsemblingJobEnsemblerSpecResult) GetColumnName() string {
 // GetColumnNameOk returns a tuple with the ColumnName field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobEnsemblerSpecResult) GetColumnNameOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ColumnName, true
@@ -169,5 +169,3 @@ func (v *NullableEnsemblingJobEnsemblerSpecResult) UnmarshalJSON(src []byte) err
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

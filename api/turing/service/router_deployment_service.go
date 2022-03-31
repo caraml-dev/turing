@@ -128,7 +128,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	// Create namespace if not exists
 	eventsCh.Write(models.NewInfoEvent(
 		models.EventStageDeployingDependencies, "preparing namespace for project %s", project.Name))
-	err = controller.CreateNamespace(project.Name)
+	err = controller.CreateNamespace(ctx, project.Name)
 	if err != nil && err != cluster.ErrNamespaceAlreadyExists {
 		return endpoint, err
 	}
@@ -204,7 +204,7 @@ func (ds *deploymentService) DeployRouterVersion(
 
 	// Get the router's external endpoint
 	routerSvcName := ds.svcBuilder.GetRouterServiceName(routerVersion)
-	endpoint = controller.GetKnativeServiceURL(routerSvcName, project.Name)
+	endpoint = controller.GetKnativeServiceURL(ctx, routerSvcName, project.Name)
 
 	// Deploy or update the virtual service
 	eventsCh.Write(models.NewInfoEvent(models.EventStageUpdatingEndpoint, "updating router endpoint"))
@@ -311,7 +311,10 @@ func (ds *deploymentService) UndeployRouterVersion(
 func (ds *deploymentService) DeleteRouterEndpoint(
 	project *mlp.Project,
 	environment *merlin.Environment,
-	routerVersion *models.RouterVersion) error {
+	routerVersion *models.RouterVersion,
+) error {
+	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
+	defer cancel()
 	// Get the cluster controller
 	controller, err := ds.getClusterControllerByEnvironment(environment.Name)
 	if err != nil {
@@ -319,7 +322,7 @@ func (ds *deploymentService) DeleteRouterEndpoint(
 	}
 
 	routerEndpointName := fmt.Sprintf("%s-turing-router", routerVersion.Router.Name)
-	return controller.DeleteIstioVirtualService(routerEndpointName, project.Name, ds.deploymentDeletionTimeout)
+	return controller.DeleteIstioVirtualService(ctx, routerEndpointName, project.Name, ds.deploymentDeletionTimeout)
 }
 
 func (ds *deploymentService) getClusterControllerByEnvironment(
@@ -478,7 +481,7 @@ func deleteK8sService(
 	service *cluster.KubernetesService,
 	timeout time.Duration,
 ) error {
-	return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout)
+	return controller.DeleteKubernetesService(context.Background(), service.Name, service.Namespace, timeout)
 }
 
 // createSecret creates a secret.
@@ -497,7 +500,7 @@ func createSecret(
 
 // deleteSecret deletes a secret.
 func deleteSecret(controller cluster.Controller, secret *cluster.Secret) error {
-	return controller.DeleteSecret(secret.Name, secret.Namespace)
+	return controller.DeleteSecret(context.Background(), secret.Name, secret.Namespace)
 }
 
 func createPVC(
@@ -519,7 +522,7 @@ func deletePVC(
 	namespace string,
 	pvc *cluster.PersistentVolumeClaim,
 ) error {
-	return controller.DeletePersistentVolumeClaim(pvc.Name, namespace)
+	return controller.DeletePersistentVolumeClaim(context.Background(), pvc.Name, namespace)
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -542,7 +545,7 @@ func deployKnServices(
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying service %s", svc.Name))
 		if svc.ConfigMap != nil {
-			err := controller.ApplyConfigMap(svc.Namespace, svc.ConfigMap)
+			err := controller.ApplyConfigMap(context.Background(), svc.Namespace, svc.ConfigMap)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to apply config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -592,7 +595,7 @@ func deleteKnServices(
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageUndeployingServices, "deleting service %s", svc.Name))
 		if svc.ConfigMap != nil {
-			err := controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace)
+			err := controller.DeleteConfigMap(ctx, svc.ConfigMap.Name, svc.Namespace)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to delete config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -600,7 +603,7 @@ func deleteKnServices(
 				errCh <- err
 			}
 		}
-		err := controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout)
+		err := controller.DeleteKnativeService(ctx, svc.Name, svc.Namespace, timeout)
 		if err != nil {
 			err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
 			eventsCh.Write(models.NewErrorEvent(

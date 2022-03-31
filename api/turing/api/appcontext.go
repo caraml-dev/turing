@@ -110,7 +110,11 @@ func NewAppContext(
 			mlpSvc,
 		)
 
-		batchClusterController := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
+		batchClusterController, ok := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
+		if !ok {
+			return nil, errors.Wrapf(err, "Failed getting the default controller")
+		}
+
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 			batchClusterController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
