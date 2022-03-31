@@ -40,6 +40,8 @@ on:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
+  GO_VERSION: 1.18
+  GO_LINT_VERSION: v1.45.2
 
 jobs:
   build-api:
@@ -213,10 +215,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.18
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -238,7 +240,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.45.2
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: api
           skip-go-installation: true
           args: --timeout 3m --verbose
@@ -256,10 +258,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.18
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -278,7 +280,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.45.2
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/router
           skip-go-installation: true
           args: --verbose
@@ -291,10 +293,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.18
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -311,7 +313,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.45.2
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/experiment
           skip-go-installation: true
           args: --verbose
@@ -351,10 +353,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.18
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Download Turing API Docker tar archive
         uses: actions/download-artifact@v2
