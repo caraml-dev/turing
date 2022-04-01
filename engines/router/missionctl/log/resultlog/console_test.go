@@ -53,8 +53,8 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	// Create a new TuringResultLogEntry and send the responses
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "")
-	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "Error Response")
+	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "", "")
+	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "", "Error Response")
 
 	// Write the result log using ConsoleLogger
 	testLogger := ConsoleLogger{}

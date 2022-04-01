@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -44,16 +45,24 @@ func logTuringRouterRequestSummary(
 	for resp := range mcRespCh {
 		// If error exists, add an error record
 		if resp.err != "" {
-			logEntry.AddResponse(resp.key, nil, nil, resp.err)
+			logEntry.AddResponse(resp.key, nil, "", resp.err)
 		} else {
 			// Process the response body
 			uncompressedData, err := uncompressHTTPBody(resp.header, resp.body)
 			if err != nil {
 				logger.Errorf("Error occurred when reading %s response body: %s",
 					resp.key, err.Error())
-				logEntry.AddResponse(resp.key, nil, resp.header, err.Error())
+				logEntry.AddResponse(resp.key, nil, "", err.Error())
+			}
+
+			// Stringify the response header
+			responseHeader, err := stringifyResponseHeader(resp.header)
+			if err != nil {
+				logger.Errorf("Error occurred when converting the response body %s to a string: %s",
+					resp.header, err.Error())
+				logEntry.AddResponse(resp.key, nil, responseHeader, err.Error())
 			} else {
-				logEntry.AddResponse(resp.key, uncompressedData, resp.header, "")
+				logEntry.AddResponse(resp.key, uncompressedData, responseHeader, "")
 			}
 		}
 	}
@@ -132,4 +141,9 @@ func uncompressHTTPBody(header http.Header, body []byte) ([]byte, error) {
 		result = body
 	}
 	return result, nil
+}
+
+func stringifyResponseHeader(header http.Header) (string, error) {
+	headerJSON, err := json.Marshal(header)
+	return string(headerJSON), err
 }

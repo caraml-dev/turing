@@ -55,8 +55,8 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 		"router_version":"test-app-name",
 		"request":{"header":{"Req_id":"test_req_id"},"body":"{\"customer_id\": \"test_customer\"}"},
 		"experiment":{"error":"Error received"},
-		"enricher":{"response":"{\"key\": \"enricher_data\"}"},
-		"router":{"response":"{\"key\": \"router_data\"}"}
+		"enricher":{"response_body":"{\"key\": \"enricher_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"},
+		"router":{"response_body":"{\"key\": \"router_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"}
 		}`, string(bytes))
 }
 
@@ -230,9 +230,19 @@ func makeTestTuringResultLogEntry(t *testing.T) (context.Context, *TuringResultL
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("experiment", nil, "Error received")
-	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "")
-	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "")
+	entry.AddResponse("experiment", nil, "", "Error received")
+	entry.AddResponse(
+		"router",
+		[]byte(`{"key": "router_data"}`),
+		`{"Connection": ["Keep-Alive"], "Content-Encoding": ["gzip"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		"",
+	)
+	entry.AddResponse(
+		"enricher",
+		[]byte(`{"key": "enricher_data"}`),
+		`{"Connection": ["Keep-Alive"], "Content-Encoding": ["lz4"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		"",
+	)
 
 	return ctx, entry
 }

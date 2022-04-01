@@ -3,7 +3,6 @@ package resultlog
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -66,9 +65,9 @@ func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
 }
 
 // AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (logEntry *TuringResultLogEntry) AddResponse(key string, responseBody []byte, responseHeader map[string][]string, err string) {
+func (logEntry *TuringResultLogEntry) AddResponse(key string, responseBody []byte, responseHeader string, err string) {
 	responseRecord := &turing.Response{
-		ResponseHeader: fmt.Sprint(responseHeader),
+		ResponseHeader: responseHeader,
 		ResponseBody:   string(json.RawMessage(responseBody)),
 		Error:          err,
 	}
