@@ -21,6 +21,9 @@ message Response {
 
     // The error from a Turing component, when a successful response is not received.
     string error = 2;
+
+    // The response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded.
+    string header = 3;
 }
 
 // key
