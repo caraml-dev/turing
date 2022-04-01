@@ -56,16 +56,22 @@
         "description": "The response from the Experiment engine, if configured",
         "fields": [
             {
-                "name": "response",
+                "name": "response_body",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The error from a Turing component, when a successful response is not received."
+            },
+            {
+                "name": "response_header",
+                "type": "STRING",
+                "mode": "NULLABLE",
+                "description": "The JSON header body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             }
         ]
     },
@@ -76,16 +82,22 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "response",
+                "name": "response_body",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The error from a Turing component, when a successful response is not received."
+            },
+            {
+                "name": "response_header",
+                "type": "STRING",
+                "mode": "NULLABLE",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             }
         ]
     },
@@ -96,16 +108,22 @@
         "description": "The response from the routes",
         "fields": [
             {
-                "name": "response",
+                "name": "response_body",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The error from a Turing component, when a successful response is not received."
+            },
+            {
+                "name": "response_header",
+                "type": "STRING",
+                "mode": "NULLABLE",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             }
         ]
     },
@@ -116,16 +134,22 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "response",
+                "name": "response_body",
                 "type": "STRING",
                 "mode": "NULLABLE",
-                "description": "The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             },
             {
                 "name": "error",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The error from a Turing component, when a successful response is not received."
+            },
+            {
+                "name": "response_header",
+                "type": "STRING",
+                "mode": "NULLABLE",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
             }
         ]
     }
