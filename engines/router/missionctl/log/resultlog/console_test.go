@@ -88,8 +88,8 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			`{"error":"Error Response","response_body":"{\"key\": \"router_data\"}",
-"response_header":"{\"Content-Encoding\": [\"gzip\"]}"}`),
+			(`{"error":"Error Response","response_body":"{\"key\": \"router_data\"}",` +
+				`"response_header":"{\"Content-Encoding\": [\"gzip\"]}"}`)),
 		),
 		logObj.Router,
 	)
