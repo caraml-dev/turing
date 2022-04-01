@@ -55,8 +55,15 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 		"router_version":"test-app-name",
 		"request":{"header":{"Req_id":"test_req_id"},"body":"{\"customer_id\": \"test_customer\"}"},
 		"experiment":{"error":"Error received"},
-		"enricher":{"response_body":"{\"key\": \"enricher_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"},
-		"router":{"response_body":"{\"key\": \"router_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"}
+		"enricher":{
+			"response_body":"{\"key\": \"enricher_data\"}", 
+			"response_header":
+"{\"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
+		},
+		"router":{
+			"response_body":"{\"key\": \"router_data\"}", 
+			"response_header":
+"{\"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"}
 		}`, string(bytes))
 }
 
@@ -203,11 +210,11 @@ func TestTuringResultLogEntryValue(t *testing.T) {
 		},
 		"enricher": map[string]interface{}{
 			"response_body":   "{\"key\": \"enricher_data\"}",
-			"response_header": "{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
+			"response_header": "{\"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
 		},
 		"router": map[string]interface{}{
 			"response_body":   "{\"key\": \"router_data\"}",
-			"response_header": "{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
+			"response_header": "{\"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
 		},
 	}, kvPairs)
 }
@@ -236,13 +243,13 @@ func makeTestTuringResultLogEntry(t *testing.T) (context.Context, *TuringResultL
 	entry.AddResponse(
 		"router",
 		[]byte(`{"key": "router_data"}`),
-		`{"Connection": ["Keep-Alive"], "Content-Encoding": ["gzip"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		`{"Content-Encoding": ["gzip"], "Content-Type": ["text/html", "charset=utf-8"]}`,
 		"",
 	)
 	entry.AddResponse(
 		"enricher",
 		[]byte(`{"key": "enricher_data"}`),
-		`{"Connection": ["Keep-Alive"], "Content-Encoding": ["lz4"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		`{"Content-Encoding": ["lz4"], "Content-Type": ["text/html", "charset=utf-8"]}`,
 		"",
 	)
 
