@@ -109,10 +109,10 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 				"error": "Error received"
 			},
 			"enricher": {
-				"response": "{\"key\": \"enricher_data\"}"
+				"response_body": "{\"key\": \"enricher_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
 			},
 			"router": {
-				"response": "{\"key\": \"router_data\"}"
+				"response_body": "{\"key\": \"router_data\"}", "response_header":"{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
 			}
 		}`, turingReqID),
 		string(message),
