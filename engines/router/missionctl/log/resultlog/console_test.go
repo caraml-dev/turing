@@ -76,15 +76,21 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	assert.Equal(t, "2000-02-01T04:05:06.000000007Z", logObj.EventTimestamp)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			`{"body":"{\"customer_id\": \"test_customer\"}","header":{"Req_id":"test_req_id"}}`)),
+			`{"body":"{\"customer_id\": \"test_customer\"}","header":{"Req_id":"test_req_id"}}`),
+		),
 		logObj.Request,
 	)
 	assert.Equal(t,
-		json.RawMessage([]byte(`{"response_body":"{\"key\": \"enricher_data\"}","response_header":"{\"Content-Encoding\": [\"lz4\"]}"}`)),
+		json.RawMessage([]byte(
+			`{"response_body":"{\"key\": \"enricher_data\"}","response_header":"{\"Content-Encoding\": [\"lz4\"]}"}`),
+		),
 		logObj.Enricher,
 	)
 	assert.Equal(t,
-		json.RawMessage([]byte(`{"error":"Error Response","response_body":"{\"key\": \"router_data\"}","response_header":"{\"Content-Encoding\": [\"gzip\"]}"}`)),
+		json.RawMessage([]byte(
+			`{"error":"Error Response","response_body":"{\"key\": \"router_data\"}",
+"response_header":"{\"Content-Encoding\": [\"gzip\"]}"}`),
+		),
 		logObj.Router,
 	)
 }
