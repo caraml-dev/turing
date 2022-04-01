@@ -126,13 +126,15 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	turingLogEntry.TuringReqId = "testID"
 	// Run newProtobufKafkaLogEntry and validate
 	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
+	fmt.Println(message)
+
 	assert.NoError(t, err)
 	// Compare logEntry data
 	assert.Equal(t, "\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a", string(key))
 	assert.Equal(t, strings.Join([]string{
 		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
 		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
-		"Error received2\x1a\n\x18{\"key\": \"enricher_data\"}:\x18\n\x16{\"key\": \"router_data\"}",
+		"Error received2\x87\x01\n\x18{\"key\": \"enricher_data\"}\x1ak{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}:\x86\x01\n\x16{\"key\": \"router_data\"}\x1al{\"Connection\": [\"Keep-Alive\"], \"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
 	}, ""), string(message))
 }
 
