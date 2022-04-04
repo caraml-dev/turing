@@ -126,6 +126,10 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	_, turingLogEntry := makeTestTuringResultLogEntry(t)
 	// Overwrite the turing request id value
 	turingLogEntry.TuringReqId = "testID"
+	// Manually remove the key-value pair corresponding to "Content-Type" in the router and enricher header to prevent
+	// non-deterministic behaviour when the hashmap in the log gets serialised
+	delete(turingLogEntry.Enricher.Header, "Content-Encoding")
+	delete(turingLogEntry.Router.Header, "Content-Encoding")
 	// Run newProtobufKafkaLogEntry and validate
 	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
 	fmt.Println(message)
@@ -136,9 +140,8 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	assert.Equal(t, strings.Join([]string{
 		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
 		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
-		"Error received2\\\n\x18{\"key\": \"enricher_data\"}\x1a\x17\n\x10Content-Encoding\x12\x03lz4\x1a'\n\f",
-		"Content-Type\x12\x17text/html,charset=utf-8:[\n\x16{\"key\": \"router_data\"}\x1a'\n\f",
-		"Content-Type\x12\x17text/html,charset=utf-8\x1a\x18\n\x10Content-Encoding\x12\x04gzip",
+		"Error received2C\n\x18{\"key\": \"enricher_data\"}\x1a'\n\fContent-Type\x12\x17text/html,",
+		"charset=utf-8:A\n\x16{\"key\": \"router_data\"}\x1a'\n\fContent-Type\x12\x17text/html,charset=utf-8",
 	}, ""), string(message))
 }
 
