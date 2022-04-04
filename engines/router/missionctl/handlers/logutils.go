@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -45,18 +45,22 @@ func logTuringRouterRequestSummary(
 	for resp := range mcRespCh {
 		// If error exists, add an error record
 		if resp.err != "" {
-			logEntry.AddResponse(resp.key, nil, "", resp.err)
+			logEntry.AddResponse(resp.key, nil, nil, resp.err)
 		} else {
 			// Process the response body
 			uncompressedData, err := uncompressHTTPBody(resp.header, resp.body)
 			if err != nil {
 				logger.Errorf("Error occurred when reading %s response body: %s",
 					resp.key, err.Error())
-				logEntry.AddResponse(resp.key, nil, "", err.Error())
+				logEntry.AddResponse(resp.key, nil, nil, err.Error())
 			}
 
-			// Stringify the response header
-			responseHeader, err := stringifyResponseHeader(resp.header)
+			// Format the response header
+			responseHeader := map[string]string{}
+			for k, v := range resp.header {
+				responseHeader[k] = strings.Join(v, ",")
+			}
+
 			if err != nil {
 				logger.Errorf("Error occurred when converting the response header %s to a string: %s",
 					resp.header, err.Error())
@@ -141,9 +145,4 @@ func uncompressHTTPBody(header http.Header, body []byte) ([]byte, error) {
 		result = body
 	}
 	return result, nil
-}
-
-func stringifyResponseHeader(header http.Header) (string, error) {
-	headerJSON, err := json.Marshal(header)
-	return string(headerJSON), err
 }
