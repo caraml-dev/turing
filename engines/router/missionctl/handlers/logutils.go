@@ -58,7 +58,7 @@ func logTuringRouterRequestSummary(
 			// Stringify the response header
 			responseHeader, err := stringifyResponseHeader(resp.header)
 			if err != nil {
-				logger.Errorf("Error occurred when converting the response body %s to a string: %s",
+				logger.Errorf("Error occurred when converting the response header %s to a string: %s",
 					resp.header, err.Error())
 				logEntry.AddResponse(resp.key, nil, responseHeader, err.Error())
 			} else {
