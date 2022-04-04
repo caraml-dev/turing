@@ -53,19 +53,12 @@ func logTuringRouterRequestSummary(
 				logger.Errorf("Error occurred when reading %s response body: %s",
 					resp.key, err.Error())
 				logEntry.AddResponse(resp.key, nil, nil, err.Error())
-			}
-
-			// Format the response header
-			responseHeader := map[string]string{}
-			for k, v := range resp.header {
-				responseHeader[k] = strings.Join(v, ",")
-			}
-
-			if err != nil {
-				logger.Errorf("Error occurred when converting the response header %s to a string: %s",
-					resp.header, err.Error())
-				logEntry.AddResponse(resp.key, nil, responseHeader, err.Error())
 			} else {
+				// Format the response header
+				responseHeader := map[string]string{}
+				for k, v := range resp.header {
+					responseHeader[k] = strings.Join(v, ",")
+				}
 				logEntry.AddResponse(resp.key, uncompressedData, responseHeader, "")
 			}
 		}
