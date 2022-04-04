@@ -108,15 +108,13 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 			"experiment": {
 				"error": "Error received"
 			},
-			"enricher": {
-				"response_body": "{\"key\": \"enricher_data\"}",
-				"response_header":
-"{\"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
+			"enricher":{
+				"body":"{\"key\": \"enricher_data\"}", 
+				"header":{"Content-Encoding":"lz4","Content-Type":"text/html,charset=utf-8"}
 			},
-			"router": {
-				"response_body": "{\"key\": \"router_data\"}", 
-				"response_header":
-"{\"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
+			"router":{
+				"body":"{\"key\": \"router_data\"}",
+				"header":{"Content-Encoding":"gzip","Content-Type":"text/html,charset=utf-8"}
 			}
 		}`, turingReqID),
 		string(message),
@@ -138,9 +136,9 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	assert.Equal(t, strings.Join([]string{
 		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
 		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
-		"Error received2i\n\x18{\"key\": \"enricher_data\"}\x1aM{\"Content-Encoding\": [\"lz4\"], \"Content-Type\"",
-		": [\"text/html\", \"charset=utf-8\"]}:h\n\u0016{\"key\": \"router_data\"}\u001AN{\"Content-Encoding\": ",
-		"[\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
+		"Error received2\\\n\x18{\"key\": \"enricher_data\"}\x1a\x17\n\x10Content-Encoding\x12\x03lz4\x1a'\n\f",
+		"Content-Type\x12\x17text/html,charset=utf-8:[\n\x16{\"key\": \"router_data\"}\x1a'\n\f",
+		"Content-Type\x12\x17text/html,charset=utf-8\x1a\x18\n\x10Content-Encoding\x12\x04gzip",
 	}, ""), string(message))
 }
 

@@ -53,8 +53,10 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	// Create a new TuringResultLogEntry and send the responses
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), `{"Content-Encoding": ["lz4"]}`, "")
-	entry.AddResponse("router", []byte(`{"key": "router_data"}`), `{"Content-Encoding": ["gzip"]}`, "Error Response")
+	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), map[string]string{"Content-Encoding": "lz4"},
+		"")
+	entry.AddResponse("router", []byte(`{"key": "router_data"}`), map[string]string{"Content-Encoding": "gzip"},
+		"Error Response")
 
 	// Write the result log using ConsoleLogger
 	testLogger := ConsoleLogger{}
@@ -82,14 +84,13 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			`{"response_body":"{\"key\": \"enricher_data\"}","response_header":"{\"Content-Encoding\": [\"lz4\"]}"}`),
+			`{"body":"{\"key\": \"enricher_data\"}","header":{"Content-Encoding":"lz4"}}`),
 		),
 		logObj.Enricher,
 	)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			(`{"error":"Error Response","response_body":"{\"key\": \"router_data\"}",` +
-				`"response_header":"{\"Content-Encoding\": [\"gzip\"]}"}`)),
+			(`{"body":"{\"key\": \"router_data\"}","error":"Error Response","header":{"Content-Encoding":"gzip"}}`)),
 		),
 		logObj.Router,
 	)

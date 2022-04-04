@@ -117,10 +117,10 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
 	entry.RouterVersion = "turing-router-1"
-	entry.AddResponse("experiment", []byte(`{"key": "experiment_data"}`), "", "")
-	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), "", "")
-	entry.AddResponse("router", []byte(`{"key": "router_data"}`), "", "")
-	entry.AddResponse("ensembler", nil, "", "Error Response")
+	entry.AddResponse("experiment", []byte(`{"key": "experiment_data"}`), nil, "")
+	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), nil, "")
+	entry.AddResponse("router", []byte(`{"key": "router_data"}`), nil, "")
+	entry.AddResponse("ensembler", nil, nil, "Error Response")
 
 	// Get the log data and validate
 	logData := testLogger.getLogData(entry)
@@ -150,7 +150,7 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 
 		// Experiment
 		if respObj, ok := logMap["experiment"].(map[string]interface{}); ok {
-			assert.Equal(t, `{"key": "experiment_data"}`, respObj["response_body"])
+			assert.Equal(t, `{"key": "experiment_data"}`, respObj["body"])
 			assert.Equal(t, nil, respObj["error"])
 		} else {
 			tu.FailOnError(t, fmt.Errorf("Cannot cast experiment log to expected type"))
@@ -158,7 +158,7 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 
 		// Enricher
 		if respObj, ok := logMap["enricher"].(map[string]interface{}); ok {
-			assert.Equal(t, `{"key": "enricher_data"}`, respObj["response_body"])
+			assert.Equal(t, `{"key": "enricher_data"}`, respObj["body"])
 			assert.Equal(t, nil, respObj["error"])
 		} else {
 			tu.FailOnError(t, fmt.Errorf("Cannot cast enricher log to expected type"))
@@ -166,7 +166,7 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 
 		// Router
 		if respObj, ok := logMap["router"].(map[string]interface{}); ok {
-			assert.Equal(t, `{"key": "router_data"}`, respObj["response_body"])
+			assert.Equal(t, `{"key": "router_data"}`, respObj["body"])
 			assert.Equal(t, nil, respObj["error"])
 		} else {
 			tu.FailOnError(t, fmt.Errorf("Cannot cast router log to expected type"))
@@ -174,7 +174,7 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 
 		// Ensembler
 		if requestObj, ok := logMap["ensembler"].(map[string]interface{}); ok {
-			assert.Equal(t, nil, requestObj["response_body"])
+			assert.Equal(t, nil, requestObj["body"])
 			assert.Equal(t, "Error Response", requestObj["error"])
 		} else {
 			tu.FailOnError(t, fmt.Errorf("Cannot cast ensembler log to expected type"))

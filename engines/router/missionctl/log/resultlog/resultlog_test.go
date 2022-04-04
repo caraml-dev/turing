@@ -49,6 +49,8 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 	// Marshal and validate
 	bytes, err := json.Marshal(logEntry)
 	require.NoError(t, err)
+	//a := string(bytes)
+	//assert.Equal(t, a, 0)
 	assert.JSONEq(t, `{
 		"turing_req_id":"test-req-id",
 		"event_timestamp":"2000-02-01T04:05:06.000000007Z",
@@ -56,15 +58,14 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 		"request":{"header":{"Req_id":"test_req_id"},"body":"{\"customer_id\": \"test_customer\"}"},
 		"experiment":{"error":"Error received"},
 		"enricher":{
-			"response_body":"{\"key\": \"enricher_data\"}", 
-			"response_header":
-"{\"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"
+			"body":"{\"key\": \"enricher_data\"}", 
+			"header":{"Content-Encoding":"lz4","Content-Type":"text/html,charset=utf-8"}
 		},
 		"router":{
-			"response_body":"{\"key\": \"router_data\"}", 
-			"response_header":
-"{\"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}"}
-		}`, string(bytes))
+			"body":"{\"key\": \"router_data\"}",
+			"header":{"Content-Encoding":"gzip","Content-Type":"text/html,charset=utf-8"}
+		}
+	}`, string(bytes))
 }
 
 func TestInitTuringResultLogger(t *testing.T) {
@@ -209,12 +210,12 @@ func TestTuringResultLogEntryValue(t *testing.T) {
 			"error": "Error received",
 		},
 		"enricher": map[string]interface{}{
-			"response_body":   "{\"key\": \"enricher_data\"}",
-			"response_header": "{\"Content-Encoding\": [\"lz4\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
+			"body":   "{\"key\": \"enricher_data\"}",
+			"header": map[string]interface{}{"Content-Encoding": "lz4", "Content-Type": "text/html,charset=utf-8"},
 		},
 		"router": map[string]interface{}{
-			"response_body":   "{\"key\": \"router_data\"}",
-			"response_header": "{\"Content-Encoding\": [\"gzip\"], \"Content-Type\": [\"text/html\", \"charset=utf-8\"]}",
+			"body":   "{\"key\": \"router_data\"}",
+			"header": map[string]interface{}{"Content-Encoding": "gzip", "Content-Type": "text/html,charset=utf-8"},
 		},
 	}, kvPairs)
 }
@@ -239,17 +240,17 @@ func makeTestTuringResultLogEntry(t *testing.T) (context.Context, *TuringResultL
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("experiment", nil, "", "Error received")
+	entry.AddResponse("experiment", nil, nil, "Error received")
 	entry.AddResponse(
 		"router",
 		[]byte(`{"key": "router_data"}`),
-		`{"Content-Encoding": ["gzip"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		map[string]string{"Content-Encoding": "gzip", "Content-Type": "text/html,charset=utf-8"},
 		"",
 	)
 	entry.AddResponse(
 		"enricher",
 		[]byte(`{"key": "enricher_data"}`),
-		`{"Content-Encoding": ["lz4"], "Content-Type": ["text/html", "charset=utf-8"]}`,
+		map[string]string{"Content-Encoding": "lz4", "Content-Type": "text/html,charset=utf-8"},
 		"",
 	)
 

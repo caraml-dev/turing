@@ -56,7 +56,7 @@
         "description": "The response from the Experiment engine, if configured",
         "fields": [
             {
-                "name": "response_body",
+                "name": "body",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -68,10 +68,22 @@
                 "description": "The error from a Turing component, when a successful response is not received."
             },
             {
-                "name": "response_header",
-                "type": "STRING",
-                "mode": "NULLABLE",
-                "description": "The JSON header body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "name": "header",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler); the map value is a comma-delimited string.",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    },
+                    {
+                        "name": "value",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
             }
         ]
     },
@@ -82,7 +94,7 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "response_body",
+                "name": "body",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -94,10 +106,22 @@
                 "description": "The error from a Turing component, when a successful response is not received."
             },
             {
-                "name": "response_header",
-                "type": "STRING",
-                "mode": "NULLABLE",
-                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "name": "header",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler); the map value is a comma-delimited string.",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    },
+                    {
+                        "name": "value",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
             }
         ]
     },
@@ -108,7 +132,7 @@
         "description": "The response from the routes",
         "fields": [
             {
-                "name": "response_body",
+                "name": "body",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -120,10 +144,22 @@
                 "description": "The error from a Turing component, when a successful response is not received."
             },
             {
-                "name": "response_header",
-                "type": "STRING",
-                "mode": "NULLABLE",
-                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "name": "header",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler); the map value is a comma-delimited string.",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    },
+                    {
+                        "name": "value",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
             }
         ]
     },
@@ -134,7 +170,7 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "response_body",
+                "name": "body",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -146,10 +182,22 @@
                 "description": "The error from a Turing component, when a successful response is not received."
             },
             {
-                "name": "response_header",
-                "type": "STRING",
-                "mode": "NULLABLE",
-                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
+                "name": "header",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "description": "The JSON response header from a Turing component (Enricher / Experiment Engine / Router / Ensembler); the map value is a comma-delimited string.",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    },
+                    {
+                        "name": "value",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
             }
         ]
     }
