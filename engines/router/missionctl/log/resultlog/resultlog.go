@@ -164,9 +164,9 @@ func LogEntry(turLogEntry *TuringResultLogEntry) error {
 // FormatHTTPHeader formats the header which by concatenating the string values corresponding to each header into a
 // single comma-delimited string
 func FormatHTTPHeader(header http.Header) map[string]string {
-	responseHeader := map[string]string{}
+	formattedHeader := map[string]string{}
 	for k, v := range header {
-		responseHeader[k] = strings.Join(v, ",")
+		formattedHeader[k] = strings.Join(v, ",")
 	}
-	return responseHeader
+	return formattedHeader
 }
