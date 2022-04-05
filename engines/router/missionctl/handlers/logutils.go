@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gojek/turing/engines/router/missionctl/errors"
@@ -55,10 +54,7 @@ func logTuringRouterRequestSummary(
 				logEntry.AddResponse(resp.key, nil, nil, err.Error())
 			} else {
 				// Format the response header
-				responseHeader := map[string]string{}
-				for k, v := range resp.header {
-					responseHeader[k] = strings.Join(v, ",")
-				}
+				responseHeader := resultlog.FormatHTTPHeader(resp.header)
 				logEntry.AddResponse(resp.key, uncompressedData, responseHeader, "")
 			}
 		}

@@ -95,10 +95,7 @@ func NewTuringResultLogEntry(
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Format Request Header
-	reqHeader := map[string]string{}
-	for k, v := range *header {
-		reqHeader[k] = strings.Join(v, ",")
-	}
+	reqHeader := FormatHTTPHeader(*header)
 
 	return &TuringResultLogEntry{
 		TuringReqId:    turingReqID,
@@ -162,4 +159,14 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 // LogEntry sends the input TuringResultLogEntry to the appropriate logger
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
 	return globalLogger.write(turLogEntry)
+}
+
+// FormatHTTPHeader formats the header which by concatenating the string values corresponding to each header into a
+// single comma-delimited string
+func FormatHTTPHeader(header http.Header) map[string]string {
+	responseHeader := map[string]string{}
+	for k, v := range header {
+		responseHeader[k] = strings.Join(v, ",")
+	}
+	return responseHeader
 }
