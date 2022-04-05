@@ -132,8 +132,6 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	delete(turingLogEntry.Router.Header, "Content-Encoding")
 	// Run newProtobufKafkaLogEntry and validate
 	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
-	fmt.Println(message)
-
 	assert.NoError(t, err)
 	// Compare logEntry data
 	assert.Equal(t, "\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a", string(key))
