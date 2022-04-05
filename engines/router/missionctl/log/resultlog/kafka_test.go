@@ -112,11 +112,11 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 				"error": "Error received"
 			},
 			"enricher":{
-				"body":"{\"key\": \"enricher_data\"}", 
+				"response":"{\"key\": \"enricher_data\"}", 
 				"header":{"Content-Encoding":"lz4","Content-Type":"text/html,charset=utf-8"}
 			},
 			"router":{
-				"body":"{\"key\": \"router_data\"}",
+				"response":"{\"key\": \"router_data\"}",
 				"header":{"Content-Encoding":"gzip","Content-Type":"text/html,charset=utf-8"}
 			}
 		}`, turingReqID),
@@ -138,7 +138,6 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	decodedTuringResultLogMessage := &turing.TuringResultLogMessage{}
 	err = proto.Unmarshal(message, decodedTuringResultLogMessage)
 	assert.NoError(t, err)
-
 	// Convert expected and actual log entries to JSON for comparison
 	expectedJSON, err := json.Marshal(turingLogEntry)
 	assert.NoError(t, err)

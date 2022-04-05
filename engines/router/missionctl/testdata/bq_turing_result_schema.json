@@ -56,7 +56,7 @@
         "description": "The response from the Experiment engine, if configured",
         "fields": [
             {
-                "name": "body",
+                "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -94,7 +94,7 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "body",
+                "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -132,7 +132,7 @@
         "description": "The response from the routes",
         "fields": [
             {
-                "name": "body",
+                "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."
@@ -170,7 +170,7 @@
         "description": "The response from the Enricher, if configured",
         "fields": [
             {
-                "name": "body",
+                "name": "response",
                 "type": "STRING",
                 "mode": "NULLABLE",
                 "description": "The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded."

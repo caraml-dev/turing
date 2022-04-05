@@ -84,13 +84,13 @@ func TestConsoleLoggerWrite(t *testing.T) {
 	)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			`{"body":"{\"key\": \"enricher_data\"}","header":{"Content-Encoding":"lz4"}}`),
+			`{"header":{"Content-Encoding":"lz4"},"response":"{\"key\": \"enricher_data\"}"}`),
 		),
 		logObj.Enricher,
 	)
 	assert.Equal(t,
 		json.RawMessage([]byte(
-			(`{"body":"{\"key\": \"router_data\"}","error":"Error Response","header":{"Content-Encoding":"gzip"}}`)),
+			(`{"error":"Error Response","header":{"Content-Encoding":"gzip"},"response":"{\"key\": \"router_data\"}"}`)),
 		),
 		logObj.Router,
 	)

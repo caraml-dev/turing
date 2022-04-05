@@ -58,11 +58,11 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 		"request":{"header":{"Req_id":"test_req_id"},"body":"{\"customer_id\": \"test_customer\"}"},
 		"experiment":{"error":"Error received"},
 		"enricher":{
-			"body":"{\"key\": \"enricher_data\"}", 
+			"response":"{\"key\": \"enricher_data\"}", 
 			"header":{"Content-Encoding":"lz4","Content-Type":"text/html,charset=utf-8"}
 		},
 		"router":{
-			"body":"{\"key\": \"router_data\"}",
+			"response":"{\"key\": \"router_data\"}",
 			"header":{"Content-Encoding":"gzip","Content-Type":"text/html,charset=utf-8"}
 		}
 	}`, string(bytes))
@@ -210,12 +210,12 @@ func TestTuringResultLogEntryValue(t *testing.T) {
 			"error": "Error received",
 		},
 		"enricher": map[string]interface{}{
-			"body":   "{\"key\": \"enricher_data\"}",
-			"header": map[string]interface{}{"Content-Encoding": "lz4", "Content-Type": "text/html,charset=utf-8"},
+			"response": "{\"key\": \"enricher_data\"}",
+			"header":   map[string]interface{}{"Content-Encoding": "lz4", "Content-Type": "text/html,charset=utf-8"},
 		},
 		"router": map[string]interface{}{
-			"body":   "{\"key\": \"router_data\"}",
-			"header": map[string]interface{}{"Content-Encoding": "gzip", "Content-Type": "text/html,charset=utf-8"},
+			"response": "{\"key\": \"router_data\"}",
+			"header":   map[string]interface{}{"Content-Encoding": "gzip", "Content-Type": "text/html,charset=utf-8"},
 		},
 	}, kvPairs)
 }
