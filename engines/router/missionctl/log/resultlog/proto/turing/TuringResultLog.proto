@@ -16,9 +16,8 @@ message Request {
 }
 
 message Response {
-    // The JSON response body from a Turing component (Enricher / Experiment Engine / Router / Ensembler),
-    // UTF-8-encoded.
-    string body = 1;
+    // The JSON response from a Turing component (Enricher / Experiment Engine / Router / Ensembler), UTF-8-encoded.
+    string response = 1;
 
     // The error from a Turing component, when a successful response is not received.
     string error = 2;
