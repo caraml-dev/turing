@@ -62,22 +62,21 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 func formatBQLogEntryResponse(response *turing.Response) bigquery.Value {
 	if response == nil {
 		return nil
-	} else {
-		bgLogEntryComponents := map[string]interface{}{}
-
-		if response.Header != nil {
-			bgLogEntryComponents["header"] = formatBQLogEntryHeader(response.Header)
-		}
-
-		if response.Response != "" {
-			bgLogEntryComponents["response"] = response.Response
-		}
-
-		if response.Error != "" {
-			bgLogEntryComponents["error"] = response.Error
-		}
-		return bigquery.Value(bgLogEntryComponents)
 	}
+	bgLogEntryComponents := map[string]interface{}{}
+
+	if response.Header != nil {
+		bgLogEntryComponents["header"] = formatBQLogEntryHeader(response.Header)
+	}
+
+	if response.Response != "" {
+		bgLogEntryComponents["response"] = response.Response
+	}
+
+	if response.Error != "" {
+		bgLogEntryComponents["error"] = response.Error
+	}
+	return bigquery.Value(bgLogEntryComponents)
 }
 
 // formatBQLogEntryHeader formats header values in a map into a list of header values
