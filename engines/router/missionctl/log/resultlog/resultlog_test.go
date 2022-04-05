@@ -49,8 +49,6 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 	// Marshal and validate
 	bytes, err := json.Marshal(logEntry)
 	require.NoError(t, err)
-	//a := string(bytes)
-	//assert.Equal(t, a, 0)
 	assert.JSONEq(t, `{
 		"turing_req_id":"test-req-id",
 		"event_timestamp":"2000-02-01T04:05:06.000000007Z",
