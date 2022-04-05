@@ -42,22 +42,58 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 		return kvPairs, "", errors.Wrapf(err, "Error unmarshaling the result log for save to BQ")
 	}
 
-	// Special handling: Update request.Header to a list of records, expected by BQ.
+	// Special handling: Update request, experiment, enricher, router and ensembler headers to a list of records,
+	// expected by BQ.
 	// It seems protobq.Marshal will be adding support for map[string]string that would help simplify the
 	// implementation of Save().
+	kvPairs["request"] = bigquery.Value(map[string]interface{}{
+		"header": formatBQLogEntryHeaders(e.TuringResultLogEntry.Request.Header),
+		"body":   e.TuringResultLogEntry.Request.Body,
+	})
+
+	if e.TuringResultLogEntry.Experiment != nil {
+		kvPairs["experiment"] = bigquery.Value(map[string]interface{}{
+			"header":   formatBQLogEntryHeaders(e.TuringResultLogEntry.Experiment.Header),
+			"response": e.TuringResultLogEntry.Experiment.Response,
+			"error":    e.TuringResultLogEntry.Experiment.Error,
+		})
+	}
+	if e.TuringResultLogEntry.Enricher != nil {
+		kvPairs["enricher"] = bigquery.Value(map[string]interface{}{
+			"header":   formatBQLogEntryHeaders(e.TuringResultLogEntry.Enricher.Header),
+			"response": e.TuringResultLogEntry.Enricher.Response,
+			"error":    e.TuringResultLogEntry.Enricher.Error,
+		})
+	}
+
+	if e.TuringResultLogEntry.Router != nil {
+		kvPairs["router"] = bigquery.Value(map[string]interface{}{
+			"header":   formatBQLogEntryHeaders(e.TuringResultLogEntry.Router.Header),
+			"response": e.TuringResultLogEntry.Router.Response,
+			"error":    e.TuringResultLogEntry.Router.Error,
+		})
+	}
+
+	if e.TuringResultLogEntry.Ensembler != nil {
+		kvPairs["ensembler"] = bigquery.Value(map[string]interface{}{
+			"header":   formatBQLogEntryHeaders(e.TuringResultLogEntry.Ensembler.Header),
+			"response": e.TuringResultLogEntry.Ensembler.Response,
+			"error":    e.TuringResultLogEntry.Ensembler.Error,
+		})
+	}
+
+	return kvPairs, "", nil
+}
+
+func formatBQLogEntryHeaders(headerMap map[string]string) []map[string]interface{} {
 	headers := []map[string]interface{}{}
-	for key, value := range e.TuringResultLogEntry.Request.Header {
+	for key, value := range headerMap {
 		headers = append(headers, map[string]interface{}{
 			"key":   key,
 			"value": value,
 		})
 	}
-	kvPairs["request"] = bigquery.Value(map[string]interface{}{
-		"header": headers,
-		"body":   e.TuringResultLogEntry.Request.Body,
-	})
-
-	return kvPairs, "", nil
+	return headers
 }
 
 // BigQueryLogger extends the TuringResultLogger interface and defines additional
