@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import {
   EuiBadge,
   EuiCallOut,
@@ -21,13 +21,20 @@ import { RouterVersionActions } from "../components/RouterVersionActions";
 import { Status } from "../../../services/status/Status";
 import { useInitiallyLoaded } from "../../../hooks/useInitiallyLoaded";
 
+import { TuringRouter } from "../../../services/router/TuringRouter";
+import { RouterVersion } from "../../../services/version/RouterVersion";
+
 export const RouterVersionDetailsView = ({
   projectId,
   routerId,
   versionId,
   ...props
 }) => {
-  const [{ data: version, isLoaded, error }, fetchVersionDetails] =
+  // Use local states to store parsed responses
+  const [router, setRouter] = useState({});
+  const [version, setVersion] = useState({});
+
+  const [{ data: versionDetails, isLoaded, error }, fetchVersionDetails] =
     useTuringApi(
       `/projects/${projectId}/routers/${routerId}/versions/${versionId}`,
       {},
@@ -35,7 +42,7 @@ export const RouterVersionDetailsView = ({
     );
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
-  const [{ data: router }, fetchRouterDetails] = useTuringApi(
+  const [{ data: routerDetails }, fetchRouterDetails] = useTuringApi(
     `/projects/${projectId}/routers/${routerId}`,
     {},
     {}
@@ -54,6 +61,18 @@ export const RouterVersionDetailsView = ({
       return () => clearInterval(interval);
     }
   }, [router.status, refreshData]);
+
+  useEffect(() => {
+    if (!!routerDetails) {
+      setRouter(TuringRouter.fromJson(routerDetails));
+    }
+  }, [routerDetails, setRouter]);
+
+  useEffect(() => {
+    if (!!versionDetails) {
+      setVersion(RouterVersion.fromJson(versionDetails));
+    }
+  }, [versionDetails, setVersion]);
 
   return (
     <EuiPage>

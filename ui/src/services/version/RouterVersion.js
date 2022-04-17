@@ -1,8 +1,11 @@
 import yaml from "js-yaml";
-import objectAssignDeep from "object-assign-deep";
 import { BaseExperimentEngine } from "../experiment_engine";
+import { Ensembler } from "../ensembler";
 import { get } from "../../components/form/utils";
 import { stripKeys } from "../../utils/object";
+
+const _ = require(`lodash`);
+const objectAssignDeep = require(`object-assign-deep`);
 
 export class RouterVersion {
   static fromJson(json) {
@@ -10,6 +13,15 @@ export class RouterVersion {
     version.experiment_engine = BaseExperimentEngine.fromJson(
       get(json, "experiment_engine")
     );
+    // Init ensembler. If type nop, send in the default route id.
+    const ensemblerConfig = get(json, "ensembler");
+    version.ensembler = _.isEmpty(ensemblerConfig)
+      ? Ensembler.fromJson({
+          nop_config: {
+            final_response_route_id: get(json, "default_route_id"),
+          },
+        })
+      : Ensembler.fromJson(ensemblerConfig);
     return version;
   }
 
@@ -76,8 +88,12 @@ export class RouterVersion {
               type: "none",
             },
       ensembler:
-        !!this.ensembler && this.ensembler.type !== "nop"
+        this.ensembler.type === "nop"
           ? {
+              type: "none",
+              nop_config: { ...this.ensembler.nop_config },
+            }
+          : {
               type: this.ensembler.type,
               ...(this.ensembler.type === "standard"
                 ? {
@@ -92,9 +108,6 @@ export class RouterVersion {
                     pyfunc_config: this.ensembler.pyfunc_config,
                   }
                 : undefined),
-            }
-          : {
-              type: "none",
             },
       result_logging: {
         type: this.log_config.result_logger_type,
