@@ -56,7 +56,7 @@ export const RouterVersionDetailsView = ({
   const isActiveConfig = version.version === (router.config || {}).version;
 
   useEffect(() => {
-    if (router.status === Status.PENDING.toString()) {
+    if (router.status?.toString() === Status.PENDING.toString()) {
       const interval = setInterval(refreshData, 5000);
       return () => clearInterval(interval);
     }

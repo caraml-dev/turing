@@ -45,7 +45,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [fetchRouterDetails, props.location.state]);
 
   useEffect(() => {
-    if (router.status === Status.PENDING.toString()) {
+    if (router.status?.toString() === Status.PENDING.toString()) {
       const interval = setInterval(fetchRouterDetails, 5000);
       return () => clearInterval(interval);
     }
@@ -80,9 +80,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
               <EuiPageHeaderSection>
                 <PageTitle
                   title={router.name}
-                  prepend={
-                    <StatusBadge status={Status.fromValue(router.status)} />
-                  }
+                  prepend={<StatusBadge status={router.status} />}
                 />
               </EuiPageHeaderSection>
             </EuiPageHeader>

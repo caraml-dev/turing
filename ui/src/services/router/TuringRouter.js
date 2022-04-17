@@ -74,12 +74,10 @@ export class TuringRouter {
         })
       : Ensembler.fromJson(ensemblerConfig);
 
-    const {
-      config: { enricher },
-    } = router;
-
-    if (!!get(json, "config.enricher")) {
-      router.config.enricher = { ...enricher, type: "docker" };
+    // Init enricher. If config exists, update the type to docker.
+    const enricherConfig = get(json, "config.enricher");
+    if (!!enricherConfig && enricherConfig.type !== "nop") {
+      router.config.enricher = { ...router.config.enricher, type: "docker" };
     }
 
     return router;

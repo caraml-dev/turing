@@ -3,6 +3,7 @@ import { BaseExperimentEngine } from "../experiment_engine";
 import { Ensembler } from "../ensembler";
 import { get } from "../../components/form/utils";
 import { stripKeys } from "../../utils/object";
+import { Status } from "../status/Status";
 
 const _ = require(`lodash`);
 const objectAssignDeep = require(`object-assign-deep`);
@@ -10,6 +11,8 @@ const objectAssignDeep = require(`object-assign-deep`);
 export class RouterVersion {
   static fromJson(json) {
     const version = objectAssignDeep(new RouterVersion(), json);
+    version.status = Status.fromValue(json.status);
+    // Init experiment engine
     version.experiment_engine = BaseExperimentEngine.fromJson(
       get(json, "experiment_engine")
     );
