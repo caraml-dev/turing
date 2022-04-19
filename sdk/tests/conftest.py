@@ -454,8 +454,8 @@ def generic_router_version(
         error="NONE",
         image="test.io/just-a-test/turing-router:0.0.0-build.0",
         routes=[generic_route for _ in range(2)],
-        default_route="http://models.internal/default",
-        default_route_id="control",
+        default_route=generic_route.endpoint,
+        default_route_id=generic_route.id,
         rules=[generic_traffic_rule for _ in range(2)],
         experiment_engine=experiment_config,
         resource_request=generic_resource_request,
@@ -485,7 +485,7 @@ def generic_router_config():
             )
         ],
         rules=None,
-        default_route_id="test",
+        default_route_id="model-a",
         experiment_engine=ExperimentConfig(
             type="test-exp",
             config={
