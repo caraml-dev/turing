@@ -10,7 +10,7 @@ from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
-from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import RouterEnsemblerConfig, NopRouterEnsemblerConfig
 from turing.router.config.experiment_config import ExperimentConfig
 
 
@@ -73,7 +73,8 @@ class RouterConfig:
         self.timeout = timeout
         self.log_config = log_config
         self.enricher = enricher
-        self.ensembler = ensembler
+        # Init nop ensembler config if ensembler is not set
+        self.ensembler = ensembler or NopRouterEnsemblerConfig(final_response_route_id=default_route_id)
 
     @property
     def environment_name(self) -> str:
@@ -207,6 +208,9 @@ class RouterConfig:
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
         self._verify_no_duplicate_routes()
+        
+        # Get default route id before processing the ensembler
+        kwargs['default_route_id'] = self._get_default_route_id()
 
         if self.rules is not None:
             kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
@@ -216,19 +220,39 @@ class RouterConfig:
             kwargs['enricher'] = self.enricher.to_open_api()
         if self.ensembler is not None:
             kwargs['ensembler'] = self.ensembler.to_open_api()
+            if kwargs['ensembler'] is None:
+                # Nop ensembler, delete
+                del kwargs['ensembler']
 
         return turing.generated.models.RouterConfig(
             environment_name=self.environment_name,
             name=self.name,
             config=turing.generated.models.RouterVersionConfig(
                 routes=[route.to_open_api() for route in self.routes],
-                default_route_id=self.default_route_id,
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
                 **kwargs
             )
         )
+
+    def _get_default_route_id(self):
+        default_route_id = self.default_route_id
+        # If nop config is set, use the final_response_route_id as the default
+        if (self.ensembler.type == "nop" and
+            self.ensembler.nop_config is not None and
+            self.ensembler.nop_config.final_response_route_id is not None):
+            default_route_id = self.ensembler.nop_config.final_response_route_id
+        self._verify_default_route_exists(default_route_id)
+        return default_route_id
+
+    def _verify_default_route_exists(self, default_route_id):
+        for route in self.routes:
+            if route.id == default_route_id:
+                return
+        raise turing.router.config.route.InvalidRouteException(
+                f"Default route id {default_route_id} is not registered in the routes."
+            )
 
     def _verify_no_duplicate_routes(self):
         route_id_counter = Counter(route.id for route in self.routes)
