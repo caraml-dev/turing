@@ -188,10 +188,10 @@ def main(turing_api: str, project: str):
     )
 
     # Create an ensembler for the router
-    # Note: Ensembling for Turing Routers is done through Standard, Docker or Pyfunc ensemblers, and its configuration
-    # is managed by the `RouterEnsemblerConfig` class. Three helper classes (child classes of `RouterEnsemblerConfig`)
-    # have been created to assist you in constructing these objects - `StandardRouterEnsemblerConfig`,
-    # `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
+    # Note: Ensembling for Turing Routers is done through Nop, Standard, Docker or Pyfunc ensemblers, and its configuration
+    # is managed by the `RouterEnsemblerConfig` class. Helper classes (child classes of `RouterEnsemblerConfig`)
+    # have been created to assist you in constructing these objects - `NopRouterEnsemblerConfig`,
+    # `StandardRouterEnsemblerConfig`, `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
     ensembler = DockerRouterEnsemblerConfig(
         image="ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
