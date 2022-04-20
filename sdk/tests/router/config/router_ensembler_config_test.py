@@ -3,12 +3,14 @@ import turing.generated.models
 from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.route import InvalidRouteException
 from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
+                                                          EnsemblerNopConfig,
+                                                          NopRouterEnsemblerConfig,
                                                           PyfuncRouterEnsemblerConfig,
                                                           DockerRouterEnsemblerConfig,
                                                           StandardRouterEnsemblerConfig,
                                                           InvalidExperimentMappingException)
-
 
 @pytest.mark.parametrize(
     "id,type,standard_config,docker_config,expected", [
@@ -437,3 +439,59 @@ def test_set_standard_router_ensembler_config_with_valid_experiment_mappings(
     )
     actual.experiment_mappings = new_experiment_mappings
     assert actual.to_open_api() == request.getfixturevalue(expected)
+
+
+@pytest.mark.parametrize(
+    "final_response_route_id,nop_config,expected", [
+        pytest.param(
+            "test-route",
+            EnsemblerNopConfig(final_response_route_id="test-route"),
+            None
+        )
+    ])
+def test_create_nop_router_ensembler_config(
+    final_response_route_id,
+    nop_config,
+    expected):
+    ensembler = NopRouterEnsemblerConfig(final_response_route_id=final_response_route_id)
+    assert ensembler.nop_config == nop_config
+    assert ensembler.to_open_api() == expected
+
+@pytest.mark.parametrize(
+    "router_config,ensembler_config", [
+        pytest.param(
+            "generic_router_config",
+           NopRouterEnsemblerConfig(final_response_route_id="model-b"),
+        )
+    ])
+def test_copy_nop_ensembler_default_route(
+    router_config,
+    ensembler_config,
+    request):
+    router = request.getfixturevalue(router_config)
+    # Check precondition
+    assert router.default_route_id != ensembler_config.final_response_route_id
+    
+    router.ensembler = ensembler_config
+    actual = router.to_open_api()
+    router.default_route_id = ensembler_config.final_response_route_id
+    expected = router.to_open_api()
+    assert actual == expected
+
+@pytest.mark.parametrize(
+    "router_config,ensembler_config,expected", [
+        pytest.param(
+            "generic_router_config",
+           NopRouterEnsemblerConfig(final_response_route_id="test-route-not-exists"),
+           InvalidRouteException,
+        )
+    ])
+def test_create_nop_router_ensembler_config_with_invalid_route(
+    router_config,
+    ensembler_config,
+    expected,
+    request):
+    router = request.getfixturevalue(router_config)
+    router.ensembler = ensembler_config
+    with pytest.raises(expected):
+       router.to_open_api()

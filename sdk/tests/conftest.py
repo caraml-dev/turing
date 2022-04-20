@@ -356,7 +356,6 @@ def ensembler(request, generic_ensembler_standard_config, generic_ensembler_dock
         updated_at=datetime.now() + timedelta(seconds=10)
     )
 
-
 @pytest.fixture
 def generic_standard_router_ensembler_config(generic_ensembler_standard_config):
     return turing.generated.models.RouterEnsemblerConfig(
