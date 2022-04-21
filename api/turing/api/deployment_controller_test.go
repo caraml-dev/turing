@@ -301,7 +301,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// is correct, and the endpoint value remains unchanged. Also test that the statuses -
 	// the new vers's deployment status should be failed and the router and the current
 	// ver should be deployed.
-	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, newVer, mock.Anything, false)
+	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, newVer, mock.Anything, true)
 	assert.Equal(t, models.ID(200), router.CurrRouterVersion.ID)
 	assert.Equal(t, "current-endpoint", router.Endpoint)
 	assert.Equal(t, models.RouterVersionStatusDeployed, router.CurrRouterVersion.Status)
