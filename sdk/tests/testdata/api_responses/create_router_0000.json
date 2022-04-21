@@ -31,7 +31,7 @@
         "timeout": "100ms"
       }
     ],
-    "default_route_id": "test",
+    "default_route_id": "model-a",
     "experiment_engine": {
       "type": "test-exp",
       "config": {
