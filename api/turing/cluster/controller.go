@@ -242,10 +242,7 @@ func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) erro
 // IsConfigMapInNamespace returns a boolean indicating if the config map with the name is present in the namespace
 func (c *controller) IsConfigMapInNamespace(name, namespace string) bool {
 	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // DeleteConfigMap deletes a configmap if exists.
@@ -307,10 +304,7 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 func (c *controller) IsKnativeServiceInNamespace(svcName string, namespace string) bool {
 	services := c.knServingClient.Services(namespace)
 	_, err := services.Get(svcName, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // Delete removes the Kubernetes/Knative service and all related artifacts
@@ -403,10 +397,7 @@ func (c *controller) DeployKubernetesService(
 func (c *controller) IsKubernetesServiceInNamespace(svcName string, namespace string) bool {
 	deployments := c.k8sAppsClient.Deployments(namespace)
 	_, err := deployments.Get(svcName, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // DeleteKubernetesService deletes a kubernetes service an deployment
@@ -479,10 +470,7 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 func (c *controller) IsSecretInNamespace(secretName string, namespace string) bool {
 	secrets := c.k8sCoreClient.Secrets(namespace)
 	_, err := secrets.Get(secretName, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // DeleteSecret deletes a secret
@@ -541,10 +529,7 @@ func (c *controller) ApplyPersistentVolumeClaim(
 func (c *controller) IsPersistentVolumeClaimInNamespace(pvcName string, namespace string) bool {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
 	_, err := pvcs.Get(pvcName, metav1.GetOptions{})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // DeletePersistentVolumeClaim deletes the PVC in the given namespace.
