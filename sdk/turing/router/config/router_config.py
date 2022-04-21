@@ -221,7 +221,7 @@ class RouterConfig:
         if self.ensembler is not None:
             kwargs['ensembler'] = self.ensembler.to_open_api()
             if kwargs['ensembler'] is None:
-                # Nop ensembler, delete
+                # The Turing API does not handle an ensembler type "nop" - it must be left unset.
                 del kwargs['ensembler']
 
         return turing.generated.models.RouterConfig(
@@ -246,7 +246,7 @@ class RouterConfig:
         self._verify_default_route_exists(default_route_id)
         return default_route_id
 
-    def _verify_default_route_exists(self, default_route_id):
+    def _verify_default_route_exists(self, default_route_id: str):
         for route in self.routes:
             if route.id == default_route_id:
                 return

@@ -20,15 +20,15 @@ def test_set_router_config_with_invalid_routes(actual, new_routes, expected, req
         actual.to_open_api()
 
 @pytest.mark.parametrize(
-    "actual,default_route_id,expected", [
+    "actual,invalid_route_id,expected", [
         pytest.param(
             "generic_router_config",
             "test-route-not-exists",
             InvalidRouteException
         )
     ])
-def test_set_router_config_with_invalid_default_route(actual, default_route_id, expected, request):
+def test_set_router_config_with_invalid_default_route(actual, invalid_route_id, expected, request):
     actual = request.getfixturevalue(actual)
-    actual.default_route_id = default_route_id
+    actual.default_route_id = invalid_route_id
     with pytest.raises(expected):
         actual.to_open_api()
