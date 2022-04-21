@@ -481,6 +481,10 @@ func deleteK8sService(
 	timeout time.Duration,
 	isCleanUp bool,
 ) error {
+	if !isCleanUp || controller.IsKubernetesDeploymentInNamespace(service.Name, service.Namespace) {
+		return controller.DeleteKubernetesDeployment(service.Name, service.Namespace, timeout)
+	}
+
 	if !isCleanUp || controller.IsKubernetesServiceInNamespace(service.Name, service.Namespace) {
 		return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout)
 	}

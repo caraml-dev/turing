@@ -70,6 +70,8 @@ type Controller interface {
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(svcName string, namespace string, timeout time.Duration) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
+	IsKubernetesDeploymentInNamespace(name string, namespace string) bool
+	DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration) error
 	IsKubernetesServiceInNamespace(svcName string, namespace string) bool
 	DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error
 	CreateNamespace(name string) error
@@ -393,32 +395,45 @@ func (c *controller) DeployKubernetesService(
 	return c.waitDeploymentReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// IsKubernetesServiceInNamespace returns a bool indicating if the service with the svcName is present in the namespace
-func (c *controller) IsKubernetesServiceInNamespace(svcName string, namespace string) bool {
+// IsKubernetesDeploymentInNamespace returns a bool indicating if the deployment with the name is present in the
+// namespace
+func (c *controller) IsKubernetesDeploymentInNamespace(name string, namespace string) bool {
 	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(svcName, metav1.GetOptions{})
+	_, err := deployments.Get(name, metav1.GetOptions{})
 	return err == nil
 }
 
-// DeleteKubernetesService deletes a kubernetes service an deployment
-func (c *controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
+// DeleteKubernetesDeployment deletes a kubernetes deployment
+func (c *controller) DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration) error {
 	gracePeriod := int64(timeout.Seconds())
 	delOptions := &metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriod,
 	}
 
 	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(svcName, metav1.GetOptions{})
+	_, err := deployments.Get(name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	err = deployments.Delete(svcName, delOptions)
-	if err != nil {
-		return err
+	return deployments.Delete(name, delOptions)
+}
+
+// IsKubernetesServiceInNamespace returns a bool indicating if the service with the svcName is present in the namespace
+func (c *controller) IsKubernetesServiceInNamespace(svcName string, namespace string) bool {
+	services := c.k8sCoreClient.Services(namespace)
+	_, err := services.Get(svcName, metav1.GetOptions{})
+	return err == nil
+}
+
+// DeleteKubernetesService deletes a kubernetes service
+func (c *controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
+	gracePeriod := int64(timeout.Seconds())
+	delOptions := &metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriod,
 	}
 
 	services := c.k8sCoreClient.Services(namespace)
-	_, err = services.Get(svcName, metav1.GetOptions{})
+	_, err := services.Get(svcName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

@@ -268,6 +268,20 @@ func (_m *Controller) DeleteKnativeService(svcName string, namespace string, tim
 	return r0
 }
 
+// DeleteKubernetesDeployment provides a mock function with given fields: name, namespace, timeout
+func (_m *Controller) DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration) error {
+	ret := _m.Called(name, namespace, timeout)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string, time.Duration) error); ok {
+		r0 = rf(name, namespace, timeout)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteKubernetesService provides a mock function with given fields: svcName, namespace, timeout
 func (_m *Controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
 	ret := _m.Called(svcName, namespace, timeout)
@@ -433,6 +447,20 @@ func (_m *Controller) IsKnativeServiceInNamespace(svcName string, namespace stri
 	var r0 bool
 	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
 		r0 = rf(svcName, namespace)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// IsKubernetesDeploymentInNamespace provides a mock function with given fields: name, namespace
+func (_m *Controller) IsKubernetesDeploymentInNamespace(name string, namespace string) bool {
+	ret := _m.Called(name, namespace)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
+		r0 = rf(name, namespace)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}

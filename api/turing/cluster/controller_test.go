@@ -436,7 +436,7 @@ func TestIsKnativeServiceInNamespace(t *testing.T) {
 			// Run test
 			actual := c.IsKnativeServiceInNamespace(testName, testNamespace)
 			// Validate no error
-			assert.Equal(t, actual, tc.expected)
+			assert.Equal(t, tc.expected, actual)
 		})
 	}
 }
@@ -484,16 +484,73 @@ func TestDeleteKnativeService(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestDeleteKubernetesService(t *testing.T) {
+func TestIsKubernetesDeploymentInNamespace(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	deploymentResourceItem := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
 		Resource: "deployments",
 	}
-	svcResourceItem := schema.GroupVersionResource{
+	cs := fake.NewSimpleClientset()
+
+	tests := []struct {
+		name     string
+		reactors []reactor
+		expected bool
+	}{
+		{
+			"not_exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			false,
+		},
+		{
+			"exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test controller
+			c := createTestK8sController(cs, tc.reactors)
+			// Run test
+			actual := c.IsKubernetesDeploymentInNamespace(testName, testNamespace)
+			// Validate no error
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
+func TestDeleteKubernetesDeployment(t *testing.T) {
+	testName, testNamespace := "test-name", "test-namespace"
+	deploymentResourceItem := schema.GroupVersionResource{
+		Group:    "apps",
 		Version:  "v1",
-		Resource: "services",
+		Resource: "deployments",
 	}
 
 	// Define reactors. The reactors also validate that they are called
@@ -517,6 +574,86 @@ func TestDeleteKubernetesService(t *testing.T) {
 				return true, nil, nil
 			},
 		},
+	}
+
+	// Create test controller
+	c := createTestK8sController(fake.NewSimpleClientset(), reactors)
+	// Run tests
+	err := c.DeleteKubernetesDeployment(testName, testNamespace, time.Second*5)
+	// Validate no error
+	assert.NoError(t, err)
+}
+
+func TestIsKubernetesServiceInNamespace(t *testing.T) {
+	testName, testNamespace := "test-name", "test-namespace"
+	svcResourceItem := schema.GroupVersionResource{
+		Version:  "v1",
+		Resource: "services",
+	}
+	cs := fake.NewSimpleClientset()
+
+	tests := []struct {
+		name     string
+		reactors []reactor
+		expected bool
+	}{
+		{
+			"not_exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "services",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			false,
+		},
+		{
+			"exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "services",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test controller
+			c := createTestK8sController(cs, tc.reactors)
+			// Run test
+			actual := c.IsKubernetesServiceInNamespace(testName, testNamespace)
+			// Validate no error
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
+func TestDeleteKubernetesService(t *testing.T) {
+	testName, testNamespace := "test-name", "test-namespace"
+	svcResourceItem := schema.GroupVersionResource{
+		Version:  "v1",
+		Resource: "services",
+	}
+
+	// Define reactors. The reactors also validate that they are called
+	// with the expected parameters.
+	reactors := []reactor{
 		{
 			verb:     reactorVerbs.Get,
 			resource: "services",
@@ -1290,7 +1427,7 @@ func TestIsSecretInNamespace(t *testing.T) {
 			// Run test
 			actual := c.IsSecretInNamespace(secretName, testNamespace)
 			// Validate no error
-			assert.Equal(t, actual, tc.expected)
+			assert.Equal(t, tc.expected, actual)
 		})
 	}
 }
