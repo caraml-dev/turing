@@ -72,7 +72,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		// Save the error from the failed deployment
 		errorStrings = append(errorStrings, err.Error())
 		// Remove cluster resources from the failed deployment attempt
-		err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh)
+		err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh, true)
 		if err != nil {
 			errorStrings = append(errorStrings, err.Error())
 			eventsCh.Write(models.NewErrorEvent(
@@ -102,7 +102,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		if err != nil {
 			errorStrings = append(errorStrings, err.Error())
 		} else {
-			err = c.DeploymentService.UndeployRouterVersion(project, environment, currVersion, eventsCh)
+			err = c.DeploymentService.UndeployRouterVersion(project, environment, currVersion, eventsCh, false)
 			if err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
@@ -313,7 +313,7 @@ func (c RouterDeploymentController) undeployRouter(
 		if routerVersion.Status == models.RouterVersionStatusPending ||
 			routerVersion.Status == models.RouterVersionStatusDeployed {
 			// Remove cluster resources
-			err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh)
+			err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh, false)
 			if err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}

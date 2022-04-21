@@ -38,6 +38,7 @@ type DeploymentService interface {
 		environment *merlin.Environment,
 		routerVersion *models.RouterVersion,
 		eventsCh *EventChannel,
+		isCleanUp bool,
 	) error
 	DeleteRouterEndpoint(project *mlp.Project,
 		environment *merlin.Environment,
@@ -231,6 +232,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
 	eventsCh *EventChannel,
+	isCleanUp bool,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
 	defer cancel()
@@ -243,7 +245,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Delete secret
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
 	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
-	err = deleteSecret(controller, secret)
+	err = deleteSecret(controller, secret, isCleanUp)
 	if err != nil {
 		return err
 	}
@@ -264,11 +266,11 @@ func (ds *deploymentService) UndeployRouterVersion(
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion,
 			project, "", ds.routerDefaults.FluentdConfig)
-		err = deleteK8sService(controller, fluentdService, ds.deploymentTimeout)
+		err = deleteK8sService(controller, fluentdService, ds.deploymentTimeout, isCleanUp)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
-		err = deletePVC(controller, project.Name, fluentdService.PersistentVolumeClaim)
+		err = deletePVC(controller, project.Name, fluentdService.PersistentVolumeClaim, isCleanUp)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -284,7 +286,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
 		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
-		err = deleteK8sService(controller, pluginsServerSvc, ds.deploymentTimeout)
+		err = deleteK8sService(controller, pluginsServerSvc, ds.deploymentTimeout, isCleanUp)
 		if err != nil {
 			eventsCh.Write(
 				models.NewErrorEvent(
@@ -297,7 +299,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	}
 
 	// Delete all components
-	err = deleteKnServices(ctx, controller, services, ds.deploymentDeletionTimeout, eventsCh)
+	err = deleteKnServices(ctx, controller, services, ds.deploymentDeletionTimeout, eventsCh, isCleanUp)
 	if err != nil {
 		errs = append(errs, err.Error())
 	}
@@ -477,8 +479,12 @@ func deleteK8sService(
 	controller cluster.Controller,
 	service *cluster.KubernetesService,
 	timeout time.Duration,
+	isCleanUp bool,
 ) error {
-	return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout)
+	if !isCleanUp || controller.IsKubernetesServiceInNamespace(service.Name, service.Namespace) {
+		return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout)
+	}
+	return nil
 }
 
 // createSecret creates a secret.
@@ -496,8 +502,11 @@ func createSecret(
 }
 
 // deleteSecret deletes a secret.
-func deleteSecret(controller cluster.Controller, secret *cluster.Secret) error {
-	return controller.DeleteSecret(secret.Name, secret.Namespace)
+func deleteSecret(controller cluster.Controller, secret *cluster.Secret, isCleanUp bool) error {
+	if !isCleanUp || controller.IsSecretInNamespace(secret.Name, secret.Namespace) {
+		return controller.DeleteSecret(secret.Name, secret.Namespace)
+	}
+	return nil
 }
 
 func createPVC(
@@ -518,8 +527,12 @@ func deletePVC(
 	controller cluster.Controller,
 	namespace string,
 	pvc *cluster.PersistentVolumeClaim,
+	isCleanUp bool,
 ) error {
-	return controller.DeletePersistentVolumeClaim(pvc.Name, namespace)
+	if !isCleanUp || controller.IsPersistentVolumeClaimInNamespace(pvc.Name, pvc.Namespace) {
+		return controller.DeletePersistentVolumeClaim(pvc.Name, namespace)
+	}
+	return nil
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -580,6 +593,7 @@ func deleteKnServices(
 	services []*cluster.KnativeService,
 	timeout time.Duration,
 	eventsCh *EventChannel,
+	isCleanUp bool,
 ) error {
 	// Define delete function
 	deleteFunc := func(_ context.Context,
@@ -589,10 +603,12 @@ func deleteKnServices(
 		eventsCh *EventChannel,
 	) {
 		defer wg.Done()
+		var err error
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageUndeployingServices, "deleting service %s", svc.Name))
-		if svc.ConfigMap != nil {
-			err := controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace)
+		if svc.ConfigMap != nil &&
+			(!isCleanUp || controller.IsPersistentVolumeClaimInNamespace(svc.ConfigMap.Name, svc.Namespace)) {
+			err = controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to delete config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -600,12 +616,17 @@ func deleteKnServices(
 				errCh <- err
 			}
 		}
-		err := controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout)
-		if err != nil {
-			err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
-			eventsCh.Write(models.NewErrorEvent(
-				models.EventStageUndeployingServices, "failed to delete service %s: %s", svc.Name, err.Error()))
-		} else {
+
+		if !isCleanUp || controller.IsKnativeServiceInNamespace(svc.Name, svc.Namespace) {
+			err = controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout)
+			if err != nil {
+				err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
+				eventsCh.Write(models.NewErrorEvent(
+					models.EventStageUndeployingServices, "failed to delete service %s: %s", svc.Name, err.Error()))
+			}
+		}
+
+		if err == nil {
 			eventsCh.Write(models.NewInfoEvent(
 				models.EventStageUndeployingServices, "successfully deleted %s", svc.Name))
 		}
@@ -615,7 +636,7 @@ func deleteKnServices(
 	return updateKnServices(ctx, services, deleteFunc, eventsCh)
 }
 
-// updateKnServices is a helper method for deployment / deletion of serivices that runs the
+// updateKnServices is a helper method for deployment / deletion of services that runs the
 // given update function on the given services simultaneously and waits for a response,
 // within the supplied timeout.
 func updateKnServices(ctx context.Context, services []*cluster.KnativeService,

@@ -404,6 +404,7 @@ func TestDeleteEndpoint(t *testing.T) {
 		&merlin.Environment{Name: testEnv},
 		routerVersion,
 		eventsCh,
+		false,
 	)
 	assert.NoError(t, err)
 	controller.AssertCalled(t, "DeleteKubernetesService", "test-svc-fluentd-logger-1", testNs, timeout)

@@ -270,7 +270,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	ds := &mocks.DeploymentService{}
 	ds.On("DeployRouterVersion", project, environment, newVer, testSvcAcct,
 		"", "", mock.Anything, json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
-	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything).
+	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything, true).
 		Return(nil)
 
 	es := &mocks.EventService{}
@@ -301,7 +301,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// is correct, and the endpoint value remains unchanged. Also test that the statuses -
 	// the new vers's deployment status should be failed and the router and the current
 	// ver should be deployed.
-	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, newVer, mock.Anything)
+	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, newVer, mock.Anything, false)
 	assert.Equal(t, models.ID(200), router.CurrRouterVersion.ID)
 	assert.Equal(t, "current-endpoint", router.Endpoint)
 	assert.Equal(t, models.RouterVersionStatusDeployed, router.CurrRouterVersion.Status)
@@ -370,8 +370,8 @@ func TestUndeployRouterSuccess(t *testing.T) {
 		Return([]*models.RouterVersion{routerVersion, pendingRouterVersion}, nil)
 
 	ds := &mocks.DeploymentService{}
-	ds.On("UndeployRouterVersion", project, environment, routerVersion, mock.Anything).Return(nil)
-	ds.On("UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything).Return(nil)
+	ds.On("UndeployRouterVersion", project, environment, routerVersion, mock.Anything, false).Return(nil)
+	ds.On("UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, false).Return(nil)
 	ds.On("DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router}).Return(nil)
 
 	es := &mocks.EventService{}
@@ -400,8 +400,8 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	assert.Equal(t, models.RouterVersionStatusUndeployed, router.CurrRouterVersion.Status)
 	assert.Equal(t, "", router.Endpoint)
 	// Assert calls
-	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, routerVersion, mock.Anything)
-	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything)
+	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, routerVersion, mock.Anything, false)
+	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, false)
 	ds.AssertCalled(t, "DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router})
 	rs.AssertCalled(t, "Save", modifiedRouter)
 }
