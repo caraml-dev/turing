@@ -484,7 +484,7 @@ func TestDeleteKnativeService(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestDeleteK8sService(t *testing.T) {
+func TestDeleteKubernetesService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	deploymentResourceItem := schema.GroupVersionResource{
 		Group:    "apps",
