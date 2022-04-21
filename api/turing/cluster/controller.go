@@ -239,7 +239,7 @@ func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) erro
 	return err
 }
 
-// IsConfigMapInNamespace returns a boolean indicating if the config map with the name is present in the namespace
+// IsConfigMapInNamespace returns a bool indicating if the config map with the name is present in the namespace
 func (c *controller) IsConfigMapInNamespace(name, namespace string) bool {
 	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(name, metav1.GetOptions{})
 	return err == nil
@@ -300,7 +300,7 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 	return c.waitKnativeServiceReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// IsKnativeServiceInNamespace returns a boolean indicating if the service with the svcName is present in the namespace
+// IsKnativeServiceInNamespace returns a bool indicating if the service with the svcName is present in the namespace
 func (c *controller) IsKnativeServiceInNamespace(svcName string, namespace string) bool {
 	services := c.knServingClient.Services(namespace)
 	_, err := services.Get(svcName, metav1.GetOptions{})
@@ -393,7 +393,7 @@ func (c *controller) DeployKubernetesService(
 	return c.waitDeploymentReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// IsKubernetesServiceInNamespace returns a boolean indicating if the service with the svcName is present in the namespace
+// IsKubernetesServiceInNamespace returns a bool indicating if the service with the svcName is present in the namespace
 func (c *controller) IsKubernetesServiceInNamespace(svcName string, namespace string) bool {
 	deployments := c.k8sAppsClient.Deployments(namespace)
 	_, err := deployments.Get(svcName, metav1.GetOptions{})
@@ -466,7 +466,7 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 	return err
 }
 
-// IsSecretInNamespace returns a boolean indicating if the secret with the secretName is present in the namespace
+// IsSecretInNamespace returns a bool indicating if the secret with the secretName is present in the namespace
 func (c *controller) IsSecretInNamespace(secretName string, namespace string) bool {
 	secrets := c.k8sCoreClient.Secrets(namespace)
 	_, err := secrets.Get(secretName, metav1.GetOptions{})
@@ -524,7 +524,7 @@ func (c *controller) ApplyPersistentVolumeClaim(
 	return err
 }
 
-// IsPersistentVolumeClaimInNamespace returns a boolean indicating if the pvc with the pvcName is present in the
+// IsPersistentVolumeClaimInNamespace returns a bool indicating if the pvc with the pvcName is present in the
 //namespace
 func (c *controller) IsPersistentVolumeClaimInNamespace(pvcName string, namespace string) bool {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)

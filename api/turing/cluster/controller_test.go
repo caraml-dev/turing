@@ -380,6 +380,67 @@ func TestDeployKubernetesService(t *testing.T) {
 	}
 }
 
+func TestIsKnativeServiceInNamespace(t *testing.T) {
+	testName, testNamespace := "test-name", "test-namespace"
+	resourceItem := schema.GroupVersionResource{
+		Group:    knativeGroup,
+		Version:  knativeVersion,
+		Resource: knativeResource,
+	}
+
+	cs := knservingclientset.NewSimpleClientset()
+	tests := []struct {
+		name     string
+		reactors []reactor
+		expected bool
+	}{
+		{
+			"not_exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: knativeResource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			false,
+		},
+		{
+			"exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: knativeResource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test controller
+			c := createTestKnController(cs, tc.reactors)
+			// Run test
+			actual := c.IsKnativeServiceInNamespace(testName, testNamespace)
+			// Validate no error
+			assert.Equal(t, actual, tc.expected)
+		})
+	}
+}
+
 func TestDeleteKnativeService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	resourceItem := schema.GroupVersionResource{
@@ -1168,6 +1229,68 @@ func TestCreateSecret(t *testing.T) {
 			err := c.CreateSecret(context.Background(), &secretConf)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
+		})
+	}
+}
+
+func TestIsSecretInNamespace(t *testing.T) {
+	secretResource := schema.GroupVersionResource{
+		Group:    "",
+		Version:  "v1",
+		Resource: "secrets",
+	}
+	testNamespace := "namespace"
+
+	secretName := "secret"
+	cs := fake.NewSimpleClientset()
+	tests := []struct {
+		name     string
+		reactors []reactor
+		expected bool
+	}{
+		{
+			"not_exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: secretResource.Resource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, secretName)
+					},
+				},
+			},
+			false,
+		},
+		{
+			"exists",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: secretResource.Resource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test controller
+			c := createTestK8sController(cs, tc.reactors)
+			// Run test
+			actual := c.IsSecretInNamespace(secretName, testNamespace)
+			// Validate no error
+			assert.Equal(t, actual, tc.expected)
 		})
 	}
 }
