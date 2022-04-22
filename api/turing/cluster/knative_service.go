@@ -23,8 +23,9 @@ var knativeSvcDefaults = struct {
 	// to requests
 	RequestTimeoutSeconds int
 }{
-	AutoscalingClass:      "kpa.autoscaling.knative.dev",
-	RequestTimeoutSeconds: 30,
+	AutoscalingClass: "kpa.autoscaling.knative.dev",
+	// TODO: was 30s
+	RequestTimeoutSeconds: 600,
 }
 
 // KnativeService defines the properties for Knative services
