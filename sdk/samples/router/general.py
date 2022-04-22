@@ -50,6 +50,11 @@ def main(turing_api: str, project: str):
             id='ring-ding-ding',
             endpoint='http://fox-says.ring-ding-ding',
             timeout='20ms'
+        ),
+        Route(
+            id='control',
+            endpoint='http://fox-says.control',
+            timeout='20ms'
         )
     ]
 
@@ -169,14 +174,14 @@ def main(turing_api: str, project: str):
 
     # Create an enricher for the router
     enricher = Enricher(
-        image="ealen/echo-server:0.5.1",
+        image="docker.io/ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=0,
             max_replica=2,
             cpu_request="500m",
             memory_request="512Mi"
         ),
-        endpoint="/",
+        endpoint="/echo",
         timeout="60ms",
         port=3000,
         env=[
@@ -193,7 +198,7 @@ def main(turing_api: str, project: str):
     # have been created to assist you in constructing these objects - `NopRouterEnsemblerConfig`,
     # `StandardRouterEnsemblerConfig`, `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
     ensembler = DockerRouterEnsemblerConfig(
-        image="ealen/echo-server:0.5.1",
+        image="docker.io/ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=1,
             max_replica=3,
@@ -212,7 +217,7 @@ def main(turing_api: str, project: str):
         name="what-does-the-fox-say",
         routes=routes,
         rules=rules,
-        default_route_id="test",
+        default_route_id="control",
         experiment_engine=experiment_config,
         resource_request=resource_request,
         timeout="100ms",

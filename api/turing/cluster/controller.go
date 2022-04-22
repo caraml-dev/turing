@@ -64,19 +64,20 @@ type clusterConfig struct {
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
-	DeleteKnativeService(svcName string, namespace string, timeout time.Duration) error
+	DeleteKnativeService(svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
 	GetKnativeServiceURL(svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(svcName string, namespace string, timeout time.Duration) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
-	DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error
+	DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKubernetesService(svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
 	CreateNamespace(name string) error
 	ApplyConfigMap(namespace string, configMap *ConfigMap) error
-	DeleteConfigMap(name, namespace string) error
+	DeleteConfigMap(name string, namespace string, ignoreNotFound bool) error
 	CreateSecret(ctx context.Context, secret *Secret) error
-	DeleteSecret(secretName string, namespace string) error
+	DeleteSecret(secretName string, namespace string, ignoreNotFound bool) error
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
-	DeletePersistentVolumeClaim(pvcName string, namespace string) error
+	DeletePersistentVolumeClaim(pvcName string, namespace string, ignoreNotFound bool) error
 	ListPods(namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(namespace string, podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
 	CreateJob(namespace string, job Job) (*apibatchv1.Job, error)
@@ -235,9 +236,12 @@ func (c *controller) ApplyConfigMap(namespace string, configMap *ConfigMap) erro
 }
 
 // DeleteConfigMap deletes a configmap if exists.
-func (c *controller) DeleteConfigMap(name, namespace string) error {
+func (c *controller) DeleteConfigMap(name string, namespace string, ignoreNotFound bool) error {
 	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 	return c.k8sCoreClient.ConfigMaps(namespace).Delete(name, &metav1.DeleteOptions{})
@@ -294,6 +298,7 @@ func (c *controller) DeleteKnativeService(
 	svcName string,
 	namespace string,
 	timeout time.Duration,
+	ignoreNotFound bool,
 ) error {
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(namespace)
@@ -301,6 +306,9 @@ func (c *controller) DeleteKnativeService(
 	// Get the service
 	_, err := services.Get(svcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 
@@ -375,26 +383,47 @@ func (c *controller) DeployKubernetesService(
 	return c.waitDeploymentReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// DeleteKubernetesService deletes a kubernetes service an deployment
-func (c *controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
+// DeleteKubernetesDeployment deletes a kubernetes deployment
+func (c *controller) DeleteKubernetesDeployment(
+	name string,
+	namespace string,
+	timeout time.Duration,
+	ignoreNotFound bool,
+) error {
 	gracePeriod := int64(timeout.Seconds())
 	delOptions := &metav1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriod,
 	}
 
 	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(svcName, metav1.GetOptions{})
+	_, err := deployments.Get(name, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
-	err = deployments.Delete(svcName, delOptions)
-	if err != nil {
-		return err
+	return deployments.Delete(name, delOptions)
+}
+
+// DeleteKubernetesService deletes a kubernetes service
+func (c *controller) DeleteKubernetesService(
+	svcName string,
+	namespace string,
+	timeout time.Duration,
+	ignoreNotFound bool,
+) error {
+	gracePeriod := int64(timeout.Seconds())
+	delOptions := &metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriod,
 	}
 
 	services := c.k8sCoreClient.Services(namespace)
-	_, err = services.Get(svcName, metav1.GetOptions{})
+	_, err := services.Get(svcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 	return services.Delete(svcName, delOptions)
@@ -442,10 +471,13 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 }
 
 // DeleteSecret deletes a secret
-func (c *controller) DeleteSecret(secretName string, namespace string) error {
+func (c *controller) DeleteSecret(secretName string, namespace string, ignoreNotFound bool) error {
 	secrets := c.k8sCoreClient.Secrets(namespace)
 	_, err := secrets.Get(secretName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
 	}
 	return secrets.Delete(secretName, &metav1.DeleteOptions{})
@@ -493,10 +525,13 @@ func (c *controller) ApplyPersistentVolumeClaim(
 }
 
 // DeletePersistentVolumeClaim deletes the PVC in the given namespace.
-func (c *controller) DeletePersistentVolumeClaim(pvcName string, namespace string) error {
+func (c *controller) DeletePersistentVolumeClaim(pvcName string, namespace string, ignoreNotFound bool) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
 	_, err := pvcs.Get(pvcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return fmt.Errorf("unable to get pvc with name %s: %s", pvcName, err.Error())
 	}
 	return pvcs.Delete(pvcName, &metav1.DeleteOptions{})
