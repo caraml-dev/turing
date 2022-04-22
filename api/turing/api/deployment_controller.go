@@ -313,7 +313,12 @@ func (c RouterDeploymentController) undeployRouter(
 		if routerVersion.Status == models.RouterVersionStatusPending ||
 			routerVersion.Status == models.RouterVersionStatusDeployed {
 			// Remove cluster resources
-			err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh, false)
+			if routerVersion.Status == models.RouterVersionStatusPending {
+				err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh, true)
+			} else if routerVersion.Status == models.RouterVersionStatusDeployed {
+				err = c.DeploymentService.UndeployRouterVersion(project, environment, routerVersion, eventsCh, false)
+			}
+
 			if err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
