@@ -353,14 +353,14 @@ func TestDeleteEndpoint(t *testing.T) {
 	// Create mock controller
 	controller := &mocks.Controller{}
 	controller.On("DeleteKnativeService", mock.Anything, mock.Anything,
-		mock.Anything, mock.Anything).Return(nil)
+		mock.Anything, false).Return(nil)
 	controller.On("DeleteKubernetesDeployment", mock.Anything, mock.Anything,
-		mock.Anything, mock.Anything).Return(nil)
+		mock.Anything, false).Return(nil)
 	controller.On("DeleteKubernetesService", mock.Anything, mock.Anything,
-		mock.Anything, mock.Anything).Return(nil)
-	controller.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-	controller.On("DeleteConfigMap", mock.Anything, mock.Anything).Return(nil)
-	controller.On("DeletePersistentVolumeClaim", mock.Anything, mock.Anything).Return(nil)
+		mock.Anything, false).Return(nil)
+	controller.On("DeleteSecret", mock.Anything, mock.Anything, false).Return(nil)
+	controller.On("DeleteConfigMap", mock.Anything, mock.Anything, false).Return(nil)
+	controller.On("DeletePersistentVolumeClaim", mock.Anything, mock.Anything, false).Return(nil)
 
 	// Create test router version
 	filePath := filepath.Join("..", "testdata", "cluster",
@@ -409,13 +409,13 @@ func TestDeleteEndpoint(t *testing.T) {
 		false,
 	)
 	assert.NoError(t, err)
-	controller.AssertCalled(t, "DeleteKubernetesDeployment", "test-svc-fluentd-logger-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteKubernetesService", "test-svc-fluentd-logger-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteConfigMap", "test-svc-fiber-config-1", testNs)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-enricher-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-ensembler-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-router-1", testNs, timeout)
-	controller.AssertCalled(t, "DeleteSecret", "test-svc-svc-acct-secret-1", testNs)
-	controller.AssertCalled(t, "DeletePersistentVolumeClaim", "pvc", testNs)
+	controller.AssertCalled(t, "DeleteKubernetesDeployment", "test-svc-fluentd-logger-1", testNs, timeout, false)
+	controller.AssertCalled(t, "DeleteKubernetesService", "test-svc-fluentd-logger-1", testNs, timeout, false)
+	controller.AssertCalled(t, "DeleteConfigMap", "test-svc-fiber-config-1", testNs, false)
+	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-enricher-1", testNs, timeout, false)
+	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-ensembler-1", testNs, timeout, false)
+	controller.AssertCalled(t, "DeleteKnativeService", "test-svc-router-1", testNs, timeout, false)
+	controller.AssertCalled(t, "DeleteSecret", "test-svc-svc-acct-secret-1", testNs, false)
+	controller.AssertCalled(t, "DeletePersistentVolumeClaim", "pvc", testNs, false)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
 }

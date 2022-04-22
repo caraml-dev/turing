@@ -481,17 +481,20 @@ func deleteK8sService(
 	timeout time.Duration,
 	isCleanUp bool,
 ) error {
-	if !isCleanUp || controller.IsKubernetesDeploymentInNamespace(service.Name, service.Namespace) {
-		err := controller.DeleteKubernetesDeployment(service.Name, service.Namespace, timeout)
-		if err != nil {
-			return err
-		}
+	var err error
+	if isCleanUp {
+		err = controller.DeleteKubernetesDeployment(service.Name, service.Namespace, timeout, true)
+	} else {
+		err = controller.DeleteKubernetesDeployment(service.Name, service.Namespace, timeout, false)
+	}
+	if err != nil {
+		return err
 	}
 
-	if !isCleanUp || controller.IsKubernetesServiceInNamespace(service.Name, service.Namespace) {
-		return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout)
+	if isCleanUp {
+		return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout, true)
 	}
-	return nil
+	return controller.DeleteKubernetesService(service.Name, service.Namespace, timeout, false)
 }
 
 // createSecret creates a secret.
@@ -510,10 +513,10 @@ func createSecret(
 
 // deleteSecret deletes a secret.
 func deleteSecret(controller cluster.Controller, secret *cluster.Secret, isCleanUp bool) error {
-	if !isCleanUp || controller.IsSecretInNamespace(secret.Name, secret.Namespace) {
-		return controller.DeleteSecret(secret.Name, secret.Namespace)
+	if isCleanUp {
+		return controller.DeleteSecret(secret.Name, secret.Namespace, true)
 	}
-	return nil
+	return controller.DeleteSecret(secret.Name, secret.Namespace, false)
 }
 
 func createPVC(
@@ -536,10 +539,10 @@ func deletePVC(
 	pvc *cluster.PersistentVolumeClaim,
 	isCleanUp bool,
 ) error {
-	if !isCleanUp || controller.IsPersistentVolumeClaimInNamespace(pvc.Name, pvc.Namespace) {
-		return controller.DeletePersistentVolumeClaim(pvc.Name, namespace)
+	if isCleanUp {
+		return controller.DeletePersistentVolumeClaim(pvc.Name, namespace, true)
 	}
-	return nil
+	return controller.DeletePersistentVolumeClaim(pvc.Name, namespace, false)
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -613,9 +616,12 @@ func deleteKnServices(
 		var err error
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageUndeployingServices, "deleting service %s", svc.Name))
-		if svc.ConfigMap != nil &&
-			(!isCleanUp || controller.IsPersistentVolumeClaimInNamespace(svc.ConfigMap.Name, svc.Namespace)) {
-			err = controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace)
+		if svc.ConfigMap != nil {
+			if isCleanUp {
+				err = controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace, true)
+			} else {
+				err = controller.DeleteConfigMap(svc.ConfigMap.Name, svc.Namespace, false)
+			}
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to delete config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -624,16 +630,16 @@ func deleteKnServices(
 			}
 		}
 
-		if !isCleanUp || controller.IsKnativeServiceInNamespace(svc.Name, svc.Namespace) {
-			err = controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout)
-			if err != nil {
-				err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
-				eventsCh.Write(models.NewErrorEvent(
-					models.EventStageUndeployingServices, "failed to delete service %s: %s", svc.Name, err.Error()))
-			}
+		if isCleanUp {
+			err = controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout, true)
+		} else {
+			err = controller.DeleteKnativeService(svc.Name, svc.Namespace, timeout, false)
 		}
-
-		if err == nil {
+		if err != nil {
+			err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageUndeployingServices, "failed to delete service %s: %s", svc.Name, err.Error()))
+		} else {
 			eventsCh.Write(models.NewInfoEvent(
 				models.EventStageUndeployingServices, "successfully deleted %s", svc.Name))
 		}

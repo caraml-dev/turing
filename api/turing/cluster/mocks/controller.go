@@ -212,13 +212,13 @@ func (_m *Controller) CreateSparkApplication(namespace string, request *cluster.
 	return r0, r1
 }
 
-// DeleteConfigMap provides a mock function with given fields: name, namespace
-func (_m *Controller) DeleteConfigMap(name string, namespace string) error {
-	ret := _m.Called(name, namespace)
+// DeleteConfigMap provides a mock function with given fields: name, namespace, ignoreNotFound
+func (_m *Controller) DeleteConfigMap(name string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(name, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(name, namespace)
+	if rf, ok := ret.Get(0).(func(string, string, bool) error); ok {
+		r0 = rf(name, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -254,13 +254,13 @@ func (_m *Controller) DeleteJob(namespace string, jobName string) error {
 	return r0
 }
 
-// DeleteKnativeService provides a mock function with given fields: svcName, namespace, timeout
-func (_m *Controller) DeleteKnativeService(svcName string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(svcName, namespace, timeout)
+// DeleteKnativeService provides a mock function with given fields: svcName, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKnativeService(svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(svcName, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, time.Duration) error); ok {
-		r0 = rf(svcName, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(string, string, time.Duration, bool) error); ok {
+		r0 = rf(svcName, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -268,13 +268,13 @@ func (_m *Controller) DeleteKnativeService(svcName string, namespace string, tim
 	return r0
 }
 
-// DeleteKubernetesDeployment provides a mock function with given fields: name, namespace, timeout
-func (_m *Controller) DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(name, namespace, timeout)
+// DeleteKubernetesDeployment provides a mock function with given fields: name, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKubernetesDeployment(name string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(name, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, time.Duration) error); ok {
-		r0 = rf(name, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(string, string, time.Duration, bool) error); ok {
+		r0 = rf(name, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -282,13 +282,13 @@ func (_m *Controller) DeleteKubernetesDeployment(name string, namespace string, 
 	return r0
 }
 
-// DeleteKubernetesService provides a mock function with given fields: svcName, namespace, timeout
-func (_m *Controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(svcName, namespace, timeout)
+// DeleteKubernetesService provides a mock function with given fields: svcName, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKubernetesService(svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(svcName, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, time.Duration) error); ok {
-		r0 = rf(svcName, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(string, string, time.Duration, bool) error); ok {
+		r0 = rf(svcName, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -296,13 +296,13 @@ func (_m *Controller) DeleteKubernetesService(svcName string, namespace string, 
 	return r0
 }
 
-// DeletePersistentVolumeClaim provides a mock function with given fields: pvcName, namespace
-func (_m *Controller) DeletePersistentVolumeClaim(pvcName string, namespace string) error {
-	ret := _m.Called(pvcName, namespace)
+// DeletePersistentVolumeClaim provides a mock function with given fields: pvcName, namespace, ignoreNotFound
+func (_m *Controller) DeletePersistentVolumeClaim(pvcName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(pvcName, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(pvcName, namespace)
+	if rf, ok := ret.Get(0).(func(string, string, bool) error); ok {
+		r0 = rf(pvcName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -310,13 +310,13 @@ func (_m *Controller) DeletePersistentVolumeClaim(pvcName string, namespace stri
 	return r0
 }
 
-// DeleteSecret provides a mock function with given fields: secretName, namespace
-func (_m *Controller) DeleteSecret(secretName string, namespace string) error {
-	ret := _m.Called(secretName, namespace)
+// DeleteSecret provides a mock function with given fields: secretName, namespace, ignoreNotFound
+func (_m *Controller) DeleteSecret(secretName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(secretName, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(secretName, namespace)
+	if rf, ok := ret.Get(0).(func(string, string, bool) error); ok {
+		r0 = rf(secretName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -424,90 +424,6 @@ func (_m *Controller) GetSparkApplication(namespace string, appName string) (*v1
 	}
 
 	return r0, r1
-}
-
-// IsConfigMapInNamespace provides a mock function with given fields: name, namespace
-func (_m *Controller) IsConfigMapInNamespace(name string, namespace string) bool {
-	ret := _m.Called(name, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(name, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// IsKnativeServiceInNamespace provides a mock function with given fields: svcName, namespace
-func (_m *Controller) IsKnativeServiceInNamespace(svcName string, namespace string) bool {
-	ret := _m.Called(svcName, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(svcName, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// IsKubernetesDeploymentInNamespace provides a mock function with given fields: name, namespace
-func (_m *Controller) IsKubernetesDeploymentInNamespace(name string, namespace string) bool {
-	ret := _m.Called(name, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(name, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// IsKubernetesServiceInNamespace provides a mock function with given fields: svcName, namespace
-func (_m *Controller) IsKubernetesServiceInNamespace(svcName string, namespace string) bool {
-	ret := _m.Called(svcName, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(svcName, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// IsPersistentVolumeClaimInNamespace provides a mock function with given fields: pvcName, namespace
-func (_m *Controller) IsPersistentVolumeClaimInNamespace(pvcName string, namespace string) bool {
-	ret := _m.Called(pvcName, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(pvcName, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// IsSecretInNamespace provides a mock function with given fields: secretName, namespace
-func (_m *Controller) IsSecretInNamespace(secretName string, namespace string) bool {
-	ret := _m.Called(secretName, namespace)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
-		r0 = rf(secretName, namespace)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
 }
 
 // ListPodLogs provides a mock function with given fields: namespace, podName, opts

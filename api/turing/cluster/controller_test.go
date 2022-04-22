@@ -380,22 +380,67 @@ func TestDeployKubernetesService(t *testing.T) {
 	}
 }
 
-func TestIsKnativeServiceInNamespace(t *testing.T) {
+func TestDeleteKnativeService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	resourceItem := schema.GroupVersionResource{
 		Group:    knativeGroup,
 		Version:  knativeVersion,
 		Resource: knativeResource,
 	}
-
 	cs := knservingclientset.NewSimpleClientset()
+
 	tests := []struct {
-		name     string
-		reactors []reactor
-		expected bool
+		name           string
+		reactors       []reactor
+		ignoreNotFound bool
+		hasErr         bool
 	}{
 		{
-			"not_exists",
+			"not_exists; ignore knative resource not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: knativeResource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			true,
+			false,
+		},
+		{
+			"exists; ignore knative resource not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: knativeResource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+				{
+					verb:     reactorVerbs.Delete,
+					resource: knativeResource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewDeleteAction(resourceItem, testNamespace, testName)
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+			false,
+		},
+		{
+			"not_exists; do not ignore knative resource not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -410,21 +455,6 @@ func TestIsKnativeServiceInNamespace(t *testing.T) {
 				},
 			},
 			false,
-		},
-		{
-			"exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: knativeResource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, nil, nil
-					},
-				},
-			},
 			true,
 		},
 	}
@@ -434,113 +464,9 @@ func TestIsKnativeServiceInNamespace(t *testing.T) {
 			// Create test controller
 			c := createTestKnController(cs, tc.reactors)
 			// Run test
-			actual := c.IsKnativeServiceInNamespace(testName, testNamespace)
+			err := c.DeleteKnativeService(testName, testNamespace, time.Second*5, tc.ignoreNotFound)
 			// Validate no error
-			assert.Equal(t, tc.expected, actual)
-		})
-	}
-}
-
-func TestDeleteKnativeService(t *testing.T) {
-	testName, testNamespace := "test-name", "test-namespace"
-	resourceItem := schema.GroupVersionResource{
-		Group:    knativeGroup,
-		Version:  knativeVersion,
-		Resource: knativeResource,
-	}
-
-	// Define reactors. The reactors also validate that they are called
-	// with the expected parameters.
-	reactors := []reactor{
-		{
-			verb:     reactorVerbs.Get,
-			resource: knativeResource,
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
-				// Check that the method is called with the expected action
-				assert.Equal(t, expAction, action)
-				// Nil error indicates Get success to the DeleteKnativeService() method
-				return true, nil, nil
-			},
-		},
-		{
-			verb:     reactorVerbs.Delete,
-			resource: knativeResource,
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewDeleteAction(resourceItem, testNamespace, testName)
-				// Check that the method is called with the expected action
-				assert.Equal(t, expAction, action)
-				// Nil error indicates Delete success
-				return true, nil, nil
-			},
-		},
-	}
-
-	// Create test controller
-	c := createTestKnController(knservingclientset.NewSimpleClientset(), reactors)
-	// Run tests
-	err := c.DeleteKnativeService(testName, testNamespace, time.Second*5)
-	// Validate no error
-	assert.NoError(t, err)
-}
-
-func TestIsKubernetesDeploymentInNamespace(t *testing.T) {
-	testName, testNamespace := "test-name", "test-namespace"
-	deploymentResourceItem := schema.GroupVersionResource{
-		Group:    "apps",
-		Version:  "v1",
-		Resource: "deployments",
-	}
-	cs := fake.NewSimpleClientset()
-
-	tests := []struct {
-		name     string
-		reactors []reactor
-		expected bool
-	}{
-		{
-			"not_exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: "deployments",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
-					},
-				},
-			},
-			false,
-		},
-		{
-			"exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: "deployments",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, nil, nil
-					},
-				},
-			},
-			true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create test controller
-			c := createTestK8sController(cs, tc.reactors)
-			// Run test
-			actual := c.IsKubernetesDeploymentInNamespace(testName, testNamespace)
-			// Validate no error
-			assert.Equal(t, tc.expected, actual)
+			assert.Equal(t, err != nil, tc.hasErr)
 		})
 	}
 }
@@ -552,39 +478,91 @@ func TestDeleteKubernetesDeployment(t *testing.T) {
 		Version:  "v1",
 		Resource: "deployments",
 	}
+	cs := fake.NewSimpleClientset()
 
-	// Define reactors. The reactors also validate that they are called
-	// with the expected parameters.
-	reactors := []reactor{
+	tests := []struct {
+		name           string
+		reactors       []reactor
+		ignoreNotFound bool
+		hasErr         bool
+	}{
 		{
-			verb:     reactorVerbs.Get,
-			resource: "deployments",
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
-				assert.Equal(t, expAction, action)
-				return true, nil, nil
+			"not_exists; ignore deployment not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
 			},
+			true,
+			false,
 		},
 		{
-			verb:     reactorVerbs.Delete,
-			resource: "deployments",
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewDeleteAction(deploymentResourceItem, testNamespace, testName)
-				assert.Equal(t, expAction, action)
-				return true, nil, nil
+			"exists; ignore deployment not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+				{
+					verb:     reactorVerbs.Delete,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewDeleteAction(deploymentResourceItem, testNamespace, testName)
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
 			},
+			true,
+			false,
+		},
+		{
+			"not_exists; do not ignore deployment not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "deployments",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			false,
+			true,
 		},
 	}
 
-	// Create test controller
-	c := createTestK8sController(fake.NewSimpleClientset(), reactors)
-	// Run tests
-	err := c.DeleteKubernetesDeployment(testName, testNamespace, time.Second*5)
-	// Validate no error
-	assert.NoError(t, err)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test controller
+			c := createTestK8sController(cs, tc.reactors)
+			// Run test
+			err := c.DeleteKubernetesDeployment(testName, testNamespace, time.Second*5, tc.ignoreNotFound)
+			// Validate no error
+			assert.Equal(t, err != nil, tc.hasErr)
+		})
+	}
 }
 
-func TestIsKubernetesServiceInNamespace(t *testing.T) {
+func TestDeleteKubernetesService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	svcResourceItem := schema.GroupVersionResource{
 		Version:  "v1",
@@ -593,12 +571,57 @@ func TestIsKubernetesServiceInNamespace(t *testing.T) {
 	cs := fake.NewSimpleClientset()
 
 	tests := []struct {
-		name     string
-		reactors []reactor
-		expected bool
+		name           string
+		reactors       []reactor
+		ignoreNotFound bool
+		hasErr         bool
 	}{
 		{
-			"not_exists",
+			"not_exists; ignore service not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "services",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+					},
+				},
+			},
+			true,
+			false,
+		},
+		{
+			"exists; ignore service not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: "services",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+				{
+					verb:     reactorVerbs.Delete,
+					resource: "services",
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewDeleteAction(svcResourceItem, testNamespace, testName)
+						assert.Equal(t, expAction, action)
+						return true, nil, nil
+					},
+				},
+			},
+			true,
+			false,
+		},
+		{
+			"not_exists; do not ignore service not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -613,21 +636,6 @@ func TestIsKubernetesServiceInNamespace(t *testing.T) {
 				},
 			},
 			false,
-		},
-		{
-			"exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: "services",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, nil, nil
-					},
-				},
-			},
 			true,
 		},
 	}
@@ -637,49 +645,11 @@ func TestIsKubernetesServiceInNamespace(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			actual := c.IsKubernetesServiceInNamespace(testName, testNamespace)
+			err := c.DeleteKubernetesService(testName, testNamespace, time.Second*5, tc.ignoreNotFound)
 			// Validate no error
-			assert.Equal(t, tc.expected, actual)
+			assert.Equal(t, err != nil, tc.hasErr)
 		})
 	}
-}
-
-func TestDeleteKubernetesService(t *testing.T) {
-	testName, testNamespace := "test-name", "test-namespace"
-	svcResourceItem := schema.GroupVersionResource{
-		Version:  "v1",
-		Resource: "services",
-	}
-
-	// Define reactors. The reactors also validate that they are called
-	// with the expected parameters.
-	reactors := []reactor{
-		{
-			verb:     reactorVerbs.Get,
-			resource: "services",
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewGetAction(svcResourceItem, testNamespace, testName)
-				assert.Equal(t, expAction, action)
-				return true, nil, nil
-			},
-		},
-		{
-			verb:     reactorVerbs.Delete,
-			resource: "services",
-			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-				expAction := k8stesting.NewDeleteAction(svcResourceItem, testNamespace, testName)
-				assert.Equal(t, expAction, action)
-				return true, nil, nil
-			},
-		},
-	}
-
-	// Create test controller
-	c := createTestK8sController(fake.NewSimpleClientset(), reactors)
-	// Run tests
-	err := c.DeleteKubernetesService(testName, testNamespace, time.Second*5)
-	// Validate no error
-	assert.NoError(t, err)
 }
 
 func TestCreateKanikoJob(t *testing.T) {
@@ -1370,68 +1340,6 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
-func TestIsSecretInNamespace(t *testing.T) {
-	secretResource := schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "secrets",
-	}
-	testNamespace := "namespace"
-
-	secretName := "secret"
-	cs := fake.NewSimpleClientset()
-	tests := []struct {
-		name     string
-		reactors []reactor
-		expected bool
-	}{
-		{
-			"not_exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: secretResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, secretName)
-					},
-				},
-			},
-			false,
-		},
-		{
-			"exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: secretResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, nil, nil
-					},
-				},
-			},
-			true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create test controller
-			c := createTestK8sController(cs, tc.reactors)
-			// Run test
-			actual := c.IsSecretInNamespace(secretName, testNamespace)
-			// Validate no error
-			assert.Equal(t, tc.expected, actual)
-		})
-	}
-}
-
 func TestDeleteSecret(t *testing.T) {
 	secretResource := schema.GroupVersionResource{
 		Group:    "",
@@ -1442,12 +1350,15 @@ func TestDeleteSecret(t *testing.T) {
 
 	secretName := "secret"
 	cs := fake.NewSimpleClientset()
+
 	tests := []struct {
-		name     string
-		reactors []reactor
-		hasErr   bool
+		name           string
+		reactors       []reactor
+		ignoreNotFound bool
+		hasErr         bool
 	}{
-		{"not_exists",
+		{
+			"not_exists; ignore secret not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1462,9 +1373,10 @@ func TestDeleteSecret(t *testing.T) {
 				},
 			},
 			true,
+			false,
 		},
 		{
-			"delete_secret",
+			"exists; ignore secret not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1481,14 +1393,31 @@ func TestDeleteSecret(t *testing.T) {
 					resource: secretResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewDeleteAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
 						return true, nil, nil
 					},
 				},
 			},
+			true,
 			false,
+		},
+		{
+			"not_exists; do not ignore secret not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: secretResource.Resource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, secretName)
+					},
+				},
+			},
+			false,
+			true,
 		},
 	}
 
@@ -1497,7 +1426,7 @@ func TestDeleteSecret(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteSecret(secretName, testNamespace)
+			err := c.DeleteSecret(secretName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -1613,12 +1542,15 @@ func TestDeletePVC(t *testing.T) {
 		Size:        volSize,
 	}
 	cs := fake.NewSimpleClientset()
+
 	tests := []struct {
-		name     string
-		reactors []reactor
-		hasErr   bool
+		name           string
+		reactors       []reactor
+		ignoreNotFound bool
+		hasErr         bool
 	}{
-		{"not_exists",
+		{
+			"not_exists; ignore pvc not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1633,9 +1565,10 @@ func TestDeletePVC(t *testing.T) {
 				},
 			},
 			true,
+			false,
 		},
 		{
-			"delete_pvc",
+			"exists; ignore pvc not found",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1652,14 +1585,31 @@ func TestDeletePVC(t *testing.T) {
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewDeleteAction(pvcResource, testNamespace, pvcConf.Name)
-						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
 						return true, nil, nil
 					},
 				},
 			},
+			true,
 			false,
+		},
+		{
+			"not_exists; do not ignore pvc not found",
+			[]reactor{
+				{
+					verb:     reactorVerbs.Get,
+					resource: pvcResource.Resource,
+					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						// Check that the method is called with the expected action
+						assert.Equal(t, expAction, action)
+						// Return nil object and error to indicate non existent object
+						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, pvcConf.Name)
+					},
+				},
+			},
+			false,
+			true,
 		},
 	}
 
@@ -1668,7 +1618,7 @@ func TestDeletePVC(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeletePersistentVolumeClaim(pvcConf.Name, testNamespace)
+			err := c.DeletePersistentVolumeClaim(pvcConf.Name, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
 		})

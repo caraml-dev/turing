@@ -371,7 +371,7 @@ func TestUndeployRouterSuccess(t *testing.T) {
 
 	ds := &mocks.DeploymentService{}
 	ds.On("UndeployRouterVersion", project, environment, routerVersion, mock.Anything, false).Return(nil)
-	ds.On("UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, false).Return(nil)
+	ds.On("UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, true).Return(nil)
 	ds.On("DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router}).Return(nil)
 
 	es := &mocks.EventService{}
@@ -401,7 +401,7 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	assert.Equal(t, "", router.Endpoint)
 	// Assert calls
 	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, routerVersion, mock.Anything, false)
-	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, false)
+	ds.AssertCalled(t, "UndeployRouterVersion", project, environment, pendingRouterVersion, mock.Anything, true)
 	ds.AssertCalled(t, "DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router})
 	rs.AssertCalled(t, "Save", modifiedRouter)
 }
