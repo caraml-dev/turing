@@ -7,7 +7,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20200424034326-7cd886c7ec44
 	github.com/antihax/optional v1.0.0
-	github.com/aws/aws-sdk-go v1.43.44 // indirect
 	github.com/getkin/kin-openapi v0.75.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.9.0
