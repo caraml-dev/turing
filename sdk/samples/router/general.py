@@ -214,7 +214,7 @@ def main(turing_api: str, project: str):
     # Create the RouterConfig instance
     router_config = RouterConfig(
         environment_name="id-dev",
-        name="what-does-the-fox-say-fixed",
+        name="what-does-the-fox-say",
         routes=routes,
         rules=rules,
         default_route_id="nothing",
