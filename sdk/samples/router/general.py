@@ -52,8 +52,8 @@ def main(turing_api: str, project: str):
             timeout='20ms'
         ),
         Route(
-            id='nothing',
-            endpoint='http://fox-says.nothing',
+            id='control',
+            endpoint='http://fox-says.control',
             timeout='20ms'
         )
     ]
@@ -217,7 +217,7 @@ def main(turing_api: str, project: str):
         name="what-does-the-fox-say",
         routes=routes,
         rules=rules,
-        default_route_id="nothing",
+        default_route_id="control",
         experiment_engine=experiment_config,
         resource_request=resource_request,
         timeout="100ms",
