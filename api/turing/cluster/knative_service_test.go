@@ -85,7 +85,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	}
 
 	// Expected specs
-	var timeout int64 = 30
+	timeout := int64(knativeSvcDefaults.RequestTimeoutSeconds)
 	resources := corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("600m"),
