@@ -8,17 +8,140 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/gojek/turing/engines/experiment/pkg/request"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}
 var customExperimentManagerConfig = manager.Engine{Type: manager.CustomExperimentManagerType}
+
+func TestIsStandardExperimentManager(t *testing.T) {
+	tests := map[string]struct {
+		engineInfo    manager.Engine
+		engineInfoErr string
+		expected      bool
+	}{
+		"standard": {
+			engineInfo: manager.Engine{
+				Name: "standard-engine-1",
+				Type: manager.StandardExperimentManagerType,
+			},
+			expected: true,
+		},
+		"error": {
+			engineInfo: manager.Engine{
+				Name: "standard-engine-2",
+				Type: manager.StandardExperimentManagerType,
+			},
+			engineInfoErr: "test error",
+		},
+		"custom": {
+			engineInfo: manager.Engine{
+				Name: "custom-engine",
+				Type: manager.CustomExperimentManagerType,
+			},
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Set up mock API call
+			expMgr := &mocks.ExperimentManager{}
+			var err error
+			if data.engineInfoErr != "" {
+				err = errors.New(data.engineInfoErr)
+			}
+			expMgr.On("GetEngineInfo").Return(data.engineInfo, err)
+			// Set up experiment service
+			svc := &experimentsService{
+				experimentManagers: map[string]manager.ExperimentManager{
+					data.engineInfo.Name: expMgr,
+				},
+				cache: cache.New(time.Second, time.Second),
+			}
+			// Validate
+			isStdEngine := svc.IsStandardExperimentManager(data.engineInfo.Name)
+			assert.Equal(t, data.expected, isStdEngine)
+		})
+	}
+}
+
+func TestIsClientSelectionEnabled(t *testing.T) {
+	// Set up mock experiment managers
+	tests := map[string]struct {
+		engineInfo    manager.Engine
+		engineInfoErr string
+		expectedErr   string
+		expected      bool
+	}{
+		"standard | no client selection": {
+			engineInfo: manager.Engine{
+				Name: "standard-engine-1",
+				Type: manager.StandardExperimentManagerType,
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+					ClientSelectionEnabled: false,
+				},
+			},
+		},
+		"standard | with client selection": {
+			engineInfo: manager.Engine{
+				Name: "standard-engine-2",
+				Type: manager.StandardExperimentManagerType,
+				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
+					ClientSelectionEnabled: true,
+				},
+			},
+			expected: true,
+		},
+		"custom": {
+			engineInfo: manager.Engine{
+				Name: "custom-engine-1",
+				Type: manager.CustomExperimentManagerType,
+			},
+		},
+		"error": {
+			engineInfo: manager.Engine{
+				Name: "custom-engine-2",
+				Type: manager.CustomExperimentManagerType,
+			},
+			engineInfoErr: "test error",
+			expectedErr:   "test error",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Set up mock API call
+			expMgr := &mocks.ExperimentManager{}
+			var err error
+			if data.engineInfoErr != "" {
+				err = errors.New(data.engineInfoErr)
+			}
+			expMgr.On("GetEngineInfo").Return(data.engineInfo, err)
+			// Set up experiment service
+			svc := &experimentsService{
+				experimentManagers: map[string]manager.ExperimentManager{
+					data.engineInfo.Name: expMgr,
+				},
+				cache: cache.New(time.Second, time.Second),
+			}
+			// Validate
+			isClientSelectionEnabled, err := svc.IsClientSelectionEnabled(data.engineInfo.Name)
+			if data.expectedErr != "" {
+				assert.EqualError(t, err, data.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, data.expected, isClientSelectionEnabled)
+			}
+		})
+	}
+}
 
 func TestListEngines(t *testing.T) {
 	// Set up mock Experiment Managers
