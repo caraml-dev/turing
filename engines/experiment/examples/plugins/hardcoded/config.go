@@ -25,9 +25,9 @@ type Experiment struct {
 }
 
 type ManagerConfig struct {
-	Engine      manager.Engine      `json:"engine"`
-	Experiments []Experiment        `json:"experiments"`
-	Variables   []manager.Variables `json:"variables"`
+	Engine      manager.Engine                `json:"engine"`
+	Experiments []Experiment                  `json:"experiments"`
+	Variables   map[string][]manager.Variable `json:"variables"`
 }
 
 type RunnerConfig struct {
