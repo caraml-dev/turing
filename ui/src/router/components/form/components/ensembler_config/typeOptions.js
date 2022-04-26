@@ -6,8 +6,8 @@ const typeOptions = [
     inputDisplay: "None",
     description: (
       <Fragment>
-        Turing will simply return response from the <strong>Default</strong>{" "}
-        route
+        Turing will simply return response from the route marked as the{" "}
+        <strong>Final Response</strong>
       </Fragment>
     ),
   },

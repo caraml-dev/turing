@@ -9,7 +9,9 @@ Turing currently supports ensemblers in the same fashion as the enrichers. The e
 Currently, there are 4 options available - no ensembler, a standard ensembler, Docker and an external ensembler.
 
 ## No Ensembler
-The router will return a response from the default route, specified in Configure Routes. This option is available only when **no experiment engine** is configured in Configure Experiment Engine.
+The router will return a response from the route configured to act as the final response. This option is available only when **no experiment engine** is configured in Configure Experiment Engine.
+
+![](../../.gitbook/assets/nop_ensembler_config.png)
 
 ## Docker
 Turing will deploy specified image as a post-processor and will send the original request, responses from all routes, and the treatment configuration (if a Experiment Engine is selected, in Configure Experiment Engine), for ensembling. To configure a Docker ensembler, there are 3 sections to be filled.

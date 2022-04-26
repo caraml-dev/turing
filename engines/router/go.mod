@@ -10,7 +10,6 @@ require (
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/mlp v1.4.7
 	github.com/gojek/turing/engines/experiment v0.0.0
-	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40

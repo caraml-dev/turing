@@ -42,6 +42,7 @@ import (
 )
 
 var (
+	// ErrNamespaceAlreadyExists is an error that a Kubernetes namespace already exists.
 	ErrNamespaceAlreadyExists = errors.New("namespace already exists")
 )
 
@@ -64,19 +65,20 @@ type clusterConfig struct {
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
-	DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
+	DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
 	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
-	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
+	DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
 	CreateNamespace(ctx context.Context, name string) error
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
-	DeleteConfigMap(ctx context.Context, name, namespace string) error
+	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
 	CreateSecret(ctx context.Context, secret *Secret) error
-	DeleteSecret(ctx context.Context, secretName string, namespace string) error
+	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
-	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error
+	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(
 		ctx context.Context, namespace string, podName string, opts *apicorev1.PodLogOptions,
@@ -84,9 +86,7 @@ type Controller interface {
 	CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(ctx context.Context, namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(ctx context.Context, namespace string, jobName string) error
-	CreateServiceAccount(
-		ctx context.Context, namespace string, serviceAccount *ServiceAccount,
-	) (*apicorev1.ServiceAccount, error)
+	CreateServiceAccount(ctx context.Context, namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
 	CreateRole(ctx context.Context, namespace string, role *Role) (*apirbacv1.Role, error)
 	CreateRoleBinding(ctx context.Context, namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
 	CreateSparkApplication(
@@ -242,9 +242,12 @@ func (c *controller) ApplyConfigMap(ctx context.Context, namespace string, confi
 }
 
 // DeleteConfigMap deletes a configmap if exists.
-func (c *controller) DeleteConfigMap(ctx context.Context, name, namespace string) error {
+func (c *controller) DeleteConfigMap(ctx context.Context, name, namespace string, ignoreNotFound bool) error {
 	_, err := c.k8sCoreClient.ConfigMaps(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 	return c.k8sCoreClient.ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{})
@@ -302,6 +305,7 @@ func (c *controller) DeleteKnativeService(
 	svcName string,
 	namespace string,
 	timeout time.Duration,
+	ignoreNotFound bool,
 ) error {
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(namespace)
@@ -309,6 +313,9 @@ func (c *controller) DeleteKnativeService(
 	// Get the service
 	_, err := services.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 
@@ -383,12 +390,13 @@ func (c *controller) DeployKubernetesService(
 	return c.waitDeploymentReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// DeleteKubernetesService deletes a kubernetes service an deployment
-func (c *controller) DeleteKubernetesService(
+// DeleteKubernetesDeployment deletes a kubernetes deployment
+func (c *controller) DeleteKubernetesDeployment(
 	ctx context.Context,
-	svcName string,
+	name string,
 	namespace string,
 	timeout time.Duration,
+	ignoreNotFound bool,
 ) error {
 	gracePeriod := int64(timeout.Seconds())
 	delOptions := metav1.DeleteOptions{
@@ -396,18 +404,35 @@ func (c *controller) DeleteKubernetesService(
 	}
 
 	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(ctx, svcName, metav1.GetOptions{})
+	_, err := deployments.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
-	err = deployments.Delete(ctx, svcName, delOptions)
-	if err != nil {
-		return err
+	return deployments.Delete(ctx, name, delOptions)
+}
+
+// DeleteKubernetesService deletes a kubernetes service
+func (c *controller) DeleteKubernetesService(
+	ctx context.Context,
+	svcName string,
+	namespace string,
+	timeout time.Duration,
+	ignoreNotFound bool,
+) error {
+	gracePeriod := int64(timeout.Seconds())
+	delOptions := metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriod,
 	}
 
 	services := c.k8sCoreClient.Services(namespace)
-	_, err = services.Get(ctx, svcName, metav1.GetOptions{})
+	_, err := services.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return err
 	}
 	return services.Delete(ctx, svcName, delOptions)
@@ -461,10 +486,13 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 }
 
 // DeleteSecret deletes a secret
-func (c *controller) DeleteSecret(ctx context.Context, secretName string, namespace string) error {
+func (c *controller) DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error {
 	secrets := c.k8sCoreClient.Secrets(namespace)
 	_, err := secrets.Get(ctx, secretName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
 	}
 	return secrets.Delete(ctx, secretName, metav1.DeleteOptions{})
@@ -512,10 +540,13 @@ func (c *controller) ApplyPersistentVolumeClaim(
 }
 
 // DeletePersistentVolumeClaim deletes the PVC in the given namespace.
-func (c *controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error {
+func (c *controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
 	_, err := pvcs.Get(ctx, pvcName, metav1.GetOptions{})
 	if err != nil {
+		if ignoreNotFound {
+			return nil
+		}
 		return fmt.Errorf("unable to get pvc with name %s: %s", pvcName, err.Error())
 	}
 	return pvcs.Delete(ctx, pvcName, metav1.DeleteOptions{})

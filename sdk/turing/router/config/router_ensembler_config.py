@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import turing.generated.models
 from typing import List, Dict, Union
@@ -6,19 +6,37 @@ from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
 
+@dataclass
+class EnsemblerNopConfig:
+    final_response_route_id: str
+
+    _final_response_route_id: str = field(init=False, repr=False)
+
+    @property
+    def final_response_route_id(self) -> str:
+        return self._final_response_route_id
+
+    @final_response_route_id.setter
+    def final_response_route_id(self, final_response_route_id: str):
+        self._final_response_route_id = final_response_route_id
+
+    def to_open_api(self) -> OpenApiModel:
+        return None
+
 
 @dataclass
 class RouterEnsemblerConfig:
     """
     Class to create a new RouterEnsemblerConfig
 
-    :param type: type of the ensembler; must be one of {'standard', 'docker'}
+    :param type: type of the ensembler; must be one of {'nop', 'standard', 'docker', 'pyfunc'}
     :param id: id of the ensembler
     :param standard_config: EnsemblerStandardConfig instance containing mappings between routes and treatments
     :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
     """
     type: str
     id: int = None
+    nop_config: EnsemblerNopConfig = None
     standard_config: turing.generated.models.EnsemblerStandardConfig = None
     docker_config: turing.generated.models.EnsemblerDockerConfig = None
     pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None
@@ -26,12 +44,14 @@ class RouterEnsemblerConfig:
     def __init__(self,
                  type: str,
                  id: int = None,
+                 nop_config: EnsemblerNopConfig = None,
                  standard_config: turing.generated.models.EnsemblerStandardConfig = None,
                  docker_config: turing.generated.models.EnsemblerDockerConfig = None,
                  pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None,
                  **kwargs):
         self.id = id
         self.type = type
+        self.nop_config = nop_config
         self.standard_config = standard_config
         self.docker_config = docker_config
         self.pyfunc_config = pyfunc_config
@@ -50,7 +70,7 @@ class RouterEnsemblerConfig:
 
     @type.setter
     def type(self, type: str):
-        assert type in {"standard", "docker", "pyfunc"}
+        assert type in {"nop", "standard", "docker", "pyfunc"}
         self._type = type
 
     @property
@@ -108,6 +128,21 @@ class RouterEnsemblerConfig:
             )
         else:
             self._pyfunc_config = pyfunc_config
+
+    @property
+    def nop_config(self) -> EnsemblerNopConfig:
+        return self._nop_config
+
+    @nop_config.setter
+    def nop_config(self, nop_config: EnsemblerNopConfig):
+        if isinstance(nop_config, EnsemblerNopConfig):
+            self._nop_config = nop_config
+        elif isinstance(nop_config, dict):
+            self._nop_config = turing.generated.models.EnsemblerPyfuncConfig(
+                **nop_config
+            )
+        else:
+            self._nop_config = nop_config
 
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
@@ -349,6 +384,32 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
             ]
         )
         return super().to_open_api()
+
+@dataclass
+class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
+    def __init__(self,
+                 final_response_route_id: str):
+        """
+        Method to create a new Nop ensembler
+
+        :param final_response_route_id: The route id of the route to be returned as the final response
+        """
+        self.final_response_route_id = final_response_route_id
+        super().__init__(type="nop",
+            nop_config = EnsemblerNopConfig(final_response_route_id=self.final_response_route_id))
+
+    @property
+    def final_response_route_id(self) -> str:
+        return self._final_response_route_id
+
+    @final_response_route_id.setter
+    def final_response_route_id(self, final_response_route_id: str):
+        self._final_response_route_id = final_response_route_id
+    
+    def to_open_api(self) -> OpenApiModel:
+        # Nop config is not passed down to the API. The final_response_route_id property
+        # will be parsed in the router config and copied over as appropriate.
+        return None
 
 
 class InvalidExperimentMappingException(Exception):

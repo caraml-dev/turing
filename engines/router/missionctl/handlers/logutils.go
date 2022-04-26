@@ -44,16 +44,18 @@ func logTuringRouterRequestSummary(
 	for resp := range mcRespCh {
 		// If error exists, add an error record
 		if resp.err != "" {
-			logEntry.AddResponse(resp.key, nil, resp.err)
+			logEntry.AddResponse(resp.key, nil, nil, resp.err)
 		} else {
 			// Process the response body
 			uncompressedData, err := uncompressHTTPBody(resp.header, resp.body)
 			if err != nil {
 				logger.Errorf("Error occurred when reading %s response body: %s",
 					resp.key, err.Error())
-				logEntry.AddResponse(resp.key, nil, err.Error())
+				logEntry.AddResponse(resp.key, nil, nil, err.Error())
 			} else {
-				logEntry.AddResponse(resp.key, uncompressedData, "")
+				// Format the response header
+				responseHeader := resultlog.FormatHTTPHeader(resp.header)
+				logEntry.AddResponse(resp.key, uncompressedData, responseHeader, "")
 			}
 		}
 	}

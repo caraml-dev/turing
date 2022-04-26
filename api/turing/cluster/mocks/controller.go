@@ -212,13 +212,13 @@ func (_m *Controller) CreateSparkApplication(ctx context.Context, namespace stri
 	return r0, r1
 }
 
-// DeleteConfigMap provides a mock function with given fields: ctx, name, namespace
-func (_m *Controller) DeleteConfigMap(ctx context.Context, name string, namespace string) error {
-	ret := _m.Called(ctx, name, namespace)
+// DeleteConfigMap provides a mock function with given fields: ctx, name, namespace, ignoreNotFound
+func (_m *Controller) DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, name, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, name, namespace)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, name, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -254,13 +254,13 @@ func (_m *Controller) DeleteJob(ctx context.Context, namespace string, jobName s
 	return r0
 }
 
-// DeleteKnativeService provides a mock function with given fields: ctx, svcName, namespace, timeout
-func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(ctx, svcName, namespace, timeout)
+// DeleteKnativeService provides a mock function with given fields: ctx, svcName, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, svcName, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration) error); ok {
-		r0 = rf(ctx, svcName, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
+		r0 = rf(ctx, svcName, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -268,13 +268,13 @@ func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, 
 	return r0
 }
 
-// DeleteKubernetesService provides a mock function with given fields: ctx, svcName, namespace, timeout
-func (_m *Controller) DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(ctx, svcName, namespace, timeout)
+// DeleteKubernetesDeployment provides a mock function with given fields: ctx, name, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, name, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration) error); ok {
-		r0 = rf(ctx, svcName, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
+		r0 = rf(ctx, name, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -282,13 +282,13 @@ func (_m *Controller) DeleteKubernetesService(ctx context.Context, svcName strin
 	return r0
 }
 
-// DeletePersistentVolumeClaim provides a mock function with given fields: ctx, pvcName, namespace
-func (_m *Controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string) error {
-	ret := _m.Called(ctx, pvcName, namespace)
+// DeleteKubernetesService provides a mock function with given fields: ctx, svcName, namespace, timeout, ignoreNotFound
+func (_m *Controller) DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, svcName, namespace, timeout, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, pvcName, namespace)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
+		r0 = rf(ctx, svcName, namespace, timeout, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -296,13 +296,27 @@ func (_m *Controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName s
 	return r0
 }
 
-// DeleteSecret provides a mock function with given fields: ctx, secretName, namespace
-func (_m *Controller) DeleteSecret(ctx context.Context, secretName string, namespace string) error {
-	ret := _m.Called(ctx, secretName, namespace)
+// DeletePersistentVolumeClaim provides a mock function with given fields: ctx, pvcName, namespace, ignoreNotFound
+func (_m *Controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, pvcName, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, secretName, namespace)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, pvcName, namespace, ignoreNotFound)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteSecret provides a mock function with given fields: ctx, secretName, namespace, ignoreNotFound
+func (_m *Controller) DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, secretName, namespace, ignoreNotFound)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, secretName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}

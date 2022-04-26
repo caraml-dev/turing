@@ -101,7 +101,7 @@ turing:
     useInClusterConfig: false
 
   # -- Turing Experiment Engines configuration
-  experimentEngines: {}
+  experimentEngines: []
   # Example:
   # - name: my-exp-engine
   #   type: rpc-plugin

@@ -6,6 +6,7 @@ import {
 } from "../experiment_engine";
 import { Status } from "../status/Status";
 
+const _ = require(`lodash`);
 const objectAssignDeep = require(`object-assign-deep`);
 
 export class TuringRouter {
@@ -62,14 +63,21 @@ export class TuringRouter {
     router.config.experiment_engine = BaseExperimentEngine.fromJson(
       get(json, "config.experiment_engine")
     );
-    router.config.ensembler = Ensembler.fromJson(get(json, "config.ensembler"));
 
-    const {
-      config: { enricher },
-    } = router;
+    // Init ensembler. If type nop, send in the default route id.
+    const ensemblerConfig = get(json, "config.ensembler");
+    router.config.ensembler = _.isEmpty(ensemblerConfig)
+      ? Ensembler.fromJson({
+          nop_config: {
+            final_response_route_id: get(json, "config.default_route_id"),
+          },
+        })
+      : Ensembler.fromJson(ensemblerConfig);
 
-    if (!!get(json, "config.enricher")) {
-      router.config.enricher = { ...enricher, type: "docker" };
+    // Init enricher. If config exists, update the type to docker.
+    const enricherConfig = get(json, "config.enricher");
+    if (!!enricherConfig && enricherConfig.type !== "nop") {
+      router.config.enricher = { ...router.config.enricher, type: "docker" };
     }
 
     return router;
@@ -86,6 +94,9 @@ export class TuringRouter {
 
     // Ensembler
     if (obj.config.ensembler && obj.config.ensembler.type === "nop") {
+      // Copy the final response route id to the top level, as the default route
+      obj.config.default_route_id =
+        obj.config["ensembler"].nop_config["final_response_route_id"];
       delete obj.config["ensembler"];
     }
 

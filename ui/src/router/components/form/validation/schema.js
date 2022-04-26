@@ -302,6 +302,14 @@ const schema = (maxAllowedReplica) => [
             ["nop", "docker", "standard", "pyfunc"],
             "Valid Ensembler type should be selected"
           ),
+        nop_config: yup.mixed().when("type", {
+          is: "nop",
+          then: yup.object().shape({
+            final_response_route_id: yup
+              .string()
+              .required("Valid route must be chosen"),
+          }),
+        }),
         docker_config: yup.mixed().when("type", {
           is: "docker",
           then: dockerDeploymentSchema(maxAllowedReplica),
