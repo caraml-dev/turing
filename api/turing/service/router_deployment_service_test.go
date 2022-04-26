@@ -409,7 +409,9 @@ func TestDeleteEndpoint(t *testing.T) {
 		false,
 	)
 	assert.NoError(t, err)
-	controller.AssertCalled(t, "DeleteKubernetesService", mock.Anything, "test-svc-fluentd-logger-1", testNs, timeout, false)
+	controller.AssertCalled(
+		t, "DeleteKubernetesService", mock.Anything, "test-svc-fluentd-logger-1", testNs, timeout, false,
+	)
 	controller.AssertCalled(t, "DeleteConfigMap", mock.Anything, "test-svc-fiber-config-1", testNs, false)
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-enricher-1", testNs, timeout, false)
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-ensembler-1", testNs, timeout, false)

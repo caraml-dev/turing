@@ -65,13 +65,19 @@ type clusterConfig struct {
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
-	DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKnativeService(
+		ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool,
+	) error
 	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
-	DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, timeout time.Duration, ignoreNotFound bool) error
-	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKubernetesDeployment(
+		ctx context.Context, name string, namespace string, timeout time.Duration, ignoreNotFound bool,
+	) error
+	DeleteKubernetesService(
+		ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool,
+	) error
 	CreateNamespace(ctx context.Context, name string) error
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
 	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
@@ -86,7 +92,9 @@ type Controller interface {
 	CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(ctx context.Context, namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(ctx context.Context, namespace string, jobName string) error
-	CreateServiceAccount(ctx context.Context, namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
+	CreateServiceAccount(
+		ctx context.Context, namespace string, serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error,
+	)
 	CreateRole(ctx context.Context, namespace string, role *Role) (*apirbacv1.Role, error)
 	CreateRoleBinding(ctx context.Context, namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
 	CreateSparkApplication(
@@ -540,7 +548,9 @@ func (c *controller) ApplyPersistentVolumeClaim(
 }
 
 // DeletePersistentVolumeClaim deletes the PVC in the given namespace.
-func (c *controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error {
+func (c *controller) DeletePersistentVolumeClaim(
+	ctx context.Context, pvcName string, namespace string, ignoreNotFound bool,
+) error {
 	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
 	_, err := pvcs.Get(ctx, pvcName, metav1.GetOptions{})
 	if err != nil {
