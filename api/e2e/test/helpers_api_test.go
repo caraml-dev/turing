@@ -41,7 +41,7 @@ func getRouter(
 
 	err = json.Unmarshal(respBytes, &router)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Could not unmarshal: %v\n %s", err, string(respBytes))
 	}
 
 	return &router, err

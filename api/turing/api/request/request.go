@@ -206,9 +206,12 @@ func (r RouterConfig) BuildExperimentEngineConfig(
 	expSvc service.ExperimentsService,
 ) (json.RawMessage, error) {
 	rawExpConfig := r.ExperimentEngine.Config
-
-	// Handle missing passkey / encrypt it in Standard experiment config
-	if expSvc.IsStandardExperimentManager(r.ExperimentEngine.Type) {
+	// Handle missing passkey / encrypt it, if Standard experiment config using client selection
+	isClientSelectionEnabled, err := expSvc.IsClientSelectionEnabled(r.ExperimentEngine.Type)
+	if err != nil {
+		return nil, err
+	}
+	if isClientSelectionEnabled {
 		// Convert the new config to the standard type
 		expConfig, err := manager.ParseStandardExperimentConfig(rawExpConfig)
 		if err != nil {
