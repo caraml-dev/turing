@@ -89,9 +89,15 @@ func TestIsClientSelectionEnabled(t *testing.T) {
 				},
 			},
 		},
-		"standard | with client selection": {
+		"standard | no standard config": {
 			engineInfo: manager.Engine{
 				Name: "standard-engine-2",
+				Type: manager.StandardExperimentManagerType,
+			},
+		},
+		"standard | with client selection": {
+			engineInfo: manager.Engine{
+				Name: "standard-engine-3",
 				Type: manager.StandardExperimentManagerType,
 				StandardExperimentManagerConfig: &manager.StandardExperimentManagerConfig{
 					ClientSelectionEnabled: true,
