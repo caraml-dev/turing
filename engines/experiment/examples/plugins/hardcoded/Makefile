@@ -1,4 +1,4 @@
-PLUGIN_NAME ?= example-plugin
+PLUGIN_NAME ?= plugin-example
 VERSION ?= latest
 
 .PHONY: tidy

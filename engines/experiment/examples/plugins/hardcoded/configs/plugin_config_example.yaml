@@ -1,6 +1,6 @@
 ---
 engine:
-  name: example-plugin
+  name: plugin-example
   display_name: Plugin Example
   type: standard
   standard_experiment_manager_config:

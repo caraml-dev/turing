@@ -264,8 +264,8 @@ The screenshot below shows the configuration UI for the standard experiment engi
 **Router (Re-)Deployment Stage:**
   1. Turing Server retrieves Router's configuration from the Database
   2. Turing Server calls `ExperimentEngine plugin`::`ExperimentManager`::`GetExperimentRunnerConfig` with the saved configuration from the DB, to create the configuration used by the `ExperimentRunner`
-  2. Turing Server creates required resources in the k8s cluster (deployments, services, config maps and secrets)
-  3. Turing Router is being deployed and during the initialization, it establishes the connection with the ExperimentEngine plugin and passes the configuration from step 2 into `ExperimentRunner`'s `Configure` method.
+  3. Turing Server creates required resources in the k8s cluster (deployments, services, config maps and secrets)
+  4. Turing Router is being deployed and during the initialization, it establishes the connection with the ExperimentEngine plugin and passes the configuration from step 2 into `ExperimentRunner`'s `Configure` method.
 
 ### Logging
 In order for Turing Server/Router to include log messages from the Experiment Engine plugin, you can use 
