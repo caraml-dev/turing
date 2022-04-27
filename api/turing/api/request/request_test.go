@@ -411,7 +411,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 
 	// Set up mock Experiment service
 	expSvc := &mocks.ExperimentsService{}
-	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
+	expSvc.On("IsClientSelectionEnabled", mock.Anything).Return(true, nil)
 
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
@@ -468,8 +468,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 		Return("passkey-enc", nil)
 
 	es := &mocks.ExperimentsService{}
-	es.On("IsStandardExperimentManager", "standard-manager").Return(true)
-	es.On("IsStandardExperimentManager", "custom-manager").Return(false)
+	es.On("IsClientSelectionEnabled", "standard-manager").Return(true, nil)
+	es.On("IsClientSelectionEnabled", "custom-manager").Return(false, nil)
 
 	// Define tests
 	tests := map[string]struct {

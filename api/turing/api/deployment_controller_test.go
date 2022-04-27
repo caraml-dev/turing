@@ -143,9 +143,9 @@ func TestDeployVersionSuccess(t *testing.T) {
 			exps := &mocks.ExperimentsService{}
 			exps.
 				On(
-					"IsStandardExperimentManager",
+					"IsClientSelectionEnabled",
 					data.routerVersion.ExperimentEngine.Type,
-				).Return(true)
+				).Return(true, nil)
 			exps.
 				On(
 					"GetExperimentRunnerConfig",
@@ -278,7 +278,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	exps := &mocks.ExperimentsService{}
-	exps.On("IsStandardExperimentManager", "nop").Return(false)
+	exps.On("IsClientSelectionEnabled", "nop").Return(false, nil)
 
 	// Create test controller
 	ctrl := RouterDeploymentController{

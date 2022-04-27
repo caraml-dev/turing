@@ -192,7 +192,11 @@ func (c RouterDeploymentController) deployRouterVersion(
 	expSvc := c.BaseController.AppContext.ExperimentsService
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
 		experimentConfig = routerVersion.ExperimentEngine.Config
-		if expSvc.IsStandardExperimentManager(routerVersion.ExperimentEngine.Type) {
+		isClientSelectionEnabled, err := expSvc.IsClientSelectionEnabled(routerVersion.ExperimentEngine.Type)
+		if err != nil {
+			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
+		}
+		if isClientSelectionEnabled {
 			// Convert the config to the standard type
 			standardExperimentConfig, err := manager.ParseStandardExperimentConfig(experimentConfig)
 			if err != nil {
