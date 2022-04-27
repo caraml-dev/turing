@@ -254,16 +254,18 @@ func (*FooBarExperimentRunner) Configure(cfg json.RawMessage) error {
 ExperimentRunner's configuration is stored in the Turing database together with the rest of the Router configuration. I.e:
 
 **Router Configuration Stage:**
-  1. Turing Server calls `ExperimentEngine plugin`::`ExperimentManager`::`GetExperimentRunnerConfig` to retrieve  
-     ExperimentRunner's configuration
+  1. Based on the type of the experiment manager (standard or custom) and the engine properties, the router's experiment data may be configured.
   2. Turing Server saves this data into the database as part of the Router configuration 
-     (`router_versions.experiment_engine`) 
+     (`router_versions.experiment_engine`).
+The screenshot below shows the configuration UI for the standard experiment engine defined in [`configs/plugin_config_example.yaml`](../examples/plugins/hardcoded/configs/plugin_config_example.yaml)
+
+![example_experiment_manager_ui](./assets/example_experiment_manager_router_ui.png)
 
 **Router (Re-)Deployment Stage:**
   1. Turing Server retrieves Router's configuration from the Database
+  2. Turing Server calls `ExperimentEngine plugin`::`ExperimentManager`::`GetExperimentRunnerConfig` with the saved configuration from the DB, to create the configuration used by the `ExperimentRunner`
   2. Turing Server creates required resources in the k8s cluster (deployments, services, config maps and secrets)
-  3. Turing Router is being deployed and during the initialization, it establishes the connection with the 
-     ExperimentEngine plugin and passes the configuration into `ExperimentRunner`'s `Configure` method.
+  3. Turing Router is being deployed and during the initialization, it establishes the connection with the ExperimentEngine plugin and passes the configuration from step 2 into `ExperimentRunner`'s `Configure` method.
 
 ### Logging
 In order for Turing Server/Router to include log messages from the Experiment Engine plugin, you can use 
