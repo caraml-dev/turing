@@ -46,8 +46,8 @@ export const RouterConfigView = ({ router }) => {
       title={<h2>Router is not deployed</h2>}
       body={
         <p>
-          Deploy it first and wait for deployment to complete before you can see
-          the configuration details here
+          Deploy it first and wait for the deployment to complete before you can
+          see the configuration details here
         </p>
       }
     />

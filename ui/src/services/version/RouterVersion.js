@@ -24,6 +24,16 @@ export class RouterVersion {
             final_response_route_id: get(json, "default_route_id"),
           },
         })
+      : ensemblerConfig.type === "standard"
+      ? Ensembler.fromJson({
+          ...ensemblerConfig,
+          standard_config: {
+            ...ensemblerConfig.standard_config,
+            fallback_response_route_id:
+              ensemblerConfig.standard_config.fallback_response_route_id ||
+              get(json, "config.default_route_id"),
+          },
+        })
       : Ensembler.fromJson(ensemblerConfig);
     return version;
   }
@@ -129,7 +139,6 @@ export class RouterVersion {
           : undefined),
       },
     };
-
     return yaml.dump(pretty, { sortKeys: true });
   }
 }

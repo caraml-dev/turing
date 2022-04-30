@@ -20,6 +20,7 @@ export class StandardEnsembler extends Ensembler {
   static newConfig() {
     return {
       experiment_mappings: [],
+      fallback_response_route_id: "",
     };
   }
 }
