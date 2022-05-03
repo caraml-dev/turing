@@ -161,11 +161,17 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedRoute:     nil,
 			expectedFallbacks: []fiber.Component{},
 		},
-		"simulate experiment engine returns error when calling GetTreatmentForRequest()": {
-			endpoints:               []string{"treatment-B", "treatment-C"},
+		"error when calling GetTreatmentForRequest() should fallback to default route": {
+			endpoints:               []string{"treatment-B", "control"},
 			experimentRunnerWantErr: true,
 			expectedRoute:           nil,
-			expectedFallbacks:       []fiber.Component{},
+			defaultRoute:            "control",
+			expectedFallbacks: []fiber.Component{
+				fiber.NewProxy(
+					fiber.NewBackend("control", ""),
+					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+				),
+			},
 		},
 	}
 
@@ -194,9 +200,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			}
 			route, fallbacks, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
 
-			if (err != nil) != data.experimentRunnerWantErr {
-				t.Errorf("SelectRoute() error = %v, wantErr %v", err, data.experimentRunnerWantErr)
-			}
+			assert.NoError(t, err)
 			assert.Equal(t, data.expectedRoute, route)
 			assert.Equal(t, data.expectedFallbacks, fallbacks)
 		})
