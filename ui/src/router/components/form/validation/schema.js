@@ -190,6 +190,9 @@ const mappingSchema = yup.object().shape({
 
 const standardEnsemblerConfigSchema = yup.object().shape({
   experiment_mappings: yup.array(mappingSchema),
+  fallback_response_route_id: yup
+    .string()
+    .required("Valid route must be chosen"),
 });
 
 const bigQueryConfigSchema = yup.object().shape({

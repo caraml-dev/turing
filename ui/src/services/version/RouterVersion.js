@@ -29,9 +29,11 @@ export class RouterVersion {
           ...ensemblerConfig,
           standard_config: {
             ...ensemblerConfig.standard_config,
+            // Set fallback_response_route_id to default route if not already set.
+            // fallback_response_route_id will be set during edit scenario and wont for view version.
             fallback_response_route_id:
               ensemblerConfig.standard_config.fallback_response_route_id ||
-              get(json, "config.default_route_id"),
+              get(json, "default_route_id"),
           },
         })
       : Ensembler.fromJson(ensemblerConfig);
