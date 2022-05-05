@@ -60,16 +60,32 @@ export class TuringRouter {
   static fromJson(json) {
     const router = objectAssignDeep(new TuringRouter(), json);
     router.status = Status.fromValue(json.status);
+    // If the router has just been created, there is no config while it's being deployed.
+    // Clear the dummy config.
+    if (!json.config) {
+      router.config = undefined;
+      return router;
+    }
+
+    // Init experiment engine
     router.config.experiment_engine = BaseExperimentEngine.fromJson(
       get(json, "config.experiment_engine")
     );
 
-    // Init ensembler. If type nop, send in the default route id.
+    // Init ensembler. If type nop / standard, send in the default route id.
     const ensemblerConfig = get(json, "config.ensembler");
     router.config.ensembler = _.isEmpty(ensemblerConfig)
       ? Ensembler.fromJson({
           nop_config: {
             final_response_route_id: get(json, "config.default_route_id"),
+          },
+        })
+      : ensemblerConfig.type === "standard"
+      ? Ensembler.fromJson({
+          ...ensemblerConfig,
+          standard_config: {
+            ...ensemblerConfig.standard_config,
+            fallback_response_route_id: get(json, "config.default_route_id"),
           },
         })
       : Ensembler.fromJson(ensemblerConfig);
@@ -93,11 +109,20 @@ export class TuringRouter {
     }
 
     // Ensembler
-    if (obj.config.ensembler && obj.config.ensembler.type === "nop") {
-      // Copy the final response route id to the top level, as the default route
-      obj.config.default_route_id =
-        obj.config["ensembler"].nop_config["final_response_route_id"];
-      delete obj.config["ensembler"];
+    if (!!obj.config.ensembler) {
+      if (obj.config.ensembler.type === "nop") {
+        // Copy the final response route id to the top level, as the default route
+        obj.config.default_route_id =
+          obj.config["ensembler"].nop_config["final_response_route_id"];
+        delete obj.config["ensembler"];
+      } else if (obj.config.ensembler.type === "standard") {
+        // Copy the fallback response route id to the top level, as the default route
+        obj.config.default_route_id =
+          obj.config["ensembler"].standard_config["fallback_response_route_id"];
+        delete obj.config["ensembler"].standard_config[
+          "fallback_response_route_id"
+        ];
+      }
     }
 
     // Outcome Logging

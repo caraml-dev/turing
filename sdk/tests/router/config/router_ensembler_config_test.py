@@ -6,6 +6,7 @@ from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.route import InvalidRouteException
 from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
                                                           EnsemblerNopConfig,
+                                                          EnsemblerStandardConfig,
                                                           NopRouterEnsemblerConfig,
                                                           PyfuncRouterEnsemblerConfig,
                                                           DockerRouterEnsemblerConfig,
@@ -17,7 +18,7 @@ from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
         pytest.param(
             1,
             "standard",
-            turing.generated.models.EnsemblerStandardConfig(
+            EnsemblerStandardConfig(
                 experiment_mappings=[
                     turing.generated.models.EnsemblerStandardConfigExperimentMappings(
                         experiment="experiment-1",
@@ -29,7 +30,8 @@ from turing.router.config.router_ensembler_config import (RouterEnsemblerConfig,
                         treatment="treatment-2",
                         route="route-2"
                     )
-                ]
+                ],
+                fallback_response_route_id="route-1"
             ),
             None,
             "generic_standard_router_ensembler_config"
@@ -324,7 +326,7 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
 
 
 @pytest.mark.parametrize(
-    "experiment_mappings,expected", [
+    "experiment_mappings,fallback_response_route_id,expected", [
         pytest.param(
             [
                 {
@@ -338,18 +340,21 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
                     "route": "route-2"
                 },
             ],
+            "route-1",
             "generic_standard_router_ensembler_config"
         )
     ])
-def test_create_standard_router_ensembler_config(experiment_mappings, expected, request):
+def test_create_standard_router_ensembler_config(experiment_mappings, fallback_response_route_id, expected, request):
     actual = StandardRouterEnsemblerConfig(
-        experiment_mappings=experiment_mappings
-    ).to_open_api()
-    assert actual == request.getfixturevalue(expected)
+        experiment_mappings=experiment_mappings,
+        fallback_response_route_id=fallback_response_route_id,
+    )
+    assert actual.to_open_api() == request.getfixturevalue(expected)
+    assert actual.standard_config.fallback_response_route_id == fallback_response_route_id
 
 
 @pytest.mark.parametrize(
-    "new_experiment_mappings,experiment_mappings,expected", [
+    "new_experiment_mappings,experiment_mappings,fallback_response_route_id,expected", [
         pytest.param(
             [
                 {
@@ -368,6 +373,7 @@ def test_create_standard_router_ensembler_config(experiment_mappings, expected, 
                     "route": "route-2"
                 },
             ],
+            "route-1",
             InvalidExperimentMappingException
         ),
         pytest.param(
@@ -390,22 +396,25 @@ def test_create_standard_router_ensembler_config(experiment_mappings, expected, 
                     "route": "route-2"
                 },
             ],
+            "route-1",
             InvalidExperimentMappingException
         )
     ])
 def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
         new_experiment_mappings,
         experiment_mappings,
+        fallback_response_route_id,
         expected):
     actual = StandardRouterEnsemblerConfig(
-        experiment_mappings=experiment_mappings
+        experiment_mappings=experiment_mappings,
+        fallback_response_route_id=fallback_response_route_id
     )
     with pytest.raises(expected):
         actual.experiment_mappings = new_experiment_mappings
 
 
 @pytest.mark.parametrize(
-    "new_experiment_mappings,experiment_mappings,expected", [
+    "new_experiment_mappings,experiment_mappings,fallback_response_route_id,expected", [
         pytest.param(
             [
                 {
@@ -426,19 +435,23 @@ def test_set_standard_router_ensembler_config_with_invalid_experiment_mappings(
                     "route": "wrong-route"
                 }
             ],
+            "route-1",
             "generic_standard_router_ensembler_config"
         )
     ])
 def test_set_standard_router_ensembler_config_with_valid_experiment_mappings(
         new_experiment_mappings,
         experiment_mappings,
+        fallback_response_route_id,
         expected,
         request):
     actual = StandardRouterEnsemblerConfig(
-        experiment_mappings=experiment_mappings
+        experiment_mappings=experiment_mappings,
+        fallback_response_route_id=fallback_response_route_id
     )
     actual.experiment_mappings = new_experiment_mappings
     assert actual.to_open_api() == request.getfixturevalue(expected)
+    assert actual.standard_config.fallback_response_route_id == fallback_response_route_id
 
 
 @pytest.mark.parametrize(
@@ -454,8 +467,8 @@ def test_create_nop_router_ensembler_config(
     nop_config,
     expected):
     ensembler = NopRouterEnsemblerConfig(final_response_route_id=final_response_route_id)
-    assert ensembler.nop_config == nop_config
     assert ensembler.to_open_api() == expected
+    assert ensembler.nop_config == nop_config
 
 @pytest.mark.parametrize(
     "router_config,ensembler_config", [
@@ -475,6 +488,30 @@ def test_copy_nop_ensembler_default_route(
     router.ensembler = ensembler_config
     actual = router.to_open_api()
     router.default_route_id = ensembler_config.final_response_route_id
+    expected = router.to_open_api()
+    assert actual == expected
+
+@pytest.mark.parametrize(
+    "router_config,ensembler_config", [
+        pytest.param(
+            "generic_router_config",
+           StandardRouterEnsemblerConfig(
+               experiment_mappings=[],
+               fallback_response_route_id="model-b",
+           )
+        )
+    ])
+def test_copy_standard_ensembler_default_route(
+    router_config,
+    ensembler_config,
+    request):
+    router = request.getfixturevalue(router_config)
+    # Check precondition
+    assert router.default_route_id != ensembler_config.fallback_response_route_id
+    
+    router.ensembler = ensembler_config
+    actual = router.to_open_api()
+    router.default_route_id = ensembler_config.fallback_response_route_id
     expected = router.to_open_api()
     assert actual == expected
 

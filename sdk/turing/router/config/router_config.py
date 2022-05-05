@@ -10,7 +10,7 @@ from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
-from turing.router.config.router_ensembler_config import RouterEnsemblerConfig, NopRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import RouterEnsemblerConfig, NopRouterEnsemblerConfig, StandardRouterEnsemblerConfig
 from turing.router.config.experiment_config import ExperimentConfig
 
 
@@ -73,8 +73,8 @@ class RouterConfig:
         self.timeout = timeout
         self.log_config = log_config
         self.enricher = enricher
-        # Init nop ensembler config if ensembler is not set
-        self.ensembler = ensembler or NopRouterEnsemblerConfig(final_response_route_id=default_route_id)
+        # Init ensembler after the default route has been initialized
+        self.ensembler = ensembler
 
     @property
     def environment_name(self) -> str:
@@ -198,9 +198,15 @@ class RouterConfig:
 
     @ensembler.setter
     def ensembler(self, ensembler: Union[RouterEnsemblerConfig, Dict]):
-        if isinstance(ensembler, RouterEnsemblerConfig):
+        if ensembler is None:
+            # Init nop ensembler config if ensembler is not set
+            self._ensembler = NopRouterEnsemblerConfig(final_response_route_id=self.default_route_id)
+        elif isinstance(ensembler, RouterEnsemblerConfig):
             self._ensembler = ensembler
         elif isinstance(ensembler, dict):
+            # Set fallback_response_route_id into standard ensembler config
+            if ensembler["type"] == "standard" and "fallback_response_route_id" not in ensembler["standard_config"]:
+                ensembler["standard_config"]["fallback_response_route_id"] = self.default_route_id
             self._ensembler = RouterEnsemblerConfig(**ensembler)
         else:
             self._ensembler = ensembler
@@ -239,10 +245,11 @@ class RouterConfig:
     def _get_default_route_id(self):
         default_route_id = self.default_route_id
         # If nop config is set, use the final_response_route_id as the default
-        if (self.ensembler.type == "nop" and
-            self.ensembler.nop_config is not None and
-            self.ensembler.nop_config.final_response_route_id is not None):
-            default_route_id = self.ensembler.nop_config.final_response_route_id
+        if isinstance(self.ensembler, NopRouterEnsemblerConfig):
+            default_route_id = self.ensembler.final_response_route_id
+        # Or, if standard config is set, use the fallback_response_route_id as the default
+        elif isinstance(self.ensembler, StandardRouterEnsemblerConfig):
+            default_route_id = self.ensembler.fallback_response_route_id
         self._verify_default_route_exists(default_route_id)
         return default_route_id
 

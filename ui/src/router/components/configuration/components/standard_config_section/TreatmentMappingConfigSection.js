@@ -7,9 +7,9 @@ import {
   EuiTextColor,
   EuiTitle,
 } from "@elastic/eui";
-import { ConfigSectionPanel } from "../../../../components/config_section";
-import { getExperimentUrl } from "./config";
-import ExperimentEngineContext from "../../../../providers/experiments/context";
+import { ConfigSectionPanel } from "../../../../../components/config_section";
+import { getExperimentUrl } from "../config";
+import ExperimentEngineContext from "../../../../../providers/experiments/context";
 
 const TreatmentMappingConfigTable = ({ items }) => {
   const columns = [
