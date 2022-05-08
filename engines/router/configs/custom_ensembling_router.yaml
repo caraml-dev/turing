@@ -3,7 +3,6 @@ id: combiner
 fan_in:
   type: fiber.EnsemblingFanIn
   properties:
-    default_route_id: route_id_1
     experiment_engine: test-exp-engine
     experiment_engine_properties:
       endpoint: test-exp-engine:8080
