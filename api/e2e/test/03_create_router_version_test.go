@@ -141,7 +141,7 @@ func TestCreateRouterVersion(t *testing.T) {
 				  "data": {
 					"version": "control"
 				  },
-				  "is_default": true,
+				  "is_default": false,
 				  "route": "control"
 				}
 			  ]
