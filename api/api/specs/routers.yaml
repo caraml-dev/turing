@@ -512,8 +512,6 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Route"
-        default_route:
-          type: "string"
         experiment_engine:
           $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
         resource_request:
