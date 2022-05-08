@@ -65,6 +65,7 @@ func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
 	return expEngineConfig
 }
 
+var defaultRouteID string = "default"
 var validRouterConfig = RouterConfig{
 	Routes: []*models.Route{
 		{
@@ -74,7 +75,7 @@ var validRouterConfig = RouterConfig{
 			Timeout:  "6s",
 		},
 	},
-	DefaultRouteID: "default",
+	DefaultRouteID: &defaultRouteID,
 	ExperimentEngine: &ExperimentEngineConfig{
 		Type:   "standard",
 		Config: makeTuringExperimentConfig("dummy_passkey"),
@@ -141,7 +142,7 @@ var invalidRouterConfig = RouterConfig{
 			Timeout:  "6s",
 		},
 	},
-	DefaultRouteID: "default",
+	DefaultRouteID: &defaultRouteID,
 	ExperimentEngine: &ExperimentEngineConfig{
 		Type:   "standard",
 		Config: makeTuringExperimentConfig("dummy_passkey"),
@@ -220,7 +221,6 @@ func TestRequestBuildRouter(t *testing.T) {
 }
 
 func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
-
 	baseRequest := CreateOrUpdateRouterRequest{
 		Environment: "env",
 		Name:        "router",
@@ -457,6 +457,35 @@ func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
 
 	assert.EqualError(t, err, "failed to find specified ensembler: record not found")
 	assert.Nil(t, got)
+}
+
+func TestRequestBuildRouterVersionNoDefaultRoute(t *testing.T) {
+	defaults := &config.RouterDefaults{
+		Image: "routerimage",
+	}
+	router := &models.Router{
+		ProjectID:       models.ID(1),
+		EnvironmentName: "env",
+		Name:            "router",
+		Status:          "pending",
+	}
+	cfg := RouterConfig{
+		Routes: []*models.Route{
+			{
+				ID:       "default",
+				Type:     "PROXY",
+				Endpoint: "endpoint",
+				Timeout:  "6s",
+			},
+		},
+		Timeout:          "10s",
+		ExperimentEngine: &ExperimentEngineConfig{Type: "nop"},
+		LogConfig:        &LogConfig{ResultLoggerType: "nop"},
+	}
+
+	rv, err := cfg.BuildRouterVersion(router, defaults, nil, nil, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "", rv.DefaultRouteID)
 }
 
 func TestBuildExperimentEngineConfig(t *testing.T) {

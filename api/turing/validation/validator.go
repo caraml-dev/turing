@@ -120,20 +120,36 @@ func newExperimentConfigValidator(expSvc service.ExperimentsService) func(valida
 
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
+	instance := sl.Validator()
 
-	if routerConfig.TrafficRules != nil {
-		routeIds := make([]string, len(routerConfig.Routes))
-		for idx, route := range routerConfig.Routes {
-			routeIds[idx] = route.ID
+	routeIds := make([]string, len(routerConfig.Routes))
+	for idx, route := range routerConfig.Routes {
+		routeIds[idx] = route.ID
+	}
+	routeIdsStr := strings.Join(routeIds, " ")
+
+	// Validate default route
+	if routerConfig.Ensembler == nil || routerConfig.Ensembler.Type == models.EnsemblerStandardType {
+		if routerConfig.DefaultRouteID == nil {
+			sl.ReportError(routerConfig.DefaultRouteID, "default_route_id", "DefaultRouteID",
+				"should be set for chosen ensembler type", "")
+		} else {
+			if err := instance.Var(*routerConfig.DefaultRouteID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+				ns := "DefaultRouteID"
+				sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
+			}
 		}
+	} else if routerConfig.DefaultRouteID != nil && *routerConfig.DefaultRouteID != "" {
+		sl.ReportError(routerConfig.DefaultRouteID, "default_route_id", "DefaultRouteID",
+			"should not be set for chosen ensembler type", *routerConfig.DefaultRouteID)
+	}
 
-		routeIdsStr := strings.Join(routeIds, " ")
-
+	// Validate traffic rules
+	if routerConfig.TrafficRules != nil {
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
-					instance := sl.Validator()
 					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
 						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 					}

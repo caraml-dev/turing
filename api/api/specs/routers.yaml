@@ -603,7 +603,6 @@ components:
       type: "object"
       required:
         - routes
-        - default_route_id
         - experiment_engine
         - timeout
         - log_config
