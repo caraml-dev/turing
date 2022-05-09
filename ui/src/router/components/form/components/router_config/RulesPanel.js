@@ -15,13 +15,7 @@ import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { newRule } from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({
-  rules,
-  routes,
-  defaultRouteId,
-  onChangeHandler,
-  errors = {},
-}) => {
+export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
@@ -34,7 +28,7 @@ export const RulesPanel = ({
   };
 
   const addRuleButton = (
-    <EuiButton fullWidth onClick={onAddRule} isDisabled={routes.length < 2}>
+    <EuiButton fullWidth onClick={onAddRule} isDisabled={!routes.length}>
       + Add Rule
     </EuiButton>
   );
@@ -61,7 +55,6 @@ export const RulesPanel = ({
             <RuleCard
               rule={rule}
               routes={routes}
-              defaultRouteId={defaultRouteId}
               onChangeHandler={onChange(`rules.${idx}`)}
               onDelete={onDeleteRule(idx)}
               errors={get(errors, `${idx}`)}

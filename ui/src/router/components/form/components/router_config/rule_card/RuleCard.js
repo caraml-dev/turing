@@ -32,7 +32,6 @@ const newCondition = () => ({
 export const RuleCard = ({
   rule,
   routes,
-  defaultRouteId,
   onChangeHandler,
   onDelete,
   errors,
@@ -46,16 +45,10 @@ export const RuleCard = ({
         .filter((route) => !!route.id && !!route.endpoint)
         .map((route) => ({
           value: route.id,
-          inputDisplay: (
-            <RuleCardRouteDropDownOption
-              {...route}
-              isDefault={route.id === defaultRouteId}
-            />
-          ),
-          disabled: route.id === defaultRouteId,
+          inputDisplay: <RuleCardRouteDropDownOption {...route} />,
         }));
     },
-    [rule.routes, routes, defaultRouteId]
+    [rule.routes, routes]
   );
 
   const onDeleteCondition = (idx) => () => {

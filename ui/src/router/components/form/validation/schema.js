@@ -244,9 +244,6 @@ const schema = (maxAllowedReplica) => [
     environment_name: yup.string().required("Environment is required"),
     config: yup.object().shape({
       timeout: timeoutSchema.required("Timeout is required"),
-      default_route_id: yup
-        .mixed()
-        .required("Default Route should be selected"),
       routes: yup
         .array(routeSchema)
         .required()

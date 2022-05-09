@@ -5,14 +5,13 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTextColor,
-  EuiToolTip,
 } from "@elastic/eui";
 
-export const RuleCardRouteDropDownOption = ({ id, endpoint, isDefault }) => {
+export const RuleCardRouteDropDownOption = ({ id, endpoint }) => {
   const option = (
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiBadge color={isDefault ? "hollow" : "default"}>{id}</EuiBadge>
+        <EuiBadge>{id}</EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <EuiTextColor color="subdued">
@@ -24,11 +23,5 @@ export const RuleCardRouteDropDownOption = ({ id, endpoint, isDefault }) => {
     </EuiFlexGroup>
   );
 
-  return isDefault ? (
-    <EuiToolTip content="Default route can't be a part of any rules">
-      {option}
-    </EuiToolTip>
-  ) : (
-    option
-  );
+  return option;
 };
