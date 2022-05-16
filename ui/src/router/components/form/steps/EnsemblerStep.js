@@ -16,7 +16,7 @@ import ExperimentEngineContext from "../../../../providers/experiments/context";
 export const EnsemblerStep = ({ projectId }) => {
   const {
     data: {
-      config: { experiment_engine, ensembler, routes },
+      config: { experiment_engine, ensembler, routes, rules },
     },
     onChangeHandler,
   } = useContext(FormContext);
@@ -43,6 +43,7 @@ export const EnsemblerStep = ({ projectId }) => {
       {ensembler.type === "nop" && (
         <NopConfigFormGroup
           routes={routes}
+          rules={rules}
           nopConfig={ensembler.nop_config}
           onChangeHandler={onChange("config.ensembler.nop_config")}
           errors={get(errors, "config.ensembler.nop_config")}
@@ -71,6 +72,7 @@ export const EnsemblerStep = ({ projectId }) => {
         <StandardEnsemblerFormGroup
           experimentConfig={experiment_engine.config}
           routes={routes}
+          rules={rules}
           standardConfig={ensembler.standard_config}
           onChangeHandler={onChange("config.ensembler.standard_config")}
           errors={get(errors, "config.ensembler.standard_config")}

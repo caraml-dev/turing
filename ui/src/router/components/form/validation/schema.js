@@ -64,6 +64,14 @@ const routeSchema = yup.object().shape({
   timeout: timeoutSchema.required("Timeout is required"),
 });
 
+const validRouteSchema = yup
+  .mixed()
+  .test("valid-route", "Valid route is required", function (value) {
+    const configSchema = this.from.slice(-1).pop();
+    const { routes } = configSchema.value.config;
+    return routes.map((r) => r.id).includes(value);
+  });
+
 const ruleConditionSchema = yup.object().shape({
   field_source: fieldSourceSchema,
   field: fieldSchema("field_source"),
@@ -82,22 +90,7 @@ const trafficRuleSchema = yup.object().shape({
     .min(1, "At least one condition should be defined"),
   routes: yup
     .array()
-    .of(
-      yup
-        .mixed()
-        .test(
-          "valid-route",
-          "Valid, non-default route is required",
-          function (value) {
-            const [, configSchema] = this.from;
-            const { routes, default_route_id } = configSchema.value;
-            return (
-              routes.map((r) => r.id).includes(value) &&
-              default_route_id !== value
-            );
-          }
-        )
-    )
+    .of(validRouteSchema)
     .min(1, "At least one route should be attached to the rule"),
 });
 
@@ -190,9 +183,7 @@ const mappingSchema = yup.object().shape({
 
 const standardEnsemblerConfigSchema = yup.object().shape({
   experiment_mappings: yup.array(mappingSchema),
-  fallback_response_route_id: yup
-    .string()
-    .required("Valid route must be chosen"),
+  fallback_response_route_id: validRouteSchema,
 });
 
 const bigQueryConfigSchema = yup.object().shape({
@@ -305,9 +296,7 @@ const schema = (maxAllowedReplica) => [
         nop_config: yup.mixed().when("type", {
           is: "nop",
           then: yup.object().shape({
-            final_response_route_id: yup
-              .string()
-              .required("Valid route must be chosen"),
+            final_response_route_id: validRouteSchema,
           }),
         }),
         docker_config: yup.mixed().when("type", {

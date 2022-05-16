@@ -1,33 +1,46 @@
 import React, { useEffect } from "react";
-import { EuiFlexItem, EuiForm, EuiFormRow } from "@elastic/eui";
+import { EuiFlexItem, EuiForm, EuiFormRow, EuiSuperSelect } from "@elastic/eui";
 
+import { RouteDropDownOption } from "../RouteDropDownOption";
 import { Panel } from "../Panel";
-import { EuiComboBoxSelect } from "../../../../../components/form/combo_box/EuiComboBoxSelect";
 
 const SelectRouteIdCombobox = ({ value, routeOptions, onChange, ...props }) => {
-  // Note: routeNames changes on every render, which we need to capture name changes to routes
-  const routeNames = routeOptions.map((e) => (!!e.value ? e.value : e.label));
+  const noneValue = "_none_";
 
   useEffect(() => {
-    // Clear route if it doesn't exist in the options
-    if (!!value && !routeNames.includes(value)) {
-      onChange(undefined);
+    const routeNames = routeOptions
+      .filter((e) => !e.disabled)
+      .map((e) => e.value);
+    // Clear route if it doesn't exist in the enabled options
+    if (value !== noneValue && !routeNames.includes(value)) {
+      onChange(noneValue);
     }
     // Auto-select route if there is exactly one
-    if (!value && routeNames.length === 1) {
+    if ((!value || value === noneValue) && routeNames.length === 1) {
       onChange(routeNames[0]);
     }
-  }, [routeNames, value, onChange]);
+  }, [routeOptions, value, onChange]);
+
+  const routeOptionsWithNone = [
+    // Hack to have a placeholder for EuiSuperSelect
+    {
+      value: noneValue,
+      inputDisplay: props.placeholder,
+      disabled: true,
+    },
+    ...routeOptions,
+  ];
 
   return (
-    <EuiComboBoxSelect
+    <EuiSuperSelect
       fullWidth={props.fullWidth}
-      placeholder={props.placeholder}
+      itemLayoutAlign="top"
+      hasDividers
       isInvalid={props.isInvalid}
-      options={routeOptions}
+      options={routeOptionsWithNone}
       value={value || ""}
       onChange={onChange}
-      isDisabled={routeOptions.length <= 1}
+      disabled={routeOptionsWithNone.length <= 1}
     />
   );
 };
@@ -35,6 +48,7 @@ const SelectRouteIdCombobox = ({ value, routeOptions, onChange, ...props }) => {
 export const RouteSelectionPanel = ({
   routeId,
   routes,
+  rules,
   onChange,
   errors,
   panelTitle,
@@ -42,7 +56,23 @@ export const RouteSelectionPanel = ({
 }) => {
   const routeOptions = routes
     .filter((e) => !!e.id)
-    .map((e) => ({ label: e.id }));
+    .map((e) => {
+      const isDisabled =
+        !!rules && rules.filter((r) => r.routes.includes(e.id)).length > 0;
+      return {
+        value: e.id,
+        inputDisplay: e.id,
+        dropdownDisplay: (
+          <RouteDropDownOption
+            id={e.id}
+            endpoint={e.endpoint}
+            isDisabled={isDisabled}
+            disabledOptionTooltip="Route with traffic rules cannot be selected"
+          />
+        ),
+        disabled: isDisabled,
+      };
+    });
 
   return (
     <EuiFlexItem>
@@ -58,7 +88,7 @@ export const RouteSelectionPanel = ({
               fullWidth
               value={routeId}
               routeOptions={routeOptions}
-              placeholder="Select route"
+              placeholder="Select route..."
               onChange={onChange}
               isInvalid={!!errors}
             />

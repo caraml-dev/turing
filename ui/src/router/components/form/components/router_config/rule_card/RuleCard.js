@@ -11,7 +11,7 @@ import {
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
-import { RuleCardRouteDropDownOption } from "./RuleCardRouteDropDown";
+import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
 
 import "./RuleCard.scss";
@@ -45,7 +45,7 @@ export const RuleCard = ({
         .filter((route) => !!route.id && !!route.endpoint)
         .map((route) => ({
           value: route.id,
-          inputDisplay: <RuleCardRouteDropDownOption {...route} />,
+          inputDisplay: <RouteDropDownOption {...route} />,
         }));
     },
     [rule.routes, routes]
