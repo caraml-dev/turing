@@ -1883,7 +1883,6 @@ components:
             - values
             operator: in
         error: error
-        default_route: default_route
         version: 5
         log_config:
           custom_metrics_enabled: true
@@ -2018,8 +2017,6 @@ components:
           items:
             $ref: '#/components/schemas/Route'
           type: array
-        default_route:
-          type: string
         experiment_engine:
           $ref: '#/components/schemas/ExperimentConfig'
         resource_request:
@@ -2737,7 +2734,6 @@ components:
         ensembler:
           $ref: '#/components/schemas/RouterEnsemblerConfig'
       required:
-      - default_route_id
       - experiment_engine
       - log_config
       - routes
