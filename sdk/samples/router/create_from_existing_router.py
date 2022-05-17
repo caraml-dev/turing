@@ -127,7 +127,6 @@ def main(turing_api: str, project: str):
         name="my-router-1",
         routes=routes,
         rules=rules,
-        default_route_id="test",
         experiment_engine=experiment_config,
         resource_request=resource_request,
         timeout="100ms",
