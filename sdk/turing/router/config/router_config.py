@@ -1,3 +1,4 @@
+import deprecation
 import inspect
 from typing import List, Dict, Union
 from collections import Counter
@@ -125,10 +126,14 @@ class RouterConfig:
             self._rules = rules
 
     @property
+    @deprecation.deprecated(deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.")
     def default_route_id(self) -> str:
         return self._default_route_id
 
     @default_route_id.setter
+    @deprecation.deprecated(deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.")
     def default_route_id(self, default_route_id: str):
         self._default_route_id = default_route_id
 
@@ -215,8 +220,10 @@ class RouterConfig:
         kwargs = {}
         self._verify_no_duplicate_routes()
         
-        # Get default route id before processing the ensembler
-        kwargs['default_route_id'] = self._get_default_route_id()
+        # Get default route id if exists
+        default_route_id = self._get_default_route_id()
+        if default_route_id is not None:
+            kwargs['default_route_id'] = default_route_id
 
         if self.rules is not None:
             kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
@@ -250,7 +257,8 @@ class RouterConfig:
         # Or, if standard config is set, use the fallback_response_route_id as the default
         elif isinstance(self.ensembler, StandardRouterEnsemblerConfig):
             default_route_id = self.ensembler.fallback_response_route_id
-        self._verify_default_route_exists(default_route_id)
+        if default_route_id is not None:
+            self._verify_default_route_exists(default_route_id)
         return default_route_id
 
     def _verify_default_route_exists(self, default_route_id: str):

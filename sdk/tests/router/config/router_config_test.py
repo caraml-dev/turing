@@ -32,3 +32,14 @@ def test_set_router_config_with_invalid_default_route(actual, invalid_route_id, 
     actual.default_route_id = invalid_route_id
     with pytest.raises(expected):
         actual.to_open_api()
+
+@pytest.mark.parametrize(
+    "actual,expected", [
+        pytest.param(
+            "generic_router_config",
+            {}
+        )
+    ])
+def test_remove_router_config_default_route(actual, expected, request):
+    actual = request.getfixturevalue(actual)
+    assert "default_route_id" not in actual.to_open_api()

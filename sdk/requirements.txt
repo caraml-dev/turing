@@ -1,3 +1,4 @@
+deprecation==2.1.0
 fire
 google-auth>=1.30.0,<2.0dev
 google-cloud-storage>=1.37.0
