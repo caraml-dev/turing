@@ -221,12 +221,12 @@ func TestValidateTrafficRules(t *testing.T) {
 	// Common variables used by suite tests
 	routeAID, routeBID := "route-a", "route-b"
 	routeA, routeB := &models.Route{
-		ID:       "route-a",
+		ID:       routeAID,
 		Type:     "PROXY",
 		Endpoint: "http://example.com/a",
 		Timeout:  "10ms",
 	}, &models.Route{
-		ID:       "route-b",
+		ID:       routeBID,
 		Type:     "PROXY",
 		Endpoint: "http://example.com/b",
 		Timeout:  "10ms",

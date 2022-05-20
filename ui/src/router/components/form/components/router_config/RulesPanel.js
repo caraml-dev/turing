@@ -28,7 +28,7 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
   };
 
   const addRuleButton = (
-    <EuiButton fullWidth onClick={onAddRule} isDisabled={!routes.length}>
+    <EuiButton fullWidth onClick={onAddRule} isDisabled={routes.length < 2}>
       + Add Rule
     </EuiButton>
   );
@@ -64,7 +64,7 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
         ))}
         <EuiFlexItem>
           {routes.length < 2 ? (
-            <EuiToolTip content="You should have other routes besides the default one in order to be able to define traffic rules">
+            <EuiToolTip content="You should have more than one route in order to be able to define traffic rules">
               {addRuleButton}
             </EuiToolTip>
           ) : (
