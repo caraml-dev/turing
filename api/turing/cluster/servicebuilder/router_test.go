@@ -52,6 +52,8 @@ func TestNewRouterService(t *testing.T) {
 	require.NoError(t, err)
 	cfgmapExpEngine, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_exp_engine.yml"))
 	require.NoError(t, err)
+	cfgmapNoDefaultRoute, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_no_default_route.yml"))
+	require.NoError(t, err)
 
 	// Define tests
 	tests := map[string]testSuiteNewService{
@@ -495,6 +497,78 @@ func TestNewRouterService(t *testing.T) {
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
 										Name: "router-with-exp-engine-turing-fiber-config-1",
+									},
+								},
+							},
+						},
+					},
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							Name:      routerConfigMapVolume,
+							MountPath: routerConfigMapMountPath,
+						},
+					},
+				},
+				ContainerPort:                   8080,
+				MinReplicas:                     2,
+				MaxReplicas:                     4,
+				TargetConcurrency:               1,
+				QueueProxyResourcePercentage:    20,
+				UserContainerLimitRequestFactor: 1.5,
+			},
+		},
+		"success | no default route": {
+			filePath:     filepath.Join(testDataBasePath, "router_version_no_default_route.json"),
+			expRawConfig: json.RawMessage(`{}`),
+			expected: &cluster.KnativeService{
+				BaseService: &cluster.BaseService{
+					Name:                 "test-svc-turing-router-1",
+					Namespace:            "test-project",
+					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
+					CPURequests:          resource.MustParse("400m"),
+					MemoryRequests:       resource.MustParse("512Mi"),
+					LivenessHTTPGetPath:  "/v1/internal/live",
+					ReadinessHTTPGetPath: "/v1/internal/ready",
+					ConfigMap: &cluster.ConfigMap{
+						Name:     "test-svc-turing-fiber-config-1",
+						FileName: "fiber.yml",
+						Data:     string(cfgmapNoDefaultRoute),
+						Labels: map[string]string{
+							"app":          "test-svc",
+							"environment":  "",
+							"orchestrator": "turing",
+							"stream":       "test-stream",
+							"team":         "test-team",
+						},
+					},
+					Envs: []corev1.EnvVar{
+						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
+						{Name: "APP_ENVIRONMENT", Value: "test-env"},
+						{Name: "ROUTER_TIMEOUT", Value: "5s"},
+						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
+						{Name: "APP_SENTRY_ENABLED", Value: "true"},
+						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{Name: "APP_LOGLEVEL", Value: "INFO"},
+						{Name: "APP_CUSTOM_METRICS", Value: "false"},
+						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_RESULT_LOGGER", Value: "nop"},
+						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
+					},
+					Labels: map[string]string{
+						"app":          "test-svc",
+						"environment":  "",
+						"orchestrator": "turing",
+						"stream":       "test-stream",
+						"team":         "test-team",
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: routerConfigMapVolume,
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "test-svc-turing-fiber-config-1",
 									},
 								},
 							},

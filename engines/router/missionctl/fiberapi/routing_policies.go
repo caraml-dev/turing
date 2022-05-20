@@ -59,10 +59,6 @@ func newRouteSelectionPolicy(properties json.RawMessage) (*routeSelectionPolicy,
 	if err != nil {
 		return nil, errors.Newf(errors.BadConfig, "Failed to parse route selection policy")
 	}
-	// Check that the default route is not empty
-	if routeSelPolicy.DefRoute == "" {
-		return nil, errors.Newf(errors.BadConfig, "No default route defined")
-	}
 	return &routeSelectionPolicy{
 		defaultRoute:       routeSelPolicy.DefRoute,
 		experimentMappings: routeSelPolicy.ExperimentMappings,

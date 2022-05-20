@@ -59,7 +59,7 @@ var efiExpTimeout = &EnsemblingFanIn{
 
 func TestInitializeEnsemblingFanIn(t *testing.T) {
 	tests := map[string]testSuiteInitFanIn{
-		"success": {
+		"success | all properties": {
 			properties: json.RawMessage(`{
 				"default_route_id":  "route1",
 				"experiment_engine": "Test"
@@ -74,17 +74,20 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 				},
 			},
 		},
-		"missing_experimentation_policy": {
-			properties: json.RawMessage(`invalid_data`),
-			success:    false,
-			err:        "Failed initializing experimentation policy on FanIn: Failed to parse experimentation policy",
-		},
-		"missing_route_policy": {
+		"success | missing route policy": {
 			properties: json.RawMessage(`{
 				"experiment_engine": "Test"
 			}`),
-			success: false,
-			err:     "Failed initializing route selection policy on FanIn: No default route defined",
+			success: true,
+			expected: EnsemblingFanIn{
+				routeSelectionPolicy:  &routeSelectionPolicy{},
+				experimentationPolicy: &experimentationPolicy{},
+			},
+		},
+		"missing experimentation policy": {
+			properties: json.RawMessage(`invalid_data`),
+			success:    false,
+			err:        "Failed initializing experimentation policy on FanIn: Failed to parse experimentation policy",
 		},
 	}
 

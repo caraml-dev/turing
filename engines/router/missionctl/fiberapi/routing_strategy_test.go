@@ -19,9 +19,10 @@ import (
 
 func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 	type testSuiteInitStrategy struct {
-		properties json.RawMessage
-		success    bool
-		expected   DefaultTuringRoutingStrategy
+		properties    json.RawMessage
+		success       bool
+		expected      DefaultTuringRoutingStrategy
+		expectedError string
 	}
 
 	tests := map[string]testSuiteInitStrategy{
@@ -54,7 +55,8 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			properties: json.RawMessage(`{
 				"experiment_engine": "Test"
 			}`),
-			success: false,
+			success:       false,
+			expectedError: "No default route defined",
 		},
 	}
 
@@ -82,10 +84,12 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			monkey.Unpatch(experiment.NewExperimentRunner)
 			monkey.Unpatch(runnerV1.Get)
 
-			// Test that there is no error and fanIn is initialised as expected
-			assert.Equal(t, data.success, err == nil)
+			// Test that there is no error and the routing strategy is initialised as expected
 			if data.success {
+				assert.Nil(t, err)
 				assert.Equal(t, data.expected, strategy)
+			} else {
+				assert.EqualError(t, err, data.expectedError)
 			}
 		})
 	}

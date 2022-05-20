@@ -31,6 +31,10 @@ func (r *DefaultTuringRoutingStrategy) Initialize(properties json.RawMessage) er
 	if err != nil {
 		return errors.Wrapf(err, "Failed initializing route selection policy on routing strategy")
 	}
+	// Check that the default route is not empty
+	if r.routeSelectionPolicy.defaultRoute == "" {
+		return errors.Newf(errors.BadConfig, "No default route defined")
+	}
 	return nil
 }
 

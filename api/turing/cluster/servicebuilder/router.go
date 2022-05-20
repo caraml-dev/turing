@@ -465,8 +465,10 @@ func buildFiberConfigMap(
 ) (*cluster.ConfigMap, error) {
 	// Create the properties map for fiber's routing strategy or fanIn
 	propsMap := map[string]interface{}{
-		"default_route_id":  ver.DefaultRouteID,
 		"experiment_engine": ver.ExperimentEngine.Type,
+	}
+	if ver.DefaultRouteID != "" {
+		propsMap["default_route_id"] = ver.DefaultRouteID
 	}
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
 		expEngineProps := experimentCfg

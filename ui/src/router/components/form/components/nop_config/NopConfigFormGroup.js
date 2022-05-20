@@ -7,6 +7,7 @@ import { RouteSelectionPanel } from "../ensembler_config/RouteSelectionPanel";
 
 export const NopConfigFormGroup = ({
   routes,
+  rules,
   nopConfig,
   onChangeHandler,
   errors = {},
@@ -21,6 +22,7 @@ export const NopConfigFormGroup = ({
       <RouteSelectionPanel
         routeId={nopConfig.final_response_route_id}
         routes={routes}
+        rules={rules}
         onChange={onChange("final_response_route_id")}
         errors={errors.final_response_route_id}
         panelTitle="Response"

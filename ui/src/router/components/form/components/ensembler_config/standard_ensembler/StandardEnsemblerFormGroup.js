@@ -11,6 +11,7 @@ import { useOnChangeHandler } from "../../../../../../components/form/hooks/useO
 export const StandardEnsemblerFormGroup = ({
   experimentConfig = {},
   routes,
+  rules,
   standardConfig,
   onChangeHandler,
   errors = {},
@@ -58,6 +59,7 @@ export const StandardEnsemblerFormGroup = ({
           <RouteSelectionPanel
             routeId={standardConfig.fallback_response_route_id}
             routes={routes}
+            rules={rules}
             onChange={onChange("fallback_response_route_id")}
             errors={get(errors, "fallback_response_route_id")}
             panelTitle="Fallback"
