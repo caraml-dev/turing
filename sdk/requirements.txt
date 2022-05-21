@@ -1,3 +1,4 @@
+cloudpickle==2.0.0
 deprecation==2.1.0
 fire
 google-auth>=1.30.0,<2.0dev
@@ -8,4 +9,3 @@ pandas==1.2.2
 python-dateutil
 requests==2.25.1
 urllib3 >= 1.25.3
-cloudpickle==1.2.2
