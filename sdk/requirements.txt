@@ -3,7 +3,7 @@ fire
 google-auth>=1.30.0,<2.0dev
 google-cloud-storage>=1.37.0
 mlflow==1.14.1
-numpy==1.17.3
+numpy==1.21.6
 pandas==1.2.2
 python-dateutil
 requests==2.25.1
