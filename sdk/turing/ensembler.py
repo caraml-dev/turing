@@ -3,6 +3,10 @@ from typing import Optional, Union, List, Any, Dict
 import mlflow
 import numpy
 import pandas
+import re
+from sys import version_info
+import yaml
+
 import turing.generated.models
 from turing.generated.models import EnsemblerType
 from turing._base_types import ApiObject, ApiObjectSpec
@@ -167,12 +171,14 @@ class PyFuncEnsembler(Ensembler):
             mlflow_experiment_id: int = None,
             mlflow_run_id: str = None,
             artifact_uri: str = None,
+            python_version: str = None,
             **kwargs):
         kwargs.pop('type', None)
         super(PyFuncEnsembler, self).__init__(type=PyFuncEnsembler.TYPE, **kwargs)
         self._mlflow_experiment_id = mlflow_experiment_id
         self._mlflow_run_id = mlflow_run_id
         self._artifact_uri = artifact_uri
+        self._python_version = python_version
 
     @property
     def mlflow_experiment_id(self) -> int:
@@ -197,6 +203,14 @@ class PyFuncEnsembler(Ensembler):
     @artifact_uri.setter
     def artifact_uri(self, artifact_uri):
         self._artifact_uri = artifact_uri
+    
+    @property
+    def python_version(self) -> str:
+        return self._python_version
+
+    @python_version.setter
+    def python_version(self, python_version):
+        self._python_version = python_version
 
     @classmethod
     def _experiment_name(cls, project_name: str, ensembler_name: str) -> str:
@@ -236,6 +250,7 @@ class PyFuncEnsembler(Ensembler):
         if ensembler_instance:
             project_name = turing.active_session.active_project.name
             mlflow.set_experiment(experiment_name=self._experiment_name(project_name, self.name))
+            conda_env, python_version = _process_conda_env(conda_env)
 
             mlflow.start_run()
             mlflow.pyfunc.log_model(
@@ -251,6 +266,7 @@ class PyFuncEnsembler(Ensembler):
             self.mlflow_experiment_id = int(run.info.experiment_id)
             self.mlflow_run_id = run.info.run_id
             self.artifact_uri = mlflow.get_artifact_uri()
+            self.python_version = python_version
 
             mlflow.end_run()
 
@@ -325,7 +341,8 @@ class PyFuncEnsembler(Ensembler):
         """
         project_name = turing.active_session.active_project.name
         mlflow.set_experiment(experiment_name=cls._experiment_name(project_name, name))
-
+        conda_env, python_version = _process_conda_env(conda_env)
+        
         mlflow.start_run()
         mlflow.pyfunc.log_model(
             PyFuncEnsembler.DEFAULT_ENSEMBLER_PATH,
@@ -341,9 +358,33 @@ class PyFuncEnsembler(Ensembler):
             name=name,
             mlflow_experiment_id=int(run.info.experiment_id),
             mlflow_run_id=run.info.run_id,
-            artifact_uri=mlflow.get_artifact_uri()
+            artifact_uri=mlflow.get_artifact_uri(),
+            python_version=python_version
         )
         mlflow.end_run()
 
         return PyFuncEnsembler.from_open_api(
             turing.active_session.create_ensembler(ensembler.to_open_api()))
+
+def _process_conda_env(conda_env):
+    def match_dependency(spec, name):
+        # Using direct match or regex match to match the dependency name,
+        # where the regex accounts for the official conda dependency formats:
+        # https://docs.conda.io/projects/conda-build/en/latest/resources/package-spec.html
+        # There are no convenient python libraries to carry out the parsing of
+        # conda dependencies whose spec differs slightly from Python's setuptools.
+        # We could install the complete conda library but this is too bulky if the goal is
+        # to just carry out this matching.
+        return spec == name or re.match(f'{name}[><=\s]+', spec) is not None
+    if isinstance(conda_env, str):
+        with open(conda_env, "r") as f:
+            conda_env = yaml.safe_load(f)
+    elif not isinstance(conda_env, dict):
+        conda_env = {}
+    if 'dependencies' not in conda_env:
+        conda_env['dependencies'] = []
+    # Replace python dependency to match minor version
+    python_version = f'{version_info.major}.{version_info.minor}.*'
+    conda_env['dependencies'] = ([f'python={python_version}'] +
+        [spec for spec in  conda_env['dependencies'] if not match_dependency(spec, "python")])
+    return conda_env, python_version
