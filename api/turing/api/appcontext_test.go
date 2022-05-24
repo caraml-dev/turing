@@ -69,8 +69,10 @@ func TestNewAppContext(t *testing.T) {
 				MaxRetryCount:                  3,
 			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
-				DestinationRegistry:  "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
+				DestinationRegistry: "ghcr.io",
+				BaseImageRef: map[string]string{
+					"3.7.*": "ghcr.io/gojek/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
+				},
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
@@ -94,8 +96,10 @@ func TestNewAppContext(t *testing.T) {
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			DefaultEnvironment: "dev",
 			ImageBuildingConfig: &config.ImageBuildingConfig{
-				DestinationRegistry:  "ghcr.io",
-				BaseImageRef:         "ghcr.io/gojek/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
+				DestinationRegistry: "ghcr.io",
+				BaseImageRef: map[string]string{
+					"3.7.*": "ghcr.io/gojek/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
+				},
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
@@ -283,6 +287,7 @@ func TestNewAppContext(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
+	ensemblersService := service.NewEnsemblersService(nil)
 	ensemblingJobService := service.NewEnsemblingJobService(
 		nil,
 		testCfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
@@ -300,6 +305,7 @@ func TestNewAppContext(t *testing.T) {
 	batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
 		batchEnsemblingController,
 		ensemblingJobService,
+		ensemblersService,
 		mlpSvc,
 		ensemblingImageBuilder,
 		testCfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
@@ -323,7 +329,7 @@ func TestNewAppContext(t *testing.T) {
 			ensemblerImageBuilder,
 		),
 		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     service.NewEnsemblersService(nil),
+		EnsemblersService:     ensemblersService,
 		EnsemblingJobService:  ensemblingJobService,
 		RouterVersionsService: service.NewRouterVersionsService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(nil),
