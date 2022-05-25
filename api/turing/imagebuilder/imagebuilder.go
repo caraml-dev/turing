@@ -216,11 +216,16 @@ func (ib *imageBuilder) createKanikoJob(
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
 
+	baseImage, ok := ib.imageBuildingConfig.BaseImageRef[baseImageRefTag]
+	if !ok {
+		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
+	}
+
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImageRef[baseImageRefTag]),
+		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
 		"--cache=true",

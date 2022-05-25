@@ -38,6 +38,30 @@ const (
 )
 
 func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
+	imageBuildingConfig := config.ImageBuildingConfig{
+		BuildNamespace:       buildNamespace,
+		BuildTimeoutDuration: timeout,
+		DestinationRegistry:  dockerRegistry,
+		BaseImageRef: map[string]string{
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
+		},
+		KanikoConfig: config.KanikoConfig{
+			BuildContextURI:    buildContext,
+			DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
+			Image:              "gcr.io/kaniko-project/executor",
+			ImageVersion:       "v1.5.2",
+			ResourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+				Limits: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+			},
+		},
+	}
 	var tests = map[string]struct {
 		name                string
 		expected            string
@@ -108,32 +132,9 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
 			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -190,32 +191,9 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
 			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -281,32 +259,9 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
 		},
 	}
 
@@ -335,29 +290,54 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 }
 
 func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
+	imageBuildingConfig := config.ImageBuildingConfig{
+		BuildNamespace:       buildNamespace,
+		BuildTimeoutDuration: timeout,
+		DestinationRegistry:  dockerRegistry,
+		BaseImageRef: map[string]string{
+			"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
+		},
+		KanikoConfig: config.KanikoConfig{
+			BuildContextURI:    buildContext,
+			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
+			Image:              "gcr.io/kaniko-project/executor",
+			ImageVersion:       "v1.5.2",
+			ResourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+				Limits: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+			},
+		},
+	}
 	var tests = map[string]struct {
-		name                string
-		expected            string
-		projectName         string
-		modelName           string
-		artifactURI         string
-		modelID             models.ID
-		versionID           string
-		inputDependencies   []string
-		namespace           string
-		imageBuildingConfig config.ImageBuildingConfig
-		buildLabels         map[string]string
-		clusterController   func() cluster.Controller
-		ensemblerFolder     string
-		imageTag            string
+		name                       string
+		expectedImage              string
+		expectedImageBuildingError string
+		projectName                string
+		modelName                  string
+		artifactURI                string
+		modelID                    models.ID
+		versionID                  string
+		inputDependencies          []string
+		namespace                  string
+		imageBuildingConfig        config.ImageBuildingConfig
+		buildLabels                map[string]string
+		clusterController          func() cluster.Controller
+		ensemblerFolder            string
+		imageTag                   string
 	}{
 		"success | no existing job": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
-			projectName: projectName,
-			modelName:   modelName,
-			modelID:     modelVersion,
-			versionID:   runID,
-			artifactURI: artifactURI,
+			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			projectName:   projectName,
+			modelName:     modelName,
+			modelID:       modelVersion,
+			versionID:     runID,
+			artifactURI:   artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -405,40 +385,17 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
-			projectName: projectName,
-			modelName:   modelName,
-			modelID:     modelVersion,
-			versionID:   runID,
-			artifactURI: artifactURI,
+			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			projectName:   projectName,
+			modelName:     modelName,
+			modelID:       modelVersion,
+			versionID:     runID,
+			artifactURI:   artifactURI,
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
@@ -487,40 +444,17 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 
 				return ctlr
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
-			projectName: projectName,
-			modelName:   modelName,
-			modelID:     modelVersion,
-			versionID:   runID,
-			artifactURI: artifactURI,
+			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			projectName:   projectName,
+			modelName:     modelName,
+			modelID:       modelVersion,
+			versionID:     runID,
+			artifactURI:   artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -578,32 +512,39 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.7.*",
+		},
+		"failure: image tag not matched": {
+			expectedImageBuildingError: "error building OCI image",
+			projectName:                projectName,
+			modelName:                  modelName,
+			modelID:                    modelVersion,
+			versionID:                  runID,
+			artifactURI:                artifactURI,
+			clusterController: func() cluster.Controller {
+				ctlr := &clustermock.Controller{}
+				// First time it's called
+				ctlr.On(
+					"GetJob",
+					mock.Anything,
+					mock.Anything,
+				).Return(
+					nil,
+					k8serrors.NewNotFound(
+						schema.GroupResource{},
+						fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
+					),
+				).Once()
+				return ctlr
 			},
-			ensemblerFolder: ensemblerFolder,
-			imageTag:        "3.7.*",
+			buildLabels: map[string]string{
+				"gojek.io/team": "dsp",
+			},
+			imageBuildingConfig: imageBuildingConfig,
+			ensemblerFolder:     ensemblerFolder,
+			imageTag:            "3.8.*",
 		},
 	}
 
@@ -625,8 +566,13 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				tt.imageTag,
 			}
 			actual, err := ib.BuildImage(buildImageRequest)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.expected, actual)
+			if tt.expectedImageBuildingError == "" {
+				assert.Nil(t, err)
+			} else {
+				assert.EqualError(t, err, tt.expectedImageBuildingError)
+			}
+
+			assert.Equal(t, tt.expectedImage, actual)
 		})
 	}
 }
@@ -716,6 +662,30 @@ func TestParseResources(t *testing.T) {
 }
 
 func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
+	imageBuildingConfig := config.ImageBuildingConfig{
+		BuildNamespace:       buildNamespace,
+		BuildTimeoutDuration: timeout,
+		DestinationRegistry:  dockerRegistry,
+		BaseImageRef: map[string]string{
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
+		},
+		KanikoConfig: config.KanikoConfig{
+			BuildContextURI:    buildContext,
+			DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
+			Image:              "gcr.io/kaniko-project/executor",
+			ImageVersion:       "v1.5.2",
+			ResourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+				Limits: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+			},
+		},
+	}
 	tests := map[string]struct {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
@@ -723,30 +693,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 		expected            JobStatus
 	}{
 		"success | active": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -763,30 +710,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusActive,
 		},
 		"success | succeeded": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -803,30 +727,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusSucceeded,
 		},
 		"success | Failed": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -843,30 +744,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusFailed,
 		},
 		"success | Unknown": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -879,30 +757,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusUnknown,
 		},
 		"failure | Unknown": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -932,6 +787,30 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 }
 
 func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
+	imageBuildingConfig := config.ImageBuildingConfig{
+		BuildNamespace:       buildNamespace,
+		BuildTimeoutDuration: timeout,
+		DestinationRegistry:  dockerRegistry,
+		BaseImageRef: map[string]string{
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
+		},
+		KanikoConfig: config.KanikoConfig{
+			BuildContextURI:    buildContext,
+			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
+			Image:              "gcr.io/kaniko-project/executor",
+			ImageVersion:       "v1.5.2",
+			ResourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+				Limits: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+			},
+		},
+	}
 	tests := map[string]struct {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
@@ -939,30 +818,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 		expected            JobStatus
 	}{
 		"success | active": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -979,30 +835,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatusActive,
 		},
 		"success | succeeded": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
@@ -1148,36 +981,37 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 }
 
 func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
+	imageBuildingConfig := config.ImageBuildingConfig{
+		BuildNamespace:       buildNamespace,
+		BuildTimeoutDuration: timeout,
+		DestinationRegistry:  dockerRegistry,
+		BaseImageRef: map[string]string{
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
+		},
+		KanikoConfig: config.KanikoConfig{
+			BuildContextURI:    buildContext,
+			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
+			Image:              "gcr.io/kaniko-project/executor",
+			ImageVersion:       "v1.5.2",
+			ResourceRequestsLimits: config.ResourceRequestsLimits{
+				Requests: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+				Limits: config.Resource{
+					CPU:    "1",
+					Memory: "2Gi",
+				},
+			},
+		},
+	}
 	tests := map[string]struct {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
 		hasErr              bool
 	}{
 		"success | no error": {
-			imageBuildingConfig: config.ImageBuildingConfig{
-				BuildNamespace:       buildNamespace,
-				BuildTimeoutDuration: timeout,
-				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
-				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    buildContext,
-					DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
-					Image:              "gcr.io/kaniko-project/executor",
-					ImageVersion:       "v1.5.2",
-					ResourceRequestsLimits: config.ResourceRequestsLimits{
-						Requests: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-						Limits: config.Resource{
-							CPU:    "1",
-							Memory: "2Gi",
-						},
-					},
-				},
-			},
+			imageBuildingConfig: imageBuildingConfig,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything).Return(
