@@ -28,13 +28,17 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+    
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -52,7 +56,7 @@ jobs:
         with:
           path: engines/pyfunc-ensembler-job/env
           key: |
-            conda-${{ hashFiles('engines/pyfunc-ensembler-job/environment.yaml') }}-${{ hashFiles('engines/pyfunc-ensembler-job/requirements.txt') }}-${{ hashFiles('engines/pyfunc-ensembler-job/requirements.dev.txt') }}
+            conda-${{ hashFiles('engines/pyfunc-ensembler-job/env-${{ matrix.python-version }}.yaml') }}-${{ hashFiles('engines/pyfunc-ensembler-job/requirements.txt') }}-${{ hashFiles('engines/pyfunc-ensembler-job/requirements.dev.txt') }}
           restore-keys: conda-
 
       - name: Run Tests
@@ -86,6 +90,9 @@ jobs:
         || ( github.event.pull_request.head.repo.full_name == github.repository )
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
     needs:
       - release-rules
       - test
@@ -106,6 +113,7 @@ jobs:
         working-directory: engines/pyfunc-ensembler-job
         env:
           DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
+          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           set -o pipefail
           make build-image | tee output.log
