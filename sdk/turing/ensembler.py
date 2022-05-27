@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Union, List, Any, Dict
+from typing import Optional, Union, List, Any, Dict, Tuple
 import mlflow
 import numpy
 import pandas
@@ -366,7 +366,7 @@ class PyFuncEnsembler(Ensembler):
         return PyFuncEnsembler.from_open_api(
             turing.active_session.create_ensembler(ensembler.to_open_api()))
 
-def _process_conda_env(conda_env):
+def _process_conda_env(conda_env: Union[str, Dict[str, Any]]) -> Tuple[Dict[str, Any], str]:
     def match_dependency(spec, name):
         # Using direct match or regex match to match the dependency name,
         # where the regex accounts for the official conda dependency formats:
@@ -386,5 +386,5 @@ def _process_conda_env(conda_env):
     # Replace python dependency to match minor version
     python_version = f'{version_info.major}.{version_info.minor}.*'
     conda_env['dependencies'] = ([f'python={python_version}'] +
-        [spec for spec in  conda_env['dependencies'] if not match_dependency(spec, "python")])
+        [spec for spec in conda_env['dependencies'] if not match_dependency(spec, 'python')])
     return conda_env, python_version
