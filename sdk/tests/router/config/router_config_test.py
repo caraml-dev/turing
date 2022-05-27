@@ -29,6 +29,7 @@ def test_set_router_config_with_invalid_routes(actual, new_routes, expected, req
     ])
 def test_set_router_config_with_invalid_default_route(actual, invalid_route_id, expected, request):
     actual = request.getfixturevalue(actual)
+    actual.ensembler = None
     actual.default_route_id = invalid_route_id
     with pytest.raises(expected):
         actual.to_open_api()

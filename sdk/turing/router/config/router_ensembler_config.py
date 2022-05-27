@@ -251,6 +251,20 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
     def env(self, env: List['EnvVar']):
         self._env = env
 
+    @staticmethod
+    def from_config(config: turing.generated.models.EnsemblerPyfuncConfig):
+        return PyfuncRouterEnsemblerConfig(
+            project_id=config.project_id,
+            ensembler_id=config.ensembler_id,
+            timeout=config.timeout,
+            resource_request=ResourceRequest(
+                min_replica=config.resource_request.min_replica,
+                max_replica=config.resource_request.max_replica,
+                cpu_request=config.resource_request.cpu_request,
+                memory_request=config.resource_request.memory_request,
+            ),
+            env=config.env)
+
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
 
@@ -259,8 +273,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
             ensembler_id=self.ensembler_id,
             resource_request=self.resource_request.to_open_api(),
             timeout=self.timeout,
-            env=[env_var.to_open_api() for env_var in self.env],
-        )
+            env=[env_var.to_open_api() for env_var in self.env])
         return super().to_open_api()
 
 
@@ -350,6 +363,22 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
     def service_account(self, service_account: str):
         self._service_account = service_account
 
+    @staticmethod
+    def from_config(config: turing.generated.models.EnsemblerDockerConfig):
+        return DockerRouterEnsemblerConfig(
+            image=config.image,
+            resource_request=ResourceRequest(
+                min_replica=config.resource_request.min_replica,
+                max_replica=config.resource_request.max_replica,
+                cpu_request=config.resource_request.cpu_request,
+                memory_request=config.resource_request.memory_request,
+            ),
+            endpoint=config.endpoint,
+            timeout=config.timeout,
+            port=config.port,
+            env=config.env,
+            service_account=config["service_account"])
+
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
 
@@ -413,6 +442,12 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                     f"experiment_mapping passed: {experiment_mapping}"
                 )
 
+    @staticmethod
+    def from_config(config: EnsemblerStandardConfig):
+        return StandardRouterEnsemblerConfig(
+            fallback_response_route_id=config.fallback_response_route_id,
+            experiment_mappings=[e.to_dict() for e in config.experiment_mappings])
+
     def to_open_api(self) -> OpenApiModel:
         self.standard_config = EnsemblerStandardConfig(
             experiment_mappings=[
@@ -441,6 +476,10 @@ class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
     @final_response_route_id.setter
     def final_response_route_id(self, final_response_route_id: str):
         self._final_response_route_id = final_response_route_id
+
+    @staticmethod
+    def from_config(config: EnsemblerNopConfig):
+        return NopRouterEnsemblerConfig(final_response_route_id=config.final_response_route_id)
     
     def to_open_api(self) -> OpenApiModel:
         self.nop_config = EnsemblerNopConfig(final_response_route_id=self.final_response_route_id)

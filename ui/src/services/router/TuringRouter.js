@@ -109,20 +109,21 @@ export class TuringRouter {
     }
 
     // Ensembler
-    if (!!obj.config.ensembler) {
-      if (obj.config.ensembler.type === "nop") {
-        // Copy the final response route id to the top level, as the default route
-        obj.config.default_route_id =
-          obj.config["ensembler"].nop_config["final_response_route_id"];
-        delete obj.config["ensembler"];
-      } else if (obj.config.ensembler.type === "standard") {
-        // Copy the fallback response route id to the top level, as the default route
-        obj.config.default_route_id =
-          obj.config["ensembler"].standard_config["fallback_response_route_id"];
-        delete obj.config["ensembler"].standard_config[
-          "fallback_response_route_id"
-        ];
-      }
+    if (obj.config.ensembler.type === "nop") {
+      // Copy the final response route id to the top level, as the default route
+      obj.config.default_route_id =
+        obj.config["ensembler"].nop_config["final_response_route_id"];
+      delete obj.config["ensembler"];
+    } else if (obj.config.ensembler.type === "standard") {
+      // Copy the fallback response route id to the top level, as the default route
+      obj.config.default_route_id =
+        obj.config["ensembler"].standard_config["fallback_response_route_id"];
+      delete obj.config["ensembler"].standard_config[
+        "fallback_response_route_id"
+      ];
+    } else {
+      // Docker or Pyfunc ensembler, clear the default_route_id
+      delete obj.config["default_route_id"];
     }
 
     // Outcome Logging

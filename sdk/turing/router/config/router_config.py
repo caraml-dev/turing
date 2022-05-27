@@ -11,7 +11,13 @@ from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
-from turing.router.config.router_ensembler_config import RouterEnsemblerConfig, NopRouterEnsemblerConfig, StandardRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import (
+    DockerRouterEnsemblerConfig,
+    NopRouterEnsemblerConfig,
+    PyfuncRouterEnsemblerConfig,
+    RouterEnsemblerConfig,
+    StandardRouterEnsemblerConfig,
+)
 from turing.router.config.experiment_config import ExperimentConfig
 
 
@@ -136,6 +142,13 @@ class RouterConfig:
         details="Please use the ensembler properties to configure the final / fallback route.")
     def default_route_id(self, default_route_id: str):
         self._default_route_id = default_route_id
+        # User may directly modify the default_route_id property while it is deprecated.
+        # So, copy to the nop / standard ensembler if set.
+        if hasattr(self, "ensembler"):
+            if isinstance(self.ensembler, NopRouterEnsemblerConfig):
+                self.ensembler.final_response_route_id = default_route_id
+            elif isinstance(self.ensembler, StandardRouterEnsemblerConfig):
+                self.ensembler.fallback_response_route_id = default_route_id
 
     @property
     def experiment_engine(self) -> ExperimentConfig:
@@ -206,8 +219,6 @@ class RouterConfig:
         if ensembler is None:
             # Init nop ensembler config if ensembler is not set
             self._ensembler = NopRouterEnsemblerConfig(final_response_route_id=self.default_route_id)
-        elif isinstance(ensembler, RouterEnsemblerConfig):
-            self._ensembler = ensembler
         elif isinstance(ensembler, dict):
             # Set fallback_response_route_id into standard ensembler config
             if ensembler["type"] == "standard" and "fallback_response_route_id" not in ensembler["standard_config"]:
@@ -215,7 +226,17 @@ class RouterConfig:
             self._ensembler = RouterEnsemblerConfig(**ensembler)
         else:
             self._ensembler = ensembler
-
+        # Init child class types
+        if isinstance(self._ensembler, RouterEnsemblerConfig):
+            if self._ensembler.type == "nop" and not isinstance(self._ensembler, NopRouterEnsemblerConfig):
+                self._ensembler = NopRouterEnsemblerConfig.from_config(self._ensembler.nop_config)
+            if self._ensembler.type == "standard" and not isinstance(self._ensembler, StandardRouterEnsemblerConfig):
+                self._ensembler = StandardRouterEnsemblerConfig.from_config(self._ensembler.standard_config)
+            elif self._ensembler.type == "docker" and not isinstance(self._ensembler, DockerRouterEnsemblerConfig):
+                self._ensembler = DockerRouterEnsemblerConfig.from_config(self._ensembler.docker_config)
+            elif self._ensembler.type == "pyfunc" and not isinstance(self._ensembler, PyfuncRouterEnsemblerConfig):
+                self._ensembler = PyfuncRouterEnsemblerConfig.from_config(self._ensembler.pyfunc_config)
+            
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
         self._verify_no_duplicate_routes()
@@ -250,7 +271,7 @@ class RouterConfig:
         )
 
     def _get_default_route_id(self):
-        default_route_id = self.default_route_id
+        default_route_id = None
         # If nop config is set, use the final_response_route_id as the default
         if isinstance(self.ensembler, NopRouterEnsemblerConfig):
             default_route_id = self.ensembler.final_response_route_id
