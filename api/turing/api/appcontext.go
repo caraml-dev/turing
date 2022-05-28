@@ -86,8 +86,11 @@ func NewAppContext(
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
-
 	var ensemblingJobService service.EnsemblingJobService
+
+	// Init ensemblers service
+	ensemblersService := service.NewEnsemblersService(db)
+
 	if cfg.BatchEnsemblingConfig.Enabled {
 		if cfg.BatchEnsemblingConfig.JobConfig == nil {
 			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.JobConfig was not set")
@@ -128,6 +131,7 @@ func NewAppContext(
 		batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
 			batchEnsemblingController,
 			ensemblingJobService,
+			ensemblersService,
 			mlpSvc,
 			ensemblingImageBuilder,
 			cfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
@@ -151,7 +155,7 @@ func NewAppContext(
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
 		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     service.NewEnsemblersService(db),
+		EnsemblersService:     ensemblersService,
 		EnsemblingJobService:  ensemblingJobService,
 		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EventService:          service.NewEventService(db),

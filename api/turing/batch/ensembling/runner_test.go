@@ -21,10 +21,16 @@ func TestRun(t *testing.T) {
 	// Unfortunately this is hard to test as we need Kubernetes integration
 	// and a Spark Operator. Testing with an actual cluster is required.
 	// Here we just try to run it without throwing an exception.
+	mockEnsemblersService := func() service.EnsemblersService {
+		svc := &servicemock.EnsemblersService{}
+		svc.On("FindByID", mock.Anything, mock.Anything).Return(&models.PyFuncEnsembler{}, nil)
+		return svc
+	}
 	var tests = map[string]struct {
 		ensemblingController func() EnsemblingController
 		imageBuilder         func() imagebuilder.ImageBuilder
 		ensemblingJobService func() service.EnsemblingJobService
+		ensemblersService    func() service.EnsemblersService
 		mlpService           func() service.MLPService
 	}{
 		"success | nominal": {
@@ -88,9 +94,9 @@ func TestRun(t *testing.T) {
 					&models.EnsemblingJob{},
 					nil,
 				)
-
 				return svc
 			},
+			ensemblersService: mockEnsemblersService,
 			mlpService: func() service.MLPService {
 				svc := &servicemock.MLPService{}
 				svc.On(
@@ -167,6 +173,7 @@ func TestRun(t *testing.T) {
 
 				return svc
 			},
+			ensemblersService: mockEnsemblersService,
 			mlpService: func() service.MLPService {
 				svc := &servicemock.MLPService{}
 				svc.On(
@@ -222,6 +229,7 @@ func TestRun(t *testing.T) {
 
 				return svc
 			},
+			ensemblersService: mockEnsemblersService,
 			mlpService: func() service.MLPService {
 				svc := &servicemock.MLPService{}
 				svc.On(
@@ -238,12 +246,14 @@ func TestRun(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ensemblingController := tt.ensemblingController()
 			ensemblingJobService := tt.ensemblingJobService()
+			ensemblersService := tt.ensemblersService()
 			mlpService := tt.mlpService()
 			imageBuilder := tt.imageBuilder()
 
 			r := NewBatchEnsemblingJobRunner(
 				ensemblingController,
 				ensemblingJobService,
+				ensemblersService,
 				mlpService,
 				imageBuilder,
 				10,

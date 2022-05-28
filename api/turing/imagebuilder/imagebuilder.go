@@ -62,6 +62,7 @@ type BuildImageRequest struct {
 	ArtifactURI     string
 	BuildLabels     map[string]string
 	EnsemblerFolder string
+	BaseImageRefTag string
 }
 
 // ImageBuilder defines the operations on building and publishing OCI images.
@@ -146,7 +147,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		}
 
 		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-			request.EnsemblerFolder)
+			request.EnsemblerFolder, request.BaseImageRefTag)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -162,7 +163,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			}
 
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-				request.EnsemblerFolder)
+				request.EnsemblerFolder, request.BaseImageRefTag)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -210,15 +211,21 @@ func (ib *imageBuilder) createKanikoJob(
 	artifactURI string,
 	buildLabels map[string]string,
 	ensemblerFolder string,
+	baseImageRefTag string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
+
+	baseImage, ok := ib.imageBuildingConfig.BaseImageRef[baseImageRefTag]
+	if !ok {
+		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
+	}
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImageRef),
+		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
 		"--cache=true",

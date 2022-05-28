@@ -1,11 +1,12 @@
+cloudpickle==2.0.0
 deprecation==2.1.0
 fire
 google-auth>=1.30.0,<2.0dev
 google-cloud-storage>=1.37.0
 mlflow==1.14.1
-numpy==1.17.3
+numpy==1.21.6
 pandas==1.2.2
+protobuf==3.20.1
 python-dateutil
 requests==2.25.1
 urllib3 >= 1.25.3
-cloudpickle==1.2.2
