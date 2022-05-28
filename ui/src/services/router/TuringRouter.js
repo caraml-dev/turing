@@ -124,6 +124,10 @@ export class TuringRouter {
     } else {
       // Docker or Pyfunc ensembler, clear the default_route_id
       delete obj.config["default_route_id"];
+      if (obj.config.ensembler.type === "pyfunc") {
+        // Delete the docker config
+        delete obj.config["ensembler"].docker_config;
+      }
     }
 
     // Outcome Logging
@@ -139,7 +143,6 @@ export class TuringRouter {
     ) {
       delete obj.config.log_config["kafka_config"];
     }
-
     return obj;
   }
 }
