@@ -428,6 +428,7 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 			},
 		),
 		EnsemblerFolder: EnsemblerFolder,
+		BaseImageRefTag: ensembler.PythonVersion,
 	}
 	eventsCh.Write(
 		models.NewInfoEvent(

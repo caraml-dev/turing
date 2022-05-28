@@ -85,6 +85,8 @@ type PyFuncEnsembler struct {
 	RunID string `json:"mlflow_run_id" gorm:"column:mlflow_run_id"`
 
 	ArtifactURI string `json:"artifact_uri" gorm:"column:artifact_uri"`
+
+	PythonVersion string `json:"python_version" gorm:"column:python_version"`
 }
 
 func (*PyFuncEnsembler) BeforeCreate(scope *gorm.Scope) error {
@@ -108,6 +110,7 @@ func (e *PyFuncEnsembler) Patch(other EnsemblerLike) error {
 	e.ExperimentID = otherPyfunc.ExperimentID
 	e.RunID = otherPyfunc.RunID
 	e.ArtifactURI = otherPyfunc.ArtifactURI
+	e.PythonVersion = otherPyfunc.PythonVersion
 
 	return nil
 }

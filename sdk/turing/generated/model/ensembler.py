@@ -100,6 +100,7 @@ class Ensembler(ModelComposed):
             'mlflow_experiment_id': (int,),  # noqa: E501
             'mlflow_run_id': (str,),  # noqa: E501
             'artifact_uri': (str,),  # noqa: E501
+            'python_version': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -124,6 +125,7 @@ class Ensembler(ModelComposed):
         'mlflow_experiment_id': 'mlflow_experiment_id',  # noqa: E501
         'mlflow_run_id': 'mlflow_run_id',  # noqa: E501
         'artifact_uri': 'artifact_uri',  # noqa: E501
+        'python_version': 'python_version',  # noqa: E501
     }
 
     required_properties = set([
@@ -185,6 +187,7 @@ class Ensembler(ModelComposed):
             mlflow_experiment_id (int): [optional]  # noqa: E501
             mlflow_run_id (str): [optional]  # noqa: E501
             artifact_uri (str): [optional]  # noqa: E501
+            python_version (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

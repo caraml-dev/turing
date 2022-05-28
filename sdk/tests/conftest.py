@@ -2,6 +2,9 @@ import json
 from datetime import datetime, timedelta
 import pytest
 import random
+from sys import version_info
+import uuid
+
 import tests
 from turing.ensembler import PyFuncEnsembler
 import turing.generated.models
@@ -21,7 +24,6 @@ from turing.router.config.router_ensembler_config import (
 )
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.experiment_config import ExperimentConfig
-import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
 
@@ -172,7 +174,8 @@ def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_ur
         mlflow_run_id=run_id,
         artifact_uri=artifact_uri,
         created_at=datetime.now(),
-        updated_at=datetime.now()
+        updated_at=datetime.now(),
+        python_version=f"{version_info.major}.{version_info.minor}.*"
     )
 
 
