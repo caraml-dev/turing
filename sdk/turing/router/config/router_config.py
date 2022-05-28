@@ -230,7 +230,7 @@ class RouterConfig:
         if isinstance(self._ensembler, RouterEnsemblerConfig):
             if self._ensembler.type == "nop" and not isinstance(self._ensembler, NopRouterEnsemblerConfig):
                 self._ensembler = NopRouterEnsemblerConfig.from_config(self._ensembler.nop_config)
-            if self._ensembler.type == "standard" and not isinstance(self._ensembler, StandardRouterEnsemblerConfig):
+            elif self._ensembler.type == "standard" and not isinstance(self._ensembler, StandardRouterEnsemblerConfig):
                 self._ensembler = StandardRouterEnsemblerConfig.from_config(self._ensembler.standard_config)
             elif self._ensembler.type == "docker" and not isinstance(self._ensembler, DockerRouterEnsemblerConfig):
                 self._ensembler = DockerRouterEnsemblerConfig.from_config(self._ensembler.docker_config)

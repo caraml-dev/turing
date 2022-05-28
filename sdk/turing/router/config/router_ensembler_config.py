@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from turing._base_types import DataObject
 import turing.generated.models
 from typing import List, Dict, Union
 from turing.generated.model_utils import OpenApiModel
@@ -52,7 +53,7 @@ class EnsemblerStandardConfig:
 
 
 @dataclass
-class RouterEnsemblerConfig:
+class RouterEnsemblerConfig(DataObject):
     """
     Class to create a new RouterEnsemblerConfig
 
@@ -251,9 +252,9 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
     def env(self, env: List['EnvVar']):
         self._env = env
 
-    @staticmethod
-    def from_config(config: turing.generated.models.EnsemblerPyfuncConfig):
-        return PyfuncRouterEnsemblerConfig(
+    @classmethod
+    def from_config(cls, config: turing.generated.models.EnsemblerPyfuncConfig):
+        return cls(
             project_id=config.project_id,
             ensembler_id=config.ensembler_id,
             timeout=config.timeout,
@@ -263,7 +264,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
                 cpu_request=config.resource_request.cpu_request,
                 memory_request=config.resource_request.memory_request,
             ),
-            env=config.env)
+            env=[EnvVar(name=env.name, value=env.value) for env in config.env])
 
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
@@ -363,9 +364,9 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
     def service_account(self, service_account: str):
         self._service_account = service_account
 
-    @staticmethod
-    def from_config(config: turing.generated.models.EnsemblerDockerConfig):
-        return DockerRouterEnsemblerConfig(
+    @classmethod
+    def from_config(cls, config: turing.generated.models.EnsemblerDockerConfig):
+        return cls(
             image=config.image,
             resource_request=ResourceRequest(
                 min_replica=config.resource_request.min_replica,
@@ -376,7 +377,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             endpoint=config.endpoint,
             timeout=config.timeout,
             port=config.port,
-            env=config.env,
+            env=[EnvVar(name=env.name, value=env.value) for env in config.env],
             service_account=config["service_account"])
 
     def to_open_api(self) -> OpenApiModel:
@@ -442,9 +443,9 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                     f"experiment_mapping passed: {experiment_mapping}"
                 )
 
-    @staticmethod
-    def from_config(config: EnsemblerStandardConfig):
-        return StandardRouterEnsemblerConfig(
+    @classmethod
+    def from_config(cls, config: EnsemblerStandardConfig):
+        return cls(
             fallback_response_route_id=config.fallback_response_route_id,
             experiment_mappings=[e.to_dict() for e in config.experiment_mappings])
 
@@ -477,9 +478,9 @@ class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
     def final_response_route_id(self, final_response_route_id: str):
         self._final_response_route_id = final_response_route_id
 
-    @staticmethod
-    def from_config(config: EnsemblerNopConfig):
-        return NopRouterEnsemblerConfig(final_response_route_id=config.final_response_route_id)
+    @classmethod
+    def from_config(cls, config: EnsemblerNopConfig):
+        return cls(final_response_route_id=config.final_response_route_id)
     
     def to_open_api(self) -> OpenApiModel:
         self.nop_config = EnsemblerNopConfig(final_response_route_id=self.final_response_route_id)
