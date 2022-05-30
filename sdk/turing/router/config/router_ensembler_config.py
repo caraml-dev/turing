@@ -253,7 +253,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._env = env
 
     @classmethod
-    def from_config(cls, config: turing.generated.models.EnsemblerPyfuncConfig):
+    def from_config(cls, config: turing.generated.models.EnsemblerPyfuncConfig) -> "PyfuncRouterEnsemblerConfig":
         return cls(
             project_id=config.project_id,
             ensembler_id=config.ensembler_id,
@@ -365,7 +365,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._service_account = service_account
 
     @classmethod
-    def from_config(cls, config: turing.generated.models.EnsemblerDockerConfig):
+    def from_config(cls, config: turing.generated.models.EnsemblerDockerConfig) -> "DockerRouterEnsemblerConfig":
         return cls(
             image=config.image,
             resource_request=ResourceRequest(
@@ -444,7 +444,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                 )
 
     @classmethod
-    def from_config(cls, config: EnsemblerStandardConfig):
+    def from_config(cls, config: EnsemblerStandardConfig) -> "StandardRouterEnsemblerConfig":
         return cls(
             fallback_response_route_id=config.fallback_response_route_id,
             experiment_mappings=[e.to_dict() for e in config.experiment_mappings])
@@ -479,7 +479,7 @@ class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._final_response_route_id = final_response_route_id
 
     @classmethod
-    def from_config(cls, config: EnsemblerNopConfig):
+    def from_config(cls, config: EnsemblerNopConfig) -> "NopRouterEnsemblerConfig":
         return cls(final_response_route_id=config.final_response_route_id)
     
     def to_open_api(self) -> OpenApiModel:
