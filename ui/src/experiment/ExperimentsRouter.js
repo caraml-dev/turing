@@ -38,10 +38,21 @@ const RemoteRouter = ({ projectId }) => {
     url: defaultExperimentEngine.url,
   });
 
+  const { ready: readyConfig, failed: failedConfig } = useDynamicScript({
+    url: defaultExperimentEngine.config,
+  });
+
   if (!ready || failed) {
     const text = failed
       ? "Failed to load Experiment Engine"
       : "Loading Experiment Engine ...";
+    return <FallbackView text={text} />;
+  }
+
+  if (!readyConfig || failedConfig) {
+    const text = failedConfig
+      ? "Failed to load Experiment Engine Config"
+      : "Loading Experiment Engine Config...";
     return <FallbackView text={text} />;
   }
 
