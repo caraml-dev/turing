@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 // Ref:
 // https://github.com/module-federation/module-federation-examples/blob/master/dynamic-system-host
@@ -38,6 +38,23 @@ const useDynamicScript = (args) => {
     ready,
     failed,
   };
+};
+
+// Renderless component wrapper
+export const LoadDynamicScript = (props) => {
+  const { ready, failed } = useDynamicScript({
+    url: props.url,
+  });
+
+  useEffect(() => {
+    if (props.url) {
+      props.setConfigStatusReady(ready);
+      props.setConfigStatusFailed(failed);
+      props.setConfigStatusLoaded(true);
+    }
+  }, [props, ready, failed]);
+
+  return null;
 };
 
 export default useDynamicScript;

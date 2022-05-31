@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   EuiPage,
   EuiPageBody,
@@ -9,7 +9,7 @@ import {
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
-import useDynamicScript from "../hooks/useDynamicScript";
+import useDynamicScript, { LoadDynamicScript } from "../hooks/useDynamicScript";
 
 import { useConfig } from "../config";
 
@@ -32,14 +32,13 @@ const FallbackView = ({ text }) => (
 
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
+  const [configStatusReady, setConfigStatusReady] = useState(false);
+  const [configStatusFailed, setConfigStatusFailed] = useState(false);
+  const [configStatusLoaded, setConfigStatusLoaded] = useState(false);
 
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
     url: defaultExperimentEngine.url,
-  });
-
-  const { ready: readyConfig, failed: failedConfig } = useDynamicScript({
-    url: defaultExperimentEngine.config,
   });
 
   if (!ready || failed) {
@@ -47,10 +46,12 @@ const RemoteRouter = ({ projectId }) => {
       ? "Failed to load Experiment Engine"
       : "Loading Experiment Engine ...";
     return <FallbackView text={text} />;
-  }
-
-  if (!readyConfig || failedConfig) {
-    const text = failedConfig
+  } else if (
+    defaultExperimentEngine.config &&
+    configStatusLoaded &&
+    (!configStatusReady || configStatusFailed)
+  ) {
+    const text = configStatusFailed
       ? "Failed to load Experiment Engine Config"
       : "Loading Experiment Engine Config...";
     return <FallbackView text={text} />;
@@ -60,6 +61,12 @@ const RemoteRouter = ({ projectId }) => {
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      <LoadDynamicScript
+        setConfigStatusReady={setConfigStatusReady}
+        setConfigStatusFailed={setConfigStatusFailed}
+        setConfigStatusLoaded={setConfigStatusLoaded}
+        url={defaultExperimentEngine.config}
+      />
       <RemoteComponent
         scope={defaultExperimentEngine.name}
         name="./ExperimentsLandingPage"
