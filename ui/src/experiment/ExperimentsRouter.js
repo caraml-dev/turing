@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   EuiPage,
   EuiPageBody,
@@ -39,6 +39,13 @@ const RemoteRouter = ({ projectId }) => {
   // Retrieve script from host dynamically
   const { ready, failed } = useDynamicScript({
     url: defaultExperimentEngine.url,
+  });
+
+  // Re-render to get updated config loading status
+  useEffect(() => {
+    return () => {
+      setConfigStatusLoaded(false);
+    };
   });
 
   if (!ready || failed) {
