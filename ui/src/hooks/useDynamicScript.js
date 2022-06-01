@@ -41,18 +41,15 @@ const useDynamicScript = (args) => {
 };
 
 // Renderless component wrapper
-export const LoadDynamicScript = (props) => {
+export const LoadDynamicScript = ({ url, setConfigReady, setConfigFailed }) => {
   const { ready, failed } = useDynamicScript({
-    url: props.url,
+    url: url,
   });
 
   useEffect(() => {
-    if (props.url) {
-      props.setConfigStatusReady(ready);
-      props.setConfigStatusFailed(failed);
-      props.setConfigStatusLoaded(true);
-    }
-  }, [props, ready, failed]);
+    setConfigReady(ready);
+    setConfigFailed(failed);
+  }, [setConfigReady, setConfigFailed, ready, failed]);
 
   return null;
 };
