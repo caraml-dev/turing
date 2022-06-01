@@ -45,26 +45,25 @@ const RemoteRouter = ({ projectId }) => {
       ? "Failed to load Experiment Engine"
       : "Loading Experiment Engine ...";
     return <FallbackView text={text} />;
-  } else if (!configReady && !configFailed) {
-    // Config has not loaded - Do nothing
-  } else if (!configReady || configFailed) {
-    const text = configFailed
-      ? "Failed to load Experiment Engine Config"
-      : "Loading Experiment Engine Config...";
-    return <FallbackView text={text} />;
+  } else if (!!defaultExperimentEngine.config && !configReady) {
+    return configFailed ? (
+      <FallbackView text={"Failed to load Experiment Engine Config"} />
+    ) : (
+      <>
+        <LoadDynamicScript
+          setReady={setConfigReady}
+          setFailed={setConfigFailed}
+          url={defaultExperimentEngine.config}
+        />
+        <FallbackView text={"Loading Experiment Engine Config..."} />
+      </>
+    );
   }
 
   // Load component from remote host
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      {!!defaultExperimentEngine.config && (
-        <LoadDynamicScript
-          setConfigReady={setConfigReady}
-          setConfigFailed={setConfigFailed}
-          url={defaultExperimentEngine.config}
-        />
-      )}
       <RemoteComponent
         scope={defaultExperimentEngine.name}
         name="./ExperimentsLandingPage"
