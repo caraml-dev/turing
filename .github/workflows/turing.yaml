@@ -144,6 +144,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Install system dependencies
+        run: sudo apt-get install --no-install-recommends gcc make libpng-dev
+
       - name: Set up Node 14.x
         uses: actions/setup-node@v1
         with:
