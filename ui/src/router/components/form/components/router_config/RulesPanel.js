@@ -15,13 +15,7 @@ import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { newRule } from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({
-  rules,
-  routes,
-  defaultRouteId,
-  onChangeHandler,
-  errors = {},
-}) => {
+export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
@@ -61,7 +55,6 @@ export const RulesPanel = ({
             <RuleCard
               rule={rule}
               routes={routes}
-              defaultRouteId={defaultRouteId}
               onChangeHandler={onChange(`rules.${idx}`)}
               onDelete={onDeleteRule(idx)}
               errors={get(errors, `${idx}`)}
@@ -71,7 +64,7 @@ export const RulesPanel = ({
         ))}
         <EuiFlexItem>
           {routes.length < 2 ? (
-            <EuiToolTip content="You should have other routes besides the default one in order to be able to define traffic rules">
+            <EuiToolTip content="You should have more than one route in order to be able to define traffic rules">
               {addRuleButton}
             </EuiToolTip>
           ) : (

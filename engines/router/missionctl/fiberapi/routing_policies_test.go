@@ -56,10 +56,9 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 			},
 			success: true,
 		},
-		"failure | empty route": {
+		"success | empty route": {
 			props:   json.RawMessage(`{}`),
-			success: false,
-			err:     "No default route defined",
+			success: true,
 		},
 		"failure | invalid data": {
 			props:   json.RawMessage(`invalid_data`),

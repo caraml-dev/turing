@@ -31,6 +31,10 @@ func (r *DefaultTuringRoutingStrategy) Initialize(properties json.RawMessage) er
 	if err != nil {
 		return errors.Wrapf(err, "Failed initializing route selection policy on routing strategy")
 	}
+	// Check that the default route is not empty
+	if r.routeSelectionPolicy.defaultRoute == "" {
+		return errors.Newf(errors.BadConfig, "No default route defined")
+	}
 	return nil
 }
 
@@ -64,23 +68,20 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		close(expResultCh)
 	}
 
-	// If error, return it
+	// If error, log it and return the fallback(s)
 	if expErr != nil {
 		log.WithContext(ctx).Errorf(expErr.Error())
-		return nil, fallbacks, createFiberError(expErr)
+		return nil, fallbacks, nil
 	}
-
-	// selectedRoute is the route that should be visited first based on the the experiment treatment and mappings (if any)
-	// selectedRoute will be nil if the experiment treatment has no corresponding mappings
-	var selectedRoute fiber.Component
 
 	for _, m := range r.experimentMappings {
 		if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
-			selectedRoute = routes[m.Route]
-			// stop matching on first match because only 1 selected route is required
-			break
+			// Stop matching on first match because only 1 route is required. Don't send in fallbacks,
+			// because we do not want to suppress the error from the preferred route.
+			return routes[m.Route], []fiber.Component{}, nil
 		}
 	}
 
-	return selectedRoute, fallbacks, nil
+	// primary route will be nil if there are no matching treatments in the mapping
+	return nil, fallbacks, nil
 }

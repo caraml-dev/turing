@@ -80,6 +80,13 @@ const alertConfig = {
     appConfig.environment === "dev" ? "development" : appConfig.environment,
 };
 
+/**
+ * Default Experiment Engine setting
+ *
+ * name: Name of Experiment Engine
+ * url: URL Path to load Experiment Engine
+ * config: URL Path to load Experiment Engine Config
+ */
 const defaultExperimentEngine = process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE
   ? JSON.parse(process.env.REACT_APP_DEFAULT_EXPERIMENT_ENGINE)
   : {};

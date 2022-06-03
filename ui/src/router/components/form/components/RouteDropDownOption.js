@@ -1,18 +1,22 @@
-import React from "react";
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiTextColor,
+  EuiText,
   EuiToolTip,
 } from "@elastic/eui";
 
-export const RuleCardRouteDropDownOption = ({ id, endpoint, isDefault }) => {
+export const RouteDropDownOption = ({
+  id,
+  endpoint,
+  isDisabled,
+  disabledOptionTooltip,
+}) => {
   const option = (
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiBadge color={isDefault ? "hollow" : "default"}>{id}</EuiBadge>
+        <EuiBadge color={isDisabled ? "hollow" : "default"}>{id}</EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <EuiTextColor color="subdued">
@@ -24,10 +28,8 @@ export const RuleCardRouteDropDownOption = ({ id, endpoint, isDefault }) => {
     </EuiFlexGroup>
   );
 
-  return isDefault ? (
-    <EuiToolTip content="Default route can't be a part of any rules">
-      {option}
-    </EuiToolTip>
+  return isDisabled ? (
+    <EuiToolTip content={disabledOptionTooltip}>{option}</EuiToolTip>
   ) : (
     option
   );

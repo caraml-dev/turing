@@ -65,9 +65,10 @@ func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
 }
 
 // AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (logEntry *TuringResultLogEntry) AddResponse(key string, response []byte, err string) {
+func (logEntry *TuringResultLogEntry) AddResponse(key string, body []byte, header map[string]string, err string) {
 	responseRecord := &turing.Response{
-		Response: string(json.RawMessage(response)),
+		Header:   header,
+		Response: string(json.RawMessage(body)),
 		Error:    err,
 	}
 	switch key {
@@ -94,10 +95,7 @@ func NewTuringResultLogEntry(
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Format Request Header
-	reqHeader := map[string]string{}
-	for k, v := range *header {
-		reqHeader[k] = strings.Join(v, ",")
-	}
+	reqHeader := FormatHTTPHeader(*header)
 
 	return &TuringResultLogEntry{
 		TuringReqId:    turingReqID,
@@ -161,4 +159,14 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 // LogEntry sends the input TuringResultLogEntry to the appropriate logger
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
 	return globalLogger.write(turLogEntry)
+}
+
+// FormatHTTPHeader formats the header which by concatenating the string values corresponding to each header into a
+// single comma-delimited string
+func FormatHTTPHeader(header http.Header) map[string]string {
+	formattedHeader := map[string]string{}
+	for k, v := range header {
+		formattedHeader[k] = strings.Join(v, ",")
+	}
+	return formattedHeader
 }

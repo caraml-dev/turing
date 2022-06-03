@@ -1,5 +1,5 @@
 argparse>=1.4.0
-cloudpickle==1.2.2
-orjson==2.6.8
+cloudpickle==2.0.0
+orjson==3.6.8
 tornado==6.1
 file:../../sdk

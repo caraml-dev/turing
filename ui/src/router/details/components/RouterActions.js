@@ -17,32 +17,31 @@ export const RouterActions = ({
 
   const actions = useCallback(
     (router) => {
-      const status = Status.fromValue(router.status);
       return [
         {
           name: "Edit Router",
           icon: "documentEdit",
-          disabled: status === Status.PENDING,
+          disabled: router.status === Status.PENDING,
           onClick: onEditRouter,
         },
         {
           name: "Undeploy Router",
           icon: "exportAction",
-          disabled: status === Status.PENDING,
-          hidden: [Status.UNDEPLOYED, Status.FAILED].includes(status),
+          disabled: router.status === Status.PENDING,
+          hidden: [Status.UNDEPLOYED, Status.FAILED].includes(router.status),
           onClick: () => undeployRouterRef.current(router),
         },
         {
           name: "Redeploy Router",
           icon: "importAction",
-          hidden: [Status.DEPLOYED, Status.PENDING].includes(status),
+          hidden: [Status.DEPLOYED, Status.PENDING].includes(router.status),
           onClick: () => redeployRouterRef.current(router),
         },
         {
           name: "Delete Router",
           icon: "trash",
           color: "danger",
-          disabled: [Status.DEPLOYED, Status.PENDING].includes(status),
+          disabled: [Status.DEPLOYED, Status.PENDING].includes(router.status),
           onClick: () => deleteRouterRef.current(router),
         },
       ];

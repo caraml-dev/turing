@@ -5,7 +5,7 @@ engine:
   type: standard
   standard_experiment_manager_config:
     client_selection_enabled: false
-    experiment_selection_enabled: false
+    experiment_selection_enabled: true
 experiments:
   - id: '001'
     name: exp_1
@@ -21,3 +21,8 @@ experiments:
         traffic: 0.15
         treatment_configuration:
           bar: baz
+variables:
+  '001':
+    - name: client
+      required: true
+      type: unit

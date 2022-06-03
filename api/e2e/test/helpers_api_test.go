@@ -41,7 +41,7 @@ func getRouter(
 
 	err = json.Unmarshal(respBytes, &router)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Could not unmarshal: %v\n %s", err, string(respBytes))
 	}
 
 	return &router, err
@@ -181,7 +181,7 @@ func withDeployedRouter(
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
 		require.NoError(t, err)
 	}
-	t.Log(fmt.Sprintf("Created router with name: %s, ID: %d", created.Name, created.ID))
+	t.Logf("Created router with name: %s, ID: %d", created.Name, created.ID)
 
 	t.Log("Ensure router has been created and current status is pending")
 	router, err := getRouter(

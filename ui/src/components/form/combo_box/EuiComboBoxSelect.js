@@ -25,6 +25,7 @@ export const EuiComboBoxSelect = ({ value, onChange, options, ...props }) => {
       placeholder={props.placeholder}
       isLoading={props.isLoading}
       isInvalid={props.isInvalid}
+      isDisabled={props.isDisabled}
       singleSelection={{ asPlainText: true }}
       noSuggestions={props.noSuggestions || !options}
       options={options}

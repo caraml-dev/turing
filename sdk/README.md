@@ -19,14 +19,14 @@ Check out [samples](./samples) for examples on how to use Turing SDK.
 
 #### Prerequisites
 
-* Python >= 3.8
+* Python >=3.7,<3.10
 * openapi-generator >= 5.1.0 (`brew install openapi-generator`)
 
 ### Make commands
 
 * Setup development environment
 ```shell
-make dev
+make setup
 ```
 
 * (Re-)generate openapi client
@@ -36,5 +36,5 @@ make gen-client
 
 * Run unit tests
 ```shell
-make test-unit
+make test
 ```

@@ -252,12 +252,12 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 }
 
 func (c *ensemblingController) cleanup(jobName string, namespace string) {
-	err := c.clusterController.DeleteSecret(context.Background(), jobName, namespace)
+	err := c.clusterController.DeleteSecret(context.Background(), jobName, namespace, false)
 	if err != nil {
 		log.Warnf("failed deleting secret %s in namespace %s: %v", jobName, namespace, err)
 	}
 
-	err = c.clusterController.DeleteConfigMap(context.Background(), jobName, namespace)
+	err = c.clusterController.DeleteConfigMap(context.Background(), jobName, namespace, false)
 	if err != nil {
 		log.Warnf("failed deleting job spec %s in namespace %s: %v", jobName, namespace, err)
 	}

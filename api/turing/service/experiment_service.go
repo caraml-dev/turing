@@ -24,6 +24,9 @@ const (
 type ExperimentsService interface {
 	// IsStandardExperimentManager checks if the experiment manager is of the standard type
 	IsStandardExperimentManager(engine string) bool
+	// IsClientSelectionEnabled checks if the experiment manager is of the standard type and
+	// has clients
+	IsClientSelectionEnabled(engine string) (bool, error)
 	// ListEngines returns a list of the experiment engines available
 	ListEngines() []manager.Engine
 	// ListClients returns a list of the clients registered on the given experiment engine
@@ -116,6 +119,20 @@ func (es *experimentsService) IsStandardExperimentManager(engine string) bool {
 		return false
 	}
 	return manager.IsStandardExperimentManager(expManager)
+}
+
+func (es *experimentsService) IsClientSelectionEnabled(engine string) (bool, error) {
+	expManager, err := es.getExperimentManager(engine)
+	if err != nil {
+		return false, err
+	}
+	engineInfo, err := expManager.GetEngineInfo()
+	if err != nil {
+		return false, err
+	}
+	return manager.IsStandardExperimentManager(expManager) &&
+		engineInfo.StandardExperimentManagerConfig != nil &&
+		engineInfo.StandardExperimentManagerConfig.ClientSelectionEnabled, nil
 }
 
 func (es *experimentsService) ListEngines() []manager.Engine {

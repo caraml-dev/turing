@@ -1,13 +1,17 @@
 import React, { useEffect } from "react";
 import { EuiFlexItem, EuiText } from "@elastic/eui";
+
 import { get } from "../../../../../../components/form/utils";
 import { StandardEnsembler } from "../../../../../../services/ensembler";
 import { StandardEnsemblerPanel } from "./StandardEnsemblerPanel";
+import { RouteSelectionPanel } from "../RouteSelectionPanel";
+import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
 
 export const StandardEnsemblerFormGroup = ({
   experimentConfig = {},
   routes,
+  rules,
   standardConfig,
   onChangeHandler,
   errors = {},
@@ -41,15 +45,33 @@ export const StandardEnsemblerFormGroup = ({
 
   return (
     !!standardConfig && (
-      <EuiFlexItem>
-        <StandardEnsemblerPanel
-          experiments={experimentConfig.experiments}
-          mappings={standardConfig.experiment_mappings}
-          routeOptions={routeOptions}
-          onChangeHandler={onChange("experiment_mappings")}
-          errors={get(errors, "experiment_mappings")}
-        />
-      </EuiFlexItem>
+      <>
+        <EuiFlexItem>
+          <StandardEnsemblerPanel
+            experiments={experimentConfig.experiments}
+            mappings={standardConfig.experiment_mappings}
+            routeOptions={routeOptions}
+            onChangeHandler={onChange("experiment_mappings")}
+            errors={get(errors, "experiment_mappings")}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <RouteSelectionPanel
+            routeId={standardConfig.fallback_response_route_id}
+            routes={routes}
+            rules={rules}
+            onChange={onChange("fallback_response_route_id")}
+            errors={get(errors, "fallback_response_route_id")}
+            panelTitle="Fallback"
+            inputLabel={
+              <FormLabelWithToolTip
+                label="Fallback Response *"
+                content="Select the route to fallback to, if the call to the experiment engine fails or if a matching route cannot be found for the treatment."
+              />
+            }
+          />
+        </EuiFlexItem>
+      </>
     )
   );
 };

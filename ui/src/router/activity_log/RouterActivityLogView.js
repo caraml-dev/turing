@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import {
   EuiPanel,
   EuiTextAlign,
@@ -32,21 +32,16 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
   );
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
-  const routerStatus = useMemo(
-    () => Status.fromValue(router.status),
-    [router.status]
-  );
-
   useEffect(() => {
     fetchEventsOnce();
   }, [fetchEventsOnce]);
 
   useEffect(() => {
-    if (routerStatus === Status.PENDING) {
+    if (router.status === Status.PENDING) {
       startPollingEvents();
     }
     return stopPollingEvents;
-  }, [routerStatus, startPollingEvents, stopPollingEvents]);
+  }, [router.status, startPollingEvents, stopPollingEvents]);
 
   return (
     <ConfigSection title="Activity Log">
@@ -66,7 +61,7 @@ export const RouterActivityLogView = ({ projectId, routerId, router }) => {
           <ScrollToBottom
             className="scrollToBottom--container"
             followButtonClassName="followButton">
-            <EventsList events={events} status={routerStatus} />
+            <EventsList events={events} status={router.status} />
           </ScrollToBottom>
         )}
       </EuiPanel>

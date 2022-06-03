@@ -95,11 +95,11 @@ class RouterVersionConfig(ModelNormal):
         lazy_import()
         return {
             'routes': ([Route],),  # noqa: E501
-            'default_route_id': (str,),  # noqa: E501
             'experiment_engine': (ExperimentConfig,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
             'log_config': (RouterVersionConfigLogConfig,),  # noqa: E501
             'rules': ([TrafficRule],),  # noqa: E501
+            'default_route_id': (str,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
             'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
@@ -112,11 +112,11 @@ class RouterVersionConfig(ModelNormal):
 
     attribute_map = {
         'routes': 'routes',  # noqa: E501
-        'default_route_id': 'default_route_id',  # noqa: E501
         'experiment_engine': 'experiment_engine',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
         'log_config': 'log_config',  # noqa: E501
         'rules': 'rules',  # noqa: E501
+        'default_route_id': 'default_route_id',  # noqa: E501
         'resource_request': 'resource_request',  # noqa: E501
         'enricher': 'enricher',  # noqa: E501
         'ensembler': 'ensembler',  # noqa: E501
@@ -134,12 +134,11 @@ class RouterVersionConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, routes, default_route_id, experiment_engine, timeout, log_config, *args, **kwargs):  # noqa: E501
+    def __init__(self, routes, experiment_engine, timeout, log_config, *args, **kwargs):  # noqa: E501
         """RouterVersionConfig - a model defined in OpenAPI
 
         Args:
             routes ([Route]):
-            default_route_id (str):
             experiment_engine (ExperimentConfig):
             timeout (str):
             log_config (RouterVersionConfigLogConfig):
@@ -176,6 +175,7 @@ class RouterVersionConfig(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             rules ([TrafficRule]): [optional]  # noqa: E501
+            default_route_id (str): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501
             ensembler (RouterEnsemblerConfig): [optional]  # noqa: E501
@@ -205,7 +205,6 @@ class RouterVersionConfig(ModelNormal):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         self.routes = routes
-        self.default_route_id = default_route_id
         self.experiment_engine = experiment_engine
         self.timeout = timeout
         self.log_config = log_config

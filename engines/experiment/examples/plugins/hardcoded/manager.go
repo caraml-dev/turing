@@ -2,12 +2,14 @@ package hardcoded
 
 import (
 	"encoding/json"
+
 	"github.com/gojek/turing/engines/experiment/manager"
 )
 
 type ExperimentManager struct {
 	*manager.BaseStandardExperimentManager
 	experiments map[string]Experiment
+	variables   map[string][]manager.Variable
 }
 
 func (e *ExperimentManager) Configure(cfg json.RawMessage) error {
@@ -23,6 +25,7 @@ func (e *ExperimentManager) Configure(cfg json.RawMessage) error {
 	for _, exp := range config.Experiments {
 		e.experiments[exp.Name] = exp
 	}
+	e.variables = config.Variables
 	return nil
 }
 
@@ -37,6 +40,16 @@ func (e *ExperimentManager) ListExperiments() ([]manager.Experiment, error) {
 
 func (e *ExperimentManager) ListExperimentsForClient(manager.Client) ([]manager.Experiment, error) {
 	return e.ListExperiments()
+}
+
+func (e *ExperimentManager) ListVariablesForExperiments(exps []manager.Experiment) (map[string][]manager.Variable, error) {
+	variableMap := map[string][]manager.Variable{}
+	for _, exp := range exps {
+		if variables, ok := e.variables[exp.ID]; ok {
+			variableMap[exp.ID] = variables
+		}
+	}
+	return variableMap, nil
 }
 
 func (e ExperimentManager) GetExperimentRunnerConfig(cfg json.RawMessage) (json.RawMessage, error) {

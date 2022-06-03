@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -25,13 +25,16 @@ import { useInitiallyLoaded } from "../../hooks/useInitiallyLoaded";
 import { HistoryView } from "../history/HistoryView";
 import { RouterLogsView } from "./logs/RouterLogsView";
 import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
+import { TuringRouter } from "../../services/router/TuringRouter";
 
 export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
-  const [{ data: router, isLoaded, error }, fetchRouterDetails] = useTuringApi(
-    `/projects/${projectId}/routers/${routerId}`,
-    {},
-    { config: {} }
-  );
+  const [router, setRouter] = useState({});
+  const [{ data: routerDetails, isLoaded, error }, fetchRouterDetails] =
+    useTuringApi(
+      `/projects/${projectId}/routers/${routerId}`,
+      {},
+      { config: {} }
+    );
 
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
@@ -42,11 +45,18 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [fetchRouterDetails, props.location.state]);
 
   useEffect(() => {
-    if (router.status === Status.PENDING.toString()) {
+    if (router.status?.toString() === Status.PENDING.toString()) {
       const interval = setInterval(fetchRouterDetails, 5000);
       return () => clearInterval(interval);
     }
   }, [router.status, fetchRouterDetails]);
+
+  useEffect(() => {
+    // Parse router details
+    if (!!routerDetails) {
+      setRouter(TuringRouter.fromJson(routerDetails));
+    }
+  }, [routerDetails, setRouter]);
 
   return (
     <EuiPage>
@@ -70,9 +80,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
               <EuiPageHeaderSection>
                 <PageTitle
                   title={router.name}
-                  prepend={
-                    <StatusBadge status={Status.fromValue(router.status)} />
-                  }
+                  prepend={<StatusBadge status={router.status} />}
                 />
               </EuiPageHeaderSection>
             </EuiPageHeader>
