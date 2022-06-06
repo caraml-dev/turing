@@ -195,7 +195,8 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 
 type routerConfigTestCase struct {
 	routes         models.Routes
-	defaultRouteID string
+	ensembler      *models.Ensembler
+	defaultRouteID *string
 	trafficRules   models.TrafficRules
 	expectedError  string
 }
@@ -212,27 +213,29 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},
+		Ensembler: tt.ensembler,
 	}
 }
 
 func TestValidateTrafficRules(t *testing.T) {
+	// Common variables used by suite tests
+	routeAID, routeBID := "route-a", "route-b"
+	routeA, routeB := &models.Route{
+		ID:       routeAID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/a",
+		Timeout:  "10ms",
+	}, &models.Route{
+		ID:       routeBID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/b",
+		Timeout:  "10ms",
+	}
+
 	suite := map[string]routerConfigTestCase{
 		"success": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-				{
-					ID:       "route-b",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/b",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -248,21 +251,8 @@ func TestValidateTrafficRules(t *testing.T) {
 			},
 		},
 		"failure | empty conditions": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-				{
-					ID:       "route-b",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/b",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{},
@@ -273,15 +263,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for 'Conditions' failed on the 'notBlank' tag",
 		},
 		"failure | empty routes": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -299,21 +282,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for 'Routes' failed on the 'notBlank' tag",
 		},
 		"failure | unsupported operator": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-				{
-					ID:       "route-b",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/b",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -331,21 +301,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for 'Operator' failed on the 'required' tag",
 		},
 		"failure | unsupported field source": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-				{
-					ID:       "route-b",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/b",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -363,21 +320,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for 'FieldSource' failed on the 'oneof' tag",
 		},
 		"failure | incomplete condition": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-				{
-					ID:       "route-b",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/b",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -396,16 +340,40 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Key: 'RouterConfig.TrafficRules[0].Conditions[0].Values' " +
 				"Error:Field validation for 'Values' failed on the 'notBlank' tag",
 		},
-		"failure | unknown route": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+		"failure | nop ensembler missing default route": {
+			routes: models.Routes{routeA},
+			expectedError: "Key: 'RouterConfig.default_route_id' " +
+				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
+		},
+		"failure | standard ensembler missing default route": {
+			routes:    models.Routes{routeA},
+			ensembler: &models.Ensembler{Type: models.EnsemblerStandardType},
+			expectedError: "Key: 'RouterConfig.default_route_id' " +
+				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
+		},
+		"failure | docker ensembler has default route": {
+			routes:         models.Routes{routeA},
+			ensembler:      &models.Ensembler{Type: models.EnsemblerDockerType},
+			defaultRouteID: &routeAID,
+			expectedError: "Key: 'RouterConfig.default_route_id' " +
+				"Error:Field validation for 'default_route_id' failed on the 'should not be set for chosen ensembler type' tag",
+		},
+		"failure | pyfunc ensembler has default route": {
+			routes:         models.Routes{routeA},
+			ensembler:      &models.Ensembler{Type: models.EnsemblerPyFuncType},
+			defaultRouteID: &routeAID,
+			expectedError: "Key: 'RouterConfig.default_route_id' " +
+				"Error:Field validation for 'default_route_id' failed on the 'should not be set for chosen ensembler type' tag",
+		},
+		"failure | unknown default route": {
+			routes:         models.Routes{routeA},
+			defaultRouteID: &routeBID,
+			expectedError: "Key: 'RouterConfig.DefaultRouteID' " +
+				"Error:Field validation for '' failed on the 'oneof' tag",
+		},
+		"failure | unknown traffic rule route": {
+			routes:         models.Routes{routeA},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -423,15 +391,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for '' failed on the 'oneof' tag",
 		},
 		"failure | rule contains default route": {
-			routes: models.Routes{
-				{
-					ID:       "route-a",
-					Type:     "PROXY",
-					Endpoint: "http://example.com/a",
-					Timeout:  "10ms",
-				},
-			},
-			defaultRouteID: "route-a",
+			routes:         models.Routes{routeA},
+			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{

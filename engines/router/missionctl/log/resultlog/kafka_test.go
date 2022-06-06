@@ -1,16 +1,19 @@
 package resultlog
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
 	"testing"
 
 	"bou.ke/monkey"
 	"github.com/gojek/turing/engines/router/missionctl/config"
 	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
 	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
@@ -108,11 +111,13 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 			"experiment": {
 				"error": "Error received"
 			},
-			"enricher": {
-				"response": "{\"key\": \"enricher_data\"}"
+			"enricher":{
+				"response":"{\"key\": \"enricher_data\"}", 
+				"header":{"Content-Encoding":"lz4","Content-Type":"text/html,charset=utf-8"}
 			},
-			"router": {
-				"response": "{\"key\": \"router_data\"}"
+			"router":{
+				"response":"{\"key\": \"router_data\"}",
+				"header":{"Content-Encoding":"gzip","Content-Type":"text/html,charset=utf-8"}
 			}
 		}`, turingReqID),
 		string(message),
@@ -124,16 +129,27 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	_, turingLogEntry := makeTestTuringResultLogEntry(t)
 	// Overwrite the turing request id value
 	turingLogEntry.TuringReqId = "testID"
+
 	// Run newProtobufKafkaLogEntry and validate
 	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
 	assert.NoError(t, err)
+
+	// Unmarshall serialised message
+	decodedTuringResultLogMessage := &turing.TuringResultLogMessage{}
+	err = proto.Unmarshal(message, decodedTuringResultLogMessage)
+	assert.NoError(t, err)
+	// Convert expected and actual log entries to JSON for comparison
+	expectedJSON, err := json.Marshal(turingLogEntry)
+	assert.NoError(t, err)
+	m := protojson.MarshalOptions{
+		UseProtoNames: true,
+	}
+	actualJSON, err := m.Marshal(decodedTuringResultLogMessage)
+	assert.NoError(t, err)
+
 	// Compare logEntry data
 	assert.Equal(t, "\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a", string(key))
-	assert.Equal(t, strings.Join([]string{
-		"\n\x06testID\x12\b\b\xf2\xb6\xd9\xc4\x03\x10\a\x1a\rtest-app-name\"9\n\x15\n\x06",
-		"Req_id\x12\vtest_req_id\x12 {\"customer_id\": \"test_customer\"}*\x10\x12\x0e",
-		"Error received2\x1a\n\x18{\"key\": \"enricher_data\"}:\x18\n\x16{\"key\": \"router_data\"}",
-	}, ""), string(message))
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
 func TestKafkaLoggerWrite(t *testing.T) {

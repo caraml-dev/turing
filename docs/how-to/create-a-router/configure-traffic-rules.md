@@ -28,7 +28,7 @@ Provided values are case-sensitive.
 
 ### Routes   
 
-You should also select one or more routes from the drop-down list that would be activated if the rule is triggered. The default route cannot be selected in any of traffic rules. As for non-default routes, they could be attached to zero or more traffic rules.
+You should also select one or more routes from the drop-down list that would be activated if the rule is triggered. A route can be attached to zero or more traffic rules.
 
 * If a route is attached to some traffic rule, then Turing will only send request to this route if the request meets this rule's conditions.
 * If a route is not attached to any of the traffic rules, then Turing will call this route with every incoming request.

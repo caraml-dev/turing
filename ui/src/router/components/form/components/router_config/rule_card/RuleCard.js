@@ -11,7 +11,7 @@ import {
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
-import { RuleCardRouteDropDownOption } from "./RuleCardRouteDropDown";
+import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
 
 import "./RuleCard.scss";
@@ -32,7 +32,6 @@ const newCondition = () => ({
 export const RuleCard = ({
   rule,
   routes,
-  defaultRouteId,
   onChangeHandler,
   onDelete,
   errors,
@@ -46,16 +45,10 @@ export const RuleCard = ({
         .filter((route) => !!route.id && !!route.endpoint)
         .map((route) => ({
           value: route.id,
-          inputDisplay: (
-            <RuleCardRouteDropDownOption
-              {...route}
-              isDefault={route.id === defaultRouteId}
-            />
-          ),
-          disabled: route.id === defaultRouteId,
+          inputDisplay: <RouteDropDownOption {...route} />,
         }));
     },
-    [rule.routes, routes, defaultRouteId]
+    [rule.routes, routes]
   );
 
   const onDeleteCondition = (idx) => () => {

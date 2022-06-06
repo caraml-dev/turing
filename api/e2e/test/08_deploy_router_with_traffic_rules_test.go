@@ -85,7 +85,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
       "data": {
         "version": "control"
       },
-      "is_default": true,
+      "is_default": false,
       "route": "control"
     }
   ]
@@ -118,7 +118,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
       "data": {
         "version": "control"
       },
-      "is_default": true,
+      "is_default": false,
       "route": "control"
     },
     {
@@ -160,7 +160,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
                           "data": {
                             "version": "control"
                           },
-                          "is_default": true,
+                          "is_default": false,
                           "route": "control"
                         }
                       ]

@@ -50,6 +50,11 @@ def main(turing_api: str, project: str):
             id='ring-ding-ding',
             endpoint='http://fox-says.ring-ding-ding',
             timeout='20ms'
+        ),
+        Route(
+            id='control',
+            endpoint='http://fox-says.control',
+            timeout='20ms'
         )
     ]
 
@@ -169,14 +174,14 @@ def main(turing_api: str, project: str):
 
     # Create an enricher for the router
     enricher = Enricher(
-        image="ealen/echo-server:0.5.1",
+        image="docker.io/ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=0,
             max_replica=2,
             cpu_request="500m",
             memory_request="512Mi"
         ),
-        endpoint="/",
+        endpoint="/echo",
         timeout="60ms",
         port=3000,
         env=[
@@ -188,12 +193,12 @@ def main(turing_api: str, project: str):
     )
 
     # Create an ensembler for the router
-    # Note: Ensembling for Turing Routers is done through Standard, Docker or Pyfunc ensemblers, and its configuration
-    # is managed by the `RouterEnsemblerConfig` class. Three helper classes (child classes of `RouterEnsemblerConfig`)
-    # have been created to assist you in constructing these objects - `StandardRouterEnsemblerConfig`,
-    # `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
+    # Note: Ensembling for Turing Routers is done through Nop, Standard, Docker or Pyfunc ensemblers, and its configuration
+    # is managed by the `RouterEnsemblerConfig` class. Helper classes (child classes of `RouterEnsemblerConfig`)
+    # have been created to assist you in constructing these objects - `NopRouterEnsemblerConfig`,
+    # `StandardRouterEnsemblerConfig`, `DockerRouterEnsemblerConfig` and `PyfuncRouterEnsemblerConfig`.
     ensembler = DockerRouterEnsemblerConfig(
-        image="ealen/echo-server:0.5.1",
+        image="docker.io/ealen/echo-server:0.5.1",
         resource_request=ResourceRequest(
             min_replica=1,
             max_replica=3,
@@ -212,7 +217,6 @@ def main(turing_api: str, project: str):
         name="what-does-the-fox-say",
         routes=routes,
         rules=rules,
-        default_route_id="test",
         experiment_engine=experiment_config,
         resource_request=resource_request,
         timeout="100ms",

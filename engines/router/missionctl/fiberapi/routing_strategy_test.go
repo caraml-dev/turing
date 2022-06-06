@@ -19,9 +19,10 @@ import (
 
 func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 	type testSuiteInitStrategy struct {
-		properties json.RawMessage
-		success    bool
-		expected   DefaultTuringRoutingStrategy
+		properties    json.RawMessage
+		success       bool
+		expected      DefaultTuringRoutingStrategy
+		expectedError string
 	}
 
 	tests := map[string]testSuiteInitStrategy{
@@ -54,7 +55,8 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			properties: json.RawMessage(`{
 				"experiment_engine": "Test"
 			}`),
-			success: false,
+			success:       false,
+			expectedError: "No default route defined",
 		},
 	}
 
@@ -82,10 +84,12 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			monkey.Unpatch(experiment.NewExperimentRunner)
 			monkey.Unpatch(runnerV1.Get)
 
-			// Test that there is no error and fanIn is initialised as expected
-			assert.Equal(t, data.success, err == nil)
+			// Test that there is no error and the routing strategy is initialised as expected
 			if data.success {
+				assert.Nil(t, err)
 				assert.Equal(t, data.expected, strategy)
+			} else {
+				assert.EqualError(t, err, data.expectedError)
 			}
 		})
 	}
@@ -161,11 +165,17 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedRoute:     nil,
 			expectedFallbacks: []fiber.Component{},
 		},
-		"simulate experiment engine returns error when calling GetTreatmentForRequest()": {
-			endpoints:               []string{"treatment-B", "treatment-C"},
+		"error when calling GetTreatmentForRequest() should fallback to default route": {
+			endpoints:               []string{"treatment-B", "control"},
 			experimentRunnerWantErr: true,
 			expectedRoute:           nil,
-			expectedFallbacks:       []fiber.Component{},
+			defaultRoute:            "control",
+			expectedFallbacks: []fiber.Component{
+				fiber.NewProxy(
+					fiber.NewBackend("control", ""),
+					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+				),
+			},
 		},
 	}
 
@@ -194,9 +204,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			}
 			route, fallbacks, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
 
-			if (err != nil) != data.experimentRunnerWantErr {
-				t.Errorf("SelectRoute() error = %v, wantErr %v", err, data.experimentRunnerWantErr)
-			}
+			assert.NoError(t, err)
 			assert.Equal(t, data.expectedRoute, route)
 			assert.Equal(t, data.expectedFallbacks, fallbacks)
 		})

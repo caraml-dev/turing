@@ -121,7 +121,6 @@ def main(turing_api: str, project: str):
         name="router-with-pyfunc-ensembler",
         routes=routes,
         rules=[],
-        default_route_id="test",
         experiment_engine=experiment_config,
         resource_request=resource_request,
         timeout="100ms",

@@ -20,7 +20,7 @@ export class Ensembler {
       case "pyfunc":
         return PyFuncEnsembler.fromJson(json);
       default:
-        return new NopEnsembler();
+        return NopEnsembler.fromJson(json);
     }
   }
 
@@ -33,7 +33,7 @@ export class Ensembler {
       case "pyfunc":
         return { type: this.type, pyfunc_config: this.pyfunc_config };
       default:
-        return { ...this };
+        return { ...this, nop_config: this.nop_config };
     }
   }
 }

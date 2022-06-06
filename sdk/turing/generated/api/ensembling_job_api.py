@@ -19,11 +19,13 @@ from turing.generated.model_utils import (  # noqa: F401
     datetime,
     file_type,
     none_type,
-    validate_and_convert_types
+    validate_and_convert_types,
 )
 from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
 from turing.generated.model.ensembling_job import EnsemblingJob
-from turing.generated.model.ensembling_job_paginated_results import EnsemblingJobPaginatedResults
+from turing.generated.model.ensembling_job_paginated_results import (
+    EnsemblingJobPaginatedResults,
+)
 from turing.generated.model.id_object import IdObject
 
 
@@ -39,12 +41,7 @@ class EnsemblingJobApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-        def __create_ensembling_job(
-            self,
-            project_id,
-            ensembling_job,
-            **kwargs
-        ):
+        def __create_ensembling_job(self, project_id, ensembling_job, **kwargs):
             """Submit an Ensembling job.  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -83,95 +80,66 @@ class EnsemblingJobApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['ensembling_job'] = \
-                ensembling_job
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["ensembling_job"] = ensembling_job
             return self.call_with_http_info(**kwargs)
 
         self.create_ensembling_job = _Endpoint(
             settings={
-                'response_type': (EnsemblingJob,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/jobs',
-                'operation_id': 'create_ensembling_job',
-                'http_method': 'POST',
-                'servers': None,
+                "response_type": (EnsemblingJob,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/jobs",
+                "operation_id": "create_ensembling_job",
+                "http_method": "POST",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'ensembling_job',
+                "all": [
+                    "project_id",
+                    "ensembling_job",
                 ],
-                'required': [
-                    'project_id',
-                    'ensembling_job',
+                "required": [
+                    "project_id",
+                    "ensembling_job",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "ensembling_job": (EnsemblingJob,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'ensembling_job':
-                        (EnsemblingJob,),
+                "location_map": {
+                    "project_id": "path",
+                    "ensembling_job": "body",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'ensembling_job': 'body',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [
-                    'application/json'
-                ]
+                "accept": ["application/json"],
+                "content_type": ["application/json"],
             },
             api_client=api_client,
-            callable=__create_ensembling_job
+            callable=__create_ensembling_job,
         )
 
-        def __get_ensembling_job(
-            self,
-            project_id,
-            job_id,
-            **kwargs
-        ):
+        def __get_ensembling_job(self, project_id, job_id, **kwargs):
             """Get an existing Ensembling job.  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -210,93 +178,67 @@ class EnsemblingJobApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['job_id'] = \
-                job_id
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["job_id"] = job_id
             return self.call_with_http_info(**kwargs)
 
         self.get_ensembling_job = _Endpoint(
             settings={
-                'response_type': (EnsemblingJob,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/jobs/{job_id}',
-                'operation_id': 'get_ensembling_job',
-                'http_method': 'GET',
-                'servers': None,
+                "response_type": (EnsemblingJob,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/jobs/{job_id}",
+                "operation_id": "get_ensembling_job",
+                "http_method": "GET",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'job_id',
+                "all": [
+                    "project_id",
+                    "job_id",
                 ],
-                'required': [
-                    'project_id',
-                    'job_id',
+                "required": [
+                    "project_id",
+                    "job_id",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "job_id": (int,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "job_id": "job_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'job_id':
-                        (int,),
+                "location_map": {
+                    "project_id": "path",
+                    "job_id": "path",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'job_id': 'job_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'job_id': 'path',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__get_ensembling_job
+            callable=__get_ensembling_job,
         )
 
-        def __list_ensembling_jobs(
-            self,
-            project_id,
-            **kwargs
-        ):
+        def __list_ensembling_jobs(self, project_id, **kwargs):
             """Returns a list of ensembling jobs that belong to the project  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -339,112 +281,83 @@ class EnsemblingJobApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
             return self.call_with_http_info(**kwargs)
 
         self.list_ensembling_jobs = _Endpoint(
             settings={
-                'response_type': (EnsemblingJobPaginatedResults,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/jobs',
-                'operation_id': 'list_ensembling_jobs',
-                'http_method': 'GET',
-                'servers': None,
+                "response_type": (EnsemblingJobPaginatedResults,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/jobs",
+                "operation_id": "list_ensembling_jobs",
+                "http_method": "GET",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'page',
-                    'page_size',
-                    'ensembler_id',
-                    'search',
-                    'status',
+                "all": [
+                    "project_id",
+                    "page",
+                    "page_size",
+                    "ensembler_id",
+                    "search",
+                    "status",
                 ],
-                'required': [
-                    'project_id',
+                "required": [
+                    "project_id",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "page": (int,),
+                    "page_size": (int,),
+                    "ensembler_id": (int,),
+                    "search": (str,),
+                    "status": ([EnsemblerJobStatus],),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "page": "page",
+                    "page_size": "page_size",
+                    "ensembler_id": "ensembler_id",
+                    "search": "search",
+                    "status": "status",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'page':
-                        (int,),
-                    'page_size':
-                        (int,),
-                    'ensembler_id':
-                        (int,),
-                    'search':
-                        (str,),
-                    'status':
-                        ([EnsemblerJobStatus],),
+                "location_map": {
+                    "project_id": "path",
+                    "page": "query",
+                    "page_size": "query",
+                    "ensembler_id": "query",
+                    "search": "query",
+                    "status": "query",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'page': 'page',
-                    'page_size': 'page_size',
-                    'ensembler_id': 'ensembler_id',
-                    'search': 'search',
-                    'status': 'status',
+                "collection_format_map": {
+                    "status": "multi",
                 },
-                'location_map': {
-                    'project_id': 'path',
-                    'page': 'query',
-                    'page_size': 'query',
-                    'ensembler_id': 'query',
-                    'search': 'query',
-                    'status': 'query',
-                },
-                'collection_format_map': {
-                    'status': 'multi',
-                }
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__list_ensembling_jobs
+            callable=__list_ensembling_jobs,
         )
 
-        def __terminate_ensembling_job(
-            self,
-            project_id,
-            job_id,
-            **kwargs
-        ):
+        def __terminate_ensembling_job(self, project_id, job_id, **kwargs):
             """Terminate an ongoing Ensembling Job.  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -483,84 +396,62 @@ class EnsemblingJobApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['job_id'] = \
-                job_id
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["job_id"] = job_id
             return self.call_with_http_info(**kwargs)
 
         self.terminate_ensembling_job = _Endpoint(
             settings={
-                'response_type': (IdObject,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/jobs/{job_id}',
-                'operation_id': 'terminate_ensembling_job',
-                'http_method': 'DELETE',
-                'servers': None,
+                "response_type": (IdObject,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/jobs/{job_id}",
+                "operation_id": "terminate_ensembling_job",
+                "http_method": "DELETE",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'job_id',
+                "all": [
+                    "project_id",
+                    "job_id",
                 ],
-                'required': [
-                    'project_id',
-                    'job_id',
+                "required": [
+                    "project_id",
+                    "job_id",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "job_id": (int,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "job_id": "job_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'job_id':
-                        (int,),
+                "location_map": {
+                    "project_id": "path",
+                    "job_id": "path",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'job_id': 'job_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'job_id': 'path',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__terminate_ensembling_job
+            callable=__terminate_ensembling_job,
         )

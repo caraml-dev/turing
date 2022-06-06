@@ -33,14 +33,14 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 # Install wget and other libraries required by Miniconda3
 RUN apt-get update --allow-releaseinfo-change-suite -q && \
     apt-get install -q -y \
-        bzip2 \
-        ca-certificates \
-        git \
-        libglib2.0-0 \
-        libsm6 \
-        libxext6 \
-        libxrender1 \
-        wget \
+    bzip2 \
+    ca-certificates \
+    git \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    wget \
     && apt-get clean
 
 # Install gcloud SDK
@@ -89,8 +89,9 @@ COPY --chown=$UID:$GID . $PROJECT_DIR/
 COPY ./temp-deps/sdk $PROJECT_DIR/../../sdk
 
 # Setup base conda environment
+ARG PYTHON_VERSION
 ENV CONDA_ENVIRONMENT turing-batch-ensembler
-RUN conda env create -f $PROJECT_DIR/environment.yaml -n $CONDA_ENVIRONMENT && \
+RUN conda env create -f $PROJECT_DIR/env-${PYTHON_VERSION}.yaml -n $CONDA_ENVIRONMENT && \
     rm -rf $HOME/.cache
 
 RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc

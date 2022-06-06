@@ -7,7 +7,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
 } from "@elastic/eui";
 import { SelectEndpointComboBox } from "../../../../../../components/form/endpoint_combo_box/SelectEndpointComboBox";
@@ -17,10 +16,8 @@ import "./RouteCard.scss";
 
 export const RouteCard = ({
   route,
-  isDefault,
   endpointOptions,
   onChange,
-  onSelect,
   onDelete,
   errors,
 }) => {
@@ -42,29 +39,22 @@ export const RouteCard = ({
       className="euiCard--routeCard"
       title=""
       description=""
-      textAlign="left"
-      selectable={{
-        children: isDefault ? "Default" : "Set Default",
-        onClick: onSelect,
-        isSelected: isDefault,
-      }}>
+      textAlign="left">
       <EuiForm onClick={(e) => e.stopPropagation()}>
         <EuiFlexGroup
           className="euiFlexGroup--removeButton"
           justifyContent="flexEnd"
           gutterSize="none"
           direction="row">
-          <EuiFlexItem grow={false}>
-            {!isDefault ? (
+          {!!onDelete && (
+            <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType="cross"
                 onClick={onDelete}
                 aria-label="delete-route"
               />
-            ) : (
-              <EuiIcon type="empty" size="l" />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiFormRow
