@@ -169,7 +169,9 @@ turing:
   # for the detailed explanation on Turing UI config options
   # @default -- computed value
   uiConfig:
-    alertConfig: { }
+    alertConfig:
+      enabled: false
+      environment: "" # This value is passed down to the create / update alerts API
     apiConfig:
       turingApiUrl: /api/turing/v1
       merlinApiUrl: /api/merlin/v1

@@ -15,6 +15,16 @@ var config = {
      */
   },
 
+  "alertConfig": {
+    /*
+    * Whether Alert configurations are enabled for the user
+    * "enabled": true
+    * 
+    * The name of the environment, to be sent to the create / update alert API
+    * "environment": "staging"
+    */
+  },
+
   "authConfig": {
     /*
      * OAuth2 Client ID
