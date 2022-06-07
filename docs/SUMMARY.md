@@ -1,9 +1,9 @@
-# Table of contents
+# Table of Contents
 
 * [Introduction](README.md)
 * [Concepts](concepts.md)
 
-## How to guides
+## User Guides
 * [Create a project](how-to/create-project.md)
 * [Create a router](how-to/create-a-router/README.md)
     * [Configure general settings](how-to/create-a-router/configure-general-settings.md)
@@ -31,3 +31,9 @@
     * [Deleting router versions](how-to/delete-a-router/delete-a-router-version.md)
     * [Deleting router versions from details page](how-to/delete-a-router/delete-a-router-version-from-details-page.md)
     * [Deleting routers](how-to/delete-a-router/delete-a-router.md)
+
+## Developer Guides
+* [Getting started](dev-docs/README.md)
+* [Monitoring and alerting](dev-docs/monitoring-and-alerting/README.md)
+    * [Configure a monitoring backend](dev-docs/monitoring-and-alerting/configure-monitoring-backend.md.md)
+    * [Configure an alerting backend](dev-docs/monitoring-and-alerting/configure-alerting-backend.md.md)
