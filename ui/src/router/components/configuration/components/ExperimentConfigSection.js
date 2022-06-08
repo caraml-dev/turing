@@ -1,9 +1,9 @@
-import React, { Fragment, useContext, useState } from "react";
+import React, { Fragment, useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 
 import { ConfigSectionPanel } from "../../../../components/config_section";
 import { RemoteComponent } from "../../../../components/remote_component/RemoteComponent";
-import { LoadDynamicScript } from "../../../../hooks/useDynamicScript";
+import { DynamicHookComponent } from "../../../../components/remote_component/DynamicHookComponent";
 import ExperimentEngineContext from "../../../../providers/experiments/context";
 
 import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
@@ -25,51 +25,21 @@ const FallbackView = ({ text }) => (
 );
 
 const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
-  const [urlReady, setUrlReady] = useState(false);
-  const [urlFailed, setUrlFailed] = useState(false);
-  const [configReady, setConfigReady] = useState(false);
-  const [configFailed, setConfigFailed] = useState(false);
-
-  // Retrieve script from host dynamically
-  if (!!remoteUi.url && !urlReady) {
-    return urlFailed ? (
-      <FallbackView text={"Failed to load Experiment Engine"} />
-    ) : (
-      <>
-        <LoadDynamicScript
-          setReady={setUrlReady}
-          setFailed={setUrlFailed}
-          url={remoteUi.url}
-        />
-        <FallbackView text={"Loading Experiment Engine..."} />
-      </>
-    );
-  } else if (!!remoteUi.config && !configReady) {
-    return configFailed ? (
-      <FallbackView text={"Failed to load Experiment Engine Config"} />
-    ) : (
-      <>
-        <LoadDynamicScript
-          setReady={setConfigReady}
-          setFailed={setConfigFailed}
-          url={remoteUi.config}
-        />
-        <FallbackView text={"Loading Experiment Engine Config..."} />
-      </>
-    );
-  }
-
   // Load component from remote host
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <RemoteComponent
-        scope={remoteUi.name}
-        name="./ExperimentEngineConfigDetails"
-        fallback={<FallbackView text="Loading Experiment Engine config" />}
-        projectId={projectId}
-        config={config}
-      />
+      <DynamicHookComponent
+        FallbackView={FallbackView}
+        experimentEngine={remoteUi}>
+        <RemoteComponent
+          scope={remoteUi.name}
+          name="./ExperimentEngineConfigDetails"
+          fallback={<FallbackView text="Loading Experiment Engine config" />}
+          projectId={projectId}
+          config={config}
+        />
+      </DynamicHookComponent>
     </React.Suspense>
   );
 };
