@@ -3,9 +3,7 @@ import { EuiFlexItem, EuiSpacer } from "@elastic/eui";
 
 import { RemoteComponent } from "../../../../../components/remote_component/RemoteComponent";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
-import useDynamicScript, {
-  LoadDynamicScript,
-} from "../../../../../hooks/useDynamicScript";
+import { LoadDynamicScript } from "../../../../../hooks/useDynamicScript";
 import { Panel } from "../Panel";
 
 import { StandardExperimentConfigGroup } from "./StandardExperimentConfigGroup";
@@ -26,19 +24,25 @@ const CustomExperimentEngineConfigGroup = ({
   onChangeHandler,
   errors,
 }) => {
+  const [urlReady, setUrlReady] = useState(false);
+  const [urlFailed, setUrlFailed] = useState(false);
   const [configReady, setConfigReady] = useState(false);
   const [configFailed, setConfigFailed] = useState(false);
 
   // Retrieve script from host dynamically
-  const { ready, failed } = useDynamicScript({
-    url: remoteUi.url,
-  });
-
-  if (!ready || failed) {
-    const text = failed
-      ? "Failed to load Experiment Engine"
-      : "Loading Experiment Engine ...";
-    return <FallbackView text={text} />;
+  if (!!remoteUi.url && !urlReady) {
+    return urlFailed ? (
+      <FallbackView text={"Failed to load Experiment Engine"} />
+    ) : (
+      <>
+        <LoadDynamicScript
+          setReady={setUrlReady}
+          setFailed={setUrlFailed}
+          url={remoteUi.url}
+        />
+        <FallbackView text={"Loading Experiment Engine..."} />
+      </>
+    );
   } else if (!!remoteUi.config && !configReady) {
     return configFailed ? (
       <FallbackView text={"Failed to load Experiment Engine Config"} />
