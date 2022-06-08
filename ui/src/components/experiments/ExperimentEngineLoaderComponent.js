@@ -17,7 +17,7 @@ const LoadDynamicScript = ({ url, setReady, setFailed }) => {
 };
 
 // Dynamic Script Loading component wrapper
-export const DynamicHookComponent = ({
+export const ExperimentEngineLoaderComponent = ({
   FallbackView,
   experimentEngine,
   children,
@@ -58,4 +58,4 @@ export const DynamicHookComponent = ({
   return children;
 };
 
-export default DynamicHookComponent;
+export default ExperimentEngineLoaderComponent;

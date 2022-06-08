@@ -9,7 +9,7 @@ import {
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
-import { DynamicHookComponent } from "../components/remote_component/DynamicHookComponent";
+import { ExperimentEngineLoaderComponent } from "../components/experiments/ExperimentEngineLoaderComponent";
 
 import { useConfig } from "../config";
 
@@ -37,7 +37,7 @@ const RemoteRouter = ({ projectId }) => {
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <DynamicHookComponent
+      <ExperimentEngineLoaderComponent
         FallbackView={FallbackView}
         experimentEngine={defaultExperimentEngine}>
         <RemoteComponent
@@ -46,7 +46,7 @@ const RemoteRouter = ({ projectId }) => {
           fallback={<FallbackView text="Loading Experiment Engine" />}
           projectId={projectId}
         />
-      </DynamicHookComponent>
+      </ExperimentEngineLoaderComponent>
     </React.Suspense>
   );
 };
