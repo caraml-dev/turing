@@ -16,10 +16,10 @@ import (
 
 // EnsemblingResources struct for EnsemblingResources
 type EnsemblingResources struct {
-	DriverCpuRequest *string `json:"driver_cpu_request,omitempty"`
-	DriverMemoryRequest *string `json:"driver_memory_request,omitempty"`
-	ExecutorReplica *int32 `json:"executor_replica,omitempty"`
-	ExecutorCpuRequest *string `json:"executor_cpu_request,omitempty"`
+	DriverCpuRequest      *string `json:"driver_cpu_request,omitempty"`
+	DriverMemoryRequest   *string `json:"driver_memory_request,omitempty"`
+	ExecutorReplica       *int32  `json:"executor_replica,omitempty"`
+	ExecutorCpuRequest    *string `json:"executor_cpu_request,omitempty"`
 	ExecutorMemoryRequest *string `json:"executor_memory_request,omitempty"`
 }
 
@@ -255,5 +255,3 @@ func (v *NullableEnsemblingResources) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

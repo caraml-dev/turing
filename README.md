@@ -56,9 +56,9 @@ in these getting started guide.
 
 - [Docker](https://www.docker.com/get-started) v19.03
 - [Docker compose](https://docs.docker.com/compose/) v1.27
-- [Go](https://golang.org/dl/) v1.14
+- [Go](https://golang.org/dl/) v1.18
 - [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
-- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.19 (optional)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.22 (optional)
 - Local ports 80, 8080, 8081, 8082, 8200, 5000, 6443 should be available
 
 ### Download Turing Source Code
@@ -382,9 +382,9 @@ to check them, they are installed in the following namespaces:
 
 Alternatively, you could install the following components yourself with the following recommended versions:
 
-- Knative: v0.18.3
-- Knative Istio: v0.18.1
-- Istio: 1.9.9
+- Knative: v1.0.1
+- Knative Istio: v1.0.0
+- Istio: 1.12.5
 - Spark On K8s Operator: 1.1.7 Helm charts
 
 ## Turing Router Components

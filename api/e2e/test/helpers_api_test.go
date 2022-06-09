@@ -1,4 +1,4 @@
-// +build e2e
+//go:build e2e
 
 package e2e
 
@@ -181,7 +181,7 @@ func withDeployedRouter(
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
 		require.NoError(t, err)
 	}
-	t.Log(fmt.Sprintf("Created router with name: %s, ID: %d", created.Name, created.ID))
+	t.Logf("Created router with name: %s, ID: %d", created.Name, created.ID)
 
 	t.Log("Ensure router has been created and current status is pending")
 	router, err := getRouter(

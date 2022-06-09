@@ -30,7 +30,7 @@ experiment treatment to each incoming request to the router.
 ![experiment_manager_data_types](./assets/exp_runner_plugin_diagram.png)
 
 ### Pre-requisites 
- * Golang 1.14
+ * Golang 1.18
  * Git
  * Docker
 
@@ -71,7 +71,7 @@ library, which is added into the plugin module as the dependency in [`go.mod`](.
 ```shell
 module github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded
 
-go 1.14
+go 1.18
 
 require github.com/gojek/turing/engines/experiment v1.0.0
 

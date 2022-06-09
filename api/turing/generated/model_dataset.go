@@ -22,9 +22,8 @@ type Dataset struct {
 
 // BigQueryDatasetAsDataset is a convenience function that returns BigQueryDataset wrapped in Dataset
 func BigQueryDatasetAsDataset(v *BigQueryDataset) Dataset {
-	return Dataset{ BigQueryDataset: v}
+	return Dataset{BigQueryDataset: v}
 }
-
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *Dataset) UnmarshalJSON(data []byte) error {
@@ -65,7 +64,7 @@ func (src Dataset) MarshalJSON() ([]byte, error) {
 }
 
 // Get the actual instance
-func (obj *Dataset) GetActualInstance() (interface{}) {
+func (obj *Dataset) GetActualInstance() interface{} {
 	if obj.BigQueryDataset != nil {
 		return obj.BigQueryDataset
 	}
@@ -109,5 +108,3 @@ func (v *NullableDataset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
