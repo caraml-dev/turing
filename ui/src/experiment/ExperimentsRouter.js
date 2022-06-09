@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   EuiPage,
   EuiPageBody,
@@ -32,8 +32,6 @@ const FallbackView = ({ text }) => (
 
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
-  const [configReady, setConfigReady] = useState(false);
-  const [configFailed, setConfigFailed] = useState(false);
 
   // Load component from remote host
   return (
