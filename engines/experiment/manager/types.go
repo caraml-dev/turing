@@ -29,7 +29,8 @@ type RemoteUI struct {
 	Name string `json:"name"`
 	// URL is the Host + Remote Entry file at which the remote UI can be found
 	URL string `json:"url"`
-	// Config is an optional Experiment Engine's Remote Entry file where any shared state can be dynamically loaded during runtime
+	// Config is an optional URL that will be loaded at run-time, to provide the experiment engine
+	// configs dynamically
 	Config string `json:"config,omitempty"`
 }
 
