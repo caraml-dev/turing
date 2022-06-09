@@ -2,6 +2,9 @@ import json
 from datetime import datetime, timedelta
 import pytest
 import random
+from sys import version_info
+import uuid
+
 import tests
 from turing.ensembler import PyFuncEnsembler
 import turing.generated.models
@@ -13,10 +16,14 @@ from turing.router.config.router_config import RouterConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
-from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import (
+    EnsemblerNopConfig,
+    EnsemblerStandardConfig,
+    DockerRouterEnsemblerConfig,
+    PyfuncRouterEnsemblerConfig
+)
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.experiment_config import ExperimentConfig
-import uuid
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
 
@@ -78,6 +85,58 @@ def generic_ensemblers(project, num_ensemblers):
             updated_at=datetime.now() + timedelta(seconds=i + 10)
         ) for i in range(1, num_ensemblers + 1)]
 
+@pytest.fixture
+def nop_router_ensembler_config():
+    return EnsemblerNopConfig(final_response_route_id="test")
+
+@pytest.fixture
+def standard_router_ensembler_config():
+    return EnsemblerStandardConfig(
+        experiment_mappings=[
+            turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                experiment="experiment-1",
+                treatment="treatment-1",
+                route="route-1"
+            ),
+            turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                experiment="experiment-2",
+                treatment="treatment-2",
+                route="route-2"
+            )
+        ],
+        fallback_response_route_id="route-1"
+    )
+
+@pytest.fixture
+def docker_router_ensembler_config():
+    return DockerRouterEnsemblerConfig(
+        image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
+        resource_request=ResourceRequest(
+            min_replica=1,
+            max_replica=3,
+            cpu_request="500m",
+            memory_request="512Mi"
+        ),
+        endpoint=f"http://localhost:5000/ensembler_endpoint",
+        timeout="500ms",
+        port=5120,
+        env=[],
+    )
+
+@pytest.fixture
+def pyfunc_router_ensembler_config():
+    return PyfuncRouterEnsemblerConfig(
+        project_id=1,
+        ensembler_id=1,
+        resource_request=ResourceRequest(
+            min_replica=1,
+            max_replica=3,
+            cpu_request="500m",
+            memory_request="512Mi"
+        ),
+        timeout="500ms",
+        env=[],
+    )
 
 @pytest.fixture
 def bucket_name():
@@ -115,7 +174,8 @@ def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_ur
         mlflow_run_id=run_id,
         artifact_uri=artifact_uri,
         created_at=datetime.now(),
-        updated_at=datetime.now()
+        updated_at=datetime.now(),
+        python_version=f"{version_info.major}.{version_info.minor}.*"
     )
 
 
@@ -356,7 +416,6 @@ def ensembler(request, generic_ensembler_standard_config, generic_ensembler_dock
         updated_at=datetime.now() + timedelta(seconds=10)
     )
 
-
 @pytest.fixture
 def generic_standard_router_ensembler_config(generic_ensembler_standard_config):
     return turing.generated.models.RouterEnsemblerConfig(
@@ -454,8 +513,7 @@ def generic_router_version(
         error="NONE",
         image="test.io/just-a-test/turing-router:0.0.0-build.0",
         routes=[generic_route for _ in range(2)],
-        default_route="http://models.internal/default",
-        default_route_id="control",
+        default_route_id=generic_route.id,
         rules=[generic_traffic_rule for _ in range(2)],
         experiment_engine=experiment_config,
         resource_request=generic_resource_request,
@@ -468,7 +526,7 @@ def generic_router_version(
 
 
 @pytest.fixture
-def generic_router_config():
+def generic_router_config(docker_router_ensembler_config):
     return RouterConfig(
         environment_name="id-dev",
         name="router-1",
@@ -485,7 +543,7 @@ def generic_router_config():
             )
         ],
         rules=None,
-        default_route_id="test",
+        default_route_id="model-a",
         experiment_engine=ExperimentConfig(
             type="test-exp",
             config={
@@ -529,19 +587,7 @@ def generic_router_config():
                 )
             ]
         ),
-        ensembler=DockerRouterEnsemblerConfig(
-            image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
-            resource_request=ResourceRequest(
-                min_replica=1,
-                max_replica=3,
-                cpu_request="500m",
-                memory_request="512Mi"
-            ),
-            endpoint=f"http://localhost:5000/ensembler_endpoint",
-            timeout="500ms",
-            port=5120,
-            env=[],
-        )
+        ensembler=docker_router_ensembler_config
     )
 
 

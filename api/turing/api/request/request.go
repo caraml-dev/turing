@@ -23,7 +23,7 @@ type CreateOrUpdateRouterRequest struct {
 // RouterConfig defines the properties of the specific router version
 type RouterConfig struct {
 	Routes           models.Routes           `json:"routes" validate:"required"`
-	DefaultRouteID   string                  `json:"default_route_id" validate:"required"`
+	DefaultRouteID   *string                 `json:"default_route_id"`
 	TrafficRules     models.TrafficRules     `json:"rules" validate:"dive"`
 	ExperimentEngine *ExperimentEngineConfig `json:"experiment_engine" validate:"required,dive"`
 	ResourceRequest  *models.ResourceRequest `json:"resource_request"`
@@ -114,13 +114,17 @@ func (r RouterConfig) BuildRouterVersion(
 	expSvc service.ExperimentsService,
 	ensemblersSvc service.EnsemblersService,
 ) (rv *models.RouterVersion, err error) {
+	var defaultRouteID string
+	if r.DefaultRouteID != nil {
+		defaultRouteID = *r.DefaultRouteID
+	}
 	rv = &models.RouterVersion{
 		RouterID:       router.ID,
 		Router:         router,
 		Image:          defaults.Image,
 		Status:         models.RouterVersionStatusPending,
 		Routes:         r.Routes,
-		DefaultRouteID: r.DefaultRouteID,
+		DefaultRouteID: defaultRouteID,
 		TrafficRules:   r.TrafficRules,
 		ExperimentEngine: &models.ExperimentEngine{
 			Type: r.ExperimentEngine.Type,
@@ -206,9 +210,12 @@ func (r RouterConfig) BuildExperimentEngineConfig(
 	expSvc service.ExperimentsService,
 ) (json.RawMessage, error) {
 	rawExpConfig := r.ExperimentEngine.Config
-
-	// Handle missing passkey / encrypt it in Standard experiment config
-	if expSvc.IsStandardExperimentManager(r.ExperimentEngine.Type) {
+	// Handle missing passkey / encrypt it, if Standard experiment config using client selection
+	isClientSelectionEnabled, err := expSvc.IsClientSelectionEnabled(r.ExperimentEngine.Type)
+	if err != nil {
+		return nil, err
+	}
+	if isClientSelectionEnabled {
 		// Convert the new config to the standard type
 		expConfig, err := manager.ParseStandardExperimentConfig(rawExpConfig)
 		if err != nil {

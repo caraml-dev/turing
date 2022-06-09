@@ -73,6 +73,8 @@ class Route:
 class InvalidUrlException(Exception):
     pass
 
-
 class DuplicateRouteException(Exception):
+    pass
+
+class InvalidRouteException(Exception):
     pass

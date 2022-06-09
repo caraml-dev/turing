@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { EuiEmptyPrompt, EuiLoadingChart } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { RouterConfigDetails } from "../../components/configuration/RouterConfigDetails";
@@ -8,11 +8,6 @@ import { Status } from "../../../services/status/Status";
 
 export const RouterConfigView = ({ router }) => {
   const configSectionRef = useRef();
-
-  const status = useMemo(
-    () => Status.fromValue(router.status),
-    [router.status]
-  );
 
   useEffect(() => {
     replaceBreadcrumbs([
@@ -32,9 +27,11 @@ export const RouterConfigView = ({ router }) => {
 
   return router.config ? (
     <div ref={configSectionRef}>
-      {[Status.UNDEPLOYED, Status.PENDING].includes(status) && (
+      {[Status.UNDEPLOYED, Status.PENDING].includes(router.status) && (
         <OverlayMask parentRef={configSectionRef} opacity={0.4}>
-          {status === Status.PENDING && <EuiLoadingChart size="xl" mono />}
+          {router.status === Status.PENDING && (
+            <EuiLoadingChart size="xl" mono />
+          )}
         </OverlayMask>
       )}
       <ExperimentEngineContextProvider>
@@ -49,8 +46,8 @@ export const RouterConfigView = ({ router }) => {
       title={<h2>Router is not deployed</h2>}
       body={
         <p>
-          Deploy it first and wait for deployment to complete before you can see
-          the configuration details here
+          Deploy it first and wait for the deployment to complete before you can
+          see the configuration details here
         </p>
       }
     />

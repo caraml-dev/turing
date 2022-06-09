@@ -23,8 +23,6 @@ on:
   pull_request:
     branches:
       - main
-      # TODO: remove after this feature is complete
-      - upgrade-knative
     paths-ignore:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"
@@ -143,6 +141,9 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+
+      - name: Install system dependencies
+        run: sudo apt-get install --no-install-recommends gcc make libpng-dev
 
       - name: Set up Node 14.x
         uses: actions/setup-node@v1
@@ -432,7 +433,7 @@ jobs:
           VAULT_TOKEN: root
         run: |
           echo "::group::Wait for Vault to become available"
-          timeout --foreground 100 bash -c \
+          timeout --foreground 45 bash -c \
             'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
           echo "::endgroup::"
 
@@ -540,12 +541,12 @@ jobs:
           kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
           echo "::endgroup::"
 
-          echo "::group::logs deployment/turing-merlin"
-          kubectl logs deployment/turing-merlin
-          echo "::endgroup::"
-
           echo "::group::logs deployment/turing-mlp"
           kubectl logs deployment/turing-mlp
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing-merlin"
+          kubectl logs deployment/turing-merlin
           echo "::endgroup::"
 
           echo "::group::logs deployment/turing"

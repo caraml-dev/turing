@@ -1,3 +1,4 @@
+import deprecation
 import inspect
 from typing import List, Dict, Union
 from collections import Counter
@@ -10,7 +11,13 @@ from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
-from turing.router.config.router_ensembler_config import RouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import (
+    DockerRouterEnsemblerConfig,
+    NopRouterEnsemblerConfig,
+    PyfuncRouterEnsemblerConfig,
+    RouterEnsemblerConfig,
+    StandardRouterEnsemblerConfig,
+)
 from turing.router.config.experiment_config import ExperimentConfig
 
 
@@ -73,6 +80,7 @@ class RouterConfig:
         self.timeout = timeout
         self.log_config = log_config
         self.enricher = enricher
+        # Init ensembler after the default route has been initialized
         self.ensembler = ensembler
 
     @property
@@ -124,12 +132,23 @@ class RouterConfig:
             self._rules = rules
 
     @property
+    @deprecation.deprecated(deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.")
     def default_route_id(self) -> str:
         return self._default_route_id
 
     @default_route_id.setter
+    @deprecation.deprecated(deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.")
     def default_route_id(self, default_route_id: str):
         self._default_route_id = default_route_id
+        # User may directly modify the default_route_id property while it is deprecated.
+        # So, copy to the nop / standard ensembler if set.
+        if hasattr(self, "ensembler"):
+            if isinstance(self.ensembler, NopRouterEnsemblerConfig):
+                self.ensembler.final_response_route_id = default_route_id
+            elif isinstance(self.ensembler, StandardRouterEnsemblerConfig):
+                self.ensembler.fallback_response_route_id = default_route_id
 
     @property
     def experiment_engine(self) -> ExperimentConfig:
@@ -197,16 +216,35 @@ class RouterConfig:
 
     @ensembler.setter
     def ensembler(self, ensembler: Union[RouterEnsemblerConfig, Dict]):
-        if isinstance(ensembler, RouterEnsemblerConfig):
-            self._ensembler = ensembler
+        if ensembler is None:
+            # Init nop ensembler config if ensembler is not set
+            self._ensembler = NopRouterEnsemblerConfig(final_response_route_id=self.default_route_id)
         elif isinstance(ensembler, dict):
+            # Set fallback_response_route_id into standard ensembler config
+            if ensembler["type"] == "standard" and "fallback_response_route_id" not in ensembler["standard_config"]:
+                ensembler["standard_config"]["fallback_response_route_id"] = self.default_route_id
             self._ensembler = RouterEnsemblerConfig(**ensembler)
         else:
             self._ensembler = ensembler
-
+        # Init child class types
+        if isinstance(self._ensembler, RouterEnsemblerConfig):
+            if self._ensembler.type == "nop" and not isinstance(self._ensembler, NopRouterEnsemblerConfig):
+                self._ensembler = NopRouterEnsemblerConfig.from_config(self._ensembler.nop_config)
+            elif self._ensembler.type == "standard" and not isinstance(self._ensembler, StandardRouterEnsemblerConfig):
+                self._ensembler = StandardRouterEnsemblerConfig.from_config(self._ensembler.standard_config)
+            elif self._ensembler.type == "docker" and not isinstance(self._ensembler, DockerRouterEnsemblerConfig):
+                self._ensembler = DockerRouterEnsemblerConfig.from_config(self._ensembler.docker_config)
+            elif self._ensembler.type == "pyfunc" and not isinstance(self._ensembler, PyfuncRouterEnsemblerConfig):
+                self._ensembler = PyfuncRouterEnsemblerConfig.from_config(self._ensembler.pyfunc_config)
+            
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
         self._verify_no_duplicate_routes()
+        
+        # Get default route id if exists
+        default_route_id = self._get_default_route_id()
+        if default_route_id is not None:
+            kwargs['default_route_id'] = default_route_id
 
         if self.rules is not None:
             kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
@@ -216,19 +254,41 @@ class RouterConfig:
             kwargs['enricher'] = self.enricher.to_open_api()
         if self.ensembler is not None:
             kwargs['ensembler'] = self.ensembler.to_open_api()
+            if kwargs['ensembler'] is None:
+                # The Turing API does not handle an ensembler type "nop" - it must be left unset.
+                del kwargs['ensembler']
 
         return turing.generated.models.RouterConfig(
             environment_name=self.environment_name,
             name=self.name,
             config=turing.generated.models.RouterVersionConfig(
                 routes=[route.to_open_api() for route in self.routes],
-                default_route_id=self.default_route_id,
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
                 **kwargs
             )
         )
+
+    def _get_default_route_id(self):
+        default_route_id = None
+        # If nop config is set, use the final_response_route_id as the default
+        if isinstance(self.ensembler, NopRouterEnsemblerConfig):
+            default_route_id = self.ensembler.final_response_route_id
+        # Or, if standard config is set, use the fallback_response_route_id as the default
+        elif isinstance(self.ensembler, StandardRouterEnsemblerConfig):
+            default_route_id = self.ensembler.fallback_response_route_id
+        if default_route_id is not None:
+            self._verify_default_route_exists(default_route_id)
+        return default_route_id
+
+    def _verify_default_route_exists(self, default_route_id: str):
+        for route in self.routes:
+            if route.id == default_route_id:
+                return
+        raise turing.router.config.route.InvalidRouteException(
+                f"Default route id {default_route_id} is not registered in the routes."
+            )
 
     def _verify_no_duplicate_routes(self):
         route_id_counter = Counter(route.id for route in self.routes)

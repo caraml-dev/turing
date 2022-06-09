@@ -13,6 +13,9 @@ export class PyFuncEnsembler extends Ensembler {
   static fromJson(json = {}) {
     const ensembler = new PyFuncEnsembler();
     ensembler.pyfunc_config = objectAssignDeep({}, json.pyfunc_config);
+    if (!!json.docker_config) {
+      ensembler.docker_config = objectAssignDeep({}, json.docker_config);
+    }
     return ensembler;
   }
 

@@ -37,6 +37,27 @@ func (_m *ExperimentsService) GetExperimentRunnerConfig(engine string, cfg json.
 	return r0, r1
 }
 
+// IsClientSelectionEnabled provides a mock function with given fields: engine
+func (_m *ExperimentsService) IsClientSelectionEnabled(engine string) (bool, error) {
+	ret := _m.Called(engine)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(engine)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(engine)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IsStandardExperimentManager provides a mock function with given fields: engine
 func (_m *ExperimentsService) IsStandardExperimentManager(engine string) bool {
 	ret := _m.Called(engine)

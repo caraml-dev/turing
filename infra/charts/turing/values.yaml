@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: v1.3.4
+    tag: v1.5.0
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -101,7 +101,7 @@ turing:
     useInClusterConfig: false
 
   # -- Turing Experiment Engines configuration
-  experimentEngines: {}
+  experimentEngines: []
   # Example:
   # - name: my-exp-engine
   #   type: rpc-plugin
@@ -125,7 +125,8 @@ turing:
         BuildNamespace: default
         BuildTimeoutDuration: 20m
         DestinationRegistry: ghcr.io
-        BaseImageRef: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
+        BaseImageRef:
+          3.7.*: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
         KanikoConfig:
           BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
           DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile

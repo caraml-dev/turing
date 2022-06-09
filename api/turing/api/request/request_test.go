@@ -65,6 +65,7 @@ func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
 	return expEngineConfig
 }
 
+var defaultRouteID string = "default"
 var validRouterConfig = RouterConfig{
 	Routes: []*models.Route{
 		{
@@ -74,7 +75,7 @@ var validRouterConfig = RouterConfig{
 			Timeout:  "6s",
 		},
 	},
-	DefaultRouteID: "default",
+	DefaultRouteID: &defaultRouteID,
 	ExperimentEngine: &ExperimentEngineConfig{
 		Type:   "standard",
 		Config: makeTuringExperimentConfig("dummy_passkey"),
@@ -141,7 +142,7 @@ var invalidRouterConfig = RouterConfig{
 			Timeout:  "6s",
 		},
 	},
-	DefaultRouteID: "default",
+	DefaultRouteID: &defaultRouteID,
 	ExperimentEngine: &ExperimentEngineConfig{
 		Type:   "standard",
 		Config: makeTuringExperimentConfig("dummy_passkey"),
@@ -220,7 +221,6 @@ func TestRequestBuildRouter(t *testing.T) {
 }
 
 func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
-
 	baseRequest := CreateOrUpdateRouterRequest{
 		Environment: "env",
 		Name:        "router",
@@ -411,7 +411,7 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 
 	// Set up mock Experiment service
 	expSvc := &mocks.ExperimentsService{}
-	expSvc.On("IsStandardExperimentManager", mock.Anything).Return(true)
+	expSvc.On("IsClientSelectionEnabled", mock.Anything).Return(true, nil)
 
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
@@ -459,6 +459,35 @@ func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
 	assert.Nil(t, got)
 }
 
+func TestRequestBuildRouterVersionNoDefaultRoute(t *testing.T) {
+	defaults := &config.RouterDefaults{
+		Image: "routerimage",
+	}
+	router := &models.Router{
+		ProjectID:       models.ID(1),
+		EnvironmentName: "env",
+		Name:            "router",
+		Status:          "pending",
+	}
+	cfg := RouterConfig{
+		Routes: []*models.Route{
+			{
+				ID:       "default",
+				Type:     "PROXY",
+				Endpoint: "endpoint",
+				Timeout:  "6s",
+			},
+		},
+		Timeout:          "10s",
+		ExperimentEngine: &ExperimentEngineConfig{Type: "nop"},
+		LogConfig:        &LogConfig{ResultLoggerType: "nop"},
+	}
+
+	rv, err := cfg.BuildRouterVersion(router, defaults, nil, nil, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "", rv.DefaultRouteID)
+}
+
 func TestBuildExperimentEngineConfig(t *testing.T) {
 	// Set up mock Crypto service
 	cs := &mocks.CryptoService{}
@@ -468,8 +497,8 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 		Return("passkey-enc", nil)
 
 	es := &mocks.ExperimentsService{}
-	es.On("IsStandardExperimentManager", "standard-manager").Return(true)
-	es.On("IsStandardExperimentManager", "custom-manager").Return(false)
+	es.On("IsClientSelectionEnabled", "standard-manager").Return(true, nil)
+	es.On("IsClientSelectionEnabled", "custom-manager").Return(false, nil)
 
 	// Define tests
 	tests := map[string]struct {

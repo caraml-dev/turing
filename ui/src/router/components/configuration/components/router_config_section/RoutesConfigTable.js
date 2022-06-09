@@ -59,6 +59,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       return acc;
     }, {});
 
+    // Keep the default route (used in Nop / Std ensemblers), if any, on top
     return routes
       .sort((r1, r2) =>
         r1.id === defaultRouteId ? -1 : r2.id === defaultRouteId ? 1 : 0
@@ -129,16 +130,6 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
     },
   ];
 
-  const getRowProps = (item) => {
-    const { id } = item;
-    return id === defaultRouteId
-      ? {
-          className: "euiTableRow-isSelected",
-          title: "Default Route",
-        }
-      : {};
-  };
-
   const getCellProps = (item, column) => {
     const { id } = item;
     const { field } = column;
@@ -155,7 +146,6 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isSelectable={false}
-      rowProps={getRowProps}
       cellProps={getCellProps}
     />
   );

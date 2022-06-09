@@ -3,7 +3,7 @@ import { EuiFlexItem, EuiSpacer } from "@elastic/eui";
 
 import { RemoteComponent } from "../../../../../components/remote_component/RemoteComponent";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
-import useDynamicScript from "../../../../../hooks/useDynamicScript";
+import { ExperimentEngineLoaderComponent } from "../../../../../components/experiments/ExperimentEngineLoaderComponent";
 import { Panel } from "../Panel";
 
 import { StandardExperimentConfigGroup } from "./StandardExperimentConfigGroup";
@@ -24,29 +24,24 @@ const CustomExperimentEngineConfigGroup = ({
   onChangeHandler,
   errors,
 }) => {
-  // Retrieve script from host dynamically
-  const { ready, failed } = useDynamicScript({
-    url: remoteUi.url,
-  });
-
-  if (!ready || failed) {
-    const text = failed
-      ? "Failed to load Experiment Engine"
-      : "Loading Experiment Engine ...";
-    return <FallbackView text={text} />;
-  }
-
   // Load component from remote host
   return (
-    <RemoteComponent
-      scope={remoteUi.name}
-      name="./EditExperimentEngineConfig"
-      fallback={<FallbackView text="Loading Experiment Engine config" />}
-      projectId={projectId}
-      config={config}
-      onChangeHandler={onChangeHandler}
-      errors={errors}
-    />
+    <React.Suspense
+      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      <ExperimentEngineLoaderComponent
+        FallbackView={FallbackView}
+        experimentEngine={remoteUi}>
+        <RemoteComponent
+          scope={remoteUi.name}
+          name="./EditExperimentEngineConfig"
+          fallback={<FallbackView text="Loading Experiment Engine config" />}
+          projectId={projectId}
+          config={config}
+          onChangeHandler={onChangeHandler}
+          errors={errors}
+        />
+      </ExperimentEngineLoaderComponent>
+    </React.Suspense>
   );
 };
 

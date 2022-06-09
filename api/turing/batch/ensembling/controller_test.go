@@ -218,8 +218,8 @@ func TestCreate(t *testing.T) {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
 				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -250,8 +250,8 @@ func TestCreate(t *testing.T) {
 					nil,
 					fmt.Errorf("hi"),
 				)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -290,8 +290,8 @@ func TestCreate(t *testing.T) {
 					nil,
 					fmt.Errorf("hi"),
 				)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -340,8 +340,8 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 				).Return(nil, fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -391,8 +391,8 @@ func TestCreate(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 				).Return(nil, nil)
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -444,8 +444,8 @@ func TestCreate(t *testing.T) {
 				).Return(nil, nil)
 				ctrler.On("CreateSecret", mock.Anything, mock.Anything).Return(nil, nil)
 				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -499,8 +499,8 @@ func TestCreate(t *testing.T) {
 				ctrler.On("CreateSecret", mock.Anything, mock.Anything).Return(nil, nil)
 				ctrler.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				ctrler.On("CreateSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("hi"))
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 				return ctrler
 			},
 			mlpService: func() service.MLPService {
@@ -658,6 +658,8 @@ func TestDelete(t *testing.T) {
 				ctrler := &clustermock.Controller{}
 				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 
 				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apisparkv1beta2.SparkApplication{},
@@ -673,8 +675,8 @@ func TestDelete(t *testing.T) {
 		"success | no such job": {
 			clusterController: func() cluster.Controller {
 				ctrler := &clustermock.Controller{}
-				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 
 				ctrler.On("GetSparkApplication", mock.Anything, mock.Anything, mock.Anything).Return(
 					nil,

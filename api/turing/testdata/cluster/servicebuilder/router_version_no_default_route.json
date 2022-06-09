@@ -1,0 +1,35 @@
+{
+    "router": {
+        "project_id": 10,
+        "environment_name": "id-dev",
+        "name": "test-svc"
+    },
+    "version": 1,
+    "status": "deployed",
+    "image": "asia.gcr.io/gcp-project-id/turing-router:latest",
+    "routes": [
+        {
+            "id": "control",
+            "type": "PROXY",
+            "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
+            "timeout": "2s"
+        }
+    ],
+    "experiment_engine": {
+        "type": "nop"
+    },
+    "resource_request": {
+        "min_replica": 2,
+        "max_replica": 4,
+        "cpu_request": "400m",
+        "memory_request": "512Mi"
+    },
+    "timeout": "5s",
+    "log_config": {
+        "log_level": "INFO",
+        "custom_metrics_enabled": false,
+        "fiber_debug_log_enabled": false,
+        "jaeger_enabled": false,
+        "result_logger_type": "nop"
+    }
+}

@@ -107,7 +107,6 @@ class RouterVersion(ModelNormal):
             'error': (str,),  # noqa: E501
             'image': (str,),  # noqa: E501
             'routes': ([Route],),  # noqa: E501
-            'default_route': (str,),  # noqa: E501
             'experiment_engine': (ExperimentConfig,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
@@ -134,7 +133,6 @@ class RouterVersion(ModelNormal):
         'error': 'error',  # noqa: E501
         'image': 'image',  # noqa: E501
         'routes': 'routes',  # noqa: E501
-        'default_route': 'default_route',  # noqa: E501
         'experiment_engine': 'experiment_engine',  # noqa: E501
         'resource_request': 'resource_request',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
@@ -201,7 +199,6 @@ class RouterVersion(ModelNormal):
             error (str): [optional]  # noqa: E501
             image (str): [optional]  # noqa: E501
             routes ([Route]): [optional]  # noqa: E501
-            default_route (str): [optional]  # noqa: E501
             experiment_engine (ExperimentConfig): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
             timeout (str): [optional]  # noqa: E501

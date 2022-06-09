@@ -38,7 +38,6 @@ export const RouterStep = ({ projectId }) => {
           environmentName={data.environment_name}>
           <RoutesPanel
             routes={get(data, "config.routes")}
-            defaultRouteId={get(data, "config.default_route_id")}
             onChangeHandler={onChange("config")}
             errors={get(errors, "config.routes")}
           />
@@ -48,7 +47,6 @@ export const RouterStep = ({ projectId }) => {
         <RulesPanel
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
-          defaultRouteId={get(data, "config.default_route_id")}
           onChangeHandler={onChange("config")}
           errors={get(errors, "config.rules")}
         />

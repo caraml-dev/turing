@@ -178,6 +178,8 @@ components:
             artifact_uri:
               type: "string"
               format: "uri"
+            python_version:
+              type: "string"
 
     EnsemblersPaginatedResults:
       allOf:

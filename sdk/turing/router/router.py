@@ -1,7 +1,7 @@
 import time
 import logging
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import turing.generated.models
 from turing._base_types import ApiObject, ApiObjectSpec
@@ -75,8 +75,11 @@ class Router(ApiObject):
         return self._status
 
     @property
-    def config(self) -> 'RouterConfig':
-        return RouterConfig(name=self.name, environment_name=self.environment_name, **self._config)
+    def config(self) -> Optional['RouterConfig']:
+        if self._config is not None:
+            return RouterConfig(name=self.name, environment_name=self.environment_name, **self._config)
+        else:
+            return None
 
     @property
     def version(self) -> int:

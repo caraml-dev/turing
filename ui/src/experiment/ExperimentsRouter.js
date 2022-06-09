@@ -9,7 +9,7 @@ import {
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
-import useDynamicScript from "../hooks/useDynamicScript";
+import { ExperimentEngineLoaderComponent } from "../components/experiments/ExperimentEngineLoaderComponent";
 
 import { useConfig } from "../config";
 
@@ -33,28 +33,20 @@ const FallbackView = ({ text }) => (
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
 
-  // Retrieve script from host dynamically
-  const { ready, failed } = useDynamicScript({
-    url: defaultExperimentEngine.url,
-  });
-
-  if (!ready || failed) {
-    const text = failed
-      ? "Failed to load Experiment Engine"
-      : "Loading Experiment Engine ...";
-    return <FallbackView text={text} />;
-  }
-
   // Load component from remote host
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <RemoteComponent
-        scope={defaultExperimentEngine.name}
-        name="./ExperimentsLandingPage"
-        fallback={<FallbackView text="Loading Experiment Engine" />}
-        projectId={projectId}
-      />
+      <ExperimentEngineLoaderComponent
+        FallbackView={FallbackView}
+        experimentEngine={defaultExperimentEngine}>
+        <RemoteComponent
+          scope={defaultExperimentEngine.name}
+          name="./ExperimentsLandingPage"
+          fallback={<FallbackView text="Loading Experiment Engine" />}
+          projectId={projectId}
+        />
+      </ExperimentEngineLoaderComponent>
     </React.Suspense>
   );
 };
