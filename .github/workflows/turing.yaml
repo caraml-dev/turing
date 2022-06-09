@@ -23,8 +23,6 @@ on:
   pull_request:
     branches:
       - main
-      # TODO: remove after this feature is complete
-      - upgrade-knative
     paths-ignore:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"

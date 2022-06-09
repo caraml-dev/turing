@@ -17,7 +17,6 @@ on:
   pull_request:
     branches:
       - main
-      - upgrade-knative
     paths:
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - "engines/pyfunc-ensembler-service/**"

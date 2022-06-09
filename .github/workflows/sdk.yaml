@@ -16,7 +16,6 @@ on:
   pull_request:
     branches:
       - main
-      - upgrade-knative
     paths:
       - ".github/workflows/sdk.yaml"
       - "sdk/**"
