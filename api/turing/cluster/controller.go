@@ -435,7 +435,6 @@ func (c *controller) DeleteIstioVirtualService(
 	namespace string,
 	timeout time.Duration,
 ) error {
-	// It is safe to upgrade this to v1beta1 as it can delete v1alpha3 versions of VirtualService as well.
 	vservices := c.istioClient.VirtualServices(namespace)
 	_, err := vservices.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
