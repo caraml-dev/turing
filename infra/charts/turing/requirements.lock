@@ -1,12 +1,12 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 8.9.8
+  version: 10.16.2
 - name: mlp
   repository: file://subcharts/mlp
   version: 1.0.1
 - name: merlin
   repository: file://subcharts/merlin
   version: 0.7.1
-digest: sha256:62dbfb1f6d5d038e0d5d4e7f5c5f47c1e637293899136e4347829124e9db364d
-generated: "2021-11-16T14:56:44.145523+08:00"
+digest: sha256:6f49ea5b08170eeb7493194e4bfb8efa5db363fa8e00e97f94a124a18bb6c84c
+generated: "2022-06-10T08:19:37.784556+08:00"
