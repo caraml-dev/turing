@@ -189,7 +189,7 @@ sentry:
   dsn: ""
 
 # -- Postgresql configuration to be applied to Turing's postgresql database deployment
-# Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
+# Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
 postgresql:
   # -- Resources requests and limits for Turing database. This should be set
   # according to your cluster capacity and service level objectives.
@@ -203,10 +203,13 @@ postgresql:
     enabled: true
     size: 10Gi
   postgresqlDatabase: turing
-  postgresqlPort: 5432
   postgresqlUsername: turing
   # -- Password for Turing Postgresql database
   postgresqlPassword: turing
+  tls:
+    enabled: false
+  containerPorts:
+      postgresql: 5432
   metrics:
     enabled: false
     serviceMonitor:
@@ -241,22 +244,30 @@ mlp:
       value: "http://feast.dev/v1"
 
   # -- Postgresql configuration to be applied to MLP's postgresql database deployment
-  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
+  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
   postgresql:
     # -- Name of MLP's Postgresql deployment
     nameOverride: postgresql-mlp
     # -- Password for MLP Postgresql database
     postgresqlPassword: mlp
+    tls:
+      enabled: false
+    containerPorts:
+      postgresql: 5432
 
 
 merlin:
   # -- Postgresql configuration to be applied to Merlin's's postgresql database deployment
-  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters
+  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
   postgresql:
     # -- Name of Merlin's Postgresql deployment
     nameOverride: postgresql-merlin
     # -- Password for Merlin Postgresql database
     postgresqlPassword: merlin
+    tls:
+      enabled: false
+    containerPorts:
+      postgresql: 5432
 
   mlpApi:
     # -- API endpoint to be used by Merlin to talk to MLP API
