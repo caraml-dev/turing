@@ -71,15 +71,19 @@ The following table lists the configurable parameters of the Turing chart and th
 | global.sentry.dsn | string | `nil` | Global Sentry DSN value |
 | merlin.environmentConfigs | list | computed value | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
 | merlin.mlpApi.apiHost | string | computed value | API endpoint to be used by Merlin to talk to MLP API |
-| merlin.postgresql | object | `{"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| merlin.postgresql | object | `{"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
 | merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
+| merlin.postgresql.tls.enabled | bool | `false`| TLS Setting disabled |
+| merlin.postgresql.containerPorts.postgresql | int | `5432`| PostgreSQL container port |
 | mlp.apiHost | string | `"/api/v1"` | MLP API endpoint, used by the MLP UI for fetching data |
 | mlp.extraEnvs | list | computed value | List of extra environment variables to add to MLP API container |
-| mlp.postgresql | object | `{"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| mlp.postgresql | object | `{"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
 | mlp.postgresql.postgresqlPassword | string | `"mlp"` | Password for MLP Postgresql database |
-| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlPort":5432,"postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/8.9.8#parameters |
+| mlp.postgresql.tls.enabled | bool | `false`| TLS Setting disabled |
+| mlp.postgresql.containerPorts.postgresql | int | `5432`| PostgreSQL container port |
+| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}},"tls":{"enabled":false},"containerPorts":{"postgresql":5432}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
 | postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
