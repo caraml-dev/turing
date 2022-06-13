@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useRef } from "react";
+import React, { Fragment, useRef } from "react";
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,13 +18,14 @@ import { supportedAlerts } from "../config";
 
 export const RouterAlertDetails = ({ alertsData, routerStatus, ...props }) => {
   const alertDetailsRef = useRef();
-  const status = useMemo(() => Status.fromValue(routerStatus), [routerStatus]);
 
   return (
     <div ref={alertDetailsRef}>
-      {[Status.UNDEPLOYED, Status.PENDING].includes(status) && (
+      {[Status.UNDEPLOYED, Status.PENDING].includes(routerStatus) && (
         <OverlayMask parentRef={alertDetailsRef} opacity={0.4}>
-          {status === Status.PENDING && <EuiLoadingChart size="xl" mono />}
+          {routerStatus === Status.PENDING && (
+            <EuiLoadingChart size="xl" mono />
+          )}
         </OverlayMask>
       )}
       <EuiFlexGroup alignItems="baseline">
@@ -41,7 +42,7 @@ export const RouterAlertDetails = ({ alertsData, routerStatus, ...props }) => {
           <EuiButton
             size="s"
             onClick={() => props.navigate("./edit")}
-            disabled={status !== Status.DEPLOYED}>
+            disabled={routerStatus !== Status.DEPLOYED}>
             Configure Alerts
           </EuiButton>
         </EuiFlexItem>

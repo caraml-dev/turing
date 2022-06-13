@@ -38,6 +38,8 @@ on:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
+  GO_VERSION: 1.18
+  GO_LINT_VERSION: v1.45.2
 
 jobs:
   build-api:
@@ -140,6 +142,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Install system dependencies
+        run: sudo apt-get install --no-install-recommends gcc make libpng-dev
+
       - name: Set up Node 14.x
         uses: actions/setup-node@v1
         with:
@@ -211,10 +216,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.14
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.14"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -236,7 +241,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.41.1
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: api
           skip-go-installation: true
           args: --timeout 3m --verbose
@@ -254,10 +259,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.14
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.14"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -276,7 +281,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.41.1
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/router
           skip-go-installation: true
           args: --verbose
@@ -289,10 +294,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.14
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.14"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -309,7 +314,7 @@ jobs:
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.41.1
+          version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/experiment
           skip-go-installation: true
           args: --verbose
@@ -349,10 +354,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go 1.14
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.14"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Download Turing API Docker tar archive
         uses: actions/download-artifact@v2
@@ -373,11 +378,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-
-      - name: Set up Go 1.14
-        uses: actions/setup-go@v2
-        with:
-          go-version: "1.14"
 
       - name: Run action cluster-init
         uses: ./.github/actions/run-cluster-init
@@ -481,7 +481,7 @@ jobs:
             deployment/turing-mlp,
             deployment/turing-merlin,
             deployment/turing
-          timeout: 300 #seconds
+          timeout: 600 # seconds
           max-restarts: -1
 
       - name: Setup MLP project
@@ -522,25 +522,33 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-      - if: (steps.wait-for-deployment.outcome == 'failure' || steps.run-e2e-test.outcome == 'failure') && always()
+      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
+          echo "::group::describe deployment/turing-mlp"
+          kubectl describe deployment/turing-mlp
+          echo "::endgroup::"
+
           echo "::group::describe deployment/turing-merlin"
           kubectl describe deployment/turing-merlin
           echo "::endgroup::"
-          
+
           echo "::group::describe deployment/turing"
           kubectl describe deployment/turing
           echo "::endgroup::"
-          
+
           echo "::group::secret/turing-api-config"
           kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
           echo "::endgroup::"
-          
+
+          echo "::group::logs deployment/turing-mlp"
+          kubectl logs deployment/turing-mlp
+          echo "::endgroup::"
+
           echo "::group::logs deployment/turing-merlin"
           kubectl logs deployment/turing-merlin
           echo "::endgroup::"
-          
+
           echo "::group::logs deployment/turing"
           kubectl logs deployment/turing
           echo "::endgroup::"

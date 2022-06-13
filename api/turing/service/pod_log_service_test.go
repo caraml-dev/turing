@@ -12,6 +12,7 @@ import (
 	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
 	"github.com/gojek/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
+	mock "github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -79,7 +80,7 @@ func TestPodLogServiceListPodLogs(t *testing.T) {
 
 	controller := &mocks.Controller{}
 	controller.
-		On("ListPods", "namespace", "serving.knative.dev/service=router1-turing-router-1").
+		On("ListPods", mock.Anything, "namespace", "serving.knative.dev/service=router1-turing-router-1").
 		Return(&corev1.PodList{
 			Items: []corev1.Pod{
 				{
@@ -103,10 +104,10 @@ func TestPodLogServiceListPodLogs(t *testing.T) {
 			},
 		}, nil)
 	controller.
-		On("ListPods", "listpods-error", "serving.knative.dev/service=router1-turing-router-1").
+		On("ListPods", mock.Anything, "listpods-error", "serving.knative.dev/service=router1-turing-router-1").
 		Return(nil, errors.New(""))
 	controller.
-		On("ListPods", "listpodlogs-error", "serving.knative.dev/service=router1-turing-router-1").
+		On("ListPods", mock.Anything, "listpodlogs-error", "serving.knative.dev/service=router1-turing-router-1").
 		Return(&corev1.PodList{
 			Items: []corev1.Pod{
 				{
@@ -116,24 +117,24 @@ func TestPodLogServiceListPodLogs(t *testing.T) {
 			},
 		}, nil)
 	controller.
-		On("ListPodLogs", "namespace", "json-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, SinceTime: &sinceTimeV1Minus1Sec}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
-		On("ListPodLogs", "namespace", "json-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
-		On("ListPodLogs", "namespace", "json-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, TailLines: &tailLines}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
-		On("ListPodLogs", "namespace", "text-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, SinceTime: &sinceTimeV1Minus1Sec}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
@@ -141,7 +142,7 @@ invalidtimestamp line3
 
 2020-07-07T08:00:00Z `)), nil)
 	controller.
-		On("ListPodLogs", "namespace", "text-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, TailLines: &tailLines}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
@@ -149,7 +150,7 @@ invalidtimestamp line3
 
 2020-07-07T08:00:00Z `)), nil)
 	controller.
-		On("ListPodLogs", "namespace", "text-payload",
+		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true}).
 		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
@@ -157,7 +158,7 @@ invalidtimestamp line3
 
 2020-07-07T08:00:00Z `)), nil)
 	controller.
-		On("ListPodLogs", "listpodlogs-error", "listpodlogs-error",
+		On("ListPodLogs", mock.Anything, "listpodlogs-error", "listpodlogs-error",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true}).
 		Return(nil, errors.New(""))
 	clusterControllers := map[string]cluster.Controller{"environment": controller}

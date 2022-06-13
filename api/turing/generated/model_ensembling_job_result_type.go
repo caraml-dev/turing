@@ -20,12 +20,12 @@ type EnsemblingJobResultType string
 
 // List of EnsemblingJobResultType
 const (
-	ENSEMBLINGJOBRESULTTYPE_DOUBLE EnsemblingJobResultType = "DOUBLE"
-	ENSEMBLINGJOBRESULTTYPE_FLOAT EnsemblingJobResultType = "FLOAT"
+	ENSEMBLINGJOBRESULTTYPE_DOUBLE  EnsemblingJobResultType = "DOUBLE"
+	ENSEMBLINGJOBRESULTTYPE_FLOAT   EnsemblingJobResultType = "FLOAT"
 	ENSEMBLINGJOBRESULTTYPE_INTEGER EnsemblingJobResultType = "INTEGER"
-	ENSEMBLINGJOBRESULTTYPE_LONG EnsemblingJobResultType = "LONG"
-	ENSEMBLINGJOBRESULTTYPE_STRING EnsemblingJobResultType = "STRING"
-	ENSEMBLINGJOBRESULTTYPE_ARRAY EnsemblingJobResultType = "ARRAY"
+	ENSEMBLINGJOBRESULTTYPE_LONG    EnsemblingJobResultType = "LONG"
+	ENSEMBLINGJOBRESULTTYPE_STRING  EnsemblingJobResultType = "STRING"
+	ENSEMBLINGJOBRESULTTYPE_ARRAY   EnsemblingJobResultType = "ARRAY"
 )
 
 var allowedEnsemblingJobResultTypeEnumValues = []EnsemblingJobResultType{
@@ -115,4 +115,3 @@ func (v *NullableEnsemblingJobResultType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

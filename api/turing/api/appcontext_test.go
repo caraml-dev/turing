@@ -35,6 +35,7 @@ func TestNewAppContext(t *testing.T) {
 	tolerationName := "batch-job"
 	timeout, _ := time.ParseDuration("10s")
 	delTimeout, _ := time.ParseDuration("1s")
+	defaultEnvironment := "dev"
 
 	driverCPURequest := "1"
 	driverMemoryRequest := "1Gi"
@@ -49,7 +50,7 @@ func TestNewAppContext(t *testing.T) {
 		BatchEnsemblingConfig: config.BatchEnsemblingConfig{
 			Enabled: true,
 			JobConfig: &config.JobConfig{
-				DefaultEnvironment: "dev",
+				DefaultEnvironment: defaultEnvironment,
 				DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
 					BatchEnsemblingJobResources: openapi.EnsemblingResources{
 						DriverCpuRequest:      &driverCPURequest,
@@ -94,7 +95,7 @@ func TestNewAppContext(t *testing.T) {
 			},
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
-			DefaultEnvironment: "dev",
+			DefaultEnvironment: defaultEnvironment,
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -132,7 +133,7 @@ func TestNewAppContext(t *testing.T) {
 			Database: "turing-db-name",
 		},
 		DeployConfig: &config.DeploymentConfig{
-			EnvironmentType: "dev",
+			EnvironmentType: defaultEnvironment,
 			Timeout:         timeout,
 			DeletionTimeout: delTimeout,
 			MaxCPU:          config.Quantity(resource.MustParse("200m")),
@@ -250,7 +251,9 @@ func TestNewAppContext(t *testing.T) {
 				"N2": "C2",
 			}, environmentClusterMap)
 			assert.Equal(t, testVaultClient, vaultClient)
-			return map[string]cluster.Controller{}, nil
+			return map[string]cluster.Controller{
+				defaultEnvironment: nil,
+			}, nil
 		},
 	)
 	monkey.Patch(gitlab.NewClient,
@@ -325,7 +328,9 @@ func TestNewAppContext(t *testing.T) {
 		Authorizer: testAuthorizer,
 		DeploymentService: service.NewDeploymentService(
 			testCfg,
-			map[string]cluster.Controller{},
+			map[string]cluster.Controller{
+				defaultEnvironment: nil,
+			},
 			ensemblerImageBuilder,
 		),
 		RoutersService:        service.NewRoutersService(nil, mlpSvc, testCfg.RouterDefaults.MonitoringURLFormat),
@@ -338,7 +343,9 @@ func TestNewAppContext(t *testing.T) {
 		MLPService:            mlpService,
 		ExperimentsService:    experimentService,
 		PodLogService: service.NewPodLogService(
-			map[string]cluster.Controller{},
+			map[string]cluster.Controller{
+				defaultEnvironment: nil,
+			},
 		),
 		AlertService: alertService,
 		BatchRunners: []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},

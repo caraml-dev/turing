@@ -67,7 +67,7 @@ func NewBatchEnsemblingController(
 }
 
 func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.EnsemblingJob) error {
-	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	sa, err := c.clusterController.GetSparkApplication(context.Background(), namespace, ensemblingJob.Name)
 	if err != nil {
 		c.cleanup(ensemblingJob.Name, namespace)
 		// Not found, we do not consider this as an error because its just no further
@@ -75,14 +75,14 @@ func (c *ensemblingController) Delete(namespace string, ensemblingJob *models.En
 		return nil
 	}
 	c.cleanup(ensemblingJob.Name, namespace)
-	return c.clusterController.DeleteSparkApplication(namespace, sa.Name)
+	return c.clusterController.DeleteSparkApplication(context.Background(), namespace, sa.Name)
 }
 
 func (c *ensemblingController) GetStatus(
 	namespace string,
 	ensemblingJob *models.EnsemblingJob,
 ) (SparkApplicationState, error) {
-	sa, err := c.clusterController.GetSparkApplication(namespace, ensemblingJob.Name)
+	sa, err := c.clusterController.GetSparkApplication(context.Background(), namespace, ensemblingJob.Name)
 	if err != nil {
 		return SparkApplicationStateUnknown, fmt.Errorf("failed to retrieve spark application %v", err)
 	}
@@ -111,7 +111,7 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		}
 	}()
 
-	err = c.clusterController.CreateNamespace(request.Namespace)
+	err = c.clusterController.CreateNamespace(context.Background(), request.Namespace)
 	if errors.Is(err, cluster.ErrNamespaceAlreadyExists) {
 		// This error is ok to ignore because we just need the namespace.
 		err = nil
@@ -200,7 +200,7 @@ func (c *ensemblingController) createSparkApplication(
 		SparkInfraConfig:      c.sparkInfraConfig,
 		EnvVars:               jobRequest.EnsemblingJob.InfraConfig.Env,
 	}
-	return c.clusterController.CreateSparkApplication(jobRequest.Namespace, request)
+	return c.clusterController.CreateSparkApplication(context.Background(), jobRequest.Namespace, request)
 }
 
 func (c *ensemblingController) createJobConfigMap(
@@ -224,7 +224,7 @@ func (c *ensemblingController) createJobConfigMap(
 		Data:     string(jobConfigYAML),
 		Labels:   labels,
 	}
-	err = c.clusterController.ApplyConfigMap(namespace, cm)
+	err = c.clusterController.ApplyConfigMap(context.Background(), namespace, cm)
 	if err != nil {
 		return err
 	}
@@ -242,8 +242,8 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 		Labels: request.Labels,
 	}
 	// I'm not sure why we need to pass in a context here but not other kubernetes cluster functions.
-	// Leaving a context.TODO() until we figure out what to do with this.
-	err := c.clusterController.CreateSecret(context.TODO(), secret)
+	// Leaving a context.Background() until we figure out what to do with this.
+	err := c.clusterController.CreateSecret(context.Background(), secret)
 	if err != nil {
 		return err
 	}
@@ -252,12 +252,12 @@ func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest,
 }
 
 func (c *ensemblingController) cleanup(jobName string, namespace string) {
-	err := c.clusterController.DeleteSecret(jobName, namespace, false)
+	err := c.clusterController.DeleteSecret(context.Background(), jobName, namespace, false)
 	if err != nil {
 		log.Warnf("failed deleting secret %s in namespace %s: %v", jobName, namespace, err)
 	}
 
-	err = c.clusterController.DeleteConfigMap(jobName, namespace, false)
+	err = c.clusterController.DeleteConfigMap(context.Background(), jobName, namespace, false)
 	if err != nil {
 		log.Warnf("failed deleting job spec %s in namespace %s: %v", jobName, namespace, err)
 	}
@@ -274,7 +274,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		Namespace: namespace,
 		Labels:    labels,
 	}
-	sa, err := c.clusterController.CreateServiceAccount(namespace, saCfg)
+	sa, err := c.clusterController.CreateServiceAccount(context.Background(), namespace, saCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		Labels:      labels,
 		PolicyRules: cluster.DefaultSparkDriverRoleRules,
 	}
-	r, err := c.clusterController.CreateRole(namespace, roleCfg)
+	r, err := c.clusterController.CreateRole(context.Background(), namespace, roleCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		RoleName:           r.Name,
 		ServiceAccountName: sa.Name,
 	}
-	_, err = c.clusterController.CreateRoleBinding(namespace, roleBindingCfg)
+	_, err = c.clusterController.CreateRoleBinding(context.Background(), namespace, roleBindingCfg)
 	if err != nil {
 		return nil, err
 	}

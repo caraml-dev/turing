@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   EuiPage,
   EuiPageBody,
@@ -9,7 +9,7 @@ import {
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
-import useDynamicScript, { LoadDynamicScript } from "../hooks/useDynamicScript";
+import { ExperimentEngineLoaderComponent } from "../components/experiments/ExperimentEngineLoaderComponent";
 
 import { useConfig } from "../config";
 
@@ -32,44 +32,21 @@ const FallbackView = ({ text }) => (
 
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
-  const [configReady, setConfigReady] = useState(false);
-  const [configFailed, setConfigFailed] = useState(false);
-
-  // Retrieve script from host dynamically
-  const { ready, failed } = useDynamicScript({
-    url: defaultExperimentEngine.url,
-  });
-
-  if (!ready || failed) {
-    const text = failed
-      ? "Failed to load Experiment Engine"
-      : "Loading Experiment Engine ...";
-    return <FallbackView text={text} />;
-  } else if (!!defaultExperimentEngine.config && !configReady) {
-    return configFailed ? (
-      <FallbackView text={"Failed to load Experiment Engine Config"} />
-    ) : (
-      <>
-        <LoadDynamicScript
-          setReady={setConfigReady}
-          setFailed={setConfigFailed}
-          url={defaultExperimentEngine.config}
-        />
-        <FallbackView text={"Loading Experiment Engine Config..."} />
-      </>
-    );
-  }
 
   // Load component from remote host
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <RemoteComponent
-        scope={defaultExperimentEngine.name}
-        name="./ExperimentsLandingPage"
-        fallback={<FallbackView text="Loading Experiment Engine" />}
-        projectId={projectId}
-      />
+      <ExperimentEngineLoaderComponent
+        FallbackView={FallbackView}
+        experimentEngine={defaultExperimentEngine}>
+        <RemoteComponent
+          scope={defaultExperimentEngine.name}
+          name="./ExperimentsLandingPage"
+          fallback={<FallbackView text="Loading Experiment Engine" />}
+          projectId={projectId}
+        />
+      </ExperimentEngineLoaderComponent>
     </React.Suspense>
   );
 };

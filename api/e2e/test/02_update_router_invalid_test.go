@@ -1,4 +1,4 @@
-// +build e2e
+//go:build e2e
 
 package e2e
 
@@ -30,7 +30,7 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 	// Read existing router that MUST have already exists from previous create router e2e test
 	// Router name is assumed to follow this format: e2e-experiment-{{.TestID}}
 	routerName := "e2e-experiment-" + globalTestContext.TestID
-	t.Log(fmt.Sprintf("Retrieving router with name '%s' created from previous test step", routerName))
+	t.Logf("Retrieving router with name '%s' created from previous test step", routerName)
 	existingRouter, err := getRouterByName(
 		globalTestContext.httpClient, globalTestContext.APIBasePath, globalTestContext.ProjectID, routerName)
 	require.NoError(t, err)

@@ -1,8 +1,8 @@
 package cluster
 
 import (
-	networking "istio.io/api/networking/v1alpha3"
-	"istio.io/client-go/pkg/apis/networking/v1alpha3"
+	networking "istio.io/api/networking/v1beta1"
+	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,7 +17,7 @@ type VirtualService struct {
 	MatchURIPrefixes []string          `json:"match_uri_prefix"`
 }
 
-func (cfg VirtualService) BuildVirtualService() *v1alpha3.VirtualService {
+func (cfg VirtualService) BuildVirtualService() *v1beta1.VirtualService {
 	httpRouteDest := &networking.HTTPRouteDestination{
 		Destination: &networking.Destination{
 			Host: cfg.DestinationHost,
@@ -41,7 +41,7 @@ func (cfg VirtualService) BuildVirtualService() *v1alpha3.VirtualService {
 		httpMatches[index] = &uri
 	}
 
-	return &v1alpha3.VirtualService{
+	return &v1beta1.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfg.Name,
 			Namespace: cfg.Namespace,

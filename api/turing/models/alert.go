@@ -166,7 +166,8 @@ sum(rate(revision_request_count{
   pod=~"%s-[0-9]*.*"
 }[1m]))
 /
-sum(kube_pod_container_resource_requests_cpu_cores{
+sum(kube_pod_container_resource_requests{
+  resource="cpu",
   environment="%s",
   pod=~"%s-[0-9]*.*"
 }) * 100.0 %s %f
@@ -179,7 +180,8 @@ sum(kube_pod_container_resource_requests_cpu_cores{
   image!=""
 })
 /
-sum(kube_pod_container_resource_requests_memory_bytes{
+sum(kube_pod_container_resource_requests{
+  resource="memory",
   environment="%s",
   pod=~"%s-[0-9]*.*"
 }) * 100.0 %s %f

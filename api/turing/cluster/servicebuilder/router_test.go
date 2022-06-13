@@ -668,7 +668,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 		Endpoint:         "test-svc-turing-router.models.example.com",
 		HostRewrite:      "test-svc-turing-router-1.models.example.com",
 		Gateway:          defaultGateway,
-		DestinationHost:  defaultIstioGateway,
+		DestinationHost:  defaultIstioGatewayDestination,
 		MatchURIPrefixes: defaultMatchURIPrefixes,
 	}
 
