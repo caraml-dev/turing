@@ -13,8 +13,8 @@ Currently, only Gitlab repositories may be configured for publishing alerts. The
 | throughput | revision_request_count | Knative |
 | latency95p | revision_request_latencies_bucket | Knative |
 | error_rate | revision_request_count | Knative |
-| cpu_util | container_cpu_usage_seconds_total, kube_pod_container_resource_requests_cpu_cores | Kube state |
-| memory_util | container_memory_usage_bytes, kube_pod_container_resource_requests_memory_bytes | Kube state |
+| cpu_util | container_cpu_usage_seconds_total, kube_pod_container_resource_requests{resource="cpu"} | Kube state |
+| memory_util | container_memory_usage_bytes, kube_pod_container_resource_requests{resource="memory"} | Kube state |
 
 ## Sample Alert Configuration
 
@@ -24,7 +24,7 @@ groups:
       rules:
         - alert: turing-hello-turing-router_cpu_util_violation_development
           expr: |-
-            sum by(cluster) (rate(container_cpu_usage_seconds_total{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}[1m])) / sum by(cluster) (kube_pod_container_resource_requests_cpu_cores{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}) * 100 > 90
+            sum by(cluster) (rate(container_cpu_usage_seconds_total{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}[1m])) / sum by(cluster) (kube_pod_container_resource_requests{resource="cpu",environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}) * 100 > 90
           for: 5m
           labels:
             owner: foo
@@ -37,7 +37,7 @@ groups:
             summary: 'cpu_util is higher than the threshold: 90%'
         - alert: turing-hello-turing-router_cpu_util_violation_development
           expr: |-
-            sum by(cluster) (rate(container_cpu_usage_seconds_total{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}[1m])) / sum by(cluster) (kube_pod_container_resource_requests_cpu_cores{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}) * 100 > 95
+            sum by(cluster) (rate(container_cpu_usage_seconds_total{environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}[1m])) / sum by(cluster) (kube_pod_container_resource_requests{resource="cpu",environment="staging",pod=~"turing-hello-turing-router-[0-9]*.*"}) * 100 > 95
           for: 5m
           labels:
             owner: foo

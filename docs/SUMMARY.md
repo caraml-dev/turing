@@ -35,5 +35,5 @@
 ## Developer Guides
 * [Getting started](dev-docs/README.md)
 * [Monitoring and alerting](dev-docs/monitoring-and-alerting/README.md)
-    * [Configure a monitoring backend](dev-docs/monitoring-and-alerting/configure-monitoring-backend.md.md)
-    * [Configure an alerting backend](dev-docs/monitoring-and-alerting/configure-alerting-backend.md.md)
+    * [Configure a monitoring backend](dev-docs/monitoring-and-alerting/configure-monitoring-backend.md)
+    * [Configure an alerting backend](dev-docs/monitoring-and-alerting/configure-alerting-backend.md)
