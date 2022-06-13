@@ -1,9 +1,9 @@
-# Table of contents
+# Table of Contents
 
 * [Introduction](README.md)
 * [Concepts](concepts.md)
 
-## How to guides
+## User Guides
 * [Create a project](how-to/create-project.md)
 * [Create a router](how-to/create-a-router/README.md)
     * [Configure general settings](how-to/create-a-router/configure-general-settings.md)
@@ -19,12 +19,21 @@
     * [History](how-to/viewing-routers/history.md)
     * [Logs](how-to/viewing-routers/logs.md)
     * [More actions](how-to/viewing-routers/more-actions.md)
+* [Monitoring routers](how-to/monitor-a-router/README.md)
+    * [Monitor Router Performance](how-to/monitor-a-router/monitor-router-performance.md)
+    * [Configure Alerts](how-to/monitor-a-router/configure-alerts.md)
 * [Undeploying routers](how-to/undeploying-router.md)
-* [Redeploying routers](how-to/redeploy-router/README.md)
-    * [Redeploy undeployed router](how-to/redeploy-router/redeploy-undeployed-router.md)
-    * [Redeploy version from history](how-to/redeploy-router/redeploy-version-from-history.md)
-    * [Redeploy version from version details page](how-to/redeploy-router/redeploy-from-version-detail.md)
-* [Deleting routers](how-to/delete-router/README.md)
-    * [Deleting router versions](how-to/delete-router/delete-router-version.md)
-    * [Deleting router versions from details page](how-to/delete-router/delete-router-version-from-details-page.md)
-    * [Deleting routers](how-to/delete-router/delete-router.md)
+* [Redeploying routers](how-to/redeploy-a-router/README.md)
+    * [Redeploy undeployed router](how-to/redeploy-a-router/redeploy-undeployed-router.md)
+    * [Redeploy version from history](how-to/redeploy-a-router/redeploy-version-from-history.md)
+    * [Redeploy version from version details page](how-to/redeploy-a-router/redeploy-from-version-detail.md)
+* [Deleting routers](how-to/delete-a-router/README.md)
+    * [Deleting router versions](how-to/delete-a-router/delete-a-router-version.md)
+    * [Deleting router versions from details page](how-to/delete-a-router/delete-a-router-version-from-details-page.md)
+    * [Deleting routers](how-to/delete-a-router/delete-a-router.md)
+
+## Developer Guides
+* [Getting started](dev-docs/README.md)
+* [Monitoring and alerting](dev-docs/monitoring-and-alerting/README.md)
+    * [Configure a monitoring backend](dev-docs/monitoring-and-alerting/configure-monitoring-backend.md)
+    * [Configure an alerting backend](dev-docs/monitoring-and-alerting/configure-alerting-backend.md)
