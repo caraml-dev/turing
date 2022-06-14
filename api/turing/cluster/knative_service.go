@@ -72,10 +72,9 @@ func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
 		ObjectMeta: *kserviceObjectMeta,
 		Spec:       *kserviceSpec,
 	}
-	// Call setDefaults on desired knative service here to avoid diffs generated because
-	// knative defaulter webhook is called when creating or updating the knative service.
-	// Ref: https://github.com/kserve/kserve/blob/v0.8.0/pkg/controller/v1beta1
-	// /inferenceservice/reconcilers/knative/ksvc_reconciler.go#L159
+	// Call setDefaults on desired knative service here to avoid diffs generated because knative defaulter webhook
+	// is called when creating or updating the knative service. Ref: https://github.com/kserve/kserve/blob/v0.8.0
+	// /pkg/controller/v1beta1/inferenceservice/reconcilers/knative/ksvc_reconciler.go#L159
 	svc.SetDefaults(context.TODO())
 	return svc
 }
