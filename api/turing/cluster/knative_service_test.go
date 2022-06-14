@@ -183,8 +183,8 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 					Name:      "test-svc",
 					Namespace: "test-namespace",
 					Labels: map[string]string{
-						"labelKey":                          "labelVal",
-						"networking.knative.dev/visibility": "cluster-local",
+						"labelKey":                       "labelVal",
+						"serving.knative.dev/visibility": "cluster-local",
 					},
 				},
 				Spec: knservingv1.ServiceSpec{
