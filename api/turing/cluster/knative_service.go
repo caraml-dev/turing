@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -59,19 +60,24 @@ func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
 	kserviceLabels := clone(cfg.Labels)
 	if cfg.IsClusterLocal {
 		// Kservice should only be accessible from within the cluster
-		// https://knative.dev/docs/serving/cluster-local-route/
-		kserviceLabels["serving.knative.dev/visibility"] = "cluster-local"
+		// https://knative.dev/v1.2-docs/serving/services/private-services/
+		kserviceLabels["networking.knative.dev/visibility"] = "cluster-local"
 	}
 	kserviceObjectMeta := cfg.buildSvcObjectMeta(kserviceLabels)
 
 	revisionLabels := clone(cfg.Labels)
 	kserviceSpec := cfg.buildSvcSpec(revisionLabels)
 
-	return &knservingv1.Service{
+	svc := &knservingv1.Service{
 		ObjectMeta: *kserviceObjectMeta,
 		Spec:       *kserviceSpec,
 	}
-
+	// Call setDefaults on desired knative service here to avoid diffs generated because
+	// knative defaulter webhook is called when creating or updating the knative service.
+	// Ref: https://github.com/kserve/kserve/blob/v0.8.0/pkg/controller/v1beta1
+	// /inferenceservice/reconcilers/knative/ksvc_reconciler.go#L159
+	svc.SetDefaults(context.TODO())
+	return svc
 }
 
 func (cfg *KnativeService) buildSvcObjectMeta(labels map[string]string) *metav1.ObjectMeta {
