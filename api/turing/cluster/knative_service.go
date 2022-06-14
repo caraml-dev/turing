@@ -61,7 +61,7 @@ func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
 	if cfg.IsClusterLocal {
 		// Kservice should only be accessible from within the cluster
 		// https://knative.dev/v1.2-docs/serving/services/private-services/
-		kserviceLabels["serving.knative.dev/visibility"] = "cluster-local"
+		kserviceLabels["networking.knative.dev/visibility"] = "cluster-local"
 	}
 	kserviceObjectMeta := cfg.buildSvcObjectMeta(kserviceLabels)
 
