@@ -85,7 +85,17 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	}
 
 	// Expected specs
+	var defaultConcurrency, defaultTrafficPercent int64 = 0, 100
+	var defaultLatestRevision bool = true
 	var timeout int64 = 30
+	defaultRouteSpec := knservingv1.RouteSpec{
+		Traffic: []knservingv1.TrafficTarget{
+			{
+				LatestRevision: &defaultLatestRevision,
+				Percent:        &defaultTrafficPercent,
+			},
+		},
+	}
 	resources := corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("600m"),
@@ -113,6 +123,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	podSpec := corev1.PodSpec{
 		Containers: []corev1.Container{
 			{
+				Name:  "user-container",
 				Image: "asia.gcr.io/gcp-project-id/turing-router:latest",
 				Ports: []corev1.ContainerPort{
 					{
@@ -141,6 +152,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 					},
 					InitialDelaySeconds: 20,
 					PeriodSeconds:       10,
+					SuccessThreshold:    1,
 					TimeoutSeconds:      5,
 					FailureThreshold:    5,
 				},
@@ -171,8 +183,8 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 					Name:      "test-svc",
 					Namespace: "test-namespace",
 					Labels: map[string]string{
-						"labelKey":                       "labelVal",
-						"serving.knative.dev/visibility": "cluster-local",
+						"labelKey":                          "labelVal",
+						"networking.knative.dev/visibility": "cluster-local",
 					},
 				},
 				Spec: knservingv1.ServiceSpec{
@@ -192,11 +204,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 								},
 							},
 							Spec: knservingv1.RevisionSpec{
-								PodSpec:        podSpec,
-								TimeoutSeconds: &timeout,
+								PodSpec:              podSpec,
+								TimeoutSeconds:       &timeout,
+								ContainerConcurrency: &defaultConcurrency,
 							},
 						},
 					},
+					RouteSpec: defaultRouteSpec,
 				},
 			},
 		},
@@ -234,11 +248,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 								},
 							},
 							Spec: knservingv1.RevisionSpec{
-								PodSpec:        podSpec,
-								TimeoutSeconds: &timeout,
+								PodSpec:              podSpec,
+								TimeoutSeconds:       &timeout,
+								ContainerConcurrency: &defaultConcurrency,
 							},
 						},
 					},
+					RouteSpec: defaultRouteSpec,
 				},
 			},
 		},
