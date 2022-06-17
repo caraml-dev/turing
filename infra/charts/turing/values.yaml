@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: gojek/turing
     # -- Docker image tag for Turing API
-    tag: v1.6.0-rc1
+    tag: v1.6.0
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -157,7 +157,7 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:v1.3.4
+      Image: ghcr.io/gojek/turing/turing-router:v1.6.0
 
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
