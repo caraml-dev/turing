@@ -27,35 +27,31 @@ export const ExperimentEngineLoaderComponent = ({
   const [configReady, setConfigReady] = useState(false);
   const [configFailed, setConfigFailed] = useState(false);
 
-  if (!!experimentEngine.url && !urlReady) {
-    return urlFailed ? (
-      <FallbackView text={"Failed to load Experiment Engine"} />
-    ) : (
-      <>
+  return urlFailed ? (
+    <FallbackView text={"Failed to load Experiment Engine"} />
+  ) : configFailed ? (
+    <FallbackView text={"Failed to load Experiment Engine Config"} />
+  ) : !urlReady || !configReady ? (
+    <>
+      {!!experimentEngine.url && !urlReady && (
         <LoadDynamicScript
           setReady={setUrlReady}
           setFailed={setUrlFailed}
           url={experimentEngine.url}
         />
-        <FallbackView text={"Loading Experiment Engine..."} />
-      </>
-    );
-  } else if (!!experimentEngine.config && !configReady) {
-    return configFailed ? (
-      <FallbackView text={"Failed to load Experiment Engine Config"} />
-    ) : (
-      <>
+      )}
+      {!!experimentEngine.config && !configReady && (
         <LoadDynamicScript
           setReady={setConfigReady}
           setFailed={setConfigFailed}
           url={experimentEngine.config}
         />
-        <FallbackView text={"Loading Experiment Engine Config..."} />
-      </>
-    );
-  }
-
-  return children;
+      )}
+      <FallbackView text={"Loading Experiment Engine..."} />
+    </>
+  ) : (
+    children
+  );
 };
 
 export default ExperimentEngineLoaderComponent;
