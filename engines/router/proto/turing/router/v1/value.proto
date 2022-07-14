@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package turing.router.v1;
+
+import "turing/router/v1/tensor.proto";
+
+/* Represents a named and typed data point.
+ * Can be used as a prediction input, output or metdadata.
+ * Oneof types are avoided as these can be difficult to handle */
+message NamedValue {
+  /* Name describing what the value represents.
+   * Uses include:
+   * - Ensuring ML models process columns in the correct order
+   * - Parsing metadata to apply traffic rules
+   */
+  string name = 1;
+
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_DOUBLE = 1;
+    TYPE_INTEGER = 2;
+    TYPE_STRING = 3;
+    TYPE_TENSOR = 4;
+  }
+  Type type = 2;
+  double double_value = 3;
+  int32 integer_value = 4;
+  string string_value = 5;
+  Tensor tensor_value = 6;
+}

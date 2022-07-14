@@ -47,7 +47,7 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
+	go test -v -race -short -cover -coverprofile cover.out `go list ./... | grep -v ./gen/` -tags integration
 	go tool cover -func cover.out
 
 .PHONY: benchmark

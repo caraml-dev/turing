@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package turing.router.v1;
+
+message Tensor {
+  enum DataType {
+    DATA_TYPE_UNSPECIFIED = 0;
+    DATA_TYPE_BOOL = 1;
+    DATA_TYPE_INT8 = 2;
+    DATA_TYPE_INT16 = 3;
+    DATA_TYPE_INT32 = 4;
+    DATA_TYPE_INT64 = 5;
+    DATA_TYPE_UNIT8 = 6;
+    DATA_TYPE_UNIT16 = 7;
+    DATA_TYPE_UNIT32 = 8;
+    DATA_TYPE_UNIT64 = 9;
+    DATA_TYPE_FP32 = 10;
+    DATA_TYPE_FP64 = 11;
+    DATA_TYPE_BYTES = 12;
+  }
+  DataType data_type = 1;
+  repeated int64 shape = 2;
+  TensorContents contents = 3;
+}
+
+message TensorContents {
+  repeated bool bool_contents = 1;
+  repeated int32 int_contents = 2;
+  repeated int64 int64_contents = 3;
+  repeated uint32 uint_contents = 4;
+  repeated uint64 uint64_contents = 5;
+  repeated float fp32_contents = 6;
+  repeated double fp64_contents = 7;
+  repeated bytes bytes_contents = 8;
+}

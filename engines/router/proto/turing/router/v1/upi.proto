@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package turing.router.v1;
+
+import "turing/router/v1/value.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+message PredictValuesRequest {
+
+  repeated PredictionRow prediction_rows = 1;
+
+  RequestMetadata metadata = 2;
+}
+
+message RequestMetadata {
+
+  google.protobuf.Timestamp request_timestamp = 1;
+  string target_name = 2;
+  repeated NamedValue others = 3;
+}
+
+message PredictionRow {
+  string row_id = 1;
+  repeated NamedValue contextual_features = 2;
+  repeated NamedValue row_entities = 3;
+}
+
+message PredictValuesResponse {
+  repeated PredictionResult predictions = 1;
+  ResponseMetadata metadata = 2;
+}
+
+message PredictionResult {
+
+  string row_id = 1;
+  NamedValue value = 2;
+}
+
+message ResponseMetadata {
+
+  string prediction_id = 1;
+  string target_name = 2;
+  string model_name = 3;
+  string model_version = 4;
+  string experiment_id = 5;
+  string treatment_id = 6;
+  repeated NamedValue others = 7;
+}
+
+service UPredictionService {
+
+  rpc PredictValues(PredictValuesRequest)
+      returns (PredictValuesResponse) {
+    option (google.api.http) = {
+      post : "/v2/predict"
+      body : "*"
+    };
+  }
+
+}
