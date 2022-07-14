@@ -9,6 +9,7 @@ NOW=$(shell date +'%FT%T%z')
 BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-router)
 PROJECT_ROOT=github.com/gojek/turing/engines/router
 SRC_ROOT=.
+IGNORE_DIR=/gen/
 
 .PHONY: default
 default: test
@@ -47,13 +48,13 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out `go list ./... | grep -v ./gen/` -tags integration
+	go test -v -race -short -cover -coverprofile cover.out `go list ${SRC_ROOT}/... | grep -v ${IGNORE_DIR}` -tags integration
 	go tool cover -func cover.out
 
 .PHONY: benchmark
 benchmark: tidy
 	@echo "Running Benchmark..."
-	go test -bench=. -run=Bench ${SRC_ROOT}/...
+	go test -bench=. -run=Bench `go list ${SRC_ROOT}/... | grep -v ${IGNORE_DIR}`
 
 .PHONY: version
 version:
