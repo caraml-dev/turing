@@ -16,7 +16,7 @@ plugins:
       -  paths=import,module=github.com/leonlnj/turing/engines/router/gen/go
       - require_unimplemented_servers=false
   - name: grpc-gateway
-    out: gen/go/grpc
+    out: gen/proto/go
     opt: paths=import,module=github.com/leonlnj/turing/engines/router/gen/go
 #  - name: go
 #    out: gen/go/grpc
