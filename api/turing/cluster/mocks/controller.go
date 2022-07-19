@@ -15,8 +15,6 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
-	time "time"
-
 	v1 "k8s.io/api/batch/v1"
 
 	v1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
@@ -226,13 +224,13 @@ func (_m *Controller) DeleteConfigMap(ctx context.Context, name string, namespac
 	return r0
 }
 
-// DeleteIstioVirtualService provides a mock function with given fields: ctx, svcName, namespace, timeout
-func (_m *Controller) DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error {
-	ret := _m.Called(ctx, svcName, namespace, timeout)
+// DeleteIstioVirtualService provides a mock function with given fields: ctx, svcName, namespace
+func (_m *Controller) DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string) error {
+	ret := _m.Called(ctx, svcName, namespace)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration) error); ok {
-		r0 = rf(ctx, svcName, namespace, timeout)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, svcName, namespace)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -254,13 +252,13 @@ func (_m *Controller) DeleteJob(ctx context.Context, namespace string, jobName s
 	return r0
 }
 
-// DeleteKnativeService provides a mock function with given fields: ctx, svcName, namespace, timeout, ignoreNotFound
-func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
-	ret := _m.Called(ctx, svcName, namespace, timeout, ignoreNotFound)
+// DeleteKnativeService provides a mock function with given fields: ctx, svcName, namespace, ignoreNotFound
+func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, svcName, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
-		r0 = rf(ctx, svcName, namespace, timeout, ignoreNotFound)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, svcName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -268,13 +266,13 @@ func (_m *Controller) DeleteKnativeService(ctx context.Context, svcName string, 
 	return r0
 }
 
-// DeleteKubernetesDeployment provides a mock function with given fields: ctx, name, namespace, timeout, ignoreNotFound
-func (_m *Controller) DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
-	ret := _m.Called(ctx, name, namespace, timeout, ignoreNotFound)
+// DeleteKubernetesDeployment provides a mock function with given fields: ctx, name, namespace, ignoreNotFound
+func (_m *Controller) DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, name, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
-		r0 = rf(ctx, name, namespace, timeout, ignoreNotFound)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, name, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -282,13 +280,13 @@ func (_m *Controller) DeleteKubernetesDeployment(ctx context.Context, name strin
 	return r0
 }
 
-// DeleteKubernetesService provides a mock function with given fields: ctx, svcName, namespace, timeout, ignoreNotFound
-func (_m *Controller) DeleteKubernetesService(ctx context.Context, svcName string, namespace string, timeout time.Duration, ignoreNotFound bool) error {
-	ret := _m.Called(ctx, svcName, namespace, timeout, ignoreNotFound)
+// DeleteKubernetesService provides a mock function with given fields: ctx, svcName, namespace, ignoreNotFound
+func (_m *Controller) DeleteKubernetesService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, svcName, namespace, ignoreNotFound)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration, bool) error); ok {
-		r0 = rf(ctx, svcName, namespace, timeout, ignoreNotFound)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, svcName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}
