@@ -64,16 +64,13 @@ type clusterConfig struct {
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
-	DeleteKnativeService(ctx context.Context, svcName string,
-		namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKnativeService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error
 	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
-	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string, timeout time.Duration) error
+	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string) error
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
-	DeleteKubernetesDeployment(ctx context.Context, name string,
-		namespace string, timeout time.Duration, ignoreNotFound bool) error
-	DeleteKubernetesService(ctx context.Context, svcName string,
-		namespace string, timeout time.Duration, ignoreNotFound bool) error
+	DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
+	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error
 	CreateNamespace(ctx context.Context, name string) error
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
 	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
@@ -305,7 +302,6 @@ func (c *controller) DeleteKnativeService(
 	ctx context.Context,
 	svcName string,
 	namespace string,
-	timeout time.Duration,
 	ignoreNotFound bool,
 ) error {
 	// Init knative ServicesGetter
@@ -321,12 +317,7 @@ func (c *controller) DeleteKnativeService(
 	}
 
 	// Delete the service
-	gracePeriod := int64(timeout.Seconds())
-	delOptions := metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriod,
-	}
-
-	return services.Delete(ctx, svcName, delOptions)
+	return services.Delete(ctx, svcName, metav1.DeleteOptions{})
 }
 
 // DeployKubernetesService deploys a kubernetes service and deployment
@@ -396,14 +387,8 @@ func (c *controller) DeleteKubernetesDeployment(
 	ctx context.Context,
 	name string,
 	namespace string,
-	timeout time.Duration,
 	ignoreNotFound bool,
 ) error {
-	gracePeriod := int64(timeout.Seconds())
-	delOptions := metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriod,
-	}
-
 	deployments := c.k8sAppsClient.Deployments(namespace)
 	_, err := deployments.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
@@ -412,7 +397,7 @@ func (c *controller) DeleteKubernetesDeployment(
 		}
 		return err
 	}
-	return deployments.Delete(ctx, name, delOptions)
+	return deployments.Delete(ctx, name, metav1.DeleteOptions{})
 }
 
 // DeleteKubernetesService deletes a kubernetes service
@@ -420,14 +405,8 @@ func (c *controller) DeleteKubernetesService(
 	ctx context.Context,
 	svcName string,
 	namespace string,
-	timeout time.Duration,
 	ignoreNotFound bool,
 ) error {
-	gracePeriod := int64(timeout.Seconds())
-	delOptions := metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriod,
-	}
-
 	services := c.k8sCoreClient.Services(namespace)
 	_, err := services.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
@@ -436,7 +415,7 @@ func (c *controller) DeleteKubernetesService(
 		}
 		return err
 	}
-	return services.Delete(ctx, svcName, delOptions)
+	return services.Delete(ctx, svcName, metav1.DeleteOptions{})
 }
 
 // ApplyIstioVirtualService creates a virtual service if not exists, if exists, updates the
@@ -459,18 +438,13 @@ func (c *controller) DeleteIstioVirtualService(
 	ctx context.Context,
 	svcName string,
 	namespace string,
-	timeout time.Duration,
 ) error {
 	vservices := c.istioClient.VirtualServices(namespace)
 	_, err := vservices.Get(ctx, svcName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("unable to retrieve virtual service %s: %s", svcName, err.Error())
 	}
-	gracePeriod := int64(timeout.Seconds())
-	delOptions := metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriod,
-	}
-	return vservices.Delete(ctx, svcName, delOptions)
+	return vservices.Delete(ctx, svcName, metav1.DeleteOptions{})
 }
 
 // CreateSecret creates a secret. If the secret already exists, the existing secret will be updated.
@@ -719,7 +693,7 @@ func (c *controller) waitKnativeServiceReady(
 	for {
 		select {
 		case <-ctx.Done():
-			terminationMessage := c.getKnativePodTerminationMessage(ctx, svcName, namespace)
+			terminationMessage := c.getKnativePodTerminationMessage(context.Background(), svcName, namespace)
 			if terminationMessage == "" {
 				// Pod was not created (as with invalid image names), get status messages from the knative service.
 				svc, err := services.Get(ctx, svcName, metav1.GetOptions{})

@@ -475,7 +475,7 @@ func TestDeleteKnativeService(t *testing.T) {
 			// Create test controller
 			c := createTestKnController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteKnativeService(ctx, testName, testNamespace, time.Second*5, tc.ignoreNotFound)
+			err := c.DeleteKnativeService(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -568,7 +568,7 @@ func TestDeleteKubernetesDeployment(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteKubernetesDeployment(ctx, testName, testNamespace, time.Second*5, tc.ignoreNotFound)
+			err := c.DeleteKubernetesDeployment(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -660,7 +660,7 @@ func TestDeleteKubernetesService(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteKubernetesService(ctx, testName, testNamespace, time.Second*5, tc.ignoreNotFound)
+			err := c.DeleteKubernetesService(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -1840,7 +1840,7 @@ func TestDeleteIstioVirtualService(t *testing.T) {
 	defer cancel()
 
 	// Run test
-	err := c.DeleteIstioVirtualService(ctx, vsConf.Name, testNamespace, time.Second*5)
+	err := c.DeleteIstioVirtualService(ctx, vsConf.Name, testNamespace)
 	// Validate no error
 	assert.NoError(t, err)
 }

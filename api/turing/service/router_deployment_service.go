@@ -234,7 +234,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	eventsCh *EventChannel,
 	isCleanUp bool,
 ) error {
-	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentDeletionTimeout)
 	defer cancel()
 	// Get the cluster controller
 	controller, err := ds.getClusterControllerByEnvironment(environment.Name)
@@ -266,7 +266,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion,
 			project, "", ds.routerDefaults.FluentdConfig)
-		err = deleteK8sService(controller, fluentdService, ds.deploymentTimeout, isCleanUp)
+		err = deleteK8sService(controller, fluentdService, isCleanUp)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -286,7 +286,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
 		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
-		err = deleteK8sService(controller, pluginsServerSvc, ds.deploymentTimeout, isCleanUp)
+		err = deleteK8sService(controller, pluginsServerSvc, isCleanUp)
 		if err != nil {
 			eventsCh.Write(
 				models.NewErrorEvent(
@@ -299,7 +299,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 	}
 
 	// Delete all components
-	err = deleteKnServices(ctx, controller, services, ds.deploymentDeletionTimeout, eventsCh, isCleanUp)
+	err = deleteKnServices(ctx, controller, services, eventsCh, isCleanUp)
 	if err != nil {
 		errs = append(errs, err.Error())
 	}
@@ -315,8 +315,6 @@ func (ds *deploymentService) DeleteRouterEndpoint(
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
 ) error {
-	ctx, cancel := context.WithTimeout(context.Background(), ds.deploymentTimeout)
-	defer cancel()
 	// Get the cluster controller
 	controller, err := ds.getClusterControllerByEnvironment(environment.Name)
 	if err != nil {
@@ -324,7 +322,7 @@ func (ds *deploymentService) DeleteRouterEndpoint(
 	}
 
 	routerEndpointName := fmt.Sprintf("%s-turing-router", routerVersion.Router.Name)
-	return controller.DeleteIstioVirtualService(ctx, routerEndpointName, project.Name, ds.deploymentDeletionTimeout)
+	return controller.DeleteIstioVirtualService(context.Background(), routerEndpointName, project.Name)
 }
 
 func (ds *deploymentService) getClusterControllerByEnvironment(
@@ -482,14 +480,13 @@ func deployK8sService(ctx context.Context, controller cluster.Controller, servic
 func deleteK8sService(
 	controller cluster.Controller,
 	service *cluster.KubernetesService,
-	timeout time.Duration,
 	isCleanUp bool,
 ) error {
-	err := controller.DeleteKubernetesDeployment(context.Background(), service.Name, service.Namespace, timeout, isCleanUp)
+	err := controller.DeleteKubernetesDeployment(context.Background(), service.Name, service.Namespace, isCleanUp)
 	if err != nil {
 		return err
 	}
-	return controller.DeleteKubernetesService(context.Background(), service.Name, service.Namespace, timeout, isCleanUp)
+	return controller.DeleteKubernetesService(context.Background(), service.Name, service.Namespace, isCleanUp)
 }
 
 // createSecret creates a secret.
@@ -554,7 +551,7 @@ func deployKnServices(
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying service %s", svc.Name))
 		if svc.ConfigMap != nil {
-			err := controller.ApplyConfigMap(context.Background(), svc.Namespace, svc.ConfigMap)
+			err := controller.ApplyConfigMap(ctx, svc.Namespace, svc.ConfigMap)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to apply config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -590,7 +587,6 @@ func deleteKnServices(
 	ctx context.Context,
 	controller cluster.Controller,
 	services []*cluster.KnativeService,
-	timeout time.Duration,
 	eventsCh *EventChannel,
 	isCleanUp bool,
 ) error {
@@ -606,7 +602,7 @@ func deleteKnServices(
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageUndeployingServices, "deleting service %s", svc.Name))
 		if svc.ConfigMap != nil {
-			err = controller.DeleteConfigMap(ctx, svc.ConfigMap.Name, svc.Namespace, isCleanUp)
+			err = controller.DeleteConfigMap(context.Background(), svc.ConfigMap.Name, svc.Namespace, isCleanUp)
 			if err != nil {
 				err = errors.Wrapf(err, "Failed to delete config map %s", svc.ConfigMap.Name)
 				eventsCh.Write(models.NewErrorEvent(
@@ -614,7 +610,7 @@ func deleteKnServices(
 				errCh <- err
 			}
 		}
-		err = controller.DeleteKnativeService(ctx, svc.Name, svc.Namespace, timeout, isCleanUp)
+		err = controller.DeleteKnativeService(context.Background(), svc.Name, svc.Namespace, isCleanUp)
 		if err != nil {
 			err = errors.Wrapf(err, "Error when deleting %s", svc.Name)
 			eventsCh.Write(models.NewErrorEvent(
