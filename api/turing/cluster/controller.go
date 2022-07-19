@@ -719,7 +719,7 @@ func (c *controller) waitKnativeServiceReady(
 	for {
 		select {
 		case <-ctx.Done():
-			terminationMessage := c.getKnativePodTerminationMessage(ctx, svcName, namespace)
+			terminationMessage := c.getKnativePodTerminationMessage(context.Background(), svcName, namespace)
 			if terminationMessage == "" {
 				// Pod was not created (as with invalid image names), get status messages from the knative service.
 				svc, err := services.Get(ctx, svcName, metav1.GetOptions{})
