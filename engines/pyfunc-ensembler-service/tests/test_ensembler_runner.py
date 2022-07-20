@@ -20,9 +20,10 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
 
 
 @pytest.mark.parametrize(
-    "inputs,expected", [
+    "inputs,headers,expected", [
         pytest.param(
             dummy_long_request,
+            {},
             [
                 296.15732,
                 0
@@ -30,14 +31,14 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
         ),
         pytest.param(
             dummy_short_request,
+            {"Key": "Value"},
             {"headers": {"Key": "Value"}}
         )
     ])
-def test_ensembler_prediction(simple_ensembler_uri, inputs, expected):
+def test_ensembler_prediction(simple_ensembler_uri, inputs, headers, expected):
     ensembler = PyFuncEnsemblerRunner(simple_ensembler_uri)
     ensembler.load()
-    actual = ensembler.predict(orjson.loads(inputs), {"Key": "Value"})
-    print(actual)
+    actual = ensembler.predict(orjson.loads(inputs), headers)
     assert actual == expected
 
 
