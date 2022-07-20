@@ -51,8 +51,6 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
     """
     PREDICTION_COLUMN_PREFIX = '__predictions__'
     TREATMENT_CONFIG_COLUMN_PREFIX = '__treatment_config__'
-    # Version is used to store metadata about the ensembler
-    VERSION='v2'
 
     def load_context(self, context):
         self.initialize(context.artifacts)
@@ -102,12 +100,24 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
             # Deletes route from the dictionary as it is a duplicate of the key
             del routes_to_response[prediction["route"]]["route"]
 
-        return self.ensemble(
-            input=request_body['request'],
-            predictions=routes_to_response,
-            treatment_config=request_body['response']['experiment'],
-            headers=model_input['headers']
-        )
+        try:
+            return self.ensemble(
+                input=request_body['request'],
+                predictions=routes_to_response,
+                treatment_config=request_body['response']['experiment'],
+                headers=model_input['headers']
+            )
+        except TypeError as e:
+            if "got an unexpected keyword argument 'headers'" in str(e):
+                # This handles the legacy ensemblers
+                # TODO: Deprecate support for legacy ensemblers
+                return self.ensemble(
+                    input=request_body['request'],
+                    predictions=routes_to_response,
+                    treatment_config=request_body['response']['experiment']
+                )
+            else:
+                raise e
 
     @staticmethod
     def _get_columns_with_prefix(df: pandas.DataFrame, prefix: str):
