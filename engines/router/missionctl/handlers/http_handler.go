@@ -131,7 +131,7 @@ func (h *httpHandler) getPrediction(
 
 	// Ensemble
 	if h.IsEnsemblerEnabled() {
-		resp, httpErr = h.Ensemble(ctx, req.Header, requestBody, payload)
+		resp, httpErr = h.Ensemble(ctx, postEnrichmentResponseHeader, requestBody, payload)
 		copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Ensembler, resp, httpErr)
 		if httpErr != nil {
 			return nil, httpErr
