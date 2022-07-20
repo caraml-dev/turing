@@ -13,7 +13,8 @@ class TestEnsembler(PyFunc):
             self,
             input: Dict,
             predictions: Dict,
-            treatment_config: Dict) -> Any:
+            treatment_config: Dict,
+            **kwargs) -> Any:
         if treatment_config['configuration']['name'] == "choose_the_control":
             return predictions['control']['data']['predictions']
         else:

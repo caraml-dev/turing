@@ -12,9 +12,8 @@ class EnsemblerHandler(tornado.web.RequestHandler):
         self.ensembler = ensembler
 
     def post(self):
-        request = EnsemblerHandler.validate_request(self.request)
-        response = self.ensembler.predict(request)
-
+        body = EnsemblerHandler.validate_request(self.request)
+        response = self.ensembler.predict(body, self.request.headers)
         response_json = orjson.dumps(response)
         self.write(response_json)
         self.set_header("Content-Type", "application/json; charset=UTF-8")

@@ -32,7 +32,7 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
 def test_ensembler_prediction(simple_ensembler_uri, inputs, expected):
     ensembler = PyFuncEnsemblerRunner(simple_ensembler_uri)
     ensembler.load()
-    actual = ensembler.predict(orjson.loads(inputs))
+    actual = ensembler.predict(orjson.loads(inputs), {"Key": "Value"})
     assert actual == expected
 
 
