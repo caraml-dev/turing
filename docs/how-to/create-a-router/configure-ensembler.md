@@ -2,7 +2,7 @@
 
 Turing currently supports ensemblers in the same fashion as the enrichers. The ensembling is controlled by the policy from the rule engine.
 
-Currently, there are 4 options available - no ensembler, a standard ensembler, Docker and an external ensembler.
+Currently, there are 4 options available - no ensembler, a standard ensembler, Docker and Pyfunc ensembler.
 
 ## No Ensembler
 The router will return a response from the route configured to act as the final response. This option is available only when **no experiment engine** is configured in Configure Experiment Engine.
@@ -26,7 +26,7 @@ It is not possible to select as the fallback response a route that has traffic r
 {% endhint %}
 
 ## Docker
-Turing will deploy specified image as a post-processor and will send the original request, responses from all routes, and the treatment configuration (if a Experiment Engine is selected, in Configure Experiment Engine), for ensembling. To configure a Docker ensembler, there are 3 sections to be filled.
+Turing will deploy specified image as a post-processor and will send the in the request payload the original request, responses from all routes, and the treatment configuration (if a Experiment Engine is selected, in Configure Experiment Engine), for ensembling. The ensembler's request headers will contain the original request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in the enricher's response headers will take precedence). To configure a Docker ensembler, there are 3 sections to be filled.
 
 Configure the Docker Container. There are 4 required inputs.
 

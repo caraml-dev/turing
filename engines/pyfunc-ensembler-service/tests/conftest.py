@@ -18,7 +18,7 @@ class TestEnsembler(PyFunc):
         if treatment_config['configuration']['name'] == "choose_the_control":
             return predictions['control']['data']['predictions']
         else:
-            return [0, 0]
+            return kwargs
 
 
 @pytest.fixture

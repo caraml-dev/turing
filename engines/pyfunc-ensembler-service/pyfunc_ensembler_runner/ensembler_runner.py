@@ -16,11 +16,10 @@ class PyFuncEnsemblerRunner:
 
     def load(self):
         self._ensembler = pyfunc.load_model(self.artifact_dir)
-        # If the predict_legacy method is found on the ensembler, it is created from a newer SDK version
-        # that supports both versions of the predict API.
+        # If the VERSION attribute is not found on the ensembler, it is created from an older SDK version
+        # that is not adapted to receive request headers.
         try:
             self._is_legacy_ensembler = not hasattr(self._ensembler._model_impl.python_model, "VERSION")
-            print(dir(self._ensembler._model_impl.python_model))
         except:
             pass
 

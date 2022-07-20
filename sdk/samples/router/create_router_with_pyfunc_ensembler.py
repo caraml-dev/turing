@@ -16,17 +16,21 @@ from typing import List, Any
 # To register a pyfunc ensembler to be used in a Turing router, implement the `turing.ensembler.PyFunc` interface
 class SampleEnsembler(turing.ensembler.PyFunc):
     """
-    A simple ensembler, that returns the value corresponding to the version that has been specified in the
-    `input` in each request. This value if obtained from the route responses found in the `predictions` in each
-    request.
+    A simple ensembler, that returns the value corresponding to the version that has been specified
+    either in the `input` (which is the request body sent to the Turing router) or the ensembler request
+    headers (received by the `kwargs`), in each request. This value is expected to be one of the route names
+    and thus, the corresponding result found in the `predictions` will be returned.
 
-    If no version is specified in `input`, return the sum of all the values of all the route responses in
-    `predictions` instead.
+    If no version is specified, return the sum of all the values of all the route responses in `predictions` instead.
+
+    Note: The headers received by the ensembler in `kwargs` will contain the original request headers sent to Turing,
+    merged with the enricher's response headers. If there are duplicates, the value in the enricher's response
+    headers will take precedence.
 
     e.g. The values in the route responses (`predictions`) corresponding to the versions, `a`, `b` and `c` are 1, 2
          and 3 respectively.
 
-         For a given request, if the version specified in `input` is "a", the ensembler would return the value 1.
+         For a given request, if the version specified is "a", the ensembler would return the value 1.
 
          If no version is specified in `input`, the ensembler would return the value 6 (1 + 2 + 3).
     """
@@ -42,11 +46,15 @@ class SampleEnsembler(turing.ensembler.PyFunc):
     # The return value of `ensemble` will then be returned as a `json` payload to the Turing router.
     def ensemble(
             self,
-            input: dict,
+            input: dict, # Request body to the router
             predictions: dict,
-            treatment_config: dict) -> Any:
+            treatment_config: dict,
+            **kwargs: dict # Captures contextual info such as ensembler request headers
+            ) -> Any:
         if "version" in input:
             return predictions[input["version"]]["data"]["value"]
+        elif "Version" in kwargs["headers"]:
+            return predictions[kwargs["headers"]["Version"]]["data"]["value"]
         else:
             return sum(prediction["data"]["value"] for prediction in predictions.values())
 

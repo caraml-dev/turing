@@ -27,12 +27,17 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
                 296.15732,
                 0
             ]
+        ),
+        pytest.param(
+            dummy_short_request,
+            {"headers": {"Key": "Value"}}
         )
     ])
 def test_ensembler_prediction(simple_ensembler_uri, inputs, expected):
     ensembler = PyFuncEnsemblerRunner(simple_ensembler_uri)
     ensembler.load()
     actual = ensembler.predict(orjson.loads(inputs), {"Key": "Value"})
+    print(actual)
     assert actual == expected
 
 
@@ -52,12 +57,12 @@ class TestEnsemblerService(AsyncHTTPTestCase):
         return PyFuncEnsemblerServer(ensembler).create_application()
 
     def test_valid_request(self):
-        response = self.fetch('/ensemble', method="POST", body=dummy_long_request)
+        response = self.fetch("/ensemble", method="POST", body=dummy_long_request)
         self.assertEqual(response.code, 200)
         self.assertEqual(orjson.loads(response.body), [296.15732, 0])
 
     def test_invalid_request(self):
-        response = self.fetch('/ensemble', method="POST", body=dummy_invalid_request)
+        response = self.fetch("/ensemble", method="POST", body=dummy_invalid_request)
         self.assertEqual(response.code, 400)
         self.assertEqual(type(response.error), HTTPError)
 
