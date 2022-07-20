@@ -191,7 +191,8 @@ func TestHTTPService(t *testing.T) {
 	assert.JSONEq(t, expectedResponse, rr.Body.String(), "Response body mismatch.")
 
 	// Check that ensembler was called with the expected headers
-	mc.AssertCalled(t, "Ensemble", http.Header{"Context-Type": []string{"application/json"}, "Enricher": []string{"value"}})
+	mc.AssertCalled(t, "Ensemble",
+		http.Header{"Context-Type": []string{"application/json"}, "Enricher": []string{"value"}})
 }
 
 // TestHTTPServiceBadRequest tests for a HTTP InternalServerError on bad
@@ -368,7 +369,11 @@ func doTestRequest(mc missionctl.MissionControl, req *http.Request, rr *httptest
 	http.HandlerFunc(handler.ServeHTTP).ServeHTTP(rr, req)
 }
 
-func modifyRequestBody(body []byte, responseHeaders map[string]string, caller string) (mchttp.Response, *errors.HTTPError) {
+func modifyRequestBody(
+	body []byte,
+	responseHeaders map[string]string,
+	caller string,
+) (mchttp.Response, *errors.HTTPError) {
 	// Parse the body
 	var t testBody
 	err := json.Unmarshal(body, &t)
