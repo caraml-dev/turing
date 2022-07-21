@@ -1,10 +1,12 @@
 import abc
+import logging
+from sys import version_info
 from typing import Optional, Union, List, Any, Dict, Tuple
+
 import mlflow
 import numpy
 import pandas
 import re
-from sys import version_info
 import yaml
 
 import turing.generated.models
@@ -21,7 +23,8 @@ class EnsemblerBase(abc.ABC):
             self,
             input: Union[pandas.Series, Dict[str, Any]],
             predictions: Union[pandas.Series, Dict[str, Any]],
-            treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]]) -> Any:
+            treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]],
+            **kwargs: Optional[Dict[str, Any]]) -> Any:
         """
         Ensembler should have an ensemble method, that implements the logic on how to
         ensemble final prediction results from individual model predictions and a treatment
@@ -33,6 +36,8 @@ class EnsemblerBase(abc.ABC):
         :param treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]], representing the configuration of a
                 treatment, that should be applied to a given record/payload. If the experiment
                 engine is not configured, then `treatment_config` will be `None`
+        :param kwargs: Optional[Dict[str, Any]], representing a flexible list of keyword-arguments to send additional
+               contextual info for ensembling.
 
         :returns ensembling result (one of str, int, float, double or array)
         """
@@ -87,18 +92,33 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
         Helper function to ensemble single requests; works on dictionary input in a single request made to the pyfunc
         ensembler service (run by the pyfunc ensembler service engine)
         """
+        request_body = model_input['body']
         # Get a mapping between route names and their corresponding responses
         routes_to_response = dict()
-        for prediction in model_input['response']['route_responses']:
+        for prediction in request_body['response']['route_responses']:
             routes_to_response[prediction["route"]] = prediction.copy()
             # Deletes route from the dictionary as it is a duplicate of the key
             del routes_to_response[prediction["route"]]["route"]
 
-        return self.ensemble(
-            input=model_input['request'],
-            predictions=routes_to_response,
-            treatment_config=model_input['response']['experiment']
-        )
+        try:
+            return self.ensemble(
+                input=request_body['request'],
+                predictions=routes_to_response,
+                treatment_config=request_body['response']['experiment'],
+                headers=model_input['headers']
+            )
+        except TypeError as e:
+            if "got an unexpected keyword argument 'headers'" in str(e):
+                logging.warn("ensemble() uses a deprecated signature, please refer to samples.")
+                # This handles the legacy ensemblers
+                # TODO: Deprecate support for legacy ensemblers
+                return self.ensemble(
+                    input=request_body['request'],
+                    predictions=routes_to_response,
+                    treatment_config=request_body['response']['experiment']
+                )
+            else:
+                raise e
 
     @staticmethod
     def _get_columns_with_prefix(df: pandas.DataFrame, prefix: str):

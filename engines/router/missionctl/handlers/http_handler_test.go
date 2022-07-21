@@ -59,7 +59,7 @@ func (mc *BaseMockMissionControl) Enrich(
 	body []byte,
 ) (mchttp.Response, *errors.HTTPError) {
 	mc.Called()
-	return modifyRequestBody(body, "Enrich")
+	return modifyRequestBody(body, map[string]string{"Enricher": "value"}, "Enrich")
 }
 
 // Route appends ":Route" to the value in the json payload
@@ -69,7 +69,7 @@ func (mc *BaseMockMissionControl) Route(
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.HTTPError) {
 	mc.Called()
-	resp, err := modifyRequestBody(body, "Route")
+	resp, err := modifyRequestBody(body, map[string]string{}, "Route")
 	return nil, resp, err
 }
 
@@ -80,8 +80,8 @@ func (mc *BaseMockMissionControl) Ensemble(
 	requestBody []byte,
 	routerResponse []byte,
 ) (mchttp.Response, *errors.HTTPError) {
-	mc.Called()
-	return modifyRequestBody(routerResponse, "Ensemble")
+	mc.Called(header)
+	return modifyRequestBody(routerResponse, map[string]string{}, "Ensemble")
 }
 
 // MockMissionControl simply inherits from BaseMockMissionControl
@@ -189,6 +189,10 @@ func TestHTTPService(t *testing.T) {
 
 	// Check the result body is expected
 	assert.JSONEq(t, expectedResponse, rr.Body.String(), "Response body mismatch.")
+
+	// Check that ensembler was called with the expected headers
+	mc.AssertCalled(t, "Ensemble",
+		http.Header{"Context-Type": []string{"application/json"}, "Enricher": []string{"value"}})
 }
 
 // TestHTTPServiceBadRequest tests for a HTTP InternalServerError on bad
@@ -350,7 +354,7 @@ func createTestBaseMissionControl() *BaseMockMissionControl {
 	mc := &BaseMockMissionControl{}
 	mc.On("Enrich").Return(nil)
 	mc.On("Route").Return(nil)
-	mc.On("Ensemble").Return(nil)
+	mc.On("Ensemble", mock.Anything).Return(nil)
 	return mc
 }
 
@@ -365,7 +369,11 @@ func doTestRequest(mc missionctl.MissionControl, req *http.Request, rr *httptest
 	http.HandlerFunc(handler.ServeHTTP).ServeHTTP(rr, req)
 }
 
-func modifyRequestBody(body []byte, caller string) (mchttp.Response, *errors.HTTPError) {
+func modifyRequestBody(
+	body []byte,
+	responseHeaders map[string]string,
+	caller string,
+) (mchttp.Response, *errors.HTTPError) {
 	// Parse the body
 	var t testBody
 	err := json.Unmarshal(body, &t)
@@ -382,13 +390,18 @@ func modifyRequestBody(body []byte, caller string) (mchttp.Response, *errors.HTT
 		return nil, errors.NewHTTPError(fmt.Errorf("Error occurred in %s: %v", caller, err))
 	}
 
+	httpHeader := http.Header{
+		"Context-Type": []string{"application/json"},
+	}
+	for key, value := range responseHeaders {
+		httpHeader.Set(key, value)
+	}
+
 	// Return response
 	httpResponse := &http.Response{
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewBuffer(tBytes)),
-		Header: http.Header{
-			"Context-Type": []string{"application/json"},
-		},
+		Header:     httpHeader,
 	}
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(httpResponse)
 	if err != nil {

@@ -20,19 +20,42 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
 
 
 @pytest.mark.parametrize(
-    "inputs,expected", [
+    "ensembler_uri,inputs,headers,expected", [
         pytest.param(
+            "simple_ensembler_uri",
             dummy_long_request,
+            {},
             [
                 296.15732,
                 0
             ]
+        ),
+        pytest.param(
+            "simple_ensembler_uri",
+            dummy_short_request,
+            {"Key": "Value"},
+            {"headers": {"Key": "Value"}}
+        ),
+        pytest.param(
+            "legacy_ensembler_uri",
+            dummy_long_request,
+            {},
+            [
+                296.15732,
+                0
+            ]
+        ),
+        pytest.param(
+            "legacy_ensembler_uri",
+            dummy_short_request,
+            {"Key": "Value"},
+            [0, 0]
         )
     ])
-def test_ensembler_prediction(simple_ensembler_uri, inputs, expected):
-    ensembler = PyFuncEnsemblerRunner(simple_ensembler_uri)
+def test_ensembler_prediction(ensembler_uri, inputs, headers, expected, request):
+    ensembler = PyFuncEnsemblerRunner(request.getfixturevalue(ensembler_uri))
     ensembler.load()
-    actual = ensembler.predict(orjson.loads(inputs))
+    actual = ensembler.predict(orjson.loads(inputs), headers)
     assert actual == expected
 
 
@@ -52,12 +75,12 @@ class TestEnsemblerService(AsyncHTTPTestCase):
         return PyFuncEnsemblerServer(ensembler).create_application()
 
     def test_valid_request(self):
-        response = self.fetch('/ensemble', method="POST", body=dummy_long_request)
+        response = self.fetch("/ensemble", method="POST", body=dummy_long_request)
         self.assertEqual(response.code, 200)
         self.assertEqual(orjson.loads(response.body), [296.15732, 0])
 
     def test_invalid_request(self):
-        response = self.fetch('/ensemble', method="POST", body=dummy_invalid_request)
+        response = self.fetch("/ensemble", method="POST", body=dummy_invalid_request)
         self.assertEqual(response.code, 400)
         self.assertEqual(type(response.error), HTTPError)
 

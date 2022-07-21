@@ -16,8 +16,8 @@ class PyFuncEnsemblerRunner:
     def load(self):
         self._ensembler = pyfunc.load_model(self.artifact_dir)
 
-    def predict(self, inputs: Dict[str, Any]) -> List[Any]:
-        logging.info(f"Input request payload: {inputs}")
-        output = self._ensembler.predict(inputs)
+    def predict(self, body: Dict[str, Any], headers: Dict[str, str]) -> List[Any]:
+        logging.info(f"Input request payload: {body}")
+        output = self._ensembler.predict({"headers": dict(headers), "body": body})
         logging.info(f"Output response: {output}")
         return output
