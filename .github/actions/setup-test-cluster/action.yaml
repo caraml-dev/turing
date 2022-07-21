@@ -111,7 +111,7 @@ runs:
         docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: "Install Vault"
-      if: ${{ !matrix_use_in_cluster_config }}
+      if: ${{ !inputs.matrix_use_in_cluster_config }}
       env:
         VAULT_CHART_VERSION: 0.16.1
       run: |
@@ -124,7 +124,7 @@ runs:
         kubectl apply -f infra/e2e/vault.ingress.yaml
 
     - name: Prepare cluster credentials
-      if: ${{ !matrix_use_in_cluster_config }}
+      if: ${{ !inputs.matrix_use_in_cluster_config }}
       env:
         VAULT_TOKEN: root
       run: |
