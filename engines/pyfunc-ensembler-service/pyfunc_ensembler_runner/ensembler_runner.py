@@ -18,6 +18,6 @@ class PyFuncEnsemblerRunner:
 
     def predict(self, body: Dict[str, Any], headers: Dict[str, str]) -> List[Any]:
         logging.info(f"Input request payload: {body}")
-        output = self._ensembler.predict({"headers": headers, "body": body})
+        output = self._ensembler.predict({"headers": dict(headers), "body": body})
         logging.info(f"Output response: {output}")
         return output
