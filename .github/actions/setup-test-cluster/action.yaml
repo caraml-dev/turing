@@ -22,6 +22,10 @@ inputs:
     required: true
     description: 'Matrix: useInClusterConfig'
     default: ''
+  matrix_values_file:
+    required: true
+    description: 'Matrix: valuesFile'
+    default: ''
   cluster_name:
     required: true
     description: 'Name of Cluster'
@@ -161,7 +165,7 @@ runs:
       run: |
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
-          --values infra/e2e/${{ matrix.valuesFile }} \
+          --values infra/e2e/${{ inputs.matrix_values_file }} \
           --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
           --set turing.image.repository=${{ github.repository }}/turing-api \
           --set turing.image.tag=${{ env.TURING_API_VERSION }} \

@@ -360,6 +360,7 @@ jobs:
           experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
           cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
           matrix_use_in_cluster_config: ${{ matrix.useInClusterConfig }}
+          matrix_values_file: ${{ matrix.valuesFile }}
 
       - name: Run End-to-End Test Suite
         id: run-e2e-test
@@ -453,6 +454,7 @@ jobs:
           turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
           cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
+          matrix_values_file: ${{ matrix.valuesFile }}
           matrix_use_in_cluster_config: ${{ matrix.useInClusterConfig }}
 
       - name: Setup Python ${{ matrix.versionNumber }}
