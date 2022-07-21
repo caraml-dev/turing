@@ -9,7 +9,7 @@ PROJECT_NAME = "default"
 
 
 def setup_module():
-    turing.set_url(API_BASE_PATH)
+    turing.set_url(API_BASE_PATH, use_google_oauth=False)
     turing.set_project(PROJECT_NAME)
 
 
