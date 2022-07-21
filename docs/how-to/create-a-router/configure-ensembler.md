@@ -26,7 +26,7 @@ It is not possible to select as the fallback response a route that has traffic r
 {% endhint %}
 
 ## Docker
-Turing will deploy the specified image as a post-processor and will send the in the request payload the original request, responses from all routes, and the treatment configuration (if an Experiment Engine is selected, in Configure Experiment Engine), for ensembling. The ensembler's request headers will contain the original request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in the enricher's response headers will take precedence). To configure a Docker ensembler, there are 3 sections to be filled.
+Turing will deploy the specified image as a post-processor and will send in the request payload the following, for ensembling - the original request, responses from all routes, and the treatment configuration (if an Experiment Engine is selected, in Configure Experiment Engine). The ensembler's request headers will contain the original request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in the enricher's response headers will take precedence). To configure a Docker ensembler, there are 3 sections to be filled.
 
 Configure the Docker Container. There are 4 required inputs.
 

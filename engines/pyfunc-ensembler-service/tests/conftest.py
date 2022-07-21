@@ -6,7 +6,7 @@ from turing.ensembler import PyFunc
 
 class TestEnsembler(PyFunc):
 
-    def initialize(self, artifacts: dict):
+    def initialize(self, artifacts: Dict):
         pass
 
     def ensemble(
@@ -22,7 +22,7 @@ class TestEnsembler(PyFunc):
 
 class LegacyEnsembler(PyFunc):
 
-    def initialize(self, artifacts: dict):
+    def initialize(self, artifacts: Dict):
         pass
 
     def ensemble(

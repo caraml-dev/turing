@@ -1,12 +1,12 @@
 import abc
-import deprecation
-
+import logging
+from sys import version_info
 from typing import Optional, Union, List, Any, Dict, Tuple
+
 import mlflow
 import numpy
 import pandas
 import re
-from sys import version_info
 import yaml
 
 import turing.generated.models
@@ -109,6 +109,7 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
             )
         except TypeError as e:
             if "got an unexpected keyword argument 'headers'" in str(e):
+                logging.warn("ensemble() uses a deprecated signature, please refer to samples.")
                 # This handles the legacy ensemblers
                 # TODO: Deprecate support for legacy ensemblers
                 return self.ensemble(
