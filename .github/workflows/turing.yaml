@@ -521,6 +521,7 @@ jobs:
       - build-ui
       - release-rules
       - test-e2e
+      - test-e2e-sdk
       - test-api
       - test-engines-router
       - test-engines-experiment
