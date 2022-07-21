@@ -340,7 +340,6 @@ jobs:
       fail-fast: false
       matrix:
         name: ["In-cluster credentials", "Remote cluster credentials"]
-        python-version: ["3.7", "3.8", "3.9"]
         include:
           - name: "In-cluster credentials"
             useInClusterConfig: true
@@ -350,6 +349,9 @@ jobs:
             valuesFile: "turing.values.remote.yaml"
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
         with:
@@ -372,6 +374,80 @@ jobs:
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+
+      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
+        name: "Debug Deployment Failure"
+        run: |
+          echo "::group::describe deployment/turing-mlp"
+          kubectl describe deployment/turing-mlp
+          echo "::endgroup::"
+
+          echo "::group::describe deployment/turing-merlin"
+          kubectl describe deployment/turing-merlin
+          echo "::endgroup::"
+
+          echo "::group::describe deployment/turing"
+          kubectl describe deployment/turing
+          echo "::endgroup::"
+
+          echo "::group::secret/turing-api-config"
+          kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing-mlp"
+          kubectl logs deployment/turing-mlp
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing-merlin"
+          kubectl logs deployment/turing-merlin
+          echo "::endgroup::"
+
+          echo "::group::logs deployment/turing"
+          kubectl logs deployment/turing
+          echo "::endgroup::"
+
+  test-e2e-sdk:
+    runs-on: ubuntu-latest
+    env:
+      CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
+      CLUSTER_NAME: turing-e2e
+      ISTIO_VERSION: 1.9.9
+      KNATIVE_VERSION: v0.18.3
+      KNATIVE_ISTIO_VERSION: v0.18.1
+      LOCAL_REGISTRY: registry.localhost:5000
+      TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
+      TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
+      TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
+    needs:
+      - build-api
+      - build-router
+      - build-test-experiment-engine-plugin
+      - build-cluster-init
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["In-cluster credentials", "Remote cluster credentials"]
+        python-version: ["3.7", "3.8", "3.9"]
+        include:
+          - name: "In-cluster credentials"
+            useInClusterConfig: true
+            valuesFile: "turing.values.in-cluster.yaml"
+          - name: "Remote cluster credentials"
+            useInClusterConfig: false
+            valuesFile: "turing.values.remote.yaml"
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set Up Test Cluster
+        uses: ./.github/actions/setup-test-cluster
+        with:
+          turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
+          turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
+          experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
+          cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
+          matrix_use_in_cluster_config: ${{ matrix.useInClusterConfig }}
 
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
