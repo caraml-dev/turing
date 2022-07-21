@@ -92,7 +92,7 @@ runs:
         # Turing API
         docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
         docker tag \
-          turing-api:${{ needs.build-api.outputs.api-version }} \
+          turing-api:${{ env.TURING_API_VERSION }} \
           ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
         docker push ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
         
