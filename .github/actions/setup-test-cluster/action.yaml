@@ -86,6 +86,7 @@ runs:
         cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
     - name: Publish Turing images to local registry
+      shell: bash
       env:
         DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
       run: |
@@ -112,6 +113,7 @@ runs:
 
     - name: "Install Vault"
       if: ${{ !inputs.matrix_use_in_cluster_config }}
+      shell: bash
       env:
         VAULT_CHART_VERSION: 0.16.1
       run: |
@@ -125,6 +127,7 @@ runs:
 
     - name: Prepare cluster credentials
       if: ${{ !inputs.matrix_use_in_cluster_config }}
+      shell: bash
       env:
         VAULT_TOKEN: root
       run: |
@@ -154,6 +157,7 @@ runs:
           --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 
     - name: Install Turing
+      shell: bash
       run: |
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
@@ -165,6 +169,7 @@ runs:
           --set turing.experimentEngines[0].rpcPlugin.image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: Install mockserver
+      shell: bash
       run: |
         kubectl apply -f infra/e2e/turing.mockserver.yaml
 
@@ -181,6 +186,7 @@ runs:
         max-restarts: -1
 
     - name: Setup MLP project
+      shell: bash
       run: |
         tee payload.json <<EOF
         {
