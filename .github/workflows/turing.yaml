@@ -469,6 +469,16 @@ jobs:
       - name: Run End-to-End Test Suite with Turing SDK
         id: run-e2e-test-sdk
         working-directory: sdk
+        env:
+          GOPATH: ${{ github.workspace }}/api/.go
+          TEST_ID: ${{ github.run_id }}
+          MOCKSERVER_ENDPOINT: http://mockserver
+          API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/
+          MODEL_CLUSTER_NAME: "dev"
+          PROJECT_ID: "1"
+          PROJECT_NAME: default
+          KUBECONFIG_USE_LOCAL: true
+          TEST_ECHO_IMAGE: eexit/mirror-http-server:1.1.3
         run: make e2e-sdk
 
       - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test-sdk.outcome == 'failure') && always()
