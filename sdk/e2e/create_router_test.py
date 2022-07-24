@@ -1,5 +1,7 @@
 import os
+import logging
 
+import requests
 import turing
 import turing.batch
 import turing.batch.config
@@ -140,10 +142,53 @@ def test_create_router():
 
     # create a router using the RouterConfig object
     router = turing.Router.create(router_config)
-    print(f"You have created a router with id: {router.id}")
+    logging.info(f"You have created a router with id: {router.id}")
+    assert router.status == RouterStatus.PENDING
 
-    # Wait for the router to get deployed; note that a router that is PENDING will have None as its router_config
+    # wait for the router to get deployed
     try:
         router.wait_for_status(RouterStatus.DEPLOYED)
     except TimeoutError:
         raise Exception(f"Turing API is taking too long for router {router.id} to get deployed.")
+    assert router.status == RouterStatus.DEPLOYED
+
+    # get router with id 1
+    retrieved_router = turing.Router.get(1)
+    assert retrieved_router.version == 1
+    assert retrieved_router.status == RouterStatus.DEPLOYED
+    assert retrieved_router.endpoint == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+
+    # get router version with id 1
+    router_version_1 = retrieved_router.get_version(1)
+    assert router_version_1.status == RouterStatus.DEPLOYED
+
+    # post single request to turing router
+    response = requests.post(
+        url=router.endpoint,
+        headers={
+            "Content-Type": ["application/json"],
+            "X-Mirror-Body": ["true"],
+        },
+        data={
+            "client": {"id": 4}
+        },
+    )
+    assert response.status_code == 200
+    expected_response = {
+      "experiment": {
+        "configuration": {
+            "foo": "bar"
+        }
+      },
+      "route_responses": [
+        {
+          "data": {
+            "version": "control"
+          },
+          "is_default": False,
+          "route": "control"
+        }
+      ]
+    }
+    assert response.json() == expected_response
+

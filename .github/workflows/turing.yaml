@@ -479,6 +479,7 @@ jobs:
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true
           TEST_ECHO_IMAGE: eexit/mirror-http-server:1.1.3
+          KSERVICE_DOMAIN: 127.0.0.1.nip.io
         run: make e2e-sdk
 
       - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test-sdk.outcome == 'failure') && always()
