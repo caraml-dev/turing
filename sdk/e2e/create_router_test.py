@@ -32,13 +32,13 @@ def test_create_router():
         Route(
             id='control',
             endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
-            timeout='5ms'
+            timeout='5s'
         )
     ]
 
     # set up experiment config (
     experiment_config = ExperimentConfig(
-        type="nop",
+        type="proprietary",
         config={
             "client": {
                 "id": "1",
