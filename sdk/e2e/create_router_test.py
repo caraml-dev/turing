@@ -142,7 +142,6 @@ def test_create_router():
 
     # create a router using the RouterConfig object
     router = turing.Router.create(router_config)
-    logging.info(f"You have created a router with id: {router.id}")
     assert router.status == RouterStatus.PENDING
 
     # wait for the router to get deployed
@@ -163,11 +162,12 @@ def test_create_router():
     assert router_version_1.status == RouterStatus.DEPLOYED
 
     # post single request to turing router
+    logging.info("Testing router endpoint...")
     response = requests.post(
         url=router.endpoint,
         headers={
-            "Content-Type": ["application/json"],
-            "X-Mirror-Body": ["true"],
+            "Content-Type": "application/json",
+            "X-Mirror-Body": "true",
         },
         data={
             "client": {"id": 4}
@@ -175,20 +175,98 @@ def test_create_router():
     )
     assert response.status_code == 200
     expected_response = {
-      "experiment": {
-        "configuration": {
-            "foo": "bar"
-        }
-      },
-      "route_responses": [
-        {
-          "data": {
-            "version": "control"
-          },
-          "is_default": False,
-          "route": "control"
-        }
-      ]
+        "experiment": {
+            "configuration": {
+                "foo": "bar"
+            }
+        },
+        "route_responses": [
+            {
+                "data": {
+                    "version": "control"
+                },
+                "is_default": False,
+                "route": "control"
+            }
+        ]
     }
     assert response.json() == expected_response
 
+    # post batch request to turing router
+    logging.info("Testing router batch endpoint...")
+    response = requests.post(
+        url=router.endpoint.replace("/predict", "/batch_predict"),
+        headers={
+            "Content-Type": "application/json",
+            "X-Mirror-Body": "true",
+        },
+        data=[{"client": {"id": 4}}, {"client": {"id": 7}}],
+    )
+    assert response.status_code == 200
+    expected_response = [
+        {
+            "code": 200,
+            "data": {
+                "request": {
+                    "client": {
+                        "id": 4
+                    }
+                },
+                "response": {
+                    "experiment": {
+                        "configuration": {
+                            "foo": "bar"
+                        }
+                    },
+                    "route_responses": [
+                        {
+                            "data": {
+                                "version": "control"
+                            },
+                            "is_default": False,
+                            "route": "control"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "code": 200,
+            "data": {
+                "request": {
+                    "client": {
+                        "id": 7
+                    }
+                },
+                "response": {
+                    "experiment": {
+                        "configuration": {
+                            "bar": "baz"
+                        }
+                    },
+                    "route_responses": [
+                        {
+                            "data": {
+                                "version": "control"
+                            },
+                            "is_default": False,
+                            "route": "control"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+    assert response.json() == expected_response
+
+    # test endpoint for router logs
+    logging.info("Testing endpoint for router logs...")
+    router_component_types = ["router", "ensembler", "enricher"]
+    base_url = f'{os.getenv("API_BASE_PATH")}/projects/{os.getenv("PROJECT_ID")}/routers/{router.id}/logs'
+    for component in router_component_types:
+        response = requests.get(
+            url=base_url + "?component_type=" + component,
+        )
+    assert response.status_code == 200
+    print(response.content)
+    assert len(response.content) > 0
