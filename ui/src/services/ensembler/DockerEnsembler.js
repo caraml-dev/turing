@@ -18,7 +18,7 @@ export class DockerEnsembler extends Ensembler {
 
   static newConfig() {
     return {
-      timeout: "60ms",
+      timeout: "100ms",
       endpoint: "/",
       port: 8080,
       resource_request: {

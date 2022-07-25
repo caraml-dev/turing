@@ -25,11 +25,11 @@ export class TuringRouter {
         min_replica: 0,
         max_replica: 2,
       },
-      timeout: "100ms",
+      timeout: "300ms",
       experiment_engine: new NopExperimentEngine(),
       enricher: {
         type: "nop",
-        timeout: "60ms",
+        timeout: "100ms",
         endpoint: "/",
         port: 8080,
         resource_request: {
@@ -150,7 +150,7 @@ export class TuringRouter {
 export const newRoute = () => ({
   id: "",
   type: "PROXY",
-  timeout: "20ms",
+  timeout: "100ms",
 });
 
 export const newRule = () => ({

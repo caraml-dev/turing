@@ -29,7 +29,7 @@ export class PyFuncEnsembler extends Ensembler {
         max_replica: 2,
       },
       env: [],
-      timeout: "60ms",
+      timeout: "100ms",
     };
   }
 }
