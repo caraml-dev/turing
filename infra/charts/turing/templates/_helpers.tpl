@@ -109,6 +109,14 @@ heritage: {{ .Release.Service }}
 {{- printf "%s-%s" .Release.Name (.Values.mlp.nameOverride | default "mlp") -}}
 {{- end -}}
 
+{{- define "turing.xpManagement.name" -}}
+{{- printf "%s-%s" .Release.Name ((.Values.xpManagement).nameOverride | default "xp-management") -}}
+{{- end -}}
+
+{{- define "turing.xpTreatment.name" -}}
+{{- printf "%s-%s" .Release.Name ((.Values.xpTreatment).nameOverride | default "xp-treatment") -}}
+{{- end -}}
+
 {{- define "turing.clusterConfig.useInClusterCredentials" -}}
 {{- .Values.tags.mlp | ternary true .Values.turing.clusterConfig.useInClusterConfig -}}
 {{- end -}}

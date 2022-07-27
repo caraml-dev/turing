@@ -260,7 +260,7 @@ mlp:
 
 
 merlin:
-  # -- Postgresql configuration to be applied to Merlin's's postgresql database deployment
+  # -- Postgresql configuration to be applied to Merlin's postgresql database deployment
   # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
   postgresql:
     # -- Name of Merlin's Postgresql deployment
@@ -306,6 +306,19 @@ merlin:
         driver_memory_request: "2Gi"
         executor_cpu_request: "2"
         executor_memory_request: "2Gi"
+
+xpManagement:
+  # -- Postgresql configuration to be applied to XP Management Service Postgresql database deployment
+  # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
+  postgresql:
+    # -- Name of XP Management Service Postgresql deployment
+    nameOverride: postgresql-xp
+    # -- Password for XP Management Service Postgresql database
+    postgresqlPassword: xp
+    tls:
+      enabled: false
+    containerPorts:
+      postgresql: 5432
 
 global:
   sentry:

@@ -8,5 +8,11 @@ dependencies:
 - name: merlin
   repository: file://subcharts/merlin
   version: 0.7.1
-digest: sha256:6f49ea5b08170eeb7493194e4bfb8efa5db363fa8e00e97f94a124a18bb6c84c
-generated: "2022-06-10T08:19:37.784556+08:00"
+- name: xp-management
+  repository: https://turing-ml.github.io/charts
+  version: 0.1.1
+- name: xp-treatment
+  repository: https://turing-ml.github.io/charts
+  version: 0.1.1
+digest: sha256:c9bf9b4fd7527c27cfa3de004662328c4ff8a14fcaa8661279ce2688cbc2c786
+generated: "2022-07-27T10:24:52.509596+08:00"
