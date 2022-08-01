@@ -2,6 +2,10 @@ name: Set Up Test Cluster
 description: Set up Turing Test Cluster
 
 inputs:
+  go-version:
+    required: true
+    description: 'Go Version'
+    default: ''
   turing_api_tar_archive_name:
     required: true
     description: 'Turing API tar Archive Name'
@@ -18,11 +22,11 @@ inputs:
     required: true
     description: 'Cluster init tar Archive Name'
     default: ''
-  matrix_use_in_cluster_config:
+  use_in_cluster_config:
     required: true
     description: 'Matrix: useInClusterConfig'
     default: ''
-  matrix_values_file:
+  values_file:
     required: true
     description: 'Matrix: valuesFile'
     default: ''
@@ -57,7 +61,7 @@ runs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: ${{ inputs.go_version }}
+        go-version: ${{ inputs.go-version }}
 
     - name: Download Turing API Docker tar archive
       uses: actions/download-artifact@v2
@@ -82,17 +86,17 @@ runs:
     - name: Run action cluster-init
       uses: ./.github/actions/run-cluster-init
       with:
-        cluster_name: ${{ env.CLUSTER_NAME}}
-        istio_version: ${{ env.ISTIO_VERSION}}
-        knative_version: ${{ env.KNATIVE_VERSION}}
-        knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
-        local_registry: ${{ env.LOCAL_REGISTRY}}
-        cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
+        cluster_name: ${{ inputs.cluster_name }}
+        istio_version: ${{ inputs.istio_version }}
+        knative_version: ${{ inputs.knative_version }}
+        knative_istio_version: ${{ inputs.knative_istio_version }}
+        local_registry: ${{ inputs.local_registry }}
+        cluster_init_version: ${{ inputs.cluster_init_version }}
 
     - name: Publish Turing images to local registry
       shell: bash
       env:
-        DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
+        DOCKER_REPOSITORY: ${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}
       run: |
         # Turing API
         docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
@@ -116,7 +120,7 @@ runs:
         docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: "Install Vault"
-      if: ${{ inputs.matrix_use_in_cluster_config == 'false' }}
+      if: ${{ inputs.use_in_cluster_config == 'false' }}
       shell: bash
       env:
         VAULT_CHART_VERSION: 0.16.1
@@ -130,7 +134,7 @@ runs:
         kubectl apply -f infra/e2e/vault.ingress.yaml
 
     - name: Prepare cluster credentials
-      if: ${{ inputs.matrix_use_in_cluster_config == 'false' }}
+      if: ${{ inputs.use_in_cluster_config == 'false' }}
       shell: bash
       env:
         VAULT_TOKEN: root
@@ -143,9 +147,9 @@ runs:
         tee credentials.json <<EOF
         {
           "master_ip": "kubernetes:443",
-          "certs": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
-          "client_certificate": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
-          "client_key": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
+          "certs": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
+          "client_certificate": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
+          "client_key": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
         }
         EOF
         
@@ -165,12 +169,12 @@ runs:
       run: |
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
-          --values infra/e2e/${{ inputs.matrix_values_file }} \
-          --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
+          --values infra/e2e/${{ inputs.values_file }} \
+          --set turing.image.registry=${{ inputs.LOCAL_REGISTRY }} \
           --set turing.image.repository=${{ github.repository }}/turing-api \
           --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-          --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-          --set turing.experimentEngines[0].rpcPlugin.image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+          --set turing.config.RouterDefaults.Image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+          --set turing.experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: Install mockserver
       shell: bash
@@ -213,3 +217,8 @@ runs:
         key: |
           gomod-${{ hashFiles('api/go.mod') }}
         restore-keys: gomod-
+
+    - name: Get all pods
+      shell: bash
+      run: |
+        kubectl get pods --sort-by=.metadata.creationTimestamp -A  

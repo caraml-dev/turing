@@ -40,6 +40,11 @@ env:
   ARTIFACT_RETENTION_DAYS: 7
   GO_VERSION: 1.18
   GO_LINT_VERSION: v1.45.2
+  CLUSTER_NAME: turing-e2e
+  ISTIO_VERSION: 1.9.9
+  KNATIVE_VERSION: v0.18.3
+  KNATIVE_ISTIO_VERSION: v0.18.1
+  LOCAL_REGISTRY: registry.localhost:5000
 
 jobs:
   build-api:
@@ -323,11 +328,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
-      CLUSTER_NAME: turing-e2e
-      ISTIO_VERSION: 1.9.9
-      KNATIVE_VERSION: v0.18.3
-      KNATIVE_ISTIO_VERSION: v0.18.1
-      LOCAL_REGISTRY: registry.localhost:5000
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
       TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
@@ -355,12 +355,19 @@ jobs:
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
         with:
+          go-version: ${{ env.GO_VERSION }}
           turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
           turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
           cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-          matrix_use_in_cluster_config: ${{ matrix.useInClusterConfig }}
-          matrix_values_file: ${{ matrix.valuesFile }}
+          use_in_cluster_config: ${{ matrix.useInClusterConfig }}
+          values_file: ${{ matrix.valuesFile }}
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          istio_version: ${{ env.ISTIO_VERSION }}
+          knative_version: ${{ env.KNATIVE_VERSION }}
+          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
+          local_registry: ${{ env.LOCAL_REGISTRY }}
+          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Run End-to-End Test Suite
         id: run-e2e-test
@@ -411,11 +418,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
-      CLUSTER_NAME: turing-e2e
-      ISTIO_VERSION: 1.9.9
-      KNATIVE_VERSION: v0.18.3
-      KNATIVE_ISTIO_VERSION: v0.18.1
-      LOCAL_REGISTRY: registry.localhost:5000
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
       TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
@@ -424,24 +426,6 @@ jobs:
       - build-router
       - build-test-experiment-engine-plugin
       - build-cluster-init
-    strategy:
-      fail-fast: false
-      matrix:
-        name: ["In-cluster credentials", "Remote cluster credentials"]
-        python-version: ["Python 3.7", "Python 3.8", "Python 3.9"]
-        include:
-          - name: "In-cluster credentials"
-            useInClusterConfig: true
-            valuesFile: "turing.values.in-cluster.yaml"
-          - name: "Remote cluster credentials"
-            useInClusterConfig: false
-            valuesFile: "turing.values.remote.yaml"
-          - python-version: "Python 3.7"
-            versionNumber: "3.7"
-          - python-version: "Python 3.8"
-            versionNumber: "3.8"
-          - python-version: "Python 3.9"
-            versionNumber: "3.9"
 
     steps:
       - name: Check out code
@@ -450,17 +434,24 @@ jobs:
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
         with:
+          go-version: ${{ env.GO_VERSION }}
           turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
           turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
           cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-          matrix_values_file: ${{ matrix.valuesFile }}
-          matrix_use_in_cluster_config: ${{ matrix.useInClusterConfig }}
+          use_in_cluster_config: false
+          values_file: "turing.values.remote.yaml"
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          istio_version: ${{ env.ISTIO_VERSION }}
+          knative_version: ${{ env.KNATIVE_VERSION }}
+          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
+          local_registry: ${{ env.LOCAL_REGISTRY }}
+          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: Setup Python ${{ matrix.versionNumber }}
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.versionNumber }}
+          python-version: 3.9
 
       - name: Install dependencies
         working-directory: sdk
