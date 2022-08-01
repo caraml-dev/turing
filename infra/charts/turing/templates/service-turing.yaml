@@ -14,7 +14,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.turing.service.externalPort }}
+    - name: http
+      port: {{ .Values.turing.service.externalPort }}
       targetPort: {{ .Values.turing.service.internalPort }}
       protocol: TCP
   selector:
