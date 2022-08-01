@@ -13,7 +13,7 @@ from turing.router.config.router_version import RouterStatus
 
 
 def test_create_router_version():
-    # get existing router that has been created in 01_create_router_test.py
+    # get the existing router that has been created in 01_create_router_test.py
     logging.info("Retrieving router...")
     router = turing.Router.get(1)
     assert router is not None
@@ -68,7 +68,7 @@ def test_create_router_version():
 
     # update router
     logging.info("Updating router with new config...")
-    router.update(new_router_config)
+    router.create_version(new_router_config)
 
     # get router version 3
     logging.info("Retrieving new router version...")

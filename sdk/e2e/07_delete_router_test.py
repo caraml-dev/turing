@@ -5,7 +5,7 @@ import turing
 from turing.router.config.router_version import RouterStatus
 
 
-def test_undeploy_router():
+def test_delete_router():
     # get the existing router that has been created in 01_create_router_test.py
     logging.info("Retrieving router...")
     router = turing.Router.get(1)
@@ -22,11 +22,11 @@ def test_undeploy_router():
     except TimeoutError:
         raise Exception(f"Turing API is taking too long for router {router.id} to get undeployed.")
 
-    # get the router again
-    logging.info("Retrieving router...")
-    router = turing.Router.get(1)
-    assert router is not None
-    assert router.status == RouterStatus.UNDEPLOYED
-    assert router.version == 1
-    assert router.get_version(1).status == RouterStatus.UNDEPLOYED
-    assert router.endpoint is None
+    # delete router
+    logging.info("Deleting router...")
+    deleted_router_id = turing.Router.delete(router.id)
+    assert deleted_router_id == router.id
+
+    # check that the router no longer exists
+    for r in turing.Router.list():
+        assert r.name != router.name

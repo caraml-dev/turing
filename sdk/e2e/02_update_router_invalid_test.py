@@ -12,7 +12,7 @@ from turing.router.config.router_version import RouterStatus
 
 
 def test_update_router_invalid_config():
-    # get existing router that has been created in 01_create_router_test.py
+    # get the existing router that has been created in 01_create_router_test.py
     logging.info("Retrieving router...")
     router = turing.Router.get(1)
     assert router is not None

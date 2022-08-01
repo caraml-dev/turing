@@ -6,7 +6,7 @@ from turing.router.config.router_version import RouterStatus
 
 
 def test_deploy_router_invalid_config():
-    # get existing router that has been created in 01_create_router_test.py
+    # get the existing router that has been created in 01_create_router_test.py
     logging.info("Retrieving router...")
     router = turing.Router.get(1)
     assert router is not None
@@ -19,9 +19,9 @@ def test_deploy_router_invalid_config():
 
     # wait for the router version deployment to fail
     try:
-        router.wait_for_version_status(RouterStatus.DEPLOYED, 2)
+        router.wait_for_version_status(RouterStatus.FAILED, 2)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {router.id} with version 2 to get deployed.")
+        raise Exception(f"Turing API is taking too long for router {router.id} with version 2 to fail.")
 
     # get the failed router version
     logging.info("Retrieving router version...")
