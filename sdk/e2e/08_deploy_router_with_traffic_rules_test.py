@@ -128,19 +128,20 @@ def test_deploy_router_with_traffic_rules():
     expected_response = {
         "experiment": {},
         "route_responses": [
+            {"data": {"version": "control"}, "is_default": False, "route": "control"},
             {
                 "data": {"version": "treatment-a"},
                 "is_default": False,
                 "route": "treatment-a",
             },
-            {"data": {"version": "control"}, "is_default": False, "route": "control"},
         ],
     }
     actual_response = response.json()["response"]
-    assert actual_response["experiment"] == expected_response["experiment"]
-    assert frozenset(actual_response["route_responses"]) == frozenset(
-        expected_response["route_responses"]
+    actual_response["route_responses"] = sorted(
+        actual_response["route_responses"], key=lambda x: x["data"]["version"]
     )
+    assert actual_response["experiment"] == expected_response["experiment"]
+    assert actual_response["route_responses"] == expected_response["route_responses"]
 
     # post single request to turing router that satisfies the second traffic rule
     logging.info(
@@ -158,19 +159,20 @@ def test_deploy_router_with_traffic_rules():
     expected_response = {
         "experiment": {},
         "route_responses": [
+            {"data": {"version": "control"}, "is_default": False, "route": "control"},
             {
                 "data": {"version": "treatment-b"},
                 "is_default": False,
                 "route": "treatment-b",
             },
-            {"data": {"version": "control"}, "is_default": False, "route": "control"},
         ],
     }
     actual_response = response.json()["response"]
-    assert actual_response["experiment"] == expected_response["experiment"]
-    assert frozenset(actual_response["route_responses"]) == frozenset(
-        expected_response["route_responses"]
+    actual_response["route_responses"] = sorted(
+        actual_response["route_responses"], key=lambda x: x["data"]["version"]
     )
+    assert actual_response["experiment"] == expected_response["experiment"]
+    assert actual_response["route_responses"] == expected_response["route_responses"]
 
     # post single request to turing router that satisfies neither traffic rule
     logging.info(
