@@ -14,14 +14,16 @@ def test_deploy_router_invalid_config():
     # deploy router version that corresponds to a failed deployment
     logging.info("Deploying router version...")
     response = router.deploy_version(2)
-    assert response['router_id'] == router.id
-    assert response['version'] == 2
+    assert response["router_id"] == router.id
+    assert response["version"] == 2
 
     # wait for the router version deployment to fail
     try:
         router.wait_for_version_status(RouterStatus.FAILED, 2)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {router.id} with version 2 to fail.")
+        raise Exception(
+            f"Turing API is taking too long for router {router.id} with version 2 to fail."
+        )
 
     # get the failed router version
     logging.info("Retrieving router version...")

@@ -25,9 +25,9 @@ def test_create_router():
     # set up route
     routes = [
         Route(
-            id='control',
+            id="control",
             endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
-            timeout='5s'
+            timeout="5s",
         )
     ]
 
@@ -35,90 +35,54 @@ def test_create_router():
     experiment_config = ExperimentConfig(
         type="proprietary",
         config={
-            "client": {
-                "id": "1",
-                "username": "test",
-                "passkey": "test"
-            },
-            "experiments": [
-                {
-                    "id": "001",
-                    "name": "exp_1"
-                }
-            ],
+            "client": {"id": "1", "username": "test", "passkey": "test"},
+            "experiments": [{"id": "001", "name": "exp_1"}],
             "variables": {
                 "experiment_variables": {
-                    "001": [
-                        {
-                            "name": "client_id",
-                            "type": "unit",
-                            "required": True
-                        }
-                    ]
+                    "001": [{"name": "client_id", "type": "unit", "required": True}]
                 },
                 "config": [
                     {
                         "name": "client_id",
                         "required": True,
                         "field": "client.id",
-                        "field_source": "payload"
+                        "field_source": "payload",
                     }
-                ]
-            }
-        }
+                ],
+            },
+        },
     )
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1,
-        max_replica=1,
-        cpu_request="200m",
-        memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="200m", memory_request="250Mi"
     )
 
     # set up log config for the router
-    log_config = LogConfig(
-        result_logger_type=ResultLoggerType.NOP
-    )
+    log_config = LogConfig(result_logger_type=ResultLoggerType.NOP)
 
     # set up enricher for the router
     enricher = Enricher(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=1,
-            max_replica=1,
-            cpu_request="200m",
-            memory_request="1Gi"
+            min_replica=1, max_replica=1, cpu_request="200m", memory_request="1Gi"
         ),
         endpoint="anything",
         timeout="2s",
         port=80,
-        env=[
-            EnvVar(
-                name="TEST_ENV",
-                value="enricher"
-            )
-        ]
+        env=[EnvVar(name="TEST_ENV", value="enricher")],
     )
 
     # set up ensembler for the router
     ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2,
-            max_replica=2,
-            cpu_request="250m",
-            memory_request="256Mi"
+            min_replica=2, max_replica=2, cpu_request="250m", memory_request="256Mi"
         ),
         endpoint="anything",
         timeout="3s",
         port=80,
-        env=[
-            EnvVar(
-                name="TEST_ENV",
-                value="ensembler"
-            )
-        ],
+        env=[EnvVar(name="TEST_ENV", value="ensembler")],
     )
 
     # create the RouterConfig instance
@@ -132,7 +96,7 @@ def test_create_router():
         timeout="5s",
         log_config=log_config,
         enricher=enricher,
-        ensembler=ensembler
+        ensembler=ensembler,
     )
 
     # create a router using the RouterConfig object
@@ -143,14 +107,19 @@ def test_create_router():
     try:
         router.wait_for_status(RouterStatus.DEPLOYED)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {router.id} to get deployed.")
+        raise Exception(
+            f"Turing API is taking too long for router {router.id} to get deployed."
+        )
     assert router.status == RouterStatus.DEPLOYED
 
     # get router with id 1
     retrieved_router = turing.Router.get(1)
     assert retrieved_router.version == 1
     assert retrieved_router.status == RouterStatus.DEPLOYED
-    assert retrieved_router.endpoint == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+    assert (
+        retrieved_router.endpoint
+        == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+    )
 
     # get router version with id 1
     router_version_1 = retrieved_router.get_version(1)
@@ -164,28 +133,16 @@ def test_create_router():
             "Content-Type": "application/json",
             "X-Mirror-Body": "true",
         },
-        json={
-            "client": {"id": 4}
-        },
+        json={"client": {"id": 4}},
     )
     assert response.status_code == 200
     expected_response = {
-        "experiment": {
-            "configuration": {
-                "foo": "bar"
-            }
-        },
+        "experiment": {"configuration": {"foo": "bar"}},
         "route_responses": [
-            {
-                "data": {
-                    "version": "control"
-                },
-                "is_default": False,
-                "route": "control"
-            }
-        ]
+            {"data": {"version": "control"}, "is_default": False, "route": "control"}
+        ],
     }
-    assert response.json()['response'] == expected_response
+    assert response.json()["response"] == expected_response
 
     # post batch request to turing router
     logging.info("Testing router batch endpoint...")
@@ -202,55 +159,35 @@ def test_create_router():
         {
             "code": 200,
             "data": {
-                "request": {
-                    "client": {
-                        "id": 4
-                    }
-                },
+                "request": {"client": {"id": 4}},
                 "response": {
-                    "experiment": {
-                        "configuration": {
-                            "foo": "bar"
-                        }
-                    },
+                    "experiment": {"configuration": {"foo": "bar"}},
                     "route_responses": [
                         {
-                            "data": {
-                                "version": "control"
-                            },
+                            "data": {"version": "control"},
                             "is_default": False,
-                            "route": "control"
+                            "route": "control",
                         }
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         },
         {
             "code": 200,
             "data": {
-                "request": {
-                    "client": {
-                        "id": 7
-                    }
-                },
+                "request": {"client": {"id": 7}},
                 "response": {
-                    "experiment": {
-                        "configuration": {
-                            "bar": "baz"
-                        }
-                    },
+                    "experiment": {"configuration": {"bar": "baz"}},
                     "route_responses": [
                         {
-                            "data": {
-                                "version": "control"
-                            },
+                            "data": {"version": "control"},
                             "is_default": False,
-                            "route": "control"
+                            "route": "control",
                         }
-                    ]
-                }
-            }
-        }
+                    ],
+                },
+            },
+        },
     ]
     assert response.json() == expected_response
 

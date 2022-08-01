@@ -14,13 +14,15 @@ def test_undeploy_router():
     # undeploy router
     logging.info("Undeploying router...")
     response = router.undeploy()
-    assert response['router_id'] == router.id
+    assert response["router_id"] == router.id
 
     # wait for the router to get undeployed
     try:
         router.wait_for_status(RouterStatus.UNDEPLOYED)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {router.id} to get undeployed.")
+        raise Exception(
+            f"Turing API is taking too long for router {router.id} to get undeployed."
+        )
 
     # get the router again
     logging.info("Retrieving router...")

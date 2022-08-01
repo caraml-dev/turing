@@ -30,40 +30,24 @@ def test_create_router_version():
     new_router_config.enricher = Enricher(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=1,
-            max_replica=1,
-            cpu_request="10",
-            memory_request="1Gi"
+            min_replica=1, max_replica=1, cpu_request="10", memory_request="1Gi"
         ),
         endpoint="anything",
         timeout="2s",
         port=80,
-        env=[
-            EnvVar(
-                name="TEST_ENV",
-                value="enricher"
-            )
-        ]
+        env=[EnvVar(name="TEST_ENV", value="enricher")],
     )
 
     # set up the new ensembler for the router
     new_router_config.ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2,
-            max_replica=2,
-            cpu_request="200m",
-            memory_request="256Mi"
+            min_replica=2, max_replica=2, cpu_request="200m", memory_request="256Mi"
         ),
         endpoint="anything",
         timeout="3s",
         port=80,
-        env=[
-            EnvVar(
-                name="TEST_ENV",
-                value="ensembler"
-            )
-        ],
+        env=[EnvVar(name="TEST_ENV", value="ensembler")],
     )
 
     # update router
@@ -76,12 +60,17 @@ def test_create_router_version():
     assert router_ver_3.status == RouterStatus.UNDEPLOYED
 
     # ensure router is not yet updated (i.e. router version remains as 1)
-    logging.info("Ensuring the router is not yet updated (i.e. the version number remains as 1)...")
+    logging.info(
+        "Ensuring the router is not yet updated (i.e. the version number remains as 1)..."
+    )
     router = turing.Router.get(1)
     assert router.version == 1
 
     # test router endpoint by posting a single request
-    assert router.endpoint == f'http://{router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+    assert (
+        router.endpoint
+        == f'http://{router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+    )
     logging.info("Testing router endpoint...")
     response = requests.post(
         url=router.endpoint,
@@ -89,25 +78,13 @@ def test_create_router_version():
             "Content-Type": "application/json",
             "X-Mirror-Body": "true",
         },
-        json={
-            "client": {"id": 4}
-        },
+        json={"client": {"id": 4}},
     )
     assert response.status_code == 200
     expected_response = {
-        "experiment": {
-            "configuration": {
-                "foo": "bar"
-            }
-        },
+        "experiment": {"configuration": {"foo": "bar"}},
         "route_responses": [
-            {
-                "data": {
-                    "version": "control"
-                },
-                "is_default": False,
-                "route": "control"
-            }
-        ]
+            {"data": {"version": "control"}, "is_default": False, "route": "control"}
+        ],
     }
-    assert response.json()['response'] == expected_response
+    assert response.json()["response"] == expected_response
