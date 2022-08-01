@@ -18,11 +18,6 @@ from turing.router.config.router_config import RouterConfig
 from turing.router.config.router_version import RouterStatus
 
 
-def setup_module():
-    turing.set_url(os.getenv('API_BASE_PATH'), use_google_oauth=False)
-    turing.set_project(os.getenv('PROJECT_NAME'))
-
-
 def test_create_router():
     # assert 0 routers are present before creating a new router
     assert len(turing.Router.list()) == 0
@@ -257,7 +252,7 @@ def test_create_router():
             }
         }
     ]
-    assert response.json()['response'] == expected_response
+    assert response.json() == expected_response
 
     # test endpoint for router logs
     logging.info("Testing endpoint for router logs...")
