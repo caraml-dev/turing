@@ -8,10 +8,11 @@ from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
+from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
 from turing.router.config.router_version import RouterStatus
 
 
-def test_update_router_invalid_config():
+def test_create_router_version():
     # get existing router that has been created in 01_create_router_test.py
     logging.info("Retrieving router...")
     router = turing.Router.get(1)
@@ -45,21 +46,37 @@ def test_update_router_invalid_config():
         ]
     )
 
+    # set up the new ensembler for the router
+    new_router_config.ensembler = DockerRouterEnsemblerConfig(
+        image=os.getenv("TEST_ECHO_IMAGE"),
+        resource_request=ResourceRequest(
+            min_replica=2,
+            max_replica=2,
+            cpu_request="200m",
+            memory_request="256Mi"
+        ),
+        endpoint="anything",
+        timeout="3s",
+        port=80,
+        env=[
+            EnvVar(
+                name="TEST_ENV",
+                value="ensembler"
+            )
+        ],
+    )
+
     # update router
     logging.info("Updating router with new config...")
     router.update(new_router_config)
 
-    # get router version 2
-    logging.info("Waiting for new router version to be deployed/fail...")
-    try:
-        router.wait_for_version_status(RouterStatus.FAILED, 2)
-    except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {router.id} with version 2 to get deployed.")
-    router_ver_2 = router.get_version(2)
-    assert router_ver_2.status == RouterStatus.FAILED
+    # get router version 3
+    logging.info("Retrieving new router version...")
+    router_ver_3 = router.get_version(3)
+    assert router_ver_3.status == RouterStatus.UNDEPLOYED
 
-    # ensure router does not get updated to the failed version (version 2)
-    logging.info("Ensuring the router does not get updated to the failed version (i.e. the version number remains as 1)...")
+    # ensure router is not yet updated (i.e. router version remains as 1)
+    logging.info("Ensuring the router is not yet updated (i.e. the version number remains as 1)...")
     router = turing.Router.get(1)
     assert router.version == 1
 
