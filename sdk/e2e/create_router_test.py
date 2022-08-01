@@ -36,7 +36,7 @@ def test_create_router():
         )
     ]
 
-    # set up experiment config (
+    # set up experiment config
     experiment_config = ExperimentConfig(
         type="proprietary",
         config={
@@ -169,7 +169,7 @@ def test_create_router():
             "Content-Type": "application/json",
             "X-Mirror-Body": "true",
         },
-        data={
+        json={
             "client": {"id": 4}
         },
     )
@@ -190,7 +190,7 @@ def test_create_router():
             }
         ]
     }
-    assert response.json() == expected_response
+    assert response.json()['response'] == expected_response
 
     # post batch request to turing router
     logging.info("Testing router batch endpoint...")
@@ -200,7 +200,7 @@ def test_create_router():
             "Content-Type": "application/json",
             "X-Mirror-Body": "true",
         },
-        data=[{"client": {"id": 4}}, {"client": {"id": 7}}],
+        json=[{"client": {"id": 4}}, {"client": {"id": 7}}],
     )
     assert response.status_code == 200
     expected_response = [
@@ -257,7 +257,7 @@ def test_create_router():
             }
         }
     ]
-    assert response.json() == expected_response
+    assert response.json()['response'] == expected_response
 
     # test endpoint for router logs
     logging.info("Testing endpoint for router logs...")
@@ -268,5 +268,4 @@ def test_create_router():
             url=base_url + "?component_type=" + component,
         )
     assert response.status_code == 200
-    print(response.content)
     assert len(response.content) > 0
