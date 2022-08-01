@@ -184,7 +184,7 @@ def test_deploy_router_with_traffic_rules():
             "Content-Type": "application/json",
             "X-Mirror-Body": "true",
         },
-        json={"service_type": {"id": "service-type-b"}},
+        json={"service_type": {"id": "service-type-c"}},
     )
     assert response.status_code == 200
     expected_response = {
