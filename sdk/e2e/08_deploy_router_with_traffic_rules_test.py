@@ -19,9 +19,6 @@ from turing.router.config.router_version import RouterStatus
 
 
 def test_deploy_router_with_traffic_rules():
-    # assert 1 router is present before creating a new router
-    assert len(turing.Router.list()) == 1
-
     # set up routes
     routes = [
         Route(

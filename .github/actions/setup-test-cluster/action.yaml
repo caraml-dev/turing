@@ -217,8 +217,3 @@ runs:
         key: |
           gomod-${{ hashFiles('api/go.mod') }}
         restore-keys: gomod-
-
-    - name: Get all pods
-      shell: bash
-      run: |
-        kubectl get pods --sort-by=.metadata.creationTimestamp -A  
