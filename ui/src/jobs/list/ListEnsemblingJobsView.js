@@ -14,7 +14,8 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
 
-export const ListEnsemblingJobsView = ({ projectId, ...props }) => {
+export const ListEnsemblingJobsView = (props) => {
+  const projectId = props.projectId;
   const {
     appConfig: {
       pagination: { defaultPageSize },
