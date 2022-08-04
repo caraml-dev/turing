@@ -60,6 +60,8 @@ const appConfig = {
     // Default number of tail log entries to be fetched
     defaultTailLines: 1000,
   },
+  batchEnsemblingEnabled:
+    process.env.REACT_APP_BATCH_ENSEMBLING_ENABLED === "true",
 };
 
 const sentryConfig = {
