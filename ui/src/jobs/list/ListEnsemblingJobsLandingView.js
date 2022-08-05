@@ -22,7 +22,7 @@ export const ListEnsemblingJobsLandingView = (props) => {
             <EuiSpacer />
             <EuiText>
               To use batch ensembling, please enable it in the configuration
-              file used to deploy the Turing API.
+              file used to deploy the Turing app.
             </EuiText>
           </EuiPanel>
         </EuiPage>
