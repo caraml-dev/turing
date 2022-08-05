@@ -45,7 +45,7 @@ func TestDeployRouterInvalidConfig(t *testing.T) {
 	defer response.Body.Close()
 	assert.Equal(t, http.StatusAccepted, response.StatusCode)
 
-	// Wait for the version status to to change to success/failed deployment
+	// Wait for the version status to change to success/failed deployment
 	t.Log("Waiting for router to deploy")
 	err = waitDeployVersion(
 		globalTestContext.httpClient,

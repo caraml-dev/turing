@@ -1,0 +1,219 @@
+name: Set Up Test Cluster
+description: Set up Turing Test Cluster
+
+inputs:
+  go-version:
+    required: true
+    description: 'Go Version'
+    default: ''
+  turing_api_tar_archive_name:
+    required: true
+    description: 'Turing API tar Archive Name'
+    default: ''
+  turing_router_tar_archive_name:
+    required: true
+    description: 'Turing Router tar Archive Name'
+    default: ''
+  experiment_engine_plugin_archive_name:
+    required: true
+    description: 'Experiment Engine tar Archive Name'
+    default: ''
+  cluster_init_tar_archive_name:
+    required: true
+    description: 'Cluster init tar Archive Name'
+    default: ''
+  use_in_cluster_config:
+    required: true
+    description: 'Matrix: useInClusterConfig'
+    default: ''
+  values_file:
+    required: true
+    description: 'Matrix: valuesFile'
+    default: ''
+  cluster_name:
+    required: true
+    description: 'Name of Cluster'
+    default: ''
+  istio_version:
+    required: true
+    description: 'Istio Version'
+    default: ''
+  knative_version:
+    required: true
+    description: 'Knative Version'
+    default: ''
+  knative_istio_version:
+    required: true
+    description: 'Knative Istio Version'
+    default: ''
+  local_registry:
+    required: true
+    description: 'Endpoint of local registry'
+    default: ''
+  cluster_init_version:
+    required: true
+    description: 'Version of cluster to install, tar file has to follow naming - cluster-init.(CLUSTER_INIT_VERSION).tar '
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Download Turing API Docker tar archive
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.turing_api_tar_archive_name }}
+
+    - name: Download Turing Router Docker tar archive
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.turing_router_tar_archive_name }}
+
+    - name: Download Experiment Engine Plugin Docker tar archive
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.experiment_engine_plugin_archive_name }}
+
+    - name: Download Cluster Init Docker tar archive
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.cluster_init_tar_archive_name }}
+
+    - name: Run action cluster-init
+      uses: ./.github/actions/run-cluster-init
+      with:
+        cluster_name: ${{ inputs.cluster_name }}
+        istio_version: ${{ inputs.istio_version }}
+        knative_version: ${{ inputs.knative_version }}
+        knative_istio_version: ${{ inputs.knative_istio_version }}
+        local_registry: ${{ inputs.local_registry }}
+        cluster_init_version: ${{ inputs.cluster_init_version }}
+
+    - name: Publish Turing images to local registry
+      shell: bash
+      env:
+        DOCKER_REPOSITORY: ${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}
+      run: |
+        # Turing API
+        docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
+        docker tag \
+          turing-api:${{ env.TURING_API_VERSION }} \
+          ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
+        docker push ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
+        
+        # Turing Router
+        docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
+        docker tag \
+          turing-router:${{ env.TURING_ROUTER_VERSION }} \
+          ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
+        docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
+        
+        # Experiment Engine Plugin
+        docker image load --input test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
+        docker tag \
+          plugin-example-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
+          ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+        docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+
+    - name: "Install Vault"
+      if: ${{ inputs.use_in_cluster_config == 'false' }}
+      shell: bash
+      env:
+        VAULT_CHART_VERSION: 0.16.1
+      run: |
+        helm repo add hashicorp https://helm.releases.hashicorp.com
+        helm install vault hashicorp/vault \
+          --version=${{ env.VAULT_CHART_VERSION }} \
+          --values infra/e2e/vault.helm-values.yaml \
+          --wait
+        
+        kubectl apply -f infra/e2e/vault.ingress.yaml
+
+    - name: Prepare cluster credentials
+      if: ${{ inputs.use_in_cluster_config == 'false' }}
+      shell: bash
+      env:
+        VAULT_TOKEN: root
+      run: |
+        echo "::group::Wait for Vault to become available"
+        timeout --foreground 45 bash -c \
+          'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
+        echo "::endgroup::"
+        
+        tee credentials.json <<EOF
+        {
+          "master_ip": "kubernetes:443",
+          "certs": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
+          "client_certificate": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
+          "client_key": "$(k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
+        }
+        EOF
+        
+        curl -v \
+          --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
+          --request POST \
+          --data @credentials.json \
+          http://vault.127.0.0.1.nip.io/v1/secret/dev
+        
+        # Create a secret for Merlin with information on how to access Vault
+        kubectl create secret generic vault-secret \
+          --from-literal=vault-address=http://vault:8200 \
+          --from-literal=vault-token=${{ env.VAULT_TOKEN }}
+
+    - name: Install Turing
+      shell: bash
+      run: |
+        helm install turing ./infra/charts/turing \
+          --values infra/e2e/turing.values.yaml \
+          --values infra/e2e/${{ inputs.values_file }} \
+          --set turing.image.registry=${{ inputs.LOCAL_REGISTRY }} \
+          --set turing.image.repository=${{ github.repository }}/turing-api \
+          --set turing.image.tag=${{ env.TURING_API_VERSION }} \
+          --set turing.config.RouterDefaults.Image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+          --set turing.experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+
+    - name: Install mockserver
+      shell: bash
+      run: |
+        kubectl apply -f infra/e2e/turing.mockserver.yaml
+
+    - name: Run action await k8 workloads
+      uses: jupyterhub/action-k8s-await-workloads@v1
+      id: wait-for-deployment
+      with:
+        workloads: >-
+          deployment/mockserver,
+          deployment/turing-mlp,
+          deployment/turing-merlin,
+          deployment/turing
+        timeout: 600 # seconds
+        max-restarts: -1
+
+    - name: Setup MLP project
+      shell: bash
+      run: |
+        tee payload.json <<EOF
+        {
+          "name": "default",
+          "team": "myteam",
+          "stream": "mystream"
+        }
+        EOF
+        
+        curl -v \
+          --header 'Content-Type: application/json' \
+          --request POST \
+          --data @payload.json \
+          http://turing-gateway.127.0.0.1.nip.io/api/v1/projects
+
+    - name: Cache Test Dependencies
+      uses: actions/cache@v2
+      with:
+        path: api/.go/pkg/mod/
+        key: |
+          gomod-${{ hashFiles('api/go.mod') }}
+        restore-keys: gomod-

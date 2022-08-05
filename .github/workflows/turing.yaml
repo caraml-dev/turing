@@ -40,6 +40,11 @@ env:
   ARTIFACT_RETENTION_DAYS: 7
   GO_VERSION: 1.18
   GO_LINT_VERSION: v1.45.2
+  CLUSTER_NAME: turing-e2e
+  ISTIO_VERSION: 1.9.9
+  KNATIVE_VERSION: v0.18.3
+  KNATIVE_ISTIO_VERSION: v0.18.1
+  LOCAL_REGISTRY: registry.localhost:5000
 
 jobs:
   build-api:
@@ -323,11 +328,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
-      CLUSTER_NAME: turing-e2e
-      ISTIO_VERSION: 1.9.9
-      KNATIVE_VERSION: v0.18.3
-      KNATIVE_ISTIO_VERSION: v0.18.1
-      LOCAL_REGISTRY: registry.localhost:5000
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
       TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
@@ -339,176 +339,51 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name:
-          - "In-cluster credentials"
-          - "Remote cluster credentials"
+        name: ["In-cluster credentials; API e2e", "Remote cluster credentials; SDK e2e"]
         include:
-          - name: "In-cluster credentials"
+          - name: "In-cluster credentials; API e2e"
             useInClusterConfig: true
             valuesFile: "turing.values.in-cluster.yaml"
-          - name: "Remote cluster credentials"
+            useSDK: false
+          - name: "Remote cluster credentials; SDK e2e"
             useInClusterConfig: false
             valuesFile: "turing.values.remote.yaml"
+            useSDK: true
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name: Set Up Test Cluster
+        uses: ./.github/actions/setup-test-cluster
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Download Turing API Docker tar archive
-        uses: actions/download-artifact@v2
-        with:
-          name: turing-api.${{ env.TURING_API_VERSION }}.tar
-
-      - name: Download Turing Router Docker tar archive
-        uses: actions/download-artifact@v2
-        with:
-          name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
-
-      - name: Download Experiment Engine Plugin Docker tar archive
-        uses: actions/download-artifact@v2
-        with:
-          name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
-
-      - name: Download Cluster Init Docker tar archive
-        uses: actions/download-artifact@v2
-        with:
-          name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-
-      - name: Run action cluster-init
-        uses: ./.github/actions/run-cluster-init
-        with:
-          cluster_name: ${{ env.CLUSTER_NAME}}
-          istio_version: ${{ env.ISTIO_VERSION}}
-          knative_version: ${{ env.KNATIVE_VERSION}}
-          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION}}
-          local_registry: ${{ env.LOCAL_REGISTRY}}
+          turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
+          turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
+          experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
+          cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
+          use_in_cluster_config: ${{ matrix.useInClusterConfig }}
+          values_file: ${{ matrix.valuesFile }}
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          istio_version: ${{ env.ISTIO_VERSION }}
+          knative_version: ${{ env.KNATIVE_VERSION }}
+          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
+          local_registry: ${{ env.LOCAL_REGISTRY }}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
-      - name: Publish Turing images to local registry
-        env:
-          DOCKER_REPOSITORY: ${{ env.LOCAL_REGISTRY }}/${{ github.repository }}
-        run: |
-          # Turing API
-          docker image load --input turing-api.${{ env.TURING_API_VERSION }}.tar
-          docker tag \
-            turing-api:${{ needs.build-api.outputs.api-version }} \
-            ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
-          docker push ${{ env.DOCKER_REPOSITORY }}/turing-api:${{ env.TURING_API_VERSION }}
-
-          # Turing Router
-          docker image load --input turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
-          docker tag \
-            turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
-          docker push ${{ env.DOCKER_REPOSITORY }}/turing-router:${{ env.TURING_ROUTER_VERSION }}
-          
-          # Experiment Engine Plugin
-          docker image load --input test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
-          docker tag \
-            plugin-example-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
-            ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
-          docker push ${{ env.DOCKER_REPOSITORY }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
-
-      - name: "Install Vault"
-        if: ${{ !matrix.useInClusterConfig }}
-        env:
-          VAULT_CHART_VERSION: 0.16.1
-        run: |
-          helm repo add hashicorp https://helm.releases.hashicorp.com
-          helm install vault hashicorp/vault \
-            --version=${{ env.VAULT_CHART_VERSION }} \
-            --values infra/e2e/vault.helm-values.yaml \
-            --wait
-
-          kubectl apply -f infra/e2e/vault.ingress.yaml
-
-      - name: Prepare cluster credentials
-        if: ${{ !matrix.useInClusterConfig }}
-        env:
-          VAULT_TOKEN: root
-        run: |
-          echo "::group::Wait for Vault to become available"
-          timeout --foreground 45 bash -c \
-            'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
-          echo "::endgroup::"
-
-          tee credentials.json <<EOF
-          {
-            "master_ip": "kubernetes:443",
-            "certs": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 --decode | awk 1 ORS='\\n')",
-            "client_certificate": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-certificate-data' - | base64 --decode | awk 1 ORS='\\n')",
-            "client_key": "$(k3d kubeconfig get ${{ env.CLUSTER_NAME }} | yq e '.users[0].user.client-key-data' - | base64 --decode | awk 1 ORS='\\n')"
-          }
-          EOF
-
-          curl -v \
-            --header "X-Vault-Token: ${{ env.VAULT_TOKEN }}" \
-            --request POST \
-            --data @credentials.json \
-            http://vault.127.0.0.1.nip.io/v1/secret/dev
-
-          # Create a secret for Merlin with information on how to access Vault
-          kubectl create secret generic vault-secret \
-            --from-literal=vault-address=http://vault:8200 \
-            --from-literal=vault-token=${{ env.VAULT_TOKEN }}
-
-      - name: Install Turing
-        run: |
-          helm install turing ./infra/charts/turing \
-            --values infra/e2e/turing.values.yaml \
-            --values infra/e2e/${{ matrix.valuesFile }} \
-            --set turing.image.registry=${{ env.LOCAL_REGISTRY }} \
-            --set turing.image.repository=${{ github.repository }}/turing-api \
-            --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-            --set turing.config.RouterDefaults.Image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-            --set turing.experimentEngines[0].rpcPlugin.image=${{ env.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
-
-      - name: Install mockserver
-        run: |
-          kubectl apply -f infra/e2e/turing.mockserver.yaml
-
-      - name: Run action await k8 workloads
-        uses: jupyterhub/action-k8s-await-workloads@v1
-        id: wait-for-deployment
+      - name: Setup Python
+        if: ${{ matrix.useSDK }}
+        uses: actions/setup-python@v2
         with:
-          workloads: >-
-            deployment/mockserver,
-            deployment/turing-mlp,
-            deployment/turing-merlin,
-            deployment/turing
-          timeout: 600 # seconds
-          max-restarts: -1
+          python-version: 3.9
 
-      - name: Setup MLP project
-        run: |
-          tee payload.json <<EOF
-          {
-            "name": "default",
-            "team": "myteam",
-            "stream": "mystream"
-          }
-          EOF
-
-          curl -v \
-            --header 'Content-Type: application/json' \
-            --request POST \
-            --data @payload.json \
-            http://turing-gateway.127.0.0.1.nip.io/api/v1/projects
-
-      - name: Cache Test Dependencies
-        uses: actions/cache@v2
-        with:
-          path: api/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('api/go.mod') }}
-          restore-keys: gomod-
+      - name: Install Python dependencies
+        if: ${{ matrix.useSDK }}
+        working-directory: sdk
+        run: make setup
 
       - name: Run End-to-End Test Suite
+        if: ${{ !matrix.useSDK }}
         id: run-e2e-test
         working-directory: api
         env:
@@ -521,6 +396,23 @@ jobs:
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+
+      - name: Run End-to-End Test Suite with Turing SDK
+        if: ${{ matrix.useSDK }}
+        id: run-e2e-test-sdk
+        working-directory: sdk
+        env:
+          GOPATH: ${{ github.workspace }}/api/.go
+          TEST_ID: ${{ github.run_id }}
+          MOCKSERVER_ENDPOINT: http://mockserver
+          API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/
+          MODEL_CLUSTER_NAME: "dev"
+          PROJECT_ID: "1"
+          PROJECT_NAME: default
+          KUBECONFIG_USE_LOCAL: true
+          TEST_ECHO_IMAGE: eexit/mirror-http-server:1.1.3
+          KSERVICE_DOMAIN: 127.0.0.1.nip.io
+        run: make e2e-sdk
 
       - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
         name: "Debug Deployment Failure"

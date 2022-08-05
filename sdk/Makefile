@@ -24,4 +24,7 @@ build: version
 
 .PHONY: test
 test:
-	@python -m pytest --cov=turing
+	@python -m pytest --cov=turing tests/
+
+e2e-sdk:
+	@python -m pytest -s -v e2e

@@ -395,7 +395,7 @@ def _process_conda_env(conda_env: Union[str, Dict[str, Any]]) -> Tuple[Dict[str,
         # conda dependencies whose spec differs slightly from Python's setuptools.
         # We could install the complete conda library but this is too bulky if the goal is
         # to just carry out this matching.
-        return spec == name or re.match(f'{name}[><=\s]+', spec) is not None
+        return spec == name or re.match(name + r"[><=\s]+", spec) is not None
     if isinstance(conda_env, str):
         with open(conda_env, "r") as f:
             conda_env = yaml.safe_load(f)
