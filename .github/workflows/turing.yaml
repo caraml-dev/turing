@@ -339,14 +339,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ["In-cluster credentials", "Remote cluster credentials"]
+        name: ["In-cluster credentials; API e2e", "Remote cluster credentials; SDK e2e"]
         include:
-          - name: "In-cluster credentials"
+          - name: "In-cluster credentials; API e2e"
             useInClusterConfig: true
             valuesFile: "turing.values.in-cluster.yaml"
-          - name: "Remote cluster credentials"
+            useSDK: false
+          - name: "Remote cluster credentials; SDK e2e"
             useInClusterConfig: false
             valuesFile: "turing.values.remote.yaml"
+            useSDK: true
 
     steps:
       - name: Check out code
@@ -369,7 +371,19 @@ jobs:
           local_registry: ${{ env.LOCAL_REGISTRY }}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
+      - name: Setup Python
+        if: ${{ matrix.useSDK }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        if: ${{ matrix.useSDK }}
+        working-directory: sdk
+        run: make setup
+
       - name: Run End-to-End Test Suite
+        if: ${{ !matrix.useSDK }}
         id: run-e2e-test
         working-directory: api
         env:
@@ -383,81 +397,8 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
         run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
-      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
-        name: "Debug Deployment Failure"
-        run: |
-          echo "::group::describe deployment/turing-mlp"
-          kubectl describe deployment/turing-mlp
-          echo "::endgroup::"
-
-          echo "::group::describe deployment/turing-merlin"
-          kubectl describe deployment/turing-merlin
-          echo "::endgroup::"
-
-          echo "::group::describe deployment/turing"
-          kubectl describe deployment/turing
-          echo "::endgroup::"
-
-          echo "::group::secret/turing-api-config"
-          kubectl get secret/turing-api-config -o jsonpath='{.data.config\.yaml}' | base64 --decode
-          echo "::endgroup::"
-
-          echo "::group::logs deployment/turing-mlp"
-          kubectl logs deployment/turing-mlp
-          echo "::endgroup::"
-
-          echo "::group::logs deployment/turing-merlin"
-          kubectl logs deployment/turing-merlin
-          echo "::endgroup::"
-
-          echo "::group::logs deployment/turing"
-          kubectl logs deployment/turing
-          echo "::endgroup::"
-
-  test-e2e-sdk:
-    runs-on: ubuntu-latest
-    env:
-      CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
-      TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
-      TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
-      TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
-    needs:
-      - build-api
-      - build-router
-      - build-test-experiment-engine-plugin
-      - build-cluster-init
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set Up Test Cluster
-        uses: ./.github/actions/setup-test-cluster
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
-          turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
-          experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
-          cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
-          use_in_cluster_config: false
-          values_file: "turing.values.remote.yaml"
-          cluster_name: ${{ env.CLUSTER_NAME }}
-          istio_version: ${{ env.ISTIO_VERSION }}
-          knative_version: ${{ env.KNATIVE_VERSION }}
-          knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
-          local_registry: ${{ env.LOCAL_REGISTRY }}
-          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        working-directory: sdk
-        run: make setup
-
       - name: Run End-to-End Test Suite with Turing SDK
+        if: ${{ matrix.useSDK }}
         id: run-e2e-test-sdk
         working-directory: sdk
         env:
@@ -473,7 +414,7 @@ jobs:
           KSERVICE_DOMAIN: 127.0.0.1.nip.io
         run: make e2e-sdk
 
-      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test-sdk.outcome == 'failure') && always()
+      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
           echo "::group::describe deployment/turing-mlp"
@@ -531,7 +472,6 @@ jobs:
       - build-ui
       - release-rules
       - test-e2e
-      - test-e2e-sdk
       - test-api
       - test-engines-router
       - test-engines-experiment
