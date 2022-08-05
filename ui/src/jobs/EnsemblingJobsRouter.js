@@ -1,13 +1,13 @@
 import React from "react";
 import { Redirect, Router } from "@reach/router";
-import { ListEnsemblingJobsView } from "./list/ListEnsemblingJobsView";
+import { ListEnsemblingJobsLandingView } from "./list/ListEnsemblingJobsLandingView";
 import { EnsemblingJobDetailsView } from "./details/EnsemblingJobDetailsView";
 import { EnsemblersContextContextProvider } from "../providers/ensemblers/context";
 
 export const EnsemblingJobsRouter = ({ projectId }) => (
   <EnsemblersContextContextProvider projectId={projectId}>
     <Router>
-      <ListEnsemblingJobsView path="/" />
+      <ListEnsemblingJobsLandingView path="/" />
 
       <EnsemblingJobDetailsView path=":jobId/*" />
 

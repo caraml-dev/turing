@@ -118,7 +118,7 @@ turing:
     AlertConfig:
       Enabled: false
     BatchEnsemblingConfig:
-      Enabled: false
+      Enabled: &batchEnsemblingEnabled false
     EnsemblerServiceBuilderConfig:
       DefaultEnvironment: dev
       ImageBuildingConfig:
@@ -182,6 +182,7 @@ turing:
           href: https://github.com/gojek/turing/tree/main/docs
       scaling:
         maxAllowedReplica: 20
+      batchEnsemblingEnabled: *batchEnsemblingEnabled
     authConfig:
       oauthClientId: ""
     sentryConfig: { }
