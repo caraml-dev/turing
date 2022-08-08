@@ -19,8 +19,9 @@ type EngineFactory interface {
 
 // NewEngineFactory is a constructor method that creates a new instance of EngineFactory
 // The concrete implementation of EngineFactory can be either:
-// 	- experiment/plugin/inproc/factory (for experiment engines implemented as compile-time plugins)
-//  - experiment/plugin/rpc/factory (for experiment engines implemented as external net/rpc plugins)
+//   - experiment/plugin/inproc/factory (for experiment engines implemented as compile-time plugins)
+//   - experiment/plugin/rpc/factory (for experiment engines implemented as external net/rpc plugins)
+//
 // The actual implementation is determined based on provided engine configuration (passed via `cfg`)
 func NewEngineFactory(name string, cfg map[string]interface{}, logger *zap.SugaredLogger) (EngineFactory, error) {
 	var engineCfg config.EngineConfig

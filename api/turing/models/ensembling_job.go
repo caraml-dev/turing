@@ -84,23 +84,29 @@ func (r *InfraConfig) Scan(value interface{}) error {
 // Status is the state of the finite machine ensembling job.
 // Possible statuses:
 // JobPending --▶ JobFailedSubmission
-//     |
-//     |
-//     |
-//     |
+//
+//	|
+//	|
+//	|
+//	|
+//
 // JobBuildingImage --▶ JobFailedBuildImage
-//     |
-//     |
-//     |
-//     |
-//     ▼
+//
+//	|
+//	|
+//	|
+//	|
+//	▼
+//
 // JobRunning --▶ JobFailed
-//     |
-//     |
-//     |--▶ JobTerminating --▶ JobTerminated
-//     |
-//     |
-//     ▼
+//
+//	|
+//	|
+//	|--▶ JobTerminating --▶ JobTerminated
+//	|
+//	|
+//	▼
+//
 // JobCompleted
 type Status string
 

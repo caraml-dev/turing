@@ -253,7 +253,7 @@ func assertNil(t *testing.T, actualResp []byte, _ string) {
 	assert.Nil(t, actualResp)
 }
 
-//////////////////////// Benchmark Tests //////////////////////////////////////
+// ////////////////////// Benchmark Tests //////////////////////////////////////
 // Global variables for benchmark tests, to ensure compiler optimization doesn't
 // eliminate function calls
 var benchMarkResp mchttp.Response
