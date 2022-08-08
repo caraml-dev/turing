@@ -33,8 +33,6 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "10.4.4",
     "@testing-library/user-event": "^7.2.1",
-    "husky": "^7.0.1",
-    "lint-staged": "^11.1.2",
     "node-sass": "^6.0.1",
     "prettier": "^2.4.0",
     "react-scripts": "5.0.0-next.37"
@@ -43,18 +41,11 @@
     "react-scripts/**/postcss-normalize": "10.0.1",
     "**/react-beautiful-dnd": "git+https://github.com/gojekfarm/react-beautiful-dnd.git#master"
   },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --bracket-same-line --write",
-      "git add"
-    ]
-  },
   "scripts": {
     "start": "PORT=3001 craco start --verbose",
     "build": "craco build",
     "test": "craco test",
-    "lint": "eslint --max-warnings 0 src",
-    "prepare": "cd ../ && husky install ui/.husky"
+    "lint": "eslint --max-warnings 0 src"
   },
   "eslintConfig": {
     "extends": "react-app"
