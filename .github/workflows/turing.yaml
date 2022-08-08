@@ -382,7 +382,7 @@ jobs:
         working-directory: sdk
         run: make setup
 
-      - name: Run End-to-End Test Suite
+      - name: Run End-to-End Test Suite with Turing API
         if: ${{ !matrix.useSDK }}
         id: run-e2e-test
         working-directory: api
