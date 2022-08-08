@@ -20,38 +20,21 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
 
 
 @pytest.mark.parametrize(
-    "ensembler_uri,inputs,headers,expected", [
-        pytest.param(
-            "simple_ensembler_uri",
-            dummy_long_request,
-            {},
-            [
-                296.15732,
-                0
-            ]
-        ),
+    "ensembler_uri,inputs,headers,expected",
+    [
+        pytest.param("simple_ensembler_uri", dummy_long_request, {}, [296.15732, 0]),
         pytest.param(
             "simple_ensembler_uri",
             dummy_short_request,
             {"Key": "Value"},
-            {"headers": {"Key": "Value"}}
+            {"headers": {"Key": "Value"}},
         ),
+        pytest.param("legacy_ensembler_uri", dummy_long_request, {}, [296.15732, 0]),
         pytest.param(
-            "legacy_ensembler_uri",
-            dummy_long_request,
-            {},
-            [
-                296.15732,
-                0
-            ]
+            "legacy_ensembler_uri", dummy_short_request, {"Key": "Value"}, [0, 0]
         ),
-        pytest.param(
-            "legacy_ensembler_uri",
-            dummy_short_request,
-            {"Key": "Value"},
-            [0, 0]
-        )
-    ])
+    ],
+)
 def test_ensembler_prediction(ensembler_uri, inputs, headers, expected, request):
     ensembler = PyFuncEnsemblerRunner(request.getfixturevalue(ensembler_uri))
     ensembler.load()
@@ -87,4 +70,3 @@ class TestEnsemblerService(AsyncHTTPTestCase):
     @pytest.fixture(autouse=True)
     def _get_ensembler(self, simple_ensembler_uri):
         self.ensembler = simple_ensembler_uri
-

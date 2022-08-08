@@ -29,9 +29,9 @@ class DataObject:
         return False
 
     def __str__(self):
-        return '%s(%s)' % (
+        return "%s(%s)" % (
             type(self).__name__,
-            ','.join('\n\t%s=%s' % item for item in self.to_dict().items())
+            ",".join("\n\t%s=%s" % item for item in self.to_dict().items()),
         )
 
     def __repr__(self) -> str:
@@ -42,12 +42,14 @@ class ApiObject(DataObject):
     """
     Base DTO class, for objects retrieved from Turing API
     """
+
     def __init__(
-            self,
-            id: int = 0,
-            created_at: datetime = None,
-            updated_at: datetime = None,
-            **kwargs):
+        self,
+        id: int = 0,
+        created_at: datetime = None,
+        updated_at: datetime = None,
+        **kwargs
+    ):
         self._id = id
         self._created_at = created_at
         self._updated_at = updated_at

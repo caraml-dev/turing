@@ -3,24 +3,22 @@ import pathlib
 import pkg_resources
 
 
-with pathlib.Path('requirements.txt').open() as requirements_txt:
+with pathlib.Path("requirements.txt").open() as requirements_txt:
     requirements = [
         str(requirement)
-        for requirement
-        in pkg_resources.parse_requirements(requirements_txt)
+        for requirement in pkg_resources.parse_requirements(requirements_txt)
     ]
 
-with pathlib.Path('requirements.dev.txt').open() as dev_requirements_test:
+with pathlib.Path("requirements.dev.txt").open() as dev_requirements_test:
     dev_requirements = [
         str(requirement)
-        for requirement
-        in pkg_resources.parse_requirements(dev_requirements_test)
+        for requirement in pkg_resources.parse_requirements(dev_requirements_test)
     ]
 
 setuptools.setup(
-    name='pyfunc-ensembler-service',
+    name="pyfunc-ensembler-service",
     packages=setuptools.find_packages(),
     install_requires=requirements,
     dev_requirements=dev_requirements,
-    python_requires='==3.7.*',
+    python_requires="==3.7.*",
 )

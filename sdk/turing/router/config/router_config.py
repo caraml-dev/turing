@@ -43,6 +43,7 @@ class RouterConfig:
     :param enricher: enricher config settings to be used with the router
     :param ensembler: ensembler config settings to be used with the router
     """
+
     environment_name: str = ""
     name: str = ""
     routes: Union[List[Route], List[Dict[str, str]]] = None
@@ -55,21 +56,23 @@ class RouterConfig:
     enricher: Union[Enricher, Dict] = None
     ensembler: Union[RouterEnsemblerConfig, Dict] = None
 
-    def __init__(self,
-                 environment_name: str = "",
-                 name: str = "",
-                 routes: Union[List[Route], List[Dict[str, str]]] = None,
-                 rules: Union[List[TrafficRule], List[Dict]] = None,
-                 default_route_id: str = None,
-                 experiment_engine: Union[ExperimentConfig, Dict] = None,
-                 resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
-                 timeout: str = None,
-                 log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
-                     result_logger_type=ResultLoggerType.NOP
-                 ),
-                 enricher: Union[Enricher, Dict] = None,
-                 ensembler: Union[RouterEnsemblerConfig, Dict] = None,
-                 **kwargs):
+    def __init__(
+        self,
+        environment_name: str = "",
+        name: str = "",
+        routes: Union[List[Route], List[Dict[str, str]]] = None,
+        rules: Union[List[TrafficRule], List[Dict]] = None,
+        default_route_id: str = None,
+        experiment_engine: Union[ExperimentConfig, Dict] = None,
+        resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
+        timeout: str = None,
+        log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
+            result_logger_type=ResultLoggerType.NOP
+        ),
+        enricher: Union[Enricher, Dict] = None,
+        ensembler: Union[RouterEnsemblerConfig, Dict] = None,
+        **kwargs,
+    ):
         self.environment_name = environment_name
         self.name = name
         self.routes = routes
@@ -132,14 +135,18 @@ class RouterConfig:
             self._rules = rules
 
     @property
-    @deprecation.deprecated(deprecated_in="0.4.0",
-        details="Please use the ensembler properties to configure the final / fallback route.")
+    @deprecation.deprecated(
+        deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.",
+    )
     def default_route_id(self) -> str:
         return self._default_route_id
 
     @default_route_id.setter
-    @deprecation.deprecated(deprecated_in="0.4.0",
-        details="Please use the ensembler properties to configure the final / fallback route.")
+    @deprecation.deprecated(
+        deprecated_in="0.4.0",
+        details="Please use the ensembler properties to configure the final / fallback route.",
+    )
     def default_route_id(self, default_route_id: str):
         self._default_route_id = default_route_id
         # User may directly modify the default_route_id property while it is deprecated.
@@ -168,7 +175,9 @@ class RouterConfig:
         return self._resource_request
 
     @resource_request.setter
-    def resource_request(self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]):
+    def resource_request(
+        self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]
+    ):
         if isinstance(resource_request, ResourceRequest):
             self._resource_request = resource_request
         elif isinstance(resource_request, dict):
@@ -189,7 +198,9 @@ class RouterConfig:
         return self._log_config
 
     @log_config.setter
-    def log_config(self, log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]]):
+    def log_config(
+        self, log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]]
+    ):
         if isinstance(log_config, LogConfig):
             self._log_config = log_config
         elif isinstance(log_config, dict):
@@ -218,45 +229,68 @@ class RouterConfig:
     def ensembler(self, ensembler: Union[RouterEnsemblerConfig, Dict]):
         if ensembler is None:
             # Init nop ensembler config if ensembler is not set
-            self._ensembler = NopRouterEnsemblerConfig(final_response_route_id=self.default_route_id)
+            self._ensembler = NopRouterEnsemblerConfig(
+                final_response_route_id=self.default_route_id
+            )
         elif isinstance(ensembler, dict):
             # Set fallback_response_route_id into standard ensembler config
-            if ensembler["type"] == "standard" and "fallback_response_route_id" not in ensembler["standard_config"]:
-                ensembler["standard_config"]["fallback_response_route_id"] = self.default_route_id
+            if (
+                ensembler["type"] == "standard"
+                and "fallback_response_route_id" not in ensembler["standard_config"]
+            ):
+                ensembler["standard_config"][
+                    "fallback_response_route_id"
+                ] = self.default_route_id
             self._ensembler = RouterEnsemblerConfig(**ensembler)
         else:
             self._ensembler = ensembler
         # Init child class types
         if isinstance(self._ensembler, RouterEnsemblerConfig):
-            if self._ensembler.type == "nop" and not isinstance(self._ensembler, NopRouterEnsemblerConfig):
-                self._ensembler = NopRouterEnsemblerConfig.from_config(self._ensembler.nop_config)
-            elif self._ensembler.type == "standard" and not isinstance(self._ensembler, StandardRouterEnsemblerConfig):
-                self._ensembler = StandardRouterEnsemblerConfig.from_config(self._ensembler.standard_config)
-            elif self._ensembler.type == "docker" and not isinstance(self._ensembler, DockerRouterEnsemblerConfig):
-                self._ensembler = DockerRouterEnsemblerConfig.from_config(self._ensembler.docker_config)
-            elif self._ensembler.type == "pyfunc" and not isinstance(self._ensembler, PyfuncRouterEnsemblerConfig):
-                self._ensembler = PyfuncRouterEnsemblerConfig.from_config(self._ensembler.pyfunc_config)
-            
+            if self._ensembler.type == "nop" and not isinstance(
+                self._ensembler, NopRouterEnsemblerConfig
+            ):
+                self._ensembler = NopRouterEnsemblerConfig.from_config(
+                    self._ensembler.nop_config
+                )
+            elif self._ensembler.type == "standard" and not isinstance(
+                self._ensembler, StandardRouterEnsemblerConfig
+            ):
+                self._ensembler = StandardRouterEnsemblerConfig.from_config(
+                    self._ensembler.standard_config
+                )
+            elif self._ensembler.type == "docker" and not isinstance(
+                self._ensembler, DockerRouterEnsemblerConfig
+            ):
+                self._ensembler = DockerRouterEnsemblerConfig.from_config(
+                    self._ensembler.docker_config
+                )
+            elif self._ensembler.type == "pyfunc" and not isinstance(
+                self._ensembler, PyfuncRouterEnsemblerConfig
+            ):
+                self._ensembler = PyfuncRouterEnsemblerConfig.from_config(
+                    self._ensembler.pyfunc_config
+                )
+
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
         self._verify_no_duplicate_routes()
-        
+
         # Get default route id if exists
         default_route_id = self._get_default_route_id()
         if default_route_id is not None:
-            kwargs['default_route_id'] = default_route_id
+            kwargs["default_route_id"] = default_route_id
 
         if self.rules is not None:
-            kwargs['rules'] = [rule.to_open_api() for rule in self.rules]
+            kwargs["rules"] = [rule.to_open_api() for rule in self.rules]
         if self.resource_request is not None:
-            kwargs['resource_request'] = self.resource_request.to_open_api()
+            kwargs["resource_request"] = self.resource_request.to_open_api()
         if self.enricher is not None:
-            kwargs['enricher'] = self.enricher.to_open_api()
+            kwargs["enricher"] = self.enricher.to_open_api()
         if self.ensembler is not None:
-            kwargs['ensembler'] = self.ensembler.to_open_api()
-            if kwargs['ensembler'] is None:
+            kwargs["ensembler"] = self.ensembler.to_open_api()
+            if kwargs["ensembler"] is None:
                 # The Turing API does not handle an ensembler type "nop" - it must be left unset.
-                del kwargs['ensembler']
+                del kwargs["ensembler"]
 
         return turing.generated.models.RouterConfig(
             environment_name=self.environment_name,
@@ -266,8 +300,8 @@ class RouterConfig:
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
-                **kwargs
-            )
+                **kwargs,
+            ),
         )
 
     def _get_default_route_id(self):
@@ -287,8 +321,8 @@ class RouterConfig:
             if route.id == default_route_id:
                 return
         raise turing.router.config.route.InvalidRouteException(
-                f"Default route id {default_route_id} is not registered in the routes."
-            )
+            f"Default route id {default_route_id} is not registered in the routes."
+        )
 
     def _verify_no_duplicate_routes(self):
         route_id_counter = Counter(route.id for route in self.routes)
@@ -301,6 +335,8 @@ class RouterConfig:
     def to_dict(self):
         att_dict = {}
         for m in inspect.getmembers(self):
-            if not inspect.ismethod(m[VALUE_INDEX]) and not m[NAME_INDEX].startswith('_'):
+            if not inspect.ismethod(m[VALUE_INDEX]) and not m[NAME_INDEX].startswith(
+                "_"
+            ):
                 att_dict[m[NAME_INDEX]] = m[VALUE_INDEX]
         return att_dict

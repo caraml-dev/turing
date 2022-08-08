@@ -7,14 +7,14 @@ import turing.ensembler
 def json_serializer(o):
     if isinstance(o, (date, datetime)):
         return o.isoformat()
-    if isinstance(o, (client.model_utils.ModelNormal, client.model_utils.ModelComposed)):
+    if isinstance(
+        o, (client.model_utils.ModelNormal, client.model_utils.ModelComposed)
+    ):
         return o.to_dict()
 
 
 def utc_date(date_str: str):
-    return datetime.strptime(
-        date_str, "%Y-%m-%dT%H:%M:%S.%fZ"
-    ).replace(tzinfo=tzutc())
+    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=tzutc())
 
 
 class MyTestEnsembler(turing.ensembler.PyFunc):
@@ -28,10 +28,10 @@ class MyTestEnsembler(turing.ensembler.PyFunc):
         pass
 
     def ensemble(
-            self,
-            input: pandas.Series,
-            predictions: pandas.Series,
-            treatment_config: Optional[dict]
+        self,
+        input: pandas.Series,
+        predictions: pandas.Series,
+        treatment_config: Optional[dict],
     ) -> Any:
         if input["treatment"] in predictions:
             return predictions[input["treatment"]]

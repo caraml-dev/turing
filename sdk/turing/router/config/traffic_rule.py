@@ -28,6 +28,7 @@ class TrafficRuleCondition:
     :param operator: name of the operator (fixed as 'in')
     :param values: values that are supposed to match those found in the field
     """
+
     field_source: FieldSource
     field: str
     operator: str
@@ -81,7 +82,7 @@ class TrafficRuleCondition:
             field_source=self.field_source.to_open_api(),
             field=self.field,
             operator=self.operator,
-            values=self.values
+            values=self.values,
         )
 
     @classmethod
@@ -96,30 +97,30 @@ class InvalidOperatorException(Exception):
 
 @dataclass
 class HeaderTrafficRuleCondition(TrafficRuleCondition):
-    def __init__(self,
-                 field: str,
-                 values: List[str]):
+    def __init__(self, field: str, values: List[str]):
         """
         Method to create a new TrafficRuleCondition that is defined on a request header
 
         :param field: name of the field specified
         :param values: values that are supposed to match those found in the field
         """
-        super().__init__(field_source=FieldSource.HEADER, field=field, operator="in", values=values)
+        super().__init__(
+            field_source=FieldSource.HEADER, field=field, operator="in", values=values
+        )
 
 
 @dataclass
 class PayloadTrafficRuleCondition(TrafficRuleCondition):
-    def __init__(self,
-                 field: str,
-                 values: List[str]):
+    def __init__(self, field: str, values: List[str]):
         """
         Method to create a new TrafficRuleCondition that is defined on a request payload
 
         :param field: name of the field specified
         :param values: values that are supposed to match those found in the field
         """
-        super().__init__(field_source=FieldSource.PAYLOAD, field=field, operator="in", values=values)
+        super().__init__(
+            field_source=FieldSource.PAYLOAD, field=field, operator="in", values=values
+        )
 
 
 @dataclass
@@ -130,10 +131,13 @@ class TrafficRule:
     :param conditions: list of TrafficRuleConditions that need to ALL be satisfied before routing to the given routes
     :param routes: list of routes to send the request to should all the given conditions be met
     """
+
     conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]
     routes: List[str]
 
-    _conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]] = dataclasses.field(init=False, repr=False)
+    _conditions: Union[
+        List[TrafficRuleCondition], List[Dict[str, List[str]]]
+    ] = dataclasses.field(init=False, repr=False)
     _routes: List[str] = dataclasses.field(init=False, repr=False)
 
     @property
@@ -141,12 +145,18 @@ class TrafficRule:
         return self._conditions
 
     @conditions.setter
-    def conditions(self, conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]):
+    def conditions(
+        self, conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]
+    ):
         if isinstance(conditions, list):
-            if all(isinstance(condition, TrafficRuleCondition) for condition in conditions):
+            if all(
+                isinstance(condition, TrafficRuleCondition) for condition in conditions
+            ):
                 self._conditions = conditions
             elif all(isinstance(condition, dict) for condition in conditions):
-                self._conditions = [TrafficRuleCondition(**condition) for condition in conditions]
+                self._conditions = [
+                    TrafficRuleCondition(**condition) for condition in conditions
+                ]
             else:
                 self._conditions = conditions
         else:
@@ -164,8 +174,11 @@ class TrafficRule:
         self._verify_no_duplicate_routes()
 
         return turing.generated.models.TrafficRule(
-            conditions=[traffic_rule_condition.to_open_api() for traffic_rule_condition in self.conditions],
-            routes=self.routes
+            conditions=[
+                traffic_rule_condition.to_open_api()
+                for traffic_rule_condition in self.conditions
+            ],
+            routes=self.routes,
         )
 
     def _verify_no_duplicate_routes(self):

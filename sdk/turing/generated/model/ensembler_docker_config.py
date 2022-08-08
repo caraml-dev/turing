@@ -26,11 +26,13 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
+
 def lazy_import():
     from turing.generated.model.env_var import EnvVar
     from turing.generated.model.resource_request import ResourceRequest
-    globals()['EnvVar'] = EnvVar
-    globals()['ResourceRequest'] = ResourceRequest
+
+    globals()["EnvVar"] = EnvVar
+    globals()["ResourceRequest"] = ResourceRequest
 
 
 class EnsemblerDockerConfig(ModelNormal):
@@ -57,20 +59,19 @@ class EnsemblerDockerConfig(ModelNormal):
           as additional properties values.
     """
 
-    allowed_values = {
-    }
+    allowed_values = {}
 
     validations = {
-        ('image',): {
-            'regex': {
-                'pattern': r'^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$',  # noqa: E501
+        ("image",): {
+            "regex": {
+                "pattern": r"^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$",  # noqa: E501
             },
         },
-        ('timeout',): {
-            'regex': {
-                'pattern': r'^[0-9]+(ms|s|m|h)$',  # noqa: E501
+        ("timeout",): {
+            "regex": {
+                "pattern": r"^[0-9]+(ms|s|m|h)$",
             },
-        },
+        },  # noqa: E501
     }
 
     additional_properties_type = None
@@ -89,43 +90,46 @@ class EnsemblerDockerConfig(ModelNormal):
         """
         lazy_import()
         return {
-            'image': (str,),  # noqa: E501
-            'resource_request': (ResourceRequest,),  # noqa: E501
-            'endpoint': (str,),  # noqa: E501
-            'timeout': (str,),  # noqa: E501
-            'port': (int,),  # noqa: E501
-            'env': ([EnvVar],),  # noqa: E501
-            'service_account': (str,),  # noqa: E501
+            "image": (str,),  # noqa: E501
+            "resource_request": (ResourceRequest,),  # noqa: E501
+            "endpoint": (str,),  # noqa: E501
+            "timeout": (str,),  # noqa: E501
+            "port": (int,),  # noqa: E501
+            "env": ([EnvVar],),  # noqa: E501
+            "service_account": (str,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
-
     attribute_map = {
-        'image': 'image',  # noqa: E501
-        'resource_request': 'resource_request',  # noqa: E501
-        'endpoint': 'endpoint',  # noqa: E501
-        'timeout': 'timeout',  # noqa: E501
-        'port': 'port',  # noqa: E501
-        'env': 'env',  # noqa: E501
-        'service_account': 'service_account',  # noqa: E501
+        "image": "image",  # noqa: E501
+        "resource_request": "resource_request",  # noqa: E501
+        "endpoint": "endpoint",  # noqa: E501
+        "timeout": "timeout",  # noqa: E501
+        "port": "port",  # noqa: E501
+        "env": "env",  # noqa: E501
+        "service_account": "service_account",  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set([
-        '_data_store',
-        '_check_type',
-        '_spec_property_naming',
-        '_path_to_item',
-        '_configuration',
-        '_visited_composed_classes',
-    ])
+    required_properties = set(
+        [
+            "_data_store",
+            "_check_type",
+            "_spec_property_naming",
+            "_path_to_item",
+            "_configuration",
+            "_visited_composed_classes",
+        ]
+    )
 
     @convert_js_args_to_python_args
-    def __init__(self, image, resource_request, endpoint, timeout, port, env, *args, **kwargs):  # noqa: E501
+    def __init__(
+        self, image, resource_request, endpoint, timeout, port, env, *args, **kwargs
+    ):  # noqa: E501
         """EnsemblerDockerConfig - a model defined in OpenAPI
 
         Args:
@@ -170,15 +174,16 @@ class EnsemblerDockerConfig(ModelNormal):
             service_account (str): (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file.\" . [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop('_check_type', True)
-        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
-        _path_to_item = kwargs.pop('_path_to_item', ())
-        _configuration = kwargs.pop('_configuration', None)
-        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
+        _check_type = kwargs.pop("_check_type", True)
+        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
+        _path_to_item = kwargs.pop("_path_to_item", ())
+        _configuration = kwargs.pop("_configuration", None)
+        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
+                % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -200,10 +205,12 @@ class EnsemblerDockerConfig(ModelNormal):
         self.port = port
         self.env = env
         for var_name, var_value in kwargs.items():
-            if var_name not in self.attribute_map and \
-                        self._configuration is not None and \
-                        self._configuration.discard_unknown_keys and \
-                        self.additional_properties_type is None:
+            if (
+                var_name not in self.attribute_map
+                and self._configuration is not None
+                and self._configuration.discard_unknown_keys
+                and self.additional_properties_type is None
+            ):
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)

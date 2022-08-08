@@ -9,13 +9,13 @@ from turing.router.config.router_config import RouterConfig
 from turing.router.config.router_version import RouterVersion, RouterStatus
 
 
-logger = logging.getLogger('router_sdk_logger')
+logger = logging.getLogger("router_sdk_logger")
 logger.setLevel(level=logging.INFO)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
@@ -26,16 +26,19 @@ class Router(ApiObject):
     """
     API entity for Router
     """
-    def __init__(self,
-                 id: int,
-                 name: str,
-                 project_id: int,
-                 environment_name: str,
-                 monitoring_url: str,
-                 status: str,
-                 config: Dict = None,
-                 endpoint: str = None,
-                 **kwargs):
+
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        project_id: int,
+        environment_name: str,
+        monitoring_url: str,
+        status: str,
+        config: Dict = None,
+        endpoint: str = None,
+        **kwargs,
+    ):
         super(Router, self).__init__(**kwargs)
         self._id = id
         self._name = name
@@ -75,18 +78,20 @@ class Router(ApiObject):
         return self._status
 
     @property
-    def config(self) -> Optional['RouterConfig']:
+    def config(self) -> Optional["RouterConfig"]:
         if self._config is not None:
-            return RouterConfig(name=self.name, environment_name=self.environment_name, **self._config)
+            return RouterConfig(
+                name=self.name, environment_name=self.environment_name, **self._config
+            )
         else:
             return None
 
     @property
     def version(self) -> int:
-        return self._config.get('version') if self._config else None
+        return self._config.get("version") if self._config else None
 
     @classmethod
-    def list(cls) -> List['Router']:
+    def list(cls) -> List["Router"]:
         """
         List routers in the active project
 
@@ -96,14 +101,16 @@ class Router(ApiObject):
         return [Router.from_open_api(item) for item in response]
 
     @classmethod
-    def create(cls, config: RouterConfig) -> 'Router':
+    def create(cls, config: RouterConfig) -> "Router":
         """
         Create router with a given configuration
 
         :param config: configuration of router
         :return: instance of router created
         """
-        return Router.from_open_api(turing.active_session.create_router(router_config=config.to_open_api()))
+        return Router.from_open_api(
+            turing.active_session.create_router(router_config=config.to_open_api())
+        )
 
     @classmethod
     def delete(cls, router_id: int) -> int:
@@ -116,7 +123,7 @@ class Router(ApiObject):
         return turing.active_session.delete_router(router_id=router_id).id
 
     @classmethod
-    def get(cls, router_id: int) -> 'Router':
+    def get(cls, router_id: int) -> "Router":
         """
         Fetch router by its router ID
 
@@ -124,9 +131,10 @@ class Router(ApiObject):
         :return: router with the corresponding id
         """
         return Router.from_open_api(
-            turing.active_session.get_router(router_id=router_id))
+            turing.active_session.get_router(router_id=router_id)
+        )
 
-    def update(self, config: RouterConfig) -> 'Router':
+    def update(self, config: RouterConfig) -> "Router":
         """
         Update the current router with a new set of configs specified in the RouterConfig argument
 
@@ -135,12 +143,14 @@ class Router(ApiObject):
         """
         self._config = config
         updated_router = Router.from_open_api(
-            turing.active_session.update_router(router_id=self.id, router_config=config.to_open_api())
+            turing.active_session.update_router(
+                router_id=self.id, router_config=config.to_open_api()
+            )
         )
         self.__dict__ = updated_router.__dict__
         return self
 
-    def create_version(self, config: RouterConfig) -> 'RouterVersion':
+    def create_version(self, config: RouterConfig) -> "RouterVersion":
         """
         Creates a new router version for the router WITHOUT deploying it
 
@@ -165,24 +175,32 @@ class Router(ApiObject):
         """
         return turing.active_session.undeploy_router(router_id=self.id).to_dict()
 
-    def list_versions(self) -> List['RouterVersion']:
+    def list_versions(self) -> List["RouterVersion"]:
         """
         List router versions for this router
 
         :return: list of router versions
         """
         response = turing.active_session.list_router_versions(router_id=self.id)
-        return [RouterVersion(environment_name=self.environment_name, name=self.name, **ver.to_dict())
-                for ver in response]
+        return [
+            RouterVersion(
+                environment_name=self.environment_name, name=self.name, **ver.to_dict()
+            )
+            for ver in response
+        ]
 
-    def get_version(self, version: int) -> 'RouterVersion':
+    def get_version(self, version: int) -> "RouterVersion":
         """
         Fetch a version of this router given a version number
 
         :return: list of router versions
         """
-        version = turing.active_session.get_router_version(router_id=self.id, version=version)
-        return RouterVersion(environment_name=self.environment_name, name=self.name, **version.to_dict())
+        version = turing.active_session.get_router_version(
+            router_id=self.id, version=version
+        )
+        return RouterVersion(
+            environment_name=self.environment_name, name=self.name, **version.to_dict()
+        )
 
     def delete_version(self, version: int) -> Dict[str, int]:
         """
@@ -191,7 +209,9 @@ class Router(ApiObject):
 
         :return: router_id and deleted version of this router
         """
-        return turing.active_session.delete_router_version(router_id=self.id, version=version).to_dict()
+        return turing.active_session.delete_router_version(
+            router_id=self.id, version=version
+        ).to_dict()
 
     def deploy_version(self, version: int) -> Dict[str, int]:
         """
@@ -199,7 +219,9 @@ class Router(ApiObject):
 
         :return: router_id and version of this router
         """
-        return turing.active_session.deploy_router_version(router_id=self.id, version=version).to_dict()
+        return turing.active_session.deploy_router_version(
+            router_id=self.id, version=version
+        ).to_dict()
 
     def get_events(self) -> List[turing.generated.models.Event]:
         """
@@ -207,10 +229,14 @@ class Router(ApiObject):
 
         :return: list of events involving this router
         """
-        response = turing.active_session.get_router_events(router_id=self.id).get('events')
+        response = turing.active_session.get_router_events(router_id=self.id).get(
+            "events"
+        )
         return [event for event in response] if response else []
 
-    def wait_for_status(self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0):
+    def wait_for_status(
+        self, status: RouterStatus, max_tries: int = 15, duration: float = 10.0
+    ):
         for i in range(1, max_tries + 1):
             logger.debug(f"Checking if router {self.id} is {status.value}...")
             current_router = Router.get(self.id)
@@ -223,23 +249,39 @@ class Router(ApiObject):
                 return
             else:
                 logger.debug(f"Router {self.id} is {cur_status.value}.")
-                logger.debug(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                logger.debug(
+                    f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying..."
+                )
                 time.sleep(duration)
 
         raise TimeoutError
 
-    def wait_for_version_status(self, status: RouterStatus, version: int, max_tries: int = 15, duration: float = 10.0):
+    def wait_for_version_status(
+        self,
+        status: RouterStatus,
+        version: int,
+        max_tries: int = 15,
+        duration: float = 10.0,
+    ):
         for i in range(1, max_tries + 1):
-            logger.debug(f"Checking if router {self.id} with version {version} is {status.value}...")
+            logger.debug(
+                f"Checking if router {self.id} with version {version} is {status.value}..."
+            )
             cur_status = self.get_version(version).status
             if cur_status == status:
                 # Wait for backend components to fully resolve
                 time.sleep(5)
-                logger.debug(f"Router {self.id} with version {version} is finally {status.value}.")
+                logger.debug(
+                    f"Router {self.id} with version {version} is finally {status.value}."
+                )
                 return
             else:
-                logger.debug(f"Router {self.id} with version {version} is {cur_status.value}.")
-                logger.debug(f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying...")
+                logger.debug(
+                    f"Router {self.id} with version {version} is {cur_status.value}."
+                )
+                logger.debug(
+                    f"Retrying {i}/{max_tries} time(s): waiting for {duration} seconds before retrying..."
+                )
                 time.sleep(duration)
 
         raise TimeoutError

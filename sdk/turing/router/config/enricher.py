@@ -20,25 +20,28 @@ class Enricher:
     :param id: id of the enricher
     :param service_account: optional service account for the Docker deployment
     """
+
     image: str
     resource_request: ResourceRequest
     endpoint: str
     timeout: str
     port: int
-    env: List['EnvVar']
+    env: List["EnvVar"]
     id: int = None
     service_account: str = None
 
-    def __init__(self,
-                 image: str,
-                 resource_request: ResourceRequest,
-                 endpoint: str,
-                 timeout: str,
-                 port: int,
-                 env: List['EnvVar'],
-                 id: int = None,
-                 service_account: str = None,
-                 **kwargs):
+    def __init__(
+        self,
+        image: str,
+        resource_request: ResourceRequest,
+        endpoint: str,
+        timeout: str,
+        port: int,
+        env: List["EnvVar"],
+        id: int = None,
+        service_account: str = None,
+        **kwargs
+    ):
         self.id = id
         self.image = image
         self.resource_request = resource_request
@@ -69,7 +72,9 @@ class Enricher:
         return self._resource_request
 
     @resource_request.setter
-    def resource_request(self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]):
+    def resource_request(
+        self, resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]]
+    ):
         if isinstance(resource_request, ResourceRequest):
             self._resource_request = resource_request
         elif isinstance(resource_request, dict):
@@ -102,11 +107,11 @@ class Enricher:
         self._port = port
 
     @property
-    def env(self) -> List['EnvVar']:
+    def env(self) -> List["EnvVar"]:
         return self._env
 
     @env.setter
-    def env(self, env: Union[List['EnvVar'], List[Dict[str, str]]]):
+    def env(self, env: Union[List["EnvVar"], List[Dict[str, str]]]):
         if isinstance(env, list):
             if all(isinstance(env_var, EnvVar) for env_var in env):
                 self._env = env
@@ -130,9 +135,9 @@ class Enricher:
 
         kwargs = {}
         if self.id is not None:
-            kwargs['id'] = self.id
+            kwargs["id"] = self.id
         if self.service_account is not None:
-            kwargs['service_account'] = self.service_account
+            kwargs["service_account"] = self.service_account
 
         return turing.generated.models.Enricher(
             image=self.image,

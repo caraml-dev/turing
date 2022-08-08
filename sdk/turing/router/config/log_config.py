@@ -24,15 +24,18 @@ class LogConfig:
     :param bigquery_config: config file for logging using BigQuery
     :param kafka_config: config file for logging using Kafka
     """
+
     result_logger_type: ResultLoggerType
     bigquery_config: turing.generated.models.BigQueryConfig = None
     kafka_config: turing.generated.models.KafkaConfig = None
 
-    def __init__(self,
-                 result_logger_type: ResultLoggerType,
-                 bigquery_config: turing.generated.models.BigQueryConfig = None,
-                 kafka_config: turing.generated.models.KafkaConfig = None,
-                 **kwargs):
+    def __init__(
+        self,
+        result_logger_type: ResultLoggerType,
+        bigquery_config: turing.generated.models.BigQueryConfig = None,
+        kafka_config: turing.generated.models.KafkaConfig = None,
+        **kwargs,
+    ):
         self.result_logger_type = result_logger_type
         self.bigquery_config = bigquery_config
         self.kafka_config = kafka_config
@@ -55,11 +58,15 @@ class LogConfig:
         return self._bigquery_config
 
     @bigquery_config.setter
-    def bigquery_config(self, bigquery_config: Union[turing.generated.models.BigQueryConfig, Dict]):
+    def bigquery_config(
+        self, bigquery_config: Union[turing.generated.models.BigQueryConfig, Dict]
+    ):
         if isinstance(bigquery_config, turing.generated.models.BigQueryConfig):
             self._bigquery_config = bigquery_config
         elif isinstance(bigquery_config, dict):
-            self._bigquery_config = turing.generated.models.BigQueryConfig(**bigquery_config)
+            self._bigquery_config = turing.generated.models.BigQueryConfig(
+                **bigquery_config
+            )
         else:
             self._bigquery_config = bigquery_config
 
@@ -68,7 +75,9 @@ class LogConfig:
         return self._kafka_config
 
     @kafka_config.setter
-    def kafka_config(self, kafka_config: Union[turing.generated.models.KafkaConfig, Dict]):
+    def kafka_config(
+        self, kafka_config: Union[turing.generated.models.KafkaConfig, Dict]
+    ):
         if isinstance(kafka_config, turing.generated.models.KafkaConfig):
             self._kafka_config = kafka_config
         elif isinstance(kafka_config, dict):
@@ -86,16 +95,21 @@ class LogConfig:
             kwargs["kafka_config"] = self.kafka_config
 
         return turing.generated.models.RouterVersionConfigLogConfig(
-            result_logger_type=self.result_logger_type.to_open_api(),
-            **kwargs
+            result_logger_type=self.result_logger_type.to_open_api(), **kwargs
         )
 
     def verify_result_logger_type_and_config_combination(self):
-        if self.result_logger_type == ResultLoggerType.BIGQUERY and self.kafka_config is not None:
+        if (
+            self.result_logger_type == ResultLoggerType.BIGQUERY
+            and self.kafka_config is not None
+        ):
             raise InvalidResultLoggerTypeAndConfigCombination(
                 f"kafka_config must be set to None when result_logger_type is: {self.result_logger_type}"
             )
-        if self.result_logger_type == ResultLoggerType.KAFKA and self.bigquery_config is not None:
+        if (
+            self.result_logger_type == ResultLoggerType.KAFKA
+            and self.bigquery_config is not None
+        ):
             raise InvalidResultLoggerTypeAndConfigCombination(
                 f"bigquery_config must be set to None when result_logger_type is: {self.result_logger_type}"
             )
@@ -114,10 +128,10 @@ class BigQueryLogConfig(LogConfig):
     :param service_account_secret: service account which has both JobUser and DataEditor privileges and write access
     :param batch_load: optional parameter to indicate if batch loading is used
     """
-    def __init__(self,
-                 table: str,
-                 service_account_secret: str,
-                 batch_load: bool = None):
+
+    def __init__(
+        self, table: str, service_account_secret: str, batch_load: bool = None
+    ):
         self.table = table
         self.service_account_secret = service_account_secret
         self.batch_load = batch_load
@@ -152,7 +166,7 @@ class BigQueryLogConfig(LogConfig):
         self.bigquery_config = turing.generated.models.BigQueryConfig(
             table=self.table,
             service_account_secret=self.service_account_secret,
-            batch_load=self.batch_load
+            batch_load=self.batch_load,
         )
         return super().to_open_api()
 
@@ -164,10 +178,12 @@ class KafkaConfigSerializationFormat(Enum):
 
 @dataclass
 class KafkaLogConfig(LogConfig):
-    def __init__(self,
-                 brokers: str,
-                 topic: str,
-                 serialization_format: KafkaConfigSerializationFormat):
+    def __init__(
+        self,
+        brokers: str,
+        topic: str,
+        serialization_format: KafkaConfigSerializationFormat,
+    ):
         """
         Method to create a new log config with a Kafka config
 
@@ -202,14 +218,16 @@ class KafkaLogConfig(LogConfig):
         return self._serialization_format
 
     @serialization_format.setter
-    def serialization_format(self, serialization_format: KafkaConfigSerializationFormat):
+    def serialization_format(
+        self, serialization_format: KafkaConfigSerializationFormat
+    ):
         self._serialization_format = serialization_format
 
     def to_open_api(self) -> OpenApiModel:
         self.kafka_config = turing.generated.models.KafkaConfig(
             brokers=self.brokers,
             topic=self.topic,
-            serialization_format=self.serialization_format.value
+            serialization_format=self.serialization_format.value,
         )
         return super().to_open_api()
 
@@ -221,12 +239,14 @@ class RouterVersionLogConfig(LogConfig):
     fiber_debug_log_enabled: bool = None
     jaeger_enabled: bool = None
 
-    def __init__(self,
-                 log_level: turing.generated.models.LogLevel = None,
-                 custom_metrics_enabled: bool = None,
-                 fiber_debug_log_enabled: bool = None,
-                 jaeger_enabled: bool = None,
-                 **kwargs):
+    def __init__(
+        self,
+        log_level: turing.generated.models.LogLevel = None,
+        custom_metrics_enabled: bool = None,
+        fiber_debug_log_enabled: bool = None,
+        jaeger_enabled: bool = None,
+        **kwargs,
+    ):
         self.log_level = log_level
         self.custom_metrics_enabled = custom_metrics_enabled
         self.fiber_debug_log_enabled = fiber_debug_log_enabled

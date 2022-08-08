@@ -34,6 +34,7 @@ class SampleEnsembler(turing.ensembler.PyFunc):
 
          If no version is specified in `input`, the ensembler would return the value 6 (1 + 2 + 3).
     """
+
     # `initialize` is essentially a method that gets called when an object of your implemented class gets instantiated
     def initialize(self, artifacts: dict):
         pass
@@ -45,18 +46,20 @@ class SampleEnsembler(turing.ensembler.PyFunc):
     #
     # The return value of `ensemble` will then be returned as a `json` payload to the Turing router.
     def ensemble(
-            self,
-            input: dict, # Request body to the router
-            predictions: dict,
-            treatment_config: dict,
-            **kwargs: dict # Captures contextual info such as ensembler request headers
-            ) -> Any:
+        self,
+        input: dict,  # Request body to the router
+        predictions: dict,
+        treatment_config: dict,
+        **kwargs: dict,  # Captures contextual info such as ensembler request headers
+    ) -> Any:
         if "version" in input:
             return predictions[input["version"]]["data"]["value"]
         elif "Version" in kwargs["headers"]:
             return predictions[kwargs["headers"]["Version"]]["data"]["value"]
         else:
-            return sum(prediction["data"]["value"] for prediction in predictions.values())
+            return sum(
+                prediction["data"]["value"] for prediction in predictions.values()
+            )
 
 
 def main(turing_api: str, project: str):
@@ -69,11 +72,11 @@ def main(turing_api: str, project: str):
         name="sample-ensembler-1",
         ensembler_instance=SampleEnsembler(),
         conda_env={
-            'dependencies': [
-                'python>=3.7.0',
+            "dependencies": [
+                "python>=3.7.0",
                 # other dependencies, if required
             ]
-        }
+        },
     )
     print("Ensembler created:\n", ensembler)
 
@@ -81,44 +84,32 @@ def main(turing_api: str, project: str):
     # Create some routes
     routes = [
         Route(
-            id='control',
-            endpoint='http://control.endpoints/predict',
-            timeout='20ms'
+            id="control", endpoint="http://control.endpoints/predict", timeout="20ms"
         ),
         Route(
-            id='experiment-a',
-            endpoint='http://experiment-a.endpoints/predict',
-            timeout='20ms'
-        )
+            id="experiment-a",
+            endpoint="http://experiment-a.endpoints/predict",
+            timeout="20ms",
+        ),
     ]
 
     # Create an experiment config (
-    experiment_config = ExperimentConfig(
-        type="nop"
-    )
+    experiment_config = ExperimentConfig(type="nop")
 
     # Create a resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=0,
-        max_replica=2,
-        cpu_request="500m",
-        memory_request="512Mi"
+        min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
     )
 
     # Create a log config for the router
-    log_config = LogConfig(
-        result_logger_type=ResultLoggerType.NOP
-    )
+    log_config = LogConfig(result_logger_type=ResultLoggerType.NOP)
 
     # Create an ensembler for the router
     ensembler_config = PyfuncRouterEnsemblerConfig(
         project_id=1,
         ensembler_id=1,
         resource_request=ResourceRequest(
-            min_replica=0,
-            max_replica=2,
-            cpu_request="500m",
-            memory_request="512Mi"
+            min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
         ),
         timeout="60ms",
     )
@@ -133,7 +124,7 @@ def main(turing_api: str, project: str):
         resource_request=resource_request,
         timeout="100ms",
         log_config=log_config,
-        ensembler=ensembler_config
+        ensembler=ensembler_config,
     )
 
     # Create a new router using the RouterConfig object
@@ -144,7 +135,9 @@ def main(turing_api: str, project: str):
     try:
         new_router.wait_for_status(RouterStatus.DEPLOYED)
     except TimeoutError:
-        raise Exception(f"Turing API is taking too long for router {new_router.id} to get deployed.")
+        raise Exception(
+            f"Turing API is taking too long for router {new_router.id} to get deployed."
+        )
 
     # 2. List all routers
     routers = turing.Router.list()
@@ -152,6 +145,7 @@ def main(turing_api: str, project: str):
         print(r)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import fire
+
     fire.Fire(main)

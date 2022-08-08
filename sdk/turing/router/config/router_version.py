@@ -13,6 +13,7 @@ class RouterStatus(Enum):
     """
     Status of router
     """
+
     DEPLOYED = "deployed"
     UNDEPLOYED = "undeployed"
     FAILED = "failed"
@@ -25,16 +26,19 @@ class RouterVersion(RouterConfig):
     Class to used to contain a RouterVersion. Used when returning a response containing a router's version from Turing
     API. Not to be instantiated manually.
     """
-    def __init__(self,
-                 id: int,
-                 version: int,
-                 created_at: datetime,
-                 updated_at: datetime,
-                 status: str,
-                 environment_name: str,
-                 name: str,
-                 monitoring_url: str,
-                 **kwargs):
+
+    def __init__(
+        self,
+        id: int,
+        version: int,
+        created_at: datetime,
+        updated_at: datetime,
+        status: str,
+        environment_name: str,
+        name: str,
+        monitoring_url: str,
+        **kwargs,
+    ):
         self.id = id
         self.version = version
         self.created_at = created_at
@@ -43,7 +47,7 @@ class RouterVersion(RouterConfig):
         self.status = RouterStatus(status)
         self.name = name
         self.monitoring_url = monitoring_url
-        self.log_config = RouterVersionLogConfig(**kwargs.get('log_config'))
+        self.log_config = RouterVersionLogConfig(**kwargs.get("log_config"))
         super().__init__(environment_name=environment_name, name=name, **kwargs)
 
     def get_config(self) -> RouterConfig:
@@ -67,11 +71,10 @@ class RouterVersion(RouterConfig):
         :return: the new router version
         """
         version = turing.active_session.create_router_version(
-            router_id=router_id,
-            router_version_config=config.to_open_api().config
+            router_id=router_id, router_version_config=config.to_open_api().config
         )
         return RouterVersion(
             environment_name=version.router.environment_name,
             name=version.router.name,
-            **version.to_dict()
+            **version.to_dict(),
         )

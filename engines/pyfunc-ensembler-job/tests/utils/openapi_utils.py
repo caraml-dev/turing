@@ -11,5 +11,5 @@ def from_yaml(text: str, required_type):
         path_to_item=[],
         spec_property_naming=True,
         _check_type=True,
-        configuration=Configuration()
+        configuration=Configuration(),
     )
