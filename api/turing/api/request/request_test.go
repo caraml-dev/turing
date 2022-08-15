@@ -11,11 +11,11 @@ import (
 	assertgotest "gotest.tools/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service/mocks"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {

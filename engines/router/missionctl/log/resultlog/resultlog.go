@@ -10,11 +10,11 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/log/resultlog/proto/turing"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 )
 
 // Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.

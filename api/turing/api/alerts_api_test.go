@@ -9,10 +9,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service/mocks"
 	testifyAssert "github.com/stretchr/testify/assert"
 	"gotest.tools/assert"
 )

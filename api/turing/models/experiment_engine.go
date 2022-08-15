@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 )
 
 const (

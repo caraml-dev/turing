@@ -5,7 +5,7 @@ package mocks
 import (
 	http "net/http"
 
-	runner "github.com/gojek/turing/engines/experiment/runner"
+	runner "github.com/caraml-dev/turing/engines/experiment/runner"
 	mock "github.com/stretchr/testify/mock"
 )
 

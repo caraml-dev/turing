@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/utils"
+	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/stretchr/testify/assert"
 )
 

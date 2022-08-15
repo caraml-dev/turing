@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
 // rpcServer serves the implementation of a ConfigurableExperimentManager

@@ -13,10 +13,10 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"gotest.tools/assert"
 )

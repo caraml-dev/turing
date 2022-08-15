@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojek/turing/engines/experiment"
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
+	"github.com/caraml-dev/turing/engines/experiment"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/experiment/runner/nop"
-	"github.com/gojek/turing/engines/router/missionctl/experiment"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner/nop"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
 
-	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
+	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 )
 
 func TestNewRouteSelectionPolicy(t *testing.T) {

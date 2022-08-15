@@ -3,8 +3,8 @@ package hardcoded
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 type TreatmentConfig struct {

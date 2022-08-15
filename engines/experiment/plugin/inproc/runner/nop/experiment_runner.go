@@ -3,8 +3,8 @@ package nop
 import (
 	"log"
 
-	plugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
-	"github.com/gojek/turing/engines/experiment/runner/nop"
+	plugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner/nop"
 )
 
 // init ensures this runner is registered when the package is imported.

@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/experiment"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a

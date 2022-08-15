@@ -3,9 +3,9 @@ package models_test
 import (
 	"testing"
 
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
-	"github.com/gojek/turing/engines/router"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/router"
 	"github.com/stretchr/testify/require"
 )
 

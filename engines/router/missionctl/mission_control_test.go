@@ -17,12 +17,12 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
-	"github.com/gojek/turing/engines/router/missionctl/config"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
-	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,13 +3,13 @@ package batchensembling
 import (
 	"time"
 
+	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
+	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
+	"github.com/caraml-dev/turing/api/turing/imagebuilder"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	mlp "github.com/gojek/mlp/api/client"
-	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
-	"github.com/gojek/turing/api/turing/cluster/labeller"
-	"github.com/gojek/turing/api/turing/imagebuilder"
-	"github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 var pageOne = 1

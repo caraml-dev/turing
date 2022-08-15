@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gojek/turing/engines/router"
+	"github.com/caraml-dev/turing/engines/router"
 )
 
 type TrafficRule struct {

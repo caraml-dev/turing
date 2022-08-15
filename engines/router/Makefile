@@ -7,7 +7,7 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 NOW=$(shell date +'%FT%T%z')
 
 BIN_NAME=$(if $(APP_NAME),$(APP_NAME),turing-router)
-PROJECT_ROOT=github.com/gojek/turing/engines/router
+PROJECT_ROOT=github.com/caraml-dev/turing/engines/router
 SRC_ROOT=.
 
 .PHONY: default

@@ -40,7 +40,7 @@ implementation.
 
 First, clone the Turing repo and change the workdir to the reference plugin root directory: 
 ```shell
-$ git clone https://github.com/gojek/turing.git
+$ git clone https://github.com/caraml-dev/turing.git
 $ cd turing/engines/experiment/examples/plugins/hardcoded
 ```
 
@@ -51,8 +51,8 @@ A Go plugin is a standalone application which serves the Experiment Engine imple
 package main
 
 import (
-	"github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 )
 
 func main() {
@@ -69,13 +69,13 @@ before it gets served.
 All the bootstrapping code, required to serve the Experiment Engine plugin via the RPC, is provided by the Turing
 library, which is added into the plugin module as the dependency in [`go.mod`](../examples/plugins/hardcoded/go.mod):
 ```shell
-module github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded
+module github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded
 
 go 1.18
 
-require github.com/gojek/turing/engines/experiment v1.0.0
+require github.com/caraml-dev/turing/engines/experiment v1.0.0
 
-replace github.com/gojek/turing/engines/experiment => ../../../
+replace github.com/caraml-dev/turing/engines/experiment => ../../../
 ```
 NOTE: Since this example plugin module and the `engines/experiment` library belong to the same repository, the plugin
 resolves `engines/experiment` package locally and that's the reason why the `replace ...` line is added to the 
@@ -269,11 +269,11 @@ The screenshot below shows the configuration UI for the standard experiment engi
 
 ### Logging
 In order for Turing Server/Router to include log messages from the Experiment Engine plugin, you can use 
-`github.com/gojek/turing/engines/experiment/log` package:
+`github.com/caraml-dev/turing/engines/experiment/log` package:
 ```go
 import (
-	"github.com/gojek/turing/engines/experiment/log"
-    _ "github.com/gojek/turing/engines/experiment/log/hclog"
+	"github.com/caraml-dev/turing/engines/experiment/log"
+    _ "github.com/caraml-dev/turing/engines/experiment/log/hclog"
 )
 
 type FooBarExperimentRunner struct {}
@@ -291,10 +291,10 @@ used for logging, so in order to enable `hclog` logger, it's required to import 
 side effect:
 ```go
 import (
-	_ "github.com/gojek/turing/engines/experiment/log/hclog"
+	_ "github.com/caraml-dev/turing/engines/experiment/log/hclog"
 )
 ```
-Such import statement will configure `github.com/gojek/turing/engines/experiment/log` to use `hclog` logger with the 
+Such import statement will configure `github.com/caraml-dev/turing/engines/experiment/log` to use `hclog` logger with the 
 default configuration. Alternatively, it's possible to configure `hclog` logger explicitly by calling `SetGlobalLogger`
 function:
 
@@ -302,9 +302,9 @@ function:
 package main
 
 import (
-     "github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded"
-     "github.com/gojek/turing/engines/experiment/log"
-     "github.com/gojek/turing/engines/experiment/plugin/rpc"
+     "github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded"
+     "github.com/caraml-dev/turing/engines/experiment/log"
+     "github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
      "github.com/hashicorp/go-hclog"
 )
 
@@ -395,6 +395,6 @@ turing:
 Then this configuration can be used for the deployment. Check the helm chart [README.md](
 ../../../infra/charts/turing/README.md) for more details. 
 
-This example experiment engine plugin is also used in the [Turing CI Pipeline](https://github.com/gojek/turing/actions/workflows/turing.yaml) 
+This example experiment engine plugin is also used in the [Turing CI Pipeline](https://github.com/caraml-dev/turing/actions/workflows/turing.yaml) 
 and full deployment configuration of Turing with experiment engine plugin can be found at [infra/e2e/turing.values.yaml](
 ../../../infra/e2e/turing.values.yaml) 

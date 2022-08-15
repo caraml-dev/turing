@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

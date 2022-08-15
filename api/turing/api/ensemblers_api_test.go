@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/api/request"
-	"github.com/gojek/turing/api/turing/internal/ref"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/api/turing/service/mocks"
-	"github.com/gojek/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/api/request"
+	"github.com/caraml-dev/turing/api/turing/internal/ref"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/validation"
 	"github.com/stretchr/testify/assert"
 )
 

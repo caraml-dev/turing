@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type RouterMonitoringService interface {

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/engines/experiment/manager"
-	routercfg "github.com/gojek/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // CreateOrUpdateRouterRequest structure defines the format of the request payload

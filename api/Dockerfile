@@ -6,7 +6,7 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 
-ENV PROJECT_ROOT=github.com/gojek/turing/api/turing
+ENV PROJECT_ROOT=github.com/caraml-dev/turing/api/turing
 
 WORKDIR /app
 COPY . .

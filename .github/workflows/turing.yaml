@@ -475,7 +475,7 @@ jobs:
       - test-api
       - test-engines-router
       - test-engines-experiment
-    uses: gojek/turing/.github/workflows/turing-publish.yaml@main
+    uses: caraml-dev/turing/.github/workflows/turing-publish.yaml@main
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
       router_version: ${{ needs.build-router.outputs.router-version }}

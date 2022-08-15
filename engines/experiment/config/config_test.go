@@ -3,7 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/config"
+	"github.com/caraml-dev/turing/engines/experiment/config"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"

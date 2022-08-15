@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 // MockExperimentRunner is a mock implementation for the Planner interface

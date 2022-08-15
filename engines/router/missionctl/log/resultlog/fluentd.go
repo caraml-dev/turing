@@ -1,10 +1,10 @@
 package resultlog
 
 import (
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/fluent/fluent-logger-golang/fluent"
-	"github.com/gojek/turing/engines/router/missionctl/config"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
 )
 
 // fluentdClient minimally defines the functionality used by the FluentdLogger for sending

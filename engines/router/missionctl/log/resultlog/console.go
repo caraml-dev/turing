@@ -1,7 +1,7 @@
 package resultlog
 
 import (
-	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 )
 
 // ConsoleLogger generates instance of ConsoleLog for logging results

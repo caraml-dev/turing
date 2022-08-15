@@ -1,4 +1,4 @@
-module github.com/gojek/turing/api
+module github.com/caraml-dev/turing/api
 
 go 1.18
 
@@ -13,8 +13,8 @@ require (
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
-	github.com/gojek/turing/engines/experiment v0.0.0
-	github.com/gojek/turing/engines/router v0.0.0
+	github.com/caraml-dev/turing/engines/experiment v0.0.0
+	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.7
 	github.com/google/go-containerregistry v0.8.1-0.20220219142810-1571d7fdc46e
@@ -182,8 +182,8 @@ replace (
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
 
-	github.com/gojek/turing/engines/experiment => ../engines/experiment
-	github.com/gojek/turing/engines/router => ../engines/router
+	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
+	github.com/caraml-dev/turing/engines/router => ../engines/router
 
 	k8s.io/api => k8s.io/api v0.22.7
 

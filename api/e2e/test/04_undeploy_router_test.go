@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

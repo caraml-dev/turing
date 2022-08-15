@@ -5,18 +5,18 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/handlers"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gojek/turing/engines/router/missionctl"
-	"github.com/gojek/turing/engines/router/missionctl/config"
-	"github.com/gojek/turing/engines/router/missionctl/handlers"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/log/resultlog"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	// Turing router will support these experiment runners: nop
-	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
+	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	// TODO: justify this
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
 	// TODO: justify this

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/handlers/compression"
-	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/handlers/compression"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 )
 
 type routerResponse struct {

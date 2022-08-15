@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fibererror "github.com/gojek/fiber/errors"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
 	"github.com/stretchr/testify/assert"
 )
 

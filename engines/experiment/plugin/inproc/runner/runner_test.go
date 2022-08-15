@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/experiment/runner/mocks"
+	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner/mocks"
 )
 
 type fakeRunner struct {

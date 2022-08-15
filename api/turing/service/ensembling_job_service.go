@@ -7,14 +7,14 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/batch"
+	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
+	"github.com/caraml-dev/turing/api/turing/config"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	logger "github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/batch"
-	"github.com/gojek/turing/api/turing/cluster/labeller"
-	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
-	"github.com/gojek/turing/api/turing/config"
-	openapi "github.com/gojek/turing/api/turing/generated"
-	logger "github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
 

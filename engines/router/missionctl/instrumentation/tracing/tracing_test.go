@@ -3,7 +3,7 @@ package tracing
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 )
 

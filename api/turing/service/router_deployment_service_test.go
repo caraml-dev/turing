@@ -8,20 +8,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/cluster/mocks"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/models"
 	merlin "github.com/gojek/merlin/client"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
 // mockClusterServiceBuilder implements the servicebuilder.ClusterServiceBuilder interface

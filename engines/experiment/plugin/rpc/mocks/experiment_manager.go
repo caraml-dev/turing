@@ -3,7 +3,7 @@ package mocks
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager/mocks"
 )
 
 type ConfigurableExperimentManager struct {

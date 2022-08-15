@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	cluster "github.com/gojek/turing/api/turing/cluster"
+	cluster "github.com/caraml-dev/turing/api/turing/cluster"
 
 	corev1 "k8s.io/api/core/v1"
 

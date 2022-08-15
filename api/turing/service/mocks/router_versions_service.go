@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	models "github.com/gojek/turing/api/turing/models"
+	models "github.com/caraml-dev/turing/api/turing/models"
 	mock "github.com/stretchr/testify/mock"
 )
 

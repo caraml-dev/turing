@@ -6,7 +6,7 @@
   },
   "version": 1,
   "status": "pending",
-  "image": "ghcr.io/gojek/turing/turing-router:latest",
+  "image": "ghcr.io/caraml-dev/turing/turing-router:latest",
   "routes": [
     {
       "id": "control",

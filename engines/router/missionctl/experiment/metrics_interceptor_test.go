@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/mock"
 )
 

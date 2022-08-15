@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 	goPlugin "github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"

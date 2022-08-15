@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	schema "github.com/gojek/turing/api/turing/internal/alertschema"
+	schema "github.com/caraml-dev/turing/api/turing/internal/alertschema"
 	"github.com/stretchr/testify/assert"
 )
 

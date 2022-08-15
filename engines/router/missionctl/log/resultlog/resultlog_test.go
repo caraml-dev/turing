@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/fluent/fluent-logger-golang/fluent"
-	"github.com/gojek/turing/engines/router/missionctl/config"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

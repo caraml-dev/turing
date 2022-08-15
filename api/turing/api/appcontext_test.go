@@ -5,18 +5,18 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
+	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/imagebuilder"
+	"github.com/caraml-dev/turing/api/turing/middleware"
+	"github.com/caraml-dev/turing/api/turing/service"
+	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
 	merlin "github.com/gojek/merlin/client"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
-	batchensembling "github.com/gojek/turing/api/turing/batch/ensembling"
-	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/config"
-	openapi "github.com/gojek/turing/api/turing/generated"
-	"github.com/gojek/turing/api/turing/imagebuilder"
-	"github.com/gojek/turing/api/turing/middleware"
-	"github.com/gojek/turing/api/turing/service"
-	svcmocks "github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
@@ -72,12 +72,12 @@ func TestNewAppContext(t *testing.T) {
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
-					"3.7.*": "ghcr.io/gojek/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
+					"3.7.*": "ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
 				},
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					BuildContextURI:    "git://github.com/caraml-dev/turing.git#refs/heads/master",
 					DockerfileFilePath: "engines/pyfunc-ensembler-job/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",
@@ -99,12 +99,12 @@ func TestNewAppContext(t *testing.T) {
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
-					"3.7.*": "ghcr.io/gojek/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
+					"3.7.*": "ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
 				},
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
-					BuildContextURI:    "git://github.com/gojek/turing.git#refs/heads/master",
+					BuildContextURI:    "git://github.com/caraml-dev/turing.git#refs/heads/master",
 					DockerfileFilePath: "engines/pyfunc-ensembler-service/app.Dockerfile",
 					Image:              "gcr.io/kaniko-project/executor",
 					ImageVersion:       "v1.5.2",

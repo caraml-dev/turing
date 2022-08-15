@@ -8,11 +8,11 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/gojek/turing/api/turing/cluster"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

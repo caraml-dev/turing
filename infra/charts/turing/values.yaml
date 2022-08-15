@@ -7,7 +7,7 @@ turing:
     # the registry for now as there is no publicly available Turing image
     registry: ghcr.io
     # -- Docker image repository for Turing API
-    repository: gojek/turing
+    repository: caraml-dev/turing
     # -- Docker image tag for Turing API
     tag: v1.6.0
   labels: {}
@@ -111,7 +111,7 @@ turing:
   #     key-1: value-1
 
   # -- Turing API server configuration.
-  # Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
+  # Please refer to https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml
   # for the detailed explanation on Turing API config options
   # @default -- computed value
   config:
@@ -126,9 +126,9 @@ turing:
         BuildTimeoutDuration: 20m
         DestinationRegistry: ghcr.io
         BaseImageRef:
-          3.7.*: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
+          3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
         KanikoConfig:
-          BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
+          BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
           DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile
           Image: gcr.io/kaniko-project/executor
           ImageVersion: v1.6.0
@@ -157,7 +157,7 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/gojek/turing/turing-router:v1.6.0
+      Image: ghcr.io/caraml-dev/turing/turing-router:v1.6.0
 
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
@@ -165,7 +165,7 @@ turing:
   openApiSpecOverrides: { }
 
   # -- Turing UI configuration.
-  # Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js
+  # Please Refer to https://github.com/caraml-dev/turing/blob/main/ui/public/app.config.js
   # for the detailed explanation on Turing UI config options
   # @default -- computed value
   uiConfig:
@@ -179,7 +179,7 @@ turing:
     appConfig:
       docsUrl:
         - label: Turing User Guide
-          href: https://github.com/gojek/turing/tree/main/docs
+          href: https://github.com/caraml-dev/turing/tree/main/docs
       scaling:
         maxAllowedReplica: 20
       batchEnsemblingEnabled: *batchEnsemblingEnabled

@@ -1,6 +1,6 @@
 package ref
 
-import openapi "github.com/gojek/turing/api/turing/generated"
+import openapi "github.com/caraml-dev/turing/api/turing/generated"
 
 func EnsemblingJobResultType(i openapi.EnsemblingJobResultType) *openapi.EnsemblingJobResultType {
 	return &i

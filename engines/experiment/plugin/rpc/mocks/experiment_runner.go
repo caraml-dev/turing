@@ -5,7 +5,7 @@ package mocks
 import (
 	http "net/http"
 
-	experimentrunner "github.com/gojek/turing/engines/experiment/runner"
+	experimentrunner "github.com/caraml-dev/turing/engines/experiment/runner"
 
 	json "encoding/json"
 

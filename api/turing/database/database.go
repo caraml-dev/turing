@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jinzhu/gorm"
 

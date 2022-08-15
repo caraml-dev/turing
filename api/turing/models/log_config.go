@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	routercfg "github.com/gojek/turing/engines/router/missionctl/config"
+	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // ResultLogger is the type used to capture the supported response

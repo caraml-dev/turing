@@ -3,9 +3,9 @@ package hardcoded
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded/utils"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/utils"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"net/http"
 	"sort"
 )

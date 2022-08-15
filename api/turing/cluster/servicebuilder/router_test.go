@@ -7,11 +7,11 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
+	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/config"
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
-	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -452,7 +452,7 @@ func TestNewRouterService(t *testing.T) {
 				BaseService: &cluster.BaseService{
 					Name:                 "router-with-exp-engine-turing-router-1",
 					Namespace:            "test-project",
-					Image:                "ghcr.io/gojek/turing/turing-router:latest",
+					Image:                "ghcr.io/caraml-dev/turing/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
 					MemoryRequests:       resource.MustParse("512Mi"),
 					LivenessHTTPGetPath:  "/v1/internal/live",

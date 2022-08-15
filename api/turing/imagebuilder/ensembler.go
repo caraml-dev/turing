@@ -3,9 +3,9 @@ package imagebuilder
 import (
 	"fmt"
 
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // NewEnsemblerJobImageBuilder create ImageBuilder for building docker image of ensembling job (batch)

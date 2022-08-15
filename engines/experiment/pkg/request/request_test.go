@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
 )
 

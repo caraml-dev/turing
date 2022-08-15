@@ -1,7 +1,7 @@
 FROM golang:1.14-alpine as builder
 
 ARG binary_name="plugin"
-ARG project_root=github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded/cmd
+ARG project_root=github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/cmd
 
 ENV GO111MODULE=on \
     GOOS=linux \

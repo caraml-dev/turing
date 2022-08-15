@@ -3,8 +3,8 @@ package manager_test
 import (
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

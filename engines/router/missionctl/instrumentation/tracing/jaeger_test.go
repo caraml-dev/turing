@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 )

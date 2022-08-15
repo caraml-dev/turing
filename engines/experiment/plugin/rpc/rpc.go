@@ -5,8 +5,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/manager"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/manager"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/runner"
 	"github.com/hashicorp/go-plugin"
 	wrapper "github.com/zaffka/zap-to-hclog"
 	"go.uber.org/zap"

@@ -111,7 +111,7 @@ istio-system      cluster-local-gateway-5bf54b4999-p2bv7    1/1     Running   0 
 istio-system      istio-ingressgateway-555bdcd566-xcn6h     1/1     Running   0          19m
 ```
 
-Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/gojek/turing/pkgs/container/turing%2Fturing-router).
+Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
 
 ```bash
 pushd ../engines/router

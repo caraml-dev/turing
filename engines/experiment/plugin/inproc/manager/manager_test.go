@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager/mocks"
+	managerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/manager"
 )
 
 type fakeManager struct {
