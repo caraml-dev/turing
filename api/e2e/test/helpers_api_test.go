@@ -159,7 +159,8 @@ func getPodLogs(t *testing.T, resp *http.Response) []service.PodLog {
 // function, that is passed as an argument
 //
 // cleanup - optional function, that can be used for cleaning up some resources from
-//           the cluster, after assertion of the router is done
+//
+//	the cluster, after assertion of the router is done
 func withDeployedRouter(
 	t *testing.T,
 	routerPayload []byte,

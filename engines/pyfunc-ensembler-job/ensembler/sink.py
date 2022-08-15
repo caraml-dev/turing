@@ -37,9 +37,9 @@ class Sink(ABC):
             return BigQuerySink(
                 getattr(sdk.sink.SaveMode, config.save_mode.to_str()),
                 config.columns,
-                config.bq_config
+                config.bq_config,
             )
-        raise ValueError(f'Sink not implemented: {config.type}')
+        raise ValueError(f"Sink not implemented: {config.type}")
 
 
 class ConsoleSink(Sink):
@@ -55,15 +55,16 @@ class ConsoleSink(Sink):
 
 
 class BigQuerySink(Sink):
-    _WRITE_FORMAT = 'bigquery'
-    _OPTION_NAME_TABLE = 'table'
-    _OPTION_NAME_STAGING_BUCKET = 'temporaryGcsBucket'
+    _WRITE_FORMAT = "bigquery"
+    _OPTION_NAME_TABLE = "table"
+    _OPTION_NAME_STAGING_BUCKET = "temporaryGcsBucket"
 
     def __init__(
-            self,
-            save_mode: sdk.sink.SaveMode,
-            columns: List[str],
-            config: openapi.BigQuerySinkConfig):
+        self,
+        save_mode: sdk.sink.SaveMode,
+        columns: List[str],
+        config: openapi.BigQuerySinkConfig,
+    ):
         super(BigQuerySink, self).__init__(save_mode=save_mode, columns=columns)
 
         self._options = {
@@ -81,8 +82,6 @@ class BigQuerySink(Sink):
         return self._options
 
     def _save(self, df: DataFrame):
-        df.write \
-            .mode(self.save_mode.name.lower()) \
-            .format(self._WRITE_FORMAT) \
-            .options(**self.options) \
-            .save()
+        df.write.mode(self.save_mode.name.lower()).format(self._WRITE_FORMAT).options(
+            **self.options
+        ).save()

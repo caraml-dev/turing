@@ -26,13 +26,15 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
+
 def lazy_import():
     from turing.generated.model.ensembler_config import EnsemblerConfig
     from turing.generated.model.ensembler_infra_config import EnsemblerInfraConfig
     from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
-    globals()['EnsemblerConfig'] = EnsemblerConfig
-    globals()['EnsemblerInfraConfig'] = EnsemblerInfraConfig
-    globals()['EnsemblerJobStatus'] = EnsemblerJobStatus
+
+    globals()["EnsemblerConfig"] = EnsemblerConfig
+    globals()["EnsemblerInfraConfig"] = EnsemblerInfraConfig
+    globals()["EnsemblerJobStatus"] = EnsemblerJobStatus
 
 
 class EnsemblingJob(ModelNormal):
@@ -59,13 +61,12 @@ class EnsemblingJob(ModelNormal):
           as additional properties values.
     """
 
-    allowed_values = {
-    }
+    allowed_values = {}
 
     validations = {
-        ('name',): {
-            'max_length': 50,
-            'min_length': 3,
+        ("name",): {
+            "max_length": 50,
+            "min_length": 3,
         },
     }
 
@@ -85,50 +86,51 @@ class EnsemblingJob(ModelNormal):
         """
         lazy_import()
         return {
-            'id': (int,),  # noqa: E501
-            'name': (str,),  # noqa: E501
-            'project_id': (int,),  # noqa: E501
-            'ensembler_id': (int,),  # noqa: E501
-            'environment_name': (str,),  # noqa: E501
-            'infra_config': (EnsemblerInfraConfig,),  # noqa: E501
-            'job_config': (EnsemblerConfig,),  # noqa: E501
-            'status': (EnsemblerJobStatus,),  # noqa: E501
-            'error': (str,),  # noqa: E501
-            'monitoring_url': (str,),  # noqa: E501
-            'created_at': (datetime,),  # noqa: E501
-            'updated_at': (datetime,),  # noqa: E501
+            "id": (int,),  # noqa: E501
+            "name": (str,),  # noqa: E501
+            "project_id": (int,),  # noqa: E501
+            "ensembler_id": (int,),  # noqa: E501
+            "environment_name": (str,),  # noqa: E501
+            "infra_config": (EnsemblerInfraConfig,),  # noqa: E501
+            "job_config": (EnsemblerConfig,),  # noqa: E501
+            "status": (EnsemblerJobStatus,),  # noqa: E501
+            "error": (str,),  # noqa: E501
+            "monitoring_url": (str,),  # noqa: E501
+            "created_at": (datetime,),  # noqa: E501
+            "updated_at": (datetime,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
-
     attribute_map = {
-        'id': 'id',  # noqa: E501
-        'name': 'name',  # noqa: E501
-        'project_id': 'project_id',  # noqa: E501
-        'ensembler_id': 'ensembler_id',  # noqa: E501
-        'environment_name': 'environment_name',  # noqa: E501
-        'infra_config': 'infra_config',  # noqa: E501
-        'job_config': 'job_config',  # noqa: E501
-        'status': 'status',  # noqa: E501
-        'error': 'error',  # noqa: E501
-        'monitoring_url': 'monitoring_url',  # noqa: E501
-        'created_at': 'created_at',  # noqa: E501
-        'updated_at': 'updated_at',  # noqa: E501
+        "id": "id",  # noqa: E501
+        "name": "name",  # noqa: E501
+        "project_id": "project_id",  # noqa: E501
+        "ensembler_id": "ensembler_id",  # noqa: E501
+        "environment_name": "environment_name",  # noqa: E501
+        "infra_config": "infra_config",  # noqa: E501
+        "job_config": "job_config",  # noqa: E501
+        "status": "status",  # noqa: E501
+        "error": "error",  # noqa: E501
+        "monitoring_url": "monitoring_url",  # noqa: E501
+        "created_at": "created_at",  # noqa: E501
+        "updated_at": "updated_at",  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set([
-        '_data_store',
-        '_check_type',
-        '_spec_property_naming',
-        '_path_to_item',
-        '_configuration',
-        '_visited_composed_classes',
-    ])
+    required_properties = set(
+        [
+            "_data_store",
+            "_check_type",
+            "_spec_property_naming",
+            "_path_to_item",
+            "_configuration",
+            "_visited_composed_classes",
+        ]
+    )
 
     @convert_js_args_to_python_args
     def __init__(self, *args, **kwargs):  # noqa: E501
@@ -179,15 +181,16 @@ class EnsemblingJob(ModelNormal):
             updated_at (datetime): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop('_check_type', True)
-        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
-        _path_to_item = kwargs.pop('_path_to_item', ())
-        _configuration = kwargs.pop('_configuration', None)
-        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
+        _check_type = kwargs.pop("_check_type", True)
+        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
+        _path_to_item = kwargs.pop("_path_to_item", ())
+        _configuration = kwargs.pop("_configuration", None)
+        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
+                % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -203,10 +206,12 @@ class EnsemblingJob(ModelNormal):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         for var_name, var_value in kwargs.items():
-            if var_name not in self.attribute_map and \
-                        self._configuration is not None and \
-                        self._configuration.discard_unknown_keys and \
-                        self.additional_properties_type is None:
+            if (
+                var_name not in self.attribute_map
+                and self._configuration is not None
+                and self._configuration.discard_unknown_keys
+                and self.additional_properties_type is None
+            ):
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)

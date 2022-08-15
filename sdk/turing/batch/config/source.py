@@ -10,12 +10,12 @@ class EnsemblingJobSource:
     Configuration of source of the ensembling job
     """
 
-    def __init__(self, dataset: 'Dataset', join_on: Iterable[str]):
+    def __init__(self, dataset: "Dataset", join_on: Iterable[str]):
         self._dataset = dataset
         self._join_on = join_on
 
     @property
-    def dataset(self) -> 'Dataset':
+    def dataset(self) -> "Dataset":
         return self._dataset
 
     @property
@@ -24,22 +24,17 @@ class EnsemblingJobSource:
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.EnsemblingJobSource(
-            dataset=self.dataset.to_open_api(),
-            join_on=self.join_on
+            dataset=self.dataset.to_open_api(), join_on=self.join_on
         )
 
-    def select(self, columns: Iterable[str]) -> 'EnsemblingJobPredictionSource':
+    def select(self, columns: Iterable[str]) -> "EnsemblingJobPredictionSource":
         """
         Creates an instance of prediction source configuration
 
         :param columns: list of columns from this source, that contain prediction data
         :return: instance of `EnsemblingJobPredictionSource`
         """
-        return EnsemblingJobPredictionSource(
-            self.dataset,
-            self.join_on,
-            columns
-        )
+        return EnsemblingJobPredictionSource(self.dataset, self.join_on, columns)
 
 
 class EnsemblingJobPredictionSource(EnsemblingJobSource):
@@ -59,7 +54,7 @@ class EnsemblingJobPredictionSource(EnsemblingJobSource):
         return turing.generated.models.EnsemblingJobPredictionSource(
             dataset=self.dataset.to_open_api(),
             join_on=self.join_on,
-            columns=self.columns
+            columns=self.columns,
         )
 
 
@@ -68,7 +63,7 @@ class Dataset(abc.ABC, DataObject):
     Abstract dataset
     """
 
-    def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
+    def join_on(self, columns: Iterable[str]) -> "EnsemblingJobSource":
         """
         Create ensembling job source configuration from this dataset,
         by specifying how this dataset could be joined with the
@@ -91,11 +86,13 @@ class BigQueryDataset(Dataset):
 
     TYPE = "BQ"
 
-    def __init__(self,
-                 table: Optional[str] = None,
-                 features: Optional[Iterable[str]] = None,
-                 query: Optional[str] = None,
-                 options: Optional[MutableMapping[str, str]] = None):
+    def __init__(
+        self,
+        table: Optional[str] = None,
+        features: Optional[Iterable[str]] = None,
+        query: Optional[str] = None,
+        options: Optional[MutableMapping[str, str]] = None,
+    ):
         """
         Create new instance of BigQuery dataset
 
@@ -132,8 +129,5 @@ class BigQueryDataset(Dataset):
             bq_config=turing.generated.models.BigQueryDatasetConfig(**self.to_dict())
         )
 
-    def join_on(self, columns: Iterable[str]) -> 'EnsemblingJobSource':
-        return EnsemblingJobSource(
-            dataset=self,
-            join_on=columns
-        )
+    def join_on(self, columns: Iterable[str]) -> "EnsemblingJobSource":
+        return EnsemblingJobSource(dataset=self, join_on=columns)

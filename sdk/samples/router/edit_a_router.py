@@ -23,12 +23,7 @@ def main(turing_api: str, project: str):
 
     # Make your desired changes to the config
     # Note that router_config.enricher.env is a regular Python list; so you can use methods such as append or extend
-    new_router_config_to_deploy.enricher.env.append(
-        EnvVar(
-            name="WORKERS",
-            value="2"
-        )
-    )
+    new_router_config_to_deploy.enricher.env.append(EnvVar(name="WORKERS", value="2"))
 
     new_router_config_to_deploy.resource_request.max_replica = 5
 
@@ -55,10 +50,12 @@ def main(turing_api: str, project: str):
         print(v)
 
     # Alternatively, you may also do the following to create a new version for your router without deploying it.
-    new_undeployed_version = turing.router.config.router_version.RouterVersion.create(new_router_config_to_save,
-                                                                                      router_id=1)
+    new_undeployed_version = turing.router.config.router_version.RouterVersion.create(
+        new_router_config_to_save, router_id=1
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import fire
+
     fire.Fire(main)

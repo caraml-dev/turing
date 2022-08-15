@@ -22,21 +22,15 @@ class ResultType(Enum):
 
 
 class ResultConfig:
-
     def __init__(
-            self,
-            type: ResultType,
-            column_name: str,
-            item_type: Optional[ResultType] = None):
+        self, type: ResultType, column_name: str, item_type: Optional[ResultType] = None
+    ):
         self._type, self._column_name, self._item_type = type, column_name, item_type
 
     def to_open_api(self) -> OpenApiModel:
-        kwargs = {
-            'type': self._type.to_open_api(),
-            'column_name': self._column_name
-        }
+        kwargs = {"type": self._type.to_open_api(), "column_name": self._column_name}
         if self._item_type:
-            kwargs['item_type'] = self._item_type.to_open_api()
+            kwargs["item_type"] = self._item_type.to_open_api()
 
         return turing.generated.models.EnsemblingJobEnsemblerSpecResult(**kwargs)
 
@@ -46,14 +40,16 @@ class EnsemblingJobConfig:
     Configuration of the batch ensembling job
     """
 
-    def __init__(self,
-                 source: EnsemblingJobSource,
-                 predictions: Dict[str, EnsemblingJobPredictionSource],
-                 result_config: ResultConfig,
-                 sink: EnsemblingJobSink,
-                 service_account: str,
-                 resource_request: ResourceRequest = None,
-                 env_vars: Dict[str, str] = {}):
+    def __init__(
+        self,
+        source: EnsemblingJobSource,
+        predictions: Dict[str, EnsemblingJobPredictionSource],
+        result_config: ResultConfig,
+        sink: EnsemblingJobSink,
+        service_account: str,
+        resource_request: ResourceRequest = None,
+        env_vars: Dict[str, str] = {},
+    ):
         """
         Create new instance of batch ensembling job configuration
 
@@ -75,7 +71,7 @@ class EnsemblingJobConfig:
         self._env_vars = env_vars
 
     @property
-    def source(self) -> 'EnsemblingJobSource':
+    def source(self) -> "EnsemblingJobSource":
         return self._source
 
     @property
@@ -83,11 +79,11 @@ class EnsemblingJobConfig:
         return self._predictions
 
     @property
-    def sink(self) -> 'EnsemblingJobSink':
+    def sink(self) -> "EnsemblingJobSink":
         return self._sink
 
     @property
-    def result_config(self) -> 'ResultConfig':
+    def result_config(self) -> "ResultConfig":
         return self._result_config
 
     @property
@@ -99,25 +95,28 @@ class EnsemblingJobConfig:
         return self._env_vars
 
     @property
-    def resource_request(self) -> Optional['ResourceRequest']:
+    def resource_request(self) -> Optional["ResourceRequest"]:
         return self._resource_request
 
     def job_spec(self) -> turing.generated.models.EnsemblingJobSpec:
         return turing.generated.models.EnsemblingJobSpec(
             source=self.source.to_open_api(),
-            predictions={name: source.to_open_api() for name, source in self.predictions.items()},
+            predictions={
+                name: source.to_open_api() for name, source in self.predictions.items()
+            },
             ensembler=turing.generated.models.EnsemblingJobEnsemblerSpec(
                 result=self.result_config.to_open_api()
             ),
-            sink=self.sink.to_open_api()
+            sink=self.sink.to_open_api(),
         )
 
     def infra_spec(self) -> turing.generated.models.EnsemblerInfraConfig:
         if self.env_vars is None:
             env_vars = []
         else:
-            env_vars = [EnvVar(name=name, value=value) for name, value in self.env_vars.items()]\
-
+            env_vars = [
+                EnvVar(name=name, value=value) for name, value in self.env_vars.items()
+            ]
         return turing.generated.models.EnsemblerInfraConfig(
             service_account_name=self.service_account,
             resources=self.resource_request,

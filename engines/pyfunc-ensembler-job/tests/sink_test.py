@@ -7,7 +7,8 @@ from tests.utils.openapi_utils import from_yaml
 
 @pytest.fixture(scope="session")
 def sink_config():
-    return from_yaml("""\
+    return from_yaml(
+        """\
     type: BQ
     save_mode: OVERWRITE
     columns:
@@ -18,7 +19,9 @@ def sink_config():
       staging_bucket: "bucket_name"
       options:
         partitionField: target_date
-    """, openapi.EnsemblingJobSink)
+    """,
+        openapi.EnsemblingJobSink,
+    )
 
 
 def test_load_from_config(sink_config):
@@ -31,5 +34,5 @@ def test_load_from_config(sink_config):
     assert sink.options == {
         "table": "project.dataset.table",
         "temporaryGcsBucket": "bucket_name",
-        "partitionField": "target_date"
+        "partitionField": "target_date",
     }

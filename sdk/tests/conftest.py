@@ -20,12 +20,13 @@ from turing.router.config.router_ensembler_config import (
     EnsemblerNopConfig,
     EnsemblerStandardConfig,
     DockerRouterEnsemblerConfig,
-    PyfuncRouterEnsemblerConfig
+    PyfuncRouterEnsemblerConfig,
 )
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.experiment_config import ExperimentConfig
 from tests.fixtures.mlflow import mock_mlflow
 from tests.fixtures.gcs import mock_gcs
+
 
 @pytest.fixture
 def turing_api() -> str:
@@ -44,7 +45,7 @@ def project():
         name=f"project_name",
         mlflow_tracking_url="http://localhost:5000",
         created_at=datetime.now(),
-        updated_at=datetime.now()
+        updated_at=datetime.now(),
     )
 
 
@@ -56,7 +57,7 @@ def active_project(responses, project):
         body=json.dumps([project], default=tests.json_serializer),
         match_querystring=True,
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
     return project
 
@@ -69,8 +70,10 @@ def projects(num_projects):
             name=f"project_{i}",
             mlflow_tracking_url="http://localhost:5000",
             created_at=datetime.now() + timedelta(seconds=i + 10),
-            updated_at=datetime.now() + timedelta(seconds=i + 10)
-        ) for i in range(1, num_projects + 1)]
+            updated_at=datetime.now() + timedelta(seconds=i + 10),
+        )
+        for i in range(1, num_projects + 1)
+    ]
 
 
 @pytest.fixture
@@ -82,40 +85,38 @@ def generic_ensemblers(project, num_ensemblers):
             type=PyFuncEnsembler.TYPE,
             name=f"test_{i}",
             created_at=datetime.now() + timedelta(seconds=i + 10),
-            updated_at=datetime.now() + timedelta(seconds=i + 10)
-        ) for i in range(1, num_ensemblers + 1)]
+            updated_at=datetime.now() + timedelta(seconds=i + 10),
+        )
+        for i in range(1, num_ensemblers + 1)
+    ]
+
 
 @pytest.fixture
 def nop_router_ensembler_config():
     return EnsemblerNopConfig(final_response_route_id="test")
+
 
 @pytest.fixture
 def standard_router_ensembler_config():
     return EnsemblerStandardConfig(
         experiment_mappings=[
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                experiment="experiment-1",
-                treatment="treatment-1",
-                route="route-1"
+                experiment="experiment-1", treatment="treatment-1", route="route-1"
             ),
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                experiment="experiment-2",
-                treatment="treatment-2",
-                route="route-2"
-            )
+                experiment="experiment-2", treatment="treatment-2", route="route-2"
+            ),
         ],
-        fallback_response_route_id="route-1"
+        fallback_response_route_id="route-1",
     )
+
 
 @pytest.fixture
 def docker_router_ensembler_config():
     return DockerRouterEnsemblerConfig(
         image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
         resource_request=ResourceRequest(
-            min_replica=1,
-            max_replica=3,
-            cpu_request="500m",
-            memory_request="512Mi"
+            min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
         ),
         endpoint=f"http://localhost:5000/ensembler_endpoint",
         timeout="500ms",
@@ -123,20 +124,19 @@ def docker_router_ensembler_config():
         env=[],
     )
 
+
 @pytest.fixture
 def pyfunc_router_ensembler_config():
     return PyfuncRouterEnsemblerConfig(
         project_id=1,
         ensembler_id=1,
         resource_request=ResourceRequest(
-            min_replica=1,
-            max_replica=3,
-            cpu_request="500m",
-            memory_request="512Mi"
+            min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
         ),
         timeout="500ms",
         env=[],
     )
+
 
 @pytest.fixture
 def bucket_name():
@@ -175,7 +175,7 @@ def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_ur
         artifact_uri=artifact_uri,
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        python_version=f"{version_info.major}.{version_info.minor}.*"
+        python_version=f"{version_info.major}.{version_info.minor}.*",
     )
 
 
@@ -183,47 +183,46 @@ def pyfunc_ensembler(project, ensembler_name, experiment_id, run_id, artifact_ur
 def ensembling_job_config():
     source = turing.batch.config.source.BigQueryDataset(
         table="project.dataset.features",
-        features=["feature_1", "feature_2", "features_3"]
+        features=["feature_1", "feature_2", "features_3"],
     ).join_on(columns=["feature_1"])
 
     predictions = {
-        'model_odd':
-            turing.batch.config.source.BigQueryDataset(
-                table="project.dataset.scores_model_odd",
-                features=["feature_1", "prediction_score"]
-            ).join_on(columns=["feature_1"]).select(columns=["prediction_score"]),
-
-        'model_even':
-            turing.batch.config.source.BigQueryDataset(
-                query="""
+        "model_odd": turing.batch.config.source.BigQueryDataset(
+            table="project.dataset.scores_model_odd",
+            features=["feature_1", "prediction_score"],
+        )
+        .join_on(columns=["feature_1"])
+        .select(columns=["prediction_score"]),
+        "model_even": turing.batch.config.source.BigQueryDataset(
+            query="""
                     SELECT feature_1, prediction_score
                     FROM `project.dataset.scores_model_even`
                     WHERE target_date = DATE("2021-03-15", "Asia/Jakarta")
                 """,
-                options={
-                    "viewsEnabled": "true",
-                    "materializationDataset": "my_dataset"
-                }
-            ).join_on(columns=["feature_1"]).select(columns=["prediction_score"])
+            options={"viewsEnabled": "true", "materializationDataset": "my_dataset"},
+        )
+        .join_on(columns=["feature_1"])
+        .select(columns=["prediction_score"]),
     }
 
     result_config = turing.batch.config.ResultConfig(
-        type=turing.batch.config.ResultType.INTEGER,
-        column_name="prediction_result"
+        type=turing.batch.config.ResultType.INTEGER, column_name="prediction_result"
     )
 
-    sink = turing.batch.config.sink.BigQuerySink(
-        table="project.dataset.ensembling_results",
-        staging_bucket="staging_bucket"
-    ).save_mode(turing.batch.config.sink.SaveMode.OVERWRITE) \
+    sink = (
+        turing.batch.config.sink.BigQuerySink(
+            table="project.dataset.ensembling_results", staging_bucket="staging_bucket"
+        )
+        .save_mode(turing.batch.config.sink.SaveMode.OVERWRITE)
         .select(columns=["feature_1", "feature_2", "prediction_result"])
+    )
 
     resource_request = turing.batch.config.ResourceRequest(
         driver_cpu_request="1",
         driver_memory_request="1G",
         executor_replica=5,
         executor_cpu_request="500Mi",
-        executor_memory_request="800M"
+        executor_memory_request="800M",
     )
 
     return turing.batch.config.EnsemblingJobConfig(
@@ -232,45 +231,50 @@ def ensembling_job_config():
         result_config=result_config,
         sink=sink,
         service_account="service-account",
-        resource_request=resource_request
+        resource_request=resource_request,
     )
 
 
 @pytest.fixture
 def generic_router_status():
-    return turing.generated.models.RouterStatus(random.choice(["deployed", "undeployed", "failed", "pending"]))
+    return turing.generated.models.RouterStatus(
+        random.choice(["deployed", "undeployed", "failed", "pending"])
+    )
 
 
 @pytest.fixture
 def generic_router_version_status():
-    return turing.generated.models.RouterVersionStatus(random.choice(["deployed", "undeployed", "failed", "pending"]))
+    return turing.generated.models.RouterVersionStatus(
+        random.choice(["deployed", "undeployed", "failed", "pending"])
+    )
 
 
 @pytest.fixture
 def generic_resource_request():
     return turing.generated.models.ResourceRequest(
-        min_replica=1,
-        max_replica=3,
-        cpu_request='100m',
-        memory_request='512Mi'
+        min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
     )
 
 
 @pytest.fixture
 def generic_log_level():
-    return turing.generated.models.LogLevel(random.choice(["DEBUG", "INFO", "WARN", "ERROR"]))
+    return turing.generated.models.LogLevel(
+        random.choice(["DEBUG", "INFO", "WARN", "ERROR"])
+    )
 
 
 @pytest.fixture
 def generic_result_logger_type():
-    return turing.generated.models.ResultLoggerType(random.choice(["nop", "console", "bigquery", "kafka"]))
+    return turing.generated.models.ResultLoggerType(
+        random.choice(["nop", "console", "bigquery", "kafka"])
+    )
 
 
 @pytest.fixture
 def generic_bigquery_config():
     return turing.generated.models.BigQueryConfig(
         table="bigqueryproject.bigquerydataset.bigquerytable",
-        service_account_secret="my-little-secret"
+        service_account_secret="my-little-secret",
     )
 
 
@@ -279,13 +283,21 @@ def generic_kafka_config():
     return turing.generated.models.KafkaConfig(
         brokers="1.2.3.4:5678,9.0.1.2:3456",
         topic="new_topics",
-        serialization_format=random.choice(["json", "protobuf"])
+        serialization_format=random.choice(["json", "protobuf"]),
     )
 
 
 @pytest.fixture(params=["kafka", "bigquery", "others"])
-def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_config, generic_kafka_config, request):
-    result_logger_type = generic_result_logger_type.value if request.param == "others" else request.param
+def log_config(
+    generic_log_level,
+    generic_result_logger_type,
+    generic_bigquery_config,
+    generic_kafka_config,
+    request,
+):
+    result_logger_type = (
+        generic_result_logger_type.value if request.param == "others" else request.param
+    )
 
     params = dict(
         log_level=generic_log_level,
@@ -294,7 +306,7 @@ def log_config(generic_log_level, generic_result_logger_type, generic_bigquery_c
         jaeger_enabled=True,
         result_logger_type=turing.generated.models.ResultLoggerType(result_logger_type),
         bigquery_config=None,
-        kafka_config=None
+        kafka_config=None,
     )
 
     if request.param == "kafka":
@@ -311,12 +323,14 @@ def generic_route():
         id="model-a",
         type="PROXY",
         endpoint="http://predict_this.io/model-a",
-        timeout="100ms"
+        timeout="100ms",
     )
 
 
 @pytest.fixture
-def generic_traffic_rule_condition(generic_header_traffic_rule_condition, generic_payload_traffic_rule_condition):
+def generic_traffic_rule_condition(
+    generic_header_traffic_rule_condition, generic_payload_traffic_rule_condition
+):
     field_source = random.choice(["header", "payload"])
     if field_source == "header":
         return generic_header_traffic_rule_condition
@@ -330,7 +344,7 @@ def generic_header_traffic_rule_condition():
         field_source=turing.generated.models.FieldSource("header"),
         field="x-region",
         operator="in",
-        values=["region-a", "region-b"]
+        values=["region-a", "region-b"],
     )
 
 
@@ -340,17 +354,22 @@ def generic_payload_traffic_rule_condition():
         field_source=turing.generated.models.FieldSource("payload"),
         field="service_type.id",
         operator="in",
-        values=["MyService", "YourService"]
+        values=["MyService", "YourService"],
     )
 
 
 @pytest.fixture
-def generic_traffic_rule(generic_header_traffic_rule_condition,
-                         generic_payload_traffic_rule_condition,
-                         generic_route):
+def generic_traffic_rule(
+    generic_header_traffic_rule_condition,
+    generic_payload_traffic_rule_condition,
+    generic_route,
+):
     return turing.generated.models.TrafficRule(
-        conditions=[generic_header_traffic_rule_condition, generic_payload_traffic_rule_condition],
-        routes=[generic_route.id]
+        conditions=[
+            generic_header_traffic_rule_condition,
+            generic_payload_traffic_rule_condition,
+        ],
+        routes=[generic_route.id],
     )
 
 
@@ -359,25 +378,18 @@ def generic_ensembler_standard_config():
     return turing.generated.models.EnsemblerStandardConfig(
         experiment_mappings=[
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                experiment="experiment-1",
-                treatment="treatment-1",
-                route="route-1"
+                experiment="experiment-1", treatment="treatment-1", route="route-1"
             ),
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                experiment="experiment-2",
-                treatment="treatment-2",
-                route="route-2"
-            )
+                experiment="experiment-2", treatment="treatment-2", route="route-2"
+            ),
         ]
     )
 
 
 @pytest.fixture
 def generic_env_var():
-    return turing.generated.models.EnvVar(
-        name="env_name",
-        value="env_val"
-    )
+    return turing.generated.models.EnvVar(name="env_name", value="env_val")
 
 
 @pytest.fixture
@@ -389,7 +401,7 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
         timeout="500ms",
         port=5120,
         env=[generic_env_var],
-        service_account="secret-name-for-google-service-account"
+        service_account="secret-name-for-google-service-account",
     )
 
 
@@ -400,12 +412,17 @@ def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
         ensembler_id=11,
         resource_request=generic_resource_request,
         timeout="500ms",
-        env=[generic_env_var]
+        env=[generic_env_var],
     )
 
 
 @pytest.fixture(params=["standard", "docker", "pyfunc"])
-def ensembler(request, generic_ensembler_standard_config, generic_ensembler_docker_config, generic_ensembler_pyfunc_config):
+def ensembler(
+    request,
+    generic_ensembler_standard_config,
+    generic_ensembler_docker_config,
+    generic_ensembler_pyfunc_config,
+):
     ensembler_type = request.param
     return turing.generated.models.RouterEnsemblerConfig(
         type=ensembler_type,
@@ -413,8 +430,9 @@ def ensembler(request, generic_ensembler_standard_config, generic_ensembler_dock
         docker_config=generic_ensembler_docker_config,
         pyfunc_config=generic_ensembler_pyfunc_config,
         created_at=datetime.now() + timedelta(seconds=10),
-        updated_at=datetime.now() + timedelta(seconds=10)
+        updated_at=datetime.now() + timedelta(seconds=10),
     )
+
 
 @pytest.fixture
 def generic_standard_router_ensembler_config(generic_ensembler_standard_config):
@@ -427,16 +445,14 @@ def generic_standard_router_ensembler_config(generic_ensembler_standard_config):
 @pytest.fixture
 def generic_docker_router_ensembler_config(generic_ensembler_docker_config):
     return turing.generated.models.RouterEnsemblerConfig(
-        type="docker",
-        docker_config=generic_ensembler_docker_config
+        type="docker", docker_config=generic_ensembler_docker_config
     )
 
 
 @pytest.fixture
 def generic_pyfunc_router_ensembler_config(generic_ensembler_pyfunc_config):
     return turing.generated.models.RouterEnsemblerConfig(
-        type="pyfunc",
-        pyfunc_config=generic_ensembler_pyfunc_config
+        type="pyfunc", pyfunc_config=generic_ensembler_pyfunc_config
     )
 
 
@@ -461,52 +477,35 @@ def experiment_config(request):
         config = {}
     elif experiment_type == "random_engine":
         config = {
-            "client": {
-                "id": 1,
-                "passkey": "abc"
-            },
-            "experiments": [
-                {
-                    "client_id": 1,
-                    "name": "experiment_1"
-                }
-            ],
+            "client": {"id": 1, "passkey": "abc"},
+            "experiments": [{"client_id": 1, "name": "experiment_1"}],
             "variables": {
-                "client_variables": [
-                    {
-                        "variable_name": "version",
-                        "required": False
-                    }
-                ]
-            }
+                "client_variables": [{"variable_name": "version", "required": False}]
+            },
         }
     else:
         config = None
 
-    return turing.generated.models.ExperimentConfig(
-        type=experiment_type,
-        config=config
-    )
+    return turing.generated.models.ExperimentConfig(type=experiment_type, config=config)
 
 
 @pytest.fixture
 def generic_router_version(
-        generic_router_version_status,
-        generic_route,
-        generic_traffic_rule,
-        experiment_config,
-        generic_resource_request,
-        log_config,
-        ensembler,
-        generic_enricher
+    generic_router_version_status,
+    generic_route,
+    generic_traffic_rule,
+    experiment_config,
+    generic_resource_request,
+    log_config,
+    ensembler,
+    generic_enricher,
 ):
     return turing.generated.models.RouterVersion(
         id=2,
         created_at=datetime.now() + timedelta(seconds=20),
         updated_at=datetime.now() + timedelta(seconds=20),
         router=turing.generated.models.Router(
-            environment_name="test_env",
-            name="test_router"
+            environment_name="test_env", name="test_router"
         ),
         version=1,
         status=generic_router_version_status,
@@ -521,7 +520,7 @@ def generic_router_version(
         log_config=log_config,
         ensembler=ensembler,
         monitoring_url="https://lookhere.io/",
-        enricher=generic_enricher
+        enricher=generic_enricher,
     )
 
 
@@ -532,62 +531,46 @@ def generic_router_config(docker_router_ensembler_config):
         name="router-1",
         routes=[
             Route(
-                id="model-a",
-                endpoint="http://predict-this.io/model-a",
-                timeout="100ms"
+                id="model-a", endpoint="http://predict-this.io/model-a", timeout="100ms"
             ),
             Route(
-                id="model-b",
-                endpoint="http://predict-this.io/model-b",
-                timeout="100ms"
-            )
+                id="model-b", endpoint="http://predict-this.io/model-b", timeout="100ms"
+            ),
         ],
         rules=None,
         default_route_id="model-a",
         experiment_engine=ExperimentConfig(
             type="test-exp",
             config={
-                'variables':
-                        [
-                            {'name': 'order_id', 'field': 'fdsv', 'field_source': 'header'},
-                            {'name': 'country_code', 'field': 'dcsd', 'field_source': 'header'},
-                            {'name': 'latitude', 'field': 'd', 'field_source': 'header'},
-                            {'name': 'longitude', 'field': 'sdSDa', 'field_source': 'header'}
-                        ],
-                'project_id': 102
-            }
+                "variables": [
+                    {"name": "order_id", "field": "fdsv", "field_source": "header"},
+                    {"name": "country_code", "field": "dcsd", "field_source": "header"},
+                    {"name": "latitude", "field": "d", "field_source": "header"},
+                    {"name": "longitude", "field": "sdSDa", "field_source": "header"},
+                ],
+                "project_id": 102,
+            },
         ),
         resource_request=ResourceRequest(
-            min_replica=0,
-            max_replica=2,
-            cpu_request="500m",
-            memory_request="512Mi"
+            min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
         ),
         timeout="100ms",
         log_config=LogConfig(
             result_logger_type=ResultLoggerType.NOP,
             table="abc.dataset.table",
-            service_account_secret="not-a-secret"
+            service_account_secret="not-a-secret",
         ),
         enricher=Enricher(
             image="test.io/model-dev/echo:1.0.2",
             resource_request=ResourceRequest(
-                min_replica=0,
-                max_replica=2,
-                cpu_request="500m",
-                memory_request="512Mi"
+                min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
             ),
             endpoint="/",
             timeout="60ms",
             port=8080,
-            env=[
-                EnvVar(
-                    name="test",
-                    value="abc"
-                )
-            ]
+            env=[EnvVar(name="test", value="abc")],
         ),
-        ensembler=docker_router_ensembler_config
+        ensembler=docker_router_ensembler_config,
     )
 
 
@@ -603,12 +586,14 @@ def generic_router(project, generic_router_status, generic_router_version):
         status=generic_router_status,
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        config=generic_router_version
+        config=generic_router_version,
     )
 
 
 @pytest.fixture
-def generic_routers(project, num_routers, generic_router_status, generic_router_version):
+def generic_routers(
+    project, num_routers, generic_router_status, generic_router_version
+):
     return [
         turing.generated.models.RouterDetails(
             id=i,
@@ -620,8 +605,10 @@ def generic_routers(project, num_routers, generic_router_status, generic_router_
             status=generic_router_status,
             created_at=datetime.now() + timedelta(seconds=i + 10),
             updated_at=datetime.now() + timedelta(seconds=i + 10),
-            config=generic_router_version
-        ) for i in range(1, num_routers + 1)]
+            config=generic_router_version,
+        )
+        for i in range(1, num_routers + 1)
+    ]
 
 
 @pytest.fixture
@@ -633,18 +620,18 @@ def generic_events():
                 updated_at=datetime.now() + timedelta(seconds=1000),
                 event_type="info",
                 id=123,
-                message='successfully deployed router not-a-router version 5',
-                stage='deployment success',
-                version=5
+                message="successfully deployed router not-a-router version 5",
+                stage="deployment success",
+                version=5,
             ),
             turing.generated.models.Event(
                 created_at=datetime.now() + timedelta(seconds=1500),
                 updated_at=datetime.now() + timedelta(seconds=2500),
-                event_type='error',
+                event_type="error",
                 id=124,
-                message='failed to deploy router not-a-router version 5',
-                stage='deployment failure',
-                version=5
-            )
+                message="failed to deploy router not-a-router version 5",
+                stage="deployment failure",
+                version=5,
+            ),
         ]
     )

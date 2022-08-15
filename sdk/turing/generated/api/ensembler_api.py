@@ -19,11 +19,13 @@ from turing.generated.model_utils import (  # noqa: F401
     datetime,
     file_type,
     none_type,
-    validate_and_convert_types
+    validate_and_convert_types,
 )
 from turing.generated.model.ensembler import Ensembler
 from turing.generated.model.ensembler_type import EnsemblerType
-from turing.generated.model.ensemblers_paginated_results import EnsemblersPaginatedResults
+from turing.generated.model.ensemblers_paginated_results import (
+    EnsemblersPaginatedResults,
+)
 
 
 class EnsemblerApi(object):
@@ -38,12 +40,7 @@ class EnsemblerApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-        def __create_ensembler(
-            self,
-            project_id,
-            ensembler,
-            **kwargs
-        ):
+        def __create_ensembler(self, project_id, ensembler, **kwargs):
             """Saves a user-defined ensembler into the project  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -82,95 +79,66 @@ class EnsemblerApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['ensembler'] = \
-                ensembler
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["ensembler"] = ensembler
             return self.call_with_http_info(**kwargs)
 
         self.create_ensembler = _Endpoint(
             settings={
-                'response_type': (Ensembler,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/ensemblers',
-                'operation_id': 'create_ensembler',
-                'http_method': 'POST',
-                'servers': None,
+                "response_type": (Ensembler,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/ensemblers",
+                "operation_id": "create_ensembler",
+                "http_method": "POST",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'ensembler',
+                "all": [
+                    "project_id",
+                    "ensembler",
                 ],
-                'required': [
-                    'project_id',
-                    'ensembler',
+                "required": [
+                    "project_id",
+                    "ensembler",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "ensembler": (Ensembler,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'ensembler':
-                        (Ensembler,),
+                "location_map": {
+                    "project_id": "path",
+                    "ensembler": "body",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'ensembler': 'body',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [
-                    'application/json'
-                ]
+                "accept": ["application/json"],
+                "content_type": ["application/json"],
             },
             api_client=api_client,
-            callable=__create_ensembler
+            callable=__create_ensembler,
         )
 
-        def __get_ensembler_details(
-            self,
-            project_id,
-            ensembler_id,
-            **kwargs
-        ):
+        def __get_ensembler_details(self, project_id, ensembler_id, **kwargs):
             """Returns Ensembler's details by its ID  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -209,93 +177,67 @@ class EnsemblerApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['ensembler_id'] = \
-                ensembler_id
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["ensembler_id"] = ensembler_id
             return self.call_with_http_info(**kwargs)
 
         self.get_ensembler_details = _Endpoint(
             settings={
-                'response_type': (Ensembler,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/ensemblers/{ensembler_id}',
-                'operation_id': 'get_ensembler_details',
-                'http_method': 'GET',
-                'servers': None,
+                "response_type": (Ensembler,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/ensemblers/{ensembler_id}",
+                "operation_id": "get_ensembler_details",
+                "http_method": "GET",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'ensembler_id',
+                "all": [
+                    "project_id",
+                    "ensembler_id",
                 ],
-                'required': [
-                    'project_id',
-                    'ensembler_id',
+                "required": [
+                    "project_id",
+                    "ensembler_id",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "ensembler_id": (int,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "ensembler_id": "ensembler_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'ensembler_id':
-                        (int,),
+                "location_map": {
+                    "project_id": "path",
+                    "ensembler_id": "path",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'ensembler_id': 'ensembler_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'ensembler_id': 'path',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__get_ensembler_details
+            callable=__get_ensembler_details,
         )
 
-        def __list_ensemblers(
-            self,
-            project_id,
-            **kwargs
-        ):
+        def __list_ensemblers(self, project_id, **kwargs):
             """Returns a list of ensemblers that belong to the project  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -337,107 +279,77 @@ class EnsemblerApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
             return self.call_with_http_info(**kwargs)
 
         self.list_ensemblers = _Endpoint(
             settings={
-                'response_type': (EnsemblersPaginatedResults,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/ensemblers',
-                'operation_id': 'list_ensemblers',
-                'http_method': 'GET',
-                'servers': None,
+                "response_type": (EnsemblersPaginatedResults,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/ensemblers",
+                "operation_id": "list_ensemblers",
+                "http_method": "GET",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'page',
-                    'page_size',
-                    'search',
-                    'type',
+                "all": [
+                    "project_id",
+                    "page",
+                    "page_size",
+                    "search",
+                    "type",
                 ],
-                'required': [
-                    'project_id',
+                "required": [
+                    "project_id",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "page": (int,),
+                    "page_size": (int,),
+                    "search": (str,),
+                    "type": (EnsemblerType,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "page": "page",
+                    "page_size": "page_size",
+                    "search": "search",
+                    "type": "type",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'page':
-                        (int,),
-                    'page_size':
-                        (int,),
-                    'search':
-                        (str,),
-                    'type':
-                        (EnsemblerType,),
+                "location_map": {
+                    "project_id": "path",
+                    "page": "query",
+                    "page_size": "query",
+                    "search": "query",
+                    "type": "query",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'page': 'page',
-                    'page_size': 'page_size',
-                    'search': 'search',
-                    'type': 'type',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'page': 'query',
-                    'page_size': 'query',
-                    'search': 'query',
-                    'type': 'query',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__list_ensemblers
+            callable=__list_ensemblers,
         )
 
-        def __update_ensembler(
-            self,
-            project_id,
-            ensembler_id,
-            ensembler,
-            **kwargs
-        ):
+        def __update_ensembler(self, project_id, ensembler_id, ensembler, **kwargs):
             """Updates existing Ensembler with the data provided in the payload  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
@@ -477,93 +389,67 @@ class EnsemblerApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
-            kwargs['project_id'] = \
-                project_id
-            kwargs['ensembler_id'] = \
-                ensembler_id
-            kwargs['ensembler'] = \
-                ensembler
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
+            kwargs["project_id"] = project_id
+            kwargs["ensembler_id"] = ensembler_id
+            kwargs["ensembler"] = ensembler
             return self.call_with_http_info(**kwargs)
 
         self.update_ensembler = _Endpoint(
             settings={
-                'response_type': (Ensembler,),
-                'auth': [],
-                'endpoint_path': '/projects/{project_id}/ensemblers/{ensembler_id}',
-                'operation_id': 'update_ensembler',
-                'http_method': 'PUT',
-                'servers': None,
+                "response_type": (Ensembler,),
+                "auth": [],
+                "endpoint_path": "/projects/{project_id}/ensemblers/{ensembler_id}",
+                "operation_id": "update_ensembler",
+                "http_method": "PUT",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'project_id',
-                    'ensembler_id',
-                    'ensembler',
+                "all": [
+                    "project_id",
+                    "ensembler_id",
+                    "ensembler",
                 ],
-                'required': [
-                    'project_id',
-                    'ensembler_id',
-                    'ensembler',
+                "required": [
+                    "project_id",
+                    "ensembler_id",
+                    "ensembler",
                 ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "project_id": (int,),
+                    "ensembler_id": (int,),
+                    "ensembler": (Ensembler,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "project_id": "project_id",
+                    "ensembler_id": "ensembler_id",
                 },
-                'openapi_types': {
-                    'project_id':
-                        (int,),
-                    'ensembler_id':
-                        (int,),
-                    'ensembler':
-                        (Ensembler,),
+                "location_map": {
+                    "project_id": "path",
+                    "ensembler_id": "path",
+                    "ensembler": "body",
                 },
-                'attribute_map': {
-                    'project_id': 'project_id',
-                    'ensembler_id': 'ensembler_id',
-                },
-                'location_map': {
-                    'project_id': 'path',
-                    'ensembler_id': 'path',
-                    'ensembler': 'body',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [
-                    'application/json'
-                ]
+                "accept": ["application/json"],
+                "content_type": ["application/json"],
             },
             api_client=api_client,
-            callable=__update_ensembler
+            callable=__update_ensembler,
         )

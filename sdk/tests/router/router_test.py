@@ -8,7 +8,7 @@ from urllib3_mock import Responses
 from turing.router.config.router_version import RouterStatus
 
 
-responses = Responses('requests.packages.urllib3')
+responses = Responses("requests.packages.urllib3")
 data_dir = os.path.join(os.path.dirname(__file__), "../testdata/api_responses")
 
 with open(os.path.join(data_dir, "create_router_0000.json")) as f:
@@ -21,14 +21,14 @@ def _responses():
 
 
 @responses.activate
-@pytest.mark.parametrize('num_routers', [2])
+@pytest.mark.parametrize("num_routers", [2])
 def test_list_routers(turing_api, active_project, generic_routers, use_google_oauth):
     responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/routers",
         body=json.dumps(generic_routers, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     turing.set_url(turing_api, use_google_oauth)
@@ -52,14 +52,11 @@ def test_list_routers(turing_api, active_project, generic_routers, use_google_oa
 
 @responses.activate
 @pytest.mark.parametrize(
-    "actual,expected", [
-        pytest.param(
-            "generic_router_config",
-            create_router_0000
-        )
-    ]
+    "actual,expected", [pytest.param("generic_router_config", create_router_0000)]
 )
-def test_create_router(turing_api, active_project, actual, expected, use_google_oauth, request):
+def test_create_router(
+    turing_api, active_project, actual, expected, use_google_oauth, request
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -70,7 +67,7 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
         url=f"/v1/projects/{active_project.id}/routers",
         body=expected,
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     actual_response = turing.Router.create(router_config)
@@ -80,13 +77,24 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
     assert actual_config.name == router_config.name
     assert actual_config.rules == router_config.rules
     assert actual_config.default_route_id == router_config.default_route_id
-    assert actual_config.experiment_engine.to_open_api() == router_config.experiment_engine.to_open_api()
-    assert actual_config.resource_request.to_open_api() == router_config.resource_request.to_open_api()
+    assert (
+        actual_config.experiment_engine.to_open_api()
+        == router_config.experiment_engine.to_open_api()
+    )
+    assert (
+        actual_config.resource_request.to_open_api()
+        == router_config.resource_request.to_open_api()
+    )
     assert actual_config.timeout == router_config.timeout
-    assert actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
+    assert (
+        actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
+    )
 
     assert actual_config.enricher.image == router_config.enricher.image
-    assert actual_config.enricher.resource_request.to_open_api() == router_config.enricher.resource_request.to_open_api()
+    assert (
+        actual_config.enricher.resource_request.to_open_api()
+        == router_config.enricher.resource_request.to_open_api()
+    )
     assert actual_config.enricher.endpoint == router_config.enricher.endpoint
     assert actual_config.enricher.timeout == router_config.enricher.timeout
     assert actual_config.enricher.port == router_config.enricher.port
@@ -96,12 +104,7 @@ def test_create_router(turing_api, active_project, actual, expected, use_google_
 
 @responses.activate
 @pytest.mark.parametrize(
-    "actual,expected", [
-        pytest.param(
-            1,
-            turing.generated.models.IdObject(id=1)
-        )
-    ]
+    "actual,expected", [pytest.param(1, turing.generated.models.IdObject(id=1))]
 )
 def test_delete_router(turing_api, active_project, actual, expected, use_google_oauth):
     turing.set_url(turing_api, use_google_oauth)
@@ -112,7 +115,7 @@ def test_delete_router(turing_api, active_project, actual, expected, use_google_
         url=f"/v1/projects/{active_project.id}/routers/{actual}",
         body=json.dumps(expected, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = turing.Router.delete(1)
@@ -131,7 +134,7 @@ def test_get_router(turing_api, active_project, generic_router, use_google_oauth
         url=f"/v1/projects/{active_project.id}/routers/{actual_id}",
         body=json.dumps(generic_router, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = turing.Router.get(actual_id)
@@ -140,14 +143,11 @@ def test_get_router(turing_api, active_project, generic_router, use_google_oauth
 
 @responses.activate
 @pytest.mark.parametrize(
-    "actual,expected", [
-        pytest.param(
-            "generic_router_config",
-            create_router_0000
-        )
-    ]
+    "actual,expected", [pytest.param("generic_router_config", create_router_0000)]
 )
-def test_update_router(turing_api, active_project, actual, expected, use_google_oauth, request):
+def test_update_router(
+    turing_api, active_project, actual, expected, use_google_oauth, request
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -167,7 +167,7 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}",
         body=expected,
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     actual_response = base_router.update(router_config)
@@ -177,13 +177,24 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
     assert actual_config.name == router_config.name
     assert actual_config.rules == router_config.rules
     assert actual_config.default_route_id == router_config.default_route_id
-    assert actual_config.experiment_engine.to_open_api() == router_config.experiment_engine.to_open_api()
-    assert actual_config.resource_request.to_open_api() == router_config.resource_request.to_open_api()
+    assert (
+        actual_config.experiment_engine.to_open_api()
+        == router_config.experiment_engine.to_open_api()
+    )
+    assert (
+        actual_config.resource_request.to_open_api()
+        == router_config.resource_request.to_open_api()
+    )
     assert actual_config.timeout == router_config.timeout
-    assert actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
+    assert (
+        actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
+    )
 
     assert actual_config.enricher.image == router_config.enricher.image
-    assert actual_config.enricher.resource_request.to_open_api() == router_config.enricher.resource_request.to_open_api()
+    assert (
+        actual_config.enricher.resource_request.to_open_api()
+        == router_config.enricher.resource_request.to_open_api()
+    )
     assert actual_config.enricher.endpoint == router_config.enricher.endpoint
     assert actual_config.enricher.timeout == router_config.enricher.timeout
     assert actual_config.enricher.port == router_config.enricher.port
@@ -192,32 +203,33 @@ def test_update_router(turing_api, active_project, actual, expected, use_google_
 
 
 @responses.activate
-def test_deploy_router(turing_api, active_project, generic_router, generic_router_version, use_google_oauth):
+def test_deploy_router(
+    turing_api, active_project, generic_router, generic_router_version, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
     base_router = turing.Router.from_open_api(generic_router)
 
-    expected = turing.generated.models.RouterIdAndVersion(
-        router_id=1,
-        version=1
-    )
+    expected = turing.generated.models.RouterIdAndVersion(router_id=1, version=1)
 
     responses.add(
         method="POST",
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/deploy",
         body=json.dumps(expected, default=tests.json_serializer),
         status=202,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = base_router.deploy()
-    assert base_router.id == response['router_id']
-    assert generic_router.config.version == response['version']
+    assert base_router.id == response["router_id"]
+    assert generic_router.config.version == response["version"]
 
 
 @responses.activate
-def test_undeploy_router(turing_api, active_project, generic_router, generic_router_version, use_google_oauth):
+def test_undeploy_router(
+    turing_api, active_project, generic_router, generic_router_version, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -232,15 +244,17 @@ def test_undeploy_router(turing_api, active_project, generic_router, generic_rou
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/undeploy",
         body=json.dumps(expected, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = base_router.undeploy()
-    assert base_router.id == response['router_id']
+    assert base_router.id == response["router_id"]
 
 
 @responses.activate
-def test_list_versions(turing_api, active_project, generic_router, generic_router_version, use_google_oauth):
+def test_list_versions(
+    turing_api, active_project, generic_router, generic_router_version, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -253,7 +267,7 @@ def test_list_versions(turing_api, active_project, generic_router, generic_route
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions",
         body=json.dumps(expected_versions, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     actual_versions = base_router.list_versions()
@@ -269,7 +283,9 @@ def test_list_versions(turing_api, active_project, generic_router, generic_route
 
 
 @responses.activate
-def test_get_version(turing_api, active_project, generic_router, generic_router_version, use_google_oauth):
+def test_get_version(
+    turing_api, active_project, generic_router, generic_router_version, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -282,7 +298,7 @@ def test_get_version(turing_api, active_project, generic_router, generic_router_
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{actual_version}",
         body=json.dumps(generic_router_version, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     actual_response = base_router.get_version(actual_version)
@@ -295,7 +311,9 @@ def test_get_version(turing_api, active_project, generic_router, generic_router_
 
 
 @responses.activate
-def test_get_version_config(turing_api, active_project, generic_router, generic_router_version, use_google_oauth):
+def test_get_version_config(
+    turing_api, active_project, generic_router, generic_router_version, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -308,7 +326,7 @@ def test_get_version_config(turing_api, active_project, generic_router, generic_
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{actual_version}",
         body=json.dumps(generic_router_version, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     actual_response = base_router.get_version(actual_version).get_config()
@@ -317,10 +335,19 @@ def test_get_version_config(turing_api, active_project, generic_router, generic_
     assert actual_response.name == base_router.config.name
     assert actual_response.rules == base_router.config.rules
     assert actual_response.default_route_id == base_router.config.default_route_id
-    assert actual_response.experiment_engine.to_open_api() == base_router.config.experiment_engine.to_open_api()
-    assert actual_response.resource_request.to_open_api() == base_router.config.resource_request.to_open_api()
+    assert (
+        actual_response.experiment_engine.to_open_api()
+        == base_router.config.experiment_engine.to_open_api()
+    )
+    assert (
+        actual_response.resource_request.to_open_api()
+        == base_router.config.resource_request.to_open_api()
+    )
     assert actual_response.timeout == base_router.config.timeout
-    assert actual_response.log_config.to_open_api() == base_router.config.log_config.to_open_api()
+    assert (
+        actual_response.log_config.to_open_api()
+        == base_router.config.log_config.to_open_api()
+    )
 
 
 @responses.activate
@@ -333,8 +360,7 @@ def test_delete_version(turing_api, active_project, generic_router, use_google_o
     expected_router_id = 1
     expected_version = 1
     expected = turing.generated.models.RouterIdAndVersion(
-        router_id=expected_router_id,
-        version=expected_version
+        router_id=expected_router_id, version=expected_version
     )
 
     responses.add(
@@ -342,12 +368,12 @@ def test_delete_version(turing_api, active_project, generic_router, use_google_o
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{expected_version}",
         body=json.dumps(expected, default=tests.json_serializer),
         status=202,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = base_router.delete_version(1)
-    assert base_router.id == response['router_id']
-    assert generic_router.config.version == response['version']
+    assert base_router.id == response["router_id"]
+    assert generic_router.config.version == response["version"]
 
 
 @responses.activate
@@ -360,8 +386,7 @@ def test_deploy_version(turing_api, active_project, generic_router, use_google_o
     expected_router_id = 1
     expected_version = 1
     expected = turing.generated.models.RouterIdAndVersion(
-        router_id=expected_router_id,
-        version=expected_version
+        router_id=expected_router_id, version=expected_version
     )
 
     responses.add(
@@ -369,16 +394,18 @@ def test_deploy_version(turing_api, active_project, generic_router, use_google_o
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{expected_version}/deploy",
         body=json.dumps(expected, default=tests.json_serializer),
         status=202,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = base_router.deploy_version(1)
-    assert base_router.id == response['router_id']
-    assert generic_router.config.version == response['version']
+    assert base_router.id == response["router_id"]
+    assert generic_router.config.version == response["version"]
 
 
 @responses.activate
-def test_get_events_list(turing_api, active_project, generic_router, generic_events, use_google_oauth):
+def test_get_events_list(
+    turing_api, active_project, generic_router, generic_events, use_google_oauth
+):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -389,11 +416,11 @@ def test_get_events_list(turing_api, active_project, generic_router, generic_eve
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/events",
         body=json.dumps(generic_events, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     response = base_router.get_events()
-    expected_events = generic_events['events']
+    expected_events = generic_events["events"]
 
     assert len(response) == len(expected_events)
 
@@ -409,37 +436,31 @@ def test_get_events_list(turing_api, active_project, generic_router, generic_eve
 
 @responses.activate
 @pytest.mark.parametrize(
-    "status,max_tries,duration,expected", [
-        pytest.param(
-            RouterStatus.DEPLOYED,
-            5,
-            0.00001,
-            TimeoutError
-        )
-    ]
+    "status,max_tries,duration,expected",
+    [pytest.param(RouterStatus.DEPLOYED, 5, 0.00001, TimeoutError)],
 )
 def test_wait_for_status(
-        turing_api,
-        active_project,
-        generic_router,
-        status,
-        max_tries,
-        duration,
-        expected,
-        use_google_oauth
+    turing_api,
+    active_project,
+    generic_router,
+    status,
+    max_tries,
+    duration,
+    expected,
+    use_google_oauth,
 ):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
     base_router = turing.Router.from_open_api(generic_router)
-    generic_router.status = turing.generated.models.RouterStatus('pending')
+    generic_router.status = turing.generated.models.RouterStatus("pending")
 
     responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}",
         body=json.dumps(generic_router, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     with pytest.raises(expected):
@@ -448,41 +469,38 @@ def test_wait_for_status(
 
 @responses.activate
 @pytest.mark.parametrize(
-    "version,status,max_tries,duration,expected", [
-        pytest.param(
-            1,
-            RouterStatus.DEPLOYED,
-            5,
-            0.00001,
-            TimeoutError
-        )
-    ]
+    "version,status,max_tries,duration,expected",
+    [pytest.param(1, RouterStatus.DEPLOYED, 5, 0.00001, TimeoutError)],
 )
 def test_wait_for_version_status(
-        turing_api,
-        active_project,
-        generic_router,
-        generic_router_version,
-        version,
-        status,
-        max_tries,
-        duration,
-        expected,
-        use_google_oauth
+    turing_api,
+    active_project,
+    generic_router,
+    generic_router_version,
+    version,
+    status,
+    max_tries,
+    duration,
+    expected,
+    use_google_oauth,
 ):
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
     base_router = turing.Router.from_open_api(generic_router)
-    generic_router_version.status = turing.generated.models.RouterVersionStatus('pending')
+    generic_router_version.status = turing.generated.models.RouterVersionStatus(
+        "pending"
+    )
 
     responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/routers/{base_router.id}/versions/{version}",
         body=json.dumps(generic_router_version, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     with pytest.raises(expected):
-        base_router.wait_for_version_status(status, version=version, max_tries=max_tries, duration=duration)
+        base_router.wait_for_version_status(
+            status, version=version, max_tries=max_tries, duration=duration
+        )

@@ -25,6 +25,6 @@ class EnsemblerHandler(tornado.web.RequestHandler):
         except json.decoder.JSONDecodeError as e:
             raise tornado.web.HTTPError(
                 status_code=HTTPStatus.BAD_REQUEST,
-                reason="Unrecognized request format: %s" % e
+                reason="Unrecognized request format: %s" % e,
             )
         return body

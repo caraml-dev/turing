@@ -18,7 +18,7 @@ class ExperimentConfig:
     @property
     def type(self) -> str:
         return self._type
-    
+
     @type.setter
     def type(self, type: str):
         self._type = type
@@ -30,8 +30,8 @@ class ExperimentConfig:
     @config.setter
     def config(self, config: Dict):
         self._config = config
-        if self._config is not None and 'project_id' in self._config:
-            self.config['project_id'] = int(self._config['project_id'])
+        if self._config is not None and "project_id" in self._config:
+            self.config["project_id"] = int(self._config["project_id"])
 
     def to_open_api(self) -> OpenApiModel:
         if self.config is None:
@@ -39,7 +39,4 @@ class ExperimentConfig:
         else:
             config = self.config
 
-        return turing.generated.models.ExperimentConfig(
-            type=self.type,
-            config=config
-        )
+        return turing.generated.models.ExperimentConfig(type=self.type, config=config)

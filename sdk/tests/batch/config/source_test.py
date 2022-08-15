@@ -4,7 +4,8 @@ import turing.generated.models
 
 
 @pytest.mark.parametrize(
-    "table,features,query,options,expected", [
+    "table,features,query,options,expected",
+    [
         pytest.param(
             "project.table.dataset_1",
             ["feature_1", "feature_2"],
@@ -12,32 +13,28 @@ import turing.generated.models
             None,
             turing.generated.models.BigQueryDataset(
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
-                    table="project.table.dataset_1",
-                    features=["feature_1", "feature_2"]
+                    table="project.table.dataset_1", features=["feature_1", "feature_2"]
                 )
             ),
-            id="Initialize BQ dataset table and list of features"
+            id="Initialize BQ dataset table and list of features",
         ),
         pytest.param(
             None,
             None,
             "SELECT * FROM `project.dataset.table`",
-            {
-                "viewsEnabled": "true",
-                "materializationDataset": "my_dataset"
-            },
+            {"viewsEnabled": "true", "materializationDataset": "my_dataset"},
             turing.generated.models.BigQueryDataset(
                 bq_config=turing.generated.models.BigQueryDatasetConfig(
                     query="SELECT * FROM `project.dataset.table`",
                     options={
-                       "viewsEnabled": "true",
-                       "materializationDataset": "my_dataset"
-                    }
+                        "viewsEnabled": "true",
+                        "materializationDataset": "my_dataset",
+                    },
                 )
             ),
-            id="Initialize BQ dataset from query"
-        )
-    ]
+            id="Initialize BQ dataset from query",
+        ),
+    ],
 )
 def test_bq_dataset(table, query, features, options, expected):
     dataset = turing.batch.config.source.BigQueryDataset(
@@ -48,7 +45,8 @@ def test_bq_dataset(table, query, features, options, expected):
 
 
 @pytest.mark.parametrize(
-    "dataset,join_on,expected_fn", [
+    "dataset,join_on,expected_fn",
+    [
         pytest.param(
             turing.batch.config.source.BigQueryDataset(
                 table="project.table.dataset_1",
@@ -56,12 +54,11 @@ def test_bq_dataset(table, query, features, options, expected):
             ),
             ["feature_2"],
             lambda dataset, join_on: turing.generated.models.EnsemblingJobSource(
-                dataset=dataset.to_open_api(),
-                join_on=join_on
+                dataset=dataset.to_open_api(), join_on=join_on
             ),
-            id="Initialize source from BQ dataset"
+            id="Initialize source from BQ dataset",
         )
-    ]
+    ],
 )
 def test_bq_source(dataset, join_on, expected_fn):
     expected = expected_fn(dataset, join_on)
@@ -69,24 +66,25 @@ def test_bq_source(dataset, join_on, expected_fn):
 
 
 @pytest.mark.parametrize(
-    "source,prediction_columns,expected_fn", [
+    "source,prediction_columns,expected_fn",
+    [
         pytest.param(
             turing.batch.config.source.BigQueryDataset(
                 query="SELECT feature_2, feature_3, score FROM `project.dataset.table`",
                 options={
                     "viewsEnabled": "true",
-                    "materializationDataset": "my_dataset"
+                    "materializationDataset": "my_dataset",
                 },
             ).join_on(columns=["feature_2", "feature_3"]),
             ["score"],
             lambda source, prediction_columns: turing.generated.models.EnsemblingJobPredictionSource(
                 dataset=source.dataset.to_open_api(),
                 join_on=source.join_on,
-                columns=prediction_columns
+                columns=prediction_columns,
             ),
-            id="Initialize prediction source from BQ dataset"
+            id="Initialize prediction source from BQ dataset",
         )
-    ]
+    ],
 )
 def test_bq_prediction_source(source, prediction_columns, expected_fn):
     expected = expected_fn(source, prediction_columns)

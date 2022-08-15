@@ -17,6 +17,12 @@ version:
 	@echo 'VERSION = "$(VERSION)"' > turing/version.py
 	@echo "turing-sdk version:" $(VERSION)
 
+.PHONY: lint
+lint:
+	@$(eval black_version=$(shell pip show black | grep Version | grep -oE '[0-9].*'))
+	@[ "${black_version}" == "22.6.0" ] || sh -c "pip install black==22.6.0"
+	@black .
+
 .PHONY: build
 build: version
 	@rm -rf build dist

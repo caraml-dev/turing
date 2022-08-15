@@ -4,18 +4,18 @@ import turing
 import pytest
 from urllib3_mock import Responses
 
-responses = Responses('requests.packages.urllib3')
+responses = Responses("requests.packages.urllib3")
 
 
 @responses.activate
-@pytest.mark.parametrize('num_projects', [10])
+@pytest.mark.parametrize("num_projects", [10])
 def test_list_projects(turing_api, projects, use_google_oauth):
     responses.add(
         method="GET",
         url=f"/v1/projects",
         body=json.dumps(projects, default=tests.json_serializer),
         status=200,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     turing.set_url(turing_api, use_google_oauth)

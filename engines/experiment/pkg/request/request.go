@@ -37,10 +37,13 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 // reqHeader - request header
 // bodyBytes - request JSON payload
 // fieldSrc - source of data, where the given key will be looked in,
-//			  one of `PayloadFieldSource` | `HeaderFieldSource`
+//
+//	one of `PayloadFieldSource` | `HeaderFieldSource`
+//
 // field - if `fieldSrc` is `HeaderFieldSource` - name of request header
-//		   if `fieldSrc` is `PayloadFieldSource` - json path to the value that should
-//         be extracted from the request payload
+//
+//			   if `fieldSrc` is `PayloadFieldSource` - json path to the value that should
+//	        be extracted from the request payload
 func GetValueFromRequest(
 	reqHeader http.Header,
 	bodyBytes []byte,

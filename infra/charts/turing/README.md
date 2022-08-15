@@ -1,7 +1,7 @@
 # turing
 
 ---
-![Version: 0.2.11](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square)
+![Version: 0.2.12](https://img.shields.io/badge/Version-0.2.12-informational?style=flat-square)
 ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
 Turing: ML Experimentation System
@@ -71,26 +71,22 @@ The following table lists the configurable parameters of the Turing chart and th
 | global.sentry.dsn | string | `nil` | Global Sentry DSN value |
 | merlin.environmentConfigs | list | computed value | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
 | merlin.mlpApi.apiHost | string | computed value | API endpoint to be used by Merlin to talk to MLP API |
-| merlin.postgresql | object | `{"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| merlin.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin","tls":{"enabled":false}}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
 | merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
-| merlin.postgresql.tls.enabled | bool | `false`| TLS Setting disabled |
-| merlin.postgresql.containerPorts.postgresql | int | `5432`| PostgreSQL container port |
 | mlp.apiHost | string | `"/api/v1"` | MLP API endpoint, used by the MLP UI for fetching data |
 | mlp.extraEnvs | list | computed value | List of extra environment variables to add to MLP API container |
-| mlp.postgresql | object | `{"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| mlp.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp","tls":{"enabled":false}}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
 | mlp.postgresql.postgresqlPassword | string | `"mlp"` | Password for MLP Postgresql database |
-| mlp.postgresql.tls.enabled | bool | `false`| TLS Setting disabled |
-| mlp.postgresql.containerPorts.postgresql | int | `5432`| PostgreSQL container port |
-| postgresql | object | `{"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}},"tls":{"enabled":false},"containerPorts":{"postgresql":5432}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| postgresql | object | `{"containerPorts":{"postgresql":5432},"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}},"tls":{"enabled":false}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
 | postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
 | tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
-| turing.clusterConfig.useInClusterConfig | bool | `false` | (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
+| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
 | turing.experimentEngines | list | `[]` | Turing Experiment Engines configuration |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
@@ -101,7 +97,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.extraVolumes | list | `[]` | Extra volumes to attach to the Pod. For example, you can mount  additional secrets to these volumes |
 | turing.image.registry | string | `"ghcr.io"` | Docker registry for Turing API image. User is required to override the registry for now as there is no publicly available Turing image |
 | turing.image.repository | string | `"gojek/turing"` | Docker image repository for Turing API |
-| turing.image.tag | string | `"v1.3.4"` | Docker image tag for Turing API |
+| turing.image.tag | string | `"v1.6.0"` | Docker image tag for Turing API |
 | turing.ingress.class | string | `""` | Ingress class annotation to add to this Ingress rule,  useful when there are multiple ingress controllers installed |
 | turing.ingress.enabled | bool | `false` | Enable ingress to provision Ingress resource for external access to Turing API |
 | turing.ingress.host | string | `""` | Set host value to enable name based virtual hosting. This allows routing HTTP traffic to multiple host names at the same IP address. If no host is specified, the ingress rule applies to all inbound HTTP traffic through  the IP address specified. https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting |

@@ -26,7 +26,6 @@ import (
 //
 // Environment, Team, Service, Metric and Duration are required in order to generate the correct
 // query for the metric values and to direct the alert to the correct recipients.
-//
 type Alert struct {
 	Model
 

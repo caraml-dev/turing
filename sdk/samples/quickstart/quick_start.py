@@ -20,11 +20,11 @@ def main(turing_api: str, project: str):
         name="my-ensembler",
         ensembler_instance=MyEnsembler(),
         conda_env={
-            'dependencies': [
-                'python>=3.8.0',
+            "dependencies": [
+                "python>=3.8.0",
                 # other dependencies, if required
             ]
-        }
+        },
     )
     print("Ensembler created:\n", ensembler)
 
@@ -36,12 +36,8 @@ def main(turing_api: str, project: str):
     ensembler.update(
         ensembler_instance=MyEnsembler(),
         conda_env={
-            'channels': ['defaults'],
-            'dependencies': [
-                'python=3.7.0',
-                "cookiecutter>=1.7.2",
-                "numpy"
-            ]
+            "channels": ["defaults"],
+            "dependencies": ["python=3.7.0", "cookiecutter>=1.7.2", "numpy"],
         },
         code_dir=[os.path.join(os.path.dirname(__file__), "../../samples")],
     )
@@ -53,6 +49,7 @@ def main(turing_api: str, project: str):
         print(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import fire
+
     fire.Fire(main)

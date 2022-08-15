@@ -19,9 +19,9 @@ type PodLogController struct {
 
 // ListRouterPodLogs handles the HTTP request for getting Router Pod Logs
 // It supports 3 types of pods:
-//   1. Router
-//   2. Enricher
-//   3. Ensembler
+//  1. Router
+//  2. Enricher
+//  3. Ensembler
 func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _ interface{}) *Response {
 	// Parse input
 	var errResp *Response
@@ -88,9 +88,9 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 
 // ListEnsemblingJobPodLogs handles the HTTP request for getting Ensembling Pod Logs
 // It supports 3 types of pods:
-//   1. Image Builder
-//   2. Spark Driver
-//   3. Spark Executor
+//  1. Image Builder
+//  2. Spark Driver
+//  3. Spark Executor
 func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars RequestVars, _ interface{}) *Response {
 	var errResp *Response
 	var project *mlp.Project

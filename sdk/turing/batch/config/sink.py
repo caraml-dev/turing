@@ -10,6 +10,7 @@ class SaveMode(Enum):
     Configuration that specifies the mode of saving results
     See: https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/SaveMode.html
     """
+
     ERRORIFEXISTS = 0
     OVERWRITE = 1
     APPEND = 2
@@ -28,7 +29,7 @@ class EnsemblingJobSink:
         self._save_mode = save_mode
         self._columns = []
 
-    def save_mode(self, save_mode: SaveMode) -> 'EnsemblingJobSink':
+    def save_mode(self, save_mode: SaveMode) -> "EnsemblingJobSink":
         """
         Configure `save_mode` of the sink
 
@@ -38,7 +39,7 @@ class EnsemblingJobSink:
         self._save_mode = save_mode
         return self
 
-    def select(self, columns: Iterable[str]) -> 'EnsemblingJobSink':
+    def select(self, columns: Iterable[str]) -> "EnsemblingJobSink":
         """
         Configure columns, that would be written into the ensembling results destination
 
@@ -66,10 +67,8 @@ class BigQuerySink(EnsemblingJobSink):
     TYPE = "BQ"
 
     def __init__(
-            self,
-            table: str,
-            staging_bucket: str,
-            options: MutableMapping[str, str] = None):
+        self, table: str, staging_bucket: str, options: MutableMapping[str, str] = None
+    ):
         """
         :param table: fully-qualified name of the BQ table, where results will be written to
         :param staging_bucket: temporary GCS bucket for staging write into BQ table
@@ -99,11 +98,12 @@ class BigQuerySink(EnsemblingJobSink):
             bq_config=turing.generated.models.BigQuerySinkConfig(
                 table=self.table,
                 staging_bucket=self.staging_bucket,
-                options=self.options
-            )
+                options=self.options,
+            ),
         )
 
 
 __all__ = [
-    "SaveMode", "BigQuerySink",
+    "SaveMode",
+    "BigQuerySink",
 ]

@@ -6,9 +6,23 @@ import turing.generated.models
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
 from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
-from turing.generated.models import (Project, Ensembler, EnsemblingJob, EnsemblerJobStatus, EnsemblersPaginatedResults,
-                                     EnsemblingJobPaginatedResults, JobId, RouterId, RouterIdObject, RouterIdAndVersion,
-                                     Router, RouterDetails, RouterConfig, RouterVersion, RouterVersionConfig)
+from turing.generated.models import (
+    Project,
+    Ensembler,
+    EnsemblingJob,
+    EnsemblerJobStatus,
+    EnsemblersPaginatedResults,
+    EnsemblingJobPaginatedResults,
+    JobId,
+    RouterId,
+    RouterIdObject,
+    RouterIdAndVersion,
+    Router,
+    RouterDetails,
+    RouterConfig,
+    RouterVersion,
+    RouterVersionConfig,
+)
 
 
 def require_active_project(f):
@@ -16,6 +30,7 @@ def require_active_project(f):
         if not args[0].active_project:
             raise Exception("Active project isn't set, use set_project(...) to set it")
         return f(*args, **kwargs)
+
     return wrap
 
 
@@ -24,9 +39,11 @@ class TuringSession:
     Session object for interacting with Turing back-end
     """
 
-    OAUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email']
+    OAUTH_SCOPES = ["https://www.googleapis.com/auth/userinfo.email"]
 
-    def __init__(self, host: str, project_name: str = None, use_google_oauth: bool = True):
+    def __init__(
+        self, host: str, project_name: str = None, use_google_oauth: bool = True
+    ):
         """
         Create new session
 
@@ -34,14 +51,16 @@ class TuringSession:
         :param project_name: name of the project, this session should stick to
         :param use_google_oauth: should be True if Turing API is protected with Google OAuth
         """
-        config = Configuration(host=os.path.join(host, 'v1'))
+        config = Configuration(host=os.path.join(host, "v1"))
         self._api_client = ApiClient(config)
 
         if use_google_oauth:
             import google.auth
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
-            credentials, project = google.auth.default(scopes=TuringSession.OAUTH_SCOPES)
+            credentials, project = google.auth.default(
+                scopes=TuringSession.OAUTH_SCOPES
+            )
             authorized_http = AuthorizedHttp(credentials, urllib3.PoolManager())
             self._api_client.rest_client.pool_manager = authorized_http
 
@@ -92,16 +111,18 @@ class TuringSession:
             raise Exception(
                 f"{project_name} does not exist or you don't have access to the project. Please create new "
                 f"project using MLP console or ask the project's administrator to be able to access "
-                f"existing project.")
+                f"existing project."
+            )
 
         return filtered[0]
 
     @require_active_project
     def list_ensemblers(
-            self,
-            ensembler_type: Optional[EnsemblerType] = None,
-            page: Optional[int] = None,
-            page_size: Optional[int] = None) -> EnsemblersPaginatedResults:
+        self,
+        ensembler_type: Optional[EnsemblerType] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+    ) -> EnsemblersPaginatedResults:
         """
         List ensemblers
         """
@@ -115,8 +136,7 @@ class TuringSession:
             kwargs["page_size"] = page_size
 
         return EnsemblerApi(self._api_client).list_ensemblers(
-            project_id=self.active_project.id,
-            **kwargs
+            project_id=self.active_project.id, **kwargs
         )
 
     @require_active_project
@@ -125,8 +145,8 @@ class TuringSession:
         Create a new ensembler in the Turing back-end
         """
         return EnsemblerApi(self._api_client).create_ensembler(
-            project_id=self.active_project.id,
-            ensembler=ensembler)
+            project_id=self.active_project.id, ensembler=ensembler
+        )
 
     @require_active_project
     def get_ensembler(self, ensembler_id: int) -> Ensembler:
@@ -146,13 +166,16 @@ class TuringSession:
         return EnsemblerApi(self._api_client).update_ensembler(
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,
-            ensembler=ensembler)
+            ensembler=ensembler,
+        )
 
     @require_active_project
-    def list_ensembling_jobs(self,
-                             status: List[EnsemblerJobStatus] = None,
-                             page: Optional[int] = None,
-                             page_size: Optional[int] = None) -> EnsemblingJobPaginatedResults:
+    def list_ensembling_jobs(
+        self,
+        status: List[EnsemblerJobStatus] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+    ) -> EnsemblingJobPaginatedResults:
         """
         List ensembling jobs
         """
@@ -166,8 +189,7 @@ class TuringSession:
             kwargs["page_size"] = page_size
 
         return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
-            project_id=self.active_project.id,
-            **kwargs
+            project_id=self.active_project.id, **kwargs
         )
 
     @require_active_project
@@ -176,22 +198,19 @@ class TuringSession:
         Fetch ensembling job by its ID
         """
         return EnsemblingJobApi(self._api_client).get_ensembling_job(
-            project_id=self.active_project.id,
-            job_id=job_id
+            project_id=self.active_project.id, job_id=job_id
         )
 
     @require_active_project
     def terminate_ensembling_job(self, job_id: int) -> JobId:
         return EnsemblingJobApi(self._api_client).terminate_ensembling_job(
-            project_id=self.active_project.id,
-            job_id=job_id
+            project_id=self.active_project.id, job_id=job_id
         )
 
     @require_active_project
     def submit_ensembling_job(self, job: EnsemblingJob) -> EnsemblingJob:
         return EnsemblingJobApi(self._api_client).create_ensembling_job(
-            project_id=self.active_project.id,
-            ensembling_job=job
+            project_id=self.active_project.id, ensembling_job=job
         )
 
     @require_active_project
@@ -202,7 +221,9 @@ class TuringSession:
         :return: list of routers
         """
         kwargs = {}
-        return RouterApi(self._api_client).projects_project_id_routers_get(project_id=self.active_project.id, **kwargs)
+        return RouterApi(self._api_client).projects_project_id_routers_get(
+            project_id=self.active_project.id, **kwargs
+        )
 
     @require_active_project
     def create_router(self, router_config: RouterConfig) -> RouterDetails:
@@ -211,8 +232,9 @@ class TuringSession:
 
         :return: details of router submitted
         """
-        return RouterApi(self._api_client).projects_project_id_routers_post(project_id=self.active_project.id,
-                                                                            router_config=router_config)
+        return RouterApi(self._api_client).projects_project_id_routers_post(
+            project_id=self.active_project.id, router_config=router_config
+        )
 
     @require_active_project
     def delete_router(self, router_id: int) -> RouterId:
@@ -220,8 +242,7 @@ class TuringSession:
         Delete router given its router ID
         """
         return RouterApi(self._api_client).projects_project_id_routers_router_id_delete(
-            project_id=self.active_project.id,
-            router_id=router_id
+            project_id=self.active_project.id, router_id=router_id
         )
 
     @require_active_project
@@ -230,8 +251,7 @@ class TuringSession:
         Fetch router by its router ID
         """
         return RouterApi(self._api_client).projects_project_id_routers_router_id_get(
-            project_id=self.active_project.id,
-            router_id=router_id
+            project_id=self.active_project.id, router_id=router_id
         )
 
     @require_active_project
@@ -239,18 +259,21 @@ class TuringSession:
         """
         Update router in the active project the user has access to, with a router_config passed as a parameter
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_put(project_id=self.active_project.id,
-                                                                                     router_id=router_id,
-                                                                                     router_config=router_config)
+        return RouterApi(self._api_client).projects_project_id_routers_router_id_put(
+            project_id=self.active_project.id,
+            router_id=router_id,
+            router_config=router_config,
+        )
 
     @require_active_project
     def deploy_router(self, router_id: int) -> RouterIdAndVersion:
         """
         Deploy router given its router ID
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_deploy_post(
-            project_id=self.active_project.id,
-            router_id=router_id
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_deploy_post(
+            project_id=self.active_project.id, router_id=router_id
         )
 
     @require_active_project
@@ -258,9 +281,10 @@ class TuringSession:
         """
         Undeploy router given its router ID
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_undeploy_post(
-            project_id=self.active_project.id,
-            router_id=router_id
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_undeploy_post(
+            project_id=self.active_project.id, router_id=router_id
         )
 
     @require_active_project
@@ -268,17 +292,22 @@ class TuringSession:
         """
         List all router versions, that the current user has access to, given the router ID specified
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_get(
-            project_id=self.active_project.id,
-            router_id=router_id
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_versions_get(
+            project_id=self.active_project.id, router_id=router_id
         )
 
     @require_active_project
-    def create_router_version(self, router_id: int, router_version_config: RouterVersionConfig) -> RouterVersion:
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_post(
+    def create_router_version(
+        self, router_id: int, router_version_config: RouterVersionConfig
+    ) -> RouterVersion:
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_versions_post(
             project_id=self.active_project.id,
             router_id=router_id,
-            router_version_config=router_version_config
+            router_version_config=router_version_config,
         )
 
     @require_active_project
@@ -286,10 +315,10 @@ class TuringSession:
         """
         Fetch specific router version by its router ID and version
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_get(
-            project_id=self.active_project.id,
-            router_id=router_id,
-            version=version
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_versions_version_get(
+            project_id=self.active_project.id, router_id=router_id, version=version
         )
 
     @require_active_project
@@ -297,10 +326,10 @@ class TuringSession:
         """
         Delete specific router version given its router ID and version
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_delete(
-            project_id=self.active_project.id,
-            router_id=router_id,
-            version=version
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_versions_version_delete(
+            project_id=self.active_project.id, router_id=router_id, version=version
         )
 
     @require_active_project
@@ -308,10 +337,10 @@ class TuringSession:
         """
         Deploy specific router version by its router ID and version
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_versions_version_deploy_post(
-            project_id=self.active_project.id,
-            router_id=router_id,
-            version=version
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_versions_version_deploy_post(
+            project_id=self.active_project.id, router_id=router_id, version=version
         )
 
     @require_active_project
@@ -319,7 +348,8 @@ class TuringSession:
         """
         Fetch deployment events associated with the router with the given router ID
         """
-        return RouterApi(self._api_client).projects_project_id_routers_router_id_events_get(
-            project_id=self.active_project.id,
-            router_id=router_id
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_router_id_events_get(
+            project_id=self.active_project.id, router_id=router_id
         )

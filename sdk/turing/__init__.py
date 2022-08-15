@@ -5,8 +5,7 @@ from turing.session import TuringSession
 from turing.version import VERSION as __version__
 
 active_session: TuringSession = TuringSession(
-    host="http://localhost:8080",
-    use_google_oauth=False
+    host="http://localhost:8080", use_google_oauth=False
 )
 
 

@@ -25,7 +25,7 @@ class ResourceRequest:
 
     @min_replica.setter
     def min_replica(self, min_replica: int):
-        if hasattr(self, 'max_replica'):
+        if hasattr(self, "max_replica"):
             ResourceRequest._verify_min_max_replica(min_replica, self.max_replica)
         self._min_replica = min_replica
 
@@ -35,7 +35,7 @@ class ResourceRequest:
 
     @max_replica.setter
     def max_replica(self, max_replica: int):
-        if hasattr(self, 'min_replica'):
+        if hasattr(self, "min_replica"):
             ResourceRequest._verify_min_max_replica(self.min_replica, max_replica)
         self._max_replica = max_replica
 
@@ -60,11 +60,13 @@ class ResourceRequest:
         if min_replica < ResourceRequest.min_allowed_replica:
             raise InvalidReplicaCountException(
                 f"Min replica count must be >= {ResourceRequest.min_allowed_replica}; "
-                f"min_replica passed: {min_replica}")
+                f"min_replica passed: {min_replica}"
+            )
         elif max_replica > ResourceRequest.max_allowed_replica:
             raise InvalidReplicaCountException(
                 f"Max replica count must be <= {ResourceRequest.max_allowed_replica}; "
-                f"min_replica passed: {max_replica}")
+                f"min_replica passed: {max_replica}"
+            )
         elif min_replica > max_replica:
             raise InvalidReplicaCountException(
                 f"Min replica must be <= max_replica; "
@@ -76,7 +78,7 @@ class ResourceRequest:
             min_replica=self.min_replica,
             max_replica=self.max_replica,
             cpu_request=self.cpu_request,
-            memory_request=self.memory_request
+            memory_request=self.memory_request,
         )
 
 

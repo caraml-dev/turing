@@ -24,3 +24,10 @@ build-image: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell scripts/vertagen/vertagen.sh)))
 	@echo "turing version:" $$VERSION
+
+.PHONY: setup
+setup:
+	@echo "Setting up dev tools..."
+	@test -x "$(which pre-commit)" || pip install pre-commit
+	@pre-commit install
+	@pre-commit install-hooks

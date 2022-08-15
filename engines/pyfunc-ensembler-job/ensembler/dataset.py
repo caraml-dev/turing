@@ -6,14 +6,13 @@ from jinjasql import JinjaSql
 import turing.generated.models as openapi
 import turing.batch.config as sdk
 
-__all__ = ['Dataset', 'BigQueryDataset', 'jinja']
+__all__ = ["Dataset", "BigQueryDataset", "jinja"]
 
-jinja = JinjaSql(param_style='pyformat')
-jinja.env.filters['zip'] = zip
+jinja = JinjaSql(param_style="pyformat")
+jinja.env.filters["zip"] = zip
 
 
 class Dataset(ABC):
-
     @abstractmethod
     def load(self, spark: SparkSession) -> DataFrame:
         pass
@@ -23,18 +22,20 @@ class Dataset(ABC):
         pass
 
     @classmethod
-    def from_config(cls, config: openapi.Dataset) -> 'Dataset':
+    def from_config(cls, config: openapi.Dataset) -> "Dataset":
         if config.type == sdk.source.BigQueryDataset.TYPE:
             return BigQueryDataset.from_config(config.bq_config)
-        raise ValueError(f'Unknown dataset type: {config.type} is not implemented')
+        raise ValueError(f"Unknown dataset type: {config.type} is not implemented")
 
 
 class BigQueryDataset(Dataset):
-    with open(os.path.join(os.path.dirname(__file__), 'sql', 'bq_select.sql.jinja2'), 'r') as _f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "sql", "bq_select.sql.jinja2"), "r"
+    ) as _f:
         _SQL_TEMPLATE = _f.read()
 
-    _READ_FORMAT = 'bigquery'
-    _OPTION_QUERY = 'query'
+    _READ_FORMAT = "bigquery"
+    _OPTION_QUERY = "query"
 
     def __init__(self, query: str, options: MutableMapping[str, str]):
         self._query = query
@@ -53,25 +54,25 @@ class BigQueryDataset(Dataset):
         return self._options
 
     def load(self, spark: SparkSession) -> DataFrame:
-        return spark.read \
-            .format(BigQueryDataset._READ_FORMAT) \
-            .options(**self.options) \
-            .option(BigQueryDataset._OPTION_QUERY, self.query) \
+        return (
+            spark.read.format(BigQueryDataset._READ_FORMAT)
+            .options(**self.options)
+            .option(BigQueryDataset._OPTION_QUERY, self.query)
             .load()
+        )
 
     @classmethod
-    def from_config(cls, config: openapi.BigQueryDatasetConfig) -> 'BigQueryDataset':
-        if config.get('query', ""):
+    def from_config(cls, config: openapi.BigQueryDatasetConfig) -> "BigQueryDataset":
+        if config.get("query", ""):
             query = config.query
         elif config.table:
             template, bind_params = jinja.prepare_query(
-                cls._SQL_TEMPLATE,
-                {'table': config.table, 'columns': config.features}
+                cls._SQL_TEMPLATE, {"table": config.table, "columns": config.features}
             )
             query = template % bind_params
         else:
             raise ValueError(
-                'Dataset initialization failed: '
+                "Dataset initialization failed: "
                 'either "query" or "table" should be provided'
             )
-        return BigQueryDataset(query, config.get('options', {}))
+        return BigQueryDataset(query, config.get("options", {}))

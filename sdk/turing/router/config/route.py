@@ -13,15 +13,12 @@ class Route:
     :param endpoint: endpoint of the route. Must be a valid URL
     :param timeout: timeout indicating the duration past which the request execution will end
     """
+
     id: str
     endpoint: str
     timeout: str
 
-    def __init__(self,
-                 id: str,
-                 endpoint: str,
-                 timeout: str,
-                 **kwargs):
+    def __init__(self, id: str, endpoint: str, timeout: str, **kwargs):
         self.id = id
         self.endpoint = endpoint
         self.timeout = timeout
@@ -53,7 +50,7 @@ class Route:
 
     @classmethod
     def _verify_endpoint(cls, endpoint: str):
-        """Rudimentary url checker """
+        """Rudimentary url checker"""
         parse_result = urlparse(endpoint)
 
         if parse_result.scheme and parse_result.netloc:
@@ -64,7 +61,7 @@ class Route:
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.Route(
             id=self.id,
-            type='PROXY',
+            type="PROXY",
             endpoint=self.endpoint,
             timeout=self.timeout,
         )
@@ -73,8 +70,10 @@ class Route:
 class InvalidUrlException(Exception):
     pass
 
+
 class DuplicateRouteException(Exception):
     pass
+
 
 class InvalidRouteException(Exception):
     pass

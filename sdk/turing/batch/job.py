@@ -52,13 +52,14 @@ class EnsemblingJob(ApiObject):
     _KIND = "BatchEnsemblingJob"
 
     def __init__(
-            self,
-            name: str,
-            ensembler_id: int,
-            status: EnsemblingJobStatus = None,
-            project_id: int = None,
-            error: str = None,
-            **kwargs):
+        self,
+        name: str,
+        ensembler_id: int,
+        status: EnsemblingJobStatus = None,
+        project_id: int = None,
+        error: str = None,
+        **kwargs
+    ):
 
         super(EnsemblingJob, self).__init__(**kwargs)
         self._name = name
@@ -80,7 +81,7 @@ class EnsemblingJob(ApiObject):
         return self._ensembler_id
 
     @property
-    def status(self) -> 'EnsemblingJobStatus':
+    def status(self) -> "EnsemblingJobStatus":
         return self._status
 
     @property
@@ -105,18 +106,16 @@ class EnsemblingJob(ApiObject):
         self.refresh()
 
     @classmethod
-    def get_by_id(cls, job_id: int) -> 'EnsemblingJob':
+    def get_by_id(cls, job_id: int) -> "EnsemblingJob":
         """
         Fetch ensembling job by its ID
         """
         return EnsemblingJob.from_open_api(
-            turing.active_session.get_ensembling_job(job_id=job_id))
+            turing.active_session.get_ensembling_job(job_id=job_id)
+        )
 
     @classmethod
-    def submit(
-            cls,
-            ensembler_id: int,
-            config: EnsemblingJobConfig) -> 'EnsemblingJob':
+    def submit(cls, ensembler_id: int, config: EnsemblingJobConfig) -> "EnsemblingJob":
         """
         Submit ensembling job with a given configuration for execution
 
@@ -127,7 +126,7 @@ class EnsemblingJob(ApiObject):
         job_config = turing.generated.models.EnsemblerConfig(
             version=EnsemblingJob._VERSION,
             kind=turing.generated.models.EnsemblerConfigKind(EnsemblingJob._KIND),
-            spec=config.job_spec()
+            spec=config.job_spec(),
         )
 
         job = turing.generated.models.EnsemblingJob(
@@ -137,14 +136,16 @@ class EnsemblingJob(ApiObject):
         )
 
         return EnsemblingJob.from_open_api(
-            turing.active_session.submit_ensembling_job(job=job))
+            turing.active_session.submit_ensembling_job(job=job)
+        )
 
     @classmethod
     def list(
-            cls,
-            status: List[EnsemblingJobStatus] = None,
-            page: Optional[int] = None,
-            page_size: Optional[int] = None) -> List['EnsemblingJob']:
+        cls,
+        status: List[EnsemblingJobStatus] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+    ) -> List["EnsemblingJob"]:
         """
         List ensembling jobs in the active project
 
@@ -156,11 +157,11 @@ class EnsemblingJob(ApiObject):
         """
         mapped_statuses = None
         if status:
-            mapped_statuses = [turing.generated.models.EnsemblerJobStatus(s.value) for s in status]
+            mapped_statuses = [
+                turing.generated.models.EnsemblerJobStatus(s.value) for s in status
+            ]
 
         response = turing.active_session.list_ensembling_jobs(
-            status=mapped_statuses,
-            page=page,
-            page_size=page_size
+            status=mapped_statuses, page=page, page_size=page_size
         )
         return [EnsemblingJob.from_open_api(item) for item in response.results]

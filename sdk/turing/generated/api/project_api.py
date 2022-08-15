@@ -19,7 +19,7 @@ from turing.generated.model_utils import (  # noqa: F401
     datetime,
     file_type,
     none_type,
-    validate_and_convert_types
+    validate_and_convert_types,
 )
 from turing.generated.model.project import Project
 
@@ -36,10 +36,7 @@ class ProjectApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-        def __projects_get(
-            self,
-            **kwargs
-        ):
+        def __projects_get(self, **kwargs):
             """List existing projects  # noqa: E501
 
             Projects can be filtered by optional `name` parameter  # noqa: E501
@@ -77,72 +74,53 @@ class ProjectApi(object):
                     If the method is called asynchronously, returns the request
                     thread.
             """
-            kwargs['async_req'] = kwargs.get(
-                'async_req', False
+            kwargs["async_req"] = kwargs.get("async_req", False)
+            kwargs["_return_http_data_only"] = kwargs.get(
+                "_return_http_data_only", True
             )
-            kwargs['_return_http_data_only'] = kwargs.get(
-                '_return_http_data_only', True
-            )
-            kwargs['_preload_content'] = kwargs.get(
-                '_preload_content', True
-            )
-            kwargs['_request_timeout'] = kwargs.get(
-                '_request_timeout', None
-            )
-            kwargs['_check_input_type'] = kwargs.get(
-                '_check_input_type', True
-            )
-            kwargs['_check_return_type'] = kwargs.get(
-                '_check_return_type', True
-            )
-            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs["_preload_content"] = kwargs.get("_preload_content", True)
+            kwargs["_request_timeout"] = kwargs.get("_request_timeout", None)
+            kwargs["_check_input_type"] = kwargs.get("_check_input_type", True)
+            kwargs["_check_return_type"] = kwargs.get("_check_return_type", True)
+            kwargs["_host_index"] = kwargs.get("_host_index")
             return self.call_with_http_info(**kwargs)
 
         self.projects_get = _Endpoint(
             settings={
-                'response_type': ([Project],),
-                'auth': [],
-                'endpoint_path': '/projects',
-                'operation_id': 'projects_get',
-                'http_method': 'GET',
-                'servers': None,
+                "response_type": ([Project],),
+                "auth": [],
+                "endpoint_path": "/projects",
+                "operation_id": "projects_get",
+                "http_method": "GET",
+                "servers": None,
             },
             params_map={
-                'all': [
-                    'name',
+                "all": [
+                    "name",
                 ],
-                'required': [],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
+                "required": [],
+                "nullable": [],
+                "enum": [],
+                "validation": [],
             },
             root_map={
-                'validations': {
+                "validations": {},
+                "allowed_values": {},
+                "openapi_types": {
+                    "name": (str,),
                 },
-                'allowed_values': {
+                "attribute_map": {
+                    "name": "name",
                 },
-                'openapi_types': {
-                    'name':
-                        (str,),
+                "location_map": {
+                    "name": "query",
                 },
-                'attribute_map': {
-                    'name': 'name',
-                },
-                'location_map': {
-                    'name': 'query',
-                },
-                'collection_format_map': {
-                }
+                "collection_format_map": {},
             },
             headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
+                "accept": ["application/json"],
+                "content_type": [],
             },
             api_client=api_client,
-            callable=__projects_get
+            callable=__projects_get,
         )

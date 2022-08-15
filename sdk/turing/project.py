@@ -8,6 +8,7 @@ class Project(ApiObject):
     """
     API entity for MLP Project
     """
+
     def __init__(self, name: str, mlflow_tracking_url: str, **kwargs):
         super().__init__(**kwargs)
         self._name = name
@@ -30,6 +31,6 @@ class Project(ApiObject):
         self._mlflow_tracking_url = mlflow_tracking_url
 
     @classmethod
-    def list(cls, name: Optional[str] = None) -> List['Project']:
+    def list(cls, name: Optional[str] = None) -> List["Project"]:
         response = turing.active_session.list_projects(name=name)
         return [Project.from_open_api(item) for item in response]

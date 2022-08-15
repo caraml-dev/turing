@@ -7,6 +7,7 @@ from turing.generated.model_utils import OpenApiModel
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
 
+
 @dataclass
 class EnsemblerNopConfig:
     final_response_route_id: str
@@ -23,6 +24,7 @@ class EnsemblerNopConfig:
 
     def to_open_api(self) -> OpenApiModel:
         return None
+
 
 @dataclass
 class EnsemblerStandardConfig:
@@ -49,7 +51,9 @@ class EnsemblerStandardConfig:
         self._fallback_response_route_id = fallback_response_route_id
 
     def to_open_api(self) -> OpenApiModel:
-        return turing.generated.models.EnsemblerStandardConfig(experiment_mappings=self.experiment_mappings)
+        return turing.generated.models.EnsemblerStandardConfig(
+            experiment_mappings=self.experiment_mappings
+        )
 
 
 @dataclass
@@ -62,6 +66,7 @@ class RouterEnsemblerConfig(DataObject):
     :param standard_config: EnsemblerStandardConfig instance containing mappings between routes and treatments
     :param docker_config: EnsemblerDockerConfig instance containing configs for the docker ensembler
     """
+
     type: str
     id: int = None
     nop_config: EnsemblerNopConfig = None
@@ -69,14 +74,16 @@ class RouterEnsemblerConfig(DataObject):
     docker_config: turing.generated.models.EnsemblerDockerConfig = None
     pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None
 
-    def __init__(self,
-                 type: str,
-                 id: int = None,
-                 nop_config: EnsemblerNopConfig = None,
-                 standard_config: EnsemblerStandardConfig = None,
-                 docker_config: turing.generated.models.EnsemblerDockerConfig = None,
-                 pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None,
-                 **kwargs):
+    def __init__(
+        self,
+        type: str,
+        id: int = None,
+        nop_config: EnsemblerNopConfig = None,
+        standard_config: EnsemblerStandardConfig = None,
+        docker_config: turing.generated.models.EnsemblerDockerConfig = None,
+        pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig = None,
+        **kwargs,
+    ):
         self.id = id
         self.type = type
         self.nop_config = nop_config
@@ -112,7 +119,9 @@ class RouterEnsemblerConfig(DataObject):
         elif isinstance(standard_config, dict):
             openapi_standard_config = standard_config.copy()
             openapi_standard_config["experiment_mappings"] = [
-                turing.generated.models.EnsemblerStandardConfigExperimentMappings(**mapping)
+                turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                    **mapping
+                )
                 for mapping in standard_config["experiment_mappings"]
             ]
             self._standard_config = EnsemblerStandardConfig(**openapi_standard_config)
@@ -124,14 +133,22 @@ class RouterEnsemblerConfig(DataObject):
         return self._docker_config
 
     @docker_config.setter
-    def docker_config(self, docker_config: turing.generated.models.EnsemblerDockerConfig):
+    def docker_config(
+        self, docker_config: turing.generated.models.EnsemblerDockerConfig
+    ):
         if isinstance(docker_config, turing.generated.models.EnsemblerDockerConfig):
             self._docker_config = docker_config
         elif isinstance(docker_config, dict):
             openapi_docker_config = docker_config.copy()
-            openapi_docker_config["resource_request"] = \
-                turing.generated.models.ResourceRequest(**openapi_docker_config['resource_request'])
-            openapi_docker_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in docker_config['env']]
+            openapi_docker_config[
+                "resource_request"
+            ] = turing.generated.models.ResourceRequest(
+                **openapi_docker_config["resource_request"]
+            )
+            openapi_docker_config["env"] = [
+                turing.generated.models.EnvVar(**env_var)
+                for env_var in docker_config["env"]
+            ]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
                 **openapi_docker_config
             )
@@ -143,14 +160,22 @@ class RouterEnsemblerConfig(DataObject):
         return self._pyfunc_config
 
     @pyfunc_config.setter
-    def pyfunc_config(self, pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig):
+    def pyfunc_config(
+        self, pyfunc_config: turing.generated.models.EnsemblerPyfuncConfig
+    ):
         if isinstance(pyfunc_config, turing.generated.models.EnsemblerPyfuncConfig):
             self._pyfunc_config = pyfunc_config
         elif isinstance(pyfunc_config, dict):
             openapi_pyfunc_config = pyfunc_config.copy()
-            openapi_pyfunc_config["resource_request"] = \
-                turing.generated.models.ResourceRequest(**pyfunc_config["resource_request"])
-            openapi_pyfunc_config["env"] = [turing.generated.models.EnvVar(**env_var) for env_var in pyfunc_config["env"]]
+            openapi_pyfunc_config[
+                "resource_request"
+            ] = turing.generated.models.ResourceRequest(
+                **pyfunc_config["resource_request"]
+            )
+            openapi_pyfunc_config["env"] = [
+                turing.generated.models.EnvVar(**env_var)
+                for env_var in pyfunc_config["env"]
+            ]
             self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
                 **openapi_pyfunc_config
             )
@@ -166,9 +191,7 @@ class RouterEnsemblerConfig(DataObject):
         if isinstance(nop_config, EnsemblerNopConfig):
             self._nop_config = nop_config
         elif isinstance(nop_config, dict):
-            self._nop_config = EnsemblerNopConfig(
-                **nop_config
-            )
+            self._nop_config = EnsemblerNopConfig(**nop_config)
         else:
             self._nop_config = nop_config
 
@@ -182,20 +205,19 @@ class RouterEnsemblerConfig(DataObject):
         if self.pyfunc_config is not None:
             kwargs["pyfunc_config"] = self.pyfunc_config
 
-        return turing.generated.models.RouterEnsemblerConfig(
-            type=self.type,
-            **kwargs
-        )
+        return turing.generated.models.RouterEnsemblerConfig(type=self.type, **kwargs)
 
 
 @dataclass
 class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
-    def __init__(self,
-                 project_id: int,
-                 ensembler_id: int,
-                 timeout: str,
-                 resource_request: ResourceRequest,
-                 env: List['EnvVar']):
+    def __init__(
+        self,
+        project_id: int,
+        ensembler_id: int,
+        timeout: str,
+        resource_request: ResourceRequest,
+        env: List["EnvVar"],
+    ):
         """
         Method to create a new Pyfunc ensembler
 
@@ -245,15 +267,17 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._timeout = timeout
 
     @property
-    def env(self) -> List['EnvVar']:
+    def env(self) -> List["EnvVar"]:
         return self._env
 
     @env.setter
-    def env(self, env: List['EnvVar']):
+    def env(self, env: List["EnvVar"]):
         self._env = env
 
     @classmethod
-    def from_config(cls, config: turing.generated.models.EnsemblerPyfuncConfig) -> "PyfuncRouterEnsemblerConfig":
+    def from_config(
+        cls, config: turing.generated.models.EnsemblerPyfuncConfig
+    ) -> "PyfuncRouterEnsemblerConfig":
         return cls(
             project_id=config.project_id,
             ensembler_id=config.ensembler_id,
@@ -264,7 +288,8 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
                 cpu_request=config.resource_request.cpu_request,
                 memory_request=config.resource_request.memory_request,
             ),
-            env=[EnvVar(name=env.name, value=env.value) for env in config.env])
+            env=[EnvVar(name=env.name, value=env.value) for env in config.env],
+        )
 
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
@@ -274,20 +299,23 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
             ensembler_id=self.ensembler_id,
             resource_request=self.resource_request.to_open_api(),
             timeout=self.timeout,
-            env=[env_var.to_open_api() for env_var in self.env])
+            env=[env_var.to_open_api() for env_var in self.env],
+        )
         return super().to_open_api()
 
 
 @dataclass
 class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
-    def __init__(self,
-                 image: str,
-                 resource_request: ResourceRequest,
-                 endpoint: str,
-                 timeout: str,
-                 port: int,
-                 env: List['EnvVar'],
-                 service_account: str = None):
+    def __init__(
+        self,
+        image: str,
+        resource_request: ResourceRequest,
+        endpoint: str,
+        timeout: str,
+        port: int,
+        env: List["EnvVar"],
+        service_account: str = None,
+    ):
         """
         Method to create a new Docker ensembler
 
@@ -349,11 +377,11 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._port = port
 
     @property
-    def env(self) -> List['EnvVar']:
+    def env(self) -> List["EnvVar"]:
         return self._env
 
     @env.setter
-    def env(self, env: List['EnvVar']):
+    def env(self, env: List["EnvVar"]):
         self._env = env
 
     @property
@@ -365,7 +393,9 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._service_account = service_account
 
     @classmethod
-    def from_config(cls, config: turing.generated.models.EnsemblerDockerConfig) -> "DockerRouterEnsemblerConfig":
+    def from_config(
+        cls, config: turing.generated.models.EnsemblerDockerConfig
+    ) -> "DockerRouterEnsemblerConfig":
         return cls(
             image=config.image,
             resource_request=ResourceRequest(
@@ -378,7 +408,8 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             timeout=config.timeout,
             port=config.port,
             env=[EnvVar(name=env.name, value=env.value) for env in config.env],
-            service_account=config["service_account"])
+            service_account=config["service_account"],
+        )
 
     def to_open_api(self) -> OpenApiModel:
         assert all(isinstance(env_var, EnvVar) for env_var in self.env)
@@ -394,16 +425,16 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             timeout=self.timeout,
             port=self.port,
             env=[env_var.to_open_api() for env_var in self.env],
-            **kwargs
+            **kwargs,
         )
         return super().to_open_api()
 
 
 @dataclass
 class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
-    def __init__(self,
-                 experiment_mappings: List[Dict[str, str]],
-                 fallback_response_route_id: str):
+    def __init__(
+        self, experiment_mappings: List[Dict[str, str]], fallback_response_route_id: str
+    ):
         """
         Method to create a new standard ensembler
 
@@ -444,24 +475,30 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                 )
 
     @classmethod
-    def from_config(cls, config: EnsemblerStandardConfig) -> "StandardRouterEnsemblerConfig":
+    def from_config(
+        cls, config: EnsemblerStandardConfig
+    ) -> "StandardRouterEnsemblerConfig":
         return cls(
             fallback_response_route_id=config.fallback_response_route_id,
-            experiment_mappings=[e.to_dict() for e in config.experiment_mappings])
+            experiment_mappings=[e.to_dict() for e in config.experiment_mappings],
+        )
 
     def to_open_api(self) -> OpenApiModel:
         self.standard_config = EnsemblerStandardConfig(
             experiment_mappings=[
-                turing.generated.models.EnsemblerStandardConfigExperimentMappings(**experiment_mapping) \
+                turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                    **experiment_mapping
+                )
                 for experiment_mapping in self.experiment_mappings
             ],
-            fallback_response_route_id=self.fallback_response_route_id)
+            fallback_response_route_id=self.fallback_response_route_id,
+        )
         return super().to_open_api()
+
 
 @dataclass
 class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
-    def __init__(self,
-                 final_response_route_id: str):
+    def __init__(self, final_response_route_id: str):
         """
         Method to create a new Nop ensembler
 
@@ -481,9 +518,11 @@ class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
     @classmethod
     def from_config(cls, config: EnsemblerNopConfig) -> "NopRouterEnsemblerConfig":
         return cls(final_response_route_id=config.final_response_route_id)
-    
+
     def to_open_api(self) -> OpenApiModel:
-        self.nop_config = EnsemblerNopConfig(final_response_route_id=self.final_response_route_id)
+        self.nop_config = EnsemblerNopConfig(
+            final_response_route_id=self.final_response_route_id
+        )
         # Nop config is not passed down to the API. The final_response_route_id property
         # will be parsed in the router config and copied over as appropriate.
         return None

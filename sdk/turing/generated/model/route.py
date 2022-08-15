@@ -51,15 +51,14 @@ class Route(ModelNormal):
           as additional properties values.
     """
 
-    allowed_values = {
-    }
+    allowed_values = {}
 
     validations = {
-        ('timeout',): {
-            'regex': {
-                'pattern': r'^[0-9]+(ms|s|m|h)$',  # noqa: E501
+        ("timeout",): {
+            "regex": {
+                "pattern": r"^[0-9]+(ms|s|m|h)$",
             },
-        },
+        },  # noqa: E501
     }
 
     additional_properties_type = None
@@ -77,36 +76,40 @@ class Route(ModelNormal):
                 and the value is attribute type.
         """
         return {
-            'id': (str,),  # noqa: E501
-            'type': (str,),  # noqa: E501
-            'endpoint': (str,),  # noqa: E501
-            'timeout': (str,),  # noqa: E501
-            'annotations': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}, none_type,),  # noqa: E501
+            "id": (str,),  # noqa: E501
+            "type": (str,),  # noqa: E501
+            "endpoint": (str,),  # noqa: E501
+            "timeout": (str,),  # noqa: E501
+            "annotations": (
+                {str: (bool, date, datetime, dict, float, int, list, str, none_type)},
+                none_type,
+            ),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
-
     attribute_map = {
-        'id': 'id',  # noqa: E501
-        'type': 'type',  # noqa: E501
-        'endpoint': 'endpoint',  # noqa: E501
-        'timeout': 'timeout',  # noqa: E501
-        'annotations': 'annotations',  # noqa: E501
+        "id": "id",  # noqa: E501
+        "type": "type",  # noqa: E501
+        "endpoint": "endpoint",  # noqa: E501
+        "timeout": "timeout",  # noqa: E501
+        "annotations": "annotations",  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set([
-        '_data_store',
-        '_check_type',
-        '_spec_property_naming',
-        '_path_to_item',
-        '_configuration',
-        '_visited_composed_classes',
-    ])
+    required_properties = set(
+        [
+            "_data_store",
+            "_check_type",
+            "_spec_property_naming",
+            "_path_to_item",
+            "_configuration",
+            "_visited_composed_classes",
+        ]
+    )
 
     @convert_js_args_to_python_args
     def __init__(self, id, type, endpoint, timeout, *args, **kwargs):  # noqa: E501
@@ -152,15 +155,16 @@ class Route(ModelNormal):
             annotations ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}, none_type): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop('_check_type', True)
-        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
-        _path_to_item = kwargs.pop('_path_to_item', ())
-        _configuration = kwargs.pop('_configuration', None)
-        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
+        _check_type = kwargs.pop("_check_type", True)
+        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
+        _path_to_item = kwargs.pop("_path_to_item", ())
+        _configuration = kwargs.pop("_configuration", None)
+        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
+                % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -180,10 +184,12 @@ class Route(ModelNormal):
         self.endpoint = endpoint
         self.timeout = timeout
         for var_name, var_value in kwargs.items():
-            if var_name not in self.attribute_map and \
-                        self._configuration is not None and \
-                        self._configuration.discard_unknown_keys and \
-                        self.additional_properties_type is None:
+            if (
+                var_name not in self.attribute_map
+                and self._configuration is not None
+                and self._configuration.discard_unknown_keys
+                and self.additional_properties_type is None
+            ):
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)

@@ -9,6 +9,6 @@ class PyFuncEnsemblerServer:
         self.ensembler = ensembler
 
     def create_application(self):
-        return tornado.web.Application([
-            (r"/ensemble", EnsemblerHandler, dict(ensembler=self.ensembler))
-        ])
+        return tornado.web.Application(
+            [(r"/ensemble", EnsemblerHandler, dict(ensembler=self.ensembler))]
+        )

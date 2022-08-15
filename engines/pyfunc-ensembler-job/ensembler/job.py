@@ -11,12 +11,13 @@ from turing.generated.api_client import Configuration
 
 class BatchEnsemblingJob:
     def __init__(
-            self,
-            metadata: EnsemblingJobMeta,
-            source: 'Source',
-            predictions: Dict[str, 'PredictionSource'],
-            ensembler: 'Ensembler',
-            sink: 'Sink'):
+        self,
+        metadata: EnsemblingJobMeta,
+        source: "Source",
+        predictions: Dict[str, "PredictionSource"],
+        ensembler: "Ensembler",
+        sink: "Sink",
+    ):
         self.metadata = metadata
         self.source = source
         self.predictions = predictions
@@ -30,15 +31,13 @@ class BatchEnsemblingJob:
         return self.metadata.annotations
 
     def run(self, spark: SparkSession):
-        combined_df = self.source \
-            .join(**self.predictions) \
-            .load(spark)
+        combined_df = self.source.join(**self.predictions).load(spark)
         result_df = self.ensembler.ensemble(combined_df, spark)
         self.sink.save(result_df)
 
     @classmethod
-    def from_yaml(cls, spec_path: str) -> Tuple['BatchEnsemblingJob', str]:
-        with open(spec_path, 'r') as file:
+    def from_yaml(cls, spec_path: str) -> Tuple["BatchEnsemblingJob", str]:
+        with open(spec_path, "r") as file:
             job_spec_raw = file.read()
 
         parsed_data = yaml.safe_load(job_spec_raw)
@@ -48,16 +47,18 @@ class BatchEnsemblingJob:
             path_to_item=[],
             spec_property_naming=True,
             _check_type=True,
-            configuration=Configuration()
+            configuration=Configuration(),
         )
         return BatchEnsemblingJob.from_config(job_spec), job_spec_raw
 
     @classmethod
-    def from_config(cls, config: EnsemblerConfig) -> 'BatchEnsemblingJob':
+    def from_config(cls, config: EnsemblerConfig) -> "BatchEnsemblingJob":
         metadata = config.metadata
         source = Source.from_config(config.spec.source)
-        predictions: Dict[str, 'PredictionSource'] = \
-            {k: PredictionSource.from_config(v) for k, v in config.spec.predictions.items()}
+        predictions: Dict[str, "PredictionSource"] = {
+            k: PredictionSource.from_config(v)
+            for k, v in config.spec.predictions.items()
+        }
         ensembler = Ensembler.from_config(config.spec.ensembler)
         sink = Sink.from_config(config.spec.sink)
 
@@ -66,5 +67,5 @@ class BatchEnsemblingJob:
             source=source,
             predictions=predictions,
             ensembler=ensembler,
-            sink=sink
+            sink=sink,
         )

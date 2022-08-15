@@ -59,6 +59,7 @@ in these getting started guide.
 - [Go](https://golang.org/dl/) v1.18
 - [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.22 (optional)
+- [Python](https://www.python.org/downloads/) >=3.7
 - Local ports 80, 8080, 8081, 8082, 8200, 5000, 6443 should be available
 
 ### Download Turing Source Code
@@ -69,6 +70,14 @@ for the Turing source code.
 ```bash
 git clone https://github.com/gojek/turing.git
 export TURING=$PWD/turing
+```
+
+### Set up Development Tools
+
+Install the necessary pre-commit hooks when cloning the project for the first time. Subsequent changes to to hooks will be synced automatically.
+
+```bash
+make setup
 ```
 
 ### Setup Local Infrastructure with Docker Compose

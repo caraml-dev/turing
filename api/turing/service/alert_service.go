@@ -70,7 +70,6 @@ type DashboardURLValue struct {
 // alert repository in GitLab. In most cases, the alerts persisted in the database will be in sync
 // with the alert files in GitLab (as long as the Git files are not manually modified i.e.
 // the alert files are only updated by calling this service).
-//
 func NewGitlabOpsAlertService(db *gorm.DB, config config.AlertConfig) (AlertService, error) {
 	if config.GitLab == nil {
 		return nil, errors.New("missing GitLab AlertConfig")

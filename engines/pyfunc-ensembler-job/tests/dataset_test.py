@@ -8,7 +8,8 @@ import turing.batch.config as sdk
 
 @pytest.fixture(scope="session")
 def dataset_config():
-    return from_yaml("""\
+    return from_yaml(
+        """\
     type: BQ
     bq_config:
       table: "project.dataset.table"
@@ -16,7 +17,9 @@ def dataset_config():
         - customer_id
         - target_date
         - predictions
-    """, openapi.Dataset)
+    """,
+        openapi.Dataset,
+    )
 
 
 def test_load_from_config(dataset_config):
@@ -24,10 +27,12 @@ def test_load_from_config(dataset_config):
 
     assert dataset.type == sdk.source.BigQueryDataset.TYPE
     assert isinstance(dataset, BigQueryDataset)
-    assert dataset.query == textwrap.dedent("""\
+    assert dataset.query == textwrap.dedent(
+        """\
     SELECT
         customer_id,
         target_date,
         predictions
-    FROM `project.dataset.table`""")
+    FROM `project.dataset.table`"""
+    )
     assert len(dataset.options) == 0

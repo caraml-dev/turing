@@ -26,13 +26,17 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
+
 def lazy_import():
     from turing.generated.model.dataset import Dataset
-    from turing.generated.model.ensembling_job_prediction_source_all_of import EnsemblingJobPredictionSourceAllOf
+    from turing.generated.model.ensembling_job_prediction_source_all_of import (
+        EnsemblingJobPredictionSourceAllOf,
+    )
     from turing.generated.model.ensembling_job_source import EnsemblingJobSource
-    globals()['Dataset'] = Dataset
-    globals()['EnsemblingJobPredictionSourceAllOf'] = EnsemblingJobPredictionSourceAllOf
-    globals()['EnsemblingJobSource'] = EnsemblingJobSource
+
+    globals()["Dataset"] = Dataset
+    globals()["EnsemblingJobPredictionSourceAllOf"] = EnsemblingJobPredictionSourceAllOf
+    globals()["EnsemblingJobSource"] = EnsemblingJobSource
 
 
 class EnsemblingJobPredictionSource(ModelComposed):
@@ -59,11 +63,9 @@ class EnsemblingJobPredictionSource(ModelComposed):
           as additional properties values.
     """
 
-    allowed_values = {
-    }
+    allowed_values = {}
 
-    validations = {
-    }
+    validations = {}
 
     @cached_property
     def additional_properties_type():
@@ -72,7 +74,17 @@ class EnsemblingJobPredictionSource(ModelComposed):
         of type self, this must run after the class is loaded
         """
         lazy_import()
-        return (bool, date, datetime, dict, float, int, list, str, none_type,)  # noqa: E501
+        return (
+            bool,
+            date,
+            datetime,
+            dict,
+            float,
+            int,
+            list,
+            str,
+            none_type,
+        )  # noqa: E501
 
     _nullable = False
 
@@ -88,33 +100,37 @@ class EnsemblingJobPredictionSource(ModelComposed):
         """
         lazy_import()
         return {
-            'dataset': (Dataset,),  # noqa: E501
-            'join_on': ([str],),  # noqa: E501
-            'columns': ([str], none_type,),  # noqa: E501
+            "dataset": (Dataset,),  # noqa: E501
+            "join_on": ([str],),  # noqa: E501
+            "columns": (
+                [str],
+                none_type,
+            ),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
-
     attribute_map = {
-        'dataset': 'dataset',  # noqa: E501
-        'join_on': 'join_on',  # noqa: E501
-        'columns': 'columns',  # noqa: E501
+        "dataset": "dataset",  # noqa: E501
+        "join_on": "join_on",  # noqa: E501
+        "columns": "columns",  # noqa: E501
     }
 
-    required_properties = set([
-        '_data_store',
-        '_check_type',
-        '_spec_property_naming',
-        '_path_to_item',
-        '_configuration',
-        '_visited_composed_classes',
-        '_composed_instances',
-        '_var_name_to_model_instances',
-        '_additional_properties_model_instances',
-    ])
+    required_properties = set(
+        [
+            "_data_store",
+            "_check_type",
+            "_spec_property_naming",
+            "_path_to_item",
+            "_configuration",
+            "_visited_composed_classes",
+            "_composed_instances",
+            "_var_name_to_model_instances",
+            "_additional_properties_model_instances",
+        ]
+    )
 
     @convert_js_args_to_python_args
     def __init__(self, dataset, join_on, *args, **kwargs):  # noqa: E501
@@ -158,15 +174,16 @@ class EnsemblingJobPredictionSource(ModelComposed):
             columns ([str], none_type): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop('_check_type', True)
-        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
-        _path_to_item = kwargs.pop('_path_to_item', ())
-        _configuration = kwargs.pop('_configuration', None)
-        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
+        _check_type = kwargs.pop("_check_type", True)
+        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
+        _path_to_item = kwargs.pop("_path_to_item", ())
+        _configuration = kwargs.pop("_configuration", None)
+        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
+                % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -182,21 +199,20 @@ class EnsemblingJobPredictionSource(ModelComposed):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         constant_args = {
-            '_check_type': _check_type,
-            '_path_to_item': _path_to_item,
-            '_spec_property_naming': _spec_property_naming,
-            '_configuration': _configuration,
-            '_visited_composed_classes': self._visited_composed_classes,
+            "_check_type": _check_type,
+            "_path_to_item": _path_to_item,
+            "_spec_property_naming": _spec_property_naming,
+            "_configuration": _configuration,
+            "_visited_composed_classes": self._visited_composed_classes,
         }
         required_args = {
-            'dataset': dataset,
-            'join_on': join_on,
+            "dataset": dataset,
+            "join_on": join_on,
         }
         model_args = {}
         model_args.update(required_args)
         model_args.update(kwargs)
-        composed_info = validate_get_composed_info(
-            constant_args, model_args, self)
+        composed_info = validate_get_composed_info(constant_args, model_args, self)
         self._composed_instances = composed_info[0]
         self._var_name_to_model_instances = composed_info[1]
         self._additional_properties_model_instances = composed_info[2]
@@ -205,10 +221,12 @@ class EnsemblingJobPredictionSource(ModelComposed):
         for var_name, var_value in required_args.items():
             setattr(self, var_name, var_value)
         for var_name, var_value in kwargs.items():
-            if var_name in unused_args and \
-                        self._configuration is not None and \
-                        self._configuration.discard_unknown_keys and \
-                        not self._additional_properties_model_instances:
+            if (
+                var_name in unused_args
+                and self._configuration is not None
+                and self._configuration.discard_unknown_keys
+                and not self._additional_properties_model_instances
+            ):
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)
@@ -224,12 +242,10 @@ class EnsemblingJobPredictionSource(ModelComposed):
         # loading
         lazy_import()
         return {
-          'anyOf': [
-          ],
-          'allOf': [
-              EnsemblingJobPredictionSourceAllOf,
-              EnsemblingJobSource,
-          ],
-          'oneOf': [
-          ],
+            "anyOf": [],
+            "allOf": [
+                EnsemblingJobPredictionSourceAllOf,
+                EnsemblingJobSource,
+            ],
+            "oneOf": [],
         }

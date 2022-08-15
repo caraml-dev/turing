@@ -58,7 +58,7 @@ heritage: {{ .Release.Service }}
 
 {{- define "turing.db.port" -}}
 {{ if .Values.tags.db }}
-    {{ .Values.postgresql.postgresqlPort }}
+    {{ .Values.postgresql.containerPorts.postgresql }}
 {{- else -}}
     {{- .Values.turing.config.DbConfig.Port -}}
 {{- end -}}

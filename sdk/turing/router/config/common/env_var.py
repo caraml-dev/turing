@@ -25,11 +25,8 @@ class EnvVar:
         return self._value
 
     @value.setter
-    def value(self, value:str):
+    def value(self, value: str):
         self._value = value
 
     def to_open_api(self) -> OpenApiModel:
-        return turing.generated.models.EnvVar(
-            name=self.name,
-            value=self.value
-        )
+        return turing.generated.models.EnvVar(name=self.name, value=self.value)
