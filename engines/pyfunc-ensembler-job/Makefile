@@ -20,6 +20,12 @@ type-check:
 		--allow-untyped-globals \
 		ensembler
 
+.PHONY: lint
+lint:
+	@$(eval black_version=$(shell pip show black | grep Version | grep -oE '[0-9].*'))
+	@[ "${black_version}" == "22.6.0" ] || sh -c "pip install black==22.6.0"
+	@black .
+
 .PHONY: test
 test: type-check
 	@$(ACTIVATE_ENV) && \

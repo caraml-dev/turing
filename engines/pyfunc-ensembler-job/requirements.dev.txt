@@ -1,3 +1,4 @@
+black==22.6.0
 chispa
 mypy>=0.910
 pytest

@@ -14,37 +14,37 @@ repos:
         args:
           - --chart-search-root=infra/charts/turing-init
           - --template-files=./README.md.gotmpl
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.48.0
+  - repo: local
     hooks:
-      # For the below hooks, we need to cd into the folder as we cannot execute golangci-lint
-      # outside the module. See: https://github.com/pre-commit/pre-commit/issues/1417
       - id: golangci-lint
         name: 'Linter for API'
         alias: golangci-lint-api
         files: '^api/'
         types: [go]
-        entry: bash -c 'cd api && golangci-lint run --timeout 3m --fix'
+        language: system
+        entry: bash -c 'cd api make lint'
       - id: golangci-lint
         name: 'Linter for the Router Engine'
         alias: golangci-lint-router
         files: '^engines/router/'
         types: [go]
-        entry: bash -c 'cd engines/router && golangci-lint run --fix'
+        language: system
+        entry: bash -c 'cd engines/router make lint'
       - id: golangci-lint
         name: 'Linter for the Experiment Engine'
         alias: golangci-lint-experiment
         files: '^engines/experiment/'
         types: [go]
-        entry: bash -c 'cd engines/experiment && golangci-lint run --fix'
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+        language: system
+        entry: bash -c 'cd engines/experiment make lint'
+  - repo: local
     hooks:
       - id: prettier
         name: 'Prettier for UI'
         files: '^ui/'
         types_or: [javascript, css]
-        entry: prettier --bracket-same-line --write
+        language: system
+        entry: bash -c 'cd ui && yarn lint'
   - repo: local
     hooks:
       - id: openapi-gen
@@ -52,18 +52,26 @@ repos:
         files: '^api/api/specs/'
         language: system
         entry: bash -c 'cd sdk && make gen-client'
-  - repo: https://github.com/psf/black
-    rev: '22.6.0'
+  - repo: local
     hooks:
       - id: black
         name: 'Black formatter for the SDK'
         alias: black-sdk
         files: '^sdk/'
+        types: [python]
+        language: system
+        entry: bash -c 'cd sdk && make lint'
       - id: black
         name: 'Black formatter for Pyfunc Ensembler Job Engine'
         alias: black-ensembler-job
         files: '^engines/pyfunc-ensembler-job/'
+        types: [python]
+        language: system
+        entry: bash -c 'cd engines/pyfunc-ensembler-job && make lint'
       - id: black
         name: 'Black formatter for Pyfunc Ensembler Service Engine'
         alias: black-ensembler-service
         files: '^engines/pyfunc-ensembler-service/'
+        types: [python]
+        language: system
+        entry: bash -c 'cd engines/pyfunc-ensembler-service && make lint'

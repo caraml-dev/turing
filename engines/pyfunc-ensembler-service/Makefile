@@ -11,6 +11,12 @@ $(CONDA_ENV_NAME):
 	@conda env update -f env-$(PYTHON_VERSION).yaml -n $(CONDA_ENV_NAME) --prune
 	$(ACTIVATE_ENV) && pip install -r requirements.dev.txt
 
+.PHONY: lint
+lint:
+	@$(eval black_version=$(shell pip show black | grep Version | grep -oE '[0-9].*'))
+	@[ "${black_version}" == "22.6.0" ] || sh -c "pip install black==22.6.0"
+	@black .
+
 .PHONY: test
 test:
 	@$(ACTIVATE_ENV) && \
