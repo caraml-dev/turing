@@ -3,14 +3,14 @@ package fiberapi
 import (
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/fiber"
 	"github.com/gojek/fiber/config"
 	fibererror "github.com/gojek/fiber/errors"
 	fiberhttp "github.com/gojek/fiber/http"
 	"github.com/gojek/fiber/types"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
-	"github.com/gojek/turing/engines/router/missionctl/log"
 )
 
 // CreateFiberRequestHandler creates a new Fiber component from the given config file,

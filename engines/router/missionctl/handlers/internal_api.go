@@ -11,7 +11,7 @@ import (
 
 	"github.com/heptiolabs/healthcheck"
 
-	"github.com/gojek/turing/engines/router/missionctl/internal"
+	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 )
 
 func versionAPI(w http.ResponseWriter, r *http.Request) {

@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/config"
+	"github.com/caraml-dev/turing/engines/experiment/config"
 
 	"bou.ke/monkey"
-	"github.com/gojek/turing/engines/experiment"
-	"github.com/gojek/turing/engines/experiment/plugin/inproc"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )

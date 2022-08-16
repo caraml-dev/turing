@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // gets an int from the provided request variables. If not found, will throw

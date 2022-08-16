@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
 )
 

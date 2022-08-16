@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 )
 
 var (

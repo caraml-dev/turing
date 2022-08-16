@@ -61,7 +61,7 @@ docs:
     },
     {
       "label": "Turing User Guide",
-      "href": "https://github.com/gojek/turing"
+      "href": "https://github.com/caraml-dev/turing"
     },
     {
       "label": "Feast User Guide",

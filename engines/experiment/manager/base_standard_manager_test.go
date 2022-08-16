@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
 )
 

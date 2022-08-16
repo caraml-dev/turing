@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/mocks"
-	rpcRunner "github.com/gojek/turing/engines/experiment/plugin/rpc/runner"
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
+	rpcRunner "github.com/caraml-dev/turing/engines/experiment/plugin/rpc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 )

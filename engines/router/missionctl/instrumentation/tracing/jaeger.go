@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/gojek/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-client-go/zipkin"

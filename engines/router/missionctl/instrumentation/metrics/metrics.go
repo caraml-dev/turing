@@ -3,7 +3,7 @@ package metrics
 import (
 	"time"
 
-	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 )
 
 //////////////////// Define Metric Name, label constants //////////////////////

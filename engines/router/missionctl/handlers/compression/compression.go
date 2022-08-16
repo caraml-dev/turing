@@ -1,7 +1,7 @@
 package compression
 
 import (
-	"github.com/gojek/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/pierrec/lz4"
 )
 

@@ -1,4 +1,4 @@
-module github.com/gojek/turing/engines/router
+module github.com/caraml-dev/turing/engines/router
 
 go 1.18
 
@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/mlp v1.4.7
-	github.com/gojek/turing/engines/experiment v0.0.0
+	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
@@ -87,4 +87,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/gojek/turing/engines/experiment => ../experiment
+replace github.com/caraml-dev/turing/engines/experiment => ../experiment

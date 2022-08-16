@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/gojek/turing/engines/experiment/plugin/inproc/runner/nop"
-	"github.com/gojek/turing/engines/router/missionctl"
-	"github.com/gojek/turing/engines/router/missionctl/config"
+	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
+	"github.com/caraml-dev/turing/engines/router/missionctl"
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 )
 

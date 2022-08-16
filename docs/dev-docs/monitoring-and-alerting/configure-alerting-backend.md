@@ -4,7 +4,7 @@ The Turing UI exposes alerting configurations for various Prometheus metrics, de
 
 ## GitOps Configuration
 
-Currently, only Gitlab repositories may be configured for publishing alerts. The required client configurations (such as the Gitlab token) may be set at deploy time, under `AlertConfig.GitLab` (please refer to the [sample Helm values file](https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml) for an example).
+Currently, only Gitlab repositories may be configured for publishing alerts. The required client configurations (such as the Gitlab token) may be set at deploy time, under `AlertConfig.GitLab` (please refer to the [sample Helm values file](https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml) for an example).
 
 ## Available Metrics
 

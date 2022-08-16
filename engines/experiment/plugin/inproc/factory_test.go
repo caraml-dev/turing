@@ -5,16 +5,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/config"
+	"github.com/caraml-dev/turing/engines/experiment/config"
 
 	"bou.ke/monkey"
-	"github.com/gojek/turing/engines/experiment/manager"
-	mocksManager "github.com/gojek/turing/engines/experiment/manager/mocks"
-	plugin "github.com/gojek/turing/engines/experiment/plugin/inproc"
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
-	"github.com/gojek/turing/engines/experiment/runner"
-	mocksRunner "github.com/gojek/turing/engines/experiment/runner/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	mocksManager "github.com/caraml-dev/turing/engines/experiment/manager/mocks"
+	plugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
+	managerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/manager"
+	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	mocksRunner "github.com/caraml-dev/turing/engines/experiment/runner/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

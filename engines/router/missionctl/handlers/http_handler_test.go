@@ -16,12 +16,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/gojek/turing/engines/router/missionctl"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/experiment"
-	mchttp "github.com/gojek/turing/engines/router/missionctl/http"
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 )
 
 // testBody is a simple struct with a string, for testing json payload in requests

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
 var managersLock sync.Mutex

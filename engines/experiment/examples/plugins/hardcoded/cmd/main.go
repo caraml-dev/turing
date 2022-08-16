@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/gojek/turing/engines/experiment/examples/plugins/hardcoded"
-	"github.com/gojek/turing/engines/experiment/log"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded"
+	"github.com/caraml-dev/turing/engines/experiment/log"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	"github.com/hashicorp/go-hclog"
 )
 

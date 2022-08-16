@@ -1,11 +1,11 @@
 package experiment
 
 import (
-	"github.com/gojek/turing/engines/experiment/config"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/plugin/inproc"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc"
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/config"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 )

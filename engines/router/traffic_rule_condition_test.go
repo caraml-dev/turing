@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gojek/turing/engines/experiment/pkg/request"
-	"github.com/gojek/turing/engines/router"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/router"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

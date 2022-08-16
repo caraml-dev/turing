@@ -3,7 +3,7 @@ package hardcoded
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
 type ExperimentManager struct {

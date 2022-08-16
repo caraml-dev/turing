@@ -10,15 +10,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/caraml-dev/turing/api/turing/api"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/server"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/api"
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/server"
-	"github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/gorilla/mux"
 
-	"github.com/gojek/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/stretchr/testify/assert"
 )
 

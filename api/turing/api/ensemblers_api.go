@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/caraml-dev/turing/api/turing/api/request"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/api/request"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 type EnsemblersController struct {

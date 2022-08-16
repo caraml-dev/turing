@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/tracing"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
 	"github.com/opentracing/opentracing-go"
 )
 

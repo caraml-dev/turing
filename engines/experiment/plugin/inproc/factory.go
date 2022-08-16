@@ -3,12 +3,12 @@ package inproc
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/config"
+	"github.com/caraml-dev/turing/engines/experiment/config"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	managerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/manager"
-	runnerPlugin "github.com/gojek/turing/engines/experiment/plugin/inproc/runner"
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	managerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/manager"
+	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 // EngineFactory implements experiment.EngineFactory and creates experiment manager/runner

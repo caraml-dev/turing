@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 // rpcClient implements ConfigurableExperimentRunner interface

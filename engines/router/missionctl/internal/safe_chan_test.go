@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gojek/turing/engines/router/missionctl/internal"
+	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 )
 
 func TestSafeChan_Simple(t *testing.T) {

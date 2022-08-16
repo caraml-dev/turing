@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/imagebuilder"
+	imagebuildermock "github.com/caraml-dev/turing/api/turing/imagebuilder/mocks"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	servicemock "github.com/caraml-dev/turing/api/turing/service/mocks"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/imagebuilder"
-	imagebuildermock "github.com/gojek/turing/api/turing/imagebuilder/mocks"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
-	servicemock "github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/stretchr/testify/mock"
 )
 

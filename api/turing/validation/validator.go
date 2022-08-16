@@ -6,13 +6,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gojek/turing/engines/router"
+	"github.com/caraml-dev/turing/engines/router"
 
+	"github.com/caraml-dev/turing/api/turing/api/request"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
-	"github.com/gojek/turing/api/turing/api/request"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
 )
 
 var tableRegexString string = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"text/template"
 
-	logger "github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
+	logger "github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
 

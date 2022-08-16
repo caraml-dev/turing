@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/jinzhu/gorm"
 )
 

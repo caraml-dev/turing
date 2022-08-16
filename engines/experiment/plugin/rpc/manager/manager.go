@@ -3,8 +3,8 @@ package manager
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/plugin/rpc/shared"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 )
 
 // ConfigurableExperimentManager interface of an ExperimentManager, that can be configured

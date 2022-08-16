@@ -3,7 +3,7 @@ syntax = "proto3";
 package turing;
 
 option java_outer_classname = "TuringResultLogProto";
-option go_package = "github.com/gojek/turing";
+option go_package = "github.com/caraml-dev/turing";
 
 import "google/protobuf/timestamp.proto";
 

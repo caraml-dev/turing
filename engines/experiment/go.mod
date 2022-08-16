@@ -1,4 +1,4 @@
-module github.com/gojek/turing/engines/experiment
+module github.com/caraml-dev/turing/engines/experiment
 
 go 1.18
 

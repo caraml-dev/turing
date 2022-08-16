@@ -3,7 +3,7 @@ package cluster
 import (
 	"testing"
 
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"gotest.tools/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

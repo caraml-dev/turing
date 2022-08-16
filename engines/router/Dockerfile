@@ -11,7 +11,7 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 
-ENV PROJECT_ROOT=github.com/gojek/turing/engines/router/missionctl
+ENV PROJECT_ROOT=github.com/caraml-dev/turing/engines/router/missionctl
 
 WORKDIR /app
 COPY . .

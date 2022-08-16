@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gojek/turing/api/turing/config"
-	logger "github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/engines/experiment"
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/api/turing/config"
+	logger "github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/engines/experiment"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/patrickmn/go-cache"
 )
 

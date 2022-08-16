@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gojek/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 // All registered experiment runners.

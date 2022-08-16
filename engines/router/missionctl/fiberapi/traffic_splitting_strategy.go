@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/caraml-dev/turing/engines/router"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
-	"github.com/gojek/turing/engines/router"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/internal"
-	"github.com/gojek/turing/engines/router/missionctl/log"
 )
 
 var (

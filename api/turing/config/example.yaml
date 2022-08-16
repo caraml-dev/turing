@@ -43,9 +43,9 @@ BatchEnsemblingConfig:
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
     BaseImageRef:
-      3.7.*: ghcr.io/gojek/turing/pyfunc-ensembler-job:latest
+      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
     KanikoConfig: &kanikoConfig
-      BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
+      BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
       Image: gcr.io/kaniko-project/executor
       ImageVersion: v1.8.0
@@ -63,7 +63,7 @@ EnsemblerServiceBuilderConfig:
   ImageBuildingConfig:
     <<: *imageBuildingConfig
     BaseImageRef:
-      3.7.*: ghcr.io/gojek/turing/pyfunc-ensembler-service:latest
+      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
     KanikoConfig:
       <<: *kanikoConfig
       DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile
@@ -138,7 +138,7 @@ SparkAppConfig:
 
 # Turing router configuration
 RouterDefaults:
-  Image: ghcr.io/gojek/turing:latest
+  Image: ghcr.io/caraml-dev/turing:latest
   FiberDebugLogEnabled: false
   CustomMetricsEnabled: false
   JaegerEnabled: false

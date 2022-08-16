@@ -3,7 +3,7 @@ package models
 import (
 	"testing"
 
-	routercfg "github.com/gojek/turing/engines/router/missionctl/config"
+	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/utils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
 	fiberconfig "github.com/gojek/fiber/config"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/utils"
-	"github.com/gojek/turing/engines/router/missionctl/fiberapi"
 	corev1 "k8s.io/api/core/v1"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

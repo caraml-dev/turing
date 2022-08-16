@@ -3,7 +3,7 @@ package cluster
 import (
 	"testing"
 
-	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"gotest.tools/assert"
 	networking "istio.io/api/networking/v1beta1"
 	"istio.io/client-go/pkg/apis/networking/v1beta1"

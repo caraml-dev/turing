@@ -10,10 +10,10 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 
-	"github.com/gojek/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/config"
 
-	"github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"github.com/xanzy/go-gitlab"
 	"gopkg.in/yaml.v2"

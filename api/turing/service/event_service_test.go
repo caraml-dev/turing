@@ -5,8 +5,8 @@ package service
 import (
 	"testing"
 
-	"github.com/gojek/turing/api/turing/database"
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )

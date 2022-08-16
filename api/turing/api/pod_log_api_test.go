@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/turing/api/turing/batch"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
-	openapi "github.com/gojek/turing/api/turing/generated"
-	"github.com/gojek/turing/api/turing/internal/ref"
-	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/batch"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/internal/ref"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/validation"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service/mocks"
 )
 
 func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {

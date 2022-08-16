@@ -19,10 +19,10 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 var (

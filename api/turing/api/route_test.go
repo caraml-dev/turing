@@ -24,7 +24,7 @@ func TestRoute_Name(t *testing.T) {
 				path:    "/projects/{project_id}/entities",
 				handler: mockHandler,
 			},
-			expected: "github.com/gojek/turing/api/turing/api.mockHandler",
+			expected: "github.com/caraml-dev/turing/api/turing/api.mockHandler",
 		},
 		"success | override handler name": {
 			route: Route{
@@ -41,7 +41,7 @@ func TestRoute_Name(t *testing.T) {
 				path:    "/projects/{project_id}/entities",
 				handler: ctrl.ListRouters,
 			},
-			expected: "github.com/gojek/turing/api/turing/api.RoutersController.ListRouters-fm",
+			expected: "github.com/caraml-dev/turing/api/turing/api.RoutersController.ListRouters-fm",
 		},
 		"success | nil handler": {
 			route: Route{

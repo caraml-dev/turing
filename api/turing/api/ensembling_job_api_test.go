@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/batch"
+	"github.com/caraml-dev/turing/api/turing/batch"
 
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/internal/ref"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/validation"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	openapi "github.com/gojek/turing/api/turing/generated"
-	"github.com/gojek/turing/api/turing/internal/ref"
-	"github.com/gojek/turing/api/turing/models"
-	"github.com/gojek/turing/api/turing/service"
-	"github.com/gojek/turing/api/turing/service/mocks"
-	"github.com/gojek/turing/api/turing/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

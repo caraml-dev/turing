@@ -8,7 +8,7 @@ Turing: ML Experimentation System
 
 ## Introduction
 
-This Helm chart installs [Turing](https://github.com/gojek/turing) and all its dependencies in a Kubernetes cluster.
+This Helm chart installs [Turing](https://github.com/caraml-dev/turing) and all its dependencies in a Kubernetes cluster.
 
 ## Prerequisites
 
@@ -22,11 +22,11 @@ but it's possible it works with earlier k8s versions too
 - **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
 - **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
 
-It's recommended to use [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
+It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
 
-Configuration and installation of [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
-is out of scope of this README, please refer to [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
+Configuration and installation of [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md)
+is out of scope of this README, please refer to [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md)
 for installation instructions.
 
 ## Installation
@@ -87,7 +87,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
-| turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
+| turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
 | turing.experimentEngines | list | `[]` | Turing Experiment Engines configuration |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
@@ -96,7 +96,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.extraVolumeMounts | list | `[]` | Extra volume mounts to attach to Turing API server container. For example to mount the extra volume containing secrets |
 | turing.extraVolumes | list | `[]` | Extra volumes to attach to the Pod. For example, you can mount  additional secrets to these volumes |
 | turing.image.registry | string | `"ghcr.io"` | Docker registry for Turing API image. User is required to override the registry for now as there is no publicly available Turing image |
-| turing.image.repository | string | `"gojek/turing"` | Docker image repository for Turing API |
+| turing.image.repository | string | `"caraml-dev/turing"` | Docker image repository for Turing API |
 | turing.image.tag | string | `"v1.6.0"` | Docker image tag for Turing API |
 | turing.ingress.class | string | `""` | Ingress class annotation to add to this Ingress rule,  useful when there are multiple ingress controllers installed |
 | turing.ingress.enabled | bool | `false` | Enable ingress to provision Ingress resource for external access to Turing API |
@@ -109,4 +109,4 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.resources | object | `{}` | Resources requests and limits for Turing API. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | turing.service.externalPort | int | `8080` | Turing API Kubernetes service port number |
 | turing.service.internalPort | int | `8080` | Turing API container port number |
-| turing.uiConfig | object | computed value | Turing UI configuration. Please Refer to https://github.com/gojek/turing/blob/main/ui/public/app.config.js for the detailed explanation on Turing UI config options |
+| turing.uiConfig | object | computed value | Turing UI configuration. Please Refer to https://github.com/caraml-dev/turing/blob/main/ui/public/app.config.js for the detailed explanation on Turing UI config options |

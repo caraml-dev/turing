@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 )
 
 type ctxKey string

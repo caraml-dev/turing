@@ -68,7 +68,7 @@ Download Turing source code to your local filesystem. From here onwards
 the environment variable `$TURING` will refer to the root directory
 for the Turing source code.
 ```bash
-git clone https://github.com/gojek/turing.git
+git clone https://github.com/caraml-dev/turing.git
 export TURING=$PWD/turing
 ```
 
@@ -190,9 +190,9 @@ BatchEnsemblingConfig:
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
     BaseImageRef:
-      3.7.*: ghcr.io/gojek/turing/pyfunc-ensembler-job:latest
+      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
     KanikoConfig:
-      BuildContextURI: git://github.com/gojek/turing.git#refs/heads/main
+      BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
       Image: gcr.io/kaniko-project/executor
       ImageVersion: v1.6.0

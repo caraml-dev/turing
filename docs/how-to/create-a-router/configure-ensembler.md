@@ -58,7 +58,7 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 
 ## Pyfunc Ensembler
 Turing will deploy a previously registered pyfunc ensembler (refer to 
-[the samples](https://github.com/gojek/turing/tree/main/sdk/samples) in the SDK section for more information on how to 
+[the samples](https://github.com/caraml-dev/turing/tree/main/sdk/samples) in the SDK section for more information on how to 
 deploy one) as a containerised web service. 
 
 This allows you to simply define the logic required for the ensembling 

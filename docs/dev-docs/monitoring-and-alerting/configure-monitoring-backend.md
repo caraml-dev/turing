@@ -18,7 +18,7 @@ Users are also free to publish their own custom metrics from the Enricher / Ense
 
 ### Configuring the Monitoring URL on Turing
 
-Once the required dashboard has been created using the Prometheus metrics and other data, the template string `RouterDefaults.MonitoringURLFormat` can be used to configure the monitoring URL, when deploying the Turing application (please refer to the [sample Helm values file](https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml) for an example). This URL will be used by Turing when creating / editing a router and subsequently, in the Turing UI as a navigation link to the dashboard.
+Once the required dashboard has been created using the Prometheus metrics and other data, the template string `RouterDefaults.MonitoringURLFormat` can be used to configure the monitoring URL, when deploying the Turing application (please refer to the [sample Helm values file](https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml) for an example). This URL will be used by Turing when creating / editing a router and subsequently, in the Turing UI as a navigation link to the dashboard.
 
 ## Monitoring Batch Ensemblers
 

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/gojek/turing/engines/router/missionctl/server"
+import "github.com/caraml-dev/turing/engines/router/missionctl/server"
 
 func main() {
 	server.Run()

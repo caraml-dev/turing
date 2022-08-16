@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/jinzhu/gorm"
 )
 

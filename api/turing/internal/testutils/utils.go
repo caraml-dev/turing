@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gojek/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	openapi "github.com/gojek/turing/api/turing/generated"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )

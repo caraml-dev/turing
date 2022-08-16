@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	tu "github.com/gojek/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/turing/engines/router/missionctl/log"
-	"github.com/gojek/turing/engines/router/missionctl/turingctx"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/stretchr/testify/assert"
 )
 

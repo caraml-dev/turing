@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/service"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
+	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/cluster/servicebuilder"
-	"github.com/gojek/turing/api/turing/models"
 )
 
 type PodLogController struct {

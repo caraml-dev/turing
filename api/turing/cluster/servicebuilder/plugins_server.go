@@ -3,9 +3,9 @@ package servicebuilder
 import (
 	"fmt"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/turing/api/turing/cluster"
-	"github.com/gojek/turing/api/turing/models"
 	v1 "k8s.io/api/core/v1"
 )
 

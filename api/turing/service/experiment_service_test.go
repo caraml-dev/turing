@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gojek/turing/engines/experiment/manager"
-	"github.com/gojek/turing/engines/experiment/manager/mocks"
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/manager/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 var standardExperimentManagerConfig = manager.Engine{Type: manager.StandardExperimentManagerType}

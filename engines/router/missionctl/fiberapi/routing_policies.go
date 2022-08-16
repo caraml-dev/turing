@@ -3,9 +3,9 @@ package fiberapi
 import (
 	"encoding/json"
 
-	"github.com/gojek/turing/engines/experiment/runner"
-	"github.com/gojek/turing/engines/router/missionctl/errors"
-	"github.com/gojek/turing/engines/router/missionctl/experiment"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 )
 
 // ****************************************************************************

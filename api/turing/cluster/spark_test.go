@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
-	"github.com/gojek/turing/api/turing/batch"
-	"github.com/gojek/turing/api/turing/config"
-	openapi "github.com/gojek/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/batch"
+	"github.com/caraml-dev/turing/api/turing/config"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/stretchr/testify/assert"
 	apicorev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

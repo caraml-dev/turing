@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"github.com/gojek/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 type ExperimentManagerType string

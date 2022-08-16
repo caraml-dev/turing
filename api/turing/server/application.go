@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/api"
+	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/middleware"
+	"github.com/caraml-dev/turing/api/turing/vault"
 	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gojek/turing/api/turing/api"
-	batchrunner "github.com/gojek/turing/api/turing/batch/runner"
-	"github.com/gojek/turing/api/turing/config"
-	"github.com/gojek/turing/api/turing/database"
-	"github.com/gojek/turing/api/turing/log"
-	"github.com/gojek/turing/api/turing/middleware"
-	"github.com/gojek/turing/api/turing/vault"
 	"github.com/gorilla/mux"
 )
 

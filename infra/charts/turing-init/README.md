@@ -7,7 +7,7 @@ A Helm chart for Kubernetes
 
 ## Introduction
 
-This Helm chart installs the infrastructure components [Turing](https://github.com/gojek/turing) requires.
+This Helm chart installs the infrastructure components [Turing](https://github.com/caraml-dev/turing) requires.
 
 ## Installation
 
@@ -53,7 +53,7 @@ The following table lists the configurable parameters of the Turing chart and th
 |-----|------|---------|-------------|
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io/"` | Docker registry for Turing cluster init |
-| image.repository | string | `"gojek/turing/cluster-init"` | Docker image repository for Turing cluster init |
+| image.repository | string | `"caraml-dev/turing/cluster-init"` | Docker image repository for Turing cluster init |
 | image.tag | string | `"latest"` | Docker image tag for Turing cluster init |
 | istio.operatorConfig | object | `{"apiVersion":"install.istio.io/v1alpha1","kind":"IstioOperator","spec":{"components":{"ingressGateways":[{"enabled":true,"k8s":{"service":{"ports":[{"name":"status-port","port":15020},{"name":"http2","port":80},{"name":"https","port":443},{"name":"http2-knative","port":8081}],"type":"LoadBalancer"}},"name":"istio-ingressgateway"}]},"values":{"gateways":{"istio-ingressgateway":{"runAsRoot":true}},"global":{"proxy":{"autoInject":"disabled"}}}}}` | istio operator config, defaults are the minimum to run turing, see https://istio.io/v1.9/docs/reference/config/istio.operator.v1alpha1/ |
 | istio.version | string | `"1.12.5"` | Istio version to use |

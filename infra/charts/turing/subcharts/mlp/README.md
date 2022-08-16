@@ -8,7 +8,7 @@ MLP API
 
 ## Introduction
 
-This Helm chart installs [Turing](https://github.com/gojek/turing) and all its dependencies in a Kubernetes cluster.
+This Helm chart installs [Turing](https://github.com/caraml-dev/turing) and all its dependencies in a Kubernetes cluster.
 
 ## Prerequisites
 
@@ -22,11 +22,11 @@ but it's possible it works with earlier k8s versions too
 - **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
 - **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
 
-It's recommended to use [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
+It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
 
-Configuration and installation of [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
-is out of scope of this README, please refer to [turing/turing-init](https://github.com/gojek/turing/blob/main/infra/charts/turing-init/README.md)
+Configuration and installation of [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md)
+is out of scope of this README, please refer to [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md)
 for installation instructions.
 
 ## Installation
@@ -73,7 +73,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | dbMigrations.image.tag | string | `"v4.7.1"` |  |
 | docs[0].href | string | `"https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"` |  |
 | docs[0].label | string | `"Merlin User Guide"` |  |
-| docs[1].href | string | `"https://github.com/gojek/turing"` |  |
+| docs[1].href | string | `"https://github.com/caraml-dev/turing"` |  |
 | docs[1].label | string | `"Turing User Guide"` |  |
 | docs[2].href | string | `"https://docs.feast.dev/user-guide/overview"` |  |
 | docs[2].label | string | `"Feast User Guide"` |  |
