@@ -10,9 +10,9 @@ dependencies:
   version: 0.7.1
 - name: xp-management
   repository: https://turing-ml.github.io/charts
-  version: 0.1.1
+  version: 0.1.2
 - name: xp-treatment
   repository: https://turing-ml.github.io/charts
-  version: 0.1.1
-digest: sha256:c9bf9b4fd7527c27cfa3de004662328c4ff8a14fcaa8661279ce2688cbc2c786
-generated: "2022-07-27T10:24:52.509596+08:00"
+  version: 0.1.2
+digest: sha256:27de39ce5b78ef06a08945d25c1d0f75e8be9278caf2bb0324f0a5f8822ea385
+generated: "2022-08-17T15:07:41.013431+08:00"

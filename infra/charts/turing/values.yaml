@@ -307,7 +307,7 @@ merlin:
         executor_cpu_request: "2"
         executor_memory_request: "2Gi"
 
-xpManagement:
+xp-management:
   # -- Postgresql configuration to be applied to XP Management Service Postgresql database deployment
   # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
   postgresql:

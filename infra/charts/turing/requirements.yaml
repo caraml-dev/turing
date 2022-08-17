@@ -15,12 +15,12 @@ dependencies:
     tags:
       - mlp
   - name: xp-management
-    version: 0.1.1
+    version: 0.1.2
     repository: https://turing-ml.github.io/charts
     tags:
       - mlp
   - name: xp-treatment
-    version: 0.1.1
+    version: 0.1.2
     repository: https://turing-ml.github.io/charts
     tags:
       - mlp
