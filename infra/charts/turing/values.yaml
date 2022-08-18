@@ -101,7 +101,21 @@ turing:
     useInClusterConfig: false
 
   # -- Turing Experiment Engines configuration
-  experimentEngines: []
+  experimentEngines:
+    - name: xp
+      type: rpc-plugin
+      rpcPlugin:
+        image: ghcr.io/caraml-dev/xp/turing-plugin:latest
+      options:
+        base_url: http://xp-management/v1
+        home_page_url: http://turing/projects/{{projectId}}/experiments
+        runner_defaults:
+          endpoint: http://xp-treatment/v1
+          timeout: 5s
+        remote_ui:
+          name: xp
+          url: http://xp-management/remoteEntry.js
+          config: http://xp-management/app.config.js
   # Example:
   # - name: my-exp-engine
   #   type: rpc-plugin
@@ -335,5 +349,7 @@ global:
 tags:
   # -- Specifies if the necessary MLP components needs to be installed together with Turing
   mlp: true
+  # -- Specifies if the default MLP Experiment Engine XP needs to be installed together with Turing
+  xp: true
   # -- Specifies if Postgresql database needs to be installed together with Turing
   db: true

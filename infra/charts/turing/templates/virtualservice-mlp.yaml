@@ -59,18 +59,6 @@ spec:
               number: 8080
     - match:
         - uri:
-            prefix: "/api/xp/"
-        - uri:
-            prefix: "/api/xp"
-      rewrite:
-        uri: "/"
-      route:
-        - destination:
-            host: {{ template "turing.xpManagement.name" . }}
-            port:
-              number: 8080
-    - match:
-        - uri:
             prefix: "/api/"
         - uri:
             prefix: "/api"
@@ -107,7 +95,7 @@ spec:
               number: 8080
     - match:
         - uri:
-            prefix: "/xp-treatment"
+            prefix: "/api/xp-treatment"
       route:
         - destination:
             host: {{ template "turing.xpTreatment.name" . }}

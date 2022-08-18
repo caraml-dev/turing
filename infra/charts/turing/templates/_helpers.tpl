@@ -195,12 +195,14 @@ Sentry:
 {{ if .Values.turing.experimentEngines }}
 Experiment:
 {{ range $expEngine := .Values.turing.experimentEngines }}
+{{ if or (and (eq (toString $expEngine.name) "xp") (.Values).tags.xp ) (ne (toString $expEngine.name) "xp") }}
   {{ $expEngine.name }}:
 {{ if $expEngine.options }}
 {{ toYaml $expEngine.options | indent 4 }}
 {{ end }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
     plugin_binary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
+{{ end }}
 {{ end }}
 {{ end }}
 RouterDefaults:
