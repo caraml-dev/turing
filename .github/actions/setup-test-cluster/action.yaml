@@ -50,6 +50,10 @@ inputs:
     required: true
     description: 'Endpoint of local registry'
     default: ''
+  xp_image:
+    required: true
+    description: 'XP experiment engine image'
+    default: ''
   cluster_init_version:
     required: true
     description: 'Version of cluster to install, tar file has to follow naming - cluster-init.(CLUSTER_INIT_VERSION).tar '
@@ -91,6 +95,7 @@ runs:
         knative_version: ${{ inputs.knative_version }}
         knative_istio_version: ${{ inputs.knative_istio_version }}
         local_registry: ${{ inputs.local_registry }}
+        xp_image: ${{ inputs.xp_image }}
         cluster_init_version: ${{ inputs.cluster_init_version }}
 
     - name: Publish Turing images to local registry
@@ -174,7 +179,8 @@ runs:
           --set turing.image.repository=${{ github.repository }}/turing-api \
           --set turing.image.tag=${{ env.TURING_API_VERSION }} \
           --set turing.config.RouterDefaults.Image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-          --set turing.experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+          --set turing.experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }} \
+          --set turing.experimentEngines[1].rpcPlugin.image=${{ inputs.XP_IMAGE }}:${{ env.XP_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: Install mockserver
       shell: bash
@@ -189,8 +195,10 @@ runs:
           deployment/mockserver,
           deployment/turing-mlp,
           deployment/turing-merlin,
+          deployment/turing-xp-management,
+          deployment/turing-xp-treatment,
           deployment/turing
-        timeout: 600 # seconds
+        timeout: 1200 # seconds
         max-restarts: -1
 
     - name: Setup MLP project

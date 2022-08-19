@@ -107,15 +107,15 @@ turing:
       rpcPlugin:
         image: ghcr.io/caraml-dev/xp/turing-plugin:latest
       options:
-        base_url: http://xp-management/v1
+        base_url: http://turing-xp-management/v1
         home_page_url: http://turing/projects/{{projectId}}/experiments
         runner_defaults:
-          endpoint: http://xp-treatment/v1
+          endpoint: http://turing-xp-treatment/v1
           timeout: 5s
         remote_ui:
           name: xp
-          url: http://xp-management/remoteEntry.js
-          config: http://xp-management/app.config.js
+          url: http://turing-xp-management/remoteEntry.js
+          config: http://turing-xp-management/app.config.js
   # Example:
   # - name: my-exp-engine
   #   type: rpc-plugin

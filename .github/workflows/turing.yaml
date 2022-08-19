@@ -45,6 +45,8 @@ env:
   KNATIVE_VERSION: v0.18.3
   KNATIVE_ISTIO_VERSION: v0.18.1
   LOCAL_REGISTRY: registry.localhost:5000
+  XP_IMAGE: ghcr.io/caraml-dev/xp/turing-plugin
+  XP_VERSION: v0.7.0-build.12-2d4c494
 
 jobs:
   build-api:
@@ -331,6 +333,7 @@ jobs:
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
       TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
+      XP_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ env.XP_VERSION }}
     needs:
       - build-api
       - build-router
@@ -369,6 +372,7 @@ jobs:
           knative_version: ${{ env.KNATIVE_VERSION }}
           knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
           local_registry: ${{ env.LOCAL_REGISTRY }}
+          xp_image: ${{ env.XP_IMAGE }}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Setup Python
