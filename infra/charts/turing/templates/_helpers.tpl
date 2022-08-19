@@ -231,7 +231,7 @@ OpenapiConfig:
 Experiment:
 # Add all configured Experiment Engines
 {{ range $expEngine := $mergedConfig.Experiment }}
-{{ if eq (toString $expEngine.name) "xp" }}
+{{ if eq (toString ($expEngine).name) "xp" }}
 {{ $c := "true" }}
 {{ end }}
   {{ $expEngine }}
@@ -239,12 +239,12 @@ Experiment:
 # Add XP Experiment Engine if it is enabled but overwritten by .Values.turing.config previously
 {{ if and (eq $c "false") (.Values).tags.xp }}
 {{ range $expEngine := .Values.turing.experimentEngines }}
-{{ if eq (toString $expEngine.name) "xp" }}
-  {{ $expEngine.name }}:
-{{ if $expEngine.options }}
-{{ toYaml $expEngine.options | indent 4 }}
+{{ if eq (toString ($expEngine).name) "xp" }}
+  {{ ($expEngine).name }}:
+{{ if ($expEngine).options }}
+{{ toYaml ($expEngine).options | indent 4 }}
 {{ end }}
-{{ if eq (toString $expEngine.type) "rpc-plugin" }}
+{{ if eq (toString ($expEngine).type) "rpc-plugin" }}
     plugin_binary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
 {{ end }}
 {{ end }}
