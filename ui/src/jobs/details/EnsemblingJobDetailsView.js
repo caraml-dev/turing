@@ -5,11 +5,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate,
 } from "@elastic/eui";
 import React, { Fragment } from "react";
 import { PageTitle } from "../../components/page/PageTitle";
@@ -31,47 +28,44 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <PageTitle
-                  icon="sqlApp"
-                  iconSize="l"
-                  size="s"
-                  title={jobDetails.name}
-                  prepend={
-                    <StatusBadge
-                      status={JobStatus.fromValue(jobDetails.status)}
-                    />
-                  }
-                />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
-
+    <EuiPageTemplate restrictWidth="95%">
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                icon="sqlApp"
+                title={jobDetails.name}
+                prepend={
+                  <StatusBadge
+                    status={JobStatus.fromValue(jobDetails.status)}
+                  />
+                }
+              />
+            }
+          >
             <EnsemblingJobDetailsPageHeader job={jobDetails} {...props} />
 
             <EuiSpacer size="xs" />
 
             <EnsemblingJobDetailsPageNavigation job={jobDetails} {...props} />
 
-            <EuiSpacer size="m" />
-
+          </EuiPageTemplate.Header>
+          <EuiPageTemplate.Section color={"transparent"}>
             <Router>
               <Redirect from="/" to="details" noThrow />
               <EnsemblingJobConfigView path="details" job={jobDetails} />
@@ -80,9 +74,9 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
-          </Fragment>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
+    </EuiPageTemplate>
   );
 };

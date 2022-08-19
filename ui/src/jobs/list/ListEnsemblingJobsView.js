@@ -1,13 +1,10 @@
 import { useTuringApi } from "../../hooks/useTuringApi";
 import {
   EuiButton,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiPanel
 } from "@elastic/eui";
-import { PageTitle } from "../../components/page/PageTitle";
+// import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
@@ -78,19 +75,19 @@ export const ListEnsemblingJobsView = (props) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <PageTitle title="Ensembling Jobs" />
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButton fill disabled href={"jobs/create"}>
-              Submit Job
-            </EuiButton>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+    <EuiPageTemplate restrictWidth="95%">
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        iconType={"graphApp"}
+        pageTitle={"Ensembling Jobs"}
+        rightSideItems={[
+          <EuiButton fill disabled href={"jobs/create"}>
+            Submit Job
+          </EuiButton>,
+        ]}
+      />
+      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+        <EuiPanel>
           <ListEnsemblingJobsTable
             {...results}
             isLoaded={isLoaded}
@@ -102,8 +99,8 @@ export const ListEnsemblingJobsView = (props) => {
             onRowClick={onRowClick}
             {...props}
           />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { EuiBadge, EuiComment } from "@elastic/eui";
+import { EuiBadge, EuiComment, EuiCommentList } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
 import { Status } from "../../../services/status/Status";
 import PulseLoader from "react-spinners/PulseLoader";
@@ -19,33 +19,36 @@ export const EventsList = ({ events, status }) => {
       case "error":
         return "alert";
       default:
-        return undefined;
+        return "dot";
     }
   };
 
   return (
     <Fragment>
-      {events.map((event, idx) => (
-        <EuiComment
-          key={`event-${idx}`}
-          username={badge(event)}
-          timelineIcon={timelineIcon(event)}
-          type="update"
-          timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
-          <ExpandableContainer
-            maxCollapsedHeight={43}
-            toggleKind="text"
-            isScrollable={false}>
-            <span className="activityLogEvent">{event.message}</span>
-          </ExpandableContainer>
-        </EuiComment>
-      ))}
-      {status === Status.PENDING && (
-        <EuiComment
-          username={<PulseLoader size={6} color={infoColor} />}
-          type="update"
-        />
-      )}
+      <EuiCommentList>
+        {events.map((event, idx) => (
+          <EuiComment
+            key={`event-${idx}`}
+            username={badge(event)}
+            timelineAvatarAriaLabel="System"
+            timelineAvatar={timelineIcon(event)}
+            type="update"
+            timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
+            <ExpandableContainer
+              maxCollapsedHeight={43}
+              toggleKind="text"
+              isScrollable={false}>
+              <span className="activityLogEvent">{event.message}</span>
+            </ExpandableContainer>
+          </EuiComment>
+        ))}
+        {status === Status.PENDING && (
+          <EuiComment
+            username={<PulseLoader size={6} color={infoColor} />}
+            type="update"
+          />
+        )}
+      </EuiCommentList>
     </Fragment>
   );
 };

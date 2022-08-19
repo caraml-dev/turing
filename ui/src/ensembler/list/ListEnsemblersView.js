@@ -1,14 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-} from "@elastic/eui";
-import { PageTitle } from "../../components/page/PageTitle";
+import { EuiPageTemplate, EuiPanel } from "@elastic/eui";
+// import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
@@ -72,14 +66,14 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <PageTitle title="Ensemblers" />
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+    <EuiPageTemplate restrictWidth="95%">
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        iconType={"graphApp"}
+        pageTitle={"Ensemblers"}
+      />
+      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+        <EuiPanel>
           <ListEnsemblersTable
             {...results}
             isLoaded={isLoaded}
@@ -91,8 +85,8 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
             onRowClick={onRowClick}
             {...props}
           />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

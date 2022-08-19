@@ -4,11 +4,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate
 } from "@elastic/eui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
@@ -59,36 +56,37 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [routerDetails, setRouter]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <PageTitle
-                  title={router.name}
-                  prepend={<StatusBadge status={router.status} />}
-                />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
+    <EuiPageTemplate restrictWidth="95%">
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                title={router.name}
+                prepend={<StatusBadge status={router.status} />}
+              />
+            }
+          >
+          <RouterDetailsPageHeader router={router} />
+          </EuiPageTemplate.Header>
 
-            <RouterDetailsPageHeader router={router} />
+          <EuiPageTemplate.Section color={"transparent"}>
             {!(props["*"] === "edit" || props["*"] === "alerts/edit") && (
               <Fragment>
-                <EuiSpacer size="xs" />
                 <RouterActions
                   onEditRouter={() => props.navigate("./edit")}
                   onDeploySuccess={fetchRouterDetails}
@@ -126,9 +124,9 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
-          </Fragment>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
+    </EuiPageTemplate>
   );
 };

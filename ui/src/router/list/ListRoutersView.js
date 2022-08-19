@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
 import {
   EuiButton,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiPanel
 } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
-import { PageTitle } from "../../components/page/PageTitle";
 
 export const ListRoutersView = ({ projectId, ...props }) => {
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -26,27 +22,27 @@ export const ListRoutersView = ({ projectId, ...props }) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <PageTitle title="Routers" />
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButton onClick={() => props.navigate("./create")} fill>
-              Create Router
-            </EuiButton>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+    <EuiPageTemplate restrictWidth="95%">
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        iconType={"graphApp"}
+        pageTitle={"Routers"}
+        rightSideItems={[
+          <EuiButton onClick={() => props.navigate("./create")} fill>
+            Create Router
+          </EuiButton>,
+        ]}
+      />
+      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+        <EuiPanel>
           <ListRoutersTable
             isLoaded={isLoaded}
             items={data}
             error={error}
             onRowClick={onRowClick}
           />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };
