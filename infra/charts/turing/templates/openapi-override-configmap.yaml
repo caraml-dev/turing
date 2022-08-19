@@ -8,5 +8,5 @@ metadata:
 {{ include "turing.labels" . | indent 4 }}
 data:
   override.yaml: |
-    {{- toYaml .Values.turing.openApiSpecOverrides | nindent 4 -}}
+    {{- include "turing.finalOpenApiSpecOverrides" . | nindent 4 }}
 {{- end }}

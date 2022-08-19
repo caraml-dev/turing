@@ -220,9 +220,83 @@ OpenapiConfig:
 {{- end -}}
 {{- end -}}
 
-{{- define "turing.config" -}}
+{{- define "turing.mergedConfig" -}}
 {{- $defaultConfig := include "turing.defaultConfig" . | fromYaml -}}
-{{ .Values.turing.config | merge $defaultConfig | toYaml }}
+{{ $defaultConfig | merge .Values.turing.config | toYaml }}
+{{- end -}}
+
+{{- define "turing.experimentEngines" -}}
+{{- $mergedConfig := include "turing.mergedConfig" . | fromYaml -}}
+{{ $c := "false" }}
+Experiment:
+# Add all configured Experiment Engines
+{{ range $expEngine := $mergedConfig.Experiment }}
+{{ if eq (toString $expEngine.name) "xp" }}
+{{ $c := "true" }}
+{{ end }}
+  {{ $expEngine }}
+{{ end }}
+# Add XP Experiment Engine if it is enabled but overwritten by .Values.turing.config previously
+{{ if and (eq $c "false") (.Values).tags.xp }}
+{{ range $expEngine := .Values.turing.experimentEngines }}
+{{ if eq (toString $expEngine.name) "xp" }}
+  {{ $expEngine.name }}:
+{{ if $expEngine.options }}
+{{ toYaml $expEngine.options | indent 4 }}
+{{ end }}
+{{ if eq (toString $expEngine.type) "rpc-plugin" }}
+    plugin_binary: {{ include "turing.plugins.directory" . }}/{{ $expEngine.name }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{- end -}}
+
+{{- define "turing.config" -}}
+{{- $mergedConfig := include "turing.mergedConfig" . | fromYaml -}}
+{{- $experimentEngines := include "turing.experimentEngines" . | fromYaml -}}
+{{ $mergedConfig | merge $experimentEngines | toYaml }}
+{{- end -}}
+
+{{- define "turing.defaultOpenApiSpecOverrides" -}}
+{{ if (.Values).tags.xp }}
+components:
+  schemas:
+    ExperimentEngineType:
+      enum:
+      - xp
+{{ end }}
+{{- end -}}
+
+{{- define "turing.mergedOpenApiSpecOverrides" -}}
+{{- $defaultOpenApiSpecOverrides := include "turing.defaultOpenApiSpecOverrides" . | fromYaml -}}
+{{ $defaultOpenApiSpecOverrides | merge .Values.turing.openApiSpecOverrides | toYaml }}
+{{- end -}}
+
+{{- define "turing.openApiSpecOverridesEnums" -}}
+{{- $mergedOpenApiSpecOverrides := include "turing.mergedOpenApiSpecOverrides" . | fromYaml -}}
+{{- $c := "false" -}}
+components:
+  schemas:
+    ExperimentEngineType:
+      enum:
+{{- range $enum := $mergedOpenApiSpecOverrides.components.schemas.ExperimentEngineType.enum }}
+{{- if eq $enum "xp" -}}
+{{- $c := "true" -}}
+{{- end -}}
+{{- if ne (toString $enum) "xp" }}
+        - {{ $enum }}
+{{- end -}}
+{{ end }}
+{{- if and (eq $c "false") (.Values).tags.xp }}
+        - xp
+{{ end }}
+{{- end -}}
+
+{{- define "turing.finalOpenApiSpecOverrides" -}}
+{{- $mergedOpenApiSpecOverrides := include "turing.mergedOpenApiSpecOverrides" . | fromYaml -}}
+{{- $openApiSpecOverridesEnums := include "turing.openApiSpecOverridesEnums" . | fromYaml -}}
+{{ $mergedOpenApiSpecOverrides | merge $openApiSpecOverridesEnums | toYaml }}
 {{- end -}}
 
 {{- define "turing.ui.defaultConfig" -}}
