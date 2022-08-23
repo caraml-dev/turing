@@ -7,6 +7,7 @@ import {
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
+import { PageTitle } from "../../components/page/PageTitle";
 
 export const ListRoutersView = ({ projectId, ...props }) => {
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -25,8 +26,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
     <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
-        iconType={"graphApp"}
-        pageTitle={"Routers"}
+        pageTitle={<PageTitle title="Routers" />}
         rightSideItems={[
           <EuiButton onClick={() => props.navigate("./create")} fill>
             Create Router

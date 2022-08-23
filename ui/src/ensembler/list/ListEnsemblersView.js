@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { EuiPageTemplate, EuiPanel } from "@elastic/eui";
-// import { PageTitle } from "../../components/page/PageTitle";
+import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
@@ -69,8 +69,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
     <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
-        iconType={"graphApp"}
-        pageTitle={"Ensemblers"}
+        pageTitle={<PageTitle title="Ensemblers" />}
       />
       <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>

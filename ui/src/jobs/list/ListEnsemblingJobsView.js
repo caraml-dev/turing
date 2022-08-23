@@ -4,7 +4,7 @@ import {
   EuiPageTemplate,
   EuiPanel
 } from "@elastic/eui";
-// import { PageTitle } from "../../components/page/PageTitle";
+import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
@@ -78,8 +78,7 @@ export const ListEnsemblingJobsView = (props) => {
     <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
-        iconType={"graphApp"}
-        pageTitle={"Ensembling Jobs"}
+        pageTitle={<PageTitle title="Ensembling Jobs" />}
         rightSideItems={[
           <EuiButton fill disabled href={"jobs/create"}>
             Submit Job
