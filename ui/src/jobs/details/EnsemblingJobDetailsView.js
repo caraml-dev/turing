@@ -28,7 +28,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   return (
-    <EuiPageTemplate restrictWidth="95%">
+    <EuiPageTemplate restrictWidth="90%">
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={true}>
@@ -48,8 +48,8 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
             bottomBorder={false}
             pageTitle={
               <PageTitle
-                icon="sqlApp"
                 title={jobDetails.name}
+                icon={"sqlApp"}
                 prepend={
                   <StatusBadge
                     status={JobStatus.fromValue(jobDetails.status)}
@@ -65,6 +65,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
             <EnsemblingJobDetailsPageNavigation job={jobDetails} {...props} />
 
           </EuiPageTemplate.Header>
+
           <EuiPageTemplate.Section color={"transparent"}>
             <Router>
               <Redirect from="/" to="details" noThrow />

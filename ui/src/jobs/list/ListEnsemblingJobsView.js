@@ -75,7 +75,7 @@ export const ListEnsemblingJobsView = (props) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="95%">
+    <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
         iconType={"graphApp"}

@@ -22,7 +22,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="95%">
+    <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
         iconType={"graphApp"}
@@ -33,7 +33,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
           </EuiButton>,
         ]}
       />
-      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+      <EuiPageTemplate.Section  color={"transparent"}>
         <EuiPanel>
           <ListRoutersTable
             isLoaded={isLoaded}

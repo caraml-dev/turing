@@ -66,13 +66,13 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="95%">
+    <EuiPageTemplate restrictWidth="90%">
       <EuiPageTemplate.Header
         bottomBorder={false}
         iconType={"graphApp"}
         pageTitle={"Ensemblers"}
       />
-      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+      <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListEnsemblersTable
             {...results}

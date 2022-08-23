@@ -56,7 +56,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [routerDetails, setRouter]);
 
   return (
-    <EuiPageTemplate restrictWidth="95%">
+    <EuiPageTemplate restrictWidth="90%">
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={true}>
@@ -81,12 +81,11 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
               />
             }
           >
-          <RouterDetailsPageHeader router={router} />
-          </EuiPageTemplate.Header>
+            <RouterDetailsPageHeader router={router} />
 
-          <EuiPageTemplate.Section color={"transparent"}>
             {!(props["*"] === "edit" || props["*"] === "alerts/edit") && (
               <Fragment>
+                <EuiSpacer size="xs" />
                 <RouterActions
                   onEditRouter={() => props.navigate("./edit")}
                   onDeploySuccess={fetchRouterDetails}
@@ -102,8 +101,8 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
                 </RouterActions>
               </Fragment>
             )}
-            <EuiSpacer size="m" />
-
+          </EuiPageTemplate.Header>
+          <EuiPageTemplate.Section color={"transparent"}>
             <Router primary={false}>
               <Redirect from="/" to="details" noThrow />
               <RouterConfigView path="details" router={router} />

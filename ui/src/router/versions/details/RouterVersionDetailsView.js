@@ -5,11 +5,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
   EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate
 } from "@elastic/eui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
@@ -75,7 +73,7 @@ export const RouterVersionDetailsView = ({
   }, [versionDetails, setVersion]);
 
   return (
-    <EuiPage>
+    <EuiPageTemplate restrictWidth="90%">
       <EuiPageBody>
         {!hasInitiallyLoaded ? (
           <EuiFlexGroup direction="row">
@@ -92,10 +90,11 @@ export const RouterVersionDetailsView = ({
           </EuiCallOut>
         ) : (
           <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
+            <EuiPageTemplate.Header
+              bottomBorder={false}
+              pageTitle={
                 <PageTitle
-                  size="m"
+                  icon="graphApp"
                   title={
                     <Fragment>
                       Version <b>{version.version}</b>
@@ -110,40 +109,41 @@ export const RouterVersionDetailsView = ({
                     </Fragment>
                   }
                 />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
+              }
+            >
+              <VersionDetailsPageHeader version={version} />
 
-            <VersionDetailsPageHeader version={version} />
+              <EuiSpacer size="xs" />
 
-            <EuiSpacer size="xs" />
+              <RouterVersionActions
+                router={router}
+                onDeploySuccess={refreshData}
+                onDeleteSuccess={() => props.navigate("../")}>
+                {(actions) => (
+                  <RouterVersionDetailsPageNavigation
+                    version={version}
+                    actions={actions.map((action) => ({
+                      ...action,
+                      onClick: () => action.onClick(version),
+                      hidden: !action.available(version),
+                      disabled: !action.enabled(version),
+                    }))}
+                    {...props}
+                  />
+                )}
+              </RouterVersionActions>
+            </EuiPageTemplate.Header>
 
-            <RouterVersionActions
-              router={router}
-              onDeploySuccess={refreshData}
-              onDeleteSuccess={() => props.navigate("../")}>
-              {(actions) => (
-                <RouterVersionDetailsPageNavigation
-                  version={version}
-                  actions={actions.map((action) => ({
-                    ...action,
-                    onClick: () => action.onClick(version),
-                    hidden: !action.available(version),
-                    disabled: !action.enabled(version),
-                  }))}
-                  {...props}
-                />
-              )}
-            </RouterVersionActions>
-            <EuiSpacer size="m" />
-
-            <Router primary={false}>
-              <Redirect from="/" to="details" noThrow />
-              <RouterVersionConfigView path="details" config={version} />
-              <Redirect from="any" to="/error/404" default noThrow />
-            </Router>
+            <EuiPageTemplate.Section color={"transparent"}>
+              <Router primary={false}>
+                <Redirect from="/" to="details" noThrow />
+                <RouterVersionConfigView path="details" config={version} />
+                <Redirect from="any" to="/error/404" default noThrow />
+              </Router>
+            </EuiPageTemplate.Section>
           </Fragment>
         )}
       </EuiPageBody>
-    </EuiPage>
+    </EuiPageTemplate>
   );
 };
