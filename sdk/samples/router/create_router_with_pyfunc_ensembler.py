@@ -55,7 +55,10 @@ class SampleEnsembler(turing.ensembler.PyFunc):
         if "version" in input:
             return predictions[input["version"]]["data"]["value"]
         elif "Version" in kwargs["headers"]:
-            return predictions[kwargs["headers"]["Version"]]["data"]["value"]
+            if hash(kwargs["headers"]["Turing-Req-Id"]) % 2 == 0:  # If the hash of the turing request id is even
+                return predictions[kwargs["headers"]["Version"]]["data"]["value"]
+            else:
+                return 0
         else:
             return sum(
                 prediction["data"]["value"] for prediction in predictions.values()
