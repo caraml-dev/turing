@@ -12,7 +12,7 @@ Original request will be sent to configured routes without enrichment.
 ### Docker
 Turing will deploy specified Docker image as a pre-processor and will send original request to it for enrichment. 
 
-The request to the enricher is constructed from the request headers to the Router, and an identifier `turing_req_id` 
+The request to the enricher is constructed from the request headers to the Router, and an identifier `Turing-Req-Id` 
 that is uniquely assigned to each request received by the Router.
 
 To configure a Docker enricher, there are 3 sections to fill.  

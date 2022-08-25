@@ -31,7 +31,7 @@ Turing will deploy the specified image as a post-processor and will send in the 
 ensembling - the original request, responses from all routes, and the treatment configuration (if an Experiment 
 Engine is selected, in the Configure Experiment Engine step). The ensembler's request headers will contain the original 
 request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in 
-the enricher's response headers will take precedence), and an identifier `turing_req_id` that is uniquely assigned to each request received by the Router. 
+the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router. 
 
 To configure a Docker ensembler, there are 3 sections to be filled.
 
@@ -76,7 +76,7 @@ Similar to requests sent to a Docker Ensembler, the request payload sent to a Py
 original request, responses from all routes, and the treatment configuration (if an Experiment
 Engine is selected, in the Configure Experiment Engine step). The ensembler's request headers will contain the original
 request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in
-the enricher's response headers will take precedence), and an identifier `turing_req_id` that is uniquely assigned to each request received by the Router. 
+the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router. 
 
 To configure your router with a Pyfunc ensembler, simply select from the drop down list your desired ensembler, 
 registered in your current project. You'll also need to indicate your desired timeout value and resource request values:
