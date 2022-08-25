@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -14,7 +14,7 @@ func ReadFile(filepath string) ([]byte, error) {
 	}
 	defer fileObj.Close()
 	// Read contents
-	byteValue, err := ioutil.ReadAll(fileObj)
+	byteValue, err := io.ReadAll(fileObj)
 	if err != nil {
 		return nil, err
 	}

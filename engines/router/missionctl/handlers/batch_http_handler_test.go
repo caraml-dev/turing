@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -25,7 +25,7 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 
 	//Create test routes endpoint. Route will write request body as response
 	testRouterHandler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		requestBody, err := ioutil.ReadAll(request.Body)
+		requestBody, err := io.ReadAll(request.Body)
 		assert.NoError(t, err)
 		_, err = writer.Write(requestBody)
 		assert.NoError(t, err)
@@ -101,7 +101,7 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 			batchHTTPHandler.ServeHTTP(w, req)
 			res := w.Result()
 			defer res.Body.Close()
-			result, _ := ioutil.ReadAll(res.Body)
+			result, _ := io.ReadAll(res.Body)
 
 			assert.Equal(t, test.expectedStatusCode, res.StatusCode)
 			assert.Equal(t, test.expectedContentType, res.Header.Get("Content-Type"))

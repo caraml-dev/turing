@@ -3,7 +3,7 @@ package resultlog
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"testing"
 	"time"
 
@@ -33,7 +33,7 @@ func TestNewConsoleLogger(t *testing.T) {
 func TestConsoleLoggerWrite(t *testing.T) {
 	// Make test request
 	req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
-	reqBody, err := ioutil.ReadAll(req.Body)
+	reqBody, err := io.ReadAll(req.Body)
 	tu.FailOnError(t, err)
 
 	// Make test context

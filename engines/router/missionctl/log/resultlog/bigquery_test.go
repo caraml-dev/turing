@@ -3,7 +3,7 @@ package resultlog
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"path/filepath"
 	"testing"
 	"time"
@@ -102,7 +102,7 @@ func TestCheckTableSchema(t *testing.T) {
 func TestBigQueryLoggerGetData(t *testing.T) {
 	// Make test request
 	req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
-	reqBody, err := ioutil.ReadAll(req.Body)
+	reqBody, err := io.ReadAll(req.Body)
 	tu.FailOnError(t, err)
 
 	// Make test context

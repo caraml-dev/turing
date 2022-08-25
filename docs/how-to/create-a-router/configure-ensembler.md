@@ -26,7 +26,14 @@ It is not possible to select as the fallback response a route that has traffic r
 {% endhint %}
 
 ## Docker
-Turing will deploy the specified image as a post-processor and will send in the request payload the following, for ensembling - the original request, responses from all routes, and the treatment configuration (if an Experiment Engine is selected, in Configure Experiment Engine). The ensembler's request headers will contain the original request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in the enricher's response headers will take precedence). To configure a Docker ensembler, there are 3 sections to be filled.
+
+Turing will deploy the specified image as a post-processor and will send in the request payload the following, for 
+ensembling - the original request, responses from all routes, and the treatment configuration (if an Experiment 
+Engine is selected, in the Configure Experiment Engine step). The ensembler's request headers will contain the original 
+request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in 
+the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router. 
+
+To configure a Docker ensembler, there are 3 sections to be filled.
 
 Configure the Docker Container. There are 4 required inputs.
 
@@ -57,7 +64,7 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
 ## Pyfunc Ensembler
-Turing will deploy a previously registered pyfunc ensembler (refer to 
+Turing will deploy a previously registered Pyfunc ensembler (refer to 
 [the samples](https://github.com/caraml-dev/turing/tree/main/sdk/samples) in the SDK section for more information on how to 
 deploy one) as a containerised web service. 
 
@@ -65,12 +72,18 @@ This allows you to simply define the logic required for the ensembling
 step by implementing a Python `mlflow`-based interface, and rely on Turing API to containerise and package your 
 implementation as an entire web service automatically.
 
+Similar to requests sent to a Docker Ensembler, the request payload sent to a Pyfunc ensembler will contain the 
+original request, responses from all routes, and the treatment configuration (if an Experiment
+Engine is selected, in the Configure Experiment Engine step). The ensembler's request headers will contain the original
+request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in
+the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router. 
+
 To configure your router with a Pyfunc ensembler, simply select from the drop down list your desired ensembler, 
 registered in your current project. You'll also need to indicate your desired timeout value and resource request values:
 
 ![](../../.gitbook/assets/pyfunc_ensembler_config.png)
 
-**Pyfunc Ensembler**: The name of the pyfunc ensembler that has been deployed in your *current* project 
+**Pyfunc Ensembler**: The name of the Pyfunc ensembler that has been deployed in your *current* project 
 
 **Timeout**: Request timeout, which when exceeded, the request to the ensembler will be terminated
 
@@ -87,7 +100,8 @@ The router will send responses from all routes, together with treatment configur
 
 
 ## Ensembler Request Payload Format
-When the ensembler type is Docker/External, the ensembler will receive the following information in the request payload and the behaviour of the ensembler is up to the implementer.
+When the ensembler type is Docker/Pyfunc/External, the ensembler will receive the following information in the request 
+payload and the behaviour of the ensembler is up to the implementer.
 
 ```json
 {

@@ -5,11 +5,11 @@ go 1.18
 require (
 	bou.ke/monkey v1.0.2
 	cloud.google.com/go/bigquery v1.14.0
+	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/mlp v1.4.7
-	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -32,7 +32,7 @@ func (r *CachedResponse) Body() []byte {
 // a HTTP response as input
 func NewCachedResponseFromHTTP(r *http.Response) (*CachedResponse, error) {
 	// Consume response body
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
 	}

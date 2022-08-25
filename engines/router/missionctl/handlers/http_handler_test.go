@@ -192,7 +192,8 @@ func TestHTTPService(t *testing.T) {
 
 	// Check that ensembler was called with the expected headers
 	mc.AssertCalled(t, "Ensemble",
-		http.Header{"Context-Type": []string{"application/json"}, "Enricher": []string{"value"}})
+		http.Header{"Context-Type": []string{"application/json"}, "Enricher": []string{"value"},
+			"Turing-Req-Id": []string{rr.Header().Get("Turing-Req-Id")}})
 }
 
 // TestHTTPServiceBadRequest tests for a HTTP InternalServerError on bad
