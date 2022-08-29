@@ -133,7 +133,6 @@ func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value stri
 func checkTrafficRulesUniqueName(sl validator.StructLevel, fieldName string, value []string) {
 	uniqueNameDescription := "Name should be unique for set of rules in a Router."
 	if !utils.IsUniqueStrings(value) {
-		fmt.Println("FAILED")
 		sl.ReportError(value, fieldName, "trafficRuleName", uniqueNameDescription, fmt.Sprintf("%v", value))
 	}
 }
