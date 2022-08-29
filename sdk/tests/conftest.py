@@ -365,6 +365,7 @@ def generic_traffic_rule(
     generic_route,
 ):
     return turing.generated.models.TrafficRule(
+        name="generic-rule-name",
         conditions=[
             generic_header_traffic_rule_condition,
             generic_payload_traffic_rule_condition,

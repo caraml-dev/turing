@@ -103,9 +103,10 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
 
 
 @pytest.mark.parametrize(
-    "conditions,routes,expected",
+    "name,conditions,routes,expected",
     [
         pytest.param(
+            "generic-rule-name",
             [
                 HeaderTrafficRuleCondition(
                     field="x-region",
@@ -121,15 +122,16 @@ def test_create_payload_traffic_rule_condition(field, values, expected, request)
         )
     ],
 )
-def test_create_traffic_rule(conditions, routes, expected, request):
-    actual = TrafficRule(conditions=conditions, routes=routes).to_open_api()
+def test_create_traffic_rule(name, conditions, routes, expected, request):
+    actual = TrafficRule(name=name, conditions=conditions, routes=routes).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "conditions,routes,expected",
+    "name,conditions,routes,expected",
     [
         pytest.param(
+            "generic-rule-name",
             [
                 HeaderTrafficRuleCondition(
                     field="x-region",
@@ -148,6 +150,8 @@ def test_create_traffic_rule(conditions, routes, expected, request):
         )
     ],
 )
-def test_create_traffic_rule_with_duplicate_route_id(conditions, routes, expected):
+def test_create_traffic_rule_with_duplicate_route_id(
+    name, conditions, routes, expected
+):
     with pytest.raises(expected):
-        TrafficRule(conditions=conditions, routes=routes).to_open_api()
+        TrafficRule(name=name, conditions=conditions, routes=routes).to_open_api()
