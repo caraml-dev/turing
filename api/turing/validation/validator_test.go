@@ -221,8 +221,8 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 func TestValidateTrafficRules(t *testing.T) {
 	// Common variables used by suite tests
 	ruleName := "rule-name"
-	routeAID, routeBID := "route-a", "route-b"
-	routeA, routeB := &models.Route{
+	routeAID, routeBID, routeCID := "route-a", "route-b", "route-c"
+	routeA, routeB, routeC := &models.Route{
 		ID:       routeAID,
 		Type:     "PROXY",
 		Endpoint: "http://example.com/a",
@@ -231,6 +231,11 @@ func TestValidateTrafficRules(t *testing.T) {
 		ID:       routeBID,
 		Type:     "PROXY",
 		Endpoint: "http://example.com/b",
+		Timeout:  "10ms",
+	}, &models.Route{
+		ID:       routeCID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/c",
 		Timeout:  "10ms",
 	}
 
@@ -476,7 +481,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				strings.Join([]string{
 					"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 					"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
-					"and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$&:.' tag",
+					"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+					"following symbols: -_()#$&:.' tag",
 				}, " "),
 			}, "\n"),
 		},
@@ -500,7 +506,8 @@ func TestValidateTrafficRules(t *testing.T) {
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
-				"and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$&:.' tag",
+				"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+				"following symbols: -_()#$&:.' tag",
 			}, " "),
 		},
 		"failure | Invalid trailing character": {
@@ -523,7 +530,42 @@ func TestValidateTrafficRules(t *testing.T) {
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
-				"and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$&:.' tag",
+				"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+				"following symbols: -_()#$&:.' tag",
+			}, " "),
+		},
+		"failure | Non-unique Traffic Rule names": {
+			routes:         models.Routes{routeA, routeB, routeC},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "abcd",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeBID},
+				},
+				{
+					Name: "abcd",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-c"},
+						},
+					},
+					Routes: []string{routeCID},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+				"'Name should be unique for set of rules in a Router.' tag",
 			}, " "),
 		},
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 )
@@ -129,6 +130,14 @@ func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value stri
 	}
 }
 
+func checkTrafficRulesUniqueName(sl validator.StructLevel, fieldName string, value []string) {
+	uniqueNameDescription := "Name should be unique for set of rules in a Router."
+	if !utils.IsUniqueStrings(value) {
+		fmt.Println("FAILED")
+		sl.ReportError(value, fieldName, "trafficRuleName", uniqueNameDescription, fmt.Sprintf("%v", value))
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -156,9 +165,12 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate traffic rules
+	trafficRuleNames := []string{}
 	if routerConfig.TrafficRules != nil {
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
+			trafficRuleNames = append(trafficRuleNames, rule.Name)
+			checkTrafficRulesUniqueName(sl, "TrafficRule", trafficRuleNames)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
