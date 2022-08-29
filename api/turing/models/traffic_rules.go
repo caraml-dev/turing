@@ -9,6 +9,7 @@ import (
 )
 
 type TrafficRule struct {
+	Name       string                         `json:"name" validate:"required,notBlank"`
 	Conditions []*router.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
 	Routes     []string                       `json:"routes" validate:"required,notBlank"`
 }

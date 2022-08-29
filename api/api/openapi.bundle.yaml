@@ -2390,6 +2390,7 @@ components:
       type: object
     TrafficRule:
       example:
+        name: name
         routes:
         - routes
         - routes
@@ -2405,6 +2406,8 @@ components:
           - values
           operator: in
       properties:
+        name:
+          type: string
         conditions:
           items:
             $ref: '#/components/schemas/TrafficRuleCondition'
@@ -2416,6 +2419,7 @@ components:
             type: string
           type: array
       required:
+      - name
       - conditions
       - routes
       type: object

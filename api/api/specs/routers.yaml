@@ -660,9 +660,12 @@ components:
     TrafficRule:
       type: "object"
       required:
+        - name
         - conditions
         - routes
       properties:
+        name:
+          type: "string"
         conditions:
           type: "array"
           items:
