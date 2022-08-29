@@ -12,6 +12,6 @@ func TestUniqueStrings(t *testing.T) {
 
 	isUnique := IsUniqueStrings(uniqueStrings)
 	isNonUnique := IsUniqueStrings(nonUniqueStrings)
-	assert.EqualError(t, true, isUnique)
-	assert.EqualError(t, false, isNonUnique)
+	assert.Equal(t, true, isUnique)
+	assert.Equal(t, false, isNonUnique)
 }
