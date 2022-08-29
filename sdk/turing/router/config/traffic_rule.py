@@ -137,7 +137,7 @@ class TrafficRule:
     conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]
     routes: List[str]
 
-    _name: str
+    _name: str = dataclasses.field(init=False, repr=False)
     _conditions: Union[
         List[TrafficRuleCondition], List[Dict[str, List[str]]]
     ] = dataclasses.field(init=False, repr=False)
