@@ -154,6 +154,7 @@ export const newRoute = () => ({
 });
 
 export const newRule = () => ({
+  name: "",
   conditions: [],
   routes: [],
 });
