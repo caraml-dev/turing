@@ -66,7 +66,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%">
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
       <EuiPageTemplate.Header
         bottomBorder={false}
         pageTitle={<PageTitle title="Ensemblers" />}

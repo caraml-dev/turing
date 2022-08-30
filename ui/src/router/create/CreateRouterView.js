@@ -11,7 +11,7 @@ export const CreateRouterView = ({ projectId, ...props }) => {
   }, [projectId]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%">
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
       <EuiPageTemplate.Header
         bottomBorder={false}
         iconType={"graphApp"}

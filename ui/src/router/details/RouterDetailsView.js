@@ -56,7 +56,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [routerDetails, setRouter]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%">
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={true}>
@@ -102,6 +102,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
               </Fragment>
             )}
           </EuiPageTemplate.Header>
+
           <EuiPageTemplate.Section color={"transparent"}>
             <Router primary={false}>
               <Redirect from="/" to="details" noThrow />
