@@ -2,9 +2,9 @@
 @import "@elastic/eui/src/themes/amsterdam/globals";
 
 .predictionSources {
-  //.euiStepNumber--small {
-  //  background-color: $euiColorSecondary;
-  //}
+  .euiStepNumber--small {
+    background-color: $euiColorSuccess;
+  }
 
   .euiStep__content {
     margin-left: 16px;
