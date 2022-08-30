@@ -563,10 +563,8 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeCID},
 				},
 			},
-			expectedError: strings.Join([]string{
-				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
-				"'Name should be unique for set of rules in a Router.' tag",
-			}, " "),
+			expectedError: "Key: 'RouterConfig.TrafficRules' " +
+				"Error:Field validation for 'TrafficRules' failed on the 'unique' tag",
 		},
 	}
 
