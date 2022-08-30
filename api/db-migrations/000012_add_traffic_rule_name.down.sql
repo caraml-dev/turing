@@ -10,4 +10,4 @@ FROM (
         ) new_traffic_rules
     FROM
         router_versions, jsonb_array_elements(traffic_rules) as elem
-) s
+) s;

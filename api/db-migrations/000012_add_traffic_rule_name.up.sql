@@ -11,4 +11,4 @@ FROM (
         ) as new_traffic_rules
     FROM
         router_versions, jsonb_array_elements(traffic_rules) with ordinality arr(elem, position)
-) s
+) s;
