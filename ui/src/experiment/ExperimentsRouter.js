@@ -11,7 +11,7 @@ const FallbackView = ({ text }) => {
   const { appConfig } = useConfig();
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={appConfig.pageTemplate.restrictWidth} paddingSize={appConfig.pageTemplate.paddingSize}>
       <EuiPageTemplate.EmptyPrompt
         iconType={appConfig.appIcon}
         title={<h2>Experiments</h2>}

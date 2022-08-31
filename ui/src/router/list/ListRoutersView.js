@@ -8,8 +8,15 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
 import { PageTitle } from "../../components/page/PageTitle";
+import { useConfig } from "../../config";
 
 export const ListRoutersView = ({ projectId, ...props }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   const [{ data, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/routers`,
     {},
@@ -23,7 +30,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
@@ -46,6 +53,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
           />
         </EuiPanel>
       </EuiPageTemplate.Section>
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };

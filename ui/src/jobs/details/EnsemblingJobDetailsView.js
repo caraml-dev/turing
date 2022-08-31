@@ -17,8 +17,15 @@ import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
 import { EnsemblingJobLogsView } from "./logs/EnsemblingJobLogsView";
+import { useConfig } from "../../config";
 
 export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   const [{ data: jobDetails, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/jobs/${jobId}`,
     {},
@@ -28,7 +35,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
@@ -80,6 +87,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
           </EuiPageTemplate.Section>
         </Fragment>
       )}
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };

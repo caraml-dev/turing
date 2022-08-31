@@ -20,6 +20,7 @@ import { useInitiallyLoaded } from "../../../hooks/useInitiallyLoaded";
 
 import { TuringRouter } from "../../../services/router/TuringRouter";
 import { RouterVersion } from "../../../services/version/RouterVersion";
+import { useConfig } from "../../../config";
 
 export const RouterVersionDetailsView = ({
   projectId,
@@ -27,6 +28,12 @@ export const RouterVersionDetailsView = ({
   versionId,
   ...props
 }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   // Use local states to store parsed responses
   const [router, setRouter] = useState({});
   const [version, setVersion] = useState({});
@@ -72,7 +79,7 @@ export const RouterVersionDetailsView = ({
   }, [versionDetails, setVersion]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
@@ -143,6 +150,7 @@ export const RouterVersionDetailsView = ({
           </EuiPageTemplate.Section>
         </Fragment>
       )}
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };

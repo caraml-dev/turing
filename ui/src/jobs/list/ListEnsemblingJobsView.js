@@ -16,6 +16,7 @@ export const ListEnsemblingJobsView = (props) => {
   const {
     appConfig: {
       pagination: { defaultPageSize },
+      pageTemplate: { restrictWidth, paddingSize },
     },
   } = useConfig();
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
@@ -75,7 +76,7 @@ export const ListEnsemblingJobsView = (props) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
@@ -88,7 +89,7 @@ export const ListEnsemblingJobsView = (props) => {
       />
 
       <EuiSpacer size="m" />
-      <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+      <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListEnsemblingJobsTable
             {...results}
@@ -103,6 +104,7 @@ export const ListEnsemblingJobsView = (props) => {
           />
         </EuiPanel>
       </EuiPageTemplate.Section>
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };

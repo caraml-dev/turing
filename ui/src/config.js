@@ -60,6 +60,12 @@ const appConfig = {
     // Default number of tail log entries to be fetched
     defaultTailLines: 1000,
   },
+  pageTemplate: {
+    // width of page template
+    restrictWidth: "90%",
+    // padding of page template
+    paddingSize: "none",
+  },
   batchEnsemblingEnabled:
     process.env.REACT_APP_BATCH_ENSEMBLING_ENABLED === "true",
 };

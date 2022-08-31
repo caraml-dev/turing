@@ -11,6 +11,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   const {
     appConfig: {
       pagination: { defaultPageSize },
+      pageTemplate: { restrictWidth, paddingSize },
     },
   } = useConfig();
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
@@ -66,7 +67,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
@@ -89,6 +90,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
           />
         </EuiPanel>
       </EuiPageTemplate.Section>
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };

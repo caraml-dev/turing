@@ -23,8 +23,15 @@ import { HistoryView } from "../history/HistoryView";
 import { RouterLogsView } from "./logs/RouterLogsView";
 import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
 import { TuringRouter } from "../../services/router/TuringRouter";
+import { useConfig } from "../../config";
 
 export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   const [router, setRouter] = useState({});
   const [{ data: routerDetails, isLoaded, error }, fetchRouterDetails] =
     useTuringApi(
@@ -56,7 +63,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [routerDetails, setRouter]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
       <EuiSpacer size="l" />
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
@@ -129,6 +136,7 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
           </EuiPageTemplate.Section>
         </Fragment>
       )}
+      <EuiSpacer size="l" />
     </EuiPageTemplate>
   );
 };
