@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { replaceBreadcrumbs, FormContextProvider } from "@gojek/mlp-ui";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { CreateRouterForm } from "../components/form/CreateRouterForm";
-import { EuiPageTemplate } from "@elastic/eui";
+import {EuiPageTemplate, EuiSpacer} from "@elastic/eui";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
 
 export const CreateRouterView = ({ projectId, ...props }) => {
@@ -11,12 +11,15 @@ export const CreateRouterView = ({ projectId, ...props }) => {
   }, [projectId]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
         iconType={"graphApp"}
         pageTitle="Create Router"
       />
+
+      <EuiSpacer size="m" />
       <EuiPageTemplate.Section color={"transparent"}>
         <FormContextProvider data={new TuringRouter()}>
           <ExperimentEngineContextProvider>

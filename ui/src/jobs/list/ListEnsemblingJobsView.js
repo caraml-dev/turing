@@ -2,7 +2,7 @@ import { useTuringApi } from "../../hooks/useTuringApi";
 import {
   EuiButton,
   EuiPageTemplate,
-  EuiPanel
+  EuiPanel, EuiSpacer
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
@@ -75,7 +75,8 @@ export const ListEnsemblingJobsView = (props) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
         pageTitle={<PageTitle title="Ensembling Jobs" />}
@@ -85,6 +86,8 @@ export const ListEnsemblingJobsView = (props) => {
           </EuiButton>,
         ]}
       />
+
+      <EuiSpacer size="m" />
       <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
         <EuiPanel>
           <ListEnsemblingJobsTable

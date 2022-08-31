@@ -28,7 +28,8 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={true}>
@@ -66,6 +67,7 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
 
           </EuiPageTemplate.Header>
 
+          <EuiSpacer size="m" />
           <EuiPageTemplate.Section color={"transparent"}>
             <Router>
               <Redirect from="/" to="details" noThrow />

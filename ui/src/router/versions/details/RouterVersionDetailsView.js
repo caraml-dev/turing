@@ -5,7 +5,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPageBody,
   EuiSpacer,
   EuiPageTemplate
 } from "@elastic/eui";
@@ -73,77 +72,77 @@ export const RouterVersionDetailsView = ({
   }, [versionDetails, setVersion]);
 
   return (
-    <EuiPageTemplate restrictWidth="90%">
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageTemplate.Header
-              bottomBorder={false}
-              pageTitle={
-                <PageTitle
-                  icon="graphApp"
-                  title={
-                    <Fragment>
-                      Version <b>{version.version}</b>
-                      &nbsp;&nbsp;
-                      {isActiveConfig && (
-                        <EuiBadge
-                          color="default"
-                          style={{ letterSpacing: "initial" }}>
-                          Current
-                        </EuiBadge>
-                      )}
-                    </Fragment>
-                  }
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                icon="graphApp"
+                title={
+                  <Fragment>
+                    Version <b>{version.version}</b>
+                    &nbsp;&nbsp;
+                    {isActiveConfig && (
+                      <EuiBadge
+                        color="default"
+                        style={{ letterSpacing: "initial" }}>
+                        Current
+                      </EuiBadge>
+                    )}
+                  </Fragment>
+                }
+              />
+            }
+          >
+            <VersionDetailsPageHeader version={version} />
+
+            <EuiSpacer size="xs" />
+
+            <RouterVersionActions
+              router={router}
+              onDeploySuccess={refreshData}
+              onDeleteSuccess={() => props.navigate("../")}>
+              {(actions) => (
+                <RouterVersionDetailsPageNavigation
+                  version={version}
+                  actions={actions.map((action) => ({
+                    ...action,
+                    onClick: () => action.onClick(version),
+                    hidden: !action.available(version),
+                    disabled: !action.enabled(version),
+                  }))}
+                  {...props}
                 />
-              }
-            >
-              <VersionDetailsPageHeader version={version} />
+              )}
+            </RouterVersionActions>
+          </EuiPageTemplate.Header>
 
-              <EuiSpacer size="xs" />
-
-              <RouterVersionActions
-                router={router}
-                onDeploySuccess={refreshData}
-                onDeleteSuccess={() => props.navigate("../")}>
-                {(actions) => (
-                  <RouterVersionDetailsPageNavigation
-                    version={version}
-                    actions={actions.map((action) => ({
-                      ...action,
-                      onClick: () => action.onClick(version),
-                      hidden: !action.available(version),
-                      disabled: !action.enabled(version),
-                    }))}
-                    {...props}
-                  />
-                )}
-              </RouterVersionActions>
-            </EuiPageTemplate.Header>
-
-            <EuiPageTemplate.Section color={"transparent"}>
-              <Router primary={false}>
-                <Redirect from="/" to="details" noThrow />
-                <RouterVersionConfigView path="details" config={version} />
-                <Redirect from="any" to="/error/404" default noThrow />
-              </Router>
-            </EuiPageTemplate.Section>
-          </Fragment>
-        )}
-      </EuiPageBody>
+          <EuiSpacer size="m" />
+          <EuiPageTemplate.Section color={"transparent"}>
+            <Router primary={false}>
+              <Redirect from="/" to="details" noThrow />
+              <RouterVersionConfigView path="details" config={version} />
+              <Redirect from="any" to="/error/404" default noThrow />
+            </Router>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
     </EuiPageTemplate>
   );
 };

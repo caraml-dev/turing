@@ -1,10 +1,6 @@
 import React from "react";
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate, EuiSpacer,
   EuiText,
 } from "@elastic/eui";
 import { PageTitle } from "../components/page/PageTitle";
@@ -14,20 +10,20 @@ import { ExperimentEngineLoaderComponent } from "../components/experiments/Exper
 import { useConfig } from "../config";
 
 const FallbackView = ({ text }) => (
-  <EuiPage>
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <PageTitle title="Experiments" />
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiText size="s" color="subdued">
-          {text}
-        </EuiText>
-      </EuiPageContent>
-    </EuiPageBody>
-  </EuiPage>
+  <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+    <EuiSpacer size="l" />
+    <EuiPageTemplate.Header
+      bottomBorder={false}
+      pageTitle={<PageTitle title="Experiments" />}
+    />
+
+    <EuiSpacer size="m" />
+    <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
+      <EuiText size="s" color="subdued">
+        {text}
+      </EuiText>
+    </EuiPageTemplate.Section>
+  </EuiPageTemplate>
 );
 
 const RemoteRouter = ({ projectId }) => {

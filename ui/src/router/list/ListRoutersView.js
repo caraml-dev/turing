@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import {
   EuiButton,
   EuiPageTemplate,
-  EuiPanel
+  EuiPanel, EuiSpacer
 } from "@elastic/eui";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useTuringApi } from "../../hooks/useTuringApi";
@@ -23,7 +23,8 @@ export const ListRoutersView = ({ projectId, ...props }) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
         pageTitle={<PageTitle title="Routers" />}
@@ -33,6 +34,8 @@ export const ListRoutersView = ({ projectId, ...props }) => {
           </EuiButton>,
         ]}
       />
+
+      <EuiSpacer size="m" />
       <EuiPageTemplate.Section  color={"transparent"}>
         <EuiPanel>
           <ListRoutersTable

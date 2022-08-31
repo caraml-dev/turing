@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import { EuiPageTemplate, EuiPanel } from "@elastic/eui";
+import {EuiPageTemplate, EuiPanel, EuiSpacer} from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
@@ -66,11 +66,14 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPageTemplate restrictWidth="90%" paddingSize={"m"}>
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         bottomBorder={false}
         pageTitle={<PageTitle title="Ensemblers" />}
       />
+
+      <EuiSpacer size="m" />
       <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListEnsemblersTable
