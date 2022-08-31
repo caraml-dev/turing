@@ -3,17 +3,17 @@ import { Enum, EnumValue } from "../enum/Enum";
 export const JobStatus = Enum({
   PENDING: EnumValue("pending", {
     label: "Pending",
-    color: "#F5A700",
+    color: "#FEC514",
     iconType: "clock",
   }),
   BUILDING: EnumValue("building", {
     label: "Pending",
-    color: "#F5A700",
+    color: "#FEC514",
     iconType: "clock",
   }),
   RUNNING: EnumValue("running", {
     label: "Running",
-    color: "#017D73",
+    color: "#00BFB3",
     iconType: "check",
   }),
   TERMINATING: EnumValue("terminating", {

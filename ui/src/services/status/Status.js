@@ -3,7 +3,7 @@ import { EnumValue, Enum } from "../enum/Enum";
 export const Status = Enum({
   DEPLOYED: EnumValue("deployed", {
     label: "Deployed",
-    color: "#017D73",
+    color: "#00BFB3",
     iconType: "check",
   }),
   FAILED: EnumValue("failed", {
@@ -13,7 +13,7 @@ export const Status = Enum({
   }),
   PENDING: EnumValue("pending", {
     label: "Updating",
-    color: "#F5A700",
+    color: "#FEC514",
     iconType: "clock",
   }),
   UNDEPLOYED: EnumValue("undeployed", {
