@@ -1,30 +1,29 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {
-  EuiPageTemplate, EuiSpacer,
-  EuiText,
+  EuiPageTemplate,
 } from "@elastic/eui";
-import { PageTitle } from "../components/page/PageTitle";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
 import { ExperimentEngineLoaderComponent } from "../components/experiments/ExperimentEngineLoaderComponent";
 
 import { useConfig } from "../config";
 
-const FallbackView = ({ text }) => (
-  <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
-    <EuiSpacer size="l" />
-    <EuiPageTemplate.Header
-      bottomBorder={false}
-      pageTitle={<PageTitle title="Experiments" />}
-    />
+const FallbackView = ({ text }) => {
+  const { appConfig } = useConfig();
 
-    <EuiSpacer size="m" />
-    <EuiPageTemplate.Section restrictWidth="90%" color={"transparent"}>
-      <EuiText size="s" color="subdued">
-        {text}
-      </EuiText>
-    </EuiPageTemplate.Section>
-  </EuiPageTemplate>
-);
+  return (
+    <EuiPageTemplate restrictWidth="90%" paddingSize={"none"}>
+      <EuiPageTemplate.EmptyPrompt
+        iconType={appConfig.appIcon}
+        title={<h2>Experiments</h2>}
+        body={
+          <Fragment>
+            <p>{text}</p>
+          </Fragment>
+        }
+      />
+    </EuiPageTemplate>
+  );
+};
 
 const RemoteRouter = ({ projectId }) => {
   const { defaultExperimentEngine } = useConfig();
