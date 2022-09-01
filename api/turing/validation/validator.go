@@ -16,6 +16,7 @@ import (
 )
 
 var tableRegexString string = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
+var trafficRuleNameRegex = regexp.MustCompile(`^[A-Za-z\d][\w\d \-()#$%&:.]{2,62}[\w\d\-()#$%&:.]$`)
 
 // NewValidator creates a new validator using the given defaults
 func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error) {
@@ -118,6 +119,16 @@ func newExperimentConfigValidator(expSvc service.ExperimentsService) func(valida
 	return validationFunc
 }
 
+func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value string) {
+	nameRegexDescription := strings.Join([]string{
+		"Name must be between 4-64 characters long, and begin with an alphanumeric character",
+		"and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$&:.",
+	}, " ")
+	if !trafficRuleNameRegex.MatchString(value) {
+		sl.ReportError(value, fieldName, "trafficRuleName", nameRegexDescription, fmt.Sprintf("%v", value))
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -147,6 +158,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 	// Validate traffic rules
 	if routerConfig.TrafficRules != nil {
 		for ruleIdx, rule := range routerConfig.TrafficRules {
+			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)

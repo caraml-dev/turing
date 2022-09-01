@@ -24,7 +24,7 @@ type CreateOrUpdateRouterRequest struct {
 type RouterConfig struct {
 	Routes           models.Routes           `json:"routes" validate:"required"`
 	DefaultRouteID   *string                 `json:"default_route_id"`
-	TrafficRules     models.TrafficRules     `json:"rules" validate:"dive"`
+	TrafficRules     models.TrafficRules     `json:"rules" validate:"unique=Name,dive"`
 	ExperimentEngine *ExperimentEngineConfig `json:"experiment_engine" validate:"required,dive"`
 	ResourceRequest  *models.ResourceRequest `json:"resource_request"`
 	Timeout          string                  `json:"timeout" validate:"required"`

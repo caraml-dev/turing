@@ -45,12 +45,14 @@ def test_deploy_router_with_traffic_rules():
     # set up traffic rules
     rules = [
         TrafficRule(
+            name="rule-1",
             conditions=[
                 HeaderTrafficRuleCondition(field="X-Region", values=["region-a"])
             ],
             routes=["treatment-a"],
         ),
         TrafficRule(
+            name="rule-2",
             conditions=[
                 PayloadTrafficRuleCondition(
                     field="service_type.id", values=["service-type-b"]

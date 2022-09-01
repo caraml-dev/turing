@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
@@ -219,8 +220,9 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 
 func TestValidateTrafficRules(t *testing.T) {
 	// Common variables used by suite tests
-	routeAID, routeBID := "route-a", "route-b"
-	routeA, routeB := &models.Route{
+	ruleName := "rule-name"
+	routeAID, routeBID, routeCID := "route-a", "route-b", "route-c"
+	routeA, routeB, routeC := &models.Route{
 		ID:       routeAID,
 		Type:     "PROXY",
 		Endpoint: "http://example.com/a",
@@ -230,6 +232,11 @@ func TestValidateTrafficRules(t *testing.T) {
 		Type:     "PROXY",
 		Endpoint: "http://example.com/b",
 		Timeout:  "10ms",
+	}, &models.Route{
+		ID:       routeCID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/c",
+		Timeout:  "10ms",
 	}
 
 	suite := map[string]routerConfigTestCase{
@@ -238,6 +245,43 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+		},
+		"success | valid trailing symbol": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "aBc -_()#$%&:.",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+		},
+		"success | valid trailing alphabet ": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "aBc -_()#$%&:.d",
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.HeaderFieldSource,
@@ -255,6 +299,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name:       ruleName,
 					Conditions: []*router.TrafficRuleCondition{},
 					Routes:     []string{"route-b"},
 				},
@@ -267,6 +312,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.HeaderFieldSource,
@@ -286,6 +332,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.HeaderFieldSource,
@@ -305,6 +352,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "unknown",
@@ -324,6 +372,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.HeaderFieldSource,
@@ -376,6 +425,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.PayloadFieldSource,
@@ -395,6 +445,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
+					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: expRequest.PayloadFieldSource,
@@ -408,6 +459,112 @@ func TestValidateTrafficRules(t *testing.T) {
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[0]' " +
 				"Error:Field validation for '' failed on the 'necsfield' tag",
+		},
+		"failure | empty name": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRules[0].Name' Error:Field validation for 'Name' failed on the 'required' tag",
+				strings.Join([]string{
+					"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+					"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
+					"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+					"following symbols: -_()#$&:.' tag",
+				}, " "),
+			}, "\n"),
+		},
+		"failure | More than 64 characters": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
+				"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+				"following symbols: -_()#$&:.' tag",
+			}, " "),
+		},
+		"failure | Invalid trailing character": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "abc@",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
+				"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
+				"following symbols: -_()#$&:.' tag",
+			}, " "),
+		},
+		"failure | Non-unique Traffic Rule names": {
+			routes:         models.Routes{routeA, routeB, routeC},
+			defaultRouteID: &routeAID,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "abcd",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeBID},
+				},
+				{
+					Name: "abcd",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-c"},
+						},
+					},
+					Routes: []string{routeCID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules' " +
+				"Error:Field validation for 'TrafficRules' failed on the 'unique' tag",
 		},
 	}
 

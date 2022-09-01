@@ -7,14 +7,15 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20220113170521-22cd4a2c6990
 	github.com/antihax/optional v1.0.0
+	github.com/caraml-dev/turing/engines/experiment v0.0.0
+	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gojek/fiber v0.0.0-20201008181849-4f0f8284dc84
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
-	github.com/caraml-dev/turing/engines/experiment v0.0.0
-	github.com/caraml-dev/turing/engines/router v0.0.0
+	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.7
 	github.com/google/go-containerregistry v0.8.1-0.20220219142810-1571d7fdc46e
@@ -151,12 +152,13 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220126215142-9970aeb2e350 // indirect
@@ -177,13 +179,13 @@ replace (
 	// Ref: https://github.com/Azure/go-autorest/issues/414
 	github.com/Azure/azure-sdk-for-go => github.com/Azure/azure-sdk-for-go v38.2.0+incompatible
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
+
+	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
+	github.com/caraml-dev/turing/engines/router => ../engines/router
 	github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200213202729-31a86c4ab209
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
-
-	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
-	github.com/caraml-dev/turing/engines/router => ../engines/router
 
 	k8s.io/api => k8s.io/api v0.22.7
 
