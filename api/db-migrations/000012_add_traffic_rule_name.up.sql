@@ -1,7 +1,7 @@
 WITH cleaned_router_versions AS (
     SELECT id, CASE WHEN traffic_rules = 'null' THEN null ELSE traffic_rules END AS traffic_rules
     FROM router_versions
-), 
+),
 tbl1 AS (
     SELECT id, position, CONCAT('rule_', position:: text) AS name, elem
     FROM cleaned_router_versions, jsonb_array_elements(traffic_rules) WITH ordinality arr(elem, position)
