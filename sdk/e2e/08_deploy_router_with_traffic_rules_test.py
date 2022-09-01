@@ -60,6 +60,11 @@ def test_deploy_router_with_traffic_rules():
             ],
             routes=["treatment-b"],
         ),
+        TrafficRule(
+            name="default",
+            conditions=[],
+            routes=["treatment-b"],
+        ),
     ]
 
     # set up experiment engine
@@ -193,6 +198,11 @@ def test_deploy_router_with_traffic_rules():
         "experiment": {},
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"},
+            {
+                "data": {"version": "treatment-b"},
+                "is_default": False,
+                "route": "treatment-b",
+            },
         ],
     }
     assert response.json()["response"] == expected_response
