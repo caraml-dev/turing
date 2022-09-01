@@ -202,7 +202,7 @@ func TestEnsemblingFanInAggregate(t *testing.T) {
 			// Expected is already defined in the sorted order. This is done because arrays are order
 			// dependent and JSONEq will fail otherwise.
 			var f CombinedResponse
-			tu.FailOnError(t, json.Unmarshal(resp.Payload(), &f))
+			tu.FailOnError(t, json.Unmarshal(resp.Payload().([]byte), &f))
 			sort.Slice(f.RouteResponses, func(i, j int) bool {
 				return f.RouteResponses[i].Route < f.RouteResponses[j].Route
 			})

@@ -85,18 +85,24 @@ func (i *ErrorLoggingInterceptor) AfterCompletion(
 	cKind := ctx.Value(fiber.CtxComponentKindKey)
 
 	if cKindCompType, ok := cKind.(fiber.ComponentKind); ok {
-		// Only log errors at the the caller
+		// Only log errors at the caller
 		// (to avoid repeatedly logging the error at higher levels)
 		if cKindCompType == fiber.CallerKind {
 			turingReqID, _ := turingctx.GetRequestID(ctx)
 
 			// For each response in the queue, if the status is non-success, log warning
 			for resp := range queue.Iter() {
+				respByte, ok := resp.Payload().([]byte)
+				if !ok {
+					i.logger.Warnw("Route Error", "Component", cID,
+						"Turing Request", turingReqID,
+						"Response", "unable to parse fiber response")
+				}
 				if !resp.IsSuccess() {
 					i.logger.Warnw("Route Error", "Component", cID,
 						"Turing Request", turingReqID,
 						"Status", resp.StatusCode(),
-						"Response", string(resp.Payload()))
+						"Response", string(respByte))
 				}
 			}
 		}

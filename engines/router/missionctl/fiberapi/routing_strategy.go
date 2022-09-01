@@ -3,6 +3,7 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -56,8 +57,13 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	options := runner.GetTreatmentOptions{
 		TuringRequestID: turingReqID,
 	}
+
+	reqByte, ok := req.Payload().([]byte)
+	if !ok {
+		return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
+	}
 	expPlan, expErr := r.experimentEngine.
-		GetTreatmentForRequest(req.Header(), req.Payload(), options)
+		GetTreatmentForRequest(req.Header(), reqByte, options)
 
 	// Create experiment response object
 	experimentResponse := experiment.NewResponse(expPlan, expErr)

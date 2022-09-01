@@ -234,7 +234,12 @@ func (mc *missionControl) Route(
 			"Error response received: status – [%d]", fiberResponse.StatusCode()))
 	} else {
 		httpResp := fiberResponse.(*fiberhttp.Response)
-		routerResp, routerErr = mchttp.NewCachedResponse(httpResp.Payload(), httpResp.Header()), nil
+		httpPayload, ok := httpResp.Payload().([]byte)
+		if !ok {
+			routerResp, routerErr = nil, errors.NewHTTPError(fmt.Errorf("unable to parse respond payload"))
+		} else {
+			routerResp, routerErr = mchttp.NewCachedResponse(httpPayload, httpResp.Header()), nil
+		}
 	}
 
 	// Get the experiment treatment channel from the request context, read result

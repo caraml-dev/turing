@@ -13,18 +13,18 @@ import (
 func TestCreateFiberError(t *testing.T) {
 	tests := map[string]struct {
 		err         error
-		expectedErr fibererror.HTTPError
+		expectedErr fibererror.FiberError
 	}{
 		"generic": {
 			err: errors.Newf(errors.Unknown, "Test error"),
-			expectedErr: fibererror.HTTPError{
+			expectedErr: fibererror.FiberError{
 				Code:    500,
 				Message: "Test error",
 			},
 		},
 		"bad input": {
 			err: errors.Newf(errors.BadInput, "Input error"),
-			expectedErr: fibererror.HTTPError{
+			expectedErr: fibererror.FiberError{
 				Code:    400,
 				Message: "Input error",
 			},

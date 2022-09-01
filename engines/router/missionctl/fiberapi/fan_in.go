@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -71,10 +72,18 @@ func (fanIn *EnsemblingFanIn) Aggregate(
 			TuringRequestID: turingReqID,
 		}
 
-		expPlan, expPlanErr := fanIn.experimentEngine.
-			GetTreatmentForRequest(req.Header(), req.Payload(), options)
-		// Write to channel
-		expRespCh <- experiment.NewResponse(expPlan, expPlanErr)
+		reqByte, ok := req.Payload().([]byte)
+		if !ok {
+			expRespCh <- &experiment.Response{
+				Configuration: nil,
+				Error:         "unable to parse treatment response payload",
+			}
+		} else {
+			expPlan, expPlanErr := fanIn.experimentEngine.
+				GetTreatmentForRequest(req.Header(), reqByte, options)
+			// Write to channel
+			expRespCh <- experiment.NewResponse(expPlan, expPlanErr)
+		}
 		close(expRespCh)
 	}()
 
@@ -134,9 +143,13 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 	// Collect all treatment responses
 	idx := 0
 	for k, v := range responses {
+		vBytes, ok := v.Payload().([]byte)
+		if !ok {
+			return fiber.NewErrorResponse(errors.NewHTTPError(fmt.Errorf("unable to parse treatment response payload")))
+		}
 		t := RouteResponse{
 			Route:     k,
-			Data:      v.Payload(),
+			Data:      vBytes,
 			IsDefault: k == fanIn.defaultRoute,
 		}
 		result.RouteResponses[idx] = t

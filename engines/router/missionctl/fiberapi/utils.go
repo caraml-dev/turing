@@ -55,12 +55,12 @@ func createRouterFromConfigFile(cfgFilePath string) (fiber.Component, error) {
 		return nil, err
 	}
 
-	return config.FromConfig(cfgFilePath)
+	return config.InitComponentFromConfig(cfgFilePath)
 }
 
 // createFiberError wraps the input error in a format that is usable by Fiber
-func createFiberError(err error) fibererror.HTTPError {
-	return fibererror.HTTPError{
+func createFiberError(err error) fibererror.FiberError {
+	return fibererror.FiberError{
 		Code:    errors.GetHTTPErrorCode(err),
 		Message: err.Error(),
 	}

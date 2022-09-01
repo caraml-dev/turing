@@ -3,6 +3,7 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -109,10 +110,15 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	var wg sync.WaitGroup
 	wg.Add(len(s.Rules))
 
+	reqByte, ok := req.Payload().([]byte)
+	if !ok {
+		return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
+	}
+
 	for idx, rule := range s.Rules {
 		// test each rule asynchronously and write results into results array
 		go func(rule *TrafficSplittingStrategyRule, idx int) {
-			if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
+			if res, err := rule.TestRequest(req.Header(), reqByte); err != nil {
 				errCh <- err
 			} else {
 				results[idx] = res
