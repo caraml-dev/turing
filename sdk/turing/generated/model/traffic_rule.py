@@ -77,6 +77,7 @@ class TrafficRule(ModelNormal):
         """
         lazy_import()
         return {
+            "name": (str,),  # noqa: E501
             "conditions": ([TrafficRuleCondition],),  # noqa: E501
             "routes": ([str],),  # noqa: E501
         }
@@ -86,6 +87,7 @@ class TrafficRule(ModelNormal):
         return None
 
     attribute_map = {
+        "name": "name",  # noqa: E501
         "conditions": "conditions",  # noqa: E501
         "routes": "routes",  # noqa: E501
     }
@@ -104,10 +106,11 @@ class TrafficRule(ModelNormal):
     )
 
     @convert_js_args_to_python_args
-    def __init__(self, conditions, routes, *args, **kwargs):  # noqa: E501
+    def __init__(self, name, conditions, routes, *args, **kwargs):  # noqa: E501
         """TrafficRule - a model defined in OpenAPI
 
         Args:
+            name (str):
             conditions ([TrafficRuleCondition]):
             routes ([str]): List of IDs of the routes, that should be activated by this rule
 
@@ -168,6 +171,7 @@ class TrafficRule(ModelNormal):
         self._configuration = _configuration
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
+        self.name = name
         self.conditions = conditions
         self.routes = routes
         for var_name, var_value in kwargs.items():

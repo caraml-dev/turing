@@ -20,6 +20,7 @@ func TestTrafficRules_Value(t *testing.T) {
 		"success": {
 			trafficRules: models.TrafficRules{
 				&models.TrafficRule{
+					Name: "rule-name",
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "header",
@@ -38,6 +39,7 @@ func TestTrafficRules_Value(t *testing.T) {
 			},
 			serialized: `
 				[{
+					"name": "rule-name",
 				 	"conditions": [{
 						"field_source": "header",
 						"field": "X-Region",
@@ -73,6 +75,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 		"success": {
 			trafficRules: models.TrafficRules{
 				&models.TrafficRule{
+					Name: "rule-name",
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: request.HeaderFieldSource,
@@ -91,6 +94,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 			},
 			serialized: []byte(`
 				[{
+					"name": "rule-name",
 				 	"conditions": [{
 						"field_source": "header",
 						"field": "X-Region",
@@ -111,6 +115,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 		"success | unknown field_source": {
 			serialized: []byte(`
 				[{
+					"name": "rule-name",
 				 	"conditions": [{
 						"field_source": "unknown",
 						"field": "X-Region",
@@ -122,6 +127,7 @@ func TestTrafficRules_Scan(t *testing.T) {
 			`),
 			trafficRules: models.TrafficRules{
 				&models.TrafficRule{
+					Name: "rule-name",
 					Conditions: []*router.TrafficRuleCondition{
 						{
 							FieldSource: "unknown",

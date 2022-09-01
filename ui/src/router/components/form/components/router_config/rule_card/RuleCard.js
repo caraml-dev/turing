@@ -1,6 +1,7 @@
 import {
   EuiButtonIcon,
   EuiCard,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -80,6 +81,21 @@ export const RuleCard = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiFormRow
+        label="Name *"
+        isInvalid={!!get(errors, "name")}
+        error={get(errors, "name")}
+        fullWidth>
+        <EuiFieldText
+          placeholder="rule-name"
+          value={rule.name}
+          onChange={(e) => onChange("name")(e.target.value)}
+          isInvalid={!!get(errors, "name")}
+          aria-label="rule-name"
+          fullWidth
+        />
+      </EuiFormRow>
 
       <EuiFormRow
         label="Conditions *"

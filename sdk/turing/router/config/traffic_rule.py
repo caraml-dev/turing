@@ -128,17 +128,28 @@ class TrafficRule:
     """
     Class to create a new TrafficRule based on a list of conditions and routes
 
+    :param name: Name of TrafficRule, should be unique for every set of rules in a Router
     :param conditions: list of TrafficRuleConditions that need to ALL be satisfied before routing to the given routes
     :param routes: list of routes to send the request to should all the given conditions be met
     """
 
+    name: str
     conditions: Union[List[TrafficRuleCondition], List[Dict[str, List[str]]]]
     routes: List[str]
 
+    _name: str = dataclasses.field(init=False, repr=False)
     _conditions: Union[
         List[TrafficRuleCondition], List[Dict[str, List[str]]]
     ] = dataclasses.field(init=False, repr=False)
     _routes: List[str] = dataclasses.field(init=False, repr=False)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = name
 
     @property
     def conditions(self):
@@ -174,6 +185,7 @@ class TrafficRule:
         self._verify_no_duplicate_routes()
 
         return turing.generated.models.TrafficRule(
+            name=self.name,
             conditions=[
                 traffic_rule_condition.to_open_api()
                 for traffic_rule_condition in self.conditions
