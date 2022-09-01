@@ -38,6 +38,26 @@ yup.addMethod(yup.array, "unique", function (propertyPath, message) {
   });
 });
 
+const validateRuleNames = function(items) {
+  const uniqueNamesMap = items.reduce((acc, item) => {
+    const current = item.name in acc ? acc[item.name] : 0;
+    // If name is set, increment the count
+    return !!item.name ? { ...acc, [item.name]: current + 1 } : acc;
+  }, {});
+  const errors = [];
+  items.forEach((item, idx) => {
+    if (!!item.name && uniqueNamesMap[item.name] > 1) {
+      errors.push(
+        this.createError({
+          path: `${this.path}[${idx}].name`,
+          message: "Rule names in a Router should be unique",
+        })
+      );
+    }
+  });
+  return !!errors.length ? new yup.ValidationError(errors) : true;
+};
+
 const routerNameRegex = /^[a-z0-9-]*$/,
   durationRegex = /^[0-9]+(ms|s|m|h)$/,
   cpuRequestRegex = /^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$/,
@@ -248,7 +268,7 @@ const schema = (maxAllowedReplica) => [
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
-      rules: yup.array(trafficRuleSchema),
+      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       resource_request: resourceRequestSchema(maxAllowedReplica),
     }),
   }),
