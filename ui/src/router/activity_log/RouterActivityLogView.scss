@@ -7,8 +7,19 @@
   .scrollToBottom--container {
     height: 100%;
 
-    .euiComment .euiCommentTimeline::before {
+    .euiCommentEvent {
       height: calc(100% + 16px) !important;
+      border: 0;
+
+      .euiCommentEvent__header {
+        border-bottom: 0;
+        background: none;
+        padding: 4px;
+      }
+
+      .euiCommentEvent__body {
+        padding: 4px;
+      }
     }
 
     .followButton {

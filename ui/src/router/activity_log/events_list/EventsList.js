@@ -25,14 +25,13 @@ export const EventsList = ({ events, status }) => {
 
   return (
     <Fragment>
-      <EuiCommentList>
+      <EuiCommentList gutterSize={"m"}>
         {events.map((event, idx) => (
           <EuiComment
             key={`event-${idx}`}
             username={badge(event)}
             timelineAvatarAriaLabel="System"
             timelineAvatar={timelineIcon(event)}
-            type="update"
             timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
             <ExpandableContainer
               maxCollapsedHeight={43}
