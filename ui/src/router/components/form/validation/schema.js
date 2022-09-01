@@ -115,7 +115,10 @@ const trafficRuleSchema = yup.object().shape({
   conditions: yup
     .array()
     .of(ruleConditionSchema)
-    .min(1, "At least one condition should be defined"),
+    .when("name", {
+      is: (value) => value !== "default",
+      then: yup.array().min(1, "At least one condition should be defined")
+    }),
   routes: yup
     .array()
     .of(validRouteSchema)

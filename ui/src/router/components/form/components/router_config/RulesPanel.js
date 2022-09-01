@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Panel } from "../Panel";
 import {
   EuiButton,
@@ -15,15 +15,26 @@ import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { newRule } from "../../../../../services/router/TuringRouter";
 
+const defaultRuleName = "default";
+
 export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
-    onChange("rules")([...rules, newRule()]);
+    // Default rule should always be last
+    const orderedRules = rules.filter(rule => rule.name !== defaultRuleName);
+    const defaultRule = rules.filter(rule => rule.name === defaultRuleName);
+
+    onChange("rules")([...orderedRules, newRule(), ...defaultRule]);
   };
 
   const onDeleteRule = (idx) => () => {
     rules.splice(idx, 1);
+    
+    // If no custom rule left, remove default rule
+    if (rules.length === 1 && rules.at(0).name === defaultRuleName) {
+      rules = [];
+    }
     onChange("rules")(rules);
   };
 
@@ -34,6 +45,15 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
   );
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  useEffect(() => {
+    // If there are custom rules and no default rule, add default rule
+    if (rules.length > 0 && rules.at(-1).name !== defaultRuleName) {
+      const defaultRule = newRule();
+      defaultRule.name = defaultRuleName;
+      onChange("rules")([...rules, defaultRule]);
+    }
+  }, [rules, routes, onChange])
 
   return (
     <Panel
@@ -53,6 +73,7 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
         {rules.map((rule, idx) => (
           <EuiFlexItem key={`rule-${idx}`}>
             <RuleCard
+              isDefault={idx === Object.keys(rules).length - 1}
               rule={rule}
               routes={routes}
               onChangeHandler={onChange(`rules.${idx}`)}

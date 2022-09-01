@@ -129,6 +129,43 @@ func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value stri
 	}
 }
 
+func checkTrafficRuleCount(sl validator.StructLevel, fieldName string, rules models.TrafficRules) {
+	ruleLength := len(rules)
+	ruleCountDescription := "There should be either 0 or more than 1 traffic rules specified."
+	if ruleLength == 1 {
+		sl.ReportError(rules, fieldName, "trafficRule", ruleCountDescription, "")
+	}
+	// Check for presence of Default Traffic Rule
+	hasDefaultRule := false
+	noDefaultRuleDescription := "Default rule should be provided."
+	if ruleLength > 1 {
+		for _, rule := range rules {
+			if rule.Name == "default" {
+				hasDefaultRule = true
+			}
+		}
+		// Default rule should be present if any custom rules exist
+		if !hasDefaultRule {
+			sl.ReportError(rules, fieldName, "trafficRule", noDefaultRuleDescription, "")
+		}
+	}
+}
+
+func checkTrafficRuleConditions(sl validator.StructLevel, fieldName string, rule *models.TrafficRule) {
+	noConditionsDefaultRuleDescription := "Default rule should not have any conditions specified."
+	noConditionsCustomRuleDescription := "Custom rule must have conditions specified."
+
+	if rule.Name == "default" {
+		if len(rule.Conditions) != 0 {
+			sl.ReportError(rule, fieldName, "trafficRule", noConditionsDefaultRuleDescription, "")
+		}
+	} else {
+		if len(rule.Conditions) == 0 {
+			sl.ReportError(rule, fieldName, "trafficRule", noConditionsCustomRuleDescription, "")
+		}
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -157,8 +194,10 @@ func validateRouterConfig(sl validator.StructLevel) {
 
 	// Validate traffic rules
 	if routerConfig.TrafficRules != nil {
+		checkTrafficRuleCount(sl, "TrafficRule", routerConfig.TrafficRules)
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
+			checkTrafficRuleConditions(sl, "TrafficRule", rule)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
