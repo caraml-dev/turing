@@ -163,13 +163,13 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
                           "is_default": false,
                           "route": "control"
                         },
-						{
-						  "data": {
-							"version": "treatment-b"
-						  },
-						  "is_default": false,
-						  "route": "treatment-b"
-						}
+                        {
+                          "data": {
+                            "version": "treatment-b"
+                          },
+                          "is_default": false,
+                          "route": "treatment-b"
+                        }
                       ]
                     }`
 					assertRouterResponse(t, expectedRequest, actualRequest)
