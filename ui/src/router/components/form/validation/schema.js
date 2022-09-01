@@ -48,7 +48,8 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   bigqueryTableRegex = /^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$/i,
   kafkaBrokersRegex =
     /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
-  kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i;
+  kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i,
+  trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/;
 
 const timeoutSchema = yup
   .string()
@@ -84,6 +85,13 @@ const ruleConditionSchema = yup.object().shape({
 });
 
 const trafficRuleSchema = yup.object().shape({
+  name: yup
+    .string()
+    .required("Rule name is required")
+    .matches(
+      trafficRuleNameRegex,
+      "Name must begin with an alphanumeric character and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$%&:."
+    ),
   conditions: yup
     .array()
     .of(ruleConditionSchema)
