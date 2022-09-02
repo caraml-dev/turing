@@ -29,10 +29,12 @@ def main(turing_api: str, project: str):
     # Create some traffic rules
     rules = [
         TrafficRule(
+            name="left-rule",
             conditions=[HeaderTrafficRuleCondition(field="turns", values=["left"])],
             routes=["route-1"],
         ),
         TrafficRule(
+            name="right-rule",
             conditions=[HeaderTrafficRuleCondition(field="turns", values=["right"])],
             routes=["route-2"],
         ),

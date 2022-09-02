@@ -51,22 +51,27 @@ def main(turing_api: str, project: str):
     # manually set attributes such as `field_source` or `operator`.
     rules = [
         TrafficRule(
+            name="cat-rule",
             conditions=[HeaderTrafficRuleCondition(field="name", values=["cat"])],
             routes=["meow"],
         ),
         TrafficRule(
+            name="dog-rule",
             conditions=[HeaderTrafficRuleCondition(field="name", values=["dog"])],
             routes=["woof"],
         ),
         TrafficRule(
+            name="sheep-rule",
             conditions=[HeaderTrafficRuleCondition(field="name", values=["sheep"])],
             routes=["baaa"],
         ),
         TrafficRule(
+            name="pig-rule",
             conditions=[HeaderTrafficRuleCondition(field="name", values=["pig"])],
             routes=["oink"],
         ),
         TrafficRule(
+            name="sus-rule",
             conditions=[PayloadTrafficRuleCondition(field="body", values=["sus"])],
             routes=["meow", "woof", "baaa", "oink", "ring-ding-ding"],
         ),
