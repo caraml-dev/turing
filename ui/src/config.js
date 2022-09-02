@@ -60,10 +60,11 @@ const appConfig = {
     // Default number of tail log entries to be fetched
     defaultTailLines: 1000,
   },
+  // Specifies a set of page templating configurations that will soon be controlled by the mlp-ui package
   pageTemplate: {
-    // width of page template
+    // Width of page template
     restrictWidth: "90%",
-    // padding of page template
+    // Padding of page template
     paddingSize: "none",
   },
   batchEnsemblingEnabled:
