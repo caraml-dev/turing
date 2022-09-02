@@ -239,8 +239,9 @@ func TestValidateTrafficRules(t *testing.T) {
 		Timeout:  "10ms",
 	}
 	defaultTrafficRule := &models.TrafficRule{
-		Name:   "default",
-		Routes: []string{"route-b"},
+		Name:       "default",
+		Conditions: []*router.TrafficRuleCondition{},
+		Routes:     []string{"route-b"},
 	}
 
 	suite := map[string]routerConfigTestCase{
@@ -624,12 +625,14 @@ func TestValidateTrafficRules(t *testing.T) {
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
 				{
-					Name:   ruleName,
-					Routes: []string{"route-b"},
+					Name:       ruleName,
+					Conditions: []*router.TrafficRuleCondition{},
+					Routes:     []string{"route-b"},
 				},
 				{
-					Name:   "default",
-					Routes: []string{"route-b"},
+					Name:       "default",
+					Conditions: []*router.TrafficRuleCondition{},
+					Routes:     []string{"route-b"},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRule' Error:Field validation for " +
