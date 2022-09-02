@@ -30,7 +30,6 @@ export const EventsList = ({ events, status }) => {
           <EuiComment
             key={`event-${idx}`}
             username={badge(event)}
-            timelineAvatarAriaLabel="System"
             timelineAvatar={timelineIcon(event)}
             timestamp={<DateFromNow date={event.created_at} size={"s"} />}>
             <ExpandableContainer
