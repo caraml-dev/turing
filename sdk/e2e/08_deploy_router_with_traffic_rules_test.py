@@ -205,4 +205,9 @@ def test_deploy_router_with_traffic_rules():
             },
         ],
     }
-    assert response.json()["response"] == expected_response
+    actual_response = response.json()["response"]
+    actual_response["route_responses"] = sorted(
+        actual_response["route_responses"], key=lambda x: x["data"]["version"]
+    )
+    assert actual_response["experiment"] == expected_response["experiment"]
+    assert actual_response["route_responses"] == expected_response["route_responses"]
