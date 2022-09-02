@@ -87,4 +87,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/caraml-dev/turing/engines/experiment => ../experiment
+replace (
+	github.com/caraml-dev/turing/engines/experiment => ../experiment
+	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220902080308-93f804e2ab03
+)

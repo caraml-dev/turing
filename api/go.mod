@@ -182,7 +182,7 @@ replace (
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
 	github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200213202729-31a86c4ab209
-	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220902065336-0e51a9beea9e
+	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220902080308-93f804e2ab03
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
