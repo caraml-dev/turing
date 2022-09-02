@@ -47,7 +47,9 @@ export const ResourceRequestConfigTable = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <EuiTextColor color="secondary">Driver</EuiTextColor>
+          <span>
+            <EuiTextColor color="success">Driver</EuiTextColor>
+          </span>
         </EuiTitle>
         <EuiDescriptionList
           compressed
@@ -63,7 +65,9 @@ export const ResourceRequestConfigTable = ({
 
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <EuiTextColor color="secondary">Executors</EuiTextColor>
+          <span>
+            <EuiTextColor color="success">Executors</EuiTextColor>
+          </span>
         </EuiTitle>
         <EuiDescriptionList
           compressed

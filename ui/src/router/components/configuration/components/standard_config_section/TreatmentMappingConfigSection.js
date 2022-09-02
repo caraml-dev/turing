@@ -52,18 +52,20 @@ export const TreatmentMappingConfigSection = ({
         {experimentNames.map((exp) => (
           <EuiFlexItem key={`${exp}--mappingConfig`}>
             <EuiTitle size="xxs">
-              <EuiTextColor color="secondary">
-                <EuiLink
-                  href={getExperimentUrl(
-                    engineProps?.standard_experiment_manager_config
-                      ?.home_page_url,
-                    experimentInfo[exp] || {}
-                  )}
-                  target="_blank"
-                  external>
-                  <code>{exp}</code>
-                </EuiLink>
-              </EuiTextColor>
+              <span>
+                <EuiTextColor color="success">
+                  <EuiLink
+                    href={getExperimentUrl(
+                      engineProps?.standard_experiment_manager_config
+                        ?.home_page_url,
+                      experimentInfo[exp] || {}
+                    )}
+                    target="_blank"
+                    external>
+                    <code>{exp}</code>
+                  </EuiLink>
+                </EuiTextColor>
+              </span>
             </EuiTitle>
             <TreatmentMappingConfigTable
               items={mappings.filter((mapObj) => mapObj.experiment === exp)}
