@@ -42,7 +42,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
         ]}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Section  color={"transparent"}>
         <EuiPanel>
           <ListRoutersTable

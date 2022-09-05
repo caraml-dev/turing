@@ -74,7 +74,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
         pageTitle={<PageTitle title="Ensemblers" />}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListEnsemblersTable

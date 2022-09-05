@@ -88,7 +88,7 @@ export const ListEnsemblingJobsView = (props) => {
         ]}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListEnsemblingJobsTable
