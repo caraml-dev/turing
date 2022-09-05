@@ -96,10 +96,10 @@ func (i *ErrorLoggingInterceptor) AfterCompletion(
 			for resp := range queue.Iter() {
 				var response interface{}
 				if req != nil && req.Protocol() == protocol.GRPC {
-					r, _ := resp.Payload().(proto.Message)
+					r := resp.Payload().(proto.Message)
 					response = r
 				} else {
-					r, _ := resp.Payload().([]byte)
+					r := resp.Payload().([]byte)
 					response = string(r)
 				}
 				if !resp.IsSuccess() {
