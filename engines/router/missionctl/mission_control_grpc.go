@@ -30,7 +30,7 @@ func (mc *missionControlGrpc) IsEnricherEnabled() bool { return false }
 func (mc *missionControlGrpc) IsEnsemblerEnabled() bool { return false }
 
 // NewMissionControlGrpc creates new instance of the MissingControl,
-// based on the http.Client and configuration passed into it
+// based on the grpc configuration of fiber.yaml
 func NewMissionControlGrpc(
 	routerCfg *config.RouterConfig,
 	appCfg *config.AppConfig,
@@ -51,28 +51,25 @@ func (mc *missionControlGrpc) PredictValues(ctx context.Context, req *upiv1.Pred
 		Message: req,
 	}
 	resp, ok := <-mc.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
-	// TODO need to refactor and use generic error + correct response
 	if !ok {
-		return nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			"did not get back a valid response from the fiberHandler"))
+		return nil, errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.NewHTTPError(errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			string(resp.Payload().([]byte)))))
+		return nil, errors.Newf(errors.BadResponse, string(resp.Payload().([]byte)))
 	}
 
 	var responseProto upiv1.PredictValuesResponse
 	payload, ok := resp.Payload().(proto.Message)
 	if !ok {
-		return nil, errors.NewHTTPError(errors.Newf(errors.BadResponse, "unable to parse fiber response into proto"))
+		return nil, errors.Newf(errors.BadResponse, "unable to parse fiber response into proto")
 	}
 	payloadByte, err := proto.Marshal(payload)
 	if err != nil {
-		return nil, errors.NewHTTPError(errors.Newf(errors.BadResponse, "unable to marshal paryload"))
+		return nil, errors.Newf(errors.BadResponse, "unable to marshal payload")
 	}
 	err = proto.Unmarshal(payloadByte, &responseProto)
 	if err != nil {
-		return nil, errors.NewHTTPError(errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"))
+		return nil, errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto")
 	}
 	return &responseProto, nil
 }

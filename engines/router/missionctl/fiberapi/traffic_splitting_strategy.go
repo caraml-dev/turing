@@ -115,7 +115,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	if req.Protocol() != protocol.GRPC {
 		reqByte, ok := req.Payload().([]byte)
 		if !ok {
-			return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
+			return nil, nil, fmt.Errorf("unable to parse request payload to exp engine")
 		}
 
 		for idx, rule := range s.Rules {
