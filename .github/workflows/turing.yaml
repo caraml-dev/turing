@@ -377,12 +377,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Set up Go
-        if: ${{ !matrix.useSDK }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
       - name: Install Python dependencies
         if: ${{ matrix.useSDK }}
         working-directory: sdk
@@ -401,7 +395,9 @@ jobs:
           PROJECT_ID: "1"
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true
-        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+        run: |
+        go mod tidy
+        go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}
