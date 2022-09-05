@@ -39,13 +39,13 @@ func TestCreateFiberError(t *testing.T) {
 }
 
 func TestCreateFiberRequestHandler(t *testing.T) {
-	handler, err := CreateFiberRequestHandler(
-		filepath.Join("..", "testdata", "nop_default_router.yaml"),
-		time.Second*2,
-		true,
-	)
-
+	router, err := CreateFiberRouterFromConfig(filepath.Join("..", "testdata", "nop_default_router.yaml"), true)
 	assert.NoError(t, err)
+	assert.Equal(t, "eager-router", router.ID())
+	assert.Equal(t, "Combiner", string(router.Kind()))
+
+	handler := CreateFiberRequestHandler(router, time.Second*2)
+
 	assert.Equal(t, "eager-router", handler.Component.ID())
 	assert.Equal(t, "Combiner", string(handler.Component.Kind()))
 }

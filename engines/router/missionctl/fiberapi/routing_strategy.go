@@ -11,6 +11,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
+	"github.com/gojek/fiber/protocol"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a
@@ -58,35 +59,38 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		TuringRequestID: turingReqID,
 	}
 
-	reqByte, ok := req.Payload().([]byte)
-	if !ok {
-		return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
-	}
-	expPlan, expErr := r.experimentEngine.
-		GetTreatmentForRequest(req.Header(), reqByte, options)
-
-	// Create experiment response object
-	experimentResponse := experiment.NewResponse(expPlan, expErr)
-	// Copy experiment response to the result channel in the context
-	expResultCh, expChErr := experiment.GetExperimentResponseChannel(ctx)
-	if expChErr == nil {
-		expResultCh <- experimentResponse
-		close(expResultCh)
-	}
-
-	// If error, log it and return the fallback(s)
-	if expErr != nil {
-		log.WithContext(ctx).Errorf(expErr.Error())
-		return nil, fallbacks, nil
-	}
-
-	for _, m := range r.experimentMappings {
-		if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
-			// Stop matching on first match because only 1 route is required. Don't send in fallbacks,
-			// because we do not want to suppress the error from the preferred route.
-			return routes[m.Route], []fiber.Component{}, nil
+	// TODO skip experiment engine for grpc now, need convert to http later
+	if req.Protocol() != protocol.GRPC {
+		reqByte, ok := req.Payload().([]byte)
+		if !ok {
+			return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
 		}
-	}
+		expPlan, expErr := r.experimentEngine.
+			GetTreatmentForRequest(req.Header(), reqByte, options)
+
+		// Create experiment response object
+		experimentResponse := experiment.NewResponse(expPlan, expErr)
+		// Copy experiment response to the result channel in the context
+		expResultCh, expChErr := experiment.GetExperimentResponseChannel(ctx)
+		if expChErr == nil {
+			expResultCh <- experimentResponse
+			close(expResultCh)
+		}
+
+		// If error, log it and return the fallback(s)
+		if expErr != nil {
+			log.WithContext(ctx).Errorf(expErr.Error())
+			return nil, fallbacks, nil
+		}
+
+		for _, m := range r.experimentMappings {
+			if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
+				// Stop matching on first match because only 1 route is required. Don't send in fallbacks,
+				// because we do not want to suppress the error from the preferred route.
+				return routes[m.Route], []fiber.Component{}, nil
+			}
+		}
+	} // TODO GRPC implementation. To parse proto message into http json
 
 	// primary route will be nil if there are no matching treatments in the mapping
 	return nil, fallbacks, nil

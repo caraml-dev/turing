@@ -13,13 +13,12 @@ import (
 	"github.com/gojek/fiber/types"
 )
 
-// CreateFiberRequestHandler creates a new Fiber component from the given config file,
-// associates it with a Fiber HTTP handler and returns it.
-func CreateFiberRequestHandler(
+// CreateFiberRouterFromConfig creates a Fiber router from config
+func CreateFiberRouterFromConfig(
 	cfgFilePath string,
-	timeout time.Duration,
 	fiberDebugLog bool,
-) (*fiberhttp.Handler, error) {
+) (fiber.Component, error) {
+
 	component, err := createRouterFromConfigFile(cfgFilePath)
 	if err != nil {
 		return nil, err
@@ -43,8 +42,16 @@ func CreateFiberRequestHandler(
 	// Add the interceptors to the Fiber component
 	component.AddInterceptor(true, interceptors...)
 
-	handler := fiberhttp.NewHandler(component, fiberhttp.Options{Timeout: timeout})
-	return handler, nil
+	return component, err
+}
+
+// CreateFiberRequestHandler creates a new Fiber component from the given config file,
+// associates it with a Fiber HTTP handler and returns it.
+func CreateFiberRequestHandler(
+	component fiber.Component,
+	timeout time.Duration,
+) *fiberhttp.Handler {
+	return fiberhttp.NewHandler(component, fiberhttp.Options{Timeout: timeout})
 }
 
 // createRouterFromConfigFile takes the path to a fiber config file,

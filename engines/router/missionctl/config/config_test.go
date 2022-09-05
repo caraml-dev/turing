@@ -84,6 +84,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    20 * time.Millisecond,
+			Protocol:   "http",
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "",
@@ -148,6 +149,7 @@ func TestInitConfigEnv(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    10 * time.Millisecond,
+			Protocol:   "http",
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "http://localhost:8082",

@@ -143,6 +143,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 	// Collect all treatment responses
 	idx := 0
 	for k, v := range responses {
+
 		vBytes, ok := v.Payload().([]byte)
 		if !ok {
 			return fiber.NewErrorResponse(errors.NewHTTPError(fmt.Errorf("unable to parse treatment response payload")))

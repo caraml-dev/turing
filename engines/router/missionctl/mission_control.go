@@ -50,26 +50,21 @@ func NewMissionControl(
 	ensemblerCfg *config.EnsemblerConfig,
 	appCfg *config.AppConfig,
 ) (MissionControl, error) {
-	// HTTP Client
-	if client == nil {
-		client = http.DefaultClient
-	}
-
-	// Create custom router if routerCfg.ConfigFile is set
-	fiberHandler, err := fiberapi.CreateFiberRequestHandler(
-		routerCfg.ConfigFile,
-		routerCfg.Timeout,
-		appCfg.FiberDebugLog)
-
+	fiberRouter, err := fiberapi.CreateFiberRouterFromConfig(routerCfg.ConfigFile, appCfg.FiberDebugLog)
 	if err != nil {
 		return nil, err
 	}
 
+	if client == nil {
+		client = http.DefaultClient
+	}
+	fiberHandler := fiberapi.CreateFiberRequestHandler(fiberRouter, routerCfg.Timeout)
+
 	return &missionControl{
 		httpClient:        client,
+		fiberHandler:      fiberHandler,
 		enricherEndpoint:  enrichmentCfg.Endpoint,
 		enricherTimeout:   enrichmentCfg.Timeout,
-		router:            fiberHandler,
 		routerTimeout:     routerCfg.Timeout,
 		ensemblerEndpoint: ensemblerCfg.Endpoint,
 		ensemblerTimeout:  ensemblerCfg.Timeout,
@@ -77,12 +72,12 @@ func NewMissionControl(
 }
 
 type missionControl struct {
-	httpClient *http.Client
+	httpClient   *http.Client
+	fiberHandler *fiberhttp.Handler
 
 	enricherEndpoint string
 	enricherTimeout  time.Duration
 
-	router        *fiberhttp.Handler
 	routerTimeout time.Duration
 
 	ensemblerEndpoint string
@@ -223,12 +218,12 @@ func (mc *missionControl) Route(
 
 	// Pass the request to the Fiber Handler and process the response
 	var routerResp mchttp.Response
-	fiberResponse, fiberError := mc.router.DoRequest(httpReq)
+	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
 		routerResp, routerErr = nil, errors.NewHTTPError(fiberError, fiberError.Code)
 	} else if fiberResponse == nil {
 		routerResp, routerErr = nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			"Did not get back a valid response from the router"))
+			"Did not get back a valid response from the fiberHandler"))
 	} else if !fiberResponse.IsSuccess() {
 		routerResp, routerErr = nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
 			"Error response received: status – [%d]", fiberResponse.StatusCode()))

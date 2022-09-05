@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
+	"github.com/gojek/fiber/protocol"
 )
 
 var (
@@ -110,47 +111,50 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	var wg sync.WaitGroup
 	wg.Add(len(s.Rules))
 
-	reqByte, ok := req.Payload().([]byte)
-	if !ok {
-		return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
-	}
+	// TODO skip traffic spltting for grpc now
+	if req.Protocol() != protocol.GRPC {
+		reqByte, ok := req.Payload().([]byte)
+		if !ok {
+			return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
+		}
 
-	for idx, rule := range s.Rules {
-		// test each rule asynchronously and write results into results array
-		go func(rule *TrafficSplittingStrategyRule, idx int) {
-			if res, err := rule.TestRequest(req.Header(), reqByte); err != nil {
-				errCh <- err
-			} else {
-				results[idx] = res
-			}
-			wg.Done()
-		}(rule, idx)
-	}
+		for idx, rule := range s.Rules {
+			// test each rule asynchronously and write results into results array
+			go func(rule *TrafficSplittingStrategyRule, idx int) {
+				if res, err := rule.TestRequest(req.Header(), reqByte); err != nil {
+					errCh <- err
+				} else {
+					results[idx] = res
+				}
+				wg.Done()
+			}(rule, idx)
+		}
 
-	go func() {
-		wg.Wait()
-		doneCh <- true
-	}()
+		go func() {
+			wg.Wait()
+			doneCh <- true
+		}()
 
-	// wait for all rules to be tested or until an error appears in error channel
-	select {
-	case <-doneCh:
-	case err := <-errCh:
-		log.WithContext(ctx).Errorf(err.Error())
-		return nil, nil, createFiberError(err)
-	}
+		// wait for all rules to be tested or until an error appears in error channel
+		select {
+		case <-doneCh:
+		case err := <-errCh:
+			log.WithContext(ctx).Errorf(err.Error())
+			return nil, nil, createFiberError(err)
+		}
 
-	// select primary route and fallbacks, based on the results of testing
-	// given request against traffic-splitting rules
-	for i := 0; i < len(results); i++ {
-		routeID := s.Rules[i].RouteID
-		if results[i] {
-			if r, exists := routes[routeID]; exists {
-				orderedRoutes = append(orderedRoutes, r)
-			} else {
-				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
-				log.WithContext(ctx).Errorf(err.Error())
-				return nil, nil, createFiberError(err)
+		// select primary route and fallbacks, based on the results of testing
+		// given request against traffic-splitting rules
+		for i := 0; i < len(results); i++ {
+			routeID := s.Rules[i].RouteID
+			if results[i] {
+				if r, exists := routes[routeID]; exists {
+					orderedRoutes = append(orderedRoutes, r)
+				} else {
+					err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
+					log.WithContext(ctx).Errorf(err.Error())
+					return nil, nil, createFiberError(err)
+				}
 			}
 		}
 	}
