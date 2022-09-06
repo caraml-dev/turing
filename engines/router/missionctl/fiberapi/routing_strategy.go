@@ -86,7 +86,10 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 
 	// Use the route name path to locate the name of the route to be returned as the final response
 	if r.routeSelectionPolicy.routeNamePath != "" {
-		routeName, err := jsonparser.GetString(experimentResponse.Body(), strings.Split(r.routeSelectionPolicy.routeNamePath, ".")...)
+		routeName, err := jsonparser.GetString(
+			experimentResponse.Body(),
+			strings.Split(r.routeSelectionPolicy.routeNamePath, ".")...,
+		)
 
 		if err != nil {
 			log.WithContext(ctx).Errorf(err.Error())
