@@ -81,7 +81,7 @@ func TestGetHTTPErrorCode(t *testing.T) {
 
 	for _, data := range testErrorSuite {
 		t.Run(data.name, func(t *testing.T) {
-			assert.Equal(t, data.expectedCode, GetHTTPErrorCode(data.err))
+			assert.Equal(t, data.expectedCode, GetErrorCode(data.err, HTTP))
 		})
 	}
 }
@@ -89,7 +89,7 @@ func TestGetHTTPErrorCode(t *testing.T) {
 func TestNewHTTPErrorMessage(t *testing.T) {
 	message := "Test Error Message"
 	err := fmt.Errorf(message)
-	httpErr := NewHTTPError(err)
+	httpErr := NewTuringError(err, HTTP)
 	assert.Equal(t, message, httpErr.Error())
 }
 
@@ -115,7 +115,7 @@ func TestNewHTTPErrorStatus(t *testing.T) {
 			message := "Test Error"
 			err := fmt.Errorf(message)
 			// Create new HTTP error
-			httpErr := NewHTTPError(err, data.codes...)
+			httpErr := NewTuringError(err, HTTP, data.codes...)
 			// Validate
 			assert.Equal(t, data.expectedCode, httpErr.Code)
 			assert.Equal(t, message, httpErr.Message)

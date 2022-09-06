@@ -57,7 +57,7 @@ func (mc *BaseMockMissionControl) Enrich(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
 	return modifyRequestBody(body, map[string]string{"Enricher": "value"}, "Enrich")
 }
@@ -67,7 +67,7 @@ func (mc *BaseMockMissionControl) Route(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (*experiment.Response, mchttp.Response, *errors.HTTPError) {
+) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	mc.Called()
 	resp, err := modifyRequestBody(body, map[string]string{}, "Route")
 	return nil, resp, err
@@ -79,7 +79,7 @@ func (mc *BaseMockMissionControl) Ensemble(
 	header http.Header,
 	requestBody []byte,
 	routerResponse []byte,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	mc.Called(header)
 	return modifyRequestBody(routerResponse, map[string]string{}, "Ensemble")
 }
@@ -100,9 +100,9 @@ func (mc *MockMissionControlBadEnrich) Enrich(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, errors.NewHTTPError(fmt.Errorf("Bad Enrich Called"))
+	return nil, errors.NewTuringError(fmt.Errorf("Bad Enrich Called"), errors.HTTP)
 }
 
 // MockMissionControlBadRoute inherits from BaseMockMissionControl
@@ -116,9 +116,9 @@ func (mc *MockMissionControlBadRoute) Route(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (*experiment.Response, mchttp.Response, *errors.HTTPError) {
+) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, nil, errors.NewHTTPError(fmt.Errorf("Bad Route Called"))
+	return nil, nil, errors.NewTuringError(fmt.Errorf("Bad Route Called"), errors.HTTP)
 }
 
 // MockMissionControlBadEnsemble inherits from BaseMockMissionControl
@@ -133,9 +133,9 @@ func (mc *MockMissionControlBadEnsemble) Ensemble(
 	header http.Header,
 	requestBody []byte,
 	routerResponse []byte,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, errors.NewHTTPError(fmt.Errorf("Bad Ensemble Called"))
+	return nil, errors.NewTuringError(fmt.Errorf("Bad Ensemble Called"), errors.HTTP)
 }
 
 // testLogUtils provides some test methods to verify the request summary logging
@@ -149,7 +149,7 @@ type testLogUtils struct {
 func (l *testLogUtils) copyResponseToLogChannel(
 	key string,
 	r mchttp.Response,
-	httpErr *errors.HTTPError,
+	httpErr *errors.TuringError,
 ) {
 	var requestBody, errorString string
 	if httpErr != nil {
@@ -332,7 +332,7 @@ func TestLogRequestSummary(t *testing.T) {
 
 			// Patch the logging methods
 			monkey.Patch(copyResponseToLogChannel, func(_ context.Context, _ chan<- routerResponse,
-				key string, r mchttp.Response, httpErr *errors.HTTPError,
+				key string, r mchttp.Response, httpErr *errors.TuringError,
 			) {
 				data.logutils.copyResponseToLogChannel(key, r, httpErr)
 			})
@@ -374,12 +374,12 @@ func modifyRequestBody(
 	body []byte,
 	responseHeaders map[string]string,
 	caller string,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	// Parse the body
 	var t testBody
 	err := json.Unmarshal(body, &t)
 	if err != nil {
-		return nil, errors.NewHTTPError(fmt.Errorf("Error occurred in %s: %v", caller, err))
+		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), errors.HTTP)
 	}
 
 	// Append to Value
@@ -388,7 +388,7 @@ func modifyRequestBody(
 	// Convert the data back to string
 	tBytes, err := json.Marshal(t)
 	if err != nil {
-		return nil, errors.NewHTTPError(fmt.Errorf("Error occurred in %s: %v", caller, err))
+		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), errors.HTTP)
 	}
 
 	httpHeader := http.Header{
@@ -406,7 +406,7 @@ func modifyRequestBody(
 	}
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(httpResponse)
 	if err != nil {
-		return nil, errors.NewHTTPError(err)
+		return nil, errors.NewTuringError(err, errors.HTTP)
 	}
 	return mcResp, nil
 }

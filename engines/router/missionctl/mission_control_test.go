@@ -257,7 +257,7 @@ func assertNil(t *testing.T, actualResp []byte, _ string) {
 // Global variables for benchmark tests, to ensure compiler optimization doesn't
 // eliminate function calls
 var benchMarkResp mchttp.Response
-var benchMarkHTTPErr *errors.HTTPError
+var benchMarkHTTPErr *errors.TuringError
 
 func benchmarkEnrich(payloadFileName string, b *testing.B) {
 	missionCtl, _ := NewMissionControl(

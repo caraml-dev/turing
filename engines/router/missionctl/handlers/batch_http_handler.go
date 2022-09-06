@@ -33,7 +33,7 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 }
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	var httpErr *errors.HTTPError
+	var httpErr *errors.TuringError
 	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
 	defer measureDurationFunc()
 
@@ -64,7 +64,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
+		h.error(ctx, rw, errors.NewTuringError(err, errors.HTTP))
 		return
 	}
 
@@ -72,8 +72,8 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	var batchRequests []json.RawMessage
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
-			`Invalid json request`)))
+		h.error(ctx, rw, errors.NewTuringError(errors.Newf(errors.BadInput,
+			`Invalid json request`), errors.HTTP))
 		return
 	}
 

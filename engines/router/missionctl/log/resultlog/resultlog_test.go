@@ -237,17 +237,17 @@ func makeTestTuringResultLogEntry(t *testing.T) (context.Context, *TuringResultL
 
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
-	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
-	entry.AddResponse("experiment", nil, nil, "Error received")
+	entry := NewTuringResultLogEntry(ctx, timestamp, req.Header, string(reqBody))
+	entry.AddResponse("experiment", "", nil, "Error received")
 	entry.AddResponse(
 		"router",
-		[]byte(`{"key": "router_data"}`),
+		`{"key": "router_data"}`,
 		map[string]string{"Content-Encoding": "gzip", "Content-Type": "text/html,charset=utf-8"},
 		"",
 	)
 	entry.AddResponse(
 		"enricher",
-		[]byte(`{"key": "enricher_data"}`),
+		`{"key": "enricher_data"}`,
 		map[string]string{"Content-Encoding": "lz4", "Content-Type": "text/html,charset=utf-8"},
 		"",
 	)

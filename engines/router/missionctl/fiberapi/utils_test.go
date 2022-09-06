@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fibererror "github.com/gojek/fiber/errors"
+	"github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,7 +34,7 @@ func TestCreateFiberError(t *testing.T) {
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, data.expectedErr, createFiberError(data.err))
+			assert.Equal(t, data.expectedErr, createFiberError(data.err, protocol.HTTP))
 		})
 	}
 }

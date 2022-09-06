@@ -140,7 +140,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		case <-doneCh:
 		case err := <-errCh:
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err)
+			return nil, nil, createFiberError(err, req.Protocol())
 		}
 
 		// select primary route and fallbacks, based on the results of testing
@@ -153,7 +153,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 				} else {
 					err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 					log.WithContext(ctx).Errorf(err.Error())
-					return nil, nil, createFiberError(err)
+					return nil, nil, createFiberError(err, req.Protocol())
 				}
 			}
 		}
@@ -166,7 +166,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		} else {
 			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err)
+			return nil, nil, createFiberError(err, req.Protocol())
 		}
 	}
 

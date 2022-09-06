@@ -10,6 +10,7 @@ import (
 	"github.com/gojek/fiber/config"
 	fibererror "github.com/gojek/fiber/errors"
 	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/gojek/fiber/protocol"
 	"github.com/gojek/fiber/types"
 )
 
@@ -66,9 +67,9 @@ func createRouterFromConfigFile(cfgFilePath string) (fiber.Component, error) {
 }
 
 // createFiberError wraps the input error in a format that is usable by Fiber
-func createFiberError(err error) fibererror.FiberError {
+func createFiberError(err error, protocol protocol.Protocol) fibererror.FiberError {
 	return fibererror.FiberError{
-		Code:    errors.GetHTTPErrorCode(err),
+		Code:    errors.GetErrorCode(err, errors.ErrorProtocol(protocol)),
 		Message: err.Error(),
 	}
 }

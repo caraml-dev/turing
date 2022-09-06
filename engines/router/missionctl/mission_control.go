@@ -25,18 +25,18 @@ type MissionControl interface {
 		ctx context.Context,
 		header http.Header,
 		body []byte,
-	) (mchttp.Response, *errors.HTTPError)
+	) (mchttp.Response, *errors.TuringError)
 	Route(
 		ctx context.Context,
 		header http.Header,
 		body []byte,
-	) (*experiment.Response, mchttp.Response, *errors.HTTPError)
+	) (*experiment.Response, mchttp.Response, *errors.TuringError)
 	Ensemble(
 		ctx context.Context,
 		header http.Header,
 		requestBody []byte,
 		routerResponse []byte,
-	) (mchttp.Response, *errors.HTTPError)
+	) (mchttp.Response, *errors.TuringError)
 	IsEnricherEnabled() bool
 	IsEnsemblerEnabled() bool
 }
@@ -113,13 +113,13 @@ func (mc *missionControl) doPost(
 	body []byte,
 	timeout time.Duration,
 	componentLabel string,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	req, err := createNewHTTPRequest(ctx, http.MethodPost, url, header, body)
 	if err != nil {
-		return nil, errors.NewHTTPError(err)
+		return nil, errors.NewTuringError(err, errors.HTTP)
 	}
 
 	// Make HTTP request and measure duration
@@ -138,7 +138,7 @@ func (mc *missionControl) doPost(
 	stopTimer()
 
 	if err != nil {
-		return nil, errors.NewHTTPError(err)
+		return nil, errors.NewTuringError(err, errors.HTTP)
 	}
 
 	// Defer close non-nil response body
@@ -147,14 +147,14 @@ func (mc *missionControl) doPost(
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", resp.StatusCode))
+		return nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
+			"Error response received: status – [%d]", resp.StatusCode), errors.HTTP)
 	}
 
 	// No error, convert to mission control response and return
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(resp)
 	if err != nil {
-		return nil, errors.NewHTTPError(err)
+		return nil, errors.NewTuringError(err, errors.HTTP)
 	}
 	return mcResp, nil
 }
@@ -165,8 +165,8 @@ func (mc *missionControl) Enrich(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (mchttp.Response, *errors.HTTPError) {
-	var httpErr *errors.HTTPError
+) (mchttp.Response, *errors.TuringError) {
+	var httpErr *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -190,8 +190,8 @@ func (mc *missionControl) Route(
 	ctx context.Context,
 	header http.Header,
 	body []byte,
-) (*experiment.Response, mchttp.Response, *errors.HTTPError) {
-	var routerErr *errors.HTTPError
+) (*experiment.Response, mchttp.Response, *errors.TuringError) {
+	var routerErr *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -212,7 +212,7 @@ func (mc *missionControl) Route(
 	// Create a new POST request with the input body and header
 	httpReq, err := createNewHTTPRequest(ctx, http.MethodPost, "", header, body)
 	if err != nil {
-		routerErr = errors.NewHTTPError(err)
+		routerErr = errors.NewTuringError(err, errors.HTTP)
 		return nil, nil, routerErr
 	}
 
@@ -220,18 +220,18 @@ func (mc *missionControl) Route(
 	var routerResp mchttp.Response
 	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
-		routerResp, routerErr = nil, errors.NewHTTPError(fiberError, fiberError.Code)
+		routerResp, routerErr = nil, errors.NewTuringError(fiberError, errors.HTTP, fiberError.Code)
 	} else if fiberResponse == nil {
-		routerResp, routerErr = nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			"Did not get back a valid response from the fiberHandler"))
+		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
+			"Did not get back a valid response from the fiberHandler"), errors.HTTP)
 	} else if !fiberResponse.IsSuccess() {
-		routerResp, routerErr = nil, errors.NewHTTPError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", fiberResponse.StatusCode()))
+		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
+			"Error response received: status – [%d]", fiberResponse.StatusCode()), errors.HTTP)
 	} else {
 		httpResp := fiberResponse.(*fiberhttp.Response)
 		httpPayload, ok := httpResp.Payload().([]byte)
 		if !ok {
-			routerResp, routerErr = nil, errors.NewHTTPError(fmt.Errorf("unable to parse respond payload"))
+			routerResp, routerErr = nil, errors.NewTuringError(fmt.Errorf("unable to parse respond payload"), errors.HTTP)
 		} else {
 			routerResp, routerErr = mchttp.NewCachedResponse(httpPayload, httpResp.Header()), nil
 		}
@@ -257,8 +257,8 @@ func (mc *missionControl) Ensemble(
 	header http.Header,
 	requestBody []byte,
 	routerResponse []byte,
-) (mchttp.Response, *errors.HTTPError) {
-	var httpErr *errors.HTTPError
+) (mchttp.Response, *errors.TuringError) {
+	var httpErr *errors.TuringError
 	// Measure execution time for Ensemble
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -289,7 +289,7 @@ func (mc *missionControl) Ensemble(
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)
 	timer()
 	if err != nil {
-		httpErr = errors.NewHTTPError(err)
+		httpErr = errors.NewTuringError(err, errors.HTTP)
 		return nil, httpErr
 	}
 

@@ -36,7 +36,7 @@ type httpHandler struct {
 func (h *httpHandler) error(
 	ctx context.Context,
 	rw http.ResponseWriter,
-	err *errors.HTTPError,
+	err *errors.TuringError,
 ) {
 	// Get the turing request id from the context
 	turingReqID, _ := turingctx.GetRequestID(ctx)
@@ -48,7 +48,7 @@ func (h *httpHandler) error(
 }
 
 // getMeasureDurationFunc return the func that measures the duration of the request
-func (h *httpHandler) getMeasureDurationFunc(httpErr *errors.HTTPError) func() {
+func (h *httpHandler) getMeasureDurationFunc(httpErr *errors.TuringError) func() {
 	// Measure the duration of handler function
 	return metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -78,7 +78,7 @@ func (h *httpHandler) getPrediction(
 	req *http.Request,
 	ctxLogger *zap.SugaredLogger,
 	requestBody []byte,
-) (mchttp.Response, *errors.HTTPError) {
+) (mchttp.Response, *errors.TuringError) {
 	// Create response channel to store the response from each step. Allocate buffer size = 4
 	// (max responses possible, from enricher, experiment engine, router and ensembler respectively).
 	respCh := make(chan routerResponse, 4)
@@ -115,9 +115,9 @@ func (h *httpHandler) getPrediction(
 	var expResp *experiment.Response
 	expResp, resp, httpErr := h.Route(ctx, postEnrichmentResponseHeader, payload)
 	if expResp != nil {
-		var expErr *errors.HTTPError
+		var expErr *errors.TuringError
 		if expResp.Error != "" {
-			expErr = errors.NewHTTPError(fmt.Errorf(expResp.Error))
+			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), errors.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
 			copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
@@ -141,7 +141,7 @@ func (h *httpHandler) getPrediction(
 }
 
 func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	var httpErr *errors.HTTPError
+	var httpErr *errors.TuringError
 	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
 	defer measureDurationFunc()
 
@@ -176,7 +176,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
+		h.error(ctx, rw, errors.NewTuringError(err, errors.HTTP))
 		return
 	}
 

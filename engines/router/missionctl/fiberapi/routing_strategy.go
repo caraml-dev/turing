@@ -63,7 +63,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	if req.Protocol() != protocol.GRPC {
 		reqByte, ok := req.Payload().([]byte)
 		if !ok {
-			return nil, nil, errors.NewHTTPError(fmt.Errorf("unable to parse request payload to exp engine"))
+			return nil, nil, errors.NewTuringError(fmt.Errorf("unable to parse request payload to exp engine"), errors.HTTP)
 		}
 		expPlan, expErr := r.experimentEngine.
 			GetTreatmentForRequest(req.Header(), reqByte, options)

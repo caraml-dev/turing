@@ -4,12 +4,14 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
@@ -20,8 +22,6 @@ import (
 )
 
 type MissionControlGrpc interface {
-	IsEnricherEnabled() bool
-	IsEnsemblerEnabled() bool
 	PredictValues(
 		ctx context.Context,
 		req *upiv1.PredictValuesRequest,
@@ -34,10 +34,6 @@ type missionControlGrpc struct {
 
 const turingReqIDHeaderKey = "Turing-Req-ID"
 const tracingComponentId = "grpc_handler"
-
-func (mc *missionControlGrpc) IsEnricherEnabled() bool { return false }
-
-func (mc *missionControlGrpc) IsEnsemblerEnabled() bool { return false }
 
 // NewMissionControlGrpc creates new instance of the MissingControl,
 // based on the grpc configuration of fiber.yaml
@@ -58,10 +54,6 @@ func NewMissionControlGrpc(
 func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv1.PredictValuesRequest) (
 	*upiv1.PredictValuesResponse, error) {
 
-	var err error
-	measureDurationFunc := getMeasureDurationFunc(err)
-	defer measureDurationFunc()
-
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(parentCtx)
 	// Create context logger
@@ -79,6 +71,10 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 	ctxLogger.Debugf("Received request for %v", turingReqID)
 
 	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		ctxLogger.Errorf("Could not fetch headers from context: %v",
+			err.Error())
+	}
 	md.Set(turingReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
@@ -93,34 +89,82 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 		Message:  req,
 		Metadata: md,
 	}
-	resp, ok := <-mc.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
-	if !ok {
-		err = errors.NewHTTPError(
-			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"),
-		)
+	var predictionErr *errors.TuringError
+	measureDurationFunc := getMeasureDurationFunc(predictionErr, tracingComponentId)
+	defer measureDurationFunc()
+
+	resp, predictionErr := mc.getPrediction(ctx, fiberRequest)
+	if predictionErr != nil {
+		logTuringRouterRequestError(ctx, predictionErr)
+		return nil, predictionErr
+	}
+	return resp, nil
+}
+
+func (mc *missionControlGrpc) getPrediction(ctx context.Context, fiberRequest fiber.Request) (*upiv1.PredictValuesResponse, *errors.TuringError) {
+
+	// Create response channel to store the response from each step. 1 for route now
+	respCh := make(chan grpcRouterResponse, 1)
+	defer close(respCh)
+
+	// Defer logging request summary
+	defer func() {
+		go logTuringRouterRequestSummary(ctx, time.Now(), fiberRequest.Header(), fiberRequest.Payload().(*upiv1.PredictValuesRequest), respCh)
+	}()
+
+	// Calling Routes via fiber
+	resp, err := mc.Route(ctx, fiberRequest)
+	if err != nil {
 		return nil, err
 	}
+
+	return resp, err
+}
+
+func (mc *missionControlGrpc) Route(ctx context.Context, fiberRequest fiber.Request) (*upiv1.PredictValuesResponse, *errors.TuringError) {
+	var turingError *errors.TuringError
+	measureDurationFunc := getMeasureDurationFunc(turingError, "route")
+	defer measureDurationFunc()
+
+	resp, ok := <-mc.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
+	if !ok {
+		turingError = errors.NewTuringError(
+			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), errors.GRPC,
+		)
+		return nil, turingError
+	}
 	if !resp.IsSuccess() {
-		return nil, errors.Newf(errors.BadResponse, string(resp.Payload().([]byte)))
+		return nil, &errors.TuringError{
+			Code:    resp.StatusCode(),
+			Message: string(resp.Payload().([]byte)),
+		}
 	}
 
 	var responseProto upiv1.PredictValuesResponse
 	payload, ok := resp.Payload().(proto.Message)
 	if !ok {
-		return nil, errors.Newf(errors.BadResponse, "unable to parse fiber response into proto")
+		turingError = errors.NewTuringError(
+			errors.Newf(errors.BadResponse, "unable to parse fiber response into proto"), errors.GRPC,
+		)
+		return nil, turingError
 	}
 	payloadByte, err := proto.Marshal(payload)
 	if err != nil {
-		return nil, errors.Newf(errors.BadResponse, "unable to marshal payload")
+		turingError = errors.NewTuringError(
+			errors.Newf(errors.BadResponse, "unable to marshal payload"), errors.GRPC,
+		)
+		return nil, turingError
 	}
 	err = proto.Unmarshal(payloadByte, &responseProto)
 	if err != nil {
-		return nil, errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto")
+		turingError = errors.NewTuringError(
+			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), errors.GRPC,
+		)
+		return nil, turingError
 	}
 	return &responseProto, nil
 }
-
-func getMeasureDurationFunc(err error) func() {
+func getMeasureDurationFunc(err error, componentName string) func() {
 	// Measure the duration of handler function
 	return metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -129,7 +173,7 @@ func getMeasureDurationFunc(err error) func() {
 				return metrics.GetStatusString(err == nil)
 			},
 			"component": func() string {
-				return tracingComponentId
+				return componentName
 			},
 		},
 	)
@@ -148,7 +192,7 @@ func enableTracingSpan(ctx context.Context, req metadata.MD, operationName strin
 }
 
 // logTuringRouterRequestError logs the given turing request id and the error data
-func logTuringRouterRequestError(ctx context.Context, err *errors.HTTPError) {
+func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 	logger := log.WithContext(ctx)
 	defer func() {
 		_ = logger.Sync()
@@ -157,4 +201,39 @@ func logTuringRouterRequestError(ctx context.Context, err *errors.HTTPError) {
 		"error", err.Message,
 		"status", err.Code,
 	)
+}
+
+type grpcRouterResponse struct {
+	key    string
+	header metadata.MD
+	body   upiv1.PredictValuesResponse
+	err    string
+}
+
+func logTuringRouterRequestSummary(
+	ctx context.Context,
+	timestamp time.Time,
+	header metadata.MD,
+	body *upiv1.PredictValuesRequest,
+	mcRespCh <-chan grpcRouterResponse,
+) {
+
+	// Create a new TuringResultLogEntry record with the context and request info
+	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, body.String())
+
+	// Read incoming responses and prepare for logging
+	for resp := range mcRespCh {
+		// If error exists, add an error record
+		if resp.err != "" {
+			logEntry.AddResponse(resp.key, "", nil, resp.err)
+		} else {
+			logEntry.AddResponse(resp.key, resp.body.String(), resultlog.FormatHeader(resp.header), "")
+		}
+	}
+
+	// Log the responses. If an error occurs in logging the result to the
+	// configured result log destination, log the error.
+	if err := resultlog.LogEntry(logEntry); err != nil {
+		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+	}
 }
