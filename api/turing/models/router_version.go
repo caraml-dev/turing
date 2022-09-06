@@ -43,6 +43,8 @@ type RouterVersion struct {
 	ExperimentEngine *ExperimentEngine `json:"experiment_engine"`
 	// Resource requests for deployment
 	ResourceRequest *ResourceRequest `json:"resource_request"`
+	// Autoscaling policy for the deployment
+	AutoscalingPolicy *AutoscalingPolicy `json:"autoscaling_policy"`
 	// Request timeout as a valid quantity string
 	Timeout string `json:"timeout"`
 	// Logging configuration for the router

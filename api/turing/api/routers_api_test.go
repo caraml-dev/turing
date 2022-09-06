@@ -223,6 +223,10 @@ func TestCreateRouter(t *testing.T) {
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},
+		AutoscalingPolicy: &models.AutoscalingPolicy{
+			Metric: "concurrency",
+			Target: "1",
+		},
 		Status: models.RouterVersionStatusPending,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
@@ -367,6 +371,10 @@ func TestUpdateRouter(t *testing.T) {
 		},
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
+		},
+		AutoscalingPolicy: &models.AutoscalingPolicy{
+			Metric: "concurrency",
+			Target: "1",
 		},
 		Status: models.RouterVersionStatusPending,
 	}

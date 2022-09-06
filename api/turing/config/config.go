@@ -228,7 +228,6 @@ type KubernetesLabelConfigs struct {
 // KnativeServiceDefaults captures some of the configurable defaults specific to
 // Knative services
 type KnativeServiceDefaults struct {
-	TargetConcurrency               int
 	QueueProxyResourcePercentage    int
 	UserContainerLimitRequestFactor float64
 }

@@ -90,6 +90,10 @@ var validRouterConfig = RouterConfig{
 			Format: "1G",
 		},
 	},
+	AutoscalingPolicy: &models.AutoscalingPolicy{
+		Metric: models.AutoscalingMetricCPU,
+		Target: "80",
+	},
 	Timeout: "10s",
 	LogConfig: &LogConfig{
 		ResultLoggerType: "bigquery",
@@ -110,6 +114,10 @@ var validRouterConfig = RouterConfig{
 				Format: "1G",
 			},
 		},
+		AutoscalingPolicy: &models.AutoscalingPolicy{
+			Metric: models.AutoscalingMetricRPS,
+			Target: "100",
+		},
 		Endpoint: "endpoint",
 		Timeout:  "6s",
 		Port:     8080,
@@ -127,6 +135,10 @@ var validRouterConfig = RouterConfig{
 			ResourceRequest: &models.ResourceRequest{
 				CPURequest:    resource.Quantity{Format: "500m"},
 				MemoryRequest: resource.Quantity{Format: "1Gi"},
+			},
+			AutoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricRPS,
+				Target: "200",
 			},
 			Timeout: "5s",
 		},
@@ -314,7 +326,7 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 	}
 }
 
-func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
+func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 	defaults := config.RouterDefaults{
 		Image:                   "routerimage",
 		FiberDebugLogEnabled:    true,
@@ -357,6 +369,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 				Format: "1G",
 			},
 		},
+		AutoscalingPolicy: &models.AutoscalingPolicy{
+			Metric: models.AutoscalingMetricCPU,
+			Target: "80",
+		},
 		Timeout: "10s",
 		LogConfig: &models.LogConfig{
 			LogLevel:             "DEBUG",
@@ -382,6 +398,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 					Format: "1G",
 				},
 			},
+			AutoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricRPS,
+				Target: "100",
+			},
 			Endpoint: "endpoint",
 			Timeout:  "6s",
 			Port:     8080,
@@ -399,6 +419,10 @@ func TestRequestBuildRouterVersionWithDefaults(t *testing.T) {
 				ResourceRequest: &models.ResourceRequest{
 					CPURequest:    resource.Quantity{Format: "500m"},
 					MemoryRequest: resource.Quantity{Format: "1Gi"},
+				},
+				AutoscalingPolicy: &models.AutoscalingPolicy{
+					Metric: models.AutoscalingMetricRPS,
+					Target: "200",
 				},
 				Timeout: "5s",
 			},
@@ -585,4 +609,50 @@ func TestBuildExperimentEngineConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDefaultAutoscalingPolicy(t *testing.T) {
+	defaults := config.RouterDefaults{
+		Image:                   "routerimage",
+		FiberDebugLogEnabled:    true,
+		CustomMetricsEnabled:    true,
+		JaegerEnabled:           true,
+		JaegerCollectorEndpoint: "jaegerendpoint",
+		LogLevel:                "DEBUG",
+		FluentdConfig: &config.FluentdConfig{
+			Image: "fluentdimage",
+			Tag:   "fluentdtag",
+		},
+	}
+
+	// Get a default working router
+	projectID := models.ID(1)
+	router := createOrUpdateRequest.BuildRouter(projectID)
+
+	// Set up mock Crypto service
+	cryptoSvc := &mocks.CryptoService{}
+	cryptoSvc.On("Encrypt", "dummy_passkey").Return("enc_passkey", nil)
+
+	// Set up mock Experiment service
+	expSvc := &mocks.ExperimentsService{}
+	expSvc.On("IsClientSelectionEnabled", mock.Anything).Return(true, nil)
+
+	// Set up mock Ensembler service
+	ensemblerSvc := &mocks.EnsemblersService{}
+
+	var routerConfig RouterConfig = validRouterConfig
+	routerConfig.AutoscalingPolicy = nil
+	routerConfig.Enricher.AutoscalingPolicy = nil
+	routerConfig.Ensembler.DockerConfig.AutoscalingPolicy = nil
+
+	expectedAutoscalingPolicy := &models.AutoscalingPolicy{
+		Metric: models.AutoscalingMetricConcurrency,
+		Target: "1",
+	}
+
+	got, err := routerConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedAutoscalingPolicy, got.AutoscalingPolicy)
+	assert.Equal(t, expectedAutoscalingPolicy, got.Enricher.AutoscalingPolicy)
+	assert.Equal(t, expectedAutoscalingPolicy, got.Ensembler.DockerConfig.AutoscalingPolicy)
 }

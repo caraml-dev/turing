@@ -90,7 +90,6 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
-	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -131,7 +130,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		ContainerPort:                   routerPort,
 		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
 		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
-		TargetConcurrency:               knativeTargetConcurrency,
+		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
+		AutoscalingTarget:               routerVersion.AutoscalingPolicy.Target,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}

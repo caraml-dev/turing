@@ -136,7 +136,6 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       config.Quantity(resource.MustParse("8Gi")),
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					TargetConcurrency:               1,
 					QueueProxyResourcePercentage:    30,
 					UserContainerLimitRequestFactor: 1,
 				},
@@ -202,7 +201,6 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       config.Quantity(resource.MustParse("4000Mi")),
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					TargetConcurrency:               2,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
@@ -288,7 +286,6 @@ func TestLoad(t *testing.T) {
 					MaxMemory:       config.Quantity(resource.MustParse("12Gi")),
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					TargetConcurrency:               2,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
@@ -372,7 +369,6 @@ func TestLoad(t *testing.T) {
 				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
 				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
 				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
-				"KNATIVESERVICEDEFAULTS_TARGETCONCURRENCY":       "4",
 			},
 			want: &config.Config{
 				Port:           5000,
@@ -391,7 +387,6 @@ func TestLoad(t *testing.T) {
 					MigrationsFolder: "db-migrations/",
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					TargetConcurrency:               4,
 					QueueProxyResourcePercentage:    20,
 					UserContainerLimitRequestFactor: 1.25,
 				},
