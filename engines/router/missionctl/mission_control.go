@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -98,7 +98,7 @@ func createNewHTTPRequest(
 ) (*http.Request, error) {
 	// Create new http request with the input body, ctx, url and method
 	req, err := http.NewRequestWithContext(ctx, httpMethod, url,
-		ioutil.NopCloser(bytes.NewReader(body)))
+		io.NopCloser(bytes.NewReader(body)))
 	if err != nil {
 		return nil, err
 	}

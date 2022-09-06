@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"sort"
 	"testing"
@@ -223,7 +223,7 @@ func makeTestResponseQueue(endpointNames ...string) fiber.ResponseQueue {
 	// Populate fiber responses into the channel
 	for _, e := range endpointNames {
 		payload := fmt.Sprintf(`{"value": "%s"}`, e)
-		body := ioutil.NopCloser(bytes.NewReader([]byte(payload)))
+		body := io.NopCloser(bytes.NewReader([]byte(payload)))
 		resp := &http.Response{
 			StatusCode: 200,
 			Body:       body,

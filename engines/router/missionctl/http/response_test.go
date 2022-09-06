@@ -2,7 +2,7 @@ package http
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -49,7 +49,7 @@ func makeTestHTTPResponse() *http.Response {
 
 	testResp := http.Response{
 		Header: header,
-		Body:   ioutil.NopCloser(bytes.NewReader(body)),
+		Body:   io.NopCloser(bytes.NewReader(body)),
 	}
 
 	return &testResp

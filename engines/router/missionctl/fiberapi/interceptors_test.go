@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -126,7 +125,7 @@ func (t *mockTracer) StartSpanFromContext(
 	return nil, nil
 }
 func (*mockTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (io.Closer, error) {
-	return ioutil.NopCloser(nil), nil
+	return io.NopCloser(nil), nil
 }
 
 // Test that a startTimeKey has been associated to the context
@@ -365,7 +364,7 @@ func createTestFiberResponseQueue(respStatus int) fiber.ResponseQueue {
 	testBody := []byte(`Test Body`)
 	httpResp := http.Response{
 		StatusCode: respStatus,
-		Body:       ioutil.NopCloser(bytes.NewBuffer(testBody)),
+		Body:       io.NopCloser(bytes.NewBuffer(testBody)),
 	}
 	fiberResp := fiberhttp.NewHTTPResponse(&httpResp)
 	queue := fiber.NewResponseQueueFromResponses(fiberResp)
