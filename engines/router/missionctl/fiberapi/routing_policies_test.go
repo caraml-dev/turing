@@ -60,6 +60,18 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 			props:   json.RawMessage(`{}`),
 			success: true,
 		},
+		"success | with route name path": {
+			props: json.RawMessage(`{
+				"default_route_id":  "route-1",
+				"experiment_engine": "Test",
+				"route_name_path": "policy.route_name"			
+			}`),
+			expectedPolicy: routeSelectionPolicy{
+				defaultRoute:  "route-1",
+				routeNamePath: "policy.route_name",
+			},
+			success: true,
+		},
 		"failure | invalid data": {
 			props:   json.RawMessage(`invalid_data`),
 			success: false,

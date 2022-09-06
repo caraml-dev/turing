@@ -51,6 +51,23 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 				},
 			},
 		},
+		"success | with route name path": {
+			properties: json.RawMessage(`{
+				"default_route_id":  "route1",
+				"experiment_engine": "Test",
+				"route_name_path": "policy.route_name"	
+			}`),
+			success: true,
+			expected: DefaultTuringRoutingStrategy{
+				routeSelectionPolicy: &routeSelectionPolicy{
+					defaultRoute:  "route1",
+					routeNamePath: "policy.route_name",
+				},
+				experimentationPolicy: &experimentationPolicy{
+					experimentEngine: nil,
+				},
+			},
+		},
 		"missing_route_policy": {
 			properties: json.RawMessage(`{
 				"experiment_engine": "Test"
@@ -103,6 +120,9 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 		treatment runner.Treatment
 		// experimentMappings in routeSelectionPolicy to select a route from the treatment and experiment in the treatment
 		experimentMappings []experimentMapping
+		// routeNamePath in routeSelectionPolicy that contains the treatment config path that has the name of the route
+		// to be used as the final response
+		routeNamePath string
 		// if true, experiment runner will return an error when the caller calls GetTreatmentForRequest()
 		experimentRunnerWantErr bool
 		// defaultRoute in routeSelectionPolicy for fallback, it should match one of the endpoints above to be valid
@@ -130,6 +150,20 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			),
 			expectedFallbacks: []fiber.Component{},
 		},
+		"match for route name in route name path in treatment config and route names should select the correct route": {
+			endpoints: []string{"route-A", "route-B"},
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder", "route_name": "route-A"}`),
+			},
+			routeNamePath: "route_name",
+			expectedRoute: fiber.NewProxy(
+				fiber.NewBackend("route-A", ""),
+				tfu.NewFiberCallerWithHTTPDispatcher(t, "route-A"),
+			),
+			expectedFallbacks: []fiber.Component{},
+		},
 		"no match for treatment and experiment in the mappings should select no route and fallback to default route": {
 			endpoints: []string{"route-A", "route-B", "control"},
 			treatment: runner.Treatment{
@@ -140,6 +174,41 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			experimentMappings: []experimentMapping{
 				{Experiment: "test_experiment", Treatment: "treatment-0", Route: "route-B"},
 			},
+			defaultRoute:  "control",
+			expectedRoute: nil,
+			expectedFallbacks: []fiber.Component{
+				fiber.NewProxy(
+					fiber.NewBackend("control", ""),
+					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+				),
+			},
+		},
+		"no match for route name in treatment config and route names should select no route and fallback to default " +
+			"route": {
+			endpoints: []string{"route-A", "route-B", "control"},
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder", "route_name": "route-C"}`),
+			},
+			routeNamePath: "route_name",
+			defaultRoute:  "control",
+			expectedRoute: nil,
+			expectedFallbacks: []fiber.Component{
+				fiber.NewProxy(
+					fiber.NewBackend("control", ""),
+					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+				),
+			},
+		},
+		"route name path not be found in treatment config should select no route and fallback to default route": {
+			endpoints: []string{"route-A", "route-B", "control"},
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder", "route_name": "route-A"}`),
+			},
+			routeNamePath: "policy.route_name",
 			defaultRoute:  "control",
 			expectedRoute: nil,
 			expectedFallbacks: []fiber.Component{
@@ -160,7 +229,24 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				),
 			},
 		},
-		"no experiment mappings and no default route should select no route and have no fallback to default route": {
+		"no route name path configured should select no route and fallback to default route": {
+			endpoints: []string{"route-A", "route-B"},
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder", "route_name": "route-A"}`),
+			},
+			expectedRoute: nil,
+			defaultRoute:  "route-B",
+			expectedFallbacks: []fiber.Component{
+				fiber.NewProxy(
+					fiber.NewBackend("route-B", ""),
+					tfu.NewFiberCallerWithHTTPDispatcher(t, "route-B"),
+				),
+			},
+		},
+		"no route name path, no experiment mappings, and no default route should select no route and have no fallback " +
+			"to default route": {
 			endpoints:         []string{"treatment-B", "treatment-C"},
 			expectedRoute:     nil,
 			expectedFallbacks: []fiber.Component{},
@@ -200,6 +286,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				&routeSelectionPolicy{
 					defaultRoute:       data.defaultRoute,
 					experimentMappings: data.experimentMappings,
+					routeNamePath:      data.routeNamePath,
 				},
 			}
 			route, fallbacks, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
