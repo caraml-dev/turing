@@ -548,6 +548,8 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/TrafficRule"
+        default_traffic_rule:
+          $ref: "#/components/schemas/DefaultTrafficRule"
 
     ResultLoggerType:
       type: "string"
@@ -617,6 +619,8 @@ components:
             $ref: "#/components/schemas/TrafficRule"
         default_route_id:
           type: "string"
+        default_traffic_rule:
+          $ref: "#/components/schemas/DefaultTrafficRule"
         experiment_engine:
           $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
         resource_request:
@@ -656,6 +660,17 @@ components:
         annotations:
           type: "object"
           nullable: true
+
+    DefaultTrafficRule:
+      type: "object"
+      required:
+        - routes
+      properties:
+        routes:
+          type: "array"
+          description: "List of IDs of the routes, that should be activated by this rule"
+          items:
+            type: "string"
 
     TrafficRule:
       type: "object"

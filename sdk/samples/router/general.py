@@ -1,3 +1,4 @@
+from sdk.turing.router.config.traffic_rule import DefaultTrafficRule
 import turing
 import turing.batch
 import turing.batch.config
@@ -49,6 +50,9 @@ def main(turing_api: str, project: str):
     # When defining a traffic rule, one would need to decide between using a `HeaderTrafficRuleCondition` or a
     # `PayloadTrafficRuleCondition`. These subclasses can be used to build a `TrafficRuleCondition` without having to
     # manually set attributes such as `field_source` or `operator`.
+    default_traffic_rule = DefaultTrafficRule(
+        routes=["control"],
+    )
     rules = [
         TrafficRule(
             name="cat-rule",
@@ -149,6 +153,7 @@ def main(turing_api: str, project: str):
         environment_name="id-dev",
         name="what-does-the-fox-say",
         routes=routes,
+        default_traffic_rule=default_traffic_rule,
         rules=rules,
         experiment_engine=experiment_config,
         resource_request=resource_request,

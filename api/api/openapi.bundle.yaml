@@ -1851,12 +1851,17 @@ components:
       type: string
     RouterVersion:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         image: image
         created_at: 2000-01-23T04:56:07.000+00:00
         rules:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -1871,6 +1876,7 @@ components:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -2039,6 +2045,8 @@ components:
           items:
             $ref: '#/components/schemas/TrafficRule'
           type: array
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
       type: object
     RouterVersionStatus:
       default: pending
@@ -2390,10 +2398,10 @@ components:
       type: object
     TrafficRule:
       example:
-        name: name
         routes:
         - routes
         - routes
+        name: name
         conditions:
         - field: field
           values:
@@ -2419,8 +2427,8 @@ components:
             type: string
           type: array
       required:
-      - name
       - conditions
+      - name
       - routes
       type: object
     TrafficRuleCondition:
@@ -2451,10 +2459,29 @@ components:
       - operator
       - values
       type: object
+    DefaultTrafficRule:
+      example:
+        routes:
+        - routes
+        - routes
+      properties:
+        routes:
+          description: List of IDs of the routes, that should be activated by this
+            rule
+          items:
+            type: string
+          type: array
+      required:
+      - routes
+      type: object
     RouterConfig:
       example:
         name: name
         config:
+          default_traffic_rule:
+            routes:
+            - routes
+            - routes
           enricher:
             service_account: secret-name-for-google-service-account
             image: image
@@ -2490,6 +2517,7 @@ components:
           - routes:
             - routes
             - routes
+            name: name
             conditions:
             - field: field
               values:
@@ -2504,6 +2532,7 @@ components:
           - routes:
             - routes
             - routes
+            name: name
             conditions:
             - field: field
               values:
@@ -2592,6 +2621,10 @@ components:
       type: object
     RouterVersionConfig:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         enricher:
           service_account: secret-name-for-google-service-account
           image: image
@@ -2627,6 +2660,7 @@ components:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -2641,6 +2675,7 @@ components:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -2724,6 +2759,8 @@ components:
           type: array
         default_route_id:
           type: string
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
         experiment_engine:
           $ref: '#/components/schemas/ExperimentConfig'
         resource_request:

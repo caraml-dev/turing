@@ -22,6 +22,9 @@
                 "timeout": "5s"
             }
         ],
+        "default_traffic_rule": {
+            "routes": ["control"]
+        },
         "rules": [
             {
                 "name": "rule-1",
@@ -45,11 +48,6 @@
                         "values": ["service-type-b"]
                     }
                 ],
-                "routes": ["treatment-b"]
-            },
-            {
-                "name": "default",
-                "conditions": [],
                 "routes": ["treatment-b"]
             }
         ],

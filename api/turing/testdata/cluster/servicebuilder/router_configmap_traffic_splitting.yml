@@ -1,11 +1,7 @@
 id: test-svc
 routes:
 - id: traffic-split-default
-  routes:
-  - endpoint: http://example.com/control
-    id: control
-    timeout: 2s
-    type: PROXY
+  routes: []
   strategy:
     properties:
       default_route_id: control
@@ -34,10 +30,6 @@ routes:
   type: EAGER_ROUTER
 - id: traffic-split-0
   routes:
-  - endpoint: http://example.com/control
-    id: control
-    timeout: 2s
-    type: PROXY
   - endpoint: http://example.com/treatment-a
     id: treatment-a
     timeout: 2s
@@ -70,10 +62,6 @@ routes:
   type: EAGER_ROUTER
 - id: traffic-split-1
   routes:
-  - endpoint: http://example.com/control
-    id: control
-    timeout: 2s
-    type: PROXY
   - endpoint: http://example.com/treatment-b
     id: treatment-b
     timeout: 2s
@@ -108,10 +96,6 @@ routes:
   routes:
   - endpoint: http://example.com/control
     id: control
-    timeout: 2s
-    type: PROXY
-  - endpoint: http://example.com/treatment-b
-    id: treatment-b
     timeout: 2s
     type: PROXY
   strategy:
@@ -158,7 +142,7 @@ strategy:
         values:
         - region-b
       route_id: traffic-split-1
-    - conditions: null
+    - conditions: []
       route_id: traffic-split-2
   type: fiber.TrafficSplittingStrategy
 type: LAZY_ROUTER

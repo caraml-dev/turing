@@ -9,6 +9,7 @@ import turing.router.config.router_config
 
 from turing.router.config.route import Route
 from turing.router.config.traffic_rule import (
+    DefaultTrafficRule,
     TrafficRule,
     HeaderTrafficRuleCondition,
     PayloadTrafficRuleCondition,
@@ -43,6 +44,9 @@ def test_deploy_router_with_traffic_rules():
     ]
 
     # set up traffic rules
+    default_traffic_rule = DefaultTrafficRule(
+        routes=["control"],
+    )
     rules = [
         TrafficRule(
             name="rule-1",
@@ -58,11 +62,6 @@ def test_deploy_router_with_traffic_rules():
                     field="service_type.id", values=["service-type-b"]
                 )
             ],
-            routes=["treatment-b"],
-        ),
-        TrafficRule(
-            name="default",
-            conditions=[],
             routes=["treatment-b"],
         ),
     ]
@@ -97,6 +96,7 @@ def test_deploy_router_with_traffic_rules():
         environment_name=os.getenv("MODEL_CLUSTER_NAME"),
         name=f'e2e-sdk-experiment-{os.getenv("TEST_ID")}',
         routes=routes,
+        default_traffic_rule=default_traffic_rule,
         rules=rules,
         experiment_engine=experiment_config,
         resource_request=resource_request,
@@ -135,7 +135,6 @@ def test_deploy_router_with_traffic_rules():
     expected_response = {
         "experiment": {},
         "route_responses": [
-            {"data": {"version": "control"}, "is_default": False, "route": "control"},
             {
                 "data": {"version": "treatment-a"},
                 "is_default": False,
@@ -166,7 +165,6 @@ def test_deploy_router_with_traffic_rules():
     expected_response = {
         "experiment": {},
         "route_responses": [
-            {"data": {"version": "control"}, "is_default": False, "route": "control"},
             {
                 "data": {"version": "treatment-b"},
                 "is_default": False,
@@ -197,11 +195,10 @@ def test_deploy_router_with_traffic_rules():
     expected_response = {
         "experiment": {},
         "route_responses": [
-            {"data": {"version": "control"}, "is_default": False, "route": "control"},
             {
-                "data": {"version": "treatment-b"},
+                "data": {"version": "control"},
                 "is_default": False,
-                "route": "treatment-b",
+                "route": "control",
             },
         ],
     }

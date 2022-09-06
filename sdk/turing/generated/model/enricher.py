@@ -26,13 +26,11 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
-
 def lazy_import():
     from turing.generated.model.env_var import EnvVar
     from turing.generated.model.resource_request import ResourceRequest
-
-    globals()["EnvVar"] = EnvVar
-    globals()["ResourceRequest"] = ResourceRequest
+    globals()['EnvVar'] = EnvVar
+    globals()['ResourceRequest'] = ResourceRequest
 
 
 class Enricher(ModelNormal):
@@ -59,14 +57,15 @@ class Enricher(ModelNormal):
           as additional properties values.
     """
 
-    allowed_values = {}
+    allowed_values = {
+    }
 
     validations = {
-        ("timeout",): {
-            "regex": {
-                "pattern": r"^[0-9]+(ms|s|m|h)$",
+        ('timeout',): {
+            'regex': {
+                'pattern': r'^[0-9]+(ms|s|m|h)$',  # noqa: E501
             },
-        },  # noqa: E501
+        },
     }
 
     additional_properties_type = None
@@ -85,52 +84,49 @@ class Enricher(ModelNormal):
         """
         lazy_import()
         return {
-            "image": (str,),  # noqa: E501
-            "resource_request": (ResourceRequest,),  # noqa: E501
-            "endpoint": (str,),  # noqa: E501
-            "timeout": (str,),  # noqa: E501
-            "port": (int,),  # noqa: E501
-            "env": ([EnvVar],),  # noqa: E501
-            "id": (int,),  # noqa: E501
-            "service_account": (str,),  # noqa: E501
-            "created_at": (datetime,),  # noqa: E501
-            "updated_at": (datetime,),  # noqa: E501
+            'image': (str,),  # noqa: E501
+            'resource_request': (ResourceRequest,),  # noqa: E501
+            'endpoint': (str,),  # noqa: E501
+            'timeout': (str,),  # noqa: E501
+            'port': (int,),  # noqa: E501
+            'env': ([EnvVar],),  # noqa: E501
+            'id': (int,),  # noqa: E501
+            'service_account': (str,),  # noqa: E501
+            'created_at': (datetime,),  # noqa: E501
+            'updated_at': (datetime,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
+
     attribute_map = {
-        "image": "image",  # noqa: E501
-        "resource_request": "resource_request",  # noqa: E501
-        "endpoint": "endpoint",  # noqa: E501
-        "timeout": "timeout",  # noqa: E501
-        "port": "port",  # noqa: E501
-        "env": "env",  # noqa: E501
-        "id": "id",  # noqa: E501
-        "service_account": "service_account",  # noqa: E501
-        "created_at": "created_at",  # noqa: E501
-        "updated_at": "updated_at",  # noqa: E501
+        'image': 'image',  # noqa: E501
+        'resource_request': 'resource_request',  # noqa: E501
+        'endpoint': 'endpoint',  # noqa: E501
+        'timeout': 'timeout',  # noqa: E501
+        'port': 'port',  # noqa: E501
+        'env': 'env',  # noqa: E501
+        'id': 'id',  # noqa: E501
+        'service_account': 'service_account',  # noqa: E501
+        'created_at': 'created_at',  # noqa: E501
+        'updated_at': 'updated_at',  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set(
-        [
-            "_data_store",
-            "_check_type",
-            "_spec_property_naming",
-            "_path_to_item",
-            "_configuration",
-            "_visited_composed_classes",
-        ]
-    )
+    required_properties = set([
+        '_data_store',
+        '_check_type',
+        '_spec_property_naming',
+        '_path_to_item',
+        '_configuration',
+        '_visited_composed_classes',
+    ])
 
     @convert_js_args_to_python_args
-    def __init__(
-        self, image, resource_request, endpoint, timeout, port, env, *args, **kwargs
-    ):  # noqa: E501
+    def __init__(self, image, resource_request, endpoint, timeout, port, env, *args, **kwargs):  # noqa: E501
         """Enricher - a model defined in OpenAPI
 
         Args:
@@ -178,16 +174,15 @@ class Enricher(ModelNormal):
             updated_at (datetime): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop("_check_type", True)
-        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
-        _path_to_item = kwargs.pop("_path_to_item", ())
-        _configuration = kwargs.pop("_configuration", None)
-        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
+        _check_type = kwargs.pop('_check_type', True)
+        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
+        _path_to_item = kwargs.pop('_path_to_item', ())
+        _configuration = kwargs.pop('_configuration', None)
+        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
-                % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -209,12 +204,10 @@ class Enricher(ModelNormal):
         self.port = port
         self.env = env
         for var_name, var_value in kwargs.items():
-            if (
-                var_name not in self.attribute_map
-                and self._configuration is not None
-                and self._configuration.discard_unknown_keys
-                and self.additional_properties_type is None
-            ):
+            if var_name not in self.attribute_map and \
+                        self._configuration is not None and \
+                        self._configuration.discard_unknown_keys and \
+                        self.additional_properties_type is None:
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)
