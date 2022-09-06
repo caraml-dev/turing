@@ -14,6 +14,7 @@ import (
 type routeSelPolicyCfg struct {
 	DefRoute           string              `json:"default_route_id,omitempty"`
 	ExperimentMappings []experimentMapping `json:"experiment_mappings"`
+	RouteNamePath      string              `json:"route_name_path"`
 }
 
 type expPolicyCfg struct {
@@ -27,6 +28,7 @@ type expPolicyCfg struct {
 type routeSelectionPolicy struct {
 	defaultRoute       string
 	experimentMappings []experimentMapping
+	routeNamePath      string
 }
 
 // ExperimentMapping specifies the route that should be selected for a particular treatment in an experiment
@@ -62,6 +64,7 @@ func newRouteSelectionPolicy(properties json.RawMessage) (*routeSelectionPolicy,
 	return &routeSelectionPolicy{
 		defaultRoute:       routeSelPolicy.DefRoute,
 		experimentMappings: routeSelPolicy.ExperimentMappings,
+		routeNamePath:      routeSelPolicy.RouteNamePath,
 	}, nil
 }
 
