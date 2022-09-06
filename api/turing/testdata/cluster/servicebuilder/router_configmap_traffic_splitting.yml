@@ -4,6 +4,7 @@ routes:
   routes:
   - endpoint: http://example.com/control
     id: control
+    protocol: ""
     timeout: 2s
     type: PROXY
   strategy:
@@ -36,10 +37,12 @@ routes:
   routes:
   - endpoint: http://example.com/control
     id: control
+    protocol: ""
     timeout: 2s
     type: PROXY
   - endpoint: http://example.com/treatment-a
     id: treatment-a
+    protocol: ""
     timeout: 2s
     type: PROXY
   strategy:
@@ -72,10 +75,12 @@ routes:
   routes:
   - endpoint: http://example.com/control
     id: control
+    protocol: ""
     timeout: 2s
     type: PROXY
   - endpoint: http://example.com/treatment-b
     id: treatment-b
+    protocol: ""
     timeout: 2s
     type: PROXY
   strategy:

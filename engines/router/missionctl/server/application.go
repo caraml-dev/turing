@@ -56,8 +56,8 @@ func Run() {
 	if strings.EqualFold(cfg.RouterConfig.Protocol, string(protocol.GRPC)) {
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControlGrpc(
-			cfg.RouterConfig,
-			cfg.AppConfig,
+			cfg.RouterConfig.ConfigFile,
+			cfg.AppConfig.FiberDebugLog,
 		)
 		if err != nil {
 			log.Glob().Panicf("Failed initializing Mission Control: %v", err)

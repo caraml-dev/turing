@@ -2,6 +2,7 @@ id: test-svc
 routes:
 - endpoint: http://www.mocky.io/v2/5e4caccc310000e2cad8c071
   id: control
+  protocol: ""
   timeout: 2s
   type: PROXY
 strategy:

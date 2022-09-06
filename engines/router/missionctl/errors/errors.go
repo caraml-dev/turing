@@ -75,6 +75,7 @@ func GetType(err error) ErrorType {
 func GetHTTPErrorCode(err error) int {
 	var code int
 
+	// Get ErrorType if its turingError else set to default
 	et := GetType(err)
 
 	switch et {
