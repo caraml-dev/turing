@@ -104,6 +104,13 @@ const ruleConditionSchema = yup.object().shape({
     .required("At least one value should be provided"),
 });
 
+const defaultTrafficRuleSchema = yup.object().shape({
+  routes: yup
+    .array()
+    .of(validRouteSchema)
+    .min(1, "At least one route should be attached to the rule"),
+});
+
 const trafficRuleSchema = yup.object().shape({
   name: yup
     .string()
@@ -115,10 +122,7 @@ const trafficRuleSchema = yup.object().shape({
   conditions: yup
     .array()
     .of(ruleConditionSchema)
-    .when("name", {
-      is: (value) => value !== "default",
-      then: yup.array().min(1, "At least one condition should be defined")
-    }),
+    .min(1, "At least one condition should be defined"),
   routes: yup
     .array()
     .of(validRouteSchema)
@@ -271,6 +275,7 @@ const schema = (maxAllowedReplica) => [
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
+      default_traffic_rule: defaultTrafficRuleSchema,
       rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       resource_request: resourceRequestSchema(maxAllowedReplica),
     }),

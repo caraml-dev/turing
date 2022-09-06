@@ -18,6 +18,7 @@ export class TuringRouter {
     this.config = {
       routes: [newRoute()],
       default_route_id: null,
+      default_traffic_rule: {routes: []},
       rules: [],
       resource_request: {
         cpu_request: "500m",
@@ -151,6 +152,10 @@ export const newRoute = () => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
+});
+
+export const newDefaultRule = () => ({
+  routes: [],
 });
 
 export const newRule = () => ({

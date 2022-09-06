@@ -14,6 +14,7 @@ import {
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
+import { CardHeader } from "../../../../../../components/card/CardHeader";
 import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
 
@@ -39,6 +40,7 @@ export const RuleCard = ({
   onChangeHandler,
   onDelete,
   errors,
+  ...props
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -71,35 +73,42 @@ export const RuleCard = ({
       title=""
       description=""
       textAlign="left">
+      {!isDefault ? 
+      <>
       <EuiFlexGroup
         className="euiFlexGroup--removeButton"
         justifyContent="flexEnd"
-        gutterSize="none"
+        gutterSize="s"
         direction="row">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={onDelete}
-            aria-label="delete-route"
+        <EuiFlexItem>
+          <CardHeader
+            onDelete={onDelete}
+            dragHandleProps={props.dragHandleProps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      </>
+      : null
+      }
 
-      <EuiFormRow
-        label="Name *"
-        isInvalid={!!get(errors, "name")}
-        error={get(errors, "name")}
-        fullWidth>
-        <EuiFieldText
-          placeholder="rule-name"
-          value={rule.name}
-          onChange={(e) => onChange("name")(e.target.value)}
+      {!isDefault ? 
+        <EuiFormRow
+          label="Name *"
           isInvalid={!!get(errors, "name")}
-          disabled={isDefault ? true : false}
-          aria-label="rule-name"
-          fullWidth
-        />
-      </EuiFormRow>
+          error={get(errors, "name")}
+          fullWidth>
+          <EuiFieldText
+            placeholder="rule-name"
+            value={rule.name}
+            onChange={(e) => onChange("name")(e.target.value)}
+            isInvalid={!!get(errors, "name")}
+            aria-label="rule-name"
+            fullWidth
+          />
+        </EuiFormRow>
+        : null
+      }
 
       {!isDefault ? <EuiFormRow
         label="Conditions *"
