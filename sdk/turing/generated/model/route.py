@@ -56,9 +56,9 @@ class Route(ModelNormal):
     validations = {
         ("timeout",): {
             "regex": {
-                "pattern": r"^[0-9]+(ms|s|m|h)$",
+                "pattern": r"^[0-9]+(ms|s|m|h)$",  # noqa: E501
             },
-        },  # noqa: E501
+        },
     }
 
     additional_properties_type = None

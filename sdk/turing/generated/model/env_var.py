@@ -56,9 +56,9 @@ class EnvVar(ModelNormal):
     validations = {
         ("name",): {
             "regex": {
-                "pattern": r"^[a-zA-Z0-9_]*$",
+                "pattern": r"^[a-zA-Z0-9_]*$",  # noqa: E501
             },
-        },  # noqa: E501
+        },
     }
 
     additional_properties_type = None

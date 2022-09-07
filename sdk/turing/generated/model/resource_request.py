@@ -61,8 +61,8 @@ class ResourceRequest(ModelNormal):
         },
         ("memory_request",): {
             "regex": {
-                "pattern": r"^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$",
-            },  # noqa: E501
+                "pattern": r"^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$",  # noqa: E501
+            },
         },
     }
 

@@ -9,6 +9,7 @@
 # import sys
 # sys.setrecursionlimit(n)
 
+from turing.generated.model.autoscaling_policy import AutoscalingPolicy
 from turing.generated.model.big_query_config import BigQueryConfig
 from turing.generated.model.big_query_dataset import BigQueryDataset
 from turing.generated.model.big_query_dataset_all_of import BigQueryDatasetAllOf

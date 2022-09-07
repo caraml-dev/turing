@@ -28,6 +28,7 @@ from turing.generated.model_utils import (  # noqa: F401
 
 
 def lazy_import():
+    from turing.generated.model.autoscaling_policy import AutoscalingPolicy
     from turing.generated.model.enricher import Enricher
     from turing.generated.model.experiment_config import ExperimentConfig
     from turing.generated.model.resource_request import ResourceRequest
@@ -38,6 +39,7 @@ def lazy_import():
     from turing.generated.model.router_version_status import RouterVersionStatus
     from turing.generated.model.traffic_rule import TrafficRule
 
+    globals()["AutoscalingPolicy"] = AutoscalingPolicy
     globals()["Enricher"] = Enricher
     globals()["ExperimentConfig"] = ExperimentConfig
     globals()["ResourceRequest"] = ResourceRequest
@@ -78,9 +80,9 @@ class RouterVersion(ModelNormal):
     validations = {
         ("timeout",): {
             "regex": {
-                "pattern": r"^[0-9]+(ms|s|m|h)$",
+                "pattern": r"^[0-9]+(ms|s|m|h)$",  # noqa: E501
             },
-        },  # noqa: E501
+        },
     }
 
     additional_properties_type = None
@@ -110,6 +112,7 @@ class RouterVersion(ModelNormal):
             "routes": ([Route],),  # noqa: E501
             "experiment_engine": (ExperimentConfig,),  # noqa: E501
             "resource_request": (ResourceRequest,),  # noqa: E501
+            "autoscaling_policy": (AutoscalingPolicy,),  # noqa: E501
             "timeout": (str,),  # noqa: E501
             "log_config": (RouterVersionLogConfig,),  # noqa: E501
             "enricher": (Enricher,),  # noqa: E501
@@ -135,6 +138,7 @@ class RouterVersion(ModelNormal):
         "routes": "routes",  # noqa: E501
         "experiment_engine": "experiment_engine",  # noqa: E501
         "resource_request": "resource_request",  # noqa: E501
+        "autoscaling_policy": "autoscaling_policy",  # noqa: E501
         "timeout": "timeout",  # noqa: E501
         "log_config": "log_config",  # noqa: E501
         "enricher": "enricher",  # noqa: E501
@@ -203,6 +207,7 @@ class RouterVersion(ModelNormal):
             routes ([Route]): [optional]  # noqa: E501
             experiment_engine (ExperimentConfig): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
+            autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
             timeout (str): [optional]  # noqa: E501
             log_config (RouterVersionLogConfig): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501

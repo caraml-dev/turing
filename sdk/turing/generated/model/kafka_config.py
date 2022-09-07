@@ -66,9 +66,9 @@ class KafkaConfig(ModelNormal):
         },
         ("topic",): {
             "regex": {
-                "pattern": r"^[A-Za-z0-9_.-]{1,249}$",
+                "pattern": r"^[A-Za-z0-9_.-]{1,249}$",  # noqa: E501
             },
-        },  # noqa: E501
+        },
     }
 
     additional_properties_type = None
