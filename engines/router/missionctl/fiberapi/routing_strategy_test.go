@@ -26,7 +26,7 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 	}
 
 	tests := map[string]testSuiteInitStrategy{
-		"success": {
+		"success | with experiment mappings": {
 			properties: json.RawMessage(`{
 				"default_route_id":  "route1",
 				"experiment_engine": "Test",
@@ -68,7 +68,24 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 				},
 			},
 		},
-		"missing_route_policy": {
+		"failure | with route name path": {
+			properties: json.RawMessage(`{
+				"default_route_id":  "route1",
+				"experiment_engine": "Test",
+				"route_name_path": "policy.route_name",
+				"experiment_mappings": [
+					{
+						"experiment": "experiment-1",
+                        "treatment": "control",
+                        "route": "route1"
+					}
+                ]
+			}`),
+			success: false,
+			expectedError: "Failed initializing route selection policy on routing strategy: Experiment mappings and " +
+				"route name path cannot both be configured together",
+		},
+		"failure | missing_route_policy": {
 			properties: json.RawMessage(`{
 				"experiment_engine": "Test"
 			}`),

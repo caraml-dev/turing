@@ -76,6 +76,8 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		return nil, fallbacks, nil
 	}
 
+	// For the DefaultTuringRoutingStrategy, we only expect experimentMappings OR routeNamePath to be configured; we
+	// perform a check on both of them and determine the final route response to return
 	for _, m := range r.experimentMappings {
 		if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
 			// Stop matching on first match because only 1 route is required. Don't send in fallbacks,
@@ -99,6 +101,12 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		if selectedRoute, ok := routes[routeName]; ok {
 			return selectedRoute, []fiber.Component{}, nil
 		}
+
+		// There are no routes with the route name found in the treatment
+		log.WithContext(ctx).Errorf(
+			"No route found corresponding to the route name found in the treatment:, %s",
+			routeName,
+		)
 	}
 
 	// primary route will be nil if there are no matching treatments in the mapping

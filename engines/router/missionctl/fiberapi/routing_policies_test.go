@@ -45,7 +45,7 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 					  "treatment": "treatment-2",
 					  "route": "route-2"
 					}
-				  ]
+				]
 			}`),
 			expectedPolicy: routeSelectionPolicy{
 				defaultRoute: "route-1",
@@ -71,6 +71,27 @@ func TestNewRouteSelectionPolicy(t *testing.T) {
 				routeNamePath: "policy.route_name",
 			},
 			success: true,
+		},
+		"failure | with experiment mappings and route name path": {
+			props: json.RawMessage(`{
+				"default_route_id":  "route-1",
+				"experiment_engine": "Test",
+				"route_name_path": "policy.route_name",	
+				"experiment_mappings": [
+					{
+					  "experiment": "experiment-1",
+					  "treatment": "treatment-1",
+					  "route": "route-1"
+					},
+					{
+					  "experiment": "experiment-1",
+					  "treatment": "treatment-2",
+					  "route": "route-2"
+					}
+				]
+			}`),
+			success: false,
+			err:     "Experiment mappings and route name path cannot both be configured together",
 		},
 		"failure | invalid data": {
 			props:   json.RawMessage(`invalid_data`),

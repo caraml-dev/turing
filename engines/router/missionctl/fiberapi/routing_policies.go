@@ -61,6 +61,15 @@ func newRouteSelectionPolicy(properties json.RawMessage) (*routeSelectionPolicy,
 	if err != nil {
 		return nil, errors.Newf(errors.BadConfig, "Failed to parse route selection policy")
 	}
+
+	// Ensure that if ExperimentMappings and RouteNamePath cannot be both set at the same time
+	if len(routeSelPolicy.ExperimentMappings) > 0 && routeSelPolicy.RouteNamePath != "" {
+		return nil, errors.Newf(
+			errors.BadConfig,
+			"Experiment mappings and route name path cannot both be configured together",
+		)
+	}
+
 	return &routeSelectionPolicy{
 		defaultRoute:       routeSelPolicy.DefRoute,
 		experimentMappings: routeSelPolicy.ExperimentMappings,
