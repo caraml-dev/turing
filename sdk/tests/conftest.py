@@ -403,6 +403,9 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
         port=5120,
         env=[generic_env_var],
         service_account="secret-name-for-google-service-account",
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="concurrency", target="1"
+        ),
     )
 
 
@@ -414,6 +417,9 @@ def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
         resource_request=generic_resource_request,
         timeout="500ms",
         env=[generic_env_var],
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="concurrency", target="1"
+        ),
     )
 
 
@@ -468,6 +474,9 @@ def generic_enricher(generic_resource_request, generic_env_var):
         port=5180,
         env=[generic_env_var],
         service_account="service-account",
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="concurrency", target="1"
+        ),
     )
 
 
@@ -522,6 +531,9 @@ def generic_router_version(
         ensembler=ensembler,
         monitoring_url="https://lookhere.io/",
         enricher=generic_enricher,
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="concurrency", target="1"
+        ),
     )
 
 

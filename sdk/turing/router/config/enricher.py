@@ -2,6 +2,10 @@ import turing.generated.models
 from dataclasses import dataclass
 from typing import List, Union, Dict
 from turing.generated.model_utils import OpenApiModel
+from turing.router.config.autoscaling_policy import (
+    AutoscalingPolicy,
+    DEFAULT_AUTOSCALING_POLICY,
+)
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
 
@@ -23,6 +27,7 @@ class Enricher:
 
     image: str
     resource_request: ResourceRequest
+    autoscaling_policy: AutoscalingPolicy
     endpoint: str
     timeout: str
     port: int
@@ -40,11 +45,13 @@ class Enricher:
         env: List["EnvVar"],
         id: int = None,
         service_account: str = None,
+        autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
         **kwargs
     ):
         self.id = id
         self.image = image
         self.resource_request = resource_request
+        self.autoscaling_policy = autoscaling_policy
         self.endpoint = endpoint
         self.timeout = timeout
         self.port = port
@@ -81,6 +88,21 @@ class Enricher:
             self._resource_request = ResourceRequest(**resource_request)
         else:
             self._resource_request = resource_request
+
+    @property
+    def autoscaling_policy(self) -> AutoscalingPolicy:
+        return self._autoscaling_policy
+
+    @autoscaling_policy.setter
+    def autoscaling_policy(
+        self, autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]]
+    ):
+        if isinstance(autoscaling_policy, AutoscalingPolicy):
+            self._autoscaling_policy = autoscaling_policy
+        elif isinstance(autoscaling_policy, dict):
+            self._autoscaling_policy = AutoscalingPolicy(**autoscaling_policy)
+        else:
+            self._autoscaling_policy = autoscaling_policy
 
     @property
     def endpoint(self) -> str:
@@ -142,6 +164,7 @@ class Enricher:
         return turing.generated.models.Enricher(
             image=self.image,
             resource_request=self.resource_request.to_open_api(),
+            autoscaling_policy=self.autoscaling_policy.to_open_api(),
             endpoint=self.endpoint,
             timeout=self.timeout,
             port=self.port,

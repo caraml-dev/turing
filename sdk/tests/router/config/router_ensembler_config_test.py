@@ -2,6 +2,7 @@ import pytest
 import turing.generated.models
 from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
+from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.route import InvalidRouteException
 from turing.router.config.router_ensembler_config import (
@@ -505,6 +506,9 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     cpu_request="100m",
                     memory_request="512Mi",
                 ),
+                "autoscaling_policy": AutoscalingPolicy(
+                    metric="concurrency", target="1"
+                ),
                 "endpoint": "http://localhost:5000/ensembler_endpoint",
                 "timeout": "500ms",
                 "port": 5120,
@@ -524,6 +528,9 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     max_replica=3,
                     cpu_request="100m",
                     memory_request="512Mi",
+                ),
+                "autoscaling_policy": AutoscalingPolicy(
+                    metric="concurrency", target="1"
                 ),
                 "timeout": "500ms",
                 "env": [EnvVar(name="env_name", value="env_val")],
