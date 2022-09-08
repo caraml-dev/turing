@@ -1,8 +1,9 @@
-@import "~@elastic/eui/src/global_styling/variables/colors";
+@import "@elastic/eui/src/themes/amsterdam/colors_light";
+@import "@elastic/eui/src/themes/amsterdam/globals";
 
 .predictionSources {
   .euiStepNumber--small {
-    background-color: $euiColorSecondary;
+    background-color: $euiColorSuccess;
   }
 
   .euiStep__content {

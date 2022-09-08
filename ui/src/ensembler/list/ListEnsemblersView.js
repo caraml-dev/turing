@@ -1,13 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-} from "@elastic/eui";
+import {EuiPageTemplate, EuiPanel, EuiSpacer} from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
@@ -17,6 +11,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   const {
     appConfig: {
       pagination: { defaultPageSize },
+      pageTemplate: { restrictWidth, paddingSize },
     },
   } = useConfig();
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
@@ -72,14 +67,16 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   // props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <PageTitle title="Ensemblers" />
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        pageTitle={<PageTitle title="Ensemblers" />}
+      />
+
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Section color={"transparent"}>
+        <EuiPanel>
           <ListEnsemblersTable
             {...results}
             isLoaded={isLoaded}
@@ -91,8 +88,9 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
             onRowClick={onRowClick}
             {...props}
           />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
+      <EuiSpacer size="l" />
+    </EuiPageTemplate>
   );
 };

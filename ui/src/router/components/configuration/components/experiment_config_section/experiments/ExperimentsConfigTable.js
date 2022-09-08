@@ -23,11 +23,13 @@ export const ExperimentsConfigTable = ({ experiments, engineProps }) => {
           <Fragment key={experiment.name}>
             {!!experimentUrl ? (
               <EuiTitle size="xxs">
-                <EuiTextColor color="secondary">
-                  <EuiLink href={experimentUrl} target="_blank" external>
-                    <code>{experiment.name}</code>
-                  </EuiLink>
-                </EuiTextColor>
+                <span>
+                  <EuiTextColor color="success">
+                    <EuiLink href={experimentUrl} target="_blank" external>
+                      <code>{experiment.name}</code>
+                    </EuiLink>
+                  </EuiTextColor>
+                </span>
               </EuiTitle>
             ) : (
               <EuiDescriptionListDescription title={experiment.name}>

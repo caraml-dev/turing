@@ -1,4 +1,5 @@
-@import "~@elastic/eui/src/global_styling/variables";
+@import "@elastic/eui/src/themes/amsterdam/colors_light";
+@import "@elastic/eui/src/themes/amsterdam/globals";
 
 .euiPanel--subHeader {
   padding: $euiSize $euiSizeL;

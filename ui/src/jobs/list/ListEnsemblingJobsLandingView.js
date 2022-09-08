@@ -1,4 +1,4 @@
-import { EuiPage, EuiPanel, EuiSpacer, EuiText } from "@elastic/eui";
+import { EuiSpacer, EuiText, EuiPageTemplate } from "@elastic/eui";
 import React from "react";
 import { useConfig } from "../../config";
 import { ListEnsemblingJobsView } from "./ListEnsemblingJobsView";
@@ -13,8 +13,8 @@ export const ListEnsemblingJobsLandingView = (props) => {
       {batchEnsemblingEnabled ? (
         <ListEnsemblingJobsView {...props} />
       ) : (
-        <EuiPage>
-          <EuiPanel>
+        <EuiPageTemplate>
+          <EuiPageTemplate.EmptyPrompt>
             <EuiText>
               Batch ensembling has not been enabled for this deployment of
               Turing.
@@ -24,8 +24,8 @@ export const ListEnsemblingJobsLandingView = (props) => {
               To use batch ensembling, please enable it in the configuration
               file used to deploy the Turing app.
             </EuiText>
-          </EuiPanel>
-        </EuiPage>
+          </EuiPageTemplate.EmptyPrompt>
+        </EuiPageTemplate>
       )}
     </>
   );
