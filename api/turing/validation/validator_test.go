@@ -664,10 +664,19 @@ func TestValidateAutoscaling(t *testing.T) {
 			ensembler: &models.Ensembler{
 				Type: models.EnsemblerDockerType,
 				DockerConfig: &models.EnsemblerDockerConfig{
+					Endpoint: "http://abc.com",
+					Port:     8080,
+					Image:    "nginx",
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
 					AutoscalingPolicy: &models.AutoscalingPolicy{
 						Metric: models.AutoscalingMetricRPS,
 						Target: "400",
 					},
+					Timeout: "5s",
+					Env:     models.EnvVars{},
 				},
 			},
 		},

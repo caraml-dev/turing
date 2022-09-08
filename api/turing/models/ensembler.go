@@ -36,19 +36,19 @@ type EnsemblerStandardConfig struct {
 }
 
 type EnsemblerDockerConfig struct {
-	Image string `json:"image"`
+	Image string `json:"image" validate:"required"`
 	// Resource requests for ensembler container deployed
-	ResourceRequest *ResourceRequest `json:"resource_request"`
+	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
 	// Autoscaling policy for the ensembler
 	AutoscalingPolicy *AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// URL path for the endpoint, e.g "/"
-	Endpoint string `json:"endpoint"`
+	Endpoint string `json:"endpoint" validate:"required"`
 	// Request timeout in duration format e.g. 60s
-	Timeout string `json:"timeout"`
+	Timeout string `json:"timeout" validate:"required"`
 	// Port number the container listens to for requests
-	Port int `json:"port"`
+	Port int `json:"port" validate:"required"`
 	// Environment variables to set in the container
-	Env EnvVars `json:"env"`
+	Env EnvVars `json:"env" validate:"required"`
 	// secret name in MLP containing service account key
 	ServiceAccount string `json:"service_account"`
 }

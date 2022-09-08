@@ -23,7 +23,7 @@ def test_create_router_version():
     new_router_config = router.config
 
     # Set autoscaling policy
-    new_router_config = AutoscalingPolicy(metric="rps", target="100")
+    new_router_config.autoscaling_policy = AutoscalingPolicy(metric="rps", target="100")
 
     # set up the new experiment config
     new_router_config.experiment_config = ExperimentConfig(
