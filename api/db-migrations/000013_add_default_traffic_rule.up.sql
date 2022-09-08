@@ -4,49 +4,39 @@ WITH cleaned_router_versions AS (
     SELECT id, CASE WHEN traffic_rules = 'null' THEN '[]'::jsonb ELSE traffic_rules END AS traffic_rules
     FROM router_versions
 ),
-tbl1 AS (
-    SELECT id, CASE WHEN r.routes IS NOT NULL THEN r.routes ELSE '[]'::jsonb END AS routes
-    FROM cleaned_router_versions
-    LEFT JOIN lateral jsonb_to_recordset(traffic_rules) as r("routes" jsonb) ON true
+rule_tbl AS (
+    SELECT id, jsonb_array_elements(traffic_rules) AS rule FROM cleaned_router_versions
 ),
-tbl2 AS (
-    SELECT id, jsonb_agg(DISTINCT elems) AS routes
-    FROM tbl1, jsonb_array_elements(routes) as elems
-    GROUP BY tbl1.id
+-- explode the route names from each rule
+rule_route_tbl AS (
+    SELECT id, jsonb_array_elements(rule->'routes') AS routes FROM rule_tbl
 ),
-tbl3 AS (
-    SELECT tbl1.id, CASE WHEN tbl2.routes IS NOT NULL THEN tbl2.routes ELSE '[]'::jsonb END AS routes
-    FROM tbl1 LEFT JOIN tbl2 ON tbl1.id = tbl2.id
+-- explode the original routes column
+route_tbl AS (
+    SELECT id, jsonb_array_elements(routes) AS route FROM router_versions
 ),
-tbl4 AS (
-    SELECT id, jsonb_agg(DISTINCT routes) AS routes
-    FROM (
-        SELECT
-            rv.id
-            , r.id as routes
-        FROM router_versions rv
-        JOIN lateral jsonb_to_recordset(routes) as r("id" jsonb) ON true
-    ) AS t_explode
-    GROUP BY t_explode.id
+original_route_tbl AS (
+    SELECT id, route -> 'id' AS route_name FROM route_tbl
 ),
--- DISTINCT is required for de-duplication
 dangling_routes AS (
     SELECT
-        DISTINCT tbl3.id
-        , array_to_json(ARRAY(SELECT jsonb_array_elements_text(tbl4.routes) EXCEPT
-                SELECT jsonb_array_elements_text(tbl3.routes)))::jsonb AS dangling_routes
-    FROM
-        tbl3 LEFT JOIN tbl4 ON tbl3.id = tbl4.id
+        id, jsonb_agg(route_name) dangling_routes
+    FROM (
+        SELECT * FROM original_route_tbl
+        EXCEPT
+        SELECT * FROM rule_route_tbl
+    ) t
+    GROUP BY t.id
 ),
--- tbl 5,6,7 are for traffic_rules column update
-tbl5 AS (
+exploded_traffic_rules AS (
     SELECT
         id
         , position
         , elem
     FROM cleaned_router_versions, jsonb_array_elements(traffic_rules) WITH ordinality arr(elem, position)
 ),
-tbl6 AS (
+-- Need to join from cleaned_router_versions since exploded_traffic_rules will exclude router versions which have no traffic rules
+exploded_traffic_rules_with_dangling_routes AS (
     SELECT
         cleaned_router_versions.id
         , position
@@ -60,15 +50,15 @@ tbl6 AS (
             END AS traffic_rule
     FROM
         cleaned_router_versions
-        LEFT JOIN tbl5 ON cleaned_router_versions.id = tbl5.id
+        LEFT JOIN exploded_traffic_rules ON cleaned_router_versions.id = exploded_traffic_rules.id
         LEFT JOIN dangling_routes ON cleaned_router_versions.id = dangling_routes.id
 ),
 -- FILTER clause added to prevent aggregating null values into [null] jsonb
-tbl7 AS (
+joined_updated_traffic_rules AS (
     SELECT
         id,
         json_agg(traffic_rule ORDER BY position) FILTER (where traffic_rule IS NOT NULL) traffic_rules_updated
-    FROM tbl6 GROUP BY id
+    FROM exploded_traffic_rules_with_dangling_routes GROUP BY id
 )
 
 UPDATE router_versions AS t 
@@ -83,6 +73,6 @@ FROM
         FROM
             router_versions
         LEFT JOIN dangling_routes ON router_versions.id = dangling_routes.id
-        LEFT JOIN tbl7 ON router_versions.id = tbl7.id
+        LEFT JOIN joined_updated_traffic_rules ON router_versions.id = joined_updated_traffic_rules.id
     ) AS t2
 WHERE t.id = t2.id;

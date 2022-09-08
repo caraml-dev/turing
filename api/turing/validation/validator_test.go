@@ -609,7 +609,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			},
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
-				"'default-traffic-rule is a protected name, and cannot be used as the name for a Custom Traffic Rule.' tag",
+				"'default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.' tag",
 			}, " "),
 		},
 	}

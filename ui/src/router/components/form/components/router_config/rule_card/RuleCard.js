@@ -76,7 +76,7 @@ export const RuleCard = ({
       title={isDefault ? "Default Traffic Rule" : ""}
       description=""
       textAlign="left">
-      {!isDefault ? 
+      {!isDefault &&
       <>
       <EuiFlexGroup
         className="euiFlexGroup--removeButton"
@@ -92,10 +92,9 @@ export const RuleCard = ({
       </EuiFlexGroup>
       <EuiSpacer />
       </>
-      : null
       }
 
-      {!isDefault ? 
+      {!isDefault &&
         <EuiFormRow
           label="Name *"
           isInvalid={!!get(errors, "name")}
@@ -110,7 +109,6 @@ export const RuleCard = ({
             fullWidth
           />
         </EuiFormRow>
-        : null
       }
 
       {!isDefault ? <EuiFormRow

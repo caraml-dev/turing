@@ -78,7 +78,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
       }>
       <EuiFlexGroup direction="column" gutterSize="s">
         {
-          rules.length > 0 ?
+          rules.length > 0 &&
             <EuiFlexItem key="default-route">
               <RuleCard
                 isDefault={true}
@@ -90,7 +90,6 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
               />
               <EuiHorizontalRule margin="xs" />
             </EuiFlexItem>
-          : null
         }
         <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m">

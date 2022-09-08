@@ -128,7 +128,7 @@ func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value stri
 		sl.ReportError(value, fieldName, "trafficRuleName", nameRegexDescription, fmt.Sprintf("%v", value))
 	}
 	invalidNameDescription :=
-		"default-traffic-rule is a protected name, and cannot be used as the name for a Custom Traffic Rule."
+		"default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule."
 	if value == "default-traffic-rule" {
 		sl.ReportError(value, fieldName, "trafficRuleName", invalidNameDescription, fmt.Sprintf("%v", value))
 	}
