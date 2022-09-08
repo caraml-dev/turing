@@ -3,8 +3,6 @@
 package e2e
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"path/filepath"
 	"testing"
@@ -13,36 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-// assertRouterResponse asserts that two JSON strings are equivalent,
-// but ignores the order of `response.route_responses` slice
-func assertRouterResponse(t *testing.T, expected, actual string) {
-	type response struct {
-		Request  map[string]interface{}
-		Response *struct {
-			Experiment     interface{}
-			RouteResponses []interface{}
-		}
-	}
-
-	var expectedJSONAsInterface, actualJSONAsInterface response
-
-	err := json.Unmarshal([]byte(expected), &expectedJSONAsInterface)
-	require.NoError(t, err, fmt.Sprintf(
-		"Expected value ('%s') is not valid json.\nJSON parsing error: '%v'", expected, err))
-
-	err = json.Unmarshal([]byte(actual), &actualJSONAsInterface)
-	require.NoError(t, err, fmt.Sprintf("Input ('%s') needs to be valid json.\nJSON parsing error: '%v'", actual, err))
-
-	assert.Equal(t, expectedJSONAsInterface.Request, actualJSONAsInterface.Request)
-	if expectedJSONAsInterface.Response != nil && actualJSONAsInterface.Response != nil {
-		assert.Equal(t, expectedJSONAsInterface.Response.Experiment, actualJSONAsInterface.Response.Experiment)
-		assert.ElementsMatch(t,
-			expectedJSONAsInterface.Response.RouteResponses, actualJSONAsInterface.Response.RouteResponses)
-	} else {
-		assert.Equal(t, expectedJSONAsInterface.Response, actualJSONAsInterface.Response)
-	}
-}
 
 func TestDeployRouterWithTrafficRules(t *testing.T) {
 	// Create router
@@ -84,7 +52,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
     ]
   }
 }`
-					assertRouterResponse(t, expectedResponse, actualResponse)
+					assert.JSONEq(t, expectedResponse, actualResponse)
 				},
 			)
 
@@ -122,7 +90,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
     ]
   }
 }`
-					assertRouterResponse(t, expectedResponse, actualResponse)
+					assert.JSONEq(t, expectedResponse, actualResponse)
 				},
 			)
 
@@ -160,7 +128,7 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
     ]
   }
 }`
-					assertRouterResponse(t, expectedResponse, actualResponse)
+					assert.JSONEq(t, expectedResponse, actualResponse)
 				},
 			)
 		},
