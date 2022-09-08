@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -401,7 +401,7 @@ func modifyRequestBody(
 	// Return response
 	httpResponse := &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBuffer(tBytes)),
+		Body:       io.NopCloser(bytes.NewBuffer(tBytes)),
 		Header:     httpHeader,
 	}
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(httpResponse)

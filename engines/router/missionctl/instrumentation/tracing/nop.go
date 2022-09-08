@@ -3,7 +3,6 @@ package tracing
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -23,7 +22,7 @@ func (*NopTracer) SetStartNewSpans(_ bool) {}
 
 // InitGlobalTracer satisfies the Tracer interface and returns a Nop closer
 func (*NopTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (io.Closer, error) {
-	return ioutil.NopCloser(nil), nil
+	return io.NopCloser(nil), nil
 }
 
 // IsEnabled satisfies the Tracer interface, always returning false

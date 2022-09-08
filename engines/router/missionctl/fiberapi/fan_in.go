@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
@@ -168,7 +168,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 	// Return successful response
 	resp := http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBuffer(rBytes)),
+		Body:       io.NopCloser(bytes.NewBuffer(rBytes)),
 		Header: http.Header{
 			"Content-Type": []string{"application/json"},
 		},
