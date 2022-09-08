@@ -1,4 +1,5 @@
-@import "~@elastic/eui/src/global_styling/variables/index";
+@import "@elastic/eui/src/themes/amsterdam/colors_light";
+@import "@elastic/eui/src/themes/amsterdam/globals";
 
 .euiComboBox--dockerImage .euiFormControlLayout {
   height: $euiFormControlHeight;

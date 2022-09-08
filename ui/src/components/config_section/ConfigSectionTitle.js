@@ -1,15 +1,18 @@
 import React from "react";
-import { EuiIcon, EuiTextColor, EuiTitle } from "@elastic/eui";
+import { EuiIcon, EuiTextColor, EuiTitle, EuiSpacer } from "@elastic/eui";
 
 export const ConfigSectionTitle = ({ title, iconType }) => (
   <EuiTitle size="s">
-    <EuiTextColor color="secondary">
-      <span>
-        {!!iconType && (
-          <EuiIcon className="eui-alignBaseline" type={iconType} size="m" />
-        )}
-        &nbsp;{title}
-      </span>
-    </EuiTextColor>
+    <span>
+      <EuiTextColor color="success">
+        <span>
+          {!!iconType && (
+            <EuiIcon className="eui-alignBaseline" type={iconType} size="m" />
+          )}
+          &nbsp;{title}
+        </span>
+        <EuiSpacer size="s" />
+      </EuiTextColor>
+    </span>
   </EuiTitle>
 );

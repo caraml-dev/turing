@@ -2,7 +2,7 @@ import React from "react";
 import { Redirect, Router } from "@reach/router";
 import {
   AuthProvider,
-  Empty,
+  Page404,
   ErrorBoundary,
   Login,
   MlpApiContextProvider,
@@ -19,83 +19,86 @@ import { ListEnsemblersView } from "./ensembler/list/ListEnsemblersView";
 import { ExperimentsRouter } from "./experiment/ExperimentsRouter";
 import { EnsemblingJobsRouter } from "./jobs/EnsemblingJobsRouter";
 import { useConfig } from "./config";
+import { EuiProvider } from "@elastic/eui";
 
 const App = () => {
   const { apiConfig, appConfig, authConfig } = useConfig();
 
   return (
-    <ErrorBoundary>
-      <MlpApiContextProvider
-        mlpApiUrl={apiConfig.mlpApiUrl}
-        timeout={apiConfig.apiTimeout}
-        useMockData={apiConfig.useMockData}>
-        <AuthProvider clientId={authConfig.oauthClientId}>
-          <Router role="group">
-            <Login path="/login" />
+    <EuiProvider>
+      <ErrorBoundary>
+        <MlpApiContextProvider
+          mlpApiUrl={apiConfig.mlpApiUrl}
+          timeout={apiConfig.apiTimeout}
+          useMockData={apiConfig.useMockData}>
+          <AuthProvider clientId={authConfig.oauthClientId}>
+            <Router role="group">
+              <Login path="/login" />
 
-            <Redirect from="/" to={appConfig.homepage} noThrow />
+              <Redirect from="/" to={appConfig.homepage} noThrow />
 
-            <Redirect
-              from={`${appConfig.homepage}/projects/:projectId`}
-              to={`${appConfig.homepage}/projects/:projectId/routers`}
-              noThrow
-            />
+              <Redirect
+                from={`${appConfig.homepage}/projects/:projectId`}
+                to={`${appConfig.homepage}/projects/:projectId/routers`}
+                noThrow
+              />
 
-            {/* HOME */}
-            <PrivateRoute
-              path={appConfig.homepage}
-              render={PrivateLayout(Home)}
-            />
+              {/* HOME */}
+              <PrivateRoute
+                path={appConfig.homepage}
+                render={PrivateLayout(Home)}
+              />
 
-            {/* BATCH JOBS */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/jobs/*`}
-              render={PrivateLayout(EnsemblingJobsRouter)}
-            />
+              {/* BATCH JOBS */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/jobs/*`}
+                render={PrivateLayout(EnsemblingJobsRouter)}
+              />
 
-            {/* ENSEMBLERS */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/ensemblers`}
-              render={PrivateLayout(ListEnsemblersView)}
-            />
+              {/* ENSEMBLERS */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/ensemblers`}
+                render={PrivateLayout(ListEnsemblersView)}
+              />
 
-            {/* EXPERIMENTS */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/experiments/*`}
-              render={PrivateLayout(ExperimentsRouter)}
-            />
+              {/* EXPERIMENTS */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/experiments/*`}
+                render={PrivateLayout(ExperimentsRouter)}
+              />
 
-            {/* CREATE ROUTER */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/routers/create`}
-              render={PrivateLayout(CreateRouterView)}
-            />
+              {/* CREATE ROUTER */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/routers/create`}
+                render={PrivateLayout(CreateRouterView)}
+              />
 
-            {/* LIST ROUTER */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/routers`}
-              render={PrivateLayout(ListRoutersView)}
-            />
+              {/* LIST ROUTER */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/routers`}
+                render={PrivateLayout(ListRoutersView)}
+              />
 
-            {/* ROUTER DETAILS */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/routers/:routerId/*`}
-              render={PrivateLayout(RouterDetailsView)}
-            />
+              {/* ROUTER DETAILS */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/routers/:routerId/*`}
+                render={PrivateLayout(RouterDetailsView)}
+              />
 
-            {/* ROUTER VERSION DETAILS */}
-            <PrivateRoute
-              path={`${appConfig.homepage}/projects/:projectId/routers/:routerId/versions/:versionId/*`}
-              render={PrivateLayout(RouterVersionDetailsView)}
-            />
+              {/* ROUTER VERSION DETAILS */}
+              <PrivateRoute
+                path={`${appConfig.homepage}/projects/:projectId/routers/:routerId/versions/:versionId/*`}
+                render={PrivateLayout(RouterVersionDetailsView)}
+              />
 
-            {/* DEFAULT */}
-            <Empty default />
-          </Router>
-          <Toast />
-        </AuthProvider>
-      </MlpApiContextProvider>
-    </ErrorBoundary>
+              {/* DEFAULT */}
+              <Page404 default />
+            </Router>
+            <Toast />
+          </AuthProvider>
+        </MlpApiContextProvider>
+      </ErrorBoundary>
+    </EuiProvider>
   );
 };
 

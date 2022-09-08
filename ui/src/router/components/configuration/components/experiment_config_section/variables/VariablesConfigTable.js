@@ -36,7 +36,9 @@ export const VariablesConfigTable = ({ variables }) => {
       {variablesList.map(({ name, field_source, field }, idx) => (
         <Fragment key={name}>
           <EuiTitle size="xxs">
-            <EuiTextColor color="secondary">{name}</EuiTextColor>
+            <span>
+               <EuiTextColor color="success">{name}</EuiTextColor>
+            </span>
           </EuiTitle>
           <EuiDescriptionList
             compressed
