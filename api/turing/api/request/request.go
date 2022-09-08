@@ -158,8 +158,15 @@ func (r RouterConfig) BuildRouterVersion(
 			r.Ensembler.DockerConfig.AutoscalingPolicy = getAutoscalingPolicyOrDefault(
 				r.Ensembler.DockerConfig.AutoscalingPolicy)
 		}
-		if r.Ensembler.Type == models.EnsemblerStandardType && r.Ensembler.StandardConfig == nil {
-			return nil, errors.New("missing ensembler standard config")
+		if r.Ensembler.Type == models.EnsemblerStandardType {
+			if r.Ensembler.StandardConfig == nil {
+				return nil, errors.New("missing ensembler standard config")
+			}
+
+			// Verify that the ExperimentMappings and RouteNamePath are not both set at the same time
+			if len(r.Ensembler.StandardConfig.ExperimentMappings) > 0 && r.Ensembler.StandardConfig.RouteNamePath != "" {
+				return nil, errors.New("Experiment mappings and route name path cannot both be configured together")
+			}
 		}
 		if r.Ensembler.Type == models.EnsemblerPyFuncType {
 			if r.Ensembler.PyfuncConfig == nil {

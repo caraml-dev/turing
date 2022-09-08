@@ -446,6 +446,59 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 	assertgotest.DeepEqual(t, expected, *got)
 }
 
+func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
+	defaults := config.RouterDefaults{
+		Image:                   "routerimage",
+		FiberDebugLogEnabled:    true,
+		CustomMetricsEnabled:    true,
+		JaegerEnabled:           true,
+		JaegerCollectorEndpoint: "jaegerendpoint",
+		LogLevel:                "DEBUG",
+		FluentdConfig: &config.FluentdConfig{
+			Image: "fluentdimage",
+			Tag:   "fluentdtag",
+		},
+	}
+	projectID := models.ID(1)
+	router := createOrUpdateRequest.BuildRouter(projectID)
+
+	// Set up mock Crypto service
+	cryptoSvc := &mocks.CryptoService{}
+	cryptoSvc.On("Encrypt", "dummy_passkey").Return("enc_passkey", nil)
+
+	// Set up mock Experiment service
+	expSvc := &mocks.ExperimentsService{}
+	expSvc.On("IsClientSelectionEnabled", mock.Anything).Return(true, nil)
+
+	// Set up mock Ensembler service
+	ensemblerSvc := &mocks.EnsemblersService{}
+
+	// Creates a router config that is valid except for the invalid ensembler config
+	testRouterConfig := validRouterConfig
+	testRouterConfig.Ensembler = &models.Ensembler{
+		Type: models.EnsemblerStandardType,
+		StandardConfig: &models.EnsemblerStandardConfig{
+			ExperimentMappings: []models.ExperimentMapping{
+				{
+					Experiment: "experiment-1",
+					Treatment:  "treatment-1",
+					Route:      "route-1",
+				},
+				{
+					Experiment: "experiment-1",
+					Treatment:  "treatment-1",
+					Route:      "route-1",
+				},
+			},
+			RouteNamePath: "abc",
+		},
+	}
+
+	result, err := testRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	assert.Nil(t, result)
+	assert.EqualError(t, err, "Experiment mappings and route name path cannot both be configured together")
+}
+
 func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
 	defaults := config.RouterDefaults{
 		Image:                   "routerimage",
