@@ -33,7 +33,7 @@ type missionControlGrpc struct {
 }
 
 const turingReqIDHeaderKey = "Turing-Req-ID"
-const tracingComponentId = "grpc_handler"
+const tracingComponentID = "grpc_handler"
 
 // NewMissionControlGrpc creates new instance of the MissingControl,
 // based on the grpc configuration of fiber.yaml
@@ -53,6 +53,9 @@ func NewMissionControlGrpc(
 
 func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv1.PredictValuesRequest) (
 	*upiv1.PredictValuesResponse, error) {
+	var predictionErr *errors.TuringError
+	measureDurationFunc := getMeasureDurationFunc(predictionErr, tracingComponentID)
+	defer measureDurationFunc()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(parentCtx)
@@ -79,7 +82,7 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
-		ctx, sp = enableTracingSpan(ctx, md, tracingComponentId)
+		ctx, sp = enableTracingSpan(ctx, md, tracingComponentID)
 		if sp != nil {
 			defer sp.Finish()
 		}
@@ -89,9 +92,6 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 		Message:  req,
 		Metadata: md,
 	}
-	var predictionErr *errors.TuringError
-	measureDurationFunc := getMeasureDurationFunc(predictionErr, tracingComponentId)
-	defer measureDurationFunc()
 
 	resp, predictionErr := mc.getPrediction(ctx, fiberRequest)
 	if predictionErr != nil {
@@ -101,15 +101,24 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 	return resp, nil
 }
 
-func (mc *missionControlGrpc) getPrediction(ctx context.Context, fiberRequest fiber.Request) (*upiv1.PredictValuesResponse, *errors.TuringError) {
+func (mc *missionControlGrpc) getPrediction(
+	ctx context.Context,
+	fiberRequest fiber.Request) (
+	*upiv1.PredictValuesResponse, *errors.TuringError) {
 
-	// Create response channel to store the response from each step. 1 for route now
+	// Create response channel to store the response from each step. 1 for route now,
+	// should be 4 when experiment engine, enricher and ensembler are added
 	respCh := make(chan grpcRouterResponse, 1)
 	defer close(respCh)
 
 	// Defer logging request summary
 	defer func() {
-		go logTuringRouterRequestSummary(ctx, time.Now(), fiberRequest.Header(), fiberRequest.Payload().(*upiv1.PredictValuesRequest), respCh)
+		go logTuringRouterRequestSummary(
+			ctx,
+			time.Now(),
+			fiberRequest.Header(),
+			fiberRequest.Payload().(*upiv1.PredictValuesRequest),
+			respCh)
 	}()
 
 	// Calling Routes via fiber
@@ -117,11 +126,15 @@ func (mc *missionControlGrpc) getPrediction(ctx context.Context, fiberRequest fi
 	if err != nil {
 		return nil, err
 	}
+	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, err)
 
 	return resp, err
 }
 
-func (mc *missionControlGrpc) Route(ctx context.Context, fiberRequest fiber.Request) (*upiv1.PredictValuesResponse, *errors.TuringError) {
+func (mc *missionControlGrpc) Route(
+	ctx context.Context,
+	fiberRequest fiber.Request) (
+	*upiv1.PredictValuesResponse, *errors.TuringError) {
 	var turingError *errors.TuringError
 	measureDurationFunc := getMeasureDurationFunc(turingError, "route")
 	defer measureDurationFunc()
@@ -206,7 +219,7 @@ func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 type grpcRouterResponse struct {
 	key    string
 	header metadata.MD
-	body   upiv1.PredictValuesResponse
+	body   *upiv1.PredictValuesResponse
 	err    string
 }
 
@@ -235,5 +248,38 @@ func logTuringRouterRequestSummary(
 	// configured result log destination, log the error.
 	if err := resultlog.LogEntry(logEntry); err != nil {
 		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+	}
+}
+
+// copyResponseToLogChannel copies the response from the turing router to the given channel
+// as a routerResponse object
+func copyResponseToLogChannel(
+	ctx context.Context,
+	ch chan<- grpcRouterResponse,
+	key string,
+	r *upiv1.PredictValuesResponse,
+	err *errors.TuringError) {
+	// if error is not nil, use error as response
+	if err != nil {
+		ch <- grpcRouterResponse{
+			key: key,
+			err: err.Message,
+		}
+		return
+	}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		ch <- grpcRouterResponse{
+			key: key,
+			err: "fail to read metadata from fiber",
+		}
+		return
+	}
+
+	// Copy to channel
+	ch <- grpcRouterResponse{
+		key:    key,
+		header: md,
+		body:   r,
 	}
 }
