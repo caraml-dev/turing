@@ -18,7 +18,7 @@ export class TuringRouter {
     this.config = {
       routes: [newRoute()],
       default_route_id: null,
-      default_traffic_rule: {routes: []},
+      default_traffic_rule: null,
       rules: [],
       resource_request: {
         cpu_request: "500m",

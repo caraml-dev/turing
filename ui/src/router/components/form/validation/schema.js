@@ -276,8 +276,12 @@ const schema = (maxAllowedReplica) => [
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
-      default_traffic_rule: defaultTrafficRuleSchema,
       rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
+      default_traffic_rule: yup.object().when('rules', {
+          is: rules => rules.length > 0,
+          then: defaultTrafficRuleSchema,
+          otherwise: null
+      }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
     }),
   }),
