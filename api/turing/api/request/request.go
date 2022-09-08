@@ -271,6 +271,7 @@ func (r RouterConfig) BuildExperimentEngineConfig(
 // getAutoscalingPolicyOrDefault applies the default autoscaling policy that has been used all along, prior to
 // user configurations. Thus, this function also ensures backward-compatibility with requests originating from
 // older SDK versions.
+// TODO: Remove the default values from the API and make the autoscaling parameters required.
 func getAutoscalingPolicyOrDefault(policy *models.AutoscalingPolicy) *models.AutoscalingPolicy {
 	if policy == nil {
 		return &models.AutoscalingPolicy{
