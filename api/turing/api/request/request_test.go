@@ -518,11 +518,8 @@ func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
 			testRouterConfig.Ensembler = &data.testEnsembler
 
 			result, err := testRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
-			if data.err == "" {
-				assert.Nil(t, result)
-			} else {
-				assert.EqualError(t, err, data.err)
-			}
+			assert.Nil(t, result)
+			assert.EqualError(t, err, data.err)
 		})
 	}
 }
