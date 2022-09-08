@@ -148,14 +148,6 @@ func checkDefaultTrafficRule(
 	}
 }
 
-func checkTrafficRuleConditions(sl validator.StructLevel, fieldName string, rule *models.TrafficRule) {
-	noConditionsCustomRuleDescription := "Custom rule must have at least 1 condition."
-
-	if len(rule.Conditions) == 0 {
-		sl.ReportError(rule, fieldName, "trafficRule", noConditionsCustomRuleDescription, "")
-	}
-}
-
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -189,7 +181,6 @@ func validateRouterConfig(sl validator.StructLevel) {
 		}
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
-			checkTrafficRuleConditions(sl, "TrafficRule", rule)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)

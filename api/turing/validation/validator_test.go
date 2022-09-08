@@ -313,8 +313,8 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes:     []string{"route-b"},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRule' " +
-				"Error:Field validation for 'TrafficRule' failed on the 'Custom rule must have at least 1 condition.' tag",
+			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions' " +
+				"Error:Field validation for 'Conditions' failed on the 'notBlank' tag",
 		},
 		"failure | empty routes": {
 			routes:             models.Routes{routeA, routeB},
