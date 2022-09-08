@@ -62,25 +62,28 @@
     },
     "ensembler": {
         "id": 300,
-        "image": "asia.gcr.io/gcp-project-id/echo:1.0.2",
-        "resource_request": {
-            "min_replica": 1,
-            "max_replica": 2,
-            "cpu_request": "200m",
-            "memory_request": "256Mi"
-        },
-        "autoscaling_policy": {
-            "metric": "memory",
-            "target": "90"
-        },
-        "endpoint": "echo?delay=10ms",
-        "timeout": "2s",
-        "port": 8080,
-        "env": [
-            {
-                "name": "TEST_ENV",
-                "value": "ensembler"
-            }
-        ]
+        "type": "docker",
+        "docker_config": {
+            "image": "asia.gcr.io/gcp-project-id/echo:1.0.2",
+            "resource_request": {
+                "min_replica": 1,
+                "max_replica": 2,
+                "cpu_request": "200m",
+                "memory_request": "256Mi"
+            },
+            "autoscaling_policy": {
+                "metric": "memory",
+                "target": "90"
+            },
+            "endpoint": "echo?delay=10ms",
+            "timeout": "2s",
+            "port": 8080,
+            "env": [
+                {
+                    "name": "TEST_ENV",
+                    "value": "ensembler"
+                }
+            ]
+        }
     }
 }
