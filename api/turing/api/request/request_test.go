@@ -473,30 +473,58 @@ func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
 
-	// Creates a router config that is valid except for the invalid ensembler config
-	testRouterConfig := validRouterConfig
-	testRouterConfig.Ensembler = &models.Ensembler{
-		Type: models.EnsemblerStandardType,
-		StandardConfig: &models.EnsemblerStandardConfig{
-			ExperimentMappings: []models.ExperimentMapping{
-				{
-					Experiment: "experiment-1",
-					Treatment:  "treatment-1",
-					Route:      "route-1",
-				},
-				{
-					Experiment: "experiment-1",
-					Treatment:  "treatment-1",
-					Route:      "route-1",
+	// Define tests
+	tests := map[string]struct {
+		testEnsembler models.Ensembler
+		err           string
+	}{
+		"failure | both experiment mappings and route name path are set": {
+			testEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					ExperimentMappings: []models.ExperimentMapping{
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+					},
+					RouteNamePath: "abc",
 				},
 			},
-			RouteNamePath: "abc",
+			err: "experiment mappings and route name path cannot both be configured together",
+		},
+		"failure | invalid route name path": {
+			testEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					RouteNamePath: "abc def",
+				},
+			},
+			err: "route name path is invalid",
 		},
 	}
 
-	result, err := testRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
-	assert.Nil(t, result)
-	assert.EqualError(t, err, "Experiment mappings and route name path cannot both be configured together")
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Creates a router config that is valid except for the invalid ensembler config
+			testRouterConfig := validRouterConfig
+			testRouterConfig.Ensembler = &data.testEnsembler
+
+			result, err := testRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+			if data.err == "" {
+				assert.Nil(t, result)
+			} else {
+				assert.EqualError(t, err, data.err)
+			}
+		})
+	}
 }
 
 func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
