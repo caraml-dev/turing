@@ -796,6 +796,7 @@ components:
       nullable: true
       required:
         - "experiment_mappings"
+        - "route_name_path"
       properties:
         experiment_mappings:
           type: "array"
@@ -818,6 +819,9 @@ components:
                 description: "route id of the routes configured in the router"
                 type: "string"
                 example: "route-1"
+        route_name_path:
+          type: "string"
+          pattern: '^\w+(?:\.\w+)*$'
 
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"

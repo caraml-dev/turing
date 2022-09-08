@@ -33,6 +33,7 @@ const (
 
 type EnsemblerStandardConfig struct {
 	ExperimentMappings []ExperimentMapping `json:"experiment_mappings" validate:"required,dive"`
+	RouteNamePath      string              `json:"route_name_path"  validate:"required"`
 }
 
 type EnsemblerDockerConfig struct {
