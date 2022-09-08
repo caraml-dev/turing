@@ -47,22 +47,6 @@ func (h *httpHandler) error(
 	logTuringRouterRequestError(ctx, err)
 }
 
-// getMeasureDurationFunc return the func that measures the duration of the request
-func (h *httpHandler) getMeasureDurationFunc(httpErr *errors.TuringError) func() {
-	// Measure the duration of handler function
-	return metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(httpErr == nil)
-			},
-			"component": func() string {
-				return httpHandlerID
-			},
-		},
-	)
-}
-
 // enableTracingSpan associates span to context, if applicable
 func (h *httpHandler) enableTracingSpan(ctx context.Context,
 	req *http.Request,
@@ -142,8 +126,7 @@ func (h *httpHandler) getPrediction(
 
 func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
-	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
-	defer measureDurationFunc()
+	defer metrics.GetMeasureDurationFunc(httpErr, httpHandlerID)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())

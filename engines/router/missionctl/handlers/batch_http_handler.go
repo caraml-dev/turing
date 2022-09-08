@@ -9,6 +9,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
@@ -34,8 +35,7 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
-	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
-	defer measureDurationFunc()
+	defer metrics.GetMeasureDurationFunc(httpErr, batchHTTPHandlerID)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())

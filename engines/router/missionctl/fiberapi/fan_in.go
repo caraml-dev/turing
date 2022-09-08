@@ -158,17 +158,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 
 	// Marshal the response, measure time
 	var err error
-	timer := metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(err == nil)
-			},
-			"component": func() string {
-				return "fanin_marshalResponse"
-			},
-		},
-	)
+	timer := metrics.GetMeasureDurationFunc(err, "fanin_marshalResponse")
 	rBytes, err := jsoniter.Marshal(result)
 	timer()
 	if err != nil {

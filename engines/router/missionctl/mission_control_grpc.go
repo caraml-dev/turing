@@ -2,8 +2,6 @@ package missionctl
 
 import (
 	"context"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -54,8 +52,7 @@ func NewMissionControlGrpc(
 func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv1.PredictValuesRequest) (
 	*upiv1.PredictValuesResponse, error) {
 	var predictionErr *errors.TuringError
-	measureDurationFunc := getMeasureDurationFunc(predictionErr, tracingComponentID)
-	defer measureDurationFunc()
+	defer metrics.GetMeasureDurationFunc(predictionErr, tracingComponentID)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(parentCtx)
@@ -82,7 +79,7 @@ func (mc *missionControlGrpc) PredictValues(parentCtx context.Context, req *upiv
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
-		ctx, sp = enableTracingSpan(ctx, md, tracingComponentID)
+		sp, _ = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
 		if sp != nil {
 			defer sp.Finish()
 		}
@@ -136,8 +133,7 @@ func (mc *missionControlGrpc) Route(
 	fiberRequest fiber.Request) (
 	*upiv1.PredictValuesResponse, *errors.TuringError) {
 	var turingError *errors.TuringError
-	measureDurationFunc := getMeasureDurationFunc(turingError, "route")
-	defer measureDurationFunc()
+	defer metrics.GetMeasureDurationFunc(turingError, "route")()
 
 	resp, ok := <-mc.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
 	if !ok {
@@ -177,44 +173,6 @@ func (mc *missionControlGrpc) Route(
 	}
 	return &responseProto, nil
 }
-func getMeasureDurationFunc(err error, componentName string) func() {
-	// Measure the duration of handler function
-	return metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(err == nil)
-			},
-			"component": func() string {
-				return componentName
-			},
-		},
-	)
-}
-
-// enableTracingSpan associates span to context, if applicable.
-// Converts grpc headers to http headers, since both are map of string underlying
-func enableTracingSpan(ctx context.Context, req metadata.MD, operationName string) (context.Context, opentracing.Span) {
-	var sp opentracing.Span
-	var httpHeader http.Header
-	for k, v := range req {
-		httpHeader.Set(k, strings.Join(v, ","))
-	}
-	sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, operationName, httpHeader)
-	return ctx, sp
-}
-
-// logTuringRouterRequestError logs the given turing request id and the error data
-func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
-	logger := log.WithContext(ctx)
-	defer func() {
-		_ = logger.Sync()
-	}()
-	logger.Errorw("Turing Request Error",
-		"error", err.Message,
-		"status", err.Code,
-	)
-}
 
 type grpcRouterResponse struct {
 	key    string
@@ -249,6 +207,18 @@ func logTuringRouterRequestSummary(
 	if err := resultlog.LogEntry(logEntry); err != nil {
 		log.Glob().Errorf("Result Logging Error: %s", err.Error())
 	}
+}
+
+// logTuringRouterRequestError logs the given turing request id and the error data
+func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
+	logger := log.WithContext(ctx)
+	defer func() {
+		_ = logger.Sync()
+	}()
+	logger.Errorw("Turing Request Error",
+		"error", err.Message,
+		"status", err.Code,
+	)
 }
 
 // copyResponseToLogChannel copies the response from the turing router to the given channel

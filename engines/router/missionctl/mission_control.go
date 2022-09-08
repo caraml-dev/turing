@@ -123,17 +123,7 @@ func (mc *missionControl) doPost(
 	}
 
 	// Make HTTP request and measure duration
-	stopTimer := metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(err == nil)
-			},
-			"component": func() string {
-				return fmt.Sprint(componentLabel, "_makeRequest")
-			},
-		},
-	)
+	stopTimer := metrics.GetMeasureDurationFunc(err, "_makeRequest")
 	resp, err := mc.httpClient.Do(req)
 	stopTimer()
 
@@ -168,17 +158,7 @@ func (mc *missionControl) Enrich(
 ) (mchttp.Response, *errors.TuringError) {
 	var httpErr *errors.TuringError
 	// Measure execution time
-	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(httpErr == nil)
-			},
-			"component": func() string {
-				return "enrich"
-			},
-		},
-	)()
+	defer metrics.GetMeasureDurationFunc(httpErr, "enrich")()
 	// Make HTTP request
 	resp, httpErr := mc.doPost(ctx, mc.enricherEndpoint,
 		header, body, mc.enricherTimeout, "enrich")
@@ -193,17 +173,7 @@ func (mc *missionControl) Route(
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	var routerErr *errors.TuringError
 	// Measure execution time
-	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(routerErr == nil)
-			},
-			"component": func() string {
-				return "route"
-			},
-		},
-	)()
+	defer metrics.GetMeasureDurationFunc(routerErr, "route")()
 
 	// Create a channel for experiment treatment response and add to context
 	ch := make(chan *experiment.Response, 1)
@@ -260,32 +230,12 @@ func (mc *missionControl) Ensemble(
 ) (mchttp.Response, *errors.TuringError) {
 	var httpErr *errors.TuringError
 	// Measure execution time for Ensemble
-	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(httpErr == nil)
-			},
-			"component": func() string {
-				return "ensemble"
-			},
-		},
-	)()
+	defer metrics.GetMeasureDurationFunc(httpErr, "ensemble")()
 
 	// Combine the request body with the router response to make ensembler payload
 	var err error
 	// Measure execution time for creating the combined payload
-	timer := metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return metrics.GetStatusString(err == nil)
-			},
-			"component": func() string {
-				return "ensemble_makePayload"
-			},
-		},
-	)
+	timer := metrics.GetMeasureDurationFunc(err, "ensemble_makePayload")
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)
 	timer()
 	if err != nil {
