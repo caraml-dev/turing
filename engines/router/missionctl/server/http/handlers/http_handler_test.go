@@ -19,9 +19,9 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 )
 
 // testBody is a simple struct with a string, for testing json payload in requests

@@ -66,8 +66,7 @@ func (us *UPIServer) PredictValues(parentCtx context.Context, req *upiv1.Predict
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		ctxLogger.Errorf("Could not fetch headers from context: %v",
-			err.Error())
+		md = metadata.New(map[string]string{})
 	}
 	md.Set(turingReqIDHeaderKey, turingReqID)
 

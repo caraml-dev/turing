@@ -13,8 +13,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	fiberhttp "github.com/gojek/fiber/http"
 	jsoniter "github.com/json-iterator/go"
 )

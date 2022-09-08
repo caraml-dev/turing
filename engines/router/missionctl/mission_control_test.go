@@ -21,8 +21,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/stretchr/testify/assert"
 )
 

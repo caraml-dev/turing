@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers/compression"
 )
 
