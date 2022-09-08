@@ -2,6 +2,8 @@ package grpc
 
 import (
 	"context"
+	"time"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
@@ -15,7 +17,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
-	"time"
 )
 
 const turingReqIDHeaderKey = "Turing-Req-ID"
