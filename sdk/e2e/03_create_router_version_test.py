@@ -5,6 +5,7 @@ import requests
 import turing
 
 from turing.router.config.experiment_config import ExperimentConfig
+from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
@@ -21,6 +22,9 @@ def test_create_router_version():
     # get the router config from the deployed router
     new_router_config = router.config
 
+    # Set autoscaling policy
+    new_router_config = AutoscalingPolicy(metric="rps", target="100")
+
     # set up the new experiment config
     new_router_config.experiment_config = ExperimentConfig(
         type="nop",
@@ -32,6 +36,7 @@ def test_create_router_version():
         resource_request=ResourceRequest(
             min_replica=1, max_replica=1, cpu_request="10", memory_request="1Gi"
         ),
+        autoscaling_policy=AutoscalingPolicy(metric="rps", target="100"),
         endpoint="anything",
         timeout="2s",
         port=80,
@@ -44,6 +49,7 @@ def test_create_router_version():
         resource_request=ResourceRequest(
             min_replica=2, max_replica=2, cpu_request="200m", memory_request="256Mi"
         ),
+        autoscaling_policy=AutoscalingPolicy(metric="rps", target="100"),
         endpoint="anything",
         timeout="3s",
         port=80,
