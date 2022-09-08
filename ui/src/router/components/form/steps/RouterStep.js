@@ -50,7 +50,7 @@ export const RouterStep = ({ projectId }) => {
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
           onChangeHandler={onChange("config")}
-          errors={get(errors, "config.rules")}
+          rules_errors={get(errors, "config.rules")}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

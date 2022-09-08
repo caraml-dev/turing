@@ -118,7 +118,8 @@ const trafficRuleSchema = yup.object().shape({
     .matches(
       trafficRuleNameRegex,
       "Name must begin with an alphanumeric character and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$%&:."
-    ),
+    )
+    .test('is-not-default-name', "default-traffic-rule is a protected name, and cannot be used as the name for a Custom Traffic Rule.", (value) => value !== "default-traffic-rule"),
   conditions: yup
     .array()
     .of(ruleConditionSchema)

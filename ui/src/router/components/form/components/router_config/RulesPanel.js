@@ -1,4 +1,3 @@
-// import React, { Fragment, useEffect, useState } from "react";
 import React, { Fragment, useState } from "react";
 import { Panel } from "../Panel";
 import {
@@ -21,15 +20,17 @@ import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { newDefaultRule, newRule } from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandler, errors = {}, default_traffic_rule_errors = {} }) => {
+export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandler, rules_errors = {}, default_traffic_rule_errors = {} }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
     // Default rule should only be added when there are custom rules
-    if (rules.length === 0) {
+    onChange("rules")([...rules, newRule()]);
+    // rule length check captures the case when all Traffic rules are first loaded
+    // null check captures the case when all Traffic rules are removed and added again
+    if ((rules.length > 0 && !default_traffic_rule) || default_traffic_rule === null) {
       onChange("default_traffic_rule")(newDefaultRule());
     }
-    onChange("rules")([...rules, newRule()]);
   };
 
   const onDeleteRule = (idx) => () => {
@@ -107,7 +108,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
                 routes={routes}
                 onChangeHandler={onChange(`rules.${idx}`)}
                 onDelete={onDeleteRule(idx)}
-                errors={get(errors, `${idx}`)}
+                errors={get(rules_errors, `${idx}`)}
                 dragHandleProps={provided.dragHandleProps}
               />
               <EuiSpacer size="s" />

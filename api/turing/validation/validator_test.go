@@ -589,6 +589,29 @@ func TestValidateTrafficRules(t *testing.T) {
 			expectedError: "Key: 'RouterConfig.TrafficRules' " +
 				"Error:Field validation for 'TrafficRules' failed on the 'unique' tag",
 		},
+		"failure | Invalid name default-traffic-rule": {
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "default-traffic-rule",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-b"},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+				"'default-traffic-rule is a protected name, and cannot be used as the name for a Custom Traffic Rule.' tag",
+			}, " "),
+		},
 	}
 
 	for name, tt := range suite {

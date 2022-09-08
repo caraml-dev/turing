@@ -14,7 +14,7 @@ import {
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
-import { CardHeader } from "../../../../../../components/card/CardHeader";
+import { DraggableCardHeader } from "../../../../../../components/card/DraggableCardHeader";
 import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
 
@@ -67,10 +67,13 @@ export const RuleCard = ({
     onChange("routes")([...rule.routes]);
   };
 
+  // Hide last row when all routes are selected
+  const routeSelectionOptions = (rule.routes.length < routes.length ? [...rule.routes,  "_none_"]: rule.routes);
+
   return (
     <EuiCard
       className="euiCard--routeCard"
-      title=""
+      title={isDefault ? "Default Traffic Rule" : ""}
       description=""
       textAlign="left">
       {!isDefault ? 
@@ -81,7 +84,7 @@ export const RuleCard = ({
         gutterSize="s"
         direction="row">
         <EuiFlexItem>
-          <CardHeader
+          <DraggableCardHeader
             onDelete={onDelete}
             dragHandleProps={props.dragHandleProps}
           />
@@ -157,7 +160,7 @@ export const RuleCard = ({
       : <EuiFormRow
           label="Conditions *"
           fullWidth>
-          <EuiCallOut title="Conditions are disabled for default rule." color="warning" iconType="help">
+          <EuiCallOut title="Conditions are disabled for the default rule." color="warning" iconType="help">
             <p>
               The default rule will be triggered if no other rule matches the request.
             </p>
@@ -173,9 +176,7 @@ export const RuleCard = ({
         }
         fullWidth>
         <Fragment>
-        {[...rule.routes, "_none_"].map((route, idx) => {
-          // Hide last row when all routes are selected
-          if (idx < routes.length) {
+        {routeSelectionOptions.map((route, idx) => {
             return (
               <Fragment key={`rule-routes-${idx}`}>
                 <EuiFlexGroup
@@ -186,11 +187,6 @@ export const RuleCard = ({
                   <EuiFlexItem grow={true} className="euiFlexItem--content">
                     <EuiFormRow
                       isInvalid={!!get(errors, `routes.${idx}`)}
-                      error={
-                        Array.isArray(get(errors, `routes.${idx}`))
-                          ? get(errors, `routes.${idx}`)
-                          : []
-                      }
                       fullWidth>
                       <EuiSuperSelect
                         fullWidth
@@ -231,9 +227,6 @@ export const RuleCard = ({
                 <EuiSpacer size="s" />
               </Fragment>
             )
-          } else {
-            return null
-          }
         })}
         </Fragment>
       </EuiFormRow>

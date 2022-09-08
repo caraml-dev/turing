@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel } from "@elastic/eui";
 import { EuiComboBoxSelect } from "../../../../../../../../components/form/combo_box/EuiComboBoxSelect";
-import { CardHeader } from "../../../../../../../../components/card/CardHeader";
+import { DraggableCardHeader } from "../../../../../../../../components/card/DraggableCardHeader";
 import ExperimentContext from "../../../providers/context";
 import { makeId } from "../../../config";
 import sortBy from "lodash/sortBy";
@@ -36,7 +36,7 @@ export const ExperimentCard = ({
 
   return (
     <EuiPanel>
-      <CardHeader
+      <DraggableCardHeader
         onDelete={onDelete}
         dragHandleProps={props.dragHandleProps}
       />
