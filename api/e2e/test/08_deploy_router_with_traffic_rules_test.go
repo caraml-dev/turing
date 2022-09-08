@@ -80,13 +80,6 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
       },
       "is_default": false,
       "route": "treatment-a"
-    },
-    {
-      "data": {
-        "version": "control"
-      },
-      "is_default": false,
-      "route": "control"
     }
   ]
 }`
@@ -114,13 +107,6 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 					expectedResponse := `{
   "experiment": {},
   "route_responses": [
-    {
-      "data": {
-        "version": "control"
-      },
-      "is_default": false,
-      "route": "control"
-    },
     {
       "data": {
         "version": "treatment-b"
@@ -162,13 +148,6 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
                           },
                           "is_default": false,
                           "route": "control"
-                        },
-                        {
-                          "data": {
-                            "version": "treatment-b"
-                          },
-                          "is_default": false,
-                          "route": "treatment-b"
                         }
                       ]
                     }`
