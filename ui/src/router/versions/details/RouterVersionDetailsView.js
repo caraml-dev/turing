@@ -5,11 +5,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate
 } from "@elastic/eui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
@@ -23,6 +20,7 @@ import { useInitiallyLoaded } from "../../../hooks/useInitiallyLoaded";
 
 import { TuringRouter } from "../../../services/router/TuringRouter";
 import { RouterVersion } from "../../../services/version/RouterVersion";
+import { useConfig } from "../../../config";
 
 export const RouterVersionDetailsView = ({
   projectId,
@@ -30,6 +28,12 @@ export const RouterVersionDetailsView = ({
   versionId,
   ...props
 }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   // Use local states to store parsed responses
   const [router, setRouter] = useState({});
   const [version, setVersion] = useState({});
@@ -75,44 +79,44 @@ export const RouterVersionDetailsView = ({
   }, [versionDetails, setVersion]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <PageTitle
-                  size="m"
-                  title={
-                    <Fragment>
-                      Version <b>{version.version}</b>
-                      &nbsp;&nbsp;
-                      {isActiveConfig && (
-                        <EuiBadge
-                          color="default"
-                          style={{ letterSpacing: "initial" }}>
-                          Current
-                        </EuiBadge>
-                      )}
-                    </Fragment>
-                  }
-                />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
-
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
+      <EuiSpacer size="l" />
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                icon="graphApp"
+                title={
+                  <Fragment>
+                    Version <b>{version.version}</b>
+                    &nbsp;&nbsp;
+                    {isActiveConfig && (
+                      <EuiBadge
+                        color="default"
+                        style={{ letterSpacing: "initial" }}>
+                        Current
+                      </EuiBadge>
+                    )}
+                  </Fragment>
+                }
+              />
+            }
+          >
             <VersionDetailsPageHeader version={version} />
 
             <EuiSpacer size="xs" />
@@ -134,16 +138,19 @@ export const RouterVersionDetailsView = ({
                 />
               )}
             </RouterVersionActions>
-            <EuiSpacer size="m" />
+          </EuiPageTemplate.Header>
 
+          <EuiSpacer size="m" />
+          <EuiPageTemplate.Section color={"transparent"}>
             <Router primary={false}>
               <Redirect from="/" to="details" noThrow />
               <RouterVersionConfigView path="details" config={version} />
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
-          </Fragment>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
+      <EuiSpacer size="l" />
+    </EuiPageTemplate>
   );
 };

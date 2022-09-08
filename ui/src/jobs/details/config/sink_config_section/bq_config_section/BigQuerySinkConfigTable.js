@@ -43,7 +43,9 @@ export const BigQuerySinkConfigTable = ({
 
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <EuiTextColor color="secondary">Extra Options</EuiTextColor>
+          <span>
+            <EuiTextColor color="success">Extra Options</EuiTextColor>
+          </span>
         </EuiTitle>
 
         <BigQueryOptionsTable options={options} />

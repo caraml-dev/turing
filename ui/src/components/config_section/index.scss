@@ -9,7 +9,7 @@
 }
 
 .euiPanel--configSection {
-  .euiDescriptionList.euiDescriptionList--responsiveColumn {
+  .euiDescriptionList {
     > * {
       @include euiTextTruncate;
 

@@ -1,11 +1,8 @@
 import { useTuringApi } from "../../hooks/useTuringApi";
 import {
   EuiButton,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiPanel, EuiSpacer
 } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
@@ -19,6 +16,7 @@ export const ListEnsemblingJobsView = (props) => {
   const {
     appConfig: {
       pagination: { defaultPageSize },
+      pageTemplate: { restrictWidth, paddingSize },
     },
   } = useConfig();
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
@@ -78,19 +76,21 @@ export const ListEnsemblingJobsView = (props) => {
   const onRowClick = (item) => props.navigate(`./${item.id}/details`);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <PageTitle title="Ensembling Jobs" />
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButton fill disabled href={"jobs/create"}>
-              Submit Job
-            </EuiButton>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Header
+        bottomBorder={false}
+        pageTitle={<PageTitle title="Ensembling Jobs" />}
+        rightSideItems={[
+          <EuiButton fill disabled href={"jobs/create"}>
+            Submit Job
+          </EuiButton>,
+        ]}
+      />
+
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Section color={"transparent"}>
+        <EuiPanel>
           <ListEnsemblingJobsTable
             {...results}
             isLoaded={isLoaded}
@@ -102,8 +102,9 @@ export const ListEnsemblingJobsView = (props) => {
             onRowClick={onRowClick}
             {...props}
           />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
+      <EuiSpacer size="l" />
+    </EuiPageTemplate>
   );
 };

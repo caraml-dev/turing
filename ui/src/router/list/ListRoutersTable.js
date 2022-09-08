@@ -53,7 +53,7 @@ const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
         <EuiText size={defaultTextSize}>
           {name}&nbsp;
           {moment().diff(item.created_at, "hours") <= 1 && (
-            <EuiBadge color="secondary">New</EuiBadge>
+            <EuiBadge color="success">New</EuiBadge>
           )}
         </EuiText>
       ),

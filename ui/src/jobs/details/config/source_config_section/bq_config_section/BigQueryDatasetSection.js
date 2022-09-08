@@ -24,7 +24,9 @@ const AccordionItem = ({ title, ...props }) => (
     id={slugify(title)}
     buttonContent={
       <EuiTitle size="xxs">
-        <EuiTextColor color="secondary">{title}</EuiTextColor>
+        <span>
+          <EuiTextColor color="success">{title}</EuiTextColor>
+        </span>
       </EuiTitle>
     }>
     <div className="childWrapper">{props.children}</div>
@@ -68,7 +70,9 @@ const BigQueryDatasetTableConfigGroup = ({ table, features, options }) => {
 
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <EuiTextColor color="secondary">Extra Options</EuiTextColor>
+          <span>
+            <EuiTextColor color="success">Extra Options</EuiTextColor>
+          </span>
         </EuiTitle>
 
         <BigQueryOptionsTable options={options} />
