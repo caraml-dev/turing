@@ -9,11 +9,11 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	"github.com/caraml-dev/turing/engines/router/missionctl/handlers"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber/protocol"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"

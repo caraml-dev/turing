@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/handlers/compression"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers/compression"
 )
 
 type routerResponse struct {
