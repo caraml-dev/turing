@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tidwall/gjson"
-
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,18 +68,21 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
 
-					actualResponse := gjson.GetBytes(payload, "response").String()
+					actualResponse := string(payload)
 					expectedResponse := `{
-  "experiment": {},
-  "route_responses": [
-    {
-      "data": {
-        "version": "treatment-a"
-      },
-      "is_default": false,
-      "route": "treatment-a"
-    }
-  ]
+  "request": {},
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "treatment-a"
+        },
+        "is_default": false,
+        "route": "treatment-a"
+      }
+    ]
+  }
 }`
 					assertRouterResponse(t, expectedResponse, actualResponse)
 				},
@@ -100,23 +101,27 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
-					actualRequest := gjson.GetBytes(payload, "request").String()
-					actualResponse := gjson.GetBytes(payload, "response").String()
+					actualResponse := string(payload)
 
-					expectedRequest := `{"service_type":{"id":"service-type-b"}}`
 					expectedResponse := `{
-  "experiment": {},
-  "route_responses": [
-    {
-      "data": {
-        "version": "treatment-b"
-      },
-      "is_default": false,
-      "route": "treatment-b"
+  "request": {
+    "service_type": {
+       "id": "service-type-b"
     }
-  ]
+  },
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "treatment-b"
+        },
+        "is_default": false,
+        "route": "treatment-b"
+      }
+    ]
+  }
 }`
-					assertRouterResponse(t, expectedRequest, actualRequest)
 					assertRouterResponse(t, expectedResponse, actualResponse)
 				},
 			)
@@ -134,24 +139,27 @@ func TestDeployRouterWithTrafficRules(t *testing.T) {
 				func(response *http.Response, payload []byte) {
 					require.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s", response.StatusCode, string(payload))
+					actualResponse := string(payload)
 
-					actualRequest := gjson.GetBytes(payload, "request").String()
-					actualResponse := gjson.GetBytes(payload, "response").String()
-
-					expectedRequest := `{"service_type": {"id": "service-type-c"}}`
 					expectedResponse := `{
-                      "experiment": {},
-                      "route_responses": [
-                        {
-                          "data": {
-                            "version": "control"
-                          },
-                          "is_default": false,
-                          "route": "control"
-                        }
-                      ]
-                    }`
-					assertRouterResponse(t, expectedRequest, actualRequest)
+  "request": {
+    "service_type": {
+      "id": "service-type-c"
+    }
+  },
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "control"
+        },
+        "is_default": false,
+        "route": "control"
+      }
+    ]
+  }
+}`
 					assertRouterResponse(t, expectedResponse, actualResponse)
 				},
 			)
