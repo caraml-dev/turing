@@ -24,11 +24,9 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
-    // Default rule should only be added when there are custom rules
     onChange("rules")([...rules, newRule()]);
-    // rule length check captures the case when all Traffic rules are first loaded
-    // null check captures the case when all Traffic rules are removed and added again
-    if ((rules.length > 0 && !default_traffic_rule) || default_traffic_rule === null) {
+    // Default rule should only be added when there are custom rules
+    if (!default_traffic_rule) {
       onChange("default_traffic_rule")(newDefaultRule());
     }
   };
