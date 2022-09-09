@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
@@ -46,19 +49,42 @@ func (us *UPIServer) Run() {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", us.port))
 	if err != nil {
 		log.Glob().Errorf("Failed to listen on port %d: %s", us.port, err)
+		return
 	}
-	if err := s.Serve(listener); err != nil {
+
+	errChan := make(chan error, 1)
+	stopChan := make(chan os.Signal, 1)
+
+	// bind OS events to the signal channel
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		if err := s.Serve(listener); err != nil {
+			errChan <- err
+		}
+	}()
+
+	defer func() {
+		s.GracefulStop()
+	}()
+
+	// block until either OS signal, or server fatal error
+	select {
+	case err := <-errChan:
 		log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
+	case <-stopChan:
+		log.Glob().Info("Signal to stop server")
 	}
+
 }
 
-func (us *UPIServer) PredictValues(parentCtx context.Context, req *upiv1.PredictValuesRequest) (
+func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValuesRequest) (
 	*upiv1.PredictValuesResponse, error) {
 	var predictionErr *errors.TuringError
 	defer metrics.GetMeasureDurationFunc(predictionErr, tracingComponentID)()
 
 	// Create context from the request context
-	ctx := turingctx.NewTuringContext(parentCtx)
+	ctx = turingctx.NewTuringContext(ctx)
 	// Create context logger
 	ctxLogger := log.WithContext(ctx)
 	defer func() {
@@ -72,12 +98,9 @@ func (us *UPIServer) PredictValues(parentCtx context.Context, req *upiv1.Predict
 			err.Error())
 	}
 	ctxLogger.Debugf("Received request for %v", turingReqID)
-
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		md = metadata.New(map[string]string{})
-	}
-	md.Set(turingReqIDHeaderKey, turingReqID)
+	ctx = metadata.AppendToOutgoingContext(ctx, turingReqIDHeaderKey, turingReqID)
+	// metadata will always be returned as turingReqIDHeaderKey is appended minimally
+	md, _ := metadata.FromOutgoingContext(ctx)
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
@@ -91,7 +114,6 @@ func (us *UPIServer) PredictValues(parentCtx context.Context, req *upiv1.Predict
 		Message:  req,
 		Metadata: md,
 	}
-
 	resp, predictionErr := us.getPrediction(ctx, fiberRequest)
 	if predictionErr != nil {
 		logTuringRouterRequestError(ctx, predictionErr)
@@ -127,5 +149,5 @@ func (us *UPIServer) getPrediction(
 	}
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, err)
 
-	return resp, err
+	return resp, nil
 }

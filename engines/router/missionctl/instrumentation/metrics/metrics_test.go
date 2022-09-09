@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	promtestutil "github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetStatusString(t *testing.T) {
@@ -31,4 +33,14 @@ func TestInitMetricsCollectorPrometheus(t *testing.T) {
 		err := fmt.Errorf("Prometheus metrics collector was not initialised")
 		tu.FailOnError(t, err)
 	}
+}
+
+func TestGetMeasureDurationFunc(t *testing.T) {
+	histoVec := histogramMap[TuringComponentRequestDurationMs]
+	require.Zero(t, promtestutil.CollectAndCount(histoVec))
+
+	err := InitMetricsCollector(true)
+	assert.NoError(t, err)
+	GetMeasureDurationFunc(err, "test")()
+	require.Equal(t, 1, promtestutil.CollectAndCount(histoVec))
 }
