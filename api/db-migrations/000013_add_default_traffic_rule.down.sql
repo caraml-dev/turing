@@ -4,6 +4,7 @@ WITH dangling_routes AS (
         , default_traffic_rule -> 'routes' AS routes
     FROM
         router_versions
+    WHERE default_traffic_rule -> 'routes' IS NOT NULL
 ),
 cleaned_router_versions AS (
     SELECT id, CASE WHEN traffic_rules = 'null' THEN '[]'::jsonb ELSE traffic_rules END AS traffic_rules
@@ -15,10 +16,11 @@ exploded_traffic_rules AS (
         , position
         , elem
     FROM cleaned_router_versions, jsonb_array_elements(traffic_rules) WITH ordinality arr(elem, position)
+    WHERE id IN (SELECT id FROM dangling_routes)
 ),
 original_traffic_rules AS (
     SELECT
-        cleaned_router_versions.id
+        exploded_traffic_rules.id
         , position
         , CASE
             WHEN elem IS NOT NULL THEN jsonb_build_object(
@@ -30,19 +32,18 @@ original_traffic_rules AS (
             ELSE NULL
             END AS traffic_rule
     FROM
-        cleaned_router_versions
-        LEFT JOIN exploded_traffic_rules ON cleaned_router_versions.id = exploded_traffic_rules.id
-        LEFT JOIN dangling_routes ON cleaned_router_versions.id = dangling_routes.id
+        exploded_traffic_rules
+        LEFT JOIN dangling_routes ON exploded_traffic_rules.id = dangling_routes.id
 ),
 joined_original_traffic_rules AS (
     SELECT
         id,
-        json_agg(traffic_rule ORDER BY position) FILTER (where traffic_rule IS NOT NULL) traffic_rules_updated
+        json_agg(traffic_rule ORDER BY position) traffic_rules_updated
     FROM original_traffic_rules GROUP BY id
 )
 
 UPDATE router_versions AS t
-SET traffic_rules = (CASE WHEN traffic_rules_updated IS NOT NULL THEN traffic_rules_updated ELSE '[]'::json END)
+SET traffic_rules = traffic_rules_updated
 FROM joined_original_traffic_rules
 WHERE joined_original_traffic_rules.id = t.id;
 
