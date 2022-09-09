@@ -8,6 +8,7 @@ import { EnvVariablesPanel } from "./EnvVariablesPanel";
 import { ResourcesPanel } from "../ResourcesPanel";
 import { SecretsContextProvider } from "../../../../../providers/secrets/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
+import { AutoscalingPolicyPanel } from "../AutoscalingPolicyPanel";
 
 export const DockerConfigFormGroup = ({
   projectId,
@@ -47,6 +48,14 @@ export const DockerConfigFormGroup = ({
             variables={dockerConfig.env}
             onChangeHandler={onChange("env")}
             errors={errors.env}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AutoscalingPolicyPanel
+            autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
+            onChangeHandler={onChange("autoscaling_policy")}
+            errors={errors.autoscaling_policy}
           />
         </EuiFlexItem>
 

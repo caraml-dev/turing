@@ -6,9 +6,10 @@ import {
   fieldSchema,
   fieldSourceSchema,
 } from "../../../../components/validation";
+import { autoscalingPolicyMetrics } from "../components/typeOptions";
 
-yup.addMethod(yup.array, "unique", function (propertyPath, message) {
-  return this.test("unique", message, function (list) {
+yup.addMethod(yup.array, "unique", function(propertyPath, message) {
+  return this.test("unique", message, function(list) {
     const errors = [];
 
     list.forEach((item, index) => {
@@ -87,7 +88,7 @@ const routeSchema = yup.object().shape({
 
 const validRouteSchema = yup
   .mixed()
-  .test("valid-route", "Valid route is required", function (value) {
+  .test("valid-route", "Valid route is required", function(value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
     return routes.map((r) => r.id).includes(value);
@@ -166,6 +167,11 @@ const resourceRequestSchema = (maxAllowedReplica) =>
       ),
   });
 
+const autoscalingPolicySchema = yup.object().shape({
+  metric: yup.string().required("Valid metric must be chosen").oneOf(autoscalingPolicyMetrics, "Valid autoscaling metric type should be chosen"),
+  target: yup.string().required("Valid target should be specified").matches(/^[0-9]+$/, "Must be a number"),
+});
+
 const enricherSchema = yup.object().shape({
   type: yup
     .mixed()
@@ -192,6 +198,7 @@ const dockerDeploymentSchema = (maxAllowedReplica) =>
     timeout: timeoutSchema.required("Timeout is required"),
     env: yup.array(environmentVariableSchema),
     resource_request: resourceRequestSchema(maxAllowedReplica),
+    autoscaling_policy: autoscalingPolicySchema,
   });
 
 const pyfuncDeploymentSchema = (maxAllowedReplica) =>
@@ -200,6 +207,7 @@ const pyfuncDeploymentSchema = (maxAllowedReplica) =>
     ensembler_id: yup.number().integer().required("Ensembler ID is required"),
     timeout: timeoutSchema.required("Timeout is required"),
     resource_request: resourceRequestSchema(maxAllowedReplica),
+    autoscaling_policy: autoscalingPolicySchema,
     env: yup.array(environmentVariableSchema),
   });
 
@@ -270,6 +278,7 @@ const schema = (maxAllowedReplica) => [
         .min(1, "At least one route should be configured"),
       rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       resource_request: resourceRequestSchema(maxAllowedReplica),
+      autoscaling_policy: autoscalingPolicySchema,
     }),
   }),
   yup.object().shape({
@@ -285,14 +294,14 @@ const schema = (maxAllowedReplica) => [
           engine === "nop"
             ? schema
             : yup
-                .mixed()
-                .when("$getEngineProperties", (getEngineProperties) => {
-                  const engineProps = getEngineProperties(engine);
-                  return engineProps.type === "standard"
-                    ? standardExperimentConfigSchema(engineProps)
-                    : engineProps.custom_experiment_manager_config
-                        ?.parsed_experiment_config_schema || schema;
-                })
+              .mixed()
+              .when("$getEngineProperties", (getEngineProperties) => {
+                const engineProps = getEngineProperties(engine);
+                return engineProps.type === "standard"
+                  ? standardExperimentConfigSchema(engineProps)
+                  : engineProps.custom_experiment_manager_config
+                    ?.parsed_experiment_config_schema || schema;
+              })
         ),
       }),
     }),
