@@ -499,15 +499,6 @@ func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
 			},
 			err: "experiment mappings and route name path cannot both be configured together",
 		},
-		"failure | invalid route name path": {
-			testEnsembler: models.Ensembler{
-				Type: models.EnsemblerStandardType,
-				StandardConfig: &models.EnsemblerStandardConfig{
-					RouteNamePath: "abc def",
-				},
-			},
-			err: "route name path is invalid",
-		},
 	}
 
 	// Run tests

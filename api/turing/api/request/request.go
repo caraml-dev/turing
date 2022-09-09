@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"regexp"
 
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
@@ -12,8 +11,6 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
-
-var routeNamePathRegex = regexp.MustCompile(`^\w+(?:\.\w+)*$`)
 
 // CreateOrUpdateRouterRequest structure defines the format of the request payload
 // when creating or updating routers
@@ -169,11 +166,6 @@ func (r RouterConfig) BuildRouterVersion(
 			// Verify that the ExperimentMappings and RouteNamePath are not both set at the same time
 			if len(r.Ensembler.StandardConfig.ExperimentMappings) > 0 && r.Ensembler.StandardConfig.RouteNamePath != "" {
 				return nil, errors.New("experiment mappings and route name path cannot both be configured together")
-			}
-
-			// Verify that the route name path is validated by the regex expression
-			if !routeNamePathRegex.MatchString(r.Ensembler.StandardConfig.RouteNamePath) {
-				return nil, errors.New("route name path is invalid")
 			}
 		}
 		if r.Ensembler.Type == models.EnsemblerPyFuncType {
