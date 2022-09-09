@@ -63,7 +63,7 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
-Optionally, modify the autoscaling policy on the enricher.
+Optionally, modify the autoscaling policy on the ensembler.
 
 ![](../../.gitbook/assets/autoscaling_policy_panel.png)
 
@@ -101,7 +101,7 @@ registered in your current project. You'll also need to indicate your desired ti
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
-Optionally, modify the autoscaling policy on the enricher.
+Optionally, modify the autoscaling policy on the ensembler.
 
 ![](../../.gitbook/assets/autoscaling_policy_panel.png)
 
