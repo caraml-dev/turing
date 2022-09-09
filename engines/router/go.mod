@@ -5,6 +5,7 @@ go 1.18
 require (
 	bou.ke/monkey v1.0.2
 	cloud.google.com/go/bigquery v1.14.0
+	github.com/buger/jsonparser v1.1.1
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220902024531-7467c7bdd0ff
 	github.com/fluent/fluent-logger-golang v1.5.0
@@ -32,7 +33,6 @@ require (
 require (
 	cloud.google.com/go v0.74.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/confluentinc/confluent-kafka-go v1.4.2 // indirect

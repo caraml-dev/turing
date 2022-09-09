@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"strings"
 
@@ -13,13 +12,11 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/grpc"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber/protocol"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 
 	// Turing router will support these experiment runners: nop
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
@@ -62,16 +59,8 @@ func Run() {
 		if err != nil {
 			log.Glob().Panicf("Failed initializing Mission Control: %v", err)
 		}
-		s := grpc.NewServer()
-		upiv1.RegisterUniversalPredictionServiceServer(s, missionCtl)
-		reflection.Register(s)
-		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
-		if err != nil {
-			log.Glob().Errorf("Failed to listen on port %d: %s", cfg.Port, err)
-		}
-		if err := s.Serve(listener); err != nil {
-			log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
-		}
+		s := grpc.NewUPIServer(missionCtl, cfg.Port)
+		s.Run()
 	} else {
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControl(

@@ -2,10 +2,12 @@ package grpc
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -15,8 +17,9 @@ import (
 	"github.com/gojek/fiber"
 	fibergrpc "github.com/gojek/fiber/grpc"
 	"github.com/opentracing/opentracing-go"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/grpc/reflection"
 )
 
 const turingReqIDHeaderKey = "Turing-Req-ID"
@@ -25,22 +28,28 @@ const tracingComponentID = "grpc_handler"
 type UPIServer struct {
 	upiv1.UnimplementedUniversalPredictionServiceServer
 
-	fiberRouter fiber.Component
+	missionControl missionctl.MissionControlUPI
+	port           int
 }
 
-func NewUPIServer(
-	cfgFilePath string,
-	fiberDebugLog bool,
-) (*UPIServer, error) {
-
-	fiberRouter, err := fiberapi.CreateFiberRouterFromConfig(cfgFilePath, fiberDebugLog)
-	if err != nil {
-		return nil, err
-	}
-
+func NewUPIServer(mc missionctl.MissionControlUPI, port int) *UPIServer {
 	return &UPIServer{
-		fiberRouter: fiberRouter,
-	}, nil
+		missionControl: mc,
+		port:           port,
+	}
+}
+
+func (us *UPIServer) Run() {
+	s := grpc.NewServer()
+	upiv1.RegisterUniversalPredictionServiceServer(s, us)
+	reflection.Register(s)
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", us.port))
+	if err != nil {
+		log.Glob().Errorf("Failed to listen on port %d: %s", us.port, err)
+	}
+	if err := s.Serve(listener); err != nil {
+		log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
+	}
 }
 
 func (us *UPIServer) PredictValues(parentCtx context.Context, req *upiv1.PredictValuesRequest) (
@@ -112,57 +121,11 @@ func (us *UPIServer) getPrediction(
 	}()
 
 	// Calling Routes via fiber
-	resp, err := us.Route(ctx, fiberRequest)
+	resp, err := us.missionControl.Route(ctx, fiberRequest)
 	if err != nil {
 		return nil, err
 	}
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, err)
 
 	return resp, err
-}
-
-func (us *UPIServer) Route(
-	ctx context.Context,
-	fiberRequest fiber.Request) (
-	*upiv1.PredictValuesResponse, *errors.TuringError) {
-	var turingError *errors.TuringError
-	defer metrics.GetMeasureDurationFunc(turingError, "route")()
-
-	resp, ok := <-us.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
-	if !ok {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), errors.GRPC,
-		)
-		return nil, turingError
-	}
-	if !resp.IsSuccess() {
-		return nil, &errors.TuringError{
-			Code:    resp.StatusCode(),
-			Message: string(resp.Payload().([]byte)),
-		}
-	}
-
-	var responseProto upiv1.PredictValuesResponse
-	payload, ok := resp.Payload().(proto.Message)
-	if !ok {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to parse fiber response into proto"), errors.GRPC,
-		)
-		return nil, turingError
-	}
-	payloadByte, err := proto.Marshal(payload)
-	if err != nil {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to marshal payload"), errors.GRPC,
-		)
-		return nil, turingError
-	}
-	err = proto.Unmarshal(payloadByte, &responseProto)
-	if err != nil {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), errors.GRPC,
-		)
-		return nil, turingError
-	}
-	return &responseProto, nil
 }
