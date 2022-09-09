@@ -1,7 +1,7 @@
 import React from "react";
 import { EuiDescriptionList } from "@elastic/eui";
 
-import { autoscalingPolicyOptions } from "../../form/components/typeOptions";
+import { autoscalingPolicyOptions } from "../../form/components/autoscaling_policy/typeOptions";
 import { ConfigMultiSectionPanel } from "../../../../components/config_multi_section_panel/ConfigMultiSectionPanel"
 
 const ResourcesSection = ({

@@ -6,7 +6,7 @@ import {
   fieldSchema,
   fieldSourceSchema,
 } from "../../../../components/validation";
-import { autoscalingPolicyMetrics } from "../components/typeOptions";
+import { autoscalingPolicyMetrics } from "../components/autoscaling_policy/typeOptions";
 
 yup.addMethod(yup.array, "unique", function(propertyPath, message) {
   return this.test("unique", message, function(list) {

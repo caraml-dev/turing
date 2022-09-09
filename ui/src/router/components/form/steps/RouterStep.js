@@ -9,7 +9,7 @@ import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { RulesPanel } from "../components/router_config/RulesPanel";
-import { AutoscalingPolicyPanel } from "../components/AutoscalingPolicyPanel";
+import { AutoscalingPolicyPanel } from "../components/autoscaling_policy/AutoscalingPolicyPanel";
 
 export const RouterStep = ({ projectId }) => {
   const {

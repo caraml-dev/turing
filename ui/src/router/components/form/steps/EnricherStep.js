@@ -2,7 +2,7 @@ import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ResourcesPanel } from "../components/ResourcesPanel";
 import React, { Fragment, useContext } from "react";
 import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
-import { AutoscalingPolicyPanel } from "../components/AutoscalingPolicyPanel";
+import { AutoscalingPolicyPanel } from "../components/autoscaling_policy/AutoscalingPolicyPanel";
 import { EnvVariablesPanel } from "../components/docker_config/EnvVariablesPanel";
 import { EnricherTypePanel } from "../components/enricher_config/EnricherTypePanel";
 import { DockerDeploymentPanel } from "../components/docker_config/DockerDeploymentPanel";

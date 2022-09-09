@@ -1,15 +1,21 @@
-import React from "react";
-import { Panel } from "./Panel";
+import React, { Fragment } from "react";
+import { useToggle } from "@gojek/mlp-ui";
 import {
   EuiForm,
   EuiFormRow,
   EuiFieldNumber,
+  EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiSuperSelect,
 } from "@elastic/eui";
-import { DescribedFormGroup } from "../../../../components/form/described_form_group/DescribedFormGroup";
-import { FormLabelWithToolTip } from "../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
-import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
+
+import { Panel } from "../Panel";
+import { DescribedFormGroup } from "../../../../../components/form/described_form_group/DescribedFormGroup";
+import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
+import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
+
+import { AutoscalingPolicyPanelFlyout } from "./AutoscalingPolicyPanelFlyout";
 import { autoscalingPolicyOptions } from "./typeOptions";
 
 export const AutoscalingPolicyPanel = ({
@@ -25,8 +31,21 @@ export const AutoscalingPolicyPanel = ({
   }
   const selectedMetric = autoscalingPolicyOptions.find((e) => e.value === autoscalingPolicyConfig.metric);
 
+  const [isFlyoutVisible, toggleIsFlyoutVisible] = useToggle();
+
   return (
-    <Panel title="Autoscaling Policy">
+    <Panel title={
+      <Fragment>
+        Autoscaling Policy{" "}
+        <EuiLink color="ghost" onClick={() => toggleIsFlyoutVisible()}>
+          <EuiIcon
+            type="questionInCircle"
+            color="subdued"
+            className="eui-alignBaseline"
+          />
+        </EuiLink>
+      </Fragment>
+    }>
       <EuiForm>
         <DescribedFormGroup description={selectedMetric?.description || ""}>
           <EuiFormRow
@@ -74,6 +93,10 @@ export const AutoscalingPolicyPanel = ({
           </EuiFormRow>
         </DescribedFormGroup>
       </EuiForm>
+
+      {isFlyoutVisible && (
+        <AutoscalingPolicyPanelFlyout onClose={() => toggleIsFlyoutVisible()} />
+      )}
     </Panel>
   );
 };

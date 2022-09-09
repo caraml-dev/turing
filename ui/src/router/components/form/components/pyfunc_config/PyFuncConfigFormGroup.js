@@ -8,7 +8,7 @@ import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
 import { EnsemblersContextContextProvider } from "../../../../../providers/ensemblers/context";
 import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
-import { AutoscalingPolicyPanel } from "../AutoscalingPolicyPanel";
+import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
 
 export const PyFuncConfigFormGroup = ({
   projectId,

@@ -8,7 +8,7 @@ import { EnvVariablesPanel } from "./EnvVariablesPanel";
 import { ResourcesPanel } from "../ResourcesPanel";
 import { SecretsContextProvider } from "../../../../../providers/secrets/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
-import { AutoscalingPolicyPanel } from "../AutoscalingPolicyPanel";
+import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
 
 export const DockerConfigFormGroup = ({
   projectId,
