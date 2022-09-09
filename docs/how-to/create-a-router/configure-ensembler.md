@@ -63,6 +63,14 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
+Optionally, modify the autoscaling policy on the enricher.
+
+![](../../.gitbook/assets/autoscaling_policy_panel.png)
+
+**Metric**: The autoscaling metric to monitor. Currently, 4 metrics are supported - Concurrency, RPS, CPU and Memory.
+
+**Target**: The target value of the chosen metric for each replica, after which autoscaling should be triggered.
+
 ## Pyfunc Ensembler
 Turing will deploy a previously registered Pyfunc ensembler (refer to 
 [the samples](https://github.com/caraml-dev/turing/tree/main/sdk/samples) in the SDK section for more information on how to 
@@ -92,6 +100,14 @@ registered in your current project. You'll also need to indicate your desired ti
 **Memory**: Total amount of RAM available for your ensembler.
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
+
+Optionally, modify the autoscaling policy on the enricher.
+
+![](../../.gitbook/assets/autoscaling_policy_panel.png)
+
+**Metric**: The autoscaling metric to monitor. Currently, 4 metrics are supported - Concurrency, RPS, CPU and Memory.
+
+**Target**: The target value of the chosen metric for each replica, after which autoscaling should be triggered.
 
 ## External Ensembler
 Coming Soon.
