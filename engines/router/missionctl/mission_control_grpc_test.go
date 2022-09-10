@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -23,6 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const port = 50550
@@ -175,4 +177,51 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 			upiv1.NamedValue{},
 			upiv1.ResponseMetadata{},
 		))
+}
+
+const (
+	grpcport1       = 50556
+	grpcport2       = 50557
+	benchmarkConfig = "testdata/grpc/grpc_router_minimal_two_route.yaml"
+)
+
+var benchMarkUpiResp *upiv1.PredictValuesResponse
+var benchMarkUpiErr *errors.TuringError
+
+func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
+
+	s1 := testutils.RunTestUPIServer(testutils.GrpcTestServer{
+		Port: grpcport1,
+	})
+	s2 := testutils.RunTestUPIServer(testutils.GrpcTestServer{
+		Port: grpcport2,
+	})
+	defer s1.Stop()
+	defer s2.Stop()
+
+	mc, err := NewMissionControlGrpc(benchmarkConfig, false)
+	require.NoError(b, err)
+
+	upiRequest := &upiv1.PredictValuesRequest{}
+	fileByte, err := ioutil.ReadFile(filepath.Join("testdata", payloadFileName))
+	require.NoError(b, err)
+	err = protojson.Unmarshal(fileByte, upiRequest)
+	require.NoError(b, err)
+
+	req := &fibergrpc.Request{
+		Message: upiRequest,
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		benchMarkUpiResp, benchMarkUpiErr = mc.Route(context.Background(), req)
+	}
+}
+
+func BenchmarkMCGrpcDefaultRouteSmallUPIPayload(b *testing.B) {
+	benchmarkGrpcRoute("upi_small_payload.json", b)
+}
+
+func BenchmarkMissionControlGrpcDefaultRouteLargeUPIPayload(b *testing.B) {
+	benchmarkGrpcRoute("upi_large_payload.json", b)
 }

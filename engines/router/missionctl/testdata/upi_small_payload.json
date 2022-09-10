@@ -1,0 +1,163 @@
+{
+    "predictionRows": [
+        {
+            "rowId": "1",
+            "modelInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                },
+                {
+                    "name": "4",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "5",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "6",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ],
+            "transformerInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ]
+        },
+        {
+            "rowId": "1",
+            "modelInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                },
+                {
+                    "name": "4",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "5",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "6",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ],
+            "transformerInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ]
+        },
+        {
+            "rowId": "1",
+            "modelInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                },
+                {
+                    "name": "4",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "5",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "6",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ],
+            "transformerInputs": [
+                {
+                    "name": "1",
+                    "type": "TYPE_DOUBLE",
+                    "doubleValue": 12.444
+                },
+                {
+                    "name": "2",
+                    "type": "TYPE_STRING",
+                    "stringValue": "test123"
+                },
+                {
+                    "name": "3",
+                    "type": "TYPE_INTEGER",
+                    "integerValue": "13131"
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "predictionId": "123"
+    }
+}

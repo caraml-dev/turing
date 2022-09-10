@@ -58,7 +58,7 @@ func (s *GrpcTestServer) PredictValues(
 	return defaultMockResponse, nil
 }
 
-func RunTestUPIServer(srv GrpcTestServer) {
+func RunTestUPIServer(srv GrpcTestServer) *grpc.Server {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", srv.Port))
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -66,12 +66,13 @@ func RunTestUPIServer(srv GrpcTestServer) {
 	s := grpc.NewServer()
 	upiv1.RegisterUniversalPredictionServiceServer(s, &srv)
 	reflection.Register(s)
-	log.Printf("Running Test Server at %v", srv.Port)
 	go func() {
 		if err := s.Serve(listener); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
+
+	return s
 }
 
 func GetDefaultMockResponse() *upiv1.PredictValuesResponse {
