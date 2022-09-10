@@ -39,8 +39,6 @@ func TestGetMeasureDurationFunc(t *testing.T) {
 	histoVec := histogramMap[TuringComponentRequestDurationMs]
 	require.Zero(t, promtestutil.CollectAndCount(histoVec))
 
-	err := InitMetricsCollector(true)
-	assert.NoError(t, err)
-	GetMeasureDurationFunc(err, "test")()
+	GetMeasureDurationFunc(nil, "test")()
 	require.Equal(t, 1, promtestutil.CollectAndCount(histoVec))
 }
