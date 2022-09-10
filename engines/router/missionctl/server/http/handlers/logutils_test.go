@@ -17,7 +17,7 @@ import (
 func TestCopyResponseToLogChannel(t *testing.T) {
 	tests := map[string]*errors.TuringError{
 		"success": nil,
-		"error":   errors.NewTuringError(fmt.Errorf("Test error"), errors.HTTP),
+		"error":   errors.NewTuringError(fmt.Errorf("test error"), errors.HTTP),
 	}
 
 	for name, httpErr := range tests {

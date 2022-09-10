@@ -74,14 +74,9 @@ func copyResponseToLogChannel(
 		}
 		return
 	}
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		ch <- grpcRouterResponse{
-			key: key,
-			err: "fail to read metadata from fiber",
-		}
-		return
-	}
+
+	// if no metadata was sent return, md will be nil
+	md, _ := metadata.FromIncomingContext(ctx)
 
 	// Copy to channel
 	ch <- grpcRouterResponse{
