@@ -9,9 +9,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
-	"github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
-	"google.golang.org/protobuf/proto"
 )
 
 type ctxKey string
@@ -87,26 +85,18 @@ func (i *ErrorLoggingInterceptor) AfterCompletion(
 	cKind := ctx.Value(fiber.CtxComponentKindKey)
 
 	if cKindCompType, ok := cKind.(fiber.ComponentKind); ok {
-		// Only log errors at the caller
+		// Only log errors at the the caller
 		// (to avoid repeatedly logging the error at higher levels)
 		if cKindCompType == fiber.CallerKind {
 			turingReqID, _ := turingctx.GetRequestID(ctx)
 
 			// For each response in the queue, if the status is non-success, log warning
 			for resp := range queue.Iter() {
-				var response interface{}
-				if req != nil && req.Protocol() == protocol.GRPC {
-					r := resp.Payload().(proto.Message)
-					response = r
-				} else {
-					r := resp.Payload().([]byte)
-					response = string(r)
-				}
 				if !resp.IsSuccess() {
 					i.logger.Warnw("Route Error", "Component", cID,
 						"Turing Request", turingReqID,
 						"Status", resp.StatusCode(),
-						"Response", response)
+						"Response", string(resp.Payload().([]byte)))
 				}
 			}
 		}

@@ -218,7 +218,7 @@ func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
 	}
 }
 
-func BenchmarkMCGrpcDefaultRouteSmallUPIPayload(b *testing.B) {
+func BenchmarkMissionControlGrpcDefaultRouteSmallUPIPayload(b *testing.B) {
 	benchmarkGrpcRoute("upi_small_payload.json", b)
 }
 
