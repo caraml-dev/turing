@@ -27,12 +27,22 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-const port = 50550
+const (
+	port            = 50550
+	grpcport1       = 50556
+	grpcport2       = 50557
+	benchmarkConfig = "testdata/grpc/grpc_router_minimal_two_route.yaml"
+)
+
+var benchMarkUpiResp *upiv1.PredictValuesResponse
+var benchMarkUpiErr *errors.TuringError
 
 // TestMain does setup for all test case pre-run
 func TestMain(m *testing.M) {
 
 	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: port})
+	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: grpcport1})
+	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: grpcport2})
 	os.Exit(m.Run())
 }
 
@@ -179,25 +189,7 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 		))
 }
 
-const (
-	grpcport1       = 50556
-	grpcport2       = 50557
-	benchmarkConfig = "testdata/grpc/grpc_router_minimal_two_route.yaml"
-)
-
-var benchMarkUpiResp *upiv1.PredictValuesResponse
-var benchMarkUpiErr *errors.TuringError
-
 func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
-
-	s1 := testutils.RunTestUPIServer(testutils.GrpcTestServer{
-		Port: grpcport1,
-	})
-	s2 := testutils.RunTestUPIServer(testutils.GrpcTestServer{
-		Port: grpcport2,
-	})
-	defer s1.Stop()
-	defer s2.Stop()
 
 	mc, err := NewMissionControlGrpc(benchmarkConfig, false)
 	require.NoError(b, err)

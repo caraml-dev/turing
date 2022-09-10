@@ -337,6 +337,9 @@ func benchmarkRoute(cfgFileName string, payloadFileName string, b *testing.B) {
 func BenchmarkMissionControlDefaultRouteSmallPayload(b *testing.B) {
 	benchmarkRoute("nop_default_router.yaml", "small_payload.json", b)
 }
+func BenchmarkMissionControlDefaultRouteSmallUPIPayload(b *testing.B) {
+	benchmarkRoute("nop_default_router.yaml", "upi_small_payload.json", b)
+}
 func BenchmarkMissionControlEnsemblingRouteSmallPayload(b *testing.B) {
 	benchmarkRoute("nop_ensembling_router.yaml", "small_payload.json", b)
 }
