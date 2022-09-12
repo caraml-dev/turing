@@ -12,19 +12,19 @@ rule_tbl AS (
 rule_route_tbl AS (
     SELECT id, jsonb_array_elements(rule->'routes') AS routes FROM rule_tbl
 ),
--- all routes for each router version
-all_routes AS (
-    SELECT
-        id, jsonb_agg(DISTINCT routes) all_routes
-    FROM rule_route_tbl
-    GROUP BY id
-),
 -- explode the original routes column
 route_tbl AS (
     SELECT id, jsonb_array_elements(routes) AS route FROM router_versions
 ),
 original_route_tbl AS (
     SELECT id, route -> 'id' AS route_name FROM route_tbl
+),
+-- all routes for each router version
+all_routes AS (
+    SELECT
+        id, jsonb_agg(DISTINCT route_name) all_routes
+    FROM original_route_tbl
+    GROUP BY id
 ),
 dangling_routes AS (
     SELECT

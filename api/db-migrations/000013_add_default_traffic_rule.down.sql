@@ -4,14 +4,14 @@ WITH default_traffic_rule_routes AS (
 route_tbl AS (
     SELECT id, jsonb_array_elements(routes) AS route FROM router_versions
 ),
-version_route_tbl AS (
-    SELECT id, route->'id' AS route_id FROM route_tbl
+original_route_tbl AS (
+    SELECT id, route -> 'id' AS route_id FROM route_tbl
 ),
 -- all routes for each router version
 all_routes AS (
     SELECT
         id, jsonb_agg(DISTINCT route_id) routes
-    FROM version_route_tbl
+    FROM original_route_tbl
     GROUP BY id
 ),
 dangling_routes AS (
