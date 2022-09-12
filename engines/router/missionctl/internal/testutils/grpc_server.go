@@ -19,25 +19,10 @@ type GrpcTestServer struct {
 }
 
 var defaultMockResponse = &upiv1.PredictValuesResponse{
-	PredictionResultRows: []*upiv1.PredictionResultRow{
-		{
-			RowId: "1",
-			Values: []*upiv1.NamedValue{
-				{
-					Name:        "one",
-					Type:        upiv1.NamedValue_TYPE_DOUBLE,
-					DoubleValue: 13.3,
-				},
-				{
-					Name:        "two",
-					Type:        upiv1.NamedValue_TYPE_STRING,
-					StringValue: "23.2",
-				},
-			},
-		},
-		{
-			RowId: "2",
-		},
+	PredictionResultTable: &upiv1.Table{
+		Name:    "table",
+		Columns: nil,
+		Rows:    nil,
 	},
 	Metadata: &upiv1.ResponseMetadata{
 		PredictionId: "123",

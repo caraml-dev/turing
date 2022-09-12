@@ -3,6 +3,7 @@ package missionctl
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -24,6 +25,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -183,7 +186,7 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 	return cmp.Equal(x, y,
 		cmpopts.IgnoreUnexported(
 			upiv1.PredictValuesResponse{},
-			upiv1.PredictionResultRow{},
+			upiv1.Table{},
 			upiv1.NamedValue{},
 			upiv1.ResponseMetadata{},
 		))
@@ -210,10 +213,36 @@ func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
 	}
 }
 
-func BenchmarkMissionControlGrpcDefaultRouteSmallUPIPayload(b *testing.B) {
+func benchmarkPlainGrpc(payloadFileName string, b *testing.B) {
+
+	upiRequest := &upiv1.PredictValuesRequest{}
+	fileByte, err := ioutil.ReadFile(filepath.Join("testdata", payloadFileName))
+	require.NoError(b, err)
+	err = protojson.Unmarshal(fileByte, upiRequest)
+	require.NoError(b, err)
+
+	conn, err := grpc.Dial(fmt.Sprintf(":%d", grpcport1), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(b, err)
+	client := upiv1.NewUniversalPredictionServiceClient(conn)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		client.PredictValues(context.Background(), upiRequest)
+	}
+}
+
+func BenchmarkMissionControlUpiDefaultRouteSmallPayload(b *testing.B) {
 	benchmarkGrpcRoute("upi_small_payload.json", b)
 }
 
-func BenchmarkMissionControlGrpcDefaultRouteLargeUPIPayload(b *testing.B) {
+func BenchmarkMissionControlUpiDefaultRouteLargePayload(b *testing.B) {
 	benchmarkGrpcRoute("upi_large_payload.json", b)
+}
+
+func BenchmarkPlainGrpcUpiSmallPayload(b *testing.B) {
+	benchmarkPlainGrpc("upi_small_payload.json", b)
+}
+
+func BenchmarkPlainGrpcUpiLargePayload(b *testing.B) {
+	benchmarkPlainGrpc("upi_large_payload.json", b)
 }

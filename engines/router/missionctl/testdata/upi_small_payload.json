@@ -1,163 +1,277 @@
 {
-    "predictionRows": [
-        {
-            "rowId": "1",
-            "modelInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                },
-                {
-                    "name": "4",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "5",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "6",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ],
-            "transformerInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ]
-        },
-        {
-            "rowId": "1",
-            "modelInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                },
-                {
-                    "name": "4",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "5",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "6",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ],
-            "transformerInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ]
-        },
-        {
-            "rowId": "1",
-            "modelInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                },
-                {
-                    "name": "4",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "5",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "6",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ],
-            "transformerInputs": [
-                {
-                    "name": "1",
-                    "type": "TYPE_DOUBLE",
-                    "doubleValue": 12.444
-                },
-                {
-                    "name": "2",
-                    "type": "TYPE_STRING",
-                    "stringValue": "test123"
-                },
-                {
-                    "name": "3",
-                    "type": "TYPE_INTEGER",
-                    "integerValue": "13131"
-                }
-            ]
-        }
+  "predictionTable": {
+    "name": "benchmark-table",
+    "columns": [
+      {
+        "name": "feature_0",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_1",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_2",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_3",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_4",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_5",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_6",
+        "type": "TYPE_DOUBLE"
+      },
+      {
+        "name": "feature_7",
+        "type": "TYPE_DOUBLE"
+      }
     ],
-    "metadata": {
-        "predictionId": "123"
-    }
+    "rows": [
+      {
+        "rowId": "0273e956-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273ea28-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273ea64-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273eadc-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273eafa-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273eb18-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273eb36-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      },
+      {
+        "rowId": "0273eb4a-326a-11ed-899f-acde48001122",
+        "values": [
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          },
+          {
+            "doubleValue": 42.0
+          }
+        ]
+      }
+    ]
+  },
+  "targetName": "my-target",
+  "metadata": {
+    "predictionId": "02744ce8-326a-11ed-899f-acde48001122"
+  }
 }
