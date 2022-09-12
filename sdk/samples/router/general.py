@@ -1,4 +1,4 @@
-from sdk.turing.router.config.traffic_rule import DefaultTrafficRule
+from turing.router.config.traffic_rule import DefaultTrafficRule
 import turing
 import turing.batch
 import turing.batch.config

@@ -104,6 +104,11 @@ export class TuringRouter {
     let obj = objectAssignDeep({}, this);
 
     // Remove properties for optional fields, if not relevant
+    // Default Traffic Rule
+    if (!obj.config.default_traffic_rule) {
+      delete obj.config["default_traffic_rule"];
+    }
+
     // Enricher
     if (obj.config.enricher && obj.config.enricher.type === "nop") {
       delete obj.config["enricher"];

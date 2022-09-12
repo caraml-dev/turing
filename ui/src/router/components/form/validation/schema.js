@@ -271,16 +271,17 @@ const schema = (maxAllowedReplica) => [
     environment_name: yup.string().required("Environment is required"),
     config: yup.object().shape({
       timeout: timeoutSchema.required("Timeout is required"),
+      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       routes: yup
         .array(routeSchema)
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
-      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
-      default_traffic_rule: yup.object().when('rules', {
+      default_traffic_rule: yup.object()
+        .nullable()
+        .when('rules', {
           is: rules => rules.length > 0,
-          then: defaultTrafficRuleSchema,
-          otherwise: null
+          then: defaultTrafficRuleSchema
       }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
     }),
