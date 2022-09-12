@@ -54,6 +54,10 @@ func TestMain(m *testing.M) {
 func TestNewMissionControlUpi(t *testing.T) {
 	fiberDebugMsg := "Time Taken"
 
+	// this mock stream is required for grpc.SetHeader to have a stream context to work
+	mockStream := &mocks.ServerTransportStream{}
+	mockStream.On("SetHeader", mock.Anything).Return(nil)
+
 	tests := []struct {
 		name          string
 		cfgFilePath   string
@@ -88,7 +92,10 @@ func TestNewMissionControlUpi(t *testing.T) {
 			if err != nil {
 				require.EqualError(t, err, tt.expectedErr)
 			} else {
-				res, err := got.Route(context.Background(), &fibergrpc.Request{
+				ctx := context.Background()
+				ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
+
+				res, err := got.Route(ctx, &fibergrpc.Request{
 					Message: &upiv1.PredictValuesRequest{},
 				})
 				require.Nil(t, err)
@@ -227,7 +234,7 @@ func benchmarkPlainGrpc(payloadFileName string, b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		client.PredictValues(context.Background(), upiRequest)
+		benchMarkUpiResp, _ = client.PredictValues(context.Background(), upiRequest)
 	}
 }
 

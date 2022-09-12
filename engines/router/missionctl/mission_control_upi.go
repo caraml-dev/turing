@@ -82,8 +82,16 @@ func (us *missionControlUpi) Route(
 		return nil, turingError
 	}
 
-	// attach metadata to context
-	grpc.SendHeader(ctx, grpcResponse.Metadata)
+	// attach metadata to context if exist
+	if len(grpcResponse.Metadata) > 0 {
+		err = grpc.SetHeader(ctx, grpcResponse.Metadata)
+		if err != nil {
+			turingError = errors.NewTuringError(
+				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), errors.GRPC,
+			)
+			return nil, turingError
+		}
+	}
 
 	return &responseProto, nil
 }
