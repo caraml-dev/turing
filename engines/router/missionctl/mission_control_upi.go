@@ -8,6 +8,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
+	fibergrpc "github.com/gojek/fiber/grpc"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -19,9 +21,9 @@ type missionControlUpi struct {
 	fiberRouter fiber.Component
 }
 
-// NewMissionControlUpi creates new instance of the MissingControl,
+// NewMissionControlUPI creates new instance of the MissingControl,
 // based on the grpc configuration of fiber.yaml
-func NewMissionControlUpi(
+func NewMissionControlUPI(
 	cfgFilePath string,
 	fiberDebugLog bool,
 ) (MissionControlUPI, error) {
@@ -56,15 +58,16 @@ func (us *missionControlUpi) Route(
 		}
 	}
 
-	var responseProto upiv1.PredictValuesResponse
-	payload, ok := resp.Payload().(proto.Message)
+	grpcResponse, ok := resp.(*fibergrpc.Response)
 	if !ok {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to parse fiber response into proto"), errors.GRPC,
+			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), errors.GRPC,
 		)
 		return nil, turingError
 	}
-	payloadByte, err := proto.Marshal(payload)
+
+	var responseProto upiv1.PredictValuesResponse
+	payloadByte, err := proto.Marshal(grpcResponse.Payload().(proto.Message))
 	if err != nil {
 		turingError = errors.NewTuringError(
 			errors.Newf(errors.BadResponse, "unable to marshal payload"), errors.GRPC,
@@ -78,5 +81,9 @@ func (us *missionControlUpi) Route(
 		)
 		return nil, turingError
 	}
+
+	// attach metadata to context
+	grpc.SendHeader(ctx, grpcResponse.Metadata)
+
 	return &responseProto, nil
 }

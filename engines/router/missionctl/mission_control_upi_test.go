@@ -81,7 +81,7 @@ func TestNewMissionControlUpi(t *testing.T) {
 			logger := zap.New(core)
 			log.SetGlobalLogger(logger.Sugar())
 
-			got, err := NewMissionControlUpi(tt.cfgFilePath, tt.fiberDebugLog)
+			got, err := NewMissionControlUPI(tt.cfgFilePath, tt.fiberDebugLog)
 			if err != nil {
 				require.EqualError(t, err, tt.expectedErr)
 			} else {
@@ -141,7 +141,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 			name: "error non proto payload",
 			expectedErr: &errors.TuringError{
 				Code:    14,
-				Message: "unable to parse fiber response into proto",
+				Message: "unable to parse fiber response into grpc response",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(fiberhttp.NewHTTPResponse(
 				&http.Response{
@@ -191,7 +191,7 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 
 func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
 
-	mc, err := NewMissionControlUpi(benchmarkConfig, false)
+	mc, err := NewMissionControlUPI(benchmarkConfig, false)
 	require.NoError(b, err)
 
 	upiRequest := &upiv1.PredictValuesRequest{}

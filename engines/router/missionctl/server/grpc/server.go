@@ -91,6 +91,12 @@ func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValues
 		_ = ctxLogger.Sync()
 	}()
 
+	// if request comes with metadata, attach it to metadata to be sent with fiber
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		md = metadata.New(map[string]string{})
+	}
+
 	// Get the unique turing request id from the context
 	turingReqID, err := turingctx.GetRequestID(ctx)
 	if err != nil {
@@ -98,9 +104,7 @@ func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValues
 			err.Error())
 	}
 	ctxLogger.Debugf("Received request for %v", turingReqID)
-	ctx = metadata.AppendToOutgoingContext(ctx, turingReqIDHeaderKey, turingReqID)
-	// metadata will always be returned as turingReqIDHeaderKey is appended minimally
-	md, _ := metadata.FromOutgoingContext(ctx)
+	md.Append(turingReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span

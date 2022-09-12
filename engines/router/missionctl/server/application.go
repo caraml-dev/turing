@@ -50,7 +50,7 @@ func Run() {
 
 	if cfg.RouterConfig.Protocol == config.UPI {
 		// Init mission control
-		missionCtl, err := missionctl.NewMissionControlUpi(
+		missionCtl, err := missionctl.NewMissionControlUPI(
 			cfg.RouterConfig.ConfigFile,
 			cfg.AppConfig.FiberDebugLog,
 		)
