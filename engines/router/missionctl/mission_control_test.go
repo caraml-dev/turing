@@ -346,6 +346,9 @@ func BenchmarkMissionControlEnsemblingRouteSmallPayload(b *testing.B) {
 func BenchmarkMissionControlDefaultRouteLargePayload(b *testing.B) {
 	benchmarkRoute("nop_default_router.yaml", "large_payload.json", b)
 }
+func BenchmarkMissionControlDefaultRouteLargeUPIPayload(b *testing.B) {
+	benchmarkRoute("nop_default_router.yaml", "upi_large_payload.json", b)
+}
 func BenchmarkMissionControlEnsemblingRouteLargePayload(b *testing.B) {
 	benchmarkRoute("nop_ensembling_router.yaml", "large_payload.json", b)
 }
