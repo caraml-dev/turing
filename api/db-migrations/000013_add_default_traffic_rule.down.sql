@@ -1,21 +1,36 @@
-WITH dangling_routes AS (
-    SELECT
-        id
-        , default_traffic_rule -> 'routes' AS routes
-    FROM
-        router_versions
-    WHERE default_traffic_rule -> 'routes' IS NOT NULL
+WITH default_traffic_rule_routes AS (
+    SELECT id , default_traffic_rule -> 'routes' AS routes FROM router_versions
 ),
-cleaned_router_versions AS (
-    SELECT id, CASE WHEN traffic_rules = 'null' THEN '[]'::jsonb ELSE traffic_rules END AS traffic_rules
-    FROM router_versions
+route_tbl AS (
+    SELECT id, jsonb_array_elements(routes) AS route FROM router_versions
+),
+version_route_tbl AS (
+    SELECT id, route->'id' AS route_id FROM route_tbl
+),
+-- all routes for each router version
+all_routes AS (
+    SELECT
+        id, jsonb_agg(DISTINCT route_id) routes
+    FROM version_route_tbl
+    GROUP BY id
+),
+dangling_routes AS (
+    SELECT
+        id, routes
+    FROM (
+        SELECT * FROM default_traffic_rule_routes
+        EXCEPT
+        SELECT * FROM all_routes
+    ) t
+    -- WHERE clause filters away rows with no traffic rules
+    WHERE t.routes IS NOT NULL    
 ),
 exploded_traffic_rules AS (
     SELECT
         id
         , position
         , elem
-    FROM cleaned_router_versions, jsonb_array_elements(traffic_rules) WITH ordinality arr(elem, position)
+    FROM router_versions, jsonb_array_elements(traffic_rules) WITH ordinality arr(elem, position)
     WHERE id IN (SELECT id FROM dangling_routes)
 ),
 original_traffic_rules AS (
