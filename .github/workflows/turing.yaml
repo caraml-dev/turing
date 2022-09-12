@@ -394,10 +394,9 @@ jobs:
           MODEL_CLUSTER_NAME: "dev"
           PROJECT_ID: "1"
           PROJECT_NAME: default
-          KUBECONFIG_USE_LOCAL: true
-        run: |
-          go mod tidy
-          go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+          KUBECONFIG_USE_LOCAL: true        
+        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}
