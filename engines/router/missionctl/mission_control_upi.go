@@ -19,9 +19,9 @@ type missionControlUpi struct {
 	fiberRouter fiber.Component
 }
 
-// NewMissionControlGrpc creates new instance of the MissingControl,
+// NewMissionControlUpi creates new instance of the MissingControl,
 // based on the grpc configuration of fiber.yaml
-func NewMissionControlGrpc(
+func NewMissionControlUpi(
 	cfgFilePath string,
 	fiberDebugLog bool,
 ) (MissionControlUPI, error) {

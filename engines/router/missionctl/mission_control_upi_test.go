@@ -46,9 +46,9 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// TestNewMissionControlGrpc tests for the creation of missionControlGrpc and fiberLog configuration.
+// TestNewMissionControlUpi tests for the creation of missionControlGrpc and fiberLog configuration.
 // server reflection is required for the grpc mission control to be created
-func TestNewMissionControlGrpc(t *testing.T) {
+func TestNewMissionControlUpi(t *testing.T) {
 	fiberDebugMsg := "Time Taken"
 
 	tests := []struct {
@@ -81,7 +81,7 @@ func TestNewMissionControlGrpc(t *testing.T) {
 			logger := zap.New(core)
 			log.SetGlobalLogger(logger.Sugar())
 
-			got, err := NewMissionControlGrpc(tt.cfgFilePath, tt.fiberDebugLog)
+			got, err := NewMissionControlUpi(tt.cfgFilePath, tt.fiberDebugLog)
 			if err != nil {
 				require.EqualError(t, err, tt.expectedErr)
 			} else {
@@ -191,7 +191,7 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 
 func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
 
-	mc, err := NewMissionControlGrpc(benchmarkConfig, false)
+	mc, err := NewMissionControlUpi(benchmarkConfig, false)
 	require.NoError(b, err)
 
 	upiRequest := &upiv1.PredictValuesRequest{}

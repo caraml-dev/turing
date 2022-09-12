@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -14,7 +13,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/grpc"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
-	"github.com/gojek/fiber/protocol"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -50,9 +48,9 @@ func Run() {
 	// Init Sentry, defer closing client
 	defer initSentryClient(cfg)()
 
-	if strings.EqualFold(cfg.RouterConfig.Protocol, string(protocol.GRPC)) {
+	if cfg.RouterConfig.Protocol == config.UPI {
 		// Init mission control
-		missionCtl, err := missionctl.NewMissionControlGrpc(
+		missionCtl, err := missionctl.NewMissionControlUpi(
 			cfg.RouterConfig.ConfigFile,
 			cfg.AppConfig.FiberDebugLog,
 		)
