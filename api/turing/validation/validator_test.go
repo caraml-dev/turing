@@ -247,7 +247,7 @@ func TestValidateTrafficRules(t *testing.T) {
 		Timeout:  "10ms",
 	}
 	defaultTrafficRule := &models.DefaultTrafficRule{
-		Routes: []string{"route-b"},
+		Routes: []string{routeAID, routeBID},
 	}
 
 	suite := map[string]routerConfigTestCase{
@@ -266,7 +266,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 		},
@@ -285,7 +285,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 		},
@@ -304,7 +304,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 		},
@@ -316,7 +316,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Name:       ruleName,
 					Conditions: []*router.TrafficRuleCondition{},
-					Routes:     []string{"route-b"},
+					Routes:     []string{"route-a"},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions' " +
@@ -340,8 +340,11 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes' " +
-				"Error:Field validation for 'Routes' failed on the 'notBlank' tag",
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRules[0].Routes' Error:Field validation for 'Routes' failed on the 'notBlank' tag",
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated for all Traffic Rules' tag",
+			}, "\n"),
 		},
 		"failure | unsupported operator": {
 			routes:             models.Routes{routeA, routeB},
@@ -358,7 +361,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Operator' " +
@@ -379,7 +382,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' " +
@@ -400,7 +403,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Field' " +
@@ -436,8 +439,7 @@ func TestValidateTrafficRules(t *testing.T) {
 		"failure | unknown default route": {
 			routes:         models.Routes{routeA},
 			defaultRouteID: &routeBID,
-			expectedError: "Key: 'RouterConfig.DefaultRouteID' " +
-				"Error:Field validation for '' failed on the 'oneof' tag",
+			expectedError:  "Key: 'RouterConfig.DefaultRouteID' Error:Field validation for '' failed on the 'oneof' tag",
 		},
 		"failure | unknown traffic rule route": {
 			routes:             models.Routes{routeA, routeB},
@@ -454,10 +456,10 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"some_value"},
 						},
 					},
-					Routes: []string{"route-c"},
+					Routes: []string{"route-a", "route-c"},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[0]' " +
+			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[1]' " +
 				"Error:Field validation for '' failed on the 'oneof' tag",
 		},
 		"failure | rule does not contains default route": {
@@ -481,8 +483,6 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for " +
 					"'DefaultTrafficRule' failed on the 'Since 1 or more Custom Traffic rules have been specified, " +
 					"a default Traffic rule is required.' tag",
-				"Key: 'RouterConfig.TrafficRules[0].Routes[0]' " +
-					"Error:Field validation for '' failed on the 'necsfield' tag",
 			}, "\n"),
 		},
 		"failure | empty name": {
@@ -510,6 +510,8 @@ func TestValidateTrafficRules(t *testing.T) {
 					"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
 					"following symbols: -_()#$&:.' tag",
 				}, " "),
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated for all Traffic Rules' tag",
 			}, "\n"),
 		},
 		"failure | More than 64 characters": {
@@ -527,7 +529,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -552,7 +554,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -577,7 +579,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a"},
 						},
 					},
-					Routes: []string{routeBID},
+					Routes: []string{routeAID, routeBID},
 				},
 				{
 					Name: "abcd",
@@ -589,7 +591,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-c"},
 						},
 					},
-					Routes: []string{routeCID},
+					Routes: []string{routeAID, routeCID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules' " +
@@ -610,12 +612,37 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.' tag",
+			}, " "),
+		},
+		"failure | missing default route id in default traffic rule": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			defaultTrafficRule: &models.DefaultTrafficRule{
+				Routes: []string{routeBID},
+			},
+			trafficRules: models.TrafficRules{
+				{
+					Name: ruleName,
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{"route-a", "route-b"},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for 'DefaultTrafficRule' failed on the",
+				"'Fallback Route (DefaultRouteId): 'route-a' should be associated for the Default Traffic Rule' tag",
 			}, " "),
 		},
 	}

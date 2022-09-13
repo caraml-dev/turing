@@ -57,8 +57,6 @@ export const RouteSelectionPanel = ({
   const routeOptions = routes
     .filter((e) => !!e.id)
     .map((e) => {
-      const isDisabled =
-        !!rules && rules.filter((r) => r.routes.includes(e.id)).length > 0;
       return {
         value: e.id,
         inputDisplay: e.id,
@@ -66,11 +64,9 @@ export const RouteSelectionPanel = ({
           <RouteDropDownOption
             id={e.id}
             endpoint={e.endpoint}
-            isDisabled={isDisabled}
             disabledOptionTooltip="Route with traffic rules cannot be selected"
           />
         ),
-        disabled: isDisabled,
       };
     });
 
