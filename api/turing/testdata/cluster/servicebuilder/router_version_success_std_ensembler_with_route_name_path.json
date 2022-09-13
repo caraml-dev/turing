@@ -1,0 +1,111 @@
+{
+  "router": {
+    "project_id": 10,
+    "environment_name": "id-dev",
+    "name": "test-svc"
+  },
+  "version": 1,
+  "status": "pending",
+  "image": "asia.gcr.io/gcp-project-id/turing-router:latest",
+  "routes": [
+    {
+      "id": "treatment-b",
+      "type": "PROXY",
+      "endpoint": "http://example.com/treatment-b",
+      "timeout": "2s"
+    },
+    {
+      "id": "treatment-a",
+      "type": "PROXY",
+      "endpoint": "http://example.com/treatment-a",
+      "timeout": "2s"
+    },
+    {
+      "id": "control",
+      "type": "PROXY",
+      "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
+      "timeout": "2s"
+    }
+  ],
+  "default_route_id": "control",
+  "experiment_engine": {
+    "type": "exp-engine-2",
+    "config": {
+      "deployment": {
+      "endpoint": "exp-engine:8080",
+      "timeout": "500ms"
+      },
+      "client": {
+        "id": "1",
+        "username": "client_id",
+        "passkey": "xyz"
+      },
+      "experiments": [
+        {
+          "id": "2",
+          "name": "exp_exp_test_experiment_1",
+          "client_id": "1"
+        }
+      ],
+      "variables": {
+        "client_variables": [
+          {
+            "name": "app_version",
+            "required": false,
+            "type": "filter"
+          }
+        ],
+        "experiment_variables": {
+          "2": [
+            {
+              "name": "customer",
+              "required": true,
+              "type": "unit"
+            }
+          ]
+        },
+        "config": [
+          {
+            "name": "customer",
+            "required": true,
+            "field": "customer_id",
+            "field_source": "payload"
+          },
+          {
+            "name": "app_version",
+            "required": false,
+            "field": "appVer",
+            "field_source": "header"
+          }
+        ]
+      }
+    }
+  },
+  "resource_request": {
+    "min_replica": 2,
+    "max_replica": 4,
+    "cpu_request": "400m",
+    "memory_request": "512Mi"
+  },
+  "timeout": "5s",
+  "log_config": {
+    "log_level": "INFO",
+    "custom_metrics_enabled": false,
+    "fiber_debug_log_enabled": false,
+    "jaeger_enabled": false,
+    "result_logger_type": "bigquery",
+    "bigquery_config": {
+      "table": "gcp-project-id.dataset_id.turing_log_test",
+      "service_account_name": "test-svc-account",
+      "batch_load": false
+    }
+  },
+  "ensembler": {
+    "id": 300,
+    "type": "standard",
+    "standard_config": {
+      "experiment_mappings": [],
+      "route_name_path": "policy.route_name"
+    }
+  }
+}
