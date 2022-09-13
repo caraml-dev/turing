@@ -186,7 +186,7 @@ type EnrichmentConfig struct {
 type RouterConfig struct {
 	ConfigFile string        `split_words:"true" required:"true"`
 	Timeout    time.Duration `default:"20ms"`
-	Protocol   Protocol      `required:"true"`
+	Protocol   Protocol      `default:"HTTP_JSON"`
 }
 
 // EnsemblerConfig is the structure used to parse the Ensembler's environment configs

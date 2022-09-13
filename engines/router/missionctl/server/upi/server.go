@@ -141,16 +141,18 @@ func (us *Server) getPrediction(
 	// Create response channel to store the response from each step. 1 for route now,
 	// should be 4 when experiment engine, enricher and ensembler are added
 	respCh := make(chan grpcRouterResponse, 1)
-	defer close(respCh)
 
 	// Defer logging request summary
 	defer func() {
-		go logTuringRouterRequestSummary(
-			ctx,
-			time.Now(),
-			fiberRequest.Header(),
-			fiberRequest.Payload().(*upiv1.PredictValuesRequest),
-			respCh)
+		go func() {
+			logTuringRouterRequestSummary(
+				ctx,
+				time.Now(),
+				fiberRequest.Header(),
+				fiberRequest.Payload().(*upiv1.PredictValuesRequest),
+				respCh)
+			close(respCh)
+		}()
 	}()
 
 	// Calling Routes via fiber

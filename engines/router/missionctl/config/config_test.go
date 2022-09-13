@@ -31,7 +31,6 @@ type testSuiteSerializationFormat struct {
 var requiredEnvs = map[string]string{
 	"PORT":               "8080",
 	"ROUTER_CONFIG_FILE": "/var/test.yaml",
-	"ROUTER_PROTOCOL":    "HTTP_JSON",
 	"APP_NAME":           "turing",
 	"APP_ENVIRONMENT":    "dev",
 }

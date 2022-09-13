@@ -67,11 +67,13 @@ func (h *httpHandler) getPrediction(
 	// Create response channel to store the response from each step. Allocate buffer size = 4
 	// (max responses possible, from enricher, experiment engine, router and ensembler respectively).
 	respCh := make(chan routerResponse, 4)
-	defer close(respCh)
 
 	// Defer logging request summary
 	defer func() {
-		go logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
+		go func() {
+			logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
+			close(respCh)
+		}()
 	}()
 
 	// Enrich
