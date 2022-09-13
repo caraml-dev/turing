@@ -50,7 +50,9 @@ export const AutoscalingPolicyPanelFlyout = ({ onClose }) => {
             </li>
             <li>
               <b>CPU / Memory:</b> These can be chosen according to whether the process is CPU bound
-              or memory bound. With this, scale to 0 is not supported.
+              or memory bound. With this, scale to 0 is not supported. CPU is specified in
+              terms of the % utilization of the requested value (Eg: 75 indicates 75%),
+              while memory is specified in units of MiB (Eg: 100 indicates 100MiB).
             </li>
           </ul>
         </EuiText>
