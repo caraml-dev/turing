@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 )
@@ -136,7 +136,7 @@ func TestOpenAPIValidationValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d, err := ioutil.ReadFile("../../api/openapi.bundle.yaml")
+			d, err := os.ReadFile("../../api/openapi.bundle.yaml")
 			if err != nil {
 				t.Error(err)
 			}
@@ -189,7 +189,7 @@ func TestNewOpenAPIValidation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d, err := ioutil.ReadFile(tt.openapiYamlFile)
+			d, err := os.ReadFile(tt.openapiYamlFile)
 			if err != nil {
 				t.Error(err)
 			}

@@ -5,7 +5,7 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -42,7 +42,7 @@ func TestUndeployRouter(t *testing.T) {
 	response, err := globalTestContext.httpClient.Do(req)
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
-	responseBody, err := ioutil.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
 	defer response.Body.Close()
 	require.NoError(t, err)
 	t.Log("Undeploy Response:", string(responseBody))

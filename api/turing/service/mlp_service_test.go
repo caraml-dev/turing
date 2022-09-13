@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -48,12 +47,12 @@ func testSetupEnvForGoogleCredentials(t *testing.T) (reset func()) {
   "token_uri": "https://oauth2.googleapis.com/token"
 }`)
 
-	file, err := ioutil.TempFile("", "dummy-service-account")
+	file, err := os.CreateTemp("", "dummy-service-account")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(file.Name(), serviceAccountKey, 0644)
+	err = os.WriteFile(file.Name(), serviceAccountKey, 0644)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -34,7 +34,7 @@ func getRouter(
 	}
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func getRouterByName(
 	defer resp.Body.Close()
 
 	routers := make([]*models.Router, 0)
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func getRouterVersion(
 	}
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func waitDeployVersion(
 }
 
 func getPodLogs(t *testing.T, resp *http.Response) []service.PodLog {
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -175,7 +175,7 @@ func withDeployedRouter(
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	responsePayload, err := ioutil.ReadAll(resp.Body)
+	responsePayload, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	created := models.Router{}
