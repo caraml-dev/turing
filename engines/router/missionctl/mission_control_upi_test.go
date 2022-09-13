@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -27,7 +26,6 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -39,6 +37,18 @@ const (
 
 var benchMarkUpiResp *upiv1.PredictValuesResponse
 var benchMarkUpiErr *errors.TuringError
+
+var mockResponse = &upiv1.PredictValuesResponse{
+	PredictionResultTable: &upiv1.Table{
+		Name:    "table",
+		Columns: nil,
+		Rows:    nil,
+	},
+	Metadata: &upiv1.ResponseMetadata{
+		PredictionId: "123",
+		ExperimentId: "2",
+	},
+}
 
 // TestMain does setup for all test case pre-run
 func TestMain(m *testing.M) {
@@ -121,9 +131,9 @@ func Test_missionControlUpi_Route(t *testing.T) {
 	}{
 		{
 			name:     "ok",
-			expected: testutils.GetDefaultMockResponse(),
+			expected: mockResponse,
 			mockReturn: fiber.NewResponseQueueFromResponses(&fibergrpc.Response{
-				Message: testutils.GetDefaultMockResponse(),
+				Message: mockResponse,
 			}),
 		},
 		{
@@ -194,24 +204,18 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 		cmpopts.IgnoreUnexported(
 			upiv1.PredictValuesResponse{},
 			upiv1.Table{},
-			upiv1.NamedValue{},
+			upiv1.Variable{},
 			upiv1.ResponseMetadata{},
 		))
 }
 
-func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
+func benchmarkGrpcRoute(rows int, cols int, b *testing.B) {
 
 	mc, err := NewMissionControlUPI(benchmarkConfig, false)
 	require.NoError(b, err)
 
-	upiRequest := &upiv1.PredictValuesRequest{}
-	fileByte, err := ioutil.ReadFile(filepath.Join("testdata", payloadFileName))
-	require.NoError(b, err)
-	err = protojson.Unmarshal(fileByte, upiRequest)
-	require.NoError(b, err)
-
 	req := &fibergrpc.Request{
-		Message: upiRequest,
+		Message: testutils.GenerateUPIRequest(rows, cols),
 	}
 
 	b.ResetTimer()
@@ -220,13 +224,9 @@ func benchmarkGrpcRoute(payloadFileName string, b *testing.B) {
 	}
 }
 
-func benchmarkPlainGrpc(payloadFileName string, b *testing.B) {
+func benchmarkPlainGrpc(rows int, cols int, b *testing.B) {
 
-	upiRequest := &upiv1.PredictValuesRequest{}
-	fileByte, err := ioutil.ReadFile(filepath.Join("testdata", payloadFileName))
-	require.NoError(b, err)
-	err = protojson.Unmarshal(fileByte, upiRequest)
-	require.NoError(b, err)
+	upiRequest := testutils.GenerateUPIRequest(rows, cols)
 
 	conn, err := grpc.Dial(fmt.Sprintf(":%d", grpcport1), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(b, err)
@@ -239,17 +239,17 @@ func benchmarkPlainGrpc(payloadFileName string, b *testing.B) {
 }
 
 func BenchmarkMissionControlUpiDefaultRouteSmallPayload(b *testing.B) {
-	benchmarkGrpcRoute("upi_small_payload.json", b)
+	benchmarkGrpcRoute(5, 5, b)
 }
 
 func BenchmarkMissionControlUpiDefaultRouteLargePayload(b *testing.B) {
-	benchmarkGrpcRoute("upi_large_payload.json", b)
+	benchmarkGrpcRoute(100, 100, b)
 }
 
 func BenchmarkPlainGrpcUpiSmallPayload(b *testing.B) {
-	benchmarkPlainGrpc("upi_small_payload.json", b)
+	benchmarkPlainGrpc(5, 5, b)
 }
 
 func BenchmarkPlainGrpcUpiLargePayload(b *testing.B) {
-	benchmarkPlainGrpc("upi_large_payload.json", b)
+	benchmarkPlainGrpc(100, 100, b)
 }

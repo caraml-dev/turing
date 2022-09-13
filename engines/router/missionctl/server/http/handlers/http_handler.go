@@ -143,9 +143,6 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ctx := turingctx.NewTuringContext(req.Context())
 	// Create context logger
 	ctxLogger := log.WithContext(ctx)
-	defer func() {
-		_ = ctxLogger.Sync()
-	}()
 
 	// Get the unique turing request id from the context
 	turingReqID, err := turingctx.GetRequestID(ctx)

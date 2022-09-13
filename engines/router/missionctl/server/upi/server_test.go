@@ -7,7 +7,6 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
-	"github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/stretchr/testify/mock"
@@ -15,6 +14,18 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
+
+var mockResponse = &upiv1.PredictValuesResponse{
+	PredictionResultTable: &upiv1.Table{
+		Name:    "table",
+		Columns: nil,
+		Rows:    nil,
+	},
+	Metadata: &upiv1.ResponseMetadata{
+		PredictionId: "123",
+		ExperimentId: "2",
+	},
+}
 
 func TestUPIServer_PredictValues(t *testing.T) {
 
@@ -28,10 +39,10 @@ func TestUPIServer_PredictValues(t *testing.T) {
 		{
 			name:        "ok",
 			request:     nil,
-			expected:    testutils.GetDefaultMockResponse(),
+			expected:    mockResponse,
 			expectedErr: nil,
 			mockReturn: func() (*upiv1.PredictValuesResponse, *errors.TuringError) {
-				return testutils.GetDefaultMockResponse(), nil
+				return mockResponse, nil
 			},
 		},
 		{

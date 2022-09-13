@@ -97,9 +97,6 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 	ctx = turingctx.NewTuringContext(ctx)
 	// Create context logger
 	ctxLogger := log.WithContext(ctx)
-	defer func() {
-		_ = ctxLogger.Sync()
-	}()
 
 	// if request comes with metadata, attach it to metadata to be sent with fiber
 	md, ok := metadata.FromIncomingContext(ctx)
