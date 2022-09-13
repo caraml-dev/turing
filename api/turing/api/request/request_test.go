@@ -446,7 +446,7 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 	assertgotest.DeepEqual(t, expected, *got)
 }
 
-func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
+func TestRequestBuildRouterVersionWithStandardEnsembler(t *testing.T) {
 	defaults := config.RouterDefaults{
 		Image:                   "routerimage",
 		FiberDebugLogEnabled:    true,
@@ -475,9 +475,60 @@ func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		testEnsembler models.Ensembler
-		err           string
+		testEnsembler     models.Ensembler
+		expectedEnsembler models.Ensembler
+		err               string
 	}{
+		"success | only route name path is set": {
+			testEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					RouteNamePath: "abc",
+				},
+			},
+			expectedEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					RouteNamePath: "abc",
+				},
+			},
+		},
+		"success | only experiment mappings are set": {
+			testEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					ExperimentMappings: []models.ExperimentMapping{
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+					},
+				},
+			},
+			expectedEnsembler: models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					ExperimentMappings: []models.ExperimentMapping{
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+						{
+							Experiment: "experiment-1",
+							Treatment:  "treatment-1",
+							Route:      "route-1",
+						},
+					},
+				},
+			},
+		},
 		"failure | both experiment mappings and route name path are set": {
 			testEnsembler: models.Ensembler{
 				Type: models.EnsemblerStandardType,
@@ -509,8 +560,12 @@ func TestRequestBuildRouterVersionWithInvalidStandardEnsembler(t *testing.T) {
 			testRouterConfig.Ensembler = &data.testEnsembler
 
 			result, err := testRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
-			assert.Nil(t, result)
-			assert.EqualError(t, err, data.err)
+			if data.err != "" {
+				assert.Nil(t, result)
+				assert.EqualError(t, err, data.err)
+			} else {
+				assert.Equal(t, data.expectedEnsembler, *result.Ensembler)
+			}
 		})
 	}
 }
