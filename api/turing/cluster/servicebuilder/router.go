@@ -12,6 +12,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/utils"
+	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
 	fiberconfig "github.com/gojek/fiber/config"
@@ -503,10 +504,22 @@ func buildFiberConfigMap(
 	// then define root-level fiber component as a lazy router with
 	// a traffic-splitting strategy based on these rules
 	if ver.TrafficRules != nil && len(ver.TrafficRules) > 0 {
+		// TrafficRule struct used requires the name and conditions field to be specified. But
+		// Default Traffic Rule has no name and a hardcoded name can be used instead since
+		// the name field is not used for traffic splitting strategy. Likewise, an empty slice
+		// of conditions can be used for the same reason.
+		rules := append(
+			ver.TrafficRules,
+			&models.TrafficRule{
+				Name:       "default-traffic-rule",
+				Conditions: []*router.TrafficRuleCondition{},
+				Routes:     ver.DefaultTrafficRule.Routes,
+			},
+		)
 		routerConfig, err = buildTrafficSplittingFiberConfig(
 			ver.Router.Name,
 			ver.Routes,
-			ver.TrafficRules,
+			rules,
 			ver.Ensembler,
 			properties)
 	} else {

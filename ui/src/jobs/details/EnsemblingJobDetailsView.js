@@ -5,11 +5,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate,
 } from "@elastic/eui";
 import React, { Fragment } from "react";
 import { PageTitle } from "../../components/page/PageTitle";
@@ -20,8 +17,15 @@ import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
 import { EnsemblingJobLogsView } from "./logs/EnsemblingJobLogsView";
+import { useConfig } from "../../config";
 
 export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   const [{ data: jobDetails, isLoaded, error }] = useTuringApi(
     `/projects/${projectId}/jobs/${jobId}`,
     {},
@@ -31,47 +35,47 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <PageTitle
-                  icon="sqlApp"
-                  iconSize="l"
-                  size="s"
-                  title={jobDetails.name}
-                  prepend={
-                    <StatusBadge
-                      status={JobStatus.fromValue(jobDetails.status)}
-                    />
-                  }
-                />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
-
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
+      <EuiSpacer size="l" />
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                title={jobDetails.name}
+                icon={"sqlApp"}
+                prepend={
+                  <StatusBadge
+                    status={JobStatus.fromValue(jobDetails.status)}
+                  />
+                }
+              />
+            }
+          >
             <EnsemblingJobDetailsPageHeader job={jobDetails} {...props} />
 
             <EuiSpacer size="xs" />
 
             <EnsemblingJobDetailsPageNavigation job={jobDetails} {...props} />
 
-            <EuiSpacer size="m" />
+          </EuiPageTemplate.Header>
 
+          <EuiSpacer size="m" />
+          <EuiPageTemplate.Section color={"transparent"}>
             <Router>
               <Redirect from="/" to="details" noThrow />
               <EnsemblingJobConfigView path="details" job={jobDetails} />
@@ -80,9 +84,10 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
-          </Fragment>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
+      <EuiSpacer size="l" />
+    </EuiPageTemplate>
   );
 };

@@ -1851,6 +1851,10 @@ components:
       type: string
     RouterVersion:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         image: image
         autoscaling_policy:
           metric: concurrency
@@ -2055,6 +2059,8 @@ components:
           items:
             $ref: '#/components/schemas/TrafficRule'
           type: array
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
       type: object
     RouterVersionStatus:
       default: pending
@@ -2504,10 +2510,29 @@ components:
       - operator
       - values
       type: object
+    DefaultTrafficRule:
+      example:
+        routes:
+        - routes
+        - routes
+      properties:
+        routes:
+          description: List of IDs of the routes, that should be activated by this
+            rule
+          items:
+            type: string
+          type: array
+      required:
+      - routes
+      type: object
     RouterConfig:
       example:
         name: name
         config:
+          default_traffic_rule:
+            routes:
+            - routes
+            - routes
           enricher:
             service_account: secret-name-for-google-service-account
             image: image
@@ -2659,6 +2684,10 @@ components:
       type: object
     RouterVersionConfig:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         enricher:
           service_account: secret-name-for-google-service-account
           image: image
@@ -2805,6 +2834,8 @@ components:
           type: array
         default_route_id:
           type: string
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
         experiment_engine:
           $ref: '#/components/schemas/ExperimentConfig'
         resource_request:

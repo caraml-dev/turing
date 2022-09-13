@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
@@ -12,7 +12,7 @@ import (
 func MakeTestMisisonControlResponse() mchttp.Response {
 	httpResponse := &http.Response{
 		StatusCode: http.StatusOK,
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data": "test"}`))),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data": "test"}`))),
 		Header:     http.Header{},
 	}
 	mcResp, _ := mchttp.NewCachedResponseFromHTTP(httpResponse)

@@ -25,11 +25,9 @@ export const PrivateLayout = (Component) => {
             }
             docLinks={appConfig.docsUrl}
           />
-          <div className="main-component-layout">
-            <EnvironmentsContextProvider>
-              <Component {...props} />
-            </EnvironmentsContextProvider>
-          </div>
+          <EnvironmentsContextProvider>
+            <Component {...props} />
+          </EnvironmentsContextProvider>
         </CurrentProjectContextProvider>
       </ProjectsContextProvider>
     </ApplicationsContextProvider>

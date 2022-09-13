@@ -60,7 +60,6 @@ export const PyFuncDeploymentPanel = ({
                 options={options}
                 onChange={onEnsemblerIdChange}
                 selectedOptions={!!selectedOption ? [selectedOption] : []}
-                autoFocus
               />
             </EuiFormRow>
           </EuiFlexItem>

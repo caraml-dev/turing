@@ -26,9 +26,9 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
-
 def lazy_import():
     from turing.generated.model.autoscaling_policy import AutoscalingPolicy
+    from turing.generated.model.default_traffic_rule import DefaultTrafficRule
     from turing.generated.model.enricher import Enricher
     from turing.generated.model.experiment_config import ExperimentConfig
     from turing.generated.model.resource_request import ResourceRequest
@@ -38,17 +38,17 @@ def lazy_import():
     from turing.generated.model.router_version_log_config import RouterVersionLogConfig
     from turing.generated.model.router_version_status import RouterVersionStatus
     from turing.generated.model.traffic_rule import TrafficRule
-
-    globals()["AutoscalingPolicy"] = AutoscalingPolicy
-    globals()["Enricher"] = Enricher
-    globals()["ExperimentConfig"] = ExperimentConfig
-    globals()["ResourceRequest"] = ResourceRequest
-    globals()["Route"] = Route
-    globals()["Router"] = Router
-    globals()["RouterEnsemblerConfig"] = RouterEnsemblerConfig
-    globals()["RouterVersionLogConfig"] = RouterVersionLogConfig
-    globals()["RouterVersionStatus"] = RouterVersionStatus
-    globals()["TrafficRule"] = TrafficRule
+    globals()['AutoscalingPolicy'] = AutoscalingPolicy
+    globals()['DefaultTrafficRule'] = DefaultTrafficRule
+    globals()['Enricher'] = Enricher
+    globals()['ExperimentConfig'] = ExperimentConfig
+    globals()['ResourceRequest'] = ResourceRequest
+    globals()['Route'] = Route
+    globals()['Router'] = Router
+    globals()['RouterEnsemblerConfig'] = RouterEnsemblerConfig
+    globals()['RouterVersionLogConfig'] = RouterVersionLogConfig
+    globals()['RouterVersionStatus'] = RouterVersionStatus
+    globals()['TrafficRule'] = TrafficRule
 
 
 class RouterVersion(ModelNormal):
@@ -75,12 +75,13 @@ class RouterVersion(ModelNormal):
           as additional properties values.
     """
 
-    allowed_values = {}
+    allowed_values = {
+    }
 
     validations = {
-        ("timeout",): {
-            "regex": {
-                "pattern": r"^[0-9]+(ms|s|m|h)$",  # noqa: E501
+        ('timeout',): {
+            'regex': {
+                'pattern': r'^[0-9]+(ms|s|m|h)$',  # noqa: E501
             },
         },
     }
@@ -101,65 +102,66 @@ class RouterVersion(ModelNormal):
         """
         lazy_import()
         return {
-            "id": (int,),  # noqa: E501
-            "created_at": (datetime,),  # noqa: E501
-            "updated_at": (datetime,),  # noqa: E501
-            "router": (Router,),  # noqa: E501
-            "version": (int,),  # noqa: E501
-            "status": (RouterVersionStatus,),  # noqa: E501
-            "error": (str,),  # noqa: E501
-            "image": (str,),  # noqa: E501
-            "routes": ([Route],),  # noqa: E501
-            "experiment_engine": (ExperimentConfig,),  # noqa: E501
-            "resource_request": (ResourceRequest,),  # noqa: E501
-            "autoscaling_policy": (AutoscalingPolicy,),  # noqa: E501
-            "timeout": (str,),  # noqa: E501
-            "log_config": (RouterVersionLogConfig,),  # noqa: E501
-            "enricher": (Enricher,),  # noqa: E501
-            "ensembler": (RouterEnsemblerConfig,),  # noqa: E501
-            "monitoring_url": (str,),  # noqa: E501
-            "default_route_id": (str,),  # noqa: E501
-            "rules": ([TrafficRule],),  # noqa: E501
+            'id': (int,),  # noqa: E501
+            'created_at': (datetime,),  # noqa: E501
+            'updated_at': (datetime,),  # noqa: E501
+            'router': (Router,),  # noqa: E501
+            'version': (int,),  # noqa: E501
+            'status': (RouterVersionStatus,),  # noqa: E501
+            'error': (str,),  # noqa: E501
+            'image': (str,),  # noqa: E501
+            'routes': ([Route],),  # noqa: E501
+            'experiment_engine': (ExperimentConfig,),  # noqa: E501
+            'resource_request': (ResourceRequest,),  # noqa: E501
+            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
+            'timeout': (str,),  # noqa: E501
+            'log_config': (RouterVersionLogConfig,),  # noqa: E501
+            'enricher': (Enricher,),  # noqa: E501
+            'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
+            'monitoring_url': (str,),  # noqa: E501
+            'default_route_id': (str,),  # noqa: E501
+            'rules': ([TrafficRule],),  # noqa: E501
+            'default_traffic_rule': (DefaultTrafficRule,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
+
     attribute_map = {
-        "id": "id",  # noqa: E501
-        "created_at": "created_at",  # noqa: E501
-        "updated_at": "updated_at",  # noqa: E501
-        "router": "router",  # noqa: E501
-        "version": "version",  # noqa: E501
-        "status": "status",  # noqa: E501
-        "error": "error",  # noqa: E501
-        "image": "image",  # noqa: E501
-        "routes": "routes",  # noqa: E501
-        "experiment_engine": "experiment_engine",  # noqa: E501
-        "resource_request": "resource_request",  # noqa: E501
-        "autoscaling_policy": "autoscaling_policy",  # noqa: E501
-        "timeout": "timeout",  # noqa: E501
-        "log_config": "log_config",  # noqa: E501
-        "enricher": "enricher",  # noqa: E501
-        "ensembler": "ensembler",  # noqa: E501
-        "monitoring_url": "monitoring_url",  # noqa: E501
-        "default_route_id": "default_route_id",  # noqa: E501
-        "rules": "rules",  # noqa: E501
+        'id': 'id',  # noqa: E501
+        'created_at': 'created_at',  # noqa: E501
+        'updated_at': 'updated_at',  # noqa: E501
+        'router': 'router',  # noqa: E501
+        'version': 'version',  # noqa: E501
+        'status': 'status',  # noqa: E501
+        'error': 'error',  # noqa: E501
+        'image': 'image',  # noqa: E501
+        'routes': 'routes',  # noqa: E501
+        'experiment_engine': 'experiment_engine',  # noqa: E501
+        'resource_request': 'resource_request',  # noqa: E501
+        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
+        'timeout': 'timeout',  # noqa: E501
+        'log_config': 'log_config',  # noqa: E501
+        'enricher': 'enricher',  # noqa: E501
+        'ensembler': 'ensembler',  # noqa: E501
+        'monitoring_url': 'monitoring_url',  # noqa: E501
+        'default_route_id': 'default_route_id',  # noqa: E501
+        'rules': 'rules',  # noqa: E501
+        'default_traffic_rule': 'default_traffic_rule',  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set(
-        [
-            "_data_store",
-            "_check_type",
-            "_spec_property_naming",
-            "_path_to_item",
-            "_configuration",
-            "_visited_composed_classes",
-        ]
-    )
+    required_properties = set([
+        '_data_store',
+        '_check_type',
+        '_spec_property_naming',
+        '_path_to_item',
+        '_configuration',
+        '_visited_composed_classes',
+    ])
 
     @convert_js_args_to_python_args
     def __init__(self, *args, **kwargs):  # noqa: E501
@@ -215,18 +217,18 @@ class RouterVersion(ModelNormal):
             monitoring_url (str): [optional]  # noqa: E501
             default_route_id (str): [optional]  # noqa: E501
             rules ([TrafficRule]): [optional]  # noqa: E501
+            default_traffic_rule (DefaultTrafficRule): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop("_check_type", True)
-        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
-        _path_to_item = kwargs.pop("_path_to_item", ())
-        _configuration = kwargs.pop("_configuration", None)
-        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
+        _check_type = kwargs.pop('_check_type', True)
+        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
+        _path_to_item = kwargs.pop('_path_to_item', ())
+        _configuration = kwargs.pop('_configuration', None)
+        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
-                % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -242,12 +244,10 @@ class RouterVersion(ModelNormal):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         for var_name, var_value in kwargs.items():
-            if (
-                var_name not in self.attribute_map
-                and self._configuration is not None
-                and self._configuration.discard_unknown_keys
-                and self.additional_properties_type is None
-            ):
+            if var_name not in self.attribute_map and \
+                        self._configuration is not None and \
+                        self._configuration.discard_unknown_keys and \
+                        self.additional_properties_type is None:
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)

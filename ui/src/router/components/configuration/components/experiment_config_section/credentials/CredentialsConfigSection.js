@@ -9,11 +9,10 @@ import {
 } from "@elastic/eui";
 import "./CredentialsConfigSection.scss";
 
-import { getFormattedHomepageUrl } from "../../../../../../router/components/configuration/components/config";
+import { getFormattedHomepageUrl } from "../../config";
 
 export const CredentialsConfigSection = ({
   projectId,
-  engineType,
   client,
   engineProps,
 }) => {
@@ -25,14 +24,16 @@ export const CredentialsConfigSection = ({
     <Fragment>
       <EuiTitle size="xs">
         {!!homepageUrl ? (
-          <EuiTextColor color="secondary">
-            <EuiLink
-              href={getFormattedHomepageUrl(homepageUrl, projectId)}
-              target="_blank"
-              external>
-              {engineProps.display_name || engineProps.name}
-            </EuiLink>
-          </EuiTextColor>
+          <span>
+            <EuiTextColor color="success">
+              <EuiLink
+                href={getFormattedHomepageUrl(homepageUrl, projectId)}
+                target="_blank"
+                external>
+                {engineProps.display_name || engineProps.name}
+              </EuiLink>
+            </EuiTextColor>
+          </span>
         ) : (
           <EuiDescriptionListTitle>{engineProps.name}</EuiDescriptionListTitle>
         )}

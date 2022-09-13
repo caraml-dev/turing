@@ -4,11 +4,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
+  EuiPageTemplate
 } from "@elastic/eui";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { Redirect, Router } from "@reach/router";
@@ -26,8 +23,15 @@ import { HistoryView } from "../history/HistoryView";
 import { RouterLogsView } from "./logs/RouterLogsView";
 import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
 import { TuringRouter } from "../../services/router/TuringRouter";
+import { useConfig } from "../../config";
 
 export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
+  const {
+    appConfig: {
+      pageTemplate: { restrictWidth, paddingSize },
+    },
+  } = useConfig();
+
   const [router, setRouter] = useState({});
   const [{ data: routerDetails, isLoaded, error }, fetchRouterDetails] =
     useTuringApi(
@@ -59,33 +63,34 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   }, [routerDetails, setRouter]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {!hasInitiallyLoaded ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={true}>
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : error ? (
-          <EuiCallOut
-            title="Sorry, there was an error"
-            color="danger"
-            iconType="alert">
-            <p>{error.message}</p>
-          </EuiCallOut>
-        ) : (
-          <Fragment>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <PageTitle
-                  title={router.name}
-                  prepend={<StatusBadge status={router.status} />}
-                />
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
-
+    <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
+      <EuiSpacer size="l" />
+      {!hasInitiallyLoaded ? (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={3} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : error ? (
+        <EuiCallOut
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="alert">
+          <p>{error.message}</p>
+        </EuiCallOut>
+      ) : (
+        <Fragment>
+          <EuiPageTemplate.Header
+            bottomBorder={false}
+            pageTitle={
+              <PageTitle
+                title={router.name}
+                prepend={<StatusBadge status={router.status} />}
+              />
+            }
+          >
             <RouterDetailsPageHeader router={router} />
+
             {!(props["*"] === "edit" || props["*"] === "alerts/edit") && (
               <Fragment>
                 <EuiSpacer size="xs" />
@@ -104,8 +109,10 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
                 </RouterActions>
               </Fragment>
             )}
-            <EuiSpacer size="m" />
+          </EuiPageTemplate.Header>
 
+          <EuiSpacer size="m" />
+          <EuiPageTemplate.Section color={"transparent"}>
             <Router primary={false}>
               <Redirect from="/" to="details" noThrow />
               <RouterConfigView path="details" router={router} />
@@ -126,9 +133,10 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
 
               <Redirect from="any" to="/error/404" default noThrow />
             </Router>
-          </Fragment>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageTemplate.Section>
+        </Fragment>
+      )}
+      <EuiSpacer size="l" />
+    </EuiPageTemplate>
   );
 };

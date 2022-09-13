@@ -67,7 +67,7 @@ export const ListEnsemblingJobsTable = ({
           {moment().diff(item.created_at, "hours") <= 1 && (
             <Fragment>
               &nbsp;
-              <EuiBadge color="secondary">New</EuiBadge>
+              <EuiBadge color="success">New</EuiBadge>
             </Fragment>
           )}
         </EuiText>

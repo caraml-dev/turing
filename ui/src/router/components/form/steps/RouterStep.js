@@ -45,10 +45,12 @@ export const RouterStep = ({ projectId }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RulesPanel
+          default_traffic_rule={get(data, "config.default_traffic_rule")}
+          default_traffic_rule_errors={get(errors, "config.default_traffic_rule")}
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
           onChangeHandler={onChange("config")}
-          errors={get(errors, "config.rules")}
+          rules_errors={get(errors, "config.rules")}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
