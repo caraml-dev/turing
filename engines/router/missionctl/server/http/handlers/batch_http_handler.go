@@ -12,7 +12,9 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	"github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 )
 
@@ -35,7 +37,17 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
-	defer metrics.GetMeasureDurationFunc(httpErr, batchHTTPHandlerID)()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(httpErr == nil)
+			},
+			"component": func() string {
+				return batchHTTPHandlerID
+			},
+		},
+	)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())
@@ -64,7 +76,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewTuringError(err, errors.HTTP))
+		h.error(ctx, rw, errors.NewTuringError(err, protocol.HTTP))
 		return
 	}
 
@@ -73,7 +85,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
 		h.error(ctx, rw, errors.NewTuringError(errors.Newf(errors.BadInput,
-			`Invalid json request`), errors.HTTP))
+			`Invalid json request`), protocol.HTTP))
 		return
 	}
 
@@ -103,7 +115,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 
 	// Write the json response to the writer
 	rw.Header().Set("Content-Type", "application/json")
-	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
+	rw.Header().Set(constant.TuringReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
 	batchResponseByte, _ := json.Marshal(batchResponses)
 	contentLength, err := rw.Write(batchResponseByte)

@@ -11,8 +11,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
-	"github.com/caraml-dev/turing/engines/router/missionctl/server/grpc"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -48,7 +48,8 @@ func Run() {
 	// Init Sentry, defer closing client
 	defer initSentryClient(cfg)()
 
-	if cfg.RouterConfig.Protocol == config.UPI {
+	switch cfg.RouterConfig.Protocol {
+	case config.UPI:
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControlUPI(
 			cfg.RouterConfig.ConfigFile,
@@ -57,9 +58,9 @@ func Run() {
 		if err != nil {
 			log.Glob().Panicf("Failed initializing Mission Control: %v", err)
 		}
-		s := grpc.NewUPIServer(missionCtl, cfg.Port)
+		s := upi.NewUPIServer(missionCtl, cfg.Port)
 		s.Run()
-	} else {
+	case config.HTTP:
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControl(
 			nil,
@@ -90,6 +91,8 @@ func Run() {
 		if err := http.ListenAndServe(cfg.ListenAddress(), http.DefaultServeMux); err != nil {
 			log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
 		}
+	default:
+		log.Glob().Panicf("router protocol %s not supported", cfg.RouterConfig.Protocol)
 	}
 }
 

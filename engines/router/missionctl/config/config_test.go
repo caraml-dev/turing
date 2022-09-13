@@ -31,6 +31,7 @@ type testSuiteSerializationFormat struct {
 var requiredEnvs = map[string]string{
 	"PORT":               "8080",
 	"ROUTER_CONFIG_FILE": "/var/test.yaml",
+	"ROUTER_PROTOCOL":    "HTTP_JSON",
 	"APP_NAME":           "turing",
 	"APP_ENVIRONMENT":    "dev",
 }
@@ -41,6 +42,7 @@ var optionalEnvs = map[string]string{
 	"ENSEMBLER_ENDPOINT":             "http://localhost:8082",
 	"ENSEMBLER_TIMEOUT":              "2ms",
 	"ROUTER_TIMEOUT":                 "10ms",
+	"ROUTER_PROTOCOL":                "UPI_V1",
 	"APP_LOGLEVEL":                   "DEBUG",
 	"APP_FIBER_DEBUG_LOG":            "true",
 	"APP_RESULT_LOGGER":              "CONSOLE",
@@ -60,9 +62,10 @@ var optionalEnvs = map[string]string{
 	"APP_JAEGER_REPORTER_HOST":       "localhost",
 	"APP_JAEGER_REPORTER_PORT":       "5001",
 	"APP_JAEGER_START_NEW_SPANS":     "true",
-	"SENTRY_ENABLED":                 "true",
-	"SENTRY_DSN":                     "test:dsn",
-	"SENTRY_LABELS":                  "sentry_key1:value1,sentry_key2:value2",
+
+	"SENTRY_ENABLED": "true",
+	"SENTRY_DSN":     "test:dsn",
+	"SENTRY_LABELS":  "sentry_key1:value1,sentry_key2:value2",
 }
 
 func TestMissingRequiredEnvs(t *testing.T) {
@@ -84,7 +87,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    20 * time.Millisecond,
-			Protocol:   "http",
+			Protocol:   HTTP,
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "",
@@ -149,7 +152,7 @@ func TestInitConfigEnv(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    10 * time.Millisecond,
-			Protocol:   "http",
+			Protocol:   UPI,
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "http://localhost:8082",

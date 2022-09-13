@@ -1,4 +1,4 @@
-package grpc
+package upi
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
@@ -25,24 +26,23 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const turingReqIDHeaderKey = "Turing-Req-ID"
 const tracingComponentID = "grpc_handler"
 
-type UPIServer struct {
+type Server struct {
 	upiv1.UnimplementedUniversalPredictionServiceServer
 
 	missionControl missionctl.MissionControlUPI
 	port           int
 }
 
-func NewUPIServer(mc missionctl.MissionControlUPI, port int) *UPIServer {
-	return &UPIServer{
+func NewUPIServer(mc missionctl.MissionControlUPI, port int) *Server {
+	return &Server{
 		missionControl: mc,
 		port:           port,
 	}
 }
 
-func (us *UPIServer) Run() {
+func (us *Server) Run() {
 	s := grpc.NewServer()
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
@@ -78,10 +78,20 @@ func (us *UPIServer) Run() {
 
 }
 
-func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValuesRequest) (
+func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesRequest) (
 	*upiv1.PredictValuesResponse, error) {
-	var predictionErr *errors.TuringError
-	defer metrics.GetMeasureDurationFunc(predictionErr, tracingComponentID)()
+	var predictionErr *errors.TuringError // Measure execution time
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(predictionErr == nil)
+			},
+			"component": func() string {
+				return tracingComponentID
+			},
+		},
+	)()
 
 	// Create context from the request context
 	ctx = turingctx.NewTuringContext(ctx)
@@ -104,7 +114,7 @@ func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValues
 			err.Error())
 	}
 	ctxLogger.Debugf("Received request for %v", turingReqID)
-	md.Append(turingReqIDHeaderKey, turingReqID)
+	md.Append(constant.TuringReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
@@ -126,7 +136,7 @@ func (us *UPIServer) PredictValues(ctx context.Context, req *upiv1.PredictValues
 	return resp, nil
 }
 
-func (us *UPIServer) getPrediction(
+func (us *Server) getPrediction(
 	ctx context.Context,
 	fiberRequest fiber.Request) (
 	*upiv1.PredictValuesResponse, *errors.TuringError) {

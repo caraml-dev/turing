@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gojek/fiber/protocol"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 )
@@ -27,13 +28,6 @@ const (
 	NotFound
 	// TimeOut is used when a request / go routine times out
 	TimeOut
-)
-
-type ErrorProtocol string
-
-const (
-	HTTP ErrorProtocol = "HTTP"
-	GRPC ErrorProtocol = "GRPC"
 )
 
 type turingError struct {
@@ -80,12 +74,12 @@ func GetType(err error) ErrorType {
 }
 
 // GetErrorCode maps the ErrorType to http status codes and returns it
-func GetErrorCode(err error, protocol ErrorProtocol) int {
+func GetErrorCode(err error, p protocol.Protocol) int {
 	var code int
 
 	// Get ErrorType if its turingError else set to default
 	et := GetType(err)
-	if protocol == HTTP {
+	if p == protocol.HTTP {
 		switch et {
 		case BadInput:
 			code = http.StatusBadRequest
@@ -96,7 +90,7 @@ func GetErrorCode(err error, protocol ErrorProtocol) int {
 		default:
 			code = http.StatusInternalServerError
 		}
-	} else if protocol == GRPC {
+	} else if p == protocol.GRPC {
 		switch et {
 		case BadInput:
 			code = int(codes.InvalidArgument)
@@ -123,7 +117,7 @@ func (e *TuringError) Error() string {
 }
 
 // NewTuringError creates an error with a Status code
-func NewTuringError(err error, protocol ErrorProtocol, code ...int) *TuringError {
+func NewTuringError(err error, protocol protocol.Protocol, code ...int) *TuringError {
 	var errCode int
 	if len(code) > 0 {
 		errCode = code[0]

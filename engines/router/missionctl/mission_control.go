@@ -16,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/gojek/fiber/protocol"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -119,16 +120,26 @@ func (mc *missionControl) doPost(
 
 	req, err := createNewHTTPRequest(ctx, http.MethodPost, url, header, body)
 	if err != nil {
-		return nil, errors.NewTuringError(err, errors.HTTP)
+		return nil, errors.NewTuringError(err, protocol.HTTP)
 	}
 
 	// Make HTTP request and measure duration
-	stopTimer := metrics.GetMeasureDurationFunc(err, "_makeRequest")
+	stopTimer := metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(err == nil)
+			},
+			"component": func() string {
+				return fmt.Sprint(componentLabel, "_makeRequest")
+			},
+		},
+	)
 	resp, err := mc.httpClient.Do(req)
 	stopTimer()
 
 	if err != nil {
-		return nil, errors.NewTuringError(err, errors.HTTP)
+		return nil, errors.NewTuringError(err, protocol.HTTP)
 	}
 
 	// Defer close non-nil response body
@@ -138,13 +149,13 @@ func (mc *missionControl) doPost(
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", resp.StatusCode), errors.HTTP)
+			"Error response received: status – [%d]", resp.StatusCode), protocol.HTTP)
 	}
 
 	// No error, convert to mission control response and return
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(resp)
 	if err != nil {
-		return nil, errors.NewTuringError(err, errors.HTTP)
+		return nil, errors.NewTuringError(err, protocol.HTTP)
 	}
 	return mcResp, nil
 }
@@ -158,7 +169,17 @@ func (mc *missionControl) Enrich(
 ) (mchttp.Response, *errors.TuringError) {
 	var httpErr *errors.TuringError
 	// Measure execution time
-	defer metrics.GetMeasureDurationFunc(httpErr, "enrich")()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(httpErr == nil)
+			},
+			"component": func() string {
+				return "enrich"
+			},
+		},
+	)()
 	// Make HTTP request
 	resp, httpErr := mc.doPost(ctx, mc.enricherEndpoint,
 		header, body, mc.enricherTimeout, "enrich")
@@ -173,7 +194,17 @@ func (mc *missionControl) Route(
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	var routerErr *errors.TuringError
 	// Measure execution time
-	defer metrics.GetMeasureDurationFunc(routerErr, "route")()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(routerErr == nil)
+			},
+			"component": func() string {
+				return "route"
+			},
+		},
+	)()
 
 	// Create a channel for experiment treatment response and add to context
 	ch := make(chan *experiment.Response, 1)
@@ -182,7 +213,7 @@ func (mc *missionControl) Route(
 	// Create a new POST request with the input body and header
 	httpReq, err := createNewHTTPRequest(ctx, http.MethodPost, "", header, body)
 	if err != nil {
-		routerErr = errors.NewTuringError(err, errors.HTTP)
+		routerErr = errors.NewTuringError(err, protocol.HTTP)
 		return nil, nil, routerErr
 	}
 
@@ -190,18 +221,18 @@ func (mc *missionControl) Route(
 	var routerResp mchttp.Response
 	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
-		routerResp, routerErr = nil, errors.NewTuringError(fiberError, errors.HTTP, fiberError.Code)
+		routerResp, routerErr = nil, errors.NewTuringError(fiberError, protocol.HTTP, fiberError.Code)
 	} else if fiberResponse == nil {
 		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Did not get back a valid response from the fiberHandler"), errors.HTTP)
+			"Did not get back a valid response from the fiberHandler"), protocol.HTTP)
 	} else if !fiberResponse.IsSuccess() {
 		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", fiberResponse.StatusCode()), errors.HTTP)
+			"Error response received: status – [%d]", fiberResponse.StatusCode()), protocol.HTTP)
 	} else {
 		httpResp := fiberResponse.(*fiberhttp.Response)
 		httpPayload, ok := httpResp.Payload().([]byte)
 		if !ok {
-			routerResp, routerErr = nil, errors.NewTuringError(fmt.Errorf("unable to parse respond payload"), errors.HTTP)
+			routerResp, routerErr = nil, errors.NewTuringError(fmt.Errorf("unable to parse respond payload"), protocol.HTTP)
 		} else {
 			routerResp, routerErr = mchttp.NewCachedResponse(httpPayload, httpResp.Header()), nil
 		}
@@ -230,16 +261,36 @@ func (mc *missionControl) Ensemble(
 ) (mchttp.Response, *errors.TuringError) {
 	var httpErr *errors.TuringError
 	// Measure execution time for Ensemble
-	defer metrics.GetMeasureDurationFunc(httpErr, "ensemble")()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(httpErr == nil)
+			},
+			"component": func() string {
+				return "ensemble"
+			},
+		},
+	)()
 
 	// Combine the request body with the router response to make ensembler payload
 	var err error
 	// Measure execution time for creating the combined payload
-	timer := metrics.GetMeasureDurationFunc(err, "ensemble_makePayload")
+	timer := metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(err == nil)
+			},
+			"component": func() string {
+				return "ensemble_makePayload"
+			},
+		},
+	)
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)
 	timer()
 	if err != nil {
-		httpErr = errors.NewTuringError(err, errors.HTTP)
+		httpErr = errors.NewTuringError(err, protocol.HTTP)
 		return nil, httpErr
 	}
 

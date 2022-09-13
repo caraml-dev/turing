@@ -1,4 +1,4 @@
-package grpc
+package upi
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
 )
@@ -29,7 +30,7 @@ func Test_logTuringRouterRequestSummary(t *testing.T) {
 		},
 		{
 			name: "error",
-			err:  errors.NewTuringError(fmt.Errorf("test error"), errors.GRPC),
+			err:  errors.NewTuringError(fmt.Errorf("test error"), protocol.GRPC),
 			expected: grpcRouterResponse{
 				key: key,
 				err: "test error",

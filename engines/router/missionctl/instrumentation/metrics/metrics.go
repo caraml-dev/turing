@@ -80,18 +80,3 @@ func GetStatusString(status bool) string {
 	}
 	return statusLabels.Failure
 }
-
-// GetMeasureDurationFunc return the func that measures the duration of the request
-func GetMeasureDurationFunc(err error, componentID string) func() {
-	return Glob().MeasureDurationMs(
-		TuringComponentRequestDurationMs,
-		map[string]func() string{
-			"status": func() string {
-				return GetStatusString(err == nil)
-			},
-			"component": func() string {
-				return componentID
-			},
-		},
-	)
-}

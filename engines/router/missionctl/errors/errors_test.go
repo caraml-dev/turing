@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,7 +82,7 @@ func TestGetHTTPErrorCode(t *testing.T) {
 
 	for _, data := range testErrorSuite {
 		t.Run(data.name, func(t *testing.T) {
-			assert.Equal(t, data.expectedCode, GetErrorCode(data.err, HTTP))
+			assert.Equal(t, data.expectedCode, GetErrorCode(data.err, protocol.HTTP))
 		})
 	}
 }
@@ -89,7 +90,7 @@ func TestGetHTTPErrorCode(t *testing.T) {
 func TestNewHTTPErrorMessage(t *testing.T) {
 	message := "Test Error Message"
 	err := fmt.Errorf(message)
-	httpErr := NewTuringError(err, HTTP)
+	httpErr := NewTuringError(err, protocol.HTTP)
 	assert.Equal(t, message, httpErr.Error())
 }
 
@@ -115,7 +116,7 @@ func TestNewHTTPErrorStatus(t *testing.T) {
 			message := "Test Error"
 			err := fmt.Errorf(message)
 			// Create new HTTP error
-			httpErr := NewTuringError(err, HTTP, data.codes...)
+			httpErr := NewTuringError(err, protocol.HTTP, data.codes...)
 			// Validate
 			assert.Equal(t, data.expectedCode, httpErr.Code)
 			assert.Equal(t, message, httpErr.Message)

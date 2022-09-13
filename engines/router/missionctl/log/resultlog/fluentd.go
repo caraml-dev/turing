@@ -51,7 +51,17 @@ func newFluentdLogger(
 func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 	// Measure time taken to post the log to fluentd
 	var err error
-	defer metrics.GetMeasureDurationFunc(err, "fluentd_post")()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(err == nil)
+			},
+			"component": func() string {
+				return "fluentd_post"
+			},
+		},
+	)()
 	err = l.fluentLogger.Post(l.tag, l.bqLogger.getLogData(turLogEntry))
 	return err
 }

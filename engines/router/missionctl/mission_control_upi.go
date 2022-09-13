@@ -9,6 +9,7 @@ import (
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fibergrpc "github.com/gojek/fiber/grpc"
+	"github.com/gojek/fiber/protocol"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
@@ -39,15 +40,26 @@ func NewMissionControlUPI(
 
 func (us *missionControlUpi) Route(
 	ctx context.Context,
-	fiberRequest fiber.Request) (
-	*upiv1.PredictValuesResponse, *errors.TuringError) {
+	fiberRequest fiber.Request,
+) (*upiv1.PredictValuesResponse, *errors.TuringError) {
 	var turingError *errors.TuringError
-	defer metrics.GetMeasureDurationFunc(turingError, "route")()
+	// Measure execution time
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(turingError == nil)
+			},
+			"component": func() string {
+				return "route"
+			},
+		},
+	)()
 
 	resp, ok := <-us.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
 	if !ok {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), errors.GRPC,
+			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), protocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -61,7 +73,7 @@ func (us *missionControlUpi) Route(
 	grpcResponse, ok := resp.(*fibergrpc.Response)
 	if !ok {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), errors.GRPC,
+			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), protocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -70,14 +82,14 @@ func (us *missionControlUpi) Route(
 	payloadByte, err := proto.Marshal(grpcResponse.Payload().(proto.Message))
 	if err != nil {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to marshal payload"), errors.GRPC,
+			errors.Newf(errors.BadResponse, "unable to marshal payload"), protocol.GRPC,
 		)
 		return nil, turingError
 	}
 	err = proto.Unmarshal(payloadByte, &responseProto)
 	if err != nil {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), errors.GRPC,
+			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), protocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -87,7 +99,7 @@ func (us *missionControlUpi) Route(
 		err = grpc.SetHeader(ctx, grpcResponse.Metadata)
 		if err != nil {
 			turingError = errors.NewTuringError(
-				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), errors.GRPC,
+				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), protocol.GRPC,
 			)
 			return nil, turingError
 		}

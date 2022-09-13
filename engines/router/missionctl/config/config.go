@@ -43,9 +43,8 @@ const (
 type Protocol string
 
 const (
-	UPI  Protocol = "UPI"
-	HTTP Protocol = "HTTP"
-	GRPC Protocol = "GRPC"
+	UPI  Protocol = "UPI_V1"
+	HTTP Protocol = "HTTP_JSON"
 )
 
 // SerializationFormat represents the message serialization format to be used by the ResultLogger
@@ -187,7 +186,7 @@ type EnrichmentConfig struct {
 type RouterConfig struct {
 	ConfigFile string        `split_words:"true" required:"true"`
 	Timeout    time.Duration `default:"20ms"`
-	Protocol   Protocol      `default:"http"`
+	Protocol   Protocol      `required:"true"`
 }
 
 // EnsemblerConfig is the structure used to parse the Ensembler's environment configs

@@ -68,7 +68,17 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 	var err error
 
 	// Measure time taken to marshal the data and write the log to the kafka topic
-	defer metrics.GetMeasureDurationFunc(err, "kafka_marshal_and_write")()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(err == nil)
+			},
+			"component": func() string {
+				return "kafka_marshal_and_write"
+			},
+		},
+	)()
 
 	// Format Kafka Message
 	var keyBytes, valueBytes []byte

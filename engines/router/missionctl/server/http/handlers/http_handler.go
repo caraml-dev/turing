@@ -14,13 +14,14 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	"github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 )
 
-const turingReqIDHeaderKey = "Turing-Req-ID"
 const httpHandlerID = "http_handler"
 
 // NewHTTPHandler creates an instance of the Mission Control's prediction request handler
@@ -41,7 +42,7 @@ func (h *httpHandler) error(
 	// Get the turing request id from the context
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 	// Add the turing request id to the error response header
-	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
+	rw.Header().Set(constant.TuringReqIDHeaderKey, turingReqID)
 	http.Error(rw, err.Message, err.Code)
 	// Log the error
 	logTuringRouterRequestError(ctx, err)
@@ -101,7 +102,7 @@ func (h *httpHandler) getPrediction(
 	if expResp != nil {
 		var expErr *errors.TuringError
 		if expResp.Error != "" {
-			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), errors.HTTP)
+			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), protocol.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
 			copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
@@ -126,7 +127,17 @@ func (h *httpHandler) getPrediction(
 
 func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
-	defer metrics.GetMeasureDurationFunc(httpErr, httpHandlerID)()
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(httpErr == nil)
+			},
+			"component": func() string {
+				return httpHandlerID
+			},
+		},
+	)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())
@@ -146,7 +157,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	// Sets the turing request id in the header of the original request so that it gets sent to the enricher,
 	// the experiment engine, the model routes, and the ensembler
-	req.Header.Set(turingReqIDHeaderKey, turingReqID)
+	req.Header.Set(constant.TuringReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
@@ -159,7 +170,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewTuringError(err, errors.HTTP))
+		h.error(ctx, rw, errors.NewTuringError(err, protocol.HTTP))
 		return
 	}
 
@@ -174,7 +185,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	for key := range resp.Header() {
 		rw.Header().Set(key, resp.Header().Get(key))
 	}
-	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
+	rw.Header().Set(constant.TuringReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
 	contentLength, err := rw.Write(payload)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +18,7 @@ import (
 func TestCopyResponseToLogChannel(t *testing.T) {
 	tests := map[string]*errors.TuringError{
 		"success": nil,
-		"error":   errors.NewTuringError(fmt.Errorf("test error"), errors.HTTP),
+		"error":   errors.NewTuringError(fmt.Errorf("test error"), protocol.HTTP),
 	}
 
 	for name, httpErr := range tests {

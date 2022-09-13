@@ -67,9 +67,9 @@ func createRouterFromConfigFile(cfgFilePath string) (fiber.Component, error) {
 }
 
 // createFiberError wraps the input error in a format that is usable by Fiber
-func createFiberError(err error, protocol protocol.Protocol) fibererror.FiberError {
+func createFiberError(err error, p protocol.Protocol) fibererror.FiberError {
 	return fibererror.FiberError{
-		Code:    errors.GetErrorCode(err, errors.ErrorProtocol(protocol)),
+		Code:    errors.GetErrorCode(err, p),
 		Message: err.Error(),
 	}
 }
