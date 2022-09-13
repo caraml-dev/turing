@@ -275,7 +275,8 @@ func withDeployedRouter(
 			globalTestContext.ProjectName,
 			fmt.Sprintf("%s-turing-enricher-%d-0-deployment", router.Name, routerVersion.Version)))
 	}
-	if router.CurrRouterVersion.Ensembler != nil && router.CurrRouterVersion.Ensembler.Type != models.EnsemblerStandardType {
+	if router.CurrRouterVersion.Ensembler != nil &&
+		router.CurrRouterVersion.Ensembler.Type != models.EnsemblerStandardType {
 		require.True(t, isDeploymentExists(
 			globalTestContext.clusterClients,
 			globalTestContext.ProjectName,
