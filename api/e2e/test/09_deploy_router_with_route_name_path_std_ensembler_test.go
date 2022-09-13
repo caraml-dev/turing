@@ -9,12 +9,11 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
-	"github.com/tidwall/gjson"
 )
 
 /*
 Steps:
-Create a new router with valid config for enricher, ensembler, router.
+Create a new router with valid config for the router.
 a. Test GET router immediately > empty config
 b. Wait for success response from deployment
 c. Test GET router version > status shows "deployed"
@@ -44,22 +43,9 @@ func TestDeployRouterWithRouteNamePathInStandardEnsembler(t *testing.T) {
 					assert.Equal(t, http.StatusOK, response.StatusCode,
 						"Unexpected response (code %d): %s",
 						response.StatusCode, string(responsePayload))
-					actualResponse := gjson.GetBytes(responsePayload, "response").String()
+					actualResponse := string(responsePayload)
 					expectedResponse := `{
-					  "experiment": {
-						"configuration": {
-							"foo":"bar",
-						}
-					  },
-					  "route_responses": [
-						{
-						  "data": {
-							"version": "control"
-						  },
-						  "is_default": false,
-						  "route": "control"
-						}
-					  ]
+					  "version" : "control"
 					}`
 					assert.JSONEq(t, expectedResponse, actualResponse)
 				})
