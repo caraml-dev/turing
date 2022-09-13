@@ -51,7 +51,9 @@ def test_create_router_version():
         resource_request=ResourceRequest(
             min_replica=2, max_replica=2, cpu_request="200m", memory_request="256Mi"
         ),
-        autoscaling_policy=AutoscalingPolicy(metric=AutoscalingMetric.CPU, target="80"),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.MEMORY, target="220"
+        ),
         endpoint="anything",
         timeout="3s",
         port=80,
