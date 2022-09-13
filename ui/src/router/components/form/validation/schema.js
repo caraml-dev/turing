@@ -104,6 +104,13 @@ const ruleConditionSchema = yup.object().shape({
     .required("At least one value should be provided"),
 });
 
+const defaultTrafficRuleSchema = yup.object().shape({
+  routes: yup
+    .array()
+    .of(validRouteSchema)
+    .min(1, "At least one route should be attached to the rule"),
+});
+
 const trafficRuleSchema = yup.object().shape({
   name: yup
     .string()
@@ -111,7 +118,8 @@ const trafficRuleSchema = yup.object().shape({
     .matches(
       trafficRuleNameRegex,
       "Name must begin with an alphanumeric character and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$%&:."
-    ),
+    )
+    .test('is-not-default-name', "default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.", (value) => value !== "default-traffic-rule"),
   conditions: yup
     .array()
     .of(ruleConditionSchema)
@@ -263,12 +271,18 @@ const schema = (maxAllowedReplica) => [
     environment_name: yup.string().required("Environment is required"),
     config: yup.object().shape({
       timeout: timeoutSchema.required("Timeout is required"),
+      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       routes: yup
         .array(routeSchema)
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured"),
-      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
+      default_traffic_rule: yup.object()
+        .nullable()
+        .when('rules', {
+          is: rules => rules.length > 0,
+          then: defaultTrafficRuleSchema
+      }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
     }),
   }),

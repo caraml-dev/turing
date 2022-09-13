@@ -124,6 +124,42 @@ class PayloadTrafficRuleCondition(TrafficRuleCondition):
 
 
 @dataclass
+class DefaultTrafficRule:
+    """
+    Class to create a new default TrafficRule based on no conditions and one or more routes
+
+    :param routes: list of routes to send the request to
+    """
+
+    routes: List[str]
+
+    _routes: List[str] = dataclasses.field(init=False, repr=False)
+
+    @property
+    def routes(self) -> List[str]:
+        return self._routes
+
+    @routes.setter
+    def routes(self, routes: List[str]):
+        self._routes = routes
+
+    def to_open_api(self) -> OpenApiModel:
+        self._verify_no_duplicate_routes()
+
+        return turing.generated.models.DefaultTrafficRule(
+            routes=self.routes,
+        )
+
+    def _verify_no_duplicate_routes(self):
+        route_id_counter = Counter(self.routes)
+        most_common_route_id, max_frequency = route_id_counter.most_common(n=1)[0]
+        if max_frequency > 1:
+            raise turing.router.config.route.DuplicateRouteException(
+                f"Routes with duplicate ids are specified for this traffic rule. Duplicate id: {most_common_route_id}"
+            )
+
+
+@dataclass
 class TrafficRule:
     """
     Class to create a new TrafficRule based on a list of conditions and routes

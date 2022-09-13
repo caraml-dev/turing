@@ -27,8 +27,14 @@
       "timeout": "2s"
     }
   ],
+  "default_traffic_rule": {
+    "routes": [
+      "control"
+    ]
+  },
   "rules": [
     {
+      "name": "rule-1",
       "conditions": [
         {
           "field_source": "header",
@@ -42,6 +48,7 @@
       ]
     },
     {
+      "name": "rule-2",
       "conditions": [
         {
           "field_source": "header",

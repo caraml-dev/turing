@@ -6,7 +6,7 @@ import {
   EuiIcon,
 } from "@elastic/eui";
 
-export const ExperimentCardHeader = ({ onDelete, dragHandleProps }) => (
+export const DraggableCardHeader = ({ onDelete, dragHandleProps }) => (
   <EuiFlexGroup
     {...dragHandleProps}
     justifyContent="spaceBetween"

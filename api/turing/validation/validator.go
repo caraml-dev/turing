@@ -127,6 +127,25 @@ func checkTrafficRuleName(sl validator.StructLevel, fieldName string, value stri
 	if !trafficRuleNameRegex.MatchString(value) {
 		sl.ReportError(value, fieldName, "trafficRuleName", nameRegexDescription, fmt.Sprintf("%v", value))
 	}
+	invalidNameDescription :=
+		"default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule."
+	if value == "default-traffic-rule" {
+		sl.ReportError(value, fieldName, "trafficRuleName", invalidNameDescription, fmt.Sprintf("%v", value))
+	}
+}
+
+func checkDefaultTrafficRule(
+	sl validator.StructLevel,
+	fieldName string,
+	defaultTrafficRule *models.DefaultTrafficRule,
+) {
+	defaultTrafficRuleDescription := strings.Join([]string{
+		"Since 1 or more Custom Traffic rules have been specified,",
+		"a default Traffic rule is required.",
+	}, " ")
+	if defaultTrafficRule == nil {
+		sl.ReportError(defaultTrafficRule, fieldName, "defaultTrafficRule", defaultTrafficRuleDescription, "")
+	}
 }
 
 func validateRouterConfig(sl validator.StructLevel) {
@@ -157,6 +176,9 @@ func validateRouterConfig(sl validator.StructLevel) {
 
 	// Validate traffic rules
 	if routerConfig.TrafficRules != nil {
+		if len(routerConfig.TrafficRules) > 0 {
+			checkDefaultTrafficRule(sl, "DefaultTrafficRule", routerConfig.DefaultTrafficRule)
+		}
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
 			if rule.Routes != nil {

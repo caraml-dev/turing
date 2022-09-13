@@ -37,6 +37,8 @@ type RouterVersion struct {
 	Routes Routes `json:"routes"`
 	// Default route
 	DefaultRouteID string `json:"default_route_id"`
+	// Default fallback rule for activating some routes with no request conditions.
+	DefaultTrafficRule *DefaultTrafficRule `json:"default_traffic_rule,omitempty"`
 	// Rules for activating some routes based on request conditions.
 	TrafficRules TrafficRules `json:"rules,omitempty"`
 	// Configuration for the experiment engine queried by the router.

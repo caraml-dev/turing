@@ -18,6 +18,7 @@ export class TuringRouter {
     this.config = {
       routes: [newRoute()],
       default_route_id: null,
+      default_traffic_rule: null,
       rules: [],
       resource_request: {
         cpu_request: "500m",
@@ -103,6 +104,11 @@ export class TuringRouter {
     let obj = objectAssignDeep({}, this);
 
     // Remove properties for optional fields, if not relevant
+    // Default Traffic Rule
+    if (!obj.config.default_traffic_rule) {
+      delete obj.config["default_traffic_rule"];
+    }
+
     // Enricher
     if (obj.config.enricher && obj.config.enricher.type === "nop") {
       delete obj.config["enricher"];
@@ -151,6 +157,10 @@ export const newRoute = () => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
+});
+
+export const newDefaultRule = () => ({
+  routes: [],
 });
 
 export const newRule = () => ({

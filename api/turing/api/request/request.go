@@ -22,12 +22,13 @@ type CreateOrUpdateRouterRequest struct {
 
 // RouterConfig defines the properties of the specific router version
 type RouterConfig struct {
-	Routes           models.Routes           `json:"routes" validate:"required"`
-	DefaultRouteID   *string                 `json:"default_route_id"`
-	TrafficRules     models.TrafficRules     `json:"rules" validate:"unique=Name,dive"`
-	ExperimentEngine *ExperimentEngineConfig `json:"experiment_engine" validate:"required,dive"`
-	ResourceRequest  *models.ResourceRequest `json:"resource_request"`
-	Timeout          string                  `json:"timeout" validate:"required"`
+	Routes             models.Routes              `json:"routes" validate:"required"`
+	DefaultRouteID     *string                    `json:"default_route_id"`
+	DefaultTrafficRule *models.DefaultTrafficRule `json:"default_traffic_rule,omitempty"`
+	TrafficRules       models.TrafficRules        `json:"rules" validate:"unique=Name,dive"`
+	ExperimentEngine   *ExperimentEngineConfig    `json:"experiment_engine" validate:"required,dive"`
+	ResourceRequest    *models.ResourceRequest    `json:"resource_request"`
+	Timeout            string                     `json:"timeout" validate:"required"`
 
 	LogConfig *LogConfig `json:"log_config" validate:"required"`
 
@@ -119,13 +120,14 @@ func (r RouterConfig) BuildRouterVersion(
 		defaultRouteID = *r.DefaultRouteID
 	}
 	rv = &models.RouterVersion{
-		RouterID:       router.ID,
-		Router:         router,
-		Image:          defaults.Image,
-		Status:         models.RouterVersionStatusPending,
-		Routes:         r.Routes,
-		DefaultRouteID: defaultRouteID,
-		TrafficRules:   r.TrafficRules,
+		RouterID:           router.ID,
+		Router:             router,
+		Image:              defaults.Image,
+		Status:             models.RouterVersionStatusPending,
+		Routes:             r.Routes,
+		DefaultRouteID:     defaultRouteID,
+		DefaultTrafficRule: r.DefaultTrafficRule,
+		TrafficRules:       r.TrafficRules,
 		ExperimentEngine: &models.ExperimentEngine{
 			Type: r.ExperimentEngine.Type,
 		},
