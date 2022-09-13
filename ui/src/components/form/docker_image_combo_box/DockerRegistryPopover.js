@@ -28,7 +28,7 @@ export const DockerRegistryPopover = ({ value, registryOptions, onChange }) => {
           iconType="arrowDown"
           iconSide="right"
           onClick={togglePopover}>
-          {registryOptions.find((o) => o.value === value).inputDisplay}
+          {(registryOptions.find((o) => o.value === value) || {}).inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

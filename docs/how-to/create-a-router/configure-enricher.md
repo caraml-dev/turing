@@ -47,6 +47,14 @@ Configure the resources required for the enricher. There are 3 required inputs, 
 
 **Min/Max Replicas**: Min/max number of replicas for your enricher. Scaling of the enricher based on traffic volume will be automatically done for you.
 
+Optionally, modify the autoscaling policy on the enricher.
+
+![](../../.gitbook/assets/autoscaling_policy_panel.png)
+
+**Metric**: The autoscaling metric to monitor. Currently, 4 metrics are supported - Concurrency, RPS, CPU and Memory.
+
+**Target**: The target value of the chosen metric for each replica, after which autoscaling should be triggered.
+
 ### External Enricher
 
 Coming soon.

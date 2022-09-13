@@ -8,6 +8,7 @@ import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
 import { EnsemblersContextContextProvider } from "../../../../../providers/ensemblers/context";
 import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
+import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
 
 export const PyFuncConfigFormGroup = ({
   projectId,
@@ -49,6 +50,14 @@ export const PyFuncConfigFormGroup = ({
             variables={pyfuncConfig.env}
             onChangeHandler={onChange("env")}
             errors={errors.env}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AutoscalingPolicyPanel
+            autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
+            onChangeHandler={onChange("autoscaling_policy")}
+            errors={errors.autoscaling_policy}
           />
         </EuiFlexItem>
 

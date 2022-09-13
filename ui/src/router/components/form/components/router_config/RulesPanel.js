@@ -1,4 +1,5 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
+import { useToggle } from "@gojek/mlp-ui";
 import { Panel } from "../Panel";
 import {
   EuiButton,
@@ -47,7 +48,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
     </EuiButton>
   );
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isFlyoutVisible, toggleIsFlyoutVisible] = useToggle();
 
   const onDragEnd = ({ source, destination }) => {
     if (source && destination) {
@@ -65,7 +66,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
       title={
         <Fragment>
           Traffic Rules{" "}
-          <EuiLink color="ghost" onClick={() => setIsFlyoutVisible(true)}>
+          <EuiLink color="ghost" onClick={() => toggleIsFlyoutVisible()}>
             <EuiIcon
               type="questionInCircle"
               color="subdued"
@@ -127,7 +128,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
       </EuiFlexGroup>
 
       {isFlyoutVisible && (
-        <RulesPanelFlyout onClose={() => setIsFlyoutVisible(false)} />
+        <RulesPanelFlyout onClose={() => toggleIsFlyoutVisible()} />
       )}
     </Panel>
   );

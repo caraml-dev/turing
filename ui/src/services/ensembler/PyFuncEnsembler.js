@@ -28,6 +28,10 @@ export class PyFuncEnsembler extends Ensembler {
         min_replica: 0,
         max_replica: 2,
       },
+      autoscaling_policy: {
+        metric: "concurrency",
+        target: "1",
+      },
       env: [],
       timeout: "100ms",
     };

@@ -27,6 +27,10 @@ export class DockerEnsembler extends Ensembler {
         min_replica: 0,
         max_replica: 2,
       },
+      autoscaling_policy: {
+        metric: "concurrency",
+        target: "1",
+      },
       env: [],
       service_account: "",
     };

@@ -1,6 +1,5 @@
 import React from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
-import { ConfigSectionPanel } from "../../../../../components/config_section";
 import { ContainerConfigTable } from "./ContainerConfigTable";
 import { EnvVariablesConfigTable } from "./EnvVariablesConfigTable";
 import { ResourcesConfigTable } from "../ResourcesConfigTable";
@@ -24,11 +23,11 @@ export const DockerConfigViewGroup = ({ componentName, dockerConfig }) => {
         <ConfigMultiSectionPanel items={items} />
       </EuiFlexItem>
       <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-        <ConfigSectionPanel title={`${componentName} Resources`}>
-          <ResourcesConfigTable
-            resourceRequest={dockerConfig.resource_request}
-          />
-        </ConfigSectionPanel>
+        <ResourcesConfigTable
+          componentName={componentName}
+          autoscalingPolicy={dockerConfig.autoscaling_policy}
+          resourceRequest={dockerConfig.resource_request}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
