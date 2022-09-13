@@ -197,30 +197,23 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 }
 
 type routerConfigTestCase struct {
-	routes            models.Routes
-	enricher          *request.EnricherEnsemblerConfig
-	ensembler         *models.Ensembler
-	defaultRouteID    *string
+	routes             models.Routes
+	enricher           *request.EnricherEnsemblerConfig
+	ensembler          *models.Ensembler
+	defaultRouteID     *string
 	defaultTrafficRule *models.DefaultTrafficRule
-	trafficRules      models.TrafficRules
-	autoscalingPolicy *models.AutoscalingPolicy
-	expectedError     string
+	trafficRules       models.TrafficRules
+	autoscalingPolicy  *models.AutoscalingPolicy
+	expectedError      string
 }
 
 func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 	return &request.RouterConfig{
-<<<<<<< HEAD
-		Routes:            tt.routes,
-		DefaultRouteID:    tt.defaultRouteID,
-		DefaultTrafficRule: tt.defaultTrafficRule,
-		TrafficRules:      tt.trafficRules,
-		AutoscalingPolicy: tt.autoscalingPolicy,
-=======
 		Routes:             tt.routes,
 		DefaultRouteID:     tt.defaultRouteID,
 		DefaultTrafficRule: tt.defaultTrafficRule,
 		TrafficRules:       tt.trafficRules,
->>>>>>> main
+		AutoscalingPolicy:  tt.autoscalingPolicy,
 		ExperimentEngine: &request.ExperimentEngineConfig{
 			Type: "nop",
 		},
