@@ -285,7 +285,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 		},
@@ -304,7 +304,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 		},
@@ -316,7 +316,7 @@ func TestValidateTrafficRules(t *testing.T) {
 				{
 					Name:       ruleName,
 					Conditions: []*router.TrafficRuleCondition{},
-					Routes:     []string{"route-a"},
+					Routes:     []string{routeAID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions' " +
@@ -361,7 +361,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Operator' " +
@@ -382,7 +382,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' " +
@@ -403,7 +403,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Field' " +
@@ -456,7 +456,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"some_value"},
 						},
 					},
-					Routes: []string{"route-a", "route-c"},
+					Routes: []string{routeAID, routeCID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[1]' " +
@@ -499,7 +499,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -529,7 +529,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -637,7 +637,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-a", "route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
