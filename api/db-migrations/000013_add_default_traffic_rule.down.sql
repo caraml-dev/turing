@@ -18,12 +18,16 @@ dangling_routes AS (
     SELECT
         id, routes
     FROM (
-        SELECT * FROM default_traffic_rule_routes
-        EXCEPT
-        SELECT * FROM all_routes
+        SELECT
+            droutes.id,
+            droutes.routes,
+            all_routes.routes as original_routes
+        FROM
+            default_traffic_rule_routes droutes
+            LEFT JOIN all_routes on droutes.id = all_routes.id
     ) t
     -- WHERE clause filters away rows with no traffic rules
-    WHERE t.routes IS NOT NULL    
+    WHERE (routes <@ original_routes and routes @> original_routes) != true
 ),
 exploded_traffic_rules AS (
     SELECT
