@@ -61,7 +61,8 @@ func TestNewEnricherService(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     1,
 				MaxReplicas:                     2,
-				TargetConcurrency:               1,
+				AutoscalingMetric:               "concurrency",
+				AutoscalingTarget:               "1",
 				QueueProxyResourcePercentage:    10,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -83,7 +84,7 @@ func TestNewEnricherService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "test-env", "secret", 1, 10, 1.5)
+			svc, err := sb.NewEnricherService(routerVersion, project, "test-env", "secret", 10, 1.5)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
@@ -133,7 +134,8 @@ func TestNewEnsemblerService(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     2,
 				MaxReplicas:                     3,
-				TargetConcurrency:               1,
+				AutoscalingMetric:               "concurrency",
+				AutoscalingTarget:               "1",
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -173,7 +175,8 @@ func TestNewEnsemblerService(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     2,
 				MaxReplicas:                     3,
-				TargetConcurrency:               1,
+				AutoscalingMetric:               "cpu",
+				AutoscalingTarget:               "90",
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -195,7 +198,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret", 1, 20, 1.5)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret", 20, 1.5)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)

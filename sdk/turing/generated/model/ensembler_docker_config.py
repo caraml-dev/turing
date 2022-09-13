@@ -27,8 +27,10 @@ from turing.generated.model_utils import (  # noqa: F401
 )
 
 def lazy_import():
+    from turing.generated.model.autoscaling_policy import AutoscalingPolicy
     from turing.generated.model.env_var import EnvVar
     from turing.generated.model.resource_request import ResourceRequest
+    globals()['AutoscalingPolicy'] = AutoscalingPolicy
     globals()['EnvVar'] = EnvVar
     globals()['ResourceRequest'] = ResourceRequest
 
@@ -95,6 +97,7 @@ class EnsemblerDockerConfig(ModelNormal):
             'timeout': (str,),  # noqa: E501
             'port': (int,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
+            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'service_account': (str,),  # noqa: E501
         }
 
@@ -110,6 +113,7 @@ class EnsemblerDockerConfig(ModelNormal):
         'timeout': 'timeout',  # noqa: E501
         'port': 'port',  # noqa: E501
         'env': 'env',  # noqa: E501
+        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'service_account': 'service_account',  # noqa: E501
     }
 
@@ -167,6 +171,7 @@ class EnsemblerDockerConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
             service_account (str): (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file.\" . [optional]  # noqa: E501
         """
 

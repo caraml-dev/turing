@@ -116,6 +116,10 @@ func TestCreateRouterVersion(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Status: models.RouterVersionStatusUndeployed,
+		AutoscalingPolicy: &models.AutoscalingPolicy{
+			Metric: models.AutoscalingMetricCPU,
+			Target: "80",
+		},
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
@@ -154,6 +158,10 @@ func TestCreateRouterVersion(t *testing.T) {
 				},
 				LogConfig: &request.LogConfig{
 					ResultLoggerType: models.NopLogger,
+				},
+				AutoscalingPolicy: &models.AutoscalingPolicy{
+					Metric: models.AutoscalingMetricCPU,
+					Target: "80",
 				},
 			},
 			vars: RequestVars{"router_id": {"2"}, "project_id": {"2"}},

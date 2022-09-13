@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
@@ -196,10 +198,12 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 
 type routerConfigTestCase struct {
 	routes             models.Routes
+	enricher           *request.EnricherEnsemblerConfig
 	ensembler          *models.Ensembler
 	defaultRouteID     *string
 	defaultTrafficRule *models.DefaultTrafficRule
 	trafficRules       models.TrafficRules
+	autoscalingPolicy  *models.AutoscalingPolicy
 	expectedError      string
 }
 
@@ -209,6 +213,7 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 		DefaultRouteID:     tt.defaultRouteID,
 		DefaultTrafficRule: tt.defaultTrafficRule,
 		TrafficRules:       tt.trafficRules,
+		AutoscalingPolicy:  tt.autoscalingPolicy,
 		ExperimentEngine: &request.ExperimentEngineConfig{
 			Type: "nop",
 		},
@@ -216,6 +221,7 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},
+		Enricher:  tt.enricher,
 		Ensembler: tt.ensembler,
 	}
 }
@@ -614,6 +620,150 @@ func TestValidateTrafficRules(t *testing.T) {
 		},
 	}
 
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockExperimentsService := &mocks.ExperimentsService{}
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			validate, err := validation.NewValidator(mockExperimentsService)
+			require.NoError(t, err)
+
+			err = validate.Struct(tt.RouterConfig())
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestValidateAutoscaling(t *testing.T) {
+	enricherBasic := request.EnricherEnsemblerConfig{
+		Image: "lala",
+		ResourceRequest: &models.ResourceRequest{
+			MinReplica: 0,
+			MaxReplica: 5,
+			CPURequest: resource.Quantity{
+				Format: "500M",
+			},
+			MemoryRequest: resource.Quantity{
+				Format: "1G",
+			},
+		},
+		Endpoint: "endpoint",
+		Timeout:  "6s",
+		Port:     8080,
+		Env: []*models.EnvVar{
+			{
+				Name:  "key",
+				Value: "value",
+			},
+		},
+	}
+	makeEnricher := func(
+		enricher request.EnricherEnsemblerConfig,
+		policy *models.AutoscalingPolicy,
+	) *request.EnricherEnsemblerConfig {
+		newEnr := enricher
+		newEnr.AutoscalingPolicy = policy
+		return &newEnr
+	}
+	routeID := "abc"
+	route := &models.Route{
+		ID:       routeID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/a",
+		Timeout:  "10ms",
+	}
+	id := models.ID(1)
+	suite := map[string]routerConfigTestCase{
+		"success | no autoscaling policy | all components": {
+			routes:   models.Routes{route},
+			enricher: &enricherBasic,
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerDockerType,
+			},
+		},
+		"success | no autoscaling policy | pyfunc ensembler": {
+			routes: models.Routes{route},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerPyFuncType,
+				PyfuncConfig: &models.EnsemblerPyfuncConfig{
+					ProjectID:       &id,
+					EnsemblerID:     &id,
+					ResourceRequest: &models.ResourceRequest{},
+					Timeout:         "1s",
+					Env:             models.EnvVars{},
+				},
+			},
+		},
+		"success | valid autoscaling policy | all components": {
+			routes: models.Routes{route},
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricCPU,
+				Target: "90",
+			},
+			enricher: makeEnricher(enricherBasic, &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricConcurrency,
+				Target: "2",
+			}),
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerDockerType,
+				DockerConfig: &models.EnsemblerDockerConfig{
+					Endpoint: "http://abc.com",
+					Port:     8080,
+					Image:    "nginx",
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
+					AutoscalingPolicy: &models.AutoscalingPolicy{
+						Metric: models.AutoscalingMetricRPS,
+						Target: "400",
+					},
+					Timeout: "5s",
+					Env:     models.EnvVars{},
+				},
+			},
+		},
+		"success | valid autoscaling policy | pyfunc ensembler": {
+			routes: models.Routes{route},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerPyFuncType,
+				PyfuncConfig: &models.EnsemblerPyfuncConfig{
+					ProjectID:       &id,
+					EnsemblerID:     &id,
+					ResourceRequest: &models.ResourceRequest{},
+					AutoscalingPolicy: &models.AutoscalingPolicy{
+						Metric: models.AutoscalingMetricMemory,
+						Target: "80",
+					},
+					Timeout: "1s",
+					Env:     models.EnvVars{},
+				},
+			},
+		},
+		"failure | invalid autoscaling metric": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: "abc",
+				Target: "100",
+			},
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Metric' ",
+				"Error:Field validation for 'Metric' failed on the 'oneof' tag"}, ""),
+		},
+		"failure | invalid autoscaling target": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricRPS,
+				Target: "hundred",
+			},
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Target' ",
+				"Error:Field validation for 'Target' failed on the 'number' tag"}, ""),
+		},
+	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockExperimentsService := &mocks.ExperimentsService{}

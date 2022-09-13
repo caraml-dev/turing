@@ -1,11 +1,13 @@
 import pytest
+from turing.router.config.autoscaling_policy import DEFAULT_AUTOSCALING_POLICY
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
+from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.resource_request import ResourceRequest
 
 
 @pytest.mark.parametrize(
-    "id,image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "id,image,resource_request,autoscaling_policy,endpoint,timeout,port,env,service_account,expected",
     [
         pytest.param(
             1,
@@ -13,6 +15,7 @@ from turing.router.config.resource_request import ResourceRequest
             ResourceRequest(
                 min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
             ),
+            AutoscalingPolicy(metric="rps", target="100"),
             f"http://localhost:5000/enricher_endpoint",
             "500ms",
             5180,
@@ -26,6 +29,7 @@ def test_create_enricher(
     id,
     image,
     resource_request,
+    autoscaling_policy,
     endpoint,
     timeout,
     port,
@@ -38,6 +42,7 @@ def test_create_enricher(
         id=id,
         image=image,
         resource_request=resource_request,
+        autoscaling_policy=autoscaling_policy,
         endpoint=endpoint,
         timeout=timeout,
         port=port,
@@ -45,3 +50,21 @@ def test_create_enricher(
         service_account=service_account,
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
+
+
+def test_default_enricher_autoscaling_policy():
+    assert (
+        Enricher(
+            id=id,
+            image="image",
+            resource_request=ResourceRequest(
+                min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
+            ),
+            endpoint="endpoint",
+            timeout="1s",
+            port=8080,
+            env=EnvVar(name="env_name", value="env_val"),
+            service_account="service_account",
+        ).autoscaling_policy
+        == DEFAULT_AUTOSCALING_POLICY
+    )

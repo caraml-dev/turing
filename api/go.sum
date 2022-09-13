@@ -730,8 +730,6 @@ github.com/gojek/mlp v0.0.0-20201002030420-4e35e69a9ab8/go.mod h1:IjQCiAzap7TZRZ
 github.com/gojek/mlp v1.4.7 h1:GxqqI0rQxUF4pexCk3aHsd5Mu4o4OnnsbGk+MTnW26Y=
 github.com/gojek/mlp v1.4.7/go.mod h1:3+/YMTxQenxYSvKzOiEio+UBXPheJ4+/5c1MkbYoLwc=
 github.com/gojek/valkyrie v0.0.0-20180215180059-6aee720afcdf/go.mod h1:QzhUKaYKJmcbTnCYCAVQrroCOY7vOOI8cSQ4NbuhYf0=
-github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 h1:zN2lZNZRflqFyxVaTIU61KNKQ9C0055u9CAfpmqUvo4=
-github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3/go.mod h1:nPpo7qLxd6XL3hWJG/O60sR8ZKfMCiIoNap5GvD12KU=
 github.com/golang-migrate/migrate/v4 v4.11.0 h1:uqtd0ysK5WyBQ/T1K2uDIooJV0o2Obt6uPwP062DupQ=
 github.com/golang-migrate/migrate/v4 v4.11.0/go.mod h1:nqbpDbckcYjsCD5I8q5+NI9Tkk7SVcmaF40Ax1eAWhg=
 github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe h1:lXe2qZdvpiX5WZkZR4hgp4KJVfY3nMkvmwbVkpv1rVY=

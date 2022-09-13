@@ -516,6 +516,8 @@ components:
           $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
+        autoscaling_policy:
+          $ref: "#/components/schemas/AutoscalingPolicy"
         timeout:
           <<: *timeout
         log_config:
@@ -625,6 +627,8 @@ components:
           $ref: "experiment-engines.yaml#/components/schemas/ExperimentConfig"
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
+        autoscaling_policy:
+          $ref: "#/components/schemas/AutoscalingPolicy"
         timeout:
           <<: *timeout
         log_config:
@@ -731,6 +735,8 @@ components:
           type: "string"
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
+        autoscaling_policy:
+          $ref: "#/components/schemas/AutoscalingPolicy"
         endpoint:
           type: "string"
         timeout:
@@ -830,6 +836,8 @@ components:
           pattern: '^([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?::\d{2,5})?\/)?([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\/)*([a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)(?::[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?$'
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
+        autoscaling_policy:
+          $ref: "#/components/schemas/AutoscalingPolicy"
         endpoint:
           type: "string"
         timeout:
@@ -864,6 +872,8 @@ components:
           type: "integer"
         resource_request:
           $ref: "#/components/schemas/ResourceRequest"
+        autoscaling_policy:
+          $ref: "#/components/schemas/AutoscalingPolicy"
         timeout:
           <<: *timeout
         env:
@@ -884,6 +894,20 @@ components:
         memory_request:
           type: "string"
           pattern: '^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$'
+
+    AutoscalingPolicy:
+      type: "object"
+      properties:
+        metric:
+          type: "string"
+          enum:
+            - "concurrency"
+            - "cpu"
+            - "memory"
+            - "rps"
+        target:
+          type: "string"
+          pattern: '^\d+$'
 
     BigQueryConfig:
       type: "object"

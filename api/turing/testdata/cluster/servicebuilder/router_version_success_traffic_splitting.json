@@ -40,7 +40,9 @@
           "field_source": "header",
           "field": "X-Region",
           "operator": "in",
-          "values": ["region-a"]
+          "values": [
+            "region-a"
+          ]
         }
       ],
       "routes": [
@@ -54,7 +56,9 @@
           "field_source": "header",
           "field": "X-Region",
           "operator": "in",
-          "values": ["region-b"]
+          "values": [
+            "region-b"
+          ]
         }
       ],
       "routes": [
@@ -67,8 +71,8 @@
     "type": "exp-engine-3",
     "config": {
       "deployment": {
-      "endpoint": "exp-engine:8080",
-      "timeout": "500ms"
+        "endpoint": "exp-engine:8080",
+        "timeout": "500ms"
       },
       "client": {
         "id": "1",
@@ -121,6 +125,10 @@
     "max_replica": 4,
     "cpu_request": "400m",
     "memory_request": "512Mi"
+  },
+  "autoscaling_policy": {
+    "metric": "concurrency",
+    "target": "1"
   },
   "timeout": "5s",
   "log_config": {

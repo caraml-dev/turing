@@ -28,6 +28,7 @@ type RouterConfig struct {
 	TrafficRules       models.TrafficRules        `json:"rules" validate:"unique=Name,dive"`
 	ExperimentEngine   *ExperimentEngineConfig    `json:"experiment_engine" validate:"required,dive"`
 	ResourceRequest    *models.ResourceRequest    `json:"resource_request"`
+	AutoscalingPolicy  *models.AutoscalingPolicy  `json:"autoscaling_policy" validate:"omitempty,dive"`
 	Timeout            string                     `json:"timeout" validate:"required"`
 
 	LogConfig *LogConfig `json:"log_config" validate:"required"`
@@ -70,6 +71,8 @@ type EnricherEnsemblerConfig struct {
 	Image string `json:"image" validate:"required"`
 	// Resource requests  for the deployment of the enricher.
 	ResourceRequest *models.ResourceRequest `json:"resource_request" validate:"required"`
+	// Autoscaling policy for the enricher / ensembler.
+	AutoscalingPolicy *models.AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// Endpoint to query.
 	Endpoint string `json:"endpoint" validate:"required"`
 	// Request timeout as a valid quantity string.
@@ -87,13 +90,14 @@ type EnricherEnsemblerConfig struct {
 // BuildEnricher builds the enricher model from the enricher config
 func (cfg EnricherEnsemblerConfig) BuildEnricher() *models.Enricher {
 	return &models.Enricher{
-		Image:           cfg.Image,
-		ResourceRequest: cfg.ResourceRequest,
-		Endpoint:        cfg.Endpoint,
-		Timeout:         cfg.Timeout,
-		Port:            cfg.Port,
-		Env:             cfg.Env,
-		ServiceAccount:  cfg.ServiceAccount,
+		Image:             cfg.Image,
+		ResourceRequest:   cfg.ResourceRequest,
+		AutoscalingPolicy: getAutoscalingPolicyOrDefault(cfg.AutoscalingPolicy),
+		Endpoint:          cfg.Endpoint,
+		Timeout:           cfg.Timeout,
+		Port:              cfg.Port,
+		Env:               cfg.Env,
+		ServiceAccount:    cfg.ServiceAccount,
 	}
 }
 
@@ -131,8 +135,9 @@ func (r RouterConfig) BuildRouterVersion(
 		ExperimentEngine: &models.ExperimentEngine{
 			Type: r.ExperimentEngine.Type,
 		},
-		ResourceRequest: r.ResourceRequest,
-		Timeout:         r.Timeout,
+		ResourceRequest:   r.ResourceRequest,
+		AutoscalingPolicy: getAutoscalingPolicyOrDefault(r.AutoscalingPolicy),
+		Timeout:           r.Timeout,
 		LogConfig: &models.LogConfig{
 			LogLevel:             routercfg.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
@@ -146,8 +151,12 @@ func (r RouterConfig) BuildRouterVersion(
 	}
 	if r.Ensembler != nil {
 		// Ensure ensembler config is set based on the ensembler type
-		if r.Ensembler.Type == models.EnsemblerDockerType && r.Ensembler.DockerConfig == nil {
-			return nil, errors.New("missing ensembler docker config")
+		if r.Ensembler.Type == models.EnsemblerDockerType {
+			if r.Ensembler.DockerConfig == nil {
+				return nil, errors.New("missing ensembler docker config")
+			}
+			r.Ensembler.DockerConfig.AutoscalingPolicy = getAutoscalingPolicyOrDefault(
+				r.Ensembler.DockerConfig.AutoscalingPolicy)
 		}
 		if r.Ensembler.Type == models.EnsemblerStandardType && r.Ensembler.StandardConfig == nil {
 			return nil, errors.New("missing ensembler standard config")
@@ -156,6 +165,9 @@ func (r RouterConfig) BuildRouterVersion(
 			if r.Ensembler.PyfuncConfig == nil {
 				return nil, errors.New("missing ensembler pyfunc config")
 			}
+
+			r.Ensembler.PyfuncConfig.AutoscalingPolicy = getAutoscalingPolicyOrDefault(
+				r.Ensembler.PyfuncConfig.AutoscalingPolicy)
 
 			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
 			ensembler, err := ensemblersSvc.FindByID(
@@ -256,4 +268,18 @@ func (r RouterConfig) BuildExperimentEngineConfig(
 
 	// Custom experiment manager config, return as is.
 	return rawExpConfig, nil
+}
+
+// getAutoscalingPolicyOrDefault applies the default autoscaling policy that has been used all along, prior to
+// user configurations. Thus, this function also ensures backward-compatibility with requests originating from
+// older SDK versions.
+// TODO: Remove the default values from the API and make the autoscaling parameters required.
+func getAutoscalingPolicyOrDefault(policy *models.AutoscalingPolicy) *models.AutoscalingPolicy {
+	if policy == nil {
+		return &models.AutoscalingPolicy{
+			Metric: models.AutoscalingMetricConcurrency,
+			Target: "1",
+		}
+	}
+	return policy
 }
