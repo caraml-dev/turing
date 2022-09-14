@@ -642,7 +642,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			},
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for 'DefaultTrafficRule' failed on the",
-				"'Fallback Route (DefaultRouteId): 'route-a' should be associated for the Default Traffic Rule' tag",
+				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to the Default Traffic Rule' tag",
 			}, " "),
 		},
 	}

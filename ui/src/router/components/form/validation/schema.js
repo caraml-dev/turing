@@ -59,7 +59,7 @@ const validateRuleNames = function(items) {
   return !!errors.length ? new yup.ValidationError(errors) : true;
 };
 
-const validateRoutes = function (items) {
+const validateDanglingRoutes = function (items) {
   const defaultTrafficRule = this.options.parent.default_traffic_rule;
   let trafficRuleRoutes = [...new Set(this.options.parent.rules.map(rule => rule.routes).flat(1))];
   if (defaultTrafficRule) {
@@ -77,38 +77,6 @@ const validateRoutes = function (items) {
       );
     }
   });
-
-  // Validate Nop/Standard Ensembler
-  const ensembler_type = this.options.parent.ensembler.type
-  // Nop Ensembler
-  let final_fallback_route = "";
-  if (ensembler_type === "nop") {
-    final_fallback_route = this.options.parent.ensembler.nop_config.final_response_route_id;
-  }
-  // Standard Ensembler
-  if (ensembler_type === "standard") {
-    final_fallback_route = this.options.parent.ensembler.standard_config.fallback_response_route_id;
-  }
-
-  let containsFinalFallbackRoute = true;
-  if (final_fallback_route && this.options.parent.rules) {
-    const ruleRoutes = this.options.parent.rules.map(rule => rule.routes);
-    ruleRoutes.forEach((routes) => {
-      if (!routes.includes(final_fallback_route)) {
-        containsFinalFallbackRoute = false;
-      }
-    })
-    if (!containsFinalFallbackRoute) {
-      // Final(Nop)/Fallback(Standard) route should be present in all Traffic Rule routes
-      const invalidRouteIndex = items.findIndex((item) => item.id === final_fallback_route);
-      errors.push(
-        this.createError({
-          path: `${this.path}[${invalidRouteIndex}].id`,
-          message: "Final/Fallback response route should be present in all Traffic Rules.",
-        })
-      );
-    }
-  }
 
   return !!errors.length ? new yup.ValidationError(errors) : true;
 };
@@ -341,7 +309,7 @@ const schema = (maxAllowedReplica) => [
         .min(1, "At least one route should be configured")
         .when(['rules'], (rules, schema) => {
           if (rules.length > 0) {
-            return schema.test("no-dangling-routes", validateRoutes);
+            return schema.test("no-dangling-routes", validateDanglingRoutes);
           }
         }),
       default_traffic_rule: yup.object()
