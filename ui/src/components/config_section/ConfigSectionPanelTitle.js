@@ -1,11 +1,22 @@
 import React, { Fragment } from "react";
-import { EuiHorizontalRule, EuiTitle } from "@elastic/eui";
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from "@elastic/eui";
 
-export const ConfigSectionPanelTitle = ({ title }) => (
+export const ConfigSectionPanelTitle = ({ title, append }) => (
   <Fragment>
-    <EuiTitle size="xs">
+    {append ? 
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <span>{title}</span>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {append}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    : <EuiTitle size="xs">
       <span>{title}</span>
-    </EuiTitle>
+    </EuiTitle>}
     <EuiHorizontalRule size="full" margin="xs" />
   </Fragment>
 );

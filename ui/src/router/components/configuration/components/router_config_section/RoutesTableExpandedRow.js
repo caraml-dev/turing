@@ -2,12 +2,14 @@ import React from "react";
 import {
   EuiAvatar,
   EuiCallOut,
+  EuiBadge,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGrid,
   EuiHorizontalRule,
-  EuiPanel,
+  EuiSpacer,
 } from "@elastic/eui";
-import { TrafficRuleCondition } from "../../../traffic_rule_condition/TrafficRuleCondition";
 
 const OrDivider = () => (
   <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
@@ -25,40 +27,90 @@ const OrDivider = () => (
   </EuiFlexGroup>
 );
 
-export const RoutesTableExpandedRow = ({ item }) => {
+export const RoutesTableExpandedRow = ({ item, inDefaultTrafficRule }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiCallOut
+        {!!item.rules && <EuiCallOut
           color="warning"
           title="Turing will only send a request to this route if the request meets
             all the conditions from at least one of the rules shown below."
           iconType="questionInCircle"
-        />
+        />}
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiFlexGroup direction="row" justifyContent="center" wrap>
-          <EuiFlexItem style={{ maxWidth: "80%" }}>
+          <EuiFlexItem style={{ maxWidth: "70%" }}>
             <EuiFlexGroup direction="column" gutterSize="none">
-              {item.rules.map((rule, idx) => (
+              {!!item.rules && item.rules.map((rule, idx) => (
                 <EuiFlexItem key={`rule-${idx}`}>
-                  <EuiPanel>
+                  <EuiCard title={rule.name} layout="horizontal">
+                    <EuiHorizontalRule margin="xs" />
                     <EuiFlexGroup direction="column" gutterSize="s">
-                      {rule.map((condition, idx) => (
+                      {rule.conditions.map((condition, idx) => (
                         <EuiFlexItem key={`rule-condition-${idx}`}>
-                          <TrafficRuleCondition
-                            condition={condition}
-                            readOnly={true}
-                          />
+                          <EuiFlexGroup direction="row" gutterSize="m" alignItems="baseline">
+                            <EuiFlexItem grow={1}>
+                              <EuiFlexGroup direction="row" gutterSize="m" alignItems="baseline">
+                              <EuiFlexItem grow={false}>
+                                <EuiBadge color="primary">
+                                  {condition.field_source}
+                                </EuiBadge>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiBadge>
+                                  {condition.field}
+                                </EuiBadge>
+                              </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiFlexItem>
+
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="warning">
+                                {condition.operator}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                              
+                            <EuiFlexItem grow={1}>
+                              <EuiFlexGrid columns={4} gutterSize="s">
+                                {condition.values.map((val, idx) => (
+                                  <EuiFlexItem key={`filter-${idx}`} grow={false}>
+                                    <EuiBadge>
+                                      {val}
+                                    </EuiBadge>
+                                  </EuiFlexItem>
+                                ))}
+                                </EuiFlexGrid>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                            <EuiSpacer size="xs" />
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
-                  </EuiPanel>
+                  </EuiCard>
 
                   {idx < item.rules.length - 1 && <OrDivider />}
                 </EuiFlexItem>
               ))}
+              {inDefaultTrafficRule && (
+                <>
+                {!!item.rules && <OrDivider />}
+                <EuiFlexItem key="default-rule">
+                  <EuiCard
+                    title="default-traffic-rule"
+                    titleSize="xs"
+                    description={
+                      <>
+                        This route is {!!item.rules && "also"} a part of the Default Rule. This route will receive the request if none of the routing rules' conditions are met.
+                      </>
+                    }
+                    layout="horizontal"
+                    display="warning"
+                  />
+                </EuiFlexItem>
+                </>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
