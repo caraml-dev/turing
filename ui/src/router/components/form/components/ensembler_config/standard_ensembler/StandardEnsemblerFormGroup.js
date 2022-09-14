@@ -24,6 +24,7 @@ const FallbackView = ({ text }) => (
 const StandardEnsemblerWithCustomExperimentEnginePanel = ({
   remoteUi,
   projectId,
+  routes,
   routeNamePath,
   onChange,
   errors,
@@ -40,6 +41,7 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
           name="./EditStandardEnsemblerConfig"
           fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}
           projectId={projectId}
+          routes={routes}
           routeNamePath={routeNamePath}
           onChange={onChange}
           errors={errors}
@@ -112,6 +114,7 @@ export const StandardEnsemblerFormGroup = ({
                 url: "http://localhost:3002/xp/remoteEntry.js"
               }}
               projectId={projectId}
+              routes={routes}
               routeNamePath={standardConfig.route_name_path}
               onChange={onChange("route_name_path")}
               errors={get(errors, "route_name_path")}
