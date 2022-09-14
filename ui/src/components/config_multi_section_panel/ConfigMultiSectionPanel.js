@@ -1,6 +1,7 @@
 import React from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 import { ConfigSectionPanelTitle } from "../config_section";
+import { ConfigSectionPanelTitleWithToggle } from "../config_section";
 
 export const ConfigMultiSectionPanel = React.forwardRef(
   ({ items, className }, ref) => {
@@ -8,9 +9,12 @@ export const ConfigMultiSectionPanel = React.forwardRef(
       <EuiPanel className={`euiPanel--configSection ${className}`}>
         <div ref={ref}>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {items.map(({ title, children }, idx) => (
+            {items.map(({ title, toggle, children }, idx) => (
               <EuiFlexItem key={idx}>
-                {title && <ConfigSectionPanelTitle title={title} />}
+                {
+                  title && toggle ? <ConfigSectionPanelTitleWithToggle title={title} toggle={toggle} />
+                  : title && <ConfigSectionPanelTitle title={title} />
+                }
                 {children}
               </EuiFlexItem>
             ))}
