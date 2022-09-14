@@ -6,11 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/caraml-dev/turing/engines/router"
+	"github.com/golang-collections/collections/set"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/engines/router"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 )
@@ -148,6 +149,53 @@ func checkDefaultTrafficRule(
 	}
 }
 
+func validateDefaultRouteTrafficRules(
+	sl validator.StructLevel,
+	fieldName string,
+	trafficRules models.TrafficRules,
+	defaultRouteID *string,
+) {
+	// If Traffic Rules are configured, DefaultRouteId should be present in all rules
+	if defaultRouteID != nil {
+		missingDefaultRouteDescription := fmt.Sprintf(
+			"Fallback Route (DefaultRouteId): '%s' should be associated to all Traffic Rules", *defaultRouteID)
+		for _, rule := range trafficRules {
+			containsDefaultRouteID := false
+			for _, route := range rule.Routes {
+				if route == *defaultRouteID {
+					containsDefaultRouteID = true
+					break
+				}
+			}
+			if !containsDefaultRouteID {
+				sl.ReportError(defaultRouteID, fieldName, fieldName, missingDefaultRouteDescription, "")
+			}
+		}
+	}
+}
+
+func checkDanglingRoutes(
+	sl validator.StructLevel,
+	fieldName string,
+	allRoutes models.Routes,
+	allRulesRoutes *set.Set,
+) {
+	danglingRoutesDescription :=
+		"These route(s) should be removed since they have no rule associated and will never be called: %s"
+	danglingRoutes := make([]string, 0)
+	for _, route := range allRoutes {
+		if !allRulesRoutes.Has(route.ID) {
+			danglingRoutes = append(danglingRoutes, route.ID)
+		}
+	}
+
+	if len(danglingRoutes) > 0 {
+		sl.ReportError(
+			"", fieldName, "danglingRoutes", fmt.Sprintf(danglingRoutesDescription, strings.Join(danglingRoutes, ",")), "",
+		)
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -175,24 +223,37 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate traffic rules
+	allRuleRoutesSet := set.New()
 	if routerConfig.TrafficRules != nil {
 		if len(routerConfig.TrafficRules) > 0 {
 			checkDefaultTrafficRule(sl, "DefaultTrafficRule", routerConfig.DefaultTrafficRule)
+			if routerConfig.DefaultTrafficRule != nil {
+				allRules := append(routerConfig.TrafficRules, &models.TrafficRule{
+					Name:   "default-traffic-rule",
+					Routes: routerConfig.DefaultTrafficRule.Routes,
+				})
+				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, routerConfig.DefaultRouteID)
+				for _, route := range routerConfig.DefaultTrafficRule.Routes {
+					allRuleRoutesSet.Insert(route)
+				}
+			}
 		}
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
+					allRuleRoutesSet.Insert(routeID)
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
 					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
-						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
-					}
-
-					if err := instance.VarWithValue(routeID, routerConfig.DefaultRouteID, "necsfield"); err != nil {
 						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 					}
 				}
 			}
 		}
+	}
+
+	// Validate dangling routes
+	if routerConfig.TrafficRules != nil && len(routerConfig.TrafficRules) > 0 {
+		checkDanglingRoutes(sl, "Routes", routerConfig.Routes, allRuleRoutesSet)
 	}
 }

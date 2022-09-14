@@ -59,6 +59,28 @@ const validateRuleNames = function(items) {
   return !!errors.length ? new yup.ValidationError(errors) : true;
 };
 
+const validateDanglingRoutes = function (items) {
+  const defaultTrafficRule = this.options.parent.default_traffic_rule;
+  let trafficRuleRoutes = [...new Set(this.options.parent.rules.map(rule => rule.routes).flat(1))];
+  if (defaultTrafficRule) {
+    trafficRuleRoutes = [...trafficRuleRoutes, ...defaultTrafficRule.routes]
+  }
+
+  const errors = [];
+  items.forEach((item, idx) => {
+    if (!trafficRuleRoutes.includes(item.id)) {
+      errors.push(
+        this.createError({
+          path: `${this.path}[${idx}].id`,
+          message: "This route should be removed since they have no Traffic Rule(s) associated and will never be called.",
+        })
+      );
+    }
+  });
+
+  return !!errors.length ? new yup.ValidationError(errors) : true;
+};
+
 const routerNameRegex = /^[a-z0-9-]*$/,
   durationRegex = /^[0-9]+(ms|s|m|h)$/,
   cpuRequestRegex = /^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$/,
@@ -284,7 +306,12 @@ const schema = (maxAllowedReplica) => [
         .array(routeSchema)
         .required()
         .unique("id", "Route Id must be unique")
-        .min(1, "At least one route should be configured"),
+        .min(1, "At least one route should be configured")
+        .when(['rules'], (rules, schema) => {
+          if (rules.length > 0) {
+            return schema.test("no-dangling-routes", validateDanglingRoutes);
+          }
+        }),
       default_traffic_rule: yup.object()
         .nullable()
         .when('rules', {

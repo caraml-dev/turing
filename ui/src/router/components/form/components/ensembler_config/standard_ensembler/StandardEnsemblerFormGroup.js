@@ -12,6 +12,7 @@ export const StandardEnsemblerFormGroup = ({
   experimentConfig = {},
   routes,
   rules,
+  default_traffic_rule,
   standardConfig,
   onChangeHandler,
   errors = {},
@@ -60,6 +61,7 @@ export const StandardEnsemblerFormGroup = ({
             routeId={standardConfig.fallback_response_route_id}
             routes={routes}
             rules={rules}
+            default_traffic_rule={default_traffic_rule}
             onChange={onChange("fallback_response_route_id")}
             errors={get(errors, "fallback_response_route_id")}
             panelTitle="Fallback"
