@@ -149,24 +149,27 @@ func checkDefaultTrafficRule(
 	}
 }
 
-func validateDefaultTrafficRuleDefaultRoute(
+func validateDefaultRouteTrafficRules(
 	sl validator.StructLevel,
 	fieldName string,
-	defaultTrafficRule *models.DefaultTrafficRule,
+	trafficRules models.TrafficRules,
 	defaultRouteID *string,
 ) {
-	// DefaultRouteId should be present in Default Traffic Rule
-	if defaultTrafficRule != nil && defaultRouteID != nil {
+	// If Traffic Rules are configured, DefaultRouteId should be present in all rules
+	if defaultRouteID != nil {
 		missingDefaultRouteDescription := fmt.Sprintf(
-			"Fallback Route (DefaultRouteId): '%s' should be associated to the Default Traffic Rule", *defaultRouteID)
-		containsDefaultRouteID := false
-		for _, route := range defaultTrafficRule.Routes {
-			if route == *defaultRouteID {
-				containsDefaultRouteID = true
+			"Fallback Route (DefaultRouteId): '%s' should be associated to all Traffic Rules", *defaultRouteID)
+		for _, rule := range trafficRules {
+			containsDefaultRouteID := false
+			for _, route := range rule.Routes {
+				if route == *defaultRouteID {
+					containsDefaultRouteID = true
+					break
+				}
 			}
-		}
-		if !containsDefaultRouteID {
-			sl.ReportError(defaultTrafficRule, fieldName, "defaultTrafficRule", missingDefaultRouteDescription, "")
+			if !containsDefaultRouteID {
+				sl.ReportError(defaultRouteID, fieldName, fieldName, missingDefaultRouteDescription, "")
+			}
 		}
 	}
 }
@@ -224,22 +227,19 @@ func validateRouterConfig(sl validator.StructLevel) {
 	if routerConfig.TrafficRules != nil {
 		if len(routerConfig.TrafficRules) > 0 {
 			checkDefaultTrafficRule(sl, "DefaultTrafficRule", routerConfig.DefaultTrafficRule)
-			validateDefaultTrafficRuleDefaultRoute(
-				sl, "DefaultTrafficRule", routerConfig.DefaultTrafficRule, routerConfig.DefaultRouteID)
 			if routerConfig.DefaultTrafficRule != nil {
+				allRules := append(routerConfig.TrafficRules, &models.TrafficRule{
+					Name:   "default-traffic-rule",
+					Routes: routerConfig.DefaultTrafficRule.Routes,
+				})
+				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, routerConfig.DefaultRouteID)
 				for _, route := range routerConfig.DefaultTrafficRule.Routes {
 					allRuleRoutesSet.Insert(route)
 				}
 			}
 		}
-		rulesContainDefaultRouteID := true
 		for ruleIdx, rule := range routerConfig.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
-			containsDefaultRouteID := false
-			// Consider success if DefaultRouteID is not provided
-			if routerConfig.DefaultRouteID == nil {
-				containsDefaultRouteID = true
-			}
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
 					allRuleRoutesSet.Insert(routeID)
@@ -247,25 +247,8 @@ func validateRouterConfig(sl validator.StructLevel) {
 					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
 						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 					}
-
-					// Check if DefaultRouteID is provided
-					if routerConfig.DefaultRouteID != nil && routeID == *routerConfig.DefaultRouteID {
-						containsDefaultRouteID = true
-					}
 				}
 			}
-			if !containsDefaultRouteID {
-				rulesContainDefaultRouteID = false
-			}
-		}
-		// If Traffic Rules are configured, DefaultRouteId should be present in all rules
-		if !rulesContainDefaultRouteID {
-			missingDefaultRouteDescription := fmt.Sprintf(
-				"Fallback Route (DefaultRouteId): '%s' should be associated for all Traffic Rules", *routerConfig.DefaultRouteID,
-			)
-			sl.ReportError(
-				"TrafficRules", "TrafficRules", "DefaultRouteID", missingDefaultRouteDescription, "",
-			)
 		}
 	}
 

@@ -343,7 +343,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules[0].Routes' Error:Field validation for 'Routes' failed on the 'notBlank' tag",
 				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
-					"'Fallback Route (DefaultRouteId): 'route-a' should be associated for all Traffic Rules' tag",
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
 			}, "\n"),
 		},
 		"failure | unsupported operator": {
@@ -504,14 +504,14 @@ func TestValidateTrafficRules(t *testing.T) {
 			},
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules[0].Name' Error:Field validation for 'Name' failed on the 'required' tag",
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
 				strings.Join([]string{
 					"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 					"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
 					"and have no trailing spaces and can contain letters, numbers, blank spaces and the",
 					"following symbols: -_()#$&:.' tag",
 				}, " "),
-				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
-					"'Fallback Route (DefaultRouteId): 'route-a' should be associated for all Traffic Rules' tag",
 			}, "\n"),
 		},
 		"failure | More than 64 characters": {
@@ -641,8 +641,8 @@ func TestValidateTrafficRules(t *testing.T) {
 				},
 			},
 			expectedError: strings.Join([]string{
-				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for 'DefaultTrafficRule' failed on the",
-				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to the Default Traffic Rule' tag",
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the",
+				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
 			}, " "),
 		},
 	}
