@@ -7,10 +7,10 @@ import { RulesConfigTable } from "./router_config_section/RulesConfigTable";
 
 export const RouterConfigSection = ({ config }) => {
   // Toggle buttons
-  const [routesSelected, setToggleRoutesSelected] = useState("Routes");
+  const [routesViewMode, setRoutesViewMode] = useState("Routes");
 
   const onChangeToggle = (optionId) => {
-    setToggleRoutesSelected(optionId);
+    setRoutesViewMode(optionId);
   };
 
   const toggleButtons = [
@@ -28,17 +28,17 @@ export const RouterConfigSection = ({ config }) => {
     <EuiFlexGroup direction="row" wrap>
       <EuiFlexItem grow={3}>
         <ConfigSectionPanel
-          title={routesSelected}
-          toggle={
+          title={routesViewMode}
+          appendTitle={
             <EuiButtonGroup
               legend="Group by routes or rules"
               options={toggleButtons}
-              idSelected={routesSelected}
+              idSelected={routesViewMode}
               onChange={(id) => onChangeToggle(id)}
             />
           }
         >
-          {routesSelected === "Routes" ? 
+          {routesViewMode === "Routes" ? 
             <RoutesConfigTable
               routes={config.routes}
               rules={config.rules}

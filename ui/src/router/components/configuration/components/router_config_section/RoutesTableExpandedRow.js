@@ -9,7 +9,6 @@ import {
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
 } from "@elastic/eui";
 
 const OrDivider = () => (
@@ -32,7 +31,7 @@ export const RoutesTableExpandedRow = ({ item, inDefaultTrafficRule }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        {item.rules && <EuiCallOut
+        {!!item.rules && <EuiCallOut
           color="warning"
           title="Turing will only send a request to this route if the request meets
             all the conditions from at least one of the rules shown below."
@@ -44,7 +43,7 @@ export const RoutesTableExpandedRow = ({ item, inDefaultTrafficRule }) => {
         <EuiFlexGroup direction="row" justifyContent="center" wrap>
           <EuiFlexItem style={{ maxWidth: "70%" }}>
             <EuiFlexGroup direction="column" gutterSize="none">
-              {item.rules && item.rules.map((rule, idx) => (
+              {!!item.rules && item.rules.map((rule, idx) => (
                 <EuiFlexItem key={`rule-${idx}`}>
                   <EuiCard title={rule.name} layout="horizontal">
                     <EuiHorizontalRule margin="xs" />
@@ -96,15 +95,15 @@ export const RoutesTableExpandedRow = ({ item, inDefaultTrafficRule }) => {
               ))}
               {inDefaultTrafficRule && (
                 <>
-                {item.rules && <OrDivider />}
+                {!!item.rules && <OrDivider />}
                 <EuiFlexItem key="default-rule">
                   <EuiCard
                     title="default-traffic-rule"
                     titleSize="xs"
                     description={
-                      <EuiText>
-                        This route is {item.rules && "also"} a part of the Default Rule. This route will receive the request if none of the routing rules' conditions are met.
-                      </EuiText>
+                      <>
+                        This route is {!!item.rules && "also"} a part of the Default Rule. This route will receive the request if none of the routing rules' conditions are met.
+                      </>
                     }
                     layout="horizontal"
                     display="warning"

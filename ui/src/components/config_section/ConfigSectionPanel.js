@@ -3,7 +3,7 @@ import { ConfigMultiSectionPanel } from "../config_multi_section_panel/ConfigMul
 
 export const ConfigSectionPanel = (props) => (
   <ConfigMultiSectionPanel
-    items={[{ title: props.title, toggle: props.toggle, children: props.children }]}
+    items={[{ title: props.title, appendTitle: props.appendTitle, children: props.children }]}
     className={props.className}
   />
 );
