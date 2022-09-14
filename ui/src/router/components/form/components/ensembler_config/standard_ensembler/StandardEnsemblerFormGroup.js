@@ -1,5 +1,5 @@
-import React, {useContext, useEffect} from "react";
-import {EuiFlexItem, EuiSpacer, EuiText} from "@elastic/eui";
+import React, { useContext, useEffect } from "react";
+import { EuiFlexItem, EuiSpacer, EuiText } from "@elastic/eui";
 
 import { get } from "../../../../../../components/form/utils";
 import { StandardEnsembler } from "../../../../../../services/ensembler";
@@ -24,8 +24,8 @@ const FallbackView = ({ text }) => (
 const StandardEnsemblerWithCustomExperimentEnginePanel = ({
   remoteUi,
   projectId,
-  config,
-  onChangeHandler,
+  routeNamePath,
+  onChange,
   errors,
 }) => {
   // Load component from remote host
@@ -40,8 +40,8 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
           name="./EditStandardEnsemblerConfig"
           fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}
           projectId={projectId}
-          config={config}
-          onChangeHandler={onChangeHandler}
+          routeNamePath={routeNamePath}
+          onChange={onChange}
           errors={errors}
         />
       </StandardEnsemblerLoaderComponent>
@@ -112,9 +112,9 @@ export const StandardEnsemblerFormGroup = ({
                 url: "http://localhost:3002/xp/remoteEntry.js"
               }}
               projectId={projectId}
-              config={experimentEngine.config}
-              onChangeHandler={onChangeHandler}
-              errors={errors}
+              routeNamePath={standardConfig.route_name_path}
+              onChange={onChange("route_name_path")}
+              errors={get(errors, "route_name_path")}
             />
           </EuiFlexItem>
         ) : (
