@@ -7,6 +7,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Type to represent the autoscaling metrics supported by Knative.
+// Ref: https://pkg.go.dev/knative.dev/serving/pkg/apis/autoscaling
+//      https://github.com/knative/serving/pull/11668
+
 type AutoscalingMetric string
 
 const (
