@@ -15,12 +15,14 @@ export const autoscalingPolicyOptions = [
     inputDisplay: "CPU",
     description: `Traditional CPU-based autoscaling.
                       When the specified target (%) is reached, a new replica will be added.`,
+    unit: "%",
   },
   {
     value: "memory",
     inputDisplay: "Memory",
     description: `Traditional memory-based autoscaling.
                       When the specified target (in Mi) is reached, a new replica will be added.`,
+    unit: "Mi",
   },
 ];
 

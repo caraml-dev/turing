@@ -89,6 +89,7 @@ export const AutoscalingPolicyPanel = ({
               name="memory"
               min={1}
               step={1}
+              append={selectedMetric.unit}
             />
           </EuiFormRow>
         </DescribedFormGroup>
