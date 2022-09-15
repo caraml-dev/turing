@@ -645,6 +645,122 @@ func TestValidateTrafficRules(t *testing.T) {
 				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
 			}, " "),
 		},
+		"failure | Overlapping Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
+				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
+				"(rule-a,rule-c).' tag",
+		},
+		"failure | Complex overlapping Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-b",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID", "SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b", "region-c"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+				{
+					Name: "rule-d",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
+				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
+				"(rule-a,rule-b), (rule-b,rule-c), (rule-b,rule-d).' tag",
+		},
 	}
 
 	for name, tt := range suite {

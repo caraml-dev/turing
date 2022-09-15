@@ -196,6 +196,81 @@ func checkDanglingRoutes(
 	}
 }
 
+func validateConditionOrthogonality(
+	sl validator.StructLevel,
+	fieldName string,
+	allRules models.TrafficRules,
+) {
+	trafficConditionsFieldMap := map[string][]string{}
+	trafficConditionsValueMap := map[string]map[string]*set.Set{}
+	for _, rule := range allRules {
+		trafficConditionsValueMap[rule.Name] = map[string]*set.Set{}
+		trafficConditionsFieldMap[rule.Name] = []string{}
+		for _, condition := range rule.Conditions {
+			conditionValues := []interface{}{}
+			for _, val := range condition.Values {
+				conditionValues = append(conditionValues, val)
+			}
+			trafficConditionsValueMap[rule.Name][condition.Field] = set.New(conditionValues...)
+			trafficConditionsFieldMap[rule.Name] = append(trafficConditionsFieldMap[rule.Name], condition.Field)
+		}
+	}
+
+	allErrors := []string{}
+	for idx, rule1 := range allRules {
+		rule1Fields, ok := trafficConditionsFieldMap[rule1.Name]
+		// Check that there are rule conditions
+		if ok {
+			// Check that the current rule and the other are orthogonal
+			rulesOverlap := true
+
+			for _, rule2 := range allRules[idx+1:] {
+				// Rules with same name should fail unique name validation
+				if rule1.Name == rule2.Name {
+					continue
+				}
+				for _, field := range rule1Fields {
+					isCurrValEmpty, isOtherValEmpty := false, false
+					currSet, ok := trafficConditionsValueMap[rule1.Name][field]
+					if !ok || currSet == nil || currSet.Len() == 0 {
+						isCurrValEmpty = true
+					}
+					otherSet, ok := trafficConditionsValueMap[rule2.Name][field]
+					if !ok || otherSet == nil || otherSet.Len() == 0 {
+						isOtherValEmpty = true
+					}
+
+					// If both values non-empty, check overlap.
+					// If only one of the values is empty, we can skip further checks.
+					// If both empty, nothing to do.
+					if !isCurrValEmpty && !isOtherValEmpty {
+						if currSet.Intersection(otherSet).Len() == 0 {
+							// At least one field value does not overlap, we can terminate the check for
+							// this other rule.
+							rulesOverlap = false
+							break
+						}
+					} else if !isCurrValEmpty || !isOtherValEmpty {
+						rulesOverlap = false
+						break
+					}
+				}
+
+				if rulesOverlap {
+					allErrors = append(allErrors, fmt.Sprintf("(%s,%s)", rule1.Name, rule2.Name))
+				}
+			}
+		}
+	}
+
+	if len(allErrors) != 0 {
+		errorMessage := fmt.Sprintf(
+			"Rules Orthogonality check failed, following pairs of rules are overlapping - %s.", strings.Join(allErrors, ", "),
+		)
+		sl.ReportError(allRules, fieldName, "TrafficRules", errorMessage, "")
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	routerConfig := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -255,5 +330,6 @@ func validateRouterConfig(sl validator.StructLevel) {
 	// Validate dangling routes
 	if routerConfig.TrafficRules != nil && len(routerConfig.TrafficRules) > 0 {
 		checkDanglingRoutes(sl, "Routes", routerConfig.Routes, allRuleRoutesSet)
+		validateConditionOrthogonality(sl, "TrafficRules", routerConfig.TrafficRules)
 	}
 }
