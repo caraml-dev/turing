@@ -22,20 +22,21 @@ func logTuringRouterRequestSummary(
 	ctx context.Context,
 	timestamp time.Time,
 	header metadata.MD,
-	body *upiv1.PredictValuesRequest,
+	body []byte,
 	mcRespCh <-chan grpcRouterResponse,
 ) {
+
 	// Create a new TuringResultLogEntry record with the context and request info
-	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, body.String())
+	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, string(body))
 
 	// Read incoming responses and prepare for logging
 	for resp := range mcRespCh {
 		// If error exists, add an error record
 		if resp.err != "" {
 			logEntry.AddResponse(resp.key, "", nil, resp.err)
-			continue
+		} else {
+			logEntry.AddResponse(resp.key, resp.body.String(), resultlog.FormatHeader(resp.header), "")
 		}
-		logEntry.AddResponse(resp.key, resp.body.String(), resultlog.FormatHeader(resp.header), "")
 	}
 
 	// Log the responses. If an error occurs in logging the result to the

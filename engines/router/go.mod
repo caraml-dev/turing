@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.1.1-0.20220906074605-cc45f839caa6
 	github.com/gojek/mlp v1.4.7
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.8
 	github.com/google/uuid v1.3.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
@@ -45,7 +46,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.2 // indirect
 	github.com/hashicorp/go-hclog v0.16.0 // indirect
@@ -88,4 +88,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/caraml-dev/turing/engines/experiment => ../experiment
+replace (
+	github.com/caraml-dev/turing/engines/experiment => ../experiment
+	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220915050901-6a36b12c45cf
+)

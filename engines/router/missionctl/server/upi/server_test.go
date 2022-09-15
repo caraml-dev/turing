@@ -28,7 +28,6 @@ var mockResponse = &upiv1.PredictValuesResponse{
 }
 
 func TestUPIServer_PredictValues(t *testing.T) {
-
 	tests := []struct {
 		name        string
 		request     *upiv1.PredictValuesRequest

@@ -63,7 +63,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	if req.Protocol() != protocol.GRPC {
 		// TODO need to handle for grpc
 		expPlan, expErr := r.experimentEngine.
-			GetTreatmentForRequest(req.Header(), req.Payload().([]byte), options)
+			GetTreatmentForRequest(req.Header(), req.Payload(), options)
 
 		// Create experiment response object
 		experimentResponse := experiment.NewResponse(expPlan, expErr)

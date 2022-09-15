@@ -114,7 +114,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		// test each rule asynchronously and write results into results array
 		go func(rule *TrafficSplittingStrategyRule, idx int) {
 			// TODO need to handle for grpc
-			if res, err := rule.TestRequest(req.Header(), req.Payload().([]byte)); err != nil {
+			if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
 				errCh <- err
 			} else {
 				results[idx] = res

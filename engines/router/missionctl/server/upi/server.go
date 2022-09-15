@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/proto"
 )
 
 const tracingComponentID = "grpc_handler"
@@ -121,8 +122,9 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 		}
 	}
 
+	requestByte, err := proto.Marshal(req)
 	fiberRequest := &fibergrpc.Request{
-		Message:  req,
+		Message:  requestByte,
 		Metadata: md,
 	}
 	resp, predictionErr := us.getPrediction(ctx, fiberRequest)
@@ -149,7 +151,7 @@ func (us *Server) getPrediction(
 				ctx,
 				time.Now(),
 				fiberRequest.Header(),
-				fiberRequest.Payload().(*upiv1.PredictValuesRequest),
+				fiberRequest.Payload(),
 				respCh)
 			close(respCh)
 		}()

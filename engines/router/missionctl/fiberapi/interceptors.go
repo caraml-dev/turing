@@ -96,7 +96,7 @@ func (i *ErrorLoggingInterceptor) AfterCompletion(
 					i.logger.Warnw("Route Error", "Component", cID,
 						"Turing Request", turingReqID,
 						"Status", resp.StatusCode(),
-						"Response", string(resp.Payload().([]byte)))
+						"Response", string(resp.Payload()))
 				}
 			}
 		}

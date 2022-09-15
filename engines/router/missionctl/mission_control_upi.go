@@ -66,7 +66,7 @@ func (us *missionControlUpi) Route(
 	if !resp.IsSuccess() {
 		return nil, &errors.TuringError{
 			Code:    resp.StatusCode(),
-			Message: string(resp.Payload().([]byte)),
+			Message: string(resp.Payload()),
 		}
 	}
 
@@ -79,14 +79,7 @@ func (us *missionControlUpi) Route(
 	}
 
 	var responseProto upiv1.PredictValuesResponse
-	payloadByte, err := proto.Marshal(grpcResponse.Payload().(proto.Message))
-	if err != nil {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to marshal payload"), protocol.GRPC,
-		)
-		return nil, turingError
-	}
-	err = proto.Unmarshal(payloadByte, &responseProto)
+	err := proto.Unmarshal(resp.Payload(), &responseProto)
 	if err != nil {
 		turingError = errors.NewTuringError(
 			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), protocol.GRPC,
