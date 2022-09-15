@@ -45,7 +45,7 @@ func TestDeployRouterWithRouteNamePathInStandardEnsembler(t *testing.T) {
 						response.StatusCode, string(responsePayload))
 					actualResponse := string(responsePayload)
 					expectedResponse := `{
-					  "version" : "control"
+					  "version" : "treatment-a"
 					}`
 					assert.JSONEq(t, expectedResponse, actualResponse)
 				})

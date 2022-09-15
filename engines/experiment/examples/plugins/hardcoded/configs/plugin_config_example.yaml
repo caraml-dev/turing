@@ -17,12 +17,10 @@ experiments:
         traffic: 0.85
         treatment_configuration:
           foo: bar
-          route_name: treatment-a
       treatment-1:
         traffic: 0.15
         treatment_configuration:
           bar: baz
-          route_name: control
 variables:
   '001':
     - name: client

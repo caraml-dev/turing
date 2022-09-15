@@ -145,7 +145,8 @@ func TestUpdateRouterInvalidConfig(t *testing.T) {
 			expectedResponse := `{
 			  "experiment": {
 				"configuration": {
-					"foo":"bar"
+					"foo":"bar",
+					"route_name":"treatment-a"
 				}
 			  },
 			  "route_responses": [
