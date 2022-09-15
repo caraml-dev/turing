@@ -29,7 +29,6 @@ strategy:
         app_version:
           field: appVer
           field_source: header
-    experiment_mappings: []
     route_name_path: policy.route_name
   type: fiber.DefaultTuringRoutingStrategy
 type: EAGER_ROUTER

@@ -28,6 +28,5 @@ strategy:
     - experiment: exp_exp_test_experiment_2
       route: route-2
       treatment: treatment
-    route_name_path: ""
   type: fiber.DefaultTuringRoutingStrategy
 type: EAGER_ROUTER

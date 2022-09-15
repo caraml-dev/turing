@@ -26,7 +26,6 @@ routes:
       - experiment: exp_exp_test_experiment_2
         route: route-2
         treatment: treatment
-      route_name_path: ""
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
 - id: traffic-split-0
@@ -59,7 +58,6 @@ routes:
       - experiment: exp_exp_test_experiment_2
         route: route-2
         treatment: treatment
-      route_name_path: ""
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
 - id: traffic-split-1
@@ -92,7 +90,6 @@ routes:
       - experiment: exp_exp_test_experiment_2
         route: route-2
         treatment: treatment
-      route_name_path: ""
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
 - id: traffic-split-2
@@ -125,7 +122,6 @@ routes:
       - experiment: exp_exp_test_experiment_2
         route: route-2
         treatment: treatment
-      route_name_path: ""
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
 strategy:
