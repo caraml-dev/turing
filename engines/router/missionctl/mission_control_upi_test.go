@@ -18,7 +18,6 @@ import (
 	fiberErrors "github.com/gojek/fiber/errors"
 	fibergrpc "github.com/gojek/fiber/grpc"
 	fiberhttp "github.com/gojek/fiber/http"
-	"github.com/golang/protobuf/proto"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/mock"
@@ -27,6 +26,7 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -275,7 +275,7 @@ func benchmarkGrpcRoute(rows int, cols int, b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		benchMarkUpiResp, _ = mc.Route(ctx, req)
+		benchMarkUpiResp, benchMarkUpiErr = mc.Route(ctx, req)
 	}
 }
 

@@ -123,6 +123,10 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 	}
 
 	requestByte, err := proto.Marshal(req)
+	if err != nil {
+		ctxLogger.Errorf("Could not marshal request into bytes: %v",
+			err.Error())
+	}
 	fiberRequest := &fibergrpc.Request{
 		Message:  requestByte,
 		Metadata: md,
