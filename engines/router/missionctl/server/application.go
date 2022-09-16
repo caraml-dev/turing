@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
@@ -15,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/soheilhy/cmux"
 
 	// Turing router will support these experiment runners: nop
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
@@ -58,8 +60,34 @@ func Run() {
 		if err != nil {
 			log.Glob().Panicf("Failed initializing Mission Control: %v", err)
 		}
-		s := upi.NewUPIServer(missionCtl, cfg.Port)
-		s.Run()
+
+		l, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+		if err != nil {
+			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
+		}
+
+		s := upi.NewUPIServer(missionCtl)
+		if cfg.AppConfig.CustomMetrics {
+			m := cmux.New(l)
+			grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+			httpL := m.Match(cmux.HTTP1Fast())
+
+			mux := http.NewServeMux()
+			mux.Handle("/metrics", promhttp.Handler())
+			httpS := &http.Server{Handler: mux}
+
+			go s.Run(grpcL)
+			go func() {
+				if err := httpS.Serve(httpL); err != nil {
+					log.Glob().Errorf("Failed to serve http server: %s", err)
+				}
+			}()
+			if err := m.Serve(); err != nil {
+				log.Glob().Errorf("Failed to serve cmux: %s", err)
+			}
+		} else {
+			s.Run(l)
+		}
 	case config.HTTP:
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControl(

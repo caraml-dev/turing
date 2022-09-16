@@ -2,6 +2,8 @@ package upi
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -64,7 +66,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			mockMc := &mocks.MissionControlUPI{}
 			mockMc.On("Route", mock.Anything, mock.Anything).Return(tt.mockReturn())
 
-			upiServer := NewUPIServer(mockMc, 50400)
+			upiServer := NewUPIServer(mockMc)
 			ctx := context.Background()
 			resp, err := upiServer.PredictValues(ctx, tt.request)
 			if tt.expectedErr != nil {
@@ -81,19 +83,17 @@ func TestNewUpiServer(t *testing.T) {
 	logger := zap.New(core)
 	log.SetGlobalLogger(logger.Sugar())
 
+	port := 50560
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		log.Glob().Panicf("Failed to listen on port: %v", port)
+	}
+
 	mockMc := &mocks.MissionControlUPI{}
-	upiServer := NewUPIServer(mockMc, 50400)
-	go upiServer.Run()
+	upiServer := NewUPIServer(mockMc)
+	go upiServer.Run(l)
 
 	// Wait for server to run and check that there are no error logs
 	time.Sleep(2 * time.Second)
 	require.Zero(t, logs.Len())
-
-	upiServer2 := NewUPIServer(mockMc, 50400)
-	go upiServer2.Run()
-
-	// Wait for server to run and expected error logs due to same port
-	time.Sleep(2 * time.Second)
-	require.Equal(t, 1, logs.Len())
-	require.Contains(t, logs.All()[0].Message, "Failed to listen on port")
 }

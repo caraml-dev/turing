@@ -2,7 +2,6 @@ package upi
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -33,25 +32,18 @@ type Server struct {
 	upiv1.UnimplementedUniversalPredictionServiceServer
 
 	missionControl missionctl.MissionControlUPI
-	port           int
 }
 
-func NewUPIServer(mc missionctl.MissionControlUPI, port int) *Server {
+func NewUPIServer(mc missionctl.MissionControlUPI) *Server {
 	return &Server{
 		missionControl: mc,
-		port:           port,
 	}
 }
 
-func (us *Server) Run() {
+func (us *Server) Run(listener net.Listener) {
 	s := grpc.NewServer()
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", us.port))
-	if err != nil {
-		log.Glob().Errorf("Failed to listen on port %d: %s", us.port, err)
-		return
-	}
 
 	errChan := make(chan error, 1)
 	stopChan := make(chan os.Signal, 1)

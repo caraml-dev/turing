@@ -74,4 +74,3 @@ __Note:__ The app uses the `in_forward` plugin to write data to a TCP socket.
     -H "X-B3-Traceid: 950f2de0b8430e9fa30ec88c39471716" \
     -d '{}'
 ```
-4. Grpc routes needs to be serving with reflection on, in order for UPI router to initialise successfully.
