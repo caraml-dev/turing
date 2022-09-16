@@ -491,8 +491,13 @@ func buildFiberConfigMap(
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {
-		propsMap["experiment_mappings"] = ver.Ensembler.StandardConfig.ExperimentMappings
-		propsMap["route_name_path"] = ver.Ensembler.StandardConfig.RouteNamePath
+		if ver.Ensembler.StandardConfig.ExperimentMappings != nil &&
+			len(ver.Ensembler.StandardConfig.ExperimentMappings) != 0 {
+			propsMap["experiment_mappings"] = ver.Ensembler.StandardConfig.ExperimentMappings
+		}
+		if ver.Ensembler.StandardConfig.RouteNamePath != "" {
+			propsMap["route_name_path"] = ver.Ensembler.StandardConfig.RouteNamePath
+		}
 	}
 
 	properties, err := json.Marshal(propsMap)
