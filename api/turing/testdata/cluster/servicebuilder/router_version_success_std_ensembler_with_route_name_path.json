@@ -108,7 +108,6 @@
     "id": 300,
     "type": "standard",
     "standard_config": {
-      "experiment_mappings": [],
       "route_name_path": "policy.route_name"
     }
   }
