@@ -28,9 +28,7 @@ func TestValidateEnsemblerStandardConfig(t *testing.T) {
 		"failure | experiment mappings and route name path undefined": {
 			input: models.EnsemblerStandardConfig{},
 			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
-				"failed on the 'required when RouteNamePath is not set' tag\n" +
-				"Key: 'EnsemblerStandardConfig.RouteNamePath' Error:Field validation for 'RouteNamePath' failed on " +
-				"the 'required when ExperimentMappings is not set' tag",
+				"failed on the 'required when RouteNamePath is not set' tag",
 		},
 		"failure | experiment mappings and route name path empty": {
 			input: models.EnsemblerStandardConfig{
@@ -38,27 +36,21 @@ func TestValidateEnsemblerStandardConfig(t *testing.T) {
 				RouteNamePath:      "",
 			},
 			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
-				"failed on the 'required when RouteNamePath is not set' tag\n" +
-				"Key: 'EnsemblerStandardConfig.RouteNamePath' Error:Field validation for 'RouteNamePath' failed on " +
-				"the 'required when ExperimentMappings is not set' tag",
+				"failed on the 'required when RouteNamePath is not set' tag",
 		},
 		"failure | experiment mappings empty and route name path undefined": {
 			input: models.EnsemblerStandardConfig{
 				ExperimentMappings: []models.ExperimentMapping{},
 			},
 			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
-				"failed on the 'required when RouteNamePath is not set' tag\n" +
-				"Key: 'EnsemblerStandardConfig.RouteNamePath' Error:Field validation for 'RouteNamePath' failed on " +
-				"the 'required when ExperimentMappings is not set' tag",
+				"failed on the 'required when RouteNamePath is not set' tag",
 		},
 		"failure | experiment mappings undefined and route name path empty": {
 			input: models.EnsemblerStandardConfig{
 				RouteNamePath: "",
 			},
 			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
-				"failed on the 'required when RouteNamePath is not set' tag\n" +
-				"Key: 'EnsemblerStandardConfig.RouteNamePath' Error:Field validation for 'RouteNamePath' failed on " +
-				"the 'required when ExperimentMappings is not set' tag",
+				"failed on the 'required when RouteNamePath is not set' tag",
 		},
 		"failure | experiment mappings and route name path defined": {
 			input: models.EnsemblerStandardConfig{
@@ -72,9 +64,7 @@ func TestValidateEnsemblerStandardConfig(t *testing.T) {
 				RouteNamePath: "route-1",
 			},
 			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
-				"failed on the 'excluded when RouteNamePath is set' tag\n" +
-				"Key: 'EnsemblerStandardConfig.RouteNamePath' Error:Field validation for 'RouteNamePath' " +
-				"failed on the 'excluded when ExperimentMappings is set' tag",
+				"failed on the 'excluded when RouteNamePath is set' tag",
 		},
 		"success | only experiment mappings defined": {
 			input: models.EnsemblerStandardConfig{

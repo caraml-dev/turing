@@ -55,15 +55,11 @@ func validateEnsemblerStandardConfig(sl validator.StructLevel) {
 	if (len(ensemblerStandardConfig.ExperimentMappings) == 0) && ensemblerStandardConfig.RouteNamePath == "" {
 		sl.ReportError(ensemblerStandardConfig.ExperimentMappings,
 			"ExperimentMappings", "ExperimentMappings", "required when RouteNamePath is not set", "")
-		sl.ReportError(ensemblerStandardConfig.RouteNamePath,
-			"RouteNamePath", "RouteNamePath", "required when ExperimentMappings is not set", "")
 	}
 	// Verify that the ExperimentMappings and RouteNamePath are not both set at the same time
 	if len(ensemblerStandardConfig.ExperimentMappings) > 0 && ensemblerStandardConfig.RouteNamePath != "" {
 		sl.ReportError(ensemblerStandardConfig.ExperimentMappings,
 			"ExperimentMappings", "ExperimentMappings", "excluded when RouteNamePath is set", "")
-		sl.ReportError(ensemblerStandardConfig.RouteNamePath,
-			"RouteNamePath", "RouteNamePath", "excluded when ExperimentMappings is set", "")
 	}
 }
 
