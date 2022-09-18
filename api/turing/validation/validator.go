@@ -201,37 +201,33 @@ func validateConditionOrthogonality(
 	fieldName string,
 	allRules models.TrafficRules,
 ) {
-	trafficConditionsFieldMap := map[string][]string{}
 	trafficConditionsValueMap := map[string]map[string]*set.Set{}
 	for _, rule := range allRules {
 		trafficConditionsValueMap[rule.Name] = map[string]*set.Set{}
-		trafficConditionsFieldMap[rule.Name] = []string{}
 		for _, condition := range rule.Conditions {
 			conditionValues := []interface{}{}
 			for _, val := range condition.Values {
 				conditionValues = append(conditionValues, val)
 			}
 			trafficConditionsValueMap[rule.Name][condition.Field] = set.New(conditionValues...)
-			trafficConditionsFieldMap[rule.Name] = append(trafficConditionsFieldMap[rule.Name], condition.Field)
 		}
 	}
 
 	allErrors := []string{}
 	for idx, rule1 := range allRules {
-		rule1Fields, ok := trafficConditionsFieldMap[rule1.Name]
+		rule1Fields, ok := trafficConditionsValueMap[rule1.Name]
 		// Check that there are rule conditions
 		if ok {
 			// Check that the current rule and the other are orthogonal
 			rulesOverlap := true
 
 			for _, rule2 := range allRules[idx+1:] {
-				// Rules with same name should fail unique name validation
+				// Rules with same name should be skipped for orthogonality checks since they will fail unique name validation
 				if rule1.Name == rule2.Name {
 					continue
 				}
-				for _, field := range rule1Fields {
+				for field, currSet := range rule1Fields {
 					isCurrValEmpty, isOtherValEmpty := false, false
-					currSet, ok := trafficConditionsValueMap[rule1.Name][field]
 					if !ok || currSet == nil || currSet.Len() == 0 {
 						isCurrValEmpty = true
 					}
@@ -327,7 +323,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 		}
 	}
 
-	// Validate dangling routes
+	// Validate dangling routes and traffic rules orthogonality checks
 	if routerConfig.TrafficRules != nil && len(routerConfig.TrafficRules) > 0 {
 		checkDanglingRoutes(sl, "Routes", routerConfig.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", routerConfig.TrafficRules)

@@ -308,6 +308,85 @@ func TestValidateTrafficRules(t *testing.T) {
 				},
 			},
 		},
+		"success | valid complex Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-b",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"VN"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+				{
+					Name: "rule-d",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-c"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+		},
 		"failure | empty conditions": {
 			routes:             models.Routes{routeA, routeB},
 			defaultRouteID:     &routeAID,
