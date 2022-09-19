@@ -2352,7 +2352,6 @@ components:
             $ref: '#/components/schemas/EnsemblerStandardConfig_experiment_mappings'
           type: array
         route_name_path:
-          pattern: ^[\w\-]*(?:\.[\w\-]+)*$
           type: string
       type: object
     EnsemblerDockerConfig:

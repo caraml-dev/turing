@@ -818,7 +818,6 @@ components:
                 example: "route-1"
         route_name_path:
           type: "string"
-          pattern: '^[\w\-]*(?:\.[\w\-]+)*$'
 
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"
