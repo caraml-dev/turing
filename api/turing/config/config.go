@@ -228,7 +228,6 @@ type KubernetesLabelConfigs struct {
 // KnativeServiceDefaults captures some of the configurable defaults specific to
 // Knative services
 type KnativeServiceDefaults struct {
-	TargetConcurrency               int
 	QueueProxyResourcePercentage    int
 	UserContainerLimitRequestFactor float64
 }
@@ -474,7 +473,6 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::MaxCPU", "4")
 	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
 
-	v.SetDefault("KnativeServiceDefaults::TargetConcurrency", "1")
 	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
 	v.SetDefault("KnativeServiceDefaults::UserContainerLimitRequestFactor", "1")
 

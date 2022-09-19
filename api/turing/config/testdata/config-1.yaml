@@ -15,7 +15,6 @@ DeployConfig:
   MaxCPU: 500m
   MaxMemory: 4000Mi
 KnativeServiceDefaults:
-  TargetConcurrency: 2
   QueueProxyResourcePercentage: 20
   UserContainerLimitRequestFactor: 1.25
 RouterDefaults:

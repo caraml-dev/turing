@@ -27,14 +27,7 @@ const (
 	readinessProbeType probeType = "ReadinessProbe"
 )
 
-// NameValuePair captures a pair of name and value
-// TODO: DATA-2094: This may no longer be necessary
-type NameValuePair struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-// BaseService defines the common properties of services that can be speficied
+// BaseService defines the common properties of services that can be specified
 // for its deployment by the cluster controller
 type BaseService struct {
 	Name      string `json:"name"`

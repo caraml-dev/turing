@@ -23,7 +23,7 @@ const MerlinRouteId = ({ modelId, routeId }) => {
   );
 };
 
-const RouteId = ({ route }) => {
+export const RouteId = ({ route }) => {
   return route.annotations && route.annotations[ANNOTATIONS_MERLIN_MODEL_ID] ? (
     <MerlinRouteId
       routeId={route.id}
@@ -34,7 +34,7 @@ const RouteId = ({ route }) => {
   );
 };
 
-export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
+export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId, defaultTrafficRule }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
 
   const toggleDetails = (item) => () => {
@@ -43,7 +43,7 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       itemIdToExpandedRowMapValues[item.id] = (
-        <RoutesTableExpandedRow item={item} />
+        <RoutesTableExpandedRow item={item} inDefaultTrafficRule={!!defaultTrafficRule && defaultTrafficRule["routes"].includes(item.id)} />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -53,8 +53,8 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
     const routeRules = rules.reduce((acc, rule) => {
       rule.routes.forEach((route) => {
         !!acc[route]
-          ? (acc[route] = [...acc[route], rule.conditions])
-          : (acc[route] = [rule.conditions]);
+          ? (acc[route] = [...acc[route], {name: rule.name, conditions: rule.conditions}])
+          : (acc[route] = [{name: rule.name, conditions: rule.conditions}]);
       });
       return acc;
     }, {});
@@ -112,19 +112,15 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId }) => {
       actions: [
         {
           render: (item) =>
-            !!item.rules ? (
-              <EuiToolTip content="Show traffic rules">
-                <EuiButtonIcon
-                  size="s"
-                  className="euiIconButton--action"
-                  iconType="logstashIf"
-                  onClick={toggleDetails(item)}
-                  aria-label="Remove data field"
-                />
-              </EuiToolTip>
-            ) : (
-              <div />
-            ),
+            <EuiToolTip content="Show traffic rules">
+              <EuiButtonIcon
+                size="s"
+                className="euiIconButton--action"
+                iconType="logstashIf"
+                onClick={toggleDetails(item)}
+                aria-label="Remove data field"
+              />
+            </EuiToolTip>
         },
       ],
     },

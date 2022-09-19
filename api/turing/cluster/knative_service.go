@@ -12,20 +12,20 @@ import (
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// Default values for Knative related resources
-const KnativeServiceLabelKey = "serving.knative.dev/service"
-const KnativeUserContainerName = "user-container"
+const (
+	AutoscalingClassHPA          string = "hpa.autoscaling.knative.dev"
+	AutoscalingClassKPA          string = "kpa.autoscaling.knative.dev"
+	KnativeServiceLabelKey       string = "serving.knative.dev/service"
+	KnativeUserContainerName     string = "user-container"
+	DefaultRequestTimeoutSeconds int64  = 30
+)
 
-// Define default values used in the creation of the knative service
-var knativeSvcDefaults = struct {
-	// AutoscalingClass holds the name of the default knative autoscaling class (Knative Pod Autoscaler)
-	AutoscalingClass string
-	// RequestTimeoutSeconds is the the max duration the instance is allowed for responding
-	// to requests
-	RequestTimeoutSeconds int
-}{
-	AutoscalingClass:      "kpa.autoscaling.knative.dev",
-	RequestTimeoutSeconds: 30,
+// Autoscaling class values to be used, according to the metric
+var autoscalingMetricClassMap = map[string]string{
+	"concurrency": AutoscalingClassKPA,
+	"rps":         AutoscalingClassKPA,
+	"cpu":         AutoscalingClassHPA,
+	"memory":      AutoscalingClassHPA,
 }
 
 // KnativeService defines the properties for Knative services
@@ -36,9 +36,10 @@ type KnativeService struct {
 	ContainerPort  int32 `json:"containerPort"`
 
 	// Autoscaling properties
-	MinReplicas       int `json:"minReplicas"`
-	MaxReplicas       int `json:"maxReplicas"`
-	TargetConcurrency int `json:"targetConcurrency"`
+	MinReplicas       int    `json:"minReplicas"`
+	MaxReplicas       int    `json:"maxReplicas"`
+	AutoscalingMetric string `json:"autoscalingMetric"`
+	AutoscalingTarget string `json:"autoscalingTarget"`
 
 	// Resource properties
 	QueueProxyResourcePercentage    int     `json:"queueProxyResourcePercentage"`
@@ -91,14 +92,15 @@ func (cfg *KnativeService) buildSvcSpec(
 	labels map[string]string,
 ) *knservingv1.ServiceSpec {
 	// Set max timeout for responding to requests
-	timeout := int64(knativeSvcDefaults.RequestTimeoutSeconds)
+	timeout := DefaultRequestTimeoutSeconds
 
 	// Build annotations, set target concurrency of 1
 	annotations := map[string]string{
 		"autoscaling.knative.dev/minScale": strconv.Itoa(cfg.MinReplicas),
 		"autoscaling.knative.dev/maxScale": strconv.Itoa(cfg.MaxReplicas),
-		"autoscaling.knative.dev/target":   strconv.Itoa(cfg.TargetConcurrency),
-		"autoscaling.knative.dev/class":    knativeSvcDefaults.AutoscalingClass,
+		"autoscaling.knative.dev/metric":   cfg.AutoscalingMetric,
+		"autoscaling.knative.dev/target":   cfg.AutoscalingTarget,
+		"autoscaling.knative.dev/class":    autoscalingMetricClassMap[cfg.AutoscalingMetric],
 	}
 
 	if cfg.QueueProxyResourcePercentage > 0 {

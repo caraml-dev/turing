@@ -1,9 +1,15 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
+import { useToggle } from "@gojek/mlp-ui";
 import { Panel } from "../Panel";
 import {
   EuiButton,
+  EuiDragDropContext,
+  euiDragDropReorder,
+  EuiDraggable,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -13,17 +19,26 @@ import { get } from "../../../../../components/form/utils";
 import { RulesPanelFlyout } from "./RulesPanelFlyout";
 import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
-import { newRule } from "../../../../../services/router/TuringRouter";
+import { newDefaultRule, newRule } from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
+export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandler, rules_errors = {}, default_traffic_rule_errors = {} }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
     onChange("rules")([...rules, newRule()]);
+    // Default rule should only be added when there are custom rules
+    if (!default_traffic_rule) {
+      onChange("default_traffic_rule")(newDefaultRule());
+    }
   };
 
   const onDeleteRule = (idx) => () => {
     rules.splice(idx, 1);
+    
+    // If no custom rule left, remove default rule
+    if (rules.length === 0) {
+      onChange("default_traffic_rule")(null);
+    }
     onChange("rules")(rules);
   };
 
@@ -33,14 +48,25 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
     </EuiButton>
   );
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isFlyoutVisible, toggleIsFlyoutVisible] = useToggle();
+
+  const onDragEnd = ({ source, destination }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(
+        rules,
+        source.index,
+        destination.index
+      );
+      onChange("rules")(items);
+    }
+  };
 
   return (
     <Panel
       title={
         <Fragment>
           Traffic Rules{" "}
-          <EuiLink color="ghost" onClick={() => setIsFlyoutVisible(true)}>
+          <EuiLink color="ghost" onClick={() => toggleIsFlyoutVisible()}>
             <EuiIcon
               type="questionInCircle"
               color="subdued"
@@ -50,17 +76,43 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
         </Fragment>
       }>
       <EuiFlexGroup direction="column" gutterSize="s">
+        {
+          rules.length > 0 &&
+            <EuiFlexItem key="default-route">
+              <RuleCard
+                isDefault={true}
+                rule={default_traffic_rule}
+                routes={routes}
+                onChangeHandler={onChange("default_traffic_rule")}
+                onDelete={null}
+                errors={default_traffic_rule_errors}
+              />
+              <EuiHorizontalRule margin="xs" />
+            </EuiFlexItem>
+        }
+        <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m">
         {rules.map((rule, idx) => (
-          <EuiFlexItem key={`rule-${idx}`}>
-            <RuleCard
-              rule={rule}
-              routes={routes}
-              onChangeHandler={onChange(`rules.${idx}`)}
-              onDelete={onDeleteRule(idx)}
-              errors={get(errors, `${idx}`)}
-            />
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
+          <EuiDraggable
+            key={`${idx}`}
+            index={idx}
+            draggableId={`${idx}`}
+            customDragHandle={true}
+            disableInteractiveElementBlocking>
+            {(provided) => (
+            <EuiFlexItem key={`${idx}`}>
+              <RuleCard
+                rule={rule}
+                routes={routes}
+                onChangeHandler={onChange(`rules.${idx}`)}
+                onDelete={onDeleteRule(idx)}
+                errors={get(rules_errors, `${idx}`)}
+                dragHandleProps={provided.dragHandleProps}
+              />
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            )}
+          </EuiDraggable>
         ))}
         <EuiFlexItem>
           {routes.length < 2 ? (
@@ -71,10 +123,12 @@ export const RulesPanel = ({ rules, routes, onChangeHandler, errors = {} }) => {
             addRuleButton
           )}
         </EuiFlexItem>
+        </EuiDroppable>
+        </EuiDragDropContext>
       </EuiFlexGroup>
 
       {isFlyoutVisible && (
-        <RulesPanelFlyout onClose={() => setIsFlyoutVisible(false)} />
+        <RulesPanelFlyout onClose={() => toggleIsFlyoutVisible()} />
       )}
     </Panel>
   );

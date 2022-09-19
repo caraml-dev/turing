@@ -56,7 +56,6 @@ type ClusterServiceBuilder interface {
 		project *mlp.Project,
 		envType string,
 		secretName string,
-		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
@@ -65,7 +64,6 @@ type ClusterServiceBuilder interface {
 		project *mlp.Project,
 		envType string,
 		secretName string,
-		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
@@ -78,7 +76,6 @@ type ClusterServiceBuilder interface {
 		routerDefaults *config.RouterDefaults,
 		sentryEnabled bool,
 		sentryDSN string,
-		knativeTargetConcurrency int,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
 	) (*cluster.KnativeService, error)
@@ -132,7 +129,6 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
-	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -198,7 +194,8 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		ContainerPort:                   int32(enricher.Port),
 		MinReplicas:                     enricher.ResourceRequest.MinReplica,
 		MaxReplicas:                     enricher.ResourceRequest.MaxReplica,
-		TargetConcurrency:               knativeTargetConcurrency,
+		AutoscalingMetric:               string(enricher.AutoscalingPolicy.Metric),
+		AutoscalingTarget:               enricher.AutoscalingPolicy.Target,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})
@@ -211,7 +208,6 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	project *mlp.Project,
 	envType string,
 	secretName string,
-	knativeTargetConcurrency int,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -278,7 +274,8 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		ContainerPort:                   int32(docker.Port),
 		MinReplicas:                     docker.ResourceRequest.MinReplica,
 		MaxReplicas:                     docker.ResourceRequest.MaxReplica,
-		TargetConcurrency:               knativeTargetConcurrency,
+		AutoscalingMetric:               string(docker.AutoscalingPolicy.Metric),
+		AutoscalingTarget:               docker.AutoscalingPolicy.Target,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})

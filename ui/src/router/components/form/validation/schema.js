@@ -6,9 +6,10 @@ import {
   fieldSchema,
   fieldSourceSchema,
 } from "../../../../components/validation";
+import { autoscalingPolicyMetrics } from "../components/autoscaling_policy/typeOptions";
 
-yup.addMethod(yup.array, "unique", function (propertyPath, message) {
-  return this.test("unique", message, function (list) {
+yup.addMethod(yup.array, "unique", function(propertyPath, message) {
+  return this.test("unique", message, function(list) {
     const errors = [];
 
     list.forEach((item, index) => {
@@ -58,6 +59,28 @@ const validateRuleNames = function(items) {
   return !!errors.length ? new yup.ValidationError(errors) : true;
 };
 
+const validateDanglingRoutes = function (items) {
+  const defaultTrafficRule = this.options.parent.default_traffic_rule;
+  let trafficRuleRoutes = [...new Set(this.options.parent.rules.map(rule => rule.routes).flat(1))];
+  if (defaultTrafficRule) {
+    trafficRuleRoutes = [...trafficRuleRoutes, ...defaultTrafficRule.routes]
+  }
+
+  const errors = [];
+  items.forEach((item, idx) => {
+    if (!trafficRuleRoutes.includes(item.id)) {
+      errors.push(
+        this.createError({
+          path: `${this.path}[${idx}].id`,
+          message: "This route should be removed since they have no Traffic Rule(s) associated and will never be called.",
+        })
+      );
+    }
+  });
+
+  return !!errors.length ? new yup.ValidationError(errors) : true;
+};
+
 const routerNameRegex = /^[a-z0-9-]*$/,
   durationRegex = /^[0-9]+(ms|s|m|h)$/,
   cpuRequestRegex = /^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$/,
@@ -87,7 +110,7 @@ const routeSchema = yup.object().shape({
 
 const validRouteSchema = yup
   .mixed()
-  .test("valid-route", "Valid route is required", function (value) {
+  .test("valid-route", "Valid route is required", function(value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
     return routes.map((r) => r.id).includes(value);
@@ -104,6 +127,13 @@ const ruleConditionSchema = yup.object().shape({
     .required("At least one value should be provided"),
 });
 
+const defaultTrafficRuleSchema = yup.object().shape({
+  routes: yup
+    .array()
+    .of(validRouteSchema)
+    .min(1, "At least one route should be attached to the rule"),
+});
+
 const trafficRuleSchema = yup.object().shape({
   name: yup
     .string()
@@ -111,7 +141,8 @@ const trafficRuleSchema = yup.object().shape({
     .matches(
       trafficRuleNameRegex,
       "Name must begin with an alphanumeric character and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$%&:."
-    ),
+    )
+    .test('is-not-default-name', "default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.", (value) => value !== "default-traffic-rule"),
   conditions: yup
     .array()
     .of(ruleConditionSchema)
@@ -166,6 +197,11 @@ const resourceRequestSchema = (maxAllowedReplica) =>
       ),
   });
 
+const autoscalingPolicySchema = yup.object().shape({
+  metric: yup.string().required("Valid metric must be chosen").oneOf(autoscalingPolicyMetrics, "Valid autoscaling metric type should be chosen"),
+  target: yup.string().required("Valid target should be specified").matches(/^[0-9]+$/, "Must be a number"),
+});
+
 const enricherSchema = yup.object().shape({
   type: yup
     .mixed()
@@ -192,6 +228,7 @@ const dockerDeploymentSchema = (maxAllowedReplica) =>
     timeout: timeoutSchema.required("Timeout is required"),
     env: yup.array(environmentVariableSchema),
     resource_request: resourceRequestSchema(maxAllowedReplica),
+    autoscaling_policy: autoscalingPolicySchema,
   });
 
 const pyfuncDeploymentSchema = (maxAllowedReplica) =>
@@ -200,6 +237,7 @@ const pyfuncDeploymentSchema = (maxAllowedReplica) =>
     ensembler_id: yup.number().integer().required("Ensembler ID is required"),
     timeout: timeoutSchema.required("Timeout is required"),
     resource_request: resourceRequestSchema(maxAllowedReplica),
+    autoscaling_policy: autoscalingPolicySchema,
     env: yup.array(environmentVariableSchema),
   });
 
@@ -263,13 +301,25 @@ const schema = (maxAllowedReplica) => [
     environment_name: yup.string().required("Environment is required"),
     config: yup.object().shape({
       timeout: timeoutSchema.required("Timeout is required"),
+      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
       routes: yup
         .array(routeSchema)
         .required()
         .unique("id", "Route Id must be unique")
-        .min(1, "At least one route should be configured"),
-      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
+        .min(1, "At least one route should be configured")
+        .when(['rules'], (rules, schema) => {
+          if (rules.length > 0) {
+            return schema.test("no-dangling-routes", validateDanglingRoutes);
+          }
+        }),
+      default_traffic_rule: yup.object()
+        .nullable()
+        .when('rules', {
+          is: rules => rules.length > 0,
+          then: defaultTrafficRuleSchema
+      }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
+      autoscaling_policy: autoscalingPolicySchema,
     }),
   }),
   yup.object().shape({
@@ -285,14 +335,14 @@ const schema = (maxAllowedReplica) => [
           engine === "nop"
             ? schema
             : yup
-                .mixed()
-                .when("$getEngineProperties", (getEngineProperties) => {
-                  const engineProps = getEngineProperties(engine);
-                  return engineProps.type === "standard"
-                    ? standardExperimentConfigSchema(engineProps)
-                    : engineProps.custom_experiment_manager_config
-                        ?.parsed_experiment_config_schema || schema;
-                })
+              .mixed()
+              .when("$getEngineProperties", (getEngineProperties) => {
+                const engineProps = getEngineProperties(engine);
+                return engineProps.type === "standard"
+                  ? standardExperimentConfigSchema(engineProps)
+                  : engineProps.custom_experiment_manager_config
+                    ?.parsed_experiment_config_schema || schema;
+              })
         ),
       }),
     }),

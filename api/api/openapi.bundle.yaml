@@ -1851,12 +1851,20 @@ components:
       type: string
     RouterVersion:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         image: image
+        autoscaling_policy:
+          metric: concurrency
+          target: target
         created_at: 2000-01-23T04:56:07.000+00:00
         rules:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -1871,6 +1879,7 @@ components:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -1905,6 +1914,9 @@ components:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
+          autoscaling_policy:
+            metric: concurrency
+            target: target
           updated_at: 2000-01-23T04:56:07.000+00:00
           port: 5
           created_at: 2000-01-23T04:56:07.000+00:00
@@ -1950,6 +1962,9 @@ components:
         id: 0
         ensembler:
           pyfunc_config:
+            autoscaling_policy:
+              metric: concurrency
+              target: target
             project_id: 7
             ensembler_id: 9
             resource_request:
@@ -1965,6 +1980,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1
               route: route-1
@@ -1979,6 +1995,9 @@ components:
             service_account: secret-name-for-google-service-account
             image: image
             endpoint: endpoint
+            autoscaling_policy:
+              metric: concurrency
+              target: target
             port: 2
             resource_request:
               min_replica: 0
@@ -2021,6 +2040,8 @@ components:
           $ref: '#/components/schemas/ExperimentConfig'
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
+        autoscaling_policy:
+          $ref: '#/components/schemas/AutoscalingPolicy'
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
@@ -2039,6 +2060,8 @@ components:
           items:
             $ref: '#/components/schemas/TrafficRule'
           type: array
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
       type: object
     RouterVersionStatus:
       default: pending
@@ -2090,6 +2113,22 @@ components:
           type: string
         memory_request:
           pattern: ^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$
+          type: string
+      type: object
+    AutoscalingPolicy:
+      example:
+        metric: concurrency
+        target: target
+      properties:
+        metric:
+          enum:
+          - concurrency
+          - cpu
+          - memory
+          - rps
+          type: string
+        target:
+          pattern: ^\d+$
           type: string
       type: object
     LogLevel:
@@ -2156,6 +2195,9 @@ components:
         service_account: secret-name-for-google-service-account
         image: image
         endpoint: endpoint
+        autoscaling_policy:
+          metric: concurrency
+          target: target
         updated_at: 2000-01-23T04:56:07.000+00:00
         port: 5
         created_at: 2000-01-23T04:56:07.000+00:00
@@ -2179,6 +2221,8 @@ components:
           type: string
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
+        autoscaling_policy:
+          $ref: '#/components/schemas/AutoscalingPolicy'
         endpoint:
           type: string
         timeout:
@@ -2214,6 +2258,9 @@ components:
     RouterEnsemblerConfig:
       example:
         pyfunc_config:
+          autoscaling_policy:
+            metric: concurrency
+            target: target
           project_id: 7
           ensembler_id: 9
           resource_request:
@@ -2229,6 +2276,7 @@ components:
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
+          route_name_path: route_name_path
           experiment_mappings:
           - treatment: treatment-1
             route: route-1
@@ -2243,6 +2291,9 @@ components:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
+          autoscaling_policy:
+            metric: concurrency
+            target: target
           port: 2
           resource_request:
             min_replica: 0
@@ -2286,6 +2337,7 @@ components:
     EnsemblerStandardConfig:
       description: ensembler config when ensembler type is standard
       example:
+        route_name_path: route_name_path
         experiment_mappings:
         - treatment: treatment-1
           route: route-1
@@ -2299,8 +2351,8 @@ components:
           items:
             $ref: '#/components/schemas/EnsemblerStandardConfig_experiment_mappings'
           type: array
-      required:
-      - experiment_mappings
+        route_name_path:
+          type: string
       type: object
     EnsemblerDockerConfig:
       description: ensembler config when ensembler type is docker
@@ -2308,6 +2360,9 @@ components:
         service_account: secret-name-for-google-service-account
         image: image
         endpoint: endpoint
+        autoscaling_policy:
+          metric: concurrency
+          target: target
         port: 2
         resource_request:
           min_replica: 0
@@ -2327,6 +2382,8 @@ components:
           type: string
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
+        autoscaling_policy:
+          $ref: '#/components/schemas/AutoscalingPolicy'
         endpoint:
           type: string
         timeout:
@@ -2354,6 +2411,9 @@ components:
     EnsemblerPyfuncConfig:
       description: ensembler config when ensembler type is pyfunc
       example:
+        autoscaling_policy:
+          metric: concurrency
+          target: target
         project_id: 7
         ensembler_id: 9
         resource_request:
@@ -2375,6 +2435,8 @@ components:
           type: integer
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
+        autoscaling_policy:
+          $ref: '#/components/schemas/AutoscalingPolicy'
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
@@ -2390,10 +2452,10 @@ components:
       type: object
     TrafficRule:
       example:
-        name: name
         routes:
         - routes
         - routes
+        name: name
         conditions:
         - field: field
           values:
@@ -2419,8 +2481,8 @@ components:
             type: string
           type: array
       required:
-      - name
       - conditions
+      - name
       - routes
       type: object
     TrafficRuleCondition:
@@ -2451,14 +2513,36 @@ components:
       - operator
       - values
       type: object
+    DefaultTrafficRule:
+      example:
+        routes:
+        - routes
+        - routes
+      properties:
+        routes:
+          description: List of IDs of the routes, that should be activated by this
+            rule
+          items:
+            type: string
+          type: array
+      required:
+      - routes
+      type: object
     RouterConfig:
       example:
         name: name
         config:
+          default_traffic_rule:
+            routes:
+            - routes
+            - routes
           enricher:
             service_account: secret-name-for-google-service-account
             image: image
             endpoint: endpoint
+            autoscaling_policy:
+              metric: concurrency
+              target: target
             updated_at: 2000-01-23T04:56:07.000+00:00
             port: 5
             created_at: 2000-01-23T04:56:07.000+00:00
@@ -2485,11 +2569,15 @@ components:
             id: id
             type: type
             timeout: timeout
+          autoscaling_policy:
+            metric: concurrency
+            target: target
           default_route_id: default_route_id
           rules:
           - routes:
             - routes
             - routes
+            name: name
             conditions:
             - field: field
               values:
@@ -2504,6 +2592,7 @@ components:
           - routes:
             - routes
             - routes
+            name: name
             conditions:
             - field: field
               values:
@@ -2522,6 +2611,9 @@ components:
             cpu_request: cpu_request
           ensembler:
             pyfunc_config:
+              autoscaling_policy:
+                metric: concurrency
+                target: target
               project_id: 7
               ensembler_id: 9
               resource_request:
@@ -2537,6 +2629,7 @@ components:
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
+              route_name_path: route_name_path
               experiment_mappings:
               - treatment: treatment-1
                 route: route-1
@@ -2551,6 +2644,9 @@ components:
               service_account: secret-name-for-google-service-account
               image: image
               endpoint: endpoint
+              autoscaling_policy:
+                metric: concurrency
+                target: target
               port: 2
               resource_request:
                 min_replica: 0
@@ -2592,10 +2688,17 @@ components:
       type: object
     RouterVersionConfig:
       example:
+        default_traffic_rule:
+          routes:
+          - routes
+          - routes
         enricher:
           service_account: secret-name-for-google-service-account
           image: image
           endpoint: endpoint
+          autoscaling_policy:
+            metric: concurrency
+            target: target
           updated_at: 2000-01-23T04:56:07.000+00:00
           port: 5
           created_at: 2000-01-23T04:56:07.000+00:00
@@ -2622,11 +2725,15 @@ components:
           id: id
           type: type
           timeout: timeout
+        autoscaling_policy:
+          metric: concurrency
+          target: target
         default_route_id: default_route_id
         rules:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -2641,6 +2748,7 @@ components:
         - routes:
           - routes
           - routes
+          name: name
           conditions:
           - field: field
             values:
@@ -2659,6 +2767,9 @@ components:
           cpu_request: cpu_request
         ensembler:
           pyfunc_config:
+            autoscaling_policy:
+              metric: concurrency
+              target: target
             project_id: 7
             ensembler_id: 9
             resource_request:
@@ -2674,6 +2785,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1
               route: route-1
@@ -2688,6 +2800,9 @@ components:
             service_account: secret-name-for-google-service-account
             image: image
             endpoint: endpoint
+            autoscaling_policy:
+              metric: concurrency
+              target: target
             port: 2
             resource_request:
               min_replica: 0
@@ -2724,10 +2839,14 @@ components:
           type: array
         default_route_id:
           type: string
+        default_traffic_rule:
+          $ref: '#/components/schemas/DefaultTrafficRule'
         experiment_engine:
           $ref: '#/components/schemas/ExperimentConfig'
         resource_request:
           $ref: '#/components/schemas/ResourceRequest'
+        autoscaling_policy:
+          $ref: '#/components/schemas/AutoscalingPolicy'
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string

@@ -4,13 +4,14 @@ volumes:
   # Named volume containing kubeconfig, shared by different containers 
   kube:
 
+
 services:
-  
+
   # Local Docker registry    
   local-registry:
     image: "registry:2.7.1"
     ports:
-    - "5000:5000"
+      - "5000:5000"
 
   # Kubernetes control plane
   server:
@@ -18,43 +19,43 @@ services:
     command: server --disable traefik
     privileged: true
     environment:
-    - K3S_TOKEN=k3stoken
-    - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
-    - K3S_KUBECONFIG_MODE=666
+      - K3S_TOKEN=k3stoken
+      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
+      - K3S_KUBECONFIG_MODE=666
     volumes:
-    - "./k3s/registries.yaml:/etc/rancher/k3s/registries.yaml"
-    - "kube:/output"
-    ports: 
-    - "6443:6443"
-    - "80:80"
+      - "./k3s/registries.yaml:/etc/rancher/k3s/registries.yaml"
+      - "kube:/output"
+    ports:
+      - "6443:6443"
+      - "80:80"
 
   # Helper container for copying kubeconfig to host directory
   kubeconfig:
     image: alpine
     restart: on-failure
     volumes:
-    - "kube:/.kube"
-    - "/tmp:/tmp"
+      - "kube:/.kube"
+      - "/tmp:/tmp"
     entrypoint: sh -ec
-    command: 
-    - |
-      cp /.kube/kubeconfig.yaml /tmp/kubeconfig
-      chmod 666 /tmp/kubeconfig
+    command:
+      - |
+        cp /.kube/kubeconfig.yaml /tmp/kubeconfig
+        chmod 666 /tmp/kubeconfig
 
   spark-operator-init:
     image: alpine/helm:3.6.3
     restart: on-failure
     volumes:
-    - "kube:/.kube"
+      - "kube:/.kube"
     entrypoint: sh -ec
-    command: 
-    - |
-      [ -f "/.kube/kubeconfig.yaml" ] || exit 5
-      mkdir -p /.kube
-      cp /.kube/kubeconfig.yaml /.kube/config
-      sed -i 's/127.0.0.1/server/' /.kube/config
-      helm repo add spark-operator https://googlecloudplatform.github.io/spark-on-k8s-operator
-      helm install --insecure-skip-tls-verify spark spark-operator/spark-operator --version 1.1.6 --kubeconfig /.kube/config --wait
+    command:
+      - |
+        [ -f "/.kube/kubeconfig.yaml" ] || exit 5
+        mkdir -p /.kube
+        cp /.kube/kubeconfig.yaml /.kube/config
+        sed -i 's/127.0.0.1/server/' /.kube/config
+        helm repo add spark-operator https://googlecloudplatform.github.io/spark-on-k8s-operator
+        helm install --insecure-skip-tls-verify spark spark-operator/spark-operator --version 1.1.6 --kubeconfig /.kube/config --wait
 
   # Kubernetes worker nodes
   agent:
@@ -63,10 +64,10 @@ services:
       replicas: 3
     privileged: true
     environment:
-    - K3S_URL=https://server:6443
-    - K3S_TOKEN=k3stoken
+      - K3S_URL=https://server:6443
+      - K3S_TOKEN=k3stoken
     volumes:
-    - "./k3s/registries.yaml:/etc/rancher/k3s/registries.yaml"
+      - "./k3s/registries.yaml:/etc/rancher/k3s/registries.yaml"
 
   # Install Istio on Kubernetes 
   istio:
@@ -74,16 +75,16 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-    - "./istio/minimal-operator.yaml:/minimal-operator.yaml"
-    - "kube:/.kube"
+      - "./istio/minimal-operator.yaml:/minimal-operator.yaml"
+      - "kube:/.kube"
     entrypoint: bash -ec
     command:
-    - |
-      cp /.kube/kubeconfig.yaml /.kube/config
-      sed -i 's/127.0.0.1/server/' /.kube/config
-      kubectl cluster-info
-      curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.12.4 sh -
-      /.istioctl/bin/istioctl install -y -f /minimal-operator.yaml
+      - |
+        cp /.kube/kubeconfig.yaml /.kube/config
+        sed -i 's/127.0.0.1/server/' /.kube/config
+        kubectl cluster-info
+        curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.12.4 sh -
+        /.istioctl/bin/istioctl install -y -f /minimal-operator.yaml
 
   # Install Knative serving on Kubernetes
   knative:
@@ -91,18 +92,19 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-    - "kube:/.kube"
+      - "kube:/.kube"
     entrypoint: bash -ec
     command:
-    - |
-      cp /.kube/kubeconfig.yaml /.kube/config
-      sed -i 's/127.0.0.1/server/' /.kube/config
-      kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-crds.yaml
-      kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-core.yaml
-      kubectl -n knative-serving patch configmap/config-deployment --type merge -p '{"data":{"registriesSkippingTagResolving": "localhost:5000"}}'
-      kubectl -n knative-serving patch configmap/config-domain --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
-      kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/knative-v1.0.0/net-istio.yaml
-  
+      - |
+        cp /.kube/kubeconfig.yaml /.kube/config
+        sed -i 's/127.0.0.1/server/' /.kube/config
+        kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-crds.yaml
+        kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-core.yaml
+        kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-hpa.yaml
+        kubectl -n knative-serving patch configmap/config-deployment --type merge -p '{"data":{"registriesSkippingTagResolving": "localhost:5000"}}'
+        kubectl -n knative-serving patch configmap/config-domain --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
+        kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/knative-v1.0.0/net-istio.yaml
+
   mlp-postgres:
     image: bitnami/postgresql:13.0.0
     environment:
@@ -113,60 +115,60 @@ services:
   mlp-postgres-init:
     image: migrate/migrate:v4.13.0
     restart: on-failure
-    volumes: 
-    - "./mlp/db-migrations:/db-migrations"
+    volumes:
+      - "./mlp/db-migrations:/db-migrations"
     entrypoint: sh -ec
     command:
-    - migrate -path=/db-migrations -database=postgres://mlp:mlp@mlp-postgres:5432/mlp?sslmode=disable up
+      - migrate -path=/db-migrations -database=postgres://mlp:mlp@mlp-postgres:5432/mlp?sslmode=disable up
 
   mlp:
     image: ghcr.io/gojek/mlp:v1.1.0-alpha
     restart: on-failure
     env_file: ./mlp/dev.env
     ports:
-    - "8081:8080"
+      - "8081:8080"
 
   mlp-init:
     image: curlimages/curl:7.73.0
     restart: on-failure
     entrypoint: sh -ec
     command:
-    - |
-      curl \
-        -X POST 'http://mlp:8080/v1/projects' \
-        --header 'Content-Type: application/json' \
-        --data-raw '{"name": "default","team": "default","stream": "default"}'
-      curl 'http://mlp:8080/v1/projects' | grep '"id":1' 
+      - |
+        curl \
+          -X POST 'http://mlp:8080/v1/projects' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{"name": "default","team": "default","stream": "default"}'
+        curl 'http://mlp:8080/v1/projects' | grep '"id":1' 
 
   vault:
     image: vault:1.6.0
     command: server -dev -dev-kv-v1 -dev-root-token-id=root
-    ports: 
-    - "8200:8200"
+    ports:
+      - "8200:8200"
 
   vault-init:
     image: vault:1.6.0
     restart: on-failure
     volumes:
-    - "kube:/.kube"
+      - "kube:/.kube"
     environment:
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
     entrypoint: sh -ec
-    command: 
-    - |
-      cat /.kube/kubeconfig.yaml | grep -q 'server: https://127.0.0.1:6443'
-      wget -O yq https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
-      install yq /usr/bin/yq
-      cat <<EOF > /tmp/secret-k3s.json
-      {
-        "master_ip": "$$(cat /.kube/kubeconfig.yaml | yq read - 'clusters[0].cluster.server')",
-        "certs": "$$(cat /.kube/kubeconfig.yaml | yq read - 'clusters[0].cluster.certificate-authority-data' | base64 -d | awk 1 ORS='\\n')",
-        "client_certificate": "$$(cat /.kube/kubeconfig.yaml | yq read - 'users[0].user.client-certificate-data' | base64 -d | awk 1 ORS='\\n')",
-        "client_key": "$$(cat /.kube/kubeconfig.yaml | yq read - 'users[0].user.client-key-data' | base64 -d | awk 1 ORS='\\n')"
-      }
-      EOF
-      vault kv put secret/k3s @/tmp/secret-k3s.json
+    command:
+      - |
+        cat /.kube/kubeconfig.yaml | grep -q 'server: https://127.0.0.1:6443'
+        wget -O yq https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
+        install yq /usr/bin/yq
+        cat <<EOF > /tmp/secret-k3s.json
+        {
+          "master_ip": "$$(cat /.kube/kubeconfig.yaml | yq read - 'clusters[0].cluster.server')",
+          "certs": "$$(cat /.kube/kubeconfig.yaml | yq read - 'clusters[0].cluster.certificate-authority-data' | base64 -d | awk 1 ORS='\\n')",
+          "client_certificate": "$$(cat /.kube/kubeconfig.yaml | yq read - 'users[0].user.client-certificate-data' | base64 -d | awk 1 ORS='\\n')",
+          "client_key": "$$(cat /.kube/kubeconfig.yaml | yq read - 'users[0].user.client-key-data' | base64 -d | awk 1 ORS='\\n')"
+        }
+        EOF
+        vault kv put secret/k3s @/tmp/secret-k3s.json
 
   merlin-postgres:
     image: bitnami/postgresql:13.0.0
@@ -178,11 +180,11 @@ services:
   merlin:
     image: ghcr.io/gojek/merlin:v0.8.0-alpha
     restart: on-failure
-    volumes: 
-    - "./merlin/deployment-config.yaml:/deployment-config.yaml"
+    volumes:
+      - "./merlin/deployment-config.yaml:/deployment-config.yaml"
     env_file: ./merlin/dev.env
     ports:
-    - "8082:8080"
+      - "8082:8080"
 
   turing-postgres:
     image: bitnami/postgresql:13.0.0
@@ -190,7 +192,7 @@ services:
       POSTGRESQL_DATABASE: turing
       POSTGRESQL_USERNAME: turing
       POSTGRESQL_PASSWORD: turing
-    ports: 
+    ports:
       - "5432:5432"
 
   mockserver:
@@ -198,11 +200,11 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-    - "../../e2e/turing.mockserver.yaml:/mockserver.yaml"
-    - "kube:/.kube"
+      - "../../e2e/turing.mockserver.yaml:/mockserver.yaml"
+      - "kube:/.kube"
     entrypoint: bash -ec
     command:
-    - |
-      cp /.kube/kubeconfig.yaml /.kube/config
-      sed -i 's/127.0.0.1/server/' /.kube/config
-      kubectl apply -f /mockserver.yaml
+      - |
+        cp /.kube/kubeconfig.yaml /.kube/config
+        sed -i 's/127.0.0.1/server/' /.kube/config
+        kubectl apply -f /mockserver.yaml

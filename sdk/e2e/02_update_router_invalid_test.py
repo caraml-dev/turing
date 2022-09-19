@@ -75,7 +75,7 @@ def test_update_router_invalid_config():
     )
     assert response.status_code == 200
     expected_response = {
-        "experiment": {"configuration": {"foo": "bar"}},
+        "experiment": {"configuration": {"foo": "bar", "route_name": "treatment-a"}},
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"}
         ],

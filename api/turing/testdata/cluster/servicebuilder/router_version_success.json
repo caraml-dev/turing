@@ -25,6 +25,10 @@
         "cpu_request": "400m",
         "memory_request": "512Mi"
     },
+    "autoscaling_policy": {
+        "metric": "concurrency",
+        "target": "1"
+    },
     "timeout": "5s",
     "log_config": {
         "log_level": "INFO",
@@ -47,6 +51,10 @@
             "cpu_request": "400m",
             "memory_request": "256Mi"
         },
+        "autoscaling_policy": {
+            "metric": "concurrency",
+            "target": "1"
+        },
         "endpoint": "echo?delay=10ms",
         "timeout": "2s",
         "port": 8080,
@@ -68,6 +76,10 @@
                 "max_replica": 3,
                 "cpu_request": "200m",
                 "memory_request": "1024Mi"
+            },
+            "autoscaling_policy": {
+                "metric": "concurrency",
+                "target": "1"
             },
             "endpoint": "echo?delay=20ms",
             "timeout": "3s",

@@ -1,0 +1,73 @@
+{
+    "environment_name": "{{.DeploymentEnvironment}}",
+    "name": "e2e-std-ensembler-test-{{.TestID}}",
+    "config": {
+        "routes": [
+            {
+                "id": "control",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverEndpoint}}/control",
+                "timeout": "5s"
+            },
+            {
+                "id": "treatment-a",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverEndpoint}}/treatment-a",
+                "timeout": "5s"
+            }
+        ],
+        "experiment_engine": {
+            "type": "proprietary",
+            "config": {
+                "client": {
+                    "id": "1",
+                    "username": "test",
+                    "passkey": "test"
+                },
+                "experiments": [
+                    {
+                        "id": "001",
+                        "name": "exp_1"
+                    }
+                ],
+                "variables": {
+                    "experiment_variables": {
+                        "001": [
+                            {
+                                "name": "client_id",
+                                "type": "unit",
+                                "required": true
+                            }
+                        ]
+                    },
+                    "config": [
+                        {
+                            "name": "client_id",
+                            "required": true,
+                            "field": "client.id",
+                            "field_source": "payload"
+                        }
+                    ]
+                }
+            }
+        },
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 1,
+            "cpu_request": "200m",
+            "memory_request": "250Mi"
+        },
+        "timeout": "5s",
+        "log_config": {
+            "result_logger_type": "nop"
+        },
+        "ensembler": {
+            "type": "standard",
+            "standard_config": {
+                "experiment_mappings": [],
+                "route_name_path": "route_name"
+            }
+        },
+        "default_route_id": "control"
+    }
+}

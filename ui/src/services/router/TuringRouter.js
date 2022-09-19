@@ -18,12 +18,17 @@ export class TuringRouter {
     this.config = {
       routes: [newRoute()],
       default_route_id: null,
+      default_traffic_rule: null,
       rules: [],
       resource_request: {
         cpu_request: "500m",
         memory_request: "512Mi",
         min_replica: 0,
         max_replica: 2,
+      },
+      autoscaling_policy: {
+        metric: "concurrency",
+        target: "1",
       },
       timeout: "300ms",
       experiment_engine: new NopExperimentEngine(),
@@ -37,6 +42,10 @@ export class TuringRouter {
           memory_request: "512Mi",
           min_replica: 0,
           max_replica: 2,
+        },
+        autoscaling_policy: {
+          metric: "concurrency",
+          target: "1",
         },
         env: [],
         service_account: "",
@@ -76,19 +85,19 @@ export class TuringRouter {
     const ensemblerConfig = get(json, "config.ensembler");
     router.config.ensembler = _.isEmpty(ensemblerConfig)
       ? Ensembler.fromJson({
-          nop_config: {
-            final_response_route_id: get(json, "config.default_route_id"),
-          },
-        })
+        nop_config: {
+          final_response_route_id: get(json, "config.default_route_id"),
+        },
+      })
       : ensemblerConfig.type === "standard"
-      ? Ensembler.fromJson({
+        ? Ensembler.fromJson({
           ...ensemblerConfig,
           standard_config: {
             ...ensemblerConfig.standard_config,
             fallback_response_route_id: get(json, "config.default_route_id"),
           },
         })
-      : Ensembler.fromJson(ensemblerConfig);
+        : Ensembler.fromJson(ensemblerConfig);
 
     // Init enricher. If config exists, update the type to docker.
     const enricherConfig = get(json, "config.enricher");
@@ -103,6 +112,11 @@ export class TuringRouter {
     let obj = objectAssignDeep({}, this);
 
     // Remove properties for optional fields, if not relevant
+    // Default Traffic Rule
+    if (!obj.config.default_traffic_rule) {
+      delete obj.config["default_traffic_rule"];
+    }
+
     // Enricher
     if (obj.config.enricher && obj.config.enricher.type === "nop") {
       delete obj.config["enricher"];
@@ -151,6 +165,10 @@ export const newRoute = () => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
+});
+
+export const newDefaultRule = () => ({
+  routes: [],
 });
 
 export const newRule = () => ({

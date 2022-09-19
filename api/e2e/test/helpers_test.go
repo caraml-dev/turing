@@ -4,8 +4,9 @@ package e2e
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"testing"
 	"text/template"
 
@@ -16,7 +17,7 @@ func readBody(t *testing.T, resp *http.Response) string {
 	if resp.Body == nil {
 		return ""
 	}
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +26,7 @@ func readBody(t *testing.T, resp *http.Response) string {
 
 // make payload to create new router from a template file
 func makeRouterPayload(payloadTemplateFile string, args TestContext) []byte {
-	data, err := ioutil.ReadFile(payloadTemplateFile)
+	data, err := os.ReadFile(payloadTemplateFile)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +53,7 @@ func withRouterResponse(
 	body string,
 	assertion func(response *http.Response, responsePayload []byte)) {
 
-	req, err := http.NewRequest(method, url, ioutil.NopCloser(bytes.NewReader([]byte(body))))
+	req, err := http.NewRequest(method, url, io.NopCloser(bytes.NewReader([]byte(body))))
 	require.NoError(t, err)
 
 	req.Header = headers
@@ -61,7 +62,7 @@ func withRouterResponse(
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	responseBytes, err := ioutil.ReadAll(resp.Body)
+	responseBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	assertion(resp, responseBytes)

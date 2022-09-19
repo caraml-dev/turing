@@ -29,7 +29,7 @@ var (
 // Each rule maps set of conditions to one route configured on fiber router
 type TrafficSplittingStrategyRule struct {
 	RouteID    string                         `json:"route_id" validate:"required,notBlank"`
-	Conditions []*router.TrafficRuleCondition `json:"conditions" validate:"required,notBlank,dive"`
+	Conditions []*router.TrafficRuleCondition `json:"conditions" validate:"required,dive"`
 }
 
 // TestRequest checks if the request satisfies all conditions of this rule

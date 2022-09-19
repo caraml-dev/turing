@@ -6,8 +6,13 @@ from dataclasses import dataclass
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
+from turing.router.config.traffic_rule import DefaultTrafficRule
 from turing.router.config.route import Route
 from turing.router.config.traffic_rule import TrafficRule
+from turing.router.config.autoscaling_policy import (
+    AutoscalingPolicy,
+    DEFAULT_AUTOSCALING_POLICY,
+)
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
@@ -36,6 +41,7 @@ class RouterConfig:
     :param routes: list of routes used by the router
     :param rules: list of rules used by the router
     :param default_route_id: default route id to be used
+    :param default_traffic_rule: default traffic rule to be used if no conditions are matched
     :param experiment_engine: experiment engine config file
     :param resource_request: resources to be provisioned for the router
     :param timeout: request timeout which when exceeded, the request to the router will be terminated
@@ -49,8 +55,10 @@ class RouterConfig:
     routes: Union[List[Route], List[Dict[str, str]]] = None
     rules: Union[List[TrafficRule], List[Dict]] = None
     default_route_id: str = None
+    default_traffic_rule: DefaultTrafficRule = None
     experiment_engine: Union[ExperimentConfig, Dict] = None
     resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None
+    autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]] = None
     timeout: str = None
     log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None
     enricher: Union[Enricher, Dict] = None
@@ -63,8 +71,12 @@ class RouterConfig:
         routes: Union[List[Route], List[Dict[str, str]]] = None,
         rules: Union[List[TrafficRule], List[Dict]] = None,
         default_route_id: str = None,
+        default_traffic_rule: DefaultTrafficRule = None,
         experiment_engine: Union[ExperimentConfig, Dict] = None,
         resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
+        autoscaling_policy: Union[
+            AutoscalingPolicy, Dict[str, str]
+        ] = DEFAULT_AUTOSCALING_POLICY,
         timeout: str = None,
         log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
             result_logger_type=ResultLoggerType.NOP
@@ -78,8 +90,10 @@ class RouterConfig:
         self.routes = routes
         self.rules = rules
         self.default_route_id = default_route_id
+        self.default_traffic_rule = default_traffic_rule
         self.experiment_engine = experiment_engine
         self.resource_request = resource_request
+        self.autoscaling_policy = autoscaling_policy
         self.timeout = timeout
         self.log_config = log_config
         self.enricher = enricher
@@ -158,6 +172,19 @@ class RouterConfig:
                 self.ensembler.fallback_response_route_id = default_route_id
 
     @property
+    def default_traffic_rule(self) -> DefaultTrafficRule:
+        return self._default_traffic_rule
+
+    @default_traffic_rule.setter
+    def default_traffic_rule(self, rule: Union[DefaultTrafficRule, Dict]):
+        if isinstance(rule, DefaultTrafficRule):
+            self._default_traffic_rule = rule
+        elif isinstance(rule, dict):
+            self._default_traffic_rule = DefaultTrafficRule(**rule)
+        else:
+            self._default_traffic_rule = rule
+
+    @property
     def experiment_engine(self) -> ExperimentConfig:
         return self._experiment_engine
 
@@ -184,6 +211,21 @@ class RouterConfig:
             self._resource_request = ResourceRequest(**resource_request)
         else:
             self._resource_request = resource_request
+
+    @property
+    def autoscaling_policy(self) -> AutoscalingPolicy:
+        return self._autoscaling_policy
+
+    @autoscaling_policy.setter
+    def autoscaling_policy(
+        self, autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]]
+    ):
+        if isinstance(autoscaling_policy, AutoscalingPolicy):
+            self._autoscaling_policy = autoscaling_policy
+        elif isinstance(autoscaling_policy, dict):
+            self._autoscaling_policy = AutoscalingPolicy(**autoscaling_policy)
+        else:
+            self._autoscaling_policy = autoscaling_policy
 
     @property
     def timeout(self) -> str:
@@ -280,6 +322,8 @@ class RouterConfig:
         if default_route_id is not None:
             kwargs["default_route_id"] = default_route_id
 
+        if self.default_traffic_rule is not None:
+            kwargs["default_traffic_rule"] = self.default_traffic_rule.to_open_api()
         if self.rules is not None:
             kwargs["rules"] = [rule.to_open_api() for rule in self.rules]
         if self.resource_request is not None:
@@ -297,6 +341,7 @@ class RouterConfig:
             name=self.name,
             config=turing.generated.models.RouterVersionConfig(
                 routes=[route.to_open_api() for route in self.routes],
+                autoscaling_policy=self.autoscaling_policy.to_open_api(),
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),

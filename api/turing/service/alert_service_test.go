@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -519,7 +519,7 @@ func newMockGitlabServer() (mockGitlab *httptest.Server, requestRecords map[stri
 	records := make(map[string]string)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		record := fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if body != nil && err == nil {
 			records[record] = string(body)
 		} else {

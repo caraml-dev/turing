@@ -73,6 +73,10 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 					Format: "1G",
 				},
 			},
+			AutoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: "concurrency",
+				Target: "1",
+			},
 			Timeout: "5s",
 			LogConfig: &models.LogConfig{
 				LogLevel:             "DEBUG",
@@ -90,6 +94,10 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 					MemoryRequest: resource.Quantity{
 						Format: "1G",
 					},
+				},
+				AutoscalingPolicy: &models.AutoscalingPolicy{
+					Metric: "concurrency",
+					Target: "1",
 				},
 				Endpoint: "/enrich",
 				Timeout:  "5s",
@@ -114,6 +122,10 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 						MemoryRequest: resource.Quantity{
 							Format: "1G",
 						},
+					},
+					AutoscalingPolicy: &models.AutoscalingPolicy{
+						Metric: "concurrency",
+						Target: "1",
 					},
 					Endpoint: "/ensemble",
 					Timeout:  "5s",

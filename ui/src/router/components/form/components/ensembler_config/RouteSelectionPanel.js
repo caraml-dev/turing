@@ -49,6 +49,7 @@ export const RouteSelectionPanel = ({
   routeId,
   routes,
   rules,
+  default_traffic_rule,
   onChange,
   errors,
   panelTitle,
@@ -57,8 +58,9 @@ export const RouteSelectionPanel = ({
   const routeOptions = routes
     .filter((e) => !!e.id)
     .map((e) => {
+      const allRules = !!default_traffic_rule ? [...rules, default_traffic_rule] : rules;
       const isDisabled =
-        !!rules && rules.filter((r) => r.routes.includes(e.id)).length > 0;
+        !!allRules && allRules.filter((r) => r.routes.includes(e.id)).length !== allRules.length;
       return {
         value: e.id,
         inputDisplay: e.id,

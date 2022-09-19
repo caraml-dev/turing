@@ -26,15 +26,13 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
-
 def lazy_import():
     from turing.generated.model.big_query_sink import BigQuerySink
     from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
     from turing.generated.model.save_mode import SaveMode
-
-    globals()["BigQuerySink"] = BigQuerySink
-    globals()["BigQuerySinkConfig"] = BigQuerySinkConfig
-    globals()["SaveMode"] = SaveMode
+    globals()['BigQuerySink'] = BigQuerySink
+    globals()['BigQuerySinkConfig'] = BigQuerySinkConfig
+    globals()['SaveMode'] = SaveMode
 
 
 class EnsemblingJobSink(ModelComposed):
@@ -62,13 +60,14 @@ class EnsemblingJobSink(ModelComposed):
     """
 
     allowed_values = {
-        ("type",): {
-            "CONSOLE": "CONSOLE",
-            "BQ": "BQ",
+        ('type',): {
+            'CONSOLE': "CONSOLE",
+            'BQ': "BQ",
         },
     }
 
-    validations = {}
+    validations = {
+    }
 
     @cached_property
     def additional_properties_type():
@@ -77,17 +76,7 @@ class EnsemblingJobSink(ModelComposed):
         of type self, this must run after the class is loaded
         """
         lazy_import()
-        return (
-            bool,
-            date,
-            datetime,
-            dict,
-            float,
-            int,
-            list,
-            str,
-            none_type,
-        )  # noqa: E501
+        return (bool, date, datetime, dict, float, int, list, str, none_type,)  # noqa: E501
 
     _nullable = False
 
@@ -103,46 +92,41 @@ class EnsemblingJobSink(ModelComposed):
         """
         lazy_import()
         return {
-            "type": (str,),  # noqa: E501
-            "columns": (
-                [str],
-                none_type,
-            ),  # noqa: E501
-            "save_mode": (SaveMode,),  # noqa: E501
-            "bq_config": (BigQuerySinkConfig,),  # noqa: E501
+            'type': (str,),  # noqa: E501
+            'columns': ([str], none_type,),  # noqa: E501
+            'save_mode': (SaveMode,),  # noqa: E501
+            'bq_config': (BigQuerySinkConfig,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         lazy_import()
         val = {
-            "BQ": BigQuerySink,
-            "BigQuerySink": BigQuerySink,
+            'BQ': BigQuerySink,
+            'BigQuerySink': BigQuerySink,
         }
         if not val:
             return None
-        return {"type": val}
+        return {'type': val}
 
     attribute_map = {
-        "type": "type",  # noqa: E501
-        "columns": "columns",  # noqa: E501
-        "save_mode": "save_mode",  # noqa: E501
-        "bq_config": "bq_config",  # noqa: E501
+        'type': 'type',  # noqa: E501
+        'columns': 'columns',  # noqa: E501
+        'save_mode': 'save_mode',  # noqa: E501
+        'bq_config': 'bq_config',  # noqa: E501
     }
 
-    required_properties = set(
-        [
-            "_data_store",
-            "_check_type",
-            "_spec_property_naming",
-            "_path_to_item",
-            "_configuration",
-            "_visited_composed_classes",
-            "_composed_instances",
-            "_var_name_to_model_instances",
-            "_additional_properties_model_instances",
-        ]
-    )
+    required_properties = set([
+        '_data_store',
+        '_check_type',
+        '_spec_property_naming',
+        '_path_to_item',
+        '_configuration',
+        '_visited_composed_classes',
+        '_composed_instances',
+        '_var_name_to_model_instances',
+        '_additional_properties_model_instances',
+    ])
 
     @convert_js_args_to_python_args
     def __init__(self, *args, **kwargs):  # noqa: E501
@@ -187,17 +171,16 @@ class EnsemblingJobSink(ModelComposed):
             bq_config (BigQuerySinkConfig): [optional]  # noqa: E501
         """
 
-        type = kwargs.get("type", "BQ")
-        _check_type = kwargs.pop("_check_type", True)
-        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
-        _path_to_item = kwargs.pop("_path_to_item", ())
-        _configuration = kwargs.pop("_configuration", None)
-        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
+        type = kwargs.get('type', "BQ")
+        _check_type = kwargs.pop('_check_type', True)
+        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
+        _path_to_item = kwargs.pop('_path_to_item', ())
+        _configuration = kwargs.pop('_configuration', None)
+        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
-                % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -213,19 +196,20 @@ class EnsemblingJobSink(ModelComposed):
         self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
 
         constant_args = {
-            "_check_type": _check_type,
-            "_path_to_item": _path_to_item,
-            "_spec_property_naming": _spec_property_naming,
-            "_configuration": _configuration,
-            "_visited_composed_classes": self._visited_composed_classes,
+            '_check_type': _check_type,
+            '_path_to_item': _path_to_item,
+            '_spec_property_naming': _spec_property_naming,
+            '_configuration': _configuration,
+            '_visited_composed_classes': self._visited_composed_classes,
         }
         required_args = {
-            "type": type,
+            'type': type,
         }
         model_args = {}
         model_args.update(required_args)
         model_args.update(kwargs)
-        composed_info = validate_get_composed_info(constant_args, model_args, self)
+        composed_info = validate_get_composed_info(
+            constant_args, model_args, self)
         self._composed_instances = composed_info[0]
         self._var_name_to_model_instances = composed_info[1]
         self._additional_properties_model_instances = composed_info[2]
@@ -234,12 +218,10 @@ class EnsemblingJobSink(ModelComposed):
         for var_name, var_value in required_args.items():
             setattr(self, var_name, var_value)
         for var_name, var_value in kwargs.items():
-            if (
-                var_name in unused_args
-                and self._configuration is not None
-                and self._configuration.discard_unknown_keys
-                and not self._additional_properties_model_instances
-            ):
+            if var_name in unused_args and \
+                        self._configuration is not None and \
+                        self._configuration.discard_unknown_keys and \
+                        not self._additional_properties_model_instances:
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)
@@ -255,9 +237,11 @@ class EnsemblingJobSink(ModelComposed):
         # loading
         lazy_import()
         return {
-            "anyOf": [],
-            "allOf": [],
-            "oneOf": [
-                BigQuerySink,
-            ],
+          'anyOf': [
+          ],
+          'allOf': [
+          ],
+          'oneOf': [
+              BigQuerySink,
+          ],
         }

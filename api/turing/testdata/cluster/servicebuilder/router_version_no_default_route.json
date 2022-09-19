@@ -24,6 +24,10 @@
         "cpu_request": "400m",
         "memory_request": "512Mi"
     },
+    "autoscaling_policy": {
+        "metric": "memory",
+        "target": "90"
+    },
     "timeout": "5s",
     "log_config": {
         "log_level": "INFO",

@@ -26,15 +26,13 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_get_composed_info,
 )
 
-
 def lazy_import():
     from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
     from turing.generated.model.ensembler_pyfunc_config import EnsemblerPyfuncConfig
     from turing.generated.model.ensembler_standard_config import EnsemblerStandardConfig
-
-    globals()["EnsemblerDockerConfig"] = EnsemblerDockerConfig
-    globals()["EnsemblerPyfuncConfig"] = EnsemblerPyfuncConfig
-    globals()["EnsemblerStandardConfig"] = EnsemblerStandardConfig
+    globals()['EnsemblerDockerConfig'] = EnsemblerDockerConfig
+    globals()['EnsemblerPyfuncConfig'] = EnsemblerPyfuncConfig
+    globals()['EnsemblerStandardConfig'] = EnsemblerStandardConfig
 
 
 class RouterEnsemblerConfig(ModelNormal):
@@ -62,14 +60,15 @@ class RouterEnsemblerConfig(ModelNormal):
     """
 
     allowed_values = {
-        ("type",): {
-            "STANDARD": "standard",
-            "DOCKER": "docker",
-            "PYFUNC": "pyfunc",
+        ('type',): {
+            'STANDARD': "standard",
+            'DOCKER': "docker",
+            'PYFUNC': "pyfunc",
         },
     }
 
-    validations = {}
+    validations = {
+    }
 
     additional_properties_type = None
 
@@ -87,41 +86,40 @@ class RouterEnsemblerConfig(ModelNormal):
         """
         lazy_import()
         return {
-            "type": (str,),  # noqa: E501
-            "id": (int,),  # noqa: E501
-            "standard_config": (EnsemblerStandardConfig,),  # noqa: E501
-            "docker_config": (EnsemblerDockerConfig,),  # noqa: E501
-            "pyfunc_config": (EnsemblerPyfuncConfig,),  # noqa: E501
-            "created_at": (datetime,),  # noqa: E501
-            "updated_at": (datetime,),  # noqa: E501
+            'type': (str,),  # noqa: E501
+            'id': (int,),  # noqa: E501
+            'standard_config': (EnsemblerStandardConfig,),  # noqa: E501
+            'docker_config': (EnsemblerDockerConfig,),  # noqa: E501
+            'pyfunc_config': (EnsemblerPyfuncConfig,),  # noqa: E501
+            'created_at': (datetime,),  # noqa: E501
+            'updated_at': (datetime,),  # noqa: E501
         }
 
     @cached_property
     def discriminator():
         return None
 
+
     attribute_map = {
-        "type": "type",  # noqa: E501
-        "id": "id",  # noqa: E501
-        "standard_config": "standard_config",  # noqa: E501
-        "docker_config": "docker_config",  # noqa: E501
-        "pyfunc_config": "pyfunc_config",  # noqa: E501
-        "created_at": "created_at",  # noqa: E501
-        "updated_at": "updated_at",  # noqa: E501
+        'type': 'type',  # noqa: E501
+        'id': 'id',  # noqa: E501
+        'standard_config': 'standard_config',  # noqa: E501
+        'docker_config': 'docker_config',  # noqa: E501
+        'pyfunc_config': 'pyfunc_config',  # noqa: E501
+        'created_at': 'created_at',  # noqa: E501
+        'updated_at': 'updated_at',  # noqa: E501
     }
 
     _composed_schemas = {}
 
-    required_properties = set(
-        [
-            "_data_store",
-            "_check_type",
-            "_spec_property_naming",
-            "_path_to_item",
-            "_configuration",
-            "_visited_composed_classes",
-        ]
-    )
+    required_properties = set([
+        '_data_store',
+        '_check_type',
+        '_spec_property_naming',
+        '_path_to_item',
+        '_configuration',
+        '_visited_composed_classes',
+    ])
 
     @convert_js_args_to_python_args
     def __init__(self, type, *args, **kwargs):  # noqa: E501
@@ -169,16 +167,15 @@ class RouterEnsemblerConfig(ModelNormal):
             updated_at (datetime): [optional]  # noqa: E501
         """
 
-        _check_type = kwargs.pop("_check_type", True)
-        _spec_property_naming = kwargs.pop("_spec_property_naming", False)
-        _path_to_item = kwargs.pop("_path_to_item", ())
-        _configuration = kwargs.pop("_configuration", None)
-        _visited_composed_classes = kwargs.pop("_visited_composed_classes", ())
+        _check_type = kwargs.pop('_check_type', True)
+        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
+        _path_to_item = kwargs.pop('_path_to_item', ())
+        _configuration = kwargs.pop('_configuration', None)
+        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
 
         if args:
             raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
-                % (
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments." % (
                     args,
                     self.__class__.__name__,
                 ),
@@ -195,12 +192,10 @@ class RouterEnsemblerConfig(ModelNormal):
 
         self.type = type
         for var_name, var_value in kwargs.items():
-            if (
-                var_name not in self.attribute_map
-                and self._configuration is not None
-                and self._configuration.discard_unknown_keys
-                and self.additional_properties_type is None
-            ):
+            if var_name not in self.attribute_map and \
+                        self._configuration is not None and \
+                        self._configuration.discard_unknown_keys and \
+                        self.additional_properties_type is None:
                 # discard variable.
                 continue
             setattr(self, var_name, var_value)

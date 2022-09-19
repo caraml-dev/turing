@@ -1,6 +1,5 @@
 import React from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
-import { ConfigSectionPanel } from "../../../../../components/config_section";
 import { ContainerConfigTable } from "../docker_config_section/ContainerConfigTable";
 import { ResourcesConfigTable } from "../ResourcesConfigTable";
 import { ConfigMultiSectionPanel } from "../../../../../components/config_multi_section_panel/ConfigMultiSectionPanel";
@@ -37,11 +36,11 @@ export const PyFuncConfigViewGroup = ({
         <ConfigMultiSectionPanel items={items} />
       </EuiFlexItem>
       <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-        <ConfigSectionPanel title={`${componentName} Resources`}>
-          <ResourcesConfigTable
-            resourceRequest={pyfuncConfig.resource_request}
-          />
-        </ConfigSectionPanel>
+        <ResourcesConfigTable
+          componentName="Ensembler"
+          autoscalingPolicy={dockerConfig.autoscaling_policy}
+          resourceRequest={pyfuncConfig.resource_request}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

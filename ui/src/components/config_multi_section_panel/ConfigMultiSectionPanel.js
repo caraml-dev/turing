@@ -8,9 +8,12 @@ export const ConfigMultiSectionPanel = React.forwardRef(
       <EuiPanel className={`euiPanel--configSection ${className}`}>
         <div ref={ref}>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {items.map(({ title, children }, idx) => (
+            {items.map(({ title, appendTitle, children }, idx) => (
               <EuiFlexItem key={idx}>
-                {title && <ConfigSectionPanelTitle title={title} />}
+                {
+                  title && appendTitle ? <ConfigSectionPanelTitle title={title} append={appendTitle} />
+                  : title && <ConfigSectionPanelTitle title={title} />
+                }
                 {children}
               </EuiFlexItem>
             ))}

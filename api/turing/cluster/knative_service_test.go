@@ -173,8 +173,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     1,
 				MaxReplicas:                     2,
+				AutoscalingMetric:               "concurrency",
+				AutoscalingTarget:               "1",
 				IsClusterLocal:                  true,
-				TargetConcurrency:               1,
 				QueueProxyResourcePercentage:    30,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -198,6 +199,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 								Annotations: map[string]string{
 									"autoscaling.knative.dev/minScale":                     "1",
 									"autoscaling.knative.dev/maxScale":                     "2",
+									"autoscaling.knative.dev/metric":                       "concurrency",
 									"autoscaling.knative.dev/target":                       "1",
 									"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
 									"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
@@ -220,8 +222,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     5,
 				MaxReplicas:                     6,
+				AutoscalingMetric:               "memory",
+				AutoscalingTarget:               "70",
 				IsClusterLocal:                  false,
-				TargetConcurrency:               4,
 				UserContainerLimitRequestFactor: 1.5,
 			},
 			expectedSpec: knservingv1.Service{
@@ -243,8 +246,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 								Annotations: map[string]string{
 									"autoscaling.knative.dev/minScale": "5",
 									"autoscaling.knative.dev/maxScale": "6",
-									"autoscaling.knative.dev/target":   "4",
-									"autoscaling.knative.dev/class":    "kpa.autoscaling.knative.dev",
+									"autoscaling.knative.dev/metric":   "memory",
+									"autoscaling.knative.dev/target":   "70",
+									"autoscaling.knative.dev/class":    "hpa.autoscaling.knative.dev",
 								},
 							},
 							Spec: knservingv1.RevisionSpec{

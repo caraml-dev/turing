@@ -1,5 +1,7 @@
 import {
   EuiButtonIcon,
+  EuiCallOut,
+  EuiButtonEmpty,
   EuiCard,
   EuiFieldText,
   EuiFlexGroup,
@@ -12,6 +14,7 @@ import {
 import React, { Fragment, useCallback } from "react";
 import { get } from "../../../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
+import { DraggableCardHeader } from "../../../../../../components/card/DraggableCardHeader";
 import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
 
@@ -31,11 +34,13 @@ const newCondition = () => ({
 });
 
 export const RuleCard = ({
+  isDefault,
   rule,
   routes,
   onChangeHandler,
   onDelete,
   errors,
+  ...props
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
@@ -62,42 +67,51 @@ export const RuleCard = ({
     onChange("routes")([...rule.routes]);
   };
 
+  // Hide last row when all routes are selected
+  const routeSelectionOptions = (rule.routes.length < routes.length ? [...rule.routes,  "_none_"]: rule.routes);
+
   return (
     <EuiCard
       className="euiCard--routeCard"
-      title=""
+      title={isDefault ? "Default Traffic Rule" : ""}
       description=""
       textAlign="left">
+      {!isDefault &&
+      <>
       <EuiFlexGroup
         className="euiFlexGroup--removeButton"
         justifyContent="flexEnd"
-        gutterSize="none"
+        gutterSize="s"
         direction="row">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={onDelete}
-            aria-label="delete-route"
+        <EuiFlexItem>
+          <DraggableCardHeader
+            onDelete={onDelete}
+            dragHandleProps={props.dragHandleProps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      </>
+      }
 
-      <EuiFormRow
-        label="Name *"
-        isInvalid={!!get(errors, "name")}
-        error={get(errors, "name")}
-        fullWidth>
-        <EuiFieldText
-          placeholder="rule-name"
-          value={rule.name}
-          onChange={(e) => onChange("name")(e.target.value)}
+      {!isDefault &&
+        <EuiFormRow
+          label="Name *"
           isInvalid={!!get(errors, "name")}
-          aria-label="rule-name"
-          fullWidth
-        />
-      </EuiFormRow>
+          error={get(errors, "name")}
+          fullWidth>
+          <EuiFieldText
+            placeholder="rule-name"
+            value={rule.name}
+            onChange={(e) => onChange("name")(e.target.value)}
+            isInvalid={!!get(errors, "name")}
+            aria-label="rule-name"
+            fullWidth
+          />
+        </EuiFormRow>
+      }
 
-      <EuiFormRow
+      {!isDefault ? <EuiFormRow
         label="Conditions *"
         isInvalid={!!get(errors, "conditions")}
         error={
@@ -141,6 +155,16 @@ export const RuleCard = ({
           ))}
         </Fragment>
       </EuiFormRow>
+      : <EuiFormRow
+          label="Conditions *"
+          fullWidth>
+          <EuiCallOut title="Conditions are disabled for the default rule." color="warning" iconType="help">
+            <p>
+              The default rule will be triggered if no other rule matches the request.
+            </p>
+          </EuiCallOut>
+        </EuiFormRow>
+      }
 
       <EuiFormRow
         label="Routes *"
@@ -150,56 +174,58 @@ export const RuleCard = ({
         }
         fullWidth>
         <Fragment>
-          {[...rule.routes, "_none_"].map((route, idx) => (
-            <Fragment key={`rule-routes-${idx}`}>
-              <EuiFlexGroup
-                className="euiFlexGroup--trafficRulesRow"
-                direction="row"
-                gutterSize="m"
-                alignItems="flexStart">
-                <EuiFlexItem grow={true} className="euiFlexItem--content">
-                  <EuiFormRow
-                    isInvalid={!!get(errors, `routes.${idx}`)}
-                    error={
-                      Array.isArray(get(errors, `routes.${idx}`))
-                        ? get(errors, `routes.${idx}`)
-                        : []
-                    }
-                    fullWidth>
-                    <EuiSuperSelect
-                      fullWidth
-                      hasDividers
-                      options={
-                        idx < rule.routes.length
-                          ? routesOptions(route)
-                          : [noneRoute, ...routesOptions(route)]
-                      }
-                      valueOfSelected={route}
-                      onChange={onChange(`routes.${idx}`)}
+        {routeSelectionOptions.map((route, idx) => {
+            return (
+              <Fragment key={`rule-routes-${idx}`}>
+                <EuiFlexGroup
+                  className="euiFlexGroup--trafficRulesRow"
+                  direction="row"
+                  gutterSize="m"
+                  alignItems="flexStart">
+                  <EuiFlexItem grow={true} className="euiFlexItem--content">
+                    <EuiFormRow
                       isInvalid={!!get(errors, `routes.${idx}`)}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-
-                <EuiFlexItem
-                  grow={false}
-                  className="euiFlexItem--hasActions routes">
-                  {idx < rule.routes.length ? (
-                    <EuiButtonIcon
-                      size="s"
-                      color="danger"
-                      iconType="trash"
-                      onClick={onDeleteRoute(idx)}
-                      aria-label="Remove rule route"
-                    />
-                  ) : (
-                    <EuiIcon type="empty" size="l" />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-            </Fragment>
-          ))}
+                      fullWidth>
+                      <EuiSuperSelect
+                        fullWidth
+                        hasDividers
+                        options={
+                          idx < rule.routes.length
+                            ? routesOptions(route)
+                            : [noneRoute, ...routesOptions(route)]
+                        }
+                        valueOfSelected={route}
+                        onChange={onChange(`routes.${idx}`)}
+                        isInvalid={!!get(errors, `routes.${idx}`)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+  
+                  <EuiFlexItem
+                    grow={false}
+                    className="euiFlexItem--hasActions routes">
+                    {idx < rule.routes.length ? (
+                      <EuiButtonIcon
+                        size="s"
+                        color="danger"
+                        iconType="trash"
+                        onClick={onDeleteRoute(idx)}
+                        aria-label="Remove rule route"
+                      />
+                    ) : isDefault ? (
+                      <EuiButtonEmpty size="xs" color="text" onClick={() => onChange("routes")(routes.map(route => route.id))}>
+                       Select All
+                      </EuiButtonEmpty>
+                    )
+                    : (
+                      <EuiIcon type="empty" size="l" />
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+              </Fragment>
+            )
+        })}
         </Fragment>
       </EuiFormRow>
     </EuiCard>

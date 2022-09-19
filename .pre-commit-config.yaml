@@ -47,6 +47,13 @@ repos:
         entry: bash -c 'cd ui && yarn lint'
   - repo: local
     hooks:
+      - id: openapi-bundle
+        name: 'OpenAPI Swagger Dist'
+        files: '^api/api/specs/'
+        language: system
+        entry: bash -c 'cd api/api && make all'
+  - repo: local
+    hooks:
       - id: openapi-gen
         name: 'OpenAPI Python client'
         files: '^api/api/specs/'

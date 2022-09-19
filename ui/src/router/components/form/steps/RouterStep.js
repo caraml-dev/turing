@@ -9,6 +9,7 @@ import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { RulesPanel } from "../components/router_config/RulesPanel";
+import { AutoscalingPolicyPanel } from "../components/autoscaling_policy/AutoscalingPolicyPanel";
 
 export const RouterStep = ({ projectId }) => {
   const {
@@ -45,10 +46,12 @@ export const RouterStep = ({ projectId }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RulesPanel
+          default_traffic_rule={get(data, "config.default_traffic_rule")}
+          default_traffic_rule_errors={get(errors, "config.default_traffic_rule")}
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
           onChangeHandler={onChange("config")}
-          errors={get(errors, "config.rules")}
+          rules_errors={get(errors, "config.rules")}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -57,6 +60,13 @@ export const RouterStep = ({ projectId }) => {
           onChangeHandler={onChange("config.resource_request")}
           maxAllowedReplica={maxAllowedReplica}
           errors={get(errors, "config.resource_request")}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AutoscalingPolicyPanel
+          autoscalingPolicyConfig={get(data, "config.autoscaling_policy")}
+          onChangeHandler={onChange("config.autoscaling_policy")}
+          errors={get(errors, "config.autoscaling_policy")}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

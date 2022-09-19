@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
@@ -17,6 +19,84 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestValidateEnsemblerStandardConfig(t *testing.T) {
+	tt := map[string]struct {
+		input models.EnsemblerStandardConfig
+		err   string
+	}{
+		"failure | experiment mappings and route name path undefined": {
+			input: models.EnsemblerStandardConfig{},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings and route name path empty": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{},
+				RouteNamePath:      "",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings empty and route name path undefined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{},
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings undefined and route name path empty": {
+			input: models.EnsemblerStandardConfig{
+				RouteNamePath: "",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings and route name path defined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{
+					{
+						Experiment: "experiment-1",
+						Treatment:  "treatment-1",
+						Route:      "route-1",
+					},
+				},
+				RouteNamePath: "route-1",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'excluded when RouteNamePath is set' tag",
+		},
+		"success | only experiment mappings defined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{
+					{
+						Experiment: "experiment-1",
+						Treatment:  "treatment-1",
+						Route:      "route-1",
+					},
+				},
+			},
+		},
+		"success | only route name path defined": {
+			input: models.EnsemblerStandardConfig{
+				RouteNamePath: "route-1",
+			},
+		},
+	}
+
+	for name, tc := range tt {
+		t.Run(name, func(t *testing.T) {
+			validate, err := validation.NewValidator(nil)
+			assert.NoError(t, err)
+			err = validate.Struct(tc.input)
+			if tc.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.err)
+			}
+		})
+	}
+}
 
 func TestValidateLogConfig(t *testing.T) {
 	tt := map[string]struct {
@@ -195,18 +275,23 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 }
 
 type routerConfigTestCase struct {
-	routes         models.Routes
-	ensembler      *models.Ensembler
-	defaultRouteID *string
-	trafficRules   models.TrafficRules
-	expectedError  string
+	routes             models.Routes
+	enricher           *request.EnricherEnsemblerConfig
+	ensembler          *models.Ensembler
+	defaultRouteID     *string
+	defaultTrafficRule *models.DefaultTrafficRule
+	trafficRules       models.TrafficRules
+	autoscalingPolicy  *models.AutoscalingPolicy
+	expectedError      string
 }
 
 func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 	return &request.RouterConfig{
-		Routes:         tt.routes,
-		DefaultRouteID: tt.defaultRouteID,
-		TrafficRules:   tt.trafficRules,
+		Routes:             tt.routes,
+		DefaultRouteID:     tt.defaultRouteID,
+		DefaultTrafficRule: tt.defaultTrafficRule,
+		TrafficRules:       tt.trafficRules,
+		AutoscalingPolicy:  tt.autoscalingPolicy,
 		ExperimentEngine: &request.ExperimentEngineConfig{
 			Type: "nop",
 		},
@@ -214,6 +299,7 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},
+		Enricher:  tt.enricher,
 		Ensembler: tt.ensembler,
 	}
 }
@@ -238,11 +324,15 @@ func TestValidateTrafficRules(t *testing.T) {
 		Endpoint: "http://example.com/c",
 		Timeout:  "10ms",
 	}
+	defaultTrafficRule := &models.DefaultTrafficRule{
+		Routes: []string{routeAID, routeBID},
+	}
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -254,13 +344,14 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{"route-a", "route-b"},
 				},
 			},
 		},
 		"success | valid trailing symbol": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: "aBc -_()#$%&:.",
@@ -272,13 +363,14 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 		},
 		"success | valid trailing alphabet ": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: "aBc -_()#$%&:.d",
@@ -290,26 +382,107 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+		},
+		"success | valid complex Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-b",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"VN"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+				{
+					Name: "rule-d",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-c"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 		},
 		"failure | empty conditions": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name:       ruleName,
 					Conditions: []*router.TrafficRuleCondition{},
-					Routes:     []string{"route-b"},
+					Routes:     []string{routeAID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions' " +
 				"Error:Field validation for 'Conditions' failed on the 'notBlank' tag",
 		},
 		"failure | empty routes": {
-			routes:         models.Routes{routeA},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -324,12 +497,16 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes' " +
-				"Error:Field validation for 'Routes' failed on the 'notBlank' tag",
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRules[0].Routes' Error:Field validation for 'Routes' failed on the 'notBlank' tag",
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
+			}, "\n"),
 		},
 		"failure | unsupported operator": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -341,15 +518,16 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Operator' " +
 				"Error:Field validation for 'Operator' failed on the 'required' tag",
 		},
 		"failure | unsupported field source": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -361,15 +539,16 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' " +
 				"Error:Field validation for 'FieldSource' failed on the 'oneof' tag",
 		},
 		"failure | incomplete condition": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -381,7 +560,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Field' " +
@@ -417,12 +596,12 @@ func TestValidateTrafficRules(t *testing.T) {
 		"failure | unknown default route": {
 			routes:         models.Routes{routeA},
 			defaultRouteID: &routeBID,
-			expectedError: "Key: 'RouterConfig.DefaultRouteID' " +
-				"Error:Field validation for '' failed on the 'oneof' tag",
+			expectedError:  "Key: 'RouterConfig.DefaultRouteID' Error:Field validation for '' failed on the 'oneof' tag",
 		},
 		"failure | unknown traffic rule route": {
-			routes:         models.Routes{routeA},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: ruleName,
@@ -434,13 +613,13 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"some_value"},
 						},
 					},
-					Routes: []string{"route-c"},
+					Routes: []string{routeAID, routeCID},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[0]' " +
+			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[1]' " +
 				"Error:Field validation for '' failed on the 'oneof' tag",
 		},
-		"failure | rule contains default route": {
+		"failure | rule does not contains default route": {
 			routes:         models.Routes{routeA},
 			defaultRouteID: &routeAID,
 			trafficRules: models.TrafficRules{
@@ -457,12 +636,16 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{"route-a"},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[0]' " +
-				"Error:Field validation for '' failed on the 'necsfield' tag",
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for " +
+					"'DefaultTrafficRule' failed on the 'Since 1 or more Custom Traffic rules have been specified, " +
+					"a default Traffic rule is required.' tag",
+			}, "\n"),
 		},
 		"failure | empty name": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Conditions: []*router.TrafficRuleCondition{
@@ -473,11 +656,13 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules[0].Name' Error:Field validation for 'Name' failed on the 'required' tag",
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
+					"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
 				strings.Join([]string{
 					"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 					"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
@@ -487,8 +672,9 @@ func TestValidateTrafficRules(t *testing.T) {
 			}, "\n"),
 		},
 		"failure | More than 64 characters": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: "abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz",
@@ -500,7 +686,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -511,8 +697,9 @@ func TestValidateTrafficRules(t *testing.T) {
 			}, " "),
 		},
 		"failure | Invalid trailing character": {
-			routes:         models.Routes{routeA, routeB},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: "abc@",
@@ -524,7 +711,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a", "region-b"},
 						},
 					},
-					Routes: []string{"route-b"},
+					Routes: []string{routeAID, routeBID},
 				},
 			},
 			expectedError: strings.Join([]string{
@@ -535,8 +722,9 @@ func TestValidateTrafficRules(t *testing.T) {
 			}, " "),
 		},
 		"failure | Non-unique Traffic Rule names": {
-			routes:         models.Routes{routeA, routeB, routeC},
-			defaultRouteID: &routeAID,
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
 			trafficRules: models.TrafficRules{
 				{
 					Name: "abcd",
@@ -548,7 +736,7 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-a"},
 						},
 					},
-					Routes: []string{routeBID},
+					Routes: []string{routeAID, routeBID},
 				},
 				{
 					Name: "abcd",
@@ -560,14 +748,322 @@ func TestValidateTrafficRules(t *testing.T) {
 							Values:      []string{"region-c"},
 						},
 					},
-					Routes: []string{routeCID},
+					Routes: []string{routeAID, routeCID},
 				},
 			},
 			expectedError: "Key: 'RouterConfig.TrafficRules' " +
 				"Error:Field validation for 'TrafficRules' failed on the 'unique' tag",
 		},
+		"failure | Invalid name default-traffic-rule": {
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "default-traffic-rule",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
+				"'default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.' tag",
+			}, " "),
+		},
+		"failure | missing default route id in default traffic rule": {
+			routes:         models.Routes{routeA, routeB},
+			defaultRouteID: &routeAID,
+			defaultTrafficRule: &models.DefaultTrafficRule{
+				Routes: []string{routeBID},
+			},
+			trafficRules: models.TrafficRules{
+				{
+					Name: ruleName,
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+			expectedError: strings.Join([]string{
+				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the",
+				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
+			}, " "),
+		},
+		"failure | Overlapping Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
+				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
+				"(rule-a,rule-c).' tag",
+		},
+		"failure | Complex overlapping Traffic Rules": {
+			routes:             models.Routes{routeA, routeB, routeC},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: "rule-a",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-b",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID", "SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a", "region-b", "region-c"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+				{
+					Name: "rule-c",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"SG"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-a"},
+						},
+					},
+					Routes: []string{routeAID, routeCID},
+				},
+				{
+					Name: "rule-d",
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Country",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"ID"},
+						},
+						{
+							FieldSource: expRequest.HeaderFieldSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
+				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
+				"(rule-a,rule-b), (rule-b,rule-c), (rule-b,rule-d).' tag",
+		},
 	}
 
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockExperimentsService := &mocks.ExperimentsService{}
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			validate, err := validation.NewValidator(mockExperimentsService)
+			require.NoError(t, err)
+
+			err = validate.Struct(tt.RouterConfig())
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestValidateAutoscaling(t *testing.T) {
+	enricherBasic := request.EnricherEnsemblerConfig{
+		Image: "lala",
+		ResourceRequest: &models.ResourceRequest{
+			MinReplica: 0,
+			MaxReplica: 5,
+			CPURequest: resource.Quantity{
+				Format: "500M",
+			},
+			MemoryRequest: resource.Quantity{
+				Format: "1G",
+			},
+		},
+		Endpoint: "endpoint",
+		Timeout:  "6s",
+		Port:     8080,
+		Env: []*models.EnvVar{
+			{
+				Name:  "key",
+				Value: "value",
+			},
+		},
+	}
+	makeEnricher := func(
+		enricher request.EnricherEnsemblerConfig,
+		policy *models.AutoscalingPolicy,
+	) *request.EnricherEnsemblerConfig {
+		newEnr := enricher
+		newEnr.AutoscalingPolicy = policy
+		return &newEnr
+	}
+	routeID := "abc"
+	route := &models.Route{
+		ID:       routeID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/a",
+		Timeout:  "10ms",
+	}
+	id := models.ID(1)
+	suite := map[string]routerConfigTestCase{
+		"success | no autoscaling policy | all components": {
+			routes:   models.Routes{route},
+			enricher: &enricherBasic,
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerDockerType,
+			},
+		},
+		"success | no autoscaling policy | pyfunc ensembler": {
+			routes: models.Routes{route},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerPyFuncType,
+				PyfuncConfig: &models.EnsemblerPyfuncConfig{
+					ProjectID:       &id,
+					EnsemblerID:     &id,
+					ResourceRequest: &models.ResourceRequest{},
+					Timeout:         "1s",
+					Env:             models.EnvVars{},
+				},
+			},
+		},
+		"success | valid autoscaling policy | all components": {
+			routes: models.Routes{route},
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricCPU,
+				Target: "90",
+			},
+			enricher: makeEnricher(enricherBasic, &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricConcurrency,
+				Target: "2",
+			}),
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerDockerType,
+				DockerConfig: &models.EnsemblerDockerConfig{
+					Endpoint: "http://abc.com",
+					Port:     8080,
+					Image:    "nginx",
+					ResourceRequest: &models.ResourceRequest{
+						CPURequest:    resource.Quantity{Format: "500m"},
+						MemoryRequest: resource.Quantity{Format: "1Gi"},
+					},
+					AutoscalingPolicy: &models.AutoscalingPolicy{
+						Metric: models.AutoscalingMetricRPS,
+						Target: "400",
+					},
+					Timeout: "5s",
+					Env:     models.EnvVars{},
+				},
+			},
+		},
+		"success | valid autoscaling policy | pyfunc ensembler": {
+			routes: models.Routes{route},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerPyFuncType,
+				PyfuncConfig: &models.EnsemblerPyfuncConfig{
+					ProjectID:       &id,
+					EnsemblerID:     &id,
+					ResourceRequest: &models.ResourceRequest{},
+					AutoscalingPolicy: &models.AutoscalingPolicy{
+						Metric: models.AutoscalingMetricMemory,
+						Target: "80",
+					},
+					Timeout: "1s",
+					Env:     models.EnvVars{},
+				},
+			},
+		},
+		"failure | invalid autoscaling metric": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: "abc",
+				Target: "100",
+			},
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Metric' ",
+				"Error:Field validation for 'Metric' failed on the 'oneof' tag"}, ""),
+		},
+		"failure | invalid autoscaling target": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			autoscalingPolicy: &models.AutoscalingPolicy{
+				Metric: models.AutoscalingMetricRPS,
+				Target: "hundred",
+			},
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Target' ",
+				"Error:Field validation for 'Target' failed on the 'number' tag"}, ""),
+		},
+	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockExperimentsService := &mocks.ExperimentsService{}

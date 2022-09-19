@@ -13,6 +13,7 @@ import turing.batch.config.source
 import turing.batch.config.sink
 from turing.router.config.route import Route
 from turing.router.config.router_config import RouterConfig
+from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
@@ -403,6 +404,9 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
         port=5120,
         env=[generic_env_var],
         service_account="secret-name-for-google-service-account",
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="memory", target="80"
+        ),
     )
 
 
@@ -414,6 +418,9 @@ def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
         resource_request=generic_resource_request,
         timeout="500ms",
         env=[generic_env_var],
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="concurrency", target="10"
+        ),
     )
 
 
@@ -468,6 +475,9 @@ def generic_enricher(generic_resource_request, generic_env_var):
         port=5180,
         env=[generic_env_var],
         service_account="service-account",
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="rps", target="100"
+        ),
     )
 
 
@@ -522,6 +532,9 @@ def generic_router_version(
         ensembler=ensembler,
         monitoring_url="https://lookhere.io/",
         enricher=generic_enricher,
+        autoscaling_policy=turing.generated.models.AutoscalingPolicy(
+            metric="cpu", target="90"
+        ),
     )
 
 
@@ -555,6 +568,7 @@ def generic_router_config(docker_router_ensembler_config):
         resource_request=ResourceRequest(
             min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
         ),
+        autoscaling_policy=AutoscalingPolicy(metric="cpu", target="90"),
         timeout="100ms",
         log_config=LogConfig(
             result_logger_type=ResultLoggerType.NOP,
