@@ -3,7 +3,7 @@ package service
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"testing"
 	"time"
 
@@ -119,24 +119,24 @@ func TestPodLogServiceListPodLogs(t *testing.T) {
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, SinceTime: &sinceTimeV1Minus1Sec}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T06:59:59Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "json-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, TailLines: &tailLines}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T07:00:05Z {"foo":"bar", "baz": 5}
 2020-07-07T07:00:10Z {"foo":"bar", "baz": 10}`)), nil)
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, SinceTime: &sinceTimeV1Minus1Sec}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
 invalidtimestamp line3
 
@@ -144,7 +144,7 @@ invalidtimestamp line3
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true, TailLines: &tailLines}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
 invalidtimestamp line3
 
@@ -152,7 +152,7 @@ invalidtimestamp line3
 	controller.
 		On("ListPodLogs", mock.Anything, "namespace", "text-payload",
 			&corev1.PodLogOptions{Container: "user-container", Timestamps: true}).
-		Return(ioutil.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
+		Return(io.NopCloser(bytes.NewBufferString(`2020-07-07T08:00:05Z line1
 2020-07-07T08:00:10Z line2
 invalidtimestamp line3
 

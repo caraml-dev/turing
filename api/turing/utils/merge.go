@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -83,7 +82,7 @@ func MergeMaps(originalMap, override map[string]interface{}) (map[string]interfa
 }
 
 func readYAML(filepath string) (map[string]interface{}, error) {
-	file, err := ioutil.ReadFile(filepath)
+	file, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}

@@ -33,6 +33,9 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 			request.ExperimentEngineConfig{},
 		)
 	}
+
+	instance.RegisterStructValidation(validateEnsemblerStandardConfig, models.EnsemblerStandardConfig{})
+
 	instance.RegisterStructValidation(validateRouterConfig, request.RouterConfig{})
 
 	// register common.RuleConditionOperator type to use its String representation for validation
@@ -44,6 +47,20 @@ func NewValidator(expSvc service.ExperimentsService) (*validator.Validate, error
 	}, router.RuleConditionOperator{})
 
 	return instance, nil
+}
+
+func validateEnsemblerStandardConfig(sl validator.StructLevel) {
+	ensemblerStandardConfig := sl.Current().Interface().(models.EnsemblerStandardConfig)
+	// Verify that the ExperimentMappings and RouteNamePath are not both empty at the same time
+	if (len(ensemblerStandardConfig.ExperimentMappings) == 0) && ensemblerStandardConfig.RouteNamePath == "" {
+		sl.ReportError(ensemblerStandardConfig.ExperimentMappings,
+			"ExperimentMappings", "ExperimentMappings", "required when RouteNamePath is not set", "")
+	}
+	// Verify that the ExperimentMappings and RouteNamePath are not both set at the same time
+	if len(ensemblerStandardConfig.ExperimentMappings) > 0 && ensemblerStandardConfig.RouteNamePath != "" {
+		sl.ReportError(ensemblerStandardConfig.ExperimentMappings,
+			"ExperimentMappings", "ExperimentMappings", "excluded when RouteNamePath is set", "")
+	}
 }
 
 func validateLogConfig(sl validator.StructLevel) {

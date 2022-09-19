@@ -1980,6 +1980,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1
               route: route-1
@@ -2275,6 +2276,7 @@ components:
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
+          route_name_path: route_name_path
           experiment_mappings:
           - treatment: treatment-1
             route: route-1
@@ -2335,6 +2337,7 @@ components:
     EnsemblerStandardConfig:
       description: ensembler config when ensembler type is standard
       example:
+        route_name_path: route_name_path
         experiment_mappings:
         - treatment: treatment-1
           route: route-1
@@ -2348,8 +2351,8 @@ components:
           items:
             $ref: '#/components/schemas/EnsemblerStandardConfig_experiment_mappings'
           type: array
-      required:
-      - experiment_mappings
+        route_name_path:
+          type: string
       type: object
     EnsemblerDockerConfig:
       description: ensembler config when ensembler type is docker
@@ -2626,6 +2629,7 @@ components:
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
+              route_name_path: route_name_path
               experiment_mappings:
               - treatment: treatment-1
                 route: route-1
@@ -2781,6 +2785,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1
               route: route-1

@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -19,7 +19,7 @@ func ReadFile(filepath string) ([]byte, error) {
 	}
 	defer fileObj.Close()
 	// Read contents
-	byteValue, err := ioutil.ReadAll(fileObj)
+	byteValue, err := io.ReadAll(fileObj)
 	if err != nil {
 		return nil, err
 	}

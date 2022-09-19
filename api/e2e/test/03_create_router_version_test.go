@@ -130,20 +130,21 @@ func TestCreateRouterVersion(t *testing.T) {
 				response.StatusCode, string(responsePayload))
 			actualResponse := gjson.GetBytes(responsePayload, "response").String()
 			expectedResponse := `{
-			  "experiment": {
-				"configuration": {
-					"foo":"bar"
-				}
-			  },
-			  "route_responses": [
-				{
-				  "data": {
-					"version": "control"
-				  },
-				  "is_default": false,
-				  "route": "control"
-				}
-			  ]
+				"experiment": {
+					"configuration": {
+						"foo":"bar",
+						"route_name":"treatment-a"
+					}
+				},
+				"route_responses": [
+					{
+						"data": {
+							"version": "control"
+						},
+						"is_default": false,
+						"route": "control"
+					}
+				]
 			}`
 			assert.JSONEq(t, expectedResponse, actualResponse)
 		})

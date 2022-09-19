@@ -5,7 +5,7 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -42,7 +42,7 @@ func TestDeployValidConfig(t *testing.T) {
 	response, err := globalTestContext.httpClient.Do(req)
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusAccepted, response.StatusCode, readBody(t, response))
-	responseBody, err := ioutil.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
 	require.NoError(t, err)
 	t.Log("Deploy Response:", string(responseBody))
 

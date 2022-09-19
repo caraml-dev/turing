@@ -20,6 +20,84 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestValidateEnsemblerStandardConfig(t *testing.T) {
+	tt := map[string]struct {
+		input models.EnsemblerStandardConfig
+		err   string
+	}{
+		"failure | experiment mappings and route name path undefined": {
+			input: models.EnsemblerStandardConfig{},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings and route name path empty": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{},
+				RouteNamePath:      "",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings empty and route name path undefined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{},
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings undefined and route name path empty": {
+			input: models.EnsemblerStandardConfig{
+				RouteNamePath: "",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'required when RouteNamePath is not set' tag",
+		},
+		"failure | experiment mappings and route name path defined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{
+					{
+						Experiment: "experiment-1",
+						Treatment:  "treatment-1",
+						Route:      "route-1",
+					},
+				},
+				RouteNamePath: "route-1",
+			},
+			err: "Key: 'EnsemblerStandardConfig.ExperimentMappings' Error:Field validation for 'ExperimentMappings' " +
+				"failed on the 'excluded when RouteNamePath is set' tag",
+		},
+		"success | only experiment mappings defined": {
+			input: models.EnsemblerStandardConfig{
+				ExperimentMappings: []models.ExperimentMapping{
+					{
+						Experiment: "experiment-1",
+						Treatment:  "treatment-1",
+						Route:      "route-1",
+					},
+				},
+			},
+		},
+		"success | only route name path defined": {
+			input: models.EnsemblerStandardConfig{
+				RouteNamePath: "route-1",
+			},
+		},
+	}
+
+	for name, tc := range tt {
+		t.Run(name, func(t *testing.T) {
+			validate, err := validation.NewValidator(nil)
+			assert.NoError(t, err)
+			err = validate.Struct(tc.input)
+			if tc.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.err)
+			}
+		})
+	}
+}
+
 func TestValidateLogConfig(t *testing.T) {
 	tt := map[string]struct {
 		input  request.LogConfig

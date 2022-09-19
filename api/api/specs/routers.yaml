@@ -794,8 +794,6 @@ components:
       description: "ensembler config when ensembler type is standard"
       type: "object"
       nullable: true
-      required:
-        - "experiment_mappings"
       properties:
         experiment_mappings:
           type: "array"
@@ -818,6 +816,8 @@ components:
                 description: "route id of the routes configured in the router"
                 type: "string"
                 example: "route-1"
+        route_name_path:
+          type: "string"
 
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"
