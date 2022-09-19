@@ -12,7 +12,7 @@ require (
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/gojek/fiber v0.1.1-0.20220906074605-cc45f839caa6
+	github.com/gojek/fiber v0.1.1-0.20220919041622-e1bb222fbb9a
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
 	github.com/golang-migrate/migrate/v4 v4.11.0
