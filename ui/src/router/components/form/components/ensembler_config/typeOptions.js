@@ -14,10 +14,23 @@ const typeOptions = [
   {
     value: "standard",
     inputDisplay: "Standard",
+    expenginetype: "standard",
     description: (
       <Fragment>
         Turing will select the response from one of the routes, based on the
         configured mapping between routes and experiment treatments
+      </Fragment>
+    ),
+  },
+  {
+    value: "standard",
+    inputDisplay: "Standard",
+    expenginetype: "custom",
+    description: (
+      <Fragment>
+        Turing will select the route response corresponding to the route name specified
+        in the treatment configuration. The route name path will be used to locate the
+        name of the route within the treatment configuration.
       </Fragment>
     ),
   },
@@ -62,7 +75,9 @@ export const ensemblerTypeOptions = (engineProps) => {
     return typeOptions.filter((o) => o.value !== "standard");
   }
   // Ensembler must be selected when there is an experiment engine
-  const ensemblerOptions = typeOptions.filter((o) => o.value !== "nop");
+  const ensemblerOptions = typeOptions.filter(
+    (o) => o.value !== "nop" && (o.expenginetype === engineProps.type || o.expenginetype === undefined)
+  );
   if (engineProps?.standard_experiment_manager_config?.experiment_selection_enabled === false) {
     // Standard Ensembler is not available when experiment selection is disabled
     return ensemblerOptions.filter((o) => o.value !== "standard");
