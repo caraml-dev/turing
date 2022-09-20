@@ -8,19 +8,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
-	mlp "github.com/gojek/mlp/api/client"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/caraml-dev/turing/api/turing/config"
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
-	merlin "github.com/gojek/merlin/client"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
+	mockImgBuilder "github.com/caraml-dev/turing/api/turing/imagebuilder/mocks"
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
@@ -407,4 +409,72 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller.AssertCalled(t, "DeleteSecret", mock.Anything, "test-svc-svc-acct-secret-1", testNs, false)
 	controller.AssertCalled(t, "DeletePersistentVolumeClaim", mock.Anything, "pvc", testNs, false)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
+}
+
+func TestBuildEnsemblerServiceImage(t *testing.T) {
+	ensembler := &models.PyFuncEnsembler{GenericEnsembler: &models.GenericEnsembler{Name: "test-ensembler"}}
+	project := &mlp.Project{}
+	id := models.ID(1)
+	routerVersion := &models.RouterVersion{
+		Ensembler: &models.Ensembler{
+			PyfuncConfig: &models.EnsemblerPyfuncConfig{
+				EnsemblerID: &id,
+				ProjectID:   &id,
+				ResourceRequest: &models.ResourceRequest{
+					MinReplica: 1,
+					MaxReplica: 2,
+					CPURequest: resource.Quantity{
+						Format: "500M",
+					},
+					MemoryRequest: resource.Quantity{
+						Format: "1G",
+					},
+				},
+				AutoscalingPolicy: &models.AutoscalingPolicy{
+					Metric: models.AutoscalingMetricConcurrency,
+					Target: "10",
+				},
+				Timeout: "5s",
+				Env: []*models.EnvVar{
+					{
+						Name:  "key",
+						Value: "value",
+					},
+				},
+			},
+		},
+	}
+
+	eventsCh := NewEventChannel()
+	go func() {
+		for {
+			_, done := eventsCh.Read()
+			if done {
+				return
+			}
+		}
+	}()
+	defer eventsCh.Close()
+
+	// Set up mock services
+	imageBuilder := &mockImgBuilder.ImageBuilder{}
+	imageBuilder.On("BuildImage", mock.Anything).Return("test-image", nil)
+	ds := &deploymentService{
+		ensemblerServiceImageBuilder: imageBuilder,
+	}
+
+	// Call test function
+	_ = ds.buildEnsemblerServiceImage(ensembler, project, routerVersion, eventsCh)
+
+	// Test that the docker config is set correctly
+	assert.Equal(t, routerVersion.Ensembler.DockerConfig, &models.EnsemblerDockerConfig{
+		Image:             "test-image",
+		ResourceRequest:   routerVersion.Ensembler.PyfuncConfig.ResourceRequest,
+		AutoscalingPolicy: routerVersion.Ensembler.PyfuncConfig.AutoscalingPolicy,
+		Timeout:           routerVersion.Ensembler.PyfuncConfig.Timeout,
+		Endpoint:          "/ensemble",
+		Port:              8083,
+		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
+		ServiceAccount:    "",
+	})
 }
