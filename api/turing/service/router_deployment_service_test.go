@@ -464,7 +464,7 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 	}
 
 	// Call test function
-	ds.buildEnsemblerServiceImage(ensembler, project, routerVersion, eventsCh)
+	_ = ds.buildEnsemblerServiceImage(ensembler, project, routerVersion, eventsCh)
 
 	// Test that the docker config is set correctly
 	assert.Equal(t, routerVersion.Ensembler.DockerConfig, &models.EnsemblerDockerConfig{
