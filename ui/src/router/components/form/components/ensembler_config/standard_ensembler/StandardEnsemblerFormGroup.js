@@ -14,7 +14,7 @@ import StandardEnsemblerLoaderComponent from "../../../../../../components/ensem
 
 const FallbackView = ({ text }) => (
   <EuiFlexItem grow={true}>
-    <Panel title="Route Name Path">
+    <Panel title="Route Selection">
       <EuiSpacer size="m" />
       {text}
     </Panel>
@@ -39,7 +39,7 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
         <RemoteComponent
           scope={remoteUi.name}
           name="./EditStandardEnsemblerConfig"
-          fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}
+          fallback={<FallbackView text="Loading Standard Ensembler form for the selected Custom Experiment Engine" />}
           projectId={projectId}
           routes={routes}
           routeNamePath={routeNamePath}
@@ -108,11 +108,7 @@ export const StandardEnsemblerFormGroup = ({
         ) : isLoaded ? (
           <EuiFlexItem>
             <StandardEnsemblerWithCustomExperimentEnginePanel
-              remoteUi={{
-                config: "http://localhost:3002/xp/app.config.js",
-                name: "xp",
-                url: "http://localhost:3002/xp/remoteEntry.js"
-              }}
+              remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
               projectId={projectId}
               routes={routes}
               routeNamePath={standardConfig.route_name_path}
