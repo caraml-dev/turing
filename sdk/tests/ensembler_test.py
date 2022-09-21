@@ -100,7 +100,10 @@ def test_create_ensembler(
     actual = turing.PyFuncEnsembler.create(
         name=pyfunc_ensembler.name,
         ensembler_instance=tests.MyTestEnsembler(0.01),
-        conda_env={"channels": ["defaults"], "dependencies": ["python=3.7.0"]},
+        conda_env={
+            "channels": ["defaults"],
+            "dependencies": ["python=3.7.0", {"pip": ["test-lib==0.0.1"]}],
+        },
     )
 
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
@@ -141,7 +144,10 @@ def test_update_ensembler(
     actual.update(
         name=pyfunc_ensembler.name,
         ensembler_instance=tests.MyTestEnsembler(0.06),
-        conda_env={"channels": ["defaults"], "dependencies": ["python>=3.8.0"]},
+        conda_env={
+            "channels": ["defaults"],
+            "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
+        },
         code_dir=[
             os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), "..", "samples/quickstart"
