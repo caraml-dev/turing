@@ -450,13 +450,14 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 	)
 	// Create a new docker config for the ensembler with the newly generated image
 	routerVersion.Ensembler.DockerConfig = &models.EnsemblerDockerConfig{
-		Image:           imageRef,
-		ResourceRequest: routerVersion.Ensembler.PyfuncConfig.ResourceRequest,
-		Timeout:         routerVersion.Ensembler.PyfuncConfig.Timeout,
-		Endpoint:        PyFuncEnsemblerServiceEndpoint,
-		Port:            PyFuncEnsemblerServicePort,
-		Env:             routerVersion.Ensembler.PyfuncConfig.Env,
-		ServiceAccount:  "",
+		Image:             imageRef,
+		ResourceRequest:   routerVersion.Ensembler.PyfuncConfig.ResourceRequest,
+		AutoscalingPolicy: routerVersion.Ensembler.PyfuncConfig.AutoscalingPolicy,
+		Timeout:           routerVersion.Ensembler.PyfuncConfig.Timeout,
+		Endpoint:          PyFuncEnsemblerServiceEndpoint,
+		Port:              PyFuncEnsemblerServicePort,
+		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
+		ServiceAccount:    "",
 	}
 
 	return nil
