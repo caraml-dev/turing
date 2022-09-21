@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"time"
 
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/google/uuid"
@@ -18,9 +17,6 @@ import (
 )
 
 type GrpcTestServer struct {
-	Port         int
-	MockResponse *upiv1.PredictValuesResponse
-	DelayTimer   time.Duration
 }
 
 type HTTPTestServer struct {
@@ -30,12 +26,6 @@ func (s *GrpcTestServer) PredictValues(
 	_ context.Context,
 	req *upiv1.PredictValuesRequest,
 ) (*upiv1.PredictValuesResponse, error) {
-	time.Sleep(s.DelayTimer)
-
-	if s.MockResponse != nil {
-		return s.MockResponse, nil
-	}
-
 	return &upiv1.PredictValuesResponse{PredictionResultTable: req.GetPredictionTable()}, nil
 }
 
@@ -68,13 +58,13 @@ func (h *HTTPTestServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-func RunTestUPIServer(srv GrpcTestServer) *grpc.Server {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", srv.Port))
+func RunTestUPIServer(port int) *grpc.Server {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
 	s := grpc.NewServer()
-	upiv1.RegisterUniversalPredictionServiceServer(s, &srv)
+	upiv1.RegisterUniversalPredictionServiceServer(s, &GrpcTestServer{})
 	reflection.Register(s)
 	go func() {
 		if err := s.Serve(listener); err != nil {
@@ -85,10 +75,10 @@ func RunTestUPIServer(srv GrpcTestServer) *grpc.Server {
 	return s
 }
 
-func RunTestUPIHttpServer(httpPort int) {
+func RunTestUPIHttpServer(port int) {
 	http.Handle("/predict_values", &HTTPTestServer{})
 	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), http.DefaultServeMux); err != nil {
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), http.DefaultServeMux); err != nil {
 			log.Fatalf("failed to serve: %s", err)
 		}
 	}()

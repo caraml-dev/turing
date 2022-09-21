@@ -43,7 +43,7 @@ var benchMarkUpiErr error
 
 func TestMain(m *testing.M) {
 	// Run route server
-	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: routeGRPCPort})
+	testutils.RunTestUPIServer(routeGRPCPort)
 	testutils.RunTestUPIHttpServer(routeHTTPPort)
 	// Run Turing router
 	runTuringUpiGRPCServer(turingUpiGRCPPort)

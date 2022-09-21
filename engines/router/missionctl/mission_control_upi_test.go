@@ -55,9 +55,9 @@ func TestMain(m *testing.M) {
 	// this mock stream is required for grpc.SetHeader to have a stream context to work
 	mockStream.On("SetHeader", mock.Anything).Return(nil)
 
-	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: port})
-	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: grpcport1})
-	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: grpcport2})
+	testutils.RunTestUPIServer(port)
+	testutils.RunTestUPIServer(grpcport1)
+	testutils.RunTestUPIServer(grpcport2)
 	os.Exit(m.Run())
 }
 
