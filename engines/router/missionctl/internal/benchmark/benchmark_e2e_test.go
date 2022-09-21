@@ -26,11 +26,11 @@ import (
 )
 
 const (
-	turingUpiGRCPPort = 50601
+	turingUpiGRCPPort = 50603
 	turingUpiHTTPPort = 9003
-	routeGRPCPort     = 50600
+	routeGRPCPort     = 50604
 	routeHTTPPort     = 9004
-	// require running port at 50600
+	// require running port at 50603
 	singleUpiGRPCRouteServer = "../../testdata/benchmark/single_route_upi_grpc.yaml"
 	// require running endpoint at localhost:9004/predict_values/
 	singleUpiHTTPRouteServer = "../../testdata/benchmark/single_route_upi_http.yaml"
@@ -42,8 +42,10 @@ var benchMarkHTTPResp *http.Response
 var benchMarkUpiErr error
 
 func TestMain(m *testing.M) {
+	// Run route server
 	testutils.RunTestUPIServer(testutils.GrpcTestServer{Port: routeGRPCPort})
 	testutils.RunTestUPIHttpServer(routeHTTPPort)
+	// Run Turing router
 	runTuringUpiGRPCServer(turingUpiGRCPPort)
 	runTuringUpiHTTPServer(turingUpiHTTPPort)
 	os.Exit(m.Run())
@@ -109,18 +111,14 @@ func generatedUpiClientCall(rows int, cols int, port int, b *testing.B) {
 		benchMarkUpiResp, benchMarkUpiErr = client.PredictValues(context.Background(), upiRequest)
 	}
 }
-func httpClientCall(rows int, cols int, port int, b *testing.B) {
+func httpClientCall(rows int, cols int, endpoint string, b *testing.B) {
 	upiRequest := testutils.GenerateUPIRequest(rows, cols)
 	resBytes, err := protojson.Marshal(upiRequest)
-	require.NoError(b, err)
-
-	requestURL := fmt.Sprintf("http://localhost:%d/predict_values", port)
 	require.NotNil(b, resBytes)
-	require.NotNil(b, requestURL)
 	b.ResetTimer()
 	var resp *http.Response
 	for n := 0; n < b.N; n++ {
-		resp, err = http.Post(requestURL, "application/json", io.NopCloser(bytes.NewBuffer(resBytes)))
+		resp, err = http.Post(endpoint, "application/json", io.NopCloser(bytes.NewBuffer(resBytes)))
 		resp.Body.Close()
 	}
 	benchMarkHTTPResp = resp
@@ -144,17 +142,17 @@ func Benchmark_Upi_Grpc_Turing_Large(b *testing.B) {
 }
 
 func Benchmark_Upi_Http_Direct_Small(b *testing.B) {
-	httpClientCall(5, 5, routeHTTPPort, b)
+	httpClientCall(5, 5, fmt.Sprintf("http://localhost:%d/predict_values", routeHTTPPort), b)
 }
 
 func Benchmark_Upi_Http_Direct_Large(b *testing.B) {
-	httpClientCall(100, 100, routeHTTPPort, b)
+	httpClientCall(100, 100, fmt.Sprintf("http://localhost:%d/predict_values", routeHTTPPort), b)
 }
 
 func Benchmark_Upi_Http_Turing_Small(b *testing.B) {
-	httpClientCall(5, 5, turingUpiHTTPPort, b)
+	httpClientCall(5, 5, fmt.Sprintf("http://localhost:%d/v1/predict", turingUpiHTTPPort), b)
 }
 
 func Benchmark_Upi_Http_Turing_Large(b *testing.B) {
-	httpClientCall(100, 100, turingUpiHTTPPort, b)
+	httpClientCall(100, 100, fmt.Sprintf("http://localhost:%d/v1/predict", turingUpiHTTPPort), b)
 }

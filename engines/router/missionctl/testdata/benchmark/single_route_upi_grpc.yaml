@@ -1,7 +1,7 @@
 type: EAGER_ROUTER
 id: router-id
 routes:
-  - endpoint: "localhost:50600"
+  - endpoint: "localhost:50604"
     service: "caraml.upi.v1.UniversalPredictionService"
     method: "PredictValues"
     protocol: "grpc"
