@@ -7,6 +7,6 @@ ALTER TABLE router_versions ADD autoscaling_policy jsonb NOT NULL DEFAULT '{"met
 ALTER TABLE router_versions ALTER COLUMN autoscaling_policy DROP DEFAULT;
 -- ensemblers
 UPDATE ensembler_configs set docker_config = docker_config || jsonb '{"autoscaling_policy": {"metric": "concurrency", "target": "1"}}'
-    WHERE type='docker';
+    WHERE (type='docker' OR type='pyfunc') AND docker_config IS NOT NULL;
 UPDATE ensembler_configs set pyfunc_config = pyfunc_config || jsonb '{"autoscaling_policy": {"metric": "concurrency", "target": "1"}}'
     WHERE type='pyfunc';
