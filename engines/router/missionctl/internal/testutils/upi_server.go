@@ -3,8 +3,10 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -12,12 +14,16 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type GrpcTestServer struct {
 	Port         int
 	MockResponse *upiv1.PredictValuesResponse
 	DelayTimer   time.Duration
+}
+
+type HTTPTestServer struct {
 }
 
 func (s *GrpcTestServer) PredictValues(
@@ -33,6 +39,35 @@ func (s *GrpcTestServer) PredictValues(
 	return &upiv1.PredictValuesResponse{PredictionResultTable: req.GetPredictionTable()}, nil
 }
 
+func (h *HTTPTestServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req := &upiv1.PredictValuesRequest{}
+	err = protojson.Unmarshal(requestBody, req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	res := &upiv1.PredictValuesResponse{
+		PredictionResultTable: req.PredictionTable,
+	}
+
+	resBytes, err := protojson.Marshal(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(resBytes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
 func RunTestUPIServer(srv GrpcTestServer) *grpc.Server {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", srv.Port))
 	if err != nil {
@@ -48,6 +83,15 @@ func RunTestUPIServer(srv GrpcTestServer) *grpc.Server {
 	}()
 
 	return s
+}
+
+func RunTestUPIHttpServer(httpPort int) {
+	http.Handle("/predict_values", &HTTPTestServer{})
+	go func() {
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), http.DefaultServeMux); err != nil {
+			log.Fatalf("failed to serve: %s", err)
+		}
+	}()
 }
 
 func GenerateUPIRequest(n int, m int) *upiv1.PredictValuesRequest {

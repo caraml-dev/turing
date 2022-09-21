@@ -1,0 +1,15 @@
+type: EAGER_ROUTER
+id: router-id
+routes:
+  - endpoint: "localhost:50600"
+    service: "caraml.upi.v1.UniversalPredictionService"
+    method: "PredictValues"
+    protocol: "grpc"
+    id: control
+    timeout: 20s
+    type: PROXY
+strategy:
+  properties:
+    default_route_id: control
+    experiment_engine: nop
+  type: fiber.DefaultTuringRoutingStrategy

@@ -3,7 +3,6 @@ package missionctl
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -25,20 +24,16 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 )
 
 const (
-	port            = 50550
-	grpcport1       = 50556
-	grpcport2       = 50557
-	benchmarkConfig = "testdata/grpc/grpc_router_minimal.yaml"
-	twoRouteConfig  = "testdata/grpc/grpc_router_minimal_two_route.yaml"
+	port              = 50550
+	grpcport1         = 50556
+	grpcport2         = 50557
+	singleRouteConfig = "testdata/grpc/grpc_router_minimal.yaml"
+	twoRouteConfig    = "testdata/grpc/grpc_router_minimal_two_route.yaml"
 )
-
-var benchMarkUpiResp *upiv1.PredictValuesResponse
-var benchMarkUpiErr *errors.TuringError
 
 var mockResponse = &upiv1.PredictValuesResponse{
 	PredictionResultTable: &upiv1.Table{
@@ -78,12 +73,12 @@ func TestNewMissionControlUpi(t *testing.T) {
 	}{
 		{
 			name:          "ok with no fiber debug",
-			cfgFilePath:   "testdata/grpc/grpc_router_minimal.yaml",
+			cfgFilePath:   singleRouteConfig,
 			fiberDebugLog: false,
 		},
 		{
 			name:          "ok with fiber debug",
-			cfgFilePath:   "testdata/grpc/grpc_router_minimal_two_route.yaml",
+			cfgFilePath:   twoRouteConfig,
 			fiberDebugLog: true,
 		},
 	}
@@ -259,51 +254,4 @@ func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesRe
 			upiv1.Variable{},
 			upiv1.ResponseMetadata{},
 		))
-}
-
-func benchmarkGrpcRoute(rows int, cols int, b *testing.B) {
-	mc, err := NewMissionControlUPI(benchmarkConfig, false)
-	require.NoError(b, err)
-	ctx := context.Background()
-	ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
-	byteReq, err := proto.Marshal(testutils.GenerateUPIRequest(rows, cols))
-	require.NoError(b, err)
-
-	req := &fibergrpc.Request{
-		Message: byteReq,
-	}
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		benchMarkUpiResp, benchMarkUpiErr = mc.Route(ctx, req)
-	}
-}
-
-func benchmarkPlainGrpc(rows int, cols int, b *testing.B) {
-	upiRequest := testutils.GenerateUPIRequest(rows, cols)
-
-	conn, err := grpc.Dial(fmt.Sprintf(":%d", grpcport1), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(b, err)
-	client := upiv1.NewUniversalPredictionServiceClient(conn)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		benchMarkUpiResp, _ = client.PredictValues(context.Background(), upiRequest)
-	}
-}
-
-func BenchmarkMissionControlUpiDefaultRouteSmallPayload(b *testing.B) {
-	benchmarkGrpcRoute(5, 5, b)
-}
-
-func BenchmarkMissionControlUpiDefaultRouteLargePayload(b *testing.B) {
-	benchmarkGrpcRoute(100, 100, b)
-}
-
-func BenchmarkPlainGrpcUpiSmallPayload(b *testing.B) {
-	benchmarkPlainGrpc(5, 5, b)
-}
-
-func BenchmarkPlainGrpcUpiLargePayload(b *testing.B) {
-	benchmarkPlainGrpc(100, 100, b)
 }
