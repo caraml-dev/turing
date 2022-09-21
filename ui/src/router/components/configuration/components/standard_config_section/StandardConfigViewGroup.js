@@ -4,7 +4,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/eui";
 import { TreatmentMappingConfigSection } from "./TreatmentMappingConfigSection";
 import { FallbackRouteConfigSection } from "./FallbackRouteConfigSection";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
-import { Panel} from "../../../form/components/Panel";
+import { Panel } from "../../../form/components/Panel";
 import StandardEnsemblerLoaderComponent from "../../../../../components/ensembler/StandardEnsemblerLoaderComponent";
 import { RemoteComponent } from "../../../../../components/remote_component/RemoteComponent";
 
@@ -29,7 +29,7 @@ const StandardEnsemblerWithCustomExperimentEngineConfigView = ({
       fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}>
       <StandardEnsemblerLoaderComponent
         FallbackView={FallbackView}
-        experimentEngine={remoteUi}>
+        remoteUi={remoteUi}>
         <RemoteComponent
           scope={remoteUi.name}
           name="./StandardEnsemblerConfigDetails"
@@ -42,7 +42,6 @@ const StandardEnsemblerWithCustomExperimentEngineConfigView = ({
     </React.Suspense>
   );
 };
-
 
 export const StandardConfigViewGroup = ({
   projectId,

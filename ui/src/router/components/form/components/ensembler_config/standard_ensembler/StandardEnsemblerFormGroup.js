@@ -35,7 +35,7 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
       fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}>
       <StandardEnsemblerLoaderComponent
         FallbackView={FallbackView}
-        experimentEngine={remoteUi}>
+        remoteUi={remoteUi}>
         <RemoteComponent
           scope={remoteUi.name}
           name="./EditStandardEnsemblerConfig"
