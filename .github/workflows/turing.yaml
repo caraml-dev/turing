@@ -27,7 +27,6 @@ on:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"
       - "engines/pyfunc-ensembler-service/**"
-      - "sdk/**"
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
