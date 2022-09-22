@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -39,6 +40,8 @@ type KnativeService struct {
 	MinReplicas       int    `json:"minReplicas"`
 	MaxReplicas       int    `json:"maxReplicas"`
 	AutoscalingMetric string `json:"autoscalingMetric"`
+	// AutoscalingTarget is expected to be an absolute value for concurrency / rps
+	// and a % value (of the requested value) for cpu / memory based autoscaling.
 	AutoscalingTarget string `json:"autoscalingTarget"`
 
 	// Resource properties
@@ -48,7 +51,7 @@ type KnativeService struct {
 
 // Creates a new config object compatible with the knative serving API, from
 // the given config
-func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
+func (cfg *KnativeService) BuildKnativeServiceConfig() (*knservingv1.Service, error) {
 	// clone creates a copy of a map object
 	clone := func(l map[string]string) map[string]string {
 		ll := map[string]string{}
@@ -67,7 +70,10 @@ func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
 	kserviceObjectMeta := cfg.buildSvcObjectMeta(kserviceLabels)
 
 	revisionLabels := clone(cfg.Labels)
-	kserviceSpec := cfg.buildSvcSpec(revisionLabels)
+	kserviceSpec, err := cfg.buildSvcSpec(revisionLabels)
+	if err != nil {
+		return nil, err
+	}
 
 	svc := &knservingv1.Service{
 		ObjectMeta: *kserviceObjectMeta,
@@ -77,7 +83,7 @@ func (cfg *KnativeService) BuildKnativeServiceConfig() *knservingv1.Service {
 	// is called when creating or updating the knative service. Ref: https://github.com/kserve/kserve/blob/v0.8.0
 	// /pkg/controller/v1beta1/inferenceservice/reconcilers/knative/ksvc_reconciler.go#L159
 	svc.SetDefaults(context.TODO())
-	return svc
+	return svc, nil
 }
 
 func (cfg *KnativeService) buildSvcObjectMeta(labels map[string]string) *metav1.ObjectMeta {
@@ -90,16 +96,21 @@ func (cfg *KnativeService) buildSvcObjectMeta(labels map[string]string) *metav1.
 
 func (cfg *KnativeService) buildSvcSpec(
 	labels map[string]string,
-) *knservingv1.ServiceSpec {
+) (*knservingv1.ServiceSpec, error) {
 	// Set max timeout for responding to requests
 	timeout := DefaultRequestTimeoutSeconds
 
-	// Build annotations, set target concurrency of 1
+	autoscalingTarget, err := cfg.getAutoscalingTarget()
+	if err != nil {
+		return nil, err
+	}
+
+	// Build annotations
 	annotations := map[string]string{
 		"autoscaling.knative.dev/minScale": strconv.Itoa(cfg.MinReplicas),
 		"autoscaling.knative.dev/maxScale": strconv.Itoa(cfg.MaxReplicas),
 		"autoscaling.knative.dev/metric":   cfg.AutoscalingMetric,
-		"autoscaling.knative.dev/target":   cfg.AutoscalingTarget,
+		"autoscaling.knative.dev/target":   autoscalingTarget,
 		"autoscaling.knative.dev/class":    autoscalingMetricClassMap[cfg.AutoscalingMetric],
 	}
 
@@ -149,5 +160,21 @@ func (cfg *KnativeService) buildSvcSpec(
 				},
 			},
 		},
+	}, nil
+}
+
+func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
+	if cfg.AutoscalingMetric == "memory" {
+		// The value is supplied as a % of requested memory but the Knative API expects the value in Mi.
+		targetPercent, err := strconv.ParseFloat(cfg.AutoscalingTarget, 64)
+		if err != nil {
+			return "", err
+		}
+		targetResource := ComputeResource(cfg.BaseService.MemoryRequests, targetPercent/100)
+		// Divide value by (1024^2) to convert to Mi
+		return fmt.Sprintf("%.0f", float64(targetResource.Value())/math.Pow(1024, 2)), nil
+
 	}
+	// For all other metrics, we can use the supplied value as is.
+	return cfg.AutoscalingTarget, nil
 }
