@@ -8,8 +8,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
-	fibergrpc "github.com/gojek/fiber/grpc"
-	"github.com/gojek/fiber/protocol"
+	fiberGrpc "github.com/gojek/fiber/grpc"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
@@ -59,7 +59,7 @@ func (us *missionControlUpi) Route(
 	resp, ok := <-us.fiberRouter.Dispatch(ctx, fiberRequest).Iter()
 	if !ok {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), protocol.GRPC,
+			errors.Newf(errors.BadResponse, "did not get back a valid response from the fiberHandler"), fiberProtocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -70,10 +70,10 @@ func (us *missionControlUpi) Route(
 		}
 	}
 
-	grpcResponse, ok := resp.(*fibergrpc.Response)
+	grpcResponse, ok := resp.(*fiberGrpc.Response)
 	if !ok {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), protocol.GRPC,
+			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), fiberProtocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -82,7 +82,7 @@ func (us *missionControlUpi) Route(
 	err := proto.Unmarshal(resp.Payload(), &responseProto)
 	if err != nil {
 		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), protocol.GRPC,
+			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), fiberProtocol.GRPC,
 		)
 		return nil, turingError
 	}
@@ -92,7 +92,7 @@ func (us *missionControlUpi) Route(
 		err = grpc.SetHeader(ctx, grpcResponse.Metadata)
 		if err != nil {
 			turingError = errors.NewTuringError(
-				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), protocol.GRPC,
+				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), fiberProtocol.GRPC,
 			)
 			return nil, turingError
 		}

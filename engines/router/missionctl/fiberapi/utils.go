@@ -8,9 +8,9 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/fiber"
 	"github.com/gojek/fiber/config"
-	fibererror "github.com/gojek/fiber/errors"
-	fiberhttp "github.com/gojek/fiber/http"
-	"github.com/gojek/fiber/protocol"
+	fiberErrors "github.com/gojek/fiber/errors"
+	fiberHttp "github.com/gojek/fiber/http"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/gojek/fiber/types"
 )
 
@@ -51,8 +51,8 @@ func CreateFiberRouterFromConfig(
 func CreateFiberRequestHandler(
 	component fiber.Component,
 	timeout time.Duration,
-) *fiberhttp.Handler {
-	return fiberhttp.NewHandler(component, fiberhttp.Options{Timeout: timeout})
+) *fiberHttp.Handler {
+	return fiberHttp.NewHandler(component, fiberHttp.Options{Timeout: timeout})
 }
 
 // createRouterFromConfigFile takes the path to a fiber config file,
@@ -67,8 +67,8 @@ func createRouterFromConfigFile(cfgFilePath string) (fiber.Component, error) {
 }
 
 // createFiberError wraps the input error in a format that is usable by Fiber
-func createFiberError(err error, p protocol.Protocol) fibererror.FiberError {
-	return fibererror.FiberError{
+func createFiberError(err error, p fiberProtocol.Protocol) fiberErrors.FiberError {
+	return fiberErrors.FiberError{
 		Code:    errors.GetErrorCode(err, p),
 		Message: err.Error(),
 	}

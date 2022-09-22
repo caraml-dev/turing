@@ -15,8 +15,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
-	fiberhttp "github.com/gojek/fiber/http"
-	"github.com/gojek/fiber/protocol"
+	fiberHttp "github.com/gojek/fiber/http"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -74,7 +74,7 @@ func NewMissionControl(
 
 type missionControl struct {
 	httpClient   *http.Client
-	fiberHandler *fiberhttp.Handler
+	fiberHandler *fiberHttp.Handler
 
 	enricherEndpoint string
 	enricherTimeout  time.Duration
@@ -120,7 +120,7 @@ func (mc *missionControl) doPost(
 
 	req, err := createNewHTTPRequest(ctx, http.MethodPost, url, header, body)
 	if err != nil {
-		return nil, errors.NewTuringError(err, protocol.HTTP)
+		return nil, errors.NewTuringError(err, fiberProtocol.HTTP)
 	}
 
 	// Make HTTP request and measure duration
@@ -139,7 +139,7 @@ func (mc *missionControl) doPost(
 	stopTimer()
 
 	if err != nil {
-		return nil, errors.NewTuringError(err, protocol.HTTP)
+		return nil, errors.NewTuringError(err, fiberProtocol.HTTP)
 	}
 
 	// Defer close non-nil response body
@@ -149,13 +149,13 @@ func (mc *missionControl) doPost(
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", resp.StatusCode), protocol.HTTP)
+			"Error response received: status – [%d]", resp.StatusCode), fiberProtocol.HTTP)
 	}
 
 	// No error, convert to mission control response and return
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(resp)
 	if err != nil {
-		return nil, errors.NewTuringError(err, protocol.HTTP)
+		return nil, errors.NewTuringError(err, fiberProtocol.HTTP)
 	}
 	return mcResp, nil
 }
@@ -213,7 +213,7 @@ func (mc *missionControl) Route(
 	// Create a new POST request with the input body and header
 	httpReq, err := createNewHTTPRequest(ctx, http.MethodPost, "", header, body)
 	if err != nil {
-		routerErr = errors.NewTuringError(err, protocol.HTTP)
+		routerErr = errors.NewTuringError(err, fiberProtocol.HTTP)
 		return nil, nil, routerErr
 	}
 
@@ -221,15 +221,15 @@ func (mc *missionControl) Route(
 	var routerResp mchttp.Response
 	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
-		routerResp, routerErr = nil, errors.NewTuringError(fiberError, protocol.HTTP, fiberError.Code)
+		routerResp, routerErr = nil, errors.NewTuringError(fiberError, fiberProtocol.HTTP, fiberError.Code)
 	} else if fiberResponse == nil {
 		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Did not get back a valid response from the fiberHandler"), protocol.HTTP)
+			"Did not get back a valid response from the fiberHandler"), fiberProtocol.HTTP)
 	} else if !fiberResponse.IsSuccess() {
 		routerResp, routerErr = nil, errors.NewTuringError(errors.Newf(errors.BadResponse,
-			"Error response received: status – [%d]", fiberResponse.StatusCode()), protocol.HTTP)
+			"Error response received: status – [%d]", fiberResponse.StatusCode()), fiberProtocol.HTTP)
 	} else {
-		httpResp := fiberResponse.(*fiberhttp.Response)
+		httpResp := fiberResponse.(*fiberHttp.Response)
 		routerResp, routerErr = mchttp.NewCachedResponse(httpResp.Payload(), httpResp.Header()), nil
 	}
 
@@ -285,7 +285,7 @@ func (mc *missionControl) Ensemble(
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)
 	timer()
 	if err != nil {
-		httpErr = errors.NewTuringError(err, protocol.HTTP)
+		httpErr = errors.NewTuringError(err, fiberProtocol.HTTP)
 		return nil, httpErr
 	}
 

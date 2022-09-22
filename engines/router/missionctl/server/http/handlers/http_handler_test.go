@@ -22,7 +22,7 @@ import (
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
-	"github.com/gojek/fiber/protocol"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 // testBody is a simple struct with a string, for testing json payload in requests
@@ -103,7 +103,7 @@ func (mc *MockMissionControlBadEnrich) Enrich(
 	body []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, errors.NewTuringError(fmt.Errorf("Bad Enrich Called"), protocol.HTTP)
+	return nil, errors.NewTuringError(fmt.Errorf("Bad Enrich Called"), fiberProtocol.HTTP)
 }
 
 // MockMissionControlBadRoute inherits from BaseMockMissionControl
@@ -119,7 +119,7 @@ func (mc *MockMissionControlBadRoute) Route(
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, nil, errors.NewTuringError(fmt.Errorf("Bad Route Called"), protocol.HTTP)
+	return nil, nil, errors.NewTuringError(fmt.Errorf("Bad Route Called"), fiberProtocol.HTTP)
 }
 
 // MockMissionControlBadEnsemble inherits from BaseMockMissionControl
@@ -136,7 +136,7 @@ func (mc *MockMissionControlBadEnsemble) Ensemble(
 	routerResponse []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
-	return nil, errors.NewTuringError(fmt.Errorf("Bad Ensemble Called"), protocol.HTTP)
+	return nil, errors.NewTuringError(fmt.Errorf("Bad Ensemble Called"), fiberProtocol.HTTP)
 }
 
 // testLogUtils provides some test methods to verify the request summary logging
@@ -380,7 +380,7 @@ func modifyRequestBody(
 	var t testBody
 	err := json.Unmarshal(body, &t)
 	if err != nil {
-		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), protocol.HTTP)
+		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), fiberProtocol.HTTP)
 	}
 
 	// Append to Value
@@ -389,7 +389,7 @@ func modifyRequestBody(
 	// Convert the data back to string
 	tBytes, err := json.Marshal(t)
 	if err != nil {
-		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), protocol.HTTP)
+		return nil, errors.NewTuringError(fmt.Errorf("Error occurred in %s: %v", caller, err), fiberProtocol.HTTP)
 	}
 
 	httpHeader := http.Header{
@@ -407,7 +407,7 @@ func modifyRequestBody(
 	}
 	mcResp, err := mchttp.NewCachedResponseFromHTTP(httpResponse)
 	if err != nil {
-		return nil, errors.NewTuringError(err, protocol.HTTP)
+		return nil, errors.NewTuringError(err, fiberProtocol.HTTP)
 	}
 	return mcResp, nil
 }

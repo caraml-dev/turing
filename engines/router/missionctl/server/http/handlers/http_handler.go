@@ -17,7 +17,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/fiber/protocol"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 )
@@ -104,7 +104,7 @@ func (h *httpHandler) getPrediction(
 	if expResp != nil {
 		var expErr *errors.TuringError
 		if expResp.Error != "" {
-			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), protocol.HTTP)
+			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), fiberProtocol.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
 			copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
@@ -169,7 +169,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewTuringError(err, protocol.HTTP))
+		h.error(ctx, rw, errors.NewTuringError(err, fiberProtocol.HTTP))
 		return
 	}
 

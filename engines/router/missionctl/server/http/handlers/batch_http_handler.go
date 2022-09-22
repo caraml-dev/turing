@@ -14,7 +14,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/fiber/protocol"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 )
 
@@ -73,7 +73,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewTuringError(err, protocol.HTTP))
+		h.error(ctx, rw, errors.NewTuringError(err, fiberProtocol.HTTP))
 		return
 	}
 
@@ -82,7 +82,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
 		h.error(ctx, rw, errors.NewTuringError(errors.Newf(errors.BadInput,
-			`Invalid json request`), protocol.HTTP))
+			`Invalid json request`), fiberProtocol.HTTP))
 		return
 	}
 

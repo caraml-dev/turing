@@ -16,7 +16,7 @@ import (
 	"github.com/gojek/fiber"
 	fiberErrors "github.com/gojek/fiber/errors"
 	fibergrpc "github.com/gojek/fiber/grpc"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/mock"
@@ -156,7 +156,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 				Code:    14,
 				Message: "unable to parse fiber response into grpc response",
 			},
-			mockReturn: fiber.NewResponseQueueFromResponses(fiberhttp.NewHTTPResponse(
+			mockReturn: fiber.NewResponseQueueFromResponses(fiberHttp.NewHTTPResponse(
 				&http.Response{
 					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte("dummy res"))),
