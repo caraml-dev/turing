@@ -61,10 +61,9 @@ var optionalEnvs = map[string]string{
 	"APP_JAEGER_REPORTER_HOST":       "localhost",
 	"APP_JAEGER_REPORTER_PORT":       "5001",
 	"APP_JAEGER_START_NEW_SPANS":     "true",
-
-	"SENTRY_ENABLED": "true",
-	"SENTRY_DSN":     "test:dsn",
-	"SENTRY_LABELS":  "sentry_key1:value1,sentry_key2:value2",
+	"SENTRY_ENABLED":                 "true",
+	"SENTRY_DSN":                     "test:dsn",
+	"SENTRY_LABELS":                  "sentry_key1:value1,sentry_key2:value2",
 }
 
 func TestMissingRequiredEnvs(t *testing.T) {
