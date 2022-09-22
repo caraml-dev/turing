@@ -116,6 +116,7 @@ def standard_router_ensembler_config_with_experiment_mappings():
 @pytest.fixture
 def standard_router_ensembler_config_with_route_name_path():
     return EnsemblerStandardConfig(
+        experiment_mappings=[],
         route_name_path="route_name",
         fallback_response_route_id="route-1",
     )
