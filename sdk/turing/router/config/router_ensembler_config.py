@@ -32,19 +32,40 @@ class EnsemblerNopConfig:
 
 @dataclass
 class EnsemblerStandardConfig:
-    experiment_mappings: List[Dict[str, str]]
+    experiment_mappings: List[
+        turing.generated.models.EnsemblerStandardConfigExperimentMappings
+    ]
     fallback_response_route_id: str
+    route_name_path: str
 
-    _experiment_mappings: List[Dict[str, str]] = field(init=False, repr=False)
+    _experiment_mappings: List[
+        turing.generated.models.EnsemblerStandardConfigExperimentMappings
+    ] = field(init=False, repr=False)
+    _route_name_path: str = field(init=False, repr=False)
     _fallback_response_route_id: str = field(init=False, repr=False)
 
     @property
-    def experiment_mappings(self) -> List[Dict[str, str]]:
+    def experiment_mappings(
+        self,
+    ) -> List[turing.generated.models.EnsemblerStandardConfigExperimentMappings]:
         return self._experiment_mappings
 
     @experiment_mappings.setter
-    def experiment_mappings(self, experiment_mappings: List[Dict[str, str]]):
+    def experiment_mappings(
+        self,
+        experiment_mappings: List[
+            turing.generated.models.EnsemblerStandardConfigExperimentMappings
+        ],
+    ):
         self._experiment_mappings = experiment_mappings
+
+    @property
+    def route_name_path(self) -> str:
+        return self._route_name_path
+
+    @route_name_path.setter
+    def route_name_path(self, route_name_path: str):
+        self._route_name_path = route_name_path
 
     @property
     def fallback_response_route_id(self) -> str:
@@ -56,7 +77,8 @@ class EnsemblerStandardConfig:
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.EnsemblerStandardConfig(
-            experiment_mappings=self.experiment_mappings
+            experiment_mappings=self.experiment_mappings,
+            route_name_path=self.route_name_path,
         )
 
 
@@ -487,14 +509,20 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
 @dataclass
 class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(
-        self, experiment_mappings: List[Dict[str, str]], fallback_response_route_id: str
+        self,
+        fallback_response_route_id: str,
+        experiment_mappings: List[Dict[str, str]] = None,
+        route_name_path: str = "",
     ):
         """
         Method to create a new standard ensembler
 
-        :param experiment_mappings: configured mappings between routes and treatments
+        :param route_name_path: configured routh name path that points to the route name within a given treatment config
+                :param experiment_mappings: configured mappings between routes and treatments
+        :param fallback_response_route_id: configured final response route to be used as a fallback
         """
-        self.experiment_mappings = experiment_mappings
+        self.route_name_path = route_name_path
+        self.experiment_mappings = experiment_mappings if experiment_mappings else []
         self.fallback_response_route_id = fallback_response_route_id
         super().__init__(type="standard")
 
@@ -506,6 +534,14 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def experiment_mappings(self, experiment_mappings: List[Dict[str, str]]):
         StandardRouterEnsemblerConfig._verify_experiment_mappings(experiment_mappings)
         self._experiment_mappings = experiment_mappings
+
+    @property
+    def route_name_path(self) -> str:
+        return self._route_name_path
+
+    @route_name_path.setter
+    def route_name_path(self, route_name_path: str):
+        self._route_name_path = route_name_path
 
     @property
     def fallback_response_route_id(self) -> str:
@@ -533,8 +569,9 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         cls, config: EnsemblerStandardConfig
     ) -> "StandardRouterEnsemblerConfig":
         return cls(
-            fallback_response_route_id=config.fallback_response_route_id,
             experiment_mappings=[e.to_dict() for e in config.experiment_mappings],
+            route_name_path=config.route_name_path,
+            fallback_response_route_id=config.fallback_response_route_id,
         )
 
     def to_open_api(self) -> OpenApiModel:
@@ -545,6 +582,9 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                 )
                 for experiment_mapping in self.experiment_mappings
             ],
+            route_name_path=self.route_name_path
+            if self.route_name_path is not None
+            else "",
             fallback_response_route_id=self.fallback_response_route_id,
         )
         return super().to_open_api()
