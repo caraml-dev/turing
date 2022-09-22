@@ -3,22 +3,22 @@ import { Enum, EnumValue } from "../enum/Enum";
 export const JobStatus = Enum({
   PENDING: EnumValue("pending", {
     label: "Pending",
-    color: "#FEC514",
+    color: "warning",
     iconType: "clock",
   }),
   BUILDING: EnumValue("building", {
     label: "Pending",
-    color: "#FEC514",
+    color: "warning",
     iconType: "clock",
   }),
   RUNNING: EnumValue("running", {
     label: "Running",
-    color: "#00BFB3",
+    color: "success",
     iconType: "check",
   }),
   TERMINATING: EnumValue("terminating", {
     label: "Terminating",
-    color: "#BD271E",
+    color: "danger",
     iconType: "clock",
   }),
   TERMINATED: EnumValue("terminated", {
@@ -32,17 +32,17 @@ export const JobStatus = Enum({
   }),
   FAILED: EnumValue("failed", {
     label: "Failed",
-    color: "#BD271E",
+    color: "danger",
     iconType: "cross",
   }),
   FAILED_SUBMISSION: EnumValue("failed_submission", {
     label: "Failed",
-    color: "#BD271E",
+    color: "danger",
     iconType: "cross",
   }),
   FAILED_BUILDING: EnumValue("failed_building", {
     label: "Failed",
-    color: "#BD271E",
+    color: "danger",
     iconType: "cross",
   }),
 });
