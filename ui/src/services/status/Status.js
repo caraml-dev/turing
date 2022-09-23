@@ -18,6 +18,6 @@ export const Status = Enum({
   }),
   UNDEPLOYED: EnumValue("undeployed", {
     label: "Not Deployed",
-    color: "#6A717D",
+    color: "default",
   }),
 });

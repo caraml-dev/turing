@@ -23,11 +23,11 @@ export const JobStatus = Enum({
   }),
   TERMINATED: EnumValue("terminated", {
     label: "Terminated",
-    color: "#6A717D",
+    color: "default",
   }),
   COMPLETED: EnumValue("completed", {
     label: "Completed",
-    color: "#6A717D",
+    color: "default",
     iconType: "check",
   }),
   FAILED: EnumValue("failed", {
