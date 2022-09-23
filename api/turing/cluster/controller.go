@@ -257,7 +257,10 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 	var err error
 
 	// Build the deployment specs
-	desiredSvc := svcConf.BuildKnativeServiceConfig()
+	desiredSvc, err := svcConf.BuildKnativeServiceConfig()
+	if err != nil {
+		return err
+	}
 
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(svcConf.Namespace)

@@ -67,8 +67,8 @@ func (cfg *BaseService) buildResourceReqs(userContainerLimitRequestFactor float6
 
 	// Set resource limits to request * userContainerLimitRequestFactor
 	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    computeResource(cfg.CPURequests, userContainerLimitRequestFactor),
-		corev1.ResourceMemory: computeResource(cfg.MemoryRequests, userContainerLimitRequestFactor),
+		corev1.ResourceCPU:    ComputeResource(cfg.CPURequests, userContainerLimitRequestFactor),
+		corev1.ResourceMemory: ComputeResource(cfg.MemoryRequests, userContainerLimitRequestFactor),
 	}
 
 	return corev1.ResourceRequirements{
@@ -125,7 +125,7 @@ type ConfigMap struct {
 
 // Ref:
 // https://github.com/knative/serving/blob/release-0.14/pkg/reconciler/revision/resources/queue.go#L115
-func computeResource(resourceQuantity resource.Quantity, fraction float64) resource.Quantity {
+func ComputeResource(resourceQuantity resource.Quantity, fraction float64) resource.Quantity {
 	scaledValue := resourceQuantity.Value()
 	scaledMilliValue := int64(math.MaxInt64 - 1)
 	if scaledValue < (math.MaxInt64 / 1000) {
