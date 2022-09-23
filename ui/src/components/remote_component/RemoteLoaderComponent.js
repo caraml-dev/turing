@@ -17,9 +17,10 @@ const LoadDynamicScript = ({ url, setReady, setFailed }) => {
 };
 
 // Dynamic Script Loading component wrapper
-export const StandardEnsemblerLoaderComponent = ({
+export const RemoteLoaderComponent = ({
   FallbackView,
   remoteUi,
+  componentName,
   children,
 }) => {
   const [urlReady, setUrlReady] = useState(false);
@@ -28,9 +29,9 @@ export const StandardEnsemblerLoaderComponent = ({
   const [configFailed, setConfigFailed] = useState(false);
 
   return urlFailed ? (
-    <FallbackView text={"Failed to load Standard Ensembler for the selected Custom Experiment Engine"} />
+    <FallbackView text={`Failed to load ${componentName}`} />
   ) : configFailed ? (
-    <FallbackView text={"Failed to load Standard Ensembler config for the selected Custom Experiment Engine"} />
+    <FallbackView text={`Failed to load ${componentName} Config`} />
   ) : !urlReady || !configReady ? (
     <>
       {!!remoteUi.url && !urlReady && (
@@ -47,11 +48,11 @@ export const StandardEnsemblerLoaderComponent = ({
           url={remoteUi.config}
         />
       )}
-      <FallbackView text={"Loading Standard Ensembler for the selected Custom Experiment Engine..."} />
+      <FallbackView text={`Loading ${componentName}...`} />
     </>
   ) : (
     children
   );
 };
 
-export default StandardEnsemblerLoaderComponent;
+export default RemoteLoaderComponent;

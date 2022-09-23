@@ -5,7 +5,7 @@ import { TreatmentMappingConfigSection } from "./TreatmentMappingConfigSection";
 import { FallbackRouteConfigSection } from "./FallbackRouteConfigSection";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
 import { Panel } from "../../../form/components/Panel";
-import StandardEnsemblerLoaderComponent from "../../../../../components/ensembler/StandardEnsemblerLoaderComponent";
+import RemoteLoaderComponent from "../../../../../components/remote_component/RemoteLoaderComponent";
 import { RemoteComponent } from "../../../../../components/remote_component/RemoteComponent";
 
 const FallbackView = ({ text }) => (
@@ -27,9 +27,11 @@ const StandardEnsemblerWithCustomExperimentEngineConfigView = ({
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}>
-      <StandardEnsemblerLoaderComponent
+      <RemoteLoaderComponent
         FallbackView={FallbackView}
-        remoteUi={remoteUi}>
+        remoteUi={remoteUi}
+        componentName="Standard Ensembler"
+      >
         <RemoteComponent
           scope={remoteUi.name}
           name="./StandardEnsemblerConfigDetails"
@@ -38,7 +40,7 @@ const StandardEnsemblerWithCustomExperimentEngineConfigView = ({
           routes={routes}
           routeNamePath={routeNamePath}
         />
-      </StandardEnsemblerLoaderComponent>
+      </RemoteLoaderComponent>
     </React.Suspense>
   );
 };
