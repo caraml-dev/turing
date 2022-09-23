@@ -23,16 +23,18 @@ export const RulesConfigTable = ({ routes, rules = [], defaultTrafficRule }) => 
     });
 
     // Append Default Traffic Rule
-    const defaultRuleRoutes = [];
-    defaultTrafficRule.routes.forEach((ruleRoute) => {
-        const filteredRoute = routes.find(route => route.id === ruleRoute);
-        defaultRuleRoutes.push(filteredRoute);
-    });
-    updatedRules.push({
-      name: "default-traffic-rule",
-      conditions: [],
-      routes: defaultRuleRoutes
-    });
+    if (defaultTrafficRule) {
+      const defaultRuleRoutes = [];
+      defaultTrafficRule.routes.forEach((ruleRoute) => {
+          const filteredRoute = routes.find(route => route.id === ruleRoute);
+          defaultRuleRoutes.push(filteredRoute);
+      });
+      updatedRules.push({
+        name: "default-traffic-rule",
+        conditions: [],
+        routes: defaultRuleRoutes
+      });
+    }
     return updatedRules;
   }, [routes, rules, defaultTrafficRule]);
 
