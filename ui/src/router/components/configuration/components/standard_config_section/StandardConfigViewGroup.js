@@ -57,38 +57,36 @@ export const StandardConfigViewGroup = ({
   return (
     !!standardConfig && (
       <EuiFlexGroup direction="column">
-        <>
-          {engineProps?.type === "standard" ? (
-            <EuiFlexItem>
-              <TreatmentMappingConfigSection
-                engine={type}
-                experiments={experimentConfig}
-                mappings={standardConfig.experiment_mappings}
-              />
-            </EuiFlexItem>
-          ) : isLoaded ? (
-            <EuiFlexItem>
-              <StandardEnsemblerWithCustomExperimentEngineConfigView
-                remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
-                projectId={projectId}
-                routes={routes}
-                routeNamePath={standardConfig.route_name_path}
-              />
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem>
-              <FallbackView text={"Loading ..."} />
-            </EuiFlexItem>
-          )}
-
+        {engineProps?.type === "standard" ? (
           <EuiFlexItem>
-            <FallbackRouteConfigSection
-              fallbackResponseRouteId={
-                standardConfig.fallback_response_route_id
-              }
+            <TreatmentMappingConfigSection
+              engine={type}
+              experiments={experimentConfig}
+              mappings={standardConfig.experiment_mappings}
             />
           </EuiFlexItem>
-        </>
+        ) : isLoaded ? (
+          <EuiFlexItem>
+            <StandardEnsemblerWithCustomExperimentEngineConfigView
+              remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
+              projectId={projectId}
+              routes={routes}
+              routeNamePath={standardConfig.route_name_path}
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <FallbackView text={"Loading ..."} />
+          </EuiFlexItem>
+        )}
+
+        <EuiFlexItem>
+          <FallbackRouteConfigSection
+            fallbackResponseRouteId={
+              standardConfig.fallback_response_route_id
+            }
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     )
   );
