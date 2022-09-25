@@ -11,7 +11,7 @@ TEST_ORDER = [
     "test_deploy_router_valid_config",
     "test_delete_router",
     "test_deploy_router_with_traffic_rules",
-    "test_deploy_router_with_route_name_path_std_ensembler"
+    "test_deploy_router_with_route_name_path_std_ensembler",
 ]
 
 

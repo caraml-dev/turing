@@ -289,29 +289,12 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
                     "route": "route-2",
                 },
             ],
-            "",
+            None,
             "route-1",
             "generic_standard_router_ensembler_config_with_experiment_mappings",
         ),
         pytest.param(
-            [
-                {
-                    "experiment": "experiment-1",
-                    "treatment": "treatment-1",
-                    "route": "route-1",
-                },
-                {
-                    "experiment": "experiment-2",
-                    "treatment": "treatment-2",
-                    "route": "route-2",
-                },
-            ],
-            "",
-            "route-1",
-            "generic_standard_router_ensembler_config_with_experiment_mappings",
-        ),
-        pytest.param(
-            [],
+            None,
             "route_name",
             "route-1",
             "generic_standard_router_ensembler_config_with_route_name_path",
@@ -321,10 +304,15 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
 def test_create_standard_router_ensembler_config(
     experiment_mappings, route_name_path, fallback_response_route_id, expected, request
 ):
+    kwargs = {}
+    if experiment_mappings is not None:
+        kwargs["experiment_mappings"] = experiment_mappings
+
+    if route_name_path is not None:
+        kwargs["route_name_path"] = route_name_path
+
     actual = StandardRouterEnsemblerConfig(
-        experiment_mappings=experiment_mappings,
-        route_name_path=route_name_path,
-        fallback_response_route_id=fallback_response_route_id,
+        fallback_response_route_id=fallback_response_route_id, **kwargs
     )
     assert actual.to_open_api() == request.getfixturevalue(expected)
     assert (

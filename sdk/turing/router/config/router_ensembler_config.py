@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from turing._base_types import DataObject
 import turing.generated.models
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
@@ -32,17 +32,17 @@ class EnsemblerNopConfig:
 
 @dataclass
 class EnsemblerStandardConfig:
-    experiment_mappings: List[
-        turing.generated.models.EnsemblerStandardConfigExperimentMappings
-    ]
     fallback_response_route_id: str
-    route_name_path: str
+    experiment_mappings: Optional[
+        List[turing.generated.models.EnsemblerStandardConfigExperimentMappings]
+    ]
+    route_name_path: Optional[str]
 
-    _experiment_mappings: List[
-        turing.generated.models.EnsemblerStandardConfigExperimentMappings
-    ] = field(init=False, repr=False)
-    _route_name_path: str = field(init=False, repr=False)
     _fallback_response_route_id: str = field(init=False, repr=False)
+    _experiment_mappings: Optional[
+        List[turing.generated.models.EnsemblerStandardConfigExperimentMappings]
+    ] = field(init=False, repr=False)
+    _route_name_path: Optional[str] = field(init=False, repr=False)
 
     @property
     def experiment_mappings(
@@ -76,9 +76,14 @@ class EnsemblerStandardConfig:
         self._fallback_response_route_id = fallback_response_route_id
 
     def to_open_api(self) -> OpenApiModel:
+        kwargs = {}
+        if self.experiment_mappings is not None:
+            kwargs["experiment_mappings"] = self.experiment_mappings
+        if self.route_name_path is not None:
+            kwargs["route_name_path"] = self.route_name_path
+
         return turing.generated.models.EnsemblerStandardConfig(
-            experiment_mappings=self.experiment_mappings,
-            route_name_path=self.route_name_path,
+            **kwargs,
         )
 
 
@@ -511,18 +516,20 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def __init__(
         self,
         fallback_response_route_id: str,
-        experiment_mappings: List[Dict[str, str]] = None,
-        route_name_path: str = "",
+        experiment_mappings: Optional[List[Dict[str, str]]] = None,
+        route_name_path: Optional[str] = None,
     ):
         """
         Method to create a new standard ensembler
 
-        :param route_name_path: configured routh name path that points to the route name within a given treatment config
-                :param experiment_mappings: configured mappings between routes and treatments
+        :param route_name_path: configured route name path that points to the route name within a given treatment config
+        :param experiment_mappings: configured mappings between routes and treatments
         :param fallback_response_route_id: configured final response route to be used as a fallback
         """
         self.route_name_path = route_name_path
-        self.experiment_mappings = experiment_mappings if experiment_mappings else []
+        self.experiment_mappings = (
+            experiment_mappings  # sif experiment_mappings else None
+        )
         self.fallback_response_route_id = fallback_response_route_id
         super().__init__(type="standard")
 
@@ -531,8 +538,11 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         return self._experiment_mappings
 
     @experiment_mappings.setter
-    def experiment_mappings(self, experiment_mappings: List[Dict[str, str]]):
-        StandardRouterEnsemblerConfig._verify_experiment_mappings(experiment_mappings)
+    def experiment_mappings(self, experiment_mappings: Optional[List[Dict[str, str]]]):
+        if experiment_mappings is not None:
+            StandardRouterEnsemblerConfig._verify_experiment_mappings(
+                experiment_mappings
+            )
         self._experiment_mappings = experiment_mappings
 
     @property
@@ -569,7 +579,9 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         cls, config: EnsemblerStandardConfig
     ) -> "StandardRouterEnsemblerConfig":
         return cls(
-            experiment_mappings=[e.to_dict() for e in config.experiment_mappings],
+            experiment_mappings=[e.to_dict() for e in config.experiment_mappings]
+            if config.experiment_mappings
+            else None,
             route_name_path=config.route_name_path,
             fallback_response_route_id=config.fallback_response_route_id,
         )
@@ -581,10 +593,10 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
                     **experiment_mapping
                 )
                 for experiment_mapping in self.experiment_mappings
-            ],
-            route_name_path=self.route_name_path
-            if self.route_name_path is not None
-            else "",
+            ]
+            if self.experiment_mappings
+            else None,
+            route_name_path=self.route_name_path,
             fallback_response_route_id=self.fallback_response_route_id,
         )
         return super().to_open_api()

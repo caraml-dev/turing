@@ -108,7 +108,7 @@ def standard_router_ensembler_config_with_experiment_mappings():
                 experiment="experiment-2", treatment="treatment-2", route="route-2"
             ),
         ],
-        route_name_path="",
+        route_name_path=None,
         fallback_response_route_id="route-1",
     )
 
@@ -116,7 +116,7 @@ def standard_router_ensembler_config_with_experiment_mappings():
 @pytest.fixture
 def standard_router_ensembler_config_with_route_name_path():
     return EnsemblerStandardConfig(
-        experiment_mappings=[],
+        experiment_mappings=None,
         route_name_path="route_name",
         fallback_response_route_id="route-1",
     )
@@ -395,17 +395,13 @@ def generic_ensembler_standard_config_with_experiment_mappings():
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
                 experiment="experiment-2", treatment="treatment-2", route="route-2"
             ),
-        ],
-        route_name_path=""
+        ]
     )
 
 
 @pytest.fixture
 def generic_ensembler_standard_config_with_route_name_path():
-    return turing.generated.models.EnsemblerStandardConfig(
-        experiment_mappings=[],
-        route_name_path="route_name"
-    )
+    return turing.generated.models.EnsemblerStandardConfig(route_name_path="route_name")
 
 
 @pytest.fixture
@@ -462,7 +458,9 @@ def ensembler(
 
 
 @pytest.fixture
-def generic_standard_router_ensembler_config_with_experiment_mappings(generic_ensembler_standard_config_with_experiment_mappings):
+def generic_standard_router_ensembler_config_with_experiment_mappings(
+    generic_ensembler_standard_config_with_experiment_mappings,
+):
     return turing.generated.models.RouterEnsemblerConfig(
         type="standard",
         standard_config=generic_ensembler_standard_config_with_experiment_mappings,
@@ -470,7 +468,9 @@ def generic_standard_router_ensembler_config_with_experiment_mappings(generic_en
 
 
 @pytest.fixture
-def generic_standard_router_ensembler_config_with_route_name_path(generic_ensembler_standard_config_with_route_name_path):
+def generic_standard_router_ensembler_config_with_route_name_path(
+    generic_ensembler_standard_config_with_route_name_path,
+):
     return turing.generated.models.RouterEnsemblerConfig(
         type="standard",
         standard_config=generic_ensembler_standard_config_with_route_name_path,

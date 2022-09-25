@@ -28,7 +28,7 @@ def test_deploy_router_with_route_name_path_std_ensembler():
             id="treatment-a",
             endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-a',
             timeout="5s",
-        )
+        ),
     ]
 
     # set up experiment config
@@ -63,8 +63,7 @@ def test_deploy_router_with_route_name_path_std_ensembler():
 
     # set up standard ensembler
     ensembler = StandardRouterEnsemblerConfig(
-        route_name_path="route_name",
-        fallback_response_route_id="control"
+        route_name_path="route_name", fallback_response_route_id="control"
     )
 
     # create the RouterConfig instance
@@ -77,7 +76,7 @@ def test_deploy_router_with_route_name_path_std_ensembler():
         resource_request=resource_request,
         timeout="5s",
         log_config=log_config,
-        ensembler=ensembler
+        ensembler=ensembler,
     )
 
     # create a router using the RouterConfig object
@@ -117,7 +116,5 @@ def test_deploy_router_with_route_name_path_std_ensembler():
         json={"client": {"id": 4}},
     )
     assert response.status_code == 200
-    expected_response = {
-        "version": "treatment-a"
-    }
+    expected_response = {"version": "treatment-a"}
     assert response.json() == expected_response
