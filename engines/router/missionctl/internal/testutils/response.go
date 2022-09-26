@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 )
 
 // MakeTestMisisonControlResponse makes a success response with a dummy json body for testing

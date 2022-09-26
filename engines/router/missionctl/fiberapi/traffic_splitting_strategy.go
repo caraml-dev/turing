@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 var (
@@ -112,6 +113,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	for idx, rule := range s.Rules {
 		// test each rule asynchronously and write results into results array
 		go func(rule *TrafficSplittingStrategyRule, idx int) {
+			// TODO need to handle for grpc
 			if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
 				errCh <- err
 			} else {
@@ -131,7 +133,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	case <-doneCh:
 	case err := <-errCh:
 		log.WithContext(ctx).Errorf(err.Error())
-		return nil, nil, createFiberError(err)
+		return nil, nil, createFiberError(err, fiberProtocol.HTTP)
 	}
 
 	// select primary route and fallbacks, based on the results of testing
@@ -144,7 +146,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 			} else {
 				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 				log.WithContext(ctx).Errorf(err.Error())
-				return nil, nil, createFiberError(err)
+				return nil, nil, createFiberError(err, fiberProtocol.HTTP)
 			}
 		}
 	}
@@ -156,7 +158,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		} else {
 			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err)
+			return nil, nil, createFiberError(err, fiberProtocol.HTTP)
 		}
 	}
 
