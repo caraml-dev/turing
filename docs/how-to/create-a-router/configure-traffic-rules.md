@@ -11,9 +11,9 @@ It is also possible to configure your router such that each request is only disp
 Traffic rules define which routes should be "activated" for a particular request to your router. Each rule is defined by one or more request conditions and one or more routes that would be activated if the request satisfies the conditions of the rule. 
 
 When traffic rules are configured, the following behaviour is expected:
-- A Default traffic rule is required, which has no request conditions and act as a fallback rule for requests that don't match any of the configured traffic rule conditions. At least 1 route should be configured for the Default traffic rule.
+- A Default traffic rule is required, which has no request conditions and acts as a fallback rule for requests that don't match any of the configured traffic rule conditions. At least 1 route should be configured for the Default traffic rule.
 - All routes should be used by at least 1 traffic rule, i.e no dangling routes.
-- When a Nop or Standard Ensembler is configured (See: [Configure Ensembler](./configure-ensembler.md)), the `default_route_id` must be set and present in every traffic rule.
+- When a Nop or Standard Ensembler is configured (See: [Configure Ensembler](./configure-ensembler.md)), the final/fallback route must be present in every traffic rule, including the default rule.
 
 Rules are matched against the incoming request in the order in which they are defined. The UI supports the drag-and-drop functionality to reorder priority of the rules. This property can be used to create one or more specific rules over a general rule. Consider the following example, where a router has rules defined such that requests are routed by the country of origin (ID, SG, etc.). In addition, if the routing logic must be altered for a certain service type in a country, this rule (the 'specific' rule) can be defined before the general rule.
 
@@ -47,5 +47,4 @@ Provided values are case-sensitive.
 You should also select one or more routes from the drop-down list that would be activated if the rule is triggered. A route can be attached to zero or more traffic rules.
 
 * If a route is attached to some traffic rule, then Turing will only send request to this route if the request meets this rule's conditions.
-* If a route is not attached to any of the traffic rules (i.e no traffic rules specified), then Turing will call this route with every incoming request.
 * If a route is attached to multiple rules and the request satisfies more than one rule, then Turing will decide what group of routes should receive this request based on the order in which the traffic rules are defined.

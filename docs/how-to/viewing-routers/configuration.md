@@ -8,6 +8,6 @@ If there are traffic rules (See: [Configure Traffic Rules](../create-a-router/co
 
 ![](../../.gitbook/assets/view_router_groupby_routes.png)
 
-Routes details panel also support grouping by traffic rules, where you can easily see what traffic rule conditions have been configured for the Router.
+Routes details panel also supports grouping by traffic rules, where you can easily see what traffic rule conditions have been configured for the Router.
 
 ![](../../.gitbook/assets/view_router_groupby_rules.png)
