@@ -41,6 +41,7 @@ var optionalEnvs = map[string]string{
 	"ENSEMBLER_ENDPOINT":             "http://localhost:8082",
 	"ENSEMBLER_TIMEOUT":              "2ms",
 	"ROUTER_TIMEOUT":                 "10ms",
+	"ROUTER_PROTOCOL":                "UPI_V1",
 	"APP_LOGLEVEL":                   "DEBUG",
 	"APP_FIBER_DEBUG_LOG":            "true",
 	"APP_RESULT_LOGGER":              "CONSOLE",
@@ -84,6 +85,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    20 * time.Millisecond,
+			Protocol:   HTTP,
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "",
@@ -148,6 +150,7 @@ func TestInitConfigEnv(t *testing.T) {
 		RouterConfig: &RouterConfig{
 			ConfigFile: "/var/test.yaml",
 			Timeout:    10 * time.Millisecond,
+			Protocol:   UPI,
 		},
 		EnsemblerConfig: &EnsemblerConfig{
 			Endpoint: "http://localhost:8082",

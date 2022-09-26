@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/codes"
 )
 
 // ErrorType captures some common error types
@@ -71,49 +73,62 @@ func GetType(err error) ErrorType {
 	return Unknown
 }
 
-// GetHTTPErrorCode maps the ErrorType to http status codes and returns it
-func GetHTTPErrorCode(err error) int {
+// GetErrorCode maps the ErrorType to http status codes and returns it
+func GetErrorCode(err error, p fiberProtocol.Protocol) int {
 	var code int
 
+	// Get ErrorType if its turingError else set to default
 	et := GetType(err)
-
-	switch et {
-	case BadInput:
-		code = http.StatusBadRequest
-	case BadResponse:
-		code = http.StatusBadGateway
-	case NotFound:
-		code = http.StatusNotFound
-	default:
-		code = http.StatusInternalServerError
+	if p == fiberProtocol.HTTP {
+		switch et {
+		case BadInput:
+			code = http.StatusBadRequest
+		case BadResponse:
+			code = http.StatusBadGateway
+		case NotFound:
+			code = http.StatusNotFound
+		default:
+			code = http.StatusInternalServerError
+		}
+	} else if p == fiberProtocol.GRPC {
+		switch et {
+		case BadInput:
+			code = int(codes.InvalidArgument)
+		case BadResponse:
+			code = int(codes.Unavailable)
+		case NotFound:
+			code = int(codes.NotFound)
+		default:
+			code = int(codes.Internal)
+		}
 	}
 	return code
 }
 
-// HTTPError associates an error message with a HTTP status code.
-type HTTPError struct {
+// TuringError associates an error message with a status code.
+type TuringError struct {
 	Code    int
 	Message string
 }
 
 // Error satisfies the error interface
-func (e *HTTPError) Error() string {
+func (e *TuringError) Error() string {
 	return e.Message
 }
 
-// NewHTTPError creates an error with a HTTP Status code
-func NewHTTPError(err error, code ...int) *HTTPError {
-	var httpErrCode int
+// NewTuringError creates an error with a Status code
+func NewTuringError(err error, protocol fiberProtocol.Protocol, code ...int) *TuringError {
+	var errCode int
 	if len(code) > 0 {
-		httpErrCode = code[0]
+		errCode = code[0]
 	}
 
 	// If code unknown, create a status code from the error
-	if http.StatusText(httpErrCode) == "" {
-		httpErrCode = GetHTTPErrorCode(err)
+	if http.StatusText(errCode) == "" {
+		errCode = GetErrorCode(err, protocol)
 	}
-	return &HTTPError{
-		Code:    httpErrCode,
+	return &TuringError{
+		Code:    errCode,
 		Message: err.Error(),
 	}
 }

@@ -21,8 +21,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -257,7 +257,7 @@ func assertNil(t *testing.T, actualResp []byte, _ string) {
 // Global variables for benchmark tests, to ensure compiler optimization doesn't
 // eliminate function calls
 var benchMarkResp mchttp.Response
-var benchMarkHTTPErr *errors.HTTPError
+var benchMarkHTTPErr *errors.TuringError
 
 func benchmarkEnrich(payloadFileName string, b *testing.B) {
 	missionCtl, _ := NewMissionControl(
