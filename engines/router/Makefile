@@ -53,7 +53,7 @@ test: tidy
 .PHONY: benchmark
 benchmark: tidy
 	@echo "Running Benchmark..."
-	go test -bench=. -run=Bench ${SRC_ROOT}/...
+	go test -bench=. -run=Bench ${SRC_ROOT}/... -benchmem
 
 .PHONY: version
 version:

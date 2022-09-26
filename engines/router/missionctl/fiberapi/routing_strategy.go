@@ -12,6 +12,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a
@@ -51,6 +52,11 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	fallbacks := []fiber.Component{}
 	if defRoute, ok := routes[r.defaultRoute]; ok {
 		fallbacks = append(fallbacks, defRoute)
+	}
+
+	//TODO to revisit when implementing grpc for experiment engine
+	if req.Protocol() == fiberProtocol.GRPC {
+		return nil, fallbacks, nil
 	}
 
 	// Get the experiment treatment
