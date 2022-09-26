@@ -10,7 +10,7 @@ import { useOnChangeHandler } from "../../../../../../components/form/hooks/useO
 import ExperimentEngineContext from "../../../../../../providers/experiments/context";
 import { Panel } from "../../Panel";
 import { RemoteComponent } from "../../../../../../components/remote_component/RemoteComponent";
-import RemoteLoaderComponent from "../../../../../../components/remote_component/RemoteLoaderComponent";
+import ExperimentEngineComponentLoader from "../../../../../../components/remote_component/ExperimentEngineComponentLoader";
 
 const FallbackView = ({ text }) => (
   <EuiFlexItem grow={true}>
@@ -33,7 +33,7 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}>
-      <RemoteLoaderComponent
+      <ExperimentEngineComponentLoader
         FallbackView={FallbackView}
         remoteUi={remoteUi}
         componentName="Standard Ensembler"
@@ -48,7 +48,7 @@ const StandardEnsemblerWithCustomExperimentEnginePanel = ({
           onChange={onChange}
           errors={errors}
         />
-      </RemoteLoaderComponent>
+      </ExperimentEngineComponentLoader>
     </React.Suspense>
   );
 };

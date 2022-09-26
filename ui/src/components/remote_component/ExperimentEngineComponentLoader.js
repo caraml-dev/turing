@@ -17,7 +17,7 @@ const LoadDynamicScript = ({ url, setReady, setFailed }) => {
 };
 
 // Dynamic Script Loading component wrapper
-export const RemoteLoaderComponent = ({
+export const ExperimentEngineComponentLoader = ({
   FallbackView,
   remoteUi,
   componentName,
@@ -55,4 +55,4 @@ export const RemoteLoaderComponent = ({
   );
 };
 
-export default RemoteLoaderComponent;
+export default ExperimentEngineComponentLoader;

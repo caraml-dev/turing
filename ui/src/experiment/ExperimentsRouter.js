@@ -3,7 +3,7 @@ import {
   EuiPageTemplate,
 } from "@elastic/eui";
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
-import RemoteLoaderComponent from "../components/remote_component/RemoteLoaderComponent";
+import ExperimentEngineComponentLoader from "../components/remote_component/ExperimentEngineComponentLoader";
 
 import { useConfig } from "../config";
 
@@ -32,7 +32,7 @@ const RemoteRouter = ({ projectId }) => {
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <RemoteLoaderComponent
+      <ExperimentEngineComponentLoader
         FallbackView={FallbackView}
         remoteUi={defaultExperimentEngine}
         componentName="Experiment Engine"
@@ -43,7 +43,7 @@ const RemoteRouter = ({ projectId }) => {
           fallback={<FallbackView text="Loading Experiment Engine" />}
           projectId={projectId}
         />
-      </RemoteLoaderComponent>
+      </ExperimentEngineComponentLoader>
     </React.Suspense>
   );
 };
