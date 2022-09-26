@@ -79,6 +79,30 @@ type IExperimentConfig = { [key: string]: IJsonValue };
 }) => React.ReactElement
 ```
 
+In addition, custom experiment engines should also provide the following UI components to support the edit form and view 
+configuration components for Standard Ensemblers (see
+[this](../../../docs/how-to/create-a-router/configure-ensembler.md) for more details). The `routeNamePath` field 
+should be configured to allow the Turing Router to access the route name from a treatment configuration received 
+from the experiment engine. 
+
+```javascript
+// EditStandardEnsemblerConfig component signature
+({
+    projectId: int,
+    routes: Array<Route>,
+    routeNamePath: string,
+    onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void,
+    errors: yup.ValidationError,
+}) => React.ReactElement
+
+// StandardEnsemblerConfigDetails component signature.
+({
+    projectId: int,
+    routes: Array<Route>,
+    routeNamePath: string
+}) => React.ReactElement
+```
+
 ### Experiment Runner
 
 Experiment runners are required to implement the methods in the `ExperimentRunner` interface. This interface contains a single method to retrieve the treatment for a given request.
