@@ -527,9 +527,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param fallback_response_route_id: configured final response route to be used as a fallback
         """
         self.route_name_path = route_name_path
-        self.experiment_mappings = (
-            experiment_mappings  # sif experiment_mappings else None
-        )
+        self.experiment_mappings = experiment_mappings
         self.fallback_response_route_id = fallback_response_route_id
         super().__init__(type="standard")
 
