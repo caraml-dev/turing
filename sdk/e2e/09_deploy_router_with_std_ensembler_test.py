@@ -16,7 +16,7 @@ from turing.router.config.router_config import RouterConfig
 from turing.router.config.router_version import RouterStatus
 
 
-def test_deploy_router_with_route_name_path_std_ensembler():
+def test_deploy_router_with_std_ensembler():
     # set up route
     routes = [
         Route(
