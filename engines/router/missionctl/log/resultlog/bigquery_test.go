@@ -115,12 +115,12 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
-	entry := NewTuringResultLogEntry(ctx, timestamp, &req.Header, reqBody)
+	entry := NewTuringResultLogEntry(ctx, timestamp, req.Header, string(reqBody))
 	entry.RouterVersion = "turing-router-1"
-	entry.AddResponse("experiment", []byte(`{"key": "experiment_data"}`), nil, "")
-	entry.AddResponse("enricher", []byte(`{"key": "enricher_data"}`), nil, "")
-	entry.AddResponse("router", []byte(`{"key": "router_data"}`), nil, "")
-	entry.AddResponse("ensembler", nil, nil, "Error Response")
+	entry.AddResponse("experiment", `{"key": "experiment_data"}`, nil, "")
+	entry.AddResponse("enricher", `{"key": "enricher_data"}`, nil, "")
+	entry.AddResponse("router", `{"key": "router_data"}`, nil, "")
+	entry.AddResponse("ensembler", "", nil, "Error Response")
 
 	// Get the log data and validate
 	logData := testLogger.getLogData(entry)

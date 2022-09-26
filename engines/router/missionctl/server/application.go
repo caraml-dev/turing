@@ -3,17 +3,20 @@ package server
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	"github.com/caraml-dev/turing/engines/router/missionctl/handlers"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/soheilhy/cmux"
 
 	// Turing router will support these experiment runners: nop
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
@@ -47,37 +50,77 @@ func Run() {
 	// Init Sentry, defer closing client
 	defer initSentryClient(cfg)()
 
-	// Init mission control
-	missionCtl, err := missionctl.NewMissionControl(
-		nil,
-		cfg.EnrichmentConfig,
-		cfg.RouterConfig,
-		cfg.EnsemblerConfig,
-		cfg.AppConfig,
-	)
-	if err != nil {
-		log.Glob().Panicf("Failed initializing Mission Control: %v", err)
-	}
+	switch cfg.RouterConfig.Protocol {
+	case config.UPI:
+		// Init mission control
+		missionCtl, err := missionctl.NewMissionControlUPI(
+			cfg.RouterConfig.ConfigFile,
+			cfg.AppConfig.FiberDebugLog,
+		)
+		if err != nil {
+			log.Glob().Panicf("Failed initializing Mission Control: %v", err)
+		}
 
-	// Register handlers
-	http.Handle("/v1/internal/", http.StripPrefix(
-		"/v1/internal",
-		handlers.NewInternalAPIHandler([]string{
-			cfg.EnsemblerConfig.Endpoint,
-			cfg.EnrichmentConfig.Endpoint,
-		}),
-	))
-	http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
-	http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl)))
-	// Register metrics handler
-	if cfg.AppConfig.CustomMetrics {
-		http.Handle("/metrics", promhttp.Handler())
-	}
+		l, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+		if err != nil {
+			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
+		}
 
-	// Serve
-	log.Glob().Infof("listening at port %d", cfg.Port)
-	if err := http.ListenAndServe(cfg.ListenAddress(), http.DefaultServeMux); err != nil {
-		log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
+		s := upi.NewUPIServer(missionCtl)
+		if cfg.AppConfig.CustomMetrics {
+			m := cmux.New(l)
+			grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+			httpL := m.Match(cmux.HTTP1Fast())
+
+			mux := http.NewServeMux()
+			mux.Handle("/metrics", promhttp.Handler())
+			httpS := &http.Server{Handler: mux}
+
+			go s.Run(grpcL)
+			go func() {
+				if err := httpS.Serve(httpL); err != nil {
+					log.Glob().Errorf("Failed to serve http server: %s", err)
+				}
+			}()
+			if err := m.Serve(); err != nil {
+				log.Glob().Errorf("Failed to serve cmux: %s", err)
+			}
+		} else {
+			s.Run(l)
+		}
+	case config.HTTP:
+		// Init mission control
+		missionCtl, err := missionctl.NewMissionControl(
+			nil,
+			cfg.EnrichmentConfig,
+			cfg.RouterConfig,
+			cfg.EnsemblerConfig,
+			cfg.AppConfig,
+		)
+		if err != nil {
+			log.Glob().Panicf("Failed initializing Mission Control: %v", err)
+		}
+		// Register handlers
+		http.Handle("/v1/internal/", http.StripPrefix(
+			"/v1/internal",
+			handlers.NewInternalAPIHandler([]string{
+				cfg.EnsemblerConfig.Endpoint,
+				cfg.EnrichmentConfig.Endpoint,
+			}),
+		))
+		http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
+		http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl)))
+		// Register metrics handler
+		if cfg.AppConfig.CustomMetrics {
+			http.Handle("/metrics", promhttp.Handler())
+		}
+		// Serve
+		log.Glob().Infof("listening at port %d", cfg.Port)
+		if err := http.ListenAndServe(cfg.ListenAddress(), http.DefaultServeMux); err != nil {
+			log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
+		}
+	default:
+		log.Glob().Panicf("router protocol %s not supported", cfg.RouterConfig.Protocol)
 	}
 }
 

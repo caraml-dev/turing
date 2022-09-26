@@ -13,7 +13,7 @@ import (
 	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -286,7 +286,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Create test request
 			req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
-			fiberReq, err := fiberhttp.NewHTTPRequest(req)
+			fiberReq, err := fiberHttp.NewHTTPRequest(req)
 			tu.FailOnError(t, err)
 
 			// Create test routes
@@ -322,7 +322,7 @@ func makeTestRoutes(t *testing.T, names ...string) map[string]fiber.Component {
 
 	for _, n := range names {
 		b := fiber.NewBackend(n, "")
-		httpDispatcher, err := fiberhttp.NewDispatcher(http.DefaultClient)
+		httpDispatcher, err := fiberHttp.NewDispatcher(http.DefaultClient)
 		if err != nil {
 			t.Fatal(err)
 		}

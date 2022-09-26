@@ -14,7 +14,7 @@ import (
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/require"
 )
 
@@ -401,7 +401,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			ctx := turingctx.NewTuringContext(context.Background())
 			req, _ := http.NewRequest(http.MethodPost, "/predict", bytes.NewReader([]byte(tt.payload)))
 			req.Header = tt.header
-			fiberReq, _ := fiberhttp.NewHTTPRequest(req)
+			fiberReq, _ := fiberHttp.NewHTTPRequest(req)
 
 			actual, actualFallbacks, err := tt.strategy.SelectRoute(ctx, fiberReq, tt.routes)
 			if tt.expectedError == "" {
