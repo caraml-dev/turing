@@ -797,6 +797,7 @@ components:
       properties:
         experiment_mappings:
           type: "array"
+          nullable: true
           items:
             type: "object"
             required:
@@ -818,6 +819,7 @@ components:
                 example: "route-1"
         route_name_path:
           type: "string"
+          nullable: true
 
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"

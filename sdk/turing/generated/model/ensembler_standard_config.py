@@ -77,8 +77,8 @@ class EnsemblerStandardConfig(ModelNormal):
         """
         lazy_import()
         return {
-            'experiment_mappings': ([EnsemblerStandardConfigExperimentMappings],),  # noqa: E501
-            'route_name_path': (str,),  # noqa: E501
+            'experiment_mappings': ([EnsemblerStandardConfigExperimentMappings], none_type,),  # noqa: E501
+            'route_name_path': (str, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -137,8 +137,8 @@ class EnsemblerStandardConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            experiment_mappings ([EnsemblerStandardConfigExperimentMappings]): [optional]  # noqa: E501
-            route_name_path (str): [optional]  # noqa: E501
+            experiment_mappings ([EnsemblerStandardConfigExperimentMappings], none_type): [optional]  # noqa: E501
+            route_name_path (str, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
