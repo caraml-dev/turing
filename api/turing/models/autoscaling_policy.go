@@ -22,7 +22,10 @@ const (
 
 type AutoscalingPolicy struct {
 	Metric AutoscalingMetric `json:"metric" validate:"required,oneof=concurrency rps cpu memory"`
-	Target string            `json:"target" validate:"required,number"`
+	// Target is the target value of the metric that should be reached to add a new replica.
+	// It is expected that the autoscaling target is an absolute value for concurrency / rps
+	// while it is a % value (of the requested value) for cpu / memory.
+	Target string `json:"target" validate:"required,number"`
 }
 
 func (a AutoscalingPolicy) Value() (driver.Value, error) {

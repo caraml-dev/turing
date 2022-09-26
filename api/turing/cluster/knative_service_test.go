@@ -7,6 +7,7 @@ import (
 
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -247,7 +248,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 									"autoscaling.knative.dev/minScale": "5",
 									"autoscaling.knative.dev/maxScale": "6",
 									"autoscaling.knative.dev/metric":   "memory",
-									"autoscaling.knative.dev/target":   "70",
+									"autoscaling.knative.dev/target":   "358",
 									"autoscaling.knative.dev/class":    "hpa.autoscaling.knative.dev",
 								},
 							},
@@ -267,9 +268,92 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			// Run test and validate
-			svc := data.serviceCfg.BuildKnativeServiceConfig()
-			err := tu.CompareObjects(*svc, data.expectedSpec)
+			svc, err := data.serviceCfg.BuildKnativeServiceConfig()
+			require.NoError(t, err)
+			err = tu.CompareObjects(*svc, data.expectedSpec)
 			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestGetAutoscalingTarget(t *testing.T) {
+	tests := map[string]struct {
+		cfg            *KnativeService
+		expectedTarget string
+		expectedErr    string
+	}{
+		"concurrency": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "concurrency",
+				AutoscalingTarget: "10",
+			},
+			expectedTarget: "10",
+		},
+		"rps": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "rps",
+				AutoscalingTarget: "100",
+			},
+			expectedTarget: "100",
+		},
+		"cpu": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "cpu",
+				AutoscalingTarget: "80",
+			},
+			expectedTarget: "80",
+		},
+		"memory | Mi": {
+			cfg: &KnativeService{
+				BaseService: &BaseService{
+					MemoryRequests: resource.MustParse("512Mi"),
+				},
+				AutoscalingMetric: "memory",
+				AutoscalingTarget: "70",
+			},
+			expectedTarget: "358", // (70/100) * (512 Mi)
+		},
+		"memory | Gi": {
+			cfg: &KnativeService{
+				BaseService: &BaseService{
+					MemoryRequests: resource.MustParse("2Gi"),
+				},
+				AutoscalingMetric: "memory",
+				AutoscalingTarget: "70",
+			},
+			expectedTarget: "1434", // (70/100) * (2Gi * 1024)
+		},
+		"memory | G": {
+			cfg: &KnativeService{
+				BaseService: &BaseService{
+					MemoryRequests: resource.MustParse("2G"),
+				},
+				AutoscalingMetric: "memory",
+				AutoscalingTarget: "70",
+			},
+			expectedTarget: "1335", // (70/100) * ((2G * 10^9) bytes / 1024^2)Mi
+		},
+		"memory | failure": {
+			cfg: &KnativeService{
+				BaseService: &BaseService{
+					MemoryRequests: resource.MustParse("1Gi"),
+				},
+				AutoscalingMetric: "memory",
+				AutoscalingTarget: "$^",
+			},
+			expectedErr: "strconv.ParseFloat: parsing \"$^\": invalid syntax",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			result, err := data.cfg.getAutoscalingTarget()
+			if data.expectedErr == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, data.expectedErr)
+			}
+			assert.Equal(t, data.expectedTarget, result)
 		})
 	}
 }

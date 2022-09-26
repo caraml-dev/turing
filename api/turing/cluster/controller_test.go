@@ -160,8 +160,8 @@ func TestDeployKnativeService(t *testing.T) {
 			monkey.PatchInstanceMethod(
 				reflect.TypeOf(svcConf),
 				"BuildKnativeServiceConfig",
-				func(*KnativeService) *knservingv1.Service {
-					return testKnSvc
+				func(*KnativeService) (*knservingv1.Service, error) {
+					return testKnSvc, nil
 				})
 			monkey.Patch(knServiceSemanticEquals,
 				func(*knservingv1.Service, *knservingv1.Service) bool {

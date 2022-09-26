@@ -112,15 +112,19 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId, defaultT
       actions: [
         {
           render: (item) =>
-            <EuiToolTip content="Show traffic rules">
-              <EuiButtonIcon
-                size="s"
-                className="euiIconButton--action"
-                iconType="logstashIf"
-                onClick={toggleDetails(item)}
-                aria-label="Remove data field"
-              />
-            </EuiToolTip>
+            !!item.rules ? (
+              <EuiToolTip content="Show traffic rules">
+                <EuiButtonIcon
+                  size="s"
+                  className="euiIconButton--action"
+                  iconType="logstashIf"
+                  onClick={toggleDetails(item)}
+                  aria-label="Remove data field"
+                />
+              </EuiToolTip>
+            ) : (
+              <div />
+            )
         },
       ],
     },

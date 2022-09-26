@@ -21,8 +21,8 @@ export const autoscalingPolicyOptions = [
     value: "memory",
     inputDisplay: "Memory",
     description: `Traditional memory-based autoscaling.
-                      When the specified target (in Mi) is reached, a new replica will be added.`,
-    unit: "Mi",
+                      When the specified target (% request) is reached, a new replica will be added.`,
+    unit: "%",
   },
 ];
 
