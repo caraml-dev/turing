@@ -8,6 +8,18 @@ This step is **optional** and the default behaviour will not discriminate betwee
 
 It is also possible to configure your router such that each request is only dispatched to a subset of the configured routes, based on some request specific conditions. For example, you might have some models, trained on geography-specific data. So, in this scenario, you want to call `mock` if the request contains header `"X-Region: region-A"` or `model-b` if `X-Region` header equals `"region-B"`. It's possible to achieve this by configuring traffic rules on your router.
 
+**Note**: Nested paths in the payload can be specified using `.` as the separator. This also works for array
+indices. Eg: The first session id in the below structure can be specified as `session.[0].id`.
+
+```json
+{
+  "session": [
+    {"id": 123, "data": {}},
+    {"id": 456, "data": {}}
+  ]
+}
+```
+
 Traffic rules define which routes should be "activated" for a particular request to your router. Each rule is defined by one or more request conditions and one or more routes that would be activated if the request satisfies the conditions of the rule. 
 
 When traffic rules are configured, the following behaviour is expected:
@@ -19,7 +31,7 @@ Rules are matched against the incoming request in the order in which they are de
 
 ![](../../.gitbook/assets/create_router_rules_priority.png)
 
-In addition, orthogonality checks have been put in-place to disallow overlapping rules. An example is as described below:
+In addition, orthogonality checks have been put in-place to disallow overlapping rules. Some examples are as described below:
 
 | Rule | Conditions |
 |------|------------|
@@ -29,6 +41,13 @@ In addition, orthogonality checks have been put in-place to disallow overlapping
 | 4    | country_code=[ID], geo_area=[2] |
 
 From the above rules, rule 2 is overlapping with all other rules since there are no unique combinations that would let rules 3 and 4 to be called, and rule 2 will not be called for the same conditions met by rule 1.
+
+| Rule | Conditions |
+|------|------------|
+| 1    | country_code=[ID], geo_area=[1] |
+| 2    | country_code=[SG], geo_area=[1] |
+
+From the above rules, both rule 1 and 2 are not overlapping because there's at least 1 condition parameter i.e country_code that is exclusive.
 
 ### Conditions
 
