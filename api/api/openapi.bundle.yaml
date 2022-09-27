@@ -2350,8 +2350,10 @@ components:
         experiment_mappings:
           items:
             $ref: '#/components/schemas/EnsemblerStandardConfig_experiment_mappings'
+          nullable: true
           type: array
         route_name_path:
+          nullable: true
           type: string
       type: object
     EnsemblerDockerConfig:
