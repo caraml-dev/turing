@@ -3,7 +3,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from "@elastic/eui";
 
 import { ConfigSectionPanel } from "../../../../components/config_section";
 import { RemoteComponent } from "../../../../components/remote_component/RemoteComponent";
-import { ExperimentEngineLoaderComponent } from "../../../../components/experiments/ExperimentEngineLoaderComponent";
+import ExperimentEngineComponentLoader from "../../../../components/remote_component/ExperimentEngineComponentLoader";
 import ExperimentEngineContext from "../../../../providers/experiments/context";
 
 import { StandardExperimentConfigGroup } from "./experiment_config_section/StandardExperimentConfigGroup";
@@ -29,9 +29,11 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
   return (
     <React.Suspense
       fallback={<FallbackView text="Loading Experiment Engine config" />}>
-      <ExperimentEngineLoaderComponent
+      <ExperimentEngineComponentLoader
         FallbackView={FallbackView}
-        experimentEngine={remoteUi}>
+        remoteUi={remoteUi}
+        componentName="Experiment Engine"
+      >
         <RemoteComponent
           scope={remoteUi.name}
           name="./ExperimentEngineConfigDetails"
@@ -39,7 +41,7 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
           projectId={projectId}
           config={config}
         />
-      </ExperimentEngineLoaderComponent>
+      </ExperimentEngineComponentLoader>
     </React.Suspense>
   );
 };

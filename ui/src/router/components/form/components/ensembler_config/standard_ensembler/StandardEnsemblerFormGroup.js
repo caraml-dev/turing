@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { EuiFlexItem, EuiText } from "@elastic/eui";
+import React, { useContext, useEffect } from "react";
+import { EuiFlexItem, EuiSpacer, EuiText } from "@elastic/eui";
 
 import { get } from "../../../../../../components/form/utils";
 import { StandardEnsembler } from "../../../../../../services/ensembler";
@@ -7,9 +7,55 @@ import { StandardEnsemblerPanel } from "./StandardEnsemblerPanel";
 import { RouteSelectionPanel } from "../RouteSelectionPanel";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
+import ExperimentEngineContext from "../../../../../../providers/experiments/context";
+import { Panel } from "../../Panel";
+import { RemoteComponent } from "../../../../../../components/remote_component/RemoteComponent";
+import ExperimentEngineComponentLoader from "../../../../../../components/remote_component/ExperimentEngineComponentLoader";
+
+const FallbackView = ({ text }) => (
+  <EuiFlexItem grow={true}>
+    <Panel title="Route Selection">
+      <EuiSpacer size="m" />
+      {text}
+    </Panel>
+  </EuiFlexItem>
+);
+
+const StandardEnsemblerWithCustomExperimentEnginePanel = ({
+  remoteUi,
+  projectId,
+  routes,
+  routeNamePath,
+  onChange,
+  errors,
+}) => {
+  // Load component from remote host
+  return (
+    <React.Suspense
+      fallback={<FallbackView text="Loading Standard Ensembler config for the selected Custom Experiment Engine" />}>
+      <ExperimentEngineComponentLoader
+        FallbackView={FallbackView}
+        remoteUi={remoteUi}
+        componentName="Standard Ensembler"
+      >
+        <RemoteComponent
+          scope={remoteUi.name}
+          name="./EditStandardEnsemblerConfig"
+          fallback={<FallbackView text="Loading Standard Ensembler form for the selected Custom Experiment Engine" />}
+          projectId={projectId}
+          routes={routes}
+          routeNamePath={routeNamePath}
+          onChange={onChange}
+          errors={errors}
+        />
+      </ExperimentEngineComponentLoader>
+    </React.Suspense>
+  );
+};
 
 export const StandardEnsemblerFormGroup = ({
-  experimentConfig = {},
+  projectId,
+  experimentEngine = {},
   routes,
   rules,
   default_traffic_rule,
@@ -19,9 +65,13 @@ export const StandardEnsemblerFormGroup = ({
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
+  const { getEngineProperties, isLoaded } = useContext(ExperimentEngineContext);
+
   useEffect(() => {
     !standardConfig && onChangeHandler(StandardEnsembler.newConfig());
   }, [standardConfig, onChangeHandler]);
+
+  const engineProps = getEngineProperties(experimentEngine.type);
 
   const routeOptions = [
     {
@@ -47,15 +97,33 @@ export const StandardEnsemblerFormGroup = ({
   return (
     !!standardConfig && (
       <>
-        <EuiFlexItem>
-          <StandardEnsemblerPanel
-            experiments={experimentConfig.experiments}
-            mappings={standardConfig.experiment_mappings}
-            routeOptions={routeOptions}
-            onChangeHandler={onChange("experiment_mappings")}
-            errors={get(errors, "experiment_mappings")}
-          />
-        </EuiFlexItem>
+        {engineProps?.type === "standard" ? (
+          <EuiFlexItem>
+            <StandardEnsemblerPanel
+              experiments={experimentEngine.config.experiments}
+              mappings={standardConfig.experiment_mappings}
+              routeOptions={routeOptions}
+              onChangeHandler={onChange("experiment_mappings")}
+              errors={get(errors, "experiment_mappings")}
+            />
+          </EuiFlexItem>
+        ) : isLoaded ? (
+          <EuiFlexItem>
+            <StandardEnsemblerWithCustomExperimentEnginePanel
+              remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
+              projectId={projectId}
+              routes={routes}
+              routeNamePath={standardConfig.route_name_path}
+              onChange={onChange("route_name_path")}
+              errors={get(errors, "route_name_path")}
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <FallbackView text={"Loading ..."} />
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem>
           <RouteSelectionPanel
             routeId={standardConfig.fallback_response_route_id}

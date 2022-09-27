@@ -21,6 +21,7 @@ export class StandardEnsembler extends Ensembler {
     return {
       experiment_mappings: [],
       fallback_response_route_id: "",
+      route_name_path: "",
     };
   }
 }

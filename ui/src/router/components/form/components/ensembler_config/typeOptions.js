@@ -63,10 +63,7 @@ export const ensemblerTypeOptions = (engineProps) => {
   }
   // Ensembler must be selected when there is an experiment engine
   const ensemblerOptions = typeOptions.filter((o) => o.value !== "nop");
-  if (
-    !engineProps?.standard_experiment_manager_config
-      ?.experiment_selection_enabled
-  ) {
+  if (engineProps?.standard_experiment_manager_config?.experiment_selection_enabled === false) {
     // Standard Ensembler is not available when experiment selection is disabled
     return ensemblerOptions.filter((o) => o.value !== "standard");
   }

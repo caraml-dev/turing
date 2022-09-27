@@ -17,9 +17,10 @@ const LoadDynamicScript = ({ url, setReady, setFailed }) => {
 };
 
 // Dynamic Script Loading component wrapper
-export const ExperimentEngineLoaderComponent = ({
+export const ExperimentEngineComponentLoader = ({
   FallbackView,
-  experimentEngine,
+  remoteUi,
+  componentName,
   children,
 }) => {
   const [urlReady, setUrlReady] = useState(false);
@@ -28,30 +29,30 @@ export const ExperimentEngineLoaderComponent = ({
   const [configFailed, setConfigFailed] = useState(false);
 
   return urlFailed ? (
-    <FallbackView text={"Failed to load Experiment Engine"} />
+    <FallbackView text={`Failed to load ${componentName}`} />
   ) : configFailed ? (
-    <FallbackView text={"Failed to load Experiment Engine Config"} />
+    <FallbackView text={`Failed to load ${componentName} Config`} />
   ) : !urlReady || !configReady ? (
     <>
-      {!!experimentEngine.url && !urlReady && (
+      {!!remoteUi.url && !urlReady && (
         <LoadDynamicScript
           setReady={setUrlReady}
           setFailed={setUrlFailed}
-          url={experimentEngine.url}
+          url={remoteUi.url}
         />
       )}
-      {!!experimentEngine.config && !configReady && (
+      {!!remoteUi.config && !configReady && (
         <LoadDynamicScript
           setReady={setConfigReady}
           setFailed={setConfigFailed}
-          url={experimentEngine.config}
+          url={remoteUi.config}
         />
       )}
-      <FallbackView text={"Loading Experiment Engine..."} />
+      <FallbackView text={`Loading ${componentName}...`} />
     </>
   ) : (
     children
   );
 };
 
-export default ExperimentEngineLoaderComponent;
+export default ExperimentEngineComponentLoader;

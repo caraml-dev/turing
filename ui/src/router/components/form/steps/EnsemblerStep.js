@@ -71,7 +71,8 @@ export const EnsemblerStep = ({ projectId }) => {
 
       {ensembler.type === "standard" && (
         <StandardEnsemblerFormGroup
-          experimentConfig={experiment_engine.config}
+          projectId={projectId}
+          experimentEngine={experiment_engine}
           routes={routes}
           rules={rules}
           default_traffic_rule={default_traffic_rule}
