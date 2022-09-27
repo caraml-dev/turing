@@ -29,6 +29,9 @@ export class Ensembler {
       case "docker":
         return { type: this.type, docker_config: this.docker_config };
       case "standard":
+        if (this.standard_config.experiment_mappings?.length === 0) {
+          delete this.standard_config.experiment_mappings;
+        }
         return { type: this.type, standard_config: this.standard_config };
       case "pyfunc":
         return { type: this.type, pyfunc_config: this.pyfunc_config };
