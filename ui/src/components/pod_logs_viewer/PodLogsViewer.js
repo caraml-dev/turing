@@ -7,6 +7,7 @@ import {
 } from "@elastic/eui";
 import { LazyLog, ScrollFollow } from "react-lazylog";
 import { slugify } from "@gojek/mlp-ui";
+import isArray from "lodash/isArray";
 
 import "./PodLogsViewer.scss";
 
@@ -30,7 +31,9 @@ export const PodLogsViewer = ({
         name: !!query.tail_lines
           ? `Last ${query.tail_lines} records`
           : "From the container start",
-        multiSelect: false,
+        // single select behavior is buggy in recent versions of Eui
+        // See: https://github.com/elastic/eui/issues/6271
+        multiSelect: "or",
         options: [
           {
             value: "100",
@@ -76,17 +79,22 @@ export const PodLogsViewer = ({
       let newFilterValues = {
         ...filterValues,
         ...ast.clauses.reduce((acc, { field, value }) => {
+          // This will ensure that, if there are multiple values (as with field_value_selection using OR),
+          // only the latest one is selected
           acc[field] = value;
           return acc;
         }, {}),
       };
 
       if (JSON.stringify(newFilterValues) !== JSON.stringify(filterValues)) {
+        if (isArray(newFilterValues.tail_lines)) {
+          // Grab the first value, as we are using multi-select with OR
+          newFilterValues.tail_lines = newFilterValues.tail_lines[0]
+        }
         if (newFilterValues.tail_lines === "all") {
           delete newFilterValues["tail_lines"];
           newFilterValues.head_lines = batchSize;
         }
-
         onQueryChange(() => newFilterValues);
       }
     }
