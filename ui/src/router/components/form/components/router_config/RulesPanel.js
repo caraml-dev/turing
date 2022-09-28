@@ -114,6 +114,8 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
             )}
           </EuiDraggable>
         ))}
+        </EuiDroppable>
+        </EuiDragDropContext>
         <EuiFlexItem>
           {routes.length < 2 ? (
             <EuiToolTip content="You should have more than one route in order to be able to define traffic rules">
@@ -123,8 +125,6 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
             addRuleButton
           )}
         </EuiFlexItem>
-        </EuiDroppable>
-        </EuiDragDropContext>
       </EuiFlexGroup>
 
       {isFlyoutVisible && (

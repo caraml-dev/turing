@@ -248,7 +248,8 @@ const mappingSchema = yup.object().shape({
 });
 
 const standardEnsemblerConfigSchema = yup.object().shape({
-  experiment_mappings: yup.array(mappingSchema),
+  route_name_path: yup.string().nullable(),
+  experiment_mappings: yup.array(mappingSchema).nullable(),
   fallback_response_route_id: validRouteSchema,
 });
 
