@@ -79,11 +79,18 @@ export class RouterVersion {
       router: {
         image: this.image,
         timeout: this.timeout,
+        default_traffic_rule: {routes: this.default_traffic_rule.routes.join()},
         routes: this.routes.map((route) => ({
           id: route.id,
           endpoint: route.endpoint,
           timeout: route.timeout,
           is_default: route.id === this.default_route_id,
+        })),
+        rules: this.rules.map((rule) => ({
+          conditions: rule.conditions.map((condition) => ({
+            [condition.field_source]: `${condition.field} ${condition.operator.toUpperCase()} [${condition.values.join()}]`
+          })),
+          routes: rule.routes.join(),
         })),
         resource_request: this.resource_request,
         autoscaling_policy: {
