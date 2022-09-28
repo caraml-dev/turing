@@ -32,6 +32,9 @@ export class Ensembler {
         if (this.standard_config.experiment_mappings?.length === 0) {
           delete this.standard_config.experiment_mappings;
         }
+        if (this.standard_config.route_name_path === "") {
+          delete this.standard_config.route_name_path;
+        }
         return { type: this.type, standard_config: this.standard_config };
       case "pyfunc":
         return { type: this.type, pyfunc_config: this.pyfunc_config };
