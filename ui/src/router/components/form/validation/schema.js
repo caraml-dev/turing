@@ -247,11 +247,22 @@ const mappingSchema = yup.object().shape({
   route: yup.string().required("Treatment needs to be mapped back to a route"),
 });
 
-const standardEnsemblerConfigSchema = yup.object().shape({
-  route_name_path: yup.string().nullable(),
-  experiment_mappings: yup.array(mappingSchema).nullable(),
-  fallback_response_route_id: validRouteSchema,
-});
+const standardEnsemblerConfigSchema = yup
+  .object()
+  .shape({
+    route_name_path: yup.string().nullable(),
+    experiment_mappings: yup.array(mappingSchema).nullable(),
+    fallback_response_route_id: validRouteSchema,
+  })
+  .test(
+    "is-route-name-path-or-experiment-mappings-set",
+    "only one of route_name_path or experiment_mappings must be set",
+    (standardEnsembler) => {
+      const isRouteNamePathEmpty = !standardEnsembler.route_name_path;
+      const isExperimentMappingsEmpty = !standardEnsembler.experiment_mappings || standardEnsembler.experiment_mappings.length === 0;
+      return !((isRouteNamePathEmpty && isExperimentMappingsEmpty) || (!isRouteNamePathEmpty && !isExperimentMappingsEmpty));
+    }
+  );
 
 const bigQueryConfigSchema = yup.object().shape({
   table: yup
