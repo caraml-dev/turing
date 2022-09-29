@@ -78,7 +78,8 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				Metric: "concurrency",
 				Target: "1",
 			},
-			Timeout: "5s",
+			Timeout:  "5s",
+			Protocol: "HTTP_JSON",
 			LogConfig: &models.LogConfig{
 				LogLevel:             "DEBUG",
 				CustomMetricsEnabled: true,
@@ -102,7 +103,6 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				},
 				Endpoint: "/enrich",
 				Timeout:  "5s",
-				Protocol: "HTTP_JSON",
 				Port:     8080,
 				Env: []*models.EnvVar{
 					{
