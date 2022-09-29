@@ -163,14 +163,14 @@ export class RouterVersion {
     };
 
     if (this.default_traffic_rule) {
-      pretty.router["default_traffic_rule"] = {routes: this.default_traffic_rule.routes.join()};
+      pretty.router["default_traffic_rule"] = {routes: this.default_traffic_rule.routes.join(", ")};
     }
     if (this.rules?.length > 0) {
       pretty.router["rules"] = this.rules.map((rule) => ({
         conditions: rule.conditions.map((condition) => ({
-          [condition.field_source]: `${condition.field} ${condition.operator.toUpperCase()} [${condition.values.join()}]`
+          [condition.field_source]: `${condition.field} ${condition.operator.toUpperCase()} [${condition.values.join(", ")}]`
         })),
-        routes: rule.routes.join(),
+        routes: rule.routes.join(", "),
       }))
     }
 
