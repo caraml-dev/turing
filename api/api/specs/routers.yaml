@@ -521,7 +521,7 @@ components:
         timeout:
           <<: *timeout
         protocol:
-          $ref: "#/components/schemas/Protocol"
+          $ref: "#/components/schemas/RouterProtocol"
         log_config:
           type: "object"
           properties:
@@ -588,7 +588,7 @@ components:
         - "GRPC"
         - "HTTP"
 
-    Protocol:
+    RouterProtocol:
       type: "string"
       enum:
         - "UPI_V1"
@@ -646,7 +646,7 @@ components:
         timeout:
           <<: *timeout
         protocol:
-          $ref: "#/components/schemas/Protocol"
+          $ref: "#/components/schemas/RouterProtocol"
         log_config:
           type: "object"
           properties:

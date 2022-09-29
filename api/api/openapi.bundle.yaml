@@ -2048,7 +2048,7 @@ components:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         protocol:
-          $ref: '#/components/schemas/Protocol'
+          $ref: '#/components/schemas/RouterProtocol'
         log_config:
           $ref: '#/components/schemas/RouterVersion_log_config'
         enricher:
@@ -2146,7 +2146,7 @@ components:
           pattern: ^\d+$
           type: string
       type: object
-    Protocol:
+    RouterProtocol:
       enum:
       - UPI_V1
       - HTTP_JSON
@@ -2877,7 +2877,7 @@ components:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         protocol:
-          $ref: '#/components/schemas/Protocol'
+          $ref: '#/components/schemas/RouterProtocol'
         log_config:
           $ref: '#/components/schemas/RouterVersionConfig_log_config'
         enricher:

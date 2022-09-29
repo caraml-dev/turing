@@ -55,6 +55,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				{
 					ID:       "bulbasaur",
 					Type:     "PROXY",
+					Protocol: "HTTP",
 					Endpoint: "bulbasaur.default.svc.cluster.local:80",
 					Timeout:  "5s",
 				},
@@ -101,6 +102,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				},
 				Endpoint: "/enrich",
 				Timeout:  "5s",
+				Protocol: "HTTP_JSON",
 				Port:     8080,
 				Env: []*models.EnvVar{
 					{
