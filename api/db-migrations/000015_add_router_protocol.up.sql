@@ -1,6 +1,6 @@
 -- Create type for Router and Route protocol
 CREATE TYPE RouteProtocol as ENUM ('HTTP', 'GRPC');
-CREATE TYPE RouterProtocol as ENUM ('HTTP', 'UPI_V1');
+CREATE TYPE RouterProtocol as ENUM ('HTTP_JSON', 'UPI_V1');
 
 -- Add Router protocol
 ALTER TABLE router_versions ADD protocol RouterProtocol NOT NULL DEFAULT 'HTTP';
