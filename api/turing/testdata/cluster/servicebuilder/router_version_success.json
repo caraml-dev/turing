@@ -11,6 +11,7 @@
         {
             "id": "control",
             "type": "PROXY",
+            "protocol": "HTTP",
             "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
             "timeout": "2s"
         }
@@ -29,6 +30,7 @@
         "metric": "concurrency",
         "target": "1"
     },
+    "protocol": "HTTP_JSON",
     "timeout": "5s",
     "log_config": {
         "log_level": "INFO",

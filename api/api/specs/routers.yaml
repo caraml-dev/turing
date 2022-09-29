@@ -520,6 +520,8 @@ components:
           $ref: "#/components/schemas/AutoscalingPolicy"
         timeout:
           <<: *timeout
+        protocol:
+          $ref: "#/components/schemas/Protocol"
         log_config:
           type: "object"
           properties:
@@ -580,6 +582,18 @@ components:
         - "pending"
       default: "pending"
 
+    RouteProtocol:
+      type: "string"
+      enum:
+        - "GRPC"
+        - "HTTP"
+
+    Protocol:
+      type: "string"
+      enum:
+        - "UPI_V1"
+        - "HTTP_JSON"
+
     LogLevel:
       type: "string"
       enum:
@@ -631,6 +645,8 @@ components:
           $ref: "#/components/schemas/AutoscalingPolicy"
         timeout:
           <<: *timeout
+        protocol:
+          $ref: "#/components/schemas/Protocol"
         log_config:
           type: "object"
           properties:
@@ -652,6 +668,7 @@ components:
         - type
         - endpoint
         - timeout
+        - protocol
       properties:
         id:
           type: "string"
@@ -661,6 +678,10 @@ components:
           type: "string"
         timeout:
           <<: *timeout
+        protocol:
+          $ref: "#/components/schemas/RouteProtocol"
+        service_method:
+          type: "string"
         annotations:
           type: "object"
           nullable: true

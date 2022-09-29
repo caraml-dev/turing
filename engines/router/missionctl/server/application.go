@@ -70,10 +70,17 @@ func Run() {
 		if cfg.AppConfig.CustomMetrics {
 			m := cmux.New(l)
 			grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-			httpL := m.Match(cmux.HTTP1Fast())
+			httpL := m.Match(cmux.Any())
 
 			mux := http.NewServeMux()
 			mux.Handle("/metrics", promhttp.Handler())
+			mux.Handle("/v1/internal/", http.StripPrefix(
+				"/v1/internal",
+				handlers.NewInternalAPIHandler([]string{
+					cfg.EnsemblerConfig.Endpoint,
+					cfg.EnrichmentConfig.Endpoint,
+				}),
+			))
 			httpS := &http.Server{Handler: mux}
 
 			go s.Run(grpcL)

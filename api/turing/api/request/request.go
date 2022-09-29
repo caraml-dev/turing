@@ -30,6 +30,7 @@ type RouterConfig struct {
 	ResourceRequest    *models.ResourceRequest    `json:"resource_request"`
 	AutoscalingPolicy  *models.AutoscalingPolicy  `json:"autoscaling_policy" validate:"omitempty,dive"`
 	Timeout            string                     `json:"timeout" validate:"required"`
+	Protocol           models.RouterProtocol      `json:"protocol" validate:"required"`
 
 	LogConfig *LogConfig `json:"log_config" validate:"required"`
 
@@ -138,6 +139,7 @@ func (r RouterConfig) BuildRouterVersion(
 		ResourceRequest:   r.ResourceRequest,
 		AutoscalingPolicy: getAutoscalingPolicyOrDefault(r.AutoscalingPolicy),
 		Timeout:           r.Timeout,
+		Protocol:          r.Protocol,
 		LogConfig: &models.LogConfig{
 			LogLevel:             routercfg.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,

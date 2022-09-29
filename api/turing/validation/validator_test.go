@@ -295,7 +295,8 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 		ExperimentEngine: &request.ExperimentEngineConfig{
 			Type: "nop",
 		},
-		Timeout: "20s",
+		Timeout:  "20s",
+		Protocol: models.HTTP,
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},

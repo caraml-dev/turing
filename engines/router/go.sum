@@ -228,8 +228,6 @@ github.com/gocql/gocql v0.0.0-20190301043612-f6df8288f9b4/go.mod h1:4Fw1eo5iaEhD
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
-github.com/gojek/fiber v0.1.1-0.20220919041622-e1bb222fbb9a h1:II74Doomz/x53s/g0lpYbosuQTknN/tjKSz/hYOy6oc=
-github.com/gojek/fiber v0.1.1-0.20220919041622-e1bb222fbb9a/go.mod h1:N/HYrGd73oNnZnaVhWX568VxY3Ksvu7ahPoUYEhNa3I=
 github.com/gojek/mlp v1.4.7 h1:GxqqI0rQxUF4pexCk3aHsd5Mu4o4OnnsbGk+MTnW26Y=
 github.com/gojek/mlp v1.4.7/go.mod h1:3+/YMTxQenxYSvKzOiEio+UBXPheJ4+/5c1MkbYoLwc=
 github.com/golang-migrate/migrate/v4 v4.11.0/go.mod h1:nqbpDbckcYjsCD5I8q5+NI9Tkk7SVcmaF40Ax1eAWhg=
@@ -413,6 +411,8 @@ github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
+github.com/leonlnj/fiber v0.0.0-20220928042236-caf6c893415c h1:KuegXuvT2FqHetb8sPMeHPpkDjIHHqyojfQlebaBwwc=
+github.com/leonlnj/fiber v0.0.0-20220928042236-caf6c893415c/go.mod h1:N/HYrGd73oNnZnaVhWX568VxY3Ksvu7ahPoUYEhNa3I=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.1.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.1.1/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=

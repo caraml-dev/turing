@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/jinzhu/gorm"
 )
 
@@ -13,6 +14,13 @@ const (
 	RouterVersionStatusFailed     RouterVersionStatus = "failed"
 	RouterVersionStatusDeployed   RouterVersionStatus = "deployed"
 	RouterVersionStatusUndeployed RouterVersionStatus = "undeployed"
+)
+
+type RouterProtocol string
+
+const (
+	HTTP = RouterProtocol(config.HTTP)
+	UPI  = RouterProtocol(config.UPI)
 )
 
 // RouterVersion contains the configuration of a version of a router.
@@ -49,6 +57,8 @@ type RouterVersion struct {
 	AutoscalingPolicy *AutoscalingPolicy `json:"autoscaling_policy"`
 	// Request timeout as a valid quantity string
 	Timeout string `json:"timeout"`
+	// Router transport protocol
+	Protocol RouterProtocol `json:"protocol"`
 	// Logging configuration for the router
 	LogConfig *LogConfig `json:"log_config"`
 

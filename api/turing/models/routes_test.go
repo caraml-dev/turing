@@ -4,7 +4,8 @@ import (
 	"testing"
 	"time"
 
-	fiberconfig "github.com/gojek/fiber/config"
+	fiberConfig "github.com/gojek/fiber/config"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,10 +14,12 @@ var testRoutes Routes = Routes{
 		ID:       "test-id",
 		Type:     "PROXY",
 		Endpoint: "test-endpoint",
+		Protocol: "GRPC",
 		Annotations: map[string]string{
 			"merlin.gojek.com/model-id": "10",
 		},
-		Timeout: "2s",
+		Timeout:       "2s",
+		ServiceMethod: "package/method",
 	},
 }
 
@@ -30,8 +33,10 @@ func TestRoutesValue(t *testing.T) {
 	assert.JSONEq(t, `
 		[{
 			"id": "test-id",
+			"protocol": "GRPC",
 			"type": "PROXY",
 			"endpoint": "test-endpoint",
+			"service_method": "package/method",
 			"annotations": {
 				"merlin.gojek.com/model-id": "10"
 			},
@@ -51,8 +56,10 @@ func TestRoutesScan(t *testing.T) {
 			value: []byte(`
 				[{
 					"id": "test-id",
+					"protocol": "GRPC",
 					"type": "PROXY",
 					"endpoint": "test-endpoint",
+					"service_method": "package/method",
 					"annotations": {
 						"merlin.gojek.com/model-id": "10"
 					},
@@ -87,20 +94,24 @@ func TestRoutesScan(t *testing.T) {
 func TestRoutesToFiberRoutes(t *testing.T) {
 	tests := map[string]struct {
 		routes      Routes
-		fiberRoutes fiberconfig.Routes
+		fiberRoutes fiberConfig.Routes
 		success     bool
 		err         string
 	}{
 		"success": {
 			routes: testRoutes,
-			fiberRoutes: fiberconfig.Routes{
-				&fiberconfig.ProxyConfig{
-					ComponentConfig: fiberconfig.ComponentConfig{
+			fiberRoutes: fiberConfig.Routes{
+				&fiberConfig.ProxyConfig{
+					ComponentConfig: fiberConfig.ComponentConfig{
 						ID:   "test-id",
 						Type: "PROXY",
 					},
 					Endpoint: "test-endpoint",
-					Timeout:  fiberconfig.Duration(time.Second * 2),
+					Timeout:  fiberConfig.Duration(time.Second * 2),
+					Protocol: fiberProtocol.GRPC,
+					GrpcConfig: fiberConfig.GrpcConfig{
+						ServiceMethod: "package/method",
+					},
 				},
 			},
 			success: true,
