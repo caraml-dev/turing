@@ -6,18 +6,21 @@
             {
                 "id": "control",
                 "type": "PROXY",
+                "protocol": "HTTP",
                 "endpoint": "{{.MockserverEndpoint}}/control",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-a",
                 "type": "PROXY",
+                "protocol": "HTTP",
                 "endpoint": "{{.MockserverEndpoint}}/treatment-a",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-b",
                 "type": "PROXY",
+                "protocol": "HTTP",
                 "endpoint": "{{.MockserverEndpoint}}/treatment-b",
                 "timeout": "5s"
             }
@@ -61,6 +64,7 @@
             "memory_request": "250Mi"
         },
         "timeout": "5s",
+        "protocol": "HTTP_JSON",
         "log_config": {
             "result_logger_type": "nop"
         },
