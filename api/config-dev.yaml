@@ -1,5 +1,5 @@
 BatchEnsemblingConfig:
-  Enabled: true
+  Enabled: false
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:
@@ -46,7 +46,7 @@ DbConfig:
   User: turing
   Password: turing
 DeployConfig:
-  EnvironmentType: dev 
+  EnvironmentType: dev
 KubernetesLabelConfigs:
   Environment: dev
 SparkAppConfig:
@@ -62,6 +62,7 @@ SparkAppConfig:
   TTLSecond: 86400
 RouterDefaults:
   Image: localhost:5000/turing-router
+  CustomMetricsEnabled: true
 ClusterConfig:
   InClusterConfig: false
   VaultConfig:

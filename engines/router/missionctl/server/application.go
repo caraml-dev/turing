@@ -67,33 +67,31 @@ func Run() {
 		}
 
 		s := upi.NewUPIServer(missionCtl)
+		m := cmux.New(l)
+		grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+		httpL := m.Match(cmux.Any())
+
+		mux := http.NewServeMux()
+		mux.Handle("/v1/internal/", http.StripPrefix(
+			"/v1/internal",
+			handlers.NewInternalAPIHandler([]string{
+				cfg.EnsemblerConfig.Endpoint,
+				cfg.EnrichmentConfig.Endpoint,
+			}),
+		))
 		if cfg.AppConfig.CustomMetrics {
-			m := cmux.New(l)
-			grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-			httpL := m.Match(cmux.Any())
-
-			mux := http.NewServeMux()
 			mux.Handle("/metrics", promhttp.Handler())
-			mux.Handle("/v1/internal/", http.StripPrefix(
-				"/v1/internal",
-				handlers.NewInternalAPIHandler([]string{
-					cfg.EnsemblerConfig.Endpoint,
-					cfg.EnrichmentConfig.Endpoint,
-				}),
-			))
-			httpS := &http.Server{Handler: mux}
+		}
+		httpS := &http.Server{Handler: mux}
 
-			go s.Run(grpcL)
-			go func() {
-				if err := httpS.Serve(httpL); err != nil {
-					log.Glob().Errorf("Failed to serve http server: %s", err)
-				}
-			}()
-			if err := m.Serve(); err != nil {
-				log.Glob().Errorf("Failed to serve cmux: %s", err)
+		go s.Run(grpcL)
+		go func() {
+			if err := httpS.Serve(httpL); err != nil {
+				log.Glob().Errorf("Failed to serve http server: %s", err)
 			}
-		} else {
-			s.Run(l)
+		}()
+		if err := m.Serve(); err != nil {
+			log.Glob().Errorf("Failed to serve cmux: %s", err)
 		}
 	case config.HTTP:
 		// Init mission control
