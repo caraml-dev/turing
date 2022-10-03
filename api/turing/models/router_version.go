@@ -16,7 +16,7 @@ const (
 	RouterVersionStatusUndeployed RouterVersionStatus = "undeployed"
 )
 
-type RouterProtocol string
+type RouterProtocol config.Protocol
 
 const (
 	HTTP = RouterProtocol(config.HTTP)
