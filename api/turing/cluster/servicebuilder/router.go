@@ -130,6 +130,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		},
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
+		Protocol:                        routerVersion.Protocol,
 		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
 		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
 		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
@@ -157,6 +158,11 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	routerEndpointName := fmt.Sprintf("%s-turing-%s", routerVersion.Router.Name, ComponentTypes.Router)
 	host := strings.Replace(veURL.Hostname(), routerName, routerEndpointName, 1)
 
+	var matchURIPrefixes []string
+	if routerVersion.Protocol == models.HTTP {
+		matchURIPrefixes = defaultMatchURIPrefixes
+	}
+
 	return &cluster.VirtualService{
 		Name:             routerEndpointName,
 		Namespace:        project.Name,
@@ -165,7 +171,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 		Endpoint:         host,
 		DestinationHost:  defaultIstioGatewayDestination,
 		HostRewrite:      veURL.Hostname(),
-		MatchURIPrefixes: defaultMatchURIPrefixes,
+		MatchURIPrefixes: matchURIPrefixes,
 	}, nil
 }
 

@@ -6,10 +6,9 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/caraml-dev/turing/api/turing/models"
 	corev1 "k8s.io/api/core/v1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
@@ -33,8 +32,9 @@ var autoscalingMetricClassMap = map[string]string{
 type KnativeService struct {
 	*BaseService
 
-	IsClusterLocal bool  `json:"is_cluster_local"`
-	ContainerPort  int32 `json:"containerPort"`
+	IsClusterLocal bool                  `json:"is_cluster_local"`
+	ContainerPort  int32                 `json:"containerPort"`
+	Protocol       models.RouterProtocol `json:"protocol"`
 
 	// Autoscaling properties
 	MinReplicas       int    `json:"minReplicas"`
@@ -125,10 +125,16 @@ func (cfg *KnativeService) buildSvcSpec(
 	resourceReqs := cfg.buildResourceReqs(cfg.UserContainerLimitRequestFactor)
 
 	// Build container spec
+	var containerName string
+	// If protocol is using GRPC, add "h2c" which is required for grpc knative
+	if cfg.Protocol == models.UPI {
+		containerName = "h2c"
+	}
 	container := corev1.Container{
 		Image: cfg.Image,
 		Ports: []corev1.ContainerPort{
 			{
+				Name:          containerName,
 				ContainerPort: cfg.ContainerPort,
 			},
 		},

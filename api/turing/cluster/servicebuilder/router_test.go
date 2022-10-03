@@ -42,7 +42,7 @@ func TestNewRouterService(t *testing.T) {
 		}
 	}`
 	// Read configmap test data
-	cfgmapDefault, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_default.yml"))
+	cfgmapDefault, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_default_upi.yml"))
 	require.NoError(t, err)
 	cfgmapEnsembling, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_ensembling.yml"))
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestNewRouterService(t *testing.T) {
 	// Define tests
 	tests := map[string]testSuiteNewService{
 		"success | basic": {
-			filePath:     filepath.Join(testDataBasePath, "router_version_basic.json"),
+			filePath:     filepath.Join(testDataBasePath, "router_version_basic_upi.json"),
 			expRawConfig: json.RawMessage(expRunnerConfig),
 			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
@@ -152,6 +152,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.UPI,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
@@ -257,6 +258,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
@@ -354,6 +356,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
@@ -451,6 +454,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
@@ -548,6 +552,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
@@ -622,6 +627,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
@@ -696,6 +702,7 @@ func TestNewRouterService(t *testing.T) {
 					},
 				},
 				ContainerPort:                   8080,
+				Protocol:                        models.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "memory",
