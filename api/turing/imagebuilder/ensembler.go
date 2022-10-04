@@ -33,7 +33,7 @@ func (n *ensemblerJobNameGenerator) generateBuilderName(
 	versionID string,
 ) string {
 	// Creates a unique resource name with partial versioning (part of the versionID hash) as max char count is limited
-	// by k8s pod name length (63)
+	// by k8s job name length (63)
 	partialVersionID := getPartialVersionID(versionID, 5)
 	return fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelID, partialVersionID)
 }
