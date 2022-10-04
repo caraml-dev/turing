@@ -668,7 +668,6 @@ components:
         - type
         - endpoint
         - timeout
-        - protocol
       properties:
         id:
           type: "string"

@@ -1,31 +1,37 @@
 import pytest
-from turing.router.config.route import Route, InvalidUrlException
+from turing.router.config.route import MissingServiceMethodException, Route, InvalidUrlException, RouteProtocol
 
 
 @pytest.mark.parametrize(
-    "id,endpoint,timeout,expected",
+    "id,endpoint,timeout, protocol, service_method, expected",
     [
         pytest.param(
-            "model-a", "http://predict_this.io/model-a", "100ms", "generic_route"
-        )
+            "model-a", "http://predict_this.io/model-a", "100ms", RouteProtocol.HTTP, None, "generic_route"
+        ),
+        pytest.param(
+            "model-a-grpc", "grpc_host:80", "100ms", RouteProtocol.GRPC, "package/method", "generic_route_grpc"
+        ),
     ],
 )
-def test_create_route_with_valid_endpoint(id, endpoint, timeout, expected, request):
-    actual = Route(id, endpoint, timeout).to_open_api()
+def test_create_route_with_valid_endpoint(id, endpoint, timeout, protocol, service_method, expected, request):
+    actual = Route(id, endpoint, timeout, protocol, service_method).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "id,endpoint,timeout,expected",
+    "id,endpoint,timeout,protocol,service_method,expected",
     [
         pytest.param(
-            "route_test_1", "http//test_this_route.com/", 100, InvalidUrlException
+            "route_test_1", "http//test_this_route.com/", 100, RouteProtocol.HTTP, None, InvalidUrlException
+        ),
+        pytest.param(
+            "route_test_2", "http//test_this_route.com/", 100, RouteProtocol.GRPC, None, MissingServiceMethodException
         )
     ],
 )
-def test_create_route_with_invalid_endpoint(id, endpoint, timeout, expected):
+def test_create_route_with_invalid_endpoint(id, endpoint, timeout, protocol, service_method, expected):
     with pytest.raises(expected):
-        Route(id, endpoint, timeout)
+        Route(id, endpoint, timeout, protocol=protocol, service_method=service_method)
 
 
 @pytest.mark.parametrize(

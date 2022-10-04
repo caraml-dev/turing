@@ -2103,7 +2103,6 @@ components:
       required:
       - endpoint
       - id
-      - protocol
       - timeout
       - type
       type: object

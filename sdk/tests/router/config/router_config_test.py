@@ -4,6 +4,7 @@ from turing.router.config.route import (
     Route,
     DuplicateRouteException,
     InvalidRouteException,
+    RouteProtocol,
 )
 from turing.router.config.router_config import RouterConfig
 from turing.router.config.autoscaling_policy import DEFAULT_AUTOSCALING_POLICY
@@ -23,8 +24,8 @@ from turing.router.config.router_ensembler_config import (
         pytest.param(
             "generic_router_config",
             [
-                Route("model-a", "http://predict-this.io/model-a", "100ms"),
-                Route("model-a", "http://predict-this.io/model-b", "100ms"),
+                Route("model-a", "http://predict-this.io/model-a", "100ms", RouteProtocol.HTTP),
+                Route("model-a", "http://predict-this.io/model-b", "100ms", RouteProtocol.HTTP),
             ],
             DuplicateRouteException,
         )

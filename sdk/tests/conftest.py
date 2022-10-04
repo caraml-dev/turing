@@ -11,8 +11,8 @@ import turing.generated.models
 import turing.batch.config
 import turing.batch.config.source
 import turing.batch.config.sink
-from turing.router.config.route import Route
-from turing.router.config.router_config import RouterConfig
+from turing.router.config.route import Route, RouteProtocol
+from turing.router.config.router_config import RouterConfig, RouterProtocol
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
@@ -335,8 +335,19 @@ def generic_route():
         type="PROXY",
         endpoint="http://predict_this.io/model-a",
         timeout="100ms",
+        protocol=turing.generated.models.RouteProtocol("HTTP")
     )
 
+@pytest.fixture
+def generic_route_grpc():
+    return turing.generated.models.Route(
+        id="model-a-grpc",
+        type="PROXY",
+        endpoint="grpc_host:80",
+        timeout="100ms",
+        service_method="package/method",
+        protocol=turing.generated.models.RouteProtocol("GRPC")
+    )
 
 @pytest.fixture
 def generic_traffic_rule_condition(
@@ -556,6 +567,7 @@ def generic_router_version(
         resource_request=generic_resource_request,
         timeout="100ms",
         log_config=log_config,
+        protocol=turing.generated.models.RouterProtocol("HTTP_JSON"),
         ensembler=ensembler,
         monitoring_url="https://lookhere.io/",
         enricher=generic_enricher,
@@ -597,6 +609,7 @@ def generic_router_config(docker_router_ensembler_config):
         ),
         autoscaling_policy=AutoscalingPolicy(metric="cpu", target="90"),
         timeout="100ms",
+        protocol=RouterProtocol.HTTP,
         log_config=LogConfig(
             result_logger_type=ResultLoggerType.NOP,
             table="abc.dataset.table",

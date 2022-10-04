@@ -3,6 +3,7 @@ import inspect
 from typing import List, Dict, Union
 from collections import Counter
 from dataclasses import dataclass
+from enum import Enum
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
@@ -29,6 +30,17 @@ from turing.router.config.experiment_config import ExperimentConfig
 NAME_INDEX = 0
 VALUE_INDEX = 1
 
+class RouterProtocol(Enum):
+    """
+    Router Protocol type
+    """
+
+    UPI = "UPI_V1"
+    HTTP = "HTTP_JSON"
+
+    def to_open_api(self) -> OpenApiModel:
+        print(self.value)
+        return turing.generated.models.RouterProtocol(self.value)
 
 @dataclass
 class RouterConfig:
@@ -60,6 +72,7 @@ class RouterConfig:
     resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None
     autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]] = None
     timeout: str = None
+    protocol: RouterProtocol = None
     log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None
     enricher: Union[Enricher, Dict] = None
     ensembler: Union[RouterEnsemblerConfig, Dict] = None
@@ -78,6 +91,7 @@ class RouterConfig:
             AutoscalingPolicy, Dict[str, str]
         ] = DEFAULT_AUTOSCALING_POLICY,
         timeout: str = None,
+        protocol: Union[RouterProtocol, str] = RouterProtocol.HTTP,
         log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
             result_logger_type=ResultLoggerType.NOP
         ),
@@ -95,6 +109,7 @@ class RouterConfig:
         self.resource_request = resource_request
         self.autoscaling_policy = autoscaling_policy
         self.timeout = timeout
+        self.protocol = protocol
         self.log_config = log_config
         self.enricher = enricher
         # Init ensembler after the default route has been initialized
@@ -234,6 +249,19 @@ class RouterConfig:
     @timeout.setter
     def timeout(self, timeout: str):
         self._timeout = timeout
+    
+    @property
+    def protocol(self) -> RouterProtocol:
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, protocol: Union[RouterProtocol, str]):
+        print(type(protocol))
+        print(protocol)
+        if isinstance(protocol, str):
+            self._protocol = RouterProtocol(protocol)
+        else:
+            self._protocol = protocol
 
     @property
     def log_config(self) -> LogConfig:
@@ -345,6 +373,7 @@ class RouterConfig:
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
+                protocol=self.protocol.to_open_api(),
                 **kwargs,
             ),
         )
