@@ -335,6 +335,22 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 		Endpoint: "test-svc-router.models.example.com",
 	})
+
+	// Verify endpoint for upi routers
+	routerVersion.Protocol = models.UPI
+	endpoint, err = ds.DeployRouterVersion(
+		&mlp.Project{Name: testNamespace},
+		&merlin.Environment{Name: testEnv},
+		routerVersion,
+		"router-service-account-key",
+		"enricher-service-account-key",
+		"ensembler-service-account-key",
+		nil,
+		nil,
+		eventsCh,
+	)
+	assert.Equal(t, fmt.Sprintf("%s-router.models.example.com:80", routerVersion.Router.Name), endpoint)
+	assert.NoError(t, err)
 }
 
 func TestDeleteEndpoint(t *testing.T) {

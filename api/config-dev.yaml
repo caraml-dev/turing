@@ -1,5 +1,5 @@
 BatchEnsemblingConfig:
-  Enabled: false
+  Enabled: true
   JobConfig:
     DefaultEnvironment: dev
     DefaultConfigurations:
@@ -62,7 +62,6 @@ SparkAppConfig:
   TTLSecond: 86400
 RouterDefaults:
   Image: localhost:5000/turing-router
-  CustomMetricsEnabled: true
 ClusterConfig:
   InClusterConfig: false
   VaultConfig:

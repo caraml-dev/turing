@@ -286,6 +286,7 @@ type routerConfigTestCase struct {
 }
 
 func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
+	routerProtocol := models.HTTP
 	return &request.RouterConfig{
 		Routes:             tt.routes,
 		DefaultRouteID:     tt.defaultRouteID,
@@ -296,7 +297,7 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 			Type: "nop",
 		},
 		Timeout:  "20s",
-		Protocol: models.HTTP,
+		Protocol: &routerProtocol,
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},

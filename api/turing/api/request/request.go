@@ -30,7 +30,7 @@ type RouterConfig struct {
 	ResourceRequest    *models.ResourceRequest    `json:"resource_request"`
 	AutoscalingPolicy  *models.AutoscalingPolicy  `json:"autoscaling_policy" validate:"omitempty,dive"`
 	Timeout            string                     `json:"timeout" validate:"required"`
-	Protocol           models.RouterProtocol      `json:"protocol" validate:"required"`
+	Protocol           *models.RouterProtocol     `json:"protocol"`
 
 	LogConfig *LogConfig `json:"log_config" validate:"required"`
 
@@ -124,6 +124,11 @@ func (r RouterConfig) BuildRouterVersion(
 	if r.DefaultRouteID != nil {
 		defaultRouteID = *r.DefaultRouteID
 	}
+	// Set default to http
+	routerProtocol := models.HTTP
+	if r.Protocol != nil {
+		routerProtocol = *r.Protocol
+	}
 	rv = &models.RouterVersion{
 		RouterID:           router.ID,
 		Router:             router,
@@ -139,7 +144,7 @@ func (r RouterConfig) BuildRouterVersion(
 		ResourceRequest:   r.ResourceRequest,
 		AutoscalingPolicy: getAutoscalingPolicyOrDefault(r.AutoscalingPolicy),
 		Timeout:           r.Timeout,
-		Protocol:          r.Protocol,
+		Protocol:          routerProtocol,
 		LogConfig: &models.LogConfig{
 			LogLevel:             routercfg.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,

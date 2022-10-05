@@ -39,7 +39,6 @@ class RouterProtocol(Enum):
     HTTP = "HTTP_JSON"
 
     def to_open_api(self) -> OpenApiModel:
-        print(self.value)
         return turing.generated.models.RouterProtocol(self.value)
 
 @dataclass
@@ -256,8 +255,6 @@ class RouterConfig:
 
     @protocol.setter
     def protocol(self, protocol: Union[RouterProtocol, str]):
-        print(type(protocol))
-        print(protocol)
         if isinstance(protocol, str):
             self._protocol = RouterProtocol(protocol)
         else:

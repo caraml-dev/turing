@@ -112,6 +112,7 @@ func TestCreateRouterVersion(t *testing.T) {
 		ExperimentEngine: &models.ExperimentEngine{
 			Type: models.ExperimentEngineTypeNop,
 		},
+		Protocol: models.HTTP,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},

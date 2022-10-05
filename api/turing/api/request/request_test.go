@@ -373,7 +373,8 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 			Metric: models.AutoscalingMetricCPU,
 			Target: "80",
 		},
-		Timeout: "10s",
+		Timeout:  "10s",
+		Protocol: models.HTTP,
 		LogConfig: &models.LogConfig{
 			LogLevel:             "DEBUG",
 			CustomMetricsEnabled: true,

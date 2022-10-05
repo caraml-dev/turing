@@ -223,6 +223,7 @@ func TestCreateRouter(t *testing.T) {
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},
+		Protocol: models.HTTP,
 		AutoscalingPolicy: &models.AutoscalingPolicy{
 			Metric: "concurrency",
 			Target: "1",
@@ -372,6 +373,7 @@ func TestUpdateRouter(t *testing.T) {
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},
+		Protocol: models.HTTP,
 		AutoscalingPolicy: &models.AutoscalingPolicy{
 			Metric: "concurrency",
 			Target: "1",
