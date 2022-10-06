@@ -243,7 +243,7 @@ func withDeployedRouter(
 	//	globalTestContext.ProjectName,
 	//	globalTestContext.KServiceDomain,
 	//))
-	t.log(router.Endpoint)
+	t.Log(router.Endpoint)
 	//assert.Equal(t, expectedEndpoint, router.Endpoint)
 
 	t.Log("Ensure Istio virtual services are created successfully")

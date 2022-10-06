@@ -38,7 +38,7 @@ func TestUpiRouter(t *testing.T) {
 			assert.NoError(t, err)
 			defer conn.Close()
 
-			t.log("Printing routes")
+			t.Log("Printing routes")
 			t.Log(router.CurrRouterVersion.Routes)
 			c := upiv1.NewUniversalPredictionServiceClient(conn)
 			r, err := c.PredictValues(context.Background(), &upiv1.PredictValuesRequest{})
