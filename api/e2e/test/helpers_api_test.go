@@ -173,15 +173,19 @@ func withDeployedRouter(
 		globalTestContext.ProjectID)
 	resp, err := http.Post(createRouterAPI, "application/json", bytes.NewReader(routerPayload))
 	require.NoError(t, err)
+	t.Log(err)
+	t.Log(globalTestContext.MockUpiServerEndpoint)
 	defer resp.Body.Close()
 
 	responsePayload, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
+	t.Log(string(responsePayload))
 	created := models.Router{}
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
 		require.NoError(t, err)
 	}
+	t.Log(created)
 	t.Logf("Created router with name: %s, ID: %d", created.Name, created.ID)
 
 	t.Log("Ensure router has been created and current status is pending")
