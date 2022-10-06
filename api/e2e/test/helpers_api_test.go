@@ -173,8 +173,6 @@ func withDeployedRouter(
 		globalTestContext.ProjectID)
 	resp, err := http.Post(createRouterAPI, "application/json", bytes.NewReader(routerPayload))
 	require.NoError(t, err)
-	t.Log(err)
-	t.Log(globalTestContext.MockUpiServerEndpoint)
 	defer resp.Body.Close()
 
 	responsePayload, err := io.ReadAll(resp.Body)
