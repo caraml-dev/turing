@@ -10,7 +10,7 @@ require (
 	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.3.0
-	github.com/gojek/fiber v0.1.1-0.20220919041622-e1bb222fbb9a
+	github.com/gojek/fiber v0.1.1-0.20221006024632-2614f444e92e
 	github.com/gojek/mlp v1.4.7
 	github.com/google/go-cmp v0.5.8
 	github.com/google/uuid v1.3.0
@@ -89,7 +89,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/caraml-dev/turing/engines/experiment => ../experiment
-	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220928042236-caf6c893415c
-)
+replace github.com/caraml-dev/turing/engines/experiment => ../experiment

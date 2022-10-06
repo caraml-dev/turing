@@ -27,6 +27,7 @@ type testConfig struct {
 	// MockserverEndpoint will be used as the router endpoints in the e2e tests.
 	// This endpoint is expected to handle POST request and returns a JSON object
 	MockserverEndpoint    string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
+	MockUpiServerEndpoint string `envconfig:"MOCKSERVER_UPI_ENDPOINT" required:"true"`
 	KServiceDomain        string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
 	APIBasePath           string `envconfig:"API_BASE_PATH" required:"true"`
 	ClusterName           string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
@@ -67,6 +68,7 @@ func TestEndToEnd(t *testing.T) {
 	// Run Tests
 	t.Run("EndToEnd", func(t *testing.T) {
 		t.Parallel()
+		t.Run("UPI", TestUpiRouter)
 		t.Run("CreateRouter_KnativeServices", TestCreateRouter)
 		t.Run("UpdateRouter_InvalidConfig", TestUpdateRouterInvalidConfig)
 		t.Run("CreateRouterVersion", TestCreateRouterVersion)

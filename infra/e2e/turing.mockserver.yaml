@@ -87,3 +87,42 @@ spec:
   ports:
     - port: 80
       targetPort: 1080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockserver-upi
+  labels:
+    app: mockserver-upi
+spec:
+  selector:
+    app: mockserver-upi
+  ports:
+    - port: 9000
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mockserver-upi
+  labels:
+    app: mockserver-upi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mockserver-upi
+  template:
+    metadata:
+      labels:
+        app: mockserver-upi
+    spec:
+      containers:
+        - name: mockserver-upi
+          image: ghcr.io/leonlnj/upi-echo-server:echo_server_ci
+          ports:
+            - containerPort: 50051
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "384Mi"
