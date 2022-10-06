@@ -185,7 +185,7 @@ replace (
 	github.com/caraml-dev/turing/engines/router => ../engines/router
 	github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200213202729-31a86c4ab209
 
-	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatiblekw
+	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58

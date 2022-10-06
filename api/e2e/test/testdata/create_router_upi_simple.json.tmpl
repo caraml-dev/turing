@@ -6,9 +6,9 @@
             {
                 "id": "control",
                 "type": "PROXY",
-                "protocol": "UPI_V1",
+                "protocol": "GRPC",
                 "endpoint": "{{.MockUpiServerEndpoint}}",
-                "serviceMethod": "caraml.upi.v1.UniversalPredictionService/PredictValues"
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues"
                 "timeout": "5s"
             }
         ],
