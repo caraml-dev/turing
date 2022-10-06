@@ -37,6 +37,9 @@ func TestUpiRouter(t *testing.T) {
 			conn, err := grpc.Dial(router.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			assert.NoError(t, err)
 			defer conn.Close()
+
+			t.log("Printing routes")
+			t.Log(router.CurrRouterVersion.Routes)
 			c := upiv1.NewUniversalPredictionServiceClient(conn)
 			r, err := c.PredictValues(context.Background(), &upiv1.PredictValuesRequest{})
 			assert.NoError(t, err)

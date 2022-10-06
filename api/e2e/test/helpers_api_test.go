@@ -237,12 +237,13 @@ func withDeployedRouter(
 	assert.Equal(t, 1, int(router.CurrRouterVersion.Version))
 	assert.Equal(t, models.RouterStatusDeployed, router.Status)
 
-	t.Logf(fmt.Sprintf(
-		"http://%s-turing-router.%s.%s/v1/predict",
-		router.Name,
-		globalTestContext.ProjectName,
-		globalTestContext.KServiceDomain,
-	))
+	//t.Logf(fmt.Sprintf(
+	//	"http://%s-turing-router.%s.%s/v1/predict",
+	//	router.Name,
+	//	globalTestContext.ProjectName,
+	//	globalTestContext.KServiceDomain,
+	//))
+	t.log(router.Endpoint)
 	//assert.Equal(t, expectedEndpoint, router.Endpoint)
 
 	t.Log("Ensure Istio virtual services are created successfully")

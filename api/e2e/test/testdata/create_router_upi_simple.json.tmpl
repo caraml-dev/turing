@@ -1,13 +1,13 @@
 {
     "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-experiment-upi{{.TestID}}",
+    "name": "e2e-experiment-upi-{{.TestID}}",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
                 "protocol": "GRPC",
-                "endpoint": "{{.MockUpiServerEndpoint}}",
+                "endpoint": "dns:///{{.MockUpiServerEndpoint}}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
             }

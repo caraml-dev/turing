@@ -98,7 +98,7 @@ spec:
   selector:
     app: mockserver-upi
   ports:
-    - port: 9000
+    - port: 80
       targetPort: 50051
 ---
 apiVersion: apps/v1
@@ -119,7 +119,7 @@ spec:
     spec:
       containers:
         - name: mockserver-upi
-          image: ghcr.io/leonlnj/upi-echo-server:echo_server_ci
+          image: ghcr.io/caraml-dev/upi-echo-server:0.3.1-1-g82f86cf
           ports:
             - containerPort: 50051
           resources:
