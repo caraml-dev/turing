@@ -45,12 +45,12 @@ func TestUpiRouter(t *testing.T) {
 
 			endpoint2 := router.Endpoint[:len(router.Endpoint)-3]
 			t.Log("Testing router endpoint2: " + endpoint2)
-			conn, err := grpc.Dial(endpoint2, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err = grpc.Dial(endpoint2, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			assert.NoError(t, err)
 			defer conn.Close()
 
-			c := upiv1.NewUniversalPredictionServiceClient(conn)
-			r, err := c.PredictValues(context.Background(), &upiv1.PredictValuesRequest{})
+			c = upiv1.NewUniversalPredictionServiceClient(conn)
+			r, err = c.PredictValues(context.Background(), &upiv1.PredictValuesRequest{})
 			assert.NoError(t, err)
 			t.Log(r.String())
 		},
