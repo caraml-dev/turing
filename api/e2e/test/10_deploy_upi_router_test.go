@@ -10,7 +10,6 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/models"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -66,8 +65,7 @@ func TestUpiRouter(t *testing.T) {
 			r, err := c.PredictValues(context.Background(), upiRequest)
 			assert.NoError(t, err)
 			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
-
-			assert.True(t, proto.Equal(upiRequest.GetPredictionTable(), r.GetPredictionResultTable()), "response unexpected")
+			assert.Equal(t, upiRequest.String(), r.GetPredictionResultTable().String())
 			assert.NotNil(t, r.GetMetadata())
 			t.Log(r.String())
 		},
