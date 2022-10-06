@@ -81,6 +81,9 @@ def test_deploy_router_upi():
         == f'{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}:80'
     )
 
+    logging.info(f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}')
+    logging.info(retrieved_router.endpoint)
+
     # get router version with id 1
     router_version_1 = retrieved_router.get_version(1)
     assert router_version_1.status == RouterStatus.DEPLOYED
