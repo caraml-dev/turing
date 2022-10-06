@@ -23,7 +23,7 @@ def test_deploy_router_upi():
     routes = [
         Route(
             id="control",
-            endpoint=f'dns:///{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
             protocol=RouteProtocol.GRPC,
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
