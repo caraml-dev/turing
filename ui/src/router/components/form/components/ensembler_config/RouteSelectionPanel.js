@@ -69,7 +69,7 @@ export const RouteSelectionPanel = ({
             id={e.id}
             endpoint={e.endpoint}
             isDisabled={isDisabled}
-            disabledOptionTooltip="Route with traffic rules cannot be selected"
+            disabledOptionTooltip="Route should be a part of every traffic rule including the default rule"
           />
         ),
         disabled: isDisabled,
