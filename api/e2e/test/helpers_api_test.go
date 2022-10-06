@@ -178,12 +178,10 @@ func withDeployedRouter(
 	responsePayload, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	t.Log(string(responsePayload))
 	created := models.Router{}
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
 		require.NoError(t, err)
 	}
-	t.Log(created)
 	t.Logf("Created router with name: %s, ID: %d", created.Name, created.ID)
 
 	t.Log("Ensure router has been created and current status is pending")
@@ -236,15 +234,6 @@ func withDeployedRouter(
 
 	assert.Equal(t, 1, int(router.CurrRouterVersion.Version))
 	assert.Equal(t, models.RouterStatusDeployed, router.Status)
-
-	//t.Logf(fmt.Sprintf(
-	//	"http://%s-turing-router.%s.%s/v1/predict",
-	//	router.Name,
-	//	globalTestContext.ProjectName,
-	//	globalTestContext.KServiceDomain,
-	//))
-	t.Log(router.Endpoint)
-	//assert.Equal(t, expectedEndpoint, router.Endpoint)
 
 	t.Log("Ensure Istio virtual services are created successfully")
 	downstream, err := getRouterDownstream(

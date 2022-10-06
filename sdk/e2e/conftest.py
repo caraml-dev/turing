@@ -3,7 +3,6 @@ import os
 import turing
 
 TEST_ORDER = [
-    "test_deploy_router_upi",
     "test_create_router",
     "test_update_router_invalid_config",
     "test_create_router_version",
@@ -13,6 +12,7 @@ TEST_ORDER = [
     "test_delete_router",
     "test_deploy_router_with_traffic_rules",
     "test_deploy_router_with_std_ensembler",
+    "test_deploy_router_upi",
 ]
 
 

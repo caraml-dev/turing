@@ -4,6 +4,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -15,14 +16,9 @@ import (
 )
 
 /*
-Steps:
-Create a new router with valid config for the router.
-a. Test GET router immediately > empty config
-b. Wait for success response from deployment
-c. Test GET router version > status shows "deployed"
-d. Test GET router > config section shows version 1, status "deployed"
-e. Test cluster that deployments exist
-f. Make a request to the router, validate the response.
+Create a new upi router with valid config for the router.
+No traffic rules, enricher, ensembler or experiment engine.
+Use UPI Client to call router directly.
 */
 func TestUpiRouter(t *testing.T) {
 	// Create router
@@ -34,13 +30,43 @@ func TestUpiRouter(t *testing.T) {
 	withDeployedRouter(t, data,
 		func(router *models.Router) {
 			t.Log("Testing router endpoint: " + router.Endpoint)
+			t.Log("Route Endpoint: " + globalTestContext.MockUpiServerEndpoint)
+			expectedEndpoint := fmt.Sprintf(
+				"%s-turing-router.%s.%s:80",
+				router.Name,
+				globalTestContext.ProjectName,
+				globalTestContext.KServiceDomain,
+			)
+			assert.Equal(t, expectedEndpoint, router.Endpoint)
 			conn, err := grpc.Dial(router.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			assert.NoError(t, err)
 			defer conn.Close()
 
 			c := upiv1.NewUniversalPredictionServiceClient(conn)
-			r, err := c.PredictValues(context.Background(), &upiv1.PredictValuesRequest{})
+			upiRequest := &upiv1.PredictValuesRequest{
+				PredictionTable: &upiv1.Table{
+					Name: "Test",
+					Columns: []*upiv1.Column{
+						{
+							Name: "col1",
+							Type: upiv1.Type_TYPE_DOUBLE,
+						},
+					},
+					Rows: []*upiv1.Row{
+						{
+							RowId: "1",
+							Values: []*upiv1.Value{
+								{},
+							},
+						},
+					},
+				},
+			}
+			r, err := c.PredictValues(context.Background(), upiRequest)
 			assert.NoError(t, err)
+			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
+			assert.Equal(t, upiRequest.GetPredictionTable(), r.GetPredictionResultTable())
+			assert.NotNil(t, r.GetMetadata())
 			t.Log(r.String())
 		},
 		nil,
