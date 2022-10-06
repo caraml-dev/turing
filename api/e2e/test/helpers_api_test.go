@@ -235,7 +235,7 @@ func withDeployedRouter(
 	assert.Equal(t, 1, int(router.CurrRouterVersion.Version))
 	assert.Equal(t, models.RouterStatusDeployed, router.Status)
 
-	t.Log(fmt.Sprintf(
+	t.Logf(fmt.Sprintf(
 		"http://%s-turing-router.%s.%s/v1/predict",
 		router.Name,
 		globalTestContext.ProjectName,
