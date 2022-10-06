@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
 
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
@@ -34,38 +32,22 @@ type TrafficSplittingStrategyRule struct {
 
 // TestRequest checks if the request satisfies all conditions of this rule
 func (r *TrafficSplittingStrategyRule) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
-	safeCh := internal.NewSafeChan(1)
-	defer safeCh.Close()
-
-	var wg sync.WaitGroup
-	wg.Add(len(r.Conditions))
-
 	// test each condition asynchronously
 	for _, condition := range r.Conditions {
-		go func(condition *router.TrafficRuleCondition) {
-			res, err := condition.TestRequest(reqHeader, bodyBytes)
-			if err != nil {
-				log.Glob().Infof(
-					"Failed to test if request matches traffic-splitting condition: %s", err)
-			}
+		res, err := condition.TestRequest(reqHeader, bodyBytes)
+		if err != nil {
+			log.Glob().Infof(
+				"Failed to test if request matches traffic-splitting condition: %s", err)
+		}
 
-			if !res {
-				safeCh.Write(false)
-			}
-
-			wg.Done()
-		}(condition)
+		if !res {
+			// short circuit
+			return false, nil
+		}
 	}
 
-	// wait for all conditions to be tested and write `true` into results channel
-	go func() {
-		wg.Wait()
-
-		safeCh.Write(true)
-	}()
-
 	// return the first value from the channel
-	return (<-safeCh.Read()).(bool), nil
+	return true, nil
 }
 
 // TrafficSplittingStrategy selects the route based on the traffic splitting
@@ -95,45 +77,19 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	req fiber.Request,
 	routes map[string]fiber.Component,
 ) (fiber.Component, []fiber.Component, error) {
-	doneCh := make(chan interface{}, 1)
-	errCh := make(chan error, 1)
-
-	defer close(doneCh)
-	defer close(errCh)
-
 	orderedRoutes := []fiber.Component{}
 	// array, that holds results of testing the request by each rule configured on the strategy
 	// `results[k]` – is `true` if the request satisfies `k`th rule of the strategy, and `false`
 	// otherwise
 	results := make([]bool, len(s.Rules))
 
-	var wg sync.WaitGroup
-	wg.Add(len(s.Rules))
-
 	for idx, rule := range s.Rules {
-		// test each rule asynchronously and write results into results array
-		go func(rule *TrafficSplittingStrategyRule, idx int) {
-			// TODO need to handle for grpc
-			if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
-				errCh <- err
-			} else {
-				results[idx] = res
-			}
-			wg.Done()
-		}(rule, idx)
-	}
-
-	go func() {
-		wg.Wait()
-		doneCh <- true
-	}()
-
-	// wait for all rules to be tested or until an error appears in error channel
-	select {
-	case <-doneCh:
-	case err := <-errCh:
-		log.WithContext(ctx).Errorf(err.Error())
-		return nil, nil, createFiberError(err, fiberProtocol.HTTP)
+		// TODO need to handle for grpc
+		if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
+			return nil, nil, createFiberError(err, fiberProtocol.HTTP)
+		} else {
+			results[idx] = res
+		}
 	}
 
 	// select primary route and fallbacks, based on the results of testing

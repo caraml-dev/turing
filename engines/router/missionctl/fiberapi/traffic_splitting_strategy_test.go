@@ -18,6 +18,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	// to avoid compiler optimisation in benchmark
+	primaryRoute fiber.Component
+)
+
 func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 	type testCase struct {
 		rule          *fiberapi.TrafficSplittingStrategyRule
@@ -254,7 +259,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			expected:  tfu.NewFiberCallerWithHTTPDispatcher(t, "route-a"),
 			fallbacks: []fiber.Component{},
 		},
-		"success | with default route": {
+		"success: with default route": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				DefaultRouteID: "control",
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{
@@ -297,7 +302,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			expected:  tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
 			fallbacks: []fiber.Component{},
 		},
-		"success | with fallbacks": {
+		"success: with fallbacks": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{
 					{
@@ -341,7 +346,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			expected:  tfu.NewFiberCallerWithHTTPDispatcher(t, "route-a"),
 			fallbacks: []fiber.Component{tfu.NewFiberCallerWithHTTPDispatcher(t, "route-b")},
 		},
-		"failure | request doesn't match any rule": {
+		"failure: request doesn't match any rule": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{
 					{
@@ -367,7 +372,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			fallbacks:     []fiber.Component{},
 			expectedError: "http request didn't match any traffic rule",
 		},
-		"failure | bad configuration": {
+		"failure: bad configuration": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{
 					{
@@ -412,5 +417,59 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				require.EqualError(t, err, tt.expectedError)
 			}
 		})
+	}
+}
+
+func BenchmarkTrafficSplittingStrategy_SelectRoute(b *testing.B) {
+	strategy := &fiberapi.TrafficSplittingStrategy{
+		Rules: []*fiberapi.TrafficSplittingStrategyRule{
+			{
+				RouteID: "route-a",
+				Conditions: []*router.TrafficRuleCondition{
+					{
+						FieldSource: request.HeaderFieldSource,
+						Field:       "X-Region",
+						Operator:    router.InConditionOperator,
+						Values:      []string{"region-a", "region-b"},
+					},
+					{
+						FieldSource: request.PayloadFieldSource,
+						Field:       "service_type",
+						Operator:    router.InConditionOperator,
+						Values:      []string{"service-b"},
+					},
+				},
+			},
+			{
+				RouteID: "route-b",
+				Conditions: []*router.TrafficRuleCondition{
+					{
+						FieldSource: request.PayloadFieldSource,
+						Field:       "service_type",
+						Operator:    router.InConditionOperator,
+						Values:      []string{"service-a", "service-b"},
+					},
+				},
+			},
+		},
+	}
+
+	routes := map[string]fiber.Component{
+		"route-a": tfu.NewFiberCallerWithHTTPDispatcher(b, "route-a"),
+		"route-b": tfu.NewFiberCallerWithHTTPDispatcher(b, "route-b"),
+	}
+
+	ctx := turingctx.NewTuringContext(context.Background())
+	payload := `{"service_type": "service-b"}`
+	req, _ := http.NewRequest(http.MethodPost, "/predict", bytes.NewReader([]byte(payload)))
+	req.Header = http.Header{
+		"X-Region": []string{"region-d"},
+	}
+
+	fiberReq, _ := fiberHttp.NewHTTPRequest(req)
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		primaryRoute, _, _ = strategy.SelectRoute(ctx, fiberReq, routes)
 	}
 }

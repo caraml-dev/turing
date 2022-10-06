@@ -10,7 +10,7 @@ import (
 
 // NewFiberCallerWithHTTPDispatcher is a helper function to create an instance of Fiber caller in
 // the test cases so the test cases are easier to read.
-func NewFiberCallerWithHTTPDispatcher(t *testing.T, callerID string) fiber.Component {
+func NewFiberCallerWithHTTPDispatcher(t testing.TB, callerID string) fiber.Component {
 	httpDispatcher, err := fiberHttp.NewDispatcher(http.DefaultClient)
 	if err != nil {
 		t.Fatal(err)
