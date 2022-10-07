@@ -607,11 +607,43 @@ func TestNewRouterService(t *testing.T) {
 								},
 							},
 						},
+						{
+							Name: pluginsVolume.Name,
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      routerConfigMapVolume,
 							MountPath: routerConfigMapMountPath,
+						},
+						{
+							Name:      pluginsVolume.Name,
+							MountPath: pluginsMountPath,
+						},
+					},
+					InitContainers: []cluster.Container{
+						{
+							Name:  "exp-engine-plugin",
+							Image: "ghcr.io/myproject/exp-engine-plugin:latest",
+							Envs: []cluster.Env{
+								{
+									Name:  envPluginName,
+									Value: "exp-engine",
+								},
+								{
+									Name:  envPluginsDir,
+									Value: pluginsMountPath,
+								},
+							},
+							VolumeMounts: []cluster.VolumeMount{
+								{
+									Name:      pluginsVolume.Name,
+									MountPath: pluginsMountPath,
+								},
+							},
 						},
 					},
 				},

@@ -328,8 +328,9 @@ func buildRouterVolumes(
 
 func buildInitContainers(routerVersion *models.RouterVersion) []cluster.Container {
 	// Set up initContainer if experiment engine plugin is set
-	initContainers := make([]cluster.Container, 0)
+	var initContainers []cluster.Container
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		initContainers = make([]cluster.Container, 0)
 		pluginContainer := cluster.Container{
 			Name:  fmt.Sprintf("%s-plugin", routerVersion.ExperimentEngine.Type),
 			Image: routerVersion.ExperimentEngine.PluginConfig.Image,
