@@ -112,6 +112,14 @@ func (cfg *BaseService) buildContainerProbe(ptype probeType, port int) *corev1.P
 	return nil
 }
 
+func (cfg *BaseService) buildInitContainer(initContainerSpecs []Container) []corev1.Container {
+	initContainers := make([]corev1.Container, 0)
+	for _, initContainerSpec := range initContainerSpecs {
+		initContainers = append(initContainers, initContainerSpec.Build())
+	}
+	return initContainers
+}
+
 type Port struct {
 	Name     string `json:"name"`
 	Port     int    `json:"port"`

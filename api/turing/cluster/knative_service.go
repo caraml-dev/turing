@@ -144,9 +144,9 @@ func (cfg *KnativeService) buildSvcSpec(
 	}
 
 	// Build initContainer specs if they exist
-	initContainers := make([]corev1.Container, 0)
-	for _, initContainerSpec := range cfg.InitContainers {
-		initContainers = append(initContainers, initContainerSpec.Build())
+	var initContainers []corev1.Container
+	if cfg.InitContainers != nil {
+		initContainers = cfg.buildInitContainer(cfg.InitContainers)
 	}
 
 	return &knservingv1.ServiceSpec{
