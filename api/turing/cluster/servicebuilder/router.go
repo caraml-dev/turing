@@ -11,7 +11,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
@@ -67,8 +66,6 @@ const (
 	routerConfigStrategyTypeDefault          = "fiber.DefaultTuringRoutingStrategy"
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
-
-	routerPluginURLConfigKey = "plugin_url"
 )
 
 // Router endpoint constants
@@ -473,21 +470,7 @@ func buildFiberConfigMap(
 		propsMap["default_route_id"] = ver.DefaultRouteID
 	}
 	if ver.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		expEngineProps := experimentCfg
-		// Tell router, that the experiment runner is implemented as RPC plugin
-		if ver.ExperimentEngine.PluginConfig != nil {
-			var err error
-			pluginURL := fmt.Sprintf(
-				"%s/%s", buildPluginsServerServingPath(ver, project.Name), ver.ExperimentEngine.Type)
-			expEngineProps, err = utils.MergeJSON(
-				expEngineProps,
-				map[string]interface{}{routerPluginURLConfigKey: pluginURL},
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
-		propsMap["experiment_engine_properties"] = expEngineProps
+		propsMap["experiment_engine_properties"] = experimentCfg
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {
