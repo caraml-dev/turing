@@ -57,6 +57,9 @@ type BaseService struct {
 	// Volumes
 	Volumes      []corev1.Volume      `json:"volumes"`
 	VolumeMounts []corev1.VolumeMount `json:"volume_mounts"`
+
+	// InitContainers
+	InitContainers []Container `json:"init_containers"`
 }
 
 func (cfg *BaseService) buildResourceReqs(userContainerLimitRequestFactor float64) corev1.ResourceRequirements {

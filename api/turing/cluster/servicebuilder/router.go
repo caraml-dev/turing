@@ -103,6 +103,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	volumes, volumeMounts := buildRouterVolumes(routerVersion, configMap.Name, secretName)
 
+	initContainers := buildInitContainers(routerVersion)
+
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
 		sentryEnabled, sentryDSN, secretName, routerVersion)
@@ -123,6 +125,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			ConfigMap:            configMap,
 			Volumes:              volumes,
 			VolumeMounts:         volumeMounts,
+			InitContainers:       initContainers,
 		},
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
@@ -284,6 +287,21 @@ func buildRouterVolumes(
 		MountPath: routerConfigMapMountPath,
 	})
 
+	// Set up volume and volume mount if experiment engine plugin is set
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		volumes = append(volumes, corev1.Volume{
+			Name: pluginsVolume.Name,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      pluginsVolume.Name,
+			MountPath: pluginsMountPath,
+		})
+	}
+
 	// Service account
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		volumes = append(volumes, corev1.Volume{
@@ -306,6 +324,36 @@ func buildRouterVolumes(
 		})
 	}
 	return volumes, volumeMounts
+}
+
+func buildInitContainers(routerVersion *models.RouterVersion) []cluster.Container {
+	// Set up initContainer if experiment engine plugin is set
+	initContainers := make([]cluster.Container, 0)
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		pluginContainer := cluster.Container{
+			Name:  fmt.Sprintf("%s-plugin", routerVersion.ExperimentEngine.Type),
+			Image: routerVersion.ExperimentEngine.PluginConfig.Image,
+			Envs: []cluster.Env{
+				{
+					Name:  envPluginName,
+					Value: routerVersion.ExperimentEngine.Type,
+				},
+				{
+					Name:  envPluginsDir,
+					Value: pluginsMountPath,
+				},
+			},
+			VolumeMounts: []cluster.VolumeMount{
+				{
+					Name:      pluginsVolume.Name,
+					MountPath: pluginsMountPath,
+				},
+			},
+		}
+		initContainers = append(initContainers, pluginContainer)
+	}
+
+	return initContainers
 }
 
 func buildTrafficSplittingFiberConfig(
