@@ -65,7 +65,7 @@ func TestUpiRouter(t *testing.T) {
 			r, err := c.PredictValues(context.Background(), upiRequest)
 			assert.NoError(t, err)
 			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
-			assert.Equal(t, upiRequest.String(), r.GetPredictionResultTable().String())
+			assert.Equal(t, upiRequest.PredictionTable.String(), r.GetPredictionResultTable().String())
 			assert.NotNil(t, r.GetMetadata())
 			t.Log(r.String())
 		},
