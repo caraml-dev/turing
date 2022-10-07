@@ -73,7 +73,7 @@ func (route Route) HandlerFunc(validator *validator.Validate) http.HandlerFunc {
 		}
 
 		response := func() *Response {
-			var body interface{} = nil
+			var body interface{}
 
 			if bodyType != nil {
 				body = reflect.New(bodyType).Interface()

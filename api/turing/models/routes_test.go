@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testRoutes Routes = Routes{
+var testRoutes = Routes{
 	{
 		ID:       "test-id",
 		Type:     "PROXY",
