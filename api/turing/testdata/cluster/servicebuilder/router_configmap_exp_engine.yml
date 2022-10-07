@@ -14,6 +14,5 @@ strategy:
     experiment_engine: exp-engine
     experiment_engine_properties:
       key-1: value-1
-      plugin_url: http://router-with-exp-engine-turing-plugins-server-1.test-project.svc.cluster.local/plugins/exp-engine
   type: fiber.DefaultTuringRoutingStrategy
 type: EAGER_ROUTER
