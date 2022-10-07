@@ -51,9 +51,11 @@ const (
 	envKafkaCompressionType         = "APP_KAFKA_COMPRESSION_TYPE"
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
+	envPluginName                   = "PLUGIN_NAME"
+	envPluginsDir                   = "PLUGINS_DIR"
 )
 
-// router service constants
+// Router service constants
 const (
 	routerPort                               = 8080
 	routerLivenessPath                       = "/v1/internal/live"
@@ -76,6 +78,12 @@ const (
 	defaultIstioGatewayDestination = "istio-ingressgateway.istio-system.svc.cluster.local"
 	// Warning given when using FQDN as Gateway
 	defaultGateway = "knative-serving/knative-ingress-gateway"
+)
+
+// Plugins volume constants
+const (
+	pluginsMountPath  = "/app/plugins"
+	pluginsVolumeName = "plugins-volume"
 )
 
 var defaultMatchURIPrefixes = []string{"/v1/predict", "/v1/batch_predict"}
@@ -293,14 +301,14 @@ func buildRouterVolumes(
 	// Set up volume and volume mount if experiment engine plugin is set
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
 		volumes = append(volumes, corev1.Volume{
-			Name: pluginsVolume.Name,
+			Name: pluginsVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 		})
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      pluginsVolume.Name,
+			Name:      pluginsVolumeName,
 			MountPath: pluginsMountPath,
 		})
 	}
@@ -349,7 +357,7 @@ func buildInitContainers(routerVersion *models.RouterVersion) []cluster.Containe
 			},
 			VolumeMounts: []cluster.VolumeMount{
 				{
-					Name:      pluginsVolume.Name,
+					Name:      pluginsVolumeName,
 					MountPath: pluginsMountPath,
 				},
 			},

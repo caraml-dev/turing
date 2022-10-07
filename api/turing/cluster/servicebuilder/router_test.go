@@ -608,7 +608,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: pluginsVolume.Name,
+							Name: pluginsVolumeName,
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
@@ -620,7 +620,7 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      pluginsVolume.Name,
+							Name:      pluginsVolumeName,
 							MountPath: pluginsMountPath,
 						},
 					},
@@ -640,7 +640,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 							VolumeMounts: []cluster.VolumeMount{
 								{
-									Name:      pluginsVolume.Name,
+									Name:      pluginsVolumeName,
 									MountPath: pluginsMountPath,
 								},
 							},
