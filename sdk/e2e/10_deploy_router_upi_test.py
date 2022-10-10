@@ -81,14 +81,11 @@ def test_deploy_router_upi():
         == f'{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}:80'
     )
 
-    logging.info(f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}')
-    logging.info(retrieved_router.endpoint)
-
     # get router version with id 1
     router_version_1 = retrieved_router.get_version(1)
     assert router_version_1.status == RouterStatus.DEPLOYED
 
-    channel = grpc.insecure_channel(retrieved_router.endpoint, options=(('grpc.enable_http_proxy', 0),))
+    channel = grpc.insecure_channel(retrieved_router.endpoint)
     stub = upi_pb2_grpc.UniversalPredictionServiceStub(channel)
     response = stub.PredictValues(upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
