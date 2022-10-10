@@ -38,7 +38,7 @@ export const PyFuncConfigViewGroup = ({
       <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
         <ResourcesConfigTable
           componentName="Ensembler"
-          autoscalingPolicy={dockerConfig.autoscaling_policy}
+          autoscalingPolicy={pyfuncConfig.autoscaling_policy}
           resourceRequest={pyfuncConfig.resource_request}
         />
       </EuiFlexItem>
