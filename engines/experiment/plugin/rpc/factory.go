@@ -3,14 +3,11 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"path"
 	"reflect"
 	"sync"
 
 	"github.com/caraml-dev/turing/engines/experiment/config"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
-	"github.com/caraml-dev/turing/engines/experiment/pkg/utils"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/hashicorp/go-plugin"
@@ -103,10 +100,8 @@ func NewFactory(name string, cfg config.EngineConfig, logger *zap.SugaredLogger)
 	}
 	if cfg.PluginBinary != "" {
 		factories[factoryKey], err = NewFactoryFromBinary(cfg.PluginBinary, engineCfg, logger)
-	} else if cfg.PluginURL != "" {
-		factories[factoryKey], err = NewFactoryFromURL(cfg.PluginURL, engineCfg, logger)
 	} else {
-		err = fmt.Errorf("either `plugin_url` or `plugin_binary` must be specified")
+		err = fmt.Errorf("`plugin_binary` must be specified")
 	}
 
 	if err != nil {
@@ -129,23 +124,4 @@ func NewFactoryFromBinary(
 		Client:       rpcClient,
 		EngineConfig: engineCfg,
 	}, nil
-}
-
-func NewFactoryFromURL(
-	pluginURL string,
-	engineCfg json.RawMessage,
-	logger *zap.SugaredLogger,
-) (*EngineFactory, error) {
-	downloadURL, err := url.Parse(pluginURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse plugin URL: %v", err)
-	}
-
-	filename := fmt.Sprintf("./%s", path.Base(downloadURL.Path))
-	err = utils.DownloadFile(downloadURL, filename, 0744)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to download plugin's binary from remote url: url=%s, %v", pluginURL, err)
-	}
-	return NewFactoryFromBinary(filename, engineCfg, logger)
 }

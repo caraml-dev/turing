@@ -1,5 +1,6 @@
 package servicebuilder
 
+// TODO: Delete this file once all existing routers no longer use the old plugins server service to deploy plugins
 import (
 	"fmt"
 
@@ -10,20 +11,12 @@ import (
 )
 
 const (
-	envPluginName = "PLUGIN_NAME"
-	envPluginsDir = "PLUGINS_DIR"
-)
-
-const (
 	nginxImage                = "nginx:1.21.5"
-	nginxServingRoot          = "/usr/share/nginx/html"
-	pluginsServingPath        = "plugins"
 	pluginsServerReplicaCount = 1
 )
 
 var (
-	pluginsMountPath = fmt.Sprintf("%s/%s", nginxServingRoot, pluginsServingPath)
-	pluginsVolume    = v1.Volume{
+	pluginsVolume = v1.Volume{
 		Name: "plugins-volume",
 		VolumeSource: v1.VolumeSource{
 			EmptyDir: &v1.EmptyDirVolumeSource{},
@@ -31,7 +24,7 @@ var (
 	}
 )
 
-func (sb *clusterSvcBuilder) NewPluginsServerService(
+func NewPluginsServerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 ) *cluster.KubernetesService {
@@ -48,7 +41,7 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 			VolumeMounts: []v1.VolumeMount{
 				{
 					Name:      pluginsVolume.Name,
-					MountPath: pluginsMountPath,
+					MountPath: "/usr/share/nginx/html/plugins",
 				},
 			},
 			Volumes: []v1.Volume{pluginsVolume},
@@ -67,29 +60,21 @@ func (sb *clusterSvcBuilder) NewPluginsServerService(
 				Image: routerVersion.ExperimentEngine.PluginConfig.Image,
 				Envs: []cluster.Env{
 					{
-						Name:  envPluginName,
+						Name:  "PLUGIN_NAME",
 						Value: routerVersion.ExperimentEngine.Type,
 					},
 					{
-						Name:  envPluginsDir,
-						Value: pluginsMountPath,
+						Name:  "PLUGINS_DIR",
+						Value: "/usr/share/nginx/html/plugins",
 					},
 				},
 				VolumeMounts: []cluster.VolumeMount{
 					{
 						Name:      pluginsVolume.Name,
-						MountPath: pluginsMountPath,
+						MountPath: "/usr/share/nginx/html/plugins",
 					},
 				},
 			},
 		},
 	}
-}
-
-func buildPluginsServerServingPath(
-	routerVersion *models.RouterVersion,
-	namespace string,
-) string {
-	componentName := GetComponentName(routerVersion, ComponentTypes.PluginsServer)
-	return fmt.Sprintf("http://%s.%s.svc.cluster.local/%s", componentName, namespace, pluginsServingPath)
 }

@@ -57,6 +57,9 @@ type BaseService struct {
 	// Volumes
 	Volumes      []corev1.Volume      `json:"volumes"`
 	VolumeMounts []corev1.VolumeMount `json:"volume_mounts"`
+
+	// InitContainers
+	InitContainers []Container `json:"init_containers"`
 }
 
 func (cfg *BaseService) buildResourceReqs(userContainerLimitRequestFactor float64) corev1.ResourceRequirements {
@@ -107,6 +110,14 @@ func (cfg *BaseService) buildContainerProbe(ptype probeType, port int) *corev1.P
 		return buildProbe(cfg.ReadinessHTTPGetPath, port)
 	}
 	return nil
+}
+
+func (cfg *BaseService) buildInitContainer(initContainerSpecs []Container) []corev1.Container {
+	initContainers := make([]corev1.Container, 0)
+	for _, initContainerSpec := range initContainerSpecs {
+		initContainers = append(initContainers, initContainerSpec.Build())
+	}
+	return initContainers
 }
 
 type Port struct {

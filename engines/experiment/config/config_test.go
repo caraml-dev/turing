@@ -89,20 +89,7 @@ func TestEngineConfig_IsPlugin(t *testing.T) {
 			},
 			expected: true,
 		},
-		"success | download url provided": {
-			cfg: config.EngineConfig{
-				PluginURL: "http://localhost:8080/plugins/my_plugin",
-			},
-			expected: true,
-		},
-		"success | binary path and download url provided": {
-			cfg: config.EngineConfig{
-				PluginBinary: "/app/plugins/my_plugin",
-				PluginURL:    "http://localhost:8080/plugins/my_plugin",
-			},
-			expected: true,
-		},
-		"success | not provided": {
+		"success | binary path not provided": {
 			cfg:      config.EngineConfig{},
 			expected: false,
 		},

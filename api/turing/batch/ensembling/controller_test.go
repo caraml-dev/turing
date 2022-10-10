@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	standardLabels map[string]string = map[string]string{
+	standardLabels = map[string]string{
 		"model": "T800",
 	}
 	tolerationName                          = "batch-job"
