@@ -18,6 +18,7 @@ type TrafficRuleCondition struct {
 	Values      []string              `json:"values" validate:"required,notBlank"`
 }
 
+// TestRequest test that the request satisfy the traffic rule condition
 func (c *TrafficRuleCondition) TestRequest(req fiber.Request) (bool, error) {
 	reqHeader := req.Header()
 	bodyBytes := req.Payload()
@@ -29,6 +30,7 @@ func (c *TrafficRuleCondition) TestRequest(req fiber.Request) (bool, error) {
 	return c.Operator.Test(fieldValue, c.Values)
 }
 
+// TestUPIRequest test that the UPI request satisfy the traffic rule condition
 func (c *TrafficRuleCondition) TestUPIRequest(req *upiv1.PredictValuesRequest, header metadata.MD) (bool, error) {
 	fieldValue, err := request.GetValueFromUPIRequest(header, req, c.FieldSource, c.Field)
 	if err != nil {
