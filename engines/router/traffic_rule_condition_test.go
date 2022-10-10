@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
+	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/testutils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -215,7 +216,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			actual, err := tt.condition.TestRequest(tt.header, []byte(tt.payload))
+			actual, err := tt.condition.TestRequest(tfu.NewHttpFiberRequest(t, tt.header, tt.payload))
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 				require.Equal(t, tt.expected, actual)
