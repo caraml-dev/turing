@@ -48,7 +48,7 @@ function install_knative {
         -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.0.1}/serving-hpa.yaml"
 
     kubectl apply \
-        -f config-features.yaml
+        -f knative-configmaps/config-features.yaml
 
     local core_apps=("activator" "autoscaler" "controller" "webhook")
     for app in ${core_apps[@]}; do
