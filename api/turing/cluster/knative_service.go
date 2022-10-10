@@ -125,16 +125,16 @@ func (cfg *KnativeService) buildSvcSpec(
 	resourceReqs := cfg.buildResourceReqs(cfg.UserContainerLimitRequestFactor)
 
 	// Build container spec
-	var containerName string
+	var portName string
 	// If protocol is using GRPC, add "h2c" which is required for grpc knative
 	if cfg.Protocol == models.UPI {
-		containerName = "h2c"
+		portName = "h2c"
 	}
 	container := corev1.Container{
 		Image: cfg.Image,
 		Ports: []corev1.ContainerPort{
 			{
-				Name:          containerName,
+				Name:          portName,
 				ContainerPort: cfg.ContainerPort,
 			},
 		},
