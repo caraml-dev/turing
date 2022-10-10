@@ -3,15 +3,16 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
 	fiberProtocol "github.com/gojek/fiber/protocol"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -31,21 +32,46 @@ type TrafficSplittingStrategyRule struct {
 }
 
 // TestRequest checks if the request satisfies all conditions of this rule
-func (r *TrafficSplittingStrategyRule) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
-	// test each condition asynchronously
-	for _, condition := range r.Conditions {
-		res, err := condition.TestRequest(reqHeader, bodyBytes)
-		if err != nil {
-			log.Glob().Infof(
-				"Failed to test if request matches traffic-splitting condition: %s", err)
+func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, error) {
+	switch req.Protocol() {
+	case fiberProtocol.HTTP:
+		// test all condition and return immediately if one condition is not satisfied
+		for _, condition := range r.Conditions {
+			res, err := condition.TestRequest(req)
+			if err != nil {
+				log.Glob().Infof(
+					"Failed to test if request matches traffic-splitting condition: %s", err)
+			}
+
+			if !res {
+				// short circuit
+				return false, nil
+			}
+		}
+	case fiberProtocol.GRPC:
+		// unmarshall outside the loop to minimize execution time
+		// TODO: the unmarshalling can be done more efficiently by using partial deserialization
+		var payload upiv1.PredictValuesRequest
+		if err := proto.Unmarshal(req.Payload(), &payload); err != nil {
+			log.Glob().Errorf(
+				"Failed unmarshalling into UPI request: %s", err)
+			return false, err
 		}
 
-		if !res {
-			// short circuit
-			return false, nil
+		// test all condition and return immediately if one condition is not satisfied
+		for _, condition := range r.Conditions {
+			res, err := condition.TestUPIRequest(&payload, req.Header())
+			if err != nil {
+				log.Glob().Infof(
+					"Failed to test if request matches traffic-splitting condition: %s", err)
+			}
+
+			if !res {
+				// short circuit
+				return false, nil
+			}
 		}
 	}
-
 	// return the first value from the channel
 	return true, nil
 }
@@ -77,16 +103,15 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	req fiber.Request,
 	routes map[string]fiber.Component,
 ) (fiber.Component, []fiber.Component, error) {
-	orderedRoutes := []fiber.Component{}
+	var orderedRoutes []fiber.Component
 	// array, that holds results of testing the request by each rule configured on the strategy
 	// `results[k]` – is `true` if the request satisfies `k`th rule of the strategy, and `false`
 	// otherwise
 	results := make([]bool, len(s.Rules))
 
 	for idx, rule := range s.Rules {
-		// TODO need to handle for grpc
-		if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
-			return nil, nil, createFiberError(err, fiberProtocol.HTTP)
+		if res, err := rule.TestRequest(req); err != nil {
+			return nil, nil, createFiberError(err, req.Protocol())
 		} else {
 			results[idx] = res
 		}
@@ -102,7 +127,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 			} else {
 				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 				log.WithContext(ctx).Errorf(err.Error())
-				return nil, nil, createFiberError(err, fiberProtocol.HTTP)
+				return nil, nil, createFiberError(err, req.Protocol())
 			}
 		}
 	}
@@ -114,7 +139,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		} else {
 			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err, fiberProtocol.HTTP)
+			return nil, nil, createFiberError(err, req.Protocol())
 		}
 	}
 

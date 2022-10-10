@@ -6,8 +6,10 @@ import (
 	"strings"
 	"unsafe"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/metadata"
 )
 
 // FieldSource is used to identify the source of the experiment-engine user data field
@@ -18,6 +20,8 @@ const (
 	PayloadFieldSource FieldSource = "payload"
 	// HeaderFieldSource is used to represent the request header
 	HeaderFieldSource FieldSource = "header"
+	// PredictionContextSource is used to represent the prediction_context field in UPI request
+	PredictionContextSource FieldSource = "prediction_context"
 )
 
 // GetFieldSource converts the input string to a FieldSource
@@ -27,6 +31,8 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 		return HeaderFieldSource, nil
 	case "payload":
 		return PayloadFieldSource, nil
+	case "prediction_context":
+		return PredictionContextSource, nil
 	}
 	return "", fmt.Errorf("Unknown field source %s", srcString)
 }
@@ -65,6 +71,39 @@ func GetValueFromRequest(
 	}
 }
 
+func GetValueFromUPIRequest(
+	reqHeader metadata.MD,
+	req *upiv1.PredictValuesRequest,
+	fieldSrc FieldSource,
+	field string,
+) (string, error) {
+	switch fieldSrc {
+	case HeaderFieldSource:
+		values := reqHeader.Get(field)
+		if len(values) == 0 {
+			// key not found in header
+			return "", fmt.Errorf("Field %s not found in the request header", field)
+		}
+
+		// return first value to be consistent with `GetValueFromRequest`
+		return values[0], nil
+	case PredictionContextSource:
+		predContext, err := variablesToStringMap(req.PredictionContext)
+		if err != nil {
+			return "", err
+		}
+
+		value, exists := predContext[field]
+		if !exists {
+			return "", fmt.Errorf("Variable %s not found in the prediction context", field)
+		}
+
+		return value, nil
+	default:
+		return "", fmt.Errorf("Unrecognized field source %s", fieldSrc)
+	}
+}
+
 func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	// Retrieve value using JSON path
 	value, typez, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
@@ -82,3 +121,32 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 			"Field %s can not be parsed as string value, unsupported type: %s", key, typez.String())
 	}
 }
+
+// variablesToStringMap convert slice of upi Variables into map of string
+func variablesToStringMap(vars []*upiv1.Variable) (map[string]string, error) {
+	strMap := map[string]string{}
+	for _, v := range vars {
+		vstr, err := getValueAsString(v)
+		if err != nil {
+			return nil, err
+		}
+
+		strMap[v.Name] = vstr
+	}
+
+	return strMap, nil
+}
+
+func getValueAsString(v *upiv1.Variable) (string, error) {
+	switch v.Type {
+	case upiv1.Type_TYPE_DOUBLE:
+		return fmt.Sprintf("%f", v.DoubleValue), nil
+	case upiv1.Type_TYPE_INTEGER:
+		return fmt.Sprintf("%d", v.IntegerValue), nil
+	case upiv1.Type_TYPE_STRING:
+		return v.StringValue, nil
+	default:
+		return "", fmt.Errorf("Unknown value type %s", v.Type)
+	}
+}
+

@@ -3,21 +3,34 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"reflect"
 
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/gojek/fiber"
+	"google.golang.org/grpc/metadata"
 )
 
 type TrafficRuleCondition struct {
-	FieldSource request.FieldSource   `json:"field_source" validate:"required,oneof=header payload"`
+	FieldSource request.FieldSource   `json:"field_source" validate:"required,oneof=header payload prediction_context"`
 	Field       string                `json:"field" validate:"required"`
 	Operator    RuleConditionOperator `json:"operator" validate:"required,oneof=in"`
 	Values      []string              `json:"values" validate:"required,notBlank"`
 }
 
-func (c *TrafficRuleCondition) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
+func (c *TrafficRuleCondition) TestRequest(req fiber.Request) (bool, error) {
+	reqHeader := req.Header()
+	bodyBytes := req.Payload()
+
 	fieldValue, err := request.GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
+	if err != nil {
+		return false, err
+	}
+	return c.Operator.Test(fieldValue, c.Values)
+}
+
+func (c *TrafficRuleCondition) TestUPIRequest(req *upiv1.PredictValuesRequest, header metadata.MD) (bool, error) {
+	fieldValue, err := request.GetValueFromUPIRequest(header, req, c.FieldSource, c.Field)
 	if err != nil {
 		return false, err
 	}
