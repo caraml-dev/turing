@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unsafe"
 
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/buger/jsonparser"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/metadata"
 )
@@ -71,6 +71,11 @@ func GetValueFromRequest(
 	}
 }
 
+// GetValueFromUPIRequest retrieve the value from upi request or header depending on the value of `fieldSrc`.
+// Valid value of `fieldSrc` are `HeaderFieldSource` and `PredictionContextSource`
+// if `fieldSrc` is `HeaderFieldSource`, then the value will be retrieved from `reqHeader`
+// if `fieldSrc` is `PredictionContextSource`, then the value will be retrieved from `prediction_context` field of the upi request `req`
+// other `fieldSrc` value will produce error
 func GetValueFromUPIRequest(
 	reqHeader metadata.MD,
 	req *upiv1.PredictValuesRequest,
@@ -149,4 +154,3 @@ func getValueAsString(v *upiv1.Variable) (string, error) {
 		return "", fmt.Errorf("Unknown value type %s", v.Type)
 	}
 }
-
