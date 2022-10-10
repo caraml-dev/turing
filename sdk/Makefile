@@ -30,8 +30,6 @@ build: version
 
 .PHONY: test
 test:
-	@unset http_proxy
-	@unset https_proxy
 	@python -m pytest --cov=turing tests/
 
 e2e-sdk:
