@@ -405,6 +405,7 @@ jobs:
           GOPATH: ${{ github.workspace }}/api/.go
           TEST_ID: ${{ github.run_id }}
           MOCKSERVER_ENDPOINT: http://mockserver
+          MOCKSERVER_UPI_ENDPOINT: mockserver-upi:80
           API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/
           MODEL_CLUSTER_NAME: "dev"
           PROJECT_ID: "1"
