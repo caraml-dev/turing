@@ -269,6 +269,17 @@ func (ds *deploymentService) UndeployRouterVersion(
 		}
 	}
 
+	// TODO: Delete this block once all existing routers no longer use the old plugins server service to deploy plugins
+	// Delete experiment engine plugins server
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		pluginsServerSvc := servicebuilder.NewPluginsServerService(routerVersion, project)
+		err = deleteK8sService(controller, pluginsServerSvc, isCleanUp)
+		if err == nil {
+			eventsCh.Write(models.NewInfoEvent(
+				models.EventStageDeletingDependencies, "successfully deleted plugins server"))
+		}
+	}
+
 	// Delete all components
 	err = deleteKnServices(ctx, controller, services, eventsCh, isCleanUp)
 	if err != nil {
