@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
-	"github.com/caraml-dev/turing/api/turing/models"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -230,7 +230,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				IsClusterLocal:                  true,
 				QueueProxyResourcePercentage:    30,
 				UserContainerLimitRequestFactor: 1.5,
-				Protocol:                        models.UPI,
+				Protocol:                        routerConfig.UPI,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{

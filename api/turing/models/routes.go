@@ -50,7 +50,7 @@ func (r *Routes) Scan(value interface{}) error {
 
 // ToFiberRoutes converts routes to a type compatible with Fiber's config
 func (r *Routes) ToFiberRoutes() (*fiberConfig.Routes, error) {
-	routes := fiberConfig.Routes{}
+	routes := make([]fiberConfig.Config, 0, len(*r))
 	for _, route := range *r {
 		timeout, err := time.ParseDuration(route.Timeout)
 		if err != nil {
@@ -73,5 +73,5 @@ func (r *Routes) ToFiberRoutes() (*fiberConfig.Routes, error) {
 			},
 		})
 	}
-	return &routes, nil
+	return (*fiberConfig.Routes)(&routes), nil
 }

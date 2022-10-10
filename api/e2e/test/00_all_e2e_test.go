@@ -75,7 +75,7 @@ func TestEndToEnd(t *testing.T) {
 		t.Run("DeployRouterVersion_InvalidConfig", TestDeployRouterInvalidConfig)
 		t.Run("DeployRouter", TestDeployValidConfig)
 		t.Run("DeleteRouter", TestDeleteRouter)
-		t.Run("CreateRouter_Upi", TestUpiRouter)
+		t.Run("CreateRouter_Upi", TestUPIRouter)
 	})
 	t.Run("TestTrafficRules", func(t *testing.T) {
 		t.Parallel()

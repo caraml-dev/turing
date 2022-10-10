@@ -17,6 +17,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -337,7 +338,7 @@ func TestDeployEndpoint(t *testing.T) {
 	})
 
 	// Verify endpoint for upi routers
-	routerVersion.Protocol = models.UPI
+	routerVersion.Protocol = routerConfig.UPI
 	endpoint, err = ds.DeployRouterVersion(
 		&mlp.Project{Name: testNamespace},
 		&merlin.Environment{Name: testEnv},

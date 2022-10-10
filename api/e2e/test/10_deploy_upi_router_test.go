@@ -20,7 +20,7 @@ Create a new upi router with valid config for the router.
 No traffic rules, enricher, ensembler or experiment engine.
 Use UPI Client to call router directly.
 */
-func TestUpiRouter(t *testing.T) {
+func TestUPIRouter(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
 	data := makeRouterPayload(

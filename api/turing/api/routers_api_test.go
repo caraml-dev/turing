@@ -8,6 +8,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
@@ -223,7 +224,7 @@ func TestCreateRouter(t *testing.T) {
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},
-		Protocol: models.HTTP,
+		Protocol: routerConfig.HTTP,
 		AutoscalingPolicy: &models.AutoscalingPolicy{
 			Metric: "concurrency",
 			Target: "1",
@@ -373,7 +374,7 @@ func TestUpdateRouter(t *testing.T) {
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},
-		Protocol: models.HTTP,
+		Protocol: routerConfig.HTTP,
 		AutoscalingPolicy: &models.AutoscalingPolicy{
 			Metric: "concurrency",
 			Target: "1",

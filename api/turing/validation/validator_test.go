@@ -16,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	expRequest "github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -286,7 +287,7 @@ type routerConfigTestCase struct {
 }
 
 func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
-	routerProtocol := models.HTTP
+	routerProtocol := routerConfig.HTTP
 	return &request.RouterConfig{
 		Routes:             tt.routes,
 		DefaultRouteID:     tt.defaultRouteID,

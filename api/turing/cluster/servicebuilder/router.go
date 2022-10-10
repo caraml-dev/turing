@@ -13,6 +13,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/caraml-dev/turing/engines/router"
+	routeConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
 	fiberConfig "github.com/gojek/fiber/config"
@@ -159,7 +160,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	host := strings.Replace(veURL.Hostname(), routerName, routerEndpointName, 1)
 
 	var matchURIPrefixes []string
-	if routerVersion.Protocol == models.HTTP {
+	if routerVersion.Protocol == routeConfig.HTTP {
 		matchURIPrefixes = defaultMatchURIPrefixes
 	}
 
