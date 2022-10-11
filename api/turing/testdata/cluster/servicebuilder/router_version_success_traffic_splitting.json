@@ -131,6 +131,7 @@
     "target": "1"
   },
   "timeout": "5s",
+  "protocol": "HTTP_JSON",
   "log_config": {
     "log_level": "INFO",
     "custom_metrics_enabled": false,

@@ -13,9 +13,11 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/caraml-dev/turing/engines/router"
+	routeConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
-	fiberconfig "github.com/gojek/fiber/config"
+	fiberConfig "github.com/gojek/fiber/config"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	mlp "github.com/gojek/mlp/api/client"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -50,6 +52,7 @@ const (
 	envKafkaMaxMessageBytes         = "APP_KAFKA_MAX_MESSAGE_BYTES"
 	envKafkaCompressionType         = "APP_KAFKA_COMPRESSION_TYPE"
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
+	envRouterProtocol               = "ROUTER_PROTOCOL"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
 	envPluginName                   = "PLUGIN_NAME"
 	envPluginsDir                   = "PLUGINS_DIR"
@@ -140,6 +143,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		},
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
+		Protocol:                        routerVersion.Protocol,
 		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
 		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
 		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
@@ -167,6 +171,11 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	routerEndpointName := fmt.Sprintf("%s-turing-%s", routerVersion.Router.Name, ComponentTypes.Router)
 	host := strings.Replace(veURL.Hostname(), routerName, routerEndpointName, 1)
 
+	var matchURIPrefixes []string
+	if routerVersion.Protocol == routeConfig.HTTP {
+		matchURIPrefixes = defaultMatchURIPrefixes
+	}
+
 	return &cluster.VirtualService{
 		Name:             routerEndpointName,
 		Namespace:        project.Name,
@@ -175,7 +184,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 		Endpoint:         host,
 		DestinationHost:  defaultIstioGatewayDestination,
 		HostRewrite:      veURL.Hostname(),
-		MatchURIPrefixes: defaultMatchURIPrefixes,
+		MatchURIPrefixes: matchURIPrefixes,
 	}, nil
 }
 
@@ -200,6 +209,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		{Name: envRouterTimeout, Value: ver.Timeout},
 		{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
 		{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
+		{Name: envRouterProtocol, Value: string(ver.Protocol)},
 		{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
 		{Name: envSentryDSN, Value: sentryDSN},
 	}
@@ -374,7 +384,8 @@ func buildTrafficSplittingFiberConfig(
 	rules models.TrafficRules,
 	ensembler *models.Ensembler,
 	fiberProperties json.RawMessage,
-) (fiberconfig.Config, error) {
+	protocol fiberProtocol.Protocol,
+) (fiberConfig.Config, error) {
 	// IDs of routes, that are part of at least one traffic-splitting rule
 	conditionalRouteIds := rules.ConditionalRouteIds()
 
@@ -400,13 +411,14 @@ func buildTrafficSplittingFiberConfig(
 		defaultRouteID,
 		alwaysActiveRoutes,
 		ensembler,
-		fiberProperties)
+		fiberProperties,
+		protocol)
 
 	if err != nil {
 		return nil, err
 	}
 
-	splitRoutes := []fiberconfig.Config{defaultRouteConfig}
+	splitRoutes := []fiberConfig.Config{defaultRouteConfig}
 	splitStrategy := fiberapi.TrafficSplittingStrategy{
 		DefaultRouteID: defaultRouteID,
 		Rules:          nil,
@@ -431,7 +443,8 @@ func buildTrafficSplittingFiberConfig(
 			routeID,
 			append(alwaysActiveRoutes, ruleRoutes...),
 			ensembler,
-			fiberProperties)
+			fiberProperties,
+			protocol)
 
 		if err != nil {
 			return nil, err
@@ -455,15 +468,15 @@ func buildTrafficSplittingFiberConfig(
 		return nil, err
 	}
 
-	routerConfig := &fiberconfig.RouterConfig{
-		MultiRouteConfig: fiberconfig.MultiRouteConfig{
-			ComponentConfig: fiberconfig.ComponentConfig{
+	routerConfig := &fiberConfig.RouterConfig{
+		MultiRouteConfig: fiberConfig.MultiRouteConfig{
+			ComponentConfig: fiberConfig.ComponentConfig{
 				ID:   name,
 				Type: routerConfigTypeLazyRouter,
 			},
 			Routes: splitRoutes,
 		},
-		Strategy: fiberconfig.StrategyConfig{
+		Strategy: fiberConfig.StrategyConfig{
 			Type:       routerConfigStrategyTypeTrafficSplitting,
 			Properties: splitStrategyProps,
 		},
@@ -477,14 +490,15 @@ func buildFiberConfig(
 	routes models.Routes,
 	ensembler *models.Ensembler,
 	fiberProperties json.RawMessage,
-) (fiberconfig.Config, error) {
+	protocol fiberProtocol.Protocol,
+) (fiberConfig.Config, error) {
 	// Create the MultiRouteConfig
-	fiberRoutes, err := routes.ToFiberRoutes()
+	fiberRoutes, err := routes.ToFiberRoutes(protocol)
 	if err != nil {
 		return nil, err
 	}
-	multiRouteConfig := fiberconfig.MultiRouteConfig{
-		ComponentConfig: fiberconfig.ComponentConfig{
+	multiRouteConfig := fiberConfig.MultiRouteConfig{
+		ComponentConfig: fiberConfig.ComponentConfig{
 			ID: name,
 		},
 		Routes: *fiberRoutes,
@@ -493,21 +507,21 @@ func buildFiberConfig(
 	// Select router type (eager or combiner) based on the ensembler config.
 	// If ensembler uses a DockerConfig to run, use "combiner" router
 	// Else, "eager" router is used.
-	var routerConfig fiberconfig.Config
+	var routerConfig fiberConfig.Config
 	if ensembler != nil && ensembler.DockerConfig != nil {
 		multiRouteConfig.Type = routerConfigTypeCombiner
-		routerConfig = &fiberconfig.CombinerConfig{
+		routerConfig = &fiberConfig.CombinerConfig{
 			MultiRouteConfig: multiRouteConfig,
-			FanIn: fiberconfig.FanInConfig{
+			FanIn: fiberConfig.FanInConfig{
 				Type:       routerConfigStrategyTypeFanIn,
 				Properties: fiberProperties,
 			},
 		}
 	} else {
 		multiRouteConfig.Type = routerConfigTypeEagerRouter
-		routerConfig = &fiberconfig.RouterConfig{
+		routerConfig = &fiberConfig.RouterConfig{
 			MultiRouteConfig: multiRouteConfig,
-			Strategy: fiberconfig.StrategyConfig{
+			Strategy: fiberConfig.StrategyConfig{
 				Type:       routerConfigStrategyTypeDefault,
 				Properties: fiberProperties,
 			},
@@ -562,7 +576,13 @@ func buildFiberConfigMap(
 		return nil, err
 	}
 
-	var routerConfig fiberconfig.Config
+	// default to http
+	routeProtocol := fiberProtocol.HTTP
+	if ver.Protocol == routeConfig.UPI {
+		routeProtocol = fiberProtocol.GRPC
+	}
+
+	var routerConfig fiberConfig.Config
 	// if the version is configured with traffic splitting rules on it,
 	// then define root-level fiber component as a lazy router with
 	// a traffic-splitting strategy based on these rules
@@ -584,13 +604,15 @@ func buildFiberConfigMap(
 			ver.Routes,
 			rules,
 			ver.Ensembler,
-			properties)
+			properties,
+			routeProtocol)
 	} else {
 		routerConfig, err = buildFiberConfig(
 			ver.Router.Name,
 			ver.Routes,
 			ver.Ensembler,
-			properties)
+			properties,
+			routeProtocol)
 	}
 
 	if err != nil {

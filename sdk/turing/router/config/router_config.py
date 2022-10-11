@@ -3,6 +3,7 @@ import inspect
 from typing import List, Dict, Union
 from collections import Counter
 from dataclasses import dataclass
+from enum import Enum
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
@@ -29,6 +30,16 @@ from turing.router.config.experiment_config import ExperimentConfig
 NAME_INDEX = 0
 VALUE_INDEX = 1
 
+class Protocol(Enum):
+    """
+    Router Protocol type
+    """
+
+    UPI = "UPI_V1"
+    HTTP = "HTTP_JSON"
+
+    def to_open_api(self) -> OpenApiModel:
+        return turing.generated.models.Protocol(self.value)
 
 @dataclass
 class RouterConfig:
@@ -60,6 +71,7 @@ class RouterConfig:
     resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None
     autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]] = None
     timeout: str = None
+    protocol: Protocol = None
     log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = None
     enricher: Union[Enricher, Dict] = None
     ensembler: Union[RouterEnsemblerConfig, Dict] = None
@@ -78,6 +90,7 @@ class RouterConfig:
             AutoscalingPolicy, Dict[str, str]
         ] = DEFAULT_AUTOSCALING_POLICY,
         timeout: str = None,
+        protocol: Union[Protocol, str] = Protocol.HTTP,
         log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(
             result_logger_type=ResultLoggerType.NOP
         ),
@@ -87,6 +100,7 @@ class RouterConfig:
     ):
         self.environment_name = environment_name
         self.name = name
+        self.protocol = protocol
         self.routes = routes
         self.rules = rules
         self.default_route_id = default_route_id
@@ -122,15 +136,14 @@ class RouterConfig:
 
     @routes.setter
     def routes(self, routes: Union[List[Route], List[Dict[str, str]]]):
-        if isinstance(routes, list):
-            if all(isinstance(route, Route) for route in routes):
-                self._routes = routes
-            elif all(isinstance(route, dict) for route in routes):
-                self._routes = [Route(**route) for route in routes]
-            else:
-                self._routes = routes
-        else:
-            self._routes = routes
+        if isinstance(routes, list) and all(isinstance(route, dict) for route in routes):
+            routes = [Route(**route) for route in routes]
+        for route in routes:
+            if self._protocol == Protocol.HTTP:
+                Route._verify_endpoint(route.endpoint)
+            elif self._protocol == Protocol.UPI:
+                Route._verify_service_method(route.service_method)
+        self._routes = routes
 
     @property
     def rules(self) -> List[TrafficRule]:
@@ -234,6 +247,17 @@ class RouterConfig:
     @timeout.setter
     def timeout(self, timeout: str):
         self._timeout = timeout
+    
+    @property
+    def protocol(self) -> Protocol:
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, protocol: Union[Protocol, str]):
+        if isinstance(protocol, str):
+            self._protocol = Protocol(protocol)
+        else:
+            self._protocol = protocol
 
     @property
     def log_config(self) -> LogConfig:
@@ -345,6 +369,7 @@ class RouterConfig:
                 experiment_engine=self.experiment_engine.to_open_api(),
                 timeout=self.timeout,
                 log_config=self.log_config.to_open_api(),
+                protocol=self.protocol.to_open_api(),
                 **kwargs,
             ),
         )

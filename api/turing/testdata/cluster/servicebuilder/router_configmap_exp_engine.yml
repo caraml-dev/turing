@@ -2,12 +2,12 @@ id: router-with-exp-engine
 routes:
 - endpoint: http://www.mocky.io/v2/5e4caccc310000e2cad8c071
   id: control
-  protocol: ""
+  protocol: HTTP
   timeout: 2s
   type: PROXY
 - endpoint: http://localhost:8080/predict/treatment-a
   id: treatment-a
-  protocol: ""
+  protocol: HTTP
   timeout: 2s
   type: PROXY
 strategy:

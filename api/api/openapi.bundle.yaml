@@ -1934,11 +1934,13 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
@@ -2045,6 +2047,8 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        protocol:
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersion_log_config'
         enricher:
@@ -2074,6 +2078,7 @@ components:
     Route:
       example:
         endpoint: endpoint
+        service_method: service_method
         annotations: '{}'
         id: id
         type: type
@@ -2087,6 +2092,8 @@ components:
           type: string
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
+          type: string
+        service_method:
           type: string
         annotations:
           nullable: true
@@ -2131,6 +2138,11 @@ components:
           pattern: ^\d+$
           type: string
       type: object
+    Protocol:
+      enum:
+      - UPI_V1
+      - HTTP_JSON
+      type: string
     LogLevel:
       enum:
       - DEBUG
@@ -2562,11 +2574,13 @@ components:
             timeout: timeout
           routes:
           - endpoint: endpoint
+            service_method: service_method
             annotations: '{}'
             id: id
             type: type
             timeout: timeout
           - endpoint: endpoint
+            service_method: service_method
             annotations: '{}'
             id: id
             type: type
@@ -2718,11 +2732,13 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
@@ -2852,6 +2868,8 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        protocol:
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersionConfig_log_config'
         enricher:
