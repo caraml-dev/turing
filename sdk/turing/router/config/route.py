@@ -2,8 +2,6 @@ import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from urllib.parse import urlparse
 from dataclasses import dataclass
-from enum import Enum
-from typing import Union
 
 @dataclass
 class Route:

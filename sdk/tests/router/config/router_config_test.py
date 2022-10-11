@@ -18,7 +18,7 @@ from turing.router.config.router_ensembler_config import (
 
 
 @pytest.mark.parametrize(
-    "actual,new_routes, expected",
+    "actual,new_routes,expected",
     [
         pytest.param(
             "generic_router_config",
