@@ -23,7 +23,7 @@ on:
   pull_request:
     branches:
       - main
-       - grpc_upi # temporary enable CI when creating pr targeting grpc_upi branch 
+      - grpc_upi # temporary enable CI when creating pr targeting grpc_upi branch 
     paths-ignore:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"
