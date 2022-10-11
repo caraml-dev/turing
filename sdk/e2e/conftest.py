@@ -12,6 +12,7 @@ TEST_ORDER = [
     "test_delete_router",
     "test_deploy_router_with_traffic_rules",
     "test_deploy_router_with_std_ensembler",
+    "test_deploy_router_upi",
 ]
 
 

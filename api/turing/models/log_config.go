@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // ResultLogger is the type used to capture the supported response
@@ -58,7 +58,7 @@ type KafkaConfig struct {
 // of the Turing Router.
 type LogConfig struct {
 	// LogLevel of the router.
-	LogLevel routercfg.LogLevel `json:"log_level"`
+	LogLevel routerConfig.LogLevel `json:"log_level"`
 	// Enable custom metrics for the router. Defaults to false.
 	CustomMetricsEnabled bool `json:"custom_metrics_enabled"`
 	// Enable debug logs for Fiber. Defaults to false.

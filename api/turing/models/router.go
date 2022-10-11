@@ -2,8 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
 )
 
 type RouterStatus string
@@ -59,18 +57,4 @@ func (r *Router) SetCurrRouterVersion(routerVersion *RouterVersion) {
 func (r *Router) ClearCurrRouterVersion() {
 	r.ClearCurrRouterVersionID()
 	r.CurrRouterVersion = nil
-}
-
-// RouterResponse is an alias for the Router, to enable custom marshaling
-type RouterResponse Router
-
-// MarshalJSON is a custom marshaling function for the Router, to manipulate the
-// endpoint.
-func (r *Router) MarshalJSON() ([]byte, error) {
-	response := RouterResponse(*r)
-	// Append the path to the endpoint
-	if response.Endpoint != "" {
-		response.Endpoint = fmt.Sprintf("%s/v1/predict", response.Endpoint)
-	}
-	return json.Marshal(response)
 }

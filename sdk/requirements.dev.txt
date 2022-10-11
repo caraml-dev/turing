@@ -5,3 +5,7 @@ twine
 pytest
 pytest-cov
 urllib3-mock>=0.3.3
+caraml-upi-protos
+grpcio<1.49.0
+grpcio-reflection<1.49.0
+grpcio-tools<1.49.0

@@ -29,6 +29,7 @@
         "metric": "concurrency",
         "target": "1"
     },
+    "protocol": "HTTP_JSON",
     "timeout": "5s",
     "log_config": {
         "log_level": "INFO",

@@ -31,6 +31,7 @@ def lazy_import():
     from turing.generated.model.default_traffic_rule import DefaultTrafficRule
     from turing.generated.model.enricher import Enricher
     from turing.generated.model.experiment_config import ExperimentConfig
+    from turing.generated.model.protocol import Protocol
     from turing.generated.model.resource_request import ResourceRequest
     from turing.generated.model.route import Route
     from turing.generated.model.router import Router
@@ -42,6 +43,7 @@ def lazy_import():
     globals()['DefaultTrafficRule'] = DefaultTrafficRule
     globals()['Enricher'] = Enricher
     globals()['ExperimentConfig'] = ExperimentConfig
+    globals()['Protocol'] = Protocol
     globals()['ResourceRequest'] = ResourceRequest
     globals()['Route'] = Route
     globals()['Router'] = Router
@@ -115,6 +117,7 @@ class RouterVersion(ModelNormal):
             'resource_request': (ResourceRequest,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
+            'protocol': (Protocol,),  # noqa: E501
             'log_config': (RouterVersionLogConfig,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
             'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
@@ -143,6 +146,7 @@ class RouterVersion(ModelNormal):
         'resource_request': 'resource_request',  # noqa: E501
         'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
+        'protocol': 'protocol',  # noqa: E501
         'log_config': 'log_config',  # noqa: E501
         'enricher': 'enricher',  # noqa: E501
         'ensembler': 'ensembler',  # noqa: E501
@@ -211,6 +215,7 @@ class RouterVersion(ModelNormal):
             resource_request (ResourceRequest): [optional]  # noqa: E501
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
             timeout (str): [optional]  # noqa: E501
+            protocol (Protocol): [optional]  # noqa: E501
             log_config (RouterVersionLogConfig): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501
             ensembler (RouterEnsemblerConfig): [optional]  # noqa: E501
