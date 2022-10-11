@@ -72,10 +72,11 @@ func GetValueFromRequest(
 }
 
 // GetValueFromUPIRequest retrieve the value from upi request or header depending on the value of `fieldSrc`.
-// Valid value of `fieldSrc` are `HeaderFieldSource` and `PredictionContextSource`
-// if `fieldSrc` is `HeaderFieldSource`, then the value will be retrieved from `reqHeader`
-// if `fieldSrc` is `PredictionContextSource`, then the value will be retrieved from `prediction_context` field of the upi request `req`
-// other `fieldSrc` value will produce error
+// Valid value of `fieldSrc` are `HeaderFieldSource` and `PredictionContextSource`.
+// If `fieldSrc` is `HeaderFieldSource`, then the value will be retrieved from `reqHeader`.
+// If `fieldSrc` is `PredictionContextSource`, then the value will be retrieved from
+// `prediction_context` field of the upi request `req`.
+// Other `fieldSrc` value will produce error.
 func GetValueFromUPIRequest(
 	reqHeader metadata.MD,
 	req *upiv1.PredictValuesRequest,
