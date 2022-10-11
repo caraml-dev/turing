@@ -16,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
@@ -373,7 +374,8 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 			Metric: models.AutoscalingMetricCPU,
 			Target: "80",
 		},
-		Timeout: "10s",
+		Timeout:  "10s",
+		Protocol: routerConfig.HTTP,
 		LogConfig: &models.LogConfig{
 			LogLevel:             "DEBUG",
 			CustomMetricsEnabled: true,

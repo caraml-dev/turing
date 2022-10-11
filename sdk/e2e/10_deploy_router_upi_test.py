@@ -1,7 +1,10 @@
 import os
 import logging
 
-import requests
+from caraml.upi.v1 import upi_pb2_grpc, upi_pb2
+from caraml.upi.v1 import table_pb2, type_pb2
+import grpc
+
 import turing
 import turing.batch
 import turing.batch.config
@@ -11,47 +14,26 @@ from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
-from turing.router.config.router_ensembler_config import StandardRouterEnsemblerConfig
-from turing.router.config.router_config import RouterConfig
+from turing.router.config.router_config import RouterConfig, Protocol
 from turing.router.config.router_version import RouterStatus
 
 
-def test_deploy_router_with_std_ensembler():
+def test_deploy_router_upi():
     # set up route
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-a',
+            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
     ]
-
-    # set up experiment config
-    experiment_config = ExperimentConfig(
-        type="proprietary",
-        config={
-            "client": {"id": "1", "username": "test", "passkey": "test"},
-            "experiments": [{"id": "001", "name": "exp_1"}],
-            "variables": {
-                "experiment_variables": {
-                    "001": [{"name": "client_id", "type": "unit", "required": True}]
-                },
-                "config": [
-                    {
-                        "name": "client_id",
-                        "required": True,
-                        "field": "client.id",
-                        "field_source": "payload",
-                    }
-                ],
-            },
-        },
-    )
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
@@ -61,22 +43,18 @@ def test_deploy_router_with_std_ensembler():
     # set up log config for the router
     log_config = LogConfig(result_logger_type=ResultLoggerType.NOP)
 
-    # set up standard ensembler
-    ensembler = StandardRouterEnsemblerConfig(
-        route_name_path="route_name", fallback_response_route_id="control"
-    )
-
     # create the RouterConfig instance
     router_config = RouterConfig(
         environment_name=os.getenv("MODEL_CLUSTER_NAME"),
-        name=f'e2e-sdk-std-ensembler-test-{os.getenv("TEST_ID")}',
+        name=f'e2e-sdk-upi-test-{os.getenv("TEST_ID")}',
         routes=routes,
         rules=[],
-        experiment_engine=experiment_config,
+        default_route_id="control",
+        experiment_engine=ExperimentConfig(type="nop"),
         resource_request=resource_request,
+        protocol=Protocol.UPI,
         timeout="5s",
         log_config=log_config,
-        ensembler=ensembler,
     )
 
     # create a router using the RouterConfig object
@@ -98,23 +76,19 @@ def test_deploy_router_with_std_ensembler():
     assert retrieved_router.status == RouterStatus.DEPLOYED
     assert (
         retrieved_router.endpoint
-        == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'
+        == f'{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}:80'
     )
 
     # get router version with id 1
     router_version_1 = retrieved_router.get_version(1)
     assert router_version_1.status == RouterStatus.DEPLOYED
 
-    # post single request to turing router
-    logging.info("Testing router endpoint...")
-    response = requests.post(
-        url=router.endpoint,
-        headers={
-            "Content-Type": "application/json",
-            "X-Mirror-Body": "true",
-        },
-        json={"client": {"id": 4}},
-    )
-    assert response.status_code == 200
-    expected_response = {"version": "treatment-a"}
-    assert response.json() == expected_response
+    channel = grpc.insecure_channel(retrieved_router.endpoint)
+    stub = upi_pb2_grpc.UniversalPredictionServiceStub(channel)
+    response = stub.PredictValues(upi_pb2.PredictValuesRequest(
+        prediction_table=table_pb2.Table(
+            columns=[table_pb2.Column(name="col1",type=type_pb2.TYPE_DOUBLE)],
+            rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
+        )
+    ))
+    logging.info(response)

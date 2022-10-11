@@ -3,6 +3,7 @@
 package e2e
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"testing"
@@ -31,6 +32,13 @@ func TestDeployRouterWithStandardEnsembler(t *testing.T) {
 	withDeployedRouter(t, data,
 		func(router *models.Router) {
 			t.Log("Testing router endpoint: POST " + router.Endpoint)
+			expectedEndpoint := fmt.Sprintf(
+				"http://%s-turing-router.%s.%s/v1/predict",
+				router.Name,
+				globalTestContext.ProjectName,
+				globalTestContext.KServiceDomain,
+			)
+			assert.Equal(t, expectedEndpoint, router.Endpoint)
 			withRouterResponse(t,
 				http.MethodPost,
 				router.Endpoint,

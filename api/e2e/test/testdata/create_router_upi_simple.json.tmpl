@@ -1,0 +1,30 @@
+{
+    "environment_name": "{{.DeploymentEnvironment}}",
+    "name": "e2e-experiment-upi-{{.TestID}}",
+    "config": {
+        "routes": [
+            {
+                "id": "control",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverUPIEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            }
+        ],
+        "default_route_id": "control",
+        "experiment_engine": {
+            "type": "nop"
+        },
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 1,
+            "cpu_request": "200m",
+            "memory_request": "250Mi"
+        },
+        "timeout": "5s",
+        "protocol": "UPI_V1",
+        "log_config": {
+            "result_logger_type": "nop"
+        }
+    }
+}

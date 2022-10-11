@@ -2,9 +2,8 @@ type: EAGER_ROUTER
 id: router-id
 routes:
   - endpoint: "localhost:50604"
-    service: "caraml.upi.v1.UniversalPredictionService"
-    method: "PredictValues"
     protocol: "grpc"
+    service_method: "caraml.upi.v1.UniversalPredictionService/PredictValues"
     id: control
     timeout: 20s
     type: PROXY

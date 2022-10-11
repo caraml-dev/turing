@@ -3,7 +3,7 @@ package models
 import (
 	"testing"
 
-	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +14,7 @@ func TestLogConfigValue(t *testing.T) {
 	}{
 		"nop": {
 			logConfig: LogConfig{
-				LogLevel:             routercfg.DebugLevel,
+				LogLevel:             routerConfig.DebugLevel,
 				CustomMetricsEnabled: true,
 				FiberDebugLogEnabled: false,
 				JaegerEnabled:        false,
@@ -30,7 +30,7 @@ func TestLogConfigValue(t *testing.T) {
 		},
 		"bigquery": {
 			logConfig: LogConfig{
-				LogLevel:         routercfg.InfoLevel,
+				LogLevel:         routerConfig.InfoLevel,
 				ResultLoggerType: BigQueryLogger,
 				BigQueryConfig: &BigQueryConfig{
 					Table:                "test-table",
@@ -53,7 +53,7 @@ func TestLogConfigValue(t *testing.T) {
 		},
 		"kafka": {
 			logConfig: LogConfig{
-				LogLevel:         routercfg.WarnLevel,
+				LogLevel:         routerConfig.WarnLevel,
 				ResultLoggerType: KafkaLogger,
 				KafkaConfig: &KafkaConfig{
 					Brokers:             "test-brokers",
@@ -106,7 +106,7 @@ func TestLogConfigScan(t *testing.T) {
 			}`),
 			success: true,
 			expected: LogConfig{
-				LogLevel:             routercfg.DebugLevel,
+				LogLevel:             routerConfig.DebugLevel,
 				CustomMetricsEnabled: true,
 				FiberDebugLogEnabled: false,
 				JaegerEnabled:        false,
