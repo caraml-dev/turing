@@ -66,27 +66,24 @@ func Run() {
 			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
 		}
 
-		s := upi.NewUPIServer(missionCtl)
+		upiServer := upi.NewUPIServer(missionCtl)
 		m := cmux.New(l)
-		grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-		httpL := m.Match(cmux.Any())
+		grpcListener := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+		httpListener := m.Match(cmux.Any())
 
 		mux := http.NewServeMux()
 		mux.Handle("/v1/internal/", http.StripPrefix(
 			"/v1/internal",
-			handlers.NewInternalAPIHandler([]string{
-				cfg.EnsemblerConfig.Endpoint,
-				cfg.EnrichmentConfig.Endpoint,
-			}),
+			handlers.NewInternalAPIHandler([]string{}),
 		))
 		if cfg.AppConfig.CustomMetrics {
 			mux.Handle("/metrics", promhttp.Handler())
 		}
-		httpS := &http.Server{Handler: mux}
+		httpServer := &http.Server{Handler: mux}
 
-		go s.Run(grpcL)
+		go upiServer.Run(grpcListener)
 		go func() {
-			if err := httpS.Serve(httpL); err != nil {
+			if err := httpServer.Serve(httpListener); err != nil {
 				log.Glob().Errorf("Failed to serve http server: %s", err)
 			}
 		}()
@@ -108,10 +105,7 @@ func Run() {
 		// Register handlers
 		http.Handle("/v1/internal/", http.StripPrefix(
 			"/v1/internal",
-			handlers.NewInternalAPIHandler([]string{
-				cfg.EnsemblerConfig.Endpoint,
-				cfg.EnrichmentConfig.Endpoint,
-			}),
+			handlers.NewInternalAPIHandler([]string{}),
 		))
 		http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
 		http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl)))

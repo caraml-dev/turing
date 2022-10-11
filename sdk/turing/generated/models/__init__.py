@@ -60,12 +60,12 @@ from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel
 from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project
+from turing.generated.model.protocol import Protocol
 from turing.generated.model.py_func_ensembler import PyFuncEnsembler
 from turing.generated.model.py_func_ensembler_all_of import PyFuncEnsemblerAllOf
 from turing.generated.model.resource_request import ResourceRequest
 from turing.generated.model.result_logger_type import ResultLoggerType
 from turing.generated.model.route import Route
-from turing.generated.model.route_protocol import RouteProtocol
 from turing.generated.model.router import Router
 from turing.generated.model.router_config import RouterConfig
 from turing.generated.model.router_details import RouterDetails
@@ -75,7 +75,6 @@ from turing.generated.model.router_events import RouterEvents
 from turing.generated.model.router_id import RouterId
 from turing.generated.model.router_id_and_version import RouterIdAndVersion
 from turing.generated.model.router_id_object import RouterIdObject
-from turing.generated.model.router_protocol import RouterProtocol
 from turing.generated.model.router_status import RouterStatus
 from turing.generated.model.router_version import RouterVersion
 from turing.generated.model.router_version_config import RouterVersionConfig

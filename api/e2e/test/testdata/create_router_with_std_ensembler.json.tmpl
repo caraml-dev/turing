@@ -6,15 +6,13 @@
             {
                 "id": "control",
                 "type": "PROXY",
-                "protocol": "HTTP",
-                "endpoint": "{{.MockserverEndpoint}}/control",
+                "endpoint": "{{.MockserverHTTPEndpoint}}/control",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-a",
                 "type": "PROXY",
-                "protocol": "HTTP",
-                "endpoint": "{{.MockserverEndpoint}}/treatment-a",
+                "endpoint": "{{.MockserverHTTPEndpoint}}/treatment-a",
                 "timeout": "5s"
             }
         ],

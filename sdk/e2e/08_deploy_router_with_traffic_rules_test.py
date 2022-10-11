@@ -28,17 +28,17 @@ def test_deploy_router_with_traffic_rules():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-a',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-a',
             timeout="5s",
         ),
         Route(
             id="treatment-b",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-b',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-b',
             timeout="5s",
         ),
     ]

@@ -11,10 +11,6 @@ import (
 	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
-// RouteProtocol is the type used to capture the supported response
-// logging destinations
-type RouteProtocol fiberProtocol.Protocol
-
 // Route maps onto the fiber.Component.
 type Route struct {
 	// ID of the route
@@ -27,8 +23,6 @@ type Route struct {
 	Annotations map[string]string `json:"annotations"`
 	// Request timeout as a valid quantity string.
 	Timeout string `json:"timeout"`
-	// Fiber protocol
-	Protocol RouteProtocol `json:"protocol"`
 	// Grpc ServiceMethod name
 	ServiceMethod string `json:"service_method,omitempty"`
 }
@@ -49,15 +43,15 @@ func (r *Routes) Scan(value interface{}) error {
 }
 
 // ToFiberRoutes converts routes to a type compatible with Fiber's config
-func (r *Routes) ToFiberRoutes() (*fiberConfig.Routes, error) {
+func (r *Routes) ToFiberRoutes(protocol fiberProtocol.Protocol) (*fiberConfig.Routes, error) {
 	routes := make([]fiberConfig.Config, 0, len(*r))
 	for _, route := range *r {
 		timeout, err := time.ParseDuration(route.Timeout)
 		if err != nil {
 			return nil, err
 		}
-		if string(route.Protocol) != string(fiberProtocol.HTTP) &&
-			string(route.Protocol) != string(fiberProtocol.GRPC) {
+		if protocol != fiberProtocol.HTTP &&
+			protocol != fiberProtocol.GRPC {
 			return nil, fmt.Errorf("invalid route protocol for %s", route.ID)
 		}
 		routes = append(routes, &fiberConfig.ProxyConfig{
@@ -66,7 +60,7 @@ func (r *Routes) ToFiberRoutes() (*fiberConfig.Routes, error) {
 				Type: route.Type,
 			},
 			Endpoint: route.Endpoint,
-			Protocol: fiberProtocol.Protocol(route.Protocol),
+			Protocol: protocol,
 			Timeout:  fiberConfig.Duration(timeout),
 			GrpcConfig: fiberConfig.GrpcConfig{
 				ServiceMethod: route.ServiceMethod,

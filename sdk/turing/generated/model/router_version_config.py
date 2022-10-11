@@ -31,20 +31,20 @@ def lazy_import():
     from turing.generated.model.default_traffic_rule import DefaultTrafficRule
     from turing.generated.model.enricher import Enricher
     from turing.generated.model.experiment_config import ExperimentConfig
+    from turing.generated.model.protocol import Protocol
     from turing.generated.model.resource_request import ResourceRequest
     from turing.generated.model.route import Route
     from turing.generated.model.router_ensembler_config import RouterEnsemblerConfig
-    from turing.generated.model.router_protocol import RouterProtocol
     from turing.generated.model.router_version_config_log_config import RouterVersionConfigLogConfig
     from turing.generated.model.traffic_rule import TrafficRule
     globals()['AutoscalingPolicy'] = AutoscalingPolicy
     globals()['DefaultTrafficRule'] = DefaultTrafficRule
     globals()['Enricher'] = Enricher
     globals()['ExperimentConfig'] = ExperimentConfig
+    globals()['Protocol'] = Protocol
     globals()['ResourceRequest'] = ResourceRequest
     globals()['Route'] = Route
     globals()['RouterEnsemblerConfig'] = RouterEnsemblerConfig
-    globals()['RouterProtocol'] = RouterProtocol
     globals()['RouterVersionConfigLogConfig'] = RouterVersionConfigLogConfig
     globals()['TrafficRule'] = TrafficRule
 
@@ -109,7 +109,7 @@ class RouterVersionConfig(ModelNormal):
             'default_traffic_rule': (DefaultTrafficRule,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
-            'protocol': (RouterProtocol,),  # noqa: E501
+            'protocol': (Protocol,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
             'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
         }
@@ -191,7 +191,7 @@ class RouterVersionConfig(ModelNormal):
             default_traffic_rule (DefaultTrafficRule): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
-            protocol (RouterProtocol): [optional]  # noqa: E501
+            protocol (Protocol): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501
             ensembler (RouterEnsemblerConfig): [optional]  # noqa: E501
         """

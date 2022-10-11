@@ -30,7 +30,6 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       {
         "id": "myroute",
         "type": "PROXY",
-		"protocol": "HTTP",
         "endpoint": "http://example.com",
         "timeout": "5s"
       }
@@ -72,7 +71,6 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       {
         "id": "myroute",
         "type": "PROXY",
-		"protocol": "HTTP",
         "endpoint": "http://example.com",
         "timeout": "5s"
       }
@@ -109,7 +107,6 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       {
         "id": "myroute",
         "type": "PROXY",
-		"protocol": "HTTP",
         "endpoint": "http://example.com",
         "timeout": "5s"
       }

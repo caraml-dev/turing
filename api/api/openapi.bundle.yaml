@@ -2048,7 +2048,7 @@ components:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         protocol:
-          $ref: '#/components/schemas/RouterProtocol'
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersion_log_config'
         enricher:
@@ -2093,8 +2093,6 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
-        protocol:
-          $ref: '#/components/schemas/RouteProtocol'
         service_method:
           type: string
         annotations:
@@ -2106,11 +2104,6 @@ components:
       - timeout
       - type
       type: object
-    RouteProtocol:
-      enum:
-      - GRPC
-      - HTTP
-      type: string
     ResourceRequest:
       example:
         min_replica: 0
@@ -2145,7 +2138,7 @@ components:
           pattern: ^\d+$
           type: string
       type: object
-    RouterProtocol:
+    Protocol:
       enum:
       - UPI_V1
       - HTTP_JSON
@@ -2876,7 +2869,7 @@ components:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
         protocol:
-          $ref: '#/components/schemas/RouterProtocol'
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersionConfig_log_config'
         enricher:

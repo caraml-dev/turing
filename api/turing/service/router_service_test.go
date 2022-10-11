@@ -74,7 +74,6 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				{
 					ID:       "lala",
 					Type:     "PROXY",
-					Protocol: "HTTP",
 					Endpoint: "lalal.com",
 					Timeout:  "5s",
 				},

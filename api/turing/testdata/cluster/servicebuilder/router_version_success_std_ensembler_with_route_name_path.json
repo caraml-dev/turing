@@ -11,21 +11,18 @@
     {
       "id": "treatment-b",
       "type": "PROXY",
-      "protocol": "HTTP",
       "endpoint": "http://example.com/treatment-b",
       "timeout": "2s"
     },
     {
       "id": "treatment-a",
       "type": "PROXY",
-      "protocol": "HTTP",
       "endpoint": "http://example.com/treatment-a",
       "timeout": "2s"
     },
     {
       "id": "control",
       "type": "PROXY",
-      "protocol": "HTTP",
       "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
       "timeout": "2s"
     }

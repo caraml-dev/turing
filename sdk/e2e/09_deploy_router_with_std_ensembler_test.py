@@ -21,12 +21,12 @@ def test_deploy_router_with_std_ensembler():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-a',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-a',
             timeout="5s",
         ),
     ]

@@ -7,14 +7,14 @@ import turing.batch
 import turing.batch.config
 import turing.router.config.router_config
 
-from turing.router.config.route import Route, RouteProtocol
+from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
-from turing.router.config.router_config import RouterConfig, RouterProtocol
+from turing.router.config.router_config import RouterConfig, Protocol
 from turing.router.config.router_version import RouterStatus
 
 
@@ -26,7 +26,7 @@ def test_create_router():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         )
     ]
@@ -116,8 +116,7 @@ def test_create_router():
     retrieved_router = turing.Router.get(1)
     assert retrieved_router.version == 1
     assert retrieved_router.status == RouterStatus.DEPLOYED
-    assert retrieved_router.config.protocol == RouterProtocol.HTTP
-    assert retrieved_router.config.routes[0].protocol == RouteProtocol.HTTP
+    assert retrieved_router.config.protocol == Protocol.HTTP
     assert (
         retrieved_router.endpoint
         == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'

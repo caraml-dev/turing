@@ -55,7 +55,6 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				{
 					ID:       "bulbasaur",
 					Type:     "PROXY",
-					Protocol: "HTTP",
 					Endpoint: "bulbasaur.default.svc.cluster.local:80",
 					Timeout:  "5s",
 				},

@@ -9,12 +9,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testRoutes Routes = Routes{
+var testHTTPRoutes = Routes{
 	{
 		ID:       "test-id",
 		Type:     "PROXY",
 		Endpoint: "test-endpoint",
-		Protocol: "GRPC",
+		Annotations: map[string]string{
+			"merlin.gojek.com/model-id": "10",
+		},
+		Timeout: "2s",
+	},
+}
+
+var testGRPCRoutes = Routes{
+	{
+		ID:       "test-id",
+		Type:     "PROXY",
+		Endpoint: "test-endpoint",
 		Annotations: map[string]string{
 			"merlin.gojek.com/model-id": "10",
 		},
@@ -24,7 +35,7 @@ var testRoutes Routes = Routes{
 }
 
 func TestRoutesValue(t *testing.T) {
-	value, err := testRoutes.Value()
+	value, err := testGRPCRoutes.Value()
 	// Convert to string for comparison
 	byteValue, ok := value.([]byte)
 	assert.True(t, ok)
@@ -33,7 +44,6 @@ func TestRoutesValue(t *testing.T) {
 	assert.JSONEq(t, `
 		[{
 			"id": "test-id",
-			"protocol": "GRPC",
 			"type": "PROXY",
 			"endpoint": "test-endpoint",
 			"service_method": "package/method",
@@ -56,7 +66,6 @@ func TestRoutesScan(t *testing.T) {
 			value: []byte(`
 				[{
 					"id": "test-id",
-					"protocol": "GRPC",
 					"type": "PROXY",
 					"endpoint": "test-endpoint",
 					"service_method": "package/method",
@@ -67,7 +76,7 @@ func TestRoutesScan(t *testing.T) {
 				}]
 			`),
 			success:  true,
-			expected: testRoutes,
+			expected: testGRPCRoutes,
 		},
 		"failure | invalid value": {
 			value:   100,
@@ -95,11 +104,29 @@ func TestRoutesToFiberRoutes(t *testing.T) {
 	tests := map[string]struct {
 		routes      Routes
 		fiberRoutes fiberConfig.Routes
+		protocol    fiberProtocol.Protocol
 		success     bool
 		err         string
 	}{
-		"success": {
-			routes: testRoutes,
+		"success http": {
+			routes:   testHTTPRoutes,
+			protocol: fiberProtocol.HTTP,
+			fiberRoutes: fiberConfig.Routes{
+				&fiberConfig.ProxyConfig{
+					ComponentConfig: fiberConfig.ComponentConfig{
+						ID:   "test-id",
+						Type: "PROXY",
+					},
+					Endpoint: "test-endpoint",
+					Timeout:  fiberConfig.Duration(time.Second * 2),
+					Protocol: fiberProtocol.HTTP,
+				},
+			},
+			success: true,
+		},
+		"success grpc": {
+			routes:   testGRPCRoutes,
+			protocol: fiberProtocol.GRPC,
 			fiberRoutes: fiberConfig.Routes{
 				&fiberConfig.ProxyConfig{
 					ComponentConfig: fiberConfig.ComponentConfig{
@@ -125,14 +152,15 @@ func TestRoutesToFiberRoutes(t *testing.T) {
 					Timeout:  "2t",
 				},
 			},
-			success: false,
-			err:     "time: unknown unit",
+			protocol: fiberProtocol.HTTP,
+			success:  false,
+			err:      "time: unknown unit",
 		},
 	}
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			fiberRoutes, err := data.routes.ToFiberRoutes()
+			fiberRoutes, err := data.routes.ToFiberRoutes(data.protocol)
 			if data.success {
 				assert.NoError(t, err)
 				assert.Equal(t, data.fiberRoutes, *fiberRoutes)

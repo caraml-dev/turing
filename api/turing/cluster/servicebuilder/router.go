@@ -17,6 +17,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/ghodss/yaml"
 	fiberConfig "github.com/gojek/fiber/config"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	mlp "github.com/gojek/mlp/api/client"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -326,6 +327,7 @@ func buildTrafficSplittingFiberConfig(
 	rules models.TrafficRules,
 	ensembler *models.Ensembler,
 	fiberProperties json.RawMessage,
+	protocol fiberProtocol.Protocol,
 ) (fiberConfig.Config, error) {
 	// IDs of routes, that are part of at least one traffic-splitting rule
 	conditionalRouteIds := rules.ConditionalRouteIds()
@@ -352,7 +354,8 @@ func buildTrafficSplittingFiberConfig(
 		defaultRouteID,
 		alwaysActiveRoutes,
 		ensembler,
-		fiberProperties)
+		fiberProperties,
+		protocol)
 
 	if err != nil {
 		return nil, err
@@ -383,7 +386,8 @@ func buildTrafficSplittingFiberConfig(
 			routeID,
 			append(alwaysActiveRoutes, ruleRoutes...),
 			ensembler,
-			fiberProperties)
+			fiberProperties,
+			protocol)
 
 		if err != nil {
 			return nil, err
@@ -429,9 +433,10 @@ func buildFiberConfig(
 	routes models.Routes,
 	ensembler *models.Ensembler,
 	fiberProperties json.RawMessage,
+	protocol fiberProtocol.Protocol,
 ) (fiberConfig.Config, error) {
 	// Create the MultiRouteConfig
-	fiberRoutes, err := routes.ToFiberRoutes()
+	fiberRoutes, err := routes.ToFiberRoutes(protocol)
 	if err != nil {
 		return nil, err
 	}
@@ -514,6 +519,12 @@ func buildFiberConfigMap(
 		return nil, err
 	}
 
+	// default to http
+	routeProtocol := fiberProtocol.HTTP
+	if ver.Protocol == routeConfig.UPI {
+		routeProtocol = fiberProtocol.GRPC
+	}
+
 	var routerConfig fiberConfig.Config
 	// if the version is configured with traffic splitting rules on it,
 	// then define root-level fiber component as a lazy router with
@@ -536,13 +547,15 @@ func buildFiberConfigMap(
 			ver.Routes,
 			rules,
 			ver.Ensembler,
-			properties)
+			properties,
+			routeProtocol)
 	} else {
 		routerConfig, err = buildFiberConfig(
 			ver.Router.Name,
 			ver.Routes,
 			ver.Ensembler,
-			properties)
+			properties,
+			routeProtocol)
 	}
 
 	if err != nil {

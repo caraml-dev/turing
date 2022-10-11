@@ -129,6 +129,9 @@ func (r RouterConfig) BuildRouterVersion(
 	if r.Protocol != nil {
 		routerProtocol = *r.Protocol
 	}
+	if routerProtocol != routerConfig.UPI && routerProtocol != routerConfig.HTTP {
+		return nil, errors.New("invalid router protocol")
+	}
 	rv = &models.RouterVersion{
 		RouterID:           router.ID,
 		Router:             router,

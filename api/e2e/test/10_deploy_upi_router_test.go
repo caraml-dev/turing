@@ -30,7 +30,7 @@ func TestUPIRouter(t *testing.T) {
 	withDeployedRouter(t, data,
 		func(router *models.Router) {
 			t.Log("Testing router endpoint: " + router.Endpoint)
-			t.Log("Route Endpoint: " + globalTestContext.MockUpiServerEndpoint)
+			t.Log("Route Endpoint: " + globalTestContext.MockserverUPIEndpoint)
 			expectedEndpoint := fmt.Sprintf(
 				"%s-turing-router.%s.%s:80",
 				router.Name,

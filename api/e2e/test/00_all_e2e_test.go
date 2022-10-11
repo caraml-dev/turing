@@ -24,17 +24,17 @@ type testConfig struct {
 	// The router name will currently contains TestID to ensure concurrent e2e tests will create routers with
 	// distinct name. The test runner must ensure the TestID provided is unique across concurrent runs.
 	TestID string `envconfig:"TEST_ID" required:"true"`
-	// MockserverEndpoint will be used as the router endpoints in the e2e tests.
+	// MockserverHTTPEndpoint will be used as the router endpoints in the e2e tests.
 	// This endpoint is expected to handle POST request and returns a JSON object
-	MockserverEndpoint    string `envconfig:"MOCKSERVER_ENDPOINT" required:"true"`
-	MockUpiServerEndpoint string `envconfig:"MOCKSERVER_UPI_ENDPOINT" required:"true"`
-	KServiceDomain        string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
-	APIBasePath           string `envconfig:"API_BASE_PATH" required:"true"`
-	ClusterName           string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
-	DeploymentEnvironment string `envconfig:"DEPLOYMENT_ENVIRONMENT" default:"dev"`
-	ProjectID             int    `envconfig:"PROJECT_ID" required:"true"`
-	ProjectName           string `envconfig:"PROJECT_NAME" required:"true"`
-	TestEchoImage         string `envconfig:"TEST_ECHO_IMAGE" default:"eexit/mirror-http-server:1.1.3"`
+	MockserverHTTPEndpoint string `envconfig:"MOCKSERVER_HTTP_ENDPOINT" required:"true"`
+	MockserverUPIEndpoint  string `envconfig:"MOCKSERVER_UPI_ENDPOINT" required:"true"`
+	KServiceDomain         string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
+	APIBasePath            string `envconfig:"API_BASE_PATH" required:"true"`
+	ClusterName            string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
+	DeploymentEnvironment  string `envconfig:"DEPLOYMENT_ENVIRONMENT" default:"dev"`
+	ProjectID              int    `envconfig:"PROJECT_ID" required:"true"`
+	ProjectName            string `envconfig:"PROJECT_NAME" required:"true"`
+	TestEchoImage          string `envconfig:"TEST_ECHO_IMAGE" default:"eexit/mirror-http-server:1.1.3"`
 	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
 	// If false, the helper will use the cluster credentials from the configured Vault environment.
