@@ -110,11 +110,12 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	results := make([]bool, len(s.Rules))
 
 	for idx, rule := range s.Rules {
-		if res, err := rule.TestRequest(req); err != nil {
+		res, err := rule.TestRequest(req)
+		if err != nil {
 			return nil, nil, createFiberError(err, req.Protocol())
-		} else {
-			results[idx] = res
 		}
+
+		results[idx] = res
 	}
 
 	// select primary route and fallbacks, based on the results of testing

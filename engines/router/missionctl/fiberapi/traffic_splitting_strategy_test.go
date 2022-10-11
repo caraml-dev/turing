@@ -50,7 +50,7 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 					},
 				},
 			},
-			request: tfu.NewHttpFiberRequest(t, http.Header{
+			request: tfu.NewHTTPFiberRequest(t, http.Header{
 				"X-Region": []string{"region-a"},
 			}, `{"foo": {"bar": "foobar"}}`),
 
@@ -79,7 +79,7 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 					},
 				},
 			},
-			request: tfu.NewHttpFiberRequest(t, http.Header{
+			request: tfu.NewHTTPFiberRequest(t, http.Header{
 				"X-Region": []string{"region-a"},
 			}, `{"foo": {"bar": "foobar"}, "another": "19"}`),
 
@@ -108,7 +108,7 @@ func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {
 					},
 				},
 			},
-			request: tfu.NewHttpFiberRequest(t, http.Header{
+			request: tfu.NewHTTPFiberRequest(t, http.Header{
 				"X-Region": []string{"region-c"},
 			}, `{"foo": {"bar": "foobazz"}}`),
 			expected: false,
@@ -433,7 +433,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			routes: map[string]fiber.Component{
 				"route-a": tfu.NewFiberCaller(t, "route-a"),
 			},
-			request: tfu.NewHttpFiberRequest(t, http.Header{
+			request: tfu.NewHTTPFiberRequest(t, http.Header{
 				"X-Region": []string{"region-b"},
 			}, `{"service_type": "service-b"}`),
 			expected:  tfu.NewFiberCaller(t, "route-a"),
@@ -517,7 +517,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				"route-a": tfu.NewFiberCaller(t, "route-a"),
 				"route-b": tfu.NewFiberCaller(t, "route-b"),
 			},
-			request:   tfu.NewHttpFiberRequest(t, http.Header{}, `{"service_type": "service-c"}`),
+			request:   tfu.NewHTTPFiberRequest(t, http.Header{}, `{"service_type": "service-c"}`),
 			expected:  tfu.NewFiberCaller(t, "control"),
 			fallbacks: []fiber.Component{},
 		},
@@ -611,7 +611,9 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				"route-a": tfu.NewFiberCaller(t, "route-a"),
 				"route-b": tfu.NewFiberCaller(t, "route-b"),
 			},
-			request:   tfu.NewHttpFiberRequest(t, http.Header{"X-Region": []string{"region-b"}}, `{"service_type": "service-b"}`),
+			request: tfu.NewHTTPFiberRequest(t,
+				http.Header{"X-Region": []string{"region-b"}},
+				`{"service_type": "service-b"}`),
 			expected:  tfu.NewFiberCaller(t, "route-a"),
 			fallbacks: []fiber.Component{tfu.NewFiberCaller(t, "route-b")},
 		},
@@ -686,7 +688,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			routes: map[string]fiber.Component{
 				"route-a": tfu.NewFiberCaller(t, "route-a"),
 			},
-			request:       tfu.NewHttpFiberRequest(t, http.Header{"X-Region": []string{"region-d"}}, ``),
+			request:       tfu.NewHTTPFiberRequest(t, http.Header{"X-Region": []string{"region-d"}}, ``),
 			fallbacks:     []fiber.Component{},
 			expectedError: "http request didn't match any traffic rule",
 		},
@@ -710,7 +712,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				"route-b": tfu.NewFiberCaller(t, "route-b"),
 				"route-c": tfu.NewFiberCaller(t, "route-c"),
 			},
-			request:       tfu.NewHttpFiberRequest(t, http.Header{"X-Region": []string{"region-a"}}, ``),
+			request:       tfu.NewHTTPFiberRequest(t, http.Header{"X-Region": []string{"region-a"}}, ``),
 			fallbacks:     []fiber.Component{},
 			expectedError: `route with id "route-a" doesn't exist in the router`,
 		},

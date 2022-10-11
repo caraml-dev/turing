@@ -99,5 +99,5 @@ func (o *inConditionOperator) Test(left interface{}, right interface{}) (bool, e
 }
 
 var (
-	InConditionOperator RuleConditionOperator = RuleConditionOperator{&inConditionOperator{}}
+	InConditionOperator = RuleConditionOperator{&inConditionOperator{}}
 )

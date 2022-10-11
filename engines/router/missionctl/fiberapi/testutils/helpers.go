@@ -31,8 +31,8 @@ func NewFiberCaller(t testing.TB, callerID string) fiber.Component {
 	return caller
 }
 
-// NewHttpFiberRequest create new http fiber request based on header and body
-func NewHttpFiberRequest(t testing.TB, header http.Header, body string) fiber.Request {
+// NewHTTPFiberRequest create new http fiber request based on header and body
+func NewHTTPFiberRequest(t testing.TB, header http.Header, body string) fiber.Request {
 	r, err := fiberHttp.NewHTTPRequest(&http.Request{
 		Header: header,
 		Body:   ioutil.NopCloser(strings.NewReader(body)),

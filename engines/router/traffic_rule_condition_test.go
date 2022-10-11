@@ -218,7 +218,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			actual, err := tt.condition.TestRequest(tfu.NewHttpFiberRequest(t, tt.header, tt.payload))
+			actual, err := tt.condition.TestRequest(tfu.NewHTTPFiberRequest(t, tt.header, tt.payload))
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 				require.Equal(t, tt.expected, actual)
