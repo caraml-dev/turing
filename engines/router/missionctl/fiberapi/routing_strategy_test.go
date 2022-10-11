@@ -3,7 +3,6 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"testing"
 
 	"bou.ke/monkey"
@@ -322,15 +321,7 @@ func makeTestRoutes(t *testing.T, names ...string) map[string]fiber.Component {
 
 	for _, n := range names {
 		b := fiber.NewBackend(n, "")
-		httpDispatcher, err := fiberHttp.NewDispatcher(http.DefaultClient)
-		if err != nil {
-			t.Fatal(err)
-		}
-		caller, err := fiber.NewCaller(n, httpDispatcher)
-		if err != nil {
-			t.Fatal(err)
-		}
-		routes[n] = fiber.NewProxy(b, caller)
+		routes[n] = fiber.NewProxy(b, testutils.NewFiberCaller(t, n))
 	}
 	return routes
 }
