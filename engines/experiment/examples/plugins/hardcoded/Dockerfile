@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.18-alpine as builder
 
 ARG binary_name="plugin"
 ARG project_root=github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/cmd
