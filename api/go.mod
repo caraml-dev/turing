@@ -9,10 +9,11 @@ require (
 	github.com/antihax/optional v1.0.0
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/turing/engines/router v0.0.0
+	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/gojek/fiber v0.1.1-0.20220919041622-e1bb222fbb9a
+	github.com/gojek/fiber v0.1.1-0.20221006024632-2614f444e92e
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
@@ -35,6 +36,7 @@ require (
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
+	google.golang.org/grpc v1.48.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
@@ -56,7 +58,6 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551 // indirect
 	github.com/certifi/gocertifi v0.0.0-20200922220541-2c3bb06c6054 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -163,7 +164,6 @@ require (
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220810155839-1856144b1d9c // indirect
-	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
@@ -187,7 +187,6 @@ replace (
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
-	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20220915050901-6a36b12c45cf
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58

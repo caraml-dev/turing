@@ -9,7 +9,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
-	routercfg "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // CreateOrUpdateRouterRequest structure defines the format of the request payload
@@ -30,6 +30,7 @@ type RouterConfig struct {
 	ResourceRequest    *models.ResourceRequest    `json:"resource_request"`
 	AutoscalingPolicy  *models.AutoscalingPolicy  `json:"autoscaling_policy" validate:"omitempty,dive"`
 	Timeout            string                     `json:"timeout" validate:"required"`
+	Protocol           *routerConfig.Protocol     `json:"protocol"`
 
 	LogConfig *LogConfig `json:"log_config" validate:"required"`
 
@@ -123,6 +124,14 @@ func (r RouterConfig) BuildRouterVersion(
 	if r.DefaultRouteID != nil {
 		defaultRouteID = *r.DefaultRouteID
 	}
+	// Set default to http
+	routerProtocol := routerConfig.HTTP
+	if r.Protocol != nil {
+		routerProtocol = *r.Protocol
+	}
+	if routerProtocol != routerConfig.UPI && routerProtocol != routerConfig.HTTP {
+		return nil, errors.New("invalid router protocol")
+	}
 	rv = &models.RouterVersion{
 		RouterID:           router.ID,
 		Router:             router,
@@ -138,8 +147,9 @@ func (r RouterConfig) BuildRouterVersion(
 		ResourceRequest:   r.ResourceRequest,
 		AutoscalingPolicy: getAutoscalingPolicyOrDefault(r.AutoscalingPolicy),
 		Timeout:           r.Timeout,
+		Protocol:          routerProtocol,
 		LogConfig: &models.LogConfig{
-			LogLevel:             routercfg.LogLevel(defaults.LogLevel),
+			LogLevel:             routerConfig.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
 			FiberDebugLogEnabled: defaults.FiberDebugLogEnabled,
 			JaegerEnabled:        defaults.JaegerEnabled,

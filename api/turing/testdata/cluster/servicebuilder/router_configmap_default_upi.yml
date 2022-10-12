@@ -1,14 +1,15 @@
 id: test-svc
 routes:
-- endpoint: http://www.mocky.io/v2/5e4caccc310000e2cad8c071
+- endpoint: localhost:9000
   id: control
-  protocol: HTTP
+  protocol: GRPC
+  service_method: package/method
   timeout: 2s
   type: PROXY
 strategy:
   properties:
     default_route_id: control
-    experiment_engine: exp-engine-2
+    experiment_engine: exp-engine-1
     experiment_engine_properties:
       client_id: client_id
       endpoint: exp-engine:8080
@@ -22,12 +23,5 @@ strategy:
         app_version:
           field: appVer
           field_source: header
-    experiment_mappings:
-    - experiment: exp_exp_test_experiment_1
-      route: route-1
-      treatment: control
-    - experiment: exp_exp_test_experiment_2
-      route: route-2
-      treatment: treatment
   type: fiber.DefaultTuringRoutingStrategy
 type: EAGER_ROUTER

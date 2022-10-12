@@ -68,7 +68,7 @@ func TestNewEnricherService(t *testing.T) {
 			},
 		},
 		"failure": {
-			filePath: filepath.Join(testDataBasePath, "router_version_basic.json"),
+			filePath: filepath.Join(testDataBasePath, "router_version_basic_upi.json"),
 			err:      "Enricher reference is empty",
 		},
 	}
@@ -182,7 +182,7 @@ func TestNewEnsemblerService(t *testing.T) {
 			},
 		},
 		"failure": {
-			filePath: filepath.Join(testDataBasePath, "router_version_basic.json"),
+			filePath: filepath.Join(testDataBasePath, "router_version_basic_upi.json"),
 			err:      "Ensembler reference is empty",
 		},
 	}

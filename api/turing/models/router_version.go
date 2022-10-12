@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/jinzhu/gorm"
 )
 
@@ -49,6 +50,8 @@ type RouterVersion struct {
 	AutoscalingPolicy *AutoscalingPolicy `json:"autoscaling_policy"`
 	// Request timeout as a valid quantity string
 	Timeout string `json:"timeout"`
+	// Router transport protocol
+	Protocol routerConfig.Protocol `json:"protocol"`
 	// Logging configuration for the router
 	LogConfig *LogConfig `json:"log_config"`
 
