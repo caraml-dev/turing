@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/caraml-dev/turing/engines/router"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -512,6 +513,86 @@ func TestRequestBuildRouterVersionNoDefaultRoute(t *testing.T) {
 	rv, err := cfg.BuildRouterVersion(router, defaults, nil, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "", rv.DefaultRouteID)
+}
+
+func TestRequestBuildRouterVersionInvalidTrafficRule(t *testing.T) {
+	defaults := &config.RouterDefaults{
+		Image: "routerimage",
+	}
+	r := &models.Router{
+		ProjectID:       models.ID(1),
+		EnvironmentName: "env",
+		Name:            "router",
+		Status:          "pending",
+	}
+
+	upiProtocol := routerConfig.UPI
+
+	tests := map[string]struct {
+		routerConfig RouterConfig
+		expError     error
+	}{
+		"failed | use payload in UPI_V1 protocol as traffic rule field source": {
+			routerConfig: RouterConfig{
+				Routes: []*models.Route{
+					{
+						ID:       "default",
+						Type:     "PROXY",
+						Endpoint: "endpoint",
+						Timeout:  "6s",
+					},
+				},
+				Protocol:         &upiProtocol,
+				Timeout:          "10s",
+				ExperimentEngine: &ExperimentEngineConfig{Type: "nop"},
+				LogConfig:        &LogConfig{ResultLoggerType: "nop"},
+				TrafficRules: models.TrafficRules{
+					{
+						Name: "invalid-traffic-rule",
+						Conditions: []*router.TrafficRuleCondition{
+							{
+								FieldSource: request.PayloadFieldSource,
+							},
+						},
+					},
+				},
+			},
+			expError: errors.New("invalid field source type in traffic rule index 0, condition index 0 for UPI_V1 protocol: payload"),
+		},
+		"failed | use prediction_context in HTTP_JSON as traffic rule field source": {
+			routerConfig: RouterConfig{
+				Routes: []*models.Route{
+					{
+						ID:       "default",
+						Type:     "PROXY",
+						Endpoint: "endpoint",
+						Timeout:  "6s",
+					},
+				},
+				Timeout:          "10s",
+				ExperimentEngine: &ExperimentEngineConfig{Type: "nop"},
+				LogConfig:        &LogConfig{ResultLoggerType: "nop"},
+				TrafficRules: models.TrafficRules{
+					{
+						Name: "invalid-traffic-rule",
+						Conditions: []*router.TrafficRuleCondition{
+							{
+								FieldSource: request.PredictionContextSource,
+							},
+						},
+					},
+				},
+			},
+			expError: errors.New("invalid field source type in traffic rule index 0, condition index 0 for HTTP_JSON protocol: prediction_context"),
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := test.routerConfig.BuildRouterVersion(r, defaults, nil, nil, nil)
+			assert.Equal(t, test.expError, err)
+		})
+	}
 }
 
 func TestBuildExperimentEngineConfig(t *testing.T) {
