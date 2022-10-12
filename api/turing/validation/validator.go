@@ -16,7 +16,7 @@ import (
 	"github.com/go-playground/validator/v10/non-standard/validators"
 )
 
-var tableRegexString string = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
+var tableRegexString = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
 var trafficRuleNameRegex = regexp.MustCompile(`^[A-Za-z\d][\w\d \-()#$%&:.]{2,62}[\w\d\-()#$%&:.]$`)
 
 // NewValidator creates a new validator using the given defaults

@@ -184,20 +184,6 @@ func (ds *deploymentService) DeployRouterVersion(
 			models.EventStageDeployingDependencies, "successfully deployed fluentd service"))
 	}
 
-	// Deploy experiment engine plugins server
-	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		pluginsServerService := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
-		err = deployK8sService(ctx, controller, pluginsServerService)
-		if err != nil {
-			eventsCh.Write(models.NewErrorEvent(
-				models.EventStageDeployingDependencies, "failed to deploy plugins server: %s", err.Error()))
-			return endpoint, err
-		}
-
-		eventsCh.Write(models.NewInfoEvent(
-			models.EventStageDeployingDependencies, "successfully deployed plugins server"))
-	}
-
 	err = deployKnServices(ctx, controller, services, eventsCh)
 	if err != nil {
 		return endpoint, err
@@ -283,16 +269,12 @@ func (ds *deploymentService) UndeployRouterVersion(
 		}
 	}
 
+	// TODO: Delete this block once all existing routers no longer use the old plugins server service to deploy plugins
 	// Delete experiment engine plugins server
 	if routerVersion.ExperimentEngine.PluginConfig != nil {
-		pluginsServerSvc := ds.svcBuilder.NewPluginsServerService(routerVersion, project)
+		pluginsServerSvc := servicebuilder.NewPluginsServerService(routerVersion, project)
 		err = deleteK8sService(controller, pluginsServerSvc, isCleanUp)
-		if err != nil {
-			eventsCh.Write(
-				models.NewErrorEvent(
-					models.EventStageDeletingDependencies,
-					"failed to delete plugins server: %s", strings.Join(errs, ". ")))
-		} else {
+		if err == nil {
 			eventsCh.Write(models.NewInfoEvent(
 				models.EventStageDeletingDependencies, "successfully deleted plugins server"))
 		}

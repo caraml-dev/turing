@@ -8,12 +8,11 @@ import "encoding/json"
 // used to configure experiment manager/runner
 type EngineConfig struct {
 	PluginBinary        string                 `mapstructure:"plugin_binary"`
-	PluginURL           string                 `mapstructure:"plugin_url"`
 	EngineConfiguration map[string]interface{} `mapstructure:",remain"`
 }
 
 func (c EngineConfig) IsPlugin() bool {
-	return c.PluginBinary != "" || c.PluginURL != ""
+	return c.PluginBinary != ""
 }
 
 func (c EngineConfig) RawEngineConfig() (json.RawMessage, error) {
