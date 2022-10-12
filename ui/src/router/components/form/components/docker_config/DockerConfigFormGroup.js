@@ -52,19 +52,19 @@ export const DockerConfigFormGroup = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
           <ResourcesPanel
             resourcesConfig={dockerConfig.resource_request}
             onChangeHandler={onChange("resource_request")}
             errors={errors.resource_request}
             maxAllowedReplica={maxAllowedReplica}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AutoscalingPolicyPanel
+            autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
+            onChangeHandler={onChange("autoscaling_policy")}
+            errors={errors.autoscaling_policy}
           />
         </EuiFlexItem>
       </Fragment>

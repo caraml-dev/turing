@@ -54,19 +54,19 @@ export const PyFuncConfigFormGroup = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
           <ResourcesPanel
             resourcesConfig={pyfuncConfig.resource_request}
             onChangeHandler={onChange("resource_request")}
             errors={errors.resource_request}
             maxAllowedReplica={maxAllowedReplica}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AutoscalingPolicyPanel
+            autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
+            onChangeHandler={onChange("autoscaling_policy")}
+            errors={errors.autoscaling_policy}
           />
         </EuiFlexItem>
       </Fragment>
