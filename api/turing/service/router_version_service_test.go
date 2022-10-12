@@ -15,9 +15,9 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/google/go-cmp/cmp"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	mock "github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -213,13 +213,13 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, found)
 
-		count := -1
+		var count int64 = -1
 		db.Model(&models.Ensembler{}).Count(&count)
-		assert.Equal(t, 0, count)
+		assert.Equal(t, int64(0), count)
 		// reset count
 		count = -1
 		db.Model(&models.Enricher{}).Count(&count)
-		assert.Equal(t, 0, count)
+		assert.Equal(t, int64(0), count)
 
 		// create router again without ensembler and enricher
 		routerVersion.EnricherID = sql.NullInt32{}

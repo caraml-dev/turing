@@ -5,14 +5,13 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/jinzhu/gorm"
+	pg "gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	// required for gomigrate
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-
-	// enable postgres dialect
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // InitDB initialises a database connection as well as runs the migration scripts.
@@ -26,15 +25,16 @@ func InitDB(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 
 	// Init db
 	db, err := gorm.Open(
-		"postgres",
-		connectionString(cfg),
+		pg.Open(connectionString(cfg)),
+		&gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		},
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start Gorm DB: %s", err)
 	}
 
-	db.LogMode(false)
 	return db, nil
 }
 

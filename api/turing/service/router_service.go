@@ -8,7 +8,8 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // RoutersService is the data access object for the Routers from the db.
@@ -90,13 +91,9 @@ func (service *routersService) ListRouters(projectID models.ID, environmentName 
 }
 
 func (service *routersService) Save(router *models.Router) (*models.Router, error) {
-	var err error
-	if service.db.NewRecord(router) {
-		err = service.db.Create(router).Error
-	} else {
-		err = service.db.Save(router).Error
-	}
-	if err != nil {
+	if err := service.db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(router).Error; err != nil {
 		return nil, err
 	}
 	return service.FindByID(router.ID)

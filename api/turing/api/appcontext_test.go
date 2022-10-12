@@ -17,9 +17,9 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
+	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // EnsemblersService is the data access object for the Ensemblers from the db.
@@ -63,8 +63,7 @@ func (service *ensemblersService) FindByID(
 
 func (service *ensemblersService) List(options EnsemblersListOptions) (*PaginatedResults, error) {
 	var results []*models.GenericEnsembler
-	var count int
-	done := make(chan bool, 1)
+	var count int64
 
 	query := service.db
 	if options.ProjectID != nil {
@@ -79,21 +78,16 @@ func (service *ensemblersService) List(options EnsemblersListOptions) (*Paginate
 		query = query.Where("type = ?", options.EnsemblerType)
 	}
 
-	go func() {
-		query.Model(&results).Count(&count)
-		done <- true
-	}()
-
+	query.Model(&results).Count(&count)
 	result := query.
 		Scopes(PaginationScope(options.PaginationOptions)).
 		Find(&results)
-	<-done
 
 	if err := result.Error; err != nil {
 		return nil, err
 	}
 
-	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
+	paginatedResults := createPaginatedResults(options.PaginationOptions, int(count), results)
 	return paginatedResults, nil
 }
 

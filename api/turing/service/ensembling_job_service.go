@@ -15,7 +15,7 @@ import (
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 const (
@@ -167,8 +167,7 @@ func (s *ensemblingJobService) FindByID(
 
 func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*PaginatedResults, error) {
 	var results []*models.EnsemblingJob
-	var count int
-	done := make(chan bool, 1)
+	var count int64
 
 	query := s.db
 	if options.ProjectID != nil {
@@ -195,15 +194,10 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		query = query.Where("updated_at < ?", options.UpdatedAtBefore)
 	}
 
-	go func() {
-		query.Model(&results).Count(&count)
-		done <- true
-	}()
-
+	query.Model(&results).Count(&count)
 	result := query.
 		Scopes(PaginationScope(options.PaginationOptions)).
 		Find(&results)
-	<-done
 
 	if err := result.Error; err != nil {
 		return nil, err
@@ -222,7 +216,7 @@ func (s *ensemblingJobService) List(options EnsemblingJobListOptions) (*Paginate
 		r.MonitoringURL = url
 	}
 
-	paginatedResults := createPaginatedResults(options.PaginationOptions, count, results)
+	paginatedResults := createPaginatedResults(options.PaginationOptions, int(count), results)
 	return paginatedResults, nil
 }
 

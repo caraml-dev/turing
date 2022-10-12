@@ -7,8 +7,8 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestEventServiceIntegration(t *testing.T) {

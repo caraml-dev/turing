@@ -7,7 +7,7 @@ import (
 
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 const (
@@ -113,7 +113,9 @@ func (service *routerVersionsService) ListRouterVersionsWithStatus(
 func (service *routerVersionsService) Save(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
 	var err error
 	tx := service.db.Begin()
-	if service.db.NewRecord(routerVersion) {
+	// For create vs update, there is no default gorm API. Upsert will not help for
+	// foreign key associations (enricher / ensembler). So, we naively compare ID==0.
+	if routerVersion.ID == 0 {
 		if routerVersion.Ensembler != nil {
 			if err := tx.Create(routerVersion.Ensembler).Error; err != nil {
 				return nil, err
@@ -223,7 +225,7 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 		return errors.New("router version must have valid primary key to be deleted")
 	}
 
-	var upstreamRefs int
+	var upstreamRefs int64
 	service.db.Table("routers").
 		Where("routers.curr_router_version_id = ?", routerVersion.ID).
 		Count(&upstreamRefs)

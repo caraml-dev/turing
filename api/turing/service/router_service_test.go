@@ -13,9 +13,9 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	mock "github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 func TestRoutersServiceIntegration(t *testing.T) {
@@ -156,14 +156,14 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		found, err = svc.FindByID(router.ID)
 		assert.Error(t, err)
 		assert.Nil(t, found)
-		count := -1
+		var count int64 = -1
 		db.Model(&models.RouterVersion{}).Count(&count)
-		assert.Equal(t, 0, count)
+		assert.Equal(t, int64(0), count)
 		count = -1
 		db.Model(&models.Ensembler{}).Count(&count)
-		assert.Equal(t, 0, count)
+		assert.Equal(t, int64(0), count)
 		count = -1
 		db.Model(&models.Enricher{}).Count(&count)
-		assert.Equal(t, 0, count)
+		assert.Equal(t, int64(0), count)
 	})
 }
