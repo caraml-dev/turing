@@ -67,7 +67,7 @@ export const AutoscalingPolicyPanel = ({
             <EuiSuperSelect
               fullWidth
               options={autoscalingPolicyOptions}
-              valueOfSelected={!!selectedMetric ? selectedMetric.value : ""}
+              valueOfSelected={selectedMetric?.value || ""}
               onChange={onChangeMetric}
               itemLayoutAlign="top"
               hasDividers
