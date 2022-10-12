@@ -295,7 +295,8 @@ func (r RouterConfig) validateTrafficRules(protocol routerConfig.Protocol) error
 		for i, rule := range r.TrafficRules {
 			for j, cond := range rule.Conditions {
 				if cond.FieldSource != request.PayloadFieldSource && cond.FieldSource != request.HeaderFieldSource {
-					return fmt.Errorf("invalid field source type in traffic rule index %d, condition index %d for HTTP_JSON protocol: %s", i, j, cond.FieldSource)
+					return fmt.Errorf("invalid field source type in traffic rule index %d, "+
+						"condition index %d for HTTP_JSON protocol: %s", i, j, cond.FieldSource)
 				}
 			}
 		}
@@ -303,7 +304,8 @@ func (r RouterConfig) validateTrafficRules(protocol routerConfig.Protocol) error
 		for i, rule := range r.TrafficRules {
 			for j, cond := range rule.Conditions {
 				if cond.FieldSource != request.PredictionContextSource && cond.FieldSource != request.HeaderFieldSource {
-					return fmt.Errorf("invalid field source type in traffic rule index %d, condition index %d for UPI_V1 protocol: %s", i, j, cond.FieldSource)
+					return fmt.Errorf("invalid field source type in traffic rule index %d, "+
+						"condition index %d for UPI_V1 protocol: %s", i, j, cond.FieldSource)
 				}
 			}
 		}

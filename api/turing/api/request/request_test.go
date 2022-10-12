@@ -557,7 +557,8 @@ func TestRequestBuildRouterVersionInvalidTrafficRule(t *testing.T) {
 					},
 				},
 			},
-			expError: errors.New("invalid field source type in traffic rule index 0, condition index 0 for UPI_V1 protocol: payload"),
+			expError: errors.New("invalid field source type in traffic rule index 0, " +
+				"condition index 0 for UPI_V1 protocol: payload"),
 		},
 		"failed | use prediction_context in HTTP_JSON as traffic rule field source": {
 			routerConfig: RouterConfig{
@@ -583,7 +584,8 @@ func TestRequestBuildRouterVersionInvalidTrafficRule(t *testing.T) {
 					},
 				},
 			},
-			expError: errors.New("invalid field source type in traffic rule index 0, condition index 0 for HTTP_JSON protocol: prediction_context"),
+			expError: errors.New("invalid field source type in traffic rule index 0, " +
+				"condition index 0 for HTTP_JSON protocol: prediction_context"),
 		},
 	}
 
