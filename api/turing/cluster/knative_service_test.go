@@ -88,7 +88,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 
 	// Expected specs
 	var defaultConcurrency, defaultTrafficPercent int64 = 0, 100
-	var defaultLatestRevision bool = true
+	var defaultLatestRevision = true
 	var timeout int64 = 30
 	defaultRouteSpec := knservingv1.RouteSpec{
 		Traffic: []knservingv1.TrafficTarget{

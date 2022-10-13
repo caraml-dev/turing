@@ -66,7 +66,7 @@ func makeTuringExperimentConfig(clientPasskey string) json.RawMessage {
 	return expEngineConfig
 }
 
-var defaultRouteID string = "default"
+var defaultRouteID = "default"
 var validRouterConfig = RouterConfig{
 	Routes: []*models.Route{
 		{
@@ -642,7 +642,7 @@ func TestDefaultAutoscalingPolicy(t *testing.T) {
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
 
-	var routerConfig RouterConfig = validRouterConfig
+	var routerConfig = validRouterConfig
 	routerConfig.AutoscalingPolicy = nil
 	routerConfig.Enricher.AutoscalingPolicy = nil
 	routerConfig.Ensembler.DockerConfig.AutoscalingPolicy = nil

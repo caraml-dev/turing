@@ -47,6 +47,9 @@ function install_knative {
     kubectl apply \
         -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.0.1}/serving-hpa.yaml"
 
+    kubectl apply \
+        -f knative-configmaps/config-features.yaml
+
     local core_apps=("activator" "autoscaler" "controller" "webhook")
     for app in ${core_apps[@]}; do
         kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m

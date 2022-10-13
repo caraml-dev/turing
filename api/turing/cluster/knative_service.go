@@ -150,6 +150,12 @@ func (cfg *KnativeService) buildSvcSpec(
 		container.ReadinessProbe = cfg.buildContainerProbe(readinessProbeType, int(cfg.ProbePort))
 	}
 
+	// Build initContainer specs if they exist
+	var initContainers []corev1.Container
+	if cfg.InitContainers != nil {
+		initContainers = cfg.buildInitContainer(cfg.InitContainers)
+	}
+
 	return &knservingv1.ServiceSpec{
 		ConfigurationSpec: knservingv1.ConfigurationSpec{
 			Template: knservingv1.RevisionTemplateSpec{
@@ -160,8 +166,9 @@ func (cfg *KnativeService) buildSvcSpec(
 				},
 				Spec: knservingv1.RevisionSpec{
 					PodSpec: corev1.PodSpec{
-						Containers: []corev1.Container{container},
-						Volumes:    cfg.Volumes,
+						Containers:     []corev1.Container{container},
+						Volumes:        cfg.Volumes,
+						InitContainers: initContainers,
 					},
 					TimeoutSeconds: &timeout,
 				},

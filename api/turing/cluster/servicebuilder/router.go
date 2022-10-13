@@ -54,9 +54,11 @@ const (
 	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
 	envRouterProtocol               = "ROUTER_PROTOCOL"
 	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
+	envPluginName                   = "PLUGIN_NAME"
+	envPluginsDir                   = "PLUGINS_DIR"
 )
 
-// router service constants
+// Router service constants
 const (
 	routerPort                               = 8080
 	routerLivenessPath                       = "/v1/internal/live"
@@ -71,7 +73,7 @@ const (
 	routerConfigStrategyTypeFanIn            = "fiber.EnsemblingFanIn"
 	routerConfigStrategyTypeTrafficSplitting = "fiber.TrafficSplittingStrategy"
 
-	routerPluginURLConfigKey = "plugin_url"
+	routerPluginBinaryConfigKey = "plugin_binary"
 )
 
 // Router endpoint constants
@@ -79,6 +81,12 @@ const (
 	defaultIstioGatewayDestination = "istio-ingressgateway.istio-system.svc.cluster.local"
 	// Warning given when using FQDN as Gateway
 	defaultGateway = "knative-serving/knative-ingress-gateway"
+)
+
+// Plugins volume constants
+const (
+	pluginsMountPath  = "/app/plugins"
+	pluginsVolumeName = "plugins-volume"
 )
 
 var defaultMatchURIPrefixes = []string{"/v1/predict", "/v1/batch_predict"}
@@ -109,6 +117,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	volumes, volumeMounts := buildRouterVolumes(routerVersion, configMap.Name, secretName)
 
+	initContainers := buildInitContainers(routerVersion)
+
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
 		sentryEnabled, sentryDSN, secretName, routerVersion)
@@ -129,6 +139,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			ConfigMap:            configMap,
 			Volumes:              volumes,
 			VolumeMounts:         volumeMounts,
+			InitContainers:       initContainers,
 		},
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
@@ -297,6 +308,21 @@ func buildRouterVolumes(
 		MountPath: routerConfigMapMountPath,
 	})
 
+	// Set up volume and volume mount if experiment engine plugin is set
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		volumes = append(volumes, corev1.Volume{
+			Name: pluginsVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      pluginsVolumeName,
+			MountPath: pluginsMountPath,
+		})
+	}
+
 	// Service account
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		volumes = append(volumes, corev1.Volume{
@@ -319,6 +345,37 @@ func buildRouterVolumes(
 		})
 	}
 	return volumes, volumeMounts
+}
+
+func buildInitContainers(routerVersion *models.RouterVersion) []cluster.Container {
+	// Set up initContainer if experiment engine plugin is set
+	var initContainers []cluster.Container
+	if routerVersion.ExperimentEngine.PluginConfig != nil {
+		initContainers = make([]cluster.Container, 0)
+		pluginContainer := cluster.Container{
+			Name:  fmt.Sprintf("%s-plugin", routerVersion.ExperimentEngine.Type),
+			Image: routerVersion.ExperimentEngine.PluginConfig.Image,
+			Envs: []cluster.Env{
+				{
+					Name:  envPluginName,
+					Value: routerVersion.ExperimentEngine.Type,
+				},
+				{
+					Name:  envPluginsDir,
+					Value: pluginsMountPath,
+				},
+			},
+			VolumeMounts: []cluster.VolumeMount{
+				{
+					Name:      pluginsVolumeName,
+					MountPath: pluginsMountPath,
+				},
+			},
+		}
+		initContainers = append(initContainers, pluginContainer)
+	}
+
+	return initContainers
 }
 
 func buildTrafficSplittingFiberConfig(
@@ -491,11 +548,11 @@ func buildFiberConfigMap(
 		// Tell router, that the experiment runner is implemented as RPC plugin
 		if ver.ExperimentEngine.PluginConfig != nil {
 			var err error
-			pluginURL := fmt.Sprintf(
-				"%s/%s", buildPluginsServerServingPath(ver, project.Name), ver.ExperimentEngine.Type)
+			pluginBinary := fmt.Sprintf(
+				"%s/%s", pluginsMountPath, ver.ExperimentEngine.Type)
 			expEngineProps, err = utils.MergeJSON(
 				expEngineProps,
-				map[string]interface{}{routerPluginURLConfigKey: pluginURL},
+				map[string]interface{}{routerPluginBinaryConfigKey: pluginBinary},
 			)
 			if err != nil {
 				return nil, err

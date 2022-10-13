@@ -85,10 +85,6 @@ type ClusterServiceBuilder interface {
 		secretName string,
 		fluentdConfig *config.FluentdConfig,
 	) *cluster.KubernetesService
-	NewPluginsServerService(
-		routerVersion *models.RouterVersion,
-		project *mlp.Project,
-	) *cluster.KubernetesService
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
