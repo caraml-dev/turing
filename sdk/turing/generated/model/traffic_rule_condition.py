@@ -115,7 +115,7 @@ class TrafficRuleCondition(ModelNormal):
 
         Args:
             field_source (FieldSource):
-            field (str): If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `payload`, then `field` should be a valid json path 
+            field (str): For HTTP_JSON protocol, the valid `field_source` are `header` and `payload`. Whereas, for UPIV1 protocol the valid `field_source` are `header` and `prediction_context` If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `payload`, then `field` should be a valid json path. If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `prediction_context`, then `field` should contains variable name. 
             values ([str]):
 
         Keyword Args:
