@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -17,8 +18,6 @@ import (
 	fiberErrors "github.com/gojek/fiber/errors"
 	fibergrpc "github.com/gojek/fiber/grpc"
 	fiberHttp "github.com/gojek/fiber/http"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -95,9 +94,13 @@ func TestNewMissionControlUpi(t *testing.T) {
 				ctx := context.Background()
 				ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
 
-				res, err := got.Route(ctx, &fibergrpc.Request{
-					Message: []byte{},
-				})
+				res, err := got.Route(ctx,
+					&upi.Request{
+						Request: &fibergrpc.Request{
+							Message: []byte{},
+						},
+						RequestProto: nil,
+					})
 				require.Nil(t, err)
 				require.NotNil(t, res)
 
@@ -162,16 +165,6 @@ func Test_missionControlUpi_Route(t *testing.T) {
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte("dummy res"))),
 				})),
 		},
-		{
-			name: "error wrong response payload type",
-			expectedErr: &errors.TuringError{
-				Code:    14,
-				Message: "unable to unmarshal into expected response proto",
-			},
-			mockReturn: fiber.NewResponseQueueFromResponses(&fibergrpc.Response{
-				Message: []byte("test"),
-			}),
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -181,11 +174,14 @@ func Test_missionControlUpi_Route(t *testing.T) {
 			ctx := context.Background()
 			ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
 
+			var err error
 			got, err := mc.Route(ctx, &fibergrpc.Request{})
 			if tt.expectedErr != nil {
 				require.Equal(t, tt.expectedErr, err)
 			} else {
-				require.True(t, compareUpiResponse(got, tt.expected), "response not equal to expected")
+				responseProto := &upiv1.PredictValuesResponse{}
+				require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
+				require.True(t, testutils.CompareUpiResponse(responseProto, tt.expected), "response not equal to expected")
 			}
 		})
 	}
@@ -237,21 +233,10 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
 			got, err := mc.Route(ctx, tt.request)
 			require.Nil(t, err)
-			diff := compareUpiResponse(got, tt.compareAgainst)
+			responseProto := &upiv1.PredictValuesResponse{}
+			require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
+			diff := testutils.CompareUpiResponse(responseProto, tt.compareAgainst)
 			require.Equal(t, tt.expectedEqual, diff, "Comparison result not expected")
 		})
 	}
-}
-
-func compareUpiResponse(x *upiv1.PredictValuesResponse, y *upiv1.PredictValuesResponse) bool {
-	return cmp.Equal(x, y,
-		cmpopts.IgnoreUnexported(
-			upiv1.PredictValuesResponse{},
-			upiv1.Table{},
-			upiv1.Column{},
-			upiv1.Row{},
-			upiv1.Value{},
-			upiv1.Variable{},
-			upiv1.ResponseMetadata{},
-		))
 }

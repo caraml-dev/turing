@@ -3,6 +3,7 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,12 +12,11 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberProtocol "github.com/gojek/fiber/protocol"
-	"google.golang.org/protobuf/proto"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a
@@ -58,20 +58,23 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		fallbacks = append(fallbacks, defRoute)
 	}
 
-	//TODO revisit unmarshalling, as its done too many times across Turing
 	var payload []byte
 	httpHeader := http.Header{}
-	if req.Protocol() == fiberProtocol.HTTP {
+
+	switch req.Protocol() {
+
+	case fiberProtocol.HTTP:
 		payload = req.Payload()
 		httpHeader = req.Header()
-	} else {
-		var upiPayload upiv1.PredictValuesRequest
-		if err := proto.Unmarshal(req.Payload(), &upiPayload); err != nil {
-			log.Glob().Errorf("failed unmarshalling into UPI request: %s", err)
+	case fiberProtocol.GRPC:
+		upiRequest, ok := req.(*upi.Request)
+		if !ok {
+			err := fmt.Errorf("failed to convert into UPI request")
+			log.Glob().Error(err.Error())
 			return nil, nil, err
 		}
 
-		predContext, err := request.UPIVariablesToStringMap(upiPayload.PredictionContext)
+		predContext, err := request.UPIVariablesToStringMap(upiRequest.RequestProto.PredictionContext)
 		if err != nil {
 			log.Glob().Errorf("failed converting prediction context into string map: %s", err)
 			return nil, nil, err
@@ -82,6 +85,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 			log.Glob().Errorf("failed marshalling prediction context into payload: %s", err)
 			return nil, nil, err
 		}
+
 		for k, v := range req.Header() {
 			// this is required instead of using req.header(), because grpc headers are lowercase using http2 transport
 			// http headers are transformed into canonical case, using httpheader.set, to call experiment engine in http1
