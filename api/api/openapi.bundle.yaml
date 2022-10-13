@@ -2511,7 +2511,9 @@ components:
           $ref: '#/components/schemas/FieldSource'
         field:
           description: |
-            If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `payload`, then `field` should be a valid json path
+            For HTTP_JSON protocol, the valid `field_source` are `header` and `payload`. Whereas, for UPIV1 protocol the valid `field_source` are `header` and `prediction_context`
+            If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `payload`, then `field` should be a valid json path.
+            If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `prediction_context`, then `field` should contains variable name.
           type: string
         operator:
           enum:
@@ -3281,6 +3283,7 @@ components:
       enum:
       - header
       - payload
+      - prediction_context
       type: string
     EnsemblersPaginatedResults_allOf:
       properties:
