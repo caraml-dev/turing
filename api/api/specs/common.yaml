@@ -22,6 +22,7 @@ components:
       enum:
         - "header"
         - "payload"
+        - "prediction_context"
 
     EnvVar:
       type: "object"

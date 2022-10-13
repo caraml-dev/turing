@@ -124,6 +124,7 @@ func (r RouterConfig) BuildRouterVersion(
 	if r.DefaultRouteID != nil {
 		defaultRouteID = *r.DefaultRouteID
 	}
+
 	// Set default to http
 	routerProtocol := routerConfig.HTTP
 	if r.Protocol != nil {
@@ -132,6 +133,7 @@ func (r RouterConfig) BuildRouterVersion(
 	if routerProtocol != routerConfig.UPI && routerProtocol != routerConfig.HTTP {
 		return nil, errors.New("invalid router protocol")
 	}
+
 	rv = &models.RouterVersion{
 		RouterID:           router.ID,
 		Router:             router,

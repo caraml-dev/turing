@@ -276,6 +276,7 @@ func TestValidateExperimentEngineConfig(t *testing.T) {
 }
 
 type routerConfigTestCase struct {
+	protocol           routerConfig.Protocol
 	routes             models.Routes
 	enricher           *request.EnricherEnsemblerConfig
 	ensembler          *models.Ensembler
@@ -286,8 +287,7 @@ type routerConfigTestCase struct {
 	expectedError      string
 }
 
-func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
-	routerProtocol := routerConfig.HTTP
+func (tt routerConfigTestCase) RouterConfig(protocol routerConfig.Protocol) *request.RouterConfig {
 	return &request.RouterConfig{
 		Routes:             tt.routes,
 		DefaultRouteID:     tt.defaultRouteID,
@@ -298,7 +298,7 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 			Type: "nop",
 		},
 		Timeout:  "20s",
-		Protocol: &routerProtocol,
+		Protocol: &protocol,
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},
@@ -527,7 +527,8 @@ func TestValidateTrafficRules(t *testing.T) {
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Operator' " +
 				"Error:Field validation for 'Operator' failed on the 'required' tag",
 		},
-		"failure | unsupported field source": {
+		"failure : unsupported field source for UPI": {
+			protocol:           routerConfig.UPI,
 			routes:             models.Routes{routeA, routeB},
 			defaultRouteID:     &routeAID,
 			defaultTrafficRule: defaultTrafficRule,
@@ -536,7 +537,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Name: ruleName,
 					Conditions: []*router.TrafficRuleCondition{
 						{
-							FieldSource: "unknown",
+							FieldSource: expRequest.PayloadFieldSource,
 							Field:       "X-Region",
 							Operator:    router.InConditionOperator,
 							Values:      []string{"region-b"},
@@ -545,8 +546,30 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
-			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' " +
-				"Error:Field validation for 'FieldSource' failed on the 'oneof' tag",
+			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' Error:Field validation for " +
+				"'TrafficRules[0].Conditions[0].FieldSource' failed on the 'oneof' tag",
+		},
+		"failure : unsupported field source for HTTP": {
+			protocol:           routerConfig.HTTP,
+			routes:             models.Routes{routeA, routeB},
+			defaultRouteID:     &routeAID,
+			defaultTrafficRule: defaultTrafficRule,
+			trafficRules: models.TrafficRules{
+				{
+					Name: ruleName,
+					Conditions: []*router.TrafficRuleCondition{
+						{
+							FieldSource: expRequest.PredictionContextSource,
+							Field:       "X-Region",
+							Operator:    router.InConditionOperator,
+							Values:      []string{"region-b"},
+						},
+					},
+					Routes: []string{routeAID, routeBID},
+				},
+			},
+			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' Error:Field validation for " +
+				"'TrafficRules[0].Conditions[0].FieldSource' failed on the 'oneof' tag",
 		},
 		"failure | incomplete condition": {
 			routes:             models.Routes{routeA, routeB},
@@ -930,7 +953,7 @@ func TestValidateTrafficRules(t *testing.T) {
 			validate, err := validation.NewValidator(mockExperimentsService)
 			require.NoError(t, err)
 
-			err = validate.Struct(tt.RouterConfig())
+			err = validate.Struct(tt.RouterConfig(tt.protocol))
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 			} else {
@@ -1074,7 +1097,7 @@ func TestValidateAutoscaling(t *testing.T) {
 			validate, err := validation.NewValidator(mockExperimentsService)
 			require.NoError(t, err)
 
-			err = validate.Struct(tt.RouterConfig())
+			err = validate.Struct(tt.RouterConfig(tt.protocol))
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 			} else {

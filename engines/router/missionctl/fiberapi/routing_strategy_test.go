@@ -3,14 +3,13 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"testing"
 
 	"bou.ke/monkey"
 	runnerV1 "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
+	testutils2 "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/gojek/fiber"
 	fiberHttp "github.com/gojek/fiber/http"
@@ -163,7 +162,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			},
 			expectedRoute: fiber.NewProxy(
 				fiber.NewBackend("route-A", ""),
-				tfu.NewFiberCallerWithHTTPDispatcher(t, "route-A"),
+				testutils2.NewFiberCaller(t, "route-A"),
 			),
 			expectedFallbacks: []fiber.Component{},
 		},
@@ -177,7 +176,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			routeNamePath: "route_name",
 			expectedRoute: fiber.NewProxy(
 				fiber.NewBackend("route-A", ""),
-				tfu.NewFiberCallerWithHTTPDispatcher(t, "route-A"),
+				testutils2.NewFiberCaller(t, "route-A"),
 			),
 			expectedFallbacks: []fiber.Component{},
 		},
@@ -196,7 +195,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("control", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+					testutils2.NewFiberCaller(t, "control"),
 				),
 			},
 		},
@@ -214,7 +213,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("control", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+					testutils2.NewFiberCaller(t, "control"),
 				),
 			},
 		},
@@ -231,7 +230,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("control", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+					testutils2.NewFiberCaller(t, "control"),
 				),
 			},
 		},
@@ -242,7 +241,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("control", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+					testutils2.NewFiberCaller(t, "control"),
 				),
 			},
 		},
@@ -258,7 +257,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("route-B", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "route-B"),
+					testutils2.NewFiberCaller(t, "route-B"),
 				),
 			},
 		},
@@ -276,7 +275,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			expectedFallbacks: []fiber.Component{
 				fiber.NewProxy(
 					fiber.NewBackend("control", ""),
-					tfu.NewFiberCallerWithHTTPDispatcher(t, "control"),
+					testutils2.NewFiberCaller(t, "control"),
 				),
 			},
 		},
@@ -295,7 +294,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			// Test SelectRoute
 			strategy := DefaultTuringRoutingStrategy{
 				&experimentationPolicy{
-					experimentEngine: tfu.MockExperimentRunner{
+					experimentEngine: testutils2.MockExperimentRunner{
 						Treatment: &data.treatment,
 						WantErr:   data.experimentRunnerWantErr,
 					},
@@ -322,15 +321,7 @@ func makeTestRoutes(t *testing.T, names ...string) map[string]fiber.Component {
 
 	for _, n := range names {
 		b := fiber.NewBackend(n, "")
-		httpDispatcher, err := fiberHttp.NewDispatcher(http.DefaultClient)
-		if err != nil {
-			t.Fatal(err)
-		}
-		caller, err := fiber.NewCaller(n, httpDispatcher)
-		if err != nil {
-			t.Fatal(err)
-		}
-		routes[n] = fiber.NewProxy(b, caller)
+		routes[n] = fiber.NewProxy(b, testutils2.NewFiberCaller(t, n))
 	}
 	return routes
 }

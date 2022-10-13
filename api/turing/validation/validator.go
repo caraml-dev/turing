@@ -6,11 +6,13 @@ import (
 	"regexp"
 	"strings"
 
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/golang-collections/collections/set"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	expRequest "github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
@@ -285,48 +287,48 @@ func validateConditionOrthogonality(
 }
 
 func validateRouterConfig(sl validator.StructLevel) {
-	routerConfig := sl.Current().Interface().(request.RouterConfig)
+	router := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
 
-	routeIds := make([]string, len(routerConfig.Routes))
-	for idx, route := range routerConfig.Routes {
+	routeIds := make([]string, len(router.Routes))
+	for idx, route := range router.Routes {
 		routeIds[idx] = route.ID
 	}
 	routeIdsStr := strings.Join(routeIds, " ")
 
 	// Validate default route
-	if routerConfig.Ensembler == nil || routerConfig.Ensembler.Type == models.EnsemblerStandardType {
-		if routerConfig.DefaultRouteID == nil {
-			sl.ReportError(routerConfig.DefaultRouteID, "default_route_id", "DefaultRouteID",
+	if router.Ensembler == nil || router.Ensembler.Type == models.EnsemblerStandardType {
+		if router.DefaultRouteID == nil {
+			sl.ReportError(router.DefaultRouteID, "default_route_id", "DefaultRouteID",
 				"should be set for chosen ensembler type", "")
 		} else {
-			if err := instance.Var(*routerConfig.DefaultRouteID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+			if err := instance.Var(*router.DefaultRouteID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
 				ns := "DefaultRouteID"
 				sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 			}
 		}
-	} else if routerConfig.DefaultRouteID != nil && *routerConfig.DefaultRouteID != "" {
-		sl.ReportError(routerConfig.DefaultRouteID, "default_route_id", "DefaultRouteID",
-			"should not be set for chosen ensembler type", *routerConfig.DefaultRouteID)
+	} else if router.DefaultRouteID != nil && *router.DefaultRouteID != "" {
+		sl.ReportError(router.DefaultRouteID, "default_route_id", "DefaultRouteID",
+			"should not be set for chosen ensembler type", *router.DefaultRouteID)
 	}
 
 	// Validate traffic rules
 	allRuleRoutesSet := set.New()
-	if routerConfig.TrafficRules != nil {
-		if len(routerConfig.TrafficRules) > 0 {
-			checkDefaultTrafficRule(sl, "DefaultTrafficRule", routerConfig.DefaultTrafficRule)
-			if routerConfig.DefaultTrafficRule != nil {
-				allRules := append(routerConfig.TrafficRules, &models.TrafficRule{
+	if router.TrafficRules != nil {
+		if len(router.TrafficRules) > 0 {
+			checkDefaultTrafficRule(sl, "DefaultTrafficRule", router.DefaultTrafficRule)
+			if router.DefaultTrafficRule != nil {
+				allRules := append(router.TrafficRules, &models.TrafficRule{
 					Name:   "default-traffic-rule",
-					Routes: routerConfig.DefaultTrafficRule.Routes,
+					Routes: router.DefaultTrafficRule.Routes,
 				})
-				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, routerConfig.DefaultRouteID)
-				for _, route := range routerConfig.DefaultTrafficRule.Routes {
+				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, router.DefaultRouteID)
+				for _, route := range router.DefaultTrafficRule.Routes {
 					allRuleRoutesSet.Insert(route)
 				}
 			}
 		}
-		for ruleIdx, rule := range routerConfig.TrafficRules {
+		for ruleIdx, rule := range router.TrafficRules {
 			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
 			if rule.Routes != nil {
 				for idx, routeID := range rule.Routes {
@@ -337,12 +339,32 @@ func validateRouterConfig(sl validator.StructLevel) {
 					}
 				}
 			}
+
+			if rule.Conditions != nil {
+				// validate the field source of traffic rules are valid for given protocol
+				allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
+					string(expRequest.PayloadFieldSource)}
+				if *router.Protocol == routerConfig.UPI {
+					allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
+						string(expRequest.PredictionContextSource)}
+				}
+				allowedFieldSourceStr := strings.Join(allowedFieldSource, " ")
+
+				for condIdx, cond := range rule.Conditions {
+					ns := fmt.Sprintf("TrafficRules[%d].Conditions[%d].FieldSource", ruleIdx, condIdx)
+					err := instance.Var(cond.FieldSource, fmt.Sprintf("oneof=%s", allowedFieldSourceStr))
+					if err != nil {
+						sl.ReportError(router.TrafficRules[ruleIdx].Conditions[condIdx].FieldSource, ns,
+							"FieldSource", "oneof", "")
+					}
+				}
+			}
 		}
 	}
 
 	// Validate dangling routes and traffic rules orthogonality checks
-	if routerConfig.TrafficRules != nil && len(routerConfig.TrafficRules) > 0 {
-		checkDanglingRoutes(sl, "Routes", routerConfig.Routes, allRuleRoutesSet)
-		validateConditionOrthogonality(sl, "TrafficRules", routerConfig.TrafficRules)
+	if router.TrafficRules != nil && len(router.TrafficRules) > 0 {
+		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
+		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}
 }
