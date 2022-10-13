@@ -23,13 +23,13 @@ def test_deploy_router_upi():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            endpoint=f'{os.getenv("MOCKSERVER_UPI_CONTROL_ENDPOINT")}',
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            endpoint=f'{os.getenv("MOCKSERVER_UPI_A_ENDPOINT")}',
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),

@@ -134,7 +134,9 @@ Now run E2E tests.
 ```
 TEST_ID=$(date +%Y%m%d%H%M) \
 MOCKSERVER_HTTP_ENDPOINT=http://mockserver \
-MOCKSERVER_UPI_ENDPOINT: mockserver-upi:80 \
+ MOCKSERVER_UPI_CONTROL: mockserver-upi-control:80 \
+MOCKSERVER_UPI_A_ENDPOINT: mockserver-upi-a:80 \
+MOCKSERVER_UPI_B_ENDPOINT: mockserver-upi-b:80 \
 API_BASE_PATH=http://localhost:8080/v1 \
 MODEL_CLUSTER_NAME="dev" \
 PROJECT_ID="1" \

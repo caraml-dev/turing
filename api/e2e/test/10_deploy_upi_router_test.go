@@ -30,7 +30,7 @@ func TestUPIRouter(t *testing.T) {
 	withDeployedRouter(t, data,
 		func(router *models.Router) {
 			t.Log("Testing router endpoint: " + router.Endpoint)
-			t.Log("Route Endpoint: " + globalTestContext.MockserverUPIEndpoint)
+			t.Log("Route Endpoint: " + globalTestContext.MockserverUPIControlEndpoint)
 			expectedEndpoint := fmt.Sprintf(
 				"%s-turing-router.%s.%s:80",
 				router.Name,
@@ -66,7 +66,7 @@ func TestUPIRouter(t *testing.T) {
 			assert.NoError(t, err)
 			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
 			assert.Equal(t, upiRequest.PredictionTable.String(), r.GetPredictionResultTable().String())
-			assert.NotNil(t, r.GetMetadata())
+			assert.Equal(t, r.GetMetadata().GetModels()[0].Name, "control")
 			t.Log(r.String())
 		},
 		nil,
