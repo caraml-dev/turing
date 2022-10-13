@@ -1,0 +1,72 @@
+{
+    "environment_name": "{{.DeploymentEnvironment}}",
+    "name": "e2e-experiment-upi-{{.TestID}}",
+    "config": {
+        "routes": [
+            {
+                "id": "control",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverUPIControlEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            },
+            {
+                "id": "treatment-a",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverUPIAEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            },
+            {
+                "id": "treatment-b",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverUPIBEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            }
+        ],
+        "default_traffic_rule": {
+            "routes": ["control"]
+        },
+        "rules": [
+            {
+                "name": "rule-1",
+                "conditions": [
+                    {
+                        "field_source": "header",
+                        "field": "region",
+                        "operator": "in",
+                        "values": ["region-a"]
+                    }
+                ],
+                "routes": ["treatment-a"]
+            },
+            {
+                "name": "rule-2",
+                "conditions": [
+                    {
+                        "field_source": "prediction_context",
+                        "field": "service_type",
+                        "operator": "in",
+                        "values": ["service-type-b"]
+                    }
+                ],
+                "routes": ["treatment-b"]
+            }
+        ],
+        "experiment_engine": {
+            "type": "nop"
+        },
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 1,
+            "cpu_request": "20m",
+            "memory_request": "250Mi"
+        },
+        "timeout": "5s",
+        "protocol": "UPI_V1",
+        "log_config": {
+            "result_logger_type": "nop"
+        }
+    }
+}
