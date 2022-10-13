@@ -11,9 +11,9 @@ type testStructType struct {
 	Number int
 }
 
-var testStruct testStructType = testStructType{
+var testStruct = testStructType{
 	Name:   "string_val",
-	Number: int(10),
+	Number: 10,
 }
 
 func TestGetStructFieldValues(t *testing.T) {

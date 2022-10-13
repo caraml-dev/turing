@@ -106,7 +106,7 @@ func (t *baseTracer) newOrChildSpan(
 }
 
 // globalTracer is initialised to a Nop tracer, calling InitGlobalTracer will reset this
-var globalTracer Tracer = newNopTracer()
+var globalTracer = newNopTracer()
 
 // InitGlobalTracer creates a new Jaeger tracer, and sets it as global tracer.
 func InitGlobalTracer(name string, jaegerCfg *config.JaegerConfig) (io.Closer, error) {
