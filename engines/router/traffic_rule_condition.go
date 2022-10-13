@@ -23,7 +23,7 @@ func (c *TrafficRuleCondition) TestRequest(req fiber.Request) (bool, error) {
 	reqHeader := req.Header()
 	bodyBytes := req.Payload()
 
-	fieldValue, err := request.GetValueFromRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
+	fieldValue, err := request.GetValueFromHTTPRequest(reqHeader, bodyBytes, c.FieldSource, c.Field)
 	if err != nil {
 		return false, err
 	}

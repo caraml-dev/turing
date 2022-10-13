@@ -37,7 +37,7 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 	return "", fmt.Errorf("Unknown field source %s", srcString)
 }
 
-// GetValueFromRequest parses the request header / payload to retrieve the value
+// GetValueFromHTTPRequest parses the request header / payload to retrieve the value
 // for the given field
 //
 // reqHeader - request header
@@ -50,7 +50,7 @@ func GetFieldSource(srcString string) (FieldSource, error) {
 //
 //			   if `fieldSrc` is `PayloadFieldSource` - json path to the value that should
 //	        be extracted from the request payload
-func GetValueFromRequest(
+func GetValueFromHTTPRequest(
 	reqHeader http.Header,
 	bodyBytes []byte,
 	fieldSrc FieldSource,
