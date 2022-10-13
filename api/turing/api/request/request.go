@@ -134,11 +134,6 @@ func (r RouterConfig) BuildRouterVersion(
 		return nil, errors.New("invalid router protocol")
 	}
 
-	err = r.validateTrafficRules(routerProtocol)
-	if err != nil {
-		return nil, err
-	}
-
 	rv = &models.RouterVersion{
 		RouterID:           router.ID,
 		Router:             router,
