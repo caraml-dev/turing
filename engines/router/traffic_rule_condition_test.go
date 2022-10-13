@@ -220,7 +220,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			r, err := fiberHttp.NewHTTPRequest(&http.Request{
+			r, _ := fiberHttp.NewHTTPRequest(&http.Request{
 				Header: tt.header,
 				Body:   ioutil.NopCloser(strings.NewReader(tt.payload)),
 			})
