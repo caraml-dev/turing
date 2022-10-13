@@ -123,7 +123,7 @@ spec:
           ports:
             - containerPort: 50051
           command: ["/upi-echo-server"]
-          args: ["--model-name", "mockserver-upi-a"]
+          args: ["--model-name", "treatment-a"]
           resources:
             requests:
               cpu: "20m"
@@ -164,7 +164,7 @@ spec:
           ports:
             - containerPort: 50051
           command: ["/upi-echo-server"]
-          args: ["--model-name", "mockserver-upi-b"]
+          args: ["--model-name", "treatment-b"]
           resources:
             requests:
               cpu: "20m"
@@ -205,7 +205,7 @@ spec:
           ports:
             - containerPort: 50051
           command: ["/upi-echo-server"]
-          args: ["--model-name", "mockserver-upi-control"]
+          args: ["--model-name", "control"]
           resources:
             requests:
               cpu: "20m"

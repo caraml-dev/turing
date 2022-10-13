@@ -66,7 +66,7 @@ func TestUPIRouter(t *testing.T) {
 			assert.NoError(t, err)
 			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
 			assert.Equal(t, upiRequest.PredictionTable.String(), r.GetPredictionResultTable().String())
-			assert.Equal(t, r.GetMetadata().GetModels()[0].Name, "mockserver-upi-control")
+			assert.Equal(t, r.GetMetadata().GetModels()[0].Name, "control")
 			t.Log(r.String())
 		},
 		nil,
