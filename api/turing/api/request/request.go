@@ -9,7 +9,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
@@ -286,32 +285,6 @@ func (r RouterConfig) BuildExperimentEngineConfig(
 
 	// Custom experiment manager config, return as is.
 	return rawExpConfig, nil
-}
-
-// validateTrafficRules validates if the traffic rules is valid for given protocol
-func (r RouterConfig) validateTrafficRules(protocol routerConfig.Protocol) error {
-	switch protocol {
-	case routerConfig.HTTP:
-		for i, rule := range r.TrafficRules {
-			for j, cond := range rule.Conditions {
-				if cond.FieldSource != request.PayloadFieldSource && cond.FieldSource != request.HeaderFieldSource {
-					return fmt.Errorf("invalid field source type in traffic rule index %d, "+
-						"condition index %d for HTTP_JSON protocol: %s", i, j, cond.FieldSource)
-				}
-			}
-		}
-	case routerConfig.UPI:
-		for i, rule := range r.TrafficRules {
-			for j, cond := range rule.Conditions {
-				if cond.FieldSource != request.PredictionContextSource && cond.FieldSource != request.HeaderFieldSource {
-					return fmt.Errorf("invalid field source type in traffic rule index %d, "+
-						"condition index %d for UPI_V1 protocol: %s", i, j, cond.FieldSource)
-				}
-			}
-		}
-	}
-
-	return nil
 }
 
 // getAutoscalingPolicyOrDefault applies the default autoscaling policy that has been used all along, prior to

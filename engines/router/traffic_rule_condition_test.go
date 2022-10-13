@@ -2,13 +2,15 @@ package router_test
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
-	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/testutils"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
@@ -218,7 +220,12 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			actual, err := tt.condition.TestRequest(tfu.NewHTTPFiberRequest(t, tt.header, tt.payload))
+			r, err := fiberHttp.NewHTTPRequest(&http.Request{
+				Header: tt.header,
+				Body:   ioutil.NopCloser(strings.NewReader(tt.payload)),
+			})
+
+			actual, err := tt.condition.TestRequest(r)
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 				require.Equal(t, tt.expected, actual)
