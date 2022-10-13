@@ -82,6 +82,7 @@ func TestEndToEnd(t *testing.T) {
 	t.Run("TestTrafficRules", func(t *testing.T) {
 		t.Parallel()
 		t.Run("DeployRouter", TestDeployRouterWithTrafficRules)
+		t.Run("DeployRouter_Upi", TestDeployUPIRouterWithTrafficRules)
 	})
 	t.Run("TestStandardEnsembler", func(t *testing.T) {
 		t.Parallel()
