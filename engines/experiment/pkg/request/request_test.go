@@ -24,7 +24,7 @@ func TestGetFieldSource(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetValueFromRequest(t *testing.T) {
+func TestGetValueFromHTTPRequest(t *testing.T) {
 	tests := map[string]struct {
 		field    string
 		fieldSrc request.FieldSource
@@ -105,7 +105,7 @@ func TestGetValueFromRequest(t *testing.T) {
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			val, err := request.GetValueFromRequest(data.header, data.body, data.fieldSrc, data.field)
+			val, err := request.GetValueFromHTTPRequest(data.header, data.body, data.fieldSrc, data.field)
 			assert.Equal(t, data.expected, val)
 			// Check error
 			if data.err != "" {
