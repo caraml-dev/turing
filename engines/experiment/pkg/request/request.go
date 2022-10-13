@@ -91,7 +91,7 @@ func GetValueFromUPIRequest(
 			return "", fmt.Errorf("Field %s not found in the request header", field)
 		}
 
-		// return first value to be consistent with `GetValueFromRequest`
+		// return first value to be consistent with `GetValueFromHTTPRequest`
 		return values[0], nil
 	case PredictionContextSource:
 		predContext, err := variablesToStringMap(req.PredictionContext)

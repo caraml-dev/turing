@@ -3,11 +3,12 @@ package hardcoded
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"sort"
+
 	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/utils"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"net/http"
-	"sort"
 )
 
 type ExperimentRunner struct {
@@ -46,7 +47,7 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 	_ runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	for _, exp := range e.experiments {
-		segmentationUnit, err := request.GetValueFromRequest(
+		segmentationUnit, err := request.GetValueFromHTTPRequest(
 			header,
 			payload,
 			exp.SegmentationConfig.SegmenterSource,
