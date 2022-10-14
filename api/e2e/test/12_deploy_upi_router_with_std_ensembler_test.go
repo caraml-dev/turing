@@ -29,7 +29,7 @@ func TestDeployUPIRouterWithStandardEnsembler(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
 	data := makeRouterPayload(
-		filepath.Join("testdata", "create_router_with_std_ensembler.json.tmpl"),
+		filepath.Join("testdata", "create_router_upi_with_std_ensembler.json.tmpl"),
 		globalTestContext)
 
 	withDeployedRouter(t, data,
