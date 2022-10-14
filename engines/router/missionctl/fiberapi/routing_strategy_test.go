@@ -3,6 +3,7 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"bou.ke/monkey"
@@ -10,8 +11,11 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	testutils2 "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
+	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/assert"
 )
@@ -145,7 +149,14 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 		defaultRoute      string
 		expectedRoute     fiber.Component
 		expectedFallbacks []fiber.Component
+		expectedError     error
+		request           fiber.Request
 	}
+
+	// Create test request
+	HTTPReq := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
+	fiberHTTPReq, err := fiberHttp.NewHTTPRequest(HTTPReq)
+	tu.FailOnError(t, err)
 
 	tests := map[string]testSuiteRouting{
 		"match for treatment and experiment in the mappings should select the correct route": {
@@ -165,6 +176,27 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				testutils2.NewFiberCaller(t, "route-A"),
 			),
 			expectedFallbacks: []fiber.Component{},
+		},
+		"match for treatment and experiment in the mappings should select the correct route - upi": {
+			endpoints: []string{"route-A", "route-B"},
+			treatment: runner.Treatment{
+				ExperimentName: "test_experiment",
+				Name:           "treatment-A",
+				Config:         json.RawMessage(`{"test_config": "placeholder"}`),
+			},
+			experimentMappings: []experimentMapping{
+				{Experiment: "test_experiment", Treatment: "treatment-0", Route: "route-0"},
+				{Experiment: "test_experiment_2", Treatment: "treatment-A", Route: "route-0"},
+				{Experiment: "test_experiment", Treatment: "treatment-A", Route: "route-A"},
+			},
+			expectedRoute: fiber.NewProxy(
+				fiber.NewBackend("route-A", ""),
+				testutils2.NewFiberCaller(t, "route-A"),
+			),
+			expectedFallbacks: []fiber.Component{},
+			request: &upi.Request{
+				Request: &fiberGrpc.Request{},
+			},
 		},
 		"match for route name in route name path in treatment config and route names should select the correct route": {
 			endpoints: []string{"route-A", "route-B"},
@@ -279,15 +311,32 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				),
 			},
 		},
+		"grpc non upi request": {
+			endpoints:     []string{"control", "route-A"},
+			defaultRoute:  "control",
+			request:       &fiberGrpc.Request{},
+			expectedError: errors.New("failed to convert into UPI request"),
+		},
+		"upi non upi request": {
+			endpoints:    []string{"control", "route-A"},
+			defaultRoute: "control",
+			request: &upi.Request{
+				Request: &fiberGrpc.Request{},
+				RequestProto: &upiv1.PredictValuesRequest{
+					PredictionContext: []*upiv1.Variable{
+						{
+							Name: "unknown",
+							Type: 0,
+						},
+					},
+				},
+			},
+			expectedError: errors.New("Unknown value type TYPE_UNSPECIFIED"),
+		},
 	}
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			// Create test request
-			req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
-			fiberReq, err := fiberHttp.NewHTTPRequest(req)
-			tu.FailOnError(t, err)
-
 			// Create test routes
 			routes := makeTestRoutes(t, data.endpoints...)
 
@@ -305,9 +354,14 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 					routeNamePath:      data.routeNamePath,
 				},
 			}
+			var fiberReq fiber.Request
+			fiberReq = fiberHTTPReq
+			if data.request != nil {
+				fiberReq = data.request
+			}
 			route, fallbacks, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
 
-			assert.NoError(t, err)
+			assert.Equal(t, data.expectedError, err)
 			assert.Equal(t, data.expectedRoute, route)
 			assert.Equal(t, data.expectedFallbacks, fallbacks)
 		})
