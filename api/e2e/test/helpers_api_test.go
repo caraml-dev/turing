@@ -178,7 +178,9 @@ func withDeployedRouter(
 	responsePayload, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	t.Log(string(responsePayload))
+	require.True(t, resp.StatusCode >= http.StatusOK && resp.StatusCode <= http.StatusPartialContent,
+		"invalid status code returned %d", resp.StatusCode)
+	t.Logf("Response %s", responsePayload)
 
 	created := models.Router{}
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
