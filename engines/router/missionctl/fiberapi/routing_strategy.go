@@ -3,12 +3,16 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/buger/jsonparser"
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
@@ -54,9 +58,39 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		fallbacks = append(fallbacks, defRoute)
 	}
 
-	//TODO to revisit when implementing grpc for experiment engine
-	if req.Protocol() == fiberProtocol.GRPC {
-		return nil, fallbacks, nil
+	var payload []byte
+	httpHeader := http.Header{}
+
+	switch req.Protocol() {
+
+	case fiberProtocol.HTTP:
+		payload = req.Payload()
+		httpHeader = req.Header()
+	case fiberProtocol.GRPC:
+		upiRequest, ok := req.(*upi.Request)
+		if !ok {
+			err := fmt.Errorf("failed to convert into UPI request")
+			log.Glob().Error(err.Error())
+			return nil, nil, err
+		}
+
+		predContext, err := request.UPIVariablesToStringMap(upiRequest.RequestProto.GetPredictionContext())
+		if err != nil {
+			log.Glob().Errorf("failed converting prediction context into string map: %s", err)
+			return nil, nil, err
+		}
+
+		payload, err = json.Marshal(predContext)
+		if err != nil {
+			log.Glob().Errorf("failed marshalling prediction context into payload: %s", err)
+			return nil, nil, err
+		}
+
+		for k, v := range req.Header() {
+			// this is required instead of using req.header(), because grpc headers are lowercase using http2 transport
+			// http headers are transformed into canonical case, using httpheader.set, to call experiment engine in http1
+			httpHeader.Set(k, strings.Join(v, ","))
+		}
 	}
 
 	// Get the experiment treatment
@@ -64,8 +98,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	options := runner.GetTreatmentOptions{
 		TuringRequestID: turingReqID,
 	}
-	expPlan, expErr := r.experimentEngine.
-		GetTreatmentForRequest(req.Header(), req.Payload(), options)
+	expPlan, expErr := r.experimentEngine.GetTreatmentForRequest(httpHeader, payload, options)
 
 	// Create experiment response object
 	experimentResponse := experiment.NewResponse(expPlan, expErr)

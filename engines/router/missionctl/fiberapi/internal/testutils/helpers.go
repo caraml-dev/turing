@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -51,8 +52,11 @@ func NewUPIFiberRequest(t testing.TB, header map[string]string, request *upiv1.P
 		t.Fatal(err)
 	}
 
-	return &fiberGrpc.Request{
-		Metadata: metadata.New(header),
-		Message:  m,
+	return &upi.Request{
+		Request: &fiberGrpc.Request{
+			Metadata: metadata.New(header),
+			Message:  m,
+		},
+		RequestProto: request,
 	}
 }

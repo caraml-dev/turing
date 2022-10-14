@@ -6,16 +6,14 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 )
 
 type MissionControlUPI interface {
-	Route(context.Context, fiber.Request) (*upiv1.PredictValuesResponse, *errors.TuringError)
+	Route(context.Context, fiber.Request) (fiber.Response, *errors.TuringError)
 }
 
 type missionControlUpi struct {
@@ -41,7 +39,7 @@ func NewMissionControlUPI(
 func (us *missionControlUpi) Route(
 	ctx context.Context,
 	fiberRequest fiber.Request,
-) (*upiv1.PredictValuesResponse, *errors.TuringError) {
+) (fiber.Response, *errors.TuringError) {
 	var turingError *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
@@ -78,18 +76,9 @@ func (us *missionControlUpi) Route(
 		return nil, turingError
 	}
 
-	var responseProto upiv1.PredictValuesResponse
-	err := proto.Unmarshal(resp.Payload(), &responseProto)
-	if err != nil {
-		turingError = errors.NewTuringError(
-			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), fiberProtocol.GRPC,
-		)
-		return nil, turingError
-	}
-
 	// attach metadata to context if exist
 	if len(grpcResponse.Metadata) > 0 {
-		err = grpc.SetHeader(ctx, grpcResponse.Metadata)
+		err := grpc.SetHeader(ctx, grpcResponse.Metadata)
 		if err != nil {
 			turingError = errors.NewTuringError(
 				errors.Newf(errors.BadResponse, "unable to send headers: %s", err.Error()), fiberProtocol.GRPC,
@@ -98,5 +87,5 @@ func (us *missionControlUpi) Route(
 		}
 	}
 
-	return &responseProto, nil
+	return grpcResponse, nil
 }
