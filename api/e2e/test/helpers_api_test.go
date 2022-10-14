@@ -178,7 +178,7 @@ func withDeployedRouter(
 	responsePayload, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	t.Log(responsePayload)
+	t.Log(string(responsePayload))
 
 	created := models.Router{}
 	if err = json.Unmarshal(responsePayload, &created); err != nil {
