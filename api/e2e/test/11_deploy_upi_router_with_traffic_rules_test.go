@@ -61,9 +61,16 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 						},
 					},
 				},
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "client_id",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "1",
+					},
+				},
 			}
 
-			headers := metadata.New(map[string]string{"region": "region-a"})
+			headers := metadata.New(map[string]string{})
 			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
 				assert.Equal(t, "treatment-a", response.Metadata.Models[0].Name)
 				assert.Equal(t, upiRequest.PredictionTable, response.PredictionResultTable)
@@ -91,9 +98,9 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 				},
 				PredictionContext: []*upiv1.Variable{
 					{
-						Name:        "service_type",
+						Name:        "client_id",
 						Type:        upiv1.Type_TYPE_STRING,
-						StringValue: "service-type-b",
+						StringValue: "2",
 					},
 				},
 			}

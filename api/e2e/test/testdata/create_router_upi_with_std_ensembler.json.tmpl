@@ -1,6 +1,6 @@
 {
     "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-traffic-rules-upi-{{.TestID}}",
+    "name": "e2e-std-ensembler-test-{{.TestID}}",
     "config": {
         "routes": [
             {
@@ -16,42 +16,6 @@
                 "endpoint": "{{.MockserverUPIAEndpoint}}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
-            },
-            {
-                "id": "treatment-b",
-                "type": "PROXY",
-                "endpoint": "{{.MockserverUPIBEndpoint}}",
-                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
-                "timeout": "5s"
-            }
-        ],
-        "default_traffic_rule": {
-            "routes": ["control"]
-        },
-        "rules": [
-            {
-                "name": "rule-1",
-                "conditions": [
-                    {
-                        "field_source": "prediction_context",
-                        "field": "client_id",
-                        "operator": "in",
-                        "values": ["1"]
-                    }
-                ],
-                "routes": ["treatment-a"]
-            },
-            {
-                "name": "rule-2",
-                "conditions": [
-                    {
-                        "field_source": "prediction_context",
-                        "field": "client_id",
-                        "operator": "in",
-                        "values": ["2"]
-                    }
-                ],
-                "routes": ["treatment-b"]
             }
         ],
         "experiment_engine": {
@@ -89,14 +53,6 @@
                 }
             }
         },
-        "ensembler": {
-            "type": "standard",
-            "standard_config": {
-                "experiment_mappings": [],
-                "route_name_path": "route_name"
-            }
-        },
-        "default_route_id": "control",
         "resource_request": {
             "min_replica": 1,
             "max_replica": 1,
@@ -104,9 +60,17 @@
             "memory_request": "250Mi"
         },
         "timeout": "5s",
-        "protocol": "UPI_V1",
+        "protocol": "HTTP_JSON",
         "log_config": {
             "result_logger_type": "nop"
-        }
+        },
+        "ensembler": {
+            "type": "standard",
+            "standard_config": {
+                "experiment_mappings": [],
+                "route_name_path": "route_name"
+            }
+        },
+        "default_route_id": "control"
     }
 }
