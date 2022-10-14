@@ -49,8 +49,6 @@ func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, err
 			}
 		}
 	case fiberProtocol.GRPC:
-		// unmarshall outside the loop to minimize execution time
-		// TODO: the unmarshalling can be done more efficiently by using partial deserialization
 		upiRequest, ok := req.(*upi.Request)
 		if !ok {
 			err := fmt.Errorf("failed to convert into UPI request")

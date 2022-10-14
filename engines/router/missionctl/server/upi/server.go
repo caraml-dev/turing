@@ -43,6 +43,7 @@ func NewUPIServer(mc missionctl.MissionControlUPI) *Server {
 
 func (us *Server) Run(listener net.Listener) {
 	s := grpc.NewServer()
+	//TODO: the unmarshalling can be done more efficiently by using partial deserialization
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
 

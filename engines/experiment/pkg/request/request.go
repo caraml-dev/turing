@@ -128,7 +128,7 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	}
 }
 
-// variablesToStringMap convert slice of upi Variables into map of string
+// UPIVariablesToStringMap convert slice of upi Variables into map of string
 func UPIVariablesToStringMap(vars []*upiv1.Variable) (map[string]string, error) {
 	strMap := map[string]string{}
 	for _, v := range vars {
