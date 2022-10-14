@@ -68,7 +68,7 @@ spec:
             - containerPort: 1080
           resources:
             requests:
-              cpu: "200m"
+              cpu: "20m"
               memory: "384Mi"
       volumes:
         - name: initialization-json
