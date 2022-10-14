@@ -74,7 +74,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 			return nil, nil, err
 		}
 
-		predContext, err := request.UPIVariablesToStringMap(upiRequest.RequestProto.PredictionContext)
+		predContext, err := request.UPIVariablesToStringMap(upiRequest.RequestProto.GetPredictionContext())
 		if err != nil {
 			log.Glob().Errorf("failed converting prediction context into string map: %s", err)
 			return nil, nil, err

@@ -207,20 +207,29 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 		expectedEqual  bool
 	}{
 		{
-			name:           "small request",
-			request:        &fibergrpc.Request{Message: smallRequestByte},
+			name: "small request",
+			request: &upi.Request{
+				Request: &fibergrpc.Request{
+					Message: smallRequestByte,
+				}},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  true,
 		},
 		{
-			name:           "large request",
-			request:        &fibergrpc.Request{Message: largeRequestByte},
+			name: "large request",
+			request: &upi.Request{
+				Request: &fibergrpc.Request{
+					Message: largeRequestByte,
+				}},
 			compareAgainst: &largeRequestExpected,
 			expectedEqual:  true,
 		},
 		{
-			name:           "large request",
-			request:        &fibergrpc.Request{Message: largeRequestByte},
+			name: "large request",
+			request: &upi.Request{
+				Request: &fibergrpc.Request{
+					Message: largeRequestByte,
+				}},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  false,
 		},
