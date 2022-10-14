@@ -94,7 +94,7 @@ func GetValueFromUPIRequest(
 		// return first value to be consistent with `GetValueFromHTTPRequest`
 		return values[0], nil
 	case PredictionContextSource:
-		predContext, err := variablesToStringMap(req.PredictionContext)
+		predContext, err := UPIVariablesToStringMap(req.PredictionContext)
 		if err != nil {
 			return "", err
 		}
@@ -128,8 +128,8 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	}
 }
 
-// variablesToStringMap convert slice of upi Variables into map of string
-func variablesToStringMap(vars []*upiv1.Variable) (map[string]string, error) {
+// UPIVariablesToStringMap convert slice of upi Variables into map of string
+func UPIVariablesToStringMap(vars []*upiv1.Variable) (map[string]string, error) {
 	strMap := map[string]string{}
 	for _, v := range vars {
 		vstr, err := getValueAsString(v)

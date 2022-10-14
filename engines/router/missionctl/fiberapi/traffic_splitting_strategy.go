@@ -3,16 +3,16 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
 	fiberProtocol "github.com/gojek/fiber/protocol"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -49,18 +49,16 @@ func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, err
 			}
 		}
 	case fiberProtocol.GRPC:
-		// unmarshall outside the loop to minimize execution time
-		// TODO: the unmarshalling can be done more efficiently by using partial deserialization
-		var payload upiv1.PredictValuesRequest
-		if err := proto.Unmarshal(req.Payload(), &payload); err != nil {
-			log.Glob().Errorf(
-				"Failed unmarshalling into UPI request: %s", err)
+		upiRequest, ok := req.(*upi.Request)
+		if !ok {
+			err := fmt.Errorf("failed to convert into UPI request")
+			log.Glob().Error(err.Error())
 			return false, err
 		}
 
 		// test all condition and return immediately if one condition is not satisfied
 		for _, condition := range r.Conditions {
-			res, err := condition.TestUPIRequest(&payload, req.Header())
+			res, err := condition.TestUPIRequest(upiRequest.RequestProto, req.Header())
 			if err != nil {
 				log.Glob().Infof(
 					"Failed to test if request matches traffic-splitting condition: %s", err)

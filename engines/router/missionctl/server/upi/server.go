@@ -10,6 +10,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -17,8 +18,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/gojek/fiber"
-	fibergrpc "github.com/gojek/fiber/grpc"
+	fiberGrpc "github.com/gojek/fiber/grpc"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -42,6 +43,7 @@ func NewUPIServer(mc missionctl.MissionControlUPI) *Server {
 
 func (us *Server) Run(listener net.Listener) {
 	s := grpc.NewServer()
+	//TODO: the unmarshalling can be done more efficiently by using partial deserialization
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
 
@@ -114,16 +116,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 		}
 	}
 
-	requestByte, err := proto.Marshal(req)
-	if err != nil {
-		ctxLogger.Errorf("Could not marshal request into bytes: %v",
-			err.Error())
-	}
-	fiberRequest := &fibergrpc.Request{
-		Message:  requestByte,
-		Metadata: md,
-	}
-	resp, predictionErr := us.getPrediction(ctx, fiberRequest)
+	resp, predictionErr := us.getPrediction(ctx, req, md)
 	if predictionErr != nil {
 		logTuringRouterRequestError(ctx, predictionErr)
 		return nil, predictionErr
@@ -133,32 +126,58 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 
 func (us *Server) getPrediction(
 	ctx context.Context,
-	fiberRequest fiber.Request) (
+	req *upiv1.PredictValuesRequest,
+	md metadata.MD) (
 	*upiv1.PredictValuesResponse, *errors.TuringError) {
 
 	// Create response channel to store the response from each step. 1 for route now,
 	// should be 4 when experiment engine, enricher and ensembler are added
 	respCh := make(chan grpcRouterResponse, 1)
 
-	// Defer logging request summary
+	requestByte, err := proto.Marshal(req)
+	if err != nil {
+		turingError := errors.NewTuringError(
+			errors.Newf(errors.BadInput, "unable to parse request into byte"), fiberProtocol.GRPC,
+		)
+		return nil, turingError
+	}
+
+	upiRequest := upi.Request{
+		Request: &fiberGrpc.Request{
+			Message:  requestByte,
+			Metadata: md,
+		},
+		RequestProto: req,
+	}
+
+	// Defer logging req summary
 	defer func() {
 		go func() {
 			logTuringRouterRequestSummary(
 				ctx,
 				time.Now(),
-				fiberRequest.Header(),
-				fiberRequest.Payload(),
+				upiRequest.Header(),
+				upiRequest.Payload(),
 				respCh)
 			close(respCh)
 		}()
 	}()
 
 	// Calling Routes via fiber
-	resp, err := us.missionControl.Route(ctx, fiberRequest)
-	if err != nil {
-		return nil, err
+	resp, turingError := us.missionControl.Route(ctx, &upiRequest)
+	if turingError != nil {
+		return nil, turingError
 	}
-	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, err)
 
-	return resp, nil
+	responseProto := &upiv1.PredictValuesResponse{}
+	err = proto.Unmarshal(resp.Payload(), responseProto)
+	if err != nil {
+		turingError = errors.NewTuringError(
+			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), fiberProtocol.GRPC,
+		)
+		return nil, turingError
+	}
+	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)
+
+	return responseProto, nil
 }
