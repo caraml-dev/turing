@@ -69,7 +69,7 @@ export const EnsemblerStep = ({ projectId }) => {
         />
       )}
 
-      {ensembler.type === "standard" && (
+      {experiment_engine.type !== "nop" && ensembler.type === "standard" && (
         <StandardEnsemblerFormGroup
           projectId={projectId}
           experimentEngine={experiment_engine}
