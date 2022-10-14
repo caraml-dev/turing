@@ -451,6 +451,14 @@ jobs:
           kubectl logs deployment/turing
           echo "::endgroup::"
 
+          echo "::group::kubernetes events"
+          kubectl get events
+          echo "::endgroup::"
+
+          echo "::group::pod"
+          kubectl get pod -o yaml 
+          echo "::endgroup::"
+
   release-rules:
     runs-on: ubuntu-latest
     outputs:
