@@ -467,6 +467,10 @@ jobs:
           kubectl describe pod
           echo "::endgroup::"
 
+          echo "::group::kuberentes pod logs"
+          kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
+          echo "::endgroup::"
+
   release-rules:
     runs-on: ubuntu-latest
     outputs:
