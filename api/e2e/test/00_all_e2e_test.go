@@ -87,7 +87,7 @@ func TestEndToEnd(t *testing.T) {
 	t.Run("TestStandardEnsembler", func(t *testing.T) {
 		t.Parallel()
 		//t.Run("DeployRouter", TestDeployRouterWithStandardEnsembler)
-		t.Run("DeployRouter_Upi", TestDeployUPIRouterWithStandardEnsembler)
+		//t.Run("DeployRouter_Upi", TestDeployUPIRouterWithStandardEnsembler)
 	})
 }
 
