@@ -7,6 +7,7 @@ import {
   EuiSpacer,
   EuiLoadingChart,
 } from "@elastic/eui";
+import { useNavigate } from "react-router-dom";
 import { AlertConfigSection } from "../components/alert_config_section/AlertConfigSection";
 import {
   ConfigSectionPanel,
@@ -16,7 +17,8 @@ import { Status } from "../../../services/status/Status";
 import { OverlayMask } from "../../../components/overlay_mask/OverlayMask";
 import { supportedAlerts } from "../config";
 
-export const RouterAlertDetails = ({ alertsData, routerStatus, ...props }) => {
+export const RouterAlertDetails = ({ alertsData, routerStatus }) => {
+  const navigate = useNavigate();
   const alertDetailsRef = useRef();
 
   return (
@@ -41,7 +43,7 @@ export const RouterAlertDetails = ({ alertsData, routerStatus, ...props }) => {
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            onClick={() => props.navigate("./edit")}
+            onClick={() => navigate("./edit")}
             disabled={routerStatus !== Status.DEPLOYED}>
             Configure Alerts
           </EuiButton>

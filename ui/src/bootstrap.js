@@ -5,6 +5,7 @@ import * as serviceWorker from "./serviceWorker";
 import App from "./App";
 import * as Sentry from "@sentry/browser";
 import { ConfigProvider, useConfig } from "./config";
+import { BrowserRouter } from "react-router-dom";
 
 const SentryApp = ({ children }) => {
   const {
@@ -18,11 +19,15 @@ const SentryApp = ({ children }) => {
 };
 
 const TuringUI = () => (
-  <ConfigProvider>
-    <SentryApp>
-      <App />
-    </SentryApp>
-  </ConfigProvider>
+  <React.StrictMode>
+    <ConfigProvider>
+      <SentryApp>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </SentryApp>
+    </ConfigProvider>
+  </React.StrictMode>
 );
 
 ReactDOM.render(TuringUI(), document.getElementById("root"));

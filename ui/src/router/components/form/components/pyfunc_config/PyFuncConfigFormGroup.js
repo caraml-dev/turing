@@ -6,7 +6,7 @@ import { SecretsContextProvider } from "../../../../../providers/secrets/context
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
-import { EnsemblersContextContextProvider } from "../../../../../providers/ensemblers/context";
+import { EnsemblersContextProvider } from "../../../../../providers/ensemblers/context";
 import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
 import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
 
@@ -33,7 +33,7 @@ export const PyFuncConfigFormGroup = ({
       <Fragment>
         <EuiFlexItem>
           <SecretsContextProvider projectId={projectId}>
-            <EnsemblersContextContextProvider
+            <EnsemblersContextProvider
               projectId={projectId}
               ensemblerType={"pyfunc"}>
               <PyFuncDeploymentPanel
@@ -41,7 +41,7 @@ export const PyFuncConfigFormGroup = ({
                 onChangeHandler={onChangeHandler}
                 errors={errors}
               />
-            </EnsemblersContextContextProvider>
+            </EnsemblersContextProvider>
           </SecretsContextProvider>
         </EuiFlexItem>
 

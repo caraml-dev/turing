@@ -3,7 +3,7 @@ import React from "react";
 import { useConfig } from "../../config";
 import { ListEnsemblingJobsView } from "./ListEnsemblingJobsView";
 
-export const ListEnsemblingJobsLandingView = (props) => {
+export const ListEnsemblingJobsLandingView = ({ projectId }) => {
   const {
     appConfig: { batchEnsemblingEnabled },
   } = useConfig();
@@ -11,7 +11,7 @@ export const ListEnsemblingJobsLandingView = (props) => {
   return (
     <>
       {batchEnsemblingEnabled ? (
-        <ListEnsemblingJobsView {...props} />
+        <ListEnsemblingJobsView projectId={projectId} />
       ) : (
         <EuiPageTemplate>
           <EuiPageTemplate.EmptyPrompt>

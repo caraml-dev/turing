@@ -11,21 +11,22 @@ import {
 } from "@elastic/eui";
 
 import "./PageNavigation.scss";
+import { useNavigate } from "react-router-dom";
 
 export const PageNavigation = ({
   tabs,
   actions,
-  selectedTab = "",
-  ...props
-}) => (
-  <EuiFlexGroup direction="row" gutterSize="none">
+  selectedTab = ""
+}) => {
+  const navigate = useNavigate();
+  return (<EuiFlexGroup direction="row" gutterSize="none">
     <EuiFlexItem grow={true}>
       <EuiTabs>
         {tabs.map((tab, index) => (
           <EuiTab
             {...(tab.href
               ? { href: tab.href, target: "_blank" }
-              : { onClick: () => props.navigate(`./${tab.id}`) })}
+              : { onClick: () => navigate(`./${tab.id}`) })}
             isSelected={selectedTab.startsWith(tab.id)}
             disabled={tab.disabled}
             key={index}>
@@ -40,7 +41,8 @@ export const PageNavigation = ({
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
-);
+  )
+};
 
 const MoreActionsButton = ({ actions }) => {
   const [isPopoverOpen, setPopover] = useState(false);

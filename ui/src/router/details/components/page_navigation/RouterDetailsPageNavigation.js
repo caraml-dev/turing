@@ -6,7 +6,7 @@ import { useConfig } from "../../../../config";
 export const RouterDetailsPageNavigation = ({
   router: { config = {}, ...router },
   actions,
-  ...props
+  selectedTab,
 }) => {
   const { alertConfig } = useConfig();
 
@@ -46,8 +46,7 @@ export const RouterDetailsPageNavigation = ({
     <PageNavigation
       tabs={tabs}
       actions={actions}
-      selectedTab={props["*"]}
-      {...props}
+      selectedTab={selectedTab}
     />
   );
 };

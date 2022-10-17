@@ -3,7 +3,7 @@ import { useTuringApi } from "../../hooks/useTuringApi";
 
 const EnsemblersContext = React.createContext([]);
 
-export const EnsemblersContextContextProvider = ({
+export const EnsemblersContextProvider = ({
   projectId,
   children,
   ensemblerType = "",
@@ -20,9 +20,9 @@ export const EnsemblersContextContextProvider = ({
     {
       query: !!ensemblerType
         ? {
-            type: ensemblerType,
-            page_size: Number.MAX_SAFE_INTEGER,
-          }
+          type: ensemblerType,
+          page_size: Number.MAX_SAFE_INTEGER,
+        }
         : { page_size: Number.MAX_SAFE_INTEGER },
     },
     { results: [] }

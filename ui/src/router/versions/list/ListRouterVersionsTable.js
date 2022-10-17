@@ -8,6 +8,7 @@ import {
   EuiTextAlign,
 } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
+import { useNavigate } from "react-router-dom";
 import { FormLabelWithToolTip } from "../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { DefaultItemAction } from "../components/DefaultItemAction";
 import { useConfig } from "../../../config";
@@ -21,8 +22,8 @@ export const ListRouterVersionsTable = ({
   deployedVersion,
   renderActions,
   onRowClick,
-  ...props
 }) => {
+  const navigate = useNavigate();
   const {
     appConfig: {
       tables: { defaultTextSize, defaultIconSize },
@@ -68,7 +69,7 @@ export const ListRouterVersionsTable = ({
   const onShowDiff = useCallback(() => {
     if (selection.length === 2) {
       const [leftSelection, rightSelection] = selection;
-      props.navigate(
+      navigate(
         `./compare/${leftSelection.version}/${rightSelection.version}`,
         {
           state: {
@@ -78,17 +79,17 @@ export const ListRouterVersionsTable = ({
         }
       );
     }
-  }, [props, selection]);
+  }, [navigate, selection]);
 
   const cellProps = (item, column) => {
     return onRowClick
       ? {
-          style: { cursor: "pointer" },
-          onClick: !column.hasActions ? () => onRowClick(item) : undefined,
-          className: column.hasActions
-            ? "euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
-            : "",
-        }
+        style: { cursor: "pointer" },
+        onClick: !column.hasActions ? () => onRowClick(item) : undefined,
+        className: column.hasActions
+          ? "euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+          : "",
+      }
       : undefined;
   };
 
@@ -167,16 +168,16 @@ export const ListRouterVersionsTable = ({
           },
           ...(twoSelected && isItemSelected
             ? [
-                {
-                  type: "button",
-                  name: "Compare",
-                  onClick: onShowDiff,
-                  color: "primary",
-                  size: "xs",
-                  available: () => true,
-                  enabled: () => true,
-                },
-              ]
+              {
+                type: "button",
+                name: "Compare",
+                onClick: onShowDiff,
+                color: "primary",
+                size: "xs",
+                available: () => true,
+                enabled: () => true,
+              },
+            ]
             : renderActions()),
         ];
 

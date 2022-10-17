@@ -9,7 +9,7 @@ import {
   EuiPageTemplate
 } from "@elastic/eui";
 import { useTuringApi } from "../../../hooks/useTuringApi";
-import { Redirect, Router } from "@reach/router";
+import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { RouterVersionConfigView } from "./config/RouterVersionConfigView";
 import { RouterVersionDetailsPageNavigation } from "./page_navigation/RouterVersionDetailsPageNavigation";
 import { PageTitle } from "../../../components/page/PageTitle";
@@ -22,12 +22,9 @@ import { TuringRouter } from "../../../services/router/TuringRouter";
 import { RouterVersion } from "../../../services/version/RouterVersion";
 import { useConfig } from "../../../config";
 
-export const RouterVersionDetailsView = ({
-  projectId,
-  routerId,
-  versionId,
-  ...props
-}) => {
+export const RouterVersionDetailsView = () => {
+  const { projectId, routerId, versionId, "*": section } = useParams();
+  const navigate = useNavigate();
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },
@@ -124,7 +121,7 @@ export const RouterVersionDetailsView = ({
             <RouterVersionActions
               router={router}
               onDeploySuccess={refreshData}
-              onDeleteSuccess={() => props.navigate("../")}>
+              onDeleteSuccess={() => navigate("../")}>
               {(actions) => (
                 <RouterVersionDetailsPageNavigation
                   version={version}
@@ -134,7 +131,7 @@ export const RouterVersionDetailsView = ({
                     hidden: !action.available(version),
                     disabled: !action.enabled(version),
                   }))}
-                  {...props}
+                  selectedTab={section}
                 />
               )}
             </RouterVersionActions>
@@ -142,11 +139,10 @@ export const RouterVersionDetailsView = ({
 
           <EuiSpacer size="m" />
           <EuiPageTemplate.Section color={"transparent"}>
-            <Router primary={false}>
-              <Redirect from="/" to="details" noThrow />
-              <RouterVersionConfigView path="details" config={version} />
-              <Redirect from="any" to="/error/404" default noThrow />
-            </Router>
+            <Routes>
+              <Route index element={<Navigate to="details" replace={true} />} />
+              <Route path="details" element={<RouterVersionConfigView projectId={projectId} config={version} />} />
+            </Routes>
           </EuiPageTemplate.Section>
         </Fragment>
       )}

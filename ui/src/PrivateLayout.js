@@ -1,35 +1,40 @@
 import React from "react";
-import { navigate } from "@reach/router";
 import {
+  ApplicationsContext,
   ApplicationsContextProvider,
-  CurrentProjectContextProvider,
   Header,
+  PrivateRoute,
   ProjectsContextProvider,
 } from "@gojek/mlp-ui";
+import urlJoin from "proper-url-join";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useConfig } from "./config";
 import { EnvironmentsContextProvider } from "./providers/environments/context";
 import "./PrivateLayout.scss";
 
-export const PrivateLayout = (Component) => {
+export const PrivateLayout = () => {
+  const navigate = useNavigate();
   const { appConfig } = useConfig();
-
-  return (props) => (
-    <ApplicationsContextProvider>
-      <ProjectsContextProvider>
-        <CurrentProjectContextProvider {...props}>
-          <Header
-            homeUrl={appConfig.homepage}
-            appIcon={appConfig.appIcon}
-            onProjectSelect={(projectId) =>
-              navigate(`${appConfig.homepage}/projects/${projectId}/routers`)
-            }
-            docLinks={appConfig.docsUrl}
-          />
+  return (
+    <PrivateRoute>
+      <ApplicationsContextProvider>
+        <ProjectsContextProvider>
           <EnvironmentsContextProvider>
-            <Component {...props} />
+            <ApplicationsContext.Consumer>
+              {({ currentApp }) => (
+                <Header
+                  homeUrl={appConfig.homepage}
+                  appIcon={appConfig.appIcon}
+                  onProjectSelect={pId =>
+                    navigate(urlJoin(currentApp?.href, "projects", pId, "routers"))
+                  }
+                  docLinks={appConfig.docsUrl}
+                />)}
+            </ApplicationsContext.Consumer>
+            <Outlet />
           </EnvironmentsContextProvider>
-        </CurrentProjectContextProvider>
-      </ProjectsContextProvider>
-    </ApplicationsContextProvider>
+        </ProjectsContextProvider>
+      </ApplicationsContextProvider>
+    </PrivateRoute>
   );
 };

@@ -14,7 +14,8 @@ import "./RouterActivityLogView.scss";
 import { useTuringPollingApi } from "../../hooks/useTuringPollingApi";
 
 const POLLING_INTERVAL = 5000;
-export const RouterActivityLogView = ({ projectId, routerId, router }) => {
+export const RouterActivityLogView = ({ projectId, router }) => {
+  const routerId = router?.id;
   const [
     {
       data: { events },

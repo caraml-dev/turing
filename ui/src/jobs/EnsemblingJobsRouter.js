@@ -1,17 +1,17 @@
 import React from "react";
-import { Redirect, Router } from "@reach/router";
+import { Route, Routes, useParams } from "react-router-dom";
 import { ListEnsemblingJobsLandingView } from "./list/ListEnsemblingJobsLandingView";
 import { EnsemblingJobDetailsView } from "./details/EnsemblingJobDetailsView";
-import { EnsemblersContextContextProvider } from "../providers/ensemblers/context";
+import { EnsemblersContextProvider } from "../providers/ensemblers/context";
 
-export const EnsemblingJobsRouter = ({ projectId }) => (
-  <EnsemblersContextContextProvider projectId={projectId}>
-    <Router>
-      <ListEnsemblingJobsLandingView path="/" />
-
-      <EnsemblingJobDetailsView path=":jobId/*" />
-
-      <Redirect from="any" to="/error/404" default noThrow />
-    </Router>
-  </EnsemblersContextContextProvider>
-);
+export const EnsemblingJobsRouter = () => {
+  const { projectId } = useParams();
+  return (
+    <EnsemblersContextProvider projectId={projectId}>
+      <Routes>
+        <Route index element={<ListEnsemblingJobsLandingView projectId={projectId} />} />
+        <Route path=":jobId/*" element={<EnsemblingJobDetailsView projectId={projectId} />} />
+      </Routes>
+    </EnsemblersContextProvider>
+  )
+};

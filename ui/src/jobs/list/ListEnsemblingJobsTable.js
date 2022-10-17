@@ -10,6 +10,7 @@ import {
   EuiSpacer,
   EuiText,
 } from "@elastic/eui";
+import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
@@ -27,8 +28,8 @@ export const ListEnsemblingJobsTable = ({
   onQueryChange,
   onPaginationChange,
   onRowClick,
-  ...props
 }) => {
+  const navigate = useNavigate();
   const {
     appConfig: {
       tables: { defaultTextSize, defaultIconSize },
@@ -91,7 +92,7 @@ export const ListEnsemblingJobsTable = ({
           <EuiLink
             onClick={(e) => {
               e.stopPropagation();
-              props.navigate(`./?ensembler_id=${id}`);
+              navigate(`./?ensembler_id=${id}`);
             }}>
             <EuiIcon type={"aggregate"} size={defaultIconSize} />
             {ensemblers[id].name}
@@ -176,9 +177,9 @@ export const ListEnsemblingJobsTable = ({
   const cellProps = (item) =>
     onRowClick
       ? {
-          style: { cursor: "pointer" },
-          onClick: () => onRowClick(item),
-        }
+        style: { cursor: "pointer" },
+        onClick: () => onRowClick(item),
+      }
       : undefined;
 
   return error ? (

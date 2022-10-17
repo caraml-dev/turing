@@ -1,12 +1,15 @@
 import React, { useEffect } from "react";
 import { replaceBreadcrumbs, FormContextProvider } from "@gojek/mlp-ui";
+import { useNavigate, useParams } from "react-router-dom";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { CreateRouterForm } from "../components/form/CreateRouterForm";
 import { EuiPageTemplate, EuiSpacer } from "@elastic/eui";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
 import { useConfig } from "../../config";
 
-export const CreateRouterView = ({ projectId, ...props }) => {
+export const CreateRouterView = () => {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },
@@ -33,7 +36,7 @@ export const CreateRouterView = ({ projectId, ...props }) => {
             <CreateRouterForm
               projectId={projectId}
               onCancel={() => window.history.back()}
-              onSuccess={(routerId) => props.navigate(`../${routerId}`)}
+              onSuccess={(routerId) => navigate(`../${routerId}`)}
             />
           </ExperimentEngineContextProvider>
         </FormContextProvider>

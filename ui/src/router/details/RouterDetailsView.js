@@ -7,8 +7,8 @@ import {
   EuiSpacer,
   EuiPageTemplate
 } from "@elastic/eui";
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTuringApi } from "../../hooks/useTuringApi";
-import { Redirect, Router } from "@reach/router";
 import { RouterConfigView } from "./config/RouterConfigView";
 import { RouterDetailsPageHeader } from "./components/router_details_header/RouterDetailsPageHeader";
 import { StatusBadge } from "../../components/status_badge/StatusBadge";
@@ -25,7 +25,11 @@ import { VersionComparisonView } from "../versions/comparison/VersionComparisonV
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { useConfig } from "../../config";
 
-export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
+export const RouterDetailsView = () => {
+  const { projectId, routerId, "*": section } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },
@@ -43,10 +47,10 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
   const hasInitiallyLoaded = useInitiallyLoaded(isLoaded);
 
   useEffect(() => {
-    if ((props.location.state || {}).refresh) {
+    if ((location.state || {}).refresh) {
       fetchRouterDetails();
     }
-  }, [fetchRouterDetails, props.location.state]);
+  }, [fetchRouterDetails, location.state]);
 
   useEffect(() => {
     if (router.status?.toString() === Status.PENDING.toString()) {
@@ -91,19 +95,19 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
           >
             <RouterDetailsPageHeader router={router} />
 
-            {!(props["*"] === "edit" || props["*"] === "alerts/edit") && (
+            {!(section === "edit" || section === "alerts/edit") && (
               <Fragment>
                 <EuiSpacer size="xs" />
                 <RouterActions
-                  onEditRouter={() => props.navigate("./edit")}
+                  onEditRouter={() => navigate("./edit")}
                   onDeploySuccess={fetchRouterDetails}
                   onUndeploySuccess={fetchRouterDetails}
-                  onDeleteSuccess={() => props.navigate("../")}>
+                  onDeleteSuccess={() => navigate("../")}>
                   {(getActions) => (
                     <RouterDetailsPageNavigation
                       router={router}
                       actions={getActions(router)}
-                      {...props}
+                      selectedTab={section}
                     />
                   )}
                 </RouterActions>
@@ -113,26 +117,22 @@ export const RouterDetailsView = ({ projectId, routerId, ...props }) => {
 
           <EuiSpacer size="m" />
           <EuiPageTemplate.Section color={"transparent"}>
-            <Router primary={false}>
-              <Redirect from="/" to="details" noThrow />
-              <RouterConfigView path="details" router={router} />
-
-              <EditRouterView path="edit" router={router} />
-
-              <Redirect from="versions" to="../history" noThrow />
-              <HistoryView path="history" router={router} />
-
-              <VersionComparisonView
-                path="history/compare/:leftVersionNumber/:rightVersionNumber"
-                router={router}
-              />
-
-              <RouterAlertsView path="alerts/*" router={router} />
-
-              <RouterLogsView path="logs" router={router} />
-
-              <Redirect from="any" to="/error/404" default noThrow />
-            </Router>
+            <Routes>
+              {/* DETAILS */}
+              <Route index element={<Navigate to="details" replace={true} />} />
+              <Route path="details" element={<RouterConfigView router={router} />} />
+              {/* EDIT */}
+              <Route path="edit" element={<EditRouterView projectId={projectId} router={router} />} />
+              {/* HISTORY */}
+              <Route path="versions" element={<Navigate to="../history" replace={true} />} />
+              <Route path="history" element={<HistoryView projectId={projectId} router={router} />} />
+              {/* DIFF */}
+              <Route path="history/compare/:leftVersionNumber/:rightVersionNumber" element={<VersionComparisonView router={router} />} />
+              {/* ALERTS */}
+              <Route path="alerts/*" element={<RouterAlertsView projectId={projectId} router={router} />} />
+              {/* LOGS */}
+              <Route path="logs" element={<RouterLogsView path="logs" router={router} />} />
+            </Routes>
           </EuiPageTemplate.Section>
         </Fragment>
       )}

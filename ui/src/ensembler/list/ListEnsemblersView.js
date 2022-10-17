@@ -1,13 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
-import {EuiPageTemplate, EuiPanel, EuiSpacer} from "@elastic/eui";
+import { EuiPageTemplate, EuiPanel, EuiSpacer } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-export const ListEnsemblersView = ({ projectId, ...props }) => {
+export const ListEnsemblersView = () => {
+  const { projectId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const {
     appConfig: {
       pagination: { defaultPageSize },
@@ -17,8 +21,8 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(
-    () => parse(props.location.search),
-    [props.location.search]
+    () => parse(location.search),
+    [location.search]
   );
 
   const onQueryChange = ({ query }) => {
@@ -33,7 +37,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
       filter["search"] = searchClause.map((c) => c.value).join(" ");
     }
 
-    props.navigate(`${props.location.pathname}?${stringify(filter)}`);
+    navigate(`${location.pathname}?${stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -63,8 +67,7 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
     replaceBreadcrumbs([{ text: "Ensemblers" }]);
   }, []);
 
-  const onRowClick = (item) => {};
-  // props.navigate(`./${item.id}/details`);
+  const onRowClick = (item) => { };
 
   return (
     <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
@@ -86,7 +89,6 @@ export const ListEnsemblersView = ({ projectId, ...props }) => {
             onQueryChange={onQueryChange}
             onPaginationChange={setPage}
             onRowClick={onRowClick}
-            {...props}
           />
         </EuiPanel>
       </EuiPageTemplate.Section>

@@ -7,16 +7,16 @@ import {
   EuiLink,
   EuiToolTip,
 } from "@elastic/eui";
-import { CurrentProjectContext } from "@gojek/mlp-ui";
+import { ProjectsContext } from "@gojek/mlp-ui";
 import { RoutesTableExpandedRow } from "./RoutesTableExpandedRow";
 import { ANNOTATIONS_MERLIN_MODEL_ID } from "../../../../../providers/endpoints/MerlinEndpointsProvider";
 
 const MerlinRouteId = ({ modelId, routeId }) => {
-  const { projectId } = useContext(CurrentProjectContext);
+  const { currentProject } = useContext(ProjectsContext);
 
   return (
     <EuiToolTip content="Open endpoint details page">
-      <EuiLink href={`/merlin/projects/${projectId}/models/${modelId}/`}>
+      <EuiLink href={`/merlin/projects/${currentProject.id}/models/${modelId}/`}>
         {routeId}
       </EuiLink>
     </EuiToolTip>
@@ -53,8 +53,8 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId, defaultT
     const routeRules = rules.reduce((acc, rule) => {
       rule.routes.forEach((route) => {
         !!acc[route]
-          ? (acc[route] = [...acc[route], {name: rule.name, conditions: rule.conditions}])
-          : (acc[route] = [{name: rule.name, conditions: rule.conditions}]);
+          ? (acc[route] = [...acc[route], { name: rule.name, conditions: rule.conditions }])
+          : (acc[route] = [{ name: rule.name, conditions: rule.conditions }]);
       });
       return acc;
     }, {});
