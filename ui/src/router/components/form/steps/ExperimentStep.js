@@ -25,6 +25,11 @@ export const ExperimentStep = ({ projectId }) => {
   const onChangeEngineType = (newType) => {
     // Reset the experiment config if the engine type changed
     onChange("config.experiment_engine")({ type: newType });
+    // Reset the standard ensembler config if the engine type is changed
+    if (ensemblerType === "standard") {
+      onChange("config.ensembler.standard_config.experiment_mappings")([]);
+      onChange("config.ensembler.standard_config.route_name_path")("");
+    }
   };
 
   const { experimentEngines, getEngineProperties } = useContext(
