@@ -12,7 +12,7 @@ import { RoutesTableExpandedRow } from "./RoutesTableExpandedRow";
 import { ANNOTATIONS_MERLIN_MODEL_ID } from "../../../../../providers/endpoints/MerlinEndpointsProvider";
 
 const MerlinRouteId = ({ modelId, routeId }) => {
-  const { currentProject } = useContext(ProjectsContext);
+  const { currentProject = {} } = useContext(ProjectsContext);
 
   return (
     <EuiToolTip content="Open endpoint details page">
