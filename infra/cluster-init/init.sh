@@ -47,13 +47,13 @@ function install_knative {
     kubectl apply \
         -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.0.1}/serving-hpa.yaml"
 
-    kubectl apply \
-        -f knative-configmaps/config-features.yaml
-
-    local core_apps=("activator" "autoscaler" "controller" "webhook")
+    local core_apps=("activator" "autoscaler" "controller" "webhook" "domain-mapping" "domainmapping-webhook")
     for app in ${core_apps[@]}; do
         kubectl wait -n knative-serving --for=condition=ready pod -l app=${app} --timeout=5m
     done
+
+    kubectl apply \
+        -f knative-configmaps/config-features.yaml
 
     kubectl apply \
         -f "https://github.com/knative-sandbox/net-istio/releases/download/knative-v${KNATIVE_ISTIO_VERSION:-1.0.0}/net-istio.yaml"
