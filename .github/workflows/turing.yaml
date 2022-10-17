@@ -463,13 +463,18 @@ jobs:
           kubectl get ksvc
           echo "::endgroup::"
 
-          echo "::group::kuberentes pod describe"
+          echo "::group::kubernetes pod describe"
           kubectl describe pod
           echo "::endgroup::"
 
-          echo "::group::kuberentes pod logs"
+          echo "::group::kubernetes config map"
+          kubectl get cm -o yaml
+          echo "::endgroup::"
+
+          echo "::group::kubernetes pod logs"
           kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
           echo "::endgroup::"
+
 
   release-rules:
     runs-on: ubuntu-latest
