@@ -455,8 +455,16 @@ jobs:
           kubectl get events
           echo "::endgroup::"
 
-          echo "::group::pod"
-          kubectl get pod -o yaml 
+          echo "::group::kubernetes deployment"
+          kubectl get deploy
+          echo "::endgroup::"
+          
+          echo "::group::knative serving deployment"
+          kubectl get ksvc
+          echo "::endgroup::"
+
+          echo "::group::kuberentes pod describe"
+          kubectl describe pod
           echo "::endgroup::"
 
   release-rules:
