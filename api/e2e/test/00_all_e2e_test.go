@@ -68,25 +68,25 @@ var globalTestContext TestContext
 // TestEndToEnd executes the test cases sequentially
 func TestEndToEnd(t *testing.T) {
 	//Run Tests
-	t.Run("EndToEnd", func(t *testing.T) {
-		t.Parallel()
-		t.Run("CreateRouter_KnativeServices", TestCreateRouter)
-		t.Run("UpdateRouter_InvalidConfig", TestUpdateRouterInvalidConfig)
-		t.Run("CreateRouterVersion", TestCreateRouterVersion)
-		t.Run("UndeployRouter", TestUndeployRouter)
-		t.Run("DeployRouterVersion_InvalidConfig", TestDeployRouterInvalidConfig)
-		t.Run("DeployRouter", TestDeployValidConfig)
-		t.Run("DeleteRouter", TestDeleteRouter)
-		t.Run("CreateRouter_Upi", TestUPIRouter)
-	})
+	//t.Run("EndToEnd", func(t *testing.T) {
+	//	t.Parallel()
+	//	t.Run("CreateRouter_KnativeServices", TestCreateRouter)
+	//	t.Run("UpdateRouter_InvalidConfig", TestUpdateRouterInvalidConfig)
+	//	t.Run("CreateRouterVersion", TestCreateRouterVersion)
+	//	t.Run("UndeployRouter", TestUndeployRouter)
+	//	t.Run("DeployRouterVersion_InvalidConfig", TestDeployRouterInvalidConfig)
+	//	t.Run("DeployRouter", TestDeployValidConfig)
+	//	t.Run("DeleteRouter", TestDeleteRouter)
+	//	t.Run("CreateRouter_Upi", TestUPIRouter)
+	//})
 	t.Run("TestTrafficRules", func(t *testing.T) {
 		t.Parallel()
-		t.Run("DeployRouter", TestDeployRouterWithTrafficRules)
+		//t.Run("DeployRouter", TestDeployRouterWithTrafficRules)
 		t.Run("DeployRouter_Upi", TestDeployUPIRouterWithTrafficRules)
 	})
 	t.Run("TestStandardEnsembler", func(t *testing.T) {
 		t.Parallel()
-		t.Run("DeployRouter", TestDeployRouterWithStandardEnsembler)
+		//t.Run("DeployRouter", TestDeployRouterWithStandardEnsembler)
 		t.Run("DeployRouter_Upi", TestDeployUPIRouterWithStandardEnsembler)
 	})
 }
