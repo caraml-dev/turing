@@ -339,7 +339,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ["In-cluster credentials; API e2e", "Remote cluster credentials; SDK e2e"]
+        name: ["In-cluster credentials; API e2e"]
         include:
           - name: "In-cluster credentials; API e2e"
             useInClusterConfig: true
