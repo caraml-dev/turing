@@ -51,7 +51,7 @@ func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, err
 	case fiberProtocol.GRPC:
 		upiRequest, ok := req.(*upi.Request)
 		if !ok {
-			err := fmt.Errorf("failed to convert into UPI request %v", upiRequest)
+			err := fmt.Errorf("failed to convert into UPI request %v", req)
 			log.Glob().Error(err.Error())
 			return false, err
 		}
