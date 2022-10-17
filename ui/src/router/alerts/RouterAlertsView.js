@@ -2,11 +2,12 @@ import React, { useEffect, useMemo } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { EuiCallOut, EuiLoadingChart, EuiTextAlign } from "@elastic/eui";
 import { RouterAlertDetails } from "./details/RouterAlertDetails";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useParams } from "react-router-dom";
 import { EditAlertsView } from "./edit/EditAlertsView";
 import { useTuringApi } from "../../hooks/useTuringApi";
 
-export const RouterAlertsView = ({ projectId, router }) => {
+export const RouterAlertsView = ({ router }) => {
+  const { projectId } = useParams();
   const location = useLocation();
   const routerId = router?.id;
   useEffect(() => {
@@ -60,7 +61,7 @@ export const RouterAlertsView = ({ projectId, router }) => {
   ) : (
     <Routes>
       <Route index element={<RouterAlertDetails alertsData={existingAlerts} routerStatus={router.status} />} />
-      <Route path="edit" element={<EditAlertsView projectId={projectId} router={router} alerts={existingAlerts} />} />
+      <Route path="edit" element={<EditAlertsView router={router} alerts={existingAlerts} />} />
     </Routes>
   );
 };

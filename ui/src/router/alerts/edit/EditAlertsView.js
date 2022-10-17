@@ -4,12 +4,13 @@ import {
   replaceBreadcrumbs,
   FormContextProvider,
 } from "@gojek/mlp-ui";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { EditAlertsForm } from "../components/edit_alerts_form/components/EditAlertsForm";
 import { TuringAlerts } from "../../../services/alerts/TuringAlerts";
 import { useConfig } from "../../../config";
 
-export const EditAlertsView = ({ projectId, router, alerts }) => {
+export const EditAlertsView = ({ router, alerts }) => {
+  const { projectId } = useParams();
   const navigate = useNavigate();
   const { alertConfig } = useConfig();
 

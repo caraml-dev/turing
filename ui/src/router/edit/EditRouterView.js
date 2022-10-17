@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { FormContext, FormContextProvider } from "@gojek/mlp-ui";
 import { addToast, replaceBreadcrumbs, useToggle } from "@gojek/mlp-ui";
@@ -130,7 +130,8 @@ const EditRouterView = ({ projectId, currentRouter }) => {
   );
 };
 
-const EditRouterViewWrapper = ({ projectId, router }) => {
+const EditRouterViewWrapper = ({ router }) => {
+  const { projectId } = useParams();
   useEffect(() => {
     replaceBreadcrumbs([
       {

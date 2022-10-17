@@ -19,8 +19,8 @@ import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigatio
 import { EnsemblingJobLogsView } from "./logs/EnsemblingJobLogsView";
 import { useConfig } from "../../config";
 
-export const EnsemblingJobDetailsView = ({ projectId }) => {
-  const { jobId, "*": section } = useParams();
+export const EnsemblingJobDetailsView = () => {
+  const { projectId, jobId, "*": section } = useParams();
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },

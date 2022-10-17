@@ -141,7 +141,7 @@ export const RouterVersionDetailsView = () => {
           <EuiPageTemplate.Section color={"transparent"}>
             <Routes>
               <Route index element={<Navigate to="details" replace={true} />} />
-              <Route path="details" element={<RouterVersionConfigView projectId={projectId} config={version} />} />
+              <Route path="details" element={<RouterVersionConfigView config={version} />} />
             </Routes>
           </EuiPageTemplate.Section>
         </Fragment>

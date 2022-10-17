@@ -1,6 +1,6 @@
 import React from "react";
 import { EuiIcon } from "@elastic/eui";
-import { PageNavigation } from "../../../../components/page_navigation/PageNavigation";
+import { PageNavigation } from "@gojek/mlp-ui";
 import { useConfig } from "../../../../config";
 
 export const RouterDetailsPageNavigation = ({

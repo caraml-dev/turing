@@ -122,14 +122,14 @@ export const RouterDetailsView = () => {
               <Route index element={<Navigate to="details" replace={true} />} />
               <Route path="details" element={<RouterConfigView router={router} />} />
               {/* EDIT */}
-              <Route path="edit" element={<EditRouterView projectId={projectId} router={router} />} />
+              <Route path="edit" element={<EditRouterView router={router} />} />
               {/* HISTORY */}
               <Route path="versions" element={<Navigate to="../history" replace={true} />} />
-              <Route path="history" element={<HistoryView projectId={projectId} router={router} />} />
+              <Route path="history" element={<HistoryView router={router} />} />
               {/* DIFF */}
               <Route path="history/compare/:leftVersionNumber/:rightVersionNumber" element={<VersionComparisonView router={router} />} />
               {/* ALERTS */}
-              <Route path="alerts/*" element={<RouterAlertsView projectId={projectId} router={router} />} />
+              <Route path="alerts/*" element={<RouterAlertsView router={router} />} />
               {/* LOGS */}
               <Route path="logs" element={<RouterLogsView path="logs" router={router} />} />
             </Routes>

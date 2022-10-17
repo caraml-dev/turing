@@ -9,8 +9,8 @@ export const EnsemblingJobsRouter = () => {
   return (
     <EnsemblersContextProvider projectId={projectId}>
       <Routes>
-        <Route index element={<ListEnsemblingJobsLandingView projectId={projectId} />} />
-        <Route path=":jobId/*" element={<EnsemblingJobDetailsView projectId={projectId} />} />
+        <Route index element={<ListEnsemblingJobsLandingView />} />
+        <Route path=":jobId/*" element={<EnsemblingJobDetailsView />} />
       </Routes>
     </EnsemblersContextProvider>
   )
