@@ -9,6 +9,7 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/models"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -73,7 +74,7 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 			headers := metadata.New(map[string]string{})
 			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
 				assert.Equal(t, "treatment-a", response.Metadata.Models[0].Name)
-				assert.Equal(t, upiRequest.PredictionTable, response.PredictionResultTable)
+				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
 			})
 
 			t.Log("Testing router endpoint with request that satisfy traffic rule rule-2")
@@ -107,7 +108,7 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 
 			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
 				assert.Equal(t, "treatment-b", response.Metadata.Models[0].Name)
-				assert.Equal(t, upiRequest.PredictionTable, response.PredictionResultTable)
+				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
 			})
 
 			t.Log("Testing router endpoint with the request, that doesn't satisfy any traffic rule")
@@ -134,7 +135,7 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 
 			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
 				assert.Equal(t, "control", response.Metadata.Models[0].Name)
-				assert.Equal(t, upiRequest.PredictionTable, response.PredictionResultTable)
+				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
 			})
 		},
 		func(router *models.Router) {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/models"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -79,7 +80,7 @@ func TestDeployUPIRouterWithStandardEnsembler(t *testing.T) {
 			headers := metadata.New(map[string]string{"region": "region-a"})
 			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
 				assert.Equal(t, "treatment-a", response.Metadata.Models[0].Name)
-				assert.Equal(t, upiRequest.PredictionTable, response.PredictionResultTable)
+				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
 			})
 		},
 		nil,
