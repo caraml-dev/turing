@@ -12,7 +12,6 @@ import (
 	"text/template"
 
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
 )
@@ -82,7 +81,7 @@ func withUPIRouterResponse(t *testing.T,
 	assertion func(response *upiv1.PredictValuesResponse)) {
 	ctx := metadata.NewOutgoingContext(context.Background(), headers)
 	resp, err := client.PredictValues(ctx, request)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assertion(resp)
 }
