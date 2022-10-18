@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 
+	// TODO: justify this
+	_ "net/http/pprof"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
@@ -22,8 +25,6 @@ import (
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	// TODO: justify this
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
-	// TODO: justify this
-	_ "net/http/pprof"
 )
 
 func Run() {
@@ -81,6 +82,7 @@ func Run() {
 		}
 		httpServer := &http.Server{Handler: mux}
 
+		log.Glob().Infof("Starting UPI Router in port %d", cfg.Port)
 		go upiServer.Run(grpcListener)
 		go func() {
 			if err := httpServer.Serve(httpListener); err != nil {

@@ -31,7 +31,7 @@ import (
 var testHTTPServerAddr = "127.0.0.1:9000"
 
 // Test config
-var testCfg *config.Config = &config.Config{
+var testCfg = &config.Config{
 	Port: 80,
 	EnrichmentConfig: &config.EnrichmentConfig{
 		Endpoint: fmt.Sprintf("http://%s/enrich/", testHTTPServerAddr),
