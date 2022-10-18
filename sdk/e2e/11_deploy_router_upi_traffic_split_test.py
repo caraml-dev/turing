@@ -22,17 +22,23 @@ from turing.router.config.traffic_rule import DefaultTrafficRule, FieldSource, T
 
 
 def test_deploy_router_upi():
-    # set up route
+    control_endpoint = f'{os.getenv("MOCKSERVER_UPI_CONTROL_ENDPOINT")}'
+    treatment_endpoint = f'{os.getenv("MOCKSERVER_UPI_A_ENDPOINT")}'
+
+    logging.info(f"control endpoint: {control_endpoint}")
+    logging.info(f"treatment endpoint: {treatment_endpoint}")
+
+
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_CONTROL_ENDPOINT")}',
+            endpoint=control_endpoint,
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_A_ENDPOINT")}',
+            endpoint=treatment_endpoint,
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
