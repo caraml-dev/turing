@@ -21,7 +21,7 @@ from turing.router.config.router_version import RouterStatus
 from turing.router.config.traffic_rule import DefaultTrafficRule, FieldSource, TrafficRule, TrafficRuleCondition
 
 
-def test_deploy_router_upi():
+def test_deploy_router_upi_std_ensembler():
     control_endpoint = f'{os.getenv("MOCKSERVER_UPI_CONTROL_ENDPOINT")}'
     treatment_endpoint = f'{os.getenv("MOCKSERVER_UPI_A_ENDPOINT")}'
 
