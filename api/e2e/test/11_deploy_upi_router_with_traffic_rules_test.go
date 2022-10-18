@@ -28,7 +28,6 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 			t.Logf("Testing router endpoint: %s", router.Endpoint)
 			t.Logf("Control Endpoint: %s", globalTestContext.MockserverUPIControlEndpoint)
 			t.Logf("Treatment A Endpoint: %s", globalTestContext.MockserverUPIAEndpoint)
-			t.Logf("Treatment B Endpoint: %s", globalTestContext.MockserverUPIBEndpoint)
 
 			expectedEndpoint := fmt.Sprintf(
 				"%s-turing-router.%s.%s:80",

@@ -29,7 +29,6 @@ type testConfig struct {
 	MockserverHTTPEndpoint       string `envconfig:"MOCKSERVER_HTTP_ENDPOINT" required:"true"`
 	MockserverUPIControlEndpoint string `envconfig:"MOCKSERVER_UPI_CONTROL_ENDPOINT" required:"true"`
 	MockserverUPIAEndpoint       string `envconfig:"MOCKSERVER_UPI_A_ENDPOINT" required:"true"`
-	MockserverUPIBEndpoint       string `envconfig:"MOCKSERVER_UPI_B_ENDPOINT" required:"true"`
 	KServiceDomain               string `envconfig:"KSERVICE_DOMAIN" default:"127.0.0.1.nip.io"`
 	APIBasePath                  string `envconfig:"API_BASE_PATH" required:"true"`
 	ClusterName                  string `envconfig:"MODEL_CLUSTER_NAME" required:"true"`
