@@ -4,7 +4,6 @@ package e2e
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 
@@ -98,12 +97,9 @@ func isConfigMapExists(
 	projectName string,
 	name string,
 ) bool {
-	cm, err := clusterClients.K8sCoreClient.
+	_, err := clusterClients.K8sCoreClient.
 		ConfigMaps(projectName).
 		Get(context.Background(), name, metav1.GetOptions{})
-
-	b, _ := json.Marshal(cm.Data)
-	fmt.Println(string(b))
 
 	return err == nil
 }
