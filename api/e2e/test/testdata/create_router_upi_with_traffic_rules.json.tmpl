@@ -16,13 +16,6 @@
                 "endpoint": "{{.MockserverUPIAEndpoint}}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
-            },
-            {
-                "id": "treatment-b",
-                "type": "PROXY",
-                "endpoint": "{{.MockserverUPIBEndpoint}}",
-                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
-                "timeout": "5s"
             }
         ],
         "default_traffic_rule": {
@@ -40,18 +33,6 @@
                     }
                 ],
                 "routes": ["treatment-a", "control"]
-            },
-            {
-                "name": "rule-2",
-                "conditions": [
-                    {
-                        "field_source": "prediction_context",
-                        "field": "client_id",
-                        "operator": "in",
-                        "values": ["2"]
-                    }
-                ],
-                "routes": ["treatment-b", "control"]
             }
         ],
         "experiment_engine": {

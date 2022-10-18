@@ -77,40 +77,6 @@ func TestDeployUPIRouterWithTrafficRules(t *testing.T) {
 				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
 			})
 
-			t.Log("Testing router endpoint with request that satisfy traffic rule rule-2")
-			headers = metadata.New(map[string]string{})
-			upiRequest = &upiv1.PredictValuesRequest{
-				PredictionTable: &upiv1.Table{
-					Name: "Test",
-					Columns: []*upiv1.Column{
-						{
-							Name: "col1",
-							Type: upiv1.Type_TYPE_DOUBLE,
-						},
-					},
-					Rows: []*upiv1.Row{
-						{
-							RowId: "1",
-							Values: []*upiv1.Value{
-								{},
-							},
-						},
-					},
-				},
-				PredictionContext: []*upiv1.Variable{
-					{
-						Name:        "client_id",
-						Type:        upiv1.Type_TYPE_STRING,
-						StringValue: "2",
-					},
-				},
-			}
-
-			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
-				assert.Equal(t, "treatment-b", response.Metadata.Models[0].Name)
-				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
-			})
-
 			t.Log("Testing router endpoint with the request, that doesn't satisfy any traffic rule")
 			headers = metadata.New(map[string]string{})
 			upiRequest = &upiv1.PredictValuesRequest{
