@@ -94,7 +94,10 @@ func TestNewMissionControlUpi(t *testing.T) {
 				ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
 
 				res, err := got.Route(ctx,
-					&fibergrpc.Request{Message: []byte{}},
+					&fibergrpc.Request{
+						Message: []byte{},
+						Proto:   &upiv1.PredictValuesRequest{},
+					},
 				)
 
 				require.Nil(t, err)
@@ -206,6 +209,7 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			name: "small request",
 			request: &fibergrpc.Request{
 				Message: smallRequestByte,
+				Proto:   smallRequest,
 			},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  true,
@@ -214,6 +218,7 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			name: "large request",
 			request: &fibergrpc.Request{
 				Message: largeRequestByte,
+				Proto:   largeRequest,
 			},
 			compareAgainst: &largeRequestExpected,
 			expectedEqual:  true,
@@ -222,6 +227,7 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			name: "large request",
 			request: &fibergrpc.Request{
 				Message: largeRequestByte,
+				Proto:   largeRequest,
 			},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  false,

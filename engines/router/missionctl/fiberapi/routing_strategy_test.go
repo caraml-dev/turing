@@ -193,7 +193,9 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				testutils2.NewFiberCaller(t, "route-A"),
 			),
 			expectedFallbacks: []fiber.Component{},
-			request:           &fiberGrpc.Request{},
+			request: &fiberGrpc.Request{
+				Proto: &upiv1.PredictValuesRequest{},
+			},
 		},
 		"match for route name in route name path in treatment config and route names should select the correct route": {
 			endpoints: []string{"route-A", "route-B"},

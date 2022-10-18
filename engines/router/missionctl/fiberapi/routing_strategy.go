@@ -77,7 +77,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 
 		requestProto, ok := grpcFiberReq.ProtoMessage().(*upiv1.PredictValuesRequest)
 		if !ok {
-			err := fmt.Errorf("failed to convert into upi request")
+			err := fmt.Errorf("failed to convert into UPI request")
 			log.Glob().Error(err.Error())
 			return nil, nil, err
 		}
