@@ -158,6 +158,10 @@ turing:
       Enabled: false
     RouterDefaults:
       Image: ghcr.io/caraml-dev/turing/turing-router:v1.6.0
+      FluentdConfig:
+        Image: ghcr.io/caraml-dev/turing/fluentd
+        Tag: v0.1.0
+        FlushIntervalSeconds: 90
 
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
