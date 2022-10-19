@@ -397,12 +397,7 @@ jobs:
           PROJECT_ID: "1"
           PROJECT_NAME: default
           KUBECONFIG_USE_LOCAL: true
-        run: |
-          echo "::group::kubernetes top nodes"
-          kubectl top nodes
-          echo "::endgroup::"
-
-          go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}
@@ -421,12 +416,7 @@ jobs:
           KUBECONFIG_USE_LOCAL: true
           TEST_ECHO_IMAGE: eexit/mirror-http-server:1.1.3
           KSERVICE_DOMAIN: 127.0.0.1.nip.io
-        run: |
-          echo "::group::kubernetes top nodes"
-          kubectl top nodes
-          echo "::endgroup::"
-          
-          make e2e-sdk
+        run: make e2e-sdk
 
       - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
