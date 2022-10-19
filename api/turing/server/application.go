@@ -61,7 +61,11 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+	defer sqlDB.Close()
 
 	// Initialise NewRelic
 	if err := newrelic.InitNewRelic(cfg.NewRelicConfig); err != nil {
@@ -115,7 +119,7 @@ func Run() {
 	r := mux.NewRouter()
 
 	// HealthCheck Handler
-	AddHealthCheckHandler(r, "/v1/internal", db)
+	AddHealthCheckHandler(r, "/v1/internal", sqlDB)
 
 	// Write to a file so that Swagger UI can use it
 	err = cfg.OpenapiConfig.GenerateSpecFile()

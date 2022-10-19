@@ -10,7 +10,9 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/jinzhu/gorm"
+	pg "gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func create(testDBCfg *config.DatabaseConfig) (*sql.DB, *sql.DB, error) {
@@ -57,7 +59,12 @@ func createTestDatabase() (*gorm.DB, func(), error) {
 	if err = migrateDB(testDBCfg); err != nil {
 		cleanup()
 		return nil, nil, err
-	} else if gormDb, err := gorm.Open("postgres", testDb); err != nil {
+	} else if gormDb, err := gorm.Open(
+		pg.New(pg.Config{Conn: testDb}),
+		&gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		},
+	); err != nil {
 		cleanup()
 		return nil, nil, err
 	} else {

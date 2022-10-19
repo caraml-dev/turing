@@ -13,7 +13,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/gojek/mlp/api/pkg/vault"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // AppContext stores the entities relating to the application's context
