@@ -67,7 +67,7 @@ jobs:
 
       - name: Build Docker Image
         id: build-image
-        working-directory: plugins/turing
+        working-directory: scripts/fluentd-bigquery
         env:
           DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
         run: |
