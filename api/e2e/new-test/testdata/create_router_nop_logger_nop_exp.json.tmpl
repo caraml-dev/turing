@@ -1,0 +1,66 @@
+{
+    "environment_name": "dev",
+    "name": "e2e-experiment-{{ .TestID }}",
+    "config": {
+        "routes": [
+            {
+                "id": "control",
+                "type": "PROXY",
+                "endpoint": "{{ .Mockserver.Endpoint }}/control",
+                "timeout": "5s"
+            }
+        ],
+        "experiment_engine": {
+            "type": "nop"
+        },
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 1,
+            "cpu_request": "200m",
+            "memory_request": "250Mi"
+        },
+        "timeout": "5s",
+        "log_config": {
+            "result_logger_type": "nop"
+        },
+        "enricher": {
+            "image": "{{ .Echoserver.Image }}",
+            "resource_request": {
+                "min_replica": 1,
+                "max_replica": 1,
+                "cpu_request": "250m",
+                "memory_request": "256Mi"
+            },
+            "endpoint": "enrich",
+            "timeout": "3s",
+            "port": 80,
+            "env": [
+                {
+                    "name": "TEST_ENV",
+                    "value": "enricher"
+                }
+            ]
+        },
+        "ensembler": {
+            "type": "docker",
+            "docker_config": {
+                "image": "{{ .Echoserver.Image }}",
+                "resource_request": {
+                    "min_replica": 1,
+                    "max_replica": 1,
+                    "cpu_request": "250m",
+                    "memory_request": "256Mi"
+                },
+                "endpoint": "ensemble",
+                "timeout": "3s",
+                "port": 80,
+                "env": [
+                    {
+                        "name": "TEST_ENV",
+                        "value": "ensembler"
+                    }
+                ]
+            }
+        }
+    }
+}

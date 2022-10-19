@@ -83,8 +83,8 @@ services:
         cp /.kube/kubeconfig.yaml /.kube/config
         sed -i 's/127.0.0.1/server/' /.kube/config
         kubectl cluster-info
-        curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.12.4 sh -
-        /.istioctl/bin/istioctl install -y -f /minimal-operator.yaml
+        curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.13.3 sh -
+        /.istioctl/bin/istioctl install -y
 
   # Install Knative serving on Kubernetes
   knative:
