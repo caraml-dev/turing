@@ -43,7 +43,7 @@ def test_deploy_router_upi():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="20m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router

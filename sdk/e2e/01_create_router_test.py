@@ -55,7 +55,7 @@ def test_create_router():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="20m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router
@@ -65,7 +65,7 @@ def test_create_router():
     enricher = Enricher(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=1, max_replica=1, cpu_request="20m", memory_request="1Gi"
+            min_replica=1, max_replica=1, cpu_request="100m", memory_request="1Gi"
         ),
         endpoint="anything",
         timeout="2s",
@@ -77,7 +77,7 @@ def test_create_router():
     ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2, max_replica=2, cpu_request="20m", memory_request="256Mi"
+            min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
         ),
         endpoint="anything",
         timeout="3s",
