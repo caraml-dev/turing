@@ -49,7 +49,7 @@ func TestDeployUPIRouterWithStandardEnsembler(t *testing.T) {
 			defer conn.Close()
 
 			client := upiv1.NewUniversalPredictionServiceClient(conn)
-			t.Log("Testing router endpoint with request that satisfy traffic rule rule-1")
+			t.Log("Testing router endpoint with request that satisfy traffic rule treatment-1")
 			upiRequest := &upiv1.PredictValuesRequest{
 				PredictionTable: &upiv1.Table{
 					Name: "Test",
