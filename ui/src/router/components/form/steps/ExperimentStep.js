@@ -27,6 +27,10 @@ export const ExperimentStep = ({ projectId }) => {
     onChange("config.experiment_engine")({ type: newType });
     // Reset the standard ensembler config if the engine type is changed
     if (ensemblerType === "standard") {
+      // Standard Ensemblers are not available when no experiment engine is configured
+      if (newType === "nop") {
+        onChange("config.ensembler.type")("nop");
+      }
       onChange("config.ensembler.standard_config.experiment_mappings")([]);
       onChange("config.ensembler.standard_config.route_name_path")("");
     }
