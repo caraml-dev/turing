@@ -11,9 +11,9 @@ import (
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func assertEqualEnsembler(

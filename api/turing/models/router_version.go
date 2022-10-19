@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type RouterVersionStatus string

@@ -17,9 +17,9 @@ import (
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	mock "github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 const (

@@ -28,9 +28,15 @@ export const AutoscalingPolicyPanel = ({
   const onChangeTarget = (value) => {
     const parsedInt = parseInt(value);
     onChange("target")(isNaN(parsedInt) ? "" : parsedInt.toString());
-  }
-  const selectedMetric = autoscalingPolicyOptions.find((e) => e.value === autoscalingPolicyConfig.metric);
+  };
+  // Update default target if the metric is changing
+  const onChangeMetric = (value) => {
+    const newSelection = autoscalingPolicyOptions.find((e) => e.value === value);
+    onChange("metric")(value);
+    onChangeTarget(newSelection.defaultValue);
+  };
 
+  const selectedMetric = autoscalingPolicyOptions.find((e) => e.value === autoscalingPolicyConfig.metric);
   const [isFlyoutVisible, toggleIsFlyoutVisible] = useToggle();
 
   return (
@@ -61,8 +67,8 @@ export const AutoscalingPolicyPanel = ({
             <EuiSuperSelect
               fullWidth
               options={autoscalingPolicyOptions}
-              valueOfSelected={selectedMetric ? selectedMetric.value : ""}
-              onChange={onChange("metric")}
+              valueOfSelected={selectedMetric?.value || ""}
+              onChange={onChangeMetric}
               itemLayoutAlign="top"
               hasDividers
               isInvalid={!!errors.metric}

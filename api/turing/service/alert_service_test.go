@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -17,7 +18,9 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/jinzhu/gorm"
+	pg "gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gotest.tools/assert"
 )
 
@@ -63,8 +66,8 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.ExpectBegin()
 	mockSQL.
@@ -133,8 +136,8 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.ExpectBegin()
 	mockSQL.
@@ -173,8 +176,8 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 }
 
 func TestGitlabOpsAlertServiceList(t *testing.T) {
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
@@ -214,8 +217,8 @@ func TestGitlabOpsAlertServiceList(t *testing.T) {
 }
 
 func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	columns := []string{"environment", "team", "service", "metric", "duration"}
 	mockSQL.
@@ -254,8 +257,8 @@ func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
 }
 
 func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) {
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -284,8 +287,8 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -294,7 +297,8 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 	mockSQL.ExpectBegin()
 	mockSQL.
 		ExpectExec(`UPDATE "alerts"`).
-		WithArgs(sqlmock.AnyArg(), "env", "team", "service", "throughput", float64(50), float64(25), "5m", 1).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(),
+			"env", "team", "service", "throughput", float64(50), float64(25), "5m", 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mockSQL.ExpectCommit()
 
@@ -350,8 +354,8 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -408,8 +412,8 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -463,8 +467,8 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 	mockGitlab, requestRecords := newMockGitlabServer()
 	defer mockGitlab.Close()
 
-	mockDb, mockSQL := newMockSQL(t)
-	defer mockDb.Close()
+	mockDb, mockSQLDb, mockSQL := newMockSQL(t)
+	defer mockSQLDb.Close()
 
 	mockSQL.
 		ExpectQuery(`SELECT (.+) FROM "alerts"`).
@@ -535,16 +539,21 @@ func newMockGitlabServer() (mockGitlab *httptest.Server, requestRecords map[stri
 	return server, records
 }
 
-func newMockSQL(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
-	mockdb, mocksql, err := sqlmock.New()
+func newMockSQL(t *testing.T) (*gorm.DB, *sql.DB, sqlmock.Sqlmock) {
+	mockDB, mocksql, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("failed to open stub database connection: %s", err)
 	}
-	gormDb, err := gorm.Open("postgres", mockdb)
+	gormDB, err := gorm.Open(
+		pg.New(pg.Config{Conn: mockDB}),
+		&gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		},
+	)
 	if err != nil {
 		t.Fatalf("failed to open go-orm database connection: %s", err)
 	}
-	return gormDb, mocksql
+	return gormDB, mockDB, mocksql
 }
 
 func TestGitlabOpsAlertServiceGetDashboardURL(t *testing.T) {

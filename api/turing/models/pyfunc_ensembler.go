@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type EnsemblerLike interface {
@@ -89,8 +89,9 @@ type PyFuncEnsembler struct {
 	PythonVersion string `json:"python_version" gorm:"column:python_version"`
 }
 
-func (*PyFuncEnsembler) BeforeCreate(scope *gorm.Scope) error {
-	return scope.SetColumn("type", EnsemblerPyFuncType)
+func (e *PyFuncEnsembler) BeforeCreate(*gorm.DB) error {
+	e.Type = EnsemblerPyFuncType
+	return nil
 }
 
 func (*PyFuncEnsembler) GetType() EnsemblerType {
