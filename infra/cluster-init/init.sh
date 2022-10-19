@@ -53,6 +53,9 @@ function install_knative {
     done
 
     kubectl apply \
+        -f knative-configmaps/config-features.yaml
+
+    kubectl apply \
         -f "https://github.com/knative-sandbox/net-istio/releases/download/knative-v${KNATIVE_ISTIO_VERSION:-1.0.0}/net-istio.yaml"
 
     local istio_apps=("net-istio-controller" "net-istio-webhook")

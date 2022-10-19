@@ -100,7 +100,7 @@ export const StandardEnsemblerFormGroup = ({
         {engineProps?.type === "standard" ? (
           <EuiFlexItem>
             <StandardEnsemblerPanel
-              experiments={experimentEngine.config.experiments}
+              experiments={experimentEngine.config?.experiments || []}
               mappings={standardConfig.experiment_mappings}
               routeOptions={routeOptions}
               onChangeHandler={onChange("experiment_mappings")}
