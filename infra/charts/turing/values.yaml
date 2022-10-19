@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: caraml-dev/turing
     # -- Docker image tag for Turing API
-    tag: v1.6.0
+    tag: v1.7.0
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
