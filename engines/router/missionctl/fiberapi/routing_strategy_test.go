@@ -11,7 +11,6 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	testutils2 "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
@@ -194,8 +193,8 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 				testutils2.NewFiberCaller(t, "route-A"),
 			),
 			expectedFallbacks: []fiber.Component{},
-			request: &upi.Request{
-				Request: &fiberGrpc.Request{},
+			request: &fiberGrpc.Request{
+				Proto: &upiv1.PredictValuesRequest{},
 			},
 		},
 		"match for route name in route name path in treatment config and route names should select the correct route": {
@@ -320,9 +319,8 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 		"upi non upi request": {
 			endpoints:    []string{"control", "route-A"},
 			defaultRoute: "control",
-			request: &upi.Request{
-				Request: &fiberGrpc.Request{},
-				RequestProto: &upiv1.PredictValuesRequest{
+			request: &fiberGrpc.Request{
+				Proto: &upiv1.PredictValuesRequest{
 					PredictionContext: []*upiv1.Variable{
 						{
 							Name: "unknown",

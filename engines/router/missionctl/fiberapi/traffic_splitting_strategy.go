@@ -7,11 +7,12 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
+	grpcFiber "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
@@ -49,16 +50,23 @@ func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, err
 			}
 		}
 	case fiberProtocol.GRPC:
-		upiRequest, ok := req.(*upi.Request)
+		grpcFiberReq, ok := req.(*grpcFiber.Request)
 		if !ok {
-			err := fmt.Errorf("failed to convert into UPI request")
+			err := fmt.Errorf("failed to convert into grpc fiber request")
+			log.Glob().Error(err.Error())
+			return false, err
+		}
+
+		upiReq, ok := grpcFiberReq.ProtoMessage().(*upiv1.PredictValuesRequest)
+		if !ok {
+			err := fmt.Errorf("failed to convert into upi request")
 			log.Glob().Error(err.Error())
 			return false, err
 		}
 
 		// test all condition and return immediately if one condition is not satisfied
 		for _, condition := range r.Conditions {
-			res, err := condition.TestUPIRequest(upiRequest.RequestProto, req.Header())
+			res, err := condition.TestUPIRequest(upiReq, req.Header())
 			if err != nil {
 				log.Glob().Infof(
 					"Failed to test if request matches traffic-splitting condition: %s", err)

@@ -10,7 +10,6 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -142,13 +141,7 @@ func (us *Server) getPrediction(
 		return nil, turingError
 	}
 
-	upiRequest := upi.Request{
-		Request: &fiberGrpc.Request{
-			Message:  requestByte,
-			Metadata: md,
-		},
-		RequestProto: req,
-	}
+	upiRequest := fiberGrpc.NewRequest(md, requestByte, req)
 
 	// Defer logging req summary
 	defer func() {
@@ -164,7 +157,7 @@ func (us *Server) getPrediction(
 	}()
 
 	// Calling Routes via fiber
-	resp, turingError := us.missionControl.Route(ctx, &upiRequest)
+	resp, turingError := us.missionControl.Route(ctx, upiRequest)
 	if turingError != nil {
 		return nil, turingError
 	}

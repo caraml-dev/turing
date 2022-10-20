@@ -4,13 +4,16 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"os"
 	"testing"
 	"text/template"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
 )
 
 func readBody(t *testing.T, resp *http.Response) string {
@@ -66,4 +69,19 @@ func withRouterResponse(
 	require.NoError(t, err)
 
 	assertion(resp, responseBytes)
+}
+
+// withUPIRouterResponse sends request to UPI router
+// and asserts received response by using assertion function
+// the assertion function accept the response from the request
+func withUPIRouterResponse(t *testing.T,
+	client upiv1.UniversalPredictionServiceClient,
+	headers metadata.MD,
+	request *upiv1.PredictValuesRequest,
+	assertion func(response *upiv1.PredictValuesResponse)) {
+	ctx := metadata.NewOutgoingContext(context.Background(), headers)
+	resp, err := client.PredictValues(ctx, request)
+	require.NoError(t, err)
+
+	assertion(resp)
 }

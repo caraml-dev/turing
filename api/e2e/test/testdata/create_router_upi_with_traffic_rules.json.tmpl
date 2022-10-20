@@ -1,13 +1,38 @@
 {
     "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-experiment-{{.TestID}}",
+    "name": "e2e-traffic-rules-upi-{{.TestID}}",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverHTTPEndpoint}}/control",
+                "endpoint": "{{.MockserverUPIControlEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
+            },
+            {
+                "id": "treatment-a",
+                "type": "PROXY",
+                "endpoint": "{{.MockserverUPIAEndpoint}}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            }
+        ],
+        "default_traffic_rule": {
+            "routes": ["control"]
+        },
+        "rules": [
+            {
+                "name": "rule-1",
+                "conditions": [
+                    {
+                        "field_source": "prediction_context",
+                        "field": "client_id",
+                        "operator": "in",
+                        "values": ["1"]
+                    }
+                ],
+                "routes": ["treatment-a", "control"]
             }
         ],
         "experiment_engine": {
@@ -38,13 +63,21 @@
                         {
                             "name": "client_id",
                             "required": true,
-                            "field": "client.id",
+                            "field": "client_id",
                             "field_source": "payload"
                         }
                     ]
                 }
             }
         },
+        "ensembler": {
+            "type": "standard",
+            "standard_config": {
+                "experiment_mappings": [],
+                "route_name_path": "route_name"
+            }
+        },
+        "default_route_id": "control",
         "resource_request": {
             "min_replica": 1,
             "max_replica": 1,
@@ -52,48 +85,9 @@
             "memory_request": "250Mi"
         },
         "timeout": "5s",
-        "protocol": "HTTP_JSON",
+        "protocol": "UPI_V1",
         "log_config": {
             "result_logger_type": "nop"
-        },
-        "enricher": {
-            "image": "{{.TestEchoImage}}",
-            "resource_request": {
-                "min_replica": 1,
-                "max_replica": 1,
-                "cpu_request": "200m",
-                "memory_request": "1Gi"
-            },
-            "endpoint": "anything",
-            "timeout": "2s",
-            "port": 80,
-            "env": [
-                {
-                    "name": "TEST_ENV",
-                    "value": "enricher"
-                }
-            ]
-        },
-        "ensembler": {
-            "type": "docker",
-            "docker_config": {
-                "image": "{{.TestEchoImage}}",
-                "resource_request": {
-                    "min_replica": 2,
-                    "max_replica": 2,
-                    "cpu_request": "200m",
-                    "memory_request": "256Mi"
-                },
-                "endpoint": "anything",
-                "timeout": "3s",
-                "port": 80,
-                "env": [
-                    {
-                        "name": "TEST_ENV",
-                        "value": "ensembler"
-                    }
-                ]
-            }
         }
     }
 }

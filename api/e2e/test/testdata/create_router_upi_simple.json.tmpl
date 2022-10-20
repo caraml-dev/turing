@@ -6,7 +6,7 @@
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverUPIEndpoint}}",
+                "endpoint": "{{.MockserverUPIControlEndpoint}}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
             }
@@ -18,7 +18,7 @@
         "resource_request": {
             "min_replica": 1,
             "max_replica": 1,
-            "cpu_request": "200m",
+            "cpu_request": "100m",
             "memory_request": "250Mi"
         },
         "timeout": "5s",

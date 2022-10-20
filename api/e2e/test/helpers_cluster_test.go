@@ -100,6 +100,7 @@ func isConfigMapExists(
 	_, err := clusterClients.K8sCoreClient.
 		ConfigMaps(projectName).
 		Get(context.Background(), name, metav1.GetOptions{})
+
 	return err == nil
 }
 

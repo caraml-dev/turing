@@ -10,7 +10,7 @@ require (
 	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.3.0
-	github.com/gojek/fiber v0.1.1-0.20221006024632-2614f444e92e
+	github.com/gojek/fiber v0.1.1-0.20221018054323-013517aeaf8f
 	github.com/gojek/mlp v1.4.7
 	github.com/google/go-cmp v0.5.8
 	github.com/google/uuid v1.3.0
@@ -26,7 +26,7 @@ require (
 	github.com/uber/jaeger-client-go v2.23.1+incompatible
 	go.einride.tech/protobuf-bigquery v0.7.0
 	go.uber.org/zap v1.21.0
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )

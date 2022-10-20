@@ -20,16 +20,22 @@ from turing.router.config.router_version import RouterStatus
 
 def test_deploy_router_upi():
     # set up route
+    control_endpoint = f'{os.getenv("MOCKSERVER_UPI_CONTROL_ENDPOINT")}'
+    treatment_endpoint = f'{os.getenv("MOCKSERVER_UPI_A_ENDPOINT")}'
+
+    logging.info(f"control endpoint: {control_endpoint}")
+    logging.info(f"treatment endpoint: {treatment_endpoint}")
+
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            endpoint=control_endpoint,
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_UPI_ENDPOINT")}',
+            endpoint=treatment_endpoint,
             service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
             timeout="5s",
         ),
@@ -37,7 +43,7 @@ def test_deploy_router_upi():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="200m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router

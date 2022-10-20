@@ -12,10 +12,11 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
+	grpcFiber "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
@@ -67,14 +68,21 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		payload = req.Payload()
 		httpHeader = req.Header()
 	case fiberProtocol.GRPC:
-		upiRequest, ok := req.(*upi.Request)
+		grpcFiberReq, ok := req.(*grpcFiber.Request)
+		if !ok {
+			err := fmt.Errorf("failed to convert into grpc fiber request")
+			log.Glob().Error(err.Error())
+			return nil, nil, err
+		}
+
+		requestProto, ok := grpcFiberReq.ProtoMessage().(*upiv1.PredictValuesRequest)
 		if !ok {
 			err := fmt.Errorf("failed to convert into UPI request")
 			log.Glob().Error(err.Error())
 			return nil, nil, err
 		}
 
-		predContext, err := request.UPIVariablesToStringMap(upiRequest.RequestProto.GetPredictionContext())
+		predContext, err := request.UPIVariablesToStringMap(requestProto.GetPredictionContext())
 		if err != nil {
 			log.Glob().Errorf("failed converting prediction context into string map: %s", err)
 			return nil, nil, err
@@ -143,7 +151,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 
 		// There are no routes with the route name found in the treatment
 		log.WithContext(ctx).Errorf(
-			"No route found corresponding to the route name found in the treatment:, %s",
+			"No route found corresponding to the route name found in the treatment: %s",
 			routeName,
 		)
 	}

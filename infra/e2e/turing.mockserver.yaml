@@ -68,7 +68,7 @@ spec:
             - containerPort: 1080
           resources:
             requests:
-              cpu: "200m"
+              cpu: "20m"
               memory: "384Mi"
       volumes:
         - name: initialization-json
@@ -91,12 +91,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mockserver-upi
+  name: mockserver-upi-a
   labels:
-    app: mockserver-upi
+    app: mockserver-upi-a
 spec:
   selector:
-    app: mockserver-upi
+    app: mockserver-upi-a
   ports:
     - port: 80
       targetPort: 50051
@@ -104,25 +104,68 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mockserver-upi
+  name: mockserver-upi-a
   labels:
-    app: mockserver-upi
+    app: mockserver-upi-a
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mockserver-upi
+      app: mockserver-upi-a
   template:
     metadata:
       labels:
-        app: mockserver-upi
+        app: mockserver-upi-a
     spec:
       containers:
-        - name: mockserver-upi
-          image: ghcr.io/caraml-dev/upi-echo-server:0.3.1-1-g82f86cf
+        - name: mockserver-upi-a
+          image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
           ports:
             - containerPort: 50051
+          command: ["/upi-echo-server"]
+          args: ["--model-name", "treatment-a"]
           resources:
             requests:
-              cpu: "200m"
+              cpu: "20m"
+              memory: "384Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockserver-upi-control
+  labels:
+    app: mockserver-upi-control
+spec:
+  selector:
+    app: mockserver-upi-control
+  ports:
+    - port: 80
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mockserver-upi-control
+  labels:
+    app: mockserver-upi-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mockserver-upi-control
+  template:
+    metadata:
+      labels:
+        app: mockserver-upi-control
+    spec:
+      containers:
+        - name: mockserver-upi-control
+          image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
+          ports:
+            - containerPort: 50051
+          command: ["/upi-echo-server"]
+          args: ["--model-name", "control"]
+          resources:
+            requests:
+              cpu: "20m"
               memory: "384Mi"

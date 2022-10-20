@@ -13,6 +13,7 @@ from turing.generated.model_utils import OpenApiModel
 class FieldSource(Enum):
     HEADER = "header"
     PAYLOAD = "payload"
+    PREDICTION_CONTEXT = "prediction_context"
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.FieldSource(self.value)

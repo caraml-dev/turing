@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/upi"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -95,12 +94,12 @@ func TestNewMissionControlUpi(t *testing.T) {
 				ctx = grpc.NewContextWithServerTransportStream(ctx, mockStream)
 
 				res, err := got.Route(ctx,
-					&upi.Request{
-						Request: &fibergrpc.Request{
-							Message: []byte{},
-						},
-						RequestProto: nil,
-					})
+					&fibergrpc.Request{
+						Message: []byte{},
+						Proto:   &upiv1.PredictValuesRequest{},
+					},
+				)
+
 				require.Nil(t, err)
 				require.NotNil(t, res)
 
@@ -208,28 +207,28 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 	}{
 		{
 			name: "small request",
-			request: &upi.Request{
-				Request: &fibergrpc.Request{
-					Message: smallRequestByte,
-				}},
+			request: &fibergrpc.Request{
+				Message: smallRequestByte,
+				Proto:   smallRequest,
+			},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  true,
 		},
 		{
 			name: "large request",
-			request: &upi.Request{
-				Request: &fibergrpc.Request{
-					Message: largeRequestByte,
-				}},
+			request: &fibergrpc.Request{
+				Message: largeRequestByte,
+				Proto:   largeRequest,
+			},
 			compareAgainst: &largeRequestExpected,
 			expectedEqual:  true,
 		},
 		{
 			name: "large request",
-			request: &upi.Request{
-				Request: &fibergrpc.Request{
-					Message: largeRequestByte,
-				}},
+			request: &fibergrpc.Request{
+				Message: largeRequestByte,
+				Proto:   largeRequest,
+			},
 			compareAgainst: &smallRequestExpected,
 			expectedEqual:  false,
 		},

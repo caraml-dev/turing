@@ -3,7 +3,6 @@
 package e2e
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -13,24 +12,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
 )
 
-/*
-Create a new upi router with valid config for the router.
-No traffic rules, enricher, ensembler or experiment engine.
-Use UPI Client to call router directly.
-*/
-func TestUPIRouter(t *testing.T) {
+func TestDeployUPIRouterWithStandardEnsembler(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
 	data := makeRouterPayload(
-		filepath.Join("testdata", "create_router_upi_simple.json.tmpl"),
+		filepath.Join("testdata", "create_router_upi_with_std_ensembler.json.tmpl"),
 		globalTestContext)
 
 	withDeployedRouter(t, data,
 		func(router *models.Router) {
-			t.Log("Testing router endpoint: " + router.Endpoint)
-			t.Log("Route Endpoint: " + globalTestContext.MockserverUPIControlEndpoint)
+			t.Log("Testing router endpoint: POST " + router.Endpoint)
 			expectedEndpoint := fmt.Sprintf(
 				"%s-turing-router.%s.%s:80",
 				router.Name,
@@ -38,11 +33,13 @@ func TestUPIRouter(t *testing.T) {
 				globalTestContext.KServiceDomain,
 			)
 			assert.Equal(t, expectedEndpoint, router.Endpoint)
+
 			conn, err := grpc.Dial(router.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			assert.NoError(t, err)
 			defer conn.Close()
 
-			c := upiv1.NewUniversalPredictionServiceClient(conn)
+			client := upiv1.NewUniversalPredictionServiceClient(conn)
+			t.Log("Testing router endpoint with request that generate treatment-a")
 			upiRequest := &upiv1.PredictValuesRequest{
 				PredictionTable: &upiv1.Table{
 					Name: "Test",
@@ -61,13 +58,20 @@ func TestUPIRouter(t *testing.T) {
 						},
 					},
 				},
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "client_id",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "4",
+					},
+				},
 			}
-			r, err := c.PredictValues(context.Background(), upiRequest)
-			assert.NoError(t, err)
-			// Upi echo server will send request table in result table and metadata, test to check marshaling is not erroneous
-			assert.Equal(t, upiRequest.PredictionTable.String(), r.GetPredictionResultTable().String())
-			assert.Equal(t, r.GetMetadata().GetModels()[0].Name, "control")
-			t.Log(r.String())
+
+			headers := metadata.New(map[string]string{"region": "region-a"})
+			withUPIRouterResponse(t, client, headers, upiRequest, func(response *upiv1.PredictValuesResponse) {
+				assert.Equal(t, "treatment-a", response.Metadata.Models[0].Name)
+				assert.True(t, proto.Equal(upiRequest.PredictionTable, response.PredictionResultTable))
+			})
 		},
 		nil,
 	)
