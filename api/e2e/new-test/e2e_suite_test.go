@@ -1,5 +1,3 @@
-//go:build e2e
-
 package e2e
 
 import (
@@ -26,6 +24,10 @@ import (
 
 var configFile string
 var cfg config.Config
+
+var defaultDeploymentIntervals = []interface{}{"10m", "5s"}
+var defaultDeletionIntervals = []interface{}{"20s", "2s"}
+var arbitraryUpdateIntervals = []interface{}{"10s", "1s"}
 
 type TestData struct {
 	config.Config

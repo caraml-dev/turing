@@ -372,6 +372,11 @@ jobs:
           local_registry: ${{ env.LOCAL_REGISTRY }}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
       - name: Setup Python
         if: ${{ matrix.useSDK }}
         uses: actions/setup-python@v2
@@ -404,7 +409,11 @@ jobs:
         working-directory: api
         env:
           GOPATH: ${{ github.workspace }}/api/.go
-        run: go test -v ./e2e/new-test/... -tags=e2e -run TestEndToEnd
+        run: |
+          go install github.com/onsi/ginkgo/v2/ginkgo
+          go get github.com/onsi/gomega/...
+          go mod tidy
+          ginkgo ./e2e/new-test/... -p -run TestEndToEnd -- -config config-local.yaml
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}
