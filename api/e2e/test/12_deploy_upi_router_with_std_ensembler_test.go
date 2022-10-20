@@ -16,16 +16,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-/*
-Steps:
-Create a new router with valid config for the router.
-a. Test GET router immediately > empty config
-b. Wait for success response from deployment
-c. Test GET router version > status shows "deployed"
-d. Test GET router > config section shows version 1, status "deployed"
-e. Test cluster that deployments exist
-f. Make a request to the router, validate the response.
-*/
 func TestDeployUPIRouterWithStandardEnsembler(t *testing.T) {
 	// Create router
 	t.Log("Creating router")
