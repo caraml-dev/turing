@@ -31,7 +31,6 @@ func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
 	if job.Model.IsNew() {
 		// Only update fields if the record is new.
 		// See: https://github.com/go-gorm/gorm/issues/4553
-
 		var latest EnsemblingJob
 		err := tx.Select("ensembling_jobs.run_id").
 			Where("ensembler_id = ?", job.EnsemblerID).
