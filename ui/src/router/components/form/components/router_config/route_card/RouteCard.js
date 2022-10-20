@@ -16,6 +16,7 @@ import "./RouteCard.scss";
 
 export const RouteCard = ({
   route,
+  protocol,
   endpointOptions,
   onChange,
   onDelete,
@@ -64,7 +65,7 @@ export const RouteCard = ({
           fullWidth>
           <SelectEndpointComboBox
             fullWidth
-            placeholder="http://models.internal/predict"
+            placeholder={protocol === "HTTP_JSON" ? "http://models.internal/predict": "models.internal:80"} 
             value={route.endpoint}
             options={endpointOptions}
             onChange={(endpoint) => {

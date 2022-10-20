@@ -21,7 +21,15 @@ import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { newDefaultRule, newRule } from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandler, rules_errors = {}, default_traffic_rule_errors = {} }) => {
+export const RulesPanel = ({ 
+  default_traffic_rule, 
+  rules, 
+  routes, 
+  protocol, 
+  onChangeHandler, 
+  rules_errors = {}, 
+  default_traffic_rule_errors = {} 
+}) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
@@ -104,6 +112,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
               <RuleCard
                 rule={rule}
                 routes={routes}
+                protocol={protocol}
                 onChangeHandler={onChange(`rules.${idx}`)}
                 onDelete={onDeleteRule(idx)}
                 errors={get(rules_errors, `${idx}`)}

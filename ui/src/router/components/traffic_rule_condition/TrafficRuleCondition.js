@@ -11,6 +11,7 @@ import { FieldSourceFormLabel } from "../request_field_source/FieldSourceFormLab
 
 export const TrafficRuleCondition = ({
   condition,
+  protocol,
   onChangeHandler,
   errors,
   readOnly,
@@ -43,6 +44,7 @@ export const TrafficRuleCondition = ({
             prepend={
               <FieldSourceFormLabel
                 readOnly={readOnly}
+                protocol={protocol}
                 value={condition.field_source}
                 onChange={onChange("field_source")}
               />

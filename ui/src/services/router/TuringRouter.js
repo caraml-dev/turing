@@ -31,6 +31,7 @@ export class TuringRouter {
         target: "1",
       },
       timeout: "300ms",
+      protocol: "HTTP_JSON",
       experiment_engine: new NopExperimentEngine(),
       enricher: {
         type: "nop",

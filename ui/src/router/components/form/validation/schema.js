@@ -92,7 +92,8 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   kafkaBrokersRegex =
     /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
   kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i,
-  trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/;
+  trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/,
+  routeUrlNameRegex= /^((http|https):\/\/)?(www.)?(?!.*(http|https|www.))[a-zA-Z0-9_-]+(\.[a-zA-Z]+)+(\/)?.([\w?[a-zA-Z-_%/@?]+)*([^/\w?[a-zA-Z0-9_-]+=\w+(&[a-zA-Z0-9_]+=\w+)*)?$/;
 
 const timeoutSchema = yup
   .string()
@@ -104,7 +105,7 @@ const routeSchema = yup.object().shape({
   endpoint: yup
     .string()
     .required("Valid url is required")
-    .url("Valid url is required"),
+    .matches(routeUrlNameRegex),
   timeout: timeoutSchema.required("Timeout is required"),
 });
 
@@ -332,6 +333,10 @@ const schema = (maxAllowedReplica) => [
       }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
       autoscaling_policy: autoscalingPolicySchema,
+      protocol: yup
+        .string()
+        .required("Valid Protocol should be selected")
+        .oneOf(["HTTP_JSON", "UPI_V1"], "Valid Protocol should be selected")
     }),
   }),
   yup.object().shape({

@@ -14,11 +14,13 @@ import { EuiFieldDuration } from "../../../../../components/form/field_duration/
 import { get } from "../../../../../components/form/utils";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import sortBy from "lodash/sortBy";
+import { protocolTypeOptions } from "./typeOptions";
 
 export const GeneralSettingsPanel = ({
   name,
   environment,
   timeout,
+  protocol,
   isEdit,
   onChange,
   errors = {},
@@ -54,6 +56,27 @@ export const GeneralSettingsPanel = ({
             isInvalid={!!errors.environment_name}
             disabled={isEdit}
             itemLayoutAlign="top"
+            hasDividers
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormLabelWithToolTip
+              label="Protocol *"
+              content="Specify the type of Turing router Protocol"
+            />
+          }
+          display="row">
+          <EuiSuperSelect
+            fullWidth
+            options={protocolTypeOptions}
+            valueOfSelected={protocol}
+            onChange={onChange("config.protocol")}
+            disabled={isEdit}
             hasDividers
           />
         </EuiFormRow>

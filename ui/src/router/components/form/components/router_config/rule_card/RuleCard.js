@@ -17,6 +17,7 @@ import { useOnChangeHandler } from "../../../../../../components/form/hooks/useO
 import { DraggableCardHeader } from "../../../../../../components/card/DraggableCardHeader";
 import { RouteDropDownOption } from "../../RouteDropDownOption";
 import { TrafficRuleCondition } from "../../../../traffic_rule_condition/TrafficRuleCondition";
+import { FormLabelWithToolTip } from "@gojek/mlp-ui";
 
 import "./RuleCard.scss";
 
@@ -26,23 +27,24 @@ const noneRoute = {
   disabled: true,
 };
 
-const newCondition = () => ({
-  field_source: "header",
-  field: "",
-  operator: "in",
-  values: [],
-});
-
 export const RuleCard = ({
   isDefault,
   rule,
   routes,
+  protocol,
   onChangeHandler,
   onDelete,
   errors,
   ...props
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
+
+  const newCondition = () => ({
+    field_source: protocol === "UPI_V1" ? "prediction_context" : "header",
+    field: "",
+    operator: "in",
+    values: [],
+  });
 
   const routesOptions = useCallback(
     (item) => {
@@ -69,6 +71,12 @@ export const RuleCard = ({
 
   // Hide last row when all routes are selected
   const routeSelectionOptions = (rule.routes.length < routes.length ? [...rule.routes,  "_none_"]: rule.routes);
+  
+  const conditionLabel = protocol === "UPI_V1" ? 
+  <FormLabelWithToolTip
+    label="Conditions *"
+    content='Prediction Context of the UPI proto.  e.g. "model-a" in "model"'
+  /> : "Conditions *"
 
   return (
     <EuiCard
@@ -112,7 +120,7 @@ export const RuleCard = ({
       }
 
       {!isDefault ? <EuiFormRow
-        label="Conditions *"
+        label={conditionLabel}
         isInvalid={!!get(errors, "conditions")}
         error={
           Array.isArray(get(errors, "conditions"))
@@ -130,6 +138,7 @@ export const RuleCard = ({
               alignItems="flexStart">
               <EuiFlexItem grow={true}>
                 <TrafficRuleCondition
+                  protocol={protocol}
                   condition={condition}
                   onChangeHandler={onChange(`conditions.${idx}`)}
                   errors={get(errors, `conditions.${idx}`)}

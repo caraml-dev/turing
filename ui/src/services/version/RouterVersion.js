@@ -90,6 +90,7 @@ export class RouterVersion {
           ...this.autoscaling_policy,
           target: parseInt(this.autoscaling_policy.target),
         },
+        protocol: this.protocol,
       },
       experiment_engine: experiment,
       enricher:

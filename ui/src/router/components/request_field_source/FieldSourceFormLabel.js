@@ -9,23 +9,32 @@ import {
 
 import "./FieldSourceFormLabel.scss";
 
-const fieldSourceOptions = [
-  {
-    value: "header",
-    inputDisplay: "Header",
-  },
-  {
-    value: "payload",
-    inputDisplay: "Payload",
-  },
-];
+const fieldSourceOptions = {
+  "HTTP_JSON": [
+    {
+      value: "header",
+      inputDisplay: "Header",
+    },
+    {
+      value: "payload",
+      inputDisplay: "Payload",
+    },
+  ],
+  "UPI_V1": [
+    {
+      value: "prediction_context",
+      inputDisplay: "Prediction Context",
+    }
+  ]
+}
 
-export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
+export const FieldSourceFormLabel = ({ value, onChange, readOnly, protocol }) => {
   const [isOpen, togglePopover] = useToggle();
+  const options = fieldSourceOptions[protocol]
 
   const panels = flattenPanelTree({
     id: 0,
-    items: fieldSourceOptions.map((option) => ({
+    items: options.map((option) => ({
       name: option.inputDisplay,
       value: option.value,
       onClick: () => {
@@ -36,8 +45,8 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
   });
 
   const selectedOption = useMemo(
-    () => fieldSourceOptions.find((o) => o.value === value),
-    [value]
+    () => fieldSourceOptions[protocol].find((o) => o.value === value),
+    [value, protocol]
   );
 
   return readOnly ? (

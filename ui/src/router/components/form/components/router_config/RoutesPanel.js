@@ -7,8 +7,8 @@ import { get } from "../../../../../components/form/utils";
 import EndpointsContext from "../../../../../providers/endpoints/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 
-export const RoutesPanel = ({ routes, onChangeHandler, errors = {} }) => {
-  const { onChange } = useOnChangeHandler(onChangeHandler);
+export const RoutesPanel = ({ routes, protocol, onChangeHandler, errors = {} }) => {
+const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const endpoints = useContext(EndpointsContext);
 
@@ -28,6 +28,7 @@ export const RoutesPanel = ({ routes, onChangeHandler, errors = {} }) => {
           <EuiFlexItem key={`route-${idx}`}>
             <RouteCard
               route={route}
+              protocol={protocol}
               endpointOptions={endpoints}
               onChange={onChange(`routes.${idx}`)}
               onDelete={routes.length > 1 ? onDeleteRoute(idx) : null}
