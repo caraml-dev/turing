@@ -28,19 +28,24 @@ type EnsemblingJob struct {
 
 // BeforeCreate sets the ensembling job name and run_id before creating
 func (job *EnsemblingJob) BeforeCreate(tx *gorm.DB) error {
-	var latest EnsemblingJob
-	err := tx.Select("ensembling_jobs.run_id").
-		Where("ensembler_id = ?", job.EnsemblerID).
-		Order("run_id desc").
-		FirstOrInit(&latest, &EnsemblingJob{RunID: 0}).
-		Error
+	if job.Model.IsNew() {
+		// Only update fields if the record is new.
+		// See: https://github.com/go-gorm/gorm/issues/4553
 
-	if err != nil {
-		return err
+		var latest EnsemblingJob
+		err := tx.Select("ensembling_jobs.run_id").
+			Where("ensembler_id = ?", job.EnsemblerID).
+			Order("run_id desc").
+			FirstOrInit(&latest, &EnsemblingJob{RunID: 0}).
+			Error
+
+		if err != nil {
+			return err
+		}
+		job.RunID = latest.RunID + 1
+		job.Name = fmt.Sprintf("%s-%d", *job.InfraConfig.EnsemblerName, job.RunID)
+
 	}
-
-	job.RunID = latest.RunID + 1
-	job.Name = fmt.Sprintf("%s-%d", *job.InfraConfig.EnsemblerName, job.RunID)
 
 	return nil
 }

@@ -113,10 +113,8 @@ func (service *routerVersionsService) ListRouterVersionsWithStatus(
 func (service *routerVersionsService) Save(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
 	var err error
 	tx := service.db.Begin()
-	// For create vs update, there is no default gorm API. Upsert will not help for
-	// foreign key associations (enricher / ensembler). So, we naively compare ID==0,
-	// which indicates that the router version hasn't yet been created.
-	if routerVersion.ID == 0 {
+
+	if routerVersion.Model.IsNew() {
 		if routerVersion.Ensembler != nil {
 			if err := tx.Create(routerVersion.Ensembler).Error; err != nil {
 				return nil, err
