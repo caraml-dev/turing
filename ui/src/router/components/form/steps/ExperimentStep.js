@@ -15,6 +15,7 @@ export const ExperimentStep = ({ projectId }) => {
       config: {
         experiment_engine,
         ensembler: { type: ensemblerType },
+        protocol
       },
     },
     onChangeHandler,
@@ -64,6 +65,7 @@ export const ExperimentStep = ({ projectId }) => {
       <EuiFlexItem grow={false}>
         <EngineTypePanel
           type={experiment_engine.type}
+          protocol={protocol}
           options={experimentEngineOptions}
           onChange={onChangeEngineType}
           errors={get(errors, "config.experiment_engine.type")}

@@ -4,8 +4,10 @@ import { EuiForm, EuiFormRow, EuiSuperSelect } from "@elastic/eui";
 import { DescribedFormGroup } from "../../../../../components/form/described_form_group/DescribedFormGroup";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
-export const EngineTypePanel = ({ type, options, onChange, errors }) => {
+export const EngineTypePanel = ({ type, options, protocol, onChange, errors }) => {
   const selectedOption = options.find((option) => option.value === type);
+  const helpText = protocol === "UPI_V1" ? 
+    "For UPI Router, HTTP call to Experiment Engine will be made with Prediction Context as payload" : ""
 
   return (
     <Panel title="Engine">
@@ -21,6 +23,7 @@ export const EngineTypePanel = ({ type, options, onChange, errors }) => {
             }
             isInvalid={!!errors}
             error={errors}
+            helpText={helpText}
             display="row">
             <EuiSuperSelect
               fullWidth
