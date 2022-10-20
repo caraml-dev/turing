@@ -21,7 +21,7 @@ var defaultDeletionIntervals = []interface{}{"20s", "2s"}
 var arbitraryUpdateIntervals = []interface{}{"10s", "1s"}
 
 var _ = DeployedRouterContext(
-	"testdata/create_router_nop_logger_nop_exp.json.tmpl",
+	"testdata/create_router_nop_logger_proprietary_exp.json.tmpl",
 	func(routerCtx *RouterContext) {
 		var (
 			apiE, routerE *httpexpect.Expect
@@ -41,7 +41,7 @@ var _ = DeployedRouterContext(
 		AssertPredictResponse := func() {
 			got = routerE.POST("/v1/predict").
 				WithHeaders(defaultPredictHeaders).
-				WithJSON(json.RawMessage(`{}`)).
+				WithJSON(json.RawMessage(`{"client": {"id": 4}}`)).
 				Expect().Status(http.StatusOK).
 				JSON().Object()
 
@@ -55,7 +55,7 @@ var _ = DeployedRouterContext(
 						It("responds with expected payload", func() {
 							want = httpexpect.NewValue(
 								GinkgoT(),
-								JSONPayload("testdata/responses/router_no_exp_predict.json"),
+								JSONPayload("testdata/responses/router_proprietary_exp_predict.json"),
 							).Object()
 
 							AssertPredictResponse()
@@ -68,10 +68,10 @@ var _ = DeployedRouterContext(
 						It("responds with an array, that contains individual predictions", func() {
 							routerE.POST("/v1/batch_predict").
 								WithHeaders(defaultPredictHeaders).
-								WithJSON(json.RawMessage(`[{},{}]`)).
+								WithJSON(json.RawMessage(`[{"client": {"id": 4}}, {"client": {"id": 7}}]`)).
 								Expect().Status(http.StatusOK).
 								JSON().Array().
-								Equal(JSONPayload("testdata/responses/router_no_exp_batch_predict.json"))
+								Equal(JSONPayload("testdata/responses/router_proprietary_exp_batch_predict.json"))
 						})
 					})
 				})

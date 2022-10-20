@@ -107,12 +107,8 @@ func LoadFromFiles(filepaths ...string) (*Config, error) {
 		}
 	}
 
-	fmt.Println(v.AllKeys())
-
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	fmt.Println(v.AllKeys())
 
 	config := &Config{}
 	err := v.Unmarshal(config, func(c *mapstructure.DecoderConfig) {
