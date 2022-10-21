@@ -43,6 +43,10 @@ test: tidy
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out
 
+.PHONY: test_e2e
+test_e2e:
+	@$(shell go env GOPATH)/bin/ginkgo ./e2e/new-test/... -p -run TestEndToEnd
+
 .PHONY: build
 build: tidy
 	@echo "Building binary..."

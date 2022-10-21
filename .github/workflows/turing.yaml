@@ -410,10 +410,11 @@ jobs:
         env:
           GOPATH: ${{ github.workspace }}/api/.go
         run: |
+          go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.0
+          go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.0
           go install github.com/onsi/ginkgo/v2/ginkgo
           go get github.com/onsi/gomega/...
-          go mod tidy
-          ginkgo ./e2e/new-test/... -p -run TestEndToEnd -- -config config-local.yaml
+          make test_e2e
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}

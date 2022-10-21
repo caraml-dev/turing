@@ -22,7 +22,7 @@ repos:
         files: '^api/'
         types: [go]
         language: system
-        entry: bash -c 'cd api make lint'
+        entry: bash -c 'cd api; make lint'
       - id: golangci-lint
         name: 'Linter for the Router Engine'
         alias: golangci-lint-router
