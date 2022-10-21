@@ -188,7 +188,7 @@ popd
 Now fire up the turing API server (as a daemon or tmux or some other terminal process).
 
 ```
-go run turing/cmd/main.go -config=config-dev.yaml
+go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.yaml
 ```
 
 #### <b>Run E2E tests</b>

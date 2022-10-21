@@ -75,7 +75,6 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-      - "./istio/minimal-operator.yaml:/minimal-operator.yaml"
       - "kube:/.kube"
     entrypoint: bash -ec
     command:
@@ -93,7 +92,7 @@ services:
     user: root:root
     volumes:
       - "kube:/.kube"
-      - "./knative/config-features.yaml:/config-features.yaml"
+      - "../../cluster-init/knative-configmaps/config-features.yaml:/config-features.yaml"
     entrypoint: bash -ec
     command:
       - |

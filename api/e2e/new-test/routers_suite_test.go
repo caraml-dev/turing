@@ -93,7 +93,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		}
 		return nil
 	}()).To(Succeed())
-
 	Expect(cluster.InitClusterClients(cfg)).To(Succeed())
 
 	cfgYAML, err := yaml.Marshal(cfg)
