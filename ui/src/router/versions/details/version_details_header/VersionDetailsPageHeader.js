@@ -26,6 +26,10 @@ export const VersionDetailsPageHeader = ({ version }) => {
       title: "Updated At",
       description: <DateFromNow date={version.updated_at} size="s" />,
     },
+    {
+      title: "Protocol",
+      description: version.protocol,
+    },
   ];
 
   return (

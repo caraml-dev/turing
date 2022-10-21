@@ -91,7 +91,7 @@ export const RouteCard = ({
           protocol === "UPI_V1" && 
           (
             <EuiFormRow
-              label="ServiceMethod *"
+              label="Service Method *"
               // isInvalid={!!get(errors, "service_method")}
               // error={get(errors, "service_method")}
               fullWidth>

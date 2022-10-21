@@ -59,6 +59,16 @@ export const RouterDetailsPageHeader = ({ router }) => {
       },
     },
     {
+      title: "Protocol",
+      description: router.config.protocol,
+      flexProps: {
+        grow: 1,
+        style: {
+          minWidth: "100px",
+        },
+      },
+    },
+    {
       title: "Environment",
       description: (
         <EuiBadge color="default">{router.environment_name}</EuiBadge>
