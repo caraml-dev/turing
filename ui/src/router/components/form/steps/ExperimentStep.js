@@ -47,7 +47,7 @@ export const ExperimentStep = ({ projectId }) => {
   );
 
   useEffect(() => {
-    const ensemblerOptions = ensemblerTypeOptions(engineProps).filter(
+    const ensemblerOptions = ensemblerTypeOptions(engineProps, protocol).filter(
       (o) => !o.disabled
     );
 
@@ -58,7 +58,7 @@ export const ExperimentStep = ({ projectId }) => {
     if (ensemblerOptions.length && !ensemblerTypeOption) {
       onChange("config.ensembler.type")(ensemblerOptions[0].value);
     }
-  }, [experiment_engine.type, engineProps, onChange, ensemblerType]);
+  }, [experiment_engine.type, engineProps, onChange, ensemblerType, protocol]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

@@ -7,7 +7,7 @@ import { FormLabelWithToolTip } from "../../../../../components/form/label_with_
 export const EngineTypePanel = ({ type, options, protocol, onChange, errors }) => {
   const selectedOption = options.find((option) => option.value === type);
   const helpText = protocol === "UPI_V1" ? 
-    "For UPI Router, HTTP call to Experiment Engine will be made with Prediction Context as payload" : ""
+    "For UPI Router, payload variables should be in Prediction Context" : ""
 
   return (
     <Panel title="Engine">

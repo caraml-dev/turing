@@ -25,7 +25,7 @@ export const enricherTypeOptions = {
       value: "nop",
       inputDisplay: "None",
       description:
-        "Enricher not yet supported for UPI router.",
+        "Enricher not supported for UPI router yet.",
       disabled: true,
     },
   ]
