@@ -189,6 +189,9 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, models.ID(1), saved.ID)
 		assert.Equal(t, models.RouterVersionStatusDeployed, saved.Status)
+		found, err = svc.FindByRouterIDAndVersion(router.ID, 1)
+		assert.NoError(t, err)
+		assert.Equal(t, models.ID(1), found.ID)
 
 		// list with versions
 		list, err = svc.ListRouterVersionsWithStatus(router.ID, models.RouterVersionStatusDeployed)

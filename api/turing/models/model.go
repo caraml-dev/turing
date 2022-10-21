@@ -20,6 +20,13 @@ type Model struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// IsNew tells us if the record is new. This is determined by comparing the value of ID, which is
+// the primary key. If 0, the record does not already exist in the DB.
+// See: https://github.com/go-gorm/gorm/issues/3400
+func (m Model) IsNew() bool {
+	return m.GetID() == 0
+}
+
 func (m Model) GetID() ID {
 	return m.ID
 }

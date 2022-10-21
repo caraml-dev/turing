@@ -76,15 +76,19 @@ func (r *RouterVersion) SetEnricherID(enricherID ID) {
 
 // BeforeCreate Sets version before creating
 func (r *RouterVersion) BeforeCreate(tx *gorm.DB) error {
-	var latestVersion RouterVersion
-	err := tx.Select("router_versions.*").
-		Where("router_id = ?", r.RouterID).
-		Order("version desc").
-		FirstOrInit(&latestVersion, &RouterVersion{Version: 0}).Error
-	if err != nil {
-		return err
+	if r.Model.IsNew() {
+		// Only update fields if the record is new.
+		// See: https://github.com/go-gorm/gorm/issues/4553
+		var latestVersion RouterVersion
+		err := tx.Select("router_versions.*").
+			Where("router_id = ?", r.RouterID).
+			Order("version desc").
+			FirstOrInit(&latestVersion, &RouterVersion{Version: 0}).Error
+		if err != nil {
+			return err
+		}
+		r.Version = latestVersion.Version + 1
 	}
-	r.Version = latestVersion.Version + 1
 	return nil
 }
 
