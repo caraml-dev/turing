@@ -57,6 +57,7 @@ require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/Sirupsen/logrus v0.0.0-00010101000000-000000000000 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
@@ -140,6 +141,7 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20220114050600-8b9d41f48198 // indirect
+	github.com/opencontainers/runc v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/ory/keto-client-go v0.4.3-alpha.2 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
@@ -174,7 +176,9 @@ require (
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220810155839-1856144b1d9c // indirect
+	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	google.golang.org/grpc v1.48.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
@@ -187,13 +191,15 @@ require (
 )
 
 replace (
+	cloud.google.com/go => cloud.google.com/go v0.104.0
 	// Ref: https://github.com/Azure/go-autorest/issues/414
 	github.com/Azure/azure-sdk-for-go => github.com/Azure/azure-sdk-for-go v38.2.0+incompatible
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
+	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.9.0
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
-	github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200213202729-31a86c4ab209
+	github.com/docker/docker => github.com/docker/engine v1.13.0
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0

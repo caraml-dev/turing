@@ -9,7 +9,7 @@ turing:
     # -- Docker image repository for Turing API
     repository: caraml-dev/turing
     # -- Docker image tag for Turing API
-    tag: v1.6.0
+    tag: v1.7.1
   labels: {}
   # -- Resources requests and limits for Turing API. This should be set
   # according to your cluster capacity and service level objectives.
@@ -157,7 +157,9 @@ turing:
     Sentry:
       Enabled: false
     RouterDefaults:
-      Image: ghcr.io/caraml-dev/turing/turing-router:v1.6.0
+      Image: ghcr.io/caraml-dev/turing/turing-router:v1.7.1
+      FluentdConfig:
+        Image: ghcr.io/caraml-dev/turing/fluentd:v1.7.1-build.5-6dc23d0
 
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.

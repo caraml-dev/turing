@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+ruby '~> 3.1.2'
+
+gem "fluent-plugin-bigquery", "~> 3.0.0"
