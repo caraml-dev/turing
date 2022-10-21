@@ -83,6 +83,7 @@ export class RouterVersion {
           id: route.id,
           endpoint: route.endpoint,
           timeout: route.timeout,
+          service_method: route.service_method,
           is_default: route.id === this.default_route_id,
         })),
         resource_request: this.resource_request,

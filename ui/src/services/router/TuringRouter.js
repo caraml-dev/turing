@@ -166,6 +166,7 @@ export const newRoute = () => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
+  service_method: ""
 });
 
 export const newDefaultRule = () => ({
