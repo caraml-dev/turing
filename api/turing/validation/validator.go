@@ -344,7 +344,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 				// validate the field source of traffic rules are valid for given protocol
 				allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
 					string(expRequest.PayloadFieldSource)}
-				if *router.Protocol == routerConfig.UPI {
+				if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
 					allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
 						string(expRequest.PredictionContextSource)}
 				}
