@@ -262,7 +262,7 @@ var _ = DeployedRouterContext(
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
 								WithJSON(
-									JSONPayload("testdata/update_router_nop_logger_nop_exp.json.tmpl", cfg)).
+									JSONPayload("testdata/update_router_nop_logger_proprietary_exp.json.tmpl", cfg)).
 								Expect().Status(http.StatusOK).
 								JSON().Object()
 						})
