@@ -31,6 +31,7 @@ func logTuringRouterRequestSummary(
 	reqBody []byte,
 	mcRespCh <-chan routerResponse,
 ) {
+	logger.Debugw("logTuringRouterRequestSummary", "reqBody", string(reqBody))
 	// Uncompress request data
 	uncompressedData, err := uncompressHTTPBody(reqHeader, reqBody)
 	if err != nil {
