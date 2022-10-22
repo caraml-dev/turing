@@ -4,12 +4,13 @@ import { EuiComboBoxSelect } from "../combo_box/EuiComboBoxSelect";
 
 export const SelectEndpointComboBox = ({
   value,
+  protocol,
   onChange,
   options,
   ...props
 }) => {
   const onCreateOption = (value) => {
-    if (!isValidUrl(value)) {
+    if (!isValidUrl(value, protocol)) {
       return false;
     }
     onChange(value);

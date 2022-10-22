@@ -72,6 +72,7 @@ export const RouteCard = ({
           <SelectEndpointComboBox
             fullWidth
             placeholder={protocol === "HTTP_JSON" ? "http://models.internal/predict": "models.internal:80"} 
+            protocol={protocol}
             value={route.endpoint}
             options={endpointOptions}
             onChange={(endpoint) => {

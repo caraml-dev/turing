@@ -24,7 +24,8 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     [maxAllowedReplica]
   );
 
-  const { data: router } = useContext(FormContext);
+  const { data: router} = useContext(FormContext);
+  const protocol = router.config.protocol
 
   const [submissionResponse, submitForm] = useTuringApi(
     `/projects/${projectId}/routers`,
@@ -59,6 +60,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       title: "Router",
       children: <RouterStep projectId={projectId} />,
       validationSchema: validationSchema[0],
+      validationContext: { protocol },
     },
     {
       title: "Experiments",
