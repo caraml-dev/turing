@@ -93,7 +93,8 @@ const routerNameRegex = /^[a-z0-9-]*$/,
     /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
   kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i,
   trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/,
-  upiUrlRegex= /^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)$/
+  upiUrlRegex= /^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+  serviceMethodRegex= /^\/?(\w+\.?)+(\/[A-Za-z]+)$/
 
 const timeoutSchema = yup
   .string()
@@ -110,6 +111,14 @@ const routeSchema = yup.object().shape({
       then: (schema) => schema.matches(upiUrlRegex, "Valid grpc endpoint is required"),
       otherwise: (schema) => schema.url("Valid url is required")}),
   timeout: timeoutSchema.required("Timeout is required"),
+  service_method: yup
+      .string()
+      .when('$protocol', {
+        is: "UPI_V1",
+        then: (schema) => schema
+          .required("Valid service method is required eg. my.package/PredictValue")
+          .matches(serviceMethodRegex, "Valid service method is required eg. my.package/PredictValues")
+      })
 });
 
 const validRouteSchema = yup

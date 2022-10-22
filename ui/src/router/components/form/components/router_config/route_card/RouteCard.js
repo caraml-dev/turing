@@ -93,8 +93,8 @@ export const RouteCard = ({
           (
             <EuiFormRow
               label="Service Method *"
-              // isInvalid={!!get(errors, "service_method")}
-              // error={get(errors, "service_method")}
+              isInvalid={!!get(errors, "service_method")}
+              error={get(errors, "service_method")}
               fullWidth>
               <EuiComboBoxSelect
                 fullWidth
@@ -113,7 +113,6 @@ export const RouteCard = ({
                     service_method,
                   });
                 }}
-                // isInvalid={!!get(errors, "service_method")}
               />
           </EuiFormRow>
           )
