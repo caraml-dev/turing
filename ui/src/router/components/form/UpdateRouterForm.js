@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { AccordionForm } from "@gojek/mlp-ui";
+import { AccordionForm, FormContext } from "@gojek/mlp-ui";
 import { RouterStep } from "./steps/RouterStep";
 import schema from "./validation/schema";
 import { ExperimentStep } from "./steps/ExperimentStep";
@@ -26,12 +26,20 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
     ExperimentEngineContext
   );
 
+  const { 
+    data: {
+      config: {
+        protocol
+      }
+  }} = useContext(FormContext);
+
   const sections = [
     {
       title: "Router",
       iconType: "bolt",
       children: <RouterStep projectId={projectId} />,
       validationSchema: validationSchema[0],
+      validationContext: { protocol },
     },
     {
       title: "Experiments",

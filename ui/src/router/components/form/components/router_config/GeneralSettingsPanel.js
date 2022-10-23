@@ -15,6 +15,7 @@ import { get } from "../../../../../components/form/utils";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import sortBy from "lodash/sortBy";
 import { protocolTypeOptions } from "./typeOptions";
+import { newRoute } from "../../../../../services/router/TuringRouter"
 
 export const GeneralSettingsPanel = ({
   name,
@@ -75,8 +76,11 @@ export const GeneralSettingsPanel = ({
             fullWidth
             options={protocolTypeOptions}
             valueOfSelected={protocol}
-            onChange={onChange("config.protocol")}
-            disabled={isEdit}
+            onChange={(e)=>{
+              onChange("config.protocol")(e)
+              // reset routes when protocol changes
+              onChange("config.routes")([newRoute()])
+            }}
             hasDividers
           />
         </EuiFormRow>
