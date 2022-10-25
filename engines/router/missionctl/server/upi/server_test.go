@@ -101,7 +101,8 @@ func TestUPIServer_PredictValues(t *testing.T) {
 				return
 			}
 
-			require.True(t, proto.Equal(resp.PredictionResultTable, tt.expected.PredictionResultTable), "response not equal to expected")
+			require.True(t, proto.Equal(resp.PredictionResultTable, tt.expected.PredictionResultTable),
+				"response not equal to expected")
 			require.NotEmpty(t, resp.Metadata.PredictionId, "prediction id is empty")
 		})
 	}
