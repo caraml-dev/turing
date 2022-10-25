@@ -23,8 +23,16 @@ module.exports = ({ env }) => ({
             add: [
                 new ModuleFederationPlugin({
                     name: "turing",
+                    filename: "remoteEntry.js",
+                    exposes: {
+                        ".": "./src/AppRoutes"
+                    },
                     shared: {
                         ...sharedDeps,
+                        "@emotion/react": {
+                            singleton: true,
+                            requiredVersion: sharedDeps["@emotion/react"]
+                        },
                         react: {
                             shareScope: "default",
                             singleton: true,
@@ -33,6 +41,10 @@ module.exports = ({ env }) => ({
                         "react-dom": {
                             singleton: true,
                             requiredVersion: sharedDeps["react-dom"],
+                        },
+                        "react-router-dom": {
+                            singleton: true,
+                            requiredVersion: sharedDeps["react-router-dom"]
                         },
                         "@gojek/mlp-ui": {
                             singleton: true,

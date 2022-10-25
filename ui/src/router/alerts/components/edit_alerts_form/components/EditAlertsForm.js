@@ -18,15 +18,17 @@ export const EditAlertsForm = ({
   existingData,
   onCancel,
   onSuccess,
-  ...props
+  projectId,
+  routerId,
+  environment,
 }) => {
   const { data: newAlerts, onChangeHandler } = useContext(FormContext);
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const { submitAlerts } = useAlertsApi(
-    props.projectId,
-    props.routerId,
-    props.environment,
+    projectId,
+    routerId,
+    environment,
     onCancel,
     onSuccess
   );

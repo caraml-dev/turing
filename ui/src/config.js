@@ -68,8 +68,7 @@ const appConfig = {
     // Padding of page template
     paddingSize: "none",
   },
-  batchEnsemblingEnabled:
-    process.env.REACT_APP_BATCH_ENSEMBLING_ENABLED === "true",
+  batchEnsemblingEnabled: process.env.REACT_APP_BATCH_ENSEMBLING_ENABLED === "true",
 };
 
 const sentryConfig = {
