@@ -78,8 +78,9 @@ export const GeneralSettingsPanel = ({
             valueOfSelected={protocol}
             onChange={(e)=>{
               onChange("config.protocol")(e)
-              // reset routes when protocol changes
+              // reset routes and rules when protocol changes
               onChange("config.routes")([newRoute()])
+              onChange("config.rules")([])
             }}
             hasDividers
           />
