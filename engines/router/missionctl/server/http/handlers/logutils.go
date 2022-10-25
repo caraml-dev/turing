@@ -55,7 +55,7 @@ func logTuringRouterRequestSummary(
 					resp.key, err.Error())
 				logEntry.AddResponse(resp.key, "", nil, err.Error())
 			} else {
-				logger.Debugw("Logging response", "reqBody", string(reqBody))
+				logger.Debugw("Logging response", "respBody", string(uncompressedData))
 				// Format the response header
 				responseHeader := resultlog.FormatHeader(resp.header)
 				logEntry.AddResponse(resp.key, string(uncompressedData), responseHeader, "")
@@ -63,10 +63,11 @@ func logTuringRouterRequestSummary(
 		}
 	}
 
+	logger.Debugw("Received all response from mcRespCh")
 	// Log the responses. If an error occurs in logging the result to the
 	// configured result log destination, log the error.
 	if err = resultlog.LogEntry(logEntry); err != nil {
-		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+		logger.Errorf("Result Logging Error: %s", err.Error())
 	}
 }
 
