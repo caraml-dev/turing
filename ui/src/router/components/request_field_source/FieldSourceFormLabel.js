@@ -22,6 +22,10 @@ const fieldSourceOptions = {
   ],
   "UPI_V1": [
     {
+      value: "header",
+      inputDisplay: "Header",
+    },
+    {
       value: "prediction_context",
       inputDisplay: "Prediction Context",
     }

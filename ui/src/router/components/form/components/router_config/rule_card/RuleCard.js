@@ -40,7 +40,7 @@ export const RuleCard = ({
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const newCondition = () => ({
-    field_source: protocol === "UPI_V1" ? "prediction_context" : "header",
+    field_source: "header",
     field: "",
     operator: "in",
     values: [],
