@@ -31,7 +31,7 @@ func logTuringRouterRequestSummary(
 	reqBody []byte,
 	mcRespCh <-chan routerResponse,
 ) {
-	logger.Debugw("logTuringRouterRequestSummary", "reqBody", string(reqBody))
+	logger.Debugw("Logging request", "reqBody", string(reqBody))
 	// Uncompress request data
 	uncompressedData, err := uncompressHTTPBody(reqHeader, reqBody)
 	if err != nil {
@@ -43,6 +43,7 @@ func logTuringRouterRequestSummary(
 
 	// Read incoming responses and prepare for logging
 	for resp := range mcRespCh {
+		logger.Debugw("Received data in response channel")
 		// If error exists, add an error record
 		if resp.err != "" {
 			logEntry.AddResponse(resp.key, "", nil, resp.err)
@@ -54,6 +55,7 @@ func logTuringRouterRequestSummary(
 					resp.key, err.Error())
 				logEntry.AddResponse(resp.key, "", nil, err.Error())
 			} else {
+				logger.Debugw("Logging response", "reqBody", string(reqBody))
 				// Format the response header
 				responseHeader := resultlog.FormatHeader(resp.header)
 				logEntry.AddResponse(resp.key, string(uncompressedData), responseHeader, "")
