@@ -74,7 +74,7 @@ const typeOptions = {
         <Fragment>
           Turing will select the response from one of the routes, based on the
           configured mapping between routes and experiment treatments. Only standard 
-          ensembler is support for UPI now.
+          ensembler is supported for UPI now.
         </Fragment>
       ),
     }
