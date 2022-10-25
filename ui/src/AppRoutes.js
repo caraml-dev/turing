@@ -25,7 +25,7 @@ const AppRoutes = () => {
           {/* ENSEMBLERS */}
           <Route path="ensemblers" element={<ListEnsemblersView />} />
           {/* EXPERIMENTS */}
-          <Route path="experiments" element={<ExperimentsRouter />} />
+          <Route path="experiments/*" element={<ExperimentsRouter />} />
           {/* ROUTERS */}
           <Route path="routers">
             {/* LIST */}
