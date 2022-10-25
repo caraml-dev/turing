@@ -27,6 +27,13 @@ const noneRoute = {
   disabled: true,
 };
 
+const newCondition = () => ({
+  field_source: "header",
+  field: "",
+  operator: "in",
+  values: [],
+});
+
 export const RuleCard = ({
   isDefault,
   rule,
@@ -38,13 +45,6 @@ export const RuleCard = ({
   ...props
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
-
-  const newCondition = () => ({
-    field_source: "header",
-    field: "",
-    operator: "in",
-    values: [],
-  });
 
   const routesOptions = useCallback(
     (item) => {
