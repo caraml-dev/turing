@@ -105,18 +105,20 @@ const routeSchema = yup.object().shape({
   type: yup.string().oneOf(["PROXY"], "Route Type is required"),
   endpoint: yup
     .string()
-    .required("Valid url is required")
     .when('$protocol', {
       is: "UPI_V1",
-      then: (schema) => schema.matches(upiUrlRegex, "Valid grpc endpoint is required"),
-      otherwise: (schema) => schema.url("Valid url is required")}),
+      then: (schema) => schema
+      .required("Valid grpc endpoint is required eg. {url}:{port}")
+      .matches(upiUrlRegex, "Valid grpc endpoint is required eg. {url}:{port}"),
+      otherwise: (schema) => schema
+      .required("Valid url is required")
+      .url("Valid url is required")}),
   timeout: timeoutSchema.required("Timeout is required"),
   service_method: yup
       .string()
       .when('$protocol', {
         is: "UPI_V1",
         then: (schema) => schema
-          .required("Valid service method is required in format {package}/{method} eg. my.package/PredictValues")
           .matches(serviceMethodRegex, "Valid service method is required in format {package}/{method} eg. my.package/PredictValues")
       })
 });

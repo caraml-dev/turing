@@ -13,7 +13,7 @@ const jsonPathSchema = yup
 const predictionContextSchema = yup
 .string()
 .required(
-  'Valid Prediction Context value is required, e.g. "model-a" in  "models"'
+  'Valid Prediction Context value is required, e.g. "model_name" in "model_a"'
 );
   
 export const fieldSourceSchema = yup

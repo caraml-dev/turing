@@ -9,7 +9,7 @@ import { Status } from "../../../../services/status/Status";
 import "./RouterDetailsPageHeader.scss";
 
 export const RouterDetailsPageHeader = ({ router }) => {
-  const isRouterUpdating = router.status === Status.PENDING.toString();
+  const isRouterUpdating = router.status.toString() === Status.PENDING.toString();
   const headerItems = [
     {
       title: "Endpoint",
@@ -60,7 +60,11 @@ export const RouterDetailsPageHeader = ({ router }) => {
     },
     {
       title: "Protocol",
-      description: router.config.protocol,
+      description: (
+        <EuiTextColor size="s" color={isRouterUpdating ? "subdued" : "default"}>
+          {isRouterUpdating ? "Not available" : router.config?.protocol}
+        </EuiTextColor>
+        ),
       flexProps: {
         grow: 1,
         style: {

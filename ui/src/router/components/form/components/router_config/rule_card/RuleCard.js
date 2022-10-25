@@ -75,7 +75,7 @@ export const RuleCard = ({
   const conditionLabel = protocol === "UPI_V1" ? 
   <FormLabelWithToolTip
     label="Conditions *"
-    content='Prediction Context of the UPI proto.  e.g. "model-a" in "model"'
+    content='Prediction Context of the UPI proto.  e.g. "model_name" in "model_a"'
   /> : "Conditions *"
 
   return (
