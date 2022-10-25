@@ -23,7 +23,7 @@ const AppRoutes = () => {
           {/* BATCH JOBS */}
           <Route path="jobs/*" element={<EnsemblingJobsRouter />} />
           {/* ENSEMBLERS */}
-          <Route path="ensemblers/*" element={<ListEnsemblersView />} />
+          <Route path="ensemblers" element={<ListEnsemblersView />} />
           {/* EXPERIMENTS */}
           <Route path="experiments" element={<ExperimentsRouter />} />
           {/* ROUTERS */}

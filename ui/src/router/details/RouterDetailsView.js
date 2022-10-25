@@ -131,7 +131,7 @@ export const RouterDetailsView = () => {
               {/* ALERTS */}
               <Route path="alerts/*" element={<RouterAlertsView router={router} />} />
               {/* LOGS */}
-              <Route path="logs" element={<RouterLogsView path="logs" router={router} />} />
+              <Route path="logs" element={<RouterLogsView router={router} />} />
             </Routes>
           </EuiPageTemplate.Section>
         </Fragment>

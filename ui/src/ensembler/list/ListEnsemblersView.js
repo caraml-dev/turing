@@ -67,7 +67,7 @@ export const ListEnsemblersView = () => {
     replaceBreadcrumbs([{ text: "Ensemblers" }]);
   }, []);
 
-  const onRowClick = (item) => { };
+  const onRowClick = (_item) => { };
 
   return (
     <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
