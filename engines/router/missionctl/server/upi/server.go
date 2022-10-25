@@ -181,11 +181,7 @@ func (us *Server) getPrediction(
 
 func populateRequestMetadata(req *upiv1.PredictValuesRequest, id string) *upiv1.PredictValuesRequest {
 	if req.Metadata == nil {
-		req.Metadata = &upiv1.RequestMetadata{
-			PredictionId:     id,
-			RequestTimestamp: timestamppb.Now(),
-		}
-		return req
+		req.Metadata = &upiv1.RequestMetadata{}
 	}
 
 	if req.Metadata.RequestTimestamp == nil {
@@ -198,10 +194,7 @@ func populateRequestMetadata(req *upiv1.PredictValuesRequest, id string) *upiv1.
 
 func populateResponseMetadata(resp *upiv1.PredictValuesResponse, id string) *upiv1.PredictValuesResponse {
 	if resp.Metadata == nil {
-		resp.Metadata = &upiv1.ResponseMetadata{
-			PredictionId: id,
-		}
-		return resp
+		resp.Metadata = &upiv1.ResponseMetadata{}
 	}
 
 	resp.Metadata.PredictionId = id
