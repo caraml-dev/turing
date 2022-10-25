@@ -395,8 +395,8 @@ jobs:
         env:
           GOPATH: ${{ github.workspace }}/api/.go
         run: |
-          make setup_e2e
-          make test_e2e
+          make setup-e2e
+          make test-e2e
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}

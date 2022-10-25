@@ -123,18 +123,20 @@ Next, let's get the proprietary experiment engine plugin ready!
 When building the binary, make sure you're using the same GOOS and GOARCH that's compatible with your machine.
 
 ```bash
-cd engines/experiment/examples/plugins/hardcoded
-# If using MacOS M1
-make proprietary_exp_plugin GOOS=darwin GOARCH=arm64
+pushd ../engines/experiment/examples/plugins/hardcoded
+{
+    # If using MacOS M1
+    make proprietary-exp-plugin GOOS=darwin GOARCH=arm64
+}
+popd
 ```
 
 2. Build the proprietary experiment engine and push it to the local registry.
 
 ```bash
-pushd ../experiment/examples/plugins/hardcoded
+pushd ../engines/experiment/examples/plugins/hardcoded
 {
-    docker build -t localhost:5000/proprietary-experiment-engine-plugin .
-    docker push localhost:5000/proprietary-experiment-engine-plugin
+    make build-local-proprietary-exp-plugin-image
 }
 popd
 ```
@@ -162,8 +164,11 @@ CMD ["sh", "-c", "cp /go/bin/plugin ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must 
 2. Build and push the image to the local registry.
 
 ```bash
-docker build --no-cache -t localhost:5000/proprietary-experiment-engine-plugin
-docker push localhost:5000/proprietary-experiment-engine-plugin
+pushd ../engines/experiment/examples/plugins/hardcoded
+{
+    make build-local-proprietary-exp-plugin-image
+}
+popd
 ```
 
 #### <b>Prepare Turing router</b>
@@ -173,9 +178,7 @@ Don't forget to build the Turing routers and push it to the local registry. Alte
 ```bash
 pushd ../engines/router
 {
-    go mod vendor
-    docker build -t localhost:5000/turing-router .
-    docker push localhost:5000/turing-router
+    make build-local-router-image
 }
 popd
 ```
@@ -191,7 +194,7 @@ go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.
 #### <b>Run E2E tests</b>
 ---
 ```
-ginkgo ./e2e/test/... -p -tags=e2e -run TestEndToEnd -- -config config-local.yaml
+make run-local-e2e
 ```
 
 #### <b>Cleanup k8s and required dependencies</b>

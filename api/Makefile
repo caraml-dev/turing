@@ -85,15 +85,24 @@ version:
 # E2E tests
 # ==================================
 
-.PHONY: setup_e2e
-setup_e2e:
+.PHONY: build-local-router-image
+build-local-router-image: vendor
+    docker build -t localhost:5000/turing-router .
+    docker push localhost:5000/turing-router
+
+.PHONY: run-local-e2e
+run-local-e2e:
+	ginkgo ./e2e/test/... -p -tags=e2e -run TestEndToEnd -- -config config-local.yaml
+
+.PHONY: setup-e2e
+setup-e2e:
 	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.0
 	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.0
 	go install github.com/onsi/ginkgo/v2/ginkgo
 	go get github.com/onsi/gomega/...
 
-.PHONY: test_e2e
-test_e2e:
+.PHONY: test-e2e
+test-e2e:
 	@$(shell go env GOPATH)/bin/ginkgo ./e2e/test/... -p -run TestEndToEnd
 
 #   R E V I E W   R E Q U I R E D
