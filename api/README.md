@@ -120,15 +120,12 @@ Next, let's get the proprietary experiment engine plugin ready!
 
 1. Build the proprietary experiment engine plugin binary
 
-When building the binary, make sure you're using the same GOOS and GOARCH that's compatible with your machine. Eg. for MacOS M1 would be `GOOS=darwin GOARCH=arm64`.
+When building the binary, make sure you're using the same GOOS and GOARCH that's compatible with your machine.
 
 ```bash
-pushd ../experiment/examples/plugins/hardcoded
-{
-    GOOS=linux GOARCH=amd64 go build -o ./bin/example-plugin ./cmd/main.go
-    cp ./bin/example-plugin $PWD/bin/example-plugin
-}
-popd
+cd engines/experiment/examples/plugins/hardcoded
+# If using MacOS M1
+make proprietary_exp_plugin GOOS=darwin GOARCH=arm64
 ```
 
 2. Build the proprietary experiment engine and push it to the local registry.
