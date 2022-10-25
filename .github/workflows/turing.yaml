@@ -388,24 +388,9 @@ jobs:
         working-directory: sdk
         run: make setup
 
-      # - name: Run End-to-End Test Suite with Turing API
-      #   if: ${{ !matrix.useSDK }}
-      #   id: run-e2e-test
-      #   working-directory: api
-      #   env:
-      #     GOPATH: ${{ github.workspace }}/api/.go
-      #     TEST_ID: ${{ github.run_id }}
-      #     MOCKSERVER_ENDPOINT: http://mockserver
-      #     API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/v1
-      #     MODEL_CLUSTER_NAME: "dev"
-      #     PROJECT_ID: "1"
-      #     PROJECT_NAME: default
-      #     KUBECONFIG_USE_LOCAL: true
-      #   run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
-
-      - name: Run New End-to-End Test Suite with Turing API
+      - name: Run End-to-End Test Suite with Turing API
         if: ${{ !matrix.useSDK }}
-        id: run-new-e2e-test
+        id: run-e2e-test
         working-directory: api
         env:
           GOPATH: ${{ github.workspace }}/api/.go

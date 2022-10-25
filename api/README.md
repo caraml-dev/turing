@@ -191,7 +191,7 @@ go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.
 #### <b>Run E2E tests</b>
 ---
 ```
-ginkgo ./e2e/new-test/... -p -tags=e2e -run TestEndToEnd -- -config config-local.yaml
+ginkgo ./e2e/test/... -p -tags=e2e -run TestEndToEnd -- -config config-local.yaml
 ```
 
 #### <b>Cleanup k8s and required dependencies</b>

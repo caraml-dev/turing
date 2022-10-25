@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/caraml-dev/turing/api/e2e/new-test/config"
+	"github.com/caraml-dev/turing/api/e2e/test/config"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
 	"istio.io/client-go/pkg/apis/networking/v1alpha3"

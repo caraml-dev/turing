@@ -43,17 +43,6 @@ test: tidy
 	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out
 
-.PHONY: setup_e2e
-setup_e2e:
-	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.0
-	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.0
-	go install github.com/onsi/ginkgo/v2/ginkgo
-	go get github.com/onsi/gomega/...
-
-.PHONY: test_e2e
-test_e2e:
-	@$(shell go env GOPATH)/bin/ginkgo ./e2e/new-test/... -p -run TestEndToEnd
-
 .PHONY: build
 build: tidy
 	@echo "Building binary..."
@@ -92,6 +81,20 @@ version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../scripts/vertagen/vertagen.sh)))
 	@echo "turing-api version:" $(VERSION)
 
+# ==================================
+# E2E tests
+# ==================================
+
+.PHONY: setup_e2e
+setup_e2e:
+	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.0
+	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.0
+	go install github.com/onsi/ginkgo/v2/ginkgo
+	go get github.com/onsi/gomega/...
+
+.PHONY: test_e2e
+test_e2e:
+	@$(shell go env GOPATH)/bin/ginkgo ./e2e/test/... -p -run TestEndToEnd
 
 #   R E V I E W   R E Q U I R E D
 #

@@ -7,7 +7,7 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo/v2"
 
-	"github.com/caraml-dev/turing/api/e2e/new-test/config"
+	"github.com/caraml-dev/turing/api/e2e/test/config"
 )
 
 var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_exp.json.tmpl",

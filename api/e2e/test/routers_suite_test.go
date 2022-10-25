@@ -17,9 +17,9 @@ import (
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
 
-	"github.com/caraml-dev/turing/api/e2e/new-test/api"
-	"github.com/caraml-dev/turing/api/e2e/new-test/cluster"
-	"github.com/caraml-dev/turing/api/e2e/new-test/config"
+	"github.com/caraml-dev/turing/api/e2e/test/api"
+	"github.com/caraml-dev/turing/api/e2e/test/cluster"
+	"github.com/caraml-dev/turing/api/e2e/test/config"
 )
 
 var configFile string
