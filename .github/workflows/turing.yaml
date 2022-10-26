@@ -373,6 +373,11 @@ jobs:
           local_registry: ${{ env.LOCAL_REGISTRY }}
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
       - name: Setup Python
         if: ${{ matrix.useSDK }}
         uses: actions/setup-python@v2
@@ -390,16 +395,9 @@ jobs:
         working-directory: api
         env:
           GOPATH: ${{ github.workspace }}/api/.go
-          TEST_ID: ${{ github.run_id }}
-          MOCKSERVER_HTTP_ENDPOINT: http://mockserver
-          MOCKSERVER_UPI_CONTROL_ENDPOINT: mockserver-upi-control:80
-          MOCKSERVER_UPI_A_ENDPOINT: mockserver-upi-a:80
-          API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/v1
-          MODEL_CLUSTER_NAME: "dev"
-          PROJECT_ID: "1"
-          PROJECT_NAME: default
-          KUBECONFIG_USE_LOCAL: true
-        run: go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
+        run: |
+          make setup-e2e
+          make test-e2e
 
       - name: Run End-to-End Test Suite with Turing SDK
         if: ${{ matrix.useSDK }}

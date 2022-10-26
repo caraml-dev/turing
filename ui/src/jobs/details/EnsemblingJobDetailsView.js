@@ -9,17 +9,18 @@ import {
   EuiPageTemplate,
 } from "@elastic/eui";
 import React, { Fragment } from "react";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { PageTitle } from "../../components/page/PageTitle";
 import { StatusBadge } from "../../components/status_badge/StatusBadge";
 import { JobStatus } from "../../services/job/JobStatus";
-import { Redirect, Router } from "@reach/router";
 import { EnsemblingJobConfigView } from "./config/EnsemblingJobConfigView";
 import { EnsemblingJobDetailsPageHeader } from "../components/job_details_header/EnsemblingJobDetailsPageHeader";
 import { EnsemblingJobDetailsPageNavigation } from "../components/page_navigation/EnsemblingJobDetailsPageNavigation";
 import { EnsemblingJobLogsView } from "./logs/EnsemblingJobLogsView";
 import { useConfig } from "../../config";
 
-export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
+export const EnsemblingJobDetailsView = () => {
+  const { projectId, jobId, "*": section } = useParams();
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },
@@ -66,24 +67,23 @@ export const EnsemblingJobDetailsView = ({ projectId, jobId, ...props }) => {
               />
             }
           >
-            <EnsemblingJobDetailsPageHeader job={jobDetails} {...props} />
+            <EnsemblingJobDetailsPageHeader job={jobDetails} />
 
             <EuiSpacer size="xs" />
 
-            <EnsemblingJobDetailsPageNavigation job={jobDetails} {...props} />
+            <EnsemblingJobDetailsPageNavigation job={jobDetails} selectedTab={section} />
 
           </EuiPageTemplate.Header>
 
           <EuiSpacer size="m" />
           <EuiPageTemplate.Section color={"transparent"}>
-            <Router>
-              <Redirect from="/" to="details" noThrow />
-              <EnsemblingJobConfigView path="details" job={jobDetails} />
-
-              <EnsemblingJobLogsView path="logs" job={jobDetails} />
-
-              <Redirect from="any" to="/error/404" default noThrow />
-            </Router>
+            <Routes>
+              {/* DETAILS */}
+              <Route index element={<Navigate to="details" replace={true} />} />
+              <Route path="details" element={<EnsemblingJobConfigView job={jobDetails} />} />
+              {/* LOGS */}
+              <Route path="logs" element={<EnsemblingJobLogsView job={jobDetails} />} />
+            </Routes>
           </EuiPageTemplate.Section>
         </Fragment>
       )}

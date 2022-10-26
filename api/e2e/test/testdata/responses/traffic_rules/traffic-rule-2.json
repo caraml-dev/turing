@@ -1,0 +1,19 @@
+{
+  "request": {
+    "service_type": {
+      "id": "service-type-b"
+    }
+  },
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "treatment-b"
+        },
+        "is_default": false,
+        "route": "treatment-b"
+      }
+    ]
+  }
+}

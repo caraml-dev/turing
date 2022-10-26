@@ -4,6 +4,7 @@ import {
   EuiPageTemplate,
   EuiPanel, EuiSpacer
 } from "@elastic/eui";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
@@ -11,8 +12,9 @@ import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
 
-export const ListEnsemblingJobsView = (props) => {
-  const projectId = props.projectId;
+export const ListEnsemblingJobsView = ({ projectId }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     appConfig: {
       pagination: { defaultPageSize },
@@ -22,8 +24,8 @@ export const ListEnsemblingJobsView = (props) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(
-    () => parse(props.location.search),
-    [props.location.search]
+    () => parse(location.search),
+    [location.search]
   );
 
   const onQueryChange = ({ query }) => {
@@ -43,7 +45,7 @@ export const ListEnsemblingJobsView = (props) => {
       filter["search"] = searchClause.map((c) => c.value).join(" ");
     }
 
-    props.navigate(`${props.location.pathname}?${stringify(filter)}`);
+    navigate(`${location.pathname}?${stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }] = useTuringApi(
@@ -73,7 +75,7 @@ export const ListEnsemblingJobsView = (props) => {
     replaceBreadcrumbs([{ text: "Jobs" }]);
   }, []);
 
-  const onRowClick = (item) => props.navigate(`./${item.id}/details`);
+  const onRowClick = (item) => navigate(`./${item.id}/details`);
 
   return (
     <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
@@ -100,7 +102,6 @@ export const ListEnsemblingJobsView = (props) => {
             onQueryChange={onQueryChange}
             onPaginationChange={setPage}
             onRowClick={onRowClick}
-            {...props}
           />
         </EuiPanel>
       </EuiPageTemplate.Section>

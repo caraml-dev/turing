@@ -4,11 +4,14 @@ import {
   replaceBreadcrumbs,
   FormContextProvider,
 } from "@gojek/mlp-ui";
+import { useNavigate, useParams } from "react-router-dom";
 import { EditAlertsForm } from "../components/edit_alerts_form/components/EditAlertsForm";
 import { TuringAlerts } from "../../../services/alerts/TuringAlerts";
 import { useConfig } from "../../../config";
 
-export const EditAlertsView = ({ router, alerts, ...props }) => {
+export const EditAlertsView = ({ router, alerts }) => {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
   const { alertConfig } = useConfig();
 
   useEffect(() => {
@@ -40,17 +43,18 @@ export const EditAlertsView = ({ router, alerts, ...props }) => {
         iconType: "check",
       });
     }
-    props.navigate("../", { state: { refresh: true } });
+    navigate("../", { state: { refresh: true } });
   };
 
   return (
     <FormContextProvider data={TuringAlerts.fromJson(alerts)}>
       <EditAlertsForm
         existingData={alerts}
-        onCancel={() => props.navigate("../")}
+        onCancel={() => navigate("../")}
         onSuccess={onSuccess}
         environment={alertConfig.environment}
-        {...props}
+        projectId={projectId}
+        routerId={router.id}
       />
     </FormContextProvider>
   );

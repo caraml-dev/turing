@@ -2,6 +2,8 @@ import React, { Fragment } from "react";
 import {
   EuiPageTemplate,
 } from "@elastic/eui";
+import { useParams } from "react-router-dom";
+
 import { RemoteComponent } from "../components/remote_component/RemoteComponent";
 import ExperimentEngineComponentLoader from "../components/remote_component/ExperimentEngineComponentLoader";
 
@@ -48,10 +50,11 @@ const RemoteRouter = ({ projectId }) => {
   );
 };
 
-export const ExperimentsRouter = ({ projectId }) => {
+export const ExperimentsRouter = () => {
+  const { projectId } = useParams();
   const { defaultExperimentEngine } = useConfig();
   return !!defaultExperimentEngine.url ? (
-    <RemoteRouter projectId />
+    <RemoteRouter projectId={projectId} />
   ) : (
     <FallbackView text="No default Experiment Engine configured" />
   );

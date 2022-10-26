@@ -1,0 +1,33 @@
+# For running E2E tests locally OR to use proprietary experiment engine
+# from https://github.com/caraml-dev/turing/tree/main/engines/experiment/examples/plugins/hardcoded
+RouterDefaults:
+  ExperimentEnginePlugins:
+    proprietary:
+      Image: localhost:5000/proprietary-experiment-engine-plugin:latest
+Experiment:
+  proprietary:
+    plugin_binary: ./bin/example-plugin
+    engine:
+      name: proprietary
+      display_name: Plugin Example
+      type: standard
+      standard_experiment_manager_config:
+        client_selection_enabled: false
+        experiment_selection_enabled: false
+    experiments:
+      - id: '001'
+        name: exp_1
+        variants:
+          - name: control
+          - name: treatment-1
+        variants_configuration:
+          control:
+            traffic: 0.85
+            treatment_configuration:
+              foo: bar
+              route_name: treatment-a
+          treatment-1:
+            traffic: 0.15
+            treatment_configuration:
+              bar: baz
+              route_name: control

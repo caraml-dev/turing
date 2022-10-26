@@ -81,6 +81,43 @@ version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../scripts/vertagen/vertagen.sh)))
 	@echo "turing-api version:" $(VERSION)
 
+# ==================================
+# E2E tests
+# ==================================
+
+.PHONY: local-infra
+local-infra:
+	@echo "Building proprietary experiment engine plugin..."
+	cd ../engines/experiment/examples/plugins/hardcoded && make proprietary-exp-plugin
+	@echo "Building proprietary experiment engine image..."
+	cd ../engines/experiment/examples/plugins/hardcoded && make build-local-proprietary-exp-plugin-image
+	@echo "Building router image..."
+	cd ../engines/router && make build-local-router-image
+	@echo "Starting Turing API server in a background process..."
+	nohup go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.yaml &
+	@echo "Started Turing API server on port 8080 in a background process..."
+
+.PHONY: clean-local-infra
+clean-local-infra:
+	@echo "Stopping background process Turing API server..."
+	lsof -ti:8080 | xargs kill -9
+	@echo "Cleaning up all E2E tests dependencies..."
+	cd ../infra/docker-compose/dev && docker-compose down -v
+
+.PHONY: run-local-e2e
+run-local-e2e:
+	ginkgo ./e2e/test/... -p -tags=e2e -run TestEndToEnd -- -config config-local.yaml
+
+.PHONY: setup-e2e
+setup-e2e:
+	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.0
+	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.0
+	go install github.com/onsi/ginkgo/v2/ginkgo
+	go get github.com/onsi/gomega/...
+
+.PHONY: test-e2e
+test-e2e:
+	@$(shell go env GOPATH)/bin/ginkgo ./e2e/test/... -p -run TestEndToEnd
 
 #   R E V I E W   R E Q U I R E D
 #

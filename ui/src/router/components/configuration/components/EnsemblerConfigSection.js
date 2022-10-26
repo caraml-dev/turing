@@ -4,7 +4,7 @@ import { ExperimentEngineContextProvider } from "../../../../providers/experimen
 import { NopConfigViewGroup } from "./nop_config_section/NopConfigViewGroup";
 import { PyFuncConfigViewGroup } from "./pyfunc_config_section/PyFuncConfigViewGroup";
 import { StandardConfigViewGroup } from "./standard_config_section/StandardConfigViewGroup"
-import { EnsemblersContextContextProvider } from "../../../../providers/ensemblers/context";
+import { EnsemblersContextProvider } from "../../../../providers/ensemblers/context";
 
 export const EnsemblerConfigSection = ({
   projectId,
@@ -19,7 +19,7 @@ export const EnsemblerConfigSection = ({
       <NopConfigViewGroup nopConfig={ensembler.nop_config} />
     )}
     {ensembler.type === "pyfunc" && (
-      <EnsemblersContextContextProvider
+      <EnsemblersContextProvider
         projectId={projectId}
         ensemblerType={"pyfunc"}>
         <PyFuncConfigViewGroup
@@ -27,7 +27,7 @@ export const EnsemblerConfigSection = ({
           pyfuncConfig={ensembler.pyfunc_config}
           dockerConfig={ensembler.docker_config}
         />
-      </EnsemblersContextContextProvider>
+      </EnsemblersContextProvider>
     )}
     {ensembler.type === "docker" && (
       <DockerConfigViewGroup

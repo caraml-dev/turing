@@ -1,8 +1,8 @@
-import { EuiIcon } from "@elastic/eui";
-import { PageNavigation } from "../../../components/page_navigation/PageNavigation";
 import React from "react";
+import { EuiIcon } from "@elastic/eui";
+import { PageNavigation } from "@gojek/mlp-ui";
 
-export const EnsemblingJobDetailsPageNavigation = ({ job, ...props }) => {
+export const EnsemblingJobDetailsPageNavigation = ({ job, selectedTab }) => {
   const tabs = [
     {
       id: "details",
@@ -25,5 +25,5 @@ export const EnsemblingJobDetailsPageNavigation = ({ job, ...props }) => {
     },
   ];
 
-  return <PageNavigation tabs={tabs} selectedTab={props["*"]} {...props} />;
+  return <PageNavigation tabs={tabs} selectedTab={selectedTab} />;
 };

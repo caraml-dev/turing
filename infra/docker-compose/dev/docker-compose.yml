@@ -75,7 +75,6 @@ services:
     restart: on-failure
     user: root:root
     volumes:
-      - "./istio/minimal-operator.yaml:/minimal-operator.yaml"
       - "kube:/.kube"
     entrypoint: bash -ec
     command:
@@ -83,8 +82,8 @@ services:
         cp /.kube/kubeconfig.yaml /.kube/config
         sed -i 's/127.0.0.1/server/' /.kube/config
         kubectl cluster-info
-        curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.12.4 sh -
-        /.istioctl/bin/istioctl install -y -f /minimal-operator.yaml
+        curl -sL https://istio.io/downloadIstioctl | ISTIO_VERSION=1.13.3 sh -
+        /.istioctl/bin/istioctl install -y
 
   # Install Knative serving on Kubernetes
   knative:
@@ -93,6 +92,7 @@ services:
     user: root:root
     volumes:
       - "kube:/.kube"
+      - "../../cluster-init/knative-configmaps/config-features.yaml:/config-features.yaml"
     entrypoint: bash -ec
     command:
       - |
@@ -101,6 +101,7 @@ services:
         kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-crds.yaml
         kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-core.yaml
         kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.1/serving-hpa.yaml
+        kubectl apply -f /config-features.yaml
         kubectl -n knative-serving patch configmap/config-deployment --type merge -p '{"data":{"registriesSkippingTagResolving": "localhost:5000"}}'
         kubectl -n knative-serving patch configmap/config-domain --type merge -p '{"data":{"127.0.0.1.nip.io":""}}'
         kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/knative-v1.0.0/net-istio.yaml

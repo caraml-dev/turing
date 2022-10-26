@@ -12,28 +12,26 @@ import { RouterVersion } from "../../../services/version/RouterVersion";
 import { VersionComparisonPanel } from "../components/version_diff/VersionComparisonPanel";
 import { ExperimentEngineContextProvider } from "../../../providers/experiments/ExperimentEngineContextProvider";
 import ExperimentEngineContext from "../../../providers/experiments/context";
+import { useLocation, useParams } from "react-router-dom";
 
-const VersionComparisonView = ({
-  router,
-  leftVersionNumber,
-  rightVersionNumber,
-  location: { state },
-  ...props
-}) => {
-  const { versionLeft, versionRight } = state || {};
+const VersionComparisonView = ({ router }) => {
+  const { projectId, routerId, leftVersionNumber, rightVersionNumber } = useParams();
+  const location = useLocation();
+
+  const { versionLeft, versionRight } = location.state || {};
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(undefined);
 
   const [leftVersion] = useTuringApi(
-    `/projects/${props.projectId}/routers/${props.routerId}/versions/${leftVersionNumber}`,
+    `/projects/${projectId}/routers/${routerId}/versions/${leftVersionNumber}`,
     {},
     versionLeft,
     !versionLeft
   );
 
   const [rightVersion] = useTuringApi(
-    `/projects/${props.projectId}/routers/${props.routerId}/versions/${rightVersionNumber}`,
+    `/projects/${projectId}/routers/${routerId}/versions/${rightVersionNumber}`,
     {},
     versionRight,
     !versionRight

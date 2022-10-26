@@ -8,6 +8,7 @@ import {
   EuiSpacer,
   EuiText,
 } from "@elastic/eui";
+import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
 import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
@@ -24,8 +25,8 @@ export const ListEnsemblersTable = ({
   onQueryChange,
   onPaginationChange,
   onRowClick,
-  ...props
 }) => {
+  const navigate = useNavigate();
   const {
     appConfig: {
       tables: { defaultTextSize, defaultIconSize },
@@ -107,7 +108,7 @@ export const ListEnsemblersTable = ({
       width: "15%",
       render: (ensemblerId) => (
         <EuiButtonEmpty
-          onClick={(_) => props.navigate(`../jobs?ensembler_id=${ensemblerId}`)}
+          onClick={(_) => navigate(`../jobs?ensembler_id=${ensemblerId}`)}
           iconType="storage"
           size="xs">
           <EuiText size="xs">Batch Jobs</EuiText>
@@ -145,9 +146,9 @@ export const ListEnsemblersTable = ({
   const cellProps = (item) =>
     onRowClick
       ? {
-          style: { cursor: "pointer" },
-          onClick: () => onRowClick(item),
-        }
+        style: { cursor: "pointer" },
+        onClick: () => onRowClick(item),
+      }
       : undefined;
 
   return error ? (
