@@ -85,10 +85,24 @@ version:
 # E2E tests
 # ==================================
 
-.PHONY: build-local-router-image
-build-local-router-image: vendor
-    docker build -t localhost:5000/turing-router .
-    docker push localhost:5000/turing-router
+.PHONY: local-infra
+local-infra:
+	@echo "Building proprietary experiment engine plugin..."
+	cd ../engines/experiment/examples/plugins/hardcoded && make proprietary-exp-plugin
+	@echo "Building proprietary experiment engine image..."
+	cd ../engines/experiment/examples/plugins/hardcoded && make build-local-proprietary-exp-plugin-image
+	@echo "Building router image..."
+	cd ../engines/router && make build-local-router-image
+	@echo "Starting Turing API server in a background process..."
+	nohup go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.yaml &
+	@echo "Started Turing API server on port 8080 in a background process..."
+
+.PHONY: clean-local-infra
+clean-local-infra:
+	@echo "Stopping background process Turing API server..."
+	lsof -ti:8080 | xargs kill -9
+	@echo "Cleaning up all E2E tests dependencies..."
+	cd ../infra/docker-compose/dev && docker-compose down -v
 
 .PHONY: run-local-e2e
 run-local-e2e:

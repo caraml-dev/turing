@@ -114,97 +114,33 @@ istio-system      svclb-istio-ingressgateway-mn9n4          3/3     Running   0 
 istio-system      istio-ingressgateway-b7ffbd9c6-kfpl2      1/1     Running   0          17h
 ```
 
-#### <b>Prepare proprietary experiment engine</b>
+#### <b>Prepare required Turing components & start Turing API</b>
 ---
-Next, let's get the proprietary experiment engine plugin ready!
-
-1. Build the proprietary experiment engine plugin binary
-
-When building the binary, make sure you're using the same GOOS and GOARCH that's compatible with your machine.
-
+Run the following to get Turing API running locally.
 ```bash
-pushd ../engines/experiment/examples/plugins/hardcoded
-{
-    # If using MacOS M1
-    make proprietary-exp-plugin GOOS=darwin GOARCH=arm64
-}
-popd
+make local-infra
 ```
 
-2. Build the proprietary experiment engine and push it to the local registry.
+Within the make command, couple of steps are taken:
 
-```bash
-pushd ../engines/experiment/examples/plugins/hardcoded
-{
-    make build-local-proprietary-exp-plugin-image
-}
-popd
-```
+1. Builds the required Turing component Docker images and pushes them to the local registry, mainly:
+    - Proprietary experiment engine plugin image
 
-If you're facing issues building the proprietary experiment engine docker image locally, do the following steps.
+    When building the binary for consumption by Turing's Experiments Service layer, make sure you're using the same GOOS and GOARCH that's compatible with your machine, you can easily pass in the necessary values eg. `make local-infra GOOS=darwin GOARCH=arm64` instead.
+    - Router image
 
-1. Replace "turing/engines/experiment/examples/plugins/hardcoded" Dockerfile with the following Dockerfile.
-```docker
-FROM alpine:3.15
-
-ARG TURING_USER="turing"
-ARG TURING_USER_GROUP="app"
-
-RUN addgroup -S ${TURING_USER_GROUP} \
-    && adduser -S ${TURING_USER} -G ${TURING_USER_GROUP} -H
-
-ENV PLUGIN_NAME ""
-ENV PLUGINS_DIR "/app/plugins"
-
-COPY --chown=${TURING_USER}:${TURING_USER_GROUP} ./bin/example-plugin /go/bin/plugin
-
-CMD ["sh", "-c", "cp /go/bin/plugin ${PLUGINS_DIR}/${PLUGIN_NAME:?variable must be set}"]
-```
-
-2. Build and push the image to the local registry.
-
-```bash
-pushd ../engines/experiment/examples/plugins/hardcoded
-{
-    make build-local-proprietary-exp-plugin-image
-}
-popd
-```
-
-#### <b>Prepare Turing router</b>
----
-Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
-
-```bash
-pushd ../engines/router
-{
-    make build-local-router-image
-}
-popd
-```
-
-#### <b>Start Turing API</b>
----
-Now fire up the turing API server (as a daemon or tmux or some other terminal process).
-
-```
-go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.yaml
-```
+    Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
 
 #### <b>Run E2E tests</b>
 ---
-```
+```bash
 make run-local-e2e
 ```
 
-#### <b>Cleanup k8s and required dependencies</b>
+#### <b>Cleanup k8s, required dependencies and Turing API</b>
 ---
 ```bash
-pushd ../infra/docker-compose/dev/
-{
-    docker-compose down -v
-}
-popd
+make clean-local-infra
 ```
 
 #### <b>Common local E2E setup issues</b>
