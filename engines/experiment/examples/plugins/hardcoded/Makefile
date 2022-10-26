@@ -22,6 +22,7 @@ build-image: vendor
 .PHONY: proprietary-exp-plugin
 proprietary-exp-plugin:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ./bin/example-plugin ./cmd/main.go
+	mkdir -p ../../../../../api/bin
 	ln -sf ${PWD}/bin/example-plugin ../../../../../api/bin/example-plugin
 
 .PHONY: build-local-proprietary-exp-plugin-image

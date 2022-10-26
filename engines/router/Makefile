@@ -97,8 +97,7 @@ swagger-ui:
 
 
 .PHONY: build-local-router-image
-build-local-router-image: vendor
-	$(MAKE) build-image DOCKER_REGISTRY=localhost:5000 OVERWRITE_VERSION=latest
+build-local-router-image: vendor build-image
 	docker push $(IMAGE_TAG)
 
 

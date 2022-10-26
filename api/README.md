@@ -118,7 +118,7 @@ istio-system      istio-ingressgateway-b7ffbd9c6-kfpl2      1/1     Running   0 
 ---
 Run the following to get Turing API running locally.
 ```bash
-make local-infra
+make build-run-local-api
 ```
 
 Within the make command, couple of steps are taken:
@@ -126,7 +126,7 @@ Within the make command, couple of steps are taken:
 1. Builds the required Turing component Docker images and pushes them to the local registry, mainly:
     - Proprietary experiment engine plugin image
 
-    When building the binary for consumption by Turing's Experiments Service layer, make sure you're using the same GOOS and GOARCH that's compatible with your machine, you can easily pass in the necessary values eg. `make local-infra GOOS=darwin GOARCH=arm64` instead.
+    When building the binary for consumption by Turing's Experiments Service layer, make sure you're using the same GOOS and GOARCH that's compatible with your machine, you can easily pass in the necessary values eg. `make build-run-local-api GOOS=darwin GOARCH=arm64` instead.
     - Router image
 
     Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
