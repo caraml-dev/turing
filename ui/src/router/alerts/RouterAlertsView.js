@@ -2,11 +2,14 @@ import React, { useEffect, useMemo } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
 import { EuiCallOut, EuiLoadingChart, EuiTextAlign } from "@elastic/eui";
 import { RouterAlertDetails } from "./details/RouterAlertDetails";
-import { Redirect, Router } from "@reach/router";
+import { Routes, Route, useLocation, useParams } from "react-router-dom";
 import { EditAlertsView } from "./edit/EditAlertsView";
 import { useTuringApi } from "../../hooks/useTuringApi";
 
-export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
+export const RouterAlertsView = ({ router }) => {
+  const { projectId } = useParams();
+  const location = useLocation();
+  const routerId = router?.id;
   useEffect(() => {
     replaceBreadcrumbs([
       {
@@ -30,10 +33,10 @@ export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
   );
 
   useEffect(() => {
-    if ((props.location.state || {}).refresh) {
+    if ((location.state || {}).refresh) {
       fetchAlertDetails();
     }
-  }, [fetchAlertDetails, props.location.state]);
+  }, [fetchAlertDetails, location.state]);
 
   const existingAlerts = useMemo(() => {
     let metricObj = {};
@@ -56,15 +59,9 @@ export const RouterAlertsView = ({ projectId, routerId, router, ...props }) => {
       <p>{error.message}</p>
     </EuiCallOut>
   ) : (
-    <Router primary={false}>
-      <RouterAlertDetails
-        path="/"
-        alertsData={existingAlerts}
-        routerStatus={router.status}
-      />
-      <EditAlertsView path="edit" router={router} alerts={existingAlerts} />
-
-      <Redirect from="any" to="/error/404" default noThrow />
-    </Router>
+    <Routes>
+      <Route index element={<RouterAlertDetails alertsData={existingAlerts} routerStatus={router.status} />} />
+      <Route path="edit" element={<EditAlertsView router={router} alerts={existingAlerts} />} />
+    </Routes>
   );
 };

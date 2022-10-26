@@ -1,11 +1,11 @@
 import React from "react";
-import { PageNavigation } from "../../../../components/page_navigation/PageNavigation";
 import { EuiIcon } from "@elastic/eui";
+import { PageNavigation } from "@gojek/mlp-ui";
 
 export const RouterVersionDetailsPageNavigation = ({
   version,
   actions,
-  ...props
+  selectedTab,
 }) => {
   const tabs = [
     {
@@ -28,8 +28,7 @@ export const RouterVersionDetailsPageNavigation = ({
     <PageNavigation
       tabs={tabs}
       actions={actions}
-      selectedTab={props["*"]}
-      {...props}
+      selectedTab={selectedTab}
     />
   );
 };

@@ -70,11 +70,12 @@ Tests are placed in `e2e/tests/` directory, in the `e2e` package. The entrypoint
 
 This is a work in progress and there changes required on this process as this is extremely clunky. A rough way of running the e2e tests are as follows:
 
+#### <b>Spin up k8s and required dependencies</b>
+---
+
 First, spin up k8s and other services required for Turing:
 
 ```bash
-#!/bin/bash
-
 pushd ../infra/docker-compose/dev/
 {
     docker-compose up -d
@@ -91,75 +92,81 @@ watch KUBECONFIG=/tmp/kubeconfig kubectl get pod -A
 An example of ready would look something like this:
 ```
 NAMESPACE         NAME                                      READY   STATUS    RESTARTS   AGE
-kube-system       metrics-server-86cbb8457f-phdvp           1/1     Running   0          20m
-knative-serving   controller-66b8964655-88fxq               1/1     Running   0          20m
-knative-serving   istio-webhook-6cd54997b5-k4nsk            1/1     Running   0          20m
-knative-serving   webhook-7d44db89cc-m2vdp                  1/1     Running   0          20m
-kube-system       coredns-6488c6fcc6-chxtl                  1/1     Running   0          20m
-knative-serving   networking-istio-c57bb746-pqtl2           1/1     Running   0          20m
-default           mockserver-7844d797f7-8v6rr               1/1     Running   0          20m
-knative-serving   autoscaler-6f6d898c75-6qx6k               1/1     Running   0          20m
-kube-system       local-path-provisioner-5ff76fc89d-5m9fp   1/1     Running   0          20m
-istio-system      istiod-7684b696d6-fjf4z                   1/1     Running   0          19m
-knative-serving   activator-7fdbbcf6dc-jkcfn                1/1     Running   0          20m
-default           spark-spark-operator-59c685545-5mrtg      1/1     Running   0          20m
-istio-system      svclb-istio-ingressgateway-b9z82          4/4     Running   0          19m
-istio-system      svclb-istio-ingressgateway-n9zzk          4/4     Running   0          19m
-istio-system      svclb-istio-ingressgateway-77scg          4/4     Running   0          19m
-istio-system      svclb-istio-ingressgateway-l26k7          4/4     Running   0          19m
-istio-system      cluster-local-gateway-5bf54b4999-p2bv7    1/1     Running   0          19m
-istio-system      istio-ingressgateway-555bdcd566-xcn6h     1/1     Running   0          19m
+knative-serving   autoscaler-6f6f6cf579-czrmw               1/1     Running   0          17h
+knative-serving   controller-66f68465cd-d58mq               1/1     Running   0          17h
+knative-serving   domain-mapping-948df9f76-mwkhj            1/1     Running   0          17h
+knative-serving   webhook-7877b457fd-vhcvm                  1/1     Running   0          17h
+knative-serving   net-istio-webhook-695d588d65-r6szn        1/1     Running   0          17h
+knative-serving   autoscaler-hpa-66d97b559f-ts6zf           1/1     Running   0          17h
+knative-serving   net-istio-controller-544874485d-mncx9     1/1     Running   0          17h
+default           mockserver-7844d797f7-zwk2b               1/1     Running   0          17h
+kube-system       local-path-provisioner-84bb864455-58c7z   1/1     Running   0          17h
+kube-system       coredns-96cc4f57d-t8vsw                   1/1     Running   0          17h
+knative-serving   domainmapping-webhook-74fc9b87b4-pmqdg    1/1     Running   0          17h
+istio-system      istiod-7c595445b6-r6fwt                   1/1     Running   0          17h
+knative-serving   activator-7d658db58b-29pnb                1/1     Running   0          17h
+kube-system       metrics-server-ff9dbcb6c-bjwl2            1/1     Running   0          17h
+istio-system      svclb-istio-ingressgateway-kxtmp          3/3     Running   0          17h
+istio-system      svclb-istio-ingressgateway-xszc7          3/3     Running   0          17h
+istio-system      svclb-istio-ingressgateway-xg6zg          3/3     Running   0          17h
+default           spark-spark-operator-59c685545-qqn44      1/1     Running   0          17h
+istio-system      svclb-istio-ingressgateway-mn9n4          3/3     Running   0          17h
+istio-system      istio-ingressgateway-b7ffbd9c6-kfpl2      1/1     Running   0          17h
 ```
 
-Don't forget to build the Turing routers and push it to the local registry. Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
-
+#### <b>Prepare required Turing components & start Turing API</b>
+---
+Run the following to get Turing API running locally.
 ```bash
-pushd ../engines/router
-{
-    go mod vendor
-    docker build -t localhost:5000/turing-router .
-    docker push localhost:5000/turing-router
-}
-popd
+make build-run-local-api
 ```
 
-Now fire up the turing API server (as a daemon or tmux or some other terminal process).
+Within the make command, couple of steps are taken:
 
-```
-go run turing/cmd/main.go -config=config-dev.yaml
-```
+1. Builds the required Turing component Docker images and pushes them to the local registry, mainly:
+    - Proprietary experiment engine plugin image
 
-Now run E2E tests.
+    When building the binary for consumption by Turing's Experiments Service layer, make sure you're using the same GOOS and GOARCH that's compatible with your machine, you can easily pass in the necessary values eg. `make build-run-local-api GOOS=darwin GOARCH=arm64` instead.
+    - Router image
 
-```
-TEST_ID=$(date +%Y%m%d%H%M) \
-MOCKSERVER_HTTP_ENDPOINT=http://mockserver \
-MOCKSERVER_UPI_CONTROL_ENDPOINT: mockserver-upi-control:80 \
-MOCKSERVER_UPI_A_ENDPOINT: mockserver-upi-a:80 \
-API_BASE_PATH=http://localhost:8080/v1 \
-MODEL_CLUSTER_NAME="dev" \
-PROJECT_ID="1" \
-PROJECT_NAME=default \
-KUBECONFIG_USE_LOCAL=true \
-KUBECONFIG_FILE_PATH=/tmp/kubeconfig \
-go test -v -parallel=2 ./e2e/... -tags=e2e -run TestEndToEnd
-```
+    Alternatively, use one of our images [here](https://github.com/caraml-dev/turing/pkgs/container/turing%2Fturing-router).
 
-To clean up the Kubernetes cluster:
-
+#### <b>Run E2E tests</b>
+---
 ```bash
-#!/bin/bash
-
-pushd ../infra/docker-compose/dev/
-{
-    docker-compose down -v
-}
-popd
+make run-local-e2e
 ```
 
+#### <b>Cleanup k8s, required dependencies and Turing API</b>
+---
+```bash
+make clean-local-infra
+```
+
+#### <b>Common local E2E setup issues</b>
+---
 If this doesn't work, check the following:
 
 1. Have all the containers started properly, does `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` work? Check `docker ps -a` if containers have been deployed correctly.
+  - Run `docker volume prune` if you're getting the following error
+  ```text
+  Unable to connect to the server: x509: certificate signed by unknown authority
+  ```
+  - If enricher/ensembler pod is constantly stuck at 1/2 ready state and `queue-proxy` container shows the following error, increase the `resource_request` values.
+  ```text
+  // Error logs from queue-proxy container
+  HTTP probe did not respond Ready, got status code: 503
+  HTTP probe did not respond Ready, got status code: 503
+  ...
+
+  // Increase to at least the following values
+  "resource_request": {
+    "min_replica": 1,
+    "max_replica": 1,
+    "cpu_request": "200m",
+    "memory_request": "256Mi"
+  }
+  ```
 2. Are you out of disk space? Not enough CPU/Memory? Check `KUBECONFIG=/tmp/kubeconfig kubectl get pod -A` and describe the pods to see if there is some sort of pressure if it's being evicted.
 
 #### CI

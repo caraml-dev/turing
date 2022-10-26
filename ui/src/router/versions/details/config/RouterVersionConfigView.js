@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { useParams } from "react-router-dom";
 import { RouterConfigDetails } from "../../../components/configuration/RouterConfigDetails";
 import { get } from "../../../../components/form/utils";
 import { ExperimentEngineContextProvider } from "../../../../providers/experiments/ExperimentEngineContextProvider";
 
-export const RouterVersionConfigView = ({ projectId, config }) => {
+export const RouterVersionConfigView = ({ config }) => {
+  const { projectId } = useParams();
   useEffect(() => {
     replaceBreadcrumbs([
       {

@@ -9,8 +9,11 @@ import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
 import { PageTitle } from "../../components/page/PageTitle";
 import { useConfig } from "../../config";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const ListRoutersView = ({ projectId, ...props }) => {
+export const ListRoutersView = () => {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
   const {
     appConfig: {
       pageTemplate: { restrictWidth, paddingSize },
@@ -27,7 +30,7 @@ export const ListRoutersView = ({ projectId, ...props }) => {
     replaceBreadcrumbs([{ text: "Routers" }]);
   }, []);
 
-  const onRowClick = (item) => props.navigate(`./${item.id}/details`);
+  const onRowClick = (item) => navigate(`./${item.id}/details`);
 
   return (
     <EuiPageTemplate restrictWidth={restrictWidth} paddingSize={paddingSize}>
@@ -36,14 +39,14 @@ export const ListRoutersView = ({ projectId, ...props }) => {
         bottomBorder={false}
         pageTitle={<PageTitle title="Routers" />}
         rightSideItems={[
-          <EuiButton onClick={() => props.navigate("./create")} fill>
+          <EuiButton onClick={() => navigate("./create")} fill>
             Create Router
           </EuiButton>,
         ]}
       />
 
       <EuiSpacer size="l" />
-      <EuiPageTemplate.Section  color={"transparent"}>
+      <EuiPageTemplate.Section color={"transparent"}>
         <EuiPanel>
           <ListRoutersTable
             isLoaded={isLoaded}

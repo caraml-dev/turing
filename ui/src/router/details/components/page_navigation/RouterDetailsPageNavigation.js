@@ -1,12 +1,12 @@
 import React from "react";
 import { EuiIcon } from "@elastic/eui";
-import { PageNavigation } from "../../../../components/page_navigation/PageNavigation";
+import { PageNavigation } from "@gojek/mlp-ui";
 import { useConfig } from "../../../../config";
 
 export const RouterDetailsPageNavigation = ({
   router: { config = {}, ...router },
   actions,
-  ...props
+  selectedTab,
 }) => {
   const { alertConfig } = useConfig();
 
@@ -46,8 +46,7 @@ export const RouterDetailsPageNavigation = ({
     <PageNavigation
       tabs={tabs}
       actions={actions}
-      selectedTab={props["*"]}
-      {...props}
+      selectedTab={selectedTab}
     />
   );
 };

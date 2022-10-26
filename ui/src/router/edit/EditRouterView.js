@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { FormContext, FormContextProvider } from "@gojek/mlp-ui";
 import { addToast, replaceBreadcrumbs, useToggle } from "@gojek/mlp-ui";
@@ -10,7 +11,8 @@ import { RouterUpdateSummary } from "../components/form/components/RouterUpdateS
 import { ConfirmationModal } from "../../components/confirmation_modal/ConfirmationModal";
 import { VersionCreationSummary } from "../components/form/components/VersionCreationSummary";
 
-const EditRouterView = ({ projectId, currentRouter, ...props }) => {
+const EditRouterView = ({ projectId, currentRouter }) => {
+  const navigate = useNavigate();
   const { data: routerConfig } = useContext(FormContext);
   const [showDiffView, toggleDiffView] = useToggle();
 
@@ -43,9 +45,9 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         iconType: "check",
       });
 
-      props.navigate("../", { state: { refresh: true } });
+      navigate("../", { state: { refresh: true } });
     }
-  }, [updateRouterResponse, props]);
+  }, [updateRouterResponse, navigate]);
 
   useEffect(() => {
     if (
@@ -59,9 +61,9 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         iconType: "check",
       });
 
-      props.navigate("../", { state: { refresh: true } });
+      navigate("../", { state: { refresh: true } });
     }
-  }, [createRouterVersionResponse, props]);
+  }, [createRouterVersionResponse, navigate]);
 
   const [withDeployment, setWithDeployment] = useState(null);
 
@@ -101,9 +103,8 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
         return !showDiffView ? (
           <UpdateRouterForm
             projectId={projectId}
-            onCancel={() => props.navigate("../")}
+            onCancel={() => navigate("../")}
             onNext={toggleDiffView}
-            {...props}
           />
         ) : (
           <VersionComparisonView
@@ -129,7 +130,8 @@ const EditRouterView = ({ projectId, currentRouter, ...props }) => {
   );
 };
 
-const EditRouterViewWrapper = ({ projectId, router, ...props }) => {
+const EditRouterViewWrapper = ({ router }) => {
+  const { projectId } = useParams();
   useEffect(() => {
     replaceBreadcrumbs([
       {
@@ -152,7 +154,6 @@ const EditRouterViewWrapper = ({ projectId, router, ...props }) => {
         <EditRouterView
           projectId={projectId}
           currentRouter={router}
-          {...props}
         />
       </ExperimentEngineContextProvider>
     </FormContextProvider>

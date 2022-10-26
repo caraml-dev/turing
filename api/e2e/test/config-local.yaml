@@ -1,0 +1,36 @@
+kubeconfig_use_local: true
+kubeconfig_file_path: /tmp/kubeconfig
+
+api_base_path: http://localhost:8080/v1
+
+echoserver:
+  image: eexit/mirror-http-server:1.1.3
+
+mockserver:
+  name: mockserver
+  image: mockserver/mockserver:5.11.2
+  endpoint: http://mockserver
+
+mockControlUPIServer:
+  name: upi-control
+  image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
+  endpoint: mockserver-upi-control:80
+
+mockTreatmentUPIServer:
+  name: upi-treatment-a
+  image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
+  endpoint: mockserver-upi-a:80
+
+cluster:
+  name: dev
+
+project:
+  id: 1
+  name: default
+
+ensemblers:
+  base_name: "turing-e2e-"
+
+vault:
+  addr: http://localhost:8200
+  token: root

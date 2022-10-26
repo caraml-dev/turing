@@ -5,7 +5,7 @@ go 1.18
 require (
 	bou.ke/monkey v1.0.2
 	github.com/buger/jsonparser v1.1.1
-	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
+	github.com/caraml-dev/universal-prediction-interface v0.0.0-20221026045401-50e7d79e4b73
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/hashicorp/go-hclog v0.16.0
 	github.com/hashicorp/go-plugin v1.4.3

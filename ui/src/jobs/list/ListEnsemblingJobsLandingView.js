@@ -1,9 +1,11 @@
 import { EuiSpacer, EuiText, EuiPageTemplate } from "@elastic/eui";
 import React from "react";
+import { useParams } from "react-router-dom";
 import { useConfig } from "../../config";
 import { ListEnsemblingJobsView } from "./ListEnsemblingJobsView";
 
-export const ListEnsemblingJobsLandingView = (props) => {
+export const ListEnsemblingJobsLandingView = () => {
+  const { projectId } = useParams();
   const {
     appConfig: { batchEnsemblingEnabled },
   } = useConfig();
@@ -11,7 +13,7 @@ export const ListEnsemblingJobsLandingView = (props) => {
   return (
     <>
       {batchEnsemblingEnabled ? (
-        <ListEnsemblingJobsView {...props} />
+        <ListEnsemblingJobsView projectId={projectId} />
       ) : (
         <EuiPageTemplate>
           <EuiPageTemplate.EmptyPrompt>

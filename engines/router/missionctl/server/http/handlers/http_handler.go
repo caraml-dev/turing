@@ -71,8 +71,10 @@ func (h *httpHandler) getPrediction(
 	// Defer logging request summary
 	defer func() {
 		go func() {
-			logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
+			// respCh should be closed first before calling logTuringRouterRequestSummary
+			// because logTuringRouterRequestSummary only returns when respCh is closed
 			close(respCh)
+			logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
 		}()
 	}()
 

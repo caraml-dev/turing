@@ -9,7 +9,6 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
-	"github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
@@ -27,10 +26,6 @@ var mockResponse = &upiv1.PredictValuesResponse{
 		Columns: nil,
 		Rows:    nil,
 	},
-	Metadata: &upiv1.ResponseMetadata{
-		PredictionId: "123",
-		ExperimentId: "2",
-	},
 }
 
 func TestUPIServer_PredictValues(t *testing.T) {
@@ -46,7 +41,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 	}{
 		{
 			name:        "ok",
-			request:     nil,
+			request:     &upiv1.PredictValuesRequest{},
 			expected:    mockResponse,
 			expectedErr: nil,
 			mockReturn: func() (fiber.Response, *errors.TuringError) {
@@ -57,7 +52,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 		},
 		{
 			name:    "error",
-			request: nil,
+			request: &upiv1.PredictValuesRequest{},
 			expectedErr: &errors.TuringError{
 				Code:    14,
 				Message: "did not get back a valid response from the fiberHandler",
@@ -70,7 +65,8 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			},
 		},
 		{
-			name: "error wrong response payload type",
+			name:    "error wrong response payload type",
+			request: &upiv1.PredictValuesRequest{},
 			expectedErr: &errors.TuringError{
 				Code:    14,
 				Message: "unable to unmarshal into expected response proto",
@@ -85,16 +81,29 @@ func TestUPIServer_PredictValues(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockMc := &mocks.MissionControlUPI{}
-			mockMc.On("Route", mock.Anything, mock.Anything).Return(tt.mockReturn())
+			mockMc.On("Route", mock.Anything, mock.Anything).Return(tt.mockReturn()).Run(func(args mock.Arguments) {
+				fiberRequest, ok := args.Get(1).(*fiberGrpc.Request)
+				require.True(t, ok, "not fiber grpc request")
+
+				upiReq, ok := fiberRequest.Proto.(*upiv1.PredictValuesRequest)
+				require.True(t, ok, "not upi request")
+
+				require.True(t, proto.Equal(upiReq.PredictionTable, tt.request.PredictionTable), "invalid prediction table")
+				require.NotEmpty(t, upiReq.Metadata.PredictionId, "prediction id is empty")
+				require.NotEmpty(t, upiReq.Metadata.RequestTimestamp, "request timestamp is empty")
+			})
 
 			upiServer := NewUPIServer(mockMc)
 			ctx := context.Background()
 			resp, err := upiServer.PredictValues(ctx, tt.request)
 			if tt.expectedErr != nil {
 				require.Equal(t, err, tt.expectedErr)
-			} else {
-				require.True(t, testutils.CompareUpiResponse(resp, tt.expected), "response not equal to expected")
+				return
 			}
+
+			require.True(t, proto.Equal(resp.PredictionResultTable, tt.expected.PredictionResultTable),
+				"response not equal to expected")
+			require.NotEmpty(t, resp.Metadata.PredictionId, "prediction id is empty")
 		})
 	}
 }

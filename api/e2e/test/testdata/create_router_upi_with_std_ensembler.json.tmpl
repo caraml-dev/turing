@@ -1,19 +1,19 @@
 {
-    "environment_name": "{{.DeploymentEnvironment}}",
+    "environment_name": "dev",
     "name": "e2e-std-ensembler-upi-{{.TestID}}",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverUPIControlEndpoint}}",
+                "endpoint": "{{ .MockControlUPIServer.Endpoint }}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-a",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverUPIAEndpoint}}",
+                "endpoint": "{{ .MockTreatmentUPIServer.Endpoint }}",
                 "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
                 "timeout": "5s"
             }

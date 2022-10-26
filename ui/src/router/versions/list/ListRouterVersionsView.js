@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { useNavigate } from "react-router-dom";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { EuiPanel } from "@elastic/eui";
 import { ConfigSection } from "../../../components/config_section";
@@ -7,7 +8,8 @@ import { ListRouterVersionsTable } from "./ListRouterVersionsTable";
 import "./ListRouterVersionsView.scss";
 import { RouterVersionActions } from "../components/RouterVersionActions";
 
-export const ListRouterVersionsView = ({ router, ...props }) => {
+export const ListRouterVersionsView = ({ router }) => {
+  const navigate = useNavigate();
   const deployedVersion = (router.config || {}).version;
 
   const [versions, fetchVersions] = useTuringApi(
@@ -22,7 +24,7 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
   }, [router.status, fetchVersions]);
 
   const onRowClick = (item) => {
-    props.navigate(`../versions/${item.version}/details`);
+    navigate(`../versions/${item.version}/details`);
   };
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
         <RouterVersionActions
           router={router}
           onDeploySuccess={() =>
-            props.navigate("./", { state: { refresh: true } })
+            navigate("./", { state: { refresh: true } })
           }
           onDeleteSuccess={fetchVersions}>
           {(actions) => (
@@ -65,7 +67,6 @@ export const ListRouterVersionsView = ({ router, ...props }) => {
                   description: action.name,
                 }))
               }
-              {...props}
             />
           )}
         </RouterVersionActions>

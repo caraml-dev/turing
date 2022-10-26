@@ -1,0 +1,24 @@
+{
+  "request": {
+    "client": {
+      "id": 4
+    }
+  },
+  "response": {
+    "experiment": {
+      "configuration": {
+        "foo": "bar",
+        "route_name": "treatment-a"
+      }
+    },
+    "route_responses": [
+      {
+        "data": {
+          "version": "control"
+        },
+        "is_default": false,
+        "route": "control"
+      }
+    ]
+  }
+}

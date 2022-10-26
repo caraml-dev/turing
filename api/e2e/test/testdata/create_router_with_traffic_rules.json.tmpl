@@ -1,24 +1,24 @@
 {
-    "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-traffic-rules-{{.TestID}}",
+    "environment_name": "dev",
+    "name": "e2e-traffic-rules-{{ .TestID }}",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverHTTPEndpoint}}/control",
+                "endpoint": "{{ .Mockserver.Endpoint }}/control",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-a",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverHTTPEndpoint}}/treatment-a",
+                "endpoint": "{{ .Mockserver.Endpoint }}/treatment-a",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-b",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverHTTPEndpoint}}/treatment-b",
+                "endpoint": "{{ .Mockserver.Endpoint }}/treatment-b",
                 "timeout": "5s"
             }
         ],
@@ -68,14 +68,14 @@
         "ensembler": {
             "type": "docker",
             "docker_config": {
-                "image": "{{.TestEchoImage}}",
+                "image": "{{ .Echoserver.Image }}",
                 "resource_request": {
                     "min_replica": 2,
                     "max_replica": 2,
-                    "cpu_request": "200m",
+                    "cpu_request": "250m",
                     "memory_request": "256Mi"
                 },
-                "endpoint": "anything",
+                "endpoint": "ensemble",
                 "timeout": "3s",
                 "port": 80,
                 "env": [

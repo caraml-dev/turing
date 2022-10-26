@@ -4,8 +4,10 @@ import { HorizontalDescriptionList } from "../../../components/horizontal_descri
 import EnsemblersContext from "../../../providers/ensemblers/context";
 import { EuiBadge, EuiButtonEmpty, EuiIcon, EuiText } from "@elastic/eui";
 import { DateFromNow } from "@gojek/mlp-ui";
+import { useNavigate } from "react-router-dom";
 
-export const EnsemblingJobDetailsPageHeader = ({ job, ...props }) => {
+export const EnsemblingJobDetailsPageHeader = ({ job }) => {
+  const navigate = useNavigate();
   const { ensemblers, isLoaded: ensemblersLoaded } =
     useContext(EnsemblersContext);
 
@@ -17,7 +19,7 @@ export const EnsemblingJobDetailsPageHeader = ({ job, ...props }) => {
           size="s"
           isLoading={!ensemblersLoaded}
           onClick={() =>
-            props.navigate(`../?ensembler_id=${job.ensembler_id}`)
+            navigate(`../?ensembler_id=${job.ensembler_id}`)
           }>
           {!!ensemblers[job.ensembler_id] ? (
             <EuiText size="s">

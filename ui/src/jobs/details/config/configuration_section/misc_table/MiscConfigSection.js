@@ -1,12 +1,12 @@
 import { EuiDescriptionList, EuiLink } from "@elastic/eui";
 import React, { useContext } from "react";
 import { getGCSDashboardUrl } from "../../../../../utils/gcp";
-import { CurrentProjectContext } from "@gojek/mlp-ui";
+import { ProjectsContext } from "@gojek/mlp-ui";
 
 export const MiscConfigSection = ({
   infra_config: { artifact_uri, service_account_name },
 }) => {
-  const { project = {} } = useContext(CurrentProjectContext);
+  const { currentProject = {} } = useContext(ProjectsContext);
 
   const items = [
     {
@@ -20,7 +20,7 @@ export const MiscConfigSection = ({
     {
       title: "Service Account",
       description: (
-        <EuiLink href={`/projects/${project.id}/settings/secrets-management`}>
+        <EuiLink href={`/projects/${currentProject.id}/settings/secrets-management`}>
           {service_account_name}
         </EuiLink>
       ),

@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const tracingComponentID = "grpc_handler"
@@ -115,7 +116,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 		}
 	}
 
-	resp, predictionErr := us.getPrediction(ctx, req, md)
+	resp, predictionErr := us.getPrediction(ctx, req, md, turingReqID)
 	if predictionErr != nil {
 		logTuringRouterRequestError(ctx, predictionErr)
 		return nil, predictionErr
@@ -126,13 +127,15 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 func (us *Server) getPrediction(
 	ctx context.Context,
 	req *upiv1.PredictValuesRequest,
-	md metadata.MD) (
+	md metadata.MD,
+	turingReqID string) (
 	*upiv1.PredictValuesResponse, *errors.TuringError) {
 
 	// Create response channel to store the response from each step. 1 for route now,
 	// should be 4 when experiment engine, enricher and ensembler are added
 	respCh := make(chan grpcRouterResponse, 1)
 
+	req = populateRequestMetadata(req, turingReqID)
 	requestByte, err := proto.Marshal(req)
 	if err != nil {
 		turingError := errors.NewTuringError(
@@ -170,7 +173,30 @@ func (us *Server) getPrediction(
 		)
 		return nil, turingError
 	}
-	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)
 
+	responseProto = populateResponseMetadata(responseProto, turingReqID)
+	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)
 	return responseProto, nil
+}
+
+func populateRequestMetadata(req *upiv1.PredictValuesRequest, id string) *upiv1.PredictValuesRequest {
+	if req.Metadata == nil {
+		req.Metadata = &upiv1.RequestMetadata{}
+	}
+
+	if req.Metadata.RequestTimestamp == nil {
+		req.Metadata.RequestTimestamp = timestamppb.Now()
+	}
+
+	req.Metadata.PredictionId = id
+	return req
+}
+
+func populateResponseMetadata(resp *upiv1.PredictValuesResponse, id string) *upiv1.PredictValuesResponse {
+	if resp.Metadata == nil {
+		resp.Metadata = &upiv1.ResponseMetadata{}
+	}
+
+	resp.Metadata.PredictionId = id
+	return resp
 }

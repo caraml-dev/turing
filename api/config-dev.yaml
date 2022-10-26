@@ -20,7 +20,9 @@ BatchEnsemblingConfig:
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
     BaseImageRef:
-      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
+      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.7:v0.0.0-build.205-cf36433
+      3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.8:v0.0.0-build.205-cf36433
+      3.9.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.9:v0.0.0-build.205-cf36433
     KanikoConfig: &kanikoConfig
       BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
@@ -38,7 +40,9 @@ EnsemblerServiceBuilderConfig:
   ImageBuildingConfig:
     <<: *imageBuildingConfig
     BaseImageRef:
-      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
+      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.7:v0.0.0-build.205-cf36433
+      3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.8:v0.0.0-build.205-cf36433
+      3.9.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.9:v0.0.0-build.205-cf36433
     KanikoConfig:
       <<: *kanikoConfig
       DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile
