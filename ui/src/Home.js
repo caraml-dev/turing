@@ -1,11 +1,14 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import { EuiPageTemplate } from "@elastic/eui";
+import { ProjectsContext } from "@gojek/mlp-ui";
+import { Navigate } from "react-router-dom";
 import { useConfig } from "./config";
 
 const Home = () => {
   const { appConfig } = useConfig();
+  const { currentProject } = useContext(ProjectsContext);
 
-  return (
+  return !currentProject ? (
     <EuiPageTemplate>
       <EuiPageTemplate.EmptyPrompt
         iconType={appConfig.appIcon}
@@ -17,6 +20,8 @@ const Home = () => {
         }
       />
     </EuiPageTemplate>
+  ) : (
+    <Navigate to={`projects/${currentProject.id}`} replace={true} />
   );
 };
 
