@@ -98,7 +98,7 @@ swagger-ui:
 
 .PHONY: build-local-router-image
 build-local-router-image: vendor build-image
-	docker push ${DOCKER_REGISTRY}/turing-router:${OVERWRITE_VERSION}
+	docker push $(IMAGE_TAG)
 
 
 #   R E V I E W   R E Q U I R E D
