@@ -16,6 +16,7 @@ RouterDefaults:
       Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
     blue:
       Image: ghcr.io/myproject/blue-exp-engine-plugin:latest
+      ServiceAccount: blue-account
   KafkaConfig:
     MaxMessageBytes: 1234567
     CompressionType: snappy

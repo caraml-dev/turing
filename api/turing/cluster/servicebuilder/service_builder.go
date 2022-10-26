@@ -26,6 +26,7 @@ const (
 	secretKeyNameRouter    = "router-service-account.json"
 	secretKeyNameEnsembler = "ensembler-service-account.json"
 	secretKeyNameEnricher  = "enricher-service-account.json"
+	secretKeyNameExpEngine = "exp-engine-service-account.json"
 )
 
 var ComponentTypes = struct {
@@ -98,6 +99,7 @@ type ClusterServiceBuilder interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
+		expEngineServiceAccountKey string,
 	) *cluster.Secret
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
@@ -287,11 +289,13 @@ func (sb *clusterSvcBuilder) NewSecret(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	expEngineServiceAccountKey string,
 ) *cluster.Secret {
 	data := map[string]string{
 		secretKeyNameRouter:    routerServiceAccountKey,
 		secretKeyNameEnricher:  enricherServiceAccountKey,
 		secretKeyNameEnsembler: ensemblerServiceAccountKey,
+		secretKeyNameExpEngine: expEngineServiceAccountKey,
 	}
 	return &cluster.Secret{
 		Name: fmt.Sprintf(

@@ -113,6 +113,8 @@ func setupNewEnv(envMaps ...map[string]string) {
 }
 
 func TestLoad(t *testing.T) {
+	blueSvcAcct := "blue-account"
+
 	tests := map[string]struct {
 		filepaths []string
 		env       map[string]string
@@ -298,7 +300,7 @@ func TestLoad(t *testing.T) {
 					},
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
-						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest", ServiceAccount: &blueSvcAcct},
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1234567,
@@ -406,7 +408,7 @@ func TestLoad(t *testing.T) {
 					},
 					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
 						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
-						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest"},
+						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest", ServiceAccount: &blueSvcAcct},
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1234567,

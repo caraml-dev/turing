@@ -218,6 +218,7 @@ func TestNewSecret(t *testing.T) {
 		routerSvcKey    string
 		enricherSvcKey  string
 		ensemblerSvcKey string
+		expEngineSvcKey string
 		expected        *cluster.Secret
 	}{
 		"success": {
@@ -233,13 +234,15 @@ func TestNewSecret(t *testing.T) {
 			routerSvcKey:    "router-key",
 			enricherSvcKey:  "enricher-key",
 			ensemblerSvcKey: "ensembler-key",
+			expEngineSvcKey: "exp-engine-key",
 			expected: &cluster.Secret{
 				Name:      "test-router-turing-secret-2",
 				Namespace: "test-project",
 				Data: map[string]string{
-					"router-service-account.json":    "router-key",
-					"enricher-service-account.json":  "enricher-key",
-					"ensembler-service-account.json": "ensembler-key",
+					"router-service-account.json":     "router-key",
+					"enricher-service-account.json":   "enricher-key",
+					"ensembler-service-account.json":  "ensembler-key",
+					"exp-engine-service-account.json": "exp-engine-key",
 				},
 				Labels: map[string]string{
 					"app":          "test-router",
@@ -254,7 +257,7 @@ func TestNewSecret(t *testing.T) {
 	sb := &clusterSvcBuilder{}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey)
+			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey, tt.expEngineSvcKey)
 			assert.Equal(t, tt.expected, secret)
 		})
 	}

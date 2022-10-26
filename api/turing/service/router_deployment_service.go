@@ -31,6 +31,7 @@ type DeploymentService interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
+		expEngineServiceAccountKey string,
 		pyfuncEnsembler *models.PyFuncEnsembler,
 		experimentConfig json.RawMessage,
 		eventsCh *EventChannel,
@@ -105,6 +106,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	expEngineServiceAccountKey string,
 	pyfuncEnsembler *models.PyFuncEnsembler,
 	experimentConfig json.RawMessage,
 	eventsCh *EventChannel,
@@ -144,6 +146,7 @@ func (ds *deploymentService) DeployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
+		expEngineServiceAccountKey,
 	)
 	err = createSecret(ctx, controller, secret)
 	if err != nil {
@@ -235,7 +238,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Delete secret
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
-	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "", "")
 	err = deleteSecret(controller, secret, isCleanUp)
 	if err != nil {
 		return err

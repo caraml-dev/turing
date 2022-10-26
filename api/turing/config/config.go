@@ -252,7 +252,8 @@ type DatabaseConfig struct {
 }
 
 type ExperimentEnginePluginConfig struct {
-	Image string `json:"image" validate:"required"`
+	Image          string `json:"image" validate:"required"`
+	ServiceAccount *string
 }
 
 // RouterDefaults contains default configuration for routers deployed

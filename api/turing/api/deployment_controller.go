@@ -154,7 +154,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 	routerVersion *models.RouterVersion,
 	eventsCh *service.EventChannel,
 ) (string, error) {
-	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey string
+	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey,
+		expEngineServiceAccountKey string
 	var experimentConfig json.RawMessage
 	var err error
 
@@ -218,6 +219,16 @@ func (c RouterDeploymentController) deployRouterVersion(
 			}
 		}
 
+		if routerVersion.ExperimentEngine.PluginConfig.ServiceAccount != nil {
+			expEngineServiceAccountKey, err = c.MLPService.GetSecret(
+				models.ID(project.Id),
+				*routerVersion.ExperimentEngine.PluginConfig.ServiceAccount,
+			)
+			if err != nil {
+				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
+			}
+		}
+
 		// Get the deployable Router Config for the experiment
 		experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
 			routerVersion.ExperimentEngine.Type,
@@ -264,6 +275,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
+		expEngineServiceAccountKey,
 		pyfuncEnsembler,
 		experimentConfig,
 		eventsCh,
