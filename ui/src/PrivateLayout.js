@@ -27,8 +27,7 @@ export const PrivateLayout = () => {
                     navigate(urlJoin(currentApp?.href, "projects", pId, "routers"))
                   }
                   docLinks={appConfig.docsUrl}
-                />
-              )}
+                />)}
             </ApplicationsContext.Consumer>
             <Outlet />
           </EnvironmentsContextProvider>
