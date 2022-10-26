@@ -40,8 +40,8 @@ var mockResponse = &upiv1.PredictValuesResponse{
 		Rows:    nil,
 	},
 	Metadata: &upiv1.ResponseMetadata{
-		PredictionId: "123",
-		ExperimentId: "2",
+		PredictionId:   "123",
+		ExperimentName: "2",
 	},
 }
 
