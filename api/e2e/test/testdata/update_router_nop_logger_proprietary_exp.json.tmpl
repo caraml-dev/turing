@@ -8,8 +8,15 @@
                 "type": "PROXY",
                 "endpoint": "{{ .Mockserver.Endpoint }}/control",
                 "timeout": "5s"
+            },
+            {
+                "id": "treatment-a",
+                "type": "PROXY",
+                "endpoint": "{{ .Mockserver.Endpoint }}/treatment-a",
+                "timeout": "5s"
             }
         ],
+        "default_route_id": "treatment-a",
         "experiment_engine": {
             "type": "proprietary",
             "config": {
@@ -54,45 +61,6 @@
         "timeout": "5s",
         "log_config": {
             "result_logger_type": "nop"
-        },
-        "enricher": {
-            "image": "{{ .Echoserver.Image }}",
-            "resource_request": {
-                "min_replica": 1,
-                "max_replica": 1,
-                "cpu_request": "250m",
-                "memory_request": "256Mi"
-            },
-            "endpoint": "enrich",
-            "timeout": "3s",
-            "port": 80,
-            "env": [
-                {
-                    "name": "TEST_ENV",
-                    "value": "enricher"
-                }
-            ]
-        },
-        "ensembler": {
-            "type": "docker",
-            "docker_config": {
-                "image": "{{ .Echoserver.Image }}",
-                "resource_request": {
-                    "min_replica": 1,
-                    "max_replica": 1,
-                    "cpu_request": "250m",
-                    "memory_request": "256Mi"
-                },
-                "endpoint": "ensemble",
-                "timeout": "3s",
-                "port": 80,
-                "env": [
-                    {
-                        "name": "TEST_ENV",
-                        "value": "ensembler"
-                    }
-                ]
-            }
         }
     }
 }

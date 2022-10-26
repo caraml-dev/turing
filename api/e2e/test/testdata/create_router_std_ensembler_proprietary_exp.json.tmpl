@@ -1,18 +1,18 @@
 {
-    "environment_name": "{{.DeploymentEnvironment}}",
-    "name": "e2e-std-ensembler-test-{{.TestID}}",
+    "environment_name": "dev",
+    "name": "e2e-std-ensembler-test-{{ .TestID }}",
     "config": {
         "routes": [
             {
                 "id": "control",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverEndpoint}}/control",
+                "endpoint": "{{ .Mockserver.Endpoint }}/control",
                 "timeout": "5s"
             },
             {
                 "id": "treatment-a",
                 "type": "PROXY",
-                "endpoint": "{{.MockserverEndpoint}}/treatment-a",
+                "endpoint": "{{ .Mockserver.Endpoint }}/treatment-a",
                 "timeout": "5s"
             }
         ],

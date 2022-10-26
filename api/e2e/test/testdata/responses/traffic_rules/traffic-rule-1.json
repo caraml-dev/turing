@@ -1,0 +1,15 @@
+{
+  "request": {},
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "treatment-a"
+        },
+        "is_default": false,
+        "route": "treatment-a"
+      }
+    ]
+  }
+}

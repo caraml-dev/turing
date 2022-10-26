@@ -1,0 +1,19 @@
+{
+  "request": {
+    "service_type": {
+      "id": "service-type-c"
+    }
+  },
+  "response": {
+    "experiment": {},
+    "route_responses": [
+      {
+        "data": {
+          "version": "control"
+        },
+        "is_default": false,
+        "route": "control"
+      }
+    ]
+  }
+}

@@ -2,10 +2,12 @@ FROM golang:1.14-alpine as builder
 
 ARG binary_name="plugin"
 ARG project_root=github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/cmd
+ARG GOOS="linux"
+ARG GOARCH="amd64"
 
 ENV GO111MODULE=on \
-    GOOS=linux \
-    GOARCH=amd64
+    GOOS=${GOOS} \
+    GOARCH=${GOARCH}
 
 WORKDIR /app
 COPY . .
