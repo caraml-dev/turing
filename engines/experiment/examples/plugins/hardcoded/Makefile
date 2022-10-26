@@ -20,11 +20,12 @@ build-image: vendor
 	docker build --tag ${IMAGE_TAG} .
 
 .PHONY: proprietary-exp-plugin
-proprietary-exp-plugin:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ./bin/example-plugin ./cmd/main.go
+proprietary-exp-plugin: tidy
+	go build -o ./bin/example-plugin ./cmd/main.go
+	mkdir -p ../../../../../api/bin
 	ln -sf ${PWD}/bin/example-plugin ../../../../../api/bin/example-plugin
 
 .PHONY: build-local-proprietary-exp-plugin-image
-build-local-proprietary-exp-plugin-image: vendor
+build-local-proprietary-exp-plugin-image: tidy vendor 
 	docker build --no-cache -t localhost:5000/proprietary-experiment-engine-plugin .
 	docker push localhost:5000/proprietary-experiment-engine-plugin
