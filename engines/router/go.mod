@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.14.0
 	github.com/buger/jsonparser v1.1.1
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
-	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
+	github.com/caraml-dev/universal-prediction-interface v0.0.0-20221026045401-50e7d79e4b73
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gojek/fiber v0.1.1-0.20221018054323-013517aeaf8f

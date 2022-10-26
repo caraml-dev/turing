@@ -81,6 +81,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551 h1:nK41mSx5EZWigXbqDropyQLUegcYlV7CUGXjwBYRj0w=
 github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551/go.mod h1:dVNvxu+vducr8/hF2g4HUJ51dwV+fJhUd/TizJYWiO4=
+github.com/caraml-dev/universal-prediction-interface v0.0.0-20221026045401-50e7d79e4b73 h1:7u3qEKXqmsfpi5gb56dAAAdeYUCsF7iHSuep9zde6h0=
+github.com/caraml-dev/universal-prediction-interface v0.0.0-20221026045401-50e7d79e4b73/go.mod h1:dVNvxu+vducr8/hF2g4HUJ51dwV+fJhUd/TizJYWiO4=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 h1:xvUo53O5MRZhVMJAxWCJcS5HHrqAiAG9SJ1LpMu6aAI=
 github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40/go.mod h1:sGbDF6GwGcLpkNXPUTkMRoywsNa/ol15pxFe6ERfguA=
