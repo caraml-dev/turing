@@ -9,7 +9,7 @@ require (
 	github.com/antihax/optional v1.0.0
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/turing/engines/router v0.0.0
-	github.com/caraml-dev/universal-prediction-interface v0.0.0-20220913065109-8170722e7551
+	github.com/caraml-dev/universal-prediction-interface v0.0.0-20221026045401-50e7d79e4b73
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
@@ -25,7 +25,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.1.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/onsi/ginkgo/v2 v2.3.0
@@ -35,7 +34,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.2
 	github.com/stretchr/testify v1.8.0
-	github.com/tidwall/gjson v1.6.5
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
@@ -131,6 +129,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.10.3 // indirect
@@ -167,7 +166,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/tidwall/match v1.0.3 // indirect
 	github.com/tidwall/pretty v1.0.2 // indirect
 	github.com/uber/jaeger-client-go v2.25.0+incompatible // indirect
 	github.com/uber/jaeger-lib v2.4.0+incompatible // indirect
