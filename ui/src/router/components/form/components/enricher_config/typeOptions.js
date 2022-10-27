@@ -1,5 +1,5 @@
 export const enricherTypeOptions = {
-  "HTTP_JSON": [
+  HTTP_JSON: [
     {
       value: "nop",
       inputDisplay: "None",
@@ -20,13 +20,12 @@ export const enricherTypeOptions = {
       disabled: true,
     },
   ],
-  "UPI_V1": [
+  UPI_V1: [
     {
       value: "nop",
       inputDisplay: "None",
-      description:
-        "Enricher not supported for UPI router yet.",
+      description: "Enricher is not yet supported for the UPI protocol.",
       disabled: true,
     },
-  ]
+  ],
 };

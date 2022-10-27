@@ -86,19 +86,19 @@ export class TuringRouter {
     const ensemblerConfig = get(json, "config.ensembler");
     router.config.ensembler = _.isEmpty(ensemblerConfig)
       ? Ensembler.fromJson({
-        nop_config: {
-          final_response_route_id: get(json, "config.default_route_id"),
-        },
-      })
+          nop_config: {
+            final_response_route_id: get(json, "config.default_route_id"),
+          },
+        })
       : ensemblerConfig.type === "standard"
-        ? Ensembler.fromJson({
+      ? Ensembler.fromJson({
           ...ensemblerConfig,
           standard_config: {
             ...ensemblerConfig.standard_config,
             fallback_response_route_id: get(json, "config.default_route_id"),
           },
         })
-        : Ensembler.fromJson(ensemblerConfig);
+      : Ensembler.fromJson(ensemblerConfig);
 
     // Init enricher. If config exists, update the type to docker.
     const enricherConfig = get(json, "config.enricher");
@@ -166,7 +166,7 @@ export const newRoute = () => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
-  service_method: ""
+  service_method: "",
 });
 
 export const newDefaultRule = () => ({

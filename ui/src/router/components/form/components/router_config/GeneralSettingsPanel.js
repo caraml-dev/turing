@@ -15,7 +15,7 @@ import { get } from "../../../../../components/form/utils";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import sortBy from "lodash/sortBy";
 import { protocolTypeOptions } from "./typeOptions";
-import { newRoute } from "../../../../../services/router/TuringRouter"
+import { newRoute } from "../../../../../services/router/TuringRouter";
 
 export const GeneralSettingsPanel = ({
   name,
@@ -48,7 +48,8 @@ export const GeneralSettingsPanel = ({
           }
           isInvalid={!!errors.environment_name}
           error={errors.environment_name}
-          display="row">
+          display="row"
+        >
           <EuiSuperSelect
             fullWidth
             options={environmentOptions}
@@ -71,16 +72,17 @@ export const GeneralSettingsPanel = ({
               content="Specify the type of Turing router Protocol"
             />
           }
-          display="row">
+          display="row"
+        >
           <EuiSuperSelect
             fullWidth
             options={protocolTypeOptions}
             valueOfSelected={protocol}
-            onChange={(e)=>{
-              onChange("config.protocol")(e)
+            onChange={(e) => {
+              onChange("config.protocol")(e);
               // reset routes and rules when protocol changes
-              onChange("config.routes")([newRoute()])
-              onChange("config.rules")([])
+              onChange("config.routes")([newRoute()]);
+              onChange("config.rules")([]);
             }}
             hasDividers
           />
@@ -100,7 +102,8 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!errors.name}
               error={errors.name}
-              display="row">
+              display="row"
+            >
               <EuiFieldText
                 fullWidth
                 placeholder="deployment-name"
@@ -124,7 +127,8 @@ export const GeneralSettingsPanel = ({
               }
               isInvalid={!!get(errors, "config.timeout")}
               error={get(errors, "config.timeout")}
-              display="row">
+              display="row"
+            >
               <EuiFieldDuration
                 fullWidth
                 placeholder="100"

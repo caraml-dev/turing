@@ -34,7 +34,8 @@ export const TrafficRuleCondition = ({
       <EuiFlexItem grow={1}>
         <EuiFormRow
           isInvalid={!!get(errors, "field")}
-          error={get(errors, "field")}>
+          error={get(errors, "field")}
+        >
           <EuiFieldText
             readOnly={readOnly}
             compressed
@@ -58,7 +59,8 @@ export const TrafficRuleCondition = ({
       <EuiFlexItem grow={1}>
         <EuiFormRow
           isInvalid={!!get(errors, "values")}
-          error={get(errors, "values")}>
+          error={get(errors, "values")}
+        >
           <EuiComboBox
             compressed
             isDisabled={readOnly}

@@ -4,10 +4,18 @@ import { EuiForm, EuiFormRow, EuiSuperSelect } from "@elastic/eui";
 import { DescribedFormGroup } from "../../../../../components/form/described_form_group/DescribedFormGroup";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
-export const EngineTypePanel = ({ type, options, protocol, onChange, errors }) => {
+export const EngineTypePanel = ({
+  type,
+  options,
+  protocol,
+  onChange,
+  errors,
+}) => {
   const selectedOption = options.find((option) => option.value === type);
-  const helpText = protocol === "UPI_V1" ? 
-    "For UPI Router, payload variables should be stored as variable in Prediction Context field of the request payload" : ""
+  const helpText =
+    protocol === "UPI_V1"
+      ? "For UPI Router, payload variables should be stored as variable in Prediction Context field of the request payload"
+      : "";
 
   return (
     <Panel title="Engine">
@@ -24,7 +32,8 @@ export const EngineTypePanel = ({ type, options, protocol, onChange, errors }) =
             isInvalid={!!errors}
             error={errors}
             helpText={helpText}
-            display="row">
+            display="row"
+          >
             <EuiSuperSelect
               fullWidth
               options={options}

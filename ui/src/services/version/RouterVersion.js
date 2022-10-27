@@ -20,12 +20,12 @@ export class RouterVersion {
     const ensemblerConfig = get(json, "ensembler");
     version.ensembler = _.isEmpty(ensemblerConfig)
       ? Ensembler.fromJson({
-        nop_config: {
-          final_response_route_id: get(json, "default_route_id"),
-        },
-      })
+          nop_config: {
+            final_response_route_id: get(json, "default_route_id"),
+          },
+        })
       : ensemblerConfig.type === "standard"
-        ? Ensembler.fromJson({
+      ? Ensembler.fromJson({
           ...ensemblerConfig,
           standard_config: {
             ...ensemblerConfig.standard_config,
@@ -36,7 +36,7 @@ export class RouterVersion {
               get(json, "default_route_id"),
           },
         })
-        : Ensembler.fromJson(ensemblerConfig);
+      : Ensembler.fromJson(ensemblerConfig);
     return version;
   }
 
@@ -44,35 +44,35 @@ export class RouterVersion {
     const experiment =
       this.experiment_engine.type === "nop"
         ? {
-          type: "none",
-        }
+            type: "none",
+          }
         : {
-          type: this.experiment_engine.type,
-          config:
-            context.experiment_engine.type === "custom"
-              ? this.experiment_engine.config
-              : {
-                client: {
-                  id: this.experiment_engine.config.client.username,
-                  ...(this.experiment_engine.config.client.passkey_set
-                    ? {
-                      encrypted_passkey:
-                        this.experiment_engine.config.client
-                          .encrypted_passkey,
-                    }
-                    : {
-                      encrypted_passkey: "<to be computed>",
-                      passkey:
-                        this.experiment_engine.config.client.passkey,
-                    }),
-                },
-                experiments: this.experiment_engine.config.experiments,
-                variables: stripKeys(
-                  this.experiment_engine.config.variables,
-                  ["idx", "selected"]
-                ),
-              },
-        };
+            type: this.experiment_engine.type,
+            config:
+              context.experiment_engine.type === "custom"
+                ? this.experiment_engine.config
+                : {
+                    client: {
+                      id: this.experiment_engine.config.client.username,
+                      ...(this.experiment_engine.config.client.passkey_set
+                        ? {
+                            encrypted_passkey:
+                              this.experiment_engine.config.client
+                                .encrypted_passkey,
+                          }
+                        : {
+                            encrypted_passkey: "<to be computed>",
+                            passkey:
+                              this.experiment_engine.config.client.passkey,
+                          }),
+                    },
+                    experiments: this.experiment_engine.config.experiments,
+                    variables: stripKeys(
+                      this.experiment_engine.config.variables,
+                      ["idx", "selected"]
+                    ),
+                  },
+          };
 
     const pretty = {
       version: this.version,
@@ -97,83 +97,93 @@ export class RouterVersion {
       enricher:
         !!this.enricher && this.enricher.type !== "nop"
           ? {
-            type: "docker",
-            image: this.enricher.image,
-            endpoint: this.enricher.endpoint,
-            port: this.enricher.port,
-            env: this.enricher.env,
-            service_account: this.enricher.service_account,
-            resource_request: this.enricher.resource_request,
-            autoscaling_policy: {
-              ...this.enricher.autoscaling_policy,
-              target: parseInt(this.enricher.autoscaling_policy.target),
-            },
-          }
+              type: "docker",
+              image: this.enricher.image,
+              endpoint: this.enricher.endpoint,
+              port: this.enricher.port,
+              env: this.enricher.env,
+              service_account: this.enricher.service_account,
+              resource_request: this.enricher.resource_request,
+              autoscaling_policy: {
+                ...this.enricher.autoscaling_policy,
+                target: parseInt(this.enricher.autoscaling_policy.target),
+              },
+            }
           : {
-            type: "none",
-          },
+              type: "none",
+            },
       ensembler:
         this.ensembler.type === "nop"
           ? {
-            type: "none",
-            nop_config: { ...this.ensembler.nop_config },
-          }
+              type: "none",
+              nop_config: { ...this.ensembler.nop_config },
+            }
           : {
-            type: this.ensembler.type,
-            ...(this.ensembler.type === "standard"
-              ? {
-                standard_config: this.ensembler.standard_config,
-              }
-              : this.ensembler.type === "docker"
+              type: this.ensembler.type,
+              ...(this.ensembler.type === "standard"
                 ? {
-                  docker_config: {
-                    ...this.ensembler.docker_config,
-                    autoscaling_policy: {
-                      ...this.ensembler.docker_config.autoscaling_policy,
-                      target: parseInt(this.ensembler.docker_config.autoscaling_policy.target),
+                    standard_config: this.ensembler.standard_config,
+                  }
+                : this.ensembler.type === "docker"
+                ? {
+                    docker_config: {
+                      ...this.ensembler.docker_config,
+                      autoscaling_policy: {
+                        ...this.ensembler.docker_config.autoscaling_policy,
+                        target: parseInt(
+                          this.ensembler.docker_config.autoscaling_policy.target
+                        ),
+                      },
                     },
-                  },
-                }
+                  }
                 : this.ensembler.type === "pyfunc"
-                  ? {
+                ? {
                     pyfunc_config: {
                       ...this.ensembler.pyfunc_config,
                       autoscaling_policy: {
                         ...this.ensembler.pyfunc_config.autoscaling_policy,
-                        target: parseInt(this.ensembler.pyfunc_config.autoscaling_policy.target),
+                        target: parseInt(
+                          this.ensembler.pyfunc_config.autoscaling_policy.target
+                        ),
                       },
-                    }
+                    },
                   }
-                  : undefined),
-          },
+                : undefined),
+            },
       result_logging: {
         type: this.log_config.result_logger_type,
         ...(this.log_config.result_logger_type === "bigquery"
           ? {
-            config: {
-              table: this.log_config.bigquery_config.table,
-              service_account:
-                this.log_config.bigquery_config.service_account_secret,
-            },
-          }
+              config: {
+                table: this.log_config.bigquery_config.table,
+                service_account:
+                  this.log_config.bigquery_config.service_account_secret,
+              },
+            }
           : this.log_config.result_logger_type === "kafka"
-            ? {
+          ? {
               config: this.log_config.kafka_config,
             }
-            : undefined),
+          : undefined),
       },
     };
 
     if (this.default_traffic_rule) {
-      pretty.router["default_traffic_rule"] = {routes: this.default_traffic_rule.routes.join(", ")};
+      pretty.router["default_traffic_rule"] = {
+        routes: this.default_traffic_rule.routes.join(", "),
+      };
     }
     if (this.rules?.length > 0) {
       pretty.router["rules"] = this.rules.map((rule) => ({
         conditions: rule.conditions.map((condition) => ({
-          [condition.field_source]: `${condition.field} ${condition.operator.toUpperCase()} [${condition.values.join(", ")}]`
+          [condition.field_source]: `${
+            condition.field
+          } ${condition.operator.toUpperCase()} [${condition.values.join(
+            ", "
+          )}]`,
         })),
         routes: rule.routes.join(", "),
-      }))
+      }));
     }
 
     return yaml.dump(pretty, { sortKeys: true });

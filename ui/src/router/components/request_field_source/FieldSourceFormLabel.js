@@ -10,7 +10,7 @@ import {
 import "./FieldSourceFormLabel.scss";
 
 const fieldSourceOptions = {
-  "HTTP_JSON": [
+  HTTP_JSON: [
     {
       value: "header",
       inputDisplay: "Header",
@@ -20,7 +20,7 @@ const fieldSourceOptions = {
       inputDisplay: "Payload",
     },
   ],
-  "UPI_V1": [
+  UPI_V1: [
     {
       value: "header",
       inputDisplay: "Header",
@@ -28,19 +28,27 @@ const fieldSourceOptions = {
     {
       value: "prediction_context",
       inputDisplay: "Prediction Context",
-    }
-  ]
-}
+      toolTipContent: "Prediction Context of the UPI proto",
+    },
+  ],
+};
 
-export const FieldSourceFormLabel = ({ value, onChange, readOnly, protocol }) => {
+export const FieldSourceFormLabel = ({
+  value,
+  onChange,
+  readOnly,
+  protocol,
+}) => {
   const [isOpen, togglePopover] = useToggle();
-  const options = fieldSourceOptions[protocol]
+  const options = fieldSourceOptions[protocol];
 
   const panels = flattenPanelTree({
     id: 0,
     items: options.map((option) => ({
       name: option.inputDisplay,
       value: option.value,
+      toolTipContent: option.toolTipContent,
+      toolTipPosition: "right",
       onClick: () => {
         togglePopover();
         onChange(option.value);
@@ -65,13 +73,15 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly, protocol }) =>
           iconType="arrowDown"
           iconSide="right"
           className="fieldSourceLabel"
-          onClick={togglePopover}>
+          onClick={togglePopover}
+        >
           {selectedOption.inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s">
+      panelPaddingSize="s"
+    >
       <EuiContextMenu
         className="fieldSourceDropdown"
         initialPanelId={0}

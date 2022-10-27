@@ -7,8 +7,13 @@ import { get } from "../../../../../components/form/utils";
 import EndpointsContext from "../../../../../providers/endpoints/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 
-export const RoutesPanel = ({ routes, protocol, onChangeHandler, errors = {} }) => {
-const { onChange } = useOnChangeHandler(onChangeHandler);
+export const RoutesPanel = ({
+  routes,
+  protocol,
+  onChangeHandler,
+  errors = {},
+}) => {
+  const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const endpoints = useContext(EndpointsContext);
 

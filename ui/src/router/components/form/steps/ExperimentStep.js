@@ -15,7 +15,7 @@ export const ExperimentStep = ({ projectId }) => {
       config: {
         experiment_engine,
         ensembler: { type: ensemblerType },
-        protocol
+        protocol,
       },
     },
     onChangeHandler,

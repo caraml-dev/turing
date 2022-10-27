@@ -25,10 +25,12 @@ export const RouteCard = ({
 }) => {
   const [endpointsMap, setEndpointsMap] = useState({});
 
-  const upiServiceMethodOptions = [{
-    label: "/caraml.upi.v1.UniversalPredictionService/PredictValues",
-    value: "/caraml.upi.v1.UniversalPredictionService/PredictValues"
-  }]
+  const upiServiceMethodOptions = [
+    {
+      label: "/caraml.upi.v1.UniversalPredictionService/PredictValues",
+      value: "/caraml.upi.v1.UniversalPredictionService/PredictValues",
+    },
+  ];
 
   useEffect(() => {
     setEndpointsMap(
@@ -46,13 +48,15 @@ export const RouteCard = ({
       className="euiCard--routeCard"
       title=""
       description=""
-      textAlign="left">
+      textAlign="left"
+    >
       <EuiForm onClick={(e) => e.stopPropagation()}>
         <EuiFlexGroup
           className="euiFlexGroup--removeButton"
           justifyContent="flexEnd"
           gutterSize="none"
-          direction="row">
+          direction="row"
+        >
           {!!onDelete && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -68,10 +72,15 @@ export const RouteCard = ({
           label="Endpoint *"
           isInvalid={!!get(errors, "endpoint")}
           error={get(errors, "endpoint")}
-          fullWidth>
+          fullWidth
+        >
           <SelectEndpointComboBox
             fullWidth
-            placeholder={protocol === "HTTP_JSON" ? "http://models.internal/predict": "models.internal:80"} 
+            placeholder={
+              protocol === "HTTP_JSON"
+                ? "http://models.internal/predict"
+                : "models.internal:80"
+            }
             protocol={protocol}
             value={route.endpoint}
             options={endpointOptions}
@@ -88,35 +97,33 @@ export const RouteCard = ({
 
         <EuiSpacer size="m" />
 
-        {
-          protocol === "UPI_V1" && 
-          (
-            <EuiFormRow
-              label="Service Method *"
-              isInvalid={!!get(errors, "service_method")}
-              error={get(errors, "service_method")}
-              fullWidth>
-              <EuiComboBoxSelect
-                fullWidth
-                placeholder="/caraml.upi.v1.UniversalPredictionService/PredictValues"
-                value={route.service_method}
-                options={upiServiceMethodOptions}
-                onChange={(service_method) => {
-                  onChange({
-                    ...route,
-                    service_method,
-                  });
-                }}
-                onCreateOption={(service_method) => {
-                  onChange({
-                    ...route,
-                    service_method,
-                  });
-                }}
-              />
+        {protocol === "UPI_V1" && (
+          <EuiFormRow
+            label="Service Method *"
+            isInvalid={!!get(errors, "service_method")}
+            error={get(errors, "service_method")}
+            fullWidth
+          >
+            <EuiComboBoxSelect
+              fullWidth
+              placeholder="/caraml.upi.v1.UniversalPredictionService/PredictValues"
+              value={route.service_method}
+              options={upiServiceMethodOptions}
+              onChange={(service_method) => {
+                onChange({
+                  ...route,
+                  service_method,
+                });
+              }}
+              onCreateOption={(service_method) => {
+                onChange({
+                  ...route,
+                  service_method,
+                });
+              }}
+            />
           </EuiFormRow>
-          )
-        }
+        )}
 
         <EuiSpacer size="m" />
 
@@ -125,7 +132,8 @@ export const RouteCard = ({
             <EuiFormRow
               label="Route Id *"
               isInvalid={!!get(errors, "id")}
-              error={get(errors, "id")}>
+              error={get(errors, "id")}
+            >
               <EuiFieldText
                 placeholder="control"
                 value={route.id}
@@ -139,7 +147,8 @@ export const RouteCard = ({
             <EuiFormRow
               label="Timeout *"
               isInvalid={!!get(errors, "timeout")}
-              error={get(errors, "timeout")}>
+              error={get(errors, "timeout")}
+            >
               <EuiFieldDuration
                 value={route.timeout}
                 max={10000}

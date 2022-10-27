@@ -16,7 +16,14 @@ import ExperimentEngineContext from "../../../../providers/experiments/context";
 export const EnsemblerStep = ({ projectId }) => {
   const {
     data: {
-      config: { experiment_engine, ensembler, routes, rules, default_traffic_rule, protocol },
+      config: {
+        experiment_engine,
+        ensembler,
+        routes,
+        rules,
+        default_traffic_rule,
+        protocol,
+      },
     },
     onChangeHandler,
   } = useContext(FormContext);

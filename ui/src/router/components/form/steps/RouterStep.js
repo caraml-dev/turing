@@ -37,7 +37,8 @@ export const RouterStep = ({ projectId }) => {
       <EuiFlexItem grow={false}>
         <MerlinEndpointsProvider
           projectId={projectId}
-          environmentName={data.environment_name}>
+          environmentName={data.environment_name}
+        >
           <RoutesPanel
             protocol={data.config.protocol}
             routes={get(data, "config.routes")}
@@ -49,7 +50,10 @@ export const RouterStep = ({ projectId }) => {
       <EuiFlexItem grow={false}>
         <RulesPanel
           default_traffic_rule={get(data, "config.default_traffic_rule")}
-          default_traffic_rule_errors={get(errors, "config.default_traffic_rule")}
+          default_traffic_rule_errors={get(
+            errors,
+            "config.default_traffic_rule"
+          )}
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
           protocol={data.config.protocol}

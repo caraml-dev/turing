@@ -21,7 +21,7 @@ export const EnricherStep = ({ projectId }) => {
   } = useConfig();
   const {
     data: {
-      config: { enricher, protocol},
+      config: { enricher, protocol },
     },
     onChangeHandler,
   } = useContext(FormContext);

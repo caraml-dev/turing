@@ -26,12 +26,11 @@ export const UpdateRouterForm = ({ projectId, onCancel, onNext }) => {
     ExperimentEngineContext
   );
 
-  const { 
+  const {
     data: {
-      config: {
-        protocol
-      }
-  }} = useContext(FormContext);
+      config: { protocol },
+    },
+  } = useContext(FormContext);
 
   const sections = [
     {

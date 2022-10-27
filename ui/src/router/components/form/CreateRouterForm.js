@@ -24,8 +24,8 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     [maxAllowedReplica]
   );
 
-  const { data: router} = useContext(FormContext);
-  const protocol = router.config.protocol
+  const { data: router } = useContext(FormContext);
+  const protocol = router.config.protocol;
 
   const [submissionResponse, submitForm] = useTuringApi(
     `/projects/${projectId}/routers`,
@@ -92,7 +92,8 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary">
+      confirmButtonColor="primary"
+    >
       {(onSubmit) => (
         <StepsWizardHorizontal
           steps={steps}
