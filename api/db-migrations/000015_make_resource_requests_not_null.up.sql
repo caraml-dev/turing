@@ -1,0 +1,1 @@
+ALTER TABLE router_versions ALTER COLUMN resource_request DROP NOT NULL;
