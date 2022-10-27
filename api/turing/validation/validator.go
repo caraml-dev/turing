@@ -368,4 +368,103 @@ func validateRouterConfig(sl validator.StructLevel) {
 		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}
+
+	// Validate autoscaling policy for the router
+	validateResourceRequestsAndAutoscalingPolicy(sl, "router", routerConfig.ResourceRequest, routerConfig.AutoscalingPolicy)
+
+	// Validate autoscaling policy for the enricher, if configured
+	if routerConfig.Enricher != nil {
+		validateResourceRequestsAndAutoscalingPolicy(sl, "enricher", routerConfig.Enricher.ResourceRequest,
+			routerConfig.Enricher.AutoscalingPolicy)
+	}
+
+	// Validate autoscaling policy for the ensembler, if configured
+	if routerConfig.Ensembler != nil {
+		if routerConfig.Ensembler.DockerConfig != nil {
+			validateResourceRequestsAndAutoscalingPolicy(
+				sl,
+				"ensembler",
+				routerConfig.Ensembler.DockerConfig.ResourceRequest,
+				routerConfig.Ensembler.DockerConfig.AutoscalingPolicy,
+			)
+		}
+
+		if routerConfig.Ensembler.PyfuncConfig != nil {
+			validateResourceRequestsAndAutoscalingPolicy(
+				sl,
+				"ensembler",
+				routerConfig.Ensembler.PyfuncConfig.ResourceRequest,
+				routerConfig.Ensembler.PyfuncConfig.AutoscalingPolicy,
+			)
+		}
+	}
+}
+
+func validateResourceRequestsAndAutoscalingPolicy(
+	sl validator.StructLevel,
+	componentName string,
+	resourceRequest *models.ResourceRequest,
+	autoscalingPolicy models.AutoscalingPolicy,
+) {
+	validateAutoscalingPolicy(sl, componentName, autoscalingPolicy)
+
+	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is used
+	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil {
+		// Validate resource requests are not set
+		if resourceRequest != nil {
+			sl.ReportError(
+				resourceRequest,
+				"ResourceRequest",
+				"ResourceRequest",
+				fmt.Sprintf("excluded when AutoscalingPolicy.DefaultAutoscalingPolicyPayloadSize is set for %s",
+					componentName),
+				"",
+			)
+		}
+	}
+
+	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is NOT used
+	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize == nil {
+		// Validate resource requests are not set
+		if resourceRequest == nil {
+			sl.ReportError(
+				resourceRequest,
+				"ResourceRequest",
+				"ResourceRequest",
+				fmt.Sprintf("required when AutoscalingPolicy.DefaultAutoscalingPolicyPayloadSize is not set for %s",
+					componentName),
+				"",
+			)
+		}
+	}
+}
+
+func validateAutoscalingPolicy(
+	sl validator.StructLevel,
+	componentName string,
+	autoscalingPolicy models.AutoscalingPolicy,
+) {
+	// Validate autoscaling policy to ensure only one of the following of AutoscalingPolicy is true:
+	//  - DefaultAutoscalingPolicyPayloadSize is set (default autoscaling policy is used)
+	//  - Metric or/and Target is/are set (default autoscaling policy is NOT used)
+	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil &&
+		(autoscalingPolicy.Metric != nil || autoscalingPolicy.Target != nil) {
+		sl.ReportError(
+			autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize,
+			"DefaultAutoscalingPolicyPayloadSize",
+			"DefaultAutoscalingPolicyPayloadSize",
+			fmt.Sprintf("excluded when Metric or/and Target is/are set for %s", componentName),
+			"",
+		)
+	}
+	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize == nil &&
+		(autoscalingPolicy.Metric == nil || autoscalingPolicy.Target == nil) {
+		sl.ReportError(
+			autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize,
+			"DefaultAutoscalingPolicyPayloadSize",
+			"DefaultAutoscalingPolicyPayloadSize",
+			fmt.Sprintf("required when Metric or/and Target is/are not set for %s", componentName),
+			"",
+		)
+	}
 }

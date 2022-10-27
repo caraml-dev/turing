@@ -121,6 +121,16 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	initContainers := buildInitContainers(routerVersion)
 
+	minReplicas, err := sb.getMinReplicaOrDefault(routerVersion.ResourceRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	maxReplicas, err := sb.getMaxReplicaOrDefault(routerVersion.ResourceRequest)
+	if err != nil {
+		return nil, err
+	}
+
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
 		sentryEnabled, sentryDSN, secretName, routerVersion)
@@ -132,8 +142,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Name:                 name,
 			Namespace:            namespace,
 			Image:                routerVersion.Image,
-			CPURequests:          routerVersion.ResourceRequest.CPURequest,
-			MemoryRequests:       routerVersion.ResourceRequest.MemoryRequest,
+			CPURequests:          sb.getCPURequestOrDefault(routerVersion.ResourceRequest),
+			MemoryRequests:       sb.getMemoryRequestOrDefault(routerVersion.ResourceRequest),
 			LivenessHTTPGetPath:  routerLivenessPath,
 			ReadinessHTTPGetPath: routerReadinessPath,
 			Envs:                 envs,
@@ -146,10 +156,10 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
 		Protocol:                        routerVersion.Protocol,
-		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
-		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
-		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
-		AutoscalingTarget:               routerVersion.AutoscalingPolicy.Target,
+		MinReplicas:                     *minReplicas,
+		MaxReplicas:                     *maxReplicas,
+		AutoscalingMetric:               sb.getAutoscalingMetricOrDefault(routerVersion.AutoscalingPolicy),
+		AutoscalingTarget:               sb.getAutoscalingTargetOrDefault(routerVersion.AutoscalingPolicy),
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}

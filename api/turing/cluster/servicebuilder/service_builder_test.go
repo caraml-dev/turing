@@ -23,7 +23,7 @@ type testSuiteNewService struct {
 }
 
 func TestNewEnricherService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, 0, 8)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, nil, nil)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 
 	tests := map[string]testSuiteNewService{
@@ -97,7 +97,7 @@ func TestNewEnricherService(t *testing.T) {
 }
 
 func TestNewEnsemblerService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, 0, 8)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, nil, nil)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	tests := map[string]testSuiteNewService{
 		"success": {

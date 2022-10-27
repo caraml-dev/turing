@@ -220,8 +220,8 @@ type DeploymentConfig struct {
 
 type DefaultAutoScalingPolicyConfig struct {
 	Enabled           bool
-	DefaultMinReplica int `validate:"min=0"`
-	DefaultMaxReplica int `validate:"min=0"`
+	DefaultMinReplica *int
+	DefaultMaxReplica *int
 }
 
 // KubernetesLabelConfigs are the configurations for labeling
