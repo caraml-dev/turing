@@ -86,7 +86,7 @@ export const GeneralSettingsPanel = ({
             valueOfSelected={protocol}
             onChange={(e) => {
               onChange("config.protocol")(e);
-              // update all service_method of routes to expected of protocol
+              // update service_method for each route if changed to UPI
               onChange("config.routes")(
                 routes.map((route) => {
                   return {
@@ -98,7 +98,24 @@ export const GeneralSettingsPanel = ({
                   };
                 })
               );
-              onChange("config.rules")([]);
+              // update prediction_context <-> payload for condition.field_source when protocol changes
+              onChange("config.rules")(
+                rules.map((rule) => {
+                  return {
+                    ...rule,
+                    conditions: rule.conditions.map((condition) => {
+                      if (condition.field_source === "header") {
+                        return condition;
+                      }
+                      return {
+                        ...condition,
+                        field_source:
+                          e === "UPI_V1" ? "prediction_context" : "payload",
+                      };
+                    }),
+                  };
+                })
+              );
             }}
             hasDividers
           />
