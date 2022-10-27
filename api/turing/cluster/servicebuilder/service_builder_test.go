@@ -257,7 +257,8 @@ func TestNewSecret(t *testing.T) {
 	sb := &clusterSvcBuilder{}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey, tt.expEngineSvcKey)
+			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey,
+				tt.expEngineSvcKey)
 			assert.Equal(t, tt.expected, secret)
 		})
 	}
