@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // Type to represent the autoscaling metrics supported by Knative.
@@ -26,6 +27,8 @@ type AutoscalingPolicy struct {
 	// It is expected that the autoscaling target is an absolute value for concurrency / rps
 	// while it is a % value (of the requested value) for cpu / memory.
 	Target string `json:"target" validate:"required,number"`
+	// DefaultAutoscalingPolicyPayload indicates the request payload
+	DefaultAutoscalingPolicyPayload *resource.Quantity `json:"default_autoscaling_policy_payload"`
 }
 
 func (a AutoscalingPolicy) Value() (driver.Value, error) {
