@@ -215,6 +215,13 @@ type DeploymentConfig struct {
 	MaxCPU            Quantity      `validate:"required"`
 	MaxMemory         Quantity      `validate:"required"`
 	MaxAllowedReplica int           `validate:"required"`
+	DefaultAutoScalingPolicyConfig DefaultAutoScalingPolicyConfig `validate:"required"`
+}
+
+type DefaultAutoScalingPolicyConfig struct {
+	Enabled           bool
+	DefaultMinReplica int `validate:"min=0"`
+	DefaultMaxReplica int `validate:"min=0"`
 }
 
 // KubernetesLabelConfigs are the configurations for labeling

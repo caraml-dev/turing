@@ -667,6 +667,9 @@ func TestConfigValidate(t *testing.T) {
 			MaxCPU:            config.Quantity(resource.MustParse("2")),
 			MaxMemory:         config.Quantity(resource.MustParse("8Gi")),
 			MaxAllowedReplica: 30,
+			DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
+				Enabled: false,
+			},
 		},
 		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
@@ -746,6 +749,17 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		"invalid min/max replica when autoscaling policy is enabled": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.DeployConfig.DefaultAutoScalingPolicyConfig = config.DefaultAutoScalingPolicyConfig{
+					Enabled:           true,
+					DefaultMinReplica: -1,
+					DefaultMaxReplica: -2,
+				}
+				return validConfig
+			},
+			wantErr: true,
+		},
 		"missing turing encryption key": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.TuringEncryptionKey = ""
@@ -802,6 +816,17 @@ func TestConfigValidate(t *testing.T) {
 				return validConfig
 			},
 			wantErr: true,
+		},
+		"valid autoscaling policy set": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.DeployConfig.DefaultAutoScalingPolicyConfig = config.DefaultAutoScalingPolicyConfig{
+					Enabled:           true,
+					DefaultMinReplica: 2,
+					DefaultMaxReplica: 10,
+				}
+				return validConfig
+			},
+			wantErr: false,
 		},
 		"valid in cluster config": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
