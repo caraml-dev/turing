@@ -15,7 +15,7 @@ import { get } from "../../../../../components/form/utils";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import sortBy from "lodash/sortBy";
 import { protocolTypeOptions } from "./typeOptions";
-import { newRoute } from "../../../../../services/router/TuringRouter";
+import { FormContext } from "@gojek/mlp-ui";
 
 export const GeneralSettingsPanel = ({
   name,
@@ -27,6 +27,12 @@ export const GeneralSettingsPanel = ({
   errors = {},
 }) => {
   const environments = useContext(EnvironmentsContext);
+
+  const {
+    data: {
+      config: { routes, rules },
+    },
+  } = useContext(FormContext);
 
   const environmentOptions = sortBy(environments, "name").map(
     (environment) => ({
@@ -80,8 +86,18 @@ export const GeneralSettingsPanel = ({
             valueOfSelected={protocol}
             onChange={(e) => {
               onChange("config.protocol")(e);
-              // reset routes and rules when protocol changes
-              onChange("config.routes")([newRoute()]);
+              // update all service_method of routes to expected of protocol
+              onChange("config.routes")(
+                routes.map((route) => {
+                  return {
+                    ...route,
+                    service_method:
+                      e === "UPI_V1"
+                        ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
+                        : "",
+                  };
+                })
+              );
               onChange("config.rules")([]);
             }}
             hasDividers

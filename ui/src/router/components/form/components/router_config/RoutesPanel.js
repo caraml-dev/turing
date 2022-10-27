@@ -18,7 +18,7 @@ export const RoutesPanel = ({
   const endpoints = useContext(EndpointsContext);
 
   const onAddRoute = () => {
-    onChange("routes")([...routes, newRoute()]);
+    onChange("routes")([...routes, newRoute(protocol)]);
   };
 
   const onDeleteRoute = (idx) => () => {

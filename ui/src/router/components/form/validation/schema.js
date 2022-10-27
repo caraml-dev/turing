@@ -97,7 +97,7 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i,
   trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/,
   upiUrlRegex = /^([a-zA-Z0-9_-]{1,256})(\.[a-zA-Z0-9-]{1,256})*(:\d+)$/,
-  serviceMethodRegex = /^\/?(\w+(\.|-)?)+(\/[A-Za-z]+)$/;
+  serviceMethodRegex = /^\/?(\w+(\.|-)?)+(\/[A-Za-z0-9]+)$/;
 
 const timeoutSchema = yup
   .string()

@@ -162,11 +162,14 @@ export class TuringRouter {
   }
 }
 
-export const newRoute = () => ({
+export const newRoute = (protocol) => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
-  service_method: "",
+  service_method:
+    protocol === "UPI_V1"
+      ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
+      : "",
 });
 
 export const newDefaultRule = () => ({

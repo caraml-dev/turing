@@ -13,7 +13,6 @@ import { SelectEndpointComboBox } from "../../../../../../components/form/endpoi
 import { EuiFieldDuration } from "../../../../../../components/form/field_duration/EuiFieldDuration";
 import { get } from "../../../../../../components/form/utils";
 import "./RouteCard.scss";
-import { EuiComboBoxSelect } from "../../../../../../components/form/combo_box/EuiComboBoxSelect";
 
 export const RouteCard = ({
   route,
@@ -24,13 +23,6 @@ export const RouteCard = ({
   errors,
 }) => {
   const [endpointsMap, setEndpointsMap] = useState({});
-
-  const upiServiceMethodOptions = [
-    {
-      label: "/caraml.upi.v1.UniversalPredictionService/PredictValues",
-      value: "/caraml.upi.v1.UniversalPredictionService/PredictValues",
-    },
-  ];
 
   useEffect(() => {
     setEndpointsMap(
@@ -96,34 +88,6 @@ export const RouteCard = ({
         </EuiFormRow>
 
         <EuiSpacer size="m" />
-
-        {protocol === "UPI_V1" && (
-          <EuiFormRow
-            label="Service Method *"
-            isInvalid={!!get(errors, "service_method")}
-            error={get(errors, "service_method")}
-            fullWidth
-          >
-            <EuiComboBoxSelect
-              fullWidth
-              placeholder="/caraml.upi.v1.UniversalPredictionService/PredictValues"
-              value={route.service_method}
-              options={upiServiceMethodOptions}
-              onChange={(service_method) => {
-                onChange({
-                  ...route,
-                  service_method,
-                });
-              }}
-              onCreateOption={(service_method) => {
-                onChange({
-                  ...route,
-                  service_method,
-                });
-              }}
-            />
-          </EuiFormRow>
-        )}
 
         <EuiSpacer size="m" />
 
