@@ -180,7 +180,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 			} else {
 				responseProto := &upiv1.PredictValuesResponse{}
 				require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
-				require.True(t, testutils.CompareUpiResponse(responseProto, tt.expected), "response not equal to expected")
+				require.True(t, proto.Equal(responseProto, tt.expected), "response not equal to expected")
 			}
 		})
 	}
@@ -243,8 +243,7 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			require.Nil(t, err)
 			responseProto := &upiv1.PredictValuesResponse{}
 			require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
-			diff := testutils.CompareUpiResponse(responseProto, tt.compareAgainst)
-			require.Equal(t, tt.expectedEqual, diff, "Comparison result not expected")
+			require.Equal(t, tt.expectedEqual, proto.Equal(responseProto, tt.compareAgainst), "Comparison result not expected")
 		})
 	}
 }
