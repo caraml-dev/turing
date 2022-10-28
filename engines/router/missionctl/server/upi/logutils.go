@@ -19,7 +19,7 @@ type grpcRouterResponse struct {
 	err    string
 }
 
-var protoJsonMarshaller = protojson.MarshalOptions{}
+var protoJSONMarshaller = protojson.MarshalOptions{}
 
 func logTuringRouterRequestSummary(
 	ctx context.Context,
@@ -31,7 +31,7 @@ func logTuringRouterRequestSummary(
 
 	// Create a new TuringResultLogEntry record with the context and request info
 	// send proto as json string
-	reqStr := protoJsonMarshaller.Format(upiReq)
+	reqStr := protoJSONMarshaller.Format(upiReq)
 	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, reqStr)
 
 	// Read incoming responses and prepare for logging
@@ -40,7 +40,7 @@ func logTuringRouterRequestSummary(
 		if resp.err != "" {
 			logEntry.AddResponse(resp.key, "", nil, resp.err)
 		} else {
-			upiResp := protoJsonMarshaller.Format(upiReq)
+			upiResp := protoJSONMarshaller.Format(upiReq)
 			logEntry.AddResponse(resp.key, upiResp, resultlog.FormatHeader(resp.header), "")
 		}
 	}
