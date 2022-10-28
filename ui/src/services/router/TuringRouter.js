@@ -29,6 +29,7 @@ export class TuringRouter {
       autoscaling_policy: {
         metric: "concurrency",
         target: "1",
+        payload_size: "",
       },
       timeout: "300ms",
       protocol: "HTTP_JSON",
@@ -47,6 +48,7 @@ export class TuringRouter {
         autoscaling_policy: {
           metric: "concurrency",
           target: "1",
+          payload_size: "",
         },
         env: [],
         service_account: "",

@@ -30,6 +30,7 @@ export class DockerEnsembler extends Ensembler {
       autoscaling_policy: {
         metric: "concurrency",
         target: "1",
+        payload_size: "",
       },
       env: [],
       service_account: "",

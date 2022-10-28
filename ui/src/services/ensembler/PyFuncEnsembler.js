@@ -31,6 +31,7 @@ export class PyFuncEnsembler extends Ensembler {
       autoscaling_policy: {
         metric: "concurrency",
         target: "1",
+        payload_size: "",
       },
       env: [],
       timeout: "100ms",
