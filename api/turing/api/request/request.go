@@ -167,7 +167,6 @@ func (r RouterConfig) BuildRouterVersion(
 			if r.Ensembler.DockerConfig == nil {
 				return nil, errors.New("missing ensembler docker config")
 			}
-			r.Ensembler.DockerConfig.AutoscalingPolicy = r.Ensembler.DockerConfig.AutoscalingPolicy
 		}
 		if r.Ensembler.Type == models.EnsemblerStandardType && r.Ensembler.StandardConfig == nil {
 			return nil, errors.New("missing ensembler standard config")
