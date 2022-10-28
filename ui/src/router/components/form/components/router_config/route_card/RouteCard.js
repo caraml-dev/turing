@@ -89,8 +89,6 @@ export const RouteCard = ({
 
         <EuiSpacer size="m" />
 
-        <EuiSpacer size="m" />
-
         <EuiFlexGroup direction="row">
           <EuiFlexItem>
             <EuiFormRow

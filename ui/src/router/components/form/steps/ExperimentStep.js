@@ -41,10 +41,16 @@ export const ExperimentStep = ({ projectId }) => {
     ExperimentEngineContext
   );
   const engineProps = getEngineProperties(experiment_engine.type);
+  // UPI will only support custom experiment engine now
+  const filteredEngine =
+    protocol === "UPI_V1"
+      ? experimentEngines.filter((engine) => engine.type !== "standard")
+      : experimentEngines;
   const experimentEngineOptions = useMemo(
-    () => getExperimentEngineOptions(experimentEngines),
-    [experimentEngines]
+    () => getExperimentEngineOptions(filteredEngine),
+    [filteredEngine]
   );
+  console.log(experimentEngineOptions);
 
   useEffect(() => {
     const ensemblerOptions = ensemblerTypeOptions(engineProps, protocol).filter(
