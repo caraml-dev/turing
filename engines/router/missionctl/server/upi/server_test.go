@@ -110,9 +110,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 }
 
 func TestNewUpiServer(t *testing.T) {
-	core, logs := observer.New(zap.ErrorLevel)
-	logger := zap.New(core)
-	log.SetGlobalLogger(logger.Sugar())
+	_, logs := observer.New(zap.ErrorLevel)
 
 	port := 50560
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
