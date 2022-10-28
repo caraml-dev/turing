@@ -51,6 +51,10 @@
             "cpu_request": "100m",
             "memory_request": "250Mi"
         },
+        "autoscaling_policy": {
+            "metric": "concurrency",
+            "target": "1"
+        },
         "timeout": "5s",
         "protocol": "HTTP_JSON",
         "log_config": {
@@ -63,6 +67,10 @@
                 "max_replica": 1,
                 "cpu_request": "250m",
                 "memory_request": "256Mi"
+            },
+            "autoscaling_policy": {
+                "metric": "concurrency",
+                "target": "1"
             },
             "endpoint": "enrich",
             "timeout": "3s",
@@ -83,6 +91,10 @@
                     "max_replica": 1,
                     "cpu_request": "250m",
                     "memory_request": "256Mi"
+                },
+                "autoscaling_policy": {
+                    "metric": "concurrency",
+                    "target": "1"
                 },
                 "endpoint": "ensemble",
                 "timeout": "3s",

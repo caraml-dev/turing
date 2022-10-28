@@ -58,6 +58,10 @@
             "cpu_request": "200m",
             "memory_request": "250Mi"
         },
+        "autoscaling_policy": {
+            "metric": "concurrency",
+            "target": "1"
+        },
         "timeout": "5s",
         "log_config": {
             "result_logger_type": "nop"
