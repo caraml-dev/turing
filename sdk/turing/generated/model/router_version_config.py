@@ -146,12 +146,13 @@ class RouterVersionConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, routes, experiment_engine, timeout, log_config, *args, **kwargs):  # noqa: E501
+    def __init__(self, routes, experiment_engine, autoscaling_policy, timeout, log_config, *args, **kwargs):  # noqa: E501
         """RouterVersionConfig - a model defined in OpenAPI
 
         Args:
             routes ([Route]):
             experiment_engine (ExperimentConfig):
+            autoscaling_policy (AutoscalingPolicy):
             timeout (str):
             log_config (RouterVersionConfigLogConfig):
 
@@ -221,6 +222,7 @@ class RouterVersionConfig(ModelNormal):
 
         self.routes = routes
         self.experiment_engine = experiment_engine
+        self.autoscaling_policy = autoscaling_policy
         self.timeout = timeout
         self.log_config = log_config
         for var_name, var_value in kwargs.items():

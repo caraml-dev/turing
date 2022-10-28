@@ -144,7 +144,7 @@ class Router(ApiObject):
         self._config = config
         updated_router = Router.from_open_api(
             turing.active_session.update_router(
-                router_id=self.id, router_config=config.to_open_api()
+                router_id=self.id, router_version_config=config.to_open_api().config
             )
         )
         self.__dict__ = updated_router.__dict__
