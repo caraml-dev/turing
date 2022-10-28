@@ -9,6 +9,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type grpcRouterResponse struct {
@@ -18,16 +19,20 @@ type grpcRouterResponse struct {
 	err    string
 }
 
+var protoJsonMarshaller = protojson.MarshalOptions{}
+
 func logTuringRouterRequestSummary(
 	ctx context.Context,
 	timestamp time.Time,
 	header metadata.MD,
-	body []byte,
+	upiReq *upiv1.PredictValuesRequest,
 	mcRespCh <-chan grpcRouterResponse,
 ) {
 
 	// Create a new TuringResultLogEntry record with the context and request info
-	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, string(body))
+	// send proto as json string
+	reqStr := protoJsonMarshaller.Format(upiReq)
+	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, reqStr)
 
 	// Read incoming responses and prepare for logging
 	for resp := range mcRespCh {
@@ -35,7 +40,8 @@ func logTuringRouterRequestSummary(
 		if resp.err != "" {
 			logEntry.AddResponse(resp.key, "", nil, resp.err)
 		} else {
-			logEntry.AddResponse(resp.key, resp.body.String(), resultlog.FormatHeader(resp.header), "")
+			upiResp := protoJsonMarshaller.Format(upiReq)
+			logEntry.AddResponse(resp.key, upiResp, resultlog.FormatHeader(resp.header), "")
 		}
 	}
 

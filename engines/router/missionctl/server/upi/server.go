@@ -149,13 +149,8 @@ func (us *Server) getPrediction(
 	// Defer logging req summary
 	defer func() {
 		go func() {
-			logTuringRouterRequestSummary(
-				ctx,
-				time.Now(),
-				upiRequest.Header(),
-				upiRequest.Payload(),
-				respCh)
 			close(respCh)
+			logTuringRouterRequestSummary(ctx, time.Now(), md, req, respCh)
 		}()
 	}()
 
