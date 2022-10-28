@@ -432,6 +432,9 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 	ensembler := &models.PyFuncEnsembler{GenericEnsembler: &models.GenericEnsembler{Name: "test-ensembler"}}
 	project := &mlp.Project{}
 	id := models.ID(1)
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "10"
+
 	routerVersion := &models.RouterVersion{
 		Ensembler: &models.Ensembler{
 			PyfuncConfig: &models.EnsemblerPyfuncConfig{
@@ -447,9 +450,9 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 						Format: "1G",
 					},
 				},
-				AutoscalingPolicy: &models.AutoscalingPolicy{
-					Metric: models.AutoscalingMetricConcurrency,
-					Target: "10",
+				AutoscalingPolicy: models.AutoscalingPolicy{
+					Metric: &autoscalingMetricConcurrency,
+					Target: &autoscalingTargetConcurrency,
 				},
 				Timeout: "5s",
 				Env: []*models.EnvVar{
