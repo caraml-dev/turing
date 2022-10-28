@@ -177,8 +177,6 @@ func (r RouterConfig) BuildRouterVersion(
 				return nil, errors.New("missing ensembler pyfunc config")
 			}
 
-			r.Ensembler.PyfuncConfig.AutoscalingPolicy = r.Ensembler.PyfuncConfig.AutoscalingPolicy
-
 			// Verify if the ensembler given by its ProjectID and EnsemblerID exist
 			ensembler, err := ensemblersSvc.FindByID(
 				*r.Ensembler.PyfuncConfig.EnsemblerID,

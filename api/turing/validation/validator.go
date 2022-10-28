@@ -371,7 +371,8 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate autoscaling policy for the router
-	validateResourceRequestsAndAutoscalingPolicy(sl, "router", routerConfig.ResourceRequest, routerConfig.AutoscalingPolicy)
+	validateResourceRequestsAndAutoscalingPolicy(sl, "router", routerConfig.ResourceRequest,
+		routerConfig.AutoscalingPolicy)
 
 	// Validate autoscaling policy for the enricher, if configured
 	if routerConfig.Enricher != nil {
@@ -469,12 +470,12 @@ func validateAutoscalingPolicy(
 		)
 	}
 	if autoscalingPolicy.Target != nil {
-		if _, err := strconv.ParseFloat(*autoscalingPolicy.Target, 10); err != nil {
+		if _, err := strconv.ParseFloat(*autoscalingPolicy.Target, 64); err != nil {
 			sl.ReportError(
 				autoscalingPolicy.Target,
 				"AutoscalingPolicy.Target",
 				"AutoscalingPolicy.Target",
-				fmt.Sprintf("number"),
+				"number",
 				"",
 			)
 		}
