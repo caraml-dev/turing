@@ -22,6 +22,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -134,7 +135,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 		{
 			name: "error wrong response payload type",
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Internal),
 				Message: "did not get back a valid response from the fiberHandler",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(),
@@ -142,20 +143,20 @@ func Test_missionControlUpi_Route(t *testing.T) {
 		{
 			name: "error - fiber router error response",
 			expectedErr: &errors.TuringError{
-				Code:    13,
+				Code:    int(codes.Internal),
 				Message: "{\n  \"code\": 13,\n  \"error\": \"fiber: request cannot be completed: err\"\n}",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(
 				fiber.NewErrorResponse(
 					fiberErrors.FiberError{
-						Code:    13,
+						Code:    int(codes.Internal),
 						Message: "fiber: request cannot be completed: err",
 					})),
 		},
 		{
 			name: "error non proto payload",
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Internal),
 				Message: "unable to parse fiber response into grpc response",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(fiberHttp.NewHTTPResponse(
