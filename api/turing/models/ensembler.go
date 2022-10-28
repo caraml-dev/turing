@@ -45,7 +45,7 @@ type EnsemblerStandardConfig struct {
 type EnsemblerDockerConfig struct {
 	Image string `json:"image" validate:"required"`
 	// Resource requests for ensembler container deployed
-	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
+	ResourceRequest *ResourceRequest `json:"resource_request"`
 	// Autoscaling policy for the ensembler
 	AutoscalingPolicy AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// URL path for the endpoint, e.g "/"
@@ -64,7 +64,7 @@ type EnsemblerPyfuncConfig struct {
 	ProjectID   *ID `json:"project_id" validate:"required"`
 	EnsemblerID *ID `json:"ensembler_id" validate:"required"`
 	// Resource requests for ensembler container deployed
-	ResourceRequest *ResourceRequest `json:"resource_request" validate:"required"`
+	ResourceRequest *ResourceRequest `json:"resource_request"`
 	// Autoscaling policy for the ensembler
 	AutoscalingPolicy AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// Request timeout in duration format e.g. 60s

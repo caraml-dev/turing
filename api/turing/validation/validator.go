@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/golang-collections/collections/set"
@@ -451,8 +452,8 @@ func validateAutoscalingPolicy(
 		(autoscalingPolicy.Metric != nil || autoscalingPolicy.Target != nil) {
 		sl.ReportError(
 			autoscalingPolicy.PayloadSize,
-			"PayloadSize",
-			"PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
 			fmt.Sprintf("excluded when Metric or/and Target is/are set for %s", componentName),
 			"",
 		)
@@ -461,10 +462,21 @@ func validateAutoscalingPolicy(
 		(autoscalingPolicy.Metric == nil || autoscalingPolicy.Target == nil) {
 		sl.ReportError(
 			autoscalingPolicy.PayloadSize,
-			"PayloadSize",
-			"PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
 			fmt.Sprintf("required when Metric or/and Target is/are not set for %s", componentName),
 			"",
 		)
+	}
+	if autoscalingPolicy.Target != nil {
+		if _, err := strconv.ParseFloat(*autoscalingPolicy.Target, 10); err != nil {
+			sl.ReportError(
+				autoscalingPolicy.Target,
+				"AutoscalingPolicy.Target",
+				"AutoscalingPolicy.Target",
+				fmt.Sprintf("number"),
+				"",
+			)
+		}
 	}
 }

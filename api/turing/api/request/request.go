@@ -71,7 +71,7 @@ type EnricherEnsemblerConfig struct {
 	// format registry/repository:version.
 	Image string `json:"image" validate:"required"`
 	// Resource requests  for the deployment of the enricher.
-	ResourceRequest *models.ResourceRequest `json:"resource_request" validate:"required"`
+	ResourceRequest *models.ResourceRequest `json:"resource_request"`
 	// Autoscaling policy for the enricher / ensembler.
 	AutoscalingPolicy models.AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// Endpoint to query.

@@ -284,7 +284,8 @@ type routerConfigTestCase struct {
 	defaultRouteID     *string
 	defaultTrafficRule *models.DefaultTrafficRule
 	trafficRules       models.TrafficRules
-	autoscalingPolicy  *models.AutoscalingPolicy
+	resourceRequest    *models.ResourceRequest
+	autoscalingPolicy  models.AutoscalingPolicy
 	expectedError      string
 }
 
@@ -294,6 +295,7 @@ func (tt routerConfigTestCase) RouterConfig(protocol routerConfig.Protocol) *req
 		DefaultRouteID:     tt.defaultRouteID,
 		DefaultTrafficRule: tt.defaultTrafficRule,
 		TrafficRules:       tt.trafficRules,
+		ResourceRequest:    tt.resourceRequest,
 		AutoscalingPolicy:  tt.autoscalingPolicy,
 		ExperimentEngine: &request.ExperimentEngineConfig{
 			Type: "nop",
@@ -331,6 +333,12 @@ func TestValidateTrafficRules(t *testing.T) {
 	defaultTrafficRule := &models.DefaultTrafficRule{
 		Routes: []string{routeAID, routeBID},
 	}
+	validPayloadSize := resource.Quantity{
+		Format: "1Mb",
+	}
+	autoscalingPolicy := models.AutoscalingPolicy{
+		PayloadSize: &validPayloadSize,
+	}
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
@@ -351,6 +359,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{"route-a", "route-b"},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 		},
 		"success | valid trailing symbol": {
 			routes:             models.Routes{routeA, routeB},
@@ -370,6 +379,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 		},
 		"success | valid trailing alphabet ": {
 			routes:             models.Routes{routeA, routeB},
@@ -389,6 +399,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 		},
 		"success | valid complex Traffic Rules": {
 			routes:             models.Routes{routeA, routeB, routeC},
@@ -468,6 +479,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 		},
 		"failure | empty conditions": {
 			routes:             models.Routes{routeA, routeB},
@@ -480,6 +492,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes:     []string{routeAID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions' " +
 				"Error:Field validation for 'Conditions' failed on the 'notBlank' tag",
 		},
@@ -501,6 +514,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules[0].Routes' Error:Field validation for 'Routes' failed on the 'notBlank' tag",
 				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
@@ -525,6 +539,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Operator' " +
 				"Error:Field validation for 'Operator' failed on the 'required' tag",
 		},
@@ -547,6 +562,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' Error:Field validation for " +
 				"'TrafficRules[0].Conditions[0].FieldSource' failed on the 'oneof' tag",
 		},
@@ -590,40 +606,46 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].Field' " +
 				"Error:Field validation for 'Field' failed on the 'required' tag\n" +
 				"Key: 'RouterConfig.TrafficRules[0].Conditions[0].Values' " +
 				"Error:Field validation for 'Values' failed on the 'notBlank' tag",
 		},
 		"failure | nop ensembler missing default route": {
-			routes: models.Routes{routeA},
+			routes:            models.Routes{routeA},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.default_route_id' " +
 				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
 		},
 		"failure | standard ensembler missing default route": {
-			routes:    models.Routes{routeA},
-			ensembler: &models.Ensembler{Type: models.EnsemblerStandardType},
+			routes:            models.Routes{routeA},
+			autoscalingPolicy: autoscalingPolicy,
+			ensembler:         &models.Ensembler{Type: models.EnsemblerStandardType},
 			expectedError: "Key: 'RouterConfig.default_route_id' " +
 				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
 		},
 		"failure | docker ensembler has default route": {
-			routes:         models.Routes{routeA},
-			ensembler:      &models.Ensembler{Type: models.EnsemblerDockerType},
-			defaultRouteID: &routeAID,
+			routes:            models.Routes{routeA},
+			autoscalingPolicy: autoscalingPolicy,
+			ensembler:         &models.Ensembler{Type: models.EnsemblerDockerType},
+			defaultRouteID:    &routeAID,
 			expectedError: "Key: 'RouterConfig.default_route_id' " +
 				"Error:Field validation for 'default_route_id' failed on the 'should not be set for chosen ensembler type' tag",
 		},
 		"failure | pyfunc ensembler has default route": {
-			routes:         models.Routes{routeA},
-			ensembler:      &models.Ensembler{Type: models.EnsemblerPyFuncType},
-			defaultRouteID: &routeAID,
+			routes:            models.Routes{routeA},
+			autoscalingPolicy: autoscalingPolicy,
+			ensembler:         &models.Ensembler{Type: models.EnsemblerPyFuncType},
+			defaultRouteID:    &routeAID,
 			expectedError: "Key: 'RouterConfig.default_route_id' " +
 				"Error:Field validation for 'default_route_id' failed on the 'should not be set for chosen ensembler type' tag",
 		},
 		"failure | unknown default route": {
-			routes:         models.Routes{routeA},
-			defaultRouteID: &routeBID,
-			expectedError:  "Key: 'RouterConfig.DefaultRouteID' Error:Field validation for '' failed on the 'oneof' tag",
+			routes:            models.Routes{routeA},
+			autoscalingPolicy: autoscalingPolicy,
+			defaultRouteID:    &routeBID,
+			expectedError:     "Key: 'RouterConfig.DefaultRouteID' Error:Field validation for '' failed on the 'oneof' tag",
 		},
 		"failure | unknown traffic rule route": {
 			routes:             models.Routes{routeA, routeB},
@@ -643,6 +665,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeCID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Routes[1]' " +
 				"Error:Field validation for '' failed on the 'oneof' tag",
 		},
@@ -663,6 +686,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{"route-a"},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.DefaultTrafficRule' Error:Field validation for " +
 					"'DefaultTrafficRule' failed on the 'Since 1 or more Custom Traffic rules have been specified, " +
@@ -686,6 +710,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules[0].Name' Error:Field validation for 'Name' failed on the 'required' tag",
 				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the " +
@@ -716,6 +741,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
@@ -741,6 +767,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'Name must be between 4-64 characters long, and begin with an alphanumeric character",
@@ -778,6 +805,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeCID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules' " +
 				"Error:Field validation for 'TrafficRules' failed on the 'unique' tag",
 		},
@@ -799,6 +827,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRule' Error:Field validation for 'TrafficRule' failed on the",
 				"'default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.' tag",
@@ -824,6 +853,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: strings.Join([]string{
 				"Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' failed on the",
 				"'Fallback Route (DefaultRouteId): 'route-a' should be associated to all Traffic Rules' tag",
@@ -859,6 +889,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeCID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
 				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
 				"(rule-a,rule-c).' tag",
@@ -941,6 +972,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules' Error:Field validation for 'TrafficRules' " +
 				"failed on the 'Rules Orthogonality check failed, following pairs of rules are overlapping - " +
 				"(rule-a,rule-b), (rule-b,rule-c), (rule-b,rule-d).' tag",
@@ -965,6 +997,19 @@ func TestValidateTrafficRules(t *testing.T) {
 }
 
 func TestValidateAutoscaling(t *testing.T) {
+	validAutoscalingMetricCPU := models.AutoscalingMetricCPU
+	validAutoscalingTargetCPU := "90"
+	validAutoScalingMetricRPS := models.AutoscalingMetricRPS
+	validAutoscalingTargetRPS := "400"
+	validAutoscalingMetricMemory := models.AutoscalingMetricMemory
+	validAutoscalingTargetMemory := "80"
+
+	invalidAutoScalingTargetRPS := "hundred"
+
+	validPayloadSize := resource.Quantity{
+		Format: "1Mb",
+	}
+
 	enricherBasic := request.EnricherEnsemblerConfig{
 		Image: "lala",
 		ResourceRequest: &models.ResourceRequest{
@@ -976,6 +1021,10 @@ func TestValidateAutoscaling(t *testing.T) {
 			MemoryRequest: resource.Quantity{
 				Format: "1G",
 			},
+		},
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &validAutoscalingMetricCPU,
+			Target: &validAutoscalingTargetCPU,
 		},
 		Endpoint: "endpoint",
 		Timeout:  "6s",
@@ -989,9 +1038,11 @@ func TestValidateAutoscaling(t *testing.T) {
 	}
 	makeEnricher := func(
 		enricher request.EnricherEnsemblerConfig,
-		policy *models.AutoscalingPolicy,
+		resourceRequest *models.ResourceRequest,
+		policy models.AutoscalingPolicy,
 	) *request.EnricherEnsemblerConfig {
 		newEnr := enricher
+		newEnr.ResourceRequest = resourceRequest
 		newEnr.AutoscalingPolicy = policy
 		return &newEnr
 	}
@@ -1003,37 +1054,55 @@ func TestValidateAutoscaling(t *testing.T) {
 		Timeout:  "10ms",
 	}
 	id := models.ID(1)
+
 	suite := map[string]routerConfigTestCase{
-		"success | no autoscaling policy | all components": {
-			routes:   models.Routes{route},
-			enricher: &enricherBasic,
+		"success | default autoscaling policy | all components": {
+			routes: models.Routes{route},
+			autoscalingPolicy: models.AutoscalingPolicy{
+				PayloadSize: &validPayloadSize,
+			},
+			enricher: makeEnricher(enricherBasic, nil, models.AutoscalingPolicy{
+				PayloadSize: &validPayloadSize,
+			}),
 			ensembler: &models.Ensembler{
 				Type: models.EnsemblerDockerType,
 			},
 		},
-		"success | no autoscaling policy | pyfunc ensembler": {
+		"success | default autoscaling policy | pyfunc ensembler": {
 			routes: models.Routes{route},
+			autoscalingPolicy: models.AutoscalingPolicy{
+				PayloadSize: &validPayloadSize,
+			},
 			ensembler: &models.Ensembler{
 				Type: models.EnsemblerPyFuncType,
 				PyfuncConfig: &models.EnsemblerPyfuncConfig{
-					ProjectID:       &id,
-					EnsemblerID:     &id,
-					ResourceRequest: &models.ResourceRequest{},
-					Timeout:         "1s",
-					Env:             models.EnvVars{},
+					ProjectID:   &id,
+					EnsemblerID: &id,
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						PayloadSize: &validPayloadSize,
+					},
+					Timeout: "1s",
+					Env:     models.EnvVars{},
 				},
 			},
 		},
 		"success | valid autoscaling policy | all components": {
 			routes: models.Routes{route},
-			autoscalingPolicy: &models.AutoscalingPolicy{
-				Metric: models.AutoscalingMetricCPU,
-				Target: "90",
+			resourceRequest: &models.ResourceRequest{
+				MinReplica: 0,
+				MaxReplica: 5,
+				CPURequest: resource.Quantity{
+					Format: "500M",
+				},
+				MemoryRequest: resource.Quantity{
+					Format: "1G",
+				},
 			},
-			enricher: makeEnricher(enricherBasic, &models.AutoscalingPolicy{
-				Metric: models.AutoscalingMetricConcurrency,
-				Target: "2",
-			}),
+			autoscalingPolicy: models.AutoscalingPolicy{
+				Metric: &validAutoscalingMetricCPU,
+				Target: &validAutoscalingTargetCPU,
+			},
+			enricher: &enricherBasic,
 			ensembler: &models.Ensembler{
 				Type: models.EnsemblerDockerType,
 				DockerConfig: &models.EnsemblerDockerConfig{
@@ -1044,9 +1113,9 @@ func TestValidateAutoscaling(t *testing.T) {
 						CPURequest:    resource.Quantity{Format: "500m"},
 						MemoryRequest: resource.Quantity{Format: "1Gi"},
 					},
-					AutoscalingPolicy: &models.AutoscalingPolicy{
-						Metric: models.AutoscalingMetricRPS,
-						Target: "400",
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &validAutoScalingMetricRPS,
+						Target: &validAutoscalingTargetRPS,
 					},
 					Timeout: "5s",
 					Env:     models.EnvVars{},
@@ -1055,40 +1124,54 @@ func TestValidateAutoscaling(t *testing.T) {
 		},
 		"success | valid autoscaling policy | pyfunc ensembler": {
 			routes: models.Routes{route},
+			resourceRequest: &models.ResourceRequest{
+				MinReplica: 0,
+				MaxReplica: 5,
+				CPURequest: resource.Quantity{
+					Format: "500M",
+				},
+				MemoryRequest: resource.Quantity{
+					Format: "1G",
+				},
+			},
+			autoscalingPolicy: models.AutoscalingPolicy{
+				Metric: &validAutoscalingMetricCPU,
+				Target: &validAutoscalingTargetCPU,
+			},
 			ensembler: &models.Ensembler{
 				Type: models.EnsemblerPyFuncType,
 				PyfuncConfig: &models.EnsemblerPyfuncConfig{
 					ProjectID:       &id,
 					EnsemblerID:     &id,
 					ResourceRequest: &models.ResourceRequest{},
-					AutoscalingPolicy: &models.AutoscalingPolicy{
-						Metric: models.AutoscalingMetricMemory,
-						Target: "80",
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &validAutoscalingMetricMemory,
+						Target: &validAutoscalingTargetMemory,
 					},
 					Timeout: "1s",
 					Env:     models.EnvVars{},
 				},
 			},
 		},
-		"failure | invalid autoscaling metric": {
-			routes:         models.Routes{route},
-			defaultRouteID: &routeID,
-			autoscalingPolicy: &models.AutoscalingPolicy{
-				Metric: "abc",
-				Target: "100",
-			},
-			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Metric' ",
-				"Error:Field validation for 'Metric' failed on the 'oneof' tag"}, ""),
-		},
 		"failure | invalid autoscaling target": {
 			routes:         models.Routes{route},
 			defaultRouteID: &routeID,
-			autoscalingPolicy: &models.AutoscalingPolicy{
-				Metric: models.AutoscalingMetricRPS,
-				Target: "hundred",
+			resourceRequest: &models.ResourceRequest{
+				MinReplica: 0,
+				MaxReplica: 5,
+				CPURequest: resource.Quantity{
+					Format: "500M",
+				},
+				MemoryRequest: resource.Quantity{
+					Format: "1G",
+				},
+			},
+			autoscalingPolicy: models.AutoscalingPolicy{
+				Metric: &validAutoScalingMetricRPS,
+				Target: &invalidAutoScalingTargetRPS,
 			},
 			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Target' ",
-				"Error:Field validation for 'Target' failed on the 'number' tag"}, ""),
+				"Error:Field validation for 'AutoscalingPolicy.Target' failed on the 'number' tag"}, ""),
 		},
 	}
 	for name, tt := range suite {

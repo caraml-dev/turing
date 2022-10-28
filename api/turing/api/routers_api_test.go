@@ -288,6 +288,10 @@ func TestCreateRouter(t *testing.T) {
 				Name:        "router3",
 				Environment: "dev",
 				Config: &request.RouterConfig{
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &autoscalingMetricConcurrency,
+						Target: &autoscalingTargetConcurrency,
+					},
 					ExperimentEngine: &request.ExperimentEngineConfig{
 						Type: "nop",
 					},
@@ -450,6 +454,10 @@ func TestUpdateRouter(t *testing.T) {
 				Name:        "router4",
 				Environment: "dev",
 				Config: &request.RouterConfig{
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &autoscalingMetricConcurrency,
+						Target: &autoscalingTargetConcurrency,
+					},
 					ExperimentEngine: &request.ExperimentEngineConfig{
 						Type: "nop",
 					},
