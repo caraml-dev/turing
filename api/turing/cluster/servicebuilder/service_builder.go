@@ -379,7 +379,7 @@ func (sb *clusterSvcBuilder) getMemoryRequestOrDefault(resourceRequest *models.R
 
 func (sb *clusterSvcBuilder) getAutoscalingMetricOrDefault(autoscalingPolicy models.AutoscalingPolicy) string {
 	// default autoscaling policy is used; hence use RPS as the default autoscaling policy metric
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil {
+	if autoscalingPolicy.PayloadSize != nil {
 		return string(models.AutoscalingMetricRPS)
 	}
 	return string(*autoscalingPolicy.Metric)
@@ -387,7 +387,7 @@ func (sb *clusterSvcBuilder) getAutoscalingMetricOrDefault(autoscalingPolicy mod
 
 func (sb *clusterSvcBuilder) getAutoscalingTargetOrDefault(autoscalingPolicy models.AutoscalingPolicy) string {
 	// TODO: default autoscaling policy is used; hence calculate target RPS from payload size
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil {
+	if autoscalingPolicy.PayloadSize != nil {
 		return string(rune(500))
 	}
 	return *autoscalingPolicy.Target

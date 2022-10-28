@@ -409,14 +409,14 @@ func validateResourceRequestsAndAutoscalingPolicy(
 	validateAutoscalingPolicy(sl, componentName, autoscalingPolicy)
 
 	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is used
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil {
+	if autoscalingPolicy.PayloadSize != nil {
 		// Validate resource requests are not set
 		if resourceRequest != nil {
 			sl.ReportError(
 				resourceRequest,
 				"ResourceRequest",
 				"ResourceRequest",
-				fmt.Sprintf("excluded when AutoscalingPolicy.DefaultAutoscalingPolicyPayloadSize is set for %s",
+				fmt.Sprintf("excluded when AutoscalingPolicy.PayloadSize is set for %s",
 					componentName),
 				"",
 			)
@@ -424,14 +424,14 @@ func validateResourceRequestsAndAutoscalingPolicy(
 	}
 
 	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is NOT used
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize == nil {
+	if autoscalingPolicy.PayloadSize == nil {
 		// Validate resource requests are not set
 		if resourceRequest == nil {
 			sl.ReportError(
 				resourceRequest,
 				"ResourceRequest",
 				"ResourceRequest",
-				fmt.Sprintf("required when AutoscalingPolicy.DefaultAutoscalingPolicyPayloadSize is not set for %s",
+				fmt.Sprintf("required when AutoscalingPolicy.PayloadSize is not set for %s",
 					componentName),
 				"",
 			)
@@ -445,24 +445,24 @@ func validateAutoscalingPolicy(
 	autoscalingPolicy models.AutoscalingPolicy,
 ) {
 	// Validate autoscaling policy to ensure only one of the following of AutoscalingPolicy is true:
-	//  - DefaultAutoscalingPolicyPayloadSize is set (default autoscaling policy is used)
+	//  - PayloadSize is set (default autoscaling policy is used)
 	//  - Metric or/and Target is/are set (default autoscaling policy is NOT used)
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize != nil &&
+	if autoscalingPolicy.PayloadSize != nil &&
 		(autoscalingPolicy.Metric != nil || autoscalingPolicy.Target != nil) {
 		sl.ReportError(
-			autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize,
-			"DefaultAutoscalingPolicyPayloadSize",
-			"DefaultAutoscalingPolicyPayloadSize",
+			autoscalingPolicy.PayloadSize,
+			"PayloadSize",
+			"PayloadSize",
 			fmt.Sprintf("excluded when Metric or/and Target is/are set for %s", componentName),
 			"",
 		)
 	}
-	if autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize == nil &&
+	if autoscalingPolicy.PayloadSize == nil &&
 		(autoscalingPolicy.Metric == nil || autoscalingPolicy.Target == nil) {
 		sl.ReportError(
-			autoscalingPolicy.DefaultAutoscalingPolicyPayloadSize,
-			"DefaultAutoscalingPolicyPayloadSize",
-			"DefaultAutoscalingPolicyPayloadSize",
+			autoscalingPolicy.PayloadSize,
+			"PayloadSize",
+			"PayloadSize",
 			fmt.Sprintf("required when Metric or/and Target is/are not set for %s", componentName),
 			"",
 		)

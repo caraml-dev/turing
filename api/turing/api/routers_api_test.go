@@ -215,6 +215,9 @@ func TestCreateRouter(t *testing.T) {
 	routerSvc.On("Save", router3Failure).Return(router3Failure, nil)
 	// For the deployment method
 	routerSvc.On("Save", mock.Anything).Return(nil, errors.New("test Router Deployment Failure"))
+
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "1"
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		RouterID: 3,
@@ -226,9 +229,9 @@ func TestCreateRouter(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Protocol: routerConfig.HTTP,
-		AutoscalingPolicy: &models.AutoscalingPolicy{
-			Metric: "concurrency",
-			Target: "1",
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &autoscalingMetricConcurrency,
+			Target: &autoscalingTargetConcurrency,
 		},
 		Status: models.RouterVersionStatusPending,
 	}
@@ -365,6 +368,9 @@ func TestUpdateRouter(t *testing.T) {
 	// For the deployment method
 	routerSvc.On("Save", mock.Anything).
 		Return(nil, errors.New("test router deployment failure"))
+
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "1"
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		RouterID: 4,
@@ -376,9 +382,9 @@ func TestUpdateRouter(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Protocol: routerConfig.HTTP,
-		AutoscalingPolicy: &models.AutoscalingPolicy{
-			Metric: "concurrency",
-			Target: "1",
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &autoscalingMetricConcurrency,
+			Target: &autoscalingTargetConcurrency,
 		},
 		Status: models.RouterVersionStatusPending,
 	}

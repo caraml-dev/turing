@@ -719,6 +719,9 @@ func TestConfigValidate(t *testing.T) {
 	// validConfigUpdate returns an updated config from a valid one
 	type validConfigUpdate func(validConfig config.Config) config.Config
 
+	minReplica := 2
+	maxReplica := 10
+
 	tests := map[string]struct {
 		validConfigUpdate validConfigUpdate
 		wantErr           bool
@@ -745,17 +748,6 @@ func TestConfigValidate(t *testing.T) {
 		"missing deployment timeout": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.DeployConfig.Timeout = 0
-				return validConfig
-			},
-			wantErr: true,
-		},
-		"invalid min/max replica when autoscaling policy is enabled": {
-			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.DeployConfig.DefaultAutoScalingPolicyConfig = config.DefaultAutoScalingPolicyConfig{
-					Enabled:           true,
-					DefaultMinReplica: -1,
-					DefaultMaxReplica: -2,
-				}
 				return validConfig
 			},
 			wantErr: true,
@@ -821,8 +813,8 @@ func TestConfigValidate(t *testing.T) {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.DeployConfig.DefaultAutoScalingPolicyConfig = config.DefaultAutoScalingPolicyConfig{
 					Enabled:           true,
-					DefaultMinReplica: 2,
-					DefaultMaxReplica: 10,
+					DefaultMinReplica: &minReplica,
+					DefaultMaxReplica: &maxReplica,
 				}
 				return validConfig
 			},

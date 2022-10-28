@@ -27,8 +27,8 @@ type AutoscalingPolicy struct {
 	// It is expected that the autoscaling target is an absolute value for concurrency / rps
 	// while it is a % value (of the requested value) for cpu / memory.
 	Target *string `json:"target" validate:"required,number"`
-	// DefaultAutoscalingPolicyPayloadSize indicates the request payload
-	DefaultAutoscalingPolicyPayloadSize *resource.Quantity `json:"default_autoscaling_policy_payload_size"`
+	// PayloadSize indicates the request payload
+	PayloadSize *resource.Quantity `json:"payload_size"`
 }
 
 func (a AutoscalingPolicy) Value() (driver.Value, error) {
