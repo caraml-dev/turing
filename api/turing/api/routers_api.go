@@ -70,7 +70,7 @@ func (c RoutersController) CreateRouter(
 		return errResp
 	}
 
-	request := body.(*request.CreateOrUpdateRouterRequest)
+	request := body.(*request.CreateRouterRequest)
 
 	// check if router already exists
 	router, _ := c.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
@@ -141,13 +141,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 		return errResp
 	}
 
-	request := body.(*request.CreateOrUpdateRouterRequest)
-
-	// Check if the router environment and name are unchanged
-	if request.Environment != router.EnvironmentName || request.Name != router.Name {
-		return BadRequest("invalid router configuration",
-			"Router name and environment cannot be changed after creation")
-	}
+	request := body.(*request.RouterConfig)
 
 	// Check if any deployment is in progress, if yes, disallow the update
 	if router.Status == models.RouterStatusPending {
@@ -157,11 +151,11 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 
 	// Create new version
 	var routerVersion *models.RouterVersion
-	if request.Config == nil {
+	if request == nil {
 		return InternalServerError("unable to update router", "router config is empty")
 	}
 
-	rVersion, err := request.Config.BuildRouterVersion(
+	rVersion, err := request.BuildRouterVersion(
 		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
 	if err == nil {
 		// Save router version, re-assign the value of err
@@ -332,13 +326,13 @@ func (c RoutersController) Routes() []Route {
 		{
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers",
-			body:    request.CreateOrUpdateRouterRequest{},
+			body:    request.CreateRouterRequest{},
 			handler: c.CreateRouter,
 		},
 		{
 			method:  http.MethodPut,
 			path:    "/projects/{project_id}/routers/{router_id}",
-			body:    request.CreateOrUpdateRouterRequest{},
+			body:    request.RouterConfig{},
 			handler: c.UpdateRouter,
 		},
 		{

@@ -221,7 +221,7 @@ var invalidRouterConfig = RouterConfig{
 	},
 }
 
-var createOrUpdateRequest = CreateOrUpdateRouterRequest{
+var createOrUpdateRequest = CreateRouterRequest{
 	Environment: "env",
 	Name:        "router",
 	Config:      &validRouterConfig,
@@ -241,7 +241,7 @@ func TestRequestBuildRouter(t *testing.T) {
 }
 
 func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
-	baseRequest := CreateOrUpdateRouterRequest{
+	baseRequest := CreateRouterRequest{
 		Environment: "env",
 		Name:        "router",
 		Config: &RouterConfig{

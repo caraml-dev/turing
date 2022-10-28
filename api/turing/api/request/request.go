@@ -12,9 +12,9 @@ import (
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
-// CreateOrUpdateRouterRequest structure defines the format of the request payload
-// when creating or updating routers
-type CreateOrUpdateRouterRequest struct {
+// CreateRouterRequest structure defines the format of the request payload
+// when creating routers
+type CreateRouterRequest struct {
 	Environment string        `json:"environment_name" validate:"required"`
 	Name        string        `json:"name" validate:"required"`
 	Config      *RouterConfig `json:"config" validate:"required,dive"`
@@ -103,7 +103,7 @@ func (cfg EnricherEnsemblerConfig) BuildEnricher() *models.Enricher {
 }
 
 // BuildRouter builds the router model from the entire request payload
-func (r CreateOrUpdateRouterRequest) BuildRouter(projectID models.ID) *models.Router {
+func (r CreateRouterRequest) BuildRouter(projectID models.ID) *models.Router {
 	return &models.Router{
 		ProjectID:       projectID,
 		EnvironmentName: r.Environment,

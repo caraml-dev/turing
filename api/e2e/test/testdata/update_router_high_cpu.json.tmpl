@@ -1,79 +1,75 @@
 {
-    "environment_name": "dev",
-    "name": "e2e-experiment-{{ .TestID }}",
-    "config": {
-        "routes": [
-            {
-                "id": "control",
-                "type": "PROXY",
-                "endpoint": "{{ .Mockserver.Endpoint }}/control",
-                "timeout": "5s"
-            }
-        ],
-        "experiment_engine": {
-            "type": "nop"
-        },
+    "routes": [
+        {
+            "id": "control",
+            "type": "PROXY",
+            "endpoint": "{{ .Mockserver.Endpoint }}/control",
+            "timeout": "5s"
+        }
+    ],
+    "experiment_engine": {
+        "type": "nop"
+    },
+    "resource_request": {
+        "min_replica": 1,
+        "max_replica": 1,
+        "cpu_request": "200m",
+        "memory_request": "250Mi"
+    },
+    "autoscaling_policy": {
+        "metric": "concurrency",
+        "target": "1"
+    },
+    "timeout": "5s",
+    "protocol": "HTTP_JSON",
+    "log_config": {
+        "result_logger_type": "nop"
+    },
+    "enricher": {
+        "image": "{{ .Echoserver.Image }}",
         "resource_request": {
             "min_replica": 1,
             "max_replica": 1,
-            "cpu_request": "100m",
-            "memory_request": "250Mi"
+            "cpu_request": "10",
+            "memory_request": "1Gi"
         },
         "autoscaling_policy": {
             "metric": "concurrency",
             "target": "1"
         },
-        "timeout": "5s",
-        "protocol": "HTTP_JSON",
-        "log_config": {
-            "result_logger_type": "nop"
-        },
-        "enricher": {
+        "endpoint": "enrich",
+        "timeout": "3s",
+        "port": 8080,
+        "env": [
+            {
+                "name": "TEST_ENV",
+                "value": "enricher"
+            }
+        ]
+    },
+    "ensembler": {
+        "type": "docker",
+        "docker_config": {
             "image": "{{ .Echoserver.Image }}",
             "resource_request": {
-                "min_replica": 1,
-                "max_replica": 1,
-                "cpu_request": "10",
-                "memory_request": "1Gi"
+                "min_replica": 2,
+                "max_replica": 2,
+                "cpu_request": "1",
+                "memory_request": "256Mi"
             },
             "autoscaling_policy": {
                 "metric": "concurrency",
                 "target": "1"
             },
-            "endpoint": "enrich",
+            "endpoint": "ensemble",
             "timeout": "3s",
-            "port": 8080,
+            "port": 80,
             "env": [
                 {
                     "name": "TEST_ENV",
-                    "value": "enricher"
+                    "value": "ensembler"
                 }
             ]
-        },
-        "ensembler": {
-            "type": "docker",
-            "docker_config": {
-                "image": "{{ .Echoserver.Image }}",
-                "resource_request": {
-                    "min_replica": 2,
-                    "max_replica": 2,
-                    "cpu_request": "1",
-                    "memory_request": "256Mi"
-                },
-                "autoscaling_policy": {
-                    "metric": "concurrency",
-                    "target": "1"
-                },
-                "endpoint": "ensemble",
-                "timeout": "3s",
-                "port": 80,
-                "env": [
-                    {
-                        "name": "TEST_ENV",
-                        "value": "ensembler"
-                    }
-                ]
-            }
         }
     }
 }

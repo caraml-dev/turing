@@ -1,70 +1,66 @@
 {
-    "environment_name": "dev",
-    "name": "e2e-experiment-{{ .TestID }}",
-    "config": {
-        "routes": [
-            {
-                "id": "control",
-                "type": "PROXY",
-                "endpoint": "{{ .Mockserver.Endpoint }}/control",
-                "timeout": "5s"
+    "routes": [
+        {
+            "id": "control",
+            "type": "PROXY",
+            "endpoint": "{{ .Mockserver.Endpoint }}/control",
+            "timeout": "5s"
+        },
+        {
+            "id": "treatment-a",
+            "type": "PROXY",
+            "endpoint": "{{ .Mockserver.Endpoint }}/treatment-a",
+            "timeout": "5s"
+        }
+    ],
+    "default_route_id": "treatment-a",
+    "experiment_engine": {
+        "type": "proprietary",
+        "config": {
+            "client": {
+                "id": "1",
+                "username": "test",
+                "passkey": "test"
             },
-            {
-                "id": "treatment-a",
-                "type": "PROXY",
-                "endpoint": "{{ .Mockserver.Endpoint }}/treatment-a",
-                "timeout": "5s"
-            }
-        ],
-        "default_route_id": "treatment-a",
-        "experiment_engine": {
-            "type": "proprietary",
-            "config": {
-                "client": {
-                    "id": "1",
-                    "username": "test",
-                    "passkey": "test"
-                },
-                "experiments": [
-                    {
-                        "id": "001",
-                        "name": "exp_1"
-                    }
-                ],
-                "variables": {
-                    "experiment_variables": {
-                        "001": [
-                            {
-                                "name": "client_id",
-                                "type": "unit",
-                                "required": true
-                            }
-                        ]
-                    },
-                    "config": [
+            "experiments": [
+                {
+                    "id": "001",
+                    "name": "exp_1"
+                }
+            ],
+            "variables": {
+                "experiment_variables": {
+                    "001": [
                         {
                             "name": "client_id",
-                            "required": true,
-                            "field": "client.id",
-                            "field_source": "payload"
+                            "type": "unit",
+                            "required": true
                         }
                     ]
-                }
+                },
+                "config": [
+                    {
+                        "name": "client_id",
+                        "required": true,
+                        "field": "client.id",
+                        "field_source": "payload"
+                    }
+                ]
             }
-        },
-        "resource_request": {
-            "min_replica": 1,
-            "max_replica": 1,
-            "cpu_request": "200m",
-            "memory_request": "250Mi"
-        },
-        "autoscaling_policy": {
-            "metric": "concurrency",
-            "target": "1"
-        },
-        "timeout": "5s",
-        "log_config": {
-            "result_logger_type": "nop"
         }
+    },
+    "resource_request": {
+        "min_replica": 1,
+        "max_replica": 1,
+        "cpu_request": "200m",
+        "memory_request": "250Mi"
+    },
+    "autoscaling_policy": {
+        "metric": "concurrency",
+        "target": "1"
+    },
+    "timeout": "5s",
+    "log_config": {
+        "result_logger_type": "nop"
     }
 }
