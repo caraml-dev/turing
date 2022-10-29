@@ -16,6 +16,17 @@ export const RoutesPanel = ({
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const endpoints = useContext(EndpointsContext);
+  const filteredEndpoints = endpoints.map((endpoint) => {
+    return {
+      ...endpoint,
+      options: endpoint.options.filter((option) => {
+        if (protocol === "UPI_V1") {
+          return !option.label.startsWith("http");
+        }
+        return option.label.startsWith("http");
+      }),
+    };
+  });
 
   const onAddRoute = () => {
     onChange("routes")([...routes, newRoute(protocol)]);
@@ -34,7 +45,7 @@ export const RoutesPanel = ({
             <RouteCard
               route={route}
               protocol={protocol}
-              endpointOptions={endpoints}
+              endpointOptions={filteredEndpoints}
               onChange={onChange(`routes.${idx}`)}
               onDelete={routes.length > 1 ? onDeleteRoute(idx) : null}
               errors={get(errors, `${idx}`)}
