@@ -50,7 +50,6 @@ export const ExperimentStep = ({ projectId }) => {
     () => getExperimentEngineOptions(filteredEngine),
     [filteredEngine]
   );
-  console.log(experimentEngineOptions);
 
   useEffect(() => {
     const ensemblerOptions = ensemblerTypeOptions(engineProps, protocol).filter(
@@ -81,6 +80,7 @@ export const ExperimentStep = ({ projectId }) => {
       {experiment_engine.type !== "nop" && (
         <ExperimentConfigPanel
           projectId={projectId}
+          protocol={protocol}
           engine={experiment_engine}
           onChangeHandler={onChange("config.experiment_engine.config")}
           errors={get(errors, "config.experiment_engine.config")}

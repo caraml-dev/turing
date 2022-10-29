@@ -20,6 +20,7 @@ const FallbackView = ({ text }) => (
 const CustomExperimentEngineConfigGroup = ({
   remoteUi,
   projectId,
+  protocol,
   config,
   onChangeHandler,
   errors,
@@ -27,7 +28,8 @@ const CustomExperimentEngineConfigGroup = ({
   // Load component from remote host
   return (
     <React.Suspense
-      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      fallback={<FallbackView text="Loading Experiment Engine config" />}
+    >
       <ExperimentEngineComponentLoader
         FallbackView={FallbackView}
         remoteUi={remoteUi}
@@ -39,6 +41,7 @@ const CustomExperimentEngineConfigGroup = ({
           fallback={<FallbackView text="Loading Experiment Engine config" />}
           projectId={projectId}
           config={config}
+          protocol={protocol}
           onChangeHandler={onChangeHandler}
           errors={errors}
         />
@@ -50,6 +53,7 @@ const CustomExperimentEngineConfigGroup = ({
 export const ExperimentConfigPanel = ({
   projectId,
   engine,
+  protocol,
   onChangeHandler,
   errors,
 }) => {
@@ -62,6 +66,7 @@ export const ExperimentConfigPanel = ({
       <CustomExperimentEngineConfigGroup
         remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
         projectId={projectId}
+        protocol={protocol}
         config={engine.config}
         onChangeHandler={onChangeHandler}
         errors={errors}
