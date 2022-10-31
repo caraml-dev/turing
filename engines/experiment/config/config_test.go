@@ -3,10 +3,10 @@ package config_test
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/config"
-
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/experiment/config"
 )
 
 func Test_EngineConfigDecoding(t *testing.T) {
