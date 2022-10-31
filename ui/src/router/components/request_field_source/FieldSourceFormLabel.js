@@ -9,25 +9,46 @@ import {
 
 import "./FieldSourceFormLabel.scss";
 
-const fieldSourceOptions = [
-  {
-    value: "header",
-    inputDisplay: "Header",
-  },
-  {
-    value: "payload",
-    inputDisplay: "Payload",
-  },
-];
+const fieldSourceOptions = {
+  HTTP_JSON: [
+    {
+      value: "header",
+      inputDisplay: "Header",
+    },
+    {
+      value: "payload",
+      inputDisplay: "Payload",
+    },
+  ],
+  UPI_V1: [
+    {
+      value: "header",
+      inputDisplay: "Header",
+    },
+    {
+      value: "prediction_context",
+      inputDisplay: "Prediction Context",
+      toolTipContent: "Prediction Context of the UPI proto",
+    },
+  ],
+};
 
-export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
+export const FieldSourceFormLabel = ({
+  value,
+  onChange,
+  readOnly,
+  protocol,
+}) => {
   const [isOpen, togglePopover] = useToggle();
+  const options = fieldSourceOptions[protocol];
 
   const panels = flattenPanelTree({
     id: 0,
-    items: fieldSourceOptions.map((option) => ({
+    items: options.map((option) => ({
       name: option.inputDisplay,
       value: option.value,
+      toolTipContent: option.toolTipContent,
+      toolTipPosition: "right",
       onClick: () => {
         togglePopover();
         onChange(option.value);
@@ -36,8 +57,8 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
   });
 
   const selectedOption = useMemo(
-    () => fieldSourceOptions.find((o) => o.value === value),
-    [value]
+    () => fieldSourceOptions[protocol].find((o) => o.value === value),
+    [value, protocol]
   );
 
   return readOnly ? (
@@ -52,13 +73,15 @@ export const FieldSourceFormLabel = ({ value, onChange, readOnly }) => {
           iconType="arrowDown"
           iconSide="right"
           className="fieldSourceLabel"
-          onClick={togglePopover}>
+          onClick={togglePopover}
+        >
           {selectedOption.inputDisplay}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={togglePopover}
-      panelPaddingSize="s">
+      panelPaddingSize="s"
+    >
       <EuiContextMenu
         className="fieldSourceDropdown"
         initialPanelId={0}

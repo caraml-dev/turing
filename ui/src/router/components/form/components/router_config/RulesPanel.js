@@ -19,9 +19,20 @@ import { get } from "../../../../../components/form/utils";
 import { RulesPanelFlyout } from "./RulesPanelFlyout";
 import { RuleCard } from "./rule_card/RuleCard";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
-import { newDefaultRule, newRule } from "../../../../../services/router/TuringRouter";
+import {
+  newDefaultRule,
+  newRule,
+} from "../../../../../services/router/TuringRouter";
 
-export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandler, rules_errors = {}, default_traffic_rule_errors = {} }) => {
+export const RulesPanel = ({
+  default_traffic_rule,
+  rules,
+  routes,
+  protocol,
+  onChangeHandler,
+  rules_errors = {},
+  default_traffic_rule_errors = {},
+}) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const onAddRule = () => {
@@ -34,7 +45,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
 
   const onDeleteRule = (idx) => () => {
     rules.splice(idx, 1);
-    
+
     // If no custom rule left, remove default rule
     if (rules.length === 0) {
       onChange("default_traffic_rule")(null);
@@ -52,11 +63,7 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
 
   const onDragEnd = ({ source, destination }) => {
     if (source && destination) {
-      const items = euiDragDropReorder(
-        rules,
-        source.index,
-        destination.index
-      );
+      const items = euiDragDropReorder(rules, source.index, destination.index);
       onChange("rules")(items);
     }
   };
@@ -74,47 +81,49 @@ export const RulesPanel = ({ default_traffic_rule, rules, routes, onChangeHandle
             />
           </EuiLink>
         </Fragment>
-      }>
+      }
+    >
       <EuiFlexGroup direction="column" gutterSize="s">
-        {
-          rules.length > 0 &&
-            <EuiFlexItem key="default-route">
-              <RuleCard
-                isDefault={true}
-                rule={default_traffic_rule}
-                routes={routes}
-                onChangeHandler={onChange("default_traffic_rule")}
-                onDelete={null}
-                errors={default_traffic_rule_errors}
-              />
-              <EuiHorizontalRule margin="xs" />
-            </EuiFlexItem>
-        }
+        {rules.length > 0 && (
+          <EuiFlexItem key="default-route">
+            <RuleCard
+              isDefault={true}
+              rule={default_traffic_rule}
+              routes={routes}
+              onChangeHandler={onChange("default_traffic_rule")}
+              onDelete={null}
+              errors={default_traffic_rule_errors}
+            />
+            <EuiHorizontalRule margin="xs" />
+          </EuiFlexItem>
+        )}
         <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m">
-        {rules.map((rule, idx) => (
-          <EuiDraggable
-            key={`${idx}`}
-            index={idx}
-            draggableId={`${idx}`}
-            customDragHandle={true}
-            disableInteractiveElementBlocking>
-            {(provided) => (
-            <EuiFlexItem key={`${idx}`}>
-              <RuleCard
-                rule={rule}
-                routes={routes}
-                onChangeHandler={onChange(`rules.${idx}`)}
-                onDelete={onDeleteRule(idx)}
-                errors={get(rules_errors, `${idx}`)}
-                dragHandleProps={provided.dragHandleProps}
-              />
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-            )}
-          </EuiDraggable>
-        ))}
-        </EuiDroppable>
+          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m">
+            {rules.map((rule, idx) => (
+              <EuiDraggable
+                key={`${idx}`}
+                index={idx}
+                draggableId={`${idx}`}
+                customDragHandle={true}
+                disableInteractiveElementBlocking
+              >
+                {(provided) => (
+                  <EuiFlexItem key={`${idx}`}>
+                    <RuleCard
+                      rule={rule}
+                      routes={routes}
+                      protocol={protocol}
+                      onChangeHandler={onChange(`rules.${idx}`)}
+                      onDelete={onDeleteRule(idx)}
+                      errors={get(rules_errors, `${idx}`)}
+                      dragHandleProps={provided.dragHandleProps}
+                    />
+                    <EuiSpacer size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiDraggable>
+            ))}
+          </EuiDroppable>
         </EuiDragDropContext>
         <EuiFlexItem>
           {routes.length < 2 ? (

@@ -8,8 +8,8 @@ import {
 } from "../../../../components/validation";
 import { autoscalingPolicyMetrics } from "../components/autoscaling_policy/typeOptions";
 
-yup.addMethod(yup.array, "unique", function(propertyPath, message) {
-  return this.test("unique", message, function(list) {
+yup.addMethod(yup.array, "unique", function (propertyPath, message) {
+  return this.test("unique", message, function (list) {
     const errors = [];
 
     list.forEach((item, index) => {
@@ -39,7 +39,7 @@ yup.addMethod(yup.array, "unique", function(propertyPath, message) {
   });
 });
 
-const validateRuleNames = function(items) {
+const validateRuleNames = function (items) {
   const uniqueNamesMap = items.reduce((acc, item) => {
     const current = item.name in acc ? acc[item.name] : 0;
     // If name is set, increment the count
@@ -61,9 +61,11 @@ const validateRuleNames = function(items) {
 
 const validateDanglingRoutes = function (items) {
   const defaultTrafficRule = this.options.parent.default_traffic_rule;
-  let trafficRuleRoutes = [...new Set(this.options.parent.rules.map(rule => rule.routes).flat(1))];
+  let trafficRuleRoutes = [
+    ...new Set(this.options.parent.rules.map((rule) => rule.routes).flat(1)),
+  ];
   if (defaultTrafficRule) {
-    trafficRuleRoutes = [...trafficRuleRoutes, ...defaultTrafficRule.routes]
+    trafficRuleRoutes = [...trafficRuleRoutes, ...defaultTrafficRule.routes];
   }
 
   const errors = [];
@@ -72,7 +74,8 @@ const validateDanglingRoutes = function (items) {
       errors.push(
         this.createError({
           path: `${this.path}[${idx}].id`,
-          message: "This route should be removed since they have no Traffic Rule(s) associated and will never be called.",
+          message:
+            "This route should be removed since they have no Traffic Rule(s) associated and will never be called.",
         })
       );
     }
@@ -92,7 +95,9 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   kafkaBrokersRegex =
     /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
   kafkaTopicRegex = /^[A-Za-z0-9_.-]{1,249}/i,
-  trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/;
+  trafficRuleNameRegex = /^[A-Za-z\d][\w\d \-()#$%&:.]*[\w\d\-()#$%&:.]$/,
+  upiUrlRegex = /^([a-zA-Z0-9_-]{1,256})(\.[a-zA-Z0-9-]{1,256})*(:\d+)$/,
+  serviceMethodRegex = /^\/?(\w+(\.|-)?)+(\/[A-Za-z0-9]+)$/;
 
 const timeoutSchema = yup
   .string()
@@ -101,16 +106,32 @@ const timeoutSchema = yup
 const routeSchema = yup.object().shape({
   id: yup.string().required("Valid route Id is required"),
   type: yup.string().oneOf(["PROXY"], "Route Type is required"),
-  endpoint: yup
-    .string()
-    .required("Valid url is required")
-    .url("Valid url is required"),
+  endpoint: yup.string().when("$protocol", {
+    is: "UPI_V1",
+    then: (schema) =>
+      schema
+        .required("Valid gRPC endpoint is required eg. {host}:{port}")
+        .matches(
+          upiUrlRegex,
+          "Valid gRPC endpoint is required eg. {host}:{port}"
+        ),
+    otherwise: (schema) =>
+      schema.required("Valid url is required").url("Valid url is required"),
+  }),
   timeout: timeoutSchema.required("Timeout is required"),
+  service_method: yup.string().when("$protocol", {
+    is: "UPI_V1",
+    then: (schema) =>
+      schema.matches(
+        serviceMethodRegex,
+        "Valid service method is required in format {package}/{method} eg. my.package/PredictValues"
+      ),
+  }),
 });
 
 const validRouteSchema = yup
   .mixed()
-  .test("valid-route", "Valid route is required", function(value) {
+  .test("valid-route", "Valid route is required", function (value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
     return routes.map((r) => r.id).includes(value);
@@ -142,7 +163,11 @@ const trafficRuleSchema = yup.object().shape({
       trafficRuleNameRegex,
       "Name must begin with an alphanumeric character and have no trailing spaces and can contain letters, numbers, blank spaces and the following symbols: -_()#$%&:."
     )
-    .test('is-not-default-name', "default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.", (value) => value !== "default-traffic-rule"),
+    .test(
+      "is-not-default-name",
+      "default-traffic-rule is a reserved name, and cannot be used as the name for a Custom Traffic Rule.",
+      (value) => value !== "default-traffic-rule"
+    ),
   conditions: yup
     .array()
     .of(ruleConditionSchema)
@@ -198,8 +223,17 @@ const resourceRequestSchema = (maxAllowedReplica) =>
   });
 
 const autoscalingPolicySchema = yup.object().shape({
-  metric: yup.string().required("Valid metric must be chosen").oneOf(autoscalingPolicyMetrics, "Valid autoscaling metric type should be chosen"),
-  target: yup.string().required("Valid target should be specified").matches(/^[0-9]+$/, "Must be a number"),
+  metric: yup
+    .string()
+    .required("Valid metric must be chosen")
+    .oneOf(
+      autoscalingPolicyMetrics,
+      "Valid autoscaling metric type should be chosen"
+    ),
+  target: yup
+    .string()
+    .required("Valid target should be specified")
+    .matches(/^[0-9]+$/, "Must be a number"),
 });
 
 const enricherSchema = yup.object().shape({
@@ -259,8 +293,13 @@ const standardEnsemblerConfigSchema = yup
     "only one of route_name_path or experiment_mappings must be set",
     (standardEnsembler) => {
       const isRouteNamePathEmpty = !standardEnsembler.route_name_path;
-      const isExperimentMappingsEmpty = !standardEnsembler.experiment_mappings || standardEnsembler.experiment_mappings.length === 0;
-      return !((isRouteNamePathEmpty && isExperimentMappingsEmpty) || (!isRouteNamePathEmpty && !isExperimentMappingsEmpty));
+      const isExperimentMappingsEmpty =
+        !standardEnsembler.experiment_mappings ||
+        standardEnsembler.experiment_mappings.length === 0;
+      return !(
+        (isRouteNamePathEmpty && isExperimentMappingsEmpty) ||
+        (!isRouteNamePathEmpty && !isExperimentMappingsEmpty)
+      );
     }
   );
 
@@ -313,25 +352,32 @@ const schema = (maxAllowedReplica) => [
     environment_name: yup.string().required("Environment is required"),
     config: yup.object().shape({
       timeout: timeoutSchema.required("Timeout is required"),
-      rules: yup.array(trafficRuleSchema).test("unique-rule-names", validateRuleNames),
+      rules: yup
+        .array(trafficRuleSchema)
+        .test("unique-rule-names", validateRuleNames),
       routes: yup
         .array(routeSchema)
         .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured")
-        .when(['rules'], (rules, schema) => {
+        .when(["rules"], (rules, schema) => {
           if (rules.length > 0) {
             return schema.test("no-dangling-routes", validateDanglingRoutes);
           }
         }),
-      default_traffic_rule: yup.object()
+      default_traffic_rule: yup
+        .object()
         .nullable()
-        .when('rules', {
-          is: rules => rules.length > 0,
-          then: defaultTrafficRuleSchema
-      }),
+        .when("rules", {
+          is: (rules) => rules.length > 0,
+          then: defaultTrafficRuleSchema,
+        }),
       resource_request: resourceRequestSchema(maxAllowedReplica),
       autoscaling_policy: autoscalingPolicySchema,
+      protocol: yup
+        .string()
+        .required("Valid Protocol should be selected")
+        .oneOf(["HTTP_JSON", "UPI_V1"], "Valid Protocol should be selected"),
     }),
   }),
   yup.object().shape({
@@ -347,14 +393,14 @@ const schema = (maxAllowedReplica) => [
           engine === "nop"
             ? schema
             : yup
-              .mixed()
-              .when("$getEngineProperties", (getEngineProperties) => {
-                const engineProps = getEngineProperties(engine);
-                return engineProps.type === "standard"
-                  ? standardExperimentConfigSchema(engineProps)
-                  : engineProps.custom_experiment_manager_config
-                    ?.parsed_experiment_config_schema || schema;
-              })
+                .mixed()
+                .when("$getEngineProperties", (getEngineProperties) => {
+                  const engineProps = getEngineProperties(engine);
+                  return engineProps.type === "standard"
+                    ? standardExperimentConfigSchema(engineProps)
+                    : engineProps.custom_experiment_manager_config
+                        ?.parsed_experiment_config_schema || schema;
+                })
         ),
       }),
     }),

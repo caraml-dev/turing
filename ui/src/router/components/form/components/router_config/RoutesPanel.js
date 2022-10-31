@@ -7,13 +7,29 @@ import { get } from "../../../../../components/form/utils";
 import EndpointsContext from "../../../../../providers/endpoints/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 
-export const RoutesPanel = ({ routes, onChangeHandler, errors = {} }) => {
+export const RoutesPanel = ({
+  routes,
+  protocol,
+  onChangeHandler,
+  errors = {},
+}) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
 
   const endpoints = useContext(EndpointsContext);
+  const filteredEndpoints = endpoints.map((endpoint) => {
+    return {
+      ...endpoint,
+      options: endpoint.options.filter((option) => {
+        if (protocol === "UPI_V1") {
+          return !option.label.startsWith("http");
+        }
+        return option.label.startsWith("http");
+      }),
+    };
+  });
 
   const onAddRoute = () => {
-    onChange("routes")([...routes, newRoute()]);
+    onChange("routes")([...routes, newRoute(protocol)]);
   };
 
   const onDeleteRoute = (idx) => () => {
@@ -28,7 +44,8 @@ export const RoutesPanel = ({ routes, onChangeHandler, errors = {} }) => {
           <EuiFlexItem key={`route-${idx}`}>
             <RouteCard
               route={route}
-              endpointOptions={endpoints}
+              protocol={protocol}
+              endpointOptions={filteredEndpoints}
               onChange={onChange(`routes.${idx}`)}
               onDelete={routes.length > 1 ? onDeleteRoute(idx) : null}
               errors={get(errors, `${idx}`)}

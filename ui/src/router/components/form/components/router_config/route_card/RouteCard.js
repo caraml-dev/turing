@@ -16,6 +16,7 @@ import "./RouteCard.scss";
 
 export const RouteCard = ({
   route,
+  protocol,
   endpointOptions,
   onChange,
   onDelete,
@@ -39,13 +40,15 @@ export const RouteCard = ({
       className="euiCard--routeCard"
       title=""
       description=""
-      textAlign="left">
+      textAlign="left"
+    >
       <EuiForm onClick={(e) => e.stopPropagation()}>
         <EuiFlexGroup
           className="euiFlexGroup--removeButton"
           justifyContent="flexEnd"
           gutterSize="none"
-          direction="row">
+          direction="row"
+        >
           {!!onDelete && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -61,10 +64,16 @@ export const RouteCard = ({
           label="Endpoint *"
           isInvalid={!!get(errors, "endpoint")}
           error={get(errors, "endpoint")}
-          fullWidth>
+          fullWidth
+        >
           <SelectEndpointComboBox
             fullWidth
-            placeholder="http://models.internal/predict"
+            placeholder={
+              protocol === "HTTP_JSON"
+                ? "http://models.internal/predict"
+                : "models.internal:80"
+            }
+            protocol={protocol}
             value={route.endpoint}
             options={endpointOptions}
             onChange={(endpoint) => {
@@ -85,7 +94,8 @@ export const RouteCard = ({
             <EuiFormRow
               label="Route Id *"
               isInvalid={!!get(errors, "id")}
-              error={get(errors, "id")}>
+              error={get(errors, "id")}
+            >
               <EuiFieldText
                 placeholder="control"
                 value={route.id}
@@ -99,7 +109,8 @@ export const RouteCard = ({
             <EuiFormRow
               label="Timeout *"
               isInvalid={!!get(errors, "timeout")}
-              error={get(errors, "timeout")}>
+              error={get(errors, "timeout")}
+            >
               <EuiFieldDuration
                 value={route.timeout}
                 max={10000}

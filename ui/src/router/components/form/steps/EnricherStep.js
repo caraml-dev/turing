@@ -21,7 +21,7 @@ export const EnricherStep = ({ projectId }) => {
   } = useConfig();
   const {
     data: {
-      config: { enricher },
+      config: { enricher, protocol },
     },
     onChangeHandler,
   } = useContext(FormContext);
@@ -34,7 +34,7 @@ export const EnricherStep = ({ projectId }) => {
       <EuiFlexItem>
         <EnricherTypePanel
           type={enricher.type}
-          options={enricherTypeOptions}
+          options={enricherTypeOptions[protocol]}
           onChange={onChange("config.enricher.type")}
           errors={get(errors, "config.enricher.type")}
         />

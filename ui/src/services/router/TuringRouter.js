@@ -31,6 +31,7 @@ export class TuringRouter {
         target: "1",
       },
       timeout: "300ms",
+      protocol: "HTTP_JSON",
       experiment_engine: new NopExperimentEngine(),
       enricher: {
         type: "nop",
@@ -85,19 +86,19 @@ export class TuringRouter {
     const ensemblerConfig = get(json, "config.ensembler");
     router.config.ensembler = _.isEmpty(ensemblerConfig)
       ? Ensembler.fromJson({
-        nop_config: {
-          final_response_route_id: get(json, "config.default_route_id"),
-        },
-      })
+          nop_config: {
+            final_response_route_id: get(json, "config.default_route_id"),
+          },
+        })
       : ensemblerConfig.type === "standard"
-        ? Ensembler.fromJson({
+      ? Ensembler.fromJson({
           ...ensemblerConfig,
           standard_config: {
             ...ensemblerConfig.standard_config,
             fallback_response_route_id: get(json, "config.default_route_id"),
           },
         })
-        : Ensembler.fromJson(ensemblerConfig);
+      : Ensembler.fromJson(ensemblerConfig);
 
     // Init enricher. If config exists, update the type to docker.
     const enricherConfig = get(json, "config.enricher");
@@ -161,10 +162,14 @@ export class TuringRouter {
   }
 }
 
-export const newRoute = () => ({
+export const newRoute = (protocol) => ({
   id: "",
   type: "PROXY",
   timeout: "100ms",
+  service_method:
+    protocol === "UPI_V1"
+      ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
+      : "",
 });
 
 export const newDefaultRule = () => ({

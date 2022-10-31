@@ -15,6 +15,7 @@ export const ExperimentStep = ({ projectId }) => {
       config: {
         experiment_engine,
         ensembler: { type: ensemblerType },
+        protocol,
       },
     },
     onChangeHandler,
@@ -40,13 +41,18 @@ export const ExperimentStep = ({ projectId }) => {
     ExperimentEngineContext
   );
   const engineProps = getEngineProperties(experiment_engine.type);
+  // UPI will only support custom experiment engine now
+  const filteredEngine =
+    protocol === "UPI_V1"
+      ? experimentEngines.filter((engine) => engine.type !== "standard")
+      : experimentEngines;
   const experimentEngineOptions = useMemo(
-    () => getExperimentEngineOptions(experimentEngines),
-    [experimentEngines]
+    () => getExperimentEngineOptions(filteredEngine),
+    [filteredEngine]
   );
 
   useEffect(() => {
-    const ensemblerOptions = ensemblerTypeOptions(engineProps).filter(
+    const ensemblerOptions = ensemblerTypeOptions(engineProps, protocol).filter(
       (o) => !o.disabled
     );
 
@@ -57,13 +63,14 @@ export const ExperimentStep = ({ projectId }) => {
     if (ensemblerOptions.length && !ensemblerTypeOption) {
       onChange("config.ensembler.type")(ensemblerOptions[0].value);
     }
-  }, [experiment_engine.type, engineProps, onChange, ensemblerType]);
+  }, [experiment_engine.type, engineProps, onChange, ensemblerType, protocol]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EngineTypePanel
           type={experiment_engine.type}
+          protocol={protocol}
           options={experimentEngineOptions}
           onChange={onChangeEngineType}
           errors={get(errors, "config.experiment_engine.type")}
@@ -73,6 +80,7 @@ export const ExperimentStep = ({ projectId }) => {
       {experiment_engine.type !== "nop" && (
         <ExperimentConfigPanel
           projectId={projectId}
+          protocol={protocol}
           engine={experiment_engine}
           onChangeHandler={onChange("config.experiment_engine.config")}
           errors={get(errors, "config.experiment_engine.config")}

@@ -11,6 +11,7 @@ import { FieldSourceFormLabel } from "../request_field_source/FieldSourceFormLab
 
 export const TrafficRuleCondition = ({
   condition,
+  protocol,
   onChangeHandler,
   errors,
   readOnly,
@@ -33,7 +34,8 @@ export const TrafficRuleCondition = ({
       <EuiFlexItem grow={1}>
         <EuiFormRow
           isInvalid={!!get(errors, "field")}
-          error={get(errors, "field")}>
+          error={get(errors, "field")}
+        >
           <EuiFieldText
             readOnly={readOnly}
             compressed
@@ -43,6 +45,7 @@ export const TrafficRuleCondition = ({
             prepend={
               <FieldSourceFormLabel
                 readOnly={readOnly}
+                protocol={protocol}
                 value={condition.field_source}
                 onChange={onChange("field_source")}
               />
@@ -56,7 +59,8 @@ export const TrafficRuleCondition = ({
       <EuiFlexItem grow={1}>
         <EuiFormRow
           isInvalid={!!get(errors, "values")}
-          error={get(errors, "values")}>
+          error={get(errors, "values")}
+        >
           <EuiComboBox
             compressed
             isDisabled={readOnly}

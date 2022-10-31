@@ -25,6 +25,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
   );
 
   const { data: router } = useContext(FormContext);
+  const protocol = router.config.protocol;
 
   const [submissionResponse, submitForm] = useTuringApi(
     `/projects/${projectId}/routers`,
@@ -59,6 +60,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       title: "Router",
       children: <RouterStep projectId={projectId} />,
       validationSchema: validationSchema[0],
+      validationContext: { protocol },
     },
     {
       title: "Experiments",
@@ -90,7 +92,8 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       isLoading={submissionResponse.isLoading}
       onConfirm={onSubmit}
       confirmButtonText="Deploy"
-      confirmButtonColor="primary">
+      confirmButtonColor="primary"
+    >
       {(onSubmit) => (
         <StepsWizardHorizontal
           steps={steps}

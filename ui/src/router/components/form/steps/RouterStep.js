@@ -28,6 +28,7 @@ export const RouterStep = ({ projectId }) => {
           name={data.name}
           environment={data.environment_name}
           timeout={data.config.timeout}
+          protocol={data.config.protocol}
           isEdit={!!data.id}
           onChange={onChange}
           errors={errors}
@@ -36,8 +37,10 @@ export const RouterStep = ({ projectId }) => {
       <EuiFlexItem grow={false}>
         <MerlinEndpointsProvider
           projectId={projectId}
-          environmentName={data.environment_name}>
+          environmentName={data.environment_name}
+        >
           <RoutesPanel
+            protocol={data.config.protocol}
             routes={get(data, "config.routes")}
             onChangeHandler={onChange("config")}
             errors={get(errors, "config.routes")}
@@ -47,9 +50,13 @@ export const RouterStep = ({ projectId }) => {
       <EuiFlexItem grow={false}>
         <RulesPanel
           default_traffic_rule={get(data, "config.default_traffic_rule")}
-          default_traffic_rule_errors={get(errors, "config.default_traffic_rule")}
+          default_traffic_rule_errors={get(
+            errors,
+            "config.default_traffic_rule"
+          )}
           rules={get(data, "config.rules")}
           routes={get(data, "config.routes")}
+          protocol={data.config.protocol}
           onChangeHandler={onChange("config")}
           rules_errors={get(errors, "config.rules")}
         />
