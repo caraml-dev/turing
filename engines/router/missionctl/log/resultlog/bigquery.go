@@ -18,10 +18,9 @@ import (
 	"cloud.google.com/go/bigquery"
 	"go.einride.tech/protobuf-bigquery/encoding/protobq"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
-
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 )
 

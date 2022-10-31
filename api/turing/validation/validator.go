@@ -8,8 +8,6 @@ import (
 
 	"github.com/golang-collections/collections/set"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 
@@ -18,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	expRequest "github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 var tableRegexString = `.+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+`
