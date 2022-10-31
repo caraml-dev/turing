@@ -8,16 +8,17 @@ import (
 	"strings"
 
 	"github.com/buger/jsonparser"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/gojek/fiber"
+	grpcFiber "github.com/gojek/fiber/grpc"
+	fiberProtocol "github.com/gojek/fiber/protocol"
+
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/gojek/fiber"
-	grpcFiber "github.com/gojek/fiber/grpc"
-	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a

@@ -7,15 +7,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"github.com/caraml-dev/turing/api/turing/models"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestNewRouterService(t *testing.T) {

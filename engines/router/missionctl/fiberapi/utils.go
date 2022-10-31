@@ -1,14 +1,15 @@
 package fiberapi
 
 import (
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/fiber"
 	"github.com/gojek/fiber/config"
 	fiberErrors "github.com/gojek/fiber/errors"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/gojek/fiber/types"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 )
 
 // CreateFiberRouterFromConfig creates a Fiber router from config

@@ -3,10 +3,11 @@ package fiberapi
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fiberErrors "github.com/gojek/fiber/errors"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 func TestCreateFiberError(t *testing.T) {

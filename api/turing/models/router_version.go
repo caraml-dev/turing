@@ -3,8 +3,9 @@ package models
 import (
 	"database/sql"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"gorm.io/gorm"
+
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 type RouterVersionStatus string

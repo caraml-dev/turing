@@ -7,13 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
-	"github.com/caraml-dev/turing/engines/router"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/router"
 )
 
 type operatorSerializationTestCase struct {

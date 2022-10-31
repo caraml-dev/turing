@@ -16,8 +16,9 @@ import (
 	"strings"
 
 	"cloud.google.com/go/bigquery"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"go.einride.tech/protobuf-bigquery/encoding/protobq"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"

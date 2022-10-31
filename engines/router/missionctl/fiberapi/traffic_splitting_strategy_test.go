@@ -7,16 +7,17 @@ import (
 	"net/http"
 	"testing"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/gojek/fiber"
+	fiberHttp "github.com/gojek/fiber/http"
+	"github.com/stretchr/testify/require"
+
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/gojek/fiber"
-	fiberHttp "github.com/gojek/fiber/http"
-	"github.com/stretchr/testify/require"
 )
 
 var (

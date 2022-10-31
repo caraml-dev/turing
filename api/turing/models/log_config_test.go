@@ -3,8 +3,9 @@ package models
 import (
 	"testing"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
+
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 func TestLogConfigValue(t *testing.T) {

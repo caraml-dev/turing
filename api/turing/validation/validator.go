@@ -6,8 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/golang-collections/collections/set"
+
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"

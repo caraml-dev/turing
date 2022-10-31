@@ -17,13 +17,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
-	"github.com/stretchr/testify/assert"
 )
 
 // testHTTPServerAddr is the address of the test HTTP server assumed to be running and

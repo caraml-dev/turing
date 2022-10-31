@@ -41,7 +41,7 @@ repos:
     hooks:
       - id: goimports
         name: 'Run goimports'
-        alias: goimport-api
+        alias: goimports
         files: '^[api/|engines/router/|engines/experiment/]'
         types: [go]
         language: system
