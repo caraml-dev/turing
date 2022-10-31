@@ -272,7 +272,7 @@ var _ = DeployedRouterContext("testdata/create_router_upi_with_traffic_rules.jso
 						Expect(resp.PredictionResultTable).To(matcher.ProtoEqual(upiRequest.PredictionTable))
 					})
 				})
-				When("send UPI PredictValues that that doesn't satisfy any traffic rule", func() {
+				When("sent UPI PredictValues doesn't satisfy any traffic rule", func() {
 					It("responds successfully using control endpoint", func() {
 						conn, _ := grpc.Dial(routerCtx.Endpoint,
 							grpc.WithTransportCredentials(insecure.NewCredentials()))
