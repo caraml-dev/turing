@@ -1,9 +1,7 @@
 package fiberapi
 
 import (
-	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fiberErrors "github.com/gojek/fiber/errors"
@@ -37,16 +35,4 @@ func TestCreateFiberError(t *testing.T) {
 			assert.Equal(t, data.expectedErr, createFiberError(data.err, fiberProtocol.HTTP))
 		})
 	}
-}
-
-func TestCreateFiberRequestHandler(t *testing.T) {
-	router, err := CreateFiberRouterFromConfig(filepath.Join("..", "testdata", "nop_default_router.yaml"), true)
-	assert.NoError(t, err)
-	assert.Equal(t, "eager-router", router.ID())
-	assert.Equal(t, "Combiner", string(router.Kind()))
-
-	handler := CreateFiberRequestHandler(router, time.Second*2)
-
-	assert.Equal(t, "eager-router", handler.Component.ID())
-	assert.Equal(t, "Combiner", string(handler.Component.Kind()))
 }
