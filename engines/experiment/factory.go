@@ -1,13 +1,14 @@
 package experiment
 
 import (
+	"github.com/mitchellh/mapstructure"
+	"go.uber.org/zap"
+
 	"github.com/caraml-dev/turing/engines/experiment/config"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/mitchellh/mapstructure"
-	"go.uber.org/zap"
 )
 
 // EngineFactory interface defines methods for accessing manager/runner

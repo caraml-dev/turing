@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/buger/jsonparser"
+	"github.com/gojek/fiber"
+
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/fiber"
 )
 
 // DefaultTuringRoutingStrategy selects the route that matches experiment treatment for a

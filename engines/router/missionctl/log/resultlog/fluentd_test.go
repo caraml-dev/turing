@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
 
 // MockFluentClient implements the fluentdClient interface

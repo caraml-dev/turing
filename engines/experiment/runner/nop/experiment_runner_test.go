@@ -3,8 +3,9 @@ package nop
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 func TestGetTreatmentForRequest(t *testing.T) {

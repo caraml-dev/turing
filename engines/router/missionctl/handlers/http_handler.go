@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
@@ -16,8 +19,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
 )
 
 const turingReqIDHeaderKey = "Turing-Req-ID"

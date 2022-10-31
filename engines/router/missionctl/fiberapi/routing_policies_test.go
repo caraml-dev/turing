@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/stretchr/testify/assert"
 
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 )

@@ -3,10 +3,11 @@ package log
 import (
 	"context"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 )
 
 // Init the global logger to default prod settings. Calling InitGlobalLogger()

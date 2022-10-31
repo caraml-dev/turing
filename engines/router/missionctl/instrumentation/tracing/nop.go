@@ -5,8 +5,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // NopTracer implements the Tracer interface with dummy methods

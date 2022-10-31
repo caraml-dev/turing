@@ -6,8 +6,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/go-playground/validator"
+
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 // BaseStandardExperimentManager provides dummy implementations for the optional

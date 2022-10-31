@@ -5,8 +5,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // TraceConfig exposes getters and setters for some of the configuration applied to the tracer

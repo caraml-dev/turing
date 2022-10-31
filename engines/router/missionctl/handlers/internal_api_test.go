@@ -5,9 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestVersionAPI(t *testing.T) {

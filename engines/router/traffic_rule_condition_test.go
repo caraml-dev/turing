@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
-	"github.com/caraml-dev/turing/engines/router"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	"github.com/caraml-dev/turing/engines/router"
 )
 
 type operatorSerializationTestCase struct {

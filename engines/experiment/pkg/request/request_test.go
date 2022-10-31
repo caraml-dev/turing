@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 func TestGetFieldSource(t *testing.T) {

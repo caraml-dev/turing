@@ -3,11 +3,12 @@ package hardcoded
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"sort"
+
 	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/utils"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"net/http"
-	"sort"
 )
 
 type ExperimentRunner struct {

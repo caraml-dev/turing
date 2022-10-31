@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestBaseStandardExperimentManagerMethods(t *testing.T) {

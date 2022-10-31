@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/stretchr/testify/assert"
+
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
 
 func TestGetStatusString(t *testing.T) {

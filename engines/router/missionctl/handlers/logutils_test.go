@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/stretchr/testify/assert"
 )
 
 // TestCopyResponseToLogChannel tests the copyResponseToLogChannel method in logutils.

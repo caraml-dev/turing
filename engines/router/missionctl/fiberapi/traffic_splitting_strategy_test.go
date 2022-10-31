@@ -7,15 +7,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gojek/fiber"
+	fiberhttp "github.com/gojek/fiber/http"
+	"github.com/stretchr/testify/require"
+
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
-	"github.com/stretchr/testify/require"
 )
 
 func TestTrafficSplittingStrategyRule_TestRequest(t *testing.T) {

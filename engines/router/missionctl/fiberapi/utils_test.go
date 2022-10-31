@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fibererror "github.com/gojek/fiber/errors"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 func TestCreateFiberError(t *testing.T) {

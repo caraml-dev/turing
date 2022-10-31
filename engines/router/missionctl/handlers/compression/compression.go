@@ -1,8 +1,9 @@
 package compression
 
 import (
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/pierrec/lz4"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 // Compressor is an interface to be implemented by types that support reading and writing

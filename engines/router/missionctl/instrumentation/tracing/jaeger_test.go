@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 func TestIsEnabled(t *testing.T) {

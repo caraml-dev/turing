@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/opentracing/opentracing-go"
 )
 
 const batchHTTPHandlerID = "batch_http_handler"
