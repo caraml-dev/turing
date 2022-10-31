@@ -14,16 +14,17 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
-	"github.com/caraml-dev/turing/api/turing/config"
 	mockImgBuilder "github.com/caraml-dev/turing/api/turing/imagebuilder/mocks"
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
-	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // mockClusterServiceBuilder implements the servicebuilder.ClusterServiceBuilder interface
@@ -241,7 +242,7 @@ func TestDeployEndpoint(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com", routerVersion.Router.Name), endpoint)
+	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com/v1/predict", routerVersion.Router.Name), endpoint)
 	controller.AssertCalled(t, "CreateNamespace", mock.Anything, testNamespace)
 	controller.AssertCalled(t, "ApplyPersistentVolumeClaim", mock.Anything,
 		testNamespace, &cluster.PersistentVolumeClaim{Name: "pvc"})
@@ -328,6 +329,22 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 		Endpoint: "test-svc-router.models.example.com",
 	})
+
+	// Verify endpoint for upi routers
+	routerVersion.Protocol = routerConfig.UPI
+	endpoint, err = ds.DeployRouterVersion(
+		&mlp.Project{Name: testNamespace},
+		&merlin.Environment{Name: testEnv},
+		routerVersion,
+		"router-service-account-key",
+		"enricher-service-account-key",
+		"ensembler-service-account-key",
+		nil,
+		nil,
+		eventsCh,
+	)
+	assert.Equal(t, fmt.Sprintf("%s-router.models.example.com:80", routerVersion.Router.Name), endpoint)
+	assert.NoError(t, err)
 }
 
 func TestDeleteEndpoint(t *testing.T) {

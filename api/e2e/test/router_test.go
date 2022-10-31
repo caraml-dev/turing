@@ -1,17 +1,24 @@
 package e2e
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"github.com/caraml-dev/turing/api/e2e/test/config"
+	"github.com/caraml-dev/turing/api/e2e/test/matcher"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo/v2"
-
-	"github.com/caraml-dev/turing/api/e2e/test/config"
+	. "github.com/onsi/gomega"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_exp.json.tmpl",
-	func(routerCtx *RouterContext) {
+	routerConfig.HTTP, func(routerCtx *RouterContext) {
 		var routerE *httpexpect.Expect
 
 		BeforeAll(func() {
@@ -49,7 +56,7 @@ var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_
 	})
 
 var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tmpl",
-	func(routerCtx *RouterContext) {
+	routerConfig.HTTP, func(routerCtx *RouterContext) {
 		Describe("Calling router endpoints to fetch predictions", func() {
 			Context("Turing Router API", func() {
 				Context("POST /v1/predict", func() {
@@ -106,6 +113,199 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 								Status(http.StatusOK).
 								JSON().Object()
 						})
+					})
+				})
+			})
+		})
+	})
+
+var _ = DeployedRouterContext("testdata/create_router_upi_simple.json.tmpl", routerConfig.UPI,
+	func(routerCtx *RouterContext) {
+		Describe("Calling UPI router endpoint to fetch predictions", func() {
+			Context("Turing Router API", func() {
+				When("send UPI PredictValues", func() {
+					It("responds successfully", func() {
+						conn, _ := grpc.Dial(routerCtx.Endpoint,
+							grpc.WithTransportCredentials(insecure.NewCredentials()))
+						defer conn.Close()
+
+						client := upiv1.NewUniversalPredictionServiceClient(conn)
+						upiRequest := &upiv1.PredictValuesRequest{
+							PredictionTable: &upiv1.Table{
+								Name: "Test",
+								Columns: []*upiv1.Column{
+									{
+										Name: "col1",
+										Type: upiv1.Type_TYPE_DOUBLE,
+									},
+								},
+								Rows: []*upiv1.Row{
+									{
+										RowId: "1",
+										Values: []*upiv1.Value{
+											{},
+										},
+									},
+								},
+							},
+							PredictionContext: []*upiv1.Variable{
+								{
+									Name:        "country_code",
+									Type:        upiv1.Type_TYPE_STRING,
+									StringValue: "ID",
+								},
+								{
+									Name:        "order_id",
+									Type:        upiv1.Type_TYPE_STRING,
+									StringValue: "12345",
+								},
+							},
+						}
+						headers := metadata.New(map[string]string{"region": "region-a"})
+						resp, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
+							upiRequest)
+
+						Expect(err).To(BeNil())
+						Expect(resp.Metadata.Models[0].Name, err).To(Equal("control"))
+						Expect(resp.PredictionResultTable).To(matcher.ProtoEqual(upiRequest.PredictionTable))
+					})
+				})
+			})
+		})
+	})
+
+var _ = DeployedRouterContext("testdata/create_router_upi_with_std_ensembler.json.tmpl", routerConfig.UPI,
+	func(routerCtx *RouterContext) {
+		Describe("Calling UPI router endpoint to fetch predictions", func() {
+			Context("Turing Router API", func() {
+				When("send UPI PredictValues that generate treatment-a", func() {
+					It("responds successfully using treatment-a", func() {
+						conn, _ := grpc.Dial(routerCtx.Endpoint,
+							grpc.WithTransportCredentials(insecure.NewCredentials()))
+						defer conn.Close()
+
+						client := upiv1.NewUniversalPredictionServiceClient(conn)
+						headers := metadata.New(map[string]string{"region": "region-a"})
+						upiRequest := &upiv1.PredictValuesRequest{
+							PredictionTable: &upiv1.Table{
+								Name: "Test",
+								Columns: []*upiv1.Column{
+									{
+										Name: "col1",
+										Type: upiv1.Type_TYPE_DOUBLE,
+									},
+								},
+								Rows: []*upiv1.Row{
+									{
+										RowId: "1",
+										Values: []*upiv1.Value{
+											{},
+										},
+									},
+								},
+							},
+							PredictionContext: []*upiv1.Variable{
+								{
+									Name:        "client_id",
+									Type:        upiv1.Type_TYPE_STRING,
+									StringValue: "4",
+								},
+							},
+						}
+
+						resp, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
+							upiRequest)
+
+						Expect(err).To(BeNil())
+						Expect(resp.Metadata.Models[0].Name, err).To(Equal("treatment-a"))
+						Expect(resp.PredictionResultTable).To(matcher.ProtoEqual(upiRequest.PredictionTable))
+					})
+				})
+			})
+		})
+	})
+
+var _ = DeployedRouterContext("testdata/create_router_upi_with_traffic_rules.json.tmpl", routerConfig.UPI,
+	func(routerCtx *RouterContext) {
+		Describe("Calling UPI router endpoint to fetch predictions", func() {
+			Context("Turing Router API", func() {
+				When("send UPI PredictValues that satisfy traffic rule rule-1", func() {
+					It("responds successfully using treatment-a endpoint", func() {
+						conn, _ := grpc.Dial(routerCtx.Endpoint,
+							grpc.WithTransportCredentials(insecure.NewCredentials()))
+						defer conn.Close()
+
+						client := upiv1.NewUniversalPredictionServiceClient(conn)
+						headers := metadata.New(map[string]string{})
+						upiRequest := &upiv1.PredictValuesRequest{
+							PredictionTable: &upiv1.Table{
+								Name: "Test",
+								Columns: []*upiv1.Column{
+									{
+										Name: "col1",
+										Type: upiv1.Type_TYPE_DOUBLE,
+									},
+								},
+								Rows: []*upiv1.Row{
+									{
+										RowId: "1",
+										Values: []*upiv1.Value{
+											{},
+										},
+									},
+								},
+							},
+							PredictionContext: []*upiv1.Variable{
+								{
+									Name:        "client_id",
+									Type:        upiv1.Type_TYPE_STRING,
+									StringValue: "1",
+								},
+							},
+						}
+
+						resp, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
+							upiRequest)
+
+						Expect(err).To(BeNil())
+						Expect(resp.Metadata.Models[0].Name, err).To(Equal("treatment-a"))
+						Expect(resp.PredictionResultTable).To(matcher.ProtoEqual(upiRequest.PredictionTable))
+					})
+				})
+				When("sent UPI PredictValues doesn't satisfy any traffic rule", func() {
+					It("responds successfully using control endpoint", func() {
+						conn, _ := grpc.Dial(routerCtx.Endpoint,
+							grpc.WithTransportCredentials(insecure.NewCredentials()))
+						defer conn.Close()
+
+						client := upiv1.NewUniversalPredictionServiceClient(conn)
+						headers := metadata.New(map[string]string{})
+						upiRequest := &upiv1.PredictValuesRequest{
+							PredictionTable: &upiv1.Table{
+								Name: "Test",
+								Columns: []*upiv1.Column{
+									{
+										Name: "col1",
+										Type: upiv1.Type_TYPE_DOUBLE,
+									},
+								},
+								Rows: []*upiv1.Row{
+									{
+										RowId: "1",
+										Values: []*upiv1.Value{
+											{},
+										},
+									},
+								},
+							},
+						}
+
+						resp, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
+							upiRequest)
+
+						Expect(err).To(BeNil())
+						Expect(resp.Metadata.Models[0].Name, err).To(Equal("control"))
+						Expect(resp.PredictionResultTable).To(matcher.ProtoEqual(upiRequest.PredictionTable))
 					})
 				})
 			})

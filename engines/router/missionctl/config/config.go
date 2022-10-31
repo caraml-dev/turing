@@ -40,6 +40,14 @@ const (
 	NopLogger ResultLogger = "NOP"
 )
 
+// Protocol is used for router config to indicate spinning up of respective router mission control
+type Protocol string
+
+const (
+	UPI  Protocol = "UPI_V1"
+	HTTP Protocol = "HTTP_JSON"
+)
+
 // SerializationFormat represents the message serialization format to be used by the ResultLogger
 type SerializationFormat string
 
@@ -179,6 +187,7 @@ type EnrichmentConfig struct {
 type RouterConfig struct {
 	ConfigFile string        `split_words:"true" required:"true"`
 	Timeout    time.Duration `default:"20ms"`
+	Protocol   Protocol      `default:"HTTP_JSON"`
 }
 
 // EnsemblerConfig is the structure used to parse the Ensembler's environment configs

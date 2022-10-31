@@ -28,17 +28,17 @@ def test_deploy_router_with_traffic_rules():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-a',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-a',
             timeout="5s",
         ),
         Route(
             id="treatment-b",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-b',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-b',
             timeout="5s",
         ),
     ]
@@ -73,7 +73,7 @@ def test_deploy_router_with_traffic_rules():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="200m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router
@@ -83,7 +83,7 @@ def test_deploy_router_with_traffic_rules():
     ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2, max_replica=2, cpu_request="200m", memory_request="256Mi"
+            min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
         ),
         endpoint="anything",
         timeout="3s",

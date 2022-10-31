@@ -33,7 +33,7 @@ var requestLatencyBuckets = []float64{
 
 // histogramMap maintains a mapping between the metric name and the corresponding
 // histogram vector
-var histogramMap map[MetricName]*prometheus.HistogramVec = map[MetricName]*prometheus.HistogramVec{
+var histogramMap = map[MetricName]*prometheus.HistogramVec{
 	ExperimentEngineRequestMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: Namespace,
 		Subsystem: Subsystem,

@@ -7,17 +7,16 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/opentracing/opentracing-go"
-
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	"github.com/gojek/fiber"
+	fiberHttp "github.com/gojek/fiber/http"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/opentracing/opentracing-go"
 )
 
 // FanInID is used to indendify the fan in component when capturing a request span
@@ -171,7 +170,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 			"Content-Type": []string{"application/json"},
 		},
 	}
-	return fiberhttp.NewHTTPResponse(&resp)
+	return fiberHttp.NewHTTPResponse(&resp)
 }
 
 // RouteResponse captures the result of each experiment

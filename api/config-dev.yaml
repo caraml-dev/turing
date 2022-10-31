@@ -50,7 +50,7 @@ DbConfig:
   User: turing
   Password: turing
 DeployConfig:
-  EnvironmentType: dev 
+  EnvironmentType: dev
 KubernetesLabelConfigs:
   Environment: dev
 SparkAppConfig:

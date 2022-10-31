@@ -60,6 +60,7 @@ from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel
 from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project
+from turing.generated.model.protocol import Protocol
 from turing.generated.model.py_func_ensembler import PyFuncEnsembler
 from turing.generated.model.py_func_ensembler_all_of import PyFuncEnsemblerAllOf
 from turing.generated.model.resource_request import ResourceRequest

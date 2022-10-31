@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/metadata"
 )
 
 func TestGetFieldSource(t *testing.T) {
@@ -23,7 +24,7 @@ func TestGetFieldSource(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetValueFromRequest(t *testing.T) {
+func TestGetValueFromHTTPRequest(t *testing.T) {
 	tests := map[string]struct {
 		field    string
 		fieldSrc request.FieldSource
@@ -104,7 +105,115 @@ func TestGetValueFromRequest(t *testing.T) {
 	// Run tests
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			val, err := request.GetValueFromRequest(data.header, data.body, data.fieldSrc, data.field)
+			val, err := request.GetValueFromHTTPRequest(data.header, data.body, data.fieldSrc, data.field)
+			assert.Equal(t, data.expected, val)
+			// Check error
+			if data.err != "" {
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+					t.FailNow()
+				}
+				assert.Equal(t, data.err, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestGetValueFromUPIRequest(t *testing.T) {
+	tests := map[string]struct {
+		field    string
+		fieldSrc request.FieldSource
+		header   metadata.MD
+		body     *upiv1.PredictValuesRequest
+		expected string
+		err      string
+	}{
+		"success | header": {
+			field:    "customer-id",
+			fieldSrc: request.HeaderFieldSource,
+			header: metadata.MD{
+				"customer-id": []string{"123"},
+			},
+			expected: "123",
+		},
+		"success | nested payload": {
+			field:    "customer-id",
+			fieldSrc: request.PredictionContextSource,
+			body: &upiv1.PredictValuesRequest{
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "foo",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "bar",
+					},
+					{
+						Name:        "customer-id",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "test_customer",
+					},
+				},
+			},
+			expected: "test_customer",
+		},
+		"success | payload integer field": {
+			field:    "customer-id",
+			fieldSrc: request.PredictionContextSource,
+			body: &upiv1.PredictValuesRequest{
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "foo",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "bar",
+					},
+					{
+						Name:         "customer-id",
+						Type:         upiv1.Type_TYPE_INTEGER,
+						IntegerValue: 1234,
+					},
+				},
+			},
+			expected: "1234",
+		},
+		"failure | header not found": {
+			field:    "missing-header",
+			fieldSrc: request.HeaderFieldSource,
+			header: metadata.MD{
+				"customer-id": []string{"123"},
+			},
+			err: "Field missing-header not found in the request header",
+		},
+		"failure | variable not found": {
+			field:    "missing-variable",
+			fieldSrc: request.PredictionContextSource,
+			body: &upiv1.PredictValuesRequest{
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "foo",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "bar",
+					},
+					{
+						Name:        "customer-id",
+						Type:        upiv1.Type_TYPE_INTEGER,
+						StringValue: "1234",
+					},
+				},
+			},
+			err: "Variable missing-variable not found in the prediction context",
+		},
+		"failure | unknown source": {
+			field:    "CustomerID",
+			fieldSrc: request.PayloadFieldSource,
+			err:      "Unrecognized field source payload",
+		},
+	}
+
+	// Run tests
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			val, err := request.GetValueFromUPIRequest(data.header, data.body, data.fieldSrc, data.field)
 			assert.Equal(t, data.expected, val)
 			// Check error
 			if data.err != "" {

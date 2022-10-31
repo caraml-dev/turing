@@ -12,15 +12,14 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
-	"github.com/stretchr/testify/assert"
-
 	runnerV1 "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/gojek/fiber"
+	fiberHttp "github.com/gojek/fiber/http"
+	"github.com/stretchr/testify/assert"
 )
 
 type testSuiteInitFanIn struct {
@@ -184,7 +183,7 @@ func TestEnsemblingFanInAggregate(t *testing.T) {
 
 			// Create test request
 			req := tu.MakeTestRequest(t, tu.NopHTTPRequestModifier)
-			fiberReq, err := fiberhttp.NewHTTPRequest(req)
+			fiberReq, err := fiberHttp.NewHTTPRequest(req)
 			tu.FailOnError(t, err)
 
 			// Call Aggregate with a timeout, exp result channel, test req and response queue
@@ -229,7 +228,7 @@ func makeTestResponseQueue(endpointNames ...string) fiber.ResponseQueue {
 			StatusCode: 200,
 			Body:       body,
 		}
-		fiberResp := fiberhttp.NewHTTPResponse(resp).WithBackendName(e)
+		fiberResp := fiberHttp.NewHTTPResponse(resp).WithBackendName(e)
 		ch <- fiberResp
 	}
 

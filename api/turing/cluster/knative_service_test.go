@@ -5,14 +5,14 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	resource "k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
 func TestBuildKnativeServiceConfig(t *testing.T) {
@@ -209,6 +209,87 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 							},
 							Spec: knservingv1.RevisionSpec{
 								PodSpec:              podSpec,
+								TimeoutSeconds:       &timeout,
+								ContainerConcurrency: &defaultConcurrency,
+							},
+						},
+					},
+					RouteSpec: defaultRouteSpec,
+				},
+			},
+		},
+		// upi has no liveness probe in pod spec and user-container is using h2c
+		"upi": {
+			serviceCfg: KnativeService{
+				BaseService:                     baseSvc,
+				ContainerPort:                   8080,
+				MinReplicas:                     1,
+				MaxReplicas:                     2,
+				AutoscalingMetric:               "concurrency",
+				AutoscalingTarget:               "1",
+				IsClusterLocal:                  true,
+				QueueProxyResourcePercentage:    30,
+				UserContainerLimitRequestFactor: 1.5,
+				Protocol:                        routerConfig.UPI,
+			},
+			expectedSpec: knservingv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-svc",
+					Namespace: "test-namespace",
+					Labels: map[string]string{
+						"labelKey":                          "labelVal",
+						"networking.knative.dev/visibility": "cluster-local",
+					},
+				},
+				Spec: knservingv1.ServiceSpec{
+					ConfigurationSpec: knservingv1.ConfigurationSpec{
+						Template: knservingv1.RevisionTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: "test-svc-0",
+								Labels: map[string]string{
+									"labelKey": "labelVal",
+								},
+								Annotations: map[string]string{
+									"autoscaling.knative.dev/minScale":                     "1",
+									"autoscaling.knative.dev/maxScale":                     "2",
+									"autoscaling.knative.dev/metric":                       "concurrency",
+									"autoscaling.knative.dev/target":                       "1",
+									"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
+									"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
+								},
+							},
+							Spec: knservingv1.RevisionSpec{
+								PodSpec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{
+											Name:  "user-container",
+											Image: "asia.gcr.io/gcp-project-id/turing-router:latest",
+											Ports: []corev1.ContainerPort{
+												{
+													Name:          "h2c",
+													ContainerPort: 8080,
+												},
+											},
+											Resources: resources,
+											ReadinessProbe: &corev1.Probe{
+												Handler: corev1.Handler{
+													HTTPGet: &corev1.HTTPGetAction{
+														Port: intstr.FromInt(8080),
+														Path: "/v1/internal/ready",
+													},
+												},
+												InitialDelaySeconds: 20,
+												PeriodSeconds:       10,
+												SuccessThreshold:    1,
+												TimeoutSeconds:      5,
+												FailureThreshold:    5,
+											},
+											VolumeMounts: baseSvc.VolumeMounts,
+											Env:          envs,
+										},
+									},
+									Volumes: baseSvc.Volumes,
+								},
 								TimeoutSeconds:       &timeout,
 								ContainerConcurrency: &defaultConcurrency,
 							},

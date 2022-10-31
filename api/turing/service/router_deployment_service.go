@@ -8,17 +8,17 @@ import (
 	"sync"
 	"time"
 
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
-
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/models"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // DeploymentService handles the deployment of the Turing routers and the related components.
@@ -210,7 +210,10 @@ func (ds *deploymentService) DeployRouterVersion(
 		eventsCh.Write(models.NewErrorEvent(
 			models.EventStageUpdatingEndpoint, "failed to update router endpoint: %s", err.Error()))
 	}
-	return "http://" + routerEndpoint.Endpoint, err
+	if routerVersion.Protocol == routerConfig.UPI {
+		return routerEndpoint.Endpoint + ":80", err
+	}
+	return fmt.Sprintf("http://%s/v1/predict", routerEndpoint.Endpoint), err
 }
 
 // UndeployRouterVersion removes the deployed router, if exists. Else, an error is returned.

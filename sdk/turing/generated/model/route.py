@@ -81,6 +81,7 @@ class Route(ModelNormal):
             'type': (str,),  # noqa: E501
             'endpoint': (str,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
+            'service_method': (str,),  # noqa: E501
             'annotations': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}, none_type,),  # noqa: E501
         }
 
@@ -94,6 +95,7 @@ class Route(ModelNormal):
         'type': 'type',  # noqa: E501
         'endpoint': 'endpoint',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
+        'service_method': 'service_method',  # noqa: E501
         'annotations': 'annotations',  # noqa: E501
     }
 
@@ -149,6 +151,7 @@ class Route(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            service_method (str): [optional]  # noqa: E501
             annotations ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}, none_type): [optional]  # noqa: E501
         """
 

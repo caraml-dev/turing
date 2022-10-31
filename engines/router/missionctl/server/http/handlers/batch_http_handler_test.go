@@ -10,18 +10,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewBatchHTTPHandler(t *testing.T) {
 	//Create the missionCtl required for test
-	configFilePath := filepath.Join("../testdata", "batch_router_test.yaml")
+	configFilePath := filepath.Join("../../../testdata", "batch_router_test.yaml")
 	missionCtl, err := createGenericMissionControl(configFilePath)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	mockMissionCtlWithBadRoute := &MockMissionControlBadRoute{BaseMockMissionControl: *createTestBaseMissionControl()}
 
 	//Create test routes endpoint. Route will write request body as response

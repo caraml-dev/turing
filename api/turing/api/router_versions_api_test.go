@@ -4,15 +4,15 @@ import (
 	"errors"
 	"testing"
 
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 const (
@@ -113,6 +113,7 @@ func TestCreateRouterVersion(t *testing.T) {
 		ExperimentEngine: &models.ExperimentEngine{
 			Type: models.ExperimentEngineTypeNop,
 		},
+		Protocol: routerConfig.HTTP,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: models.NopLogger,
 		},

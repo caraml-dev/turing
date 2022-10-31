@@ -89,6 +89,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				Target: "1",
 			},
 			Timeout:   "5s",
+			Protocol:  "HTTP_JSON",
 			LogConfig: &models.LogConfig{},
 			Enricher: &models.Enricher{
 				Image:           "lalal",

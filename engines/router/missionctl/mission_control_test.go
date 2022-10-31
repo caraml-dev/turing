@@ -17,14 +17,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
+	"github.com/stretchr/testify/assert"
 )
 
 // testHTTPServerAddr is the address of the test HTTP server assumed to be running and
@@ -32,7 +31,7 @@ import (
 var testHTTPServerAddr = "127.0.0.1:9000"
 
 // Test config
-var testCfg *config.Config = &config.Config{
+var testCfg = &config.Config{
 	Port: 80,
 	EnrichmentConfig: &config.EnrichmentConfig{
 		Endpoint: fmt.Sprintf("http://%s/enrich/", testHTTPServerAddr),
@@ -258,7 +257,7 @@ func assertNil(t *testing.T, actualResp []byte, _ string) {
 // Global variables for benchmark tests, to ensure compiler optimization doesn't
 // eliminate function calls
 var benchMarkResp mchttp.Response
-var benchMarkHTTPErr *errors.HTTPError
+var benchMarkHTTPErr *errors.TuringError
 
 func benchmarkEnrich(payloadFileName string, b *testing.B) {
 	missionCtl, _ := NewMissionControl(

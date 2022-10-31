@@ -1,0 +1,93 @@
+{
+    "environment_name": "dev",
+    "name": "e2e-traffic-rules-upi-{{.TestID}}",
+    "config": {
+        "routes": [
+            {
+                "id": "control",
+                "type": "PROXY",
+                "endpoint": "{{ .MockControlUPIServer.Endpoint }}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            },
+            {
+                "id": "treatment-a",
+                "type": "PROXY",
+                "endpoint": "{{ .MockTreatmentUPIServer.Endpoint }}",
+                "service_method": "caraml.upi.v1.UniversalPredictionService/PredictValues",
+                "timeout": "5s"
+            }
+        ],
+        "default_traffic_rule": {
+            "routes": ["control"]
+        },
+        "rules": [
+            {
+                "name": "rule-1",
+                "conditions": [
+                    {
+                        "field_source": "prediction_context",
+                        "field": "client_id",
+                        "operator": "in",
+                        "values": ["1"]
+                    }
+                ],
+                "routes": ["treatment-a", "control"]
+            }
+        ],
+        "experiment_engine": {
+            "type": "proprietary",
+            "config": {
+                "client": {
+                    "id": "1",
+                    "username": "test",
+                    "passkey": "test"
+                },
+                "experiments": [
+                    {
+                        "id": "001",
+                        "name": "exp_1"
+                    }
+                ],
+                "variables": {
+                    "experiment_variables": {
+                        "001": [
+                            {
+                                "name": "client_id",
+                                "type": "unit",
+                                "required": true
+                            }
+                        ]
+                    },
+                    "config": [
+                        {
+                            "name": "client_id",
+                            "required": true,
+                            "field": "client_id",
+                            "field_source": "payload"
+                        }
+                    ]
+                }
+            }
+        },
+        "ensembler": {
+            "type": "standard",
+            "standard_config": {
+                "experiment_mappings": [],
+                "route_name_path": "route_name"
+            }
+        },
+        "default_route_id": "control",
+        "resource_request": {
+            "min_replica": 1,
+            "max_replica": 1,
+            "cpu_request": "100m",
+            "memory_request": "250Mi"
+        },
+        "timeout": "5s",
+        "protocol": "UPI_V1",
+        "log_config": {
+            "result_logger_type": "nop"
+        }
+    }
+}

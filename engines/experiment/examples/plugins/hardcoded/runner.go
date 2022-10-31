@@ -47,7 +47,7 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 	_ runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	for _, exp := range e.experiments {
-		segmentationUnit, err := request.GetValueFromRequest(
+		segmentationUnit, err := request.GetValueFromHTTPRequest(
 			header,
 			payload,
 			exp.SegmentationConfig.SegmenterSource,

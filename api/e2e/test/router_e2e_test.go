@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,9 +15,8 @@ import (
 	"github.com/caraml-dev/turing/api/e2e/test/config"
 )
 
-var _ = DeployedRouterContext(
-	"testdata/create_router_nop_logger_proprietary_exp.json.tmpl",
-	func(routerCtx *RouterContext) {
+var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp.json.tmpl",
+	routerConfig.HTTP, func(routerCtx *RouterContext) {
 		var (
 			apiE, routerE *httpexpect.Expect
 			router        *httpexpect.Object

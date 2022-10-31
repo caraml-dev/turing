@@ -12,7 +12,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/opentracing/opentracing-go"
 	opentracingLog "github.com/opentracing/opentracing-go/log"
 	"github.com/stretchr/testify/assert"
@@ -367,7 +367,7 @@ func createTestFiberResponseQueue(respStatus int) fiber.ResponseQueue {
 		StatusCode: respStatus,
 		Body:       io.NopCloser(bytes.NewBuffer(testBody)),
 	}
-	fiberResp := fiberhttp.NewHTTPResponse(&httpResp)
+	fiberResp := fiberHttp.NewHTTPResponse(&httpResp)
 	queue := fiber.NewResponseQueueFromResponses(fiberResp)
 	return queue
 }

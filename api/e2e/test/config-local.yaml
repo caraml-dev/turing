@@ -11,6 +11,16 @@ mockserver:
   image: mockserver/mockserver:5.11.2
   endpoint: http://mockserver
 
+mockControlUPIServer:
+  name: upi-control
+  image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
+  endpoint: mockserver-upi-control:80
+
+mockTreatmentUPIServer:
+  name: upi-treatment-a
+  image: ghcr.io/caraml-dev/upi-echo-server:0.3.2-1-g1faf05e
+  endpoint: mockserver-upi-a:80
+
 cluster:
   name: dev
 

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -65,10 +66,10 @@ func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
 }
 
 // AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (logEntry *TuringResultLogEntry) AddResponse(key string, body []byte, header map[string]string, err string) {
+func (logEntry *TuringResultLogEntry) AddResponse(key string, body string, header map[string]string, err string) {
 	responseRecord := &turing.Response{
 		Header:   header,
-		Response: string(json.RawMessage(body)),
+		Response: body,
 		Error:    err,
 	}
 	switch key {
@@ -85,17 +86,17 @@ func (logEntry *TuringResultLogEntry) AddResponse(key string, body []byte, heade
 
 // NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
 // and request
-func NewTuringResultLogEntry(
+func NewTuringResultLogEntry[h http.Header | metadata.MD](
 	ctx context.Context,
 	timestamp time.Time,
-	header *http.Header,
-	body []byte,
+	header h,
+	body string,
 ) *TuringResultLogEntry {
 	// Get Turing Request Id
 	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Format Request Header
-	reqHeader := FormatHTTPHeader(*header)
+	reqHeader := FormatHeader(header)
 
 	return &TuringResultLogEntry{
 		TuringReqId:    turingReqID,
@@ -103,7 +104,7 @@ func NewTuringResultLogEntry(
 		RouterVersion:  appName,
 		Request: &turing.Request{
 			Header: reqHeader,
-			Body:   string(json.RawMessage(body)),
+			Body:   body,
 		},
 	}
 }
@@ -134,6 +135,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 
 		// Check if streaming insert or batch logging
 		if cfg.BigQuery.BatchLoad {
+			log.Glob().Info("Initializing Fluentd logger for batch logging")
 			// Init fluentd logger for batch logging
 			globalLogger, err = newFluentdLogger(cfg.Fluentd, bqLogger)
 		} else {
@@ -158,12 +160,13 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 
 // LogEntry sends the input TuringResultLogEntry to the appropriate logger
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
+	log.Glob().Debug("LogEntry")
 	return globalLogger.write(turLogEntry)
 }
 
-// FormatHTTPHeader formats the header which by concatenating the string values corresponding to each header into a
+// FormatHeader formats the header which by concatenating the string values corresponding to each header into a
 // single comma-delimited string
-func FormatHTTPHeader(header http.Header) map[string]string {
+func FormatHeader[h http.Header | metadata.MD](header h) map[string]string {
 	formattedHeader := map[string]string{}
 	for k, v := range header {
 		formattedHeader[k] = strings.Join(v, ",")
