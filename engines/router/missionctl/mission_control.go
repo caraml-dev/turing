@@ -59,7 +59,7 @@ func NewMissionControl(
 	if client == nil {
 		client = http.DefaultClient
 	}
-	fiberHandler := fiberapi.CreateFiberRequestHandler(fiberRouter, routerCfg.Timeout)
+	fiberHandler := fiberHttp.NewHandler(fiberRouter, fiberHttp.Options{Timeout: routerCfg.Timeout})
 
 	return &missionControl{
 		httpClient:        client,

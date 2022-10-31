@@ -95,8 +95,8 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		}
 
 		for k, v := range req.Header() {
-			// this is required instead of using req.header(), because grpc headers are lowercase using http2 transport
-			// http headers are transformed into canonical case, using httpheader.set, to call experiment engine in http1
+			// this is required instead of using req.Header() directly, because http2 / grpc headers are lowercase,
+			// http headers are transformed into canonical case, using httpHeader.Set, to call experiment engine in http1
 			httpHeader.Set(k, strings.Join(v, ","))
 		}
 	}

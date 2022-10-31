@@ -14,6 +14,7 @@ import (
 
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo/v2"
@@ -26,6 +27,7 @@ import (
 	"github.com/caraml-dev/turing/api/e2e/test/api"
 	"github.com/caraml-dev/turing/api/e2e/test/cluster"
 	"github.com/caraml-dev/turing/api/e2e/test/config"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 var configFile string

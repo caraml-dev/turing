@@ -1,15 +1,12 @@
 package fiberapi
 
 import (
-	"time"
-
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/fiber"
 	"github.com/gojek/fiber/config"
 	fiberErrors "github.com/gojek/fiber/errors"
-	fiberHttp "github.com/gojek/fiber/http"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/gojek/fiber/types"
 )
@@ -44,15 +41,6 @@ func CreateFiberRouterFromConfig(
 	component.AddInterceptor(true, interceptors...)
 
 	return component, err
-}
-
-// CreateFiberRequestHandler creates a new Fiber component from the given config file,
-// associates it with a Fiber HTTP handler and returns it.
-func CreateFiberRequestHandler(
-	component fiber.Component,
-	timeout time.Duration,
-) *fiberHttp.Handler {
-	return fiberHttp.NewHandler(component, fiberHttp.Options{Timeout: timeout})
 }
 
 // createRouterFromConfigFile takes the path to a fiber config file,

@@ -115,7 +115,7 @@ func TestNewUpiServer(t *testing.T) {
 	port := 50560
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		log.Glob().Panicf("Failed to listen on port: %v", port)
+		log.Glob().Panicf("Failed to listen on port %v: %s", port, err)
 	}
 
 	mockMc := &mocks.MissionControlUPI{}
