@@ -6,10 +6,11 @@ import (
 	"math"
 	"strconv"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 const (
@@ -142,7 +143,7 @@ func (cfg *KnativeService) buildSvcSpec(
 		VolumeMounts: cfg.VolumeMounts,
 		Env:          cfg.Envs,
 	}
-	//TODO Skip liveness probe for UPI due to a knative bug in <1.2, to remove after upgrading knative
+	// TODO: Skip liveness probe for UPI due to a knative bug in <1.2 (https://github.com/knative/serving/pull/12479), to remove after upgrading knative
 	if cfg.LivenessHTTPGetPath != "" && cfg.Protocol != routerConfig.UPI {
 		container.LivenessProbe = cfg.buildContainerProbe(livenessProbeType, int(cfg.ProbePort))
 	}
