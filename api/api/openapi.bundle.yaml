@@ -1934,11 +1934,13 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
@@ -2045,6 +2047,8 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        protocol:
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersion_log_config'
         enricher:
@@ -2074,6 +2078,7 @@ components:
     Route:
       example:
         endpoint: endpoint
+        service_method: service_method
         annotations: '{}'
         id: id
         type: type
@@ -2087,6 +2092,8 @@ components:
           type: string
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
+          type: string
+        service_method:
           type: string
         annotations:
           nullable: true
@@ -2131,6 +2138,11 @@ components:
           pattern: ^\d+$
           type: string
       type: object
+    Protocol:
+      enum:
+      - UPI_V1
+      - HTTP_JSON
+      type: string
     LogLevel:
       enum:
       - DEBUG
@@ -2499,7 +2511,10 @@ components:
           $ref: '#/components/schemas/FieldSource'
         field:
           description: |
-            If `field_source` is `header`, then `field` should contain the name of the request header, otherwise, if `field_source` is `payload`, then `field` should be a valid json path
+            For HTTP_JSON protocol, the valid `field_source` are `header` and `payload`. Whereas, for UPI_V1 protocol the valid `field_source` are `header` and `prediction_context`.
+            If `field_source` is `header`, then `field` should contain the name of the request header.
+            If `field_source` is `payload`, then `field` should be a valid json path.
+            If `field_source` is `prediction_context`, then `field` should contain variable name stored in `prediction_context` field of the incoming request.
           type: string
         operator:
           enum:
@@ -2562,11 +2577,13 @@ components:
             timeout: timeout
           routes:
           - endpoint: endpoint
+            service_method: service_method
             annotations: '{}'
             id: id
             type: type
             timeout: timeout
           - endpoint: endpoint
+            service_method: service_method
             annotations: '{}'
             id: id
             type: type
@@ -2718,11 +2735,13 @@ components:
           timeout: timeout
         routes:
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
           timeout: timeout
         - endpoint: endpoint
+          service_method: service_method
           annotations: '{}'
           id: id
           type: type
@@ -2852,6 +2871,8 @@ components:
         timeout:
           pattern: ^[0-9]+(ms|s|m|h)$
           type: string
+        protocol:
+          $ref: '#/components/schemas/Protocol'
         log_config:
           $ref: '#/components/schemas/RouterVersionConfig_log_config'
         enricher:
@@ -3263,6 +3284,7 @@ components:
       enum:
       - header
       - payload
+      - prediction_context
       type: string
     EnsemblersPaginatedResults_allOf:
       properties:

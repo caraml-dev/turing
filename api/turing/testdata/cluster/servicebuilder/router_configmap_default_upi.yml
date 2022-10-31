@@ -1,0 +1,27 @@
+id: test-svc
+routes:
+- endpoint: localhost:9000
+  id: control
+  protocol: GRPC
+  service_method: package/method
+  timeout: 2s
+  type: PROXY
+strategy:
+  properties:
+    default_route_id: control
+    experiment_engine: exp-engine-1
+    experiment_engine_properties:
+      client_id: client_id
+      endpoint: exp-engine:8080
+      experiments:
+      - experiment_name: exp_exp_test_experiment_1
+        segmentation_field: customer_id
+        segmentation_field_source: payload
+        segmentation_unit: customer
+      timeout: 500ms
+      user_data:
+        app_version:
+          field: appVer
+          field_source: header
+  type: fiber.DefaultTuringRoutingStrategy
+type: EAGER_ROUTER

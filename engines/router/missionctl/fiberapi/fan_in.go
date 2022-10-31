@@ -14,7 +14,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/fiber"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberHttp "github.com/gojek/fiber/http"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/opentracing/opentracing-go"
 )
@@ -170,7 +170,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 			"Content-Type": []string{"application/json"},
 		},
 	}
-	return fiberhttp.NewHTTPResponse(&resp)
+	return fiberHttp.NewHTTPResponse(&resp)
 }
 
 // RouteResponse captures the result of each experiment

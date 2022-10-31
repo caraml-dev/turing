@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -11,15 +12,20 @@ import (
 	"testing"
 	"text/template"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"gopkg.in/yaml.v2"
 
 	"github.com/caraml-dev/turing/api/e2e/test/api"
 	"github.com/caraml-dev/turing/api/e2e/test/cluster"
 	"github.com/caraml-dev/turing/api/e2e/test/config"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 var configFile string
@@ -109,7 +115,7 @@ func TestEndToEnd(t *testing.T) {
 	RunSpecs(t, "Router Suite")
 }
 
-func DeployedRouterContext(payloadTpl string, args ...interface{}) bool {
+func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, args ...interface{}) bool {
 	if len(args) == 0 {
 		return false
 	}
@@ -184,10 +190,23 @@ func DeployedRouterContext(payloadTpl string, args ...interface{}) bool {
 
 			endpoint.Path = "/"
 
-			routerCtx = RouterContext{
-				ID:        routerID,
-				ProjectID: cfg.Project.ID,
-				Endpoint:  endpoint.String(),
+			if protocol == routerConfig.UPI {
+				routerCtx = RouterContext{
+					ID:        routerID,
+					ProjectID: cfg.Project.ID,
+					Endpoint:  router.Value("endpoint").String().Raw(),
+				}
+			} else {
+				endpoint, err := url.Parse(router.Value("endpoint").String().Raw())
+				Expect(err).ShouldNot(HaveOccurred())
+
+				endpoint.Path = "/"
+
+				routerCtx = RouterContext{
+					ID:        routerID,
+					ProjectID: cfg.Project.ID,
+					Endpoint:  endpoint.String(),
+				}
 			}
 
 		})
@@ -205,15 +224,29 @@ func DeployedRouterContext(payloadTpl string, args ...interface{}) bool {
 			When("virtual service configuration is applied", func() {
 				It("responds with a status, that is not 404 NotFound", func() {
 					Eventually(func(g Gomega) {
-						resp := config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint).
-							GET("/v1/predict").
-							Expect().Raw()
+						if protocol == routerConfig.UPI {
+							conn, _ := grpc.Dial(routerCtx.Endpoint,
+								grpc.WithTransportCredentials(insecure.NewCredentials()))
+							defer conn.Close()
 
-						if resp.Body != nil {
-							defer resp.Body.Close()
+							client := upiv1.NewUniversalPredictionServiceClient(conn)
+							upiRequest := &upiv1.PredictValuesRequest{}
+							headers := metadata.New(map[string]string{"region": "region-a"})
+							_, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
+								upiRequest)
+
+							g.Expect(err).To(BeNil())
+						} else {
+							resp := config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint).
+								GET("/v1/predict").
+								Expect().Raw()
+
+							if resp.Body != nil {
+								defer resp.Body.Close()
+							}
+
+							g.Expect(resp.StatusCode).NotTo(Equal(http.StatusNotFound))
 						}
-
-						g.Expect(resp.StatusCode).NotTo(Equal(http.StatusNotFound))
 					}, istioVirtualServiceIntervals...).Should(Succeed())
 				})
 			})

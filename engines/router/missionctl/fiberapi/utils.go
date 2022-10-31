@@ -1,25 +1,22 @@
 package fiberapi
 
 import (
-	"time"
-
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/fiber"
 	"github.com/gojek/fiber/config"
-	fibererror "github.com/gojek/fiber/errors"
-	fiberhttp "github.com/gojek/fiber/http"
+	fiberErrors "github.com/gojek/fiber/errors"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/gojek/fiber/types"
 )
 
-// CreateFiberRequestHandler creates a new Fiber component from the given config file,
-// associates it with a Fiber HTTP handler and returns it.
-func CreateFiberRequestHandler(
+// CreateFiberRouterFromConfig creates a Fiber router from config
+func CreateFiberRouterFromConfig(
 	cfgFilePath string,
-	timeout time.Duration,
 	fiberDebugLog bool,
-) (*fiberhttp.Handler, error) {
+) (fiber.Component, error) {
+
 	component, err := createRouterFromConfigFile(cfgFilePath)
 	if err != nil {
 		return nil, err
@@ -43,8 +40,7 @@ func CreateFiberRequestHandler(
 	// Add the interceptors to the Fiber component
 	component.AddInterceptor(true, interceptors...)
 
-	handler := fiberhttp.NewHandler(component, fiberhttp.Options{Timeout: timeout})
-	return handler, nil
+	return component, err
 }
 
 // createRouterFromConfigFile takes the path to a fiber config file,
@@ -55,13 +51,13 @@ func createRouterFromConfigFile(cfgFilePath string) (fiber.Component, error) {
 		return nil, err
 	}
 
-	return config.FromConfig(cfgFilePath)
+	return config.InitComponentFromConfig(cfgFilePath)
 }
 
 // createFiberError wraps the input error in a format that is usable by Fiber
-func createFiberError(err error) fibererror.HTTPError {
-	return fibererror.HTTPError{
-		Code:    errors.GetHTTPErrorCode(err),
+func createFiberError(err error, p fiberProtocol.Protocol) fiberErrors.FiberError {
+	return fiberErrors.FiberError{
+		Code:    errors.GetErrorCode(err, p),
 		Message: err.Error(),
 	}
 }

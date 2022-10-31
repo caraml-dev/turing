@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,9 +16,9 @@ import (
 // when the error is empty, the response is copied an error field in the log is empty.
 // Additionally, verify that the response body is still open for reading after the operation.
 func TestCopyResponseToLogChannel(t *testing.T) {
-	tests := map[string]*errors.HTTPError{
+	tests := map[string]*errors.TuringError{
 		"success": nil,
-		"error":   errors.NewHTTPError(fmt.Errorf("Test error")),
+		"error":   errors.NewTuringError(fmt.Errorf("test error"), fiberProtocol.HTTP),
 	}
 
 	for name, httpErr := range tests {

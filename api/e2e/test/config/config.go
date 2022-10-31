@@ -23,8 +23,10 @@ type Config struct {
 	Project ProjectConfig `validate:"required,dive"`
 	Cluster ClusterConfig `validate:"required,dive"`
 
-	Mockserver MockserverConfig `validate:"required,dive"`
-	Echoserver EchoserverConfig `validate:"required,dive"`
+	Mockserver             MockserverConfig `yaml:"mockserver" validate:"required,dive"`
+	MockControlUPIServer   MockserverConfig `yaml:"mockControlUPIServer" validate:"required,dive"`
+	MockTreatmentUPIServer MockserverConfig `yaml:"mockTreatmentUPIServer" validate:"required,dive"`
+	Echoserver             EchoserverConfig `validate:"required,dive"`
 
 	Vault VaultConfig `yaml:"vault" validate:"required,dive"`
 

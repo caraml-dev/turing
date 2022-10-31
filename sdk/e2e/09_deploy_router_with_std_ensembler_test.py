@@ -21,12 +21,12 @@ def test_deploy_router_with_std_ensembler():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         ),
         Route(
             id="treatment-a",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/treatment-a',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/treatment-a',
             timeout="5s",
         ),
     ]
@@ -55,7 +55,7 @@ def test_deploy_router_with_std_ensembler():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="200m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router

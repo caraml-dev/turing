@@ -26,6 +26,6 @@ proprietary-exp-plugin:
 	ln -sf ${PWD}/bin/example-plugin ../../../../../api/bin/example-plugin
 
 .PHONY: build-local-proprietary-exp-plugin-image
-build-local-proprietary-exp-plugin-image: vendor
+build-local-proprietary-exp-plugin-image: tidy vendor 
 	docker build --no-cache -t localhost:5000/proprietary-experiment-engine-plugin .
 	docker push localhost:5000/proprietary-experiment-engine-plugin

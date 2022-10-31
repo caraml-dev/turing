@@ -3,16 +3,17 @@ package fiberapi
 import (
 	"context"
 	"encoding/json"
-	"net/http"
-	"sync"
+	"fmt"
 
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/non-standard/validators"
 	"github.com/gojek/fiber"
+	grpcFiber "github.com/gojek/fiber/grpc"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 var (
@@ -32,39 +33,53 @@ type TrafficSplittingStrategyRule struct {
 }
 
 // TestRequest checks if the request satisfies all conditions of this rule
-func (r *TrafficSplittingStrategyRule) TestRequest(reqHeader http.Header, bodyBytes []byte) (bool, error) {
-	safeCh := internal.NewSafeChan(1)
-	defer safeCh.Close()
-
-	var wg sync.WaitGroup
-	wg.Add(len(r.Conditions))
-
-	// test each condition asynchronously
-	for _, condition := range r.Conditions {
-		go func(condition *router.TrafficRuleCondition) {
-			res, err := condition.TestRequest(reqHeader, bodyBytes)
+func (r *TrafficSplittingStrategyRule) TestRequest(req fiber.Request) (bool, error) {
+	switch req.Protocol() {
+	case fiberProtocol.HTTP:
+		// test all condition and return immediately if one condition is not satisfied
+		for _, condition := range r.Conditions {
+			res, err := condition.TestRequest(req)
 			if err != nil {
 				log.Glob().Infof(
 					"Failed to test if request matches traffic-splitting condition: %s", err)
 			}
 
 			if !res {
-				safeCh.Write(false)
+				// short circuit
+				return false, nil
+			}
+		}
+	case fiberProtocol.GRPC:
+		grpcFiberReq, ok := req.(*grpcFiber.Request)
+		if !ok {
+			err := fmt.Errorf("failed to convert into grpc fiber request")
+			log.Glob().Error(err.Error())
+			return false, err
+		}
+
+		upiReq, ok := grpcFiberReq.ProtoMessage().(*upiv1.PredictValuesRequest)
+		if !ok {
+			err := fmt.Errorf("failed to convert into upi request")
+			log.Glob().Error(err.Error())
+			return false, err
+		}
+
+		// test all condition and return immediately if one condition is not satisfied
+		for _, condition := range r.Conditions {
+			res, err := condition.TestUPIRequest(upiReq, req.Header())
+			if err != nil {
+				log.Glob().Infof(
+					"Failed to test if request matches traffic-splitting condition: %s", err)
 			}
 
-			wg.Done()
-		}(condition)
+			if !res {
+				// short circuit
+				return false, nil
+			}
+		}
 	}
-
-	// wait for all conditions to be tested and write `true` into results channel
-	go func() {
-		wg.Wait()
-
-		safeCh.Write(true)
-	}()
-
 	// return the first value from the channel
-	return (<-safeCh.Read()).(bool), nil
+	return true, nil
 }
 
 // TrafficSplittingStrategy selects the route based on the traffic splitting
@@ -94,44 +109,19 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	req fiber.Request,
 	routes map[string]fiber.Component,
 ) (fiber.Component, []fiber.Component, error) {
-	doneCh := make(chan interface{}, 1)
-	errCh := make(chan error, 1)
-
-	defer close(doneCh)
-	defer close(errCh)
-
-	orderedRoutes := []fiber.Component{}
+	var orderedRoutes []fiber.Component
 	// array, that holds results of testing the request by each rule configured on the strategy
 	// `results[k]` – is `true` if the request satisfies `k`th rule of the strategy, and `false`
 	// otherwise
 	results := make([]bool, len(s.Rules))
 
-	var wg sync.WaitGroup
-	wg.Add(len(s.Rules))
-
 	for idx, rule := range s.Rules {
-		// test each rule asynchronously and write results into results array
-		go func(rule *TrafficSplittingStrategyRule, idx int) {
-			if res, err := rule.TestRequest(req.Header(), req.Payload()); err != nil {
-				errCh <- err
-			} else {
-				results[idx] = res
-			}
-			wg.Done()
-		}(rule, idx)
-	}
+		res, err := rule.TestRequest(req)
+		if err != nil {
+			return nil, nil, createFiberError(err, req.Protocol())
+		}
 
-	go func() {
-		wg.Wait()
-		doneCh <- true
-	}()
-
-	// wait for all rules to be tested or until an error appears in error channel
-	select {
-	case <-doneCh:
-	case err := <-errCh:
-		log.WithContext(ctx).Errorf(err.Error())
-		return nil, nil, createFiberError(err)
+		results[idx] = res
 	}
 
 	// select primary route and fallbacks, based on the results of testing
@@ -144,7 +134,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 			} else {
 				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 				log.WithContext(ctx).Errorf(err.Error())
-				return nil, nil, createFiberError(err)
+				return nil, nil, createFiberError(err, req.Protocol())
 			}
 		}
 	}
@@ -156,7 +146,7 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 		} else {
 			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err)
+			return nil, nil, createFiberError(err, req.Protocol())
 		}
 	}
 

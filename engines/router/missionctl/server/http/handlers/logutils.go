@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/handlers/compression"
-	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers/compression"
 )
 
 type routerResponse struct {
@@ -31,6 +31,7 @@ func logTuringRouterRequestSummary(
 	reqBody []byte,
 	mcRespCh <-chan routerResponse,
 ) {
+	logger.Debugw("Logging request", "reqBody", string(reqBody))
 	// Uncompress request data
 	uncompressedData, err := uncompressHTTPBody(reqHeader, reqBody)
 	if err != nil {
@@ -38,37 +39,40 @@ func logTuringRouterRequestSummary(
 	}
 
 	// Create a new TuringResultLogEntry record with the context and request info
-	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, &reqHeader, uncompressedData)
+	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, reqHeader, string(uncompressedData))
 
 	// Read incoming responses and prepare for logging
 	for resp := range mcRespCh {
+		logger.Debugw("Received data in response channel")
 		// If error exists, add an error record
 		if resp.err != "" {
-			logEntry.AddResponse(resp.key, nil, nil, resp.err)
+			logEntry.AddResponse(resp.key, "", nil, resp.err)
 		} else {
 			// Process the response body
 			uncompressedData, err := uncompressHTTPBody(resp.header, resp.body)
 			if err != nil {
 				logger.Errorf("Error occurred when reading %s response body: %s",
 					resp.key, err.Error())
-				logEntry.AddResponse(resp.key, nil, nil, err.Error())
+				logEntry.AddResponse(resp.key, "", nil, err.Error())
 			} else {
+				logger.Debugw("Logging response", "respBody", string(uncompressedData))
 				// Format the response header
-				responseHeader := resultlog.FormatHTTPHeader(resp.header)
-				logEntry.AddResponse(resp.key, uncompressedData, responseHeader, "")
+				responseHeader := resultlog.FormatHeader(resp.header)
+				logEntry.AddResponse(resp.key, string(uncompressedData), responseHeader, "")
 			}
 		}
 	}
 
+	logger.Debugw("Received all response from mcRespCh")
 	// Log the responses. If an error occurs in logging the result to the
 	// configured result log destination, log the error.
 	if err = resultlog.LogEntry(logEntry); err != nil {
-		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+		logger.Errorf("Result Logging Error: %s", err.Error())
 	}
 }
 
 // logTuringRouterRequestError logs the given turing request id and the error data
-func logTuringRouterRequestError(ctx context.Context, err *errors.HTTPError) {
+func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 	logger := log.WithContext(ctx)
 	defer func() {
 		_ = logger.Sync()
@@ -86,7 +90,7 @@ func copyResponseToLogChannel(
 	ch chan<- routerResponse,
 	key string,
 	r mchttp.Response,
-	httpErr *errors.HTTPError,
+	httpErr *errors.TuringError,
 ) {
 	var data []byte
 

@@ -4,6 +4,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/fluent/fluent-logger-golang/fluent"
 )
 
@@ -62,6 +63,7 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 			},
 		},
 	)()
+	log.Glob().Debugw("Sending log to fluentd", "entry", turLogEntry)
 	err = l.fluentLogger.Post(l.tag, l.bqLogger.getLogData(turLogEntry))
 	return err
 }

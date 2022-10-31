@@ -7,10 +7,10 @@ import (
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 const (
@@ -33,8 +33,9 @@ var autoscalingMetricClassMap = map[string]string{
 type KnativeService struct {
 	*BaseService
 
-	IsClusterLocal bool  `json:"is_cluster_local"`
-	ContainerPort  int32 `json:"containerPort"`
+	IsClusterLocal bool                  `json:"is_cluster_local"`
+	ContainerPort  int32                 `json:"containerPort"`
+	Protocol       routerConfig.Protocol `json:"protocol"`
 
 	// Autoscaling properties
 	MinReplicas       int    `json:"minReplicas"`
@@ -125,10 +126,16 @@ func (cfg *KnativeService) buildSvcSpec(
 	resourceReqs := cfg.buildResourceReqs(cfg.UserContainerLimitRequestFactor)
 
 	// Build container spec
+	var portName string
+	// If protocol is using GRPC, add "h2c" which is required for grpc knative
+	if cfg.Protocol == routerConfig.UPI {
+		portName = "h2c"
+	}
 	container := corev1.Container{
 		Image: cfg.Image,
 		Ports: []corev1.ContainerPort{
 			{
+				Name:          portName,
 				ContainerPort: cfg.ContainerPort,
 			},
 		},
@@ -136,7 +143,9 @@ func (cfg *KnativeService) buildSvcSpec(
 		VolumeMounts: cfg.VolumeMounts,
 		Env:          cfg.Envs,
 	}
-	if cfg.LivenessHTTPGetPath != "" {
+	// TODO: Skip liveness probe for UPI due to a knative bug in <1.2 (https://github.com/knative/serving/pull/12479)
+	// to remove after upgrading knative
+	if cfg.LivenessHTTPGetPath != "" && cfg.Protocol != routerConfig.UPI {
 		container.LivenessProbe = cfg.buildContainerProbe(livenessProbeType, int(cfg.ProbePort))
 	}
 	if cfg.ReadinessHTTPGetPath != "" {

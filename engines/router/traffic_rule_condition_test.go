@@ -2,13 +2,18 @@ package router_test
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
 )
 
 type operatorSerializationTestCase struct {
@@ -215,7 +220,112 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			actual, err := tt.condition.TestRequest(tt.header, []byte(tt.payload))
+			r, _ := fiberHttp.NewHTTPRequest(&http.Request{
+				Header: tt.header,
+				Body:   ioutil.NopCloser(strings.NewReader(tt.payload)),
+			})
+
+			actual, err := tt.condition.TestRequest(r)
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+				require.Equal(t, tt.expected, actual)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+type upiTrafficRuleConditionTestCase struct {
+	condition     *router.TrafficRuleCondition
+	header        metadata.MD
+	payload       *upiv1.PredictValuesRequest
+	expected      bool
+	expectedError string
+}
+
+func TestTrafficRuleCondition_TestUPIRequest(t *testing.T) {
+	suite := map[string]upiTrafficRuleConditionTestCase{
+		"success | header": {
+			condition: &router.TrafficRuleCondition{
+				FieldSource: request.HeaderFieldSource,
+				Field:       "foo",
+				Operator: makeMockOperator(
+					"bar", []string{"bar"}, true, nil),
+				Values: []string{"bar"},
+			},
+			header: metadata.MD{
+				"foo": []string{"bar"},
+			},
+			expected: true,
+		},
+		"success | header not in": {
+			condition: &router.TrafficRuleCondition{
+				FieldSource: request.HeaderFieldSource,
+				Field:       "header",
+				Operator: makeMockOperator(
+					"actual-value", []string{"exp-value-1", "exp-value-2"}, false, nil),
+				Values: []string{"exp-value-1", "exp-value-2"},
+			},
+			header: metadata.MD{
+				"header": []string{"actual-value"},
+			},
+			expected: false,
+		},
+		"success | prediction context": {
+			condition: &router.TrafficRuleCondition{
+				FieldSource: request.PredictionContextSource,
+				Field:       "my-variable",
+				Operator: makeMockOperator(
+					"foo", []string{"foo", "bar"}, true, nil),
+				Values: []string{"foo", "bar"},
+			},
+			payload: &upiv1.PredictValuesRequest{
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "my-variable",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "foo",
+					},
+				},
+			},
+			expected: true,
+		},
+		"failure | header not found": {
+			condition: &router.TrafficRuleCondition{
+				FieldSource: request.HeaderFieldSource,
+				Field:       "Session-ID",
+				Operator:    makeMockOperator(nil, nil, true, nil),
+				Values:      []string{"foo", "bar"},
+			},
+			header: metadata.MD{
+				"Content-Type": []string{"application/json"},
+			},
+			expectedError: "Field Session-ID not found in the request header",
+		},
+		"failure | variable not found": {
+			condition: &router.TrafficRuleCondition{
+				FieldSource: request.PredictionContextSource,
+				Field:       "missing-variable",
+				Operator:    makeMockOperator(nil, nil, true, nil),
+				Values:      []string{"foo", "bar"},
+			},
+			payload: &upiv1.PredictValuesRequest{
+				PredictionContext: []*upiv1.Variable{
+					{
+						Name:        "my-variable",
+						Type:        upiv1.Type_TYPE_STRING,
+						StringValue: "foo",
+					},
+				},
+			},
+			expectedError: "Variable missing-variable not found in the prediction context",
+		},
+	}
+
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			actual, err := tt.condition.TestUPIRequest(tt.payload, tt.header)
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 				require.Equal(t, tt.expected, actual)

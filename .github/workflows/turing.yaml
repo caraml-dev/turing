@@ -405,7 +405,9 @@ jobs:
         env:
           GOPATH: ${{ github.workspace }}/api/.go
           TEST_ID: ${{ github.run_id }}
-          MOCKSERVER_ENDPOINT: http://mockserver
+          MOCKSERVER_HTTP_ENDPOINT: http://mockserver
+          MOCKSERVER_UPI_CONTROL_ENDPOINT: mockserver-upi-control:80
+          MOCKSERVER_UPI_A_ENDPOINT: mockserver-upi-a:80
           API_BASE_PATH: http://turing-gateway.127.0.0.1.nip.io/api/turing/
           MODEL_CLUSTER_NAME: "dev"
           PROJECT_ID: "1"
@@ -415,7 +417,7 @@ jobs:
           KSERVICE_DOMAIN: 127.0.0.1.nip.io
         run: make e2e-sdk
 
-      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure') && always()
+      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
           echo "::group::describe deployment/turing-mlp"
@@ -445,6 +447,31 @@ jobs:
           echo "::group::logs deployment/turing"
           kubectl logs deployment/turing
           echo "::endgroup::"
+
+          echo "::group::kubernetes events"
+          kubectl get events
+          echo "::endgroup::"
+
+          echo "::group::kubernetes deployment"
+          kubectl get deploy
+          echo "::endgroup::"
+          
+          echo "::group::knative serving deployment"
+          kubectl get ksvc
+          echo "::endgroup::"
+
+          echo "::group::kubernetes pod describe"
+          kubectl describe pod
+          echo "::endgroup::"
+
+          echo "::group::kubernetes config map"
+          kubectl get cm -o yaml
+          echo "::endgroup::"
+
+          echo "::group::kubernetes pod logs"
+          kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
+          echo "::endgroup::"
+
 
   release-rules:
     runs-on: ubuntu-latest

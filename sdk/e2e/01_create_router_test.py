@@ -14,7 +14,7 @@ from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
-from turing.router.config.router_config import RouterConfig
+from turing.router.config.router_config import RouterConfig, Protocol
 from turing.router.config.router_version import RouterStatus
 
 
@@ -26,7 +26,7 @@ def test_create_router():
     routes = [
         Route(
             id="control",
-            endpoint=f'{os.getenv("MOCKSERVER_ENDPOINT")}/control',
+            endpoint=f'{os.getenv("MOCKSERVER_HTTP_ENDPOINT")}/control',
             timeout="5s",
         )
     ]
@@ -55,7 +55,7 @@ def test_create_router():
 
     # set up resource request config for the router
     resource_request = ResourceRequest(
-        min_replica=1, max_replica=1, cpu_request="200m", memory_request="250Mi"
+        min_replica=1, max_replica=1, cpu_request="100m", memory_request="250Mi"
     )
 
     # set up log config for the router
@@ -65,7 +65,7 @@ def test_create_router():
     enricher = Enricher(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=1, max_replica=1, cpu_request="200m", memory_request="1Gi"
+            min_replica=1, max_replica=1, cpu_request="100m", memory_request="1Gi"
         ),
         endpoint="anything",
         timeout="2s",
@@ -77,7 +77,7 @@ def test_create_router():
     ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2, max_replica=2, cpu_request="250m", memory_request="256Mi"
+            min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
         ),
         endpoint="anything",
         timeout="3s",
@@ -116,6 +116,7 @@ def test_create_router():
     retrieved_router = turing.Router.get(1)
     assert retrieved_router.version == 1
     assert retrieved_router.status == RouterStatus.DEPLOYED
+    assert retrieved_router.config.protocol == Protocol.HTTP
     assert (
         retrieved_router.endpoint
         == f'http://{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}/v1/predict'

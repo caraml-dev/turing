@@ -9,9 +9,12 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 )
 
@@ -33,17 +36,23 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 }
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	var httpErr *errors.HTTPError
-	measureDurationFunc := h.getMeasureDurationFunc(httpErr)
-	defer measureDurationFunc()
+	var httpErr *errors.TuringError
+	defer metrics.Glob().MeasureDurationMs(
+		metrics.TuringComponentRequestDurationMs,
+		map[string]func() string{
+			"status": func() string {
+				return metrics.GetStatusString(httpErr == nil)
+			},
+			"component": func() string {
+				return batchHTTPHandlerID
+			},
+		},
+	)()
 
 	// Create context from the request context
 	ctx := turingctx.NewTuringContext(req.Context())
 	// Create context logger
 	ctxLogger := log.WithContext(ctx)
-	defer func() {
-		_ = ctxLogger.Sync()
-	}()
 
 	// Get the unique turing request id from the context
 	turingReqID, err := turingctx.GetRequestID(ctx)
@@ -64,7 +73,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	// Read the request body
 	requestBody, err := io.ReadAll(req.Body)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(err))
+		h.error(ctx, rw, errors.NewTuringError(err, fiberProtocol.HTTP))
 		return
 	}
 
@@ -72,8 +81,8 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	var batchRequests []json.RawMessage
 	err = json.Unmarshal(requestBody, &batchRequests)
 	if err != nil {
-		h.error(ctx, rw, errors.NewHTTPError(errors.Newf(errors.BadInput,
-			`Invalid json request`)))
+		h.error(ctx, rw, errors.NewTuringError(errors.Newf(errors.BadInput,
+			`Invalid json request`), fiberProtocol.HTTP))
 		return
 	}
 
@@ -103,7 +112,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 
 	// Write the json response to the writer
 	rw.Header().Set("Content-Type", "application/json")
-	rw.Header().Set(turingReqIDHeaderKey, turingReqID)
+	rw.Header().Set(constant.TuringReqIDHeaderKey, turingReqID)
 	rw.WriteHeader(http.StatusOK)
 	batchResponseByte, _ := json.Marshal(batchResponses)
 	contentLength, err := rw.Write(batchResponseByte)

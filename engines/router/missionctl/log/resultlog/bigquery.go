@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/bigquery"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"go.einride.tech/protobuf-bigquery/encoding/protobq"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -151,7 +152,10 @@ func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 // as is for logging by other loggers whose destination is a BQ table.
 func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface{} {
 	entry := &bqLogEntry{turLogEntry}
-	record, _, _ := entry.Save()
+	record, _, err := entry.Save()
+	if err != nil {
+		log.Glob().Warnf("failed to create log entry %s", err)
+	}
 	return record
 }
 
