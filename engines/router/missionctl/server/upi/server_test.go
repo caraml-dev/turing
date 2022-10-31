@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -54,12 +55,12 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			name:    "error",
 			request: &upiv1.PredictValuesRequest{},
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Unavailable),
 				Message: "did not get back a valid response from the fiberHandler",
 			},
 			mockReturn: func() (fiber.Response, *errors.TuringError) {
 				return nil, &errors.TuringError{
-					Code:    14,
+					Code:    int(codes.Unavailable),
 					Message: "did not get back a valid response from the fiberHandler",
 				}
 			},
@@ -68,7 +69,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			name:    "error wrong response payload type",
 			request: &upiv1.PredictValuesRequest{},
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Internal),
 				Message: "unable to unmarshal into expected response proto",
 			},
 			mockReturn: func() (fiber.Response, *errors.TuringError) {
@@ -109,9 +110,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 }
 
 func TestNewUpiServer(t *testing.T) {
-	core, logs := observer.New(zap.ErrorLevel)
-	logger := zap.New(core)
-	log.SetGlobalLogger(logger.Sugar())
+	_, logs := observer.New(zap.ErrorLevel)
 
 	port := 50560
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))

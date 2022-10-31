@@ -95,7 +95,7 @@ func GetErrorCode(err error, p fiberProtocol.Protocol) int {
 		case BadInput:
 			code = int(codes.InvalidArgument)
 		case BadResponse:
-			code = int(codes.Unavailable)
+			code = int(codes.Internal)
 		case NotFound:
 			code = int(codes.NotFound)
 		default:

@@ -22,6 +22,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -40,8 +41,8 @@ var mockResponse = &upiv1.PredictValuesResponse{
 		Rows:    nil,
 	},
 	Metadata: &upiv1.ResponseMetadata{
-		PredictionId: "123",
-		ExperimentId: "2",
+		PredictionId:   "123",
+		ExperimentName: "2",
 	},
 }
 
@@ -134,7 +135,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 		{
 			name: "error wrong response payload type",
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Internal),
 				Message: "did not get back a valid response from the fiberHandler",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(),
@@ -142,20 +143,20 @@ func Test_missionControlUpi_Route(t *testing.T) {
 		{
 			name: "error - fiber router error response",
 			expectedErr: &errors.TuringError{
-				Code:    13,
+				Code:    int(codes.Internal),
 				Message: "{\n  \"code\": 13,\n  \"error\": \"fiber: request cannot be completed: err\"\n}",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(
 				fiber.NewErrorResponse(
 					fiberErrors.FiberError{
-						Code:    13,
+						Code:    int(codes.Internal),
 						Message: "fiber: request cannot be completed: err",
 					})),
 		},
 		{
 			name: "error non proto payload",
 			expectedErr: &errors.TuringError{
-				Code:    14,
+				Code:    int(codes.Internal),
 				Message: "unable to parse fiber response into grpc response",
 			},
 			mockReturn: fiber.NewResponseQueueFromResponses(fiberHttp.NewHTTPResponse(
@@ -180,7 +181,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 			} else {
 				responseProto := &upiv1.PredictValuesResponse{}
 				require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
-				require.True(t, testutils.CompareUpiResponse(responseProto, tt.expected), "response not equal to expected")
+				require.True(t, proto.Equal(responseProto, tt.expected), "response not equal to expected")
 			}
 		})
 	}
@@ -243,8 +244,7 @@ func Test_missionControlUpi_Route_Integration(t *testing.T) {
 			require.Nil(t, err)
 			responseProto := &upiv1.PredictValuesResponse{}
 			require.NoError(t, proto.Unmarshal(got.Payload(), responseProto))
-			diff := testutils.CompareUpiResponse(responseProto, tt.compareAgainst)
-			require.Equal(t, tt.expectedEqual, diff, "Comparison result not expected")
+			require.Equal(t, tt.expectedEqual, proto.Equal(responseProto, tt.compareAgainst), "Comparison result not expected")
 		})
 	}
 }
