@@ -45,21 +45,21 @@ repos:
         files: '^api/'
         types: [go]
         language: system
-        entry: GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing api
+        entry: bash -c "GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing api"
       - id: goimports
         name: 'Fix goimport for Router Engine'
         alias: goimport-router
         files: '^engines/router/'
         types: [go]
         language: system
-        entry: GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing engines/router
+        entry: bash -c "GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing engines/router"
       - id: goimports
         name: 'Fix goimport for Experiment Engine'
         alias: goimport-experiment
         files: '^engines/experiment/'
         types: [go]
         language: system
-        entry: GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing engines/experiment
+        entry: bash -c "GOMAXPROCS=1 goimports -w -local github.com/caraml-dev/turing engines/experiment"
   - repo: local
     hooks:
       - id: prettier
