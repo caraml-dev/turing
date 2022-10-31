@@ -143,7 +143,8 @@ func (cfg *KnativeService) buildSvcSpec(
 		VolumeMounts: cfg.VolumeMounts,
 		Env:          cfg.Envs,
 	}
-	// TODO: Skip liveness probe for UPI due to a knative bug in <1.2 (https://github.com/knative/serving/pull/12479), to remove after upgrading knative
+	// TODO: Skip liveness probe for UPI due to a knative bug in <1.2 (https://github.com/knative/serving/pull/12479)
+	// to remove after upgrading knative
 	if cfg.LivenessHTTPGetPath != "" && cfg.Protocol != routerConfig.UPI {
 		container.LivenessProbe = cfg.buildContainerProbe(livenessProbeType, int(cfg.ProbePort))
 	}
