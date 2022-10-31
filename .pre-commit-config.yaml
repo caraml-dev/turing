@@ -43,6 +43,7 @@ repos:
         name: 'Run goimports'
         alias: goimports
         files: '^[api/|engines/router/|engines/experiment/]'
+        exclude: "pb.go"
         types: [go]
         language: system
         entry: goimports -w -local github.com/caraml-dev/turing
