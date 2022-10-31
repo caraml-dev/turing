@@ -1,8 +1,6 @@
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
-import { ResourcesPanel } from "../components/ResourcesPanel";
 import React, { Fragment, useContext } from "react";
 import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
-import { AutoscalingPolicyPanel } from "../components/autoscaling_policy/AutoscalingPolicyPanel";
 import { EnvVariablesPanel } from "../components/docker_config/EnvVariablesPanel";
 import { EnricherTypePanel } from "../components/enricher_config/EnricherTypePanel";
 import { DockerDeploymentPanel } from "../components/docker_config/DockerDeploymentPanel";
@@ -12,6 +10,7 @@ import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { enricherTypeOptions } from "../components/enricher_config/typeOptions";
 import { SecretsContextProvider } from "../../../../providers/secrets/context";
+import { ResourcesRequirementsPanel } from "../components/ResourcesRequirementsPanel";
 
 export const EnricherStep = ({ projectId }) => {
   const {
@@ -63,22 +62,15 @@ export const EnricherStep = ({ projectId }) => {
             />
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            <ResourcesPanel
-              resourcesConfig={enricher.resource_request}
-              onChangeHandler={onChange("config.enricher.resource_request")}
-              maxAllowedReplica={maxAllowedReplica}
-              errors={get(errors, "config.enricher.resource_request")}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <AutoscalingPolicyPanel
-              autoscalingPolicyConfig={enricher.autoscaling_policy}
-              onChangeHandler={onChange("config.enricher.autoscaling_policy")}
-              errors={get(errors, "config.enricher.autoscaling_policy")}
-            />
-          </EuiFlexItem>
+          <ResourcesRequirementsPanel
+            resources={enricher.resource_request}
+            resourcesOnChangeHandler={onChange("config.enricher.resource_request")}
+            resourcesErrors={get(errors, "config.enricher.resource_request")}
+            autoscalingPolicy={enricher.autoscaling_policy}
+            autoscalingPolicyOnChangeHandler={onChange("config.enricher.autoscaling_policy")}
+            autoscalingPolicyErrors={get(errors, "config.enricher.autoscaling_policy")}
+            maxAllowedReplica={maxAllowedReplica}
+          />
         </Fragment>
       )}
     </EuiFlexGroup>

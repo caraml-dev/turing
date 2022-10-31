@@ -1,14 +1,13 @@
 import React, { Fragment, useEffect } from "react";
 import { EuiFlexItem } from "@elastic/eui";
 import { useConfig } from "../../../../../config";
-import { ResourcesPanel } from "../ResourcesPanel";
 import { SecretsContextProvider } from "../../../../../providers/secrets/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
 import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
 import { EnsemblersContextProvider } from "../../../../../providers/ensemblers/context";
 import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
-import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
+import { ResourcesRequirementsPanel } from "../ResourcesRequirementsPanel";
 
 export const PyFuncConfigFormGroup = ({
   projectId,
@@ -53,22 +52,15 @@ export const PyFuncConfigFormGroup = ({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <ResourcesPanel
-            resourcesConfig={pyfuncConfig.resource_request}
-            onChangeHandler={onChange("resource_request")}
-            errors={errors.resource_request}
-            maxAllowedReplica={maxAllowedReplica}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
+        <ResourcesRequirementsPanel
+          resources={pyfuncConfig.resource_request}
+          resourcesOnChangeHandler={onChange("resource_request")}
+          resourcesErrors={errors.resource_request}
+          autoscalingPolicy={pyfuncConfig.autoscaling_policy}
+          autoscalingPolicyOnChangeHandler={onChange("autoscaling_policy")}
+          autoscalingPolicyErrors={errors.autoscaling_policy}
+          maxAllowedReplica={maxAllowedReplica}
+        />
       </Fragment>
     )
   );

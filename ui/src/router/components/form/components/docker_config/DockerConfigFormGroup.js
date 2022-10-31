@@ -5,10 +5,9 @@ import { DockerDeploymentPanel } from "./DockerDeploymentPanel";
 import { DockerEnsembler } from "../../../../../services/ensembler";
 import { DockerRegistriesContextProvider } from "../../../../../providers/docker/context";
 import { EnvVariablesPanel } from "./EnvVariablesPanel";
-import { ResourcesPanel } from "../ResourcesPanel";
 import { SecretsContextProvider } from "../../../../../providers/secrets/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
-import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
+import { ResourcesRequirementsPanel } from "../ResourcesRequirementsPanel";
 
 export const DockerConfigFormGroup = ({
   projectId,
@@ -51,22 +50,15 @@ export const DockerConfigFormGroup = ({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <ResourcesPanel
-            resourcesConfig={dockerConfig.resource_request}
-            onChangeHandler={onChange("resource_request")}
-            errors={errors.resource_request}
-            maxAllowedReplica={maxAllowedReplica}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
+        <ResourcesRequirementsPanel
+          resources={dockerConfig.resource_request}
+          resourcesOnChangeHandler={onChange("resource_request")}
+          resourcesErrors={errors.resource_request}
+          autoscalingPolicy={dockerConfig.autoscaling_policy}
+          autoscalingPolicyOnChangeHandler={onChange("autoscaling_policy")}
+          autoscalingPolicyErrors={errors.autoscaling_policy}
+          maxAllowedReplica={maxAllowedReplica}
+        />
       </Fragment>
     )
   );

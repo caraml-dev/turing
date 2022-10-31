@@ -8,7 +8,7 @@ import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import { RulesPanel } from "../components/router_config/RulesPanel";
-import { ResourcesAndAutoscalingPolicyPanel } from "../components/ResourcesAndAutoscalingPolicyPanel";
+import { ResourcesRequirementsPanel } from "../components/ResourcesRequirementsPanel";
 
 export const RouterStep = ({ projectId }) => {
   const {
@@ -60,10 +60,14 @@ export const RouterStep = ({ projectId }) => {
           rules_errors={get(errors, "config.rules")}
         />
       </EuiFlexItem>
-      <ResourcesAndAutoscalingPolicyPanel
-        data={data}
-        onChangeHandler={onChange("config")}
-        errors={errors}
+
+      <ResourcesRequirementsPanel
+        resources={get(data, "config.resource_request")}
+        resourcesOnChangeHandler={onChange("config.resource_request")}
+        resourcesErrors={get(errors, "config.resource_request")}
+        autoscalingPolicy={get(data, "config.autoscaling_policy")}
+        autoscalingPolicyOnChangeHandler={onChange("config.autoscaling_policy")}
+        autoscalingPolicyErrors={get(errors, "config.autoscaling_policy")}
         maxAllowedReplica={maxAllowedReplica}
       />
     </EuiFlexGroup>
