@@ -18,7 +18,7 @@ const typeOptions = {
       description: (
         <Fragment>
           Turing will select the response from one of the routes, based on the
-          configured mapping between routes and experiment treatments
+          configured mapping between routes and experiment treatments.
         </Fragment>
       ),
     },
@@ -27,9 +27,9 @@ const typeOptions = {
       inputDisplay: "Docker",
       description: (
         <Fragment>
-          Turing will deploy specified image as a post-processor and will send
-          to it responses from all routes, together with the treatment
-          configuration, for the ensembling
+          Turing will deploy the specified image as a post-processor and send
+          the responses from all routes, together with the treatment
+          configuration, for the ensembling the final response.
         </Fragment>
       ),
     },
@@ -38,9 +38,9 @@ const typeOptions = {
       inputDisplay: "Pyfunc",
       description: (
         <Fragment>
-          Turing will build and deploy the selected pyfunc ensembler and will
-          send to it responses from all routes, together with the treatment
-          configuration, for ensembling
+          Turing will build and deploy the selected pyfunc ensembler and send
+          the responses from all routes, together with the treatment
+          configuration, for ensembling the final response.
         </Fragment>
       ),
     },
@@ -49,8 +49,8 @@ const typeOptions = {
       inputDisplay: "External (Coming Soon)",
       description: (
         <Fragment>
-          Turing will send responses from all routes, together with treatment
-          configuration, to the external URL for ensembling
+          Turing will send the responses from all routes, along with treatment
+          configuration to the external URL, for ensembling the final response.
         </Fragment>
       ),
       disabled: true,
@@ -62,9 +62,9 @@ const typeOptions = {
       inputDisplay: "None",
       description: (
         <Fragment>
-          Turing will simply return response from the route marked as the{" "}
+          Turing will simply return the response from the route marked as the{" "}
           <strong>Final Response</strong>. Other ensembler types are not yet
-          support for the UPI protocol.
+          supported for the UPI protocol.
         </Fragment>
       ),
     },

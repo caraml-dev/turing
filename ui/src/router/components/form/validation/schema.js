@@ -110,10 +110,10 @@ const routeSchema = yup.object().shape({
     is: "UPI_V1",
     then: (schema) =>
       schema
-        .required("Valid grpc endpoint is required eg. {host}:{port}")
+        .required("Valid gRPC endpoint is required eg. {host}:{port}")
         .matches(
           upiUrlRegex,
-          "Valid grpc endpoint is required eg. {host}:{port}"
+          "Valid gRPC endpoint is required eg. {host}:{port}"
         ),
     otherwise: (schema) =>
       schema.required("Valid url is required").url("Valid url is required"),
