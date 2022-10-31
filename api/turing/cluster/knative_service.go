@@ -6,7 +6,6 @@ import (
 	"math"
 	"strconv"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"

@@ -12,8 +12,6 @@ import (
 	"testing"
 	"text/template"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/mitchellh/mapstructure"
