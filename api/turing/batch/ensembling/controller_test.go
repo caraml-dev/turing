@@ -7,6 +7,12 @@ import (
 	"github.com/caraml-dev/turing/api/turing/batch"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	apicorev1 "k8s.io/api/core/v1"
+	apirbacv1 "k8s.io/api/rbac/v1"
+	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	clustermock "github.com/caraml-dev/turing/api/turing/cluster/mocks"
 	"github.com/caraml-dev/turing/api/turing/config"
@@ -15,11 +21,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	servicemock "github.com/caraml-dev/turing/api/turing/service/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	apicorev1 "k8s.io/api/core/v1"
-	apirbacv1 "k8s.io/api/rbac/v1"
-	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (

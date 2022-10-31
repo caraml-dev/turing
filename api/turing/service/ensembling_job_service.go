@@ -7,6 +7,9 @@ import (
 	"text/template"
 	"time"
 
+	mlp "github.com/gojek/mlp/api/client"
+	"gorm.io/gorm"
+
 	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
@@ -14,8 +17,6 @@ import (
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	mlp "github.com/gojek/mlp/api/client"
-	"gorm.io/gorm"
 )
 
 const (

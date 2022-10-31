@@ -7,16 +7,17 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/batch"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 var (

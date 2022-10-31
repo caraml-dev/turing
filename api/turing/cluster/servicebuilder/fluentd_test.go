@@ -8,12 +8,14 @@ import (
 
 	mlp "github.com/gojek/mlp/api/client"
 
-	"github.com/caraml-dev/turing/api/turing/config"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/caraml-dev/turing/api/turing/config"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestNewFluentdService(t *testing.T) {

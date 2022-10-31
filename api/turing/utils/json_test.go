@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/api/turing/utils"
 )
 
 func TestMergeJSON(t *testing.T) {

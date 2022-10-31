@@ -7,14 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
-	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/google/go-cmp/cmp"
 	mock "github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/cluster/mocks"
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 func TestConvertPodLogsToV2(t *testing.T) {

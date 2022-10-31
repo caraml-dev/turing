@@ -9,18 +9,20 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
+
 	"github.com/caraml-dev/turing/api/turing/api"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/server"
-	"github.com/gorilla/mux"
 
-	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/mock"
 	"gotest.tools/assert"
+
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
 func generateEnsemblingJobFixtureJSON() string {

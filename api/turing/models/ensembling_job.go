@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
 )
 
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously

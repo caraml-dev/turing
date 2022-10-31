@@ -8,16 +8,17 @@ import (
 	"sync"
 	"time"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/models"
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // DeploymentService handles the deployment of the Turing routers and the related components.

@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/log"
 	pg "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/log"
 )
 
 func create(testDBCfg *config.DatabaseConfig) (*sql.DB, *sql.DB, error) {

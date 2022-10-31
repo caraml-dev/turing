@@ -5,13 +5,14 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
 func TestBuildKnativeServiceConfig(t *testing.T) {

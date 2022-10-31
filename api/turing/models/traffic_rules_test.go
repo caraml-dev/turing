@@ -3,10 +3,11 @@ package models_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
-	"github.com/stretchr/testify/require"
 )
 
 type trafficRulesTestCase struct {

@@ -7,15 +7,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
-	"github.com/caraml-dev/turing/engines/experiment/manager"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
 func TestDeployVersionSuccess(t *testing.T) {

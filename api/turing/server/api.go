@@ -3,15 +3,16 @@ package server
 import (
 	"net/http"
 
-	"github.com/caraml-dev/turing/api/turing/api"
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/middleware"
-	"github.com/caraml-dev/turing/api/turing/validation"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
+
+	"github.com/caraml-dev/turing/api/turing/api"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/middleware"
+	"github.com/caraml-dev/turing/api/turing/validation"
 )
 
 func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config) error {

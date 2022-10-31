@@ -6,8 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/require"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // ReadFile reads a file and returns the byte contents

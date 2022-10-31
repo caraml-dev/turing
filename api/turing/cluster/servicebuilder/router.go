@@ -8,16 +8,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ghodss/yaml"
+	fiberconfig "github.com/gojek/fiber/config"
+	mlp "github.com/gojek/mlp/api/client"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/caraml-dev/turing/engines/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	"github.com/ghodss/yaml"
-	fiberconfig "github.com/gojek/fiber/config"
-	mlp "github.com/gojek/mlp/api/client"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // Define env var names for the router

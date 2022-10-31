@@ -3,8 +3,9 @@ package service
 import (
 	"fmt"
 
-	"github.com/caraml-dev/turing/api/turing/models"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // EnsemblersService is the data access object for the Ensemblers from the db.

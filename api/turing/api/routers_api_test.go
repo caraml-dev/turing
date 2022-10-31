@@ -4,14 +4,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/api/request"
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/caraml-dev/turing/api/turing/api/request"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
 func TestListRouters(t *testing.T) {

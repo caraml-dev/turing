@@ -9,6 +9,9 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
@@ -16,8 +19,6 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	expRequest "github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/router"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestValidateEnsemblerStandardConfig(t *testing.T) {

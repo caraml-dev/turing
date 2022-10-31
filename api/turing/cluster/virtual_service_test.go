@@ -3,11 +3,12 @@ package cluster
 import (
 	"testing"
 
-	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"gotest.tools/assert"
 	networking "istio.io/api/networking/v1beta1"
 	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
 func TestBuildVirtualService(t *testing.T) {

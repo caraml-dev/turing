@@ -3,10 +3,11 @@ package middleware
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/middleware/mocks"
 	"github.com/gojek/mlp/api/pkg/authz/enforcer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/caraml-dev/turing/api/turing/middleware/mocks"
 )
 
 func TestBootstrapTuringPolicies(t *testing.T) {

@@ -1,9 +1,10 @@
 package vault
 
 import (
-	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
+
+	"github.com/caraml-dev/turing/api/turing/config"
 )
 
 // NewClientFromConfig creates a vault client from the given config

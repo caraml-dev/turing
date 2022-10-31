@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	schema "github.com/caraml-dev/turing/api/turing/internal/alertschema"
 	"github.com/go-playground/validator/v10"
+
+	schema "github.com/caraml-dev/turing/api/turing/internal/alertschema"
 )
 
 // Alert contains policy that determines the "type of notification" and

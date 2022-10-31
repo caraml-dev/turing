@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/caraml-dev/turing/api/turing/models"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type EventService interface {

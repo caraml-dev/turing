@@ -5,10 +5,11 @@ package service
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/database"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 func TestEventServiceIntegration(t *testing.T) {

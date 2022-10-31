@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
-	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/models"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2/google"
+
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 const (

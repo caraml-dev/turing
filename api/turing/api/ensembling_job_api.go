@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	mlp "github.com/gojek/mlp/api/client"
+
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
-	mlp "github.com/gojek/mlp/api/client"
 )
 
 // EnsemblingJobController is the HTTP controller that handles the orchestration of ensembling jobs.

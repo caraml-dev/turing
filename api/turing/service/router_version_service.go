@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"text/template"
 
+	"gorm.io/gorm"
+
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	"gorm.io/gorm"
 )
 
 const (

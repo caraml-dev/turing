@@ -3,8 +3,9 @@
 package mocks
 
 import (
-	imagebuilder "github.com/caraml-dev/turing/api/turing/imagebuilder"
 	mock "github.com/stretchr/testify/mock"
+
+	imagebuilder "github.com/caraml-dev/turing/api/turing/imagebuilder"
 
 	models "github.com/caraml-dev/turing/api/turing/models"
 )

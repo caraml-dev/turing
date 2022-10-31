@@ -5,13 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
-	"github.com/caraml-dev/turing/api/turing/models"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type testSuiteNewService struct {

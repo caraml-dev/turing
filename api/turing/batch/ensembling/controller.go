@@ -7,14 +7,15 @@ import (
 	"fmt"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
+	apicorev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/yaml"
+
 	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
-	apicorev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/yaml"
 )
 
 // SparkApplicationState is the state of the spark application

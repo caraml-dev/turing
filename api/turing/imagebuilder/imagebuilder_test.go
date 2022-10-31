@@ -5,16 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	clustermock "github.com/caraml-dev/turing/api/turing/cluster/mocks"
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	apibatchv1 "k8s.io/api/batch/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	clustermock "github.com/caraml-dev/turing/api/turing/cluster/mocks"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 var (

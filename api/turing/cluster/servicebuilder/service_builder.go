@@ -8,12 +8,13 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	mlp "github.com/gojek/mlp/api/client"
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
-	mlp "github.com/gojek/mlp/api/client"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const (

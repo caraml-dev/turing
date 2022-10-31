@@ -3,11 +3,12 @@ package database
 import (
 	"fmt"
 
-	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/golang-migrate/migrate/v4"
 	pg "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/caraml-dev/turing/api/turing/config"
 
 	// required for gomigrate
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"

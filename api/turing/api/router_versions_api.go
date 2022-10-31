@@ -3,10 +3,11 @@ package api
 import (
 	"net/http"
 
+	mlp "github.com/gojek/mlp/api/client"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	mlp "github.com/gojek/mlp/api/client"
 )
 
 type RouterVersionsController struct {
