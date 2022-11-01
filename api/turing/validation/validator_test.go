@@ -585,6 +585,7 @@ func TestValidateTrafficRules(t *testing.T) {
 					Routes: []string{routeAID, routeBID},
 				},
 			},
+			autoscalingPolicy: autoscalingPolicy,
 			expectedError: "Key: 'RouterConfig.TrafficRules[0].Conditions[0].FieldSource' Error:Field validation for " +
 				"'TrafficRules[0].Conditions[0].FieldSource' failed on the 'oneof' tag",
 		},
