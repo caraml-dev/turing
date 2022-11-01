@@ -34,7 +34,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.2
 	github.com/stretchr/testify v1.8.0
-	github.com/tidwall/gjson v1.6.5
 	github.com/xanzy/go-gitlab v0.31.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
@@ -142,7 +141,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
-	github.com/mitchellh/reflectwalk v1.0.1 // indirect
+	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/newrelic/go-agent v3.9.0+incompatible // indirect
