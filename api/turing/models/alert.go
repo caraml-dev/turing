@@ -146,20 +146,18 @@ func getAlertExpr(metric Metric, env string, rev string, threshold float64) stri
   service_name=~"%s-[0-9]*"
 }[1m])) by (le)) %s %f
 `, env, rev, getAlertOperator(metric), threshold)
-
 	case MetricErrorRate:
-		return fmt.Sprintf(`sum(rate(revision_request_count{
-  environment="%s",
-  service_name=~"%s-[0-9]*",
-  response_code_class!="2xx"
-}[1m]))
-/
-sum(rate(revision_request_count{
-  environment="%s",
-  service_name=~"%s-[0-9]*"
-}[1m])) * 100.0 %s %f
-`, env, rev, env, rev, getAlertOperator(metric), threshold)
-
+		return fmt.Sprintf(`(sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc", grpc_response_status!="0"}[1m]))/
+ sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc"}[1m])) * 100 %s %f
+ and on()
+ (sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc"}[1m])) > 0))
+ or on()
+ sum(rate(revision_request_count{environment="%s",service_name=~"%s-[0-9]*",response_code_class!="2xx"}[1m]))/
+ sum(rate(revision_request_count{environment="%s",service_name=~"%s-[0-9]*"}[1m])) * 100 %s %f`,
+			env, rev, env, rev, getAlertOperator(metric), threshold,
+			env, rev,
+			env, rev, env, rev, getAlertOperator(metric), threshold,
+		)
 	case MetricCPUUtil:
 		return fmt.Sprintf(`sum(rate(container_cpu_usage_seconds_total{
   environment="%s",
