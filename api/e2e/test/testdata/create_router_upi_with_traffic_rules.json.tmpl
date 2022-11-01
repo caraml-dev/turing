@@ -84,6 +84,10 @@
             "cpu_request": "100m",
             "memory_request": "250Mi"
         },
+        "autoscaling_policy": {
+            "metric": "concurrency",
+            "target": "1"
+        },
         "timeout": "5s",
         "protocol": "UPI_V1",
         "log_config": {
