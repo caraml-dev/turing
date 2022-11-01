@@ -201,6 +201,7 @@ RouterDefaults:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
     {{ $expEngine.name }}:
       Image: {{ $expEngine.rpcPlugin.image }}
+      ServiceAccount: {{ $expEngine.rpcPlugin.serviceAccount }}
 {{- end -}}
 {{- end -}}
 {{ end }}
