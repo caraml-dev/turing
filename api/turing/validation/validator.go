@@ -371,32 +371,32 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate autoscaling policy for the router
-	validateResourceRequestsAndAutoscalingPolicy(sl, "router", routerConfig.ResourceRequest,
-		routerConfig.AutoscalingPolicy)
+	validateResourceRequestsAndAutoscalingPolicy(sl, "router", router.ResourceRequest,
+		router.AutoscalingPolicy)
 
 	// Validate autoscaling policy for the enricher, if configured
-	if routerConfig.Enricher != nil {
-		validateResourceRequestsAndAutoscalingPolicy(sl, "enricher", routerConfig.Enricher.ResourceRequest,
-			routerConfig.Enricher.AutoscalingPolicy)
+	if router.Enricher != nil {
+		validateResourceRequestsAndAutoscalingPolicy(sl, "enricher", router.Enricher.ResourceRequest,
+			router.Enricher.AutoscalingPolicy)
 	}
 
 	// Validate autoscaling policy for the ensembler, if configured
-	if routerConfig.Ensembler != nil {
-		if routerConfig.Ensembler.DockerConfig != nil {
+	if router.Ensembler != nil {
+		if router.Ensembler.DockerConfig != nil {
 			validateResourceRequestsAndAutoscalingPolicy(
 				sl,
 				"ensembler",
-				routerConfig.Ensembler.DockerConfig.ResourceRequest,
-				routerConfig.Ensembler.DockerConfig.AutoscalingPolicy,
+				router.Ensembler.DockerConfig.ResourceRequest,
+				router.Ensembler.DockerConfig.AutoscalingPolicy,
 			)
 		}
 
-		if routerConfig.Ensembler.PyfuncConfig != nil {
+		if router.Ensembler.PyfuncConfig != nil {
 			validateResourceRequestsAndAutoscalingPolicy(
 				sl,
 				"ensembler",
-				routerConfig.Ensembler.PyfuncConfig.ResourceRequest,
-				routerConfig.Ensembler.PyfuncConfig.AutoscalingPolicy,
+				router.Ensembler.PyfuncConfig.ResourceRequest,
+				router.Ensembler.PyfuncConfig.AutoscalingPolicy,
 			)
 		}
 	}
