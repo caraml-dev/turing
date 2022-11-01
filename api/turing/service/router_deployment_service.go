@@ -82,13 +82,21 @@ func NewDeploymentService(
 	clusterControllers map[string]cluster.Controller,
 	ensemblerServiceImageBuilder imagebuilder.ImageBuilder,
 ) DeploymentService {
+	var defaultMinReplica *int
+	var defaultMaxReplica *int
+
+	if cfg.DeployConfig.DefaultAutoScalingPolicyConfig.Enabled {
+		defaultMinReplica = cfg.DeployConfig.DefaultAutoScalingPolicyConfig.DefaultMinReplica
+		defaultMaxReplica = cfg.DeployConfig.DefaultAutoScalingPolicyConfig.DefaultMaxReplica
+	}
+
 	// Create cluster service builder
 	sb := servicebuilder.NewClusterServiceBuilder(
 		resource.Quantity(cfg.DeployConfig.MaxCPU),
 		resource.Quantity(cfg.DeployConfig.MaxMemory),
 		cfg.DeployConfig.MaxAllowedReplica,
-		cfg.DeployConfig.DefaultAutoScalingPolicyConfig.DefaultMinReplica,
-		cfg.DeployConfig.DefaultAutoScalingPolicyConfig.DefaultMaxReplica,
+		defaultMinReplica,
+		defaultMaxReplica,
 	)
 
 	return &deploymentService{

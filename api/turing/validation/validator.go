@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/golang-collections/collections/set"
 
 	"github.com/go-playground/validator/v10"
@@ -315,59 +316,8 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate traffic rules
-	allRuleRoutesSet := set.New()
 	if router.TrafficRules != nil {
-		if len(router.TrafficRules) > 0 {
-			checkDefaultTrafficRule(sl, "DefaultTrafficRule", router.DefaultTrafficRule)
-			if router.DefaultTrafficRule != nil {
-				allRules := append(router.TrafficRules, &models.TrafficRule{
-					Name:   "default-traffic-rule",
-					Routes: router.DefaultTrafficRule.Routes,
-				})
-				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, router.DefaultRouteID)
-				for _, route := range router.DefaultTrafficRule.Routes {
-					allRuleRoutesSet.Insert(route)
-				}
-			}
-		}
-		for ruleIdx, rule := range router.TrafficRules {
-			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
-			if rule.Routes != nil {
-				for idx, routeID := range rule.Routes {
-					allRuleRoutesSet.Insert(routeID)
-					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
-					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
-						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
-					}
-				}
-			}
-
-			if rule.Conditions != nil {
-				// validate the field source of traffic rules are valid for given protocol
-				allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
-					string(expRequest.PayloadFieldSource)}
-				if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
-					allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
-						string(expRequest.PredictionContextSource)}
-				}
-				allowedFieldSourceStr := strings.Join(allowedFieldSource, " ")
-
-				for condIdx, cond := range rule.Conditions {
-					ns := fmt.Sprintf("TrafficRules[%d].Conditions[%d].FieldSource", ruleIdx, condIdx)
-					err := instance.Var(cond.FieldSource, fmt.Sprintf("oneof=%s", allowedFieldSourceStr))
-					if err != nil {
-						sl.ReportError(router.TrafficRules[ruleIdx].Conditions[condIdx].FieldSource, ns,
-							"FieldSource", "oneof", "")
-					}
-				}
-			}
-		}
-	}
-
-	// Validate dangling routes and traffic rules orthogonality checks
-	if router.TrafficRules != nil && len(router.TrafficRules) > 0 {
-		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
-		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
+		validateTrafficRules(sl, instance, router, routeIdsStr)
 	}
 
 	// Validate autoscaling policy for the router
@@ -399,6 +349,67 @@ func validateRouterConfig(sl validator.StructLevel) {
 				router.Ensembler.PyfuncConfig.AutoscalingPolicy,
 			)
 		}
+	}
+}
+
+func validateTrafficRules(
+	sl validator.StructLevel,
+	instance *validator.Validate,
+	router request.RouterConfig,
+	routeIdsStr string,
+) {
+	allRuleRoutesSet := set.New()
+
+	if len(router.TrafficRules) > 0 {
+		checkDefaultTrafficRule(sl, "DefaultTrafficRule", router.DefaultTrafficRule)
+		if router.DefaultTrafficRule != nil {
+			allRules := append(router.TrafficRules, &models.TrafficRule{
+				Name:   "default-traffic-rule",
+				Routes: router.DefaultTrafficRule.Routes,
+			})
+			validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, router.DefaultRouteID)
+			for _, route := range router.DefaultTrafficRule.Routes {
+				allRuleRoutesSet.Insert(route)
+			}
+		}
+	}
+	for ruleIdx, rule := range router.TrafficRules {
+		checkTrafficRuleName(sl, "TrafficRule", rule.Name)
+		if rule.Routes != nil {
+			for idx, routeID := range rule.Routes {
+				allRuleRoutesSet.Insert(routeID)
+				ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
+				if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+					sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
+				}
+			}
+		}
+
+		if rule.Conditions != nil {
+			// validate the field source of traffic rules are valid for given protocol
+			allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
+				string(expRequest.PayloadFieldSource)}
+			if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
+				allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
+					string(expRequest.PredictionContextSource)}
+			}
+			allowedFieldSourceStr := strings.Join(allowedFieldSource, " ")
+
+			for condIdx, cond := range rule.Conditions {
+				ns := fmt.Sprintf("TrafficRules[%d].Conditions[%d].FieldSource", ruleIdx, condIdx)
+				err := instance.Var(cond.FieldSource, fmt.Sprintf("oneof=%s", allowedFieldSourceStr))
+				if err != nil {
+					sl.ReportError(router.TrafficRules[ruleIdx].Conditions[condIdx].FieldSource, ns,
+						"FieldSource", "oneof", "")
+				}
+			}
+		}
+	}
+
+	// Validate dangling routes and traffic rules orthogonality checks
+	if len(router.TrafficRules) > 0 {
+		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
+		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}
 }
 
