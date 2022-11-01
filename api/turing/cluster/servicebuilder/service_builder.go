@@ -388,7 +388,7 @@ func (sb *clusterSvcBuilder) getAutoscalingMetricOrDefault(autoscalingPolicy mod
 func (sb *clusterSvcBuilder) getAutoscalingTargetOrDefault(autoscalingPolicy models.AutoscalingPolicy) string {
 	// TODO: default autoscaling policy is used; hence calculate target RPS from payload size
 	if autoscalingPolicy.PayloadSize != nil {
-		return string(rune(500))
+		return "500"
 	}
 	return *autoscalingPolicy.Target
 }

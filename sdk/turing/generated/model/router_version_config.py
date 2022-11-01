@@ -102,13 +102,13 @@ class RouterVersionConfig(ModelNormal):
         return {
             'routes': ([Route],),  # noqa: E501
             'experiment_engine': (ExperimentConfig,),  # noqa: E501
+            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
             'log_config': (RouterVersionConfigLogConfig,),  # noqa: E501
             'rules': ([TrafficRule],),  # noqa: E501
             'default_route_id': (str,),  # noqa: E501
             'default_traffic_rule': (DefaultTrafficRule,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
-            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'protocol': (Protocol,),  # noqa: E501
             'enricher': (Enricher,),  # noqa: E501
             'ensembler': (RouterEnsemblerConfig,),  # noqa: E501
@@ -122,13 +122,13 @@ class RouterVersionConfig(ModelNormal):
     attribute_map = {
         'routes': 'routes',  # noqa: E501
         'experiment_engine': 'experiment_engine',  # noqa: E501
+        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
         'log_config': 'log_config',  # noqa: E501
         'rules': 'rules',  # noqa: E501
         'default_route_id': 'default_route_id',  # noqa: E501
         'default_traffic_rule': 'default_traffic_rule',  # noqa: E501
         'resource_request': 'resource_request',  # noqa: E501
-        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'protocol': 'protocol',  # noqa: E501
         'enricher': 'enricher',  # noqa: E501
         'ensembler': 'ensembler',  # noqa: E501
@@ -191,7 +191,6 @@ class RouterVersionConfig(ModelNormal):
             default_route_id (str): [optional]  # noqa: E501
             default_traffic_rule (DefaultTrafficRule): [optional]  # noqa: E501
             resource_request (ResourceRequest): [optional]  # noqa: E501
-            autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
             protocol (Protocol): [optional]  # noqa: E501
             enricher (Enricher): [optional]  # noqa: E501
             ensembler (RouterEnsemblerConfig): [optional]  # noqa: E501

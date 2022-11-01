@@ -101,9 +101,7 @@ class AutoscalingPolicy:
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.AutoscalingPolicy(
-            metric=self.metric.value,
-            target=self.target,
-            payload_size=self.payload_size
+            metric=self.metric.value, target=self.target, payload_size=self.payload_size
         )
 
 

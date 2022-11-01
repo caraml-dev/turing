@@ -15,7 +15,11 @@ from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.router_config import RouterConfig, Protocol
-from turing.router.config.router_ensembler_config import StandardRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import (
+    EnsemblerStandardConfig,
+    RouterEnsemblerConfig,
+    StandardRouterEnsemblerConfig,
+)
 from turing.router.config.router_version import RouterStatus
 from turing.router.config.traffic_rule import (
     DefaultTrafficRule,
