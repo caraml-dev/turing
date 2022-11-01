@@ -345,6 +345,7 @@ func TestDeployEndpoint(t *testing.T) {
 		"router-service-account-key",
 		"enricher-service-account-key",
 		"ensembler-service-account-key",
+		"exp-engine-service-account-key",
 		nil,
 		nil,
 		eventsCh,
