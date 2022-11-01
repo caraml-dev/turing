@@ -6,10 +6,11 @@ import (
 
 	"text/template"
 
-	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 // RoutersService is the data access object for the Routers from the db.

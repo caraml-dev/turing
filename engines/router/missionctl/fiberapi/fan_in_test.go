@@ -12,14 +12,15 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/gojek/fiber"
+	fiberHttp "github.com/gojek/fiber/http"
+	"github.com/stretchr/testify/assert"
+
 	runnerV1 "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	tfu "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/fiber"
-	fiberHttp "github.com/gojek/fiber/http"
-	"github.com/stretchr/testify/assert"
 )
 
 type testSuiteInitFanIn struct {

@@ -9,13 +9,14 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 
-	"github.com/caraml-dev/turing/api/turing/database"
-	"github.com/caraml-dev/turing/api/turing/models"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	mock "github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 func TestRoutersServiceIntegration(t *testing.T) {

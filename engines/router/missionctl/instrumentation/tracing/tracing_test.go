@@ -3,8 +3,9 @@ package tracing
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 func TestGetTracingConfig(t *testing.T) {

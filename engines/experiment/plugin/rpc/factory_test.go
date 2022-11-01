@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
-	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 	goPlugin "github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 )
 
 const (

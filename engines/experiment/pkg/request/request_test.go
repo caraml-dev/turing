@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 )
 
 func TestGetFieldSource(t *testing.T) {

@@ -7,9 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -19,6 +16,10 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 )
 
 var mockResponse = &upiv1.PredictValuesResponse{

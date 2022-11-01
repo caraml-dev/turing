@@ -3,8 +3,9 @@
 package mocks
 
 import (
-	models "github.com/caraml-dev/turing/api/turing/models"
 	mock "github.com/stretchr/testify/mock"
+
+	models "github.com/caraml-dev/turing/api/turing/models"
 
 	service "github.com/caraml-dev/turing/api/turing/service"
 )

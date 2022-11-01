@@ -8,13 +8,14 @@ import (
 	"testing"
 	"time"
 
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	imagebuildermock "github.com/caraml-dev/turing/api/turing/imagebuilder/mocks"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	servicemock "github.com/caraml-dev/turing/api/turing/service/mocks"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestRun(t *testing.T) {

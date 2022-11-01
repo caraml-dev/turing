@@ -4,12 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/gojek/fiber"
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/fiber"
-	"github.com/opentracing/opentracing-go"
 )
 
 type ctxKey string

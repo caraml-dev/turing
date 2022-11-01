@@ -2,6 +2,7 @@ package nop
 
 import (
 	"encoding/json"
+
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 

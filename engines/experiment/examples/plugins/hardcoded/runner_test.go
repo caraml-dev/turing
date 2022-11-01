@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 func TestExperimentRunner_GetTreatmentForRequest(t *testing.T) {

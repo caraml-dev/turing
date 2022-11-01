@@ -9,10 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	logger "github.com/caraml-dev/turing/api/turing/log"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	logger "github.com/caraml-dev/turing/api/turing/log"
 )
 
 const podLogTimeout = 10 * time.Second

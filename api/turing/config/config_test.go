@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/config"
-	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/copystructure"
@@ -15,6 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/caraml-dev/turing/api/turing/config"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
 )
 
 func TestDecodeQuantity(t *testing.T) {

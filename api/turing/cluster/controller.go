@@ -33,9 +33,10 @@ import (
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 
-	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
+
+	"github.com/caraml-dev/turing/api/turing/config"
 
 	// Load required auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

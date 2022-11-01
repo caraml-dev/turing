@@ -5,8 +5,9 @@ package mocks
 import (
 	context "context"
 
-	errors "github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	fiber "github.com/gojek/fiber"
+
+	errors "github.com/caraml-dev/turing/engines/router/missionctl/errors"
 
 	mock "github.com/stretchr/testify/mock"
 )

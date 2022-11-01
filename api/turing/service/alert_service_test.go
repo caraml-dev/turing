@@ -17,11 +17,12 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/caraml-dev/turing/api/turing/models"
 	pg "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gotest.tools/assert"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 var expectedAlertContent = strings.Join([]string{

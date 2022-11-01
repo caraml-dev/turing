@@ -12,11 +12,12 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/config"
 
-	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/xanzy/go-gitlab"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type Metric string

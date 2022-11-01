@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/stretchr/testify/mock"
 )
 
 // mockMetricsCollector satisfies the metrics.Collector interface

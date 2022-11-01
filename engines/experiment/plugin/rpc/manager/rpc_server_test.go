@@ -5,10 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/manager"
-	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 )
 
 func TestRpcServer_Configure(t *testing.T) {

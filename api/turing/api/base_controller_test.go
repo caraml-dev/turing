@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	mlp "github.com/gojek/mlp/api/client"
 	testifyAssert "github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
 func TestBaseControllerGetProjectFromRequestVars(t *testing.T) {

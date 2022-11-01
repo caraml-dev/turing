@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/caraml-dev/turing/api/e2e/test/config"
-	"github.com/caraml-dev/turing/api/e2e/test/matcher"
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo/v2"
@@ -15,6 +12,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/caraml-dev/turing/api/e2e/test/config"
+	"github.com/caraml-dev/turing/api/e2e/test/matcher"
+	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_exp.json.tmpl",

@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"strings"
 
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
 )
 
 // RouterDeploymentController handles the deployment of routers

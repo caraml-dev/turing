@@ -5,6 +5,14 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	merlin "github.com/gojek/merlin/client"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/gojek/mlp/api/pkg/vault"
+	"github.com/stretchr/testify/assert"
+	"github.com/xanzy/go-gitlab"
+	"gorm.io/gorm"
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -14,13 +22,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
-	merlin "github.com/gojek/merlin/client"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gojek/mlp/api/pkg/vault"
-	"github.com/stretchr/testify/assert"
-	"github.com/xanzy/go-gitlab"
-	"gorm.io/gorm"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // MockVaultClient satisfies the vault.VaultClient interface

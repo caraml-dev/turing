@@ -16,13 +16,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	fiberProtocol "github.com/gojek/fiber/protocol"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
-	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 // testBody is a simple struct with a string, for testing json payload in requests

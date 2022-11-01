@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/patrickmn/go-cache"
+
 	"github.com/caraml-dev/turing/api/turing/config"
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/engines/experiment"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
-	"github.com/patrickmn/go-cache"
 )
 
 const (

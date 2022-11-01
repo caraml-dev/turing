@@ -9,11 +9,12 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/config"
 
 	"bou.ke/monkey"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+
 	"github.com/caraml-dev/turing/engines/experiment"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 const serializationError = "unable to serialize struct"

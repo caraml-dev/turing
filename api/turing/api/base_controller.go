@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/caraml-dev/turing/api/turing/models"
 	val "github.com/go-playground/validator/v10"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gorilla/schema"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type Controller interface {

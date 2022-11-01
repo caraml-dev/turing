@@ -4,13 +4,14 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEnsemblersController_ListEnsemblers(t *testing.T) {

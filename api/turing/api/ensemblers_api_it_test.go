@@ -10,16 +10,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gorilla/mux"
+
 	"github.com/caraml-dev/turing/api/turing/api"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/server"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gorilla/mux"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEnsemblersController_CreateEnsembler(t *testing.T) {

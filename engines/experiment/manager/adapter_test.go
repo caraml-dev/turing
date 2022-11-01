@@ -3,9 +3,10 @@ package manager_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/manager/mocks"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestStandardExperimentIsCacheEnabled(t *testing.T) {

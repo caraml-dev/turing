@@ -39,6 +39,16 @@ repos:
         entry: bash -c 'cd engines/experiment make lint'
   - repo: local
     hooks:
+      - id: goimports
+        name: 'Run goimports'
+        alias: goimports
+        files: '^[api/|engines/router/|engines/experiment/]'
+        exclude: "pb.go"
+        types: [go]
+        language: system
+        entry: goimports -w -local github.com/caraml-dev/turing
+  - repo: local
+    hooks:
       - id: prettier
         name: 'Prettier for UI'
         files: '^ui/'

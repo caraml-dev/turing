@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
-	openapi "github.com/caraml-dev/turing/api/turing/generated"
-	"github.com/caraml-dev/turing/api/turing/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
+
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/utils"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be

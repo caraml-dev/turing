@@ -8,6 +8,8 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/config"
 
 	"bou.ke/monkey"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	mocksManager "github.com/caraml-dev/turing/engines/experiment/manager/mocks"
 	plugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc"
@@ -15,7 +17,6 @@ import (
 	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	mocksRunner "github.com/caraml-dev/turing/engines/experiment/runner/mocks"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_NewEngineFactory(t *testing.T) {

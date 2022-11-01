@@ -5,11 +5,12 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/manager"
-	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/runner"
 	"github.com/hashicorp/go-plugin"
 	wrapper "github.com/zaffka/zap-to-hclog"
 	"go.uber.org/zap"
+
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/manager"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/runner"
 )
 
 type ClientServices struct {

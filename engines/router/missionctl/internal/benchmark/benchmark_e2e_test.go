@@ -11,6 +11,12 @@ import (
 	"testing"
 	"time"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
+
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -18,11 +24,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (

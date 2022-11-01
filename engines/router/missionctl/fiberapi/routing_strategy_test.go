@@ -7,16 +7,17 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	runnerV1 "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
-	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	testutils2 "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
-	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberHttp "github.com/gojek/fiber/http"
 	"github.com/stretchr/testify/assert"
+
+	runnerV1 "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
+	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	testutils2 "github.com/caraml-dev/turing/engines/router/missionctl/fiberapi/internal/testutils"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
 
 func TestInitializeDefaultRoutingStrategy(t *testing.T) {

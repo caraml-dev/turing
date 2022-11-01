@@ -3,6 +3,9 @@ package api
 import (
 	"fmt"
 
+	"github.com/gojek/mlp/api/pkg/vault"
+	"gorm.io/gorm"
+
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -12,8 +15,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/gojek/mlp/api/pkg/vault"
-	"gorm.io/gorm"
 )
 
 // AppContext stores the entities relating to the application's context

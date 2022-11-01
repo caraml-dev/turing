@@ -1,9 +1,10 @@
 package rpc
 
 import (
+	"github.com/hashicorp/go-plugin"
+
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/manager"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/runner"
-	"github.com/hashicorp/go-plugin"
 )
 
 const (

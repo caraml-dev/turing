@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/experiment/manager"
+
+	"github.com/hashicorp/go-plugin"
 
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	rpcManager "github.com/caraml-dev/turing/engines/experiment/plugin/rpc/manager"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
-	"github.com/hashicorp/go-plugin"
 )
 
 func configuredManagerMock() *mocks.ConfigurableExperimentManager {

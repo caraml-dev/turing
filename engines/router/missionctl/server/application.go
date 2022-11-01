@@ -9,6 +9,10 @@ import (
 	// TODO: justify this
 	_ "net/http/pprof"
 
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/soheilhy/cmux"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
@@ -17,9 +21,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/soheilhy/cmux"
 
 	// Turing router will support these experiment runners: nop
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"

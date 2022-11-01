@@ -8,12 +8,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/database"
-	"github.com/caraml-dev/turing/api/turing/internal/ref"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
+
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/internal/ref"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 func assertEqualEnsembler(

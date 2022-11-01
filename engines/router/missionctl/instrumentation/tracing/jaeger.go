@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/opentracing/opentracing-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-client-go/zipkin"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // JaegerTracer implements the Tracer interface using the jaeger client library

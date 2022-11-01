@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 func Test_logTuringRouterRequestSummary(t *testing.T) {

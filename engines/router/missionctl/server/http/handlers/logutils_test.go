@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
 
 // TestCopyResponseToLogChannel tests the copyResponseToLogChannel method in logutils.

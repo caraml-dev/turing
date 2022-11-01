@@ -3,8 +3,9 @@ package models_test
 import (
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/stretchr/testify/require"
+
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 type defaultTrafficRuleTestCase struct {

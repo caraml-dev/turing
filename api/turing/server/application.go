@@ -6,6 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gojek/mlp/api/pkg/authz/enforcer"
+	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/gorilla/mux"
+
 	"github.com/caraml-dev/turing/api/turing/api"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/config"
@@ -13,10 +18,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/vault"
-	"github.com/gojek/mlp/api/pkg/authz/enforcer"
-	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gorilla/mux"
 )
 
 type configFlags []string

@@ -10,8 +10,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 
-	"github.com/caraml-dev/turing/api/turing/database"
-	"github.com/caraml-dev/turing/api/turing/models"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/google/go-cmp/cmp"
@@ -19,6 +17,9 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/caraml-dev/turing/api/turing/database"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 func TestRouterVersionsServiceIntegration(t *testing.T) {

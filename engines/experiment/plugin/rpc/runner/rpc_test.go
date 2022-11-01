@@ -5,11 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/mocks"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	runnerMocks "github.com/caraml-dev/turing/engines/experiment/runner/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 type mockExperimentRunner struct {

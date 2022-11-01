@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/caraml-dev/turing/api/e2e/test/config"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
 	"istio.io/client-go/pkg/apis/networking/v1alpha3"
@@ -26,6 +25,8 @@ import (
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
+
+	"github.com/caraml-dev/turing/api/e2e/test/config"
 )
 
 var deleteTimeoutSeconds = int64(20)

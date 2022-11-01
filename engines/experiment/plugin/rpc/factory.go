@@ -6,13 +6,14 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/hashicorp/go-plugin"
+	"github.com/mitchellh/hashstructure/v2"
+	"go.uber.org/zap"
+
 	"github.com/caraml-dev/turing/engines/experiment/config"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/hashicorp/go-plugin"
-	"github.com/mitchellh/hashstructure/v2"
-	"go.uber.org/zap"
 )
 
 var factoriesmu sync.Mutex
