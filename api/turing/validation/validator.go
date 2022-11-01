@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/golang-collections/collections/set"
 
 	"github.com/go-playground/validator/v10"
