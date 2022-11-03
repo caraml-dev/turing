@@ -27,18 +27,18 @@ routes:
     strategy:
       <<: *TURING_STRATEGY
   - id: &ID_TRAFFIC_SPLIT_B traffic-split-b
-      type: EAGER_ROUTER
-      routes:
-        - id: control
-          type: PROXY
-          endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
-          timeout: 5s
-        - id: route-b
-          type: PROXY
-          endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
-          timeout: 5s
-      strategy:
-        <<: *TURING_STRATEGY
+    type: EAGER_ROUTER
+    routes:
+      - id: control
+        type: PROXY
+        endpoint: "http://www.mocky.io/v2/5e4cacd4310000e1cad8c073"
+        timeout: 5s
+      - id: route-b
+        type: PROXY
+        endpoint: "http://www.mocky.io/v2/5e4caccc310000e2cad8c071"
+        timeout: 5s
+    strategy:
+      <<: *TURING_STRATEGY
 strategy:
   type: "fiber.TrafficSplittingStrategy"
   properties:
