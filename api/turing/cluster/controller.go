@@ -46,6 +46,8 @@ var (
 	ErrNamespaceAlreadyExists = errors.New("namespace already exists")
 )
 
+const LocalClusterName = "self"
+
 // clusterConfig Model cluster authentication settings
 type clusterConfig struct {
 	// Use Kubernetes service account in cluster config
@@ -199,18 +201,16 @@ func InitClusterControllers(
 		controllers[envName] = ctl
 	}
 
-	selfClusterName := "self"
-
 	selfCtl, err := newController(
 		clusterConfig{
-			ClusterName:     selfClusterName,
+			ClusterName:     LocalClusterName,
 			InClusterConfig: true,
 		},
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to initialize cluster controller")
 	}
-	controllers[selfClusterName] = selfCtl
+	controllers[LocalClusterName] = selfCtl
 
 	return controllers, nil
 }
@@ -484,8 +484,12 @@ func (c *controller) GetSecret(ctx context.Context, secretName string, namespace
 		return nil, fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
 	}
 
-	fmt.Println(secret.StringData)
-	secretData := secret.StringData["service-account.json"]
+	var secretData string
+	if val, ok := secret.Data["service-account.json"]; ok {
+		secretData = string(val)
+	} else {
+		return nil, fmt.Errorf("unable to get service account in secret with name %s", secretName)
+	}
 
 	return &secretData, nil
 }

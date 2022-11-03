@@ -200,6 +200,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		if routerVersion.ExperimentEngine.PluginConfig.ServiceAccount != nil {
 			serviceAccountKey, err := c.DeploymentService.GetLocalSecret(*routerVersion.ExperimentEngine.
 				PluginConfig.ServiceAccount)
+
 			expEngineServiceAccountKey = *serviceAccountKey
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
