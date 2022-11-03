@@ -2,6 +2,7 @@ package missionctl
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -42,6 +43,7 @@ func (us *missionControlUpi) Route(
 	fiberRequest fiber.Request,
 ) (fiber.Response, *errors.TuringError) {
 	var turingError *errors.TuringError
+	var trafficRule string
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -52,7 +54,7 @@ func (us *missionControlUpi) Route(
 			"component": func() string {
 				return "route"
 			},
-			"traffic_rule": func() string { return "" },
+			"traffic_rule": func() string { return trafficRule },
 		},
 	)()
 
@@ -88,6 +90,8 @@ func (us *missionControlUpi) Route(
 			return nil, turingError
 		}
 	}
+	// Record selected traffic rule info if it exists in the metadata
+	trafficRule = strings.Join(grpcResponse.Label(fiberapi.TrafficRuleLabel), ",")
 
 	return grpcResponse, nil
 }
