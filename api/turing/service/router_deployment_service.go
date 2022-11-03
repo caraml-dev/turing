@@ -47,6 +47,9 @@ type DeploymentService interface {
 		environment *merlin.Environment,
 		routerVersion *models.RouterVersion,
 	) error
+	GetLocalSecret(
+		secret string,
+	) (*string, error)
 }
 type deploymentService struct {
 	// Deployment configs
@@ -451,6 +454,17 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 	}
 
 	return nil
+}
+
+func (ds *deploymentService) GetLocalSecret(
+	secret string,
+) (*string, error) {
+	// Get the cluster controller
+	controller, err := ds.getClusterControllerByEnvironment("self")
+	if err != nil {
+		return nil, err
+	}
+	return controller.GetSecret(context.Background(), secret, "mlp")
 }
 
 // deployK8sService deploys a kubernetes service.

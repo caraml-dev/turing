@@ -76,6 +76,7 @@ type Controller interface {
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
 	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
 	CreateSecret(ctx context.Context, secret *Secret) error
+	GetSecret(ctx context.Context, secretName string, namespace string) (*string, error)
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
 	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error
@@ -160,7 +161,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 	}, nil
 }
 
-// InitClusterControllers takes in the the app config and a vault client and uses the credentials
+// InitClusterControllers takes in the app config and a vault client and uses the credentials
 // from vault to initialize one cluster controller per environment and returns a map where the
 // key is the env name and the value is the corresponding controller.
 func InitClusterControllers(
@@ -197,6 +198,19 @@ func InitClusterControllers(
 
 		controllers[envName] = ctl
 	}
+
+	selfClusterName := "self"
+
+	selfCtl, err := newController(
+		clusterConfig{
+			ClusterName:     selfClusterName,
+			InClusterConfig: true,
+		},
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to initialize cluster controller")
+	}
+	controllers[selfClusterName] = selfCtl
 
 	return controllers, nil
 }
@@ -461,6 +475,19 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 	}
 	_, err = secrets.Create(ctx, secret.BuildSecret(), metav1.CreateOptions{})
 	return err
+}
+
+func (c *controller) GetSecret(ctx context.Context, secretName string, namespace string) (*string, error) {
+	secrets := c.k8sCoreClient.Secrets(namespace)
+	secret, err := secrets.Get(ctx, secretName, metav1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
+	}
+
+	fmt.Println(secret.StringData)
+	secretData := secret.StringData["service-account.json"]
+
+	return &secretData, nil
 }
 
 // DeleteSecret deletes a secret

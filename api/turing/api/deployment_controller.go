@@ -198,10 +198,9 @@ func (c RouterDeploymentController) deployRouterVersion(
 		}
 
 		if routerVersion.ExperimentEngine.PluginConfig.ServiceAccount != nil {
-			expEngineServiceAccountKey, err = c.MLPService.GetSecret(
-				models.ID(project.Id),
-				*routerVersion.ExperimentEngine.PluginConfig.ServiceAccount,
-			)
+			serviceAccountKey, err := c.DeploymentService.GetLocalSecret(*routerVersion.ExperimentEngine.
+				PluginConfig.ServiceAccount)
+			expEngineServiceAccountKey = *serviceAccountKey
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}
