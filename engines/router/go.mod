@@ -90,3 +90,5 @@ require (
 )
 
 replace github.com/caraml-dev/turing/engines/experiment => ../experiment
+
+replace github.com/gojek/fiber => /Users/user/Documents/Code/github/fiber

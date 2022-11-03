@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	fiberHttp "github.com/gojek/fiber/http"
@@ -134,6 +135,7 @@ func (mc *missionControl) doPost(
 			"component": func() string {
 				return fmt.Sprint(componentLabel, "_makeRequest")
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)
 	resp, err := mc.httpClient.Do(req)
@@ -179,6 +181,7 @@ func (mc *missionControl) Enrich(
 			"component": func() string {
 				return "enrich"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 	// Make HTTP request
@@ -194,6 +197,7 @@ func (mc *missionControl) Route(
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	var routerErr *errors.TuringError
+	var trafficRule string
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -203,6 +207,9 @@ func (mc *missionControl) Route(
 			},
 			"component": func() string {
 				return "route"
+			},
+			"traffic_rule": func() string {
+				return trafficRule
 			},
 		},
 	)()
@@ -231,6 +238,7 @@ func (mc *missionControl) Route(
 			"Error response received: status – [%d]", fiberResponse.StatusCode()), fiberProtocol.HTTP)
 	} else {
 		httpResp := fiberResponse.(*fiberHttp.Response)
+		trafficRule = strings.Join(httpResp.Label(fiberapi.TrafficRuleLabel), ",")
 		routerResp, routerErr = mchttp.NewCachedResponse(httpResp.Payload(), httpResp.Header()), nil
 	}
 
@@ -266,6 +274,7 @@ func (mc *missionControl) Ensemble(
 			"component": func() string {
 				return "ensemble"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 
@@ -281,6 +290,7 @@ func (mc *missionControl) Ensemble(
 			"component": func() string {
 				return "ensemble_makePayload"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)

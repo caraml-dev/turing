@@ -52,6 +52,7 @@ func (us *missionControlUpi) Route(
 			"component": func() string {
 				return "route"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 
