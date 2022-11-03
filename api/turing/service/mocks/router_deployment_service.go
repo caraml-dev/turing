@@ -56,6 +56,29 @@ func (_m *DeploymentService) DeployRouterVersion(project *client.Project, enviro
 	return r0, r1
 }
 
+// GetLocalSecret provides a mock function with given fields: secret
+func (_m *DeploymentService) GetLocalSecret(secret string) (*string, error) {
+	ret := _m.Called(secret)
+
+	var r0 *string
+	if rf, ok := ret.Get(0).(func(string) *string); ok {
+		r0 = rf(secret)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(secret)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UndeployRouterVersion provides a mock function with given fields: project, environment, routerVersion, eventsCh, isCleanUp
 func (_m *DeploymentService) UndeployRouterVersion(project *client.Project, environment *merlinclient.Environment, routerVersion *models.RouterVersion, eventsCh *service.EventChannel, isCleanUp bool) error {
 	ret := _m.Called(project, environment, routerVersion, eventsCh, isCleanUp)
