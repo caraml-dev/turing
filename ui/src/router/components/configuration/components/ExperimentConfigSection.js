@@ -24,11 +24,17 @@ const FallbackView = ({ text }) => (
   </EuiFlexGroup>
 );
 
-const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
+const CustomExperimentConfigView = ({
+  projectId,
+  remoteUi,
+  config,
+  protocol,
+}) => {
   // Load component from remote host
   return (
     <React.Suspense
-      fallback={<FallbackView text="Loading Experiment Engine config" />}>
+      fallback={<FallbackView text="Loading Experiment Engine config" />}
+    >
       <ExperimentEngineComponentLoader
         FallbackView={FallbackView}
         remoteUi={remoteUi}
@@ -40,6 +46,7 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
           fallback={<FallbackView text="Loading Experiment Engine config" />}
           projectId={projectId}
           config={config}
+          protocol={protocol}
         />
       </ExperimentEngineComponentLoader>
     </React.Suspense>
@@ -48,7 +55,7 @@ const CustomExperimentConfigView = ({ projectId, remoteUi, config }) => {
 
 export const ExperimentConfigSection = ({
   projectId,
-  config: { experiment_engine },
+  config: { protocol, experiment_engine },
 }) => {
   // Get engine's properties
   const { getEngineProperties } = useContext(ExperimentEngineContext);
@@ -64,6 +71,7 @@ export const ExperimentConfigSection = ({
             projectId={projectId}
             remoteUi={engineProps.custom_experiment_manager_config.remote_ui}
             config={experiment_engine.config}
+            protocol={protocol}
           />
         ) : (
           <StandardExperimentConfigView

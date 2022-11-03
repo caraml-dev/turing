@@ -56,7 +56,7 @@ Each rule should have at least one condition configured on it. If there are mult
 Rule condition can be defined on either request header or request payload (assuming payload is a valid JSON object). For UPI routers, it would be header or [prediction context](https://github.com/caraml-dev/universal-prediction-interface/blob/main/proto/caraml/upi/v1/upi.proto) (name of the variable and value). For each condition, you should specify:
 
 * **Condition source**: either `Header` or `Payload` for HTTP router. `Header` or `Prediction Context` for UPI router.
-* **Condition key**: if condition's source is `Header` – then the name of a request Header (example: `X-Session-ID`), or else, if condition's source is `Payload` – a valid JSON path of the property from the request's JSON payload (example: `service_type.id` or `users.0.name`). If condition source is `Prediction Context` - the name of the variable within Prediction Context proto. 
+* **Condition key**: if condition's source is `Header` – then the name of a request Header (example: `X-Session-ID`), or else, if condition's source is `Payload` – a valid JSON path of the property from the request's JSON payload (example: `service_type.id` or `users.0.name`). If condition source is `Prediction Context` - the name of the variable within the Prediction Context proto. 
 * **Condition values**: one or more values that the extracted condition key is expected to match. Condition will be satisfied if key matches at least one of the configured values.<br/>
 
 {% hint style="warning" %}

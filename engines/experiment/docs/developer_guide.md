@@ -64,10 +64,12 @@ type IExperimentConfig = { [key: string]: IJsonValue };
 
 // EditExperimentEngineConfig component signature.
 // config is {} on init.
+// protocol will be HTTP_JSON or UPI_V1
 // errors holds the validaton error(s), if any.
 ({
     projectId: number,
     config: IExperimentConfig,
+    protocol: string
     onChangeHandler: (React.ChangeEvent<HTMLInputElement>) => void,
     errors: yup.ValidationError,
 }) => React.ReactElement
@@ -75,6 +77,7 @@ type IExperimentConfig = { [key: string]: IJsonValue };
 // ExperimentEngineConfigDetails component signature.
 ({
     projectId: number,
+    protocol: string
     config: IExperimentConfig
 }) => React.ReactElement
 ```

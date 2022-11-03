@@ -13,6 +13,7 @@ import { SelectEndpointComboBox } from "../../../../../../components/form/endpoi
 import { EuiFieldDuration } from "../../../../../../components/form/field_duration/EuiFieldDuration";
 import { get } from "../../../../../../components/form/utils";
 import "./RouteCard.scss";
+import { FormLabelWithToolTip } from "@gojek/mlp-ui";
 
 export const RouteCard = ({
   route,
@@ -86,6 +87,24 @@ export const RouteCard = ({
             isInvalid={!!get(errors, "endpoint")}
           />
         </EuiFormRow>
+
+        {protocol === "UPI_V1" && (
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormLabelWithToolTip
+                label="Service Method *"
+                content="Service method of route. Not configurable."
+              />
+            }
+          >
+            <EuiFieldText
+              fullWidth
+              value={route.service_method}
+              disabled={true}
+            ></EuiFieldText>
+          </EuiFormRow>
+        )}
 
         <EuiSpacer size="m" />
 

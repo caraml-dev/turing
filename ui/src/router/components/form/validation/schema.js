@@ -75,7 +75,7 @@ const validateDanglingRoutes = function (items) {
         this.createError({
           path: `${this.path}[${idx}].id`,
           message:
-            "This route should be removed since they have no Traffic Rule(s) associated and will never be called.",
+            "This route should be removed since it has no Traffic Rule(s) associated and will never be called.",
         })
       );
     }

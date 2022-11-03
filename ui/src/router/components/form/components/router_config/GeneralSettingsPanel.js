@@ -41,6 +41,40 @@ export const GeneralSettingsPanel = ({
     })
   );
 
+  const onProtocolChange = (value) => {
+    onChange("config.protocol")(value);
+    // update service_method for each route if changed to UPI
+    onChange("config.routes")(
+      routes.map((route) => {
+        return {
+          ...route,
+          service_method:
+            value === "UPI_V1"
+              ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
+              : "",
+        };
+      })
+    );
+    // update prediction_context <-> payload for condition.field_source when protocol changes
+    onChange("config.rules")(
+      rules.map((rule) => {
+        return {
+          ...rule,
+          conditions: rule.conditions.map((condition) => {
+            if (condition.field_source === "header") {
+              return condition;
+            }
+            return {
+              ...condition,
+              field_source:
+                value === "UPI_V1" ? "prediction_context" : "payload",
+            };
+          }),
+        };
+      })
+    );
+  };
+
   return (
     <Panel title="General">
       <EuiForm>
@@ -84,39 +118,7 @@ export const GeneralSettingsPanel = ({
             fullWidth
             options={protocolTypeOptions}
             valueOfSelected={protocol}
-            onChange={(e) => {
-              onChange("config.protocol")(e);
-              // update service_method for each route if changed to UPI
-              onChange("config.routes")(
-                routes.map((route) => {
-                  return {
-                    ...route,
-                    service_method:
-                      e === "UPI_V1"
-                        ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
-                        : "",
-                  };
-                })
-              );
-              // update prediction_context <-> payload for condition.field_source when protocol changes
-              onChange("config.rules")(
-                rules.map((rule) => {
-                  return {
-                    ...rule,
-                    conditions: rule.conditions.map((condition) => {
-                      if (condition.field_source === "header") {
-                        return condition;
-                      }
-                      return {
-                        ...condition,
-                        field_source:
-                          e === "UPI_V1" ? "prediction_context" : "payload",
-                      };
-                    }),
-                  };
-                })
-              );
-            }}
+            onChange={onProtocolChange}
             hasDividers
           />
         </EuiFormRow>
