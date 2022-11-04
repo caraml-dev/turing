@@ -6,8 +6,7 @@ The request sent to the each route is constructed from the request headers to th
 identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router), and either the request
 body to the Router (if there is no Enricher) or the response body from the Enricher (if enabled).
 
-For UPI Routers, the endpoint must support [UPI interface](https://github.com/caraml-dev/universal-prediction-interface).
-
+For UPI Routers, the endpoint must support [UPI interface](https://github.com/caraml-dev/universal-prediction-interface). The default service method is `/caraml.upi.v1.UniversalPredictionService/PredictValues` and is not configurable.
 ![](../../.gitbook/assets/routes_panel.png)
 
 {% hint style="info" %}

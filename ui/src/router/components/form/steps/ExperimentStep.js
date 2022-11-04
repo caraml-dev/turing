@@ -42,13 +42,13 @@ export const ExperimentStep = ({ projectId }) => {
   );
   const engineProps = getEngineProperties(experiment_engine.type);
   // UPI will only support custom experiment engine now
-  const filteredEngine =
+  const filteredEngines =
     protocol === "UPI_V1"
       ? experimentEngines.filter((engine) => engine.type !== "standard")
       : experimentEngines;
   const experimentEngineOptions = useMemo(
-    () => getExperimentEngineOptions(filteredEngine),
-    [filteredEngine]
+    () => getExperimentEngineOptions(filteredEngines),
+    [filteredEngines]
   );
 
   useEffect(() => {

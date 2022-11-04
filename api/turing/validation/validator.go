@@ -201,7 +201,7 @@ func checkDanglingRoutes(
 	allRulesRoutes *set.Set,
 ) {
 	danglingRoutesDescription :=
-		"These route(s) should be removed since they have no rule associated and will never be called: %s"
+		"These route(s) should be removed since it has no rule associated and will never be called: %s"
 	danglingRoutes := make([]string, 0)
 	for _, route := range allRoutes {
 		if !allRulesRoutes.Has(route.ID) {
