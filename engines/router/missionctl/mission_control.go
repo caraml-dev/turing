@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gojek/fiber"
+	fiberErrors "github.com/gojek/fiber/errors"
 	fiberHttp "github.com/gojek/fiber/http"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	jsoniter "github.com/json-iterator/go"
@@ -196,8 +198,8 @@ func (mc *missionControl) Route(
 	header http.Header,
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
+	var fiberResponse fiber.Response
 	var routerErr *errors.TuringError
-	var trafficRule string
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -209,7 +211,12 @@ func (mc *missionControl) Route(
 				return "route"
 			},
 			"traffic_rule": func() string {
-				return trafficRule
+				if fiberResponse != nil {
+					if httpResp, ok := fiberResponse.(*fiberHttp.Response); ok {
+						return strings.Join(httpResp.Label(fiberapi.TrafficRuleLabel), ",")
+					}
+				}
+				return ""
 			},
 		},
 	)()
@@ -227,7 +234,8 @@ func (mc *missionControl) Route(
 
 	// Pass the request to the Fiber Handler and process the response
 	var routerResp mchttp.Response
-	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
+	var fiberError *fiberErrors.FiberError
+	fiberResponse, fiberError = mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
 		routerResp, routerErr = nil, errors.NewTuringError(fiberError, fiberProtocol.HTTP, fiberError.Code)
 	} else if fiberResponse == nil {
@@ -238,7 +246,6 @@ func (mc *missionControl) Route(
 			"Error response received: status – [%d]", fiberResponse.StatusCode()), fiberProtocol.HTTP)
 	} else {
 		httpResp := fiberResponse.(*fiberHttp.Response)
-		trafficRule = strings.Join(httpResp.Label(fiberapi.TrafficRuleLabel), ",")
 		routerResp, routerErr = mchttp.NewCachedResponse(httpResp.Payload(), httpResp.Header()), nil
 	}
 

@@ -43,7 +43,7 @@ func (us *missionControlUpi) Route(
 	fiberRequest fiber.Request,
 ) (fiber.Response, *errors.TuringError) {
 	var turingError *errors.TuringError
-	var trafficRule string
+	var grpcResponse *fiberGrpc.Response
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
 		metrics.TuringComponentRequestDurationMs,
@@ -54,7 +54,12 @@ func (us *missionControlUpi) Route(
 			"component": func() string {
 				return "route"
 			},
-			"traffic_rule": func() string { return trafficRule },
+			"traffic_rule": func() string {
+				if grpcResponse != nil {
+					return strings.Join(grpcResponse.Label(fiberapi.TrafficRuleLabel), ",")
+				}
+				return ""
+			},
 		},
 	)()
 
@@ -72,7 +77,7 @@ func (us *missionControlUpi) Route(
 		}
 	}
 
-	grpcResponse, ok := resp.(*fiberGrpc.Response)
+	grpcResponse, ok = resp.(*fiberGrpc.Response)
 	if !ok {
 		turingError = errors.NewTuringError(
 			errors.Newf(errors.BadResponse, "unable to parse fiber response into grpc response"), fiberProtocol.GRPC,
@@ -90,8 +95,6 @@ func (us *missionControlUpi) Route(
 			return nil, turingError
 		}
 	}
-	// Record selected traffic rule info if it exists in the metadata
-	trafficRule = strings.Join(grpcResponse.Label(fiberapi.TrafficRuleLabel), ",")
 
 	return grpcResponse, nil
 }
