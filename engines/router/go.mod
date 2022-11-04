@@ -92,4 +92,4 @@ require (
 replace github.com/caraml-dev/turing/engines/experiment => ../experiment
 
 // Temporary change
-replace github.com/gojek/fiber => github.com/krithika369/fiber v0.0.0-20221103142156-e156b48da9f6
+replace github.com/gojek/fiber => github.com/krithika369/fiber v0.0.0-20221104013137-0e0fe2c994b2

@@ -217,7 +217,7 @@ replace (
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
 
 	// Temporary change
-	github.com/gojek/fiber => github.com/krithika369/fiber v0.0.0-20221103142156-e156b48da9f6
+	github.com/gojek/fiber => github.com/krithika369/fiber v0.0.0-20221104013137-0e0fe2c994b2
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58

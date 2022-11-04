@@ -212,9 +212,7 @@ func (mc *missionControl) Route(
 			},
 			"traffic_rule": func() string {
 				if fiberResponse != nil {
-					if httpResp, ok := fiberResponse.(*fiberHttp.Response); ok {
-						return strings.Join(httpResp.Label(fiberapi.TrafficRuleLabel), ",")
-					}
+					return strings.Join(fiberResponse.Label(fiberapi.TrafficRuleLabel), ",")
 				}
 				return ""
 			},
