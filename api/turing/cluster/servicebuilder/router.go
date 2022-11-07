@@ -325,7 +325,7 @@ func buildRouterVolumes(
 
 		if routerVersion.ExperimentEngine.ServiceAccountKeyFilePath != nil {
 			volumes = append(volumes, corev1.Volume{
-				Name: secretVolume,
+				Name: secretVolumeExpEngine,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
 						SecretName: secretName,
@@ -339,7 +339,7 @@ func buildRouterVolumes(
 				},
 			})
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{
-				Name:      secretVolume,
+				Name:      secretVolumeExpEngine,
 				MountPath: secretMountPath,
 			})
 		}

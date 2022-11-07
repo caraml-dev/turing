@@ -726,6 +726,20 @@ func TestNewRouterService(t *testing.T) {
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
+						{
+							Name: secretVolumeExpEngine,
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "service-account",
+									Items: []corev1.KeyToPath{
+										{
+											Key:  secretKeyNameExpEngine,
+											Path: secretKeyNameExpEngine,
+										},
+									},
+								},
+							},
+						},
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
@@ -735,6 +749,10 @@ func TestNewRouterService(t *testing.T) {
 						{
 							Name:      pluginsVolumeName,
 							MountPath: pluginsMountPath,
+						},
+						{
+							Name:      secretVolumeExpEngine,
+							MountPath: secretMountPath,
 						},
 					},
 					InitContainers: []cluster.Container{
