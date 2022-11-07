@@ -113,7 +113,7 @@ func setupNewEnv(envMaps ...map[string]string) {
 }
 
 func TestLoad(t *testing.T) {
-	blueSvcAcct := "blue-account"
+	blueSvcAcctKeyFilePath := "/etc/plugins/blue/gcp_service_account/service-account.json"
 
 	tests := map[string]struct {
 		filepaths []string
@@ -298,9 +298,18 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
-						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
-						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest", ServiceAccount: &blueSvcAcct},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
+						"red": {
+							PluginConfig: &config.ExperimentEnginePluginConfig{
+								Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+							},
+						},
+						"blue": {
+							PluginConfig: &config.ExperimentEnginePluginConfig{
+								Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+							},
+							ServiceAccountKeyFilePath: &blueSvcAcctKeyFilePath,
+						},
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1234567,
@@ -406,9 +415,18 @@ func TestLoad(t *testing.T) {
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
 					},
-					ExperimentEnginePlugins: map[string]*config.ExperimentEnginePluginConfig{
-						"red":  {Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1"},
-						"blue": {Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest", ServiceAccount: &blueSvcAcct},
+					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
+						"red": {
+							PluginConfig: &config.ExperimentEnginePluginConfig{
+								Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+							},
+						},
+						"blue": {
+							PluginConfig: &config.ExperimentEnginePluginConfig{
+								Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+							},
+							ServiceAccountKeyFilePath: &blueSvcAcctKeyFilePath,
+						},
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1234567,

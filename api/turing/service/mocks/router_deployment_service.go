@@ -56,13 +56,13 @@ func (_m *DeploymentService) DeployRouterVersion(project *client.Project, enviro
 	return r0, r1
 }
 
-// GetLocalSecret provides a mock function with given fields: secret
-func (_m *DeploymentService) GetLocalSecret(secret string) (*string, error) {
-	ret := _m.Called(secret)
+// GetLocalSecret provides a mock function with given fields: serviceAccountKeyFilePath
+func (_m *DeploymentService) GetLocalSecret(serviceAccountKeyFilePath string) (*string, error) {
+	ret := _m.Called(serviceAccountKeyFilePath)
 
 	var r0 *string
 	if rf, ok := ret.Get(0).(func(string) *string); ok {
-		r0 = rf(secret)
+		r0 = rf(serviceAccountKeyFilePath)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*string)
@@ -71,7 +71,7 @@ func (_m *DeploymentService) GetLocalSecret(secret string) (*string, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(secret)
+		r1 = rf(serviceAccountKeyFilePath)
 	} else {
 		r1 = ret.Error(1)
 	}

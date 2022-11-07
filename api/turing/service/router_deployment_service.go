@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
+	"io/ioutil"
 	"strings"
 	"sync"
 	"time"
@@ -22,9 +22,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
-
-// LocalClusterAPINamespace contains the env var that has the namespace of the pod where the Turing API is deployed
-const LocalClusterAPINamespace = "POD_NAMESPACE"
 
 // DeploymentService handles the deployment of the Turing routers and the related components.
 type DeploymentService interface {
@@ -52,7 +49,7 @@ type DeploymentService interface {
 		routerVersion *models.RouterVersion,
 	) error
 	GetLocalSecret(
-		secret string,
+		serviceAccountKeyFilePath string,
 	) (*string, error)
 }
 type deploymentService struct {
@@ -461,14 +458,15 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 }
 
 func (ds *deploymentService) GetLocalSecret(
-	secret string,
+	serviceAccountKeyFilePath string,
 ) (*string, error) {
-	// Get the cluster controller
-	controller, err := ds.getClusterControllerByEnvironment(cluster.LocalClusterName)
+	byteValue, err := ioutil.ReadFile(serviceAccountKeyFilePath)
 	if err != nil {
 		return nil, err
 	}
-	return controller.GetSecret(context.Background(), secret, os.Getenv(LocalClusterAPINamespace))
+
+	serviceAccountKey := string(byteValue)
+	return &serviceAccountKey, nil
 }
 
 // deployK8sService deploys a kubernetes service.

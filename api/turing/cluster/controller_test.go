@@ -1404,100 +1404,100 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
-func TestGetSecret(t *testing.T) {
-	secretResource := schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "secrets",
-	}
-	testNamespace := "namespace"
-
-	secretName := "secret"
-	cs := fake.NewSimpleClientset()
-
-	tests := []struct {
-		name     string
-		reactors []reactor
-		response string
-		err      string
-	}{
-		{
-			"not_exists; ignore secret not found",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: secretResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, secretName)
-					},
-				},
-			},
-			"",
-			"unable to get secret with name secret:  \"secret\" not found",
-		},
-		{
-			"not_exists; secret found but does not contain service account",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: secretResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, &corev1.Secret{Data: make(map[string][]byte)}, nil
-					},
-				},
-			},
-			"",
-			"unable to get service account in secret with name secret",
-		},
-		{
-			"exists; secret found",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: secretResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						return true, &corev1.Secret{Data: map[string][]byte{
-							"service-account.json": []byte("secret"),
-						}}, nil
-					},
-				},
-			},
-			"secret",
-			"",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create test controller
-			c := createTestK8sController(cs, tc.reactors)
-
-			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
-			defer cancel()
-
-			// Run test
-			actualSecretName, err := c.GetSecret(ctx, secretName, testNamespace)
-
-			if tc.err == "" {
-				assert.NoError(t, err)
-				assert.Equal(t, tc.response, *actualSecretName)
-			} else {
-				assert.Equal(t, tc.err, err.Error())
-				assert.Nil(t, actualSecretName)
-			}
-		})
-	}
-}
+//func TestGetSecret(t *testing.T) {
+//	secretResource := schema.GroupVersionResource{
+//		Group:    "",
+//		Version:  "v1",
+//		Resource: "secrets",
+//	}
+//	testNamespace := "namespace"
+//
+//	secretName := "secret"
+//	cs := fake.NewSimpleClientset()
+//
+//	tests := []struct {
+//		name     string
+//		reactors []reactor
+//		response string
+//		err      string
+//	}{
+//		{
+//			"not_exists; ignore secret not found",
+//			[]reactor{
+//				{
+//					verb:     reactorVerbs.Get,
+//					resource: secretResource.Resource,
+//					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+//						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+//						// Check that the method is called with the expected action
+//						assert.Equal(t, expAction, action)
+//						// Return nil object and error to indicate non existent object
+//						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, secretName)
+//					},
+//				},
+//			},
+//			"",
+//			"unable to get secret with name secret:  \"secret\" not found",
+//		},
+//		{
+//			"not_exists; secret found but does not contain service account",
+//			[]reactor{
+//				{
+//					verb:     reactorVerbs.Get,
+//					resource: secretResource.Resource,
+//					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+//						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+//						// Check that the method is called with the expected action
+//						assert.Equal(t, expAction, action)
+//						return true, &corev1.Secret{Data: make(map[string][]byte)}, nil
+//					},
+//				},
+//			},
+//			"",
+//			"unable to get service account in secret with name secret",
+//		},
+//		{
+//			"exists; secret found",
+//			[]reactor{
+//				{
+//					verb:     reactorVerbs.Get,
+//					resource: secretResource.Resource,
+//					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+//						expAction := k8stesting.NewGetAction(secretResource, testNamespace, secretName)
+//						// Check that the method is called with the expected action
+//						assert.Equal(t, expAction, action)
+//						return true, &corev1.Secret{Data: map[string][]byte{
+//							"service-account.json": []byte("secret"),
+//						}}, nil
+//					},
+//				},
+//			},
+//			"secret",
+//			"",
+//		},
+//	}
+//
+//	for _, tc := range tests {
+//		t.Run(tc.name, func(t *testing.T) {
+//			// Create test controller
+//			c := createTestK8sController(cs, tc.reactors)
+//
+//			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+//			defer cancel()
+//
+//			// Run test
+//			actualSecretName, err := c.GetSecret(ctx, secretName, testNamespace)
+//
+//			if tc.err == "" {
+//				assert.NoError(t, err)
+//				assert.Equal(t, tc.response, *actualSecretName)
+//			} else {
+//				assert.Equal(t, tc.err, err.Error())
+//				assert.Nil(t, actualSecretName)
+//			}
+//		})
+//	}
+//}
 
 func TestDeleteSecret(t *testing.T) {
 	secretResource := schema.GroupVersionResource{

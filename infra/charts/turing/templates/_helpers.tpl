@@ -199,9 +199,10 @@ RouterDefaults:
   ExperimentEnginePlugins:
 {{ range $expEngine := .Values.turing.experimentEngines }}
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
-    {{ $expEngine.name }}:
+  {{ $expEngine.name }}:
+    PluginConfig:
       Image: {{ $expEngine.rpcPlugin.image }}
-      ServiceAccount: {{ $expEngine.rpcPlugin.serviceAccount }}
+    ServiceAccountKeyFilePath: {{ $expEngine.serviceAccountKeyFilePath }}
 {{- end -}}
 {{- end -}}
 {{ end }}

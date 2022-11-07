@@ -401,29 +401,6 @@ func (_m *Controller) GetKnativeServiceURL(ctx context.Context, svcName string, 
 	return r0
 }
 
-// GetSecret provides a mock function with given fields: ctx, secretName, namespace
-func (_m *Controller) GetSecret(ctx context.Context, secretName string, namespace string) (*string, error) {
-	ret := _m.Called(ctx, secretName, namespace)
-
-	var r0 *string
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *string); ok {
-		r0 = rf(ctx, secretName, namespace)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*string)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, secretName, namespace)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetSparkApplication provides a mock function with given fields: ctx, namespace, appName
 func (_m *Controller) GetSparkApplication(ctx context.Context, namespace string, appName string) (*v1beta2.SparkApplication, error) {
 	ret := _m.Called(ctx, namespace, appName)

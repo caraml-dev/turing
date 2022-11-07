@@ -322,6 +322,27 @@ func buildRouterVolumes(
 			Name:      pluginsVolumeName,
 			MountPath: pluginsMountPath,
 		})
+
+		if routerVersion.ExperimentEngine.ServiceAccountKeyFilePath != nil {
+			volumes = append(volumes, corev1.Volume{
+				Name: secretVolume,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretName,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  secretKeyNameExpEngine,
+								Path: secretKeyNameExpEngine,
+							},
+						},
+					},
+				},
+			})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      secretVolume,
+				MountPath: secretMountPath,
+			})
+		}
 	}
 
 	// Service account

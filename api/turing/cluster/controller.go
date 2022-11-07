@@ -78,7 +78,6 @@ type Controller interface {
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
 	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
 	CreateSecret(ctx context.Context, secret *Secret) error
-	GetSecret(ctx context.Context, secretName string, namespace string) (*string, error)
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
 	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error
@@ -475,23 +474,6 @@ func (c *controller) CreateSecret(ctx context.Context, secret *Secret) error {
 	}
 	_, err = secrets.Create(ctx, secret.BuildSecret(), metav1.CreateOptions{})
 	return err
-}
-
-func (c *controller) GetSecret(ctx context.Context, secretName string, namespace string) (*string, error) {
-	secrets := c.k8sCoreClient.Secrets(namespace)
-	secret, err := secrets.Get(ctx, secretName, metav1.GetOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("unable to get secret with name %s: %s", secretName, err.Error())
-	}
-
-	var secretData string
-	if val, ok := secret.Data["service-account.json"]; ok {
-		secretData = string(val)
-	} else {
-		return nil, fmt.Errorf("unable to get service account in secret with name %s", secretName)
-	}
-
-	return &secretData, nil
 }
 
 // DeleteSecret deletes a secret

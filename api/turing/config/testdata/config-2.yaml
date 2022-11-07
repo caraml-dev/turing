@@ -13,10 +13,12 @@ RouterDefaults:
     FlushIntervalSeconds: 90
   ExperimentEnginePlugins:
     red:
-      Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
+      PluginConfig:
+        Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
     blue:
-      Image: ghcr.io/myproject/blue-exp-engine-plugin:latest
-      ServiceAccount: blue-account
+      PluginConfig:
+        Image: ghcr.io/myproject/blue-exp-engine-plugin:latest
+      ServiceAccountKeyFilePath: "/etc/plugins/blue/gcp_service_account/service-account.json"
   KafkaConfig:
     MaxMessageBytes: 1234567
     CompressionType: snappy
