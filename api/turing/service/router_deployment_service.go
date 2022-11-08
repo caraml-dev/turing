@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -460,7 +460,7 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 func (ds *deploymentService) GetLocalSecret(
 	serviceAccountKeyFilePath string,
 ) (*string, error) {
-	byteValue, err := ioutil.ReadFile(serviceAccountKeyFilePath)
+	byteValue, err := os.ReadFile(serviceAccountKeyFilePath)
 	if err != nil {
 		return nil, err
 	}
