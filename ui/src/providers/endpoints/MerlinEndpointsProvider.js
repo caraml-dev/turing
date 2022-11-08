@@ -38,11 +38,12 @@ export const MerlinEndpointsProvider = ({
   useEffect(() => {
     const urlWithPortRegex = /.*(:\d+)$/;
     const formatMerlinUrl = (url, protocol) => {
+      // Append port 80 as default if Merlin doesn't return url with port
       if (protocol === "UPI_V1") {
         if (url.match(urlWithPortRegex)) {
           return url;
         }
-        return url + ":80";
+        return `${url}:80`;
       }
       return `http://${url}/v1/predict`;
     };
