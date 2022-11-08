@@ -202,7 +202,7 @@ RouterDefaults:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
       PluginConfig:
         Image: {{ $expEngine.rpcPlugin.image }}
-{{- end -}}
+{{ end }}
       ServiceAccountKeyFilePath: {{ $expEngine.serviceAccountKeyFilePath }}
 {{- end -}}
 {{ end }}
