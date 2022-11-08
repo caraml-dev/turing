@@ -147,13 +147,23 @@ func getAlertExpr(metric Metric, env string, rev string, threshold float64) stri
 }[1m])) by (le)) %s %f
 `, env, rev, getAlertOperator(metric), threshold)
 	case MetricErrorRate:
-		return fmt.Sprintf(`(sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc",grpc_response_status!="0"}[1m]))/
- sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc"}[1m])) * 100 %s %f
+		return fmt.Sprintf(`(sum(rate(istio_requests_total{
+ environment="%s",destination_service_name=~"%s-.*",
+ request_protocol="grpc",grpc_response_status!="0"}[1m]))/
+ sum(rate(istio_requests_total{
+ environment="%s",destination_service_name=~"%s-.*",
+ request_protocol="grpc"}[1m])) * 100 %s %f
  and on()
- (sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="grpc"}[1m])) > 0))
+ (sum(rate(istio_requests_total{
+ environment="%s",destination_service_name=~"%s-.*",
+ request_protocol="grpc"}[1m])) > 0))
  or on()
- sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="http",response_code!="200"}[1m]))/
- sum(rate(istio_requests_total{environment="%s",destination_service_name=~"%s-.*",request_protocol="http"}[1m])) * 100 %s %f`,
+ sum(rate(istio_requests_total{
+ environment="%s",destination_service_name=~"%s-.*",
+ request_protocol="http",response_code!="200"}[1m]))/
+ sum(rate(istio_requests_total{
+ environment="%s",destination_service_name=~"%s-.*",
+ request_protocol="http"}[1m])) * 100 %s %f`,
 			env, rev, env, rev, getAlertOperator(metric), threshold,
 			env, rev,
 			env, rev, env, rev, getAlertOperator(metric), threshold,
