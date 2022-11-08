@@ -77,6 +77,7 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 			"component": func() string {
 				return "kafka_marshal_and_write"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 

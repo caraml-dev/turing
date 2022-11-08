@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gojek/fiber"
+	fiberErrors "github.com/gojek/fiber/errors"
 	fiberHttp "github.com/gojek/fiber/http"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	jsoniter "github.com/json-iterator/go"
@@ -134,6 +137,7 @@ func (mc *missionControl) doPost(
 			"component": func() string {
 				return fmt.Sprint(componentLabel, "_makeRequest")
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)
 	resp, err := mc.httpClient.Do(req)
@@ -179,6 +183,7 @@ func (mc *missionControl) Enrich(
 			"component": func() string {
 				return "enrich"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 	// Make HTTP request
@@ -193,6 +198,7 @@ func (mc *missionControl) Route(
 	header http.Header,
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
+	var fiberResponse fiber.Response
 	var routerErr *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
@@ -203,6 +209,12 @@ func (mc *missionControl) Route(
 			},
 			"component": func() string {
 				return "route"
+			},
+			"traffic_rule": func() string {
+				if fiberResponse != nil {
+					return strings.Join(fiberResponse.Label(fiberapi.TrafficRuleLabel), ",")
+				}
+				return ""
 			},
 		},
 	)()
@@ -220,7 +232,8 @@ func (mc *missionControl) Route(
 
 	// Pass the request to the Fiber Handler and process the response
 	var routerResp mchttp.Response
-	fiberResponse, fiberError := mc.fiberHandler.DoRequest(httpReq)
+	var fiberError *fiberErrors.FiberError
+	fiberResponse, fiberError = mc.fiberHandler.DoRequest(httpReq)
 	if fiberError != nil {
 		routerResp, routerErr = nil, errors.NewTuringError(fiberError, fiberProtocol.HTTP, fiberError.Code)
 	} else if fiberResponse == nil {
@@ -266,6 +279,7 @@ func (mc *missionControl) Ensemble(
 			"component": func() string {
 				return "ensemble"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 
@@ -281,6 +295,7 @@ func (mc *missionControl) Ensemble(
 			"component": func() string {
 				return "ensemble_makePayload"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)
 	payload, err := makeEnsemblerPayload(requestBody, routerResponse)

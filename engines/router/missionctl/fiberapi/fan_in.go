@@ -155,6 +155,7 @@ func (fanIn *EnsemblingFanIn) collectResponses(
 			"component": func() string {
 				return "fanin_marshalResponse"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)
 	rBytes, err := jsoniter.Marshal(result)

@@ -53,7 +53,9 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	ctx context.Context,
 	req fiber.Request,
 	routes map[string]fiber.Component,
-) (fiber.Component, []fiber.Component, error) {
+) (fiber.Component, []fiber.Component, fiber.Labels, error) {
+	labels := fiber.NewLabelsMap()
+
 	// Get fallback
 	fallbacks := []fiber.Component{}
 	if defRoute, ok := routes[r.defaultRoute]; ok {
@@ -73,26 +75,26 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		if !ok {
 			err := fmt.Errorf("failed to convert into grpc fiber request")
 			log.Glob().Error(err.Error())
-			return nil, nil, err
+			return nil, nil, labels, err
 		}
 
 		requestProto, ok := grpcFiberReq.ProtoMessage().(*upiv1.PredictValuesRequest)
 		if !ok {
 			err := fmt.Errorf("failed to convert into UPI request")
 			log.Glob().Error(err.Error())
-			return nil, nil, err
+			return nil, nil, labels, err
 		}
 
 		predContext, err := request.UPIVariablesToStringMap(requestProto.GetPredictionContext())
 		if err != nil {
 			log.Glob().Errorf("failed converting prediction context into string map: %s", err)
-			return nil, nil, err
+			return nil, nil, labels, err
 		}
 
 		payload, err = json.Marshal(predContext)
 		if err != nil {
 			log.Glob().Errorf("failed marshalling prediction context into payload: %s", err)
-			return nil, nil, err
+			return nil, nil, labels, err
 		}
 
 		for k, v := range req.Header() {
@@ -121,7 +123,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	// If error, log it and return the fallback(s)
 	if expErr != nil {
 		log.WithContext(ctx).Errorf(expErr.Error())
-		return nil, fallbacks, nil
+		return nil, fallbacks, labels, nil
 	}
 
 	// For the DefaultTuringRoutingStrategy, we only expect experimentMappings OR routeNamePath to be configured; we
@@ -130,7 +132,7 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 		if m.Experiment == expPlan.ExperimentName && m.Treatment == expPlan.Name {
 			// Stop matching on first match because only 1 route is required. Don't send in fallbacks,
 			// because we do not want to suppress the error from the preferred route.
-			return routes[m.Route], []fiber.Component{}, nil
+			return routes[m.Route], []fiber.Component{}, labels, nil
 		}
 	}
 
@@ -143,11 +145,11 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 
 		if err != nil {
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, fallbacks, nil
+			return nil, fallbacks, labels, nil
 		}
 
 		if selectedRoute, ok := routes[routeName]; ok {
-			return selectedRoute, []fiber.Component{}, nil
+			return selectedRoute, []fiber.Component{}, labels, nil
 		}
 
 		// There are no routes with the route name found in the treatment
@@ -158,5 +160,5 @@ func (r *DefaultTuringRoutingStrategy) SelectRoute(
 	}
 
 	// primary route will be nil if there are no matching treatments in the mapping
-	return nil, fallbacks, nil
+	return nil, fallbacks, labels, nil
 }

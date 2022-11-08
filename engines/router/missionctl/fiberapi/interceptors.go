@@ -2,6 +2,7 @@ package fiberapi
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/gojek/fiber"
@@ -135,6 +136,13 @@ func (i *MetricsInterceptor) AfterCompletion(
 ) {
 	cID := ctx.Value(fiber.CtxComponentIDKey)
 	cKind := ctx.Value(fiber.CtxComponentKindKey)
+	cLabels := ctx.Value(fiber.CtxComponentLabelsKey)
+
+	// Parse traffic rule, if set
+	var trafficRule string
+	if cLabels != nil {
+		trafficRule = strings.Join(cLabels.(fiber.LabelsMap).Label(TrafficRuleLabel), ",")
+	}
 
 	if cKindCompType, ok := cKind.(fiber.ComponentKind); ok {
 		// Only measure time taken for Caller
@@ -144,8 +152,9 @@ func (i *MetricsInterceptor) AfterCompletion(
 					for resp := range queue.Iter() {
 						// Measure the time taken for the route
 						labels := map[string]string{
-							"status": metrics.GetStatusString(resp.IsSuccess()),
-							"route":  routeName,
+							"status":       metrics.GetStatusString(resp.IsSuccess()),
+							"route":        routeName,
+							"traffic_rule": trafficRule,
 						}
 						metrics.Glob().MeasureDurationMsSince(
 							metrics.RouteRequestDurationMs,
