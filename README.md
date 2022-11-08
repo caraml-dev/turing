@@ -391,8 +391,8 @@ to check them, they are installed in the following namespaces:
 
 Alternatively, you could install the following components yourself with the following recommended versions:
 
-- Knative: v1.0.1
-- Knative Istio: v1.0.0
+- Knative: v1.3.2
+- Knative Istio: v1.3.0
 - Istio: 1.12.5
 - Spark On K8s Operator: 1.1.7 Helm charts
 

@@ -263,30 +263,19 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 								PodSpec: corev1.PodSpec{
 									Containers: []corev1.Container{
 										{
-											Name:  "user-container",
-											Image: "asia.gcr.io/gcp-project-id/turing-router:latest",
+											Name:  podSpec.Containers[0].Name,
+											Image: podSpec.Containers[0].Image,
 											Ports: []corev1.ContainerPort{
 												{
 													Name:          "h2c",
 													ContainerPort: 8080,
 												},
 											},
-											Resources: resources,
-											ReadinessProbe: &corev1.Probe{
-												Handler: corev1.Handler{
-													HTTPGet: &corev1.HTTPGetAction{
-														Port: intstr.FromInt(8080),
-														Path: "/v1/internal/ready",
-													},
-												},
-												InitialDelaySeconds: 20,
-												PeriodSeconds:       10,
-												SuccessThreshold:    1,
-												TimeoutSeconds:      5,
-												FailureThreshold:    5,
-											},
-											VolumeMounts: baseSvc.VolumeMounts,
-											Env:          envs,
+											Resources:      resources,
+											ReadinessProbe: podSpec.Containers[0].ReadinessProbe,
+											LivenessProbe:  podSpec.Containers[0].LivenessProbe,
+											VolumeMounts:   baseSvc.VolumeMounts,
+											Env:            envs,
 										},
 									},
 									Volumes: baseSvc.Volumes,

@@ -58,9 +58,9 @@ The following table lists the configurable parameters of the Turing chart and th
 | istio.operatorConfig | object | `{"apiVersion":"install.istio.io/v1alpha1","kind":"IstioOperator","spec":{"components":{"ingressGateways":[{"enabled":true,"k8s":{"service":{"ports":[{"name":"status-port","port":15020},{"name":"http2","port":80},{"name":"https","port":443},{"name":"http2-knative","port":8081}],"type":"LoadBalancer"}},"name":"istio-ingressgateway"}]},"values":{"gateways":{"istio-ingressgateway":{"runAsRoot":true}},"global":{"proxy":{"autoInject":"disabled"}}}}}` | istio operator config, defaults are the minimum to run turing, see https://istio.io/v1.9/docs/reference/config/istio.operator.v1alpha1/ |
 | istio.version | string | `"1.12.5"` | Istio version to use |
 | knative.domains | string | `""` | Knative domains, comma seperated values, i.e. www.example.com,www.gojek.com |
-| knative.istioVersion | string | `"1.0.0"` | Knative Istio Version to use |
+| knative.istioVersion | string | `"1.3.0"` | Knative Istio Version to use |
 | knative.registriesSkippingTagResolving | string | `""` | Knative registries skipping tag resolving, comma seperated values, i.e. www.example.com,www.gojek.com |
-| knative.version | string | `"1.0.1"` | Knative Version to use |
+| knative.version | string | `"1.3.2"` | Knative Version to use |
 | spark-operator | object | `{"image":{"repository":"ghcr.io/googlecloudplatform/spark-operator","tag":"v1beta2-1.3.3-3.1.1"},"replicas":1,"resources":{},"webhook":{"enable":true}}` | Override any spark-operator values here: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/charts/spark-operator-chart/README.md |
 | spark-operator.image.repository | string | `"ghcr.io/googlecloudplatform/spark-operator"` | repository of the spark operator |
 | spark-operator.image.tag | string | `"v1beta2-1.3.3-3.1.1"` | image tag of the spark operator |

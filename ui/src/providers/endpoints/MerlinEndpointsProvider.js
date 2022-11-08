@@ -36,6 +36,18 @@ export const MerlinEndpointsProvider = ({
   }, [region, fetchMerlinEndpoints]);
 
   useEffect(() => {
+    const urlWithPortRegex = /.*(:\d+)$/;
+    const formatMerlinUrl = (url, protocol) => {
+      // Append port 80 as default if Merlin doesn't return url with port
+      if (protocol === "UPI_V1") {
+        if (url.match(urlWithPortRegex)) {
+          return url;
+        }
+        return `${url}:80`;
+      }
+      return `http://${url}/v1/predict`;
+    };
+
     setEndpoints([
       {
         label: "Merlin Model Endpoints",
@@ -44,7 +56,7 @@ export const MerlinEndpointsProvider = ({
           .filter((modelEndpoint) => modelEndpoint.status === "serving")
           .map((modelEndpoint) => ({
             icon: "machineLearningApp",
-            label: `http://${modelEndpoint.url}/v1/predict`,
+            label: formatMerlinUrl(modelEndpoint.url, modelEndpoint.protocol),
             annotations: {
               [ANNOTATIONS_MERLIN_MODEL_ID]: `${modelEndpoint.model.id}`,
             },
