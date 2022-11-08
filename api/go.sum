@@ -702,6 +702,8 @@ github.com/gogo/protobuf v1.3.0/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXP
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gogo/protobuf v1.3.2 h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
+github.com/gojek/fiber v0.2.0 h1:1lOMFm9rqJpfFpcDT44JSXewuWuFrKZMobWBo+YnEag=
+github.com/gojek/fiber v0.2.0/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
 github.com/gojek/heimdall/v7 v7.0.2/go.mod h1:Z43HtMid7ysSjmsedPTXAki6jcdcNVnjn5pmsTyiMic=
 github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58 h1:8cVTLtTFHjfoTKQyL4sMSnfmTlTJU+Cizfy4hzRl2Tg=
 github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58/go.mod h1:FYMy4bZcts0UkTDE/rgGRWTOG4sUc5NvkljQqw4C8AE=
@@ -1127,8 +1129,6 @@ github.com/kr/pty v1.1.8/go.mod h1:O1sed60cT9XZ5uDucP5qwvh+TE3NnUj51EiZO/lmSfw=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
-github.com/krithika369/fiber v0.0.0-20221104013137-0e0fe2c994b2 h1:qvrNLMgeqb7FkLfKrwsF/PEo5VdfbJxhHO2utFx/WeU=
-github.com/krithika369/fiber v0.0.0-20221104013137-0e0fe2c994b2/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
 github.com/kubeflow/kfserving v0.4.1/go.mod h1:yGPsc6vK4+V1I8Gtz4Fax/Oc85+6U6T9W+BNWyu6XxA=
 github.com/kulti/thelper v0.4.0/go.mod h1:vMu2Cizjy/grP+jmsvOFDx1kYP6+PD1lqg4Yu5exl2U=
 github.com/kunwardeep/paralleltest v1.0.3/go.mod h1:vLydzomDFpk7yu5UX02RmP0H8QfRPOV/oFhWN85Mjb4=
