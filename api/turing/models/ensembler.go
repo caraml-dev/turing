@@ -32,6 +32,12 @@ const (
 )
 
 type EnsemblerStandardConfig struct {
+	// LazyRouting dictates whether the routes should be called lazily, based on the results
+	// of the experiment engine. If true, the experiment engine will be called first and only
+	// the selected route will be invoked - this is more cost efficient. If false, the routing
+	// will be executed in parallel with the call to the experiment engine and therefore, faster
+	// e2e execution time.
+	LazyRouting        bool                `json:"lazy_routing"`
 	ExperimentMappings []ExperimentMapping `json:"experiment_mappings" validate:"dive"`
 	RouteNamePath      string              `json:"route_name_path"`
 }

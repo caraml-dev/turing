@@ -519,7 +519,12 @@ func buildFiberConfig(
 			},
 		}
 	} else {
-		multiRouteConfig.Type = routerConfigTypeEagerRouter
+		if ensembler != nil && ensembler.StandardConfig != nil && ensembler.StandardConfig.LazyRouting {
+			// If lazy routing is set, use the lazy router
+			multiRouteConfig.Type = routerConfigTypeLazyRouter
+		} else {
+			multiRouteConfig.Type = routerConfigTypeEagerRouter
+		}
 		routerConfig = &fiberConfig.RouterConfig{
 			MultiRouteConfig: multiRouteConfig,
 			Strategy: fiberConfig.StrategyConfig{

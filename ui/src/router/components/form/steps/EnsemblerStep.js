@@ -41,9 +41,10 @@ export const EnsemblerStep = ({ projectId }) => {
       <EuiFlexItem>
         <EnsemblerTypePanel
           type={ensembler.type}
-          options={ensemblerTypeOptions(engineProps, protocol)}
-          onChange={onChange("config.ensembler.type")}
-          errors={get(errors, "config.ensembler.type")}
+          lazyRouting={ensembler.lazy_routing}
+          typeOptions={ensemblerTypeOptions(engineProps, protocol)}
+          onChange={onChange("config.ensembler")}
+          errors={get(errors, "config.ensembler")}
         />
       </EuiFlexItem>
 
