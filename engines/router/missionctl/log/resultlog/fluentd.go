@@ -62,6 +62,7 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 			"component": func() string {
 				return "fluentd_post"
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 	log.Glob().Debugw("Sending log to fluentd", "entry", turLogEntry)

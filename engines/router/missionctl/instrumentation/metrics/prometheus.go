@@ -50,7 +50,7 @@ var histogramMap = map[MetricName]*prometheus.HistogramVec{
 		Help:      "Histogram for the runtime (in milliseconds) of Fiber route requests.",
 		Buckets:   requestLatencyBuckets,
 	},
-		[]string{"status", "route"},
+		[]string{"status", "route", "traffic_rule"},
 	),
 	TuringComponentRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: Namespace,
@@ -59,7 +59,7 @@ var histogramMap = map[MetricName]*prometheus.HistogramVec{
 		Help:      "Histogram for time spent (in milliseconds) at each Turing component.",
 		Buckets:   requestLatencyBuckets,
 	},
-		[]string{"status", "component"},
+		[]string{"status", "component", "traffic_rule"},
 	),
 }
 

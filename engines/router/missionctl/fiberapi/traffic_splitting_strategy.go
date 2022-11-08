@@ -24,6 +24,7 @@ var (
 
 		return instance
 	}()
+	TrafficRuleLabel string = "traffic-rule"
 )
 
 // TrafficSplittingStrategyRule represents one rule of the TrafficSplittingStrategy
@@ -109,47 +110,33 @@ func (s *TrafficSplittingStrategy) SelectRoute(
 	ctx context.Context,
 	req fiber.Request,
 	routes map[string]fiber.Component,
-) (fiber.Component, []fiber.Component, error) {
-	var orderedRoutes []fiber.Component
-	// array, that holds results of testing the request by each rule configured on the strategy
-	// `results[k]` – is `true` if the request satisfies `k`th rule of the strategy, and `false`
-	// otherwise
-	results := make([]bool, len(s.Rules))
+) (fiber.Component, []fiber.Component, fiber.Labels, error) {
+	labels := fiber.NewLabelsMap()
 
-	for idx, rule := range s.Rules {
+	for _, rule := range s.Rules {
 		res, err := rule.TestRequest(req)
 		if err != nil {
-			return nil, nil, createFiberError(err, req.Protocol())
-		}
-
-		results[idx] = res
-	}
-
-	// select primary route and fallbacks, based on the results of testing
-	// given request against traffic-splitting rules
-	for i := 0; i < len(results); i++ {
-		routeID := s.Rules[i].RouteID
-		if results[i] {
+			return nil, nil, labels, createFiberError(err, req.Protocol())
+		} else if res {
+			routeID := rule.RouteID
 			if r, exists := routes[routeID]; exists {
-				orderedRoutes = append(orderedRoutes, r)
-			} else {
-				err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
-				log.WithContext(ctx).Errorf(err.Error())
-				return nil, nil, createFiberError(err, req.Protocol())
+				return r, []fiber.Component{}, labels.WithLabel(TrafficRuleLabel, r.ID()), nil
 			}
-		}
-	}
-
-	// given request hasn't satisfied any of the rules configured on this routing strategy
-	if len(orderedRoutes) == 0 {
-		if defaultRoute, exist := routes[s.DefaultRouteID]; exist {
-			orderedRoutes = append(orderedRoutes, defaultRoute)
-		} else {
-			err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
+			// This is unexpected, terminate with error.
+			err := errors.Newf(errors.BadConfig, `route with id "%s" doesn't exist in the router`, routeID)
 			log.WithContext(ctx).Errorf(err.Error())
-			return nil, nil, createFiberError(err, req.Protocol())
+			return nil, nil, labels, createFiberError(err, req.Protocol())
 		}
 	}
 
-	return orderedRoutes[0], orderedRoutes[1:], nil
+	// Given request hasn't satisfied any of the rules configured on this routing strategy;
+	// check if default route exists.
+	if defaultRoute, exist := routes[s.DefaultRouteID]; exist {
+		return defaultRoute, []fiber.Component{}, labels.WithLabel(TrafficRuleLabel, defaultRoute.ID()), nil
+	}
+
+	// No matches whatsoever.
+	err := errors.Newf(errors.NotFound, "http request didn't match any traffic rule")
+	log.WithContext(ctx).Errorf(err.Error())
+	return nil, nil, labels, createFiberError(err, req.Protocol())
 }

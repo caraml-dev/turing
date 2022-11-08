@@ -141,6 +141,7 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			"component": func() string {
 				return httpHandlerID
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 

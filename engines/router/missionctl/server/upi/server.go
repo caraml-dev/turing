@@ -86,6 +86,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 			"component": func() string {
 				return tracingComponentID
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 

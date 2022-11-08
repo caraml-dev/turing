@@ -358,7 +358,7 @@ func TestDefaultRoutingStrategy(t *testing.T) {
 			if data.request != nil {
 				fiberReq = data.request
 			}
-			route, fallbacks, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
+			route, fallbacks, _, err := strategy.SelectRoute(context.Background(), fiberReq, routes)
 
 			assert.Equal(t, data.expectedError, err)
 			assert.Equal(t, data.expectedRoute, route)

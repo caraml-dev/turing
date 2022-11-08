@@ -47,6 +47,7 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 			"component": func() string {
 				return batchHTTPHandlerID
 			},
+			"traffic_rule": func() string { return "" },
 		},
 	)()
 

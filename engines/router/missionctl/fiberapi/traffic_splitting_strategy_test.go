@@ -402,9 +402,10 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 	type testCase struct {
 		strategy      *fiberapi.TrafficSplittingStrategy
 		routes        map[string]fiber.Component
+		fallbacks     []fiber.Component
 		request       fiber.Request
 		expected      fiber.Component
-		fallbacks     []fiber.Component
+		labels        fiber.Labels
 		expectedError string
 	}
 
@@ -438,6 +439,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				"X-Region": []string{"region-b"},
 			}, `{"service_type": "service-b"}`),
 			expected:  tfu.NewFiberCaller(t, "route-a"),
+			labels:    fiber.LabelsMap{"traffic-rule": []string{"route-a"}},
 			fallbacks: []fiber.Component{},
 		},
 		"success | upi": {
@@ -477,6 +479,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				},
 			}),
 			expected:  tfu.NewFiberCaller(t, "route-a"),
+			labels:    fiber.LabelsMap{"traffic-rule": []string{"route-a"}},
 			fallbacks: []fiber.Component{},
 		},
 		"success | with default route": {
@@ -520,6 +523,7 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 			},
 			request:   tfu.NewHTTPFiberRequest(t, http.Header{}, `{"service_type": "service-c"}`),
 			expected:  tfu.NewFiberCaller(t, "control"),
+			labels:    fiber.LabelsMap{"traffic-rule": []string{"control"}},
 			fallbacks: []fiber.Component{},
 		},
 		"success | upi with default route": {
@@ -573,103 +577,9 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 				},
 			}),
 			expected:  tfu.NewFiberCaller(t, "control"),
+			labels:    fiber.LabelsMap{"traffic-rule": []string{"control"}},
 			fallbacks: []fiber.Component{},
 		},
-		"success | with fallbacks": {
-			strategy: &fiberapi.TrafficSplittingStrategy{
-				Rules: []*fiberapi.TrafficSplittingStrategyRule{
-					{
-						RouteID: "route-a",
-						Conditions: []*router.TrafficRuleCondition{
-							{
-								FieldSource: request.HeaderFieldSource,
-								Field:       "X-Region",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"region-a", "region-b"},
-							},
-							{
-								FieldSource: request.PayloadFieldSource,
-								Field:       "service_type",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"service-b"},
-							},
-						},
-					},
-					{
-						RouteID: "route-b",
-						Conditions: []*router.TrafficRuleCondition{
-							{
-								FieldSource: request.PayloadFieldSource,
-								Field:       "service_type",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"service-a", "service-b"},
-							},
-						},
-					},
-				},
-			},
-			routes: map[string]fiber.Component{
-				"route-a": tfu.NewFiberCaller(t, "route-a"),
-				"route-b": tfu.NewFiberCaller(t, "route-b"),
-			},
-			request: tfu.NewHTTPFiberRequest(t,
-				http.Header{"X-Region": []string{"region-b"}},
-				`{"service_type": "service-b"}`),
-			expected:  tfu.NewFiberCaller(t, "route-a"),
-			fallbacks: []fiber.Component{tfu.NewFiberCaller(t, "route-b")},
-		},
-		"success | upi with fallbacks": {
-			strategy: &fiberapi.TrafficSplittingStrategy{
-				Rules: []*fiberapi.TrafficSplittingStrategyRule{
-					{
-						RouteID: "route-a",
-						Conditions: []*router.TrafficRuleCondition{
-							{
-								FieldSource: request.HeaderFieldSource,
-								Field:       "X-Region",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"region-a", "region-b"},
-							},
-							{
-								FieldSource: request.PredictionContextSource,
-								Field:       "service_type",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"service-b"},
-							},
-						},
-					},
-					{
-						RouteID: "route-b",
-						Conditions: []*router.TrafficRuleCondition{
-							{
-								FieldSource: request.PredictionContextSource,
-								Field:       "service_type",
-								Operator:    router.InConditionOperator,
-								Values:      []string{"service-a", "service-b"},
-							},
-						},
-					},
-				},
-			},
-			routes: map[string]fiber.Component{
-				"route-a": tfu.NewFiberCaller(t, "route-a"),
-				"route-b": tfu.NewFiberCaller(t, "route-b"),
-			},
-			request: tfu.NewUPIFiberRequest(t, map[string]string{
-				"X-Region": "region-a",
-			}, &upiv1.PredictValuesRequest{
-				PredictionContext: []*upiv1.Variable{
-					{
-						Name:        "service_type",
-						Type:        upiv1.Type_TYPE_STRING,
-						StringValue: "service-b",
-					},
-				},
-			}),
-			expected:  tfu.NewFiberCaller(t, "route-a"),
-			fallbacks: []fiber.Component{tfu.NewFiberCaller(t, "route-b")},
-		},
-
 		"failure | request doesn't match any rule": {
 			strategy: &fiberapi.TrafficSplittingStrategy{
 				Rules: []*fiberapi.TrafficSplittingStrategyRule{
@@ -722,11 +632,12 @@ func TestTrafficSplittingStrategy_SelectRoute(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			ctx := turingctx.NewTuringContext(context.Background())
-			actual, actualFallbacks, err := tt.strategy.SelectRoute(ctx, tt.request, tt.routes)
+			actual, actualFallbacks, labels, err := tt.strategy.SelectRoute(ctx, tt.request, tt.routes)
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 				require.Equal(t, tt.expected, actual)
 				require.Equal(t, tt.fallbacks, actualFallbacks)
+				require.Equal(t, tt.labels, labels)
 			} else {
 				require.EqualError(t, err, tt.expectedError)
 			}
@@ -784,6 +695,6 @@ func BenchmarkTrafficSplittingStrategy_SelectRoute(b *testing.B) {
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		primaryRoute, _, _ = strategy.SelectRoute(ctx, fiberReq, routes)
+		primaryRoute, _, _, _ = strategy.SelectRoute(ctx, fiberReq, routes)
 	}
 }
