@@ -752,7 +752,7 @@ func TestNewRouterService(t *testing.T) {
 						},
 						{
 							Name:      secretVolumeExpEngine,
-							MountPath: secretMountPath,
+							MountPath: secretMountPath + "exp-engine/",
 						},
 					},
 					InitContainers: []cluster.Container{

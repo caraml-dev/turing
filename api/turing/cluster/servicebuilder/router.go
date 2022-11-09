@@ -340,7 +340,7 @@ func buildRouterVolumes(
 			})
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{
 				Name:      secretVolumeExpEngine,
-				MountPath: secretMountPath,
+				MountPath: secretMountPath + "exp-engine/",
 			})
 		}
 	}
