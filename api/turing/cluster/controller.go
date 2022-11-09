@@ -46,8 +46,6 @@ var (
 	ErrNamespaceAlreadyExists = errors.New("namespace already exists")
 )
 
-const LocalClusterName = "self"
-
 // clusterConfig Model cluster authentication settings
 type clusterConfig struct {
 	// Use Kubernetes service account in cluster config
@@ -199,17 +197,6 @@ func InitClusterControllers(
 
 		controllers[envName] = ctl
 	}
-
-	selfCtl, err := newController(
-		clusterConfig{
-			ClusterName:     LocalClusterName,
-			InClusterConfig: true,
-		},
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to initialize cluster controller")
-	}
-	controllers[LocalClusterName] = selfCtl
 
 	return controllers, nil
 }
