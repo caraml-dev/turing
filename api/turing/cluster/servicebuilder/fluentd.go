@@ -37,7 +37,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 	envs := []corev1.EnvVar{
 		{Name: "FLUENTD_LOG_LEVEL", Value: "info"},
 		{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
-		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPathRouter + secretKeyNameRouter},
+		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + secretKeyNameRouter},
 		{Name: "FLUENTD_BUFFER_LIMIT", Value: "10g"},
 		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS", Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds)},
 		{Name: "FLUENTD_TAG", Value: fluentdConfig.Tag},
@@ -106,7 +106,7 @@ func buildFluentdVolumes(
 
 	// Service account
 	volumes = append(volumes, corev1.Volume{
-		Name: secretVolumeRouter,
+		Name: secretVolume,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				SecretName: svcAccountSecretName,
@@ -120,8 +120,8 @@ func buildFluentdVolumes(
 		},
 	})
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{
-		Name:      secretVolumeRouter,
-		MountPath: secretMountPathRouter,
+		Name:      secretVolume,
+		MountPath: secretMountPath,
 	})
 
 	volumes = append(volumes, corev1.Volume{

@@ -66,7 +66,7 @@ func TestNewFluentdService(t *testing.T) {
 			Envs: []corev1.EnvVar{
 				{Name: "FLUENTD_LOG_LEVEL", Value: "info"},
 				{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
-				{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: "/var/secret/router/router-service-account.json"},
+				{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: "/var/secret/router-service-account.json"},
 				{Name: "FLUENTD_BUFFER_LIMIT", Value: "10g"},
 				{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS", Value: "30"},
 				{Name: "FLUENTD_TAG", Value: "fluentd-tag"},
@@ -89,7 +89,7 @@ func TestNewFluentdService(t *testing.T) {
 			},
 			Volumes: []corev1.Volume{
 				{
-					Name: secretVolumeRouter,
+					Name: secretVolume,
 					VolumeSource: corev1.VolumeSource{
 						Secret: &corev1.SecretVolumeSource{
 							SecretName: "service-account",
@@ -113,8 +113,8 @@ func TestNewFluentdService(t *testing.T) {
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
-					Name:      secretVolumeRouter,
-					MountPath: secretMountPathRouter,
+					Name:      secretVolume,
+					MountPath: secretMountPath,
 				},
 				{
 					Name:      ComponentTypes.CacheVolume,
