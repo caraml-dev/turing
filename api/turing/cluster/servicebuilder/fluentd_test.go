@@ -89,7 +89,7 @@ func TestNewFluentdService(t *testing.T) {
 			},
 			Volumes: []corev1.Volume{
 				{
-					Name: secretVolume,
+					Name: secretVolumeRouter,
 					VolumeSource: corev1.VolumeSource{
 						Secret: &corev1.SecretVolumeSource{
 							SecretName: "service-account",
@@ -113,8 +113,8 @@ func TestNewFluentdService(t *testing.T) {
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
-					Name:      secretVolume,
-					MountPath: secretMountPath,
+					Name:      secretVolumeRouter,
+					MountPath: secretMountPathRouter,
 				},
 				{
 					Name:      ComponentTypes.CacheVolume,

@@ -130,7 +130,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -150,8 +150,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -228,7 +228,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -248,8 +248,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -334,7 +334,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -354,8 +354,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -432,7 +432,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -452,8 +452,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -530,7 +530,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -550,8 +550,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -628,7 +628,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -648,8 +648,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath + "router/",
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
@@ -752,7 +752,7 @@ func TestNewRouterService(t *testing.T) {
 						},
 						{
 							Name:      secretVolumeExpEngine,
-							MountPath: secretMountPath + "exp-engine/",
+							MountPath: secretMountPathExpEngine,
 						},
 					},
 					InitContainers: []cluster.Container{
