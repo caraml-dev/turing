@@ -22,7 +22,7 @@ type ExperimentEngine struct {
 	PluginConfig *config.ExperimentEnginePluginConfig `json:"plugin_config,omitempty"`
 	// ServiceAccount contains the service account file path that points to the service account
 	// key that the experiment engine may require
-	ServiceAccountKeyFilePath *string `json:"service_account_key_file_path,omitempty"`
+	ServiceAccountKeyFilePath *string `json:"-"`
 	// Config contains the configs for the selected experiment engine (other than "nop").
 	// For standard experiment engine managers, the config can be unmarshalled into
 	// manager.TuringExperimentConfig type.
