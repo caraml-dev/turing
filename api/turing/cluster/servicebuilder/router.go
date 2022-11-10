@@ -263,7 +263,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envBQDataset, Value: bqFQN[1]},
 			{Name: envBQTable, Value: bqFQN[2]},
 			{Name: envBQBatchLoad, Value: strconv.FormatBool(logConfig.BigQueryConfig.BatchLoad)},
-			{Name: envGoogleApplicationCredentials, Value: secretMountPath + secretKeyNameRouter},
+			{Name: envGoogleApplicationCredentials, Value: secretMountPath + "router/" + secretKeyNameRouter},
 		}...)
 		if logConfig.BigQueryConfig.BatchLoad {
 			envs = append(envs, []corev1.EnvVar{
@@ -363,7 +363,7 @@ func buildRouterVolumes(
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      secretVolume,
-			MountPath: secretMountPath,
+			MountPath: secretMountPath + "router/",
 		})
 	}
 	return volumes, volumeMounts
