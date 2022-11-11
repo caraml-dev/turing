@@ -1,4 +1,4 @@
-from typing import DefaultDict
+from typing import DefaultDict, Optional
 import logging
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
@@ -8,8 +8,8 @@ from ensembler.ensembler import Ensembler
 
 def build_spark_session(
     app_name: str,
-    spark_config: DefaultDict[str, str] = None,
-    hadoop_config: DefaultDict[str, str] = None,
+    spark_config: Optional[DefaultDict[str, str]] = None,
+    hadoop_config: Optional[DefaultDict[str, str]] = None,
 ) -> SparkSession:
     conf = SparkConf()
     if spark_config:
