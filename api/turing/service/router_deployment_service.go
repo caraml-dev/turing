@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -31,6 +32,7 @@ type DeploymentService interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
+		expEngineServiceAccountKey string,
 		pyfuncEnsembler *models.PyFuncEnsembler,
 		experimentConfig json.RawMessage,
 		eventsCh *EventChannel,
@@ -46,6 +48,9 @@ type DeploymentService interface {
 		environment *merlin.Environment,
 		routerVersion *models.RouterVersion,
 	) error
+	GetLocalSecret(
+		serviceAccountKeyFilePath string,
+	) (*string, error)
 }
 type deploymentService struct {
 	// Deployment configs
@@ -105,6 +110,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	expEngineServiceAccountKey string,
 	pyfuncEnsembler *models.PyFuncEnsembler,
 	experimentConfig json.RawMessage,
 	eventsCh *EventChannel,
@@ -144,6 +150,7 @@ func (ds *deploymentService) DeployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
+		expEngineServiceAccountKey,
 	)
 	err = createSecret(ctx, controller, secret)
 	if err != nil {
@@ -235,7 +242,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Delete secret
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
-	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "")
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "", "")
 	err = deleteSecret(controller, secret, isCleanUp)
 	if err != nil {
 		return err
@@ -448,6 +455,18 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 	}
 
 	return nil
+}
+
+func (ds *deploymentService) GetLocalSecret(
+	serviceAccountKeyFilePath string,
+) (*string, error) {
+	byteValue, err := os.ReadFile(serviceAccountKeyFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceAccountKey := string(byteValue)
+	return &serviceAccountKey, nil
 }
 
 // deployK8sService deploys a kubernetes service.

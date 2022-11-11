@@ -55,6 +55,7 @@ func (msb *mockClusterServiceBuilder) NewSecret(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	expEngineServiceAccountKey string,
 ) *cluster.Secret {
 	return &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
@@ -63,6 +64,7 @@ func (msb *mockClusterServiceBuilder) NewSecret(
 			"SecretKeyNameRouter":    routerServiceAccountKey,
 			"SecretKeyNameEnricher":  enricherServiceAccountKey,
 			"SecretKeyNameEnsembler": ensemblerServiceAccountKey,
+			"SecretKeyNameExpEngine": expEngineServiceAccountKey,
 		},
 	}
 }
@@ -237,6 +239,7 @@ func TestDeployEndpoint(t *testing.T) {
 		"router-service-account-key",
 		"enricher-service-account-key",
 		"ensembler-service-account-key",
+		"exp-engine-service-account-key",
 		nil,
 		nil,
 		eventsCh,
@@ -261,6 +264,7 @@ func TestDeployEndpoint(t *testing.T) {
 			"SecretKeyNameRouter":    "router-service-account-key",
 			"SecretKeyNameEnricher":  "enricher-service-account-key",
 			"SecretKeyNameEnsembler": "ensembler-service-account-key",
+			"SecretKeyNameExpEngine": "exp-engine-service-account-key",
 		},
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
@@ -318,6 +322,7 @@ func TestDeployEndpoint(t *testing.T) {
 			"SecretKeyNameRouter":    "router-service-account-key",
 			"SecretKeyNameEnricher":  "enricher-service-account-key",
 			"SecretKeyNameEnsembler": "ensembler-service-account-key",
+			"SecretKeyNameExpEngine": "exp-engine-service-account-key",
 		},
 	})
 	controller.AssertNumberOfCalls(t, "DeployKnativeService", 3)
@@ -340,6 +345,7 @@ func TestDeployEndpoint(t *testing.T) {
 		"router-service-account-key",
 		"enricher-service-account-key",
 		"ensembler-service-account-key",
+		"exp-engine-service-account-key",
 		nil,
 		nil,
 		eventsCh,

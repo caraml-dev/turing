@@ -160,7 +160,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 	}, nil
 }
 
-// InitClusterControllers takes in the the app config and a vault client and uses the credentials
+// InitClusterControllers takes in the app config and a vault client and uses the credentials
 // from vault to initialize one cluster controller per environment and returns a map where the
 // key is the env name and the value is the corresponding controller.
 func InitClusterControllers(

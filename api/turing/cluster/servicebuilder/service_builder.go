@@ -18,14 +18,19 @@ import (
 )
 
 const (
-	secretVolume    = "svc-acct-secret-volume"
-	secretMountPath = "/var/secret/"
+	secretVolume             = "svc-acct-secret-volume"
+	secretVolumeRouter       = "svc-acct-secret-volume-router"
+	secretVolumeExpEngine    = "svc-acct-secret-volume-exp-engine"
+	secretMountPath          = "/var/secret/"
+	secretMountPathRouter    = "/var/secret/router/"
+	secretMountPathExpEngine = "/var/secret/exp-engine/"
 	// Kubernetes secret key name for usage in: router, ensembler, enricher.
 	// They will share the same Kubernetes secret for every RouterVersion deployment.
 	// Hence, the key name should be used to retrieve different credentials.
 	secretKeyNameRouter    = "router-service-account.json"
 	secretKeyNameEnsembler = "ensembler-service-account.json"
 	secretKeyNameEnricher  = "enricher-service-account.json"
+	secretKeyNameExpEngine = "exp-engine-service-account.json"
 )
 
 var ComponentTypes = struct {
@@ -98,6 +103,7 @@ type ClusterServiceBuilder interface {
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
 		ensemblerServiceAccountKey string,
+		expEngineServiceAccountKey string,
 	) *cluster.Secret
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
@@ -287,11 +293,13 @@ func (sb *clusterSvcBuilder) NewSecret(
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
 	ensemblerServiceAccountKey string,
+	expEngineServiceAccountKey string,
 ) *cluster.Secret {
 	data := map[string]string{
 		secretKeyNameRouter:    routerServiceAccountKey,
 		secretKeyNameEnricher:  enricherServiceAccountKey,
 		secretKeyNameEnsembler: ensemblerServiceAccountKey,
+		secretKeyNameExpEngine: expEngineServiceAccountKey,
 	}
 	return &cluster.Secret{
 		Name: fmt.Sprintf(
