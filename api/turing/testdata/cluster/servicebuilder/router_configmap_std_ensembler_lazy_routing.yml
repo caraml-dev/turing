@@ -1,0 +1,37 @@
+id: test-svc
+routes:
+- endpoint: http://example.com/treatment-b
+  id: treatment-b
+  protocol: HTTP
+  timeout: 2s
+  type: PROXY
+- endpoint: http://example.com/treatment-a
+  id: treatment-a
+  protocol: HTTP
+  timeout: 2s
+  type: PROXY
+- endpoint: http://www.mocky.io/v2/5e4caccc310000e2cad8c071
+  id: control
+  protocol: HTTP
+  timeout: 2s
+  type: PROXY
+strategy:
+  properties:
+    default_route_id: control
+    experiment_engine: exp-engine-2
+    experiment_engine_properties:
+      client_id: client_id
+      endpoint: exp-engine:8080
+      experiments:
+      - experiment_name: exp_exp_test_experiment_1
+        segmentation_field: customer_id
+        segmentation_field_source: payload
+        segmentation_unit: customer
+      timeout: 500ms
+      user_data:
+        app_version:
+          field: appVer
+          field_source: header
+    route_name_path: policy.route_name
+  type: fiber.DefaultTuringRoutingStrategy
+type: LAZY_ROUTER
