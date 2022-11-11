@@ -8,8 +8,8 @@ import {
 } from "../../../../components/validation";
 import { autoscalingPolicyMetrics } from "../components/autoscaling_policy/typeOptions";
 
-yup.addMethod(yup.array, "unique", function (propertyPath, message) {
-  return this.test("unique", message, function (list) {
+yup.addMethod(yup.array, "unique", function(propertyPath, message) {
+  return this.test("unique", message, function(list) {
     const errors = [];
 
     list.forEach((item, index) => {
@@ -39,7 +39,7 @@ yup.addMethod(yup.array, "unique", function (propertyPath, message) {
   });
 });
 
-const validateRuleNames = function (items) {
+const validateRuleNames = function(items) {
   const uniqueNamesMap = items.reduce((acc, item) => {
     const current = item.name in acc ? acc[item.name] : 0;
     // If name is set, increment the count
@@ -59,7 +59,7 @@ const validateRuleNames = function (items) {
   return !!errors.length ? new yup.ValidationError(errors) : true;
 };
 
-const validateDanglingRoutes = function (items) {
+const validateDanglingRoutes = function(items) {
   const defaultTrafficRule = this.options.parent.default_traffic_rule;
   let trafficRuleRoutes = [
     ...new Set(this.options.parent.rules.map((rule) => rule.routes).flat(1)),
@@ -131,7 +131,7 @@ const routeSchema = yup.object().shape({
 
 const validRouteSchema = yup
   .mixed()
-  .test("valid-route", "Valid route is required", function (value) {
+  .test("valid-route", "Valid route is required", function(value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
     return routes.map((r) => r.id).includes(value);
@@ -287,6 +287,7 @@ const standardEnsemblerConfigSchema = yup
     route_name_path: yup.string().nullable(),
     experiment_mappings: yup.array(mappingSchema).nullable(),
     fallback_response_route_id: validRouteSchema,
+    lazy_routing: yup.bool(),
   })
   .test(
     "is-route-name-path-or-experiment-mappings-set",
@@ -393,14 +394,14 @@ const schema = (maxAllowedReplica) => [
           engine === "nop"
             ? schema
             : yup
-                .mixed()
-                .when("$getEngineProperties", (getEngineProperties) => {
-                  const engineProps = getEngineProperties(engine);
-                  return engineProps.type === "standard"
-                    ? standardExperimentConfigSchema(engineProps)
-                    : engineProps.custom_experiment_manager_config
-                        ?.parsed_experiment_config_schema || schema;
-                })
+              .mixed()
+              .when("$getEngineProperties", (getEngineProperties) => {
+                const engineProps = getEngineProperties(engine);
+                return engineProps.type === "standard"
+                  ? standardExperimentConfigSchema(engineProps)
+                  : engineProps.custom_experiment_manager_config
+                    ?.parsed_experiment_config_schema || schema;
+              })
         ),
       }),
     }),

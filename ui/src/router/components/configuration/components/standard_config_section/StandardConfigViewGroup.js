@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/eui";
 import { TreatmentMappingConfigSection } from "./TreatmentMappingConfigSection";
 import { FallbackRouteConfigSection } from "./FallbackRouteConfigSection";
+import { RoutingOrderConfigSection } from "./RoutingOrderConfigSection";
 import ExperimentEngineContext from "../../../../../providers/experiments/context";
 import { Panel } from "../../../form/components/Panel";
 import ExperimentEngineComponentLoader from "../../../../../components/remote_component/ExperimentEngineComponentLoader";
@@ -83,11 +84,18 @@ export const StandardConfigViewGroup = ({
         )}
 
         <EuiFlexItem>
-          <FallbackRouteConfigSection
-            fallbackResponseRouteId={
-              standardConfig.fallback_response_route_id
-            }
-          />
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow={1}>
+              <RoutingOrderConfigSection
+                isLazyRouting={!!standardConfig.lazy_routing}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <FallbackRouteConfigSection
+                fallbackResponseRouteId={standardConfig.fallback_response_route_id}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     )

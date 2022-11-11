@@ -22,6 +22,7 @@ export class StandardEnsembler extends Ensembler {
       experiment_mappings: [],
       fallback_response_route_id: "",
       route_name_path: "",
+      lazy_routing: false,
     };
   }
 }

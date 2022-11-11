@@ -26,7 +26,7 @@ export const ExperimentEngineContextProvider = ({ children }) => {
             },
           };
         }
-      } catch (_) {} // Ignore errors
+      } catch (_) { } // Ignore errors
       return engineProps;
     };
     return data.map((e) => parseCustomValidationSchema(e));
