@@ -30,6 +30,7 @@ from turing.router.config.experiment_config import ExperimentConfig
 NAME_INDEX = 0
 VALUE_INDEX = 1
 
+
 class Protocol(Enum):
     """
     Router Protocol type
@@ -40,6 +41,7 @@ class Protocol(Enum):
 
     def to_open_api(self) -> OpenApiModel:
         return turing.generated.models.Protocol(self.value)
+
 
 @dataclass
 class RouterConfig:
@@ -136,7 +138,9 @@ class RouterConfig:
 
     @routes.setter
     def routes(self, routes: Union[List[Route], List[Dict[str, str]]]):
-        if isinstance(routes, list) and all(isinstance(route, dict) for route in routes):
+        if isinstance(routes, list) and all(
+            isinstance(route, dict) for route in routes
+        ):
             routes = [Route(**route) for route in routes]
         for route in routes:
             if self._protocol == Protocol.HTTP:
@@ -247,7 +251,7 @@ class RouterConfig:
     @timeout.setter
     def timeout(self, timeout: str):
         self._timeout = timeout
-    
+
     @property
     def protocol(self) -> Protocol:
         return self._protocol

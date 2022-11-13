@@ -19,6 +19,7 @@ class RouterStatus(Enum):
     FAILED = "failed"
     PENDING = "pending"
 
+
 @dataclasses.dataclass
 class RouterVersion(RouterConfig):
     """

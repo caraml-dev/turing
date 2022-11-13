@@ -91,10 +91,12 @@ def test_deploy_router_upi():
 
     channel = grpc.insecure_channel(retrieved_router.endpoint)
     stub = upi_pb2_grpc.UniversalPredictionServiceStub(channel)
-    response = stub.PredictValues(upi_pb2.PredictValuesRequest(
-        prediction_table=table_pb2.Table(
-            columns=[table_pb2.Column(name="col1",type=type_pb2.TYPE_DOUBLE)],
-            rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
+    response = stub.PredictValues(
+        upi_pb2.PredictValuesRequest(
+            prediction_table=table_pb2.Table(
+                columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
+                rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
+            )
         )
-    ))
+    )
     logging.info(response)

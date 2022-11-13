@@ -274,7 +274,7 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
 
 
 @pytest.mark.parametrize(
-    "experiment_mappings,route_name_path,fallback_response_route_id,expected",
+    "experiment_mappings,route_name_path,fallback_response_route_id,lazy_routing,expected",
     [
         pytest.param(
             [
@@ -291,18 +291,32 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
             ],
             None,
             "route-1",
+            False,
             "generic_standard_router_ensembler_config_with_experiment_mappings",
         ),
         pytest.param(
             None,
             "route_name",
             "route-1",
+            False,
             "generic_standard_router_ensembler_config_with_route_name_path",
+        ),
+        pytest.param(
+            None,
+            "route_name",
+            "route-1",
+            True,
+            "generic_standard_router_ensembler_config_lazy_routing",
         ),
     ],
 )
 def test_create_standard_router_ensembler_config(
-    experiment_mappings, route_name_path, fallback_response_route_id, expected, request
+    experiment_mappings,
+    route_name_path,
+    fallback_response_route_id,
+    lazy_routing,
+    expected,
+    request,
 ):
     kwargs = {}
     if experiment_mappings is not None:
@@ -312,7 +326,9 @@ def test_create_standard_router_ensembler_config(
         kwargs["route_name_path"] = route_name_path
 
     actual = StandardRouterEnsemblerConfig(
-        fallback_response_route_id=fallback_response_route_id, **kwargs
+        fallback_response_route_id=fallback_response_route_id,
+        lazy_routing=lazy_routing,
+        **kwargs,
     )
     assert actual.to_open_api() == request.getfixturevalue(expected)
     assert (
