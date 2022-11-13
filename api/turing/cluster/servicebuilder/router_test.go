@@ -611,7 +611,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_BQ_DATASET", Value: "dataset_id"},
 						{Name: "APP_BQ_TABLE", Value: "turing_log_test"},
 						{Name: "APP_BQ_BATCH_LOAD", Value: "false"},
-						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router-service-account.json"},
+						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/router/router-service-account.json"},
 					},
 					Labels: map[string]string{
 						"app":          "test-svc",
@@ -632,7 +632,7 @@ func TestNewRouterService(t *testing.T) {
 							},
 						},
 						{
-							Name: secretVolume,
+							Name: secretVolumeRouter,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "service-account",
@@ -652,8 +652,8 @@ func TestNewRouterService(t *testing.T) {
 							MountPath: routerConfigMapMountPath,
 						},
 						{
-							Name:      secretVolume,
-							MountPath: secretMountPath,
+							Name:      secretVolumeRouter,
+							MountPath: secretMountPathRouter,
 						},
 					},
 				},
