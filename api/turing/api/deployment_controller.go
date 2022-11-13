@@ -154,7 +154,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 	routerVersion *models.RouterVersion,
 	eventsCh *service.EventChannel,
 ) (string, error) {
-	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey string
+	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey,
+		expEngineServiceAccountKey string
 	var experimentConfig json.RawMessage
 	var err error
 
@@ -190,41 +191,19 @@ func (c RouterDeploymentController) deployRouterVersion(
 		}
 	}
 
-	expSvc := c.BaseController.AppContext.ExperimentsService
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		experimentConfig = routerVersion.ExperimentEngine.Config
-		isClientSelectionEnabled, err := expSvc.IsClientSelectionEnabled(routerVersion.ExperimentEngine.Type)
+		experimentConfig, err = c.getExperimentConfig(routerVersion)
 		if err != nil {
 			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 		}
-		if isClientSelectionEnabled {
-			// Convert the config to the standard type
-			standardExperimentConfig, err := manager.ParseStandardExperimentConfig(experimentConfig)
+
+		if routerVersion.ExperimentEngine.ServiceAccountKeyFilePath != nil {
+			serviceAccountKey, err := c.DeploymentService.GetLocalSecret(*routerVersion.ExperimentEngine.
+				ServiceAccountKeyFilePath)
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}
-			// If passkey has been set, decrypt it
-			if standardExperimentConfig.Client.Passkey != "" {
-				standardExperimentConfig.Client.Passkey, err =
-					c.CryptoService.Decrypt(standardExperimentConfig.Client.Passkey)
-				if err != nil {
-					return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
-				}
-
-				experimentConfig, err = json.Marshal(standardExperimentConfig)
-				if err != nil {
-					return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
-				}
-			}
-		}
-
-		// Get the deployable Router Config for the experiment
-		experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
-			routerVersion.ExperimentEngine.Type,
-			experimentConfig,
-		)
-		if err != nil {
-			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
+			expEngineServiceAccountKey = *serviceAccountKey
 		}
 	}
 
@@ -264,6 +243,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		routerServiceAccountKey,
 		enricherServiceAccountKey,
 		ensemblerServiceAccountKey,
+		expEngineServiceAccountKey,
 		pyfuncEnsembler,
 		experimentConfig,
 		eventsCh,
@@ -452,4 +432,46 @@ func (c RouterDeploymentController) updateRouterVersionStatusToFailed(
 		errorsStrings = append(errorsStrings, err.Error())
 	}
 	return errors.New(strings.Join(errorsStrings, ". "))
+}
+
+func (c RouterDeploymentController) getExperimentConfig(routerVersion *models.RouterVersion) (json.RawMessage, error) {
+	var experimentConfig json.RawMessage
+	experimentConfig = routerVersion.ExperimentEngine.Config
+	isClientSelectionEnabled, err := c.BaseController.AppContext.ExperimentsService.IsClientSelectionEnabled(
+		routerVersion.ExperimentEngine.Type,
+	)
+	if err != nil {
+		return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
+	}
+	if isClientSelectionEnabled {
+		// Convert the config to the standard type
+		standardExperimentConfig, err := manager.ParseStandardExperimentConfig(experimentConfig)
+		if err != nil {
+			return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
+		}
+		// If passkey has been set, decrypt it
+		if standardExperimentConfig.Client.Passkey != "" {
+			standardExperimentConfig.Client.Passkey, err =
+				c.CryptoService.Decrypt(standardExperimentConfig.Client.Passkey)
+			if err != nil {
+				return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
+			}
+
+			experimentConfig, err = json.Marshal(standardExperimentConfig)
+			if err != nil {
+				return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
+			}
+		}
+	}
+
+	// Get the deployable Router Config for the experiment
+	experimentConfig, err = c.ExperimentsService.GetExperimentRunnerConfig(
+		routerVersion.ExperimentEngine.Type,
+		experimentConfig,
+	)
+	if err != nil {
+		return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
+	}
+
+	return experimentConfig, nil
 }

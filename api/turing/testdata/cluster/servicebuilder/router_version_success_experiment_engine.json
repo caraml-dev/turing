@@ -27,6 +27,7 @@
     "plugin_config": {
       "image": "ghcr.io/myproject/exp-engine-plugin:latest"
     },
+    "service_account_key_file_path": "/etc/plugins/blue/gcp_service_account/service-account.json",
     "config": {
       "key-1": "value-1"
     }

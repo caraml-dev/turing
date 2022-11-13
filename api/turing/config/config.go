@@ -251,6 +251,11 @@ type DatabaseConfig struct {
 	MigrationsFolder string `validate:"required"`
 }
 
+type ExperimentEngineConfig struct {
+	PluginConfig              *ExperimentEnginePluginConfig
+	ServiceAccountKeyFilePath *string
+}
+
 type ExperimentEnginePluginConfig struct {
 	Image string `json:"image" validate:"required"`
 }
@@ -283,7 +288,7 @@ type RouterDefaults struct {
 	//	  Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
 	// 	blue-exp-engine:
 	//	  Image: ghcr.io/myproject/blue-exp-engine-plugin:v0.0.1
-	ExperimentEnginePlugins map[string]*ExperimentEnginePluginConfig `validate:"dive"`
+	ExperimentEnginePlugins map[string]*ExperimentEngineConfig `validate:"dive"`
 	// Kafka Configuration. If result logging is using Kafka
 	KafkaConfig *KafkaConfig
 }

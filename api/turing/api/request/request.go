@@ -216,8 +216,11 @@ func (r RouterConfig) BuildRouterVersion(
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
-		if pluginConfig, ok := defaults.ExperimentEnginePlugins[rv.ExperimentEngine.Type]; ok {
-			rv.ExperimentEngine.PluginConfig = pluginConfig
+		if experimentEnginePlugin, ok := defaults.ExperimentEnginePlugins[rv.ExperimentEngine.Type]; ok {
+			rv.ExperimentEngine.PluginConfig = experimentEnginePlugin.PluginConfig
+			if experimentEnginePlugin.ServiceAccountKeyFilePath != nil {
+				rv.ExperimentEngine.ServiceAccountKeyFilePath = experimentEnginePlugin.ServiceAccountKeyFilePath
+			}
 		}
 
 		rv.ExperimentEngine.Config, err = r.BuildExperimentEngineConfig(router, cryptoSvc, expSvc)

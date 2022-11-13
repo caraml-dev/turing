@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/engines/experiment/manager"
 	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/caraml-dev/turing/api/turing/models"
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
-	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
 func TestDeployVersionSuccess(t *testing.T) {
@@ -47,7 +47,10 @@ func TestDeployVersionSuccess(t *testing.T) {
 		manager.TuringExperimentConfig{Client: manager.Client{ID: "1", Passkey: testDecPassKey}})
 
 	expEnabledCfg := &models.ExperimentEngine{
-		Type:   testEngineType,
+		Type: testEngineType,
+		PluginConfig: &config.ExperimentEnginePluginConfig{
+			Image: "test-image",
+		},
 		Config: expCfg,
 	}
 
@@ -161,7 +164,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 			ds := &mocks.DeploymentService{}
 
 			ds.On("DeployRouterVersion", project, environment, data.pendingVersion, "service-acct",
-				"", "", mock.Anything, data.expRunnerCfg, eventsCh).Return("test-url", nil)
+				"", "", "", mock.Anything, data.expRunnerCfg, eventsCh).Return("test-url", nil)
 
 			// Create test controller
 			ctrl := RouterDeploymentController{
@@ -270,7 +273,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 
 	ds := &mocks.DeploymentService{}
 	ds.On("DeployRouterVersion", project, environment, newVer, testSvcAcct,
-		"", "", mock.Anything, json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
+		"", "", "", mock.Anything, json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
 	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything, true).
 		Return(nil)
 

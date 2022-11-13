@@ -6,13 +6,13 @@ import turing.generated.models as openapi
 
 
 class Sink(ABC):
-    def __init__(self, save_mode: sdk.sink.SaveMode, columns: List[str] = None):
+    def __init__(self, save_mode: sdk.sink.SaveMode, columns: Optional[List[str]] = None):
         self._save_mode = save_mode
         self._columns = columns
 
     @property
     def type(self) -> str:
-        pass
+        return ""
 
     @property
     def save_mode(self) -> sdk.sink.SaveMode:
@@ -43,7 +43,7 @@ class Sink(ABC):
 
 
 class ConsoleSink(Sink):
-    def __init__(self, columns: List[str] = None):
+    def __init__(self, columns: Optional[List[str]] = None):
         super(ConsoleSink, self).__init__(save_mode=None, columns=columns)
 
     @property

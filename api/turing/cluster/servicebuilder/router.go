@@ -263,7 +263,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envBQDataset, Value: bqFQN[1]},
 			{Name: envBQTable, Value: bqFQN[2]},
 			{Name: envBQBatchLoad, Value: strconv.FormatBool(logConfig.BigQueryConfig.BatchLoad)},
-			{Name: envGoogleApplicationCredentials, Value: secretMountPath + secretKeyNameRouter},
+			{Name: envGoogleApplicationCredentials, Value: secretMountPathRouter + secretKeyNameRouter},
 		}...)
 		if logConfig.BigQueryConfig.BatchLoad {
 			envs = append(envs, []corev1.EnvVar{
@@ -322,12 +322,33 @@ func buildRouterVolumes(
 			Name:      pluginsVolumeName,
 			MountPath: pluginsMountPath,
 		})
+
+		if routerVersion.ExperimentEngine.ServiceAccountKeyFilePath != nil {
+			volumes = append(volumes, corev1.Volume{
+				Name: secretVolumeExpEngine,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretName,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  secretKeyNameExpEngine,
+								Path: secretKeyNameExpEngine,
+							},
+						},
+					},
+				},
+			})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      secretVolumeExpEngine,
+				MountPath: secretMountPathExpEngine,
+			})
+		}
 	}
 
 	// Service account
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		volumes = append(volumes, corev1.Volume{
-			Name: secretVolume,
+			Name: secretVolumeRouter,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: secretName,
@@ -341,8 +362,8 @@ func buildRouterVolumes(
 			},
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      secretVolume,
-			MountPath: secretMountPath,
+			Name:      secretVolumeRouter,
+			MountPath: secretMountPathRouter,
 		})
 	}
 	return volumes, volumeMounts
