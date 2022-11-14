@@ -70,7 +70,7 @@ func Run() {
 
 		upiServer := upi.NewUPIServer(missionCtl)
 		m := cmux.New(l)
-		grpcListener := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+		grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
 		httpListener := m.Match(cmux.Any())
 
 		mux := http.NewServeMux()
