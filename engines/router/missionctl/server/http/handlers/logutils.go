@@ -77,7 +77,7 @@ func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 	defer func() {
 		_ = logger.Sync()
 	}()
-	logger.Errorw("Turing Request Error",
+	logger.Warnw("Turing Request Error",
 		"error", err.Message,
 		"status", err.Code,
 	)
