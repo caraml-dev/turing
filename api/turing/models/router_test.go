@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,4 +35,80 @@ func TestClearCurrRouterVersion(t *testing.T) {
 	// Validate
 	assert.True(t, router.CurrRouterVersion == nil)
 	assert.Equal(t, sql.NullInt32{Int32: int32(0), Valid: false}, router.CurrRouterVersionID)
+}
+
+func TestRouterMarshalJSON(t *testing.T) {
+	tests := map[string]struct {
+		router   Router
+		expected string
+	}{
+		"http endpoint": {
+			router: Router{
+				Model: Model{
+					ID: 1,
+				},
+				ProjectID:     2,
+				Endpoint:      "http://test-endpoint",
+				MonitoringURL: "http://www.example.com",
+			},
+			expected: `{
+				"id": 1,
+				"created_at": "0001-01-01T00:00:00Z",
+				"updated_at": "0001-01-01T00:00:00Z",
+				"project_id": 2,
+				"monitoring_url": "http://www.example.com",
+				"environment_name": "",
+				"name": "",
+				"status": "",
+				"endpoint": "http://test-endpoint/v1/predict"
+			}`,
+		},
+		"grpc endpoint": {
+			router: Router{
+				Model: Model{
+					ID: 1,
+				},
+				ProjectID:     2,
+				Endpoint:      "test-endpoint:80",
+				MonitoringURL: "http://www.example.com",
+			},
+			expected: `{
+				"id": 1,
+				"created_at": "0001-01-01T00:00:00Z",
+				"updated_at": "0001-01-01T00:00:00Z",
+				"project_id": 2,
+				"monitoring_url": "http://www.example.com",
+				"environment_name": "",
+				"name": "",
+				"status": "",
+				"endpoint": "test-endpoint:80"
+			}`,
+		},
+		"no endpoint": {
+			router: Router{
+				Model: Model{
+					ID: 1,
+				},
+				ProjectID: 2,
+			},
+			expected: `{
+				"id": 1,
+				"created_at": "0001-01-01T00:00:00Z",
+				"updated_at": "0001-01-01T00:00:00Z",
+				"project_id": 2,
+				"environment_name": "",
+				"name": "",
+				"status": "",
+				"monitoring_url": ""
+			}`,
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			byteData, err := json.Marshal(&data.router)
+			assert.NoError(t, err)
+			assert.JSONEq(t, data.expected, string(byteData))
+		})
+	}
 }
