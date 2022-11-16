@@ -25,38 +25,39 @@ import (
 
 // Define env var names for the router
 const (
-	envAppName                      = "APP_NAME"
-	envAppEnvironment               = "APP_ENVIRONMENT"
-	envRouterTimeout                = "ROUTER_TIMEOUT"
-	envEnricherEndpoint             = "ENRICHER_ENDPOINT"
-	envEnricherTimeout              = "ENRICHER_TIMEOUT"
-	envEnsemblerEndpoint            = "ENSEMBLER_ENDPOINT"
-	envEnsemblerTimeout             = "ENSEMBLER_TIMEOUT"
-	envLogLevel                     = "APP_LOGLEVEL"
-	envFiberDebugLog                = "APP_FIBER_DEBUG_LOG"
-	envCustomMetrics                = "APP_CUSTOM_METRICS"
-	envJaegerEnabled                = "APP_JAEGER_ENABLED"
-	envJaegerEndpoint               = "APP_JAEGER_COLLECTOR_ENDPOINT"
-	envSentryEnabled                = "APP_SENTRY_ENABLED"
-	envSentryDSN                    = "APP_SENTRY_DSN"
-	envResultLogger                 = "APP_RESULT_LOGGER"
-	envGcpProject                   = "APP_GCP_PROJECT"
-	envBQDataset                    = "APP_BQ_DATASET"
-	envBQTable                      = "APP_BQ_TABLE"
-	envBQBatchLoad                  = "APP_BQ_BATCH_LOAD"
-	envFluentdHost                  = "APP_FLUENTD_HOST"
-	envFluentdPort                  = "APP_FLUENTD_PORT"
-	envFluentdTag                   = "APP_FLUENTD_TAG"
-	envKafkaBrokers                 = "APP_KAFKA_BROKERS"
-	envKafkaTopic                   = "APP_KAFKA_TOPIC"
-	envKafkaSerializationFormat     = "APP_KAFKA_SERIALIZATION_FORMAT"
-	envKafkaMaxMessageBytes         = "APP_KAFKA_MAX_MESSAGE_BYTES"
-	envKafkaCompressionType         = "APP_KAFKA_COMPRESSION_TYPE"
-	envRouterConfigFile             = "ROUTER_CONFIG_FILE"
-	envRouterProtocol               = "ROUTER_PROTOCOL"
-	envGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
-	envPluginName                   = "PLUGIN_NAME"
-	envPluginsDir                   = "PLUGINS_DIR"
+	envAppName                         = "APP_NAME"
+	envAppEnvironment                  = "APP_ENVIRONMENT"
+	envRouterTimeout                   = "ROUTER_TIMEOUT"
+	envEnricherEndpoint                = "ENRICHER_ENDPOINT"
+	envEnricherTimeout                 = "ENRICHER_TIMEOUT"
+	envEnsemblerEndpoint               = "ENSEMBLER_ENDPOINT"
+	envEnsemblerTimeout                = "ENSEMBLER_TIMEOUT"
+	envLogLevel                        = "APP_LOGLEVEL"
+	envFiberDebugLog                   = "APP_FIBER_DEBUG_LOG"
+	envCustomMetrics                   = "APP_CUSTOM_METRICS"
+	envJaegerEnabled                   = "APP_JAEGER_ENABLED"
+	envJaegerEndpoint                  = "APP_JAEGER_COLLECTOR_ENDPOINT"
+	envSentryEnabled                   = "APP_SENTRY_ENABLED"
+	envSentryDSN                       = "APP_SENTRY_DSN"
+	envResultLogger                    = "APP_RESULT_LOGGER"
+	envGcpProject                      = "APP_GCP_PROJECT"
+	envBQDataset                       = "APP_BQ_DATASET"
+	envBQTable                         = "APP_BQ_TABLE"
+	envBQBatchLoad                     = "APP_BQ_BATCH_LOAD"
+	envFluentdHost                     = "APP_FLUENTD_HOST"
+	envFluentdPort                     = "APP_FLUENTD_PORT"
+	envFluentdTag                      = "APP_FLUENTD_TAG"
+	envKafkaBrokers                    = "APP_KAFKA_BROKERS"
+	envKafkaTopic                      = "APP_KAFKA_TOPIC"
+	envKafkaSerializationFormat        = "APP_KAFKA_SERIALIZATION_FORMAT"
+	envKafkaMaxMessageBytes            = "APP_KAFKA_MAX_MESSAGE_BYTES"
+	envKafkaCompressionType            = "APP_KAFKA_COMPRESSION_TYPE"
+	envRouterConfigFile                = "ROUTER_CONFIG_FILE"
+	envRouterProtocol                  = "ROUTER_PROTOCOL"
+	envGoogleApplicationCredentials    = "GOOGLE_APPLICATION_CREDENTIALS"
+	envExpGoogleApplicationCredentials = "EXP_GOOGLE_APPLICATION_CREDENTIALS"
+	envPluginName                      = "PLUGIN_NAME"
+	envPluginsDir                      = "PLUGINS_DIR"
 )
 
 // Router service constants
@@ -234,6 +235,13 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		envs = append(envs, []corev1.EnvVar{
 			{Name: envEnsemblerEndpoint, Value: endpoint},
 			{Name: envEnsemblerTimeout, Value: ver.Ensembler.DockerConfig.Timeout},
+		}...)
+	}
+
+	// Add exp engine secret path as env var if service account key file path is specified for exp engine
+	if ver.ExperimentEngine != nil && ver.ExperimentEngine.ServiceAccountKeyFilePath != nil {
+		envs = append(envs, []corev1.EnvVar{
+			{Name: envExpGoogleApplicationCredentials, Value: secretMountPathExpEngine + secretKeyNameExpEngine},
 		}...)
 	}
 
