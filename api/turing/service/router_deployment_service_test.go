@@ -246,7 +246,7 @@ func TestDeployEndpoint(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com/v1/predict", routerVersion.Router.Name), endpoint)
+	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com", routerVersion.Router.Name), endpoint)
 	controller.AssertCalled(t, "CreateNamespace", mock.Anything, testNamespace)
 	controller.AssertCalled(t, "ApplyPersistentVolumeClaim", mock.Anything,
 		testNamespace, &cluster.PersistentVolumeClaim{Name: "pvc"})

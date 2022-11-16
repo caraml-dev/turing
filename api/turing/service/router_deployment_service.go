@@ -218,10 +218,12 @@ func (ds *deploymentService) DeployRouterVersion(
 		eventsCh.Write(models.NewErrorEvent(
 			models.EventStageUpdatingEndpoint, "failed to update router endpoint: %s", err.Error()))
 	}
+
+	// only base endpoint is returned, models/router.go will unmarshall with /v1/predict for http routers
 	if routerVersion.Protocol == routerConfig.UPI {
 		return routerEndpoint.Endpoint + ":80", err
 	}
-	return fmt.Sprintf("http://%s/v1/predict", routerEndpoint.Endpoint), err
+	return fmt.Sprintf("http://%s", routerEndpoint.Endpoint), err
 }
 
 // UndeployRouterVersion removes the deployed router, if exists. Else, an error is returned.
