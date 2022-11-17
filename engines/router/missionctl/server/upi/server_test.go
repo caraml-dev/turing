@@ -7,19 +7,20 @@ import (
 	"testing"
 	"time"
 
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/gojek/fiber"
-	fiberGrpc "github.com/gojek/fiber/grpc"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/gojek/fiber"
+	fiberGrpc "github.com/gojek/fiber/grpc"
 )
 
 var mockResponse = &upiv1.PredictValuesResponse{
@@ -38,7 +39,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 		name        string
 		request     *upiv1.PredictValuesRequest
 		expected    *upiv1.PredictValuesResponse
-		expectedErr *errors.TuringError
+		expectedErr error
 		mockReturn  func() (fiber.Response, *errors.TuringError)
 	}{
 		{
@@ -53,12 +54,9 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			},
 		},
 		{
-			name:    "error",
-			request: &upiv1.PredictValuesRequest{},
-			expectedErr: &errors.TuringError{
-				Code:    int(codes.Unavailable),
-				Message: "did not get back a valid response from the fiberHandler",
-			},
+			name:        "error",
+			request:     &upiv1.PredictValuesRequest{},
+			expectedErr: status.Error(codes.Unavailable, "did not get back a valid response from the fiberHandler"),
 			mockReturn: func() (fiber.Response, *errors.TuringError) {
 				return nil, &errors.TuringError{
 					Code:    int(codes.Unavailable),
@@ -67,12 +65,9 @@ func TestUPIServer_PredictValues(t *testing.T) {
 			},
 		},
 		{
-			name:    "error wrong response payload type",
-			request: &upiv1.PredictValuesRequest{},
-			expectedErr: &errors.TuringError{
-				Code:    int(codes.Internal),
-				Message: "unable to unmarshal into expected response proto",
-			},
+			name:        "error wrong response payload type",
+			request:     &upiv1.PredictValuesRequest{},
+			expectedErr: status.Error(codes.Internal, "unable to unmarshal into expected response proto"),
 			mockReturn: func() (fiber.Response, *errors.TuringError) {
 				return &fiberGrpc.Response{
 					Message: []byte("test"),
