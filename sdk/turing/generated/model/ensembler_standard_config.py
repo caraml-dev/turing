@@ -79,6 +79,7 @@ class EnsemblerStandardConfig(ModelNormal):
         return {
             'experiment_mappings': ([EnsemblerStandardConfigExperimentMappings], none_type,),  # noqa: E501
             'route_name_path': (str, none_type,),  # noqa: E501
+            'lazy_routing': (bool,),  # noqa: E501
         }
 
     @cached_property
@@ -89,6 +90,7 @@ class EnsemblerStandardConfig(ModelNormal):
     attribute_map = {
         'experiment_mappings': 'experiment_mappings',  # noqa: E501
         'route_name_path': 'route_name_path',  # noqa: E501
+        'lazy_routing': 'lazy_routing',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -139,6 +141,7 @@ class EnsemblerStandardConfig(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             experiment_mappings ([EnsemblerStandardConfigExperimentMappings], none_type): [optional]  # noqa: E501
             route_name_path (str, none_type): [optional]  # noqa: E501
+            lazy_routing (bool): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

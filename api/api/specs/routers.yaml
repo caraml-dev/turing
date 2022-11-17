@@ -834,6 +834,8 @@ components:
         route_name_path:
           type: "string"
           nullable: true
+        lazy_routing:
+          type: boolean
 
     EnsemblerDockerConfig:
       description: "ensembler config when ensembler type is docker"

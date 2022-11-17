@@ -3,6 +3,7 @@ from turing.generated.model_utils import OpenApiModel
 from urllib.parse import urlparse
 from dataclasses import dataclass
 
+
 @dataclass
 class Route:
     """
@@ -18,7 +19,9 @@ class Route:
     timeout: str
     service_method: str
 
-    def __init__(self, id: str, endpoint: str, timeout: str, service_method=None, **kwargs):
+    def __init__(
+        self, id: str, endpoint: str, timeout: str, service_method=None, **kwargs
+    ):
         self.id = id
         self.timeout = timeout
         self.service_method = service_method
@@ -70,7 +73,9 @@ class Route:
     def _verify_service_method(cls, service_method: str):
         """Rudimentary grpc service method checker"""
         if service_method is None or len(service_method) == 0:
-            raise MissingServiceMethodException(f"Missing service_method for grpc route")
+            raise MissingServiceMethodException(
+                f"Missing service_method for grpc route"
+            )
 
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
@@ -82,18 +87,21 @@ class Route:
             type="PROXY",
             endpoint=self.endpoint,
             timeout=self.timeout,
-            **kwargs
+            **kwargs,
         )
 
 
 class InvalidUrlException(Exception):
     pass
 
+
 class MissingServiceMethodException(Exception):
     pass
 
+
 class DuplicateRouteException(Exception):
     pass
+
 
 class InvalidRouteException(Exception):
     pass

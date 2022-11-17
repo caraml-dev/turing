@@ -47,7 +47,7 @@
     "start": "PORT=3001 craco start --verbose",
     "build": "craco build",
     "test": "craco test",
-    "lint": "eslint --max-warnings 0 src"
+    "lint": "eslint --max-warnings 0 --ext .js,.jsx --fix src"
   },
   "eslintConfig": {
     "extends": "react-app"

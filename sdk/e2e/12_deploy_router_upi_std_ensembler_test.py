@@ -15,10 +15,14 @@ from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.router_config import RouterConfig, Protocol
-from turing.router.config.router_ensembler_config import EnsemblerStandardConfig, RouterEnsemblerConfig, \
-    StandardRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import StandardRouterEnsemblerConfig
 from turing.router.config.router_version import RouterStatus
-from turing.router.config.traffic_rule import DefaultTrafficRule, FieldSource, TrafficRule, TrafficRuleCondition
+from turing.router.config.traffic_rule import (
+    DefaultTrafficRule,
+    FieldSource,
+    TrafficRule,
+    TrafficRuleCondition,
+)
 
 
 def test_deploy_router_upi_std_ensembler():
@@ -52,41 +56,26 @@ def test_deploy_router_upi_std_ensembler():
     # set up log config for the router
     log_config = LogConfig(result_logger_type=ResultLoggerType.NOP)
 
-    #setup experiment engine
+    # setup experiment engine
     experiment_engine = ExperimentConfig(
         type="proprietary",
         config={
-                "client": {
-                    "id": "1",
-                    "username": "test",
-                    "passkey": "test"
+            "client": {"id": "1", "username": "test", "passkey": "test"},
+            "experiments": [{"id": "001", "name": "exp_1"}],
+            "variables": {
+                "experiment_variables": {
+                    "001": [{"name": "client_id", "type": "unit", "required": True}]
                 },
-                "experiments": [
+                "config": [
                     {
-                        "id": "001",
-                        "name": "exp_1"
+                        "name": "client_id",
+                        "required": True,
+                        "field": "client_id",
+                        "field_source": "payload",
                     }
                 ],
-                "variables": {
-                    "experiment_variables": {
-                        "001": [
-                            {
-                                "name": "client_id",
-                                "type": "unit",
-                                "required": True
-                            }
-                        ]
-                    },
-                    "config": [
-                        {
-                            "name": "client_id",
-                            "required": True,
-                            "field": "client_id",
-                            "field_source": "payload"
-                        }
-                    ]
-                }
-            }
+            },
+        },
     )
 
     ensembler = StandardRouterEnsemblerConfig(
@@ -126,8 +115,8 @@ def test_deploy_router_upi_std_ensembler():
     assert retrieved_router.version == 1
     assert retrieved_router.status == RouterStatus.DEPLOYED
     assert (
-            retrieved_router.endpoint
-            == f'{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}:80'
+        retrieved_router.endpoint
+        == f'{retrieved_router.name}-turing-router.{os.getenv("PROJECT_NAME")}.{os.getenv("KSERVICE_DOMAIN")}:80'
     )
 
     # get router version with id 1
@@ -144,14 +133,16 @@ def test_deploy_router_upi_std_ensembler():
             columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
             rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
         ),
-        prediction_context=[variable_pb2.Variable(
-            name="client_id",
-            type=type_pb2.TYPE_STRING,
-            string_value="1",
-        )]
+        prediction_context=[
+            variable_pb2.Variable(
+                name="client_id",
+                type=type_pb2.TYPE_STRING,
+                string_value="1",
+            )
+        ],
     )
 
-    response : upi_pb2.PredictValuesResponse = stub.PredictValues(request)
+    response: upi_pb2.PredictValuesResponse = stub.PredictValues(request)
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table
@@ -164,14 +155,16 @@ def test_deploy_router_upi_std_ensembler():
             columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
             rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
         ),
-        prediction_context=[variable_pb2.Variable(
-            name="client_id",
-            type=type_pb2.TYPE_STRING,
-            string_value="1234",
-        )]
+        prediction_context=[
+            variable_pb2.Variable(
+                name="client_id",
+                type=type_pb2.TYPE_STRING,
+                string_value="1234",
+            )
+        ],
     )
 
-    response : upi_pb2.PredictValuesResponse = stub.PredictValues(request)
+    response: upi_pb2.PredictValuesResponse = stub.PredictValues(request)
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table

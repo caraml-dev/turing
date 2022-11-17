@@ -110,6 +110,7 @@ def standard_router_ensembler_config_with_experiment_mappings():
         ],
         route_name_path=None,
         fallback_response_route_id="route-1",
+        lazy_routing=False,
     )
 
 
@@ -119,6 +120,17 @@ def standard_router_ensembler_config_with_route_name_path():
         experiment_mappings=None,
         route_name_path="route_name",
         fallback_response_route_id="route-1",
+        lazy_routing=False,
+    )
+
+
+@pytest.fixture
+def standard_router_ensembler_config_with_lazy_routing():
+    return EnsemblerStandardConfig(
+        experiment_mappings=None,
+        route_name_path="route_name",
+        fallback_response_route_id="route-1",
+        lazy_routing=True,
     )
 
 
@@ -337,6 +349,7 @@ def generic_route():
         timeout="100ms",
     )
 
+
 @pytest.fixture
 def generic_route_grpc():
     return turing.generated.models.Route(
@@ -346,6 +359,7 @@ def generic_route_grpc():
         timeout="100ms",
         service_method="package/method",
     )
+
 
 @pytest.fixture
 def generic_traffic_rule_condition(
@@ -404,13 +418,23 @@ def generic_ensembler_standard_config_with_experiment_mappings():
             turing.generated.models.EnsemblerStandardConfigExperimentMappings(
                 experiment="experiment-2", treatment="treatment-2", route="route-2"
             ),
-        ]
+        ],
+        lazy_routing=False,
     )
 
 
 @pytest.fixture
 def generic_ensembler_standard_config_with_route_name_path():
-    return turing.generated.models.EnsemblerStandardConfig(route_name_path="route_name")
+    return turing.generated.models.EnsemblerStandardConfig(
+        route_name_path="route_name", lazy_routing=False
+    )
+
+
+@pytest.fixture
+def generic_ensembler_standard_config_lazy_routing():
+    return turing.generated.models.EnsemblerStandardConfig(
+        route_name_path="route_name", lazy_routing=True
+    )
 
 
 @pytest.fixture
@@ -483,6 +507,16 @@ def generic_standard_router_ensembler_config_with_route_name_path(
     return turing.generated.models.RouterEnsemblerConfig(
         type="standard",
         standard_config=generic_ensembler_standard_config_with_route_name_path,
+    )
+
+
+@pytest.fixture
+def generic_standard_router_ensembler_config_lazy_routing(
+    generic_ensembler_standard_config_lazy_routing,
+):
+    return turing.generated.models.RouterEnsemblerConfig(
+        type="standard",
+        standard_config=generic_ensembler_standard_config_lazy_routing,
     )
 
 

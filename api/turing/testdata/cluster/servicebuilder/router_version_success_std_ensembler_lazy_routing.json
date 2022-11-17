@@ -9,6 +9,18 @@
   "image": "asia.gcr.io/gcp-project-id/turing-router:latest",
   "routes": [
     {
+      "id": "treatment-b",
+      "type": "PROXY",
+      "endpoint": "http://example.com/treatment-b",
+      "timeout": "2s"
+    },
+    {
+      "id": "treatment-a",
+      "type": "PROXY",
+      "endpoint": "http://example.com/treatment-a",
+      "timeout": "2s"
+    },
+    {
       "id": "control",
       "type": "PROXY",
       "endpoint": "http://www.mocky.io/v2/5e4caccc310000e2cad8c071",
@@ -97,19 +109,8 @@
     "id": 300,
     "type": "standard",
     "standard_config": {
-      "experiment_mappings": [
-        {
-          "experiment": "exp_exp_test_experiment_1",
-          "treatment": "control",
-          "route": "route-1"
-        },
-        {
-          "experiment": "exp_exp_test_experiment_2",
-          "treatment": "treatment",
-          "route": "route-2"
-        }
-      ],
-      "lazy_routing": false
+      "route_name_path": "policy.route_name",
+      "lazy_routing": true
     }
   }
 }

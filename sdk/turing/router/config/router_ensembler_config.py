@@ -37,12 +37,14 @@ class EnsemblerStandardConfig:
         List[turing.generated.models.EnsemblerStandardConfigExperimentMappings]
     ]
     route_name_path: Optional[str]
+    lazy_routing: bool
 
     _fallback_response_route_id: str = field(init=False, repr=False)
     _experiment_mappings: Optional[
         List[turing.generated.models.EnsemblerStandardConfigExperimentMappings]
     ] = field(init=False, repr=False)
     _route_name_path: Optional[str] = field(init=False, repr=False)
+    _lazy_routing: bool = field(init=False, repr=False)
 
     @property
     def experiment_mappings(
@@ -75,6 +77,14 @@ class EnsemblerStandardConfig:
     def fallback_response_route_id(self, fallback_response_route_id: str):
         self._fallback_response_route_id = fallback_response_route_id
 
+    @property
+    def lazy_routing(self) -> bool:
+        return self._lazy_routing
+
+    @lazy_routing.setter
+    def lazy_routing(self, lazy_routing: bool):
+        self._lazy_routing = lazy_routing
+
     def to_open_api(self) -> OpenApiModel:
         kwargs = {}
         if self.experiment_mappings is not None:
@@ -83,6 +93,7 @@ class EnsemblerStandardConfig:
             kwargs["route_name_path"] = self.route_name_path
 
         return turing.generated.models.EnsemblerStandardConfig(
+            lazy_routing=self.lazy_routing,
             **kwargs,
         )
 
@@ -149,12 +160,16 @@ class RouterEnsemblerConfig(DataObject):
             self._standard_config = standard_config
         elif isinstance(standard_config, dict):
             openapi_standard_config = standard_config.copy()
-            openapi_standard_config["experiment_mappings"] = [
-                turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                    **mapping
-                )
-                for mapping in standard_config["experiment_mappings"]
-            ] if openapi_standard_config is None else None
+            openapi_standard_config["experiment_mappings"] = (
+                [
+                    turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                        **mapping
+                    )
+                    for mapping in standard_config["experiment_mappings"]
+                ]
+                if openapi_standard_config is None
+                else None
+            )
             self._standard_config = EnsemblerStandardConfig(**openapi_standard_config)
         else:
             self._standard_config = standard_config
@@ -518,6 +533,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         fallback_response_route_id: str,
         experiment_mappings: Optional[List[Dict[str, str]]] = None,
         route_name_path: Optional[str] = None,
+        lazy_routing: Optional[bool] = False,
     ):
         """
         Method to create a new standard ensembler
@@ -525,10 +541,12 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param route_name_path: configured route name path that points to the route name within a given treatment config
         :param experiment_mappings: configured mappings between routes and treatments
         :param fallback_response_route_id: configured final response route to be used as a fallback
+        :param lazy_routing: controls whether the experiment engine should be called before the routes (True) or in parallel (False)
         """
         self.route_name_path = route_name_path
         self.experiment_mappings = experiment_mappings
         self.fallback_response_route_id = fallback_response_route_id
+        self.lazy_routing = lazy_routing
         super().__init__(type="standard")
 
     @property
@@ -559,6 +577,14 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
     def fallback_response_route_id(self, fallback_response_route_id: str):
         self._fallback_response_route_id = fallback_response_route_id
 
+    @property
+    def lazy_routing(self) -> bool:
+        return self._lazy_routing
+
+    @lazy_routing.setter
+    def lazy_routing(self, lazy_routing: bool):
+        self._lazy_routing = lazy_routing
+
     @classmethod
     def _verify_experiment_mappings(cls, experiment_mappings: List[Dict[str, str]]):
         for experiment_mapping in experiment_mappings:
@@ -582,6 +608,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
             else None,
             route_name_path=config.route_name_path,
             fallback_response_route_id=config.fallback_response_route_id,
+            lazy_routing=config.lazy_routing,
         )
 
     def to_open_api(self) -> OpenApiModel:
@@ -596,6 +623,7 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
             else None,
             route_name_path=self.route_name_path,
             fallback_response_route_id=self.fallback_response_route_id,
+            lazy_routing=self.lazy_routing,
         )
         return super().to_open_api()
 
