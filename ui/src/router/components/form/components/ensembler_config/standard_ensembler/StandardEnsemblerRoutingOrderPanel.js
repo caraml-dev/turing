@@ -1,5 +1,5 @@
 import React from "react";
-import { EuiCheckbox, EuiFlexItem, EuiForm, EuiFormRow } from "@elastic/eui";
+import { EuiCheckbox, EuiFlexItem, EuiForm, EuiFormRow, EuiSpacer } from "@elastic/eui";
 import { DescribedFormGroup } from "../../../../../../components/form/described_form_group/DescribedFormGroup";
 import { Panel } from "../../Panel";
 
@@ -27,12 +27,15 @@ export const StandardEnsemblerRoutingOrderPanel = ({
               isInvalid={!!errors}
               error={errors}
               display="row">
-              <EuiCheckbox
-                id={"routing-order-checkbox"}
-                label={"Lazy Routing"}
-                checked={isLazyRouting}
-                onChange={e => onChange(e.target.checked)}
-              />
+              <>
+                <EuiSpacer />
+                <EuiCheckbox
+                  id={"routing-order-checkbox"}
+                  label={"Lazy Routing"}
+                  checked={isLazyRouting}
+                  onChange={e => onChange(e.target.checked)}
+                />
+              </>
             </EuiFormRow>
           </DescribedFormGroup>
         </EuiFormRow>
