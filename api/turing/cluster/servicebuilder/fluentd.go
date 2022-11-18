@@ -35,6 +35,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 
 	tableSplit := strings.Split(routerVersion.LogConfig.BigQueryConfig.Table, ".")
 	envs := []corev1.EnvVar{
+		{Name: "FLUENTD_WORKER_COUNT", Value: strconv.Itoa(fluentdConfig.WorkerCount)},
 		{Name: "FLUENTD_LOG_LEVEL", Value: "info"},
 		{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
 		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + secretKeyNameRouter},

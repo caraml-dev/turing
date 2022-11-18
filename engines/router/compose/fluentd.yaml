@@ -4,6 +4,7 @@ services:
   fluentd:
     image: asia.gcr.io/gcp-project-id/fluentd-bigquery:latest
     environment:
+      - FLUENTD_WORKER_COUNT=1
       - FLUENTD_LOG_LEVEL=info
       - FLUENTD_LOG_PATH=/fluentd/log/bq_load_logs.*.buffer
       - FLUENTD_BUFFER_LIMIT=3g

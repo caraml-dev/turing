@@ -147,6 +147,7 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
+						WorkerCount:          1,
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1048588,
@@ -212,6 +213,7 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
+						WorkerCount:          2,
 					},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 1048588,
@@ -297,6 +299,7 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
+						WorkerCount:          2,
 					},
 					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
 						"red": {
@@ -414,6 +417,7 @@ func TestLoad(t *testing.T) {
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
+						WorkerCount:          2,
 					},
 					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
 						"red": {

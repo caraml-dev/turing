@@ -33,6 +33,7 @@ func TestNewFluentdService(t *testing.T) {
 		Image:                "fluentdimage:1.0.0",
 		Tag:                  "fluentd-tag",
 		FlushIntervalSeconds: 30,
+		WorkerCount:          1,
 	}
 
 	project := &mlp.Project{
@@ -64,6 +65,7 @@ func TestNewFluentdService(t *testing.T) {
 				"team":         "test-team",
 			},
 			Envs: []corev1.EnvVar{
+				{Name: "FLUENTD_WORKER_COUNT", Value: "1"},
 				{Name: "FLUENTD_LOG_LEVEL", Value: "info"},
 				{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
 				{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: "/var/secret/router-service-account.json"},
