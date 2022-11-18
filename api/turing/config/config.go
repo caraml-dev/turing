@@ -301,6 +301,8 @@ type FluentdConfig struct {
 	Tag string
 	// Flush interval seconds - value determined by load job frequency to BQ
 	FlushIntervalSeconds int
+	// No. of fluentd workers to launch for utilizing multiple CPU, useful to tune for high traffic
+	WorkerCount int
 }
 
 // KafkaConfig captures the defaults used by Turing Router when result logger is set to kafka
@@ -491,6 +493,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::FluentdConfig::Image", "")
 	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")
 	v.SetDefault("RouterDefaults::FluentdConfig::FlushIntervalSeconds", "90")
+	v.SetDefault("RouterDefaults::FluentdConfig::WorkerCount", "1")
 	v.SetDefault("RouterDefaults::Experiment", map[string]interface{}{})
 	v.SetDefault("RouterDefaults::KafkaConfig::MaxMessageBytes", "1048588")
 	v.SetDefault("RouterDefaults::KafkaConfig::CompressionType", "none")

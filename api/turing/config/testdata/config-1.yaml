@@ -20,6 +20,7 @@ KnativeServiceDefaults:
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60
+    WorkerCount: 2
 Sentry:
   Enabled: true 
   Labels:
