@@ -448,8 +448,8 @@ func buildTrafficSplittingFiberConfig(
 
 	// iterate over traffic rules and generated nested routed and
 	// config for traffic splitting routing strategy
-	for idx, rule := range rules {
-		routeID := fmt.Sprintf("traffic-split-%d", idx)
+	for _, rule := range rules {
+		routeID := rule.Name
 
 		var ruleRoutes models.Routes
 		for _, rID := range rule.Routes {
