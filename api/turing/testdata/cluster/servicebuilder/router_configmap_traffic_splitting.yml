@@ -28,7 +28,7 @@ routes:
         treatment: treatment
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
-- id: traffic-split-0
+- id: rule-1
   routes:
   - endpoint: http://example.com/treatment-a
     id: treatment-a
@@ -61,7 +61,7 @@ routes:
         treatment: treatment
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
-- id: traffic-split-1
+- id: rule-2
   routes:
   - endpoint: http://example.com/treatment-b
     id: treatment-b
@@ -94,7 +94,7 @@ routes:
         treatment: treatment
     type: fiber.DefaultTuringRoutingStrategy
   type: EAGER_ROUTER
-- id: traffic-split-2
+- id: default-traffic-rule
   routes:
   - endpoint: http://example.com/control
     id: control
@@ -137,15 +137,15 @@ strategy:
         operator: in
         values:
         - region-a
-      route_id: traffic-split-0
+      route_id: rule-1
     - conditions:
       - field: X-Region
         field_source: header
         operator: in
         values:
         - region-b
-      route_id: traffic-split-1
+      route_id: rule-2
     - conditions: []
-      route_id: traffic-split-2
+      route_id: default-traffic-rule
   type: fiber.TrafficSplittingStrategy
 type: LAZY_ROUTER
