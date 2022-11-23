@@ -13,8 +13,10 @@ import (
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -121,7 +123,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 	resp, predictionErr := us.getPrediction(ctx, req, md, turingReqID)
 	if predictionErr != nil {
 		logTuringRouterRequestError(ctx, predictionErr)
-		return nil, predictionErr
+		return nil, status.Error(codes.Code(predictionErr.Code), predictionErr.Message)
 	}
 	return resp, nil
 }
