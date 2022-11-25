@@ -120,7 +120,7 @@ turing:
     BatchEnsemblingConfig:
       Enabled: &batchEnsemblingEnabled false
     EnsemblerServiceBuilderConfig:
-      ClusterName: k3s
+      ClusterName: dev
       ImageBuildingConfig:
         BuildNamespace: default
         BuildTimeoutDuration: 20m
