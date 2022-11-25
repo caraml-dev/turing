@@ -622,7 +622,7 @@ func TestConfigValidate(t *testing.T) {
 			},
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
-			DefaultEnvironment: "dev",
+			ClusterName: "dev",
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{

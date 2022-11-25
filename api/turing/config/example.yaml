@@ -59,7 +59,7 @@ BatchEnsemblingConfig:
 
 # PyFunc ensembler service image builder configurations (this is largely similar to the batch ensembler job config)
 EnsemblerServiceBuilderConfig:
-  DefaultEnvironment: dev
+  ClusterName: k3s
   ImageBuildingConfig:
     <<: *imageBuildingConfig
     BaseImageRef:

@@ -120,7 +120,7 @@ turing:
     BatchEnsemblingConfig:
       Enabled: &batchEnsemblingEnabled false
     EnsemblerServiceBuilderConfig:
-      DefaultEnvironment: dev
+      ClusterName: dev
       ImageBuildingConfig:
         BuildNamespace: default
         BuildTimeoutDuration: 20m

@@ -114,7 +114,7 @@ type BatchEnsemblingConfig struct {
 
 // EnsemblerServiceConfig captures the config related to the build and running of ensembler services (real-time)
 type EnsemblerServiceBuilderConfig struct {
-	DefaultEnvironment  string               `validate:"required"`
+	ClusterName         string               `validate:"required"`
 	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
 }
 
