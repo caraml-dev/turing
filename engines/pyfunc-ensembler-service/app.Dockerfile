@@ -4,7 +4,9 @@ FROM ${BASE_IMAGE} as builder
 
 ARG MODEL_URL
 ARG FOLDER_NAME
+ARG GOOGLE_APPLICATION_CREDENTIALS
 
+RUN gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 RUN gsutil -m cp -r ${MODEL_URL} .
 
 # Install dependencies required by the user-defined ensembler
@@ -29,4 +31,4 @@ COPY --from=builder /venv ./venv
 
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT source /venv/bin/activate && \
-           python -m pyfunc_ensembler_runner --mlflow_ensembler_dir /${FOLDER_NAME} -l INFO
+  python -m pyfunc_ensembler_runner --mlflow_ensembler_dir /${FOLDER_NAME} -l INFO

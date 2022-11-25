@@ -223,10 +223,13 @@ func (ib *imageBuilder) createKanikoJob(
 		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
 	}
 
+	kanikoSecretFilePath := fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName)
+
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
+		fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath),
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
@@ -260,7 +263,7 @@ func (ib *imageBuilder) createKanikoJob(
 				Envs: []cluster.Env{
 					{
 						Name:  googleApplicationEnvVarName,
-						Value: fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName),
+						Value: kanikoSecretFilePath,
 					},
 				},
 				Resources: cluster.RequestLimitResources{
