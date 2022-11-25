@@ -114,19 +114,22 @@ func NewAppContext(
 			mlpSvc,
 		)
 
-		batchClusterController, ok := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
+		imageBuildingController, ok := clusterControllers[cfg.EnsemblerServiceBuilderConfig.DefaultEnvironment]
 		if !ok {
-			return nil, errors.Wrapf(err, "Failed getting the default controller")
+			return nil, errors.Wrapf(err, "Failed getting the image building controller")
 		}
-
 		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
-			batchClusterController,
+			imageBuildingController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
 		}
 
+		batchClusterController, ok := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
+		if !ok {
+			return nil, errors.Wrapf(err, "Failed getting the batch ensembling job controller")
+		}
 		batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 			batchClusterController,
 			mlpSvc,
