@@ -1,7 +1,7 @@
 # turing
 
 ---
-![Version: 0.2.12](https://img.shields.io/badge/Version-0.2.12-informational?style=flat-square)
+![Version: 0.2.14](https://img.shields.io/badge/Version-0.2.14-informational?style=flat-square)
 ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
 Turing: ML Experimentation System
@@ -97,7 +97,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.extraVolumes | list | `[]` | Extra volumes to attach to the Pod. For example, you can mount  additional secrets to these volumes |
 | turing.image.registry | string | `"ghcr.io"` | Docker registry for Turing API image. User is required to override the registry for now as there is no publicly available Turing image |
 | turing.image.repository | string | `"caraml-dev/turing"` | Docker image repository for Turing API |
-| turing.image.tag | string | `"v1.6.0"` | Docker image tag for Turing API |
+| turing.image.tag | string | `"v1.7.1"` | Docker image tag for Turing API |
 | turing.ingress.class | string | `""` | Ingress class annotation to add to this Ingress rule,  useful when there are multiple ingress controllers installed |
 | turing.ingress.enabled | bool | `false` | Enable ingress to provision Ingress resource for external access to Turing API |
 | turing.ingress.host | string | `""` | Set host value to enable name based virtual hosting. This allows routing HTTP traffic to multiple host names at the same IP address. If no host is specified, the ingress rule applies to all inbound HTTP traffic through  the IP address specified. https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting |
