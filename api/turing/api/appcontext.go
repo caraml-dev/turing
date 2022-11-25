@@ -63,7 +63,7 @@ func NewAppContext(
 	}
 
 	// Create a map of env name to cluster name for each supported deployment environment
-	envClusterMap, err := getEnvironmentClusterMap(mlpSvc)
+	envClusterMap, err := getEnvironmentClusterMap(mlpSvc, []string{cfg.EnsemblerServiceBuilderConfig.ClusterName})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service")
 	}
@@ -114,7 +114,7 @@ func NewAppContext(
 			mlpSvc,
 		)
 
-		imageBuildingController, ok := clusterControllers[cfg.EnsemblerServiceBuilderConfig.DefaultEnvironment]
+		imageBuildingController, ok := clusterControllers[cfg.EnsemblerServiceBuilderConfig.ClusterName]
 		if !ok {
 			return nil, errors.Wrapf(err, "Failed getting the image building controller")
 		}
@@ -152,7 +152,7 @@ func NewAppContext(
 
 	// Initialise EnsemblerServiceImageBuilder
 	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
-		clusterControllers[cfg.EnsemblerServiceBuilderConfig.DefaultEnvironment],
+		clusterControllers[cfg.EnsemblerServiceBuilderConfig.ClusterName],
 		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
 	)
 	if err != nil {
@@ -187,8 +187,10 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster
-func getEnvironmentClusterMap(mlpSvc service.MLPService) (map[string]string, error) {
+// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster. Additionally,
+// clusters that are not a part of the deployment environments can be registered using the clusterNames
+// parameter (in such cases, the environment name will be saved to be the same as the cluster name).
+func getEnvironmentClusterMap(mlpSvc service.MLPService, clusterNames []string) (map[string]string, error) {
 	envClusterMap := map[string]string{}
 	// Get all environments
 	environments, err := mlpSvc.GetEnvironments()
@@ -198,6 +200,10 @@ func getEnvironmentClusterMap(mlpSvc service.MLPService) (map[string]string, err
 	// Create a map of the environment name to cluster id
 	for _, environment := range environments {
 		envClusterMap[environment.Name] = environment.Cluster
+	}
+	// Add other required clusters that are not a part of the environments
+	for _, clusterName := range clusterNames {
+		envClusterMap[clusterName] = clusterName
 	}
 	return envClusterMap, nil
 }

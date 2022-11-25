@@ -96,7 +96,7 @@ func TestNewAppContext(t *testing.T) {
 			},
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
-			DefaultEnvironment: defaultEnvironment,
+			ClusterName: defaultEnvironment,
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -248,8 +248,9 @@ func TestNewAppContext(t *testing.T) {
 		) (map[string]cluster.Controller, error) {
 			assert.Equal(t, testCfg, cfg)
 			assert.Equal(t, map[string]string{
-				"N1": "C1",
-				"N2": "C2",
+				"N1":  "C1",
+				"N2":  "C2",
+				"dev": "dev",
 			}, environmentClusterMap)
 			assert.Equal(t, testVaultClient, vaultClient)
 			return map[string]cluster.Controller{
