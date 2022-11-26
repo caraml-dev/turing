@@ -17,10 +17,9 @@ It is not possible to select as the final response a route that has traffic rule
 
 There are two types of Standard Ensemblers available, one that is available with Standard Experiment Engines that 
 have experiment selection enabled, and the other with Custom Experiment Engines. Both types of standard ensemblers support
-two modes of routing - Lazy Routing (where the experiment engine is called upfront, and only the route that will be chosen
-as the final response will be invoked), and the other where all applicable routes and the experiment engine will be
-called in parallel - the former is more cost efficient while the latter is more performant.
-
+two modes of routing - 'Selective' (where the experiment engine is called upfront, and only the route that will be chosen
+as the final response will be invoked), and 'Exhaustive' (where all applicable routes and the experiment engine will be
+called in parallel) - the former is more cost efficient while the latter is more performant.
 
 
 ### Standard Experiment Engines
