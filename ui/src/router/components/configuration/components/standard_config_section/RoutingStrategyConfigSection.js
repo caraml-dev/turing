@@ -1,13 +1,14 @@
 import React from "react";
 import { EuiDescriptionList } from "@elastic/eui";
 import { ConfigSectionPanel } from "../../../../../components/config_section";
+import { routingStrategyOptions } from "../../../form/components/ensembler_config/standard_ensembler/typeOptions";
 
-
-export const RoutingOrderConfigSection = ({ isLazyRouting }) => {
+export const RoutingStrategyConfigSection = ({ isLazyRouting }) => {
+  const strategy = routingStrategyOptions.find(e => Boolean(isLazyRouting).toString() === e.flag) || {};
   const items = [
     {
-      title: "Lazy Routing",
-      description: isLazyRouting,
+      title: "Strategy",
+      description: strategy.inputDisplay,
     },
   ];
   return (<ConfigSectionPanel title={"Routing Order"}>
