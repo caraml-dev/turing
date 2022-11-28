@@ -4,7 +4,7 @@ import { EuiFlexItem, EuiSpacer, EuiText } from "@elastic/eui";
 import { get } from "../../../../../../components/form/utils";
 import { StandardEnsembler } from "../../../../../../services/ensembler";
 import { StandardEnsemblerPanel } from "./StandardEnsemblerPanel";
-import { StandardEnsemblerRoutingOrderPanel } from "./StandardEnsemblerRoutingOrderPanel";
+import { StandardEnsemblerRoutingStrategyPanel } from "./StandardEnsemblerRoutingStrategyPanel";
 import { RouteSelectionPanel } from "../RouteSelectionPanel";
 import { FormLabelWithToolTip } from "../../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../../../components/form/hooks/useOnChangeHandler";
@@ -99,7 +99,7 @@ export const StandardEnsemblerFormGroup = ({
     !!standardConfig && (
       <>
         <EuiFlexItem>
-          <StandardEnsemblerRoutingOrderPanel
+          <StandardEnsemblerRoutingStrategyPanel
             isLazyRouting={!!standardConfig.lazy_routing}
             onChange={onChange("lazy_routing")}
             errors={get(errors, "lazy_routing")}
