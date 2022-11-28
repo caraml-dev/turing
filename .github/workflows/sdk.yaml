@@ -102,7 +102,7 @@ jobs:
         working-directory: ./sdk
         run: |
           make setup
-          make build
+          OVERWRITE_VERSION=0.7.1 make build
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
