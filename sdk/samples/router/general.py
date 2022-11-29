@@ -200,6 +200,13 @@ def main(turing_api: str, project: str):
             id="fee-fi-fo-fum", endpoint="http://fox-says.fee-fi-fo-fum", timeout="20ms"
         )
     )
+    my_router_config.rules.append(
+        TrafficRule(
+            name="giant-rule",
+            conditions=[HeaderTrafficRuleCondition(field="name", values=["giant"])],
+            routes=["fee-fi-fo-fum"],
+        ),
+    )
 
     # 4. Update the router with the new router config
     my_router.update(my_router_config)
