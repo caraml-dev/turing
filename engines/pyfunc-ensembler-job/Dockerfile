@@ -86,7 +86,7 @@ ENV PROJECT_DIR $HOME/batch-ensembler
 RUN mkdir -p $PROJECT_DIR
 COPY --chown=$UID:$GID . $PROJECT_DIR/
 # Hack to ensure that it's compatible with the ../../sdk stated in requirements.txt
-COPY ./temp-deps/sdk $PROJECT_DIR/../../sdk
+COPY --chown=$UID:$GID ./temp-deps/sdk $PROJECT_DIR/../../sdk
 
 # Setup base conda environment
 ARG PYTHON_VERSION
