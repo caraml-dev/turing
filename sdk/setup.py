@@ -22,7 +22,7 @@ with pathlib.Path("requirements.dev.txt").open() as dev_requirements_test:
 setuptools.setup(
     name="turing-sdk",
     version=version,
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["docs", "e2e", "samples", "tests"]),
     install_requires=requirements,
     extras_require={"dev": dev_requirements},
     python_requires=">=3.7,!=3.11.*",
