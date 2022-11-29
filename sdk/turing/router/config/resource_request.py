@@ -7,8 +7,6 @@ from turing.generated.model_utils import OpenApiModel
 
 @dataclass
 class ResourceRequest:
-    min_allowed_replica: ClassVar[int] = 0
-    max_allowed_replica: ClassVar[int] = 20
     min_replica: int
     max_replica: int
     cpu_request: str
@@ -57,17 +55,7 @@ class ResourceRequest:
 
     @classmethod
     def _verify_min_max_replica(cls, min_replica: int, max_replica: int):
-        if min_replica < ResourceRequest.min_allowed_replica:
-            raise InvalidReplicaCountException(
-                f"Min replica count must be >= {ResourceRequest.min_allowed_replica}; "
-                f"min_replica passed: {min_replica}"
-            )
-        elif max_replica > ResourceRequest.max_allowed_replica:
-            raise InvalidReplicaCountException(
-                f"Max replica count must be <= {ResourceRequest.max_allowed_replica}; "
-                f"min_replica passed: {max_replica}"
-            )
-        elif min_replica > max_replica:
+        if min_replica > max_replica:
             raise InvalidReplicaCountException(
                 f"Min replica must be <= max_replica; "
                 f"min_replica passed: {min_replica}, max_replica passed: {max_replica}"
