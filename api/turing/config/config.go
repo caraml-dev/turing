@@ -205,11 +205,12 @@ type SparkAppConfig struct {
 
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
-	EnvironmentType string        `validate:"required"`
-	Timeout         time.Duration `validate:"required"`
-	DeletionTimeout time.Duration `validate:"required"`
-	MaxCPU          Quantity      `validate:"required"`
-	MaxMemory       Quantity      `validate:"required"`
+	EnvironmentType   string        `validate:"required"`
+	Timeout           time.Duration `validate:"required"`
+	DeletionTimeout   time.Duration `validate:"required"`
+	MaxCPU            Quantity      `validate:"required"`
+	MaxMemory         Quantity      `validate:"required"`
+	MaxAllowedReplica int           `validate:"required"`
 }
 
 // KubernetesLabelConfigs are the configurations for labeling

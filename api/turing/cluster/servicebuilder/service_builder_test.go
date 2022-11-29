@@ -23,7 +23,7 @@ type testSuiteNewService struct {
 }
 
 func TestNewEnricherService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 
 	tests := map[string]testSuiteNewService{
@@ -97,7 +97,7 @@ func TestNewEnricherService(t *testing.T) {
 }
 
 func TestNewEnsemblerService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	tests := map[string]testSuiteNewService{
 		"success": {
@@ -267,38 +267,51 @@ func TestNewSecret(t *testing.T) {
 func TestValidateKnativeService(t *testing.T) {
 	cpuLimit := resource.MustParse("400m")
 	memoryLimit := resource.MustParse("512Mi")
+	maxAllowedReplica := 30
 	tests := map[string]struct {
-		cpu resource.Quantity
-		mem resource.Quantity
-		err string
+		cpu         resource.Quantity
+		mem         resource.Quantity
+		maxReplicas int
+		err         string
 	}{
 		"success": {
-			cpu: resource.MustParse("400m"),
-			mem: resource.MustParse("50Mi"),
+			cpu:         resource.MustParse("400m"),
+			mem:         resource.MustParse("50Mi"),
+			maxReplicas: 10,
 		},
 		"cpu failure": {
-			cpu: resource.MustParse("4"),
-			mem: resource.MustParse("100Mi"),
-			err: "Requested CPU is more than max permissible",
+			cpu:         resource.MustParse("4"),
+			mem:         resource.MustParse("100Mi"),
+			maxReplicas: 10,
+			err:         "Requested CPU is more than max permissible",
 		},
 		"mem failure": {
-			cpu: resource.MustParse("100m"),
-			mem: resource.MustParse("1Gi"),
-			err: "Requested Memory is more than max permissible",
+			cpu:         resource.MustParse("100m"),
+			mem:         resource.MustParse("1Gi"),
+			maxReplicas: 10,
+			err:         "Requested Memory is more than max permissible",
+		},
+		"max replica failure": {
+			cpu:         resource.MustParse("100m"),
+			mem:         resource.MustParse("100Mi"),
+			maxReplicas: 50,
+			err:         "Requested max replica is more than max permissible",
 		},
 	}
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			sb := clusterSvcBuilder{
-				MaxCPU:    cpuLimit,
-				MaxMemory: memoryLimit,
+				MaxCPU:            cpuLimit,
+				MaxMemory:         memoryLimit,
+				MaxAllowedReplica: maxAllowedReplica,
 			}
 			testSvc := &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					CPURequests:    data.cpu,
 					MemoryRequests: data.mem,
 				},
+				MaxReplicas: data.maxReplicas,
 			}
 			// Run test method and validate
 			svc, err := sb.validateKnativeService(testSvc)

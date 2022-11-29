@@ -657,11 +657,12 @@ func TestConfigValidate(t *testing.T) {
 			MigrationsFolder: "db-migrations/",
 		},
 		DeployConfig: &config.DeploymentConfig{
-			EnvironmentType: "dev",
-			Timeout:         1 * time.Minute,
-			DeletionTimeout: 1 * time.Minute,
-			MaxCPU:          config.Quantity(resource.MustParse("2")),
-			MaxMemory:       config.Quantity(resource.MustParse("8Gi")),
+			EnvironmentType:   "dev",
+			Timeout:           1 * time.Minute,
+			DeletionTimeout:   1 * time.Minute,
+			MaxCPU:            config.Quantity(resource.MustParse("2")),
+			MaxMemory:         config.Quantity(resource.MustParse("8Gi")),
+			MaxAllowedReplica: 30,
 		},
 		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
