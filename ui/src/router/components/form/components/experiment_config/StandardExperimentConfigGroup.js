@@ -12,6 +12,7 @@ import { VariablesConfigPanel } from "./components/variables_config/VariablesCon
 export const StandardExperimentConfigGroup = ({
   engineType,
   experimentConfig,
+  protocol,
   onChangeHandler,
   errors = {},
 }) => {
@@ -47,7 +48,8 @@ export const StandardExperimentConfigGroup = ({
     <ExperimentContextProvider
       engineProps={engineProps}
       clientId={experimentConfig.client.id || ""}
-      experimentIds={selectedExpIds.join()}>
+      experimentIds={selectedExpIds.join()}
+    >
       {engineProps.standard_experiment_manager_config
         .client_selection_enabled && (
         <EuiFlexItem grow={false}>
@@ -75,6 +77,7 @@ export const StandardExperimentConfigGroup = ({
           variables={experimentConfig.variables}
           onChangeHandler={onChange("variables")}
           errors={errors.variables}
+          protocol={protocol}
         />
       </EuiFlexItem>
     </ExperimentContextProvider>

@@ -16,6 +16,7 @@ import isEqualWith from "lodash/isEqualWith";
 export const VariablesConfigPanel = ({
   variables,
   onChangeHandler,
+  protocol,
   errors = {},
 }) => {
   const {
@@ -116,7 +117,8 @@ export const VariablesConfigPanel = ({
           size="m"
           content="Specify how the required (and any optional) experiment variables may be parsed from the request."
         />
-      }>
+      }
+    >
       <EuiSpacer size="xs" />
       {!!selectedVariables.length ? (
         <EuiFlexItem>
@@ -128,6 +130,7 @@ export const VariablesConfigPanel = ({
                   allVariables={sortedVariables}
                   availableVariables={availableVariables}
                   onChangeHandler={onChange(`config.${variable.idx}`)}
+                  protocol={protocol}
                   forceUpdate={forceUpdate}
                   error={get(errors, `config.${variable.idx}`)}
                 />

@@ -76,6 +76,7 @@ export const ExperimentConfigPanel = ({
         engineType={engine.type}
         experimentConfig={engine.config}
         onChangeHandler={onChangeHandler}
+        protocol={protocol}
         errors={errors}
       />
     )
