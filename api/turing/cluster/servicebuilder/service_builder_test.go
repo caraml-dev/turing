@@ -295,7 +295,7 @@ func TestValidateKnativeService(t *testing.T) {
 			cpu:         resource.MustParse("100m"),
 			mem:         resource.MustParse("100Mi"),
 			maxReplicas: 50,
-			err:         "Requested max replica is more than max permissible",
+			err:         "Requested Max Replica (50) is more than max permissible (30)",
 		},
 	}
 

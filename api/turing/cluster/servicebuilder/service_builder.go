@@ -327,7 +327,8 @@ func (sb *clusterSvcBuilder) validateKnativeService(
 		return nil, errors.New("Requested Memory is more than max permissible")
 	}
 	if svc.MaxReplicas > sb.MaxAllowedReplica {
-		return nil, errors.New("Requested max replica is more than max permissible")
+		return nil, errors.New(fmt.Sprintf("Requested Max Replica (%v) is more than max permissible (%v)",
+			svc.MaxReplicas, sb.MaxAllowedReplica))
 	}
 	return svc, nil
 }
