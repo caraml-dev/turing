@@ -8,6 +8,7 @@ DbConfig:
   Password: newpassword
 DeployConfig:
   MaxMemory: 12Gi
+  MaxAllowedReplica: 30
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 90

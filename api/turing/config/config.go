@@ -481,6 +481,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::DeletionTimeout", "1m")
 	v.SetDefault("DeployConfig::MaxCPU", "4")
 	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
+	v.SetDefault("DeployConfig::MaxAllowedReplica", "20")
 
 	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
 	v.SetDefault("KnativeServiceDefaults::UserContainerLimitRequestFactor", "1")
