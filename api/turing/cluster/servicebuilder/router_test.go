@@ -20,7 +20,7 @@ import (
 )
 
 func TestNewRouterService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	enrEndpoint := "http://test-svc-turing-enricher-1.test-project.svc.cluster.local/echo?delay=10ms"
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
@@ -1014,7 +1014,7 @@ func TestNewRouterService(t *testing.T) {
 
 func TestNewRouterEndpoint(t *testing.T) {
 	// Get router version
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"))
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	fileBytes, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_version_success.json"))
 	require.NoError(t, err)

@@ -110,18 +110,21 @@ type ClusterServiceBuilder interface {
 
 // clusterSvcBuilder implements ClusterServiceBuilder
 type clusterSvcBuilder struct {
-	MaxCPU    resource.Quantity
-	MaxMemory resource.Quantity
+	MaxCPU            resource.Quantity
+	MaxMemory         resource.Quantity
+	MaxAllowedReplica int
 }
 
 // NewClusterServiceBuilder creates a new service builder with the supplied configs for defaults
 func NewClusterServiceBuilder(
 	cpuLimit resource.Quantity,
 	memoryLimit resource.Quantity,
+	maxAllowedReplica int,
 ) ClusterServiceBuilder {
 	return &clusterSvcBuilder{
-		MaxCPU:    cpuLimit,
-		MaxMemory: memoryLimit,
+		MaxCPU:            cpuLimit,
+		MaxMemory:         memoryLimit,
+		MaxAllowedReplica: maxAllowedReplica,
 	}
 }
 
@@ -322,6 +325,10 @@ func (sb *clusterSvcBuilder) validateKnativeService(
 	}
 	if svc.MemoryRequests.Cmp(sb.MaxMemory) > 0 {
 		return nil, errors.New("Requested Memory is more than max permissible")
+	}
+	if svc.MaxReplicas > sb.MaxAllowedReplica {
+		return nil, fmt.Errorf("Requested Max Replica (%v) is more than max permissible (%v)", svc.MaxReplicas,
+			sb.MaxAllowedReplica)
 	}
 	return svc, nil
 }
