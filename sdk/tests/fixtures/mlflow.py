@@ -8,7 +8,7 @@ def mock_mlflow(responses, experiment_name, experiment_id, run_id, artifact_uri)
     responses.add(
         method="GET",
         url=f"/api/2.0/mlflow/experiments/get-by-name?experiment_name={quote_plus(experiment_name)}",
-        body=json.dumps({"experiment": {"id": experiment_id, "name": experiment_name}}),
+        body=json.dumps({"experiment": {"id": experiment_id, "name": experiment_name, "lifecycle_stage": "active"}}),
         match_querystring=True,
         status=200,
         content_type="application/json",
