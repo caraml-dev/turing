@@ -45,7 +45,7 @@ RUN apt-get update --allow-releaseinfo-change-suite -q && \
 
 # Install gcloud SDK
 ENV PATH=$PATH:/google-cloud-sdk/bin
-ARG GCLOUD_VERSION=332.0.0
+ARG GCLOUD_VERSION=410.0.0
 
 RUN wget -qO- \
     https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz | \
