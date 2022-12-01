@@ -1,6 +1,6 @@
 name: pyfunc-ensembler-job
 dependencies:
-  - python=3.9.*
+  - python=3.10.*
   - pip=22.2.2
   - pip:
       - -r requirements.txt
