@@ -15,7 +15,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/gojek/fiber v0.2.0
+	github.com/gojek/fiber v0.2.1-rc1
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.4.7
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
@@ -215,7 +215,6 @@ replace (
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
-	github.com/gojek/fiber => github.com/leonlnj/fiber v0.0.0-20221201105457-1e2fd65df8ea
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
