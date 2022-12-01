@@ -68,18 +68,15 @@ USER ${USER}
 WORKDIR $HOME
 
 # Install miniconda
-ARG CONDA_VERSION=py38_4.9.2
-ARG CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
-ENV CONDA_DIR $HOME/miniconda3
-ENV PATH $CONDA_DIR/bin:$PATH
+ENV CONDA_DIR ${HOME}/miniconda3
+ENV PATH ${CONDA_DIR}/bin:$PATH
+ENV MINIFORGE_VERSION=4.14.0-0
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
-    echo "$CONDA_MD5  miniconda.sh" > miniconda.md5 && \
-    if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
-    sh miniconda.sh -b -p $CONDA_DIR && \
-    rm miniconda.sh miniconda.md5 && \
-    echo "source $CONDA_DIR/etc/profile.d/conda.sh" >> $HOME/.bashrc && \
-    $CONDA_DIR/bin/conda clean -afy
+RUN wget --quiet https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
+    /bin/bash miniconda.sh -b -p ${CONDA_DIR} && \
+    rm ~/miniconda.sh && \
+    $CONDA_DIR/bin/conda clean -afy && \
+    echo "source $CONDA_DIR/etc/profile.d/conda.sh" >> $HOME/.bashrc
 
 # Copy PySpark application
 ENV PROJECT_DIR $HOME/batch-ensembler
