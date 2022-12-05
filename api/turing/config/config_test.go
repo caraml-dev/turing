@@ -650,9 +650,6 @@ func TestConfigValidate(t *testing.T) {
 						},
 					},
 				},
-				NodeSelector: map[string]string{
-					"node-workload-type": "image",
-				},
 			},
 		},
 		DbConfig: &config.DatabaseConfig{

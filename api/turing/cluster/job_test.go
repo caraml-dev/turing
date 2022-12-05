@@ -45,6 +45,14 @@ func TestJob(t *testing.T) {
 					Volumes: []corev1.Volume{
 						CreateKubernetesSecretVolume(),
 					},
+					Tolerations: []corev1.Toleration{
+						{
+							Key:      "tolerate-this",
+							Operator: corev1.TolerationOpEqual,
+							Value:    "true",
+							Effect:   corev1.TaintEffectNoSchedule,
+						},
+					},
 					NodeSelector: map[string]string{
 						"node-workload-type": "image",
 					},
@@ -52,6 +60,8 @@ func TestJob(t *testing.T) {
 			},
 		},
 	}
+
+	tolerationName := "tolerate-this"
 
 	j := Job{
 		Name:                    jobName,
@@ -67,6 +77,7 @@ func TestJob(t *testing.T) {
 		SecretVolumes: []SecretVolume{
 			CreateSecretVolume(),
 		},
+		TolerationName: &tolerationName,
 		NodeSelector: map[string]string{
 			"node-workload-type": "image",
 		},

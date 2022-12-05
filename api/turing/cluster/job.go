@@ -17,6 +17,7 @@ type Job struct {
 	RestartPolicy           corev1.RestartPolicy
 	Containers              []Container
 	SecretVolumes           []SecretVolume
+	TolerationName          *string
 	NodeSelector            map[string]string
 }
 
@@ -30,6 +31,18 @@ func (j *Job) Build() *batchv1.Job {
 	volumes := []corev1.Volume{}
 	for _, v := range j.SecretVolumes {
 		volumes = append(volumes, v.Build())
+	}
+
+	tolerations := []corev1.Toleration{}
+	if j.TolerationName != nil {
+		tolerations = []corev1.Toleration{
+			{
+				Key:      *j.TolerationName,
+				Operator: corev1.TolerationOpEqual,
+				Value:    "true",
+				Effect:   corev1.TaintEffectNoSchedule,
+			},
+		}
 	}
 
 	return &batchv1.Job{
@@ -50,6 +63,7 @@ func (j *Job) Build() *batchv1.Job {
 					RestartPolicy: j.RestartPolicy,
 					Containers:    containers,
 					Volumes:       volumes,
+					Tolerations:   tolerations,
 					NodeSelector:  j.NodeSelector,
 				},
 			},
