@@ -45,6 +45,9 @@ func TestJob(t *testing.T) {
 					Volumes: []corev1.Volume{
 						CreateKubernetesSecretVolume(),
 					},
+					NodeSelector: map[string]string{
+						"node-workload-type": "image",
+					},
 				},
 			},
 		},
@@ -63,6 +66,9 @@ func TestJob(t *testing.T) {
 		},
 		SecretVolumes: []SecretVolume{
 			CreateSecretVolume(),
+		},
+		NodeSelector: map[string]string{
+			"node-workload-type": "image",
 		},
 	}
 

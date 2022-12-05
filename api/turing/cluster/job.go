@@ -17,6 +17,7 @@ type Job struct {
 	RestartPolicy           corev1.RestartPolicy
 	Containers              []Container
 	SecretVolumes           []SecretVolume
+	NodeSelector            map[string]string
 }
 
 // Build converts the spec into a Kubernetes spec
@@ -49,6 +50,7 @@ func (j *Job) Build() *batchv1.Job {
 					RestartPolicy: j.RestartPolicy,
 					Containers:    containers,
 					Volumes:       volumes,
+					NodeSelector:  j.NodeSelector,
 				},
 			},
 		},
