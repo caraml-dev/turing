@@ -55,7 +55,7 @@ const (
 	envRouterConfigFile                = "ROUTER_CONFIG_FILE"
 	envRouterProtocol                  = "ROUTER_PROTOCOL"
 	envGoogleApplicationCredentials    = "GOOGLE_APPLICATION_CREDENTIALS"
-	envExpGoogleApplicationCredentials = "EXP_GOOGLE_APPLICATION_CREDENTIALS"
+	envExpGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS_EXPERIMENT_ENGINE"
 	envPluginName                      = "PLUGIN_NAME"
 	envPluginsDir                      = "PLUGINS_DIR"
 )

@@ -798,7 +798,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
-						{Name: "EXP_GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/exp-engine/exp-engine-service-account.json"},
+						{Name: "GOOGLE_APPLICATION_CREDENTIALS_EXPERIMENT_ENGINE", Value: "/var/secret/exp-engine/exp-engine-service-account.json"},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
