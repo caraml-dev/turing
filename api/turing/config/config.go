@@ -159,6 +159,10 @@ type ImageBuildingConfig struct {
 	BaseImageRef map[string]string `validate:"required"`
 	// KanikoConfig contains the configuration related to the kaniko executor image builder.
 	KanikoConfig KanikoConfig `validate:"required"`
+	// TolerationName allow the scheduler to schedule image building jobs with the matching name
+	TolerationName *string
+	// NodeSelector restricts the running of image building jobs to nodes with the specified labels.
+	NodeSelector map[string]string
 }
 
 // Resource contains the Kubernetes resource request and limits

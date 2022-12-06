@@ -292,6 +292,8 @@ func (ib *imageBuilder) createKanikoJob(
 				SecretName: kanikoSecretName,
 			},
 		},
+		TolerationName: ib.imageBuildingConfig.TolerationName,
+		NodeSelector:   ib.imageBuildingConfig.NodeSelector,
 	}
 
 	return ib.clusterController.CreateJob(
