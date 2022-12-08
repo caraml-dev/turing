@@ -5,9 +5,8 @@ import (
 	"io"
 	"net"
 	"net/http"
-
-	// TODO: justify this
-	_ "net/http/pprof"
+	"net/http/pprof"
+	"runtime"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -26,6 +25,8 @@ import (
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	// TODO: justify this
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
+	// for profiling
+	_ "net/http/pprof"
 )
 
 func Run() {
@@ -54,6 +55,7 @@ func Run() {
 
 	switch cfg.RouterConfig.Protocol {
 	case config.UPI:
+		runtime.SetBlockProfileRate(1)
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControlUPI(
 			cfg.RouterConfig.ConfigFile,
@@ -78,6 +80,12 @@ func Run() {
 			"/v1/internal",
 			handlers.NewInternalAPIHandler([]string{}),
 		))
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/heap", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 		if cfg.AppConfig.CustomMetrics {
 			mux.Handle("/metrics", promhttp.Handler())
 		}
