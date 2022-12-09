@@ -110,11 +110,11 @@ type ClusterServiceBuilder interface {
 
 // clusterSvcBuilder implements ClusterServiceBuilder
 type clusterSvcBuilder struct {
-	MaxCPU            resource.Quantity
-	MaxMemory         resource.Quantity
-	MaxAllowedReplica int
-	DefaultAutoscalingPolicyMinReplica *int
-	DefaultAutoscalingPolicyMaxReplica *int
+	MaxCPU                             resource.Quantity
+	MaxMemory                          resource.Quantity
+	MaxAllowedReplica                  int
+	DefaultAutoscalingPolicyMinReplica int
+	DefaultAutoscalingPolicyMaxReplica int
 }
 
 // NewClusterServiceBuilder creates a new service builder with the supplied configs for defaults
@@ -122,15 +122,15 @@ func NewClusterServiceBuilder(
 	cpuLimit resource.Quantity,
 	memoryLimit resource.Quantity,
 	maxAllowedReplica int,
-	defaultMinReplica *int,
-	defaultMaxReplica *int,
+	defaultAutoscalingPolicyMinReplica int,
+	defaultAutoscalingPolicyMaxReplica int,
 ) ClusterServiceBuilder {
 	return &clusterSvcBuilder{
-		MaxCPU:            cpuLimit,
-		MaxMemory:         memoryLimit,
-		MaxAllowedReplica: maxAllowedReplica,
-		DefaultAutoscalingPolicyMinReplica: defaultMinReplica,
-		DefaultAutoscalingPolicyMaxReplica: defaultMaxReplica,
+		MaxCPU:                             cpuLimit,
+		MaxMemory:                          memoryLimit,
+		MaxAllowedReplica:                  maxAllowedReplica,
+		DefaultAutoscalingPolicyMinReplica: defaultAutoscalingPolicyMinReplica,
+		DefaultAutoscalingPolicyMaxReplica: defaultAutoscalingPolicyMaxReplica,
 	}
 }
 
@@ -190,23 +190,15 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		}
 	}
 
-	minReplicas, err := sb.getMinReplicaOrDefault(enricher.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	maxReplicas, err := sb.getMaxReplicaOrDefault(enricher.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
+	resourceRequests := sb.getResourceRequestOrDefault(enricher.ResourceRequest)
 
 	return sb.validateKnativeService(&cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:           name,
 			Namespace:      namespace,
 			Image:          enricher.Image,
-			CPURequests:    sb.getCPURequestOrDefault(enricher.ResourceRequest),
-			MemoryRequests: sb.getMemoryRequestOrDefault(enricher.ResourceRequest),
+			CPURequests:    resourceRequests.CPURequest,
+			MemoryRequests: resourceRequests.MemoryRequest,
 			Envs:           enricher.Env.ToKubernetesEnvVars(),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
@@ -214,8 +206,8 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		},
 		IsClusterLocal:                  true,
 		ContainerPort:                   int32(enricher.Port),
-		MinReplicas:                     *minReplicas,
-		MaxReplicas:                     *maxReplicas,
+		MinReplicas:                     resourceRequests.MinReplica,
+		MaxReplicas:                     resourceRequests.MaxReplica,
 		AutoscalingMetric:               sb.getAutoscalingMetricOrDefault(enricher.AutoscalingPolicy),
 		AutoscalingTarget:               sb.getAutoscalingTargetOrDefault(enricher.AutoscalingPolicy),
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
@@ -280,23 +272,15 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		}
 	}
 
-	minReplicas, err := sb.getMinReplicaOrDefault(docker.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	maxReplicas, err := sb.getMaxReplicaOrDefault(docker.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
+	resourceRequests := sb.getResourceRequestOrDefault(docker.ResourceRequest)
 
 	return sb.validateKnativeService(&cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:           name,
 			Namespace:      namespace,
 			Image:          docker.Image,
-			CPURequests:    sb.getCPURequestOrDefault(docker.ResourceRequest),
-			MemoryRequests: sb.getMemoryRequestOrDefault(docker.ResourceRequest),
+			CPURequests:    resourceRequests.CPURequest,
+			MemoryRequests: resourceRequests.MemoryRequest,
 			Envs:           docker.Env.ToKubernetesEnvVars(),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
@@ -304,8 +288,8 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		},
 		IsClusterLocal:                  true,
 		ContainerPort:                   int32(docker.Port),
-		MinReplicas:                     *minReplicas,
-		MaxReplicas:                     *maxReplicas,
+		MinReplicas:                     resourceRequests.MinReplica,
+		MaxReplicas:                     resourceRequests.MaxReplica,
 		AutoscalingMetric:               sb.getAutoscalingMetricOrDefault(docker.AutoscalingPolicy),
 		AutoscalingTarget:               sb.getAutoscalingTargetOrDefault(docker.AutoscalingPolicy),
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
@@ -343,38 +327,16 @@ func (sb *clusterSvcBuilder) NewSecret(
 	}
 }
 
-func (sb *clusterSvcBuilder) getMinReplicaOrDefault(resourceRequest *models.ResourceRequest) (*int, error) {
+func (sb *clusterSvcBuilder) getResourceRequestOrDefault(resourceRequest *models.ResourceRequest) *models.ResourceRequest {
 	if resourceRequest == nil {
-		if sb.DefaultAutoscalingPolicyMinReplica == nil {
-			return nil, errors.New("API does not have min replica for default autoscaling policy set")
+		return &models.ResourceRequest{
+			MinReplica:    sb.DefaultAutoscalingPolicyMinReplica,
+			MaxReplica:    sb.DefaultAutoscalingPolicyMaxReplica,
+			CPURequest:    sb.MaxCPU,
+			MemoryRequest: sb.MaxMemory,
 		}
-		return sb.DefaultAutoscalingPolicyMinReplica, nil
 	}
-	return &resourceRequest.MinReplica, nil
-}
-
-func (sb *clusterSvcBuilder) getMaxReplicaOrDefault(resourceRequest *models.ResourceRequest) (*int, error) {
-	if resourceRequest == nil {
-		if sb.DefaultAutoscalingPolicyMaxReplica == nil {
-			return nil, errors.New("API does not have max replica for default autoscaling policy set")
-		}
-		return sb.DefaultAutoscalingPolicyMaxReplica, nil
-	}
-	return &resourceRequest.MaxReplica, nil
-}
-
-func (sb *clusterSvcBuilder) getCPURequestOrDefault(resourceRequest *models.ResourceRequest) resource.Quantity {
-	if resourceRequest == nil {
-		return sb.MaxCPU
-	}
-	return resourceRequest.CPURequest
-}
-
-func (sb *clusterSvcBuilder) getMemoryRequestOrDefault(resourceRequest *models.ResourceRequest) resource.Quantity {
-	if resourceRequest == nil {
-		return sb.MaxMemory
-	}
-	return resourceRequest.MemoryRequest
+	return resourceRequest
 }
 
 func (sb *clusterSvcBuilder) getAutoscalingMetricOrDefault(autoscalingPolicy models.AutoscalingPolicy) string {

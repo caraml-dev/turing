@@ -121,15 +121,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	initContainers := buildInitContainers(routerVersion)
 
-	minReplicas, err := sb.getMinReplicaOrDefault(routerVersion.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	maxReplicas, err := sb.getMaxReplicaOrDefault(routerVersion.ResourceRequest)
-	if err != nil {
-		return nil, err
-	}
+	resourceRequests := sb.getResourceRequestOrDefault(routerVersion.ResourceRequest)
 
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
@@ -142,8 +134,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Name:                 name,
 			Namespace:            namespace,
 			Image:                routerVersion.Image,
-			CPURequests:          sb.getCPURequestOrDefault(routerVersion.ResourceRequest),
-			MemoryRequests:       sb.getMemoryRequestOrDefault(routerVersion.ResourceRequest),
+			CPURequests:          resourceRequests.CPURequest,
+			MemoryRequests:       resourceRequests.MemoryRequest,
 			LivenessHTTPGetPath:  routerLivenessPath,
 			ReadinessHTTPGetPath: routerReadinessPath,
 			Envs:                 envs,
@@ -156,8 +148,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
 		Protocol:                        routerVersion.Protocol,
-		MinReplicas:                     *minReplicas,
-		MaxReplicas:                     *maxReplicas,
+		MinReplicas:                     resourceRequests.MinReplica,
+		MaxReplicas:                     resourceRequests.MaxReplica,
 		AutoscalingMetric:               sb.getAutoscalingMetricOrDefault(routerVersion.AutoscalingPolicy),
 		AutoscalingTarget:               sb.getAutoscalingTargetOrDefault(routerVersion.AutoscalingPolicy),
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
