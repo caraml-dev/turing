@@ -327,7 +327,9 @@ func (sb *clusterSvcBuilder) NewSecret(
 	}
 }
 
-func (sb *clusterSvcBuilder) getResourceRequestOrDefault(resourceRequest *models.ResourceRequest) *models.ResourceRequest {
+func (sb *clusterSvcBuilder) getResourceRequestOrDefault(
+	resourceRequest *models.ResourceRequest,
+) *models.ResourceRequest {
 	if resourceRequest == nil {
 		return &models.ResourceRequest{
 			MinReplica:    sb.DefaultAutoscalingPolicyMinReplica,
