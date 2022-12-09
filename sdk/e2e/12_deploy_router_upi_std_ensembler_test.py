@@ -13,6 +13,7 @@ import turing.router.config.router_config
 from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.router_config import RouterConfig, Protocol
 from turing.router.config.router_ensembler_config import (
@@ -96,6 +97,9 @@ def test_deploy_router_upi_std_ensembler():
         ensembler=ensembler,
         default_route_id="control",
         resource_request=resource_request,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         protocol=Protocol.UPI,
         timeout="5s",
         log_config=log_config,
