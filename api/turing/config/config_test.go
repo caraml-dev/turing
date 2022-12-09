@@ -138,6 +138,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("4")),
 					MaxMemory:         config.Quantity(resource.MustParse("8Gi")),
 					MaxAllowedReplica: 20,
+					DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
+						DefaultMinReplica: 0,
+						DefaultMaxReplica: 4,
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    30,
@@ -205,6 +209,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("4000Mi")),
 					MaxAllowedReplica: 20,
+					DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
+						DefaultMinReplica: 0,
+						DefaultMaxReplica: 4,
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -292,6 +300,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("12Gi")),
 					MaxAllowedReplica: 30,
+					DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
+						DefaultMinReplica: 0,
+						DefaultMaxReplica: 4,
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -415,6 +427,10 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("4500Mi")),
 					MaxAllowedReplica: 30,
+					DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
+						DefaultMinReplica: 0,
+						DefaultMaxReplica: 4,
+					},
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -661,15 +677,13 @@ func TestConfigValidate(t *testing.T) {
 			MigrationsFolder: "db-migrations/",
 		},
 		DeployConfig: &config.DeploymentConfig{
-			EnvironmentType:   "dev",
-			Timeout:           1 * time.Minute,
-			DeletionTimeout:   1 * time.Minute,
-			MaxCPU:            config.Quantity(resource.MustParse("2")),
-			MaxMemory:         config.Quantity(resource.MustParse("8Gi")),
-			MaxAllowedReplica: 30,
-			DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{
-				Enabled: false,
-			},
+			EnvironmentType:                "dev",
+			Timeout:                        1 * time.Minute,
+			DeletionTimeout:                1 * time.Minute,
+			MaxCPU:                         config.Quantity(resource.MustParse("2")),
+			MaxMemory:                      config.Quantity(resource.MustParse("8Gi")),
+			MaxAllowedReplica:              30,
+			DefaultAutoScalingPolicyConfig: config.DefaultAutoScalingPolicyConfig{},
 		},
 		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{
@@ -718,9 +732,6 @@ func TestConfigValidate(t *testing.T) {
 
 	// validConfigUpdate returns an updated config from a valid one
 	type validConfigUpdate func(validConfig config.Config) config.Config
-
-	minReplica := 2
-	maxReplica := 10
 
 	tests := map[string]struct {
 		validConfigUpdate validConfigUpdate
@@ -812,9 +823,8 @@ func TestConfigValidate(t *testing.T) {
 		"valid autoscaling policy set": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.DeployConfig.DefaultAutoScalingPolicyConfig = config.DefaultAutoScalingPolicyConfig{
-					Enabled:           true,
-					DefaultMinReplica: &minReplica,
-					DefaultMaxReplica: &maxReplica,
+					DefaultMinReplica: 2,
+					DefaultMaxReplica: 10,
 				}
 				return validConfig
 			},

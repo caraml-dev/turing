@@ -219,7 +219,6 @@ type DeploymentConfig struct {
 }
 
 type DefaultAutoScalingPolicyConfig struct {
-	Enabled           bool
 	DefaultMinReplica int
 	DefaultMaxReplica int
 }
