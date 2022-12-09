@@ -39,7 +39,7 @@ export const DefaultAutoscalingPolicyPanel = ({
 
             <DescribedFormGroup description={
               "The value specified here will be used to perform autoscaling automatically. There is no need to specify " +
-              "and resource requests values or custom autoscaling values."
+              "any resource requests values or custom autoscaling values."
             }>
               <EuiFormRow
                 label={
