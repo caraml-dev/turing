@@ -12,7 +12,6 @@ from turing.router.config.route import Route
 from turing.router.config.traffic_rule import TrafficRule
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
-    DEFAULT_AUTOSCALING_POLICY,
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
@@ -80,6 +79,7 @@ class RouterConfig:
 
     def __init__(
         self,
+        autoscaling_policy: Union[AutoscalingPolicy, Dict[str, str]],
         environment_name: str = "",
         name: str = "",
         routes: Union[List[Route], List[Dict[str, str]]] = None,
@@ -88,9 +88,6 @@ class RouterConfig:
         default_traffic_rule: DefaultTrafficRule = None,
         experiment_engine: Union[ExperimentConfig, Dict] = None,
         resource_request: Union[ResourceRequest, Dict[str, Union[str, int]]] = None,
-        autoscaling_policy: Union[
-            AutoscalingPolicy, Dict[str, str]
-        ] = DEFAULT_AUTOSCALING_POLICY,
         timeout: str = None,
         protocol: Union[Protocol, str] = Protocol.HTTP,
         log_config: Union[LogConfig, Dict[str, Union[str, bool, int]]] = LogConfig(

@@ -6,7 +6,6 @@ from typing import List, Dict, Union, Optional
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
-    DEFAULT_AUTOSCALING_POLICY,
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
@@ -191,12 +190,10 @@ class RouterEnsemblerConfig(DataObject):
             ] = turing.generated.models.ResourceRequest(
                 **openapi_docker_config["resource_request"]
             )
-            openapi_docker_config["autoscaling_policy"] = (
-                turing.generated.models.AutoscalingPolicy(
-                    **openapi_docker_config["autoscaling_policy"]
-                )
-                if "autoscaling_policy" in openapi_docker_config
-                else DEFAULT_AUTOSCALING_POLICY.to_open_api()
+            openapi_docker_config[
+                "autoscaling_policy"
+            ] = turing.generated.models.AutoscalingPolicy(
+                **openapi_docker_config["autoscaling_policy"]
             )
             openapi_docker_config["env"] = [
                 turing.generated.models.EnvVar(**env_var)
@@ -225,12 +222,10 @@ class RouterEnsemblerConfig(DataObject):
             ] = turing.generated.models.ResourceRequest(
                 **pyfunc_config["resource_request"]
             )
-            openapi_pyfunc_config["autoscaling_policy"] = (
-                turing.generated.models.AutoscalingPolicy(
-                    **openapi_pyfunc_config["autoscaling_policy"]
-                )
-                if "autoscaling_policy" in openapi_pyfunc_config
-                else DEFAULT_AUTOSCALING_POLICY.to_open_api()
+            openapi_pyfunc_config[
+                "autoscaling_policy"
+            ] = turing.generated.models.AutoscalingPolicy(
+                **openapi_pyfunc_config["autoscaling_policy"]
             )
             openapi_pyfunc_config["env"] = [
                 turing.generated.models.EnvVar(**env_var)
@@ -276,8 +271,8 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         ensembler_id: int,
         timeout: str,
         resource_request: ResourceRequest,
+        autoscaling_policy: AutoscalingPolicy,
         env: List["EnvVar"],
-        autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
     ):
         """
         Method to create a new Pyfunc ensembler
@@ -362,9 +357,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
             autoscaling_policy=AutoscalingPolicy(
                 metric=config.autoscaling_policy.metric,
                 target=config.autoscaling_policy.target,
-            )
-            if config.autoscaling_policy is not None
-            else DEFAULT_AUTOSCALING_POLICY,
+            ),
             env=[EnvVar(name=env.name, value=env.value) for env in config.env],
         )
 
@@ -388,12 +381,12 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self,
         image: str,
         resource_request: ResourceRequest,
+        autoscaling_policy: AutoscalingPolicy,
         endpoint: str,
         timeout: str,
         port: int,
         env: List["EnvVar"],
         service_account: str = None,
-        autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
     ):
         """
         Method to create a new Docker ensembler
@@ -496,9 +489,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             autoscaling_policy=AutoscalingPolicy(
                 metric=config.autoscaling_policy.metric,
                 target=config.autoscaling_policy.target,
-            )
-            if config.autoscaling_policy is not None
-            else DEFAULT_AUTOSCALING_POLICY,
+            ),
             endpoint=config.endpoint,
             timeout=config.timeout,
             port=config.port,

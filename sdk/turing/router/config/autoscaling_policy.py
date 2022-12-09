@@ -103,8 +103,3 @@ class AutoscalingPolicy:
         return turing.generated.models.AutoscalingPolicy(
             metric=self.metric.value, target=self.target, payload_size=self.payload_size
         )
-
-
-DEFAULT_AUTOSCALING_POLICY = AutoscalingPolicy(
-    metric=AutoscalingMetric.CONCURRENCY, target="1"
-)

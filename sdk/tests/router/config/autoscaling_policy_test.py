@@ -2,15 +2,14 @@ import pytest
 from turing.router.config.autoscaling_policy import (
     AutoscalingMetric,
     AutoscalingPolicy,
-    DEFAULT_AUTOSCALING_POLICY,
     InvalidAutoscalingMetric,
 )
 
 
 def test_set_invalid_metric():
     policy = AutoscalingPolicy(
-        metric=DEFAULT_AUTOSCALING_POLICY.metric,
-        target=DEFAULT_AUTOSCALING_POLICY.target,
+        metric=AutoscalingMetric.CONCURRENCY,
+        target="1",
     )
     with pytest.raises(InvalidAutoscalingMetric):
         policy.metric = "invalid"
@@ -42,5 +41,5 @@ def test_set_invalid_metric():
     ],
 )
 def test_set_route_with_invalid_endpoint(metric, expected):
-    policy = AutoscalingPolicy(metric=metric, target=DEFAULT_AUTOSCALING_POLICY.target)
+    policy = AutoscalingPolicy(metric=metric, target="1")
     assert policy.metric == expected

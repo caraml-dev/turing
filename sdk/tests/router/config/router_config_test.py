@@ -6,8 +6,6 @@ from turing.router.config.route import (
     InvalidRouteException,
 )
 from turing.router.config.router_config import RouterConfig
-from turing.router.config.autoscaling_policy import DEFAULT_AUTOSCALING_POLICY
-from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.router_ensembler_config import (
     DockerRouterEnsemblerConfig,
     NopRouterEnsemblerConfig,
@@ -182,10 +180,3 @@ def test_default_route_id_by_ensembler_config(
         assert router.to_open_api().to_dict()["config"]["default_route_id"] == expected
     else:
         assert "default_route_id" not in router.to_open_api().to_dict()["config"]
-
-
-def test_default_router_autoscaling_policy(request):
-    router_config = request.getfixturevalue("generic_router_config")
-    config = router_config.to_dict()
-    del config["autoscaling_policy"]
-    assert RouterConfig(**config).autoscaling_policy == DEFAULT_AUTOSCALING_POLICY

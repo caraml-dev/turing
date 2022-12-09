@@ -4,7 +4,6 @@ from typing import List, Union, Dict
 from turing.generated.model_utils import OpenApiModel
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
-    DEFAULT_AUTOSCALING_POLICY,
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
@@ -39,13 +38,13 @@ class Enricher:
         self,
         image: str,
         resource_request: ResourceRequest,
+        autoscaling_policy: AutoscalingPolicy,
         endpoint: str,
         timeout: str,
         port: int,
         env: List["EnvVar"],
         id: int = None,
         service_account: str = None,
-        autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
         **kwargs
     ):
         self.id = id

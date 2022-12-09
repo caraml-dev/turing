@@ -13,7 +13,7 @@ import turing.batch.config.source
 import turing.batch.config.sink
 from turing.router.config.route import Route
 from turing.router.config.router_config import RouterConfig, Protocol
-from turing.router.config.autoscaling_policy import AutoscalingPolicy
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
@@ -141,6 +141,9 @@ def docker_router_ensembler_config():
         resource_request=ResourceRequest(
             min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
         ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         endpoint=f"http://localhost:5000/ensembler_endpoint",
         timeout="500ms",
         port=5120,
@@ -155,6 +158,9 @@ def pyfunc_router_ensembler_config():
         ensembler_id=1,
         resource_request=ResourceRequest(
             min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
+        ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
         ),
         timeout="500ms",
         env=[],
@@ -659,6 +665,9 @@ def generic_router_config(docker_router_ensembler_config):
             image="test.io/model-dev/echo:1.0.2",
             resource_request=ResourceRequest(
                 min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
+            ),
+            autoscaling_policy=AutoscalingPolicy(
+                metric=AutoscalingMetric.CONCURRENCY, target="1"
             ),
             endpoint="/",
             timeout="60ms",

@@ -3,7 +3,7 @@ from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
-    DEFAULT_AUTOSCALING_POLICY,
+    AutoscalingMetric,
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.route import InvalidRouteException
@@ -100,7 +100,7 @@ def test_create_pyfunc_router_ensembler_config(
 
 
 @pytest.mark.parametrize(
-    "project_id,ensembler_id,resource_request,timeout,env,expected",
+    "project_id,ensembler_id,resource_request,autoscaling_policy,timeout,env,expected",
     [
         pytest.param(
             77,
@@ -108,6 +108,7 @@ def test_create_pyfunc_router_ensembler_config(
             ResourceRequest(
                 min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
             ),
+            AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target="1"),
             "500ks",
             [EnvVar(name="env_name", value="env_val")],
             ApiValueError,
@@ -115,13 +116,20 @@ def test_create_pyfunc_router_ensembler_config(
     ],
 )
 def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
-    project_id, ensembler_id, resource_request, timeout, env, expected
+    project_id,
+    ensembler_id,
+    resource_request,
+    autoscaling_policy,
+    timeout,
+    env,
+    expected,
 ):
     with pytest.raises(expected):
         PyfuncRouterEnsemblerConfig(
             project_id=project_id,
             ensembler_id=ensembler_id,
             resource_request=resource_request,
+            autoscaling_policy=autoscaling_policy,
             timeout=timeout,
             env=env,
         ).to_open_api()
@@ -171,13 +179,14 @@ def test_create_docker_router_ensembler_config(
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,autoscaling_policy,endpoint,timeout,port,env,service_account,expected",
     [
         pytest.param(
             "#@!#!@#@!",
             ResourceRequest(
                 min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
             ),
+            AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target="1"),
             f"http://localhost:5000/ensembler_endpoint",
             "500ms",
             5120,
@@ -188,12 +197,21 @@ def test_create_docker_router_ensembler_config(
     ],
 )
 def test_create_docker_router_ensembler_config_with_invalid_image(
-    image, resource_request, endpoint, timeout, port, env, service_account, expected
+    image,
+    resource_request,
+    autoscaling_policy,
+    endpoint,
+    timeout,
+    port,
+    env,
+    service_account,
+    expected,
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
             image=image,
             resource_request=resource_request,
+            autoscaling_policy=autoscaling_policy,
             endpoint=endpoint,
             timeout=timeout,
             port=port,
@@ -203,13 +221,14 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,autoscaling_policy,endpoint,timeout,port,env,service_account,expected",
     [
         pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
             ),
+            AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target="1"),
             f"http://localhost:5000/ensembler_endpoint",
             "500ks",
             5120,
@@ -220,12 +239,21 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
     ],
 )
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
-    image, resource_request, endpoint, timeout, port, env, service_account, expected
+    image,
+    resource_request,
+    autoscaling_policy,
+    endpoint,
+    timeout,
+    port,
+    env,
+    service_account,
+    expected,
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
             image=image,
             resource_request=resource_request,
+            autoscaling_policy=autoscaling_policy,
             endpoint=endpoint,
             timeout=timeout,
             port=port,
@@ -235,13 +263,14 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,autoscaling_policy,endpoint,timeout,port,env,service_account,expected",
     [
         pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
             ResourceRequest(
                 min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
             ),
+            AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target="1"),
             f"http://localhost:5000/ensembler_endpoint",
             "500ms",
             5120,
@@ -254,6 +283,7 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
 def test_create_docker_router_ensembler_config_with_invalid_env(
     image,
     resource_request,
+    autoscaling_policy,
     endpoint,
     timeout,
     port,
@@ -265,6 +295,7 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
         DockerRouterEnsemblerConfig(
             image=image,
             resource_request=resource_request,
+            autoscaling_policy=autoscaling_policy,
             endpoint=endpoint,
             timeout=timeout,
             port=port,
@@ -643,29 +674,3 @@ def test_set_standard_ensembler_config_with_default_route(request):
     )
     router.default_route_id = "model-b"
     assert router.ensembler.fallback_response_route_id == "model-b"
-
-
-@pytest.mark.parametrize(
-    "ensembler_config,ensembler_type",
-    [
-        pytest.param("docker_router_ensembler_config", "docker"),
-        pytest.param("pyfunc_router_ensembler_config", "pyfunc"),
-    ],
-)
-def test_default_ensembler_autoscaling_policy(
-    ensembler_config, ensembler_type, request
-):
-    config = request.getfixturevalue(ensembler_config).to_open_api().to_dict()
-    del config["type"]
-    if ensembler_type == "docker":
-        del config["docker_config"]["autoscaling_policy"]
-        assert (
-            DockerRouterEnsemblerConfig(**config["docker_config"]).autoscaling_policy
-            == DEFAULT_AUTOSCALING_POLICY
-        )
-    elif ensembler_type == "pyfunc":
-        del config["pyfunc_config"]["autoscaling_policy"]
-        assert (
-            PyfuncRouterEnsemblerConfig(**config["pyfunc_config"]).autoscaling_policy
-            == DEFAULT_AUTOSCALING_POLICY
-        )
