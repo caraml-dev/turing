@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -114,7 +113,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
-		sp, _ = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
+		sp, ctx = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
 		if sp != nil {
 			defer sp.Finish()
 		}
@@ -150,13 +149,14 @@ func (us *Server) getPrediction(
 
 	upiRequest := fiberGrpc.NewRequest(md, requestByte, req)
 
+	defer close(respCh)
 	// Defer logging req summary
-	defer func() {
-		go func() {
-			close(respCh)
-			logTuringRouterRequestSummary(ctx, time.Now(), md, req, respCh)
-		}()
-	}()
+	//defer func() {
+	//	go func() {
+	//		close(respCh)
+	//		logTuringRouterRequestSummary(ctx, time.Now(), md, req, respCh)
+	//	}()
+	//}()
 
 	// Calling Routes via fiber
 	resp, turingError := us.missionControl.Route(ctx, upiRequest)
