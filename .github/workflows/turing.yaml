@@ -24,7 +24,7 @@ on:
   pull_request:
     branches:
       - main
-      - vpa_autoscaling
+      - *
     paths-ignore:
       - "docs/**"
       - "engines/pyfunc-ensembler-job/**"
