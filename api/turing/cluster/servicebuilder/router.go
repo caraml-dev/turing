@@ -121,6 +121,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	initContainers := buildInitContainers(routerVersion)
 
+	resourceRequests := sb.getResourceRequestOrDefault(routerVersion.ResourceRequest)
+
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
 		sentryEnabled, sentryDSN, secretName, routerVersion)
@@ -132,8 +134,8 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Name:                 name,
 			Namespace:            namespace,
 			Image:                routerVersion.Image,
-			CPURequests:          routerVersion.ResourceRequest.CPURequest,
-			MemoryRequests:       routerVersion.ResourceRequest.MemoryRequest,
+			CPURequests:          resourceRequests.CPURequest,
+			MemoryRequests:       resourceRequests.MemoryRequest,
 			LivenessHTTPGetPath:  routerLivenessPath,
 			ReadinessHTTPGetPath: routerReadinessPath,
 			Envs:                 envs,
@@ -146,10 +148,10 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		IsClusterLocal:                  false,
 		ContainerPort:                   routerPort,
 		Protocol:                        routerVersion.Protocol,
-		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
-		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
-		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
-		AutoscalingTarget:               routerVersion.AutoscalingPolicy.Target,
+		MinReplicas:                     resourceRequests.MinReplica,
+		MaxReplicas:                     resourceRequests.MaxReplica,
+		AutoscalingMetric:               sb.getAutoscalingMetricOrDefault(routerVersion.AutoscalingPolicy),
+		AutoscalingTarget:               sb.getAutoscalingTargetOrDefault(routerVersion.AutoscalingPolicy),
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}

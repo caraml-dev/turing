@@ -27,8 +27,9 @@ export class TuringRouter {
         max_replica: 2,
       },
       autoscaling_policy: {
-        metric: "concurrency",
-        target: "1",
+        metric: null,
+        target: null,
+        payload_size: "200Mi"
       },
       timeout: "300ms",
       protocol: "HTTP_JSON",
@@ -45,8 +46,9 @@ export class TuringRouter {
           max_replica: 2,
         },
         autoscaling_policy: {
-          metric: "concurrency",
-          target: "1",
+          metric: null,
+          target: null,
+          payload_size: "200Mi"
         },
         env: [],
         service_account: "",
@@ -118,9 +120,19 @@ export class TuringRouter {
       delete obj.config["default_traffic_rule"];
     }
 
+    // If the default autoscaling policy is used for the router, there is no need for the resource requests field
+    if (obj.config.autoscaling_policy.payload_size !== "") {
+      delete obj.config["resource_request"]
+    }
+
     // Enricher
     if (obj.config.enricher && obj.config.enricher.type === "nop") {
       delete obj.config["enricher"];
+    } else {
+      // If the default autoscaling policy is used for the enricher, there is no need for the resource requests field
+      if (obj.config.enricher.autoscaling_policy.payload_size !== "") {
+        delete obj.config.enricher["resource_request"]
+      }
     }
 
     // Ensembler
@@ -139,7 +151,15 @@ export class TuringRouter {
     } else {
       // Docker or Pyfunc ensembler, clear the default_route_id
       delete obj.config["default_route_id"];
+      // If the default autoscaling policy is used for the ensembler, there is no need for the resource requests field
+      if (obj.config?.ensembler?.docker_config.autoscaling_policy.payload_size !== "") {
+        delete obj.config.ensembler.docker_config["resource_request"]
+      }
       if (obj.config.ensembler.type === "pyfunc") {
+        // If the default autoscaling policy is used for the ensembler, there is no need for the resource requests field
+        if (obj.config.ensembler.pyfunc_config.autoscaling_policy.payload_size !== "") {
+          delete obj.config.ensembler.pyfunc_config["resource_request"]
+        }
         // Delete the docker config
         delete obj.config["ensembler"].docker_config;
       }

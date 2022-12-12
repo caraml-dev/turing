@@ -61,18 +61,47 @@ const AutoscalingPolicySection = ({
   );
 };
 
-
-export const ResourcesConfigTable = ({ componentName, autoscalingPolicy, resourceRequest }) => {
+const DefaultAutoscalingPolicySection = ({
+  autoscalingPolicy: { payload_size },
+}) => {
   const items = [
     {
-      title: `${componentName} Resources`,
-      children: <ResourcesSection resourceRequest={resourceRequest} />,
-    },
-    {
-      title: "Autoscaling Policy",
-      children: <AutoscalingPolicySection autoscalingPolicy={autoscalingPolicy} />,
+      title: "Payload Size",
+      description: payload_size,
     },
   ];
+
+  return (
+    <EuiDescriptionList
+      compressed
+      textStyle="reverse"
+      type="responsiveColumn"
+      listItems={items}
+    />
+  );
+};
+
+export const ResourcesConfigTable = ({ componentName, autoscalingPolicy, resourceRequest }) => {
+  let items;
+  if (autoscalingPolicy.payload_size !== "") {
+    items = [
+      {
+        title: "Default Autoscaling Policy",
+        children: <DefaultAutoscalingPolicySection autoscalingPolicy={autoscalingPolicy}/>,
+      }
+    ]
+  } else {
+    items = [
+      {
+        title: `${componentName} Resources`,
+        children: <ResourcesSection resourceRequest={resourceRequest} />,
+      },
+      {
+        title: "Autoscaling Policy",
+        children: <AutoscalingPolicySection autoscalingPolicy={autoscalingPolicy} />,
+      },
+    ];
+  }
 
   return <ConfigMultiSectionPanel items={items} />
 };

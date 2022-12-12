@@ -9,9 +9,12 @@ import (
 )
 
 func TestAutoscalingPolicyValue(t *testing.T) {
+	autoscalingMetricRPS := models.AutoscalingMetricRPS
+	autoscalingTargetRPS := "100"
+
 	autoscalingPolicy := models.AutoscalingPolicy{
-		Metric: models.AutoscalingMetricRPS,
-		Target: "100",
+		Metric: &autoscalingMetricRPS,
+		Target: &autoscalingTargetRPS,
 	}
 
 	// Validate
@@ -24,12 +27,16 @@ func TestAutoscalingPolicyValue(t *testing.T) {
 	assert.JSONEq(t, `
 		{
 			"metric": "rps",
-			"target": "100"
+			"target": "100",
+			"payload_size":null
 		}
 	`, string(byteValue))
 }
 
 func TestAutoscalingPolicyScan(t *testing.T) {
+	autoscalingMetricCPU := models.AutoscalingMetricCPU
+	autoscalingTargetCPU := "90"
+
 	tests := map[string]struct {
 		value    interface{}
 		success  bool
@@ -43,8 +50,8 @@ func TestAutoscalingPolicyScan(t *testing.T) {
 			}`),
 			success: true,
 			expected: models.AutoscalingPolicy{
-				Metric: models.AutoscalingMetricCPU,
-				Target: "90",
+				Metric: &autoscalingMetricCPU,
+				Target: &autoscalingTargetCPU,
 			},
 		},
 		"failure | invalid value": {

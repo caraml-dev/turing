@@ -1,5 +1,4 @@
 import pytest
-from turing.router.config.autoscaling_policy import DEFAULT_AUTOSCALING_POLICY
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
@@ -50,21 +49,3 @@ def test_create_enricher(
         service_account=service_account,
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
-
-
-def test_default_enricher_autoscaling_policy():
-    assert (
-        Enricher(
-            id=id,
-            image="image",
-            resource_request=ResourceRequest(
-                min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi"
-            ),
-            endpoint="endpoint",
-            timeout="1s",
-            port=8080,
-            env=EnvVar(name="env_name", value="env_val"),
-            service_account="service_account",
-        ).autoscaling_policy
-        == DEFAULT_AUTOSCALING_POLICY
-    )

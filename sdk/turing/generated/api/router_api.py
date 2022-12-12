@@ -794,7 +794,7 @@ class RouterApi(object):
             self,
             project_id,
             router_id,
-            router_config,
+            router_version_config,
             **kwargs
         ):
             """Update router  # noqa: E501
@@ -802,13 +802,13 @@ class RouterApi(object):
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True
 
-            >>> thread = api.projects_project_id_routers_router_id_put(project_id, router_id, router_config, async_req=True)
+            >>> thread = api.projects_project_id_routers_router_id_put(project_id, router_id, router_version_config, async_req=True)
             >>> result = thread.get()
 
             Args:
                 project_id (int): id of the project of the router
                 router_id (int): id of the router to update
-                router_config (RouterConfig): router configuration to save
+                router_version_config (RouterVersionConfig): router configuration to save
 
             Keyword Args:
                 _return_http_data_only (bool): response data without head status
@@ -859,8 +859,8 @@ class RouterApi(object):
                 project_id
             kwargs['router_id'] = \
                 router_id
-            kwargs['router_config'] = \
-                router_config
+            kwargs['router_version_config'] = \
+                router_version_config
             return self.call_with_http_info(**kwargs)
 
         self.projects_project_id_routers_router_id_put = _Endpoint(
@@ -876,12 +876,12 @@ class RouterApi(object):
                 'all': [
                     'project_id',
                     'router_id',
-                    'router_config',
+                    'router_version_config',
                 ],
                 'required': [
                     'project_id',
                     'router_id',
-                    'router_config',
+                    'router_version_config',
                 ],
                 'nullable': [
                 ],
@@ -900,8 +900,8 @@ class RouterApi(object):
                         (int,),
                     'router_id':
                         (int,),
-                    'router_config':
-                        (RouterConfig,),
+                    'router_version_config':
+                        (RouterVersionConfig,),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
@@ -910,7 +910,7 @@ class RouterApi(object):
                 'location_map': {
                     'project_id': 'path',
                     'router_id': 'path',
-                    'router_config': 'body',
+                    'router_version_config': 'body',
                 },
                 'collection_format_map': {
                 }

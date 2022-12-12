@@ -70,7 +70,7 @@ const EditRouterView = ({ projectId, currentRouter }) => {
   const onSubmit = () => {
     if (withDeployment === true) {
       return submitUpdateRouter({
-        body: JSON.stringify(routerConfig),
+        body: JSON.stringify(routerConfig.toJSON().config),
       });
     } else if (withDeployment === false) {
       return submitCreateRouterVersion({

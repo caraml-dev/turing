@@ -66,6 +66,10 @@
       "cpu_request": "500m",
       "memory_request": "512Mi"
     },
+    "autoscaling_policy": {
+      "metric": "cpu",
+      "target": "90"
+    },
     "timeout": "100ms",
     "log_config": {
       "log_level": "DEBUG",
@@ -84,6 +88,10 @@
         "max_replica": 2,
         "cpu_request": "500m",
         "memory_request": "512Mi"
+      },
+      "autoscaling_policy": {
+        "metric": "concurrency",
+        "target": "1"
       },
       "endpoint": "/",
       "timeout": "60ms",
@@ -109,6 +117,10 @@
           "max_replica": 3,
           "cpu_request": "500m",
           "memory_request": "512Mi"
+        },
+        "autoscaling_policy": {
+          "metric": "concurrency",
+          "target": "1"
         },
         "endpoint": "http://localhost:5000/ensembler_endpoint",
         "timeout": "500ms",

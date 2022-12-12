@@ -215,6 +215,9 @@ func TestCreateRouter(t *testing.T) {
 	routerSvc.On("Save", router3Failure).Return(router3Failure, nil)
 	// For the deployment method
 	routerSvc.On("Save", mock.Anything).Return(nil, errors.New("test Router Deployment Failure"))
+
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "1"
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		RouterID: 3,
@@ -226,9 +229,9 @@ func TestCreateRouter(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Protocol: routerConfig.HTTP,
-		AutoscalingPolicy: &models.AutoscalingPolicy{
-			Metric: "concurrency",
-			Target: "1",
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &autoscalingMetricConcurrency,
+			Target: &autoscalingTargetConcurrency,
 		},
 		Status: models.RouterVersionStatusPending,
 	}
@@ -250,14 +253,14 @@ func TestCreateRouter(t *testing.T) {
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | router exists": {
-			body: &request.CreateOrUpdateRouterRequest{
+			body: &request.CreateRouterRequest{
 				Name: "router1",
 			},
 			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router name", "router with name router1 already exists in project 2"),
 		},
 		"failure | environment missing": {
-			body: &request.CreateOrUpdateRouterRequest{
+			body: &request.CreateRouterRequest{
 				Name:        "router2",
 				Environment: "dev-invalid",
 			},
@@ -265,7 +268,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: BadRequest("invalid environment", "environment dev-invalid does not exist"),
 		},
 		"failure | router save": {
-			body: &request.CreateOrUpdateRouterRequest{
+			body: &request.CreateRouterRequest{
 				Name:        "router2",
 				Environment: "dev",
 			},
@@ -273,7 +276,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: InternalServerError("unable to create router", "test router save error"),
 		},
 		"failure | build router version": {
-			body: &request.CreateOrUpdateRouterRequest{
+			body: &request.CreateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
 			},
@@ -281,10 +284,14 @@ func TestCreateRouter(t *testing.T) {
 			expected: InternalServerError("unable to create router", "router config is empty"),
 		},
 		"success": {
-			body: &request.CreateOrUpdateRouterRequest{
+			body: &request.CreateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
 				Config: &request.RouterConfig{
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &autoscalingMetricConcurrency,
+						Target: &autoscalingTargetConcurrency,
+					},
 					ExperimentEngine: &request.ExperimentEngineConfig{
 						Type: "nop",
 					},
@@ -365,6 +372,9 @@ func TestUpdateRouter(t *testing.T) {
 	// For the deployment method
 	routerSvc.On("Save", mock.Anything).
 		Return(nil, errors.New("test router deployment failure"))
+
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "1"
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		RouterID: 4,
@@ -376,9 +386,9 @@ func TestUpdateRouter(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Protocol: routerConfig.HTTP,
-		AutoscalingPolicy: &models.AutoscalingPolicy{
-			Metric: "concurrency",
-			Target: "1",
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &autoscalingMetricConcurrency,
+			Target: &autoscalingTargetConcurrency,
 		},
 		Status: models.RouterVersionStatusPending,
 	}
@@ -387,7 +397,7 @@ func TestUpdateRouter(t *testing.T) {
 
 	// Define tests
 	tests := map[string]struct {
-		body     interface{}
+		body     *request.RouterConfig
 		vars     RequestVars
 		expected *Response
 	}{
@@ -403,28 +413,8 @@ func TestUpdateRouter(t *testing.T) {
 			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
-		"failure | router not found": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name: "router1",
-			},
-			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
-			expected: NotFound("router not found", "test router error"),
-		},
-		"failure | invalid router config": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name: "router1",
-			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
-			expected: BadRequest(
-				"invalid router configuration",
-				"Router name and environment cannot be changed after creation",
-			),
-		},
 		"failure | deployment in progress": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router2",
-				Environment: "dev",
-			},
+			body: &request.RouterConfig{},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid update request",
@@ -432,24 +422,21 @@ func TestUpdateRouter(t *testing.T) {
 			),
 		},
 		"failure | build router version": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router3",
-				Environment: "dev",
-			},
+			body:     nil,
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
 		"success": {
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router4",
-				Environment: "dev",
-				Config: &request.RouterConfig{
-					ExperimentEngine: &request.ExperimentEngineConfig{
-						Type: "nop",
-					},
-					LogConfig: &request.LogConfig{
-						ResultLoggerType: models.NopLogger,
-					},
+			body: &request.RouterConfig{
+				AutoscalingPolicy: models.AutoscalingPolicy{
+					Metric: &autoscalingMetricConcurrency,
+					Target: &autoscalingTargetConcurrency,
+				},
+				ExperimentEngine: &request.ExperimentEngineConfig{
+					Type: "nop",
+				},
+				LogConfig: &request.LogConfig{
+					ResultLoggerType: models.NopLogger,
 				},
 			},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},

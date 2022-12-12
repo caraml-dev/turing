@@ -53,6 +53,7 @@ class AutoscalingPolicy(ModelNormal):
 
     allowed_values = {
         ('metric',): {
+            'None': None,
             'CONCURRENCY': "concurrency",
             'CPU': "cpu",
             'MEMORY': "memory",
@@ -64,6 +65,11 @@ class AutoscalingPolicy(ModelNormal):
         ('target',): {
             'regex': {
                 'pattern': r'^\d+$',  # noqa: E501
+            },
+        },
+        ('payload_size',): {
+            'regex': {
+                'pattern': r'^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$',  # noqa: E501
             },
         },
     }
@@ -83,8 +89,9 @@ class AutoscalingPolicy(ModelNormal):
                 and the value is attribute type.
         """
         return {
-            'metric': (str,),  # noqa: E501
-            'target': (str,),  # noqa: E501
+            'metric': (str, none_type,),  # noqa: E501
+            'target': (str, none_type,),  # noqa: E501
+            'payload_size': (str, none_type,),  # noqa: E501
         }
 
     @cached_property
@@ -95,6 +102,7 @@ class AutoscalingPolicy(ModelNormal):
     attribute_map = {
         'metric': 'metric',  # noqa: E501
         'target': 'target',  # noqa: E501
+        'payload_size': 'payload_size',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -143,8 +151,9 @@ class AutoscalingPolicy(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            metric (str): [optional]  # noqa: E501
-            target (str): [optional]  # noqa: E501
+            metric (str, none_type): [optional]  # noqa: E501
+            target (str, none_type): [optional]  # noqa: E501
+            payload_size (str, none_type): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

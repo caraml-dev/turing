@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/golang-collections/collections/set"
@@ -314,58 +315,179 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate traffic rules
-	allRuleRoutesSet := set.New()
 	if router.TrafficRules != nil {
-		if len(router.TrafficRules) > 0 {
-			checkDefaultTrafficRule(sl, "DefaultTrafficRule", router.DefaultTrafficRule)
-			if router.DefaultTrafficRule != nil {
-				allRules := append(router.TrafficRules, &models.TrafficRule{
-					Name:   "default-traffic-rule",
-					Routes: router.DefaultTrafficRule.Routes,
-				})
-				validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, router.DefaultRouteID)
-				for _, route := range router.DefaultTrafficRule.Routes {
-					allRuleRoutesSet.Insert(route)
+		validateTrafficRules(sl, instance, router, routeIdsStr)
+	}
+
+	// Validate autoscaling policy for the router
+	validateResourceRequestsAndAutoscalingPolicy(sl, "router", router.ResourceRequest,
+		router.AutoscalingPolicy)
+
+	// Validate autoscaling policy for the enricher, if configured
+	if router.Enricher != nil {
+		validateResourceRequestsAndAutoscalingPolicy(sl, "enricher", router.Enricher.ResourceRequest,
+			router.Enricher.AutoscalingPolicy)
+	}
+
+	// Validate autoscaling policy for the ensembler, if configured
+	if router.Ensembler != nil {
+		if router.Ensembler.DockerConfig != nil {
+			validateResourceRequestsAndAutoscalingPolicy(
+				sl,
+				"ensembler",
+				router.Ensembler.DockerConfig.ResourceRequest,
+				router.Ensembler.DockerConfig.AutoscalingPolicy,
+			)
+		}
+
+		if router.Ensembler.PyfuncConfig != nil {
+			validateResourceRequestsAndAutoscalingPolicy(
+				sl,
+				"ensembler",
+				router.Ensembler.PyfuncConfig.ResourceRequest,
+				router.Ensembler.PyfuncConfig.AutoscalingPolicy,
+			)
+		}
+	}
+}
+
+func validateTrafficRules(
+	sl validator.StructLevel,
+	instance *validator.Validate,
+	router request.RouterConfig,
+	routeIdsStr string,
+) {
+	allRuleRoutesSet := set.New()
+
+	if len(router.TrafficRules) > 0 {
+		checkDefaultTrafficRule(sl, "DefaultTrafficRule", router.DefaultTrafficRule)
+		if router.DefaultTrafficRule != nil {
+			allRules := append(router.TrafficRules, &models.TrafficRule{
+				Name:   "default-traffic-rule",
+				Routes: router.DefaultTrafficRule.Routes,
+			})
+			validateDefaultRouteTrafficRules(sl, "TrafficRules", allRules, router.DefaultRouteID)
+			for _, route := range router.DefaultTrafficRule.Routes {
+				allRuleRoutesSet.Insert(route)
+			}
+		}
+	}
+	for ruleIdx, rule := range router.TrafficRules {
+		checkTrafficRuleName(sl, "TrafficRule", rule.Name)
+		if rule.Routes != nil {
+			for idx, routeID := range rule.Routes {
+				allRuleRoutesSet.Insert(routeID)
+				ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
+				if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+					sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 				}
 			}
 		}
-		for ruleIdx, rule := range router.TrafficRules {
-			checkTrafficRuleName(sl, "TrafficRule", rule.Name)
-			if rule.Routes != nil {
-				for idx, routeID := range rule.Routes {
-					allRuleRoutesSet.Insert(routeID)
-					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
-					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
-						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
-					}
-				}
+
+		if rule.Conditions != nil {
+			// validate the field source of traffic rules are valid for given protocol
+			allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
+				string(expRequest.PayloadFieldSource)}
+			if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
+				allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
+					string(expRequest.PredictionContextSource)}
 			}
+			allowedFieldSourceStr := strings.Join(allowedFieldSource, " ")
 
-			if rule.Conditions != nil {
-				// validate the field source of traffic rules are valid for given protocol
-				allowedFieldSource := []string{string(expRequest.HeaderFieldSource),
-					string(expRequest.PayloadFieldSource)}
-				if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
-					allowedFieldSource = []string{string(expRequest.HeaderFieldSource),
-						string(expRequest.PredictionContextSource)}
-				}
-				allowedFieldSourceStr := strings.Join(allowedFieldSource, " ")
-
-				for condIdx, cond := range rule.Conditions {
-					ns := fmt.Sprintf("TrafficRules[%d].Conditions[%d].FieldSource", ruleIdx, condIdx)
-					err := instance.Var(cond.FieldSource, fmt.Sprintf("oneof=%s", allowedFieldSourceStr))
-					if err != nil {
-						sl.ReportError(router.TrafficRules[ruleIdx].Conditions[condIdx].FieldSource, ns,
-							"FieldSource", "oneof", "")
-					}
+			for condIdx, cond := range rule.Conditions {
+				ns := fmt.Sprintf("TrafficRules[%d].Conditions[%d].FieldSource", ruleIdx, condIdx)
+				err := instance.Var(cond.FieldSource, fmt.Sprintf("oneof=%s", allowedFieldSourceStr))
+				if err != nil {
+					sl.ReportError(router.TrafficRules[ruleIdx].Conditions[condIdx].FieldSource, ns,
+						"FieldSource", "oneof", "")
 				}
 			}
 		}
 	}
 
 	// Validate dangling routes and traffic rules orthogonality checks
-	if router.TrafficRules != nil && len(router.TrafficRules) > 0 {
+	if len(router.TrafficRules) > 0 {
 		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
+	}
+}
+
+func validateResourceRequestsAndAutoscalingPolicy(
+	sl validator.StructLevel,
+	componentName string,
+	resourceRequest *models.ResourceRequest,
+	autoscalingPolicy models.AutoscalingPolicy,
+) {
+	validateAutoscalingPolicy(sl, componentName, autoscalingPolicy)
+
+	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is used
+	if autoscalingPolicy.PayloadSize != nil {
+		// Validate resource requests are not set
+		if resourceRequest != nil {
+			sl.ReportError(
+				resourceRequest,
+				"ResourceRequest",
+				"ResourceRequest",
+				fmt.Sprintf("excluded when AutoscalingPolicy.PayloadSize is set for %s",
+					componentName),
+				"",
+			)
+		}
+	}
+
+	// Validate AutoscalingPolicy and ResourceRequests when default autoscaling policy is NOT used
+	if autoscalingPolicy.PayloadSize == nil {
+		// Validate resource requests are not set
+		if resourceRequest == nil {
+			sl.ReportError(
+				resourceRequest,
+				"ResourceRequest",
+				"ResourceRequest",
+				fmt.Sprintf("required when AutoscalingPolicy.PayloadSize is not set for %s",
+					componentName),
+				"",
+			)
+		}
+	}
+}
+
+func validateAutoscalingPolicy(
+	sl validator.StructLevel,
+	componentName string,
+	autoscalingPolicy models.AutoscalingPolicy,
+) {
+	// Validate autoscaling policy to ensure only one of the following of AutoscalingPolicy is true:
+	//  - PayloadSize is set (default autoscaling policy is used)
+	//  - Metric or/and Target is/are set (default autoscaling policy is NOT used)
+	if autoscalingPolicy.PayloadSize != nil &&
+		(autoscalingPolicy.Metric != nil || autoscalingPolicy.Target != nil) {
+		sl.ReportError(
+			autoscalingPolicy.PayloadSize,
+			"AutoscalingPolicy.PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
+			fmt.Sprintf("excluded when Metric or/and Target is/are set for %s", componentName),
+			"",
+		)
+	}
+	if autoscalingPolicy.PayloadSize == nil &&
+		(autoscalingPolicy.Metric == nil || autoscalingPolicy.Target == nil) {
+		sl.ReportError(
+			autoscalingPolicy.PayloadSize,
+			"AutoscalingPolicy.PayloadSize",
+			"AutoscalingPolicy.PayloadSize",
+			fmt.Sprintf("required when Metric or/and Target is/are not set for %s", componentName),
+			"",
+		)
+	}
+	if autoscalingPolicy.Target != nil {
+		if _, err := strconv.ParseFloat(*autoscalingPolicy.Target, 64); err != nil {
+			sl.ReportError(
+				autoscalingPolicy.Target,
+				"AutoscalingPolicy.Target",
+				"AutoscalingPolicy.Target",
+				"number",
+				"",
+			)
+		}
 	}
 }

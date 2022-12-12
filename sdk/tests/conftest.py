@@ -13,7 +13,7 @@ import turing.batch.config.source
 import turing.batch.config.sink
 from turing.router.config.route import Route
 from turing.router.config.router_config import RouterConfig, Protocol
-from turing.router.config.autoscaling_policy import AutoscalingPolicy
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
@@ -141,6 +141,9 @@ def docker_router_ensembler_config():
         resource_request=ResourceRequest(
             min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
         ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         endpoint=f"http://localhost:5000/ensembler_endpoint",
         timeout="500ms",
         port=5120,
@@ -155,6 +158,9 @@ def pyfunc_router_ensembler_config():
         ensembler_id=1,
         resource_request=ResourceRequest(
             min_replica=1, max_replica=3, cpu_request="500m", memory_request="512Mi"
+        ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
         ),
         timeout="500ms",
         env=[],
@@ -453,7 +459,9 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
         env=[generic_env_var],
         service_account="secret-name-for-google-service-account",
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
-            metric="memory", target="80"
+            metric="memory",
+            target="80",
+            payload_size=None,
         ),
     )
 
@@ -467,7 +475,9 @@ def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
         timeout="500ms",
         env=[generic_env_var],
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
-            metric="concurrency", target="10"
+            metric="concurrency",
+            target="10",
+            payload_size=None,
         ),
     )
 
@@ -546,7 +556,9 @@ def generic_enricher(generic_resource_request, generic_env_var):
         env=[generic_env_var],
         service_account="service-account",
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
-            metric="rps", target="100"
+            metric="rps",
+            target="100",
+            payload_size=None,
         ),
     )
 
@@ -604,7 +616,9 @@ def generic_router_version(
         monitoring_url="https://lookhere.io/",
         enricher=generic_enricher,
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
-            metric="cpu", target="90"
+            metric="cpu",
+            target="90",
+            payload_size=None,
         ),
     )
 
@@ -651,6 +665,9 @@ def generic_router_config(docker_router_ensembler_config):
             image="test.io/model-dev/echo:1.0.2",
             resource_request=ResourceRequest(
                 min_replica=0, max_replica=2, cpu_request="500m", memory_request="512Mi"
+            ),
+            autoscaling_policy=AutoscalingPolicy(
+                metric=AutoscalingMetric.CONCURRENCY, target="1"
             ),
             endpoint="/",
             timeout="60ms",

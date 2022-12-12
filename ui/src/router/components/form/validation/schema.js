@@ -220,21 +220,26 @@ const resourceRequestSchema = (maxAllowedReplica) =>
           ? schema.positive("Max Replica should be positive")
           : schema
       ),
-  });
+  }).nullable();
 
 const autoscalingPolicySchema = yup.object().shape({
-  metric: yup
-    .string()
-    .required("Valid metric must be chosen")
-    .oneOf(
-      autoscalingPolicyMetrics,
-      "Valid autoscaling metric type should be chosen"
-    ),
-  target: yup
-    .string()
-    .required("Valid target should be specified")
-    .matches(/^[0-9]+$/, "Must be a number"),
-});
+  metric: yup.lazy(() => yup.string().when(["payload_size"], {
+    is: (payload_size) => payload_size === "",
+    then: yup.string().oneOf(autoscalingPolicyMetrics, "Valid autoscaling metric type should be chosen"),
+    otherwise: yup.string().nullable(),
+  })),
+  target: yup.lazy(() => yup.string().when(["payload_size"], {
+    is: (payload_size) => payload_size === "",
+    then: yup.string().matches(/^[0-9]+$/, "Must be a number"),
+    otherwise: yup.string().nullable(),
+
+  })),
+  payload_size: yup.lazy(() => yup.string().when(["metric", "target"], {
+    is: (payload_size) => payload_size === "",
+      then: yup.string().matches(memRequestRegex, "Valid data storage size is required, e.g. 512Mi"),
+      otherwise: yup.string().nullable(),
+  })),
+}, [['payload_size'], ['payload_size'], ['metric', 'target']]);
 
 const enricherSchema = yup.object().shape({
   type: yup

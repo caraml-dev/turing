@@ -10,6 +10,7 @@ import turing.router.config.router_config
 from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
@@ -67,6 +68,9 @@ def test_create_router():
         resource_request=ResourceRequest(
             min_replica=1, max_replica=1, cpu_request="100m", memory_request="1Gi"
         ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         endpoint="anything",
         timeout="2s",
         port=80,
@@ -78,6 +82,9 @@ def test_create_router():
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
             min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
+        ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
         ),
         endpoint="anything",
         timeout="3s",
@@ -93,6 +100,9 @@ def test_create_router():
         rules=[],
         experiment_engine=experiment_config,
         resource_request=resource_request,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         timeout="5s",
         log_config=log_config,
         enricher=enricher,

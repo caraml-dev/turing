@@ -10,7 +10,7 @@ type Enricher struct {
 	// Resource requests  for the deployment of the enricher.
 	ResourceRequest *ResourceRequest `json:"resource_request"`
 	// Autoscaling policy for the enricher
-	AutoscalingPolicy *AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
+	AutoscalingPolicy AutoscalingPolicy `json:"autoscaling_policy" validate:"omitempty,dive"`
 	// Endpoint to query.
 	Endpoint string `json:"endpoint"`
 	// Request timeout as a valid quantity string.

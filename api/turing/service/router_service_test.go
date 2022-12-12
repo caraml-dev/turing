@@ -66,6 +66,9 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		}
 
 		router := routers[0]
+		autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+		autoscalingTargetConcurrency := "10"
+
 		// update router with routerversions
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
@@ -84,9 +87,9 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				Type: models.ExperimentEngineTypeNop,
 			},
 			ResourceRequest: &models.ResourceRequest{},
-			AutoscalingPolicy: &models.AutoscalingPolicy{
-				Metric: models.AutoscalingMetricConcurrency,
-				Target: "1",
+			AutoscalingPolicy: models.AutoscalingPolicy{
+				Metric: &autoscalingMetricConcurrency,
+				Target: &autoscalingTargetConcurrency,
 			},
 			Timeout:   "5s",
 			Protocol:  "HTTP_JSON",
@@ -94,9 +97,9 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			Enricher: &models.Enricher{
 				Image:           "lalal",
 				ResourceRequest: &models.ResourceRequest{},
-				AutoscalingPolicy: &models.AutoscalingPolicy{
-					Metric: models.AutoscalingMetricConcurrency,
-					Target: "1",
+				AutoscalingPolicy: models.AutoscalingPolicy{
+					Metric: &autoscalingMetricConcurrency,
+					Target: &autoscalingTargetConcurrency,
 				},
 				Endpoint: "fsaf",
 				Timeout:  "5s",
@@ -108,9 +111,9 @@ func TestRoutersServiceIntegration(t *testing.T) {
 				DockerConfig: &models.EnsemblerDockerConfig{
 					Image:           "lalalala",
 					ResourceRequest: &models.ResourceRequest{},
-					AutoscalingPolicy: &models.AutoscalingPolicy{
-						Metric: models.AutoscalingMetricConcurrency,
-						Target: "1",
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &autoscalingMetricConcurrency,
+						Target: &autoscalingTargetConcurrency,
 					},
 					Endpoint: "fsaf",
 					Timeout:  "5s",

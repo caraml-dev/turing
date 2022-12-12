@@ -88,9 +88,9 @@ class EnsemblerPyfuncConfig(ModelNormal):
         return {
             'project_id': (int,),  # noqa: E501
             'ensembler_id': (int,),  # noqa: E501
-            'resource_request': (ResourceRequest,),  # noqa: E501
-            'timeout': (str,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
+            'timeout': (str,),  # noqa: E501
+            'resource_request': (ResourceRequest,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
         }
 
@@ -102,9 +102,9 @@ class EnsemblerPyfuncConfig(ModelNormal):
     attribute_map = {
         'project_id': 'project_id',  # noqa: E501
         'ensembler_id': 'ensembler_id',  # noqa: E501
-        'resource_request': 'resource_request',  # noqa: E501
-        'timeout': 'timeout',  # noqa: E501
         'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
+        'timeout': 'timeout',  # noqa: E501
+        'resource_request': 'resource_request',  # noqa: E501
         'env': 'env',  # noqa: E501
     }
 
@@ -120,13 +120,13 @@ class EnsemblerPyfuncConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, project_id, ensembler_id, resource_request, timeout, *args, **kwargs):  # noqa: E501
+    def __init__(self, project_id, ensembler_id, autoscaling_policy, timeout, *args, **kwargs):  # noqa: E501
         """EnsemblerPyfuncConfig - a model defined in OpenAPI
 
         Args:
             project_id (int):
             ensembler_id (int):
-            resource_request (ResourceRequest):
+            autoscaling_policy (AutoscalingPolicy):
             timeout (str):
 
         Keyword Args:
@@ -160,7 +160,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
+            resource_request (ResourceRequest): [optional]  # noqa: E501
             env ([EnvVar]): [optional]  # noqa: E501
         """
 
@@ -189,7 +189,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
 
         self.project_id = project_id
         self.ensembler_id = ensembler_id
-        self.resource_request = resource_request
+        self.autoscaling_policy = autoscaling_policy
         self.timeout = timeout
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \

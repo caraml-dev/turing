@@ -4,6 +4,7 @@ from turing.router.config.route import (
     Route,
     InvalidUrlException,
 )
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.router_config import RouterConfig, Protocol
 
 
@@ -40,7 +41,13 @@ def test_create_route_with_valid_endpoint(
     id, endpoint, timeout, protocol, service_method, expected, request
 ):
     actual = Route(id, endpoint, timeout, service_method).to_open_api()
-    RouterConfig(routes=[actual], protocol=protocol)
+    RouterConfig(
+        routes=[actual],
+        protocol=protocol,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
+    )
     assert actual == request.getfixturevalue(expected)
 
 
@@ -65,7 +72,13 @@ def test_create_route_with_valid_endpoint(
 )
 def test_create_route_with_invalid_endpoint(id, endpoint, timeout, protocol, expected):
     with pytest.raises(expected):
-        RouterConfig(routes=[Route(id, endpoint, timeout)], protocol=protocol)
+        RouterConfig(
+            routes=[Route(id, endpoint, timeout)],
+            protocol=protocol,
+            autoscaling_policy=AutoscalingPolicy(
+                metric=AutoscalingMetric.CONCURRENCY, target="1"
+            ),
+        )
 
 
 @pytest.mark.parametrize(
@@ -79,7 +92,12 @@ def test_create_route_with_invalid_endpoint(id, endpoint, timeout, protocol, exp
 def test_set_route_with_valid_endpoint(id, endpoint, timeout, expected, request):
     actual = Route(id, endpoint, timeout)
     actual.endpoint = "http://predict_this.io/model-a"
-    RouterConfig(routes=[actual])
+    RouterConfig(
+        routes=[actual],
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
+    )
     assert actual.to_open_api() == request.getfixturevalue(expected)
 
 
@@ -94,4 +112,9 @@ def test_set_route_with_valid_endpoint(id, endpoint, timeout, expected, request)
 def test_set_route_with_invalid_endpoint(id, endpoint, timeout, expected):
     actual = Route(id, endpoint, timeout)
     with pytest.raises(expected):
-        RouterConfig(routes=[actual])
+        RouterConfig(
+            routes=[actual],
+            autoscaling_policy=AutoscalingPolicy(
+                metric=AutoscalingMetric.CONCURRENCY, target="1"
+            ),
+        )

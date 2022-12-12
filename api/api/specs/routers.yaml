@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RouterConfig"
+              $ref: "#/components/schemas/RouterVersionConfig"
       responses:
         200:
           description: "OK"
@@ -617,6 +617,7 @@ components:
         - routes
         - experiment_engine
         - timeout
+        - autoscaling_policy
         - log_config
       properties:
         routes:
@@ -737,7 +738,7 @@ components:
       type: "object"
       required:
         - image
-        - resource_request
+        - autoscaling_policy
         - endpoint
         - timeout
         - port
@@ -843,7 +844,7 @@ components:
       nullable: true
       required:
         - image
-        - resource_request
+        - autoscaling_policy
         - endpoint
         - timeout
         - port
@@ -881,7 +882,7 @@ components:
       required:
         - project_id
         - ensembler_id
-        - resource_request
+        - autoscaling_policy
         - timeout
       properties:
         project_id:
@@ -923,9 +924,15 @@ components:
             - "cpu"
             - "memory"
             - "rps"
+          nullable: true
         target:
           type: "string"
           pattern: '^\d+$'
+          nullable: true
+        payload_size:
+          type: "string"
+          pattern: '^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$'
+          nullable: true
 
     BigQueryConfig:
       type: "object"

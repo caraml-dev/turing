@@ -209,12 +209,18 @@ type SparkAppConfig struct {
 
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
-	EnvironmentType   string        `validate:"required"`
-	Timeout           time.Duration `validate:"required"`
-	DeletionTimeout   time.Duration `validate:"required"`
-	MaxCPU            Quantity      `validate:"required"`
-	MaxMemory         Quantity      `validate:"required"`
-	MaxAllowedReplica int           `validate:"required"`
+	EnvironmentType                string                         `validate:"required"`
+	Timeout                        time.Duration                  `validate:"required"`
+	DeletionTimeout                time.Duration                  `validate:"required"`
+	MaxCPU                         Quantity                       `validate:"required"`
+	MaxMemory                      Quantity                       `validate:"required"`
+	MaxAllowedReplica              int                            `validate:"required"`
+	DefaultAutoScalingPolicyConfig DefaultAutoScalingPolicyConfig `validate:"required"`
+}
+
+type DefaultAutoScalingPolicyConfig struct {
+	DefaultMinReplica int
+	DefaultMaxReplica int
 }
 
 // KubernetesLabelConfigs are the configurations for labeling
@@ -486,6 +492,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::MaxCPU", "4")
 	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
 	v.SetDefault("DeployConfig::MaxAllowedReplica", "20")
+	v.SetDefault("DeployConfig::DefaultAutoScalingPolicyConfig::DefaultMinReplica", "0")
+	v.SetDefault("DeployConfig::DefaultAutoScalingPolicyConfig::DefaultMaxReplica", "4")
 
 	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
 	v.SetDefault("KnativeServiceDefaults::UserContainerLimitRequestFactor", "1")

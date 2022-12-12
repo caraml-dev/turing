@@ -107,6 +107,9 @@ func TestCreateRouterVersion(t *testing.T) {
 		Return(nil, errors.New("test router error"))
 	routerSvc.On("FindByID", models.ID(2)).Return(router2, nil)
 
+	autoscalingMetricCPU := models.AutoscalingMetricCPU
+	autoscalingTargetCPU := "80"
+
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		Router:   router2,
@@ -119,9 +122,9 @@ func TestCreateRouterVersion(t *testing.T) {
 			ResultLoggerType: models.NopLogger,
 		},
 		Status: models.RouterVersionStatusUndeployed,
-		AutoscalingPolicy: &models.AutoscalingPolicy{
-			Metric: models.AutoscalingMetricCPU,
-			Target: "80",
+		AutoscalingPolicy: models.AutoscalingPolicy{
+			Metric: &autoscalingMetricCPU,
+			Target: &autoscalingTargetCPU,
 		},
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
@@ -162,9 +165,9 @@ func TestCreateRouterVersion(t *testing.T) {
 				LogConfig: &request.LogConfig{
 					ResultLoggerType: models.NopLogger,
 				},
-				AutoscalingPolicy: &models.AutoscalingPolicy{
-					Metric: models.AutoscalingMetricCPU,
-					Target: "80",
+				AutoscalingPolicy: models.AutoscalingPolicy{
+					Metric: &autoscalingMetricCPU,
+					Target: &autoscalingTargetCPU,
 				},
 			},
 			vars: RequestVars{"router_id": {"2"}, "project_id": {"2"}},

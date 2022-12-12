@@ -10,6 +10,7 @@ import turing.router.config.router_config
 from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.router_ensembler_config import StandardRouterEnsemblerConfig
 from turing.router.config.router_config import RouterConfig
@@ -74,6 +75,9 @@ def test_deploy_router_with_std_ensembler():
         rules=[],
         experiment_engine=experiment_config,
         resource_request=resource_request,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         timeout="5s",
         log_config=log_config,
         ensembler=ensembler,

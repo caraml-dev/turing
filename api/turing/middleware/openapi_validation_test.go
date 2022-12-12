@@ -45,6 +45,10 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       "min_replica": 0,
       "max_replica": 0
     },
+	"autoscaling_policy": {
+	  "metric": "concurrency",
+	  "target": "1"
+	},
     "timeout": "5s"
   }
 }
@@ -86,6 +90,10 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       "min_replica": 0,
       "max_replica": 0
     },
+	"autoscaling_policy": {
+	  "metric": "concurrency",
+	  "target": "1"
+	},
     "timeout": "5s"
   }
 }
@@ -122,6 +130,10 @@ func TestOpenAPIValidationValidate(t *testing.T) {
       "min_replica": 0,
       "max_replica": 0
     },
+	"autoscaling_policy": {
+	  "metric": "concurrency",
+	  "target": "1"
+	},
     "timeout": "5s",
     "ensembler": {
       "type": "invalidtype"

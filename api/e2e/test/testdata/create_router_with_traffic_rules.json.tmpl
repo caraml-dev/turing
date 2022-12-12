@@ -60,6 +60,10 @@
             "cpu_request": "100m",
             "memory_request": "250Mi"
         },
+        "autoscaling_policy": {
+            "metric": "concurrency",
+            "target": "1"
+        },
         "timeout": "5s",
         "protocol": "HTTP_JSON",
         "log_config": {
@@ -74,6 +78,10 @@
                     "max_replica": 2,
                     "cpu_request": "250m",
                     "memory_request": "256Mi"
+                },
+                "autoscaling_policy": {
+                    "metric": "concurrency",
+                    "target": "1"
                 },
                 "endpoint": "ensemble",
                 "timeout": "3s",

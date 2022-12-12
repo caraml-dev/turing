@@ -16,6 +16,7 @@ from turing.router.config.traffic_rule import (
 )
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.router_ensembler_config import DockerRouterEnsemblerConfig
@@ -85,6 +86,9 @@ def test_deploy_router_with_traffic_rules():
         resource_request=ResourceRequest(
             min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
         ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         endpoint="anything",
         timeout="3s",
         port=80,
@@ -100,6 +104,9 @@ def test_deploy_router_with_traffic_rules():
         rules=rules,
         experiment_engine=experiment_config,
         resource_request=resource_request,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         timeout="5s",
         log_config=log_config,
         ensembler=ensembler,

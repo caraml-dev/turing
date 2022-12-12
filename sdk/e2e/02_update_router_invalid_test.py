@@ -6,6 +6,7 @@ import turing
 
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.enricher import Enricher
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.router_version import RouterStatus
@@ -30,6 +31,9 @@ def test_update_router_invalid_config():
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
             min_replica=1, max_replica=1, cpu_request="10", memory_request="1Gi"
+        ),
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
         ),
         endpoint="anything",
         timeout="2s",

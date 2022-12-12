@@ -23,6 +23,9 @@ import (
 )
 
 func TestRouterVersionsServiceIntegration(t *testing.T) {
+	autoscalingMetricConcurrency := models.AutoscalingMetricConcurrency
+	autoscalingTargetConcurrency := "10"
+
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
 		// Monitoring URL Deps
 		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
@@ -74,9 +77,9 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 					Format: "1G",
 				},
 			},
-			AutoscalingPolicy: &models.AutoscalingPolicy{
-				Metric: "concurrency",
-				Target: "1",
+			AutoscalingPolicy: models.AutoscalingPolicy{
+				Metric: &autoscalingMetricConcurrency,
+				Target: &autoscalingTargetConcurrency,
 			},
 			Timeout:  "5s",
 			Protocol: "HTTP_JSON",
@@ -97,9 +100,9 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 						Format: "1G",
 					},
 				},
-				AutoscalingPolicy: &models.AutoscalingPolicy{
-					Metric: "concurrency",
-					Target: "1",
+				AutoscalingPolicy: models.AutoscalingPolicy{
+					Metric: &autoscalingMetricConcurrency,
+					Target: &autoscalingTargetConcurrency,
 				},
 				Endpoint: "/enrich",
 				Timeout:  "5s",
@@ -125,9 +128,9 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 							Format: "1G",
 						},
 					},
-					AutoscalingPolicy: &models.AutoscalingPolicy{
-						Metric: "concurrency",
-						Target: "1",
+					AutoscalingPolicy: models.AutoscalingPolicy{
+						Metric: &autoscalingMetricConcurrency,
+						Target: &autoscalingTargetConcurrency,
 					},
 					Endpoint: "/ensemble",
 					Timeout:  "5s",

@@ -255,14 +255,16 @@ class TuringSession:
         )
 
     @require_active_project
-    def update_router(self, router_id: int, router_config: RouterConfig) -> Router:
+    def update_router(
+        self, router_id: int, router_version_config: RouterVersionConfig
+    ) -> Router:
         """
         Update router in the active project the user has access to, with a router_config passed as a parameter
         """
         return RouterApi(self._api_client).projects_project_id_routers_router_id_put(
             project_id=self.active_project.id,
             router_id=router_id,
-            router_config=router_config,
+            router_version_config=router_version_config,
         )
 
     @require_active_project

@@ -13,9 +13,12 @@ import turing.router.config.router_config
 from turing.router.config.route import Route
 from turing.router.config.experiment_config import ExperimentConfig
 from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.autoscaling_policy import AutoscalingPolicy, AutoscalingMetric
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.router_config import RouterConfig, Protocol
-from turing.router.config.router_ensembler_config import StandardRouterEnsemblerConfig
+from turing.router.config.router_ensembler_config import (
+    StandardRouterEnsemblerConfig,
+)
 from turing.router.config.router_version import RouterStatus
 from turing.router.config.traffic_rule import (
     DefaultTrafficRule,
@@ -108,6 +111,9 @@ def test_deploy_router_upi_traffic_split():
         ensembler=ensembler,
         default_route_id="control",
         resource_request=resource_request,
+        autoscaling_policy=AutoscalingPolicy(
+            metric=AutoscalingMetric.CONCURRENCY, target="1"
+        ),
         protocol=Protocol.UPI,
         timeout="5s",
         log_config=log_config,

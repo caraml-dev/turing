@@ -619,7 +619,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RouterConfig'
+              $ref: '#/components/schemas/RouterVersionConfig'
         description: router configuration to save
         required: true
       responses:
@@ -1858,6 +1858,7 @@ components:
         image: image
         autoscaling_policy:
           metric: concurrency
+          payload_size: payload_size
           target: target
         created_at: 2000-01-23T04:56:07.000+00:00
         rules:
@@ -1916,6 +1917,7 @@ components:
           endpoint: endpoint
           autoscaling_policy:
             metric: concurrency
+            payload_size: payload_size
             target: target
           updated_at: 2000-01-23T04:56:07.000+00:00
           port: 5
@@ -1966,6 +1968,7 @@ components:
           pyfunc_config:
             autoscaling_policy:
               metric: concurrency
+              payload_size: payload_size
               target: target
             project_id: 7
             ensembler_id: 9
@@ -1999,6 +2002,7 @@ components:
             endpoint: endpoint
             autoscaling_policy:
               metric: concurrency
+              payload_size: payload_size
               target: target
             port: 2
             resource_request:
@@ -2125,6 +2129,7 @@ components:
     AutoscalingPolicy:
       example:
         metric: concurrency
+        payload_size: payload_size
         target: target
       properties:
         metric:
@@ -2133,9 +2138,15 @@ components:
           - cpu
           - memory
           - rps
+          nullable: true
           type: string
         target:
+          nullable: true
           pattern: ^\d+$
+          type: string
+        payload_size:
+          nullable: true
+          pattern: ^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$
           type: string
       type: object
     Protocol:
@@ -2209,6 +2220,7 @@ components:
         endpoint: endpoint
         autoscaling_policy:
           metric: concurrency
+          payload_size: payload_size
           target: target
         updated_at: 2000-01-23T04:56:07.000+00:00
         port: 5
@@ -2260,11 +2272,11 @@ components:
           readOnly: true
           type: string
       required:
+      - autoscaling_policy
       - endpoint
       - env
       - image
       - port
-      - resource_request
       - timeout
       type: object
     RouterEnsemblerConfig:
@@ -2272,6 +2284,7 @@ components:
         pyfunc_config:
           autoscaling_policy:
             metric: concurrency
+            payload_size: payload_size
             target: target
           project_id: 7
           ensembler_id: 9
@@ -2305,6 +2318,7 @@ components:
           endpoint: endpoint
           autoscaling_policy:
             metric: concurrency
+            payload_size: payload_size
             target: target
           port: 2
           resource_request:
@@ -2376,6 +2390,7 @@ components:
         endpoint: endpoint
         autoscaling_policy:
           metric: concurrency
+          payload_size: payload_size
           target: target
         port: 2
         resource_request:
@@ -2415,11 +2430,11 @@ components:
           example: secret-name-for-google-service-account
           type: string
       required:
+      - autoscaling_policy
       - endpoint
       - env
       - image
       - port
-      - resource_request
       - timeout
       type: object
     EnsemblerPyfuncConfig:
@@ -2427,6 +2442,7 @@ components:
       example:
         autoscaling_policy:
           metric: concurrency
+          payload_size: payload_size
           target: target
         project_id: 7
         ensembler_id: 9
@@ -2459,9 +2475,9 @@ components:
             $ref: '#/components/schemas/EnvVar'
           type: array
       required:
+      - autoscaling_policy
       - ensembler_id
       - project_id
-      - resource_request
       - timeout
       type: object
     TrafficRule:
@@ -2511,7 +2527,10 @@ components:
           $ref: '#/components/schemas/FieldSource'
         field:
           description: |
-            For HTTP_JSON protocol, the valid `field_source` are `header` and `payload`. Whereas, for UPI_V1 protocol the valid `field_source` are `header` and `prediction_context`. If `field_source` is `header`, then `field` should contain the name of the request header. If `field_source` is `payload`, then `field` should be a valid json path. If `field_source` is `prediction_context`, then `field` should contain variable name stored in `prediction_context` field of the incoming request.
+            For HTTP_JSON protocol, the valid `field_source` are `header` and `payload`. Whereas, for UPI_V1 protocol the valid `field_source` are `header` and `prediction_context`. 
+            If `field_source` is `header`, then `field` should contain the name of the request header. 
+            If `field_source` is `payload`, then `field` should be a valid json path. 
+            If `field_source` is `prediction_context`, then `field` should contain variable name stored in `prediction_context` field of the incoming request.
           type: string
         operator:
           enum:
@@ -2556,6 +2575,7 @@ components:
             endpoint: endpoint
             autoscaling_policy:
               metric: concurrency
+              payload_size: payload_size
               target: target
             updated_at: 2000-01-23T04:56:07.000+00:00
             port: 5
@@ -2587,6 +2607,7 @@ components:
             timeout: timeout
           autoscaling_policy:
             metric: concurrency
+            payload_size: payload_size
             target: target
           default_route_id: default_route_id
           rules:
@@ -2629,6 +2650,7 @@ components:
             pyfunc_config:
               autoscaling_policy:
                 metric: concurrency
+                payload_size: payload_size
                 target: target
               project_id: 7
               ensembler_id: 9
@@ -2662,6 +2684,7 @@ components:
               endpoint: endpoint
               autoscaling_policy:
                 metric: concurrency
+                payload_size: payload_size
                 target: target
               port: 2
               resource_request:
@@ -2714,6 +2737,7 @@ components:
           endpoint: endpoint
           autoscaling_policy:
             metric: concurrency
+            payload_size: payload_size
             target: target
           updated_at: 2000-01-23T04:56:07.000+00:00
           port: 5
@@ -2745,6 +2769,7 @@ components:
           timeout: timeout
         autoscaling_policy:
           metric: concurrency
+          payload_size: payload_size
           target: target
         default_route_id: default_route_id
         rules:
@@ -2787,6 +2812,7 @@ components:
           pyfunc_config:
             autoscaling_policy:
               metric: concurrency
+              payload_size: payload_size
               target: target
             project_id: 7
             ensembler_id: 9
@@ -2820,6 +2846,7 @@ components:
             endpoint: endpoint
             autoscaling_policy:
               metric: concurrency
+              payload_size: payload_size
               target: target
             port: 2
             resource_request:
@@ -2877,6 +2904,7 @@ components:
         ensembler:
           $ref: '#/components/schemas/RouterEnsemblerConfig'
       required:
+      - autoscaling_policy
       - experiment_engine
       - log_config
       - routes
