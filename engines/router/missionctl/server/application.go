@@ -2,12 +2,13 @@ package server
 
 import (
 	"fmt"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/soheilhy/cmux"
 	"io"
 	"net"
 	"net/http"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/soheilhy/cmux"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
