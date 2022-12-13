@@ -5,7 +5,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/http/pprof"
 	"runtime"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -80,12 +79,6 @@ func Run() {
 			"/v1/internal",
 			handlers.NewInternalAPIHandler([]string{}),
 		))
-		mux.HandleFunc("/debug/pprof/", pprof.Index)
-		mux.HandleFunc("/debug/pprof/heap", pprof.Index)
-		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 		if cfg.AppConfig.CustomMetrics {
 			mux.Handle("/metrics", promhttp.Handler())
 		}

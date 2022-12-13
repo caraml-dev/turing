@@ -2,11 +2,14 @@ package upi
 
 import (
 	"context"
+	"time"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type grpcRouterResponse struct {
@@ -16,38 +19,38 @@ type grpcRouterResponse struct {
 	err    string
 }
 
-//var protoJSONMarshaller = protojson.MarshalOptions{}
+var protoJSONMarshaller = protojson.MarshalOptions{}
 
-//func logTuringRouterRequestSummary(
-//	ctx context.Context,
-//	timestamp time.Time,
-//	header metadata.MD,
-//	upiReq *upiv1.PredictValuesRequest,
-//	mcRespCh <-chan grpcRouterResponse,
-//) {
-//
-//	// Create a new TuringResultLogEntry record with the context and request info
-//	// send proto as json string
-//	reqStr := protoJSONMarshaller.Format(upiReq)
-//	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, reqStr)
-//
-//	// Read incoming responses and prepare for logging
-//	for resp := range mcRespCh {
-//		// If error exists, add an error record
-//		if resp.err != "" {
-//			logEntry.AddResponse(resp.key, "", nil, resp.err)
-//		} else {
-//			upiResp := protoJSONMarshaller.Format(resp.body)
-//			logEntry.AddResponse(resp.key, upiResp, resultlog.FormatHeader(resp.header), "")
-//		}
-//	}
-//
-//	// Log the responses. If an error occurs in logging the result to the
-//	// configured result log destination, log the error.
-//	if err := resultlog.LogEntry(logEntry); err != nil {
-//		log.Glob().Errorf("Result Logging Error: %s", err.Error())
-//	}
-//}
+func logTuringRouterRequestSummary(
+	ctx context.Context,
+	timestamp time.Time,
+	header metadata.MD,
+	upiReq *upiv1.PredictValuesRequest,
+	mcRespCh <-chan grpcRouterResponse,
+) {
+
+	// Create a new TuringResultLogEntry record with the context and request info
+	// send proto as json string
+	reqStr := protoJSONMarshaller.Format(upiReq)
+	logEntry := resultlog.NewTuringResultLogEntry(ctx, timestamp, header, reqStr)
+
+	// Read incoming responses and prepare for logging
+	for resp := range mcRespCh {
+		// If error exists, add an error record
+		if resp.err != "" {
+			logEntry.AddResponse(resp.key, "", nil, resp.err)
+		} else {
+			upiResp := protoJSONMarshaller.Format(resp.body)
+			logEntry.AddResponse(resp.key, upiResp, resultlog.FormatHeader(resp.header), "")
+		}
+	}
+
+	// Log the responses. If an error occurs in logging the result to the
+	// configured result log destination, log the error.
+	if err := resultlog.LogEntry(logEntry); err != nil {
+		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+	}
+}
 
 // logTuringRouterRequestError logs the given turing request id and the error data
 func logTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
