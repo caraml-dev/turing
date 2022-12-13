@@ -2,14 +2,12 @@ package server
 
 import (
 	"fmt"
-	"io"
-	"net"
-	"net/http"
-	"runtime"
-
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/soheilhy/cmux"
+	"io"
+	"net"
+	"net/http"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -24,8 +22,6 @@ import (
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	// TODO: justify this
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
-	// for profiling
-	_ "net/http/pprof"
 )
 
 func Run() {
@@ -54,7 +50,6 @@ func Run() {
 
 	switch cfg.RouterConfig.Protocol {
 	case config.UPI:
-		runtime.SetBlockProfileRate(1)
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControlUPI(
 			cfg.RouterConfig.ConfigFile,
