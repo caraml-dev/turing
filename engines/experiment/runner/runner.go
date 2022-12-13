@@ -3,6 +3,8 @@ package runner
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type GetTreatmentOptions struct {
@@ -23,4 +25,7 @@ type ExperimentRunner interface {
 		payload []byte,
 		options GetTreatmentOptions,
 	) (*Treatment, error)
+	RegisterCollector(
+		collector metrics.Collector,
+	) error
 }

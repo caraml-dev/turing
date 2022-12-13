@@ -9,6 +9,7 @@ import (
 	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner/mocks"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type fakeRunner struct {
@@ -23,6 +24,12 @@ func (runner fakeRunner) GetTreatmentForRequest(
 	http.Header, []byte, runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	return nil, nil
+}
+
+func (runner fakeRunner) RegisterCollector(
+	collector metrics.Collector,
+) error {
+	return nil
 }
 
 func TestRegisterAndGet(t *testing.T) {

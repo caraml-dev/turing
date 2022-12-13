@@ -3,9 +3,11 @@ package runner
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // ConfigurableExperimentRunner interface of an ExperimentRunner, that can be configured
@@ -39,4 +41,26 @@ type GetTreatmentRequest struct {
 	Header  http.Header
 	Payload []byte
 	Options runner.GetTreatmentOptions
+}
+
+type MeasureDurationMsSinceRequest struct {
+	Key       metrics.MetricName
+	Starttime time.Time
+	Labels    map[string]string
+}
+
+type MeasureDurationMsRequest struct {
+	Key    metrics.MetricName
+	Labels map[string]func() string
+}
+
+type RecordGaugeRequest struct {
+	Key    metrics.MetricName
+	Value  float64
+	Labels map[string]string
+}
+
+type IncRequest struct {
+	Key    metrics.MetricName
+	Labels map[string]string
 }

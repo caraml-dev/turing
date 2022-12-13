@@ -110,7 +110,7 @@ func TestRpcServer_GetTreatmentForRequest(t *testing.T) {
 				"GetTreatmentForRequest",
 				mock.Anything, mock.Anything, mock.Anything,
 			).Return(tt.expected, tt.err)
-			rpcServer := &rpcServer{mockManager}
+			rpcServer := &rpcServer{nil, mockManager}
 
 			var actual runner.Treatment
 			err := rpcServer.GetTreatmentForRequest(&GetTreatmentRequest{}, &actual)

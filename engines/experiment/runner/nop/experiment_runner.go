@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 var nopTreatment = &runner.Treatment{}
@@ -19,6 +20,12 @@ func (ExperimentRunner) GetTreatmentForRequest(
 	runner.GetTreatmentOptions,
 ) (*runner.Treatment, error) {
 	return nopTreatment, nil
+}
+
+func (ExperimentRunner) RegisterCollector(
+	collector metrics.Collector,
+) error {
+	return nil
 }
 
 // NewExperimentRunner is a creator for the experiment runners

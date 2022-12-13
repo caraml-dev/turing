@@ -9,6 +9,7 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/utils"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type ExperimentRunner struct {
@@ -73,4 +74,8 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 	}
 
 	return nil, errors.New("no experiment configured for the unit")
+}
+
+func (r *ExperimentRunner) RegisterCollector(_ metrics.Collector) error {
+	return nil
 }
