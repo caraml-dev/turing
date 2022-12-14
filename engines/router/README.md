@@ -66,7 +66,7 @@ __Note:__ The app uses the `in_forward` plugin to write data to a TCP socket.
   - name: TEST_ENV2
     value: value2
 ```
-3. Jaeger client is initialised to trace all requests (`const` mode). However, the tracer's `IsEnabled()` and `IsStartNewSpans()` methods determine whether the app adds the trace to the requests. This is because, when tracing is enabled, we only want those requests with existing spans (added by `Istio`) to be traced by the app. However, for testing, all requests can be traced using env var `APP_JAEGER_START_NEW_SPANS=true`. To run Jaeger locally, do `make jaeger-local`. Simulating incoming requests with Spans:
+3. Jaeger client is initialised to trace all requests (`const` mode). However, the tracer's `IsEnabled()` methods determine whether the app adds the trace to the requests. To run Jaeger locally, do `make jaeger-local`. Simulating incoming requests with Spans:
 ```
   curl -v -X GET http://localhost:8080/v1/predict \
     -H "X-B3-Sampled: 1" \

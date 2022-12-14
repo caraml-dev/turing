@@ -18,7 +18,6 @@ type JaegerTracer struct {
 
 // InitGlobalTracer creates a global tracer using the Jaeger client
 func (t *JaegerTracer) InitGlobalTracer(name string, cfg *config.JaegerConfig) (io.Closer, error) {
-	t.SetStartNewSpans(cfg.StartNewSpans)
 
 	// Create a zipkin propagator as the HTTP extractor
 	zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
@@ -43,8 +42,7 @@ func buildConfig(jCfg *config.JaegerConfig) jaegercfg.Configuration {
 				jCfg.ReporterAgentHost, jCfg.ReporterAgentPort),
 			LogSpans: true,
 		},
-		// Sample all requests by default. Additional setting `startNewSpans`, local to
-		// the package, may filter the actual requests being sampled.
+		// Sample all requests by default.
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: 1,
@@ -55,10 +53,6 @@ func buildConfig(jCfg *config.JaegerConfig) jaegercfg.Configuration {
 // newJaegerTracer is a creator for the Jaeger Tracer
 func newJaegerTracer() Tracer {
 	return &JaegerTracer{
-		&baseTracer{
-			&tracingConfig{
-				startNewSpans: false,
-			},
-		},
+		&baseTracer{},
 	}
 }

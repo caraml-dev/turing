@@ -107,10 +107,8 @@ type mockTracer struct {
 	mock.Mock
 }
 
-func (*mockTracer) IsEnabled() bool         { return false }
-func (*mockTracer) IsStartNewSpans() bool   { return false }
-func (*mockTracer) SetEnabled(_ bool)       {}
-func (*mockTracer) SetStartNewSpans(_ bool) {}
+func (*mockTracer) IsEnabled() bool   { return false }
+func (*mockTracer) SetEnabled(_ bool) {}
 func (*mockTracer) StartSpanFromRequestHeader(
 	context.Context,
 	string,

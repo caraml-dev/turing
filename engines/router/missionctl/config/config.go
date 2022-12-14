@@ -115,7 +115,6 @@ type JaegerConfig struct {
 	CollectorEndpoint string `split_words:"true"`
 	ReporterAgentHost string `envconfig:"REPORTER_HOST" split_words:"true"`
 	ReporterAgentPort int    `envconfig:"REPORTER_PORT" split_words:"true"`
-	StartNewSpans     bool   `split_words:"true"`
 }
 
 // AppConfig is the structure used to the parse the environment configs that correspond

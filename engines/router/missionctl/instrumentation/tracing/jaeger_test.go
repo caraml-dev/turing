@@ -22,7 +22,6 @@ func TestStartSpanFromRequestHeader(t *testing.T) {
 	// Init global tracer using Jaeger client
 	_, _ = tr.InitGlobalTracer("test", &config.JaegerConfig{
 		Enabled:           true,
-		StartNewSpans:     false,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6832,
 	})
@@ -45,7 +44,6 @@ func TestStartSpanFromContext(t *testing.T) {
 	// Init global tracer using Jaeger client
 	_, _ = tr.InitGlobalTracer("test", &config.JaegerConfig{
 		Enabled:           true,
-		StartNewSpans:     false,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6832,
 	})
@@ -60,7 +58,6 @@ func TestStartSpanFromContext(t *testing.T) {
 func TestBuildConfig(t *testing.T) {
 	cfg := &config.JaegerConfig{
 		Enabled:           true,
-		StartNewSpans:     true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 2000,
 		CollectorEndpoint: "test_endpoint",

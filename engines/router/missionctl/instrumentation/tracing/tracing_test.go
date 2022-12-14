@@ -8,22 +8,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
-func TestGetTracingConfig(t *testing.T) {
-	cfg := tracingConfig{
-		startNewSpans: true,
-	}
-
-	assert.Equal(t, true, cfg.IsStartNewSpans())
-}
-
-func TestSetTracingConfig(t *testing.T) {
-	cfg := tracingConfig{
-		startNewSpans: true,
-	}
-	cfg.SetStartNewSpans(false)
-	assert.Equal(t, false, cfg.startNewSpans)
-}
-
 func TestGetGlob(t *testing.T) {
 	// Save globalTracer in a temp var and reset after the test
 	tempTracer := globalTracer
