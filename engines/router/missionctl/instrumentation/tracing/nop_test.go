@@ -10,17 +10,11 @@ import (
 func TestNopMethods(t *testing.T) {
 	tr := newNopTracer()
 
-	// Run through the nop method with no return values and side effects to ensure no error
-	tr.SetStartNewSpans(true)
-
 	// Create test context
 	testCtx := context.Background()
 
 	// Test methods with return values
 	assert.Equal(t, false, tr.IsEnabled())
-	assert.Equal(t, false, tr.IsStartNewSpans())
-	assert.Equal(t, false, tr.IsStartNewSpans())
-	assert.Equal(t, false, tr.IsStartNewSpans())
 
 	closer, err := tr.InitGlobalTracer("", nil)
 	assert.NoError(t, err)

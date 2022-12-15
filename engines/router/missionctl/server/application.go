@@ -6,9 +6,6 @@ import (
 	"net"
 	"net/http"
 
-	// TODO: justify this
-	_ "net/http/pprof"
-
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/soheilhy/cmux"

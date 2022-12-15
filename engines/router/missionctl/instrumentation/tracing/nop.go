@@ -13,14 +13,6 @@ import (
 // NopTracer implements the Tracer interface with dummy methods
 type NopTracer struct{}
 
-// IsStartNewSpans satisfies the Tracer interface, always returning false
-func (*NopTracer) IsStartNewSpans() bool {
-	return false
-}
-
-// SetStartNewSpans is a nop method that satisfies the Tracer interface
-func (*NopTracer) SetStartNewSpans(_ bool) {}
-
 // InitGlobalTracer satisfies the Tracer interface and returns a Nop closer
 func (*NopTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (io.Closer, error) {
 	return io.NopCloser(nil), nil

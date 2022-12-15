@@ -114,7 +114,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 
 	if tracing.Glob().IsEnabled() {
 		var sp opentracing.Span
-		sp, _ = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
+		sp, ctx = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
 		if sp != nil {
 			defer sp.Finish()
 		}

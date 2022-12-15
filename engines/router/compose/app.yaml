@@ -16,7 +16,6 @@ services:
       - XP_PASSKEY=${XP_PASSKEY}
       - APP_FLUENTD_HOST=turing_stack_fluentd
       - APP_JAEGER_REPORTER_HOST=turing_stack_jaeger
-      - APP_JAEGER_START_NEW_SPANS=true
       - APP_KAFKA_BROKERS=kafka:9092
     secrets:
       - google_app_creds

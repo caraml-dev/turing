@@ -41,7 +41,7 @@ func logTuringRouterRequestSummary(
 		if resp.err != "" {
 			logEntry.AddResponse(resp.key, "", nil, resp.err)
 		} else {
-			upiResp := protoJSONMarshaller.Format(upiReq)
+			upiResp := protoJSONMarshaller.Format(resp.body)
 			logEntry.AddResponse(resp.key, upiResp, resultlog.FormatHeader(resp.header), "")
 		}
 	}
