@@ -8,7 +8,7 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	_metrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	_metrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"

@@ -1,4 +1,4 @@
-package metrics
+package instrumentation
 
 import (
 	"log"
@@ -17,6 +17,16 @@ const (
 	Subsystem string = "turing"
 )
 
+// Define all metric names for the Turing App
+const (
+	// ExperimentEngineRequestMs is the key to measure requests for fetching a treatment from the experiment-engine
+	ExperimentEngineRequestMs metrics.MetricName = "exp_engine_request_duration_ms"
+	// RouteRequestDurationMs is the key to measure http requests to individual Fiber routes
+	RouteRequestDurationMs metrics.MetricName = "route_request_duration_ms"
+	// TuringComponentRequestDurationMs is the key to measure time taken at each Turing Component
+	TuringComponentRequestDurationMs metrics.MetricName = "turing_comp_request_duration_ms"
+)
+
 // requestLatencyBuckets defines the buckets used in the custom Histogram metrics defined by Turing
 var requestLatencyBuckets = []float64{
 	2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200,
@@ -24,36 +34,39 @@ var requestLatencyBuckets = []float64{
 	2000, 5000, 10000, 20000, 50000, 100000,
 }
 
-// histogramMap maintains a mapping between the metric name and the corresponding
-// histogram vector
-var histogramMap = map[metrics.MetricName]metrics.PrometheusHistogramVec{
-	ExperimentEngineRequestMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: Namespace,
-		Subsystem: Subsystem,
-		Name:      string(ExperimentEngineRequestMs),
-		Help:      "Histogram for the runtime (in milliseconds) of Experiment Engine requests.",
-		Buckets:   requestLatencyBuckets,
-	},
-		[]string{"status", "engine"},
-	),
-	RouteRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: Namespace,
-		Subsystem: Subsystem,
-		Name:      string(RouteRequestDurationMs),
-		Help:      "Histogram for the runtime (in milliseconds) of Fiber route requests.",
-		Buckets:   requestLatencyBuckets,
-	},
-		[]string{"status", "route", "traffic_rule"},
-	),
-	TuringComponentRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: Namespace,
-		Subsystem: Subsystem,
-		Name:      string(TuringComponentRequestDurationMs),
-		Help:      "Histogram for time spent (in milliseconds) at each Turing component.",
-		Buckets:   requestLatencyBuckets,
-	},
-		[]string{"status", "component", "traffic_rule"},
-	),
+func GetHistogramMap() map[metrics.MetricName]metrics.PrometheusHistogramVec {
+	// histogramMap maintains a mapping between the metric name and the corresponding histogram vector
+	var histogramMap = map[metrics.MetricName]metrics.PrometheusHistogramVec{
+		ExperimentEngineRequestMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Namespace: Namespace,
+			Subsystem: Subsystem,
+			Name:      string(ExperimentEngineRequestMs),
+			Help:      "Histogram for the runtime (in milliseconds) of Experiment Engine requests.",
+			Buckets:   requestLatencyBuckets,
+		},
+			[]string{"status", "engine"},
+		),
+		RouteRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Namespace: Namespace,
+			Subsystem: Subsystem,
+			Name:      string(RouteRequestDurationMs),
+			Help:      "Histogram for the runtime (in milliseconds) of Fiber route requests.",
+			Buckets:   requestLatencyBuckets,
+		},
+			[]string{"status", "route", "traffic_rule"},
+		),
+		TuringComponentRequestDurationMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Namespace: Namespace,
+			Subsystem: Subsystem,
+			Name:      string(TuringComponentRequestDurationMs),
+			Help:      "Histogram for time spent (in milliseconds) at each Turing component.",
+			Buckets:   requestLatencyBuckets,
+		},
+			[]string{"status", "component", "traffic_rule"},
+		),
+	}
+
+	return histogramMap
 }
 
 //////////////////////////// MetricsRegistrationHelper Definitions //////////////////////////////

@@ -19,11 +19,12 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // timeInterceptorLog is used to Unmarshal the time log data
@@ -71,14 +72,28 @@ func (c *mockMetricsCollector) MeasureDurationMsSince(
 	key metrics.MetricName,
 	starttime time.Time,
 	labels map[string]string,
-) {
+) error {
 	c.Called(key, starttime, labels)
+	return nil
 }
 func (*mockMetricsCollector) MeasureDurationMs(
-	key metrics.MetricName,
-	labels map[string]func() string,
+	_ metrics.MetricName,
+	_ map[string]func() string,
 ) func() {
 	return func() {}
+}
+func (*mockMetricsCollector) RecordGauge(
+	_ metrics.MetricName,
+	_ float64,
+	_ map[string]string,
+) error {
+	return nil
+}
+func (*mockMetricsCollector) Inc(
+	_ metrics.MetricName,
+	_ map[string]string,
+) error {
+	return nil
 }
 
 // mockSpan satisfies the opentracing.Span interface

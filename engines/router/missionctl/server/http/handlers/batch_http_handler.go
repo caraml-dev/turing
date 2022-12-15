@@ -7,16 +7,18 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 const batchHTTPHandlerID = "batch_http_handler"
@@ -39,7 +41,7 @@ func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(httpErr == nil)

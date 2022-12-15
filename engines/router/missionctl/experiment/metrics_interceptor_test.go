@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // mockMetricsCollector satisfies the metrics.Collector interface
@@ -22,14 +22,28 @@ func (c *mockMetricsCollector) MeasureDurationMsSince(
 	key metrics.MetricName,
 	starttime time.Time,
 	labels map[string]string,
-) {
+) error {
 	c.Called(key, starttime, labels)
+	return nil
 }
 func (*mockMetricsCollector) MeasureDurationMs(
-	key metrics.MetricName,
-	labels map[string]func() string,
+	_ metrics.MetricName,
+	_ map[string]func() string,
 ) func() {
 	return func() {}
+}
+func (*mockMetricsCollector) RecordGauge(
+	_ metrics.MetricName,
+	_ float64,
+	_ map[string]string,
+) error {
+	return nil
+}
+func (*mockMetricsCollector) Inc(
+	_ metrics.MetricName,
+	_ map[string]string,
+) error {
+	return nil
 }
 
 func TestMetricsInterceptorBeforeDispatch(t *testing.T) {
