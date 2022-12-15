@@ -8,7 +8,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	routerMetrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 	"github.com/hashicorp/go-plugin"
 )
@@ -116,7 +116,7 @@ type rpcMetricsRegistrationHelperClient struct {
 	shared.RPCClient
 }
 
-func (c *rpcMetricsRegistrationHelperClient) Register(metrics []routerMetrics.Metric) error {
+func (c *rpcMetricsRegistrationHelperClient) Register(metrics []instrumentation.Metric) error {
 	return c.Call("Plugin.Register", metrics, new(interface{}))
 }
 
@@ -183,6 +183,6 @@ type rpcMetricsRegistrationHelperServer struct {
 	Impl runner.MetricsRegistrationHelper
 }
 
-func (s *rpcMetricsRegistrationHelperServer) Register(req []routerMetrics.Metric, _ *interface{}) error {
+func (s *rpcMetricsRegistrationHelperServer) Register(req []instrumentation.Metric, _ *interface{}) error {
 	return s.Impl.Register(req)
 }

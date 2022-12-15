@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	routerMetrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -21,7 +21,7 @@ type Treatment struct {
 // MetricsRegistrationHelper is the generic interface for the Turing router to
 // register additional metrics needed by the experiment engine
 type MetricsRegistrationHelper interface {
-	Register(metrics []routerMetrics.Metric) error
+	Register(metrics []instrumentation.Metric) error
 }
 
 // ExperimentRunner is the generic interface for generating experiment configs
