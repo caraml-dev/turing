@@ -1,12 +1,11 @@
 package metrics
 
 import (
-	"time"
+	"log"
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 //////////////////////////// Metrics Definitions //////////////////////////////
@@ -18,12 +17,6 @@ const (
 	Subsystem string = "turing"
 )
 
-// PrometheusHistogramVec is an interface that captures the methods from the the Prometheus
-// HistogramVec type that are used in the app. This is added for unit testing.
-type PrometheusHistogramVec interface {
-	GetMetricWith(prometheus.Labels) (prometheus.Observer, error)
-}
-
 // requestLatencyBuckets defines the buckets used in the custom Histogram metrics defined by Turing
 var requestLatencyBuckets = []float64{
 	2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200,
@@ -33,7 +26,7 @@ var requestLatencyBuckets = []float64{
 
 // histogramMap maintains a mapping between the metric name and the corresponding
 // histogram vector
-var histogramMap = map[MetricName]*prometheus.HistogramVec{
+var histogramMap = map[metrics.MetricName]metrics.PrometheusHistogramVec{
 	ExperimentEngineRequestMs: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: Namespace,
 		Subsystem: Subsystem,
@@ -63,74 +56,76 @@ var histogramMap = map[MetricName]*prometheus.HistogramVec{
 	),
 }
 
-// getHistogramVec is a getter for the prometheus.HistogramVec defined for the input key.
-// It returns a value satisfying the PrometheusHistogramVec interface
-func getHistogramVec(key MetricName) (PrometheusHistogramVec, error) {
-	histVec, ok := histogramMap[key]
-	if !ok {
-		return nil, errors.Newf(errors.NotFound, "Could not find the metric for %s", key)
-	}
-	return histVec, nil
+//////////////////////////// MetricsRegistrationHelper Definitions //////////////////////////////
+
+type MetricType string
+
+const (
+	GaugeMetricType     MetricType = "gauge"
+	HistogramMetricType            = "histogram"
+	CounterMetricType              = "counter"
+)
+
+type Metric struct {
+	Name        string
+	Type        MetricType
+	Description string
+	Labels      []string
+	Buckets     []float64
 }
 
-//////////////////////////// PrometheusClient /////////////////////////////////
+type MetricsRegistrationHelper struct{}
 
-// PrometheusClient satisfies the Collector interface
-type PrometheusClient struct {
-}
+func (MetricsRegistrationHelper) Register(additionalMetrics []Metric) error {
+	gaugeMap := map[metrics.MetricName]metrics.PrometheusGaugeVec{}
+	histogramMap := map[metrics.MetricName]metrics.PrometheusHistogramVec{}
+	counterMap := map[metrics.MetricName]metrics.PrometheusCounterVec{}
 
-// InitMetrics initializes the collectors for all metrics defined for the app
-// and registers them with the DefaultRegisterer.
-func (PrometheusClient) InitMetrics() {
-	// Register histograms
-	for _, obs := range histogramMap {
-		prometheus.MustRegister(obs)
-	}
-}
-
-// MeasureDurationMsSince takes in the Metric name, the start time and a map of labels and values
-// to be associated to the metric. If errors occur in accessing the metric or associating the
-// labels, they will simply be logged.
-func (PrometheusClient) MeasureDurationMsSince(
-	key MetricName,
-	starttime time.Time,
-	labels map[string]string,
-) {
-	// Get the histogram vec defined for the input key
-	histVec, err := getHistogramVec(key)
-	if err != nil {
-		log.Glob().Errorf(err.Error())
-		return
-	}
-	// Create a histogram with the labels
-	s, err := histVec.GetMetricWith(labels)
-	if err != nil {
-		log.Glob().Errorf("Error occurred when creating histogram for %s: %v", key, err)
-		return
-	}
-	// Record the value in milliseconds
-	s.Observe(float64(time.Since(starttime) / time.Millisecond))
-}
-
-// MeasureDurationMs takes in the Metric name and a map of labels and functions to obtain
-// the label values - this allows for MeasureDurationMs to be deferred and do a delayed
-// evaluation of the labels. It returns a function which, when executed, will log the
-// duration in ms since MeasureDurationMs was called. If errors occur in accessing the metric or
-// associating the labels, they will simply be logged.
-func (p PrometheusClient) MeasureDurationMs(
-	key MetricName,
-	labelValueGetters map[string]func() string,
-) func() {
-	// Capture start time
-	starttime := time.Now()
-	// Return function to measure and log the duration since start time
-	return func() {
-		// Evaluate the labels
-		labels := map[string]string{}
-		for key, f := range labelValueGetters {
-			labels[key] = f()
+	for _, metric := range additionalMetrics {
+		log.Println(metric)
+		switch metric.Type {
+		case GaugeMetricType:
+			gaugeMap[metrics.MetricName(metric.Name)] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+				Namespace: Namespace,
+				Subsystem: Subsystem,
+				Help:      metric.Description,
+				Name:      metric.Name,
+			},
+				metric.Labels,
+			)
+		case HistogramMetricType:
+			buckets := requestLatencyBuckets
+			if metric.Buckets != nil {
+				buckets = metric.Buckets
+			}
+			histogramMap[metrics.MetricName(metric.Name)] = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+				Namespace: Namespace,
+				Subsystem: Subsystem,
+				Help:      metric.Description,
+				Name:      metric.Name,
+				Buckets:   buckets,
+			},
+				metric.Labels,
+			)
+		case CounterMetricType:
+			counterMap[metrics.MetricName(metric.Name)] = prometheus.NewCounterVec(prometheus.CounterOpts{
+				Namespace: Namespace,
+				Subsystem: Subsystem,
+				Help:      metric.Description,
+				Name:      metric.Name,
+			},
+				metric.Labels,
+			)
 		}
-		// Log measurement
-		p.MeasureDurationMsSince(key, starttime, labels)
 	}
+
+	err := metrics.Glob().(*metrics.PrometheusClient).RegisterAdditionalMetrics(
+		gaugeMap,
+		histogramMap,
+		counterMap,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
