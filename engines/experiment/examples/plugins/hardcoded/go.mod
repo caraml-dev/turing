@@ -9,4 +9,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 )
 
-replace github.com/caraml-dev/turing/engines/experiment => ../../../
+replace (
+	github.com/caraml-dev/turing/engines/experiment => ../../../
+	github.com/caraml-dev/turing/engines/router => ../../../../router
+)

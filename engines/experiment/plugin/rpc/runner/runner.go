@@ -43,23 +43,31 @@ type GetTreatmentRequest struct {
 	Options runner.GetTreatmentOptions
 }
 
+// MeasureDurationMsSinceRequest is a struct, used to pass the data required by
+// Collector.MeasureDurationMsSince() between RPC client and server
 type MeasureDurationMsSinceRequest struct {
 	Key       metrics.MetricName
 	Starttime time.Time
 	Labels    map[string]string
 }
 
+// MeasureDurationMsRequest is a struct, used to pass the data required by
+// Collector.MeasureDurationMs() between RPC client and server
 type MeasureDurationMsRequest struct {
 	Key    metrics.MetricName
 	Labels map[string]func() string
 }
 
+// RecordGaugeRequest is a struct, used to pass the data required by
+// Collector.RecordGauge() between RPC client and server
 type RecordGaugeRequest struct {
 	Key    metrics.MetricName
 	Value  float64
 	Labels map[string]string
 }
 
+// IncRequest is a struct, used to pass the data required by
+// Collector.Inc() between RPC client and server
 type IncRequest struct {
 	Key    metrics.MetricName
 	Labels map[string]string

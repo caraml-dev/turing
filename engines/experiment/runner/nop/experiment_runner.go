@@ -22,8 +22,9 @@ func (ExperimentRunner) GetTreatmentForRequest(
 	return nopTreatment, nil
 }
 
-func (ExperimentRunner) RegisterCollector(
-	collector metrics.Collector,
+func (ExperimentRunner) RegisterMetrics(
+	_ metrics.Collector,
+	_ runner.MetricsRegistrationHelper,
 ) error {
 	return nil
 }

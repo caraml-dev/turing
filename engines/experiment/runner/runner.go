@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	routerMetrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -17,6 +18,12 @@ type Treatment struct {
 	Config         json.RawMessage
 }
 
+// MetricsRegistrationHelper is the generic interface for the Turing router to
+// register additional metrics needed by the experiment engine
+type MetricsRegistrationHelper interface {
+	Register(metrics []routerMetrics.Metric) error
+}
+
 // ExperimentRunner is the generic interface for generating experiment configs
 // for a given request
 type ExperimentRunner interface {
@@ -25,7 +32,8 @@ type ExperimentRunner interface {
 		payload []byte,
 		options GetTreatmentOptions,
 	) (*Treatment, error)
-	RegisterCollector(
+	RegisterMetrics(
 		collector metrics.Collector,
+		metricsRegistrationHelper MetricsRegistrationHelper,
 	) error
 }

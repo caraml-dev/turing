@@ -3,6 +3,7 @@ package runner
 import (
 	"net/rpc"
 
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 	"github.com/hashicorp/go-plugin"
 )
@@ -33,4 +34,18 @@ func (p *CollectorPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 
 func (CollectorPlugin) Client(_ *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
 	return &rpcCollectorClient{RPCClient: c}, nil
+}
+
+// MetricsRegistrationHelperPlugin implements hashicorp/go-plugin's Plugin interface
+// for runner.MetricsRegistrationHelper
+type MetricsRegistrationHelperPlugin struct {
+	Impl runner.MetricsRegistrationHelper
+}
+
+func (p *MetricsRegistrationHelperPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &rpcMetricsRegistrationHelperServer{}, nil
+}
+
+func (MetricsRegistrationHelperPlugin) Client(_ *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &rpcMetricsRegistrationHelperClient{RPCClient: c}, nil
 }

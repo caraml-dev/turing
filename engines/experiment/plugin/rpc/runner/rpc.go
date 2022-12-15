@@ -8,6 +8,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	routerMetrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 	"github.com/hashicorp/go-plugin"
 )
@@ -42,10 +43,22 @@ func (c *rpcClient) GetTreatmentForRequest(
 	return &resp, nil
 }
 
-func (c *rpcClient) RegisterCollector(_ metrics.Collector) error {
-	brokerId := c.MuxBroker.NextId()
-	go c.MuxBroker.AcceptAndServe(brokerId, &rpcCollectorServer{})
-	return c.Call("Plugin.RegisterCollector", brokerId, new(interface{}))
+func (c *rpcClient) RegisterMetrics(
+	_ metrics.Collector,
+	metricsRegistrationHelper runner.MetricsRegistrationHelper,
+) error {
+	collectorBrokerId := c.MuxBroker.NextId()
+	go c.MuxBroker.AcceptAndServe(collectorBrokerId, &rpcCollectorServer{})
+
+	metricsRegistrationHelperBrokerId := c.MuxBroker.NextId()
+	go c.MuxBroker.AcceptAndServe(metricsRegistrationHelperBrokerId,
+		&rpcMetricsRegistrationHelperServer{Impl: metricsRegistrationHelper})
+
+	return c.Call(
+		"Plugin.RegisterMetrics",
+		[]uint32{collectorBrokerId, metricsRegistrationHelperBrokerId},
+		new(interface{}),
+	)
 }
 
 // rpcCollectorClient is an implementation of Collector used by the plugin to talk to the router over RPC.
@@ -96,6 +109,17 @@ func (c *rpcCollectorClient) Inc(key metrics.MetricName, labels map[string]strin
 	return c.Call("Plugin.Inc", &req, new(interface{}))
 }
 
+// rpcMetricsRegistrationHelperClient is an implementation of MetricsRegistrationHelper used by the plugin to talk to
+// the router over RPC.
+type rpcMetricsRegistrationHelperClient struct {
+	*plugin.MuxBroker
+	shared.RPCClient
+}
+
+func (c *rpcMetricsRegistrationHelperClient) Register(metrics []routerMetrics.Metric) error {
+	return c.Call("Plugin.Register", metrics, new(interface{}))
+}
+
 // rpcServer serves the implementation of a ConfigurableExperimentRunner
 type rpcServer struct {
 	*plugin.MuxBroker
@@ -115,13 +139,21 @@ func (s *rpcServer) GetTreatmentForRequest(req *GetTreatmentRequest, resp *runne
 	return nil
 }
 
-func (s *rpcServer) RegisterCollector(brokerId uint32, _ *interface{}) (err error) {
-	conn, err := s.MuxBroker.Dial(brokerId)
+func (s *rpcServer) RegisterMetrics(brokerIds []uint32, _ *interface{}) (err error) {
+	collectorConn, err := s.MuxBroker.Dial(brokerIds[0])
 	if err != nil {
 		return err
 	}
 
-	return s.Impl.RegisterCollector(&rpcCollectorClient{RPCClient: rpc.NewClient(conn)})
+	metricsRegistrationHelperConn, err := s.MuxBroker.Dial(brokerIds[1])
+	if err != nil {
+		return err
+	}
+
+	return s.Impl.RegisterMetrics(
+		&rpcCollectorClient{RPCClient: rpc.NewClient(collectorConn)},
+		&rpcMetricsRegistrationHelperClient{RPCClient: rpc.NewClient(metricsRegistrationHelperConn)},
+	)
 }
 
 // rpcCollectorServer is used by the router to talk to the plugin over RPC.
@@ -144,4 +176,13 @@ func (s *rpcCollectorServer) RecordGauge(req *RecordGaugeRequest, _ *interface{}
 
 func (s *rpcCollectorServer) Inc(req *IncRequest, _ *interface{}) error {
 	return metrics.Glob().Inc(req.Key, req.Labels)
+}
+
+// rpcMetricsRegistrationHelperServer is used by the router to talk to the plugin over RPC.
+type rpcMetricsRegistrationHelperServer struct {
+	Impl runner.MetricsRegistrationHelper
+}
+
+func (s *rpcMetricsRegistrationHelperServer) Register(req []routerMetrics.Metric, _ *interface{}) error {
+	return s.Impl.Register(req)
 }

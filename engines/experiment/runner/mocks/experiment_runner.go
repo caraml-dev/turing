@@ -39,16 +39,31 @@ func (_m *ExperimentRunner) GetTreatmentForRequest(header http.Header, payload [
 	return r0, r1
 }
 
-// RegisterCollector provides a mock function with given fields: collector
-func (_m *ExperimentRunner) RegisterCollector(collector metrics.Collector) error {
-	ret := _m.Called(collector)
+// RegisterMetrics provides a mock function with given fields: collector, metricsRegistrationHelper
+func (_m *ExperimentRunner) RegisterMetrics(collector metrics.Collector, metricsRegistrationHelper runner.MetricsRegistrationHelper) error {
+	ret := _m.Called(collector, metricsRegistrationHelper)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(metrics.Collector) error); ok {
-		r0 = rf(collector)
+	if rf, ok := ret.Get(0).(func(metrics.Collector, runner.MetricsRegistrationHelper) error); ok {
+		r0 = rf(collector, metricsRegistrationHelper)
 	} else {
 		r0 = ret.Error(0)
 	}
 
 	return r0
+}
+
+type mockConstructorTestingTNewExperimentRunner interface {
+	mock.TestingT
+	Cleanup(func())
+}
+
+// NewExperimentRunner creates a new instance of ExperimentRunner. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewExperimentRunner(t mockConstructorTestingTNewExperimentRunner) *ExperimentRunner {
+	mock := &ExperimentRunner{}
+	mock.Mock.Test(t)
+
+	t.Cleanup(func() { mock.AssertExpectations(t) })
+
+	return mock
 }
