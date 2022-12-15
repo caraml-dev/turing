@@ -67,7 +67,11 @@ type rpcCollectorClient struct {
 	shared.RPCClient
 }
 
-func (c *rpcCollectorClient) MeasureDurationMsSince(key metrics.MetricName, starttime time.Time, labels map[string]string) error {
+func (c *rpcCollectorClient) MeasureDurationMsSince(
+	key metrics.MetricName,
+	starttime time.Time,
+	labels map[string]string,
+) error {
 	req := MeasureDurationMsSinceRequest{
 		Key:       key,
 		Starttime: starttime,
