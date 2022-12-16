@@ -30,7 +30,7 @@ func (c EnsemblingJobController) Create(
 
 	// Check is done in api.handlers
 	job, _ := body.(*models.EnsemblingJob)
-	projectID := models.ID(project.Id)
+	projectID := models.ID(project.ID)
 
 	// Check if ensembler exists
 	ensembler, err := c.EnsemblersService.FindByID(

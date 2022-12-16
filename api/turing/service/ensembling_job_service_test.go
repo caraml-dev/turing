@@ -60,7 +60,7 @@ func createMLPService() service.MLPService {
 	mlpService.On(
 		"GetProject",
 		mock.Anything,
-	).Return(&mlp.Project{Id: 1, Name: mlpProjectName}, nil)
+	).Return(&mlp.Project{ID: 1, Name: mlpProjectName}, nil)
 	return mlpService
 }
 
