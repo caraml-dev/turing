@@ -47,16 +47,16 @@ func (c *rpcClient) RegisterMetrics(
 	_ metrics.Collector,
 	metricsRegistrationHelper runner.MetricsRegistrationHelper,
 ) error {
-	collectorBrokerId := c.MuxBroker.NextId()
-	go c.MuxBroker.AcceptAndServe(collectorBrokerId, &rpcCollectorServer{})
+	collectorBrokerID := c.MuxBroker.NextId()
+	go c.MuxBroker.AcceptAndServe(collectorBrokerID, &rpcCollectorServer{})
 
-	metricsRegistrationHelperBrokerId := c.MuxBroker.NextId()
-	go c.MuxBroker.AcceptAndServe(metricsRegistrationHelperBrokerId,
+	metricsRegistrationHelperBrokerID := c.MuxBroker.NextId()
+	go c.MuxBroker.AcceptAndServe(metricsRegistrationHelperBrokerID,
 		&rpcMetricsRegistrationHelperServer{Impl: metricsRegistrationHelper})
 
 	return c.Call(
 		"Plugin.RegisterMetrics",
-		[]uint32{collectorBrokerId, metricsRegistrationHelperBrokerId},
+		[]uint32{collectorBrokerID, metricsRegistrationHelperBrokerID},
 		new(interface{}),
 	)
 }
