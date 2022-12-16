@@ -624,7 +624,7 @@ func TestGetNamespaceByComponent(t *testing.T) {
 		"success | any other type": {
 			componentType: batch.DriverPodType,
 			project: &mlp.Project{
-				Id:   1,
+				ID:   1,
 				Name: "hello",
 			},
 			expected: "hello",
