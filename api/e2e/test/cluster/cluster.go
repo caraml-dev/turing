@@ -57,7 +57,7 @@ func GetModelClusterCredentials(clusterName string, vaultCfg config.VaultConfig)
 		Address: vaultCfg.Address,
 		Token:   vaultCfg.Token,
 	}
-	vaultClient, err := vault.NewVaultClient(vaultConfig)
+	vaultClient, err := vault.NewClient(vaultConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to initialize vault")
 	}
@@ -91,7 +91,7 @@ func InitClusterClients(cfg *config.Config) error {
 			Address: cfg.Vault.Address,
 			Token:   cfg.Vault.Token,
 		}
-		vaultClient, err := vault.NewVaultClient(vaultConfig)
+		vaultClient, err := vault.NewClient(vaultConfig)
 		if err != nil {
 			return errors.Wrap(err, "unable to initialize vault")
 		}
