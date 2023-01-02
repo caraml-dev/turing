@@ -158,11 +158,14 @@ func (i *MetricsInterceptor) AfterCompletion(
 							"route":        routeName,
 							"traffic_rule": trafficRule,
 						}
-						metrics.Glob().MeasureDurationMsSince(
+						err := metrics.Glob().MeasureDurationMsSince(
 							instrumentation.RouteRequestDurationMs,
 							startTime,
 							labels,
 						)
+						if err != nil {
+							log.Glob().Errorf(err.Error())
+						}
 					}
 				}
 			}

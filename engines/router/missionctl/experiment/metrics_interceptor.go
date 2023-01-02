@@ -6,6 +6,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -49,10 +50,13 @@ func (i *MetricsInterceptor) AfterCompletion(
 	// Get start time
 	if startTime, ok := ctx.Value(startTimeKey).(time.Time); ok {
 		// Measure the time taken for the experiment run
-		metrics.Glob().MeasureDurationMsSince(
+		err := metrics.Glob().MeasureDurationMsSince(
 			instrumentation.ExperimentEngineRequestMs,
 			startTime,
 			labels,
 		)
+		if err != nil {
+			log.Glob().Errorf(err.Error())
+		}
 	}
 }
