@@ -132,7 +132,7 @@ func (MetricsRegistrationHelper) Register(additionalMetrics []Metric) error {
 		}
 	}
 
-	err := metrics.Glob().(*metrics.PrometheusClient).RegisterAdditionalMetrics(
+	err := metrics.Glob().(*metrics.PrometheusClient).RegisterMetrics(
 		gaugeMap,
 		histogramMap,
 		counterMap,

@@ -24,8 +24,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/deadlycoconuts/mlp v0.0.0-20221215071835-9a452b9dadd1 h1:os/cVyGcLY9YUxnSZSQv45swIHQdFSNIalT98IlEEdo=
-github.com/deadlycoconuts/mlp v0.0.0-20221215071835-9a452b9dadd1/go.mod h1:a9ipeaVPepEJjpvCpA0EgDCnZ9jZ54VDQn/uSbN+JLw=
+github.com/deadlycoconuts/mlp v0.0.0-20230102084314-9b6d25808a0e h1:GC2FaI1xDkbIe90s22+LFhtV1HTI2dXpKhBmaf8kr9k=
+github.com/deadlycoconuts/mlp v0.0.0-20230102084314-9b6d25808a0e/go.mod h1:a9ipeaVPepEJjpvCpA0EgDCnZ9jZ54VDQn/uSbN+JLw=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
