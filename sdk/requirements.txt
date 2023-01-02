@@ -4,7 +4,7 @@ fire
 google-auth>=1.11.0
 google-cloud-storage>=1.19.0
 mlflow>=1.2.0,<=1.23.0
-numpy
+numpy<1.24.0
 pandas
 protobuf>=3.0.0,<4.0.0dev
 python_dateutil>=2.5.3
