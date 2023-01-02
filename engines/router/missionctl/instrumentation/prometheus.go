@@ -75,8 +75,8 @@ type MetricType string
 
 const (
 	GaugeMetricType     MetricType = "gauge"
-	HistogramMetricType            = "histogram"
-	CounterMetricType              = "counter"
+	HistogramMetricType MetricType = "histogram"
+	CounterMetricType   MetricType = "counter"
 )
 
 type Metric struct {
