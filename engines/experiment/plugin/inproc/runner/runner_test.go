@@ -26,7 +26,7 @@ func (runner fakeRunner) GetTreatmentForRequest(
 	return nil, nil
 }
 
-func (runner fakeRunner) RegisterMetrics(
+func (runner fakeRunner) RegisterMetricsCollector(
 	_ metrics.Collector,
 	_ runner.MetricsRegistrationHelper,
 ) error {

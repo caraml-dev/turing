@@ -43,7 +43,7 @@ func (c *rpcClient) GetTreatmentForRequest(
 	return &resp, nil
 }
 
-func (c *rpcClient) RegisterMetrics(
+func (c *rpcClient) RegisterMetricsCollector(
 	_ metrics.Collector,
 	metricsRegistrationHelper runner.MetricsRegistrationHelper,
 ) error {
@@ -55,7 +55,7 @@ func (c *rpcClient) RegisterMetrics(
 		&rpcMetricsRegistrationHelperServer{Impl: metricsRegistrationHelper})
 
 	return c.Call(
-		"Plugin.RegisterMetrics",
+		"Plugin.RegisterMetricsCollector",
 		[]uint32{collectorBrokerID, metricsRegistrationHelperBrokerID},
 		new(interface{}),
 	)
@@ -143,7 +143,7 @@ func (s *rpcServer) GetTreatmentForRequest(req *GetTreatmentRequest, resp *runne
 	return nil
 }
 
-func (s *rpcServer) RegisterMetrics(brokerIds []uint32, _ *interface{}) (err error) {
+func (s *rpcServer) RegisterMetricsCollector(brokerIds []uint32, _ *interface{}) (err error) {
 	collectorConn, err := s.MuxBroker.Dial(brokerIds[0])
 	if err != nil {
 		return err
@@ -154,7 +154,7 @@ func (s *rpcServer) RegisterMetrics(brokerIds []uint32, _ *interface{}) (err err
 		return err
 	}
 
-	return s.Impl.RegisterMetrics(
+	return s.Impl.RegisterMetricsCollector(
 		&rpcCollectorClient{RPCClient: rpc.NewClient(collectorConn)},
 		&rpcMetricsRegistrationHelperClient{RPCClient: rpc.NewClient(metricsRegistrationHelperConn)},
 	)

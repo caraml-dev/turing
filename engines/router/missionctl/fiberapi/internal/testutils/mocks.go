@@ -40,7 +40,7 @@ func (mp MockExperimentRunner) GetTreatmentForRequest(
 
 }
 
-func (mp MockExperimentRunner) RegisterMetrics(
+func (mp MockExperimentRunner) RegisterMetricsCollector(
 	_ metrics.Collector,
 	_ runner.MetricsRegistrationHelper,
 ) error {

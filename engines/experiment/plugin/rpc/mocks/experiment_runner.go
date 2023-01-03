@@ -56,8 +56,8 @@ func (_m *ConfigurableExperimentRunner) GetTreatmentForRequest(header http.Heade
 	return r0, r1
 }
 
-// RegisterMetrics provides a mock function with given fields: collector, metricsRegistrationHelper
-func (_m *ConfigurableExperimentRunner) RegisterMetrics(collector metrics.Collector, metricsRegistrationHelper experimentrunner.MetricsRegistrationHelper) error {
+// RegisterMetricsCollector provides a mock function with given fields: collector, metricsRegistrationHelper
+func (_m *ConfigurableExperimentRunner) RegisterMetricsCollector(collector metrics.Collector, metricsRegistrationHelper experimentrunner.MetricsRegistrationHelper) error {
 	ret := _m.Called(collector, metricsRegistrationHelper)
 
 	var r0 error

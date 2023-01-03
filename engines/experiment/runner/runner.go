@@ -32,7 +32,7 @@ type ExperimentRunner interface {
 		payload []byte,
 		options GetTreatmentOptions,
 	) (*Treatment, error)
-	RegisterMetrics(
+	RegisterMetricsCollector(
 		collector metrics.Collector,
 		metricsRegistrationHelper MetricsRegistrationHelper,
 	) error

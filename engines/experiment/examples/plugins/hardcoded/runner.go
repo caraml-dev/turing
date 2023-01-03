@@ -76,6 +76,6 @@ func (e *ExperimentRunner) GetTreatmentForRequest(
 	return nil, errors.New("no experiment configured for the unit")
 }
 
-func (r *ExperimentRunner) RegisterMetrics(_ metrics.Collector, _ runner.MetricsRegistrationHelper) error {
+func (e *ExperimentRunner) RegisterMetricsCollector(_ metrics.Collector, _ runner.MetricsRegistrationHelper) error {
 	return nil
 }

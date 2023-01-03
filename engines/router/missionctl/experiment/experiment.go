@@ -26,7 +26,7 @@ func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.Experi
 		return nil, err
 	}
 
-	if err := engine.RegisterMetrics(metrics.Glob(), _metrics.MetricsRegistrationHelper{}); err != nil {
+	if err := engine.RegisterMetricsCollector(metrics.Glob(), _metrics.MetricsRegistrationHelper{}); err != nil {
 		return nil, err
 	}
 
