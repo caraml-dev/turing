@@ -1,8 +1,6 @@
 package instrumentation
 
 import (
-	"log"
-
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
@@ -95,7 +93,6 @@ func (MetricsRegistrationHelper) Register(additionalMetrics []Metric) error {
 	counterMap := map[metrics.MetricName]metrics.PrometheusCounterVec{}
 
 	for _, metric := range additionalMetrics {
-		log.Println(metric)
 		switch metric.Type {
 		case GaugeMetricType:
 			gaugeMap[metrics.MetricName(metric.Name)] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
