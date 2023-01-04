@@ -77,7 +77,7 @@ func (a *Authorizer) FilterAuthorizedProjects(
 
 	projectMap := make(map[string]mlp.Project)
 	for _, project := range projects {
-		projectID := fmt.Sprintf("projects:%d", project.Id)
+		projectID := fmt.Sprintf("projects:%d", project.ID)
 		projectIDs = append(projectIDs, projectID)
 		projectMap[projectID] = project
 	}

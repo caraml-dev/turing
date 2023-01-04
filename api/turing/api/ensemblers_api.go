@@ -71,7 +71,7 @@ func (c EnsemblersController) CreateEnsembler(
 	}
 	var err error
 	ensembler := body.(*request.CreateOrUpdateEnsemblerRequest).EnsemblerLike
-	ensembler.SetProjectID(models.ID(project.Id))
+	ensembler.SetProjectID(models.ID(project.ID))
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {

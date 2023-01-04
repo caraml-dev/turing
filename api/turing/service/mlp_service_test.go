@@ -82,7 +82,7 @@ func TestNewMLPService(t *testing.T) {
 	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
 	require.NoError(t, err)
 	// Create test projects and environments
-	projects := []mlp.Project{{Id: 1}}
+	projects := []mlp.Project{{ID: 1}}
 	environments := []merlin.Environment{{Name: "dev"}}
 
 	// Patch new Merlin and MLP Client methods
@@ -194,7 +194,7 @@ func TestMLPServiceGetProject(t *testing.T) {
 	defer monkey.UnpatchAll()
 	projects := []mlp.Project{
 		{
-			Id: 1,
+			ID: 1,
 		},
 	}
 
@@ -247,7 +247,7 @@ func TestMLPServiceGetSecret(t *testing.T) {
 	defer monkey.UnpatchAll()
 	secrets := []mlp.Secret{
 		{
-			Id:   1,
+			ID:   1,
 			Name: "key",
 			Data: "asd",
 		},

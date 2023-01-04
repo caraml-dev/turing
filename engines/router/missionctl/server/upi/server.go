@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
@@ -22,12 +23,13 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 const tracingComponentID = "grpc_handler"
@@ -80,7 +82,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 	*upiv1.PredictValuesResponse, error) {
 	var predictionErr *errors.TuringError // Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(predictionErr == nil)

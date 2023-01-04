@@ -5,13 +5,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	"github.com/opentracing/opentracing-go"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type ctxKey string
@@ -156,11 +158,14 @@ func (i *MetricsInterceptor) AfterCompletion(
 							"route":        routeName,
 							"traffic_rule": trafficRule,
 						}
-						metrics.Glob().MeasureDurationMsSince(
-							metrics.RouteRequestDurationMs,
+						err := metrics.Glob().MeasureDurationMsSince(
+							instrumentation.RouteRequestDurationMs,
 							startTime,
 							labels,
 						)
+						if err != nil {
+							log.Glob().Errorf(err.Error())
+						}
 					}
 				}
 			}

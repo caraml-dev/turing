@@ -22,7 +22,7 @@ import (
 func TestDeployVersionSuccess(t *testing.T) {
 	testEnv := "test-env"
 	environment := &merlin.Environment{Name: testEnv}
-	project := &mlp.Project{Id: 1, Name: "test-project"}
+	project := &mlp.Project{ID: 1, Name: "test-project"}
 	router := &models.Router{
 		Model: models.Model{
 			ID: 1,
@@ -124,7 +124,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 	// Set up common mock services
 	mlps := &mocks.MLPService{}
 	mlps.On("GetEnvironment", testEnv).Return(environment, nil)
-	mlps.On("GetSecret", models.ID(project.Id), "svc-acct-secret").Return("service-acct", nil)
+	mlps.On("GetSecret", models.ID(project.ID), "svc-acct-secret").Return("service-acct", nil)
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", router).Return(nil, nil)
@@ -260,7 +260,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// Set up mock services
 	mlps := &mocks.MLPService{}
 	mlps.On("GetEnvironment", testEnv).Return(environment, nil)
-	mlps.On("GetSecret", models.ID(project.Id), "svc-acct-secret").Return(testSvcAcct, nil)
+	mlps.On("GetSecret", models.ID(project.ID), "svc-acct-secret").Return(testSvcAcct, nil)
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", mock.Anything).Return(nil, nil)

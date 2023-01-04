@@ -3,13 +3,15 @@ package resultlog
 import (
 	"encoding/json"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 const (
@@ -69,7 +71,7 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 
 	// Measure time taken to marshal the data and write the log to the kafka topic
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(err == nil)

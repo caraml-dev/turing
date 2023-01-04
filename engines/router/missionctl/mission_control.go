@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	fiberErrors "github.com/gojek/fiber/errors"
 	fiberHttp "github.com/gojek/fiber/http"
@@ -20,8 +21,9 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // MissionControl is the base interface for the Turing Mission Control
@@ -129,7 +131,7 @@ func (mc *missionControl) doPost(
 
 	// Make HTTP request and measure duration
 	stopTimer := metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(err == nil)
@@ -175,7 +177,7 @@ func (mc *missionControl) Enrich(
 	var httpErr *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(httpErr == nil)
@@ -202,7 +204,7 @@ func (mc *missionControl) Route(
 	var routerErr *errors.TuringError
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(routerErr == nil)
@@ -271,7 +273,7 @@ func (mc *missionControl) Ensemble(
 	var httpErr *errors.TuringError
 	// Measure execution time for Ensemble
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(httpErr == nil)
@@ -287,7 +289,7 @@ func (mc *missionControl) Ensemble(
 	var err error
 	// Measure execution time for creating the combined payload
 	timer := metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(err == nil)

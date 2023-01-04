@@ -31,7 +31,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 		Return(nil, errors.New("error"))
 	mlpSvc.
 		On("GetProject", models.ID(2)).
-		Return(&mlp.Project{Id: 2}, nil)
+		Return(&mlp.Project{ID: 2}, nil)
 
 	tests := map[string]struct {
 		method       string

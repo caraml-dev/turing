@@ -220,7 +220,7 @@ func (service mlpService) refreshProjects() error {
 		defer resp.Body.Close()
 	}
 	for _, project := range projects {
-		key := buildProjectKey(project.Id)
+		key := buildProjectKey(project.ID)
 		service.cache.Set(key, project, cache.DefaultExpiration)
 	}
 	return nil

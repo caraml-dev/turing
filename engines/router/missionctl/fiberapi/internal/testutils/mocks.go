@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // MockExperimentRunner is a mock implementation for the Planner interface
@@ -37,4 +38,11 @@ func (mp MockExperimentRunner) GetTreatmentForRequest(
 	}
 	return mp.Treatment, nil
 
+}
+
+func (mp MockExperimentRunner) RegisterMetricsCollector(
+	_ metrics.Collector,
+	_ runner.MetricsRegistrationHelper,
+) error {
+	return nil
 }

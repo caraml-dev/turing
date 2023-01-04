@@ -23,8 +23,8 @@ func TestListRouters(t *testing.T) {
 	mlpSvc.
 		On("GetProject", models.ID(1)).
 		Return(nil, errors.New("test project error"))
-	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{Id: 2}, nil)
-	mlpSvc.On("GetProject", models.ID(3)).Return(&mlp.Project{Id: 3, Name: "mlp-project"}, nil)
+	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{ID: 2}, nil)
+	mlpSvc.On("GetProject", models.ID(3)).Return(&mlp.Project{ID: 3, Name: "mlp-project"}, nil)
 
 	// Router Service
 	monitoringURL := "http://www.example.com"
@@ -113,7 +113,7 @@ func TestGetRouter(t *testing.T) {
 	mlpService := &mocks.MLPService{}
 	mlpService.
 		On("GetProject", models.ID(1)).
-		Return(&mlp.Project{Id: 1, Name: "mlp-project"}, nil)
+		Return(&mlp.Project{ID: 1, Name: "mlp-project"}, nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -163,7 +163,7 @@ func TestCreateRouter(t *testing.T) {
 	mlpSvc.
 		On("GetProject", models.ID(1)).
 		Return(nil, errors.New("test project error"))
-	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{Id: 2}, nil)
+	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{ID: 2}, nil)
 	mlpSvc.
 		On("GetEnvironment", "dev-invalid").
 		Return(nil, errors.New("test env error"))
@@ -328,7 +328,7 @@ func TestUpdateRouter(t *testing.T) {
 	// MLP service
 	mlpSvc := &mocks.MLPService{}
 	mlpSvc.On("GetProject", models.ID(1)).Return(nil, errors.New("test project error"))
-	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{Id: 2}, nil)
+	mlpSvc.On("GetProject", models.ID(2)).Return(&mlp.Project{ID: 2}, nil)
 	mlpSvc.On("GetEnvironment", "dev-invalid").Return(nil, errors.New("test env error"))
 	mlpSvc.On("GetEnvironment", "dev").Return(&merlin.Environment{}, nil)
 	// Router Service

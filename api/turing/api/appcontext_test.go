@@ -24,7 +24,7 @@ import (
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
-// MockVaultClient satisfies the vault.VaultClient interface
+// MockVaultClient satisfies the vault.Client interface
 type MockVaultClient struct{}
 
 func (c *MockVaultClient) GetClusterSecret(clusterName string) (*vault.ClusterSecret, error) {
@@ -244,7 +244,7 @@ func TestNewAppContext(t *testing.T) {
 		func(
 			cfg *config.Config,
 			environmentClusterMap map[string]string,
-			vaultClient vault.VaultClient,
+			vaultClient vault.Client,
 		) (map[string]cluster.Controller, error) {
 			assert.Equal(t, testCfg, cfg)
 			assert.Equal(t, map[string]string{

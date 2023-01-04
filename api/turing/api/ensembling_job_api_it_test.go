@@ -172,7 +172,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
+				).Return(&mlp.Project{ID: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: api.RequestVars{
@@ -202,7 +202,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
+				).Return(&mlp.Project{ID: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: api.RequestVars{
@@ -236,7 +236,7 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				mlpService.On(
 					"GetProject",
 					models.ID(1),
-				).Return(&mlp.Project{Id: 1, Name: "foo"}, nil)
+				).Return(&mlp.Project{ID: 1, Name: "foo"}, nil)
 				return mlpService
 			},
 			vars: api.RequestVars{

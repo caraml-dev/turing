@@ -14,10 +14,10 @@ require (
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/go-playground/validator/v10 v10.9.0
+	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gojek/fiber v0.2.0
 	github.com/gojek/merlin v0.0.0
-	github.com/gojek/mlp v1.4.7
+	github.com/gojek/mlp v1.5.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.8
@@ -26,7 +26,7 @@ require (
 	github.com/gorilla/schema v1.1.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/mitchellh/copystructure v1.2.0
-	github.com/mitchellh/mapstructure v1.4.3
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/onsi/ginkgo/v2 v2.3.1
 	github.com/onsi/gomega v1.22.1
 	github.com/ory/viper v1.7.5
@@ -77,19 +77,19 @@ require (
 	github.com/evanphx/json-patch/v5 v5.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/analysis v0.19.5 // indirect
-	github.com/go-openapi/errors v0.19.3 // indirect
+	github.com/go-openapi/errors v0.19.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/loads v0.19.4 // indirect
-	github.com/go-openapi/runtime v0.19.9 // indirect
+	github.com/go-openapi/runtime v0.19.15 // indirect
 	github.com/go-openapi/spec v0.20.2 // indirect
-	github.com/go-openapi/strfmt v0.19.4 // indirect
+	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
-	github.com/go-openapi/validate v0.19.5 // indirect
+	github.com/go-openapi/validate v0.19.7 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
@@ -144,16 +144,16 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/newrelic/go-agent v3.9.0+incompatible // indirect
+	github.com/newrelic/go-agent v3.19.2+incompatible // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20220114050600-8b9d41f48198 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/ory/keto-client-go v0.4.3-alpha.2 // indirect
-	github.com/pelletier/go-toml v1.9.4 // indirect
+	github.com/ory/keto-client-go v0.4.4-alpha.1 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.11.0 // indirect
+	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.31.1 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
@@ -181,7 +181,7 @@ require (
 	go.mongodb.org/mongo-driver v1.1.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
+	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/sys v0.1.0 // indirect
@@ -191,6 +191,7 @@ require (
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	gopkg.in/errgo.v2 v2.1.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
@@ -218,6 +219,8 @@ replace (
 
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
+
+	github.com/gojek/mlp => github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b
 
 	k8s.io/api => k8s.io/api v0.22.7
 

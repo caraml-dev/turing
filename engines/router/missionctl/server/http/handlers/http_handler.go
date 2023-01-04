@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -14,13 +15,14 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 const httpHandlerID = "http_handler"
@@ -133,7 +135,7 @@ func (h *httpHandler) getPrediction(
 func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var httpErr *errors.TuringError
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(httpErr == nil)
