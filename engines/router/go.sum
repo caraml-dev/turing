@@ -76,8 +76,6 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/deadlycoconuts/mlp v0.0.0-20230102084314-9b6d25808a0e h1:GC2FaI1xDkbIe90s22+LFhtV1HTI2dXpKhBmaf8kr9k=
-github.com/deadlycoconuts/mlp v0.0.0-20230102084314-9b6d25808a0e/go.mod h1:a9ipeaVPepEJjpvCpA0EgDCnZ9jZ54VDQn/uSbN+JLw=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
@@ -116,6 +114,8 @@ github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/me
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gojek/fiber v0.2.0 h1:1lOMFm9rqJpfFpcDT44JSXewuWuFrKZMobWBo+YnEag=
 github.com/gojek/fiber v0.2.0/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
+github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b h1:bvE++I0HIwqD4BWDurM0BvYHXm03o60jsvob4qtwKYo=
+github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b/go.mod h1:a9ipeaVPepEJjpvCpA0EgDCnZ9jZ54VDQn/uSbN+JLw=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/glog v1.0.0 h1:nfP3RFugxnNRyKgeWd4oI1nYvXpxrx8ck8ZrcizshdQ=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=

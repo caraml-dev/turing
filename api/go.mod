@@ -220,7 +220,7 @@ replace (
 	github.com/gojek/merlin => github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58
 	github.com/gojek/merlin-pyspark-app => github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d58
 
-	github.com/gojek/mlp => github.com/deadlycoconuts/mlp v0.0.0-20230102084314-9b6d25808a0e
+	github.com/gojek/mlp => github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b
 
 	k8s.io/api => k8s.io/api v0.22.7
 
