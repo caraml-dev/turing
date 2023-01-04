@@ -14,7 +14,7 @@ import (
 )
 
 type RoutersController struct {
-	RouterDeploymentController
+	BaseController
 }
 
 // ListRouters lists all routers configured in the provided project.
@@ -31,7 +31,7 @@ func (c RoutersController) ListRouters(
 	}
 
 	// List routers
-	routers, err := c.RoutersService.ListRouters(models.ID(project.Id), "")
+	routers, err := c.AppContext.Services.RoutersService.ListRouters(models.ID(project.Id), "")
 	if err != nil {
 		return InternalServerError("unable to list routers", err.Error())
 	}
@@ -73,19 +73,19 @@ func (c RoutersController) CreateRouter(
 	request := body.(*request.CreateOrUpdateRouterRequest)
 
 	// check if router already exists
-	router, _ := c.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
+	router, _ := c.AppContext.Services.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
 	if router != nil {
 		return BadRequest("invalid router name",
 			fmt.Sprintf("router with name %s already exists in project %d", request.Name, project.Id))
 	}
 
-	_, err := c.MLPService.GetEnvironment(request.Environment)
+	_, err := c.AppContext.Services.MLPService.GetEnvironment(request.Environment)
 	if err != nil {
 		return BadRequest("invalid environment", fmt.Sprintf("environment %s does not exist", request.Environment))
 	}
 
 	// if not, create
-	router, err = c.RoutersService.Save(request.BuildRouter(models.ID(project.Id)))
+	router, err = c.AppContext.Services.RoutersService.Save(request.BuildRouter(models.ID(project.Id)))
 	if err != nil {
 		return InternalServerError("unable to create router", err.Error())
 	}
@@ -97,17 +97,22 @@ func (c RoutersController) CreateRouter(
 	}
 
 	rVersion, err := request.Config.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		router,
+		c.RouterDefaults,
+		c.AppContext.Services.CryptoService,
+		c.AppContext.Services.ExperimentsService,
+		c.AppContext.Services.EnsemblersService,
+	)
 	if err == nil {
 		// Save router version
-		routerVersion, err = c.RouterVersionsService.Save(rVersion)
+		routerVersion, err = c.AppContext.Services.RouterVersionsService.CreateRouterVersion(rVersion)
 	}
 
 	if err != nil {
 		errorStrings := []string{err.Error()}
 		// Set router status to failed and return error
 		router.Status = models.RouterStatusFailed
-		router, err = c.RoutersService.Save(router)
+		router, err = c.AppContext.Services.RoutersService.Save(router)
 		if err != nil {
 			errorStrings = append(errorStrings, err.Error())
 		}
@@ -116,7 +121,7 @@ func (c RoutersController) CreateRouter(
 
 	// deploy the new version
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.AppContext.Services.RouterDeploymentService.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -162,10 +167,15 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	}
 
 	rVersion, err := request.Config.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		router,
+		c.RouterDefaults,
+		c.AppContext.Services.CryptoService,
+		c.AppContext.Services.ExperimentsService,
+		c.AppContext.Services.EnsemblersService,
+	)
 	if err == nil {
 		// Save router version, re-assign the value of err
-		routerVersion, err = c.RouterVersionsService.Save(rVersion)
+		routerVersion, err = c.AppContext.Services.RouterVersionsService.UpdateRouterVersion(rVersion)
 	}
 
 	if err != nil {
@@ -174,7 +184,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 
 	// Deploy the new version
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.AppContext.Services.RouterDeploymentService.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -202,7 +212,7 @@ func (c RoutersController) DeleteRouter(
 		router.Status == models.RouterStatusDeployed {
 		return BadRequest("invalid delete request", "router is currently deployed. Undeploy it first.")
 	}
-	pendingRouterVersions, err := c.RouterVersionsService.ListRouterVersionsWithStatus(
+	pendingRouterVersions, err := c.AppContext.Services.RouterVersionsService.ListRouterVersionsWithStatus(
 		router.ID, models.RouterVersionStatusPending)
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())
@@ -211,7 +221,7 @@ func (c RoutersController) DeleteRouter(
 		return BadRequest("invalid delete request", "a router version is currently pending deployment")
 	}
 
-	err = c.RoutersService.Delete(router)
+	err = c.AppContext.Services.RoutersService.Delete(router)
 	if err != nil {
 		return InternalServerError("unable to delete router", err.Error())
 	}
@@ -252,14 +262,14 @@ func (c RoutersController) DeployRouter(
 	}
 
 	// Query router version to load all relationships
-	routerVersion, err := c.RouterVersionsService.FindByID(router.CurrRouterVersion.ID)
+	routerVersion, err := c.AppContext.Services.RouterVersionsService.FindByID(router.CurrRouterVersion.ID)
 	if err != nil {
 		return NotFound("router version not found", err.Error())
 	}
 
 	// Deploy the version asynchronously
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.AppContext.Services.RouterDeploymentService.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -290,7 +300,7 @@ func (c RoutersController) UndeployRouter(
 	}
 
 	// Delete the deployment
-	err := c.undeployRouter(project, router)
+	err := c.AppContext.Services.RouterDeploymentService.UndeployRouter(project, router)
 	if err != nil {
 		return InternalServerError("unable to undeploy router", err.Error())
 	}
@@ -310,7 +320,7 @@ func (c RoutersController) ListRouterEvents(r *http.Request,
 	}
 
 	// Get events
-	events, err := c.EventService.ListEvents(int(router.ID))
+	events, err := c.AppContext.Services.EventService.ListEvents(int(router.ID))
 	if err != nil {
 		return NotFound("events not found", err.Error())
 	}

@@ -33,7 +33,7 @@ func (c EnsemblingJobController) Create(
 	projectID := models.ID(project.Id)
 
 	// Check if ensembler exists
-	ensembler, err := c.EnsemblersService.FindByID(
+	ensembler, err := c.Services.EnsemblersService.FindByID(
 		job.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
 			ProjectID: &projectID,
@@ -51,7 +51,7 @@ func (c EnsemblingJobController) Create(
 		return BadRequest("only pyfunc ensemblers allowed", fmt.Sprintf("ensembler type given: %T", v))
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.CreateEnsemblingJob(job, projectID, pyFuncEnsembler)
+	ensemblingJob, err := c.Services.EnsemblingJobService.CreateEnsemblingJob(job, projectID, pyFuncEnsembler)
 	if err != nil {
 		return InternalServerError("could not create job request", err.Error())
 	}
@@ -74,7 +74,7 @@ func (c EnsemblingJobController) GetEnsemblingJob(
 		)
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+	ensemblingJob, err := c.Services.EnsemblingJobService.FindByID(
 		*options.ID,
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
@@ -102,7 +102,7 @@ func (c EnsemblingJobController) ListEnsemblingJobs(
 		)
 	}
 
-	results, err := c.EnsemblingJobService.List(options)
+	results, err := c.Services.EnsemblingJobService.List(options)
 	if err != nil {
 		return InternalServerError("unable to list ensemblers", err.Error())
 	}
@@ -128,7 +128,7 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		)
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+	ensemblingJob, err := c.Services.EnsemblingJobService.FindByID(
 		*options.ID,
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
@@ -138,7 +138,7 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		return NotFound("ensembling job not found", err.Error())
 	}
 
-	err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
+	err = c.Services.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
 	if err != nil {
 		return InternalServerError("unable to delete ensembling job", err.Error())
 	}

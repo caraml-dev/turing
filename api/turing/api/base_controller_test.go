@@ -8,6 +8,7 @@ import (
 	testifyAssert "github.com/stretchr/testify/assert"
 
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
@@ -42,7 +43,9 @@ func TestBaseControllerGetProjectFromRequestVars(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := BaseController{
 				AppContext: &AppContext{
-					MLPService: mlpSvc,
+					Services: service.Services{
+						MLPService: mlpSvc,
+					},
 				},
 			}
 			// Run test method and validate
@@ -83,7 +86,9 @@ func TestBaseControllerGetRouterFromRequestVars(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := BaseController{
 				AppContext: &AppContext{
-					RoutersService: routerSvc,
+					Services: service.Services{
+						RoutersService: routerSvc,
+					},
 				},
 			}
 			// Run test method and validate
@@ -131,7 +136,9 @@ func TestBaseControllerGetRouterVersionFromRequestVars(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctrl := BaseController{
 				AppContext: &AppContext{
-					RouterVersionsService: routerVersionSvc,
+					Services: service.Services{
+						RouterVersionsService: routerVersionSvc,
+					},
 				},
 			}
 			// Run test method and validate

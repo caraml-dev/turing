@@ -12,6 +12,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
@@ -81,9 +82,9 @@ func TestListRouters(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
 							MLPService:     mlpSvc,
 							RoutersService: routerSvc,
 						},
@@ -141,9 +142,9 @@ func TestGetRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
 							RoutersService: routerSvc,
 							MLPService:     mlpService,
 						},
@@ -168,6 +169,7 @@ func TestCreateRouter(t *testing.T) {
 		On("GetEnvironment", "dev-invalid").
 		Return(nil, errors.New("test env error"))
 	mlpSvc.On("GetEnvironment", "dev").Return(&merlin.Environment{}, nil)
+
 	// Router Service
 	router1 := &models.Router{
 		Model: models.Model{
@@ -213,8 +215,6 @@ func TestCreateRouter(t *testing.T) {
 	routerSvc.On("Save", router2).Return(nil, errors.New("test router save error"))
 	routerSvc.On("Save", router3).Return(router3Saved, nil)
 	routerSvc.On("Save", router3Failure).Return(router3Failure, nil)
-	// For the deployment method
-	routerSvc.On("Save", mock.Anything).Return(nil, errors.New("test Router Deployment Failure"))
 	// Router Version Service
 	routerVersion := &models.RouterVersion{
 		RouterID: 3,
@@ -233,7 +233,10 @@ func TestCreateRouter(t *testing.T) {
 		Status: models.RouterVersionStatusPending,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
+	routerVersionSvc.On("CreateRouterVersion", routerVersion).Return(routerVersion, nil)
+	// Deployment Service
+	deploymentSvc := &mocks.RouterDeploymentService{}
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router3Saved, routerVersion).Return(errors.New("test deployment error"))
 
 	// Define tests
 	tests := map[string]struct {
@@ -305,14 +308,15 @@ func TestCreateRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
-							MLPService:            mlpSvc,
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
-							RouterDefaults:        &config.RouterDefaults{},
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
+							MLPService:              mlpSvc,
+							RoutersService:          routerSvc,
+							RouterVersionsService:   routerVersionSvc,
+							RouterDeploymentService: deploymentSvc,
 						},
+						RouterDefaults: &config.RouterDefaults{},
 					},
 				},
 			}
@@ -383,7 +387,11 @@ func TestUpdateRouter(t *testing.T) {
 		Status: models.RouterVersionStatusPending,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
+	routerVersionSvc.On("UpdateRouterVersion", routerVersion).Return(routerVersion, nil)
+	// Deployment Service
+	deploymentSvc := &mocks.RouterDeploymentService{}
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router3, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router4, routerVersion).Return(errors.New("test deployment error"))
 
 	// Define tests
 	tests := map[string]struct {
@@ -464,14 +472,15 @@ func TestUpdateRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
-							MLPService:            mlpSvc,
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
-							RouterDefaults:        &config.RouterDefaults{},
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
+							MLPService:              mlpSvc,
+							RoutersService:          routerSvc,
+							RouterVersionsService:   routerVersionSvc,
+							RouterDeploymentService: deploymentSvc,
 						},
+						RouterDefaults: &config.RouterDefaults{},
 					},
 				},
 			}
@@ -611,13 +620,13 @@ func TestDeleteRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
-							RouterDefaults:        &config.RouterDefaults{},
 						},
+						RouterDefaults: &config.RouterDefaults{},
 					},
 				},
 			}
@@ -716,6 +725,13 @@ func TestDeployRouter(t *testing.T) {
 	routerVersionSvc.On("FindByID", models.ID(1)).
 		Return(nil, errors.New("test router version error"))
 	routerVersionSvc.On("FindByID", models.ID(2)).Return(routerVersion, nil)
+	// Deployment Service
+	deploymentSvc := &mocks.RouterDeploymentService{}
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router2, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router3, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router4, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router5, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router6, routerVersion).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -773,14 +789,15 @@ func TestDeployRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
-							MLPService:            mlpSvc,
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
-							RouterDefaults:        &config.RouterDefaults{},
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
+							MLPService:              mlpSvc,
+							RoutersService:          routerSvc,
+							RouterVersionsService:   routerVersionSvc,
+							RouterDeploymentService: deploymentSvc,
 						},
+						RouterDefaults: &config.RouterDefaults{},
 					},
 				},
 			}
@@ -846,13 +863,11 @@ func TestUndeployRouter(t *testing.T) {
 	routerVersionSvc.On("ListRouterVersions", models.ID(2)).Return([]*models.RouterVersion{}, nil)
 	routerVersionSvc.On("ListRouterVersions", models.ID(3)).Return([]*models.RouterVersion{}, nil)
 	// Deployment Service
-	deploymentSvc := &mocks.DeploymentService{}
+	deploymentSvc := &mocks.RouterDeploymentService{}
 	deploymentSvc.
-		On("DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router2}).
-		Return(errors.New("test undeploy error"))
-	deploymentSvc.
-		On("DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router3}).
-		Return(nil)
+		On("UndeployRouter", project, router2).
+		Return(errors.New("test undeploy error. test router deployment failure"))
+	deploymentSvc.On("UndeployRouter", project, router3).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -895,16 +910,16 @@ func TestUndeployRouter(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
-							MLPService:            mlpSvc,
-							RoutersService:        routerSvc,
-							RouterVersionsService: routerVersionSvc,
-							RouterDefaults:        &config.RouterDefaults{},
-							EventService:          eventSvc,
-							DeploymentService:     deploymentSvc,
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
+							MLPService:              mlpSvc,
+							RoutersService:          routerSvc,
+							RouterVersionsService:   routerVersionSvc,
+							EventService:            eventSvc,
+							RouterDeploymentService: deploymentSvc,
 						},
+						RouterDefaults: &config.RouterDefaults{},
 					},
 				},
 			}
@@ -980,9 +995,9 @@ func TestListRouterEvents(t *testing.T) {
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctrl := &RoutersController{
-				RouterDeploymentController{
-					BaseController{
-						AppContext: &AppContext{
+				BaseController{
+					AppContext: &AppContext{
+						Services: service.Services{
 							RoutersService: routerSvc,
 							EventService:   eventSvc,
 						},

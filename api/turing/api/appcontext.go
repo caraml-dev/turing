@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"text/template"
 
 	"github.com/gojek/mlp/api/pkg/vault"
 	"gorm.io/gorm"
@@ -13,30 +14,19 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/middleware"
+	"github.com/caraml-dev/turing/api/turing/repository"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 // AppContext stores the entities relating to the application's context
 type AppContext struct {
-	Authorizer *middleware.Authorizer
-	// DAO
-	DeploymentService     service.DeploymentService
-	RoutersService        service.RoutersService
-	RouterVersionsService service.RouterVersionsService
-	EventService          service.EventService
-	EnsemblersService     service.EnsemblersService
-	EnsemblingJobService  service.EnsemblingJobService
-	AlertService          service.AlertService
+	Authorizer   *middleware.Authorizer
+	BatchRunners []batchrunner.BatchJobRunner
+	Services     service.Services
 
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
-
-	BatchRunners       []batchrunner.BatchJobRunner
-	CryptoService      service.CryptoService
-	MLPService         service.MLPService
-	ExperimentsService service.ExperimentsService
-	PodLogService      service.PodLogService
 }
 
 // NewAppContext is a creator for the app context
@@ -46,6 +36,9 @@ func NewAppContext(
 	authorizer *middleware.Authorizer,
 	vaultClient vault.VaultClient,
 ) (*AppContext, error) {
+	// Init Services
+	var allServices service.Services
+
 	// Init Experiments Service
 	expSvc, err := service.NewExperimentsService(cfg.Experiment)
 	if err != nil {
@@ -159,32 +152,53 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
 	}
 
-	appContext := &AppContext{
-		Authorizer:            authorizer,
-		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
-		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     ensemblersService,
-		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EventService:          service.NewEventService(db),
-		RouterDefaults:        cfg.RouterDefaults,
-		CryptoService:         cryptoService,
-		MLPService:            mlpSvc,
-		ExperimentsService:    expSvc,
+	// Parse monitoring URL
+	var monitoringURLTemplate *template.Template
+	if cfg.RouterDefaults.MonitoringURLFormat != nil {
+		var err error
+		monitoringURLTemplate, err = template.New("monitoringURLTemplate").Parse(*cfg.RouterDefaults.MonitoringURLFormat)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error parsing monitoring url template")
+		}
+	}
+
+	allServices = service.Services{
+		RoutersService:       service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
+		EnsemblersService:    ensemblersService,
+		EnsemblingJobService: ensemblingJobService,
+		RouterVersionsService: service.NewRouterVersionsService(
+			repository.NewRoutersRepository(db),
+			repository.NewRouterVersionsRepository(db),
+			&allServices,
+		),
+		RouterDeploymentService: service.NewDeploymentService(
+			cfg,
+			clusterControllers,
+			ensemblerServiceImageBuilder,
+			&allServices,
+		),
+		RouterMonitoringService: service.NewRouterMonitoringService(mlpSvc, monitoringURLTemplate),
+		EventService:            service.NewEventService(db),
+		CryptoService:           cryptoService,
+		MLPService:              mlpSvc,
+		ExperimentsService:      expSvc,
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),
-		BatchRunners: batchJobRunners,
 	}
-
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
-		appContext.AlertService, err = service.NewGitlabOpsAlertService(db, *cfg.AlertConfig)
+		allServices.AlertService, err = service.NewGitlabOpsAlertService(db, *cfg.AlertConfig)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}
 	}
 
-	return appContext, nil
+	return &AppContext{
+		Authorizer:     authorizer,
+		Services:       allServices,
+		BatchRunners:   batchJobRunners,
+		RouterDefaults: cfg.RouterDefaults,
+	}, nil
 }
 
 // getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster. Additionally,

@@ -283,9 +283,11 @@ func TestIntegrationEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 
 			router := mux.NewRouter()
 			appCtx := &api.AppContext{
-				EnsemblersService:    ensemblersService,
-				EnsemblingJobService: ensemblingJobService,
-				MLPService:           mlpService,
+				Services: service.Services{
+					EnsemblersService:    ensemblersService,
+					EnsemblingJobService: ensemblingJobService,
+					MLPService:           mlpService,
+				},
 			}
 			_ = server.AddAPIRoutesHandler(
 				router,
@@ -361,7 +363,9 @@ func TestIntegrationEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 
 			router := mux.NewRouter()
 			appCtx := &api.AppContext{
-				EnsemblingJobService: svc,
+				Services: service.Services{
+					EnsemblingJobService: svc,
+				},
 			}
 			_ = server.AddAPIRoutesHandler(
 				router,
@@ -532,7 +536,9 @@ func TestIntegrationEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 
 			router := mux.NewRouter()
 			appCtx := &api.AppContext{
-				EnsemblingJobService: svc,
+				Services: service.Services{
+					EnsemblingJobService: svc,
+				},
 			}
 			_ = server.AddAPIRoutesHandler(
 				router,

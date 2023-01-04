@@ -27,7 +27,7 @@ func (c EnsemblersController) ListEnsemblers(
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
-	results, err := c.EnsemblersService.List(options)
+	results, err := c.Services.EnsemblersService.List(options)
 	if err != nil {
 		return InternalServerError("unable to list ensemblers", err.Error())
 	}
@@ -47,7 +47,7 @@ func (c EnsemblersController) GetEnsembler(
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
-	ensembler, err := c.EnsemblersService.FindByID(
+	ensembler, err := c.Services.EnsemblersService.FindByID(
 		*options.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
 			ProjectID: options.ProjectID,
@@ -73,7 +73,7 @@ func (c EnsemblersController) CreateEnsembler(
 	ensembler := body.(*request.CreateOrUpdateEnsemblerRequest).EnsemblerLike
 	ensembler.SetProjectID(models.ID(project.Id))
 
-	ensembler, err = c.EnsemblersService.Save(ensembler)
+	ensembler, err = c.Services.EnsemblersService.Save(ensembler)
 	if err != nil {
 		return InternalServerError("unable to save an ensembler", err.Error())
 	}
@@ -93,7 +93,7 @@ func (c EnsemblersController) UpdateEnsembler(
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
-	ensembler, err := c.EnsemblersService.FindByID(
+	ensembler, err := c.Services.EnsemblersService.FindByID(
 		*options.EnsemblerID,
 		service.EnsemblersFindByIDOptions{
 			ProjectID: options.ProjectID,
@@ -113,7 +113,7 @@ func (c EnsemblersController) UpdateEnsembler(
 		return BadRequest("invalid ensembler configuration", err.Error())
 	}
 
-	ensembler, err = c.EnsemblersService.Save(ensembler)
+	ensembler, err = c.Services.EnsemblersService.Save(ensembler)
 	if err != nil {
 		return InternalServerError("failed to update an ensembler", err.Error())
 	}

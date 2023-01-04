@@ -50,7 +50,7 @@ func (c BaseController) getProjectFromRequestVars(vars RequestVars) (project *ml
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
 	}
-	project, err = c.MLPService.GetProject(id)
+	project, err = c.Services.MLPService.GetProject(id)
 	if err != nil {
 		return nil, NotFound("project not found", err.Error())
 	}
@@ -62,7 +62,7 @@ func (c BaseController) getRouterFromRequestVars(vars RequestVars) (router *mode
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
 	}
-	router, err = c.RoutersService.FindByID(id)
+	router, err = c.Services.RoutersService.FindByID(id)
 	if err != nil {
 		return nil, NotFound("router not found", err.Error())
 	}
@@ -80,7 +80,7 @@ func (c BaseController) getRouterVersionFromRequestVars(
 	if err != nil {
 		return nil, BadRequest("invalid router version value", err.Error())
 	}
-	routerVersion, err = c.RouterVersionsService.FindByRouterIDAndVersion(routerID, uint(versionNum))
+	routerVersion, err = c.Services.RouterVersionsService.FindByRouterIDAndVersion(routerID, uint(versionNum))
 	if err != nil {
 		return nil, NotFound("router version not found", err.Error())
 	}

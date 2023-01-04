@@ -5,6 +5,7 @@ package service_test
 import (
 	"database/sql"
 	"testing"
+	"text/template"
 
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/repository"
 )
 
 func TestRoutersServiceIntegration(t *testing.T) {
@@ -34,6 +36,11 @@ func TestRoutersServiceIntegration(t *testing.T) {
 		).Return(&mlp.Project{Name: "project-name"}, nil)
 
 		svc := service.NewRoutersService(db, mlpService, &monitoringURLFormat)
+
+		monitoringURLTemplate, _ := template.New("monitoringURLTemplate").Parse(monitoringURLFormat)
+		allServices := service.Services{
+			RouterMonitoringService: service.NewRouterMonitoringService(mlpService, monitoringURLTemplate),
+		}
 
 		// create routers
 		routers := []*models.Router{
@@ -120,7 +127,11 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			},
 		}
 
-		routerVersion, err := service.NewRouterVersionsService(db, nil, nil).Save(routerVersion)
+		routerVersion, err := service.NewRouterVersionsService(
+			repository.NewRoutersRepository(db),
+			repository.NewRouterVersionsRepository(db),
+			&allServices,
+		).CreateRouterVersion(routerVersion)
 		assert.NoError(t, err)
 		router.SetCurrRouterVersionID(routerVersion.ID)
 		saved, err := svc.Save(router)

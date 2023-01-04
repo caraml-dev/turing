@@ -383,9 +383,11 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
-						EnsemblersService:    ensemblersService,
-						EnsemblingJobService: ensemblingJobService,
-						MLPService:           mlpService,
+						Services: service.Services{
+							EnsemblersService:    ensemblersService,
+							EnsemblingJobService: ensemblingJobService,
+							MLPService:           mlpService,
+						},
 					},
 					validator,
 				),
@@ -480,7 +482,9 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
-						EnsemblingJobService: svc,
+						Services: service.Services{
+							EnsemblingJobService: svc,
+						},
 					},
 					validator,
 				),
@@ -725,7 +729,9 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
-						EnsemblingJobService: svc,
+						Services: service.Services{
+							EnsemblingJobService: svc,
+						},
 					},
 					validator,
 				),
@@ -810,7 +816,9 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
-						EnsemblingJobService: svc,
+						Services: service.Services{
+							EnsemblingJobService: svc,
+						},
 					},
 					validator,
 				),

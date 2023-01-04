@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
@@ -29,7 +30,9 @@ func TestListExperimentEngines(t *testing.T) {
 	ctrl := ExperimentsController{
 		BaseController{
 			AppContext: &AppContext{
-				ExperimentsService: svc,
+				Services: service.Services{
+					ExperimentsService: svc,
+				},
 			},
 		},
 	}
@@ -78,7 +81,9 @@ func TestListExperimentEngineClients(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: failureSvc,
+						Services: service.Services{
+							ExperimentsService: failureSvc,
+						},
 					},
 				},
 			},
@@ -89,7 +94,9 @@ func TestListExperimentEngineClients(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: successSvc,
+						Services: service.Services{
+							ExperimentsService: successSvc,
+						},
 					},
 				},
 			},
@@ -150,7 +157,9 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: failureSvc,
+						Services: service.Services{
+							ExperimentsService: failureSvc,
+						},
 					},
 				},
 			},
@@ -164,7 +173,9 @@ func TestListExperimentEngineExperiments(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: successSvc,
+						Services: service.Services{
+							ExperimentsService: successSvc,
+						},
 					},
 				},
 			},
@@ -231,7 +242,9 @@ func TestListExperimentEngineVariables(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: failureSvc,
+						Services: service.Services{
+							ExperimentsService: failureSvc,
+						},
 					},
 				},
 			},
@@ -245,7 +258,9 @@ func TestListExperimentEngineVariables(t *testing.T) {
 			ctrl: ExperimentsController{
 				BaseController{
 					AppContext: &AppContext{
-						ExperimentsService: successSvc,
+						Services: service.Services{
+							ExperimentsService: successSvc,
+						},
 					},
 				},
 			},

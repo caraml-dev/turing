@@ -301,9 +301,11 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 			c := PodLogController{
 				NewBaseController(
 					&AppContext{
-						PodLogService:        tt.podLogService(),
-						MLPService:           tt.mlpService(),
-						EnsemblingJobService: tt.ensemblingJobService(),
+						Services: service.Services{
+							PodLogService:        tt.podLogService(),
+							MLPService:           tt.mlpService(),
+							EnsemblingJobService: tt.ensemblingJobService(),
+						},
 					},
 					validator,
 				),
@@ -653,10 +655,12 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 			c := PodLogController{
 				NewBaseController(
 					&AppContext{
-						PodLogService:         tt.podLogService(),
-						MLPService:            tt.mlpService(),
-						RoutersService:        tt.routersService(),
-						RouterVersionsService: tt.routerVersionsService(),
+						Services: service.Services{
+							PodLogService:         tt.podLogService(),
+							MLPService:            tt.mlpService(),
+							RoutersService:        tt.routersService(),
+							RouterVersionsService: tt.routerVersionsService(),
+						},
 					},
 					validator,
 				),

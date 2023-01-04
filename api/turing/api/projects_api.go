@@ -16,7 +16,7 @@ func (c ProjectsController) ListProjects(
 	_ interface{},
 ) *Response {
 	projectName, _ := vars.get("name")
-	projects, err := c.MLPService.GetProjects(projectName)
+	projects, err := c.Services.MLPService.GetProjects(projectName)
 	if err != nil {
 		return InternalServerError("failed to fetch projects", err.Error())
 	}
