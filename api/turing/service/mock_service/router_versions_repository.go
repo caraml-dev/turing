@@ -5,9 +5,11 @@
 package mock_service
 
 import (
-	models "github.com/caraml-dev/turing/api/turing/models"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
+
+	models "github.com/caraml-dev/turing/api/turing/models"
 )
 
 // MockRouterVersionsRepository is a mock of RouterVersionsRepository interface

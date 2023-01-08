@@ -137,13 +137,35 @@ func (svc *routerVersionsService) FindLatestVersionByRouterID(
 func (svc *routerVersionsService) CreateRouterVersion(
 	routerVersion *models.RouterVersion,
 ) (*models.RouterVersion, error) {
-	return svc.routerVersionsRepository.Save(routerVersion)
+	routerVersion, err := svc.routerVersionsRepository.Save(routerVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate monitoring URL
+	err = svc.setMonitoringURL(routerVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	return routerVersion, nil
 }
 
 func (svc *routerVersionsService) UpdateRouterVersion(
 	routerVersion *models.RouterVersion,
 ) (*models.RouterVersion, error) {
-	return svc.routerVersionsRepository.Save(routerVersion)
+	routerVersion, err := svc.routerVersionsRepository.Save(routerVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate monitoring URL
+	err = svc.setMonitoringURL(routerVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	return routerVersion, nil
 }
 
 func (svc *routerVersionsService) Delete(routerVersion *models.RouterVersion) error {
