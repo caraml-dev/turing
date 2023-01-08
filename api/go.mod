@@ -20,6 +20,7 @@ require (
 	github.com/gojek/mlp v1.4.7
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
+	github.com/golang/mock v1.4.4
 	github.com/google/go-cmp v0.5.8
 	github.com/google/go-containerregistry v0.8.1-0.20220219142810-1571d7fdc46e
 	github.com/gorilla/mux v1.8.0
