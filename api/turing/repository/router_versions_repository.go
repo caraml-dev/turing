@@ -6,31 +6,31 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
-// routerVersionsRepository implements service.RouterVersionsRepository
-type routerVersionsRepository struct {
+// RouterVersionsRepository implements service.RouterVersionsRepository
+type RouterVersionsRepository struct {
 	db *gorm.DB
 }
 
-func NewRouterVersionsRepository(db *gorm.DB) *routerVersionsRepository {
-	return &routerVersionsRepository{
+func NewRouterVersionsRepository(db *gorm.DB) *RouterVersionsRepository {
+	return &RouterVersionsRepository{
 		db: db,
 	}
 }
 
-func (rvr *routerVersionsRepository) query() *gorm.DB {
+func (rvr *RouterVersionsRepository) query() *gorm.DB {
 	return rvr.db.
 		Preload("Router").
 		Preload("Enricher").
 		Preload("Ensembler")
 }
 
-func (rvr *routerVersionsRepository) List(routerID models.ID) ([]*models.RouterVersion, error) {
+func (rvr *RouterVersionsRepository) List(routerID models.ID) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := rvr.query().Where("router_id = ?", routerID).Find(&routerVersions)
 	return routerVersions, query.Error
 }
 
-func (rvr *routerVersionsRepository) ListByStatus(
+func (rvr *RouterVersionsRepository) ListByStatus(
 	routerID models.ID,
 	status models.RouterVersionStatus,
 ) ([]*models.RouterVersion, error) {
@@ -42,7 +42,7 @@ func (rvr *routerVersionsRepository) ListByStatus(
 	return routerVersions, query.Error
 }
 
-func (rvr *routerVersionsRepository) Save(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
+func (rvr *RouterVersionsRepository) Save(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
 	var err error
 	tx := rvr.db.Begin()
 
@@ -73,7 +73,7 @@ func (rvr *routerVersionsRepository) Save(routerVersion *models.RouterVersion) (
 	return rvr.FindByID(routerVersion.ID)
 }
 
-func (rvr *routerVersionsRepository) FindByID(routerVersionID models.ID) (*models.RouterVersion, error) {
+func (rvr *RouterVersionsRepository) FindByID(routerVersionID models.ID) (*models.RouterVersion, error) {
 	var routerVersion models.RouterVersion
 	query := rvr.query().
 		Where("router_versions.id = ?", routerVersionID).
@@ -81,7 +81,7 @@ func (rvr *routerVersionsRepository) FindByID(routerVersionID models.ID) (*model
 	return &routerVersion, query.Error
 }
 
-func (rvr *routerVersionsRepository) FindByRouterIDAndVersion(
+func (rvr *RouterVersionsRepository) FindByRouterIDAndVersion(
 	routerID models.ID,
 	version uint,
 ) (*models.RouterVersion, error) {
@@ -93,7 +93,7 @@ func (rvr *routerVersionsRepository) FindByRouterIDAndVersion(
 	return &routerVersion, query.Error
 }
 
-func (rvr *routerVersionsRepository) FindLatestVersion(
+func (rvr *RouterVersionsRepository) FindLatestVersion(
 	routerID models.ID,
 ) (*models.RouterVersion, error) {
 	var routerVersion models.RouterVersion
@@ -104,7 +104,7 @@ func (rvr *routerVersionsRepository) FindLatestVersion(
 	return &routerVersion, query.Error
 }
 
-func (rvr *routerVersionsRepository) Delete(routerVersion *models.RouterVersion) error {
+func (rvr *RouterVersionsRepository) Delete(routerVersion *models.RouterVersion) error {
 	tx := rvr.db.Begin()
 	tx.Delete(routerVersion)
 	if routerVersion.Enricher != nil {

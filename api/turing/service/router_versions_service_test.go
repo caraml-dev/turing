@@ -1,25 +1,16 @@
 package service_test
 
 import (
-	// 	"database/sql"
-	// 	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/service/mock_service"
-
-	// 	merlin "github.com/gojek/merlin/client"
-	// 	mlp "github.com/gojek/mlp/api/client"
-	// 	"github.com/google/go-cmp/cmp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	// 	"gorm.io/gorm"
-	// 	"k8s.io/apimachinery/pkg/api/resource"
-	// 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/service/mock_service"
 )
 
 func TestListRouterVersions(t *testing.T) {
