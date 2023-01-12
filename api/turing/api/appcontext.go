@@ -12,9 +12,9 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/middleware"
-	"github.com/caraml-dev/turing/api/turing/mlpcluster"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 )
 
 // AppContext stores the entities relating to the application's context
