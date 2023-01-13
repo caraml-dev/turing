@@ -6,6 +6,7 @@ import (
 
 	"bou.ke/monkey"
 	merlin "github.com/gojek/merlin/client"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
+	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 // MockVaultClient satisfies the vault.Client interface
@@ -97,6 +99,13 @@ func TestNewAppContext(t *testing.T) {
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			ClusterName: defaultEnvironment,
+			K8sConfig: &mlpcluster.K8sConfig{
+				Name: defaultEnvironment,
+				Cluster: &clientcmdapiv1.Cluster{
+					Server: "k8s.api.server",
+				},
+				AuthInfo: &clientcmdapiv1.AuthInfo{},
+			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -179,10 +188,27 @@ func TestNewAppContext(t *testing.T) {
 		},
 		ClusterConfig: config.ClusterConfig{
 			InClusterConfig: false,
-			VaultConfig: &config.VaultConfig{
-				Address: "vault-addr",
-				Token:   "vault-token",
+			EnvironmentConfigs: []*config.EnvironmentConfig{
+				{
+					Name: "N1",
+					K8sConfig: &mlpcluster.K8sConfig{
+						Name: "C1",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server: "http://k8s.c1.api.server",
+						},
+					},
+				},
+				{
+					Name: "N2",
+					K8sConfig: &mlpcluster.K8sConfig{
+						Name: "C2",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server: "http://k8s.c2.api.server",
+						},
+					},
+				},
 			},
+			EnvironmentConfigPath: "path-to-env-file.yaml",
 		},
 		MLPConfig: &config.MLPConfig{
 			MerlinURL:        "http://mlp.example.com/api/merlin/v1",
@@ -200,7 +226,6 @@ func TestNewAppContext(t *testing.T) {
 	}
 	// Create test auth enforcer and Vault client
 	testAuthorizer := &middleware.Authorizer{}
-	testVaultClient := &MockVaultClient{}
 	// Create mock MLP Service
 	mlpSvc := &svcmocks.MLPService{}
 	mlpSvc.On("GetEnvironments").Return([]merlin.Environment{
@@ -243,16 +268,14 @@ func TestNewAppContext(t *testing.T) {
 	monkey.Patch(cluster.InitClusterControllers,
 		func(
 			cfg *config.Config,
-			environmentClusterMap map[string]string,
-			vaultClient vault.Client,
+			environmentClusterMap map[string]*mlpcluster.K8sConfig,
 		) (map[string]cluster.Controller, error) {
 			assert.Equal(t, testCfg, cfg)
-			assert.Equal(t, map[string]string{
-				"N1":  "C1",
-				"N2":  "C2",
-				"dev": "dev",
+			assert.Equal(t, map[string]*mlpcluster.K8sConfig{
+				"N1":  cfg.ClusterConfig.EnvironmentConfigs[0].K8sConfig,
+				"N2":  cfg.ClusterConfig.EnvironmentConfigs[1].K8sConfig,
+				"dev": cfg.EnsemblerServiceBuilderConfig.K8sConfig,
 			}, environmentClusterMap)
-			assert.Equal(t, testVaultClient, vaultClient)
 			return map[string]cluster.Controller{
 				defaultEnvironment: nil,
 			}, nil
@@ -280,7 +303,7 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Validate
-	appCtx, err := NewAppContext(nil, testCfg, testAuthorizer, testVaultClient)
+	appCtx, err := NewAppContext(nil, testCfg, testAuthorizer)
 	assert.NoError(t, err)
 
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
