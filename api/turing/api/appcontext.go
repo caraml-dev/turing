@@ -147,7 +147,6 @@ func NewAppContext(
 		)
 		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
 	}
-	fmt.Println("here")
 
 	// Initialise EnsemblerServiceImageBuilder
 	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
@@ -186,7 +185,7 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster. Additionally,
+// buildKubeconfigStore creates a map of the environment name to the kubernetes cluster. Additionally,
 // clusters that are not a part of the deployment environments can be registered using the clusterNames
 // parameter (in such cases, the environment name will be saved to be the same as the cluster name).
 func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[string]*mlpcluster.K8sConfig, error) {
