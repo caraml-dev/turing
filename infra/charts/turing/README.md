@@ -75,6 +75,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
 | merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
 | mlp.apiHost | string | `"/api/v1"` | MLP API endpoint, used by the MLP UI for fetching data |
+| mlp.environmentConfigSecret.envKey | string | `"environment.yaml"` |  |
+| mlp.environmentConfigSecret.name | string | `""` |  |
 | mlp.extraEnvs | list | computed value | List of extra environment variables to add to MLP API container |
 | mlp.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp","tls":{"enabled":false}}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
 | mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
@@ -86,8 +88,15 @@ The following table lists the configurable parameters of the Turing chart and th
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
 | tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |
 | tags.mlp | bool | `true` | Specifies if the necessary MLP components needs to be installed together with Turing |
-| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. |
+| turing.clusterConfig.ensemblingServiceK8sConfig.cluster | object | `{}` |  |
+| turing.clusterConfig.ensemblingServiceK8sConfig.name | string | `"dev-cluster"` |  |
+| turing.clusterConfig.ensemblingServiceK8sConfig.user | object | `{}` |  |
+| turing.clusterConfig.environmentConfigPath | string | `"environments.yaml"` |  |
+| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. TODO: Change comments, no more vault |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
+| turing.environments[0].cluster | object | `{}` |  |
+| turing.environments[0].name | string | `"dev"` |  |
+| turing.environments[0].user | object | `{}` |  |
 | turing.experimentEngines | list | `[]` | Turing Experiment Engines configuration |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |

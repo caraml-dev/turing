@@ -75,6 +75,8 @@ spec:
           mountPath: /etc/turing
         - name: plugins-volume
           mountPath: {{ include "turing.plugins.directory" . }}
+        - name: environments
+          mountPath: {{ include "turing.environments.directory" . }}
         {{- if .Values.turing.openApiSpecOverrides }}
         - name: openapi
           mountPath: /etc/openapi
@@ -89,6 +91,9 @@ spec:
       - name: config 
         secret:
           secretName: {{ template "turing.fullname" . }}-api-config
+      - name: environments
+        secret:
+          secretName: {{ ternary (printf "%s-environments" (include "turing.fullname" .) ) ( .Values.mlp.environmentConfigSecret.name ) (eq .Values.mlp.environmentConfigSecret.name "") }}
       - name: plugins-volume
         emptyDir: {}
       {{- if .Values.turing.openApiSpecOverrides }}
