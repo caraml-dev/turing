@@ -50,17 +50,8 @@ var (
 type clusterConfig struct {
 	// Use Kubernetes service account in cluster config
 	InClusterConfig bool
-	// Kubernetes API server endpoint
-	Host string
-	// CA Certificate to trust for TLS
-	CACert string
-	// Client Certificate for authenticating to cluster
-	ClientCert string
-	// Client Key for authenticating to cluster
-	ClientKey string
-	// Cluster Name
-	ClusterName string
 
+	// Credentials Interface to access cluster
 	Credentials mlpcluster.Credentials
 }
 
@@ -157,8 +148,8 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 	}, nil
 }
 
-// InitClusterControllers takes in the app config and a vault client and uses the credentials
-// from vault to initialize one cluster controller per environment and returns a map where the
+// InitClusterControllers takes in the app config and initializes one cluster controller
+// per environment and returns a map where the
 // key is the env name and the value is the corresponding controller.
 func InitClusterControllers(
 	cfg *config.Config,
@@ -167,9 +158,7 @@ func InitClusterControllers(
 	// For each supported environment, init controller
 	controllers := make(map[string]Controller)
 	for envName, k := range environmentClusterMap {
-		clusterCfg := clusterConfig{
-			ClusterName: k.Name,
-		}
+		clusterCfg := clusterConfig{}
 
 		if cfg.ClusterConfig.InClusterConfig {
 			clusterCfg.InClusterConfig = true
