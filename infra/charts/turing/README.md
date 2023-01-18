@@ -94,9 +94,10 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.clusterConfig.environmentConfigPath | string | `"environments.yaml"` |  |
 | turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. TODO: Change comments, no more vault |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
-| turing.environments[0].cluster | object | `{}` |  |
-| turing.environments[0].name | string | `"dev"` |  |
-| turing.environments[0].user | object | `{}` |  |
+| turing.environmentConfigs[0].k8s_config.cluster | object | `{}` |  |
+| turing.environmentConfigs[0].k8s_config.name | string | `"dev-cluster"` |  |
+| turing.environmentConfigs[0].k8s_config.user | object | `{}` |  |
+| turing.environmentConfigs[0].name | string | `"dev"` |  |
 | turing.experimentEngines | list | `[]` | Turing Experiment Engines configuration |
 | turing.extraArgs | list | `[]` | List of string containing additional Turing API server arguments. For example, multiple "-config" can be specified to use multiple config files |
 | turing.extraContainers | list | `[]` | List of sidecar containers to attach to the Pod. For example, you can attach sidecar container that forward logs or dynamically update some  configuration files. |
