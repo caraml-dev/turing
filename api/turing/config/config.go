@@ -353,6 +353,9 @@ type ClusterConfig struct {
 
 // ProcessEnvConfigs reads the env configs from a file and unmarshalls them
 func (c *ClusterConfig) ProcessEnvConfigs() error {
+	if c.InClusterConfig {
+		return nil
+	}
 	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
 	if err != nil {
 		return err
