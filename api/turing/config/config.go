@@ -344,8 +344,6 @@ type ClusterConfig struct {
 	// InClusterConfig is a flag if the service account is provided in Kubernetes
 	// and has the relevant credentials to handle all cluster operations.
 	InClusterConfig bool
-	// VaultConfig is required if InClusterConfig is false.
-	VaultConfig *VaultConfig `validate:"required_without=InClusterConfig"`
 
 	// EnvironmentConfigPath refers to a path that contains EnvironmentConfigs
 	EnvironmentConfigPath string `validate:"required_without=InClusterConfig"`
@@ -364,12 +362,6 @@ func (c *ClusterConfig) ProcessEnvConfigs() error {
 	}
 	c.EnvironmentConfigs = envs
 	return nil
-}
-
-// VaultConfig captures the config for connecting to the Vault server
-type VaultConfig struct {
-	Address string `validate:"required"`
-	Token   string `validate:"required"`
 }
 
 type AlertConfig struct {

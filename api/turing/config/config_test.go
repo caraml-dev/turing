@@ -229,11 +229,8 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					InClusterConfig:       false,
+					EnvironmentConfigPath: "path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -329,11 +326,8 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					InClusterConfig:       false,
+					EnvironmentConfigPath: "path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -389,6 +383,7 @@ func TestLoad(t *testing.T) {
 				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
 				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
 				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
+				"CLUSTERCONFIG_ENVIRONMENTCONFIGPATH":                  "env_var_path_to_env.yaml",
 			},
 			want: &config.Config{
 				Port:           5000,
@@ -449,10 +444,7 @@ func TestLoad(t *testing.T) {
 				},
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					EnvironmentConfigPath: "env_var_path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -526,6 +518,7 @@ func TestLoad(t *testing.T) {
 func TestStringToQuantityHookFunc(t *testing.T) {
 	hookFunc := config.StringToQuantityHookFunc()
 	qtyType := reflect.TypeOf(config.Quantity{})
+
 
 	tests := []struct {
 		name    string
@@ -706,10 +699,6 @@ func TestConfigValidate(t *testing.T) {
 		},
 		ClusterConfig: config.ClusterConfig{
 			InClusterConfig: false,
-			VaultConfig: &config.VaultConfig{
-				Address: "http://localhost:8200",
-				Token:   "root",
-			},
 			EnvironmentConfigPath: "./path/to/env-file.yaml",
 		},
 		TuringEncryptionKey: "secret",
@@ -796,16 +785,9 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		"missing vault address": {
+		"missing EnvironmentConfigPath when InClusterConfig is false": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig.Address = ""
-				return validConfig
-			},
-			wantErr: true,
-		},
-		"missing vaultconfig when InClusterConfig is false": {
-			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.EnvironmentConfigPath = ""
 				validConfig.ClusterConfig.InClusterConfig = false
 				return validConfig
 			},
@@ -813,7 +795,6 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"valid in cluster config": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = true
 				return validConfig
 			},
