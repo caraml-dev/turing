@@ -670,6 +670,92 @@ func TestUpdateRouterVersion(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	tests := map[string]struct {
+		routerVersion *models.RouterVersion
+		setup         func(*testing.T) service.RouterVersionsService
+		verify        func(*testing.T, error)
+	}{
+		"router version deploying error": {
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusPending, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "currently deploying")
+			},
+		},
+		"current router version error": {
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rRepo.EXPECT().
+					CountRoutersByCurrentVersionID(models.ID(3)).
+					Return(int64(1))
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "there exists a router that is currently using this version")
+			},
+		},
+		"router version repository error": {
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				rv := createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4)
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rRepo.EXPECT().
+					CountRoutersByCurrentVersionID(models.ID(3)).
+					Return(int64(0))
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				rvRepo.EXPECT().
+					Delete(rv).
+					Return(errors.New("test DB error"))
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.Error(t, err, "test DB error")
+			},
+		},
+		"success": {
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				rv := createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4)
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rRepo.EXPECT().
+					CountRoutersByCurrentVersionID(models.ID(3)).
+					Return(int64(0))
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				rvRepo.EXPECT().
+					Delete(rv).
+					Return(nil)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.NoError(t, err)
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			svc := tt.setup(t)
+			err := svc.Delete(tt.routerVersion)
+			tt.verify(t, err)
+		})
+	}
+}
+
 func createTestRouterVersion(
 	routerName string,
 	status models.RouterVersionStatus,
