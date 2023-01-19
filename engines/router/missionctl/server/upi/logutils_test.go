@@ -76,11 +76,6 @@ func TestLogTuringRouterRequestSummary(t *testing.T) {
 			},
 		},
 	}
-	header := metadata.New(map[string]string{
-		"key1": "value1",
-		"key2": "value2",
-	})
-	headerString := "map[key1:value1 key2:value2]"
 
 	tests := []struct {
 		name              string
@@ -94,17 +89,22 @@ func TestLogTuringRouterRequestSummary(t *testing.T) {
 		expectedResBody   string
 	}{
 		{
-			name:      "ok",
-			reqHeader: header,
+			name: "ok",
+			reqHeader: metadata.New(map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			}),
 			reqBody: &upiv1.PredictValuesRequest{
 				PredictionTable: table,
 			},
-			resHeader: header,
+			resHeader: metadata.New(map[string]string{
+				"key3": "value3",
+			}),
 			resBody: &upiv1.PredictValuesResponse{
 				PredictionResultTable: table,
 			},
-			expectedReqHeader: headerString,
-			expectedResHeader: headerString,
+			expectedReqHeader: "map[key1:value1 key2:value2]",
+			expectedResHeader: "map[key3:value3]",
 			expectedReqBody: `{"prediction_table":{"name":"abc", "rows":[{"row_id":"row1", 
 								"values":[{"double_value":123.456}]}]}}`,
 			expectedResBody: `{"prediction_result_table":{"name":"abc", "rows":[{"row_id":"row1", 
@@ -124,7 +124,7 @@ func TestLogTuringRouterRequestSummary(t *testing.T) {
 
 			//Add response to channel and invoke logging of summary
 			respCh := make(chan grpcRouterResponse, 1)
-			respCh <- grpcRouterResponse{header: tt.reqHeader, body: tt.resBody, key: resultlog.ResultLogKeys.Router}
+			respCh <- grpcRouterResponse{header: tt.resHeader, body: tt.resBody, key: resultlog.ResultLogKeys.Router}
 			close(respCh)
 			logTuringRouterRequestSummary(context.Background(), time.Now(), tt.reqHeader, tt.reqBody, respCh)
 
