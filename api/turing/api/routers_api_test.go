@@ -236,7 +236,8 @@ func TestCreateRouter(t *testing.T) {
 	routerVersionSvc.On("CreateRouterVersion", routerVersion).Return(routerVersion, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router3Saved, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{Id: 2}, router3Saved, routerVersion).Return(errors.New("test deployment error"))
 
 	// Define tests
 	tests := map[string]struct {
@@ -390,8 +391,10 @@ func TestUpdateRouter(t *testing.T) {
 	routerVersionSvc.On("UpdateRouterVersion", routerVersion).Return(routerVersion, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router3, routerVersion).Return(errors.New("test deployment error"))
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{Id: 2}, router4, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{Id: 2}, router3, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{Id: 2}, router4, routerVersion).Return(errors.New("test deployment error"))
 
 	// Define tests
 	tests := map[string]struct {
@@ -727,11 +730,16 @@ func TestDeployRouter(t *testing.T) {
 	routerVersionSvc.On("FindByID", models.ID(2)).Return(routerVersion, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router2, routerVersion).Return(errors.New("test deployment error"))
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router3, routerVersion).Return(errors.New("test deployment error"))
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router4, routerVersion).Return(errors.New("test deployment error"))
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router5, routerVersion).Return(errors.New("test deployment error"))
-	deploymentSvc.On("DeployOrRollbackRouter", &mlp.Project{}, router6, routerVersion).Return(nil)
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{}, router2, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{}, router3, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{}, router4, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{}, router5, routerVersion).Return(errors.New("test deployment error"))
+	deploymentSvc.On("DeployOrRollbackRouter",
+		&mlp.Project{}, router6, routerVersion).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {
