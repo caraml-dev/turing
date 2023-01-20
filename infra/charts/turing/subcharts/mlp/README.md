@@ -98,8 +98,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | oauthClientId | string | `""` |  |
 | postgresql.auth.database | string | `"mlp"` |  |
 | postgresql.auth.password | string | `"mlp"` |  |
-| postgresql.auth.postgresPassword | string | `"mlp"` |  |
 | postgresql.auth.username | string | `"mlp"` |  |
+| postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |

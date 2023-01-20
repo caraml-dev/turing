@@ -27,10 +27,6 @@
 {{- printf "%s.%s.svc.cluster.local" (include "merlin.postgresql.name" .) .Release.Namespace -}}
 {{- end -}}
 
-{{- define "merlin.mlflow.backendStoreUri" -}}
-{{- printf "postgresql://%s:%s@%s:5432/%s" .Values.postgresql.postgresqlUsername .Values.postgresql.postgresqlPassword (include "merlin.db.host" .) .Values.postgresql.postgresqlDatabase -}}
-{{- end -}}
-
 {{- define "merlin.vault.secretName" -}}
 {{- if eq (.Values.vault.enabled | toString) "true" -}}
     {{ include "merlin.fullname" . }}-secrets

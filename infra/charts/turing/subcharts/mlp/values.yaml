@@ -82,6 +82,8 @@ gitlab:
   clientSecret: #clientSecret
 
 postgresql:
+  image:
+    tag: 12.13.0
   # -- Configure resource requests and limits
   # ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
@@ -96,7 +98,6 @@ postgresql:
     username: mlp
     database: mlp
     password: mlp
-    postgresPassword: mlp
   metrics:
     enabled: false
     serviceMonitor:

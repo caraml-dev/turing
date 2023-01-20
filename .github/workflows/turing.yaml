@@ -472,6 +472,17 @@ jobs:
           kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
           echo "::endgroup::"
 
+          echo "::group::describe secret/turing-postgresql"
+          kubectl describe secret turing-postgresql
+          echo "::endgroup::"
+
+          echo "::group::describe secret/turing-postgresql-merlin"
+          kubectl describe secret turing-postgresql-merlin
+          echo "::endgroup::"
+
+          echo "::group::describe secret/turing-postgresql-mlp"
+          kubectl describe secret turing-postgresql-mlp
+          echo "::endgroup::"
 
   release-rules:
     runs-on: ubuntu-latest

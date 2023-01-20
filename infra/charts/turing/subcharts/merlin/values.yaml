@@ -135,10 +135,11 @@ mlflow:
   artifactRoot: gs://bucket-name/mlflow
   postgresql:
     enabled: false
-    postgresqlDatabase: mlflow
-    postgresqlUsername: mlflow
+    auth: {}
 
 postgresql:
+  image:
+    tag: 12.13.0
   resources:
     requests:
       memory: 256Mi
@@ -150,7 +151,6 @@ postgresql:
     username: merlin
     database: merlin
     password: merlin
-    postgresPassword: merlin
   metrics:
     enabled: false
     serviceMonitor:

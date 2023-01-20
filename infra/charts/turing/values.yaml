@@ -196,6 +196,8 @@ sentry:
 # -- Postgresql configuration to be applied to Turing's postgresql database deployment
 # Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters
 postgresql:
+  image:
+    tag: 12.13.0
   # -- Resources requests and limits for Turing database. This should be set
   # according to your cluster capacity and service level objectives.
   # Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -212,7 +214,6 @@ postgresql:
     username: turing
     # -- Password for Turing Postgresql database
     password: turing
-    postgresPassword: turing
   containerPorts:
       postgresql: 5432
   metrics:

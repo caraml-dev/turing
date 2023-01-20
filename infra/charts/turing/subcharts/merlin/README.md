@@ -128,9 +128,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | mlflow.image.registry | string | `"ghcr.io"` |  |
 | mlflow.image.repository | string | `"gojek/mlflow"` |  |
 | mlflow.image.tag | string | `"1.3.0"` |  |
+| mlflow.postgresql.auth | object | `{}` |  |
 | mlflow.postgresql.enabled | bool | `false` |  |
-| mlflow.postgresql.postgresqlDatabase | string | `"mlflow"` |  |
-| mlflow.postgresql.postgresqlUsername | string | `"mlflow"` |  |
 | mlpApi.apiHost | string | `"http://mlp.mlp:8080/v1"` |  |
 | mlpApi.encryptionKey | string | `""` |  |
 | monitoring.baseURL | string | `""` |  |
@@ -141,8 +140,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | newrelic.licenseSecretName | string | `"newrelic-license-secret"` |  |
 | postgresql.auth.database | string | `"merlin"` |  |
 | postgresql.auth.password | string | `"merlin"` |  |
-| postgresql.auth.postgresPassword | string | `"merlin"` |  |
 | postgresql.auth.username | string | `"merlin"` |  |
+| postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` |  |

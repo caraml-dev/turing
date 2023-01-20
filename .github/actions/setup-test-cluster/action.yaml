@@ -196,8 +196,12 @@ runs:
     - name: Kubernetes namespace report
       uses: jupyterhub/action-k8s-namespace-report@v1
       if: always()
-      with:
-        workloads: deployment/mockserver deployment/turing-mlp deployment/turing-merlin deployment/turing
+
+    - name: Print secrets
+      shell: bash
+      if: always()
+      run: |
+        kubectl describe secret -A
 
     - name: Setup MLP project
       shell: bash
