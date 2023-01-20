@@ -92,9 +92,11 @@ postgresql:
     # -- Persist Postgresql data in a Persistent Volume Claim
     enabled: true
     size: 10Gi
-  postgresqlUsername: mlp
-  postgresqlDatabase: mlp
-  postgresqlPassword: mlp
+  auth:
+    username: mlp
+    database: mlp
+    password: mlp
+    postgresPassword: mlp
   metrics:
     enabled: false
     serviceMonitor:

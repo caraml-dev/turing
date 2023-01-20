@@ -104,6 +104,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | environmentConfigs[0].queue_resource_percentage | string | `"20"` |  |
 | environmentConfigs[0].region | string | `"id"` |  |
 | global.merlin | object | `{}` |  |
+| global.mlp | object | `{}` |  |
 | homepage | string | `"/merlin"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
@@ -138,13 +139,14 @@ The following table lists the configurable parameters of the Turing chart and th
 | newrelic.appname | string | `"merlin-api-dev"` |  |
 | newrelic.enabled | bool | `false` |  |
 | newrelic.licenseSecretName | string | `"newrelic-license-secret"` |  |
+| postgresql.auth.database | string | `"merlin"` |  |
+| postgresql.auth.password | string | `"merlin"` |  |
+| postgresql.auth.postgresPassword | string | `"merlin"` |  |
+| postgresql.auth.username | string | `"merlin"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` |  |
 | postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"merlin"` |  |
-| postgresql.postgresqlPassword | string | `"merlin"` |  |
-| postgresql.postgresqlUsername | string | `"merlin"` |  |
 | postgresql.replication.applicationName | string | `"merlin"` |  |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` |  |

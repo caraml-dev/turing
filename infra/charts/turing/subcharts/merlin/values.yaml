@@ -1,5 +1,6 @@
 global:
   merlin: {}
+  mlp: {}
 
 image:
   pullPolicy: IfNotPresent
@@ -145,9 +146,11 @@ postgresql:
   persistence:
     enabled: true
     size: 10Gi
-  postgresqlUsername: merlin
-  postgresqlDatabase: merlin
-  postgresqlPassword: merlin
+  auth:
+    username: merlin
+    database: merlin
+    password: merlin
+    postgresPassword: merlin
   metrics:
     enabled: false
     serviceMonitor:

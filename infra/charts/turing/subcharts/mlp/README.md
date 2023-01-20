@@ -96,13 +96,14 @@ The following table lists the configurable parameters of the Turing chart and th
 | livenessProbe.path | string | `"/v1/internal/live"` |  |
 | mlflowTrackingUrl | string | `"http://mlflow.mlp"` |  |
 | oauthClientId | string | `""` |  |
+| postgresql.auth.database | string | `"mlp"` |  |
+| postgresql.auth.password | string | `"mlp"` |  |
+| postgresql.auth.postgresPassword | string | `"mlp"` |  |
+| postgresql.auth.username | string | `"mlp"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
 | postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"mlp"` |  |
-| postgresql.postgresqlPassword | string | `"mlp"` |  |
-| postgresql.postgresqlUsername | string | `"mlp"` |  |
 | postgresql.replication.applicationName | string | `"mlp"` | Replication Cluster application name. Useful for defining multiple replication policies |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` | From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication NOTE: It cannot be > slaveReplicas |
