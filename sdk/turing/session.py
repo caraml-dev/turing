@@ -56,11 +56,15 @@ class TuringSession:
 
         if use_google_oauth:
             import google.auth
+            from google.auth.transport.requests import Request
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
-            credentials, project = google.auth.default(
-                scopes=TuringSession.OAUTH_SCOPES
-            )
+            # Load default credentials
+            credentials, _ = google.auth.default(scopes=TuringSession.OAUTH_SCOPES)
+            # Refresh credentials, in case it's coming from Compute Engine.
+            # See: https://github.com/googleapis/google-auth-library-python/issues/1211
+            credentials.refresh(Request())
+
             authorized_http = AuthorizedHttp(credentials, urllib3.PoolManager())
             self._api_client.rest_client.pool_manager = authorized_http
 
