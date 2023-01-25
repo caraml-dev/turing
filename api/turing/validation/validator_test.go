@@ -1153,7 +1153,8 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 				},
 			},
 			expectedError: strings.Join([]string{"Key: 'RouterConfig.Type' ",
-				"Error:Field validation for 'Type' failed on the 'should not be nop when a standard ensembler is configured' tag"}, ""),
+				"Error:Field validation for 'Type' failed on the ",
+				"'should not be nop when a standard ensembler is configured' tag"}, ""),
 		},
 	}
 	for name, tt := range suite {
