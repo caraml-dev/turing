@@ -336,6 +336,7 @@ func TestValidateTrafficRules(t *testing.T) {
 	defaultTrafficRule := &models.DefaultTrafficRule{
 		Routes: []string{routeAID, routeBID},
 	}
+	var dummyConfig json.RawMessage
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
@@ -606,7 +607,10 @@ func TestValidateTrafficRules(t *testing.T) {
 				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
 		},
 		"failure | standard ensembler missing default route": {
-			routes:    models.Routes{routeA},
+			routes: models.Routes{routeA},
+			experimentEngine: &request.ExperimentEngineConfig{
+				Type: "custom",
+			},
 			ensembler: &models.Ensembler{Type: models.EnsemblerStandardType},
 			expectedError: "Key: 'RouterConfig.default_route_id' " +
 				"Error:Field validation for 'default_route_id' failed on the 'should be set for chosen ensembler type' tag",
@@ -955,7 +959,9 @@ func TestValidateTrafficRules(t *testing.T) {
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
 			mockExperimentsService := &mocks.ExperimentsService{}
-			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
+			mockExperimentsService.On("ValidateExperimentConfig", "custom", dummyConfig).
+				Return(nil)
 			validate, err := validation.NewValidator(mockExperimentsService)
 			require.NoError(t, err)
 
