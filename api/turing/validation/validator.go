@@ -368,4 +368,12 @@ func validateRouterConfig(sl validator.StructLevel) {
 		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}
+
+	// Validate that a non-nop experiment engine is used if a standard ensembler is set
+	if router.Ensembler != nil && router.Ensembler.Type == models.EnsemblerStandardType {
+		if router.ExperimentEngine.Type == models.ExperimentEngineTypeNop {
+			sl.ReportError(router.ExperimentEngine.Type, "Type", "Type",
+				"should not be nop when a standard ensembler is configured", "")
+		}
+	}
 }

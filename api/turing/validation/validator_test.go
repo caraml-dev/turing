@@ -281,6 +281,7 @@ type routerConfigTestCase struct {
 	routes             models.Routes
 	enricher           *request.EnricherEnsemblerConfig
 	ensembler          *models.Ensembler
+	experimentEngine   *request.ExperimentEngineConfig
 	defaultRouteID     *string
 	defaultTrafficRule *models.DefaultTrafficRule
 	trafficRules       models.TrafficRules
@@ -289,17 +290,21 @@ type routerConfigTestCase struct {
 }
 
 func (tt routerConfigTestCase) RouterConfig(protocol routerConfig.Protocol) *request.RouterConfig {
+	experimentEngine := &request.ExperimentEngineConfig{
+		Type: "nop",
+	}
+	if tt.experimentEngine != nil {
+		experimentEngine = tt.experimentEngine
+	}
 	return &request.RouterConfig{
 		Routes:             tt.routes,
 		DefaultRouteID:     tt.defaultRouteID,
 		DefaultTrafficRule: tt.defaultTrafficRule,
 		TrafficRules:       tt.trafficRules,
 		AutoscalingPolicy:  tt.autoscalingPolicy,
-		ExperimentEngine: &request.ExperimentEngineConfig{
-			Type: "nop",
-		},
-		Timeout:  "20s",
-		Protocol: &protocol,
+		ExperimentEngine:   experimentEngine,
+		Timeout:            "20s",
+		Protocol:           &protocol,
 		LogConfig: &request.LogConfig{
 			ResultLoggerType: "nop",
 		},
@@ -1095,6 +1100,62 @@ func TestValidateAutoscaling(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			mockExperimentsService := &mocks.ExperimentsService{}
 			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
+			validate, err := validation.NewValidator(mockExperimentsService)
+			require.NoError(t, err)
+
+			err = validate.Struct(tt.RouterConfig(tt.protocol))
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
+	routeID := "abc"
+	route := &models.Route{
+		ID:       routeID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/a",
+		Timeout:  "10ms",
+	}
+	var dummyConfig json.RawMessage
+
+	suite := map[string]routerConfigTestCase{
+		"success": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			experimentEngine: &request.ExperimentEngineConfig{
+				Type: "custom",
+			},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					RouteNamePath: "route-1",
+				},
+			},
+		},
+		"failure | nop exp engine is configured with standard ensembler": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerStandardType,
+				StandardConfig: &models.EnsemblerStandardConfig{
+					RouteNamePath: "route-1",
+				},
+			},
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.Type' ",
+				"Error:Field validation for 'Type' failed on the 'should not be nop when a standard ensembler is configured' tag"}, ""),
+		},
+	}
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			mockExperimentsService := &mocks.ExperimentsService{}
+			mockExperimentsService.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
+			mockExperimentsService.On("ValidateExperimentConfig", "custom", dummyConfig).
+				Return(nil)
 			validate, err := validation.NewValidator(mockExperimentsService)
 			require.NoError(t, err)
 
