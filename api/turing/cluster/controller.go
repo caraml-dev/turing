@@ -166,7 +166,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 func InitClusterControllers(
 	cfg *config.Config,
 	environmentClusterMap map[string]string,
-	vaultClient vault.VaultClient,
+	vaultClient vault.Client,
 ) (map[string]Controller, error) {
 	// For each supported environment, init controller
 	controllers := make(map[string]Controller)

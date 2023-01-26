@@ -104,7 +104,7 @@ func TestRun(t *testing.T) {
 					"GetProject",
 					mock.Anything,
 					mock.Anything,
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{ID: 1}, nil)
 				return svc
 			},
 		},
@@ -181,7 +181,7 @@ func TestRun(t *testing.T) {
 					"GetProject",
 					mock.Anything,
 					mock.Anything,
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{ID: 1}, nil)
 				return svc
 			},
 		},
@@ -237,7 +237,7 @@ func TestRun(t *testing.T) {
 					"GetProject",
 					mock.Anything,
 					mock.Anything,
-				).Return(&mlp.Project{Id: 1}, nil)
+				).Return(&mlp.Project{ID: 1}, nil)
 				return svc
 			},
 		},

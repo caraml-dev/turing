@@ -31,7 +31,7 @@ func (c RoutersController) ListRouters(
 	}
 
 	// List routers
-	routers, err := c.Services.RoutersService.ListRouters(models.ID(project.Id), "")
+	routers, err := c.Services.RoutersService.ListRouters(models.ID(project.ID), "")
 	if err != nil {
 		return InternalServerError("unable to list routers", err.Error())
 	}
@@ -73,10 +73,10 @@ func (c RoutersController) CreateRouter(
 	request := body.(*request.CreateOrUpdateRouterRequest)
 
 	// check if router already exists
-	router, _ := c.Services.RoutersService.FindByProjectAndName(models.ID(project.Id), request.Name)
+	router, _ := c.Services.RoutersService.FindByProjectAndName(models.ID(project.ID), request.Name)
 	if router != nil {
 		return BadRequest("invalid router name",
-			fmt.Sprintf("router with name %s already exists in project %d", request.Name, project.Id))
+			fmt.Sprintf("router with name %s already exists in project %d", request.Name, project.ID))
 	}
 
 	_, err := c.Services.MLPService.GetEnvironment(request.Environment)
@@ -85,7 +85,7 @@ func (c RoutersController) CreateRouter(
 	}
 
 	// if not, create
-	router, err = c.Services.RoutersService.Save(request.BuildRouter(models.ID(project.Id)))
+	router, err = c.Services.RoutersService.Save(request.BuildRouter(models.ID(project.ID)))
 	if err != nil {
 		return InternalServerError("unable to create router", err.Error())
 	}

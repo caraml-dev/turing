@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type ExperimentRunner struct{}
@@ -22,4 +23,8 @@ func (r *ExperimentRunner) GetTreatmentForRequest(
 		Name:   "my treatment",
 		Config: json.RawMessage(`{"config-1": "value-a"}`),
 	}, nil
+}
+
+func (r *ExperimentRunner) RegisterMetricsCollector(_ metrics.Collector, _ runner.MetricsRegistrationHelper) error {
+	return nil
 }

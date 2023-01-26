@@ -8,8 +8,10 @@ import (
 	"github.com/caraml-dev/turing/engines/experiment"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	_metrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
@@ -21,6 +23,10 @@ func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.Experi
 
 	engine, err := factory.GetExperimentRunner()
 	if err != nil {
+		return nil, err
+	}
+
+	if err := engine.RegisterMetricsCollector(metrics.Glob(), _metrics.MetricsRegistrationHelper{}); err != nil {
 		return nil, err
 	}
 

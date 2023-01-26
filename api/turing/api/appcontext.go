@@ -34,7 +34,7 @@ func NewAppContext(
 	db *gorm.DB,
 	cfg *config.Config,
 	authorizer *middleware.Authorizer,
-	vaultClient vault.VaultClient,
+	vaultClient vault.Client,
 ) (*AppContext, error) {
 	// Init Services
 	var allServices service.Services

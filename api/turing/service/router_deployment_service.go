@@ -329,7 +329,7 @@ func (svc routerDeploymentService) deployRouterVersion(
 
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		routerServiceAccountKey, err = svc.services.MLPService.GetSecret(
-			models.ID(project.Id),
+			models.ID(project.ID),
 			routerVersion.LogConfig.BigQueryConfig.ServiceAccountSecret,
 		)
 		if err != nil {
@@ -339,7 +339,7 @@ func (svc routerDeploymentService) deployRouterVersion(
 
 	if routerVersion.Enricher != nil && routerVersion.Enricher.ServiceAccount != "" {
 		enricherServiceAccountKey, err = svc.services.MLPService.GetSecret(
-			models.ID(project.Id),
+			models.ID(project.ID),
 			routerVersion.Enricher.ServiceAccount,
 		)
 		if err != nil {
@@ -350,7 +350,7 @@ func (svc routerDeploymentService) deployRouterVersion(
 	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerDockerType {
 		if routerVersion.Ensembler.DockerConfig.ServiceAccount != "" {
 			ensemblerServiceAccountKey, err = svc.services.MLPService.GetSecret(
-				models.ID(project.Id),
+				models.ID(project.ID),
 				routerVersion.Ensembler.DockerConfig.ServiceAccount,
 			)
 			if err != nil {

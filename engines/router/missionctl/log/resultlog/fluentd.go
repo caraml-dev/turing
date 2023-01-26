@@ -1,12 +1,14 @@
 package resultlog
 
 import (
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/fluent/fluent-logger-golang/fluent"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // fluentdClient minimally defines the functionality used by the FluentdLogger for sending
@@ -54,7 +56,7 @@ func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
 	// Measure time taken to post the log to fluentd
 	var err error
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(err == nil)

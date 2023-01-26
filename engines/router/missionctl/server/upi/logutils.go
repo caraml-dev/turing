@@ -20,7 +20,7 @@ type grpcRouterResponse struct {
 	err    string
 }
 
-var protoJSONMarshaller = protojson.MarshalOptions{}
+var protoJSONMarshaller = protojson.MarshalOptions{UseProtoNames: true}
 
 func logTuringRouterRequestSummary(
 	ctx context.Context,

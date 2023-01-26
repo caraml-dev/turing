@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
@@ -11,7 +12,8 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+
+	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type MissionControlUPI interface {
@@ -46,7 +48,7 @@ func (us *missionControlUpi) Route(
 	var grpcResponse *fiberGrpc.Response
 	// Measure execution time
 	defer metrics.Glob().MeasureDurationMs(
-		metrics.TuringComponentRequestDurationMs,
+		instrumentation.TuringComponentRequestDurationMs,
 		map[string]func() string{
 			"status": func() string {
 				return metrics.GetStatusString(turingError == nil)
