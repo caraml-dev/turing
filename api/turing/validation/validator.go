@@ -287,15 +287,15 @@ func validateConditionOrthogonality(
 	}
 }
 
-func ValidateStdEnsemblerNotConfiguredForNopExpEngine(
+func validateStdEnsemblerNotConfiguredForNopExpEngine(
 	sl validator.StructLevel,
 	ensembler *models.Ensembler,
 	experimentEngine *request.ExperimentEngineConfig,
 ) {
-	if ensembler != nil && ensembler.Type == models.EnsemblerStandardType {
-		if experimentEngine.Type == models.ExperimentEngineTypeNop {
-			sl.ReportError(experimentEngine.Type, "Type", "Type",
-				"should not be nop when a standard ensembler is configured", "")
+	if experimentEngine.Type == models.ExperimentEngineTypeNop {
+		if ensembler != nil && ensembler.Type == models.EnsemblerStandardType {
+			sl.ReportError(ensembler.Type, "Ensembler.Type", "Type",
+				"should not be standard if an nop experiment engine is configured", "")
 		}
 	}
 }
@@ -383,5 +383,5 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate that a non-nop experiment engine is used if a standard ensembler is set
-	ValidateStdEnsemblerNotConfiguredForNopExpEngine(sl, router.Ensembler, router.ExperimentEngine)
+	validateStdEnsemblerNotConfiguredForNopExpEngine(sl, router.Ensembler, router.ExperimentEngine)
 }

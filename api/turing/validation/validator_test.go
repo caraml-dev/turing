@@ -1143,7 +1143,7 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 				},
 			},
 		},
-		"failure | nop exp engine is configured with standard ensembler": {
+		"failure | standard ensembler is configured with nop exp engine": {
 			routes:         models.Routes{route},
 			defaultRouteID: &routeID,
 			ensembler: &models.Ensembler{
@@ -1152,9 +1152,9 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 					RouteNamePath: "route-1",
 				},
 			},
-			expectedError: strings.Join([]string{"Key: 'RouterConfig.Type' ",
-				"Error:Field validation for 'Type' failed on the ",
-				"'should not be nop when a standard ensembler is configured' tag"}, ""),
+			expectedError: strings.Join([]string{"Key: 'RouterConfig.Ensembler.Type' ",
+				"Error:Field validation for 'Ensembler.Type' failed on the ",
+				"'should not be standard if an nop experiment engine is configured' tag"}, ""),
 		},
 	}
 	for name, tt := range suite {
