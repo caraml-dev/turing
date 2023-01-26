@@ -22,9 +22,10 @@ type testSuiteExperimentResponse struct {
 
 func TestNewExperimentRunner(t *testing.T) {
 	tests := map[string]struct {
-		engineName string
-		config     map[string]interface{}
-		wantErr    bool
+		engineName            string
+		config                map[string]interface{}
+		livenessPeriodSeconds int
+		wantErr               bool
 	}{
 		"nop | success": {
 			engineName: "nop",
@@ -37,7 +38,7 @@ func TestNewExperimentRunner(t *testing.T) {
 
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, err := NewExperimentRunner(data.engineName, data.config)
+			_, err := NewExperimentRunner(data.engineName, data.config, data.livenessPeriodSeconds)
 			if (err != nil) != data.wantErr {
 				t.Errorf("NewExperimentRunner() error= %v, wantErr %v", err, data.wantErr)
 			}

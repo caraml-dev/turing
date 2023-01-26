@@ -112,7 +112,7 @@ func TestInitializeDefaultRoutingStrategy(t *testing.T) {
 			)
 			monkey.Patch(
 				experiment.NewExperimentRunner,
-				func(_ string, _ map[string]interface{}) (runner.ExperimentRunner, error) {
+				func(_ string, _ map[string]interface{}, _ int) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
