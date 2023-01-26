@@ -28,11 +28,9 @@ func NewExperimentRunner(
 		return nil, err
 	}
 
-	// If the experiment engine is an rpc engine with a liveness period configured
+	// If the experiment engine is an rpc engine
 	if rpcEngineFactory, ok := factory.(*rpc.EngineFactory); ok {
-		if livenessPeriodSeconds != 0 {
-			startRPCPluginMonitoring(rpcEngineFactory, livenessPeriodSeconds)
-		}
+		startRPCPluginMonitoring(rpcEngineFactory, livenessPeriodSeconds)
 	}
 
 	engine, err := factory.GetExperimentRunner()
