@@ -195,13 +195,7 @@ runs:
 
     - name: Kubernetes namespace report
       uses: jupyterhub/action-k8s-namespace-report@v1
-      if: always()
-
-    - name: Print secrets
-      shell: bash
-      if: always()
-      run: |
-        kubectl describe secret -A
+      if: ${{ failure() }}
 
     - name: Setup MLP project
       shell: bash

@@ -417,7 +417,7 @@ jobs:
           KSERVICE_DOMAIN: 127.0.0.1.nip.io
         run: make e2e-sdk
 
-      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
+      - if: (steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
           echo "::group::describe deployment/turing-mlp"
@@ -470,18 +470,6 @@ jobs:
 
           echo "::group::kubernetes pod logs"
           kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
-          echo "::endgroup::"
-
-          echo "::group::describe secret/turing-postgresql"
-          kubectl describe secret turing-postgresql
-          echo "::endgroup::"
-
-          echo "::group::describe secret/turing-postgresql-merlin"
-          kubectl describe secret turing-postgresql-merlin
-          echo "::endgroup::"
-
-          echo "::group::describe secret/turing-postgresql-mlp"
-          kubectl describe secret turing-postgresql-mlp
           echo "::endgroup::"
 
   release-rules:
