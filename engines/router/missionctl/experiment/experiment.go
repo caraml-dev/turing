@@ -3,9 +3,12 @@ package experiment
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/caraml-dev/turing/engines/experiment"
+	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	_metrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
@@ -15,10 +18,21 @@ import (
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
-func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.ExperimentRunner, error) {
+func NewExperimentRunner(
+	name string,
+	cfg map[string]interface{},
+	livenessPeriodSeconds int,
+) (runner.ExperimentRunner, error) {
 	factory, err := experiment.NewEngineFactory(name, cfg, log.Glob())
 	if err != nil {
 		return nil, err
+	}
+
+	// If the experiment engine is an rpc engine with a liveness period configured
+	if rpcEngineFactory, ok := factory.(*rpc.EngineFactory); ok {
+		if livenessPeriodSeconds != 0 {
+			startRPCPluginMonitoring(rpcEngineFactory, livenessPeriodSeconds)
+		}
 	}
 
 	engine, err := factory.GetExperimentRunner()
@@ -36,6 +50,21 @@ func NewExperimentRunner(name string, cfg map[string]interface{}) (runner.Experi
 
 	return runner.NewInterceptRunner(name, engine, interceptors...), nil
 
+}
+
+func startRPCPluginMonitoring(rpcEngineFactory *rpc.EngineFactory, livenessPeriodSeconds int) {
+	ticker := time.NewTicker(time.Duration(livenessPeriodSeconds) * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := rpcEngineFactory.Client.Ping()
+				if err != nil {
+					panic(fmt.Sprintf("Experiment engine plugin crashed: %s", err.Error()))
+				}
+			}
+		}
+	}()
 }
 
 // Response holds the experiment configuration / error response,

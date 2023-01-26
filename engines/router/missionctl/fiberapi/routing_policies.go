@@ -18,8 +18,9 @@ type routeSelPolicyCfg struct {
 }
 
 type expPolicyCfg struct {
-	ExpEngine      string                 `json:"experiment_engine,omitempty"`
-	ExpEngineProps map[string]interface{} `json:"experiment_engine_properties,omitempty"`
+	ExpEngine             string                 `json:"experiment_engine,omitempty"`
+	ExpEngineProps        map[string]interface{} `json:"experiment_engine_properties,omitempty"`
+	LivenessPeriodSeconds int                    `json:"experiment_engine_liveness_period_seconds,omitempty"`
 }
 
 // ****************************************************************************
@@ -96,6 +97,24 @@ func (exP experimentationPolicy) MarshalJSON() ([]byte, error) {
 	return jsonVal, nil
 }
 
+//func (exP experimentationPolicy) StartPluginMonitoring() {
+//	if exP.experimentEngineFactory != nil {
+//		ticker := time.NewTicker(time.Duration(exP.config.LivenessPeriodSeconds) * time.Second)
+//		go func() {
+//			for {
+//				select {
+//				case <-ticker.C:
+//					err := exP.experimentEngineFactory.Client.Ping()
+//					if err != nil {
+//						panic(fmt.Sprintf("Experiment engine plugin crashed: %s", err.Error()))
+//					}
+//				}
+//			}
+//		}()
+//	}
+//	return
+//}
+
 // newExperimentationPolicy is a creator function for experimentationPolicy
 func newExperimentationPolicy(properties json.RawMessage) (*experimentationPolicy, error) {
 	var expPolicy expPolicyCfg
@@ -107,7 +126,11 @@ func newExperimentationPolicy(properties json.RawMessage) (*experimentationPolic
 	}
 
 	// Initialize experiment policy
-	engine, err := experiment.NewExperimentRunner(expPolicy.ExpEngine, expPolicy.ExpEngineProps)
+	engine, err := experiment.NewExperimentRunner(
+		expPolicy.ExpEngine,
+		expPolicy.ExpEngineProps,
+		expPolicy.LivenessPeriodSeconds,
+	)
 	if err != nil {
 		return nil, err
 	}
