@@ -18,6 +18,7 @@ turing:
     type: rpc-plugin
     rpcPlugin:
       image:  # Value will be set at install time using helm --set command
+      livenessPeriodSeconds: 10
     options:
       engine:
         name: proprietary
