@@ -55,7 +55,6 @@ func startRPCPluginMonitoring(rpcEngineFactory *rpc.EngineFactory, livenessPerio
 	go func() {
 		for {
 			<-ticker.C
-			fmt.Println("test...")
 			err := rpcEngineFactory.Client.Ping()
 			if err != nil {
 				panic(fmt.Sprintf("Experiment engine plugin crashed: %s", err.Error()))
