@@ -14,8 +14,8 @@ type RouterVersionsService struct {
 	mock.Mock
 }
 
-// CreateRouterVersion provides a mock function with given fields: routerVersion
-func (_m *RouterVersionsService) CreateRouterVersion(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
+// Create provides a mock function with given fields: routerVersion
+func (_m *RouterVersionsService) Create(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
 	ret := _m.Called(routerVersion)
 
 	var r0 *models.RouterVersion
@@ -51,8 +51,8 @@ func (_m *RouterVersionsService) Delete(routerVersion *models.RouterVersion) err
 	return r0
 }
 
-// DeployRouterVersion provides a mock function with given fields: project, router, routerVersion
-func (_m *RouterVersionsService) DeployRouterVersion(project *client.Project, router *models.Router, routerVersion *models.RouterVersion) error {
+// Deploy provides a mock function with given fields: project, router, routerVersion
+func (_m *RouterVersionsService) Deploy(project *client.Project, router *models.Router, routerVersion *models.RouterVersion) error {
 	ret := _m.Called(project, router, routerVersion)
 
 	var r0 error
@@ -134,8 +134,8 @@ func (_m *RouterVersionsService) FindLatestVersionByRouterID(routerID models.ID)
 	return r0, r1
 }
 
-// ListRouterVersions provides a mock function with given fields: routerID
-func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
+// ListByRouterID provides a mock function with given fields: routerID
+func (_m *RouterVersionsService) ListByRouterID(routerID models.ID) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID)
 
 	var r0 []*models.RouterVersion
@@ -157,8 +157,8 @@ func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*mode
 	return r0, r1
 }
 
-// ListRouterVersionsWithStatus provides a mock function with given fields: routerID, status
-func (_m *RouterVersionsService) ListRouterVersionsWithStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error) {
+// ListByRouterIDAndStatus provides a mock function with given fields: routerID, status
+func (_m *RouterVersionsService) ListByRouterIDAndStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID, status)
 
 	var r0 []*models.RouterVersion
@@ -180,8 +180,8 @@ func (_m *RouterVersionsService) ListRouterVersionsWithStatus(routerID models.ID
 	return r0, r1
 }
 
-// UpdateRouterVersion provides a mock function with given fields: routerVersion
-func (_m *RouterVersionsService) UpdateRouterVersion(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
+// Update provides a mock function with given fields: routerVersion
+func (_m *RouterVersionsService) Update(routerVersion *models.RouterVersion) (*models.RouterVersion, error) {
 	ret := _m.Called(routerVersion)
 
 	var r0 *models.RouterVersion

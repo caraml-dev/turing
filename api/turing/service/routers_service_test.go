@@ -131,7 +131,7 @@ func TestRoutersServiceIntegration(t *testing.T) {
 			repository.NewRoutersRepository(db),
 			repository.NewRouterVersionsRepository(db),
 			&allServices,
-		).CreateRouterVersion(routerVersion)
+		).Create(routerVersion)
 		assert.NoError(t, err)
 		router.SetCurrRouterVersionID(routerVersion.ID)
 		saved, err := svc.Save(router)

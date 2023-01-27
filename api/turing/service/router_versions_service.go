@@ -11,24 +11,24 @@ import (
 
 // RouterVersionsService must implement the business logic for router version related operations.
 type RouterVersionsService interface {
-	// ListRouterVersions list all RouterVersions associated with the given routerID
-	ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error)
-	// ListRouterVersionsWithStatus lists the RouterVersions for the given Router matching the given status.
-	ListRouterVersionsWithStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error)
+	// ListByRouterID list all RouterVersions associated with the given routerID
+	ListByRouterID(routerID models.ID) ([]*models.RouterVersion, error)
+	// ListByRouterIDAndStatus lists the RouterVersions for the given Router matching the given status.
+	ListByRouterIDAndStatus(routerID models.ID, status models.RouterVersionStatus) ([]*models.RouterVersion, error)
 	// FindByID finds the RouterVersion matching the given id.
 	FindByID(routerVersionID models.ID) (*models.RouterVersion, error)
 	// FindByRouterIDAndVersion finds the RouterVersion for the given Router matching the given version.
 	FindByRouterIDAndVersion(routerID models.ID, version uint) (*models.RouterVersion, error)
 	// FindLatestVersionByRouterID finds the latest RouterVersion for the given Router matching the given version.
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
-	// CreateRouterVersion creates a new router version
-	CreateRouterVersion(routerVersion *models.RouterVersion) (*models.RouterVersion, error)
-	// UpdateRouterVersion updates an existing router version
-	UpdateRouterVersion(routerVersion *models.RouterVersion) (*models.RouterVersion, error)
+	// Create creates a new router version
+	Create(routerVersion *models.RouterVersion) (*models.RouterVersion, error)
+	// Update updates an existing router version
+	Update(routerVersion *models.RouterVersion) (*models.RouterVersion, error)
 	// Delete deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
-	// DeployRouterVersion deploys the given router version
-	DeployRouterVersion(project *mlp.Project, router *models.Router, routerVersion *models.RouterVersion) error
+	// Deploy deploys the given router version
+	Deploy(project *mlp.Project, router *models.Router, routerVersion *models.RouterVersion) error
 }
 
 func NewRouterVersionsService(
@@ -49,7 +49,7 @@ type routerVersionsService struct {
 	services                 *Services
 }
 
-func (svc *routerVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
+func (svc *routerVersionsService) ListByRouterID(routerID models.ID) ([]*models.RouterVersion, error) {
 	routerVersions, err := svc.routerVersionsRepository.List(routerID)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (svc *routerVersionsService) ListRouterVersions(routerID models.ID) ([]*mod
 	return routerVersions, nil
 }
 
-func (svc *routerVersionsService) ListRouterVersionsWithStatus(
+func (svc *routerVersionsService) ListByRouterIDAndStatus(
 	routerID models.ID,
 	status models.RouterVersionStatus,
 ) ([]*models.RouterVersion, error) {
@@ -138,7 +138,7 @@ func (svc *routerVersionsService) FindLatestVersionByRouterID(
 	return routerVersion, nil
 }
 
-func (svc *routerVersionsService) CreateRouterVersion(
+func (svc *routerVersionsService) Create(
 	routerVersion *models.RouterVersion,
 ) (*models.RouterVersion, error) {
 	routerVersion, err := svc.routerVersionsRepository.Save(routerVersion)
@@ -155,7 +155,7 @@ func (svc *routerVersionsService) CreateRouterVersion(
 	return routerVersion, nil
 }
 
-func (svc *routerVersionsService) UpdateRouterVersion(
+func (svc *routerVersionsService) Update(
 	routerVersion *models.RouterVersion,
 ) (*models.RouterVersion, error) {
 	routerVersion, err := svc.routerVersionsRepository.Save(routerVersion)
@@ -191,7 +191,7 @@ func (svc *routerVersionsService) Delete(
 	return svc.routerVersionsRepository.Delete(routerVersion)
 }
 
-func (svc *routerVersionsService) DeployRouterVersion(
+func (svc *routerVersionsService) Deploy(
 	project *mlp.Project,
 	router *models.Router,
 	routerVersion *models.RouterVersion,

@@ -105,7 +105,7 @@ func (c RoutersController) CreateRouter(
 	)
 	if err == nil {
 		// Save router version
-		routerVersion, err = c.Services.RouterVersionsService.CreateRouterVersion(rVersion)
+		routerVersion, err = c.Services.RouterVersionsService.Create(rVersion)
 	}
 
 	if err != nil {
@@ -175,7 +175,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	)
 	if err == nil {
 		// Save router version, re-assign the value of err
-		routerVersion, err = c.Services.RouterVersionsService.UpdateRouterVersion(rVersion)
+		routerVersion, err = c.Services.RouterVersionsService.Update(rVersion)
 	}
 
 	if err != nil {
@@ -212,7 +212,7 @@ func (c RoutersController) DeleteRouter(
 		router.Status == models.RouterStatusDeployed {
 		return BadRequest("invalid delete request", "router is currently deployed. Undeploy it first.")
 	}
-	pendingRouterVersions, err := c.Services.RouterVersionsService.ListRouterVersionsWithStatus(
+	pendingRouterVersions, err := c.Services.RouterVersionsService.ListByRouterIDAndStatus(
 		router.ID, models.RouterVersionStatusPending)
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())

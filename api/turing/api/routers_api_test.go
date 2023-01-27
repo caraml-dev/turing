@@ -233,7 +233,7 @@ func TestCreateRouter(t *testing.T) {
 		Status: models.RouterVersionStatusPending,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("CreateRouterVersion", routerVersion).Return(routerVersion, nil)
+	routerVersionSvc.On("Create", routerVersion).Return(routerVersion, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
 	deploymentSvc.On("DeployOrRollbackRouter",
@@ -388,7 +388,7 @@ func TestUpdateRouter(t *testing.T) {
 		Status: models.RouterVersionStatusPending,
 	}
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("UpdateRouterVersion", routerVersion).Return(routerVersion, nil)
+	routerVersionSvc.On("Update", routerVersion).Return(routerVersion, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
 	deploymentSvc.On("DeployOrRollbackRouter",
@@ -560,16 +560,16 @@ func TestDeleteRouter(t *testing.T) {
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 	routerVersionSvc.
-		On("ListRouterVersionsWithStatus", models.ID(3), models.RouterVersionStatusPending).
+		On("ListByRouterIDAndStatus", models.ID(3), models.RouterVersionStatusPending).
 		Return(nil, errors.New("test List Router Versions error"))
 	routerVersionSvc.
-		On("ListRouterVersionsWithStatus", models.ID(4), models.RouterVersionStatusPending).
+		On("ListByRouterIDAndStatus", models.ID(4), models.RouterVersionStatusPending).
 		Return([]*models.RouterVersion{{Status: models.RouterVersionStatusPending}}, nil)
 	routerVersionSvc.
-		On("ListRouterVersionsWithStatus", models.ID(5), models.RouterVersionStatusPending).
+		On("ListByRouterIDAndStatus", models.ID(5), models.RouterVersionStatusPending).
 		Return([]*models.RouterVersion{}, nil)
 	routerVersionSvc.
-		On("ListRouterVersionsWithStatus", models.ID(6), models.RouterVersionStatusPending).
+		On("ListByRouterIDAndStatus", models.ID(6), models.RouterVersionStatusPending).
 		Return([]*models.RouterVersion{}, nil)
 
 	// Define tests
@@ -868,8 +868,8 @@ func TestUndeployRouter(t *testing.T) {
 	routerSvc.On("Save", router3).Return(router3, nil)
 	// Router Version Service
 	routerVersionSvc := &mocks.RouterVersionsService{}
-	routerVersionSvc.On("ListRouterVersions", models.ID(2)).Return([]*models.RouterVersion{}, nil)
-	routerVersionSvc.On("ListRouterVersions", models.ID(3)).Return([]*models.RouterVersion{}, nil)
+	routerVersionSvc.On("ListByRouterID", models.ID(2)).Return([]*models.RouterVersion{}, nil)
+	routerVersionSvc.On("ListByRouterID", models.ID(3)).Return([]*models.RouterVersion{}, nil)
 	// Deployment Service
 	deploymentSvc := &mocks.RouterDeploymentService{}
 	deploymentSvc.

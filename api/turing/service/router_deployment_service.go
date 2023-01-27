@@ -229,7 +229,7 @@ func (svc routerDeploymentService) UndeployRouter(
 		"undeploying router %s", router.Name))
 
 	// Clean up deployed as well as pending versions from the cluster
-	routerVersions, err := svc.services.RouterVersionsService.ListRouterVersions(router.ID)
+	routerVersions, err := svc.services.RouterVersionsService.ListByRouterID(router.ID)
 	if err != nil {
 		return err
 	}
@@ -251,7 +251,7 @@ func (svc routerDeploymentService) UndeployRouter(
 			// Update the version's status
 			versionID := routerVersion.ID
 			routerVersion.Status = models.RouterVersionStatusUndeployed
-			routerVersion, err = svc.services.RouterVersionsService.UpdateRouterVersion(routerVersion)
+			routerVersion, err = svc.services.RouterVersionsService.Update(routerVersion)
 			if err != nil {
 				errorStrings = append(errorStrings, err.Error())
 				if router.CurrRouterVersion != nil &&
@@ -378,7 +378,7 @@ func (svc routerDeploymentService) deployRouterVersion(
 	// Prepare to deploy router version - set version status to pending deployment
 	if routerVersion.Status != models.RouterVersionStatusPending {
 		routerVersion.Status = models.RouterVersionStatusPending
-		_, err := svc.services.RouterVersionsService.UpdateRouterVersion(routerVersion)
+		_, err := svc.services.RouterVersionsService.Update(routerVersion)
 		if err != nil {
 			return "", err
 		}
@@ -427,7 +427,7 @@ func (svc routerDeploymentService) deployRouterVersion(
 
 	// Deploy succeeded - update version's status to deployed and return endpoint
 	routerVersion.Status = models.RouterVersionStatusDeployed
-	_, err = svc.services.RouterVersionsService.UpdateRouterVersion(routerVersion)
+	_, err = svc.services.RouterVersionsService.Update(routerVersion)
 	return endpoint, err
 }
 
@@ -452,7 +452,7 @@ func (svc routerDeploymentService) updateRouterReferences(
 			// If the current version has been re-deployed, don't set its status to undeployed
 			router.CurrRouterVersion.ID != routerVersion.ID {
 			router.CurrRouterVersion.Status = models.RouterVersionStatusUndeployed
-			_, err := svc.services.RouterVersionsService.UpdateRouterVersion(router.CurrRouterVersion)
+			_, err := svc.services.RouterVersionsService.Update(router.CurrRouterVersion)
 			if err != nil {
 				return err
 			}
@@ -499,7 +499,7 @@ func (svc routerDeploymentService) updateRouterVersionStatusToFailed(
 	errorsStrings := []string{err.Error()}
 	routerVersion.Status = models.RouterVersionStatusFailed
 	routerVersion.Error = err.Error()
-	_, err = svc.services.RouterVersionsService.UpdateRouterVersion(routerVersion)
+	_, err = svc.services.RouterVersionsService.Update(routerVersion)
 	if err != nil {
 		errorsStrings = append(errorsStrings, err.Error())
 	}

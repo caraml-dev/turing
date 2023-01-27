@@ -7,13 +7,22 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mock_service"
 )
 
-func TestListRouterVersions(t *testing.T) {
+type RouterVersionsServiceTestSuite struct {
+	suite.Suite
+}
+
+func TestRouterVersionsService(t *testing.T) {
+	suite.Run(t, new(RouterVersionsServiceTestSuite))
+}
+
+func (s *RouterVersionsServiceTestSuite) TestListByRouterID() {
 	tests := map[string]struct {
 		routerID models.ID
 		setup    func(*testing.T) service.RouterVersionsService
@@ -125,15 +134,15 @@ func TestListRouterVersions(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
-			versions, err := svc.ListRouterVersions(tt.routerID)
+			versions, err := svc.ListByRouterID(tt.routerID)
 			tt.verify(t, versions, err)
 		})
 	}
 }
 
-func TestListRouterVersionsWithStatus(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestListByRouterIDAndStatus() {
 	tests := map[string]struct {
 		routerID models.ID
 		status   models.RouterVersionStatus
@@ -249,15 +258,15 @@ func TestListRouterVersionsWithStatus(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
-			versions, err := svc.ListRouterVersionsWithStatus(tt.routerID, tt.status)
+			versions, err := svc.ListByRouterIDAndStatus(tt.routerID, tt.status)
 			tt.verify(t, versions, err)
 		})
 	}
 }
 
-func TestFindByID(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestFindByID() {
 	tests := map[string]struct {
 		id     models.ID
 		setup  func(*testing.T) service.RouterVersionsService
@@ -331,7 +340,7 @@ func TestFindByID(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
 			version, err := svc.FindByID(tt.id)
 			tt.verify(t, version, err)
@@ -339,7 +348,7 @@ func TestFindByID(t *testing.T) {
 	}
 }
 
-func TestFindByRouterIDAndVersion(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestFindByRouterIDAndVersion() {
 	tests := map[string]struct {
 		routerID models.ID
 		version  uint
@@ -416,7 +425,7 @@ func TestFindByRouterIDAndVersion(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
 			version, err := svc.FindByRouterIDAndVersion(tt.routerID, tt.version)
 			tt.verify(t, version, err)
@@ -424,7 +433,7 @@ func TestFindByRouterIDAndVersion(t *testing.T) {
 	}
 }
 
-func TestFindLatestVersionByRouterID(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestFindLatestVersionByRouterID() {
 	tests := map[string]struct {
 		routerID models.ID
 		setup    func(*testing.T) service.RouterVersionsService
@@ -498,7 +507,7 @@ func TestFindLatestVersionByRouterID(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
 			version, err := svc.FindLatestVersionByRouterID(tt.routerID)
 			tt.verify(t, version, err)
@@ -506,7 +515,7 @@ func TestFindLatestVersionByRouterID(t *testing.T) {
 	}
 }
 
-func TestCreateRouterVersion(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestCreate() {
 	tests := map[string]struct {
 		routerVersion *models.RouterVersion
 		setup         func(*testing.T) service.RouterVersionsService
@@ -580,15 +589,15 @@ func TestCreateRouterVersion(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
-			version, err := svc.CreateRouterVersion(tt.routerVersion)
+			version, err := svc.Create(tt.routerVersion)
 			tt.verify(t, version, err)
 		})
 	}
 }
 
-func TestUpdateRouterVersion(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestUpdate() {
 	tests := map[string]struct {
 		routerVersion *models.RouterVersion
 		setup         func(*testing.T) service.RouterVersionsService
@@ -662,15 +671,15 @@ func TestUpdateRouterVersion(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
-			version, err := svc.UpdateRouterVersion(tt.routerVersion)
+			version, err := svc.Update(tt.routerVersion)
 			tt.verify(t, version, err)
 		})
 	}
 }
 
-func TestDelete(t *testing.T) {
+func (s *RouterVersionsServiceTestSuite) TestDelete() {
 	tests := map[string]struct {
 		routerVersion *models.RouterVersion
 		setup         func(*testing.T) service.RouterVersionsService
@@ -748,7 +757,7 @@ func TestDelete(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
 			err := svc.Delete(tt.routerVersion)
 			tt.verify(t, err)

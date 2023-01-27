@@ -1,7 +1,6 @@
 run:
   build-tags:
     - e2e
-    # - integration
   skip-dirs:
     - turing/generated
 

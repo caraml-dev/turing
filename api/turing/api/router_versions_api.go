@@ -25,7 +25,7 @@ func (c RouterVersionsController) ListRouterVersions(
 	}
 
 	// List router versions
-	routerVersions, err := c.Services.RouterVersionsService.ListRouterVersions(router.ID)
+	routerVersions, err := c.Services.RouterVersionsService.ListByRouterID(router.ID)
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())
 	}
@@ -66,7 +66,7 @@ func (c RouterVersionsController) CreateRouterVersion(
 	if err == nil {
 		// Save router version, re-assign the value of err
 		routerVersion.Status = models.RouterVersionStatusUndeployed
-		routerVersion, err = c.Services.RouterVersionsService.CreateRouterVersion(routerVersion)
+		routerVersion, err = c.Services.RouterVersionsService.Create(routerVersion)
 	}
 
 	if err != nil {
@@ -138,7 +138,7 @@ func (c RouterVersionsController) DeployRouterVersion(
 	}
 
 	// Attempt tp deploy the router version
-	err := c.Services.RouterVersionsService.DeployRouterVersion(project, router, routerVersion)
+	err := c.Services.RouterVersionsService.Deploy(project, router, routerVersion)
 	if err != nil {
 		return BadRequest("invalid deploy request", err.Error())
 	}
