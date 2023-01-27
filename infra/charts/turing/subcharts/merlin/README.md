@@ -104,6 +104,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | environmentConfigs[0].queue_resource_percentage | string | `"20"` |  |
 | environmentConfigs[0].region | string | `"id"` |  |
 | global.merlin | object | `{}` |  |
+| global.mlp | object | `{}` |  |
 | homepage | string | `"/merlin"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
@@ -127,9 +128,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | mlflow.image.registry | string | `"ghcr.io"` |  |
 | mlflow.image.repository | string | `"gojek/mlflow"` |  |
 | mlflow.image.tag | string | `"1.3.0"` |  |
+| mlflow.postgresql.auth | object | `{}` |  |
 | mlflow.postgresql.enabled | bool | `false` |  |
-| mlflow.postgresql.postgresqlDatabase | string | `"mlflow"` |  |
-| mlflow.postgresql.postgresqlUsername | string | `"mlflow"` |  |
 | mlpApi.apiHost | string | `"http://mlp.mlp:8080/v1"` |  |
 | mlpApi.encryptionKey | string | `""` |  |
 | monitoring.baseURL | string | `""` |  |
@@ -138,13 +138,14 @@ The following table lists the configurable parameters of the Turing chart and th
 | newrelic.appname | string | `"merlin-api-dev"` |  |
 | newrelic.enabled | bool | `false` |  |
 | newrelic.licenseSecretName | string | `"newrelic-license-secret"` |  |
+| postgresql.auth.database | string | `"merlin"` |  |
+| postgresql.auth.password | string | `"merlin"` |  |
+| postgresql.auth.username | string | `"merlin"` |  |
+| postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` |  |
 | postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"merlin"` |  |
-| postgresql.postgresqlPassword | string | `"merlin"` |  |
-| postgresql.postgresqlUsername | string | `"merlin"` |  |
 | postgresql.replication.applicationName | string | `"merlin"` |  |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` |  |

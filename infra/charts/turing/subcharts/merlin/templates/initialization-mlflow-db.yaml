@@ -16,10 +16,10 @@ stringData:
   init_mlflow_backend_store.sh: |-
     #!/bin/sh
     set -e
-    echo "Create DATABASE {{ .Values.mlflow.postgresql.postgresqlDatabase }} with OWNER {{ .Values.mlflow.postgresql.postgresqlUsername }}:"
+    echo "Create DATABASE {{ .Values.mlflow.postgresql.auth.database }} with OWNER {{ .Values.mlflow.postgresql.auth.username }}:"
     psql -v ON_ERROR_STOP=1 --username "postgres" <<-EOSQL
-      CREATE USER {{ .Values.mlflow.postgresql.postgresqlUsername }} WITH PASSWORD '{{ .Values.mlflow.postgresql.postgresqlPassword }}';
-      CREATE DATABASE {{ .Values.mlflow.postgresql.postgresqlDatabase }};
-      GRANT ALL PRIVILEGES ON DATABASE {{ .Values.mlflow.postgresql.postgresqlDatabase }} TO {{ .Values.mlflow.postgresql.postgresqlUsername }};
+      CREATE USER {{ .Values.mlflow.postgresql.auth.username }} WITH PASSWORD '{{ .Values.mlflow.postgresql.auth.password }}';
+      CREATE DATABASE {{ .Values.mlflow.postgresql.auth.database }};
+      GRANT ALL PRIVILEGES ON DATABASE {{ .Values.mlflow.postgresql.auth.database }} TO {{ .Values.mlflow.postgresql.auth.username }};
     EOSQL
     echo "Done."
