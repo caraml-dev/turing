@@ -17,10 +17,10 @@ Kubernetes cluster. Setting up Kubernetes and Helm is outside the scope of
 this README. Please refer to the Kubernetes and Helm documentation.
 
 - **Helm 3.0+** – This chart was tested with Helm v3.7.1, but it is also expected to work with earlier Helm versions
-- **Kubernetes 1.18+** – This chart was tested with GKE v1.20.x and with [k3d](https://github.com/rancher/k3d) v1.21.x,
+- **Kubernetes 1.22+** – This chart was tested with GKE v1.22.x and with [k3d](https://github.com/rancher/k3d) v1.22.x,
 but it's possible it works with earlier k8s versions too
-- **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
-- **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
+- **Istio 1.12.4+** – This chart was tested with Istio v1.12.4
+- **Knative 1.7.4+, <1.8** – This chart was tested with Knative 1.7.4
 
 It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.

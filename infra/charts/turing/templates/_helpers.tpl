@@ -202,6 +202,7 @@ RouterDefaults:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
       PluginConfig:
         Image: {{ $expEngine.rpcPlugin.image }}
+        LivenessPeriodSeconds: {{ $expEngine.rpcPlugin.livenessPeriodSeconds | default 10 }}
 {{ end }}
       ServiceAccountKeyFilePath: {{ $expEngine.serviceAccountKeyFilePath }}
 {{- end -}}

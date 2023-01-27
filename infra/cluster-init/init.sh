@@ -39,13 +39,13 @@ function install_knative {
     echo "Installing Knative."
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.3.2}/serving-crds.yaml"
+        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.7.4}/serving-crds.yaml"
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.3.2}/serving-core.yaml"
+        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.7.4}/serving-core.yaml"
 
     kubectl apply \
-        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.3.2}/serving-hpa.yaml"
+        -f "https://github.com/knative/serving/releases/download/knative-v${KNATIVE_VERSION:-1.7.4}/serving-hpa.yaml"
 
     local core_apps=("activator" "autoscaler" "controller" "webhook" "domain-mapping" "domainmapping-webhook")
     for app in ${core_apps[@]}; do

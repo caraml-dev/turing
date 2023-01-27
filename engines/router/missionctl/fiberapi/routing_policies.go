@@ -18,8 +18,9 @@ type routeSelPolicyCfg struct {
 }
 
 type expPolicyCfg struct {
-	ExpEngine      string                 `json:"experiment_engine,omitempty"`
-	ExpEngineProps map[string]interface{} `json:"experiment_engine_properties,omitempty"`
+	ExpEngine             string                 `json:"experiment_engine,omitempty"`
+	ExpEngineProps        map[string]interface{} `json:"experiment_engine_properties,omitempty"`
+	LivenessPeriodSeconds int                    `json:"experiment_engine_liveness_period_seconds,omitempty"`
 }
 
 // ****************************************************************************
@@ -107,7 +108,11 @@ func newExperimentationPolicy(properties json.RawMessage) (*experimentationPolic
 	}
 
 	// Initialize experiment policy
-	engine, err := experiment.NewExperimentRunner(expPolicy.ExpEngine, expPolicy.ExpEngineProps)
+	engine, err := experiment.NewExperimentRunner(
+		expPolicy.ExpEngine,
+		expPolicy.ExpEngineProps,
+		expPolicy.LivenessPeriodSeconds,
+	)
 	if err != nil {
 		return nil, err
 	}

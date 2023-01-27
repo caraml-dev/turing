@@ -287,6 +287,19 @@ func validateConditionOrthogonality(
 	}
 }
 
+func validateStdEnsemblerNotConfiguredForNopExpEngine(
+	sl validator.StructLevel,
+	ensembler *models.Ensembler,
+	experimentEngine *request.ExperimentEngineConfig,
+) {
+	if experimentEngine.Type == models.ExperimentEngineTypeNop {
+		if ensembler != nil && ensembler.Type == models.EnsemblerStandardType {
+			sl.ReportError(ensembler.Type, "Ensembler.Type", "Type",
+				"should not be standard if an nop experiment engine is configured", "")
+		}
+	}
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	router := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -368,4 +381,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}
+
+	// Validate that a non-nop experiment engine is used if a standard ensembler is set
+	validateStdEnsemblerNotConfiguredForNopExpEngine(sl, router.Ensembler, router.ExperimentEngine)
 }

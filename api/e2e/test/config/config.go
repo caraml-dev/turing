@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/mitchellh/mapstructure"
 	"github.com/ory/viper"
