@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	mlp "github.com/gojek/mlp/api/client"
+
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mock_service"
@@ -760,6 +762,119 @@ func (s *RouterVersionsServiceTestSuite) TestDelete() {
 		s.Suite.T().Run(name, func(t *testing.T) {
 			svc := tt.setup(t)
 			err := svc.Delete(tt.routerVersion)
+			tt.verify(t, err)
+		})
+	}
+}
+
+func (s *RouterVersionsServiceTestSuite) TestDeploy() {
+	tests := map[string]struct {
+		project       *mlp.Project
+		router        *models.Router
+		routerVersion *models.RouterVersion
+		setup         func(*testing.T) service.RouterVersionsService
+		verify        func(*testing.T, error)
+	}{
+		"router deploying error": {
+			project:       &mlp.Project{},
+			router:        &models.Router{Status: models.RouterStatusPending},
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "router is currently deploying")
+			},
+		},
+		"router version deploying error": {
+			project:       &mlp.Project{},
+			router:        &models.Router{Status: models.RouterStatusDeployed},
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusPending, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "currently deploying")
+			},
+		},
+		"router version deployed error": {
+			project:       &mlp.Project{},
+			router:        &models.Router{Status: models.RouterStatusDeployed},
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusDeployed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "already deployed")
+			},
+		},
+		"deployment error": {
+			project:       &mlp.Project{},
+			router:        &models.Router{Status: models.RouterStatusDeployed},
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				routerDeploymentSvc := mock_service.NewMockRouterDeploymentService(ctrl)
+				routerDeploymentSvc.EXPECT().
+					DeployOrRollbackRouter(
+						&mlp.Project{},
+						&models.Router{Status: models.RouterStatusDeployed},
+						createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4)).
+					Return(errors.New("test Deployment error"))
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{
+					RouterDeploymentService: routerDeploymentSvc,
+				})
+			},
+			verify: func(t *testing.T, err error) {
+				// Deployment error does not affect the return response as it's done async
+				assert.NoError(t, err)
+			},
+		},
+		"success": {
+			project:       &mlp.Project{},
+			router:        &models.Router{Status: models.RouterStatusDeployed},
+			routerVersion: createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4),
+			setup: func(t *testing.T) service.RouterVersionsService {
+				ctrl := gomock.NewController(t)
+				rRepo := mock_service.NewMockRoutersRepository(ctrl)
+				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
+				routerDeploymentSvc := mock_service.NewMockRouterDeploymentService(ctrl)
+				routerDeploymentSvc.EXPECT().
+					DeployOrRollbackRouter(
+						&mlp.Project{},
+						&models.Router{Status: models.RouterStatusDeployed},
+						createTestRouterVersion("test-router", models.RouterVersionStatusFailed, 1, 2, 3, 4)).
+					Return(nil)
+				// Create new router versions service
+				return service.NewRouterVersionsService(rRepo, rvRepo, &service.Services{
+					RouterDeploymentService: routerDeploymentSvc,
+				})
+			},
+			verify: func(t *testing.T, err error) {
+				assert.NoError(t, err)
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		s.Suite.T().Run(name, func(t *testing.T) {
+			svc := tt.setup(t)
+			err := svc.Deploy(tt.project, tt.router, tt.routerVersion)
 			tt.verify(t, err)
 		})
 	}

@@ -199,8 +199,9 @@ func (svc *routerVersionsService) Deploy(
 	if router.Status == models.RouterStatusPending {
 		return errors.New("router is currently deploying, cannot do another deployment")
 	}
-	if routerVersion.Status == models.RouterVersionStatusDeployed {
-		return errors.New("router version is already deployed")
+	if routerVersion.Status == models.RouterVersionStatusDeployed ||
+		routerVersion.Status == models.RouterVersionStatusPending {
+		return errors.New("router version is already deployed or currently deploying")
 	}
 
 	// Deploy the version asynchronously
