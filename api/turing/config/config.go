@@ -486,8 +486,6 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DbConfig::Password", "")
 	v.SetDefault("DbConfig::Database", "turing")
 	v.SetDefault("DbConfig::MigrationsFolder", "db-migrations/")
-	v.SetDefault("DbConfig::ConnMaxIdleTime", "0s")
-	v.SetDefault("DbConfig::ConnMaxLifetime", "0s")
 
 	v.SetDefault("DeployConfig::EnvironmentType", "")
 	v.SetDefault("DeployConfig::Timeout", "3m")
