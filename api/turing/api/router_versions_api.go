@@ -137,7 +137,7 @@ func (c RouterVersionsController) DeployRouterVersion(
 		return errResp
 	}
 
-	// Attempt tp deploy the router version
+	// Attempt to deploy the router version
 	err := c.Services.RouterVersionsService.Deploy(project, router, routerVersion)
 	if err != nil {
 		return BadRequest("invalid deploy request", err.Error())
