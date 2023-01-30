@@ -9,6 +9,10 @@ DbConfig:
   Host: "127.0.0.1"
   User: dbuser
   Password: dbpassword
+  ConnMaxIdleTime: 1s
+  ConnMaxLifetime: 2s
+  MaxIdleConns: 3
+  MaxOpenConns: 4
 DeployConfig:
   EnvironmentType: dev
   Timeout: 5m
