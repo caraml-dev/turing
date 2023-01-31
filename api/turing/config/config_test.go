@@ -114,6 +114,9 @@ func setupNewEnv(envMaps ...map[string]string) {
 
 func TestLoad(t *testing.T) {
 	blueSvcAcctKeyFilePath := "/etc/plugins/blue/gcp_service_account/service-account.json"
+	zeroSecond, _ := time.ParseDuration("0s")
+	oneSecond, _ := time.ParseDuration("1s")
+	twoSecond, _ := time.ParseDuration("2s")
 
 	tests := map[string]struct {
 		filepaths []string
@@ -131,6 +134,10 @@ func TestLoad(t *testing.T) {
 					Port:             5432,
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
+					ConnMaxIdleTime:  zeroSecond,
+					ConnMaxLifetime:  zeroSecond,
+					MaxIdleConns:     0,
+					MaxOpenConns:     0,
 				},
 				DeployConfig: &config.DeploymentConfig{
 					Timeout:           3 * time.Minute,
@@ -197,6 +204,10 @@ func TestLoad(t *testing.T) {
 					Password:         "dbpassword",
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
+					ConnMaxIdleTime:  oneSecond,
+					ConnMaxLifetime:  twoSecond,
+					MaxIdleConns:     3,
+					MaxOpenConns:     4,
 				},
 				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType:   "dev",
@@ -284,6 +295,10 @@ func TestLoad(t *testing.T) {
 					Password:         "newpassword",
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
+					ConnMaxIdleTime:  oneSecond,
+					ConnMaxLifetime:  twoSecond,
+					MaxIdleConns:     3,
+					MaxOpenConns:     4,
 				},
 				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType:   "dev",
@@ -405,6 +420,10 @@ func TestLoad(t *testing.T) {
 					Password:         "dbpassword-env",
 					Database:         "turing",
 					MigrationsFolder: "db-migrations/",
+					ConnMaxIdleTime:  oneSecond,
+					ConnMaxLifetime:  twoSecond,
+					MaxIdleConns:     3,
+					MaxOpenConns:     4,
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,

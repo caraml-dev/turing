@@ -171,6 +171,10 @@ DbConfig:
   Database:  {{ include "turing.db.database" . }}
   User:  {{ include "turing.db.user" . }}
   Password:  {{ include "turing.db.password" . }}
+  ConnMaxIdleTime: {{ .Values.turing.config.DbConfig.ConnMaxIdleTime }}
+  ConnMaxLifetime: {{ .Values.turing.config.DbConfig.ConnMaxLifetime }}
+  MaxIdleConns: {{ .Values.turing.config.DbConfig.MaxIdleConns }}
+  MaxOpenConns: {{ .Values.turing.config.DbConfig.MaxOpenConns }}
 DeployConfig:
   EnvironmentType: {{ .Values.turing.config.DeployConfig.EnvironmentType | default (include "turing.environment" .) }}
 KubernetesLabelConfigs:

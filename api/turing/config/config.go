@@ -248,12 +248,18 @@ type SinglePageApplicationConfig struct {
 
 // DatabaseConfig config captures the Turing database config
 type DatabaseConfig struct {
-	Host             string `validate:"required"`
-	Port             int    `validate:"required"`
-	User             string `validate:"required"`
-	Password         string `validate:"required"`
-	Database         string `validate:"required"`
+	Host     string `validate:"required"`
+	Port     int    `validate:"required"`
+	User     string `validate:"required"`
+	Password string `validate:"required"`
+	Database string `validate:"required"`
+
 	MigrationsFolder string `validate:"required"`
+
+	ConnMaxIdleTime time.Duration
+	ConnMaxLifetime time.Duration
+	MaxIdleConns    int
+	MaxOpenConns    int
 }
 
 type ExperimentEngineConfig struct {
