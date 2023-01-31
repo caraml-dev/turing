@@ -35,7 +35,7 @@ services:
     restart: on-failure
     volumes:
       - "kube:/.kube"
-      - "/tmp:/tmp"
+      - "${PWD}:/tmp"
     entrypoint: sh -ec
     command:
       - |

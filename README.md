@@ -225,9 +225,8 @@ RouterDefaults:
   Image: localhost:5000/turing-router
 ClusterConfig:
   InClusterConfig: false
-  VaultConfig:
-    Address: http://localhost:8200
-    Token: root
+  EnvironmentConfigPath: ""
+  EnsemblingServiceK8sConfig: {}
 TuringEncryptionKey: password
 MLPConfig:
   MerlinURL: http://localhost:8082/v1
