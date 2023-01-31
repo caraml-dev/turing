@@ -2,7 +2,7 @@ apiVersion: v2
 name: turing-init
 description: A Helm chart for Kubernetes
 type: application
-version: 0.1.0
+version: 0.2.0
 dependencies:
 - name: spark-operator
   version: 1.1.7

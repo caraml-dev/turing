@@ -31,7 +31,7 @@ runs:
   using: composite
   steps:
     - name: "Setup local k8s cluster"
-      uses: AbsaOSS/k3d-action@v2.0.0
+      uses: AbsaOSS/k3d-action@v2.3.0
       with:
         cluster-name: ${{ inputs.cluster_name }}
         args: >-

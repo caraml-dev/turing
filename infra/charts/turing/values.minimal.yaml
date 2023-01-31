@@ -14,19 +14,3 @@ turing:
     # -- Use in-cluster authentication mode, so Turing routers will be deployed to the same cluster,
     # where Turing API is deployed
     useInClusterConfig: true
-
-postgresql:
-  # -- Password to access Turing DB
-  postgresqlPassword: "turing-db-password"
-
-
-merlin:
-  postgresql:
-    # -- Password to access Merlin DB
-    postgresqlPassword: "merlin-db-password"
-
-mlp:
-  postgresql:
-    # -- Password to access MLP DB
-    postgresqlPassword: "mlp-db-password"
-
