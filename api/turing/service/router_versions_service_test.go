@@ -53,7 +53,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					List(gomock.Eq(models.ID(1))).
+					List(models.ID(1)).
 					Return([]*models.RouterVersion{rv}, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -76,7 +76,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					List(gomock.Eq(models.ID(1))).
+					List(models.ID(1)).
 					Return([]*models.RouterVersion{rv}, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -106,7 +106,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					List(gomock.Eq(models.ID(1))).
+					List(models.ID(1)).
 					Return(versions, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				for _, rv := range versions {
@@ -175,7 +175,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterIDAndStatus() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					ListByStatus(gomock.Eq(models.ID(1)), gomock.Eq(models.RouterVersionStatusPending)).
+					ListByStatus(models.ID(1), models.RouterVersionStatusPending).
 					Return([]*models.RouterVersion{rv}, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -199,7 +199,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterIDAndStatus() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					ListByStatus(gomock.Eq(models.ID(1)), gomock.Eq(models.RouterVersionStatusPending)).
+					ListByStatus(models.ID(1), models.RouterVersionStatusPending).
 					Return([]*models.RouterVersion{rv}, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -230,7 +230,7 @@ func (s *RouterVersionsServiceTestSuite) TestListByRouterIDAndStatus() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					ListByStatus(gomock.Eq(models.ID(1)), gomock.Eq(models.RouterVersionStatusPending)).
+					ListByStatus(models.ID(1), models.RouterVersionStatusPending).
 					Return(versions, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				for _, rv := range versions {
@@ -297,7 +297,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindByID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindByID(gomock.Eq(models.ID(1))).
+					FindByID(models.ID(1)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -320,7 +320,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindByID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindByID(gomock.Eq(models.ID(1))).
+					FindByID(models.ID(1)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -381,7 +381,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindByRouterIDAndVersion() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindByRouterIDAndVersion(gomock.Eq(models.ID(1)), gomock.Eq(uint(2))).
+					FindByRouterIDAndVersion(models.ID(1), uint(2)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -405,7 +405,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindByRouterIDAndVersion() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindByRouterIDAndVersion(gomock.Eq(models.ID(1)), gomock.Eq(uint(2))).
+					FindByRouterIDAndVersion(models.ID(1), uint(2)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -464,7 +464,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindLatestVersionByRouterID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindLatestVersion(gomock.Eq(models.ID(1))).
+					FindLatestVersion(models.ID(1)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
@@ -487,7 +487,7 @@ func (s *RouterVersionsServiceTestSuite) TestFindLatestVersionByRouterID() {
 				rRepo := mock_service.NewMockRoutersRepository(ctrl)
 				rvRepo := mock_service.NewMockRouterVersionsRepository(ctrl)
 				rvRepo.EXPECT().
-					FindLatestVersion(gomock.Eq(models.ID(1))).
+					FindLatestVersion(models.ID(1)).
 					Return(rv, nil)
 				monitoringSvc := mock_service.NewMockRouterMonitoringService(ctrl)
 				monitoringSvc.EXPECT().
