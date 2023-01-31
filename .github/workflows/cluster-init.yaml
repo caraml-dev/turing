@@ -55,8 +55,8 @@ jobs:
       CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
       CLUSTER_NAME: turing-e2e
       ISTIO_VERSION: 1.9.9
-      KNATIVE_VERSION: 1.3.2
-      KNATIVE_ISTIO_VERSION: 1.3.0
+      KNATIVE_VERSION: 1.7.4
+      KNATIVE_ISTIO_VERSION: 1.7.1
       LOCAL_REGISTRY: registry.localhost:5000
     needs:
       - build-cluster-init

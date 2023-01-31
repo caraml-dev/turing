@@ -1,7 +1,7 @@
 # turing
 
 ---
-![Version: 0.2.14](https://img.shields.io/badge/Version-0.2.14-informational?style=flat-square)
+![Version: 0.2.15](https://img.shields.io/badge/Version-0.2.15-informational?style=flat-square)
 ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
 Turing: ML Experimentation System
@@ -17,10 +17,10 @@ Kubernetes cluster. Setting up Kubernetes and Helm is outside the scope of
 this README. Please refer to the Kubernetes and Helm documentation.
 
 - **Helm 3.0+** – This chart was tested with Helm v3.7.1, but it is also expected to work with earlier Helm versions
-- **Kubernetes 1.18+** – This chart was tested with GKE v1.20.x and with [k3d](https://github.com/rancher/k3d) v1.21.x,
+- **Kubernetes 1.22+** – This chart was tested with GKE v1.22.x and with [k3d](https://github.com/rancher/k3d) v1.22.x,
 but it's possible it works with earlier k8s versions too
-- **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
-- **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
+- **Istio 1.12.4+** – This chart was tested with Istio v1.12.4
+- **Knative 1.7.4+, <1.8** – This chart was tested with Knative 1.7.4
 
 It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
@@ -71,19 +71,17 @@ The following table lists the configurable parameters of the Turing chart and th
 | global.sentry.dsn | string | `nil` | Global Sentry DSN value |
 | merlin.environmentConfigs | list | computed value | List of Merlin environment configs, available to Turing for deploying routers By default, a new dev environment will automatically be created |
 | merlin.mlpApi.apiHost | string | computed value | API endpoint to be used by Merlin to talk to MLP API |
-| merlin.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-merlin","postgresqlPassword":"merlin","tls":{"enabled":false}}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| merlin.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-merlin"}` | Postgresql configuration to be applied to Merlin's's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/12.1.9#parameters |
 | merlin.postgresql.nameOverride | string | `"postgresql-merlin"` | Name of Merlin's Postgresql deployment |
-| merlin.postgresql.postgresqlPassword | string | `"merlin"` | Password for Merlin Postgresql database |
 | mlp.apiHost | string | `"/api/v1"` | MLP API endpoint, used by the MLP UI for fetching data |
 | mlp.environmentConfigSecret.envKey | string | `"environment.yaml"` |  |
 | mlp.environmentConfigSecret.name | string | `""` |  |
 | mlp.extraEnvs | list | computed value | List of extra environment variables to add to MLP API container |
-| mlp.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-mlp","postgresqlPassword":"mlp","tls":{"enabled":false}}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| mlp.postgresql | object | `{"containerPorts":{"postgresql":5432},"nameOverride":"postgresql-mlp"}` | Postgresql configuration to be applied to MLP's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/12.1.9#parameters |
 | mlp.postgresql.nameOverride | string | `"postgresql-mlp"` | Name of MLP's Postgresql deployment |
-| mlp.postgresql.postgresqlPassword | string | `"mlp"` | Password for MLP Postgresql database |
-| postgresql | object | `{"containerPorts":{"postgresql":5432},"metrics":{"enabled":false,"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"postgresqlDatabase":"turing","postgresqlPassword":"turing","postgresqlUsername":"turing","resources":{"requests":{"cpu":"500m","memory":"256Mi"}},"tls":{"enabled":false}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/10.16.2#parameters |
+| postgresql | object | `{"auth":{"database":"turing","password":"turing","username":"turing"},"containerPorts":{"postgresql":5432},"image":{"tag":"12.13.0"},"metrics":{"enabled":false,"serviceMonitor":{"enabled":false}},"persistence":{"enabled":true,"size":"10Gi"},"replication":{"applicationName":"turing","enabled":false,"numSynchronousReplicas":2,"password":"repl_password","slaveReplicas":2,"synchronousCommit":"on","user":"repl_user"},"resources":{"requests":{"cpu":"500m","memory":"256Mi"}}}` | Postgresql configuration to be applied to Turing's postgresql database deployment Reference: https://artifacthub.io/packages/helm/bitnami/postgresql/12.1.9#parameters |
+| postgresql.auth.password | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
-| postgresql.postgresqlPassword | string | `"turing"` | Password for Turing Postgresql database |
 | postgresql.resources | object | `{"requests":{"cpu":"500m","memory":"256Mi"}}` | Resources requests and limits for Turing database. This should be set according to your cluster capacity and service level objectives. Reference: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | sentry.dsn | string | `""` | Sentry DSN value used by both Turing API and Turing UI |
 | tags.db | bool | `true` | Specifies if Postgresql database needs to be installed together with Turing |

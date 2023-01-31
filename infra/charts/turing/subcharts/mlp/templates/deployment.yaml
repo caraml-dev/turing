@@ -33,14 +33,14 @@ spec:
           - |
             /migrate \
             -path /migrations \
-            -database postgres://{{ .Values.postgresql.postgresqlUsername }}:$(PG_PASSWORD)@{{ template "mlp.db.host" . }}:5432/{{ .Values.postgresql.postgresqlDatabase }}?sslmode=disable \
+            -database postgres://{{ .Values.postgresql.auth.username }}:$(PG_PASSWORD)@{{ template "mlp.db.host" . }}:5432/{{ .Values.postgresql.auth.database }}?sslmode=disable \
             up
         env:
           - name: PG_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ template "mlp.postgresql.name" . }}
-                key: postgresql-password
+                key: password
         volumeMounts:
           - mountPath: /migrations
             name: db-migrations
@@ -89,14 +89,14 @@ spec:
             - name: DATABASE_HOST
               value: {{ template "mlp.db.host" . }}
             - name: DATABASE_USER
-              value: "{{ .Values.postgresql.postgresqlUsername }}"
+              value: "{{ .Values.postgresql.auth.username }}"
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ template "mlp.postgresql.name" . }}
-                  key: postgresql-password
+                  key: password
             - name: DATABASE_NAME
-              value: "{{ .Values.postgresql.postgresqlDatabase }}"
+              value: "{{ .Values.postgresql.auth.database }}"
             - name: MLFLOW_TRACKING_URL
               value: "{{ .Values.mlflowTrackingUrl }}"
             - name: ENCRYPTION_KEY

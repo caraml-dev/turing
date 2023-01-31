@@ -214,12 +214,7 @@ runs:
       # GitHub Action reference: https://github.com/jupyterhub/action-k8s-namespace-report#readme
     - name: Emit namespace report
       uses: jupyterhub/action-k8s-namespace-report@v1
-      if: always() && (steps.wait-for-deployment.outcome == 'failure')
-      with:
-        important-workloads: >
-          deployment/turing deployment/mockserver 
-          deployment/turing-mlp deployment/turing-merlin deployment/turing
-
+      if: ${{ failure() }}
 
     - name: Setup MLP project
       shell: bash
