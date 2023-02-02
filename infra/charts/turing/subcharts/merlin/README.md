@@ -144,8 +144,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
-| postgresql.persistence.enabled | bool | `true` |  |
-| postgresql.persistence.size | string | `"10Gi"` |  |
+| postgresql.primary.persistence.enabled | bool | `true` |  |
+| postgresql.primary.persistence.size | string | `"10Gi"` |  |
 | postgresql.replication.applicationName | string | `"merlin"` |  |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` |  |
