@@ -17,10 +17,10 @@ Kubernetes cluster. Setting up Kubernetes and Helm is outside the scope of
 this README. Please refer to the Kubernetes and Helm documentation.
 
 - **Helm 3.0+** – This chart was tested with Helm v3.7.1, but it is also expected to work with earlier Helm versions
-- **Kubernetes 1.18+** – This chart was tested with GKE v1.20.x and with [k3d](https://github.com/rancher/k3d) v1.21.x,
+- **Kubernetes 1.22+** – This chart was tested with GKE v1.22.x and with [k3d](https://github.com/rancher/k3d) v1.22.x,
 but it's possible it works with earlier k8s versions too
-- **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
-- **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
+- **Istio 1.12.4+** – This chart was tested with Istio v1.12.4
+- **Knative 1.7.4+, <1.8** – This chart was tested with Knative 1.7.4
 
 It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
@@ -96,13 +96,14 @@ The following table lists the configurable parameters of the Turing chart and th
 | livenessProbe.path | string | `"/v1/internal/live"` |  |
 | mlflowTrackingUrl | string | `"http://mlflow.mlp"` |  |
 | oauthClientId | string | `""` |  |
+| postgresql.auth.database | string | `"mlp"` |  |
+| postgresql.auth.password | string | `"mlp"` |  |
+| postgresql.auth.username | string | `"mlp"` |  |
+| postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
 | postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"mlp"` |  |
-| postgresql.postgresqlPassword | string | `"mlp"` |  |
-| postgresql.postgresqlUsername | string | `"mlp"` |  |
 | postgresql.replication.applicationName | string | `"mlp"` | Replication Cluster application name. Useful for defining multiple replication policies |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` | From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication NOTE: It cannot be > slaveReplicas |

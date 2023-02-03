@@ -82,6 +82,8 @@ gitlab:
   clientSecret: #clientSecret
 
 postgresql:
+  image:
+    tag: 12.13.0
   # -- Configure resource requests and limits
   # ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
@@ -92,9 +94,10 @@ postgresql:
     # -- Persist Postgresql data in a Persistent Volume Claim
     enabled: true
     size: 10Gi
-  postgresqlUsername: mlp
-  postgresqlDatabase: mlp
-  postgresqlPassword: mlp
+  auth:
+    username: mlp
+    database: mlp
+    password: mlp
   metrics:
     enabled: false
     serviceMonitor:

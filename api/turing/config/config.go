@@ -276,7 +276,8 @@ type ExperimentEngineConfig struct {
 }
 
 type ExperimentEnginePluginConfig struct {
-	Image string `json:"image" validate:"required"`
+	Image                 string `json:"image" validate:"required"`
+	LivenessPeriodSeconds int    `json:"liveness_period_seconds" validate:"required"`
 }
 
 // RouterDefaults contains default configuration for routers deployed
