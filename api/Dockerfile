@@ -1,3 +1,7 @@
+# Build stage 1: Download gke auth plugin
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine as gke-plugin-builder
+RUN gcloud components install gke-gcloud-auth-plugin --quiet
+
 # Build turing-api binary
 FROM golang:1.18-alpine as api-builder
 ARG API_BIN_NAME=turing-api
@@ -34,6 +38,7 @@ RUN addgroup -S ${TURING_USER_GROUP} \
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/bin/* /app
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/db-migrations /app/db-migrations
 COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=api-builder /app/api/openapi.bundle.yaml /app/api/openapi.bundle.yaml
+COPY --chown=${TURING_USER}:${TURING_USER_GROUP} --from=gke-plugin-builder /google-cloud-sdk/bin/gke-gcloud-auth-plugin /usr/local/bin/gke-gcloud-auth-plugin
 
 USER ${TURING_USER}
 WORKDIR /app
