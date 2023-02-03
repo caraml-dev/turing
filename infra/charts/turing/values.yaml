@@ -97,8 +97,19 @@ turing:
   clusterConfig:
     # -- (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster
     # By default, Turing API expects to use a remote k8s cluster for deployment and to do so,
-    # it requires cluster credentials to be stored in Vault's KV Secrets store.
+    # it requires cluster credentials to be stored in Vault's KV Secrets store. TODO: Change comments, no more vault
     useInClusterConfig: false
+    environmentConfigPath: "environments.yaml"
+    ensemblingServiceK8sConfig: 
+      name: dev-cluster
+      cluster: {}
+      user: {}
+
+  environments: 
+    - name: dev
+      cluster: {}
+      user: {}
+
 
   # -- Turing Experiment Engines configuration
   experimentEngines: []
@@ -258,8 +269,10 @@ mlp:
     tls:
       enabled: false
     containerPorts:
-      postgresql: 5432
-
+      postgresql: 5432 
+  environmentConfigSecret:
+    name: "" # set by mlp if needed
+    envKey: environment.yaml
 
 merlin:
   # -- Postgresql configuration to be applied to Merlin's's postgresql database deployment
