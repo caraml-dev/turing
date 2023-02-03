@@ -66,7 +66,7 @@ heritage: {{ .Release.Service }}
 
 {{- define "turing.db.user" -}}
 {{ if .Values.tags.db }}
-    {{ .Values.postgresql.postgresqlUsername }}
+    {{ .Values.postgresql.auth.username }}
 {{- else -}}
     {{- .Values.turing.config.DbConfig.User -}}
 {{- end -}}
@@ -74,7 +74,7 @@ heritage: {{ .Release.Service }}
 
 {{- define "turing.db.password" -}}
 {{ if .Values.tags.db }}
-    {{ .Values.postgresql.postgresqlPassword }}
+    {{ .Values.postgresql.auth.password }}
 {{- else -}}
     {{- .Values.turing.config.DbConfig.Password -}}
 {{- end -}}
@@ -82,7 +82,7 @@ heritage: {{ .Release.Service }}
 
 {{- define "turing.db.database" -}}
 {{ if .Values.tags.db }}
-    {{ .Values.postgresql.postgresqlDatabase }}
+    {{ .Values.postgresql.auth.database }}
 {{- else -}}
     {{- .Values.turing.config.DbConfig.Database -}}
 {{- end -}}
@@ -205,6 +205,7 @@ RouterDefaults:
 {{ if eq (toString $expEngine.type) "rpc-plugin" }}
       PluginConfig:
         Image: {{ $expEngine.rpcPlugin.image }}
+        LivenessPeriodSeconds: {{ $expEngine.rpcPlugin.livenessPeriodSeconds | default 10 }}
 {{ end }}
       ServiceAccountKeyFilePath: {{ $expEngine.serviceAccountKeyFilePath }}
 {{- end -}}

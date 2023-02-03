@@ -592,6 +592,8 @@ func buildFiberConfigMap(
 			if err != nil {
 				return nil, err
 			}
+
+			propsMap["experiment_engine_liveness_period_seconds"] = ver.ExperimentEngine.PluginConfig.LivenessPeriodSeconds
 		}
 		propsMap["experiment_engine_properties"] = expEngineProps
 	}

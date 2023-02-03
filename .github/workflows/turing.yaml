@@ -43,8 +43,8 @@ env:
   GO_LINT_VERSION: v1.48.0
   CLUSTER_NAME: turing-e2e
   ISTIO_VERSION: 1.9.9
-  KNATIVE_VERSION: 1.3.2
-  KNATIVE_ISTIO_VERSION: 1.3.0
+  KNATIVE_VERSION: 1.7.4
+  KNATIVE_ISTIO_VERSION: 1.7.1
   LOCAL_REGISTRY: registry.localhost:5000
 
 jobs:
@@ -417,7 +417,7 @@ jobs:
           KSERVICE_DOMAIN: 127.0.0.1.nip.io
         run: make e2e-sdk
 
-      - if: (steps.wait-for-deployment.outcome == 'failure'  || steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
+      - if: (steps.run-e2e-test.outcome == 'failure' || steps.run-e2e-test-sdk.outcome == 'failure') && always()
         name: "Debug Deployment Failure"
         run: |
           echo "::group::describe deployment/turing-mlp"
@@ -471,7 +471,6 @@ jobs:
           echo "::group::kubernetes pod logs"
           kubectl get pod | awk '{print $1}' | grep -v "NAME" | while read p; echo "POD LOGS $p"; do kubectl logs "$p" --all-containers; done;
           echo "::endgroup::"
-
 
   release-rules:
     runs-on: ubuntu-latest

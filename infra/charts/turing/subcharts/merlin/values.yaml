@@ -1,5 +1,6 @@
 global:
   merlin: {}
+  mlp: {}
 
 image:
   pullPolicy: IfNotPresent
@@ -134,10 +135,11 @@ mlflow:
   artifactRoot: gs://bucket-name/mlflow
   postgresql:
     enabled: false
-    postgresqlDatabase: mlflow
-    postgresqlUsername: mlflow
+    auth: {}
 
 postgresql:
+  image:
+    tag: 12.13.0
   resources:
     requests:
       memory: 256Mi
@@ -145,9 +147,10 @@ postgresql:
   persistence:
     enabled: true
     size: 10Gi
-  postgresqlUsername: merlin
-  postgresqlDatabase: merlin
-  postgresqlPassword: merlin
+  auth:
+    username: merlin
+    database: merlin
+    password: merlin
   metrics:
     enabled: false
     serviceMonitor:

@@ -16,9 +16,11 @@ RouterDefaults:
     red:
       PluginConfig:
         Image: ghcr.io/myproject/red-exp-engine-plugin:v0.0.1
+        LivenessPeriodSeconds: 5
     blue:
       PluginConfig:
         Image: ghcr.io/myproject/blue-exp-engine-plugin:latest
+        LivenessPeriodSeconds: 10
       ServiceAccountKeyFilePath: "/etc/plugins/blue/gcp_service_account/service-account.json"
   KafkaConfig:
     MaxMessageBytes: 1234567

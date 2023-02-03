@@ -17,10 +17,10 @@ Kubernetes cluster. Setting up Kubernetes and Helm is outside the scope of
 this README. Please refer to the Kubernetes and Helm documentation.
 
 - **Helm 3.0+** – This chart was tested with Helm v3.7.1, but it is also expected to work with earlier Helm versions
-- **Kubernetes 1.18+** – This chart was tested with GKE v1.20.x and with [k3d](https://github.com/rancher/k3d) v1.21.x,
+- **Kubernetes 1.22+** – This chart was tested with GKE v1.22.x and with [k3d](https://github.com/rancher/k3d) v1.22.x,
 but it's possible it works with earlier k8s versions too
-- **Istio 1.9.9+** – This chart was tested with Istio v1.9.9
-- **Knative 0.18.3+, <1.x** – This chart was tested with Knative 0.18.3
+- **Istio 1.12.4+** – This chart was tested with Istio v1.12.4
+- **Knative 1.7.4+, <1.8** – This chart was tested with Knative 1.7.4
 
 It's recommended to use [turing/turing-init](https://github.com/caraml-dev/turing/blob/main/infra/charts/turing-init/README.md) Helm chart
 to configure and install Istio and Knative into the cluster, before proceeding with installation of Turing.
@@ -104,6 +104,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | environmentConfigs[0].queue_resource_percentage | string | `"20"` |  |
 | environmentConfigs[0].region | string | `"id"` |  |
 | global.merlin | object | `{}` |  |
+| global.mlp | object | `{}` |  |
 | homepage | string | `"/merlin"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
@@ -127,9 +128,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | mlflow.image.registry | string | `"ghcr.io"` |  |
 | mlflow.image.repository | string | `"gojek/mlflow"` |  |
 | mlflow.image.tag | string | `"1.3.0"` |  |
+| mlflow.postgresql.auth | object | `{}` |  |
 | mlflow.postgresql.enabled | bool | `false` |  |
-| mlflow.postgresql.postgresqlDatabase | string | `"mlflow"` |  |
-| mlflow.postgresql.postgresqlUsername | string | `"mlflow"` |  |
 | mlpApi.apiHost | string | `"http://mlp.mlp:8080/v1"` |  |
 | mlpApi.encryptionKey | string | `""` |  |
 | monitoring.baseURL | string | `""` |  |
@@ -138,13 +138,14 @@ The following table lists the configurable parameters of the Turing chart and th
 | newrelic.appname | string | `"merlin-api-dev"` |  |
 | newrelic.enabled | bool | `false` |  |
 | newrelic.licenseSecretName | string | `"newrelic-license-secret"` |  |
+| postgresql.auth.database | string | `"merlin"` |  |
+| postgresql.auth.password | string | `"merlin"` |  |
+| postgresql.auth.username | string | `"merlin"` |  |
+| postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
 | postgresql.persistence.enabled | bool | `true` |  |
 | postgresql.persistence.size | string | `"10Gi"` |  |
-| postgresql.postgresqlDatabase | string | `"merlin"` |  |
-| postgresql.postgresqlPassword | string | `"merlin"` |  |
-| postgresql.postgresqlUsername | string | `"merlin"` |  |
 | postgresql.replication.applicationName | string | `"merlin"` |  |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` |  |

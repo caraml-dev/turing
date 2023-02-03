@@ -307,12 +307,14 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
 						"red": {
 							PluginConfig: &config.ExperimentEnginePluginConfig{
-								Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+								Image:                 "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+								LivenessPeriodSeconds: 5,
 							},
 						},
 						"blue": {
 							PluginConfig: &config.ExperimentEnginePluginConfig{
-								Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+								Image:                 "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+								LivenessPeriodSeconds: 10,
 							},
 							ServiceAccountKeyFilePath: &blueSvcAcctKeyFilePath,
 						},
@@ -424,12 +426,14 @@ func TestLoad(t *testing.T) {
 					ExperimentEnginePlugins: map[string]*config.ExperimentEngineConfig{
 						"red": {
 							PluginConfig: &config.ExperimentEnginePluginConfig{
-								Image: "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+								Image:                 "ghcr.io/myproject/red-exp-engine-plugin:v0.0.1",
+								LivenessPeriodSeconds: 5,
 							},
 						},
 						"blue": {
 							PluginConfig: &config.ExperimentEnginePluginConfig{
-								Image: "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+								Image:                 "ghcr.io/myproject/blue-exp-engine-plugin:latest",
+								LivenessPeriodSeconds: 10,
 							},
 							ServiceAccountKeyFilePath: &blueSvcAcctKeyFilePath,
 						},
