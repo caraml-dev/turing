@@ -182,7 +182,7 @@ runs:
         yq e -P credentials.json -o yaml >/tmp/temp_k8sconfig.yaml
 
         # NOTE: Add credentials to for e2e-test
-        yq '.cluster.credentials |= load("/tmp/temp_k8sconfig.yaml")' -i api/e2e/tests/config.yaml
+        yq '.cluster.credentials |= load("/tmp/temp_k8sconfig.yaml")' -i api/e2e/test/config.yaml
 
     - name: Install Turing
       shell: bash
