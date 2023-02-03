@@ -718,6 +718,8 @@ github.com/gojek/merlin/python/batch-predictor v0.0.0-20210723093139-cc0240032d5
 github.com/gojek/mlp v0.0.0-20201002030420-4e35e69a9ab8/go.mod h1:IjQCiAzap7TZRZVZ4r2RdzVTuAzoyR5el2GgEu2X1FM=
 github.com/gojek/mlp v1.7.5-0.20230113081102-d7124ee8b0f9 h1:B2dZib+P1eD+Dp67tu+6s2WOgmHTObGu/PYPf77zaZI=
 github.com/gojek/mlp v1.7.5-0.20230113081102-d7124ee8b0f9/go.mod h1:DB01k2VspsGMfMECAonbyHqa/c8ij9RQ13FkHV19pe4=
+github.com/gojek/mlp v1.7.5-0.20230117024729-05ede139570e h1:BYJjaOyOz4RUp7BBjC++2bmObXotofCfWLQwgTYC9qE=
+github.com/gojek/mlp v1.7.5-0.20230117024729-05ede139570e/go.mod h1:DB01k2VspsGMfMECAonbyHqa/c8ij9RQ13FkHV19pe4=
 github.com/gojek/valkyrie v0.0.0-20180215180059-6aee720afcdf/go.mod h1:QzhUKaYKJmcbTnCYCAVQrroCOY7vOOI8cSQ4NbuhYf0=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 h1:zN2lZNZRflqFyxVaTIU61KNKQ9C0055u9CAfpmqUvo4=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3/go.mod h1:nPpo7qLxd6XL3hWJG/O60sR8ZKfMCiIoNap5GvD12KU=

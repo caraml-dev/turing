@@ -175,8 +175,6 @@ func InitClusterControllers(
 			clusterCfg.InClusterConfig = true
 		} else {
 			creds := mlpcluster.NewK8sClusterCreds(k)
-
-			clusterCfg.Host = k.Cluster.Server
 			clusterCfg.Credentials = creds
 		}
 
