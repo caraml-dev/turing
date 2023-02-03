@@ -182,8 +182,8 @@ runs:
       shell: bash
       run: |
         if [[ ${{inputs.use_in_cluster_config}} == false ]]; then
-          yq '.turing.environments.[0] |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
-          yq '.turing.config.ClusterConfig.ensemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
+          yq '.turing.environmentConfigs.[0].k8s_config |= load("/tmp/temp_k8sconfig.yaml").k8s_config | .turing.environmentConfigs.[0].name |= load("infra/e2e/${{ inputs.values_file }}").merlin.environmentConfigs.[0].name' -i infra/e2e/${{ inputs.values_file }}
+          yq '.turing.config.ClusterConfig.EnsemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
         fi
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
@@ -214,7 +214,7 @@ runs:
       # GitHub Action reference: https://github.com/jupyterhub/action-k8s-namespace-report#readme
     - name: Emit namespace report
       uses: jupyterhub/action-k8s-namespace-report@v1
-      if: always()
+      if: always() && (steps.wait-for-deployment.outcome == 'failure')
       with:
         important-workloads: > 
           deployment/turing deployment/mockserver 

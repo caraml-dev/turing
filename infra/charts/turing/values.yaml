@@ -105,10 +105,12 @@ turing:
       cluster: {}
       user: {}
 
-  environments: 
+  environmentConfigs: 
     - name: dev
-      cluster: {}
-      user: {}
+      k8s_config:
+        name: dev-cluster
+        cluster: {}
+        user: {}
 
 
   # -- Turing Experiment Engines configuration

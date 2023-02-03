@@ -240,7 +240,7 @@ sentryConfig:
 {{- end -}}
 
 {{- define "turing.environments" -}}
-{{ .Values.turing.environments | toYaml }}
+{{ .Values.turing.environmentConfigs | toYaml }}
 {{- end -}}
 
 {{- define "turing.environments.directory" -}}
