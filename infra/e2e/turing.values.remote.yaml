@@ -4,9 +4,7 @@ turing:
 
   config:
     ClusterConfig:
-      VaultConfig:
-        Address: http://vault:8200
-        Token: root
+      ensemblingServiceK8sConfig: {}
 
 merlin:
   vault:
