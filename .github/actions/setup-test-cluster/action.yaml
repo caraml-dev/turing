@@ -182,8 +182,8 @@ runs:
       shell: bash
       run: |
         if [[ ${{inputs.use_in_cluster_config}} == 'false' ]]; then
-          yq '.turing.environments.[0] |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i ${{ inputs.values_file }}
-          yq '.turing.config.ClusterConfig.ensemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i ${{ inputs.values_file }}
+          yq '.turing.environments.[0] |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
+          yq '.turing.config.ClusterConfig.ensemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
         fi
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
