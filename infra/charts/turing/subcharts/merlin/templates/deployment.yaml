@@ -84,14 +84,14 @@ spec:
           - name: DATABASE_HOST
             value: {{ template "merlin.db.host" . }}
           - name: DATABASE_USER
-            value: "{{ .Values.postgresql.postgresqlUsername }}"
+            value: "{{ .Values.postgresql.auth.username }}"
           - name: DATABASE_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ template "merlin.postgresql.name" . }}
-                key: postgresql-password
+                key: password
           - name: DATABASE_NAME
-            value: "{{ .Values.postgresql.postgresqlDatabase }}"
+            value: "{{ .Values.postgresql.auth.database }}"
           - name: VAULT_ADDRESS
             valueFrom:
               secretKeyRef:

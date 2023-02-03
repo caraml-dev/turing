@@ -193,6 +193,10 @@ runs:
         timeout: 600 # seconds
         max-restarts: -1
 
+    - name: Kubernetes namespace report
+      uses: jupyterhub/action-k8s-namespace-report@v1
+      if: ${{ failure() }}
+
     - name: Setup MLP project
       shell: bash
       run: |
