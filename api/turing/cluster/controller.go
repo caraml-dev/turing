@@ -33,10 +33,10 @@ import (
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 
-	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/pkg/errors"
 
 	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/mlpcluster"
 
 	// Load required auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -60,6 +60,8 @@ type clusterConfig struct {
 	ClientKey string
 	// Cluster Name
 	ClusterName string
+
+	CredsManager mlpcluster.CredsManager
 }
 
 // Controller defines the operations supported by the cluster controller
@@ -109,21 +111,16 @@ type controller struct {
 // newController initializes a new cluster controller with the given cluster config
 func newController(clusterCfg clusterConfig) (Controller, error) {
 	var cfg *rest.Config
+	var err error
 	if clusterCfg.InClusterConfig {
-		var err error
 		cfg, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		cfg = &rest.Config{
-			Host: clusterCfg.Host,
-			TLSClientConfig: rest.TLSClientConfig{
-				Insecure: false,
-				CAData:   []byte(clusterCfg.CACert),
-				CertData: []byte(clusterCfg.ClientCert),
-				KeyData:  []byte(clusterCfg.ClientKey),
-			},
+		cfg, err = clusterCfg.CredsManager.GenerateConfig()
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -165,29 +162,22 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 // key is the env name and the value is the corresponding controller.
 func InitClusterControllers(
 	cfg *config.Config,
-	environmentClusterMap map[string]string,
-	vaultClient vault.Client,
+	environmentClusterMap map[string]*mlpcluster.K8sConfig,
 ) (map[string]Controller, error) {
 	// For each supported environment, init controller
 	controllers := make(map[string]Controller)
-	for envName, clusterName := range environmentClusterMap {
+	for envName, k := range environmentClusterMap {
 		clusterCfg := clusterConfig{
-			ClusterName: clusterName,
+			ClusterName: k.Name,
 		}
 
 		if cfg.ClusterConfig.InClusterConfig {
 			clusterCfg.InClusterConfig = true
 		} else {
-			clusterSecret, err := vaultClient.GetClusterSecret(clusterName)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"unable to get cluster secret for cluster: %s", clusterName)
-			}
+			credsManager := mlpcluster.NewK8sCredsManager(k)
 
-			clusterCfg.Host = clusterSecret.Endpoint
-			clusterCfg.CACert = clusterSecret.CaCert
-			clusterCfg.ClientCert = clusterSecret.ClientCert
-			clusterCfg.ClientKey = clusterSecret.ClientKey
+			clusterCfg.Host = k.Cluster.Server
+			clusterCfg.CredsManager = credsManager
 		}
 
 		ctl, err := newController(clusterCfg)

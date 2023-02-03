@@ -9,12 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
 
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/mlpcluster"
 	"github.com/caraml-dev/turing/api/turing/utils"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
@@ -53,6 +57,15 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 }
 
 type EngineConfig map[string]interface{}
+
+// EnvironmentConfig is a abridged version of
+// https://github.dev/gojek/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
+// Only requires Name and K8sConfig
+// This struct should be removed when Environments API is moved from Merlin to MLP
+type EnvironmentConfig struct {
+	Name      string                `yaml:"name"`
+	K8sConfig *mlpcluster.K8sConfig `yaml:"k8s_config"`
+}
 
 // Config is used to parse and store the environment configs
 type Config struct {
@@ -114,8 +127,9 @@ type BatchEnsemblingConfig struct {
 
 // EnsemblerServiceConfig captures the config related to the build and running of ensembler services (real-time)
 type EnsemblerServiceBuilderConfig struct {
-	ClusterName         string               `validate:"required"`
-	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
+	ClusterName         string                `validate:"required"`
+	K8sConfig           *mlpcluster.K8sConfig `validate:"required"`
+	ImageBuildingConfig *ImageBuildingConfig  `validate:"required"`
 }
 
 // JobConfig captures the config related to the ensembling batch jobs.
@@ -332,6 +346,23 @@ type ClusterConfig struct {
 	InClusterConfig bool
 	// VaultConfig is required if InClusterConfig is false.
 	VaultConfig *VaultConfig `validate:"required_without=InClusterConfig"`
+
+	// EnvironmentConfigPath refers to a path that contains EnvironmentConfigs
+	EnvironmentConfigPath string `validate:"required_without=InClusterConfig"`
+	EnvironmentConfigs    []*EnvironmentConfig
+}
+
+func (c *ClusterConfig) ProcessEnvConfigs() error {
+	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
+	if err != nil {
+		return err
+	}
+	var envs []*EnvironmentConfig
+	if err = yaml.Unmarshal(envConfig, &envs); err != nil {
+		return err
+	}
+	c.EnvironmentConfigs = envs
+	return nil
 }
 
 // VaultConfig captures the config for connecting to the Vault server
