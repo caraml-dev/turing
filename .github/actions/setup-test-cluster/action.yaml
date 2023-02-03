@@ -208,8 +208,18 @@ runs:
           deployment/turing-mlp,
           deployment/turing-merlin,
           deployment/turing
-        timeout: 600 # seconds
+        timeout: 300 # seconds
         max-restarts: -1
+
+      # GitHub Action reference: https://github.com/jupyterhub/action-k8s-namespace-report#readme
+    - name: Emit namespace report
+      uses: jupyterhub/action-k8s-namespace-report@v1
+      if: always()
+      with:
+        important-workloads: > 
+          deployment/turing deployment/mockserver 
+          deployment/turing-mlp deployment/turing-merlin deployment/turing
+
 
     - name: Setup MLP project
       shell: bash
