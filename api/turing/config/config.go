@@ -361,6 +361,11 @@ func (c *ClusterConfig) ProcessEnvConfigs() error {
 	if err = yaml.Unmarshal(envConfig, &envs); err != nil {
 		return err
 	}
+	for _, env := range envs {
+		if env.K8sConfig == nil {
+			return fmt.Errorf("Error, k8sConfig for %s is nil", env.Name)
+		}
+	}
 	c.EnvironmentConfigs = envs
 	return nil
 }
