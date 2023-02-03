@@ -61,7 +61,7 @@ type clusterConfig struct {
 	// Cluster Name
 	ClusterName string
 
-	CredsManager mlpcluster.CredsManager
+	Credentials mlpcluster.Credentials
 }
 
 // Controller defines the operations supported by the cluster controller
@@ -118,7 +118,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 			return nil, err
 		}
 	} else {
-		cfg, err = clusterCfg.CredsManager.GenerateConfig()
+		cfg, err = clusterCfg.Credentials.ToRestConfig()
 		if err != nil {
 			return nil, err
 		}
@@ -174,10 +174,10 @@ func InitClusterControllers(
 		if cfg.ClusterConfig.InClusterConfig {
 			clusterCfg.InClusterConfig = true
 		} else {
-			credsManager := mlpcluster.NewK8sCredsManager(k)
+			creds := mlpcluster.NewK8sClusterCreds(k)
 
 			clusterCfg.Host = k.Cluster.Server
-			clusterCfg.CredsManager = credsManager
+			clusterCfg.Credentials = creds
 		}
 
 		ctl, err := newController(clusterCfg)

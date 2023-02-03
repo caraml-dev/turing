@@ -17,6 +17,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gojek/fiber v0.2.0
 	github.com/gojek/merlin v0.0.0
+	github.com/gojek/mlp v1.7.5-0.20230113081102-d7124ee8b0f9
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.9
