@@ -16,6 +16,8 @@ import (
 
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
+	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 func TestDecodeQuantity(t *testing.T) {
@@ -627,6 +629,11 @@ func TestConfigValidate(t *testing.T) {
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			ClusterName: "dev",
+			K8sConfig: &mlpcluster.K8sConfig{
+				Cluster:  &clientcmdapiv1.Cluster{},
+				AuthInfo: &clientcmdapiv1.AuthInfo{},
+				Name:     "dev",
+			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -703,6 +710,7 @@ func TestConfigValidate(t *testing.T) {
 				Address: "http://localhost:8200",
 				Token:   "root",
 			},
+			EnvironmentConfigPath: "./path/to/env-file.yaml",
 		},
 		TuringEncryptionKey: "secret",
 		AlertConfig:         nil,
@@ -811,6 +819,14 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		"missing environments file in cluster config": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.ClusterConfig.EnvironmentConfigPath = ""
+				validConfig.ClusterConfig.InClusterConfig = false
+				return validConfig
+			},
+			wantErr: true,
+		},
 		"valid batch ensembling disabled": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig = config.BatchEnsemblingConfig{
@@ -841,6 +857,57 @@ func TestConfigValidate(t *testing.T) {
 			c := tt.validConfigUpdate(validConfigCopy.(config.Config))
 			if err := c.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestProcessEnvConfigs(t *testing.T) {
+	tests := map[string]struct {
+		filepath string
+		want     []*config.EnvironmentConfig
+		wantErr  bool
+	}{
+		"basic": {
+			filepath: "testdata/env-config-1.yaml",
+			want: []*config.EnvironmentConfig{
+				{
+					Name: "id-dev",
+					K8sConfig: &mlpcluster.K8sConfig{
+						Name: "dev-cluster",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server:                "https://k8s.api.server",
+							InsecureSkipTLSVerify: true,
+						},
+						AuthInfo: &clientcmdapiv1.AuthInfo{
+							Exec: &clientcmdapiv1.ExecConfig{
+								APIVersion:         "client.authentication.k8s.io/v1beta1",
+								Command:            "gke-gcloud-auth-plugin",
+								InteractiveMode:    clientcmdapiv1.IfAvailableExecInteractiveMode,
+								ProvideClusterInfo: true,
+							},
+						},
+					},
+				},
+			},
+		},
+		"error_parsing": {
+			filepath: "testdata/env-err.yaml",
+			want:     []*config.EnvironmentConfig{},
+			wantErr:  true,
+		},
+	}
+	for testName, tt := range tests {
+		t.Run(testName, func(t *testing.T) {
+			c := config.ClusterConfig{
+				EnvironmentConfigPath: tt.filepath,
+			}
+			if err := c.ProcessEnvConfigs(); err != nil {
+				if !tt.wantErr {
+					t.Errorf("ProcessEnvConfigs() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			} else {
+				assert.Equal(t, tt.want, c.EnvironmentConfigs)
 			}
 		})
 	}

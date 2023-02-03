@@ -44,13 +44,12 @@ func Run() {
 	if err != nil {
 		log.Panicf("%s", err)
 	}
+	if err = cfg.ClusterConfig.ProcessEnvConfigs(); err != nil {
+		log.Panicf("Failed to process environment configs: %s", err)
+	}
 	err = cfg.Validate()
 	if err != nil {
 		log.Panicf("Failed validating config: %s", err)
-	}
-
-	if err = cfg.ClusterConfig.ProcessEnvConfigs(); err != nil {
-		log.Panicf("Failed to process environment configs: %s", err)
 	}
 
 	// Configure global logger

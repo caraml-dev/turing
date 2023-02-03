@@ -63,8 +63,8 @@ type EngineConfig map[string]interface{}
 // Only requires Name and K8sConfig
 // This struct should be removed when Environments API is moved from Merlin to MLP
 type EnvironmentConfig struct {
-	Name      string                `yaml:"name"`
-	K8sConfig *mlpcluster.K8sConfig `yaml:"k8s_config"`
+	Name      string                `yaml:"name" validate:"required"`
+	K8sConfig *mlpcluster.K8sConfig `yaml:"k8s_config" validate:"required"`
 }
 
 // Config is used to parse and store the environment configs
@@ -352,6 +352,7 @@ type ClusterConfig struct {
 	EnvironmentConfigs    []*EnvironmentConfig
 }
 
+// ProcessEnvConfigs reads the env configs from a file and unmarshalls them
 func (c *ClusterConfig) ProcessEnvConfigs() error {
 	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
 	if err != nil {
