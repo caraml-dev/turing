@@ -3,15 +3,13 @@ package api
 import (
 	"net/http"
 
-	mlp "github.com/gojek/mlp/api/client"
-
 	"github.com/caraml-dev/turing/api/turing/api/request"
-	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
+	mlp "github.com/gojek/mlp/api/client"
 )
 
 type RouterVersionsController struct {
-	RouterDeploymentController
+	BaseController
 }
 
 // ListRouterVersions lists the router versions of the provided router.
@@ -27,7 +25,7 @@ func (c RouterVersionsController) ListRouterVersions(
 	}
 
 	// List router versions
-	routerVersions, err := c.RouterVersionsService.ListRouterVersions(router.ID)
+	routerVersions, err := c.Services.RouterVersionsService.ListByRouterID(router.ID)
 	if err != nil {
 		return InternalServerError("unable to retrieve router versions", err.Error())
 	}
@@ -38,7 +36,8 @@ func (c RouterVersionsController) ListRouterVersions(
 // CreateRouterVersion creates a router version from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created but NOT deployed.
-func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars RequestVars, body interface{}) *Response {
+func (c RouterVersionsController) CreateRouterVersion(
+	r *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
 	var errResp *Response
 	var router *models.Router
@@ -58,12 +57,16 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 	}
 
 	routerVersion, err := request.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		router, c.RouterDefaults,
+		c.Services.CryptoService,
+		c.Services.ExperimentsService,
+		c.Services.EnsemblersService,
+	)
 
 	if err == nil {
 		// Save router version, re-assign the value of err
 		routerVersion.Status = models.RouterVersionStatusUndeployed
-		routerVersion, err = c.RouterVersionsService.Save(routerVersion)
+		routerVersion, err = c.Services.RouterVersionsService.Create(routerVersion)
 	}
 
 	if err != nil {
@@ -106,18 +109,7 @@ func (c RouterVersionsController) DeleteRouterVersion(
 		return errResp
 	}
 
-	// Check router version's status
-	if routerVersion.Status == models.RouterVersionStatusPending {
-		return BadRequest("invalid delete request",
-			"unable to delete router version that is currently deploying")
-	}
-
-	// If router version is current, prevent delete
-	if router.CurrRouterVersion != nil && routerVersion.ID == router.CurrRouterVersion.ID {
-		return BadRequest("invalid delete request", "cannot delete current router configuration")
-	}
-
-	err := c.RouterVersionsService.Delete(routerVersion)
+	err := c.Services.RouterVersionsService.Delete(routerVersion)
 	if err != nil {
 		return InternalServerError("unable to delete router version", err.Error())
 	}
@@ -145,26 +137,11 @@ func (c RouterVersionsController) DeployRouterVersion(
 		return errResp
 	}
 
-	// Check if router is already deploying
-	if router.Status == models.RouterStatusPending {
-		return BadRequest("invalid deploy request",
-			"router is currently deploying, cannot do another deployment")
+	// Attempt to deploy the router version
+	err := c.Services.RouterVersionsService.Deploy(project, router, routerVersion)
+	if err != nil {
+		return BadRequest("invalid deploy request", err.Error())
 	}
-
-	// Check if the version is already deployed
-	if routerVersion.Status == models.RouterVersionStatusDeployed {
-		return BadRequest("invalid deploy request",
-			"router version is already deployed")
-	}
-
-	// Deploy the version asynchronously
-	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
-		if err != nil {
-			log.Errorf("Error deploying router version %s:%s:%d: %v",
-				project.Name, router.Name, routerVersion.Version, err)
-		}
-	}()
 
 	return Accepted(map[string]int{
 		"router_id": int(router.ID),

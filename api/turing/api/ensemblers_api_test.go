@@ -129,7 +129,9 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
-						EnsemblersService: ensemblersSvc,
+						Services: service.Services{
+							EnsemblersService: ensemblersSvc,
+						},
 					}, validator,
 				),
 			}
@@ -224,7 +226,9 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
-						EnsemblersService: ensemblerSvc,
+						Services: service.Services{
+							EnsemblersService: ensemblerSvc,
+						},
 					},
 					validator,
 				),
@@ -425,7 +429,9 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
-						EnsemblersService: ensemblerSvc,
+						Services: service.Services{
+							EnsemblersService: ensemblerSvc,
+						},
 					},
 					validator,
 				),

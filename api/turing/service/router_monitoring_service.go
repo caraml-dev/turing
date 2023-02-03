@@ -8,6 +8,10 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
+const (
+	grafanaAllVariable = "$__all"
+)
+
 type RouterMonitoringService interface {
 	GenerateMonitoringURL(
 		projectID models.ID,

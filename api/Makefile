@@ -16,6 +16,7 @@ setup:
 	@echo "Setting up tools..."
 	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
 		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.48.0/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.48.0
+	@test -x $(shell go env GOPATH)/bin/mockgen || go install github.com/golang/mock/mockgen@v1.6.0
 
 .PHONY: fmt
 fmt:

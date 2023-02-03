@@ -15,6 +15,7 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 )
 
@@ -22,9 +23,11 @@ func TestAlertsControllerWhenAlertIsDisabled(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     &mocks.MLPService{},
-				RoutersService: &mocks.RoutersService{},
-				AlertService:   nil,
+				Services: service.Services{
+					MLPService:     &mocks.MLPService{},
+					RoutersService: &mocks.RoutersService{},
+					AlertService:   nil,
+				},
 			},
 		},
 	}
@@ -160,9 +163,11 @@ func TestAlertsControllerCreateAlert(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     mockMLPService,
-				RoutersService: mockRouterService,
-				AlertService:   mockAlertService,
+				Services: service.Services{
+					MLPService:     mockMLPService,
+					RoutersService: mockRouterService,
+					AlertService:   mockAlertService,
+				},
 			},
 		},
 	}
@@ -237,9 +242,11 @@ func TestAlertsControllerListAlerts(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     mockMLPService,
-				RoutersService: mockRouterService,
-				AlertService:   mockAlertService,
+				Services: service.Services{
+					MLPService:     mockMLPService,
+					RoutersService: mockRouterService,
+					AlertService:   mockAlertService,
+				},
 			},
 		},
 	}
@@ -303,9 +310,11 @@ func TestAlertsControllerGetAlert(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     mockMLPService,
-				RoutersService: mockRouterService,
-				AlertService:   mockAlertService,
+				Services: service.Services{
+					MLPService:     mockMLPService,
+					RoutersService: mockRouterService,
+					AlertService:   mockAlertService,
+				},
 			},
 		},
 	}
@@ -460,9 +469,11 @@ func TestAlertsControllerUpdateAlert(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     mockMLPService,
-				RoutersService: mockRouterService,
-				AlertService:   mockAlertService,
+				Services: service.Services{
+					MLPService:     mockMLPService,
+					RoutersService: mockRouterService,
+					AlertService:   mockAlertService,
+				},
 			},
 		},
 	}
@@ -565,9 +576,11 @@ func TestAlertsControllerDeleteAlert(t *testing.T) {
 	controller := &AlertsController{
 		BaseController{
 			AppContext: &AppContext{
-				MLPService:     mockMLPService,
-				RoutersService: mockRouterService,
-				AlertService:   mockAlertService,
+				Services: service.Services{
+					MLPService:     mockMLPService,
+					RoutersService: mockRouterService,
+					AlertService:   mockAlertService,
+				},
 			},
 		},
 	}
@@ -656,7 +669,9 @@ func TestAlertsControllerGetAlertFromRequestVars(t *testing.T) {
 			ctrl := &AlertsController{
 				BaseController{
 					AppContext: &AppContext{
-						AlertService: alertSvc,
+						Services: service.Services{
+							AlertService: alertSvc,
+						},
 					},
 				},
 			}

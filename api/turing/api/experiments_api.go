@@ -17,7 +17,7 @@ func (c ExperimentsController) ListExperimentEngines(
 	_ RequestVars,
 	_ interface{},
 ) *Response {
-	return Ok(c.ExperimentsService.ListEngines())
+	return Ok(c.Services.ExperimentsService.ListEngines())
 }
 
 // ListExperimentEngineClients returns a list of clients on the given experiment engine
@@ -31,7 +31,7 @@ func (c ExperimentsController) ListExperimentEngineClients(
 		return BadRequest("invalid experiment engine", "key engine not found in vars")
 	}
 
-	clients, err := c.ExperimentsService.ListClients(engine)
+	clients, err := c.Services.ExperimentsService.ListClients(engine)
 	if err != nil {
 		return InternalServerError(fmt.Sprintf("error when querying %s clients", engine), err.Error())
 	}
@@ -54,7 +54,7 @@ func (c ExperimentsController) ListExperimentEngineExperiments(
 	// Get client ID, if supplied
 	clientID, _ := vars.get("client_id")
 	// Get experiments (optionally, tied to the client)
-	experiments, err := c.ExperimentsService.ListExperiments(engine, clientID)
+	experiments, err := c.Services.ExperimentsService.ListExperiments(engine, clientID)
 	if err != nil {
 		return InternalServerError(fmt.Sprintf("error when querying %s experiments", engine), err.Error())
 	}
@@ -82,7 +82,7 @@ func (c ExperimentsController) ListExperimentEngineVariables(
 		experimentIDs = strings.Split(experimentIDStr, ",")
 	}
 	// Get variables
-	variables, err := c.ExperimentsService.ListVariables(engine, clientID, experimentIDs)
+	variables, err := c.Services.ExperimentsService.ListVariables(engine, clientID, experimentIDs)
 	if err != nil {
 		return InternalServerError(fmt.Sprintf("error when querying %s variables", engine), err.Error())
 	}

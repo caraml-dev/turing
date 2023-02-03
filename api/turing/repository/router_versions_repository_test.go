@@ -1,53 +1,38 @@
 //go:build integration
 
-package service_test
+package repository_test
 
 import (
 	"database/sql"
 	"encoding/json"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/service/mocks"
-
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
-	mock "github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/repository"
 )
 
 func TestRouterVersionsServiceIntegration(t *testing.T) {
 	database.WithTestDatabase(t, func(t *testing.T, db *gorm.DB) {
-		// Monitoring URL Deps
-		monitoringURLFormat := "https://www.example.com/{{.ProjectName}}/{{.ClusterName}}/{{.RouterName}}/{{.Version}}"
-		mlpService := &mocks.MLPService{}
-		mlpService.On(
-			"GetEnvironment",
-			mock.Anything,
-		).Return(&merlin.Environment{Cluster: "cluster-name"}, nil)
-		mlpService.On(
-			"GetProject",
-			mock.Anything,
-		).Return(&mlp.Project{Name: "project-name"}, nil)
+		rRepo := repository.NewRoutersRepository(db)
+		rvRepo := repository.NewRouterVersionsRepository(db)
 
-		// create router first
+		// Create router first
 		router := &models.Router{
 			ProjectID:       1,
 			EnvironmentName: "johto",
 			Name:            "wooper",
 			Status:          models.RouterStatusPending,
 		}
-		router, err := service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
+		router, err := rRepo.Save(router)
 		assert.NoError(t, err)
 
-		// populate database
-		svc := service.NewRouterVersionsService(db, mlpService, &monitoringURLFormat)
+		// Populate database
 		routerVersion := &models.RouterVersion{
 			RouterID: router.ID,
 			Status:   models.RouterVersionStatusPending,
@@ -141,7 +126,7 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 				},
 			},
 		}
-		saved, err := svc.Save(routerVersion)
+		saved, err := rvRepo.Save(routerVersion)
 		assert.NoError(t, err)
 		assert.Equal(t, models.ID(1), saved.ID)
 		assert.NotNil(t, saved.CreatedAt)
@@ -149,8 +134,8 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		assert.Equal(t, 1, int(saved.EnsemblerID.Int32))
 		assert.Equal(t, 1, int(saved.EnricherID.Int32))
 
-		// find by id
-		found, err := svc.FindByID(1)
+		// Find by id
+		found, err := rvRepo.FindByID(1)
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), found.Version)
 		routerVersion.Version = found.Version
@@ -164,15 +149,14 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 		routerVersion.Enricher.UpdatedAt = found.Enricher.UpdatedAt
 		routerVersion.Ensembler.CreatedAt = found.Ensembler.CreatedAt
 		routerVersion.Ensembler.UpdatedAt = found.Ensembler.UpdatedAt
-		routerVersion.MonitoringURL = "https://www.example.com/project-name/cluster-name/wooper/1"
 		if !cmp.Equal(routerVersion, found) {
 			routerVersionJson, _ := json.Marshal(routerVersion)
 			foundJson, _ := json.Marshal(found)
 			t.Errorf("Not equal: \n expected: %s\n actual: %s\n", routerVersionJson, foundJson)
 		}
 
-		// find by version
-		found, err = svc.FindByRouterIDAndVersion(router.ID, 1)
+		// Find by version
+		found, err = rvRepo.FindByRouterIDAndVersion(router.ID, 1)
 		assert.NoError(t, err)
 		if !cmp.Equal(routerVersion, found) {
 			routerVersionJson, _ := json.Marshal(routerVersion)
@@ -180,58 +164,51 @@ func TestRouterVersionsServiceIntegration(t *testing.T) {
 			t.Errorf("Not equal: \n expected: %s\n actual: %s\n", routerVersionJson, foundJson)
 		}
 
-		// list
-		list, err := svc.ListRouterVersions(router.ID)
+		// List
+		list, err := rvRepo.List(router.ID)
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, []*models.RouterVersion{found}, list)
 
-		// update
+		// Update
 		found.Status = models.RouterVersionStatusDeployed
-		saved, err = svc.Save(found)
+		saved, err = rvRepo.Save(found)
 		assert.NoError(t, err)
 		assert.Equal(t, models.ID(1), saved.ID)
 		assert.Equal(t, models.RouterVersionStatusDeployed, saved.Status)
-		found, err = svc.FindByRouterIDAndVersion(router.ID, 1)
+		found, err = rvRepo.FindByRouterIDAndVersion(router.ID, 1)
 		assert.NoError(t, err)
 		assert.Equal(t, models.ID(1), found.ID)
 
-		// list with versions
-		list, err = svc.ListRouterVersionsWithStatus(router.ID, models.RouterVersionStatusDeployed)
+		// List with versions
+		list, err = rvRepo.ListByStatus(router.ID, models.RouterVersionStatusDeployed)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(list))
 		assert.Equal(t, models.RouterVersionStatusDeployed, list[0].Status)
 
-		// delete with upstream reference
-		router.SetCurrRouterVersion(routerVersion)
-		_, err = service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
-		assert.NoError(t, err)
-		err = svc.Delete(routerVersion)
-		assert.Error(t, err, "unable to delete router version - there exists a router that is currently using this version")
-
-		// clear reference and delete
+		// Clear reference and delete
 		router.CurrRouterVersionID = sql.NullInt32{}
 		router.CurrRouterVersion = nil
-		_, err = service.NewRoutersService(db, mlpService, &monitoringURLFormat).Save(router)
+		_, err = rRepo.Save(router)
 		assert.NoError(t, err)
-		err = svc.Delete(routerVersion)
-		found, err = svc.FindByID(1)
+		err = rvRepo.Delete(routerVersion)
+		found, err = rvRepo.FindByID(1)
+		t.Log(found, err)
 		assert.Error(t, err)
-		assert.Nil(t, found)
 
 		var count int64 = -1
 		db.Model(&models.Ensembler{}).Count(&count)
 		assert.Equal(t, int64(0), count)
-		// reset count
+		// Reset count
 		count = -1
 		db.Model(&models.Enricher{}).Count(&count)
 		assert.Equal(t, int64(0), count)
 
-		// create router again without ensembler and enricher
+		// Create router again without ensembler and enricher
 		routerVersion.EnricherID = sql.NullInt32{}
 		routerVersion.Enricher = nil
 		routerVersion.EnsemblerID = sql.NullInt32{}
 		routerVersion.Ensembler = nil
-		routerVersion, err = svc.Save(routerVersion)
+		routerVersion, err = rvRepo.Save(routerVersion)
 		assert.NoError(t, err)
 		assert.Nil(t, routerVersion.Enricher)
 		assert.Nil(t, routerVersion.Ensembler)

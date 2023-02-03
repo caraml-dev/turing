@@ -16,7 +16,7 @@ type AlertsController struct {
 var ErrAlertDisabled = errors.New("alert is disabled in turing-api")
 
 func (c AlertsController) CreateAlert(r *http.Request, vars RequestVars, body interface{}) *Response {
-	if c.AlertService == nil {
+	if c.Services.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
 
@@ -38,21 +38,21 @@ func (c AlertsController) CreateAlert(r *http.Request, vars RequestVars, body in
 	alert := body.(*models.Alert)
 	alert.Service = c.getService(*router)
 
-	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
+	environment, err := c.Services.MLPService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
 		return InternalServerError("unable to get MLP environment for the router", err.Error())
 	}
 
-	project, err := c.MLPService.GetProject(router.ProjectID)
+	project, err := c.Services.MLPService.GetProject(router.ProjectID)
 	if err != nil {
 		return InternalServerError("unable to get MLP project for the router", err.Error())
 	}
 
-	dashboardURL, err := c.AlertService.GetDashboardURL(alert, project, environment, router, nil)
+	dashboardURL, err := c.Services.AlertService.GetDashboardURL(alert, project, environment, router, nil)
 	if err != nil {
 		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
 	}
-	created, err := c.AlertService.Save(*alert, email, dashboardURL)
+	created, err := c.Services.AlertService.Save(*alert, email, dashboardURL)
 	if err != nil {
 		return InternalServerError("unable to create alert", err.Error())
 	}
@@ -60,7 +60,7 @@ func (c AlertsController) CreateAlert(r *http.Request, vars RequestVars, body in
 }
 
 func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interface{}) *Response {
-	if c.AlertService == nil {
+	if c.Services.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
 
@@ -72,7 +72,7 @@ func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interf
 	}
 
 	// List alerts
-	alerts, err := c.AlertService.List(c.getService(*router))
+	alerts, err := c.Services.AlertService.List(c.getService(*router))
 	if err != nil {
 		return InternalServerError("failed to list alerts", err.Error())
 	}
@@ -80,7 +80,7 @@ func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interf
 }
 
 func (c AlertsController) GetAlert(r *http.Request, vars RequestVars, _ interface{}) *Response {
-	if c.AlertService == nil {
+	if c.Services.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
 
@@ -96,7 +96,7 @@ func (c AlertsController) GetAlert(r *http.Request, vars RequestVars, _ interfac
 }
 
 func (c AlertsController) UpdateAlert(r *http.Request, vars RequestVars, body interface{}) *Response {
-	if c.AlertService == nil {
+	if c.Services.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
 
@@ -120,28 +120,28 @@ func (c AlertsController) UpdateAlert(r *http.Request, vars RequestVars, body in
 	updateAlert.ID = alert.ID
 	updateAlert.Service = c.getService(*router)
 
-	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
+	environment, err := c.Services.MLPService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
 		return InternalServerError("unable to get MLP environment for the router", err.Error())
 	}
 
-	project, err := c.MLPService.GetProject(router.ProjectID)
+	project, err := c.Services.MLPService.GetProject(router.ProjectID)
 	if err != nil {
 		return InternalServerError("unable to get MLP project for the router", err.Error())
 	}
 
-	dashboardURL, err := c.AlertService.GetDashboardURL(alert, project, environment, router, nil)
+	dashboardURL, err := c.Services.AlertService.GetDashboardURL(alert, project, environment, router, nil)
 	if err != nil {
 		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
 	}
-	if err := c.AlertService.Update(*updateAlert, email, dashboardURL); err != nil {
+	if err := c.Services.AlertService.Update(*updateAlert, email, dashboardURL); err != nil {
 		return InternalServerError("unable to update alert", err.Error())
 	}
 	return Ok(updateAlert)
 }
 
 func (c AlertsController) DeleteAlert(r *http.Request, vars RequestVars, _ interface{}) *Response {
-	if c.AlertService == nil {
+	if c.Services.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
 
@@ -160,23 +160,23 @@ func (c AlertsController) DeleteAlert(r *http.Request, vars RequestVars, _ inter
 		return errResp
 	}
 
-	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
+	environment, err := c.Services.MLPService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
 		return InternalServerError("unable to get MLP environment for the router", err.Error())
 	}
 
-	project, err := c.MLPService.GetProject(router.ProjectID)
+	project, err := c.Services.MLPService.GetProject(router.ProjectID)
 	if err != nil {
 		return InternalServerError("unable to get MLP project for the router", err.Error())
 	}
 
-	dashboardURL, err := c.AlertService.GetDashboardURL(alert, project, environment, router, nil)
+	dashboardURL, err := c.Services.AlertService.GetDashboardURL(alert, project, environment, router, nil)
 	if err != nil {
 		return InternalServerError("unable to generate dashboard URL for the alert", err.Error())
 	}
 
 	// Delete Alert
-	if err := c.AlertService.Delete(*alert, email, dashboardURL); err != nil {
+	if err := c.Services.AlertService.Delete(*alert, email, dashboardURL); err != nil {
 		return InternalServerError("unable to delete alert", err.Error())
 	}
 	return Ok(fmt.Sprintf("Alert with id '%d' deleted", alert.ID))
@@ -196,7 +196,7 @@ func (c AlertsController) getAlertFromRequestVars(vars RequestVars) (*models.Ale
 	if err != nil {
 		return nil, BadRequest("invalid alert id", err.Error())
 	}
-	alert, err := c.AlertService.FindByID(id)
+	alert, err := c.Services.AlertService.FindByID(id)
 	if err != nil {
 		return nil, NotFound("alert not found", err.Error())
 	}

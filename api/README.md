@@ -17,6 +17,14 @@ To set up and install necessary tools, run:
 make setup
 ```
 
+### Generate Mocks
+
+It is recommended to use [mockgen](https://github.com/golang/mock) to generate the mocks for interfaces, especially the services. This tool is already installed by the setup step. To generate a mock, run:
+
+```bash
+mockgen -source=<filename.go> -destination=mock_service/<filename.go>
+```
+
 ### Re-generate openapi models 
 OAS3 specs are used to generate required Golang structs, that define 
 the configuration of ensembling batch jobs. If openapi specs have been 

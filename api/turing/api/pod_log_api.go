@@ -56,7 +56,7 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 		if !router.CurrRouterVersionID.Valid {
 			return BadRequest("Current router version id is invalid", "Make sure current router is deployed")
 		}
-		routerVersion, err = c.RouterVersionsService.FindByID(models.ID(router.CurrRouterVersionID.Int32))
+		routerVersion, err = c.Services.RouterVersionsService.FindByID(models.ID(router.CurrRouterVersionID.Int32))
 		if err != nil {
 			return InternalServerError("Failed to find current router version", err.Error())
 		}
@@ -79,7 +79,7 @@ func (c PodLogController) ListRouterPodLogs(_ *http.Request, vars RequestVars, _
 		Container: options.Container,
 	}
 
-	logs, err := c.PodLogService.ListPodLogs(request)
+	logs, err := c.Services.PodLogService.ListPodLogs(request)
 	if err != nil {
 		return InternalServerError("Failed to list logs", err.Error())
 	}
@@ -107,7 +107,7 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 		)
 	}
 
-	ensemblingJob, err := c.EnsemblingJobService.FindByID(
+	ensemblingJob, err := c.Services.EnsemblingJobService.FindByID(
 		options.ID,
 		service.EnsemblingJobFindByIDOptions{
 			ProjectID: options.ProjectID,
@@ -118,13 +118,13 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 		return NotFound("ensembling job not found", err.Error())
 	}
 
-	namespace := c.EnsemblingJobService.GetNamespaceByComponent(options.ComponentType, project)
-	environment := c.EnsemblingJobService.GetDefaultEnvironment()
+	namespace := c.Services.EnsemblingJobService.GetNamespaceByComponent(options.ComponentType, project)
+	environment := c.Services.EnsemblingJobService.GetDefaultEnvironment()
 	ensemblerName := *ensemblingJob.InfraConfig.EnsemblerName
 	request := service.PodLogRequest{
 		Namespace:   namespace,
 		Environment: environment,
-		LabelSelectors: c.EnsemblingJobService.CreatePodLabelSelector(
+		LabelSelectors: c.Services.EnsemblingJobService.CreatePodLabelSelector(
 			ensemblerName,
 			options.ComponentType,
 		),
@@ -135,12 +135,12 @@ func (c PodLogController) ListEnsemblingJobPodLogs(_ *http.Request, vars Request
 		Container: options.Container,
 	}
 
-	legacyFormatLogs, err := c.PodLogService.ListPodLogs(request)
+	legacyFormatLogs, err := c.Services.PodLogService.ListPodLogs(request)
 	if err != nil {
 		return InternalServerError("Failed to list logs", err.Error())
 	}
 
-	loggingURL, err := c.EnsemblingJobService.FormatLoggingURL(ensemblerName, namespace, options.ComponentType)
+	loggingURL, err := c.Services.EnsemblingJobService.FormatLoggingURL(ensemblerName, namespace, options.ComponentType)
 	if err != nil {
 		return InternalServerError("Failed to format monitoring URL", err.Error())
 	}

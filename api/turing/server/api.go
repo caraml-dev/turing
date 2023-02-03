@@ -35,17 +35,16 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 
 	apiRouter.Use(openapiMiddleware, sentry.Recoverer)
 
-	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
+	validator, _ := validation.NewValidator(appCtx.Services.ExperimentsService)
 	baseController := api.NewBaseController(appCtx, validator)
-	deploymentController := api.RouterDeploymentController{BaseController: baseController}
 	controllers := []api.Controller{
 		api.AlertsController{BaseController: baseController},
 		api.EnsemblersController{BaseController: baseController},
 		api.ExperimentsController{BaseController: baseController},
 		api.PodLogController{BaseController: baseController},
 		api.ProjectsController{BaseController: baseController},
-		api.RoutersController{RouterDeploymentController: deploymentController},
-		api.RouterVersionsController{RouterDeploymentController: deploymentController},
+		api.RoutersController{BaseController: baseController},
+		api.RouterVersionsController{BaseController: baseController},
 	}
 
 	if cfg.BatchEnsemblingConfig.Enabled {

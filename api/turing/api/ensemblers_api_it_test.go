@@ -17,11 +17,10 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/server"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/caraml-dev/turing/api/turing/service"
 )
 
 func TestEnsemblersController_CreateEnsembler(t *testing.T) {
@@ -167,8 +166,10 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 			router := mux.NewRouter()
 
 			appCtx := &api.AppContext{
-				MLPService:        mlpSvc,
-				EnsemblersService: ensemblerSvc,
+				Services: service.Services{
+					MLPService:        mlpSvc,
+					EnsemblersService: ensemblerSvc,
+				},
 			}
 			_ = server.AddAPIRoutesHandler(router, "/", appCtx, &config.Config{})
 
