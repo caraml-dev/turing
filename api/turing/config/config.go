@@ -17,9 +17,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
+
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/utils"
-	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be
@@ -127,9 +128,8 @@ type BatchEnsemblingConfig struct {
 
 // EnsemblerServiceConfig captures the config related to the build and running of ensembler services (real-time)
 type EnsemblerServiceBuilderConfig struct {
-	ClusterName         string                `validate:"required"`
-	K8sConfig           *mlpcluster.K8sConfig `validate:"required"`
-	ImageBuildingConfig *ImageBuildingConfig  `validate:"required"`
+	ClusterName         string               `validate:"required"`
+	ImageBuildingConfig *ImageBuildingConfig `validate:"required"`
 }
 
 // JobConfig captures the config related to the ensembling batch jobs.
@@ -346,8 +346,9 @@ type ClusterConfig struct {
 	InClusterConfig bool
 
 	// EnvironmentConfigPath refers to a path that contains EnvironmentConfigs
-	EnvironmentConfigPath string `validate:"required_without=InClusterConfig"`
-	EnvironmentConfigs    []*EnvironmentConfig
+	EnvironmentConfigPath      string                `validate:"required_without=InClusterConfig"`
+	EnsemblingServiceK8sConfig *mlpcluster.K8sConfig `validate:"required_without=InClusterConfig"`
+	EnvironmentConfigs         []*EnvironmentConfig
 }
 
 // ProcessEnvConfigs reads the env configs from a file and unmarshalls them

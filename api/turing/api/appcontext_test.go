@@ -14,6 +14,8 @@ import (
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
+
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -23,7 +25,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
-	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 // MockVaultClient satisfies the vault.Client interface
@@ -99,13 +100,6 @@ func TestNewAppContext(t *testing.T) {
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			ClusterName: defaultEnvironment,
-			K8sConfig: &mlpcluster.K8sConfig{
-				Name: defaultEnvironment,
-				Cluster: &clientcmdapiv1.Cluster{
-					Server: "k8s.api.server",
-				},
-				AuthInfo: &clientcmdapiv1.AuthInfo{},
-			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -188,6 +182,13 @@ func TestNewAppContext(t *testing.T) {
 		},
 		ClusterConfig: config.ClusterConfig{
 			InClusterConfig: false,
+			EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+				Name: defaultEnvironment,
+				Cluster: &clientcmdapiv1.Cluster{
+					Server: "k8s.api.server",
+				},
+				AuthInfo: &clientcmdapiv1.AuthInfo{},
+			},
 			EnvironmentConfigs: []*config.EnvironmentConfig{
 				{
 					Name: "N1",
@@ -274,7 +275,7 @@ func TestNewAppContext(t *testing.T) {
 			assert.Equal(t, map[string]*mlpcluster.K8sConfig{
 				"N1":  cfg.ClusterConfig.EnvironmentConfigs[0].K8sConfig,
 				"N2":  cfg.ClusterConfig.EnvironmentConfigs[1].K8sConfig,
-				"dev": cfg.EnsemblerServiceBuilderConfig.K8sConfig,
+				"dev": cfg.ClusterConfig.EnsemblingServiceK8sConfig,
 			}, environmentClusterMap)
 			return map[string]cluster.Controller{
 				defaultEnvironment: nil,

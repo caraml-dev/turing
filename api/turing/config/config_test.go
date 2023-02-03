@@ -622,11 +622,6 @@ func TestConfigValidate(t *testing.T) {
 		},
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			ClusterName: "dev",
-			K8sConfig: &mlpcluster.K8sConfig{
-				Cluster:  &clientcmdapiv1.Cluster{},
-				AuthInfo: &clientcmdapiv1.AuthInfo{},
-				Name:     "dev",
-			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
 				DestinationRegistry: "ghcr.io",
 				BaseImageRef: map[string]string{
@@ -700,6 +695,11 @@ func TestConfigValidate(t *testing.T) {
 		ClusterConfig: config.ClusterConfig{
 			InClusterConfig:       false,
 			EnvironmentConfigPath: "./path/to/env-file.yaml",
+			EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+				Cluster:  &clientcmdapiv1.Cluster{},
+				AuthInfo: &clientcmdapiv1.AuthInfo{},
+				Name:     "dev",
+			},
 		},
 		TuringEncryptionKey: "secret",
 		AlertConfig:         nil,
@@ -788,6 +788,14 @@ func TestConfigValidate(t *testing.T) {
 		"missing EnvironmentConfigPath when InClusterConfig is false": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.ClusterConfig.EnvironmentConfigPath = ""
+				validConfig.ClusterConfig.InClusterConfig = false
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"missing EnsemblingServiceK8sConfig when InClusterConfig is false": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.ClusterConfig.EnsemblingServiceK8sConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = false
 				return validConfig
 			},

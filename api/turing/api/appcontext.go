@@ -5,6 +5,8 @@ import (
 
 	"gorm.io/gorm"
 
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
+
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -14,7 +16,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 )
 
 // AppContext stores the entities relating to the application's context
@@ -192,10 +193,14 @@ func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[st
 
 	// Create a map of env name to cluster name for each supported deployment environment
 	k8sConfigStore := make(map[string]*mlpcluster.K8sConfig)
+	if !cfg.ClusterConfig.InClusterConfig {
+		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = cfg.ClusterConfig.EnsemblingServiceK8sConfig
+	} else {
+		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = nil
+	}
 	for _, envconfig := range cfg.ClusterConfig.EnvironmentConfigs {
 		k8sConfigStore[envconfig.Name] = envconfig.K8sConfig
 	}
-	k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = cfg.EnsemblerServiceBuilderConfig.K8sConfig
 
 	// Get all environments
 	environments, err := mlpSvc.GetEnvironments()
