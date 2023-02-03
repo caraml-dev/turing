@@ -96,8 +96,8 @@ turing:
 
   clusterConfig:
     # -- (bool) Configuration to tell Turing API how it should authenticate with deployment k8s cluster
-    # By default, Turing API expects to use a remote k8s cluster for deployment and to do so,
-    # it requires cluster credentials to be stored in Vault's KV Secrets store. TODO: Change comments, no more vault
+    # By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires
+    # cluster access configurations to be configured as part of values.yaml
     useInClusterConfig: false
     environmentConfigPath: "environments.yaml"
     ensemblingServiceK8sConfig: 

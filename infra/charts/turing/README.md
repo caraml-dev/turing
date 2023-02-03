@@ -90,7 +90,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | turing.clusterConfig.ensemblingServiceK8sConfig.name | string | `"dev-cluster"` |  |
 | turing.clusterConfig.ensemblingServiceK8sConfig.user | object | `{}` |  |
 | turing.clusterConfig.environmentConfigPath | string | `"environments.yaml"` |  |
-| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster credentials to be stored in Vault's KV Secrets store. TODO: Change comments, no more vault |
+| turing.clusterConfig.useInClusterConfig | bool | `false` | Configuration to tell Turing API how it should authenticate with deployment k8s cluster By default, Turing API expects to use a remote k8s cluster for deployment and to do so, it requires cluster access configurations to be configured as part of values.yaml |
 | turing.config | object | computed value | Turing API server configuration. Please refer to https://github.com/caraml-dev/turing/blob/main/api/turing/config/example.yaml for the detailed explanation on Turing API config options |
 | turing.environmentConfigs[0].k8s_config.cluster | object | `{}` |  |
 | turing.environmentConfigs[0].k8s_config.name | string | `"dev-cluster"` |  |
