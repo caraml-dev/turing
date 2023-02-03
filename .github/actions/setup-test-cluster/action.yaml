@@ -162,12 +162,12 @@ runs:
           --data @credentials.json \
           http://vault.127.0.0.1.nip.io/v1/secret/dev
         
+        # Create a secret for Merlin with information on how to access Vault
         kubectl create secret generic vault-secret \
           --from-literal=vault-address=http://vault:8200 \
           --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 
         # FOR TURING
-        # Create a secret for Merlin with information on how to access Vault
         k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} >/tmp/temp_kubeconfig.yaml
         tee credentials.json << EOF
         {

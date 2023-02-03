@@ -345,11 +345,11 @@ jobs:
           - name: "In-cluster credentials; API e2e"
             useInClusterConfig: true
             valuesFile: "turing.values.in-cluster.yaml"
-            useSDK: false
+            useSDK: true
           - name: "Remote cluster credentials; SDK e2e"
             useInClusterConfig: false
             valuesFile: "turing.values.remote.yaml"
-            useSDK: true
+            useSDK: false
 
     steps:
       - name: Check out code
