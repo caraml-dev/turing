@@ -17,7 +17,6 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gojek/fiber v0.2.0
 	github.com/gojek/merlin v0.0.0
-	github.com/gojek/mlp v1.7.5-0.20230112121123-d7b933b703c7
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.9
@@ -92,6 +91,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/gojek/mlp v1.7.5-0.20230112125751-e6a444b970d0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
