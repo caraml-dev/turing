@@ -186,11 +186,11 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// buildKubeconfigStore creates a map of the environment name to the kubernetes cluster. Additionally,
-// clusters that are not a part of the deployment environments can be registered using the clusterNames
-// parameter (in such cases, the environment name will be saved to be the same as the cluster name).
+// buildKubeconfigStore creates a map of the environment name to the kubernetes cluster.
+// It combines the EnsemblerServiceBuilderConfig with a list of environments retrieved from mlpSvc
+// into a map. Each environment retrieved from mlpSvc should have a corresponding k8sConfig, else
+// an error is returned.
 func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[string]*mlpcluster.K8sConfig, error) {
-
 	// Create a map of env name to cluster name for each supported deployment environment
 	k8sConfigStore := make(map[string]*mlpcluster.K8sConfig)
 	if !cfg.ClusterConfig.InClusterConfig {
