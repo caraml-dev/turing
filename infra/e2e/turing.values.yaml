@@ -46,8 +46,9 @@ turing:
                 route_name: control
 
 postgresql: &postgresql
-  persistence:
-    enabled: false
+  primary:
+    persistence:
+      enabled: false
 
 merlin:
   postgresql: *postgresql
