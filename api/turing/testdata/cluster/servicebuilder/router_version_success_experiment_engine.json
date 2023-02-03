@@ -25,7 +25,8 @@
   "experiment_engine": {
     "type": "exp-engine",
     "plugin_config": {
-      "image": "ghcr.io/myproject/exp-engine-plugin:latest"
+      "image": "ghcr.io/myproject/exp-engine-plugin:latest",
+      "liveness_period_seconds": 5
     },
     "service_account_key_file_path": "/etc/plugins/blue/gcp_service_account/service-account.json",
     "config": {
