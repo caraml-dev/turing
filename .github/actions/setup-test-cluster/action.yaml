@@ -167,6 +167,9 @@ runs:
           --from-literal=vault-address=http://vault:8200 \
           --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 
+    - name: Prepare cluster credentials without vault
+      shell: bash
+      run: |
         # FOR TURING
         k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} >/tmp/temp_kubeconfig.yaml
         tee credentials.json << EOF
