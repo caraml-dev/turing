@@ -14,10 +14,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/caraml-dev/turing/api/turing/config"
-	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
+
+	"github.com/caraml-dev/turing/api/turing/config"
+	openapi "github.com/caraml-dev/turing/api/turing/generated"
 )
 
 func TestDecodeQuantity(t *testing.T) {
@@ -383,7 +384,7 @@ func TestLoad(t *testing.T) {
 				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
 				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
 				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
-				"CLUSTERCONFIG_ENVIRONMENTCONFIGPATH":                  "env_var_path_to_env.yaml",
+				"CLUSTERCONFIG_ENVIRONMENTCONFIGPATH":            "env_var_path_to_env.yaml",
 			},
 			want: &config.Config{
 				Port:           5000,
@@ -443,7 +444,7 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
+					InClusterConfig:       false,
 					EnvironmentConfigPath: "env_var_path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
@@ -518,7 +519,6 @@ func TestLoad(t *testing.T) {
 func TestStringToQuantityHookFunc(t *testing.T) {
 	hookFunc := config.StringToQuantityHookFunc()
 	qtyType := reflect.TypeOf(config.Quantity{})
-
 
 	tests := []struct {
 		name    string
@@ -698,7 +698,7 @@ func TestConfigValidate(t *testing.T) {
 			IgnoreStatusCodes: []int{403, 404},
 		},
 		ClusterConfig: config.ClusterConfig{
-			InClusterConfig: false,
+			InClusterConfig:       false,
 			EnvironmentConfigPath: "./path/to/env-file.yaml",
 		},
 		TuringEncryptionKey: "secret",
