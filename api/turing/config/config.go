@@ -18,8 +18,8 @@ import (
 	"gopkg.in/yaml.v2"
 
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
-	"github.com/caraml-dev/turing/api/turing/mlpcluster"
 	"github.com/caraml-dev/turing/api/turing/utils"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
 	// always returns map[string]interface{}. Without this, config for experiment cannot be

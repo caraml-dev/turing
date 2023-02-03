@@ -36,8 +36,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/mlpcluster"
 
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	// Load required auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
