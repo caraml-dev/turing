@@ -164,7 +164,15 @@ turing:
       PythonVersion: "3"
       TTLSecond: 86400
     DeployConfig: { }
-    DbConfig: { }
+    DbConfig:
+      # The maximum amount of time a connection may be idle. For more info see: https://pkg.go.dev/database/sql#DB.SetConnMaxIdleTime
+      ConnMaxIdleTime: 0s
+      # The maximum amount of time a connection may be reused. For more info see: https://pkg.go.dev/database/sql#DB.SetConnMaxLifetime
+      ConnMaxLifetime: 0s
+      # The maximum number of connections in the idle connection pool. For more info see: https://pkg.go.dev/database/sql#DB.SetMaxIdleConns
+      MaxIdleConns: 0
+      # The maximum number of open connections to the database. For more info see: https://pkg.go.dev/database/sql#DB.SetMaxOpenConns
+      MaxOpenConns: 0
     KubernetesLabelConfigs: { }
     MLPConfig: { }
     Sentry:
