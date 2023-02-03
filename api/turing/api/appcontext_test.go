@@ -8,7 +8,6 @@ import (
 	merlin "github.com/gojek/merlin/client"
 	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
-	"github.com/gojek/mlp/api/pkg/vault"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 	"gorm.io/gorm"
@@ -26,13 +25,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
 )
-
-// MockVaultClient satisfies the vault.Client interface
-type MockVaultClient struct{}
-
-func (c *MockVaultClient) GetClusterSecret(clusterName string) (*vault.ClusterSecret, error) {
-	return nil, nil
-}
 
 func TestNewAppContext(t *testing.T) {
 	// Create test config
@@ -225,7 +217,7 @@ func TestNewAppContext(t *testing.T) {
 			},
 		},
 	}
-	// Create test auth enforcer and Vault client
+	// Create test auth enforcer
 	testAuthorizer := &middleware.Authorizer{}
 	// Create mock MLP Service
 	mlpSvc := &svcmocks.MLPService{}

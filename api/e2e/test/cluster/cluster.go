@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/gojek/mlp/api/pkg/vault"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/pkg/errors"
 	"istio.io/client-go/pkg/apis/networking/v1alpha3"
 	networkingv1alpha3 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1alpha3"
@@ -52,25 +52,6 @@ type DeleteInterface interface {
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 }
 
-func GetModelClusterCredentials(clusterName string, vaultCfg config.VaultConfig) (*vault.ClusterSecret, error) {
-	vaultConfig := &vault.Config{
-		Address: vaultCfg.Address,
-		Token:   vaultCfg.Token,
-	}
-	vaultClient, err := vault.NewClient(vaultConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to initialize vault")
-	}
-
-	// Get cluster secret
-	clusterSecret, err := vaultClient.GetClusterSecret(clusterName)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unable to get cluster secret for cluster: %s", clusterName)
-	}
-
-	return clusterSecret, nil
-}
-
 func InitClusterClients(cfg *config.Config) error {
 	var clusterCfg *rest.Config
 
@@ -86,29 +67,13 @@ func InitClusterClients(cfg *config.Config) error {
 		}
 		clusterCfg = cfg
 	} else {
-		// Authenticate to Kube with cluster credentials in Vault
-		vaultConfig := &vault.Config{
-			Address: cfg.Vault.Address,
-			Token:   cfg.Vault.Token,
-		}
-		vaultClient, err := vault.NewClient(vaultConfig)
+		c := mlpcluster.K8sConfig(*cfg.Cluster.Credentials)
+		creds := mlpcluster.NewK8sClusterCreds(&c)
+		cc, err := creds.ToRestConfig()
 		if err != nil {
-			return errors.Wrap(err, "unable to initialize vault")
+			return errors.Wrap(err, "unable to initialize kubeconfig from K8sConfig")
 		}
-		clusterSecret, err := vaultClient.GetClusterSecret(cfg.Cluster.Name)
-		if err != nil {
-			return errors.Wrapf(err,
-				"unable to get cluster secret for cluster: %s", cfg.Cluster.Name)
-		}
-		clusterCfg = &rest.Config{
-			Host: clusterSecret.Endpoint,
-			TLSClientConfig: rest.TLSClientConfig{
-				Insecure: false,
-				CAData:   []byte(clusterSecret.CaCert),
-				CertData: []byte(clusterSecret.ClientCert),
-				KeyData:  []byte(clusterSecret.ClientKey),
-			},
-		}
+		clusterCfg = cc
 	}
 
 	knsClientSet, err := knservingclientset.NewForConfig(clusterCfg)

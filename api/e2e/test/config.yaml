@@ -22,6 +22,7 @@ mockTreatmentUPIServer:
 
 cluster:
   name: dev
+  credentials: {}
 
 project:
   id: 1
@@ -29,7 +30,3 @@ project:
 
 ensemblers:
   base_name: "turing-e2e-"
-
-vault:
-  addr: http://localhost:8200
-  token: root
