@@ -250,6 +250,12 @@ This script will create 2 new files containing the credentials required to confi
 * config-dev-w-creds.yaml
 * environments-dev-w-creds.yaml
 
+These 2 files contain credentials extracted from the K3S container started from the docker-compose file.
+The fields `ClusterConfig.EnsemblingServiceK8sConfig` in `config-dev-w-creds.yaml` and 
+`k8s_config` field in `environments-dev-w-creds.yaml` 
+contain cluster certificate information.
+
+
 Now, start Turing API server with `go run` command,
 ```bash
 go run turing/cmd/main.go -config=config-dev-w-creds.yaml

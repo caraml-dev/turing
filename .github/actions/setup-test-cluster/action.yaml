@@ -224,7 +224,6 @@ runs:
       uses: jupyterhub/action-k8s-namespace-report@v1
       if: ${{ failure() }}
 
-
     - name: Setup MLP project
       shell: bash
       run: |
