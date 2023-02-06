@@ -32,6 +32,9 @@ var requestLatencyBuckets = []float64{
 	2000, 5000, 10000, 20000, 50000, 100000,
 }
 
+// additionalRegisteredMetricNames is a set containing all registered experiment engine metric names to prevent
+// re-registrations if the RegisterMetrics method is called multiple times on the same metrics (happens when there are
+// multiple fiber routes using the same experimentation policy)
 var additionalRegisteredMetricNames = set.New(nil)
 
 func GetHistogramMap() map[metrics.MetricName]metrics.PrometheusHistogramVec {
