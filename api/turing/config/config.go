@@ -9,10 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
+
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/utils"
@@ -53,6 +58,15 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 }
 
 type EngineConfig map[string]interface{}
+
+// EnvironmentConfig is a abridged version of
+// https://github.dev/gojek/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
+// Only requires Name and K8sConfig
+// This struct should be removed when Environments API is moved from Merlin to MLP
+type EnvironmentConfig struct {
+	Name      string                `yaml:"name" validate:"required"`
+	K8sConfig *mlpcluster.K8sConfig `yaml:"k8s_config" validate:"required"`
+}
 
 // Config is used to parse and store the environment configs
 type Config struct {
@@ -337,14 +351,33 @@ type ClusterConfig struct {
 	// InClusterConfig is a flag if the service account is provided in Kubernetes
 	// and has the relevant credentials to handle all cluster operations.
 	InClusterConfig bool
-	// VaultConfig is required if InClusterConfig is false.
-	VaultConfig *VaultConfig `validate:"required_without=InClusterConfig"`
+
+	// EnvironmentConfigPath refers to a path that contains EnvironmentConfigs
+	EnvironmentConfigPath      string                `validate:"required_without=InClusterConfig"`
+	EnsemblingServiceK8sConfig *mlpcluster.K8sConfig `validate:"required_without=InClusterConfig"`
+	EnvironmentConfigs         []*EnvironmentConfig
 }
 
-// VaultConfig captures the config for connecting to the Vault server
-type VaultConfig struct {
-	Address string `validate:"required"`
-	Token   string `validate:"required"`
+// ProcessEnvConfigs reads the env configs from a file and unmarshalls them
+func (c *ClusterConfig) ProcessEnvConfigs() error {
+	if c.InClusterConfig {
+		return nil
+	}
+	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
+	if err != nil {
+		return err
+	}
+	var envs []*EnvironmentConfig
+	if err = yaml.Unmarshal(envConfig, &envs); err != nil {
+		return err
+	}
+	for _, env := range envs {
+		if env.K8sConfig == nil {
+			return fmt.Errorf("Error, k8sConfig for %s is nil", env.Name)
+		}
+	}
+	c.EnvironmentConfigs = envs
+	return nil
 }
 
 type AlertConfig struct {

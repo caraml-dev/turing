@@ -17,7 +17,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/middleware"
-	"github.com/caraml-dev/turing/api/turing/vault"
 )
 
 type configFlags []string
@@ -44,6 +43,9 @@ func Run() {
 	cfg, err := config.Load(configFlags...)
 	if err != nil {
 		log.Panicf("%s", err)
+	}
+	if err = cfg.ClusterConfig.ProcessEnvConfigs(); err != nil {
+		log.Panicf("Failed to process environment configs: %s", err)
 	}
 	err = cfg.Validate()
 	if err != nil {
@@ -89,14 +91,8 @@ func Run() {
 		}
 	}
 
-	// Init Vault client
-	vaultClient, err := vault.NewClientFromConfig(cfg)
-	if err != nil {
-		log.Panicf("Failed initializing vault client: %v", err)
-	}
-
 	// Init app context
-	appCtx, err := api.NewAppContext(db, cfg, authorizer, vaultClient)
+	appCtx, err := api.NewAppContext(db, cfg, authorizer)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}

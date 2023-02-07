@@ -31,9 +31,7 @@ Sentry:
     foo: bar
 ClusterConfig:
   InClusterConfig: false
-  VaultConfig:
-    Address: "http://localhost:8200"
-    Token: root
+  EnvironmentConfigPath: "path_to_env.yaml"
 Experiment:
     qux:
       quxkey1: quxval1

@@ -4,10 +4,33 @@ turing:
 
   config:
     ClusterConfig:
-      VaultConfig:
-        Address: http://vault:8200
-        Token: root
+      EnsemblingServiceK8sConfig: {}
 
 merlin:
   vault:
     enabled: false
+  environmentConfigs:
+    - name: "dev"
+      is_default: true
+      cluster: "dev"
+      region: ""
+      gcp_project: ""
+      deployment_timeout: "10m"
+      namespace_timeout: "2m"
+      min_replica: 0
+      max_replica: 1
+      max_cpu: "8"
+      max_memory: "8Gi"
+      cpu_request: "100m"
+      memory_request: "200Mi"
+      cpu_limit: "400m"
+      memory_limit: "500Mi"
+      queue_resource_percentage: "20"
+      is_prediction_job_enabled: false
+      is_default_prediction_job: true
+      prediction_job_config:
+        executor_replica: 3
+        driver_cpu_request: "2"
+        driver_memory_request: "2Gi"
+        executor_cpu_request: "2"
+        executor_memory_request: "2Gi"

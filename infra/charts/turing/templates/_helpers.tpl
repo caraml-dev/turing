@@ -165,6 +165,9 @@ initContainers:
 {{- define "turing.defaultConfig" -}}
 ClusterConfig:
   InClusterConfig: {{ .Values.turing.clusterConfig.useInClusterConfig }}
+  EnvironmentConfigPath: {{ include "turing.environments.absolutePath" . }}
+  EnsemblingServiceK8sConfig: 
+{{ .Values.turing.clusterConfig.ensemblingServiceK8sConfig | toYaml | indent 4}}
 DbConfig:
   Host: {{ include "turing.db.host" . | quote }}
   Port: {{ include "turing.db.port" . }}
@@ -239,4 +242,18 @@ sentryConfig:
 {{- define "turing.ui.config" -}}
 {{- $defaultConfig := include "turing.ui.defaultConfig" . | fromYaml -}}
 {{ .Values.turing.uiConfig | merge $defaultConfig | toPrettyJson }}
+{{- end -}}
+
+{{- define "turing.environments" -}}
+{{ .Values.turing.environmentConfigs | toYaml }}
+{{- end -}}
+
+{{- define "turing.environments.directory" -}}
+/app/cluster-env
+{{- end -}}
+
+{{- define "turing.environments.absolutePath" -}}
+{{- $base := include "turing.environments.directory" . -}}
+{{- $path := ternary .Values.mlp.environmentConfigSecret.envKey .Values.turing.clusterConfig.environmentConfigPath (ne "" .Values.mlp.environmentConfigSecret.name) -}}
+{{- printf "%s/%s" $base $path -}}
 {{- end -}}

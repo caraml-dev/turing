@@ -3,8 +3,9 @@ package api
 import (
 	"fmt"
 
-	"github.com/gojek/mlp/api/pkg/vault"
 	"gorm.io/gorm"
+
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
@@ -44,7 +45,6 @@ func NewAppContext(
 	db *gorm.DB,
 	cfg *config.Config,
 	authorizer *middleware.Authorizer,
-	vaultClient vault.Client,
 ) (*AppContext, error) {
 	// Init Experiments Service
 	expSvc, err := service.NewExperimentsService(cfg.Experiment)
@@ -62,10 +62,9 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing MLP Service")
 	}
 
-	// Create a map of env name to cluster name for each supported deployment environment
-	envClusterMap, err := getEnvironmentClusterMap(mlpSvc, []string{cfg.EnsemblerServiceBuilderConfig.ClusterName})
+	envClusterMap, err := buildKubeconfigStore(mlpSvc, cfg)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service")
+		return nil, errors.Wrapf(err, "Error obtaining environment info from MLP Service and constructing kubeconfig store")
 	}
 
 	if cfg.ClusterConfig.InClusterConfig && len(envClusterMap) > 1 {
@@ -73,7 +72,7 @@ func NewAppContext(
 	}
 
 	// Initialise cluster controllers
-	clusterControllers, err := cluster.InitClusterControllers(cfg, envClusterMap, vaultClient)
+	clusterControllers, err := cluster.InitClusterControllers(cfg, envClusterMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
@@ -128,7 +127,7 @@ func NewAppContext(
 
 		batchClusterController, ok := clusterControllers[cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment]
 		if !ok {
-			return nil, errors.Wrapf(err, "Failed getting the batch ensembling job controller")
+			return nil, fmt.Errorf("Failed getting the batch ensembling job controller")
 		}
 		batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 			batchClusterController,
@@ -187,23 +186,36 @@ func NewAppContext(
 	return appContext, nil
 }
 
-// getEnvironmentClusterMap creates a map of the environment name to the kubernetes cluster. Additionally,
-// clusters that are not a part of the deployment environments can be registered using the clusterNames
-// parameter (in such cases, the environment name will be saved to be the same as the cluster name).
-func getEnvironmentClusterMap(mlpSvc service.MLPService, clusterNames []string) (map[string]string, error) {
-	envClusterMap := map[string]string{}
+// buildKubeconfigStore creates a map of the environment name to the kubernetes cluster.
+// It combines the EnsemblerServiceBuilderConfig with a list of environments retrieved from mlpSvc
+// into a map. Each environment retrieved from mlpSvc should have a corresponding k8sConfig, else
+// an error is returned.
+func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[string]*mlpcluster.K8sConfig, error) {
+	// Create a map of env name to cluster name for each supported deployment environment
+	k8sConfigStore := make(map[string]*mlpcluster.K8sConfig)
+	if !cfg.ClusterConfig.InClusterConfig {
+		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = cfg.ClusterConfig.EnsemblingServiceK8sConfig
+	} else {
+		// The ensembling service builder cluster name is added as the cluster to use.
+		// It has no K8sConfig set because the pod running turing is accessing the cluster
+		// in which it is deployed in.
+		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = nil
+	}
+	for _, envconfig := range cfg.ClusterConfig.EnvironmentConfigs {
+		k8sConfigStore[envconfig.Name] = envconfig.K8sConfig
+	}
+
 	// Get all environments
 	environments, err := mlpSvc.GetEnvironments()
 	if err != nil {
-		return envClusterMap, err
+		return k8sConfigStore, err
 	}
-	// Create a map of the environment name to cluster id
+	// Check if k8s store contains kubeconfig for envs received from merlin
 	for _, environment := range environments {
-		envClusterMap[environment.Name] = environment.Cluster
+		// check if clusterConfigs have k8sconfig for environment name
+		if _, ok := k8sConfigStore[environment.Name]; !ok {
+			return nil, fmt.Errorf("Missing k8sconfig for cluster %s", environment.Cluster)
+		}
 	}
-	// Add other required clusters that are not a part of the environments
-	for _, clusterName := range clusterNames {
-		envClusterMap[clusterName] = clusterName
-	}
-	return envClusterMap, nil
+	return k8sConfigStore, nil
 }

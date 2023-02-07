@@ -14,6 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
+	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
+
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 )
@@ -238,11 +241,8 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					InClusterConfig:       false,
+					EnvironmentConfigPath: "path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -344,11 +344,8 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					InClusterConfig:       false,
+					EnvironmentConfigPath: "path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -404,6 +401,7 @@ func TestLoad(t *testing.T) {
 				"OPENAPICONFIG_SWAGGERUICONFIG_SERVINGPATH":      "/swagger-ui",
 				"EXPERIMENT_QUX_QUXKEY1":                         "quxval1-env",
 				"EXPERIMENT_QUX_QUXKEY2_QUXKEY2-1":               "quxval2-1-env",
+				"CLUSTERCONFIG_ENVIRONMENTCONFIGPATH":            "env_var_path_to_env.yaml",
 			},
 			want: &config.Config{
 				Port:           5000,
@@ -469,11 +467,8 @@ func TestLoad(t *testing.T) {
 					Labels:  map[string]string{"foo": "bar"},
 				},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig: false,
-					VaultConfig: &config.VaultConfig{
-						Address: "http://localhost:8200",
-						Token:   "root",
-					},
+					InClusterConfig:       false,
+					EnvironmentConfigPath: "env_var_path_to_env.yaml",
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -721,10 +716,12 @@ func TestConfigValidate(t *testing.T) {
 			IgnoreStatusCodes: []int{403, 404},
 		},
 		ClusterConfig: config.ClusterConfig{
-			InClusterConfig: false,
-			VaultConfig: &config.VaultConfig{
-				Address: "http://localhost:8200",
-				Token:   "root",
+			InClusterConfig:       false,
+			EnvironmentConfigPath: "./path/to/env-file.yaml",
+			EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+				Cluster:  &clientcmdapiv1.Cluster{},
+				AuthInfo: &clientcmdapiv1.AuthInfo{},
+				Name:     "dev",
 			},
 		},
 		TuringEncryptionKey: "secret",
@@ -811,16 +808,17 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		"missing vault address": {
+		"missing EnvironmentConfigPath when InClusterConfig is false": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig.Address = ""
+				validConfig.ClusterConfig.EnvironmentConfigPath = ""
+				validConfig.ClusterConfig.InClusterConfig = false
 				return validConfig
 			},
 			wantErr: true,
 		},
-		"missing vaultconfig when InClusterConfig is false": {
+		"missing EnsemblingServiceK8sConfig when InClusterConfig is false": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig = nil
+				validConfig.ClusterConfig.EnsemblingServiceK8sConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = false
 				return validConfig
 			},
@@ -828,7 +826,6 @@ func TestConfigValidate(t *testing.T) {
 		},
 		"valid in cluster config": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.VaultConfig = nil
 				validConfig.ClusterConfig.InClusterConfig = true
 				return validConfig
 			},
@@ -864,6 +861,69 @@ func TestConfigValidate(t *testing.T) {
 			c := tt.validConfigUpdate(validConfigCopy.(config.Config))
 			if err := c.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestProcessEnvConfigs(t *testing.T) {
+	tests := map[string]struct {
+		filepath      string
+		want          []*config.EnvironmentConfig
+		wantErr       bool
+		wantInCluster bool
+	}{
+		"basic": {
+			filepath: "testdata/env-config-1.yaml",
+			want: []*config.EnvironmentConfig{
+				{
+					Name: "id-dev",
+					K8sConfig: &mlpcluster.K8sConfig{
+						Name: "dev-cluster",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server:                "https://k8s.api.server",
+							InsecureSkipTLSVerify: true,
+						},
+						AuthInfo: &clientcmdapiv1.AuthInfo{
+							Exec: &clientcmdapiv1.ExecConfig{
+								APIVersion:         "client.authentication.k8s.io/v1beta1",
+								Command:            "gke-gcloud-auth-plugin",
+								InteractiveMode:    clientcmdapiv1.IfAvailableExecInteractiveMode,
+								ProvideClusterInfo: true,
+							},
+						},
+					},
+				},
+			},
+		},
+		"error_parsing": {
+			filepath: "testdata/env-err.yaml",
+			want:     []*config.EnvironmentConfig{},
+			wantErr:  true,
+		},
+		"InClusterConfig": {
+			want:          []*config.EnvironmentConfig(nil),
+			filepath:      "testdata/env-config-1.yaml",
+			wantInCluster: true,
+		},
+		"env k8sconfig is missing": {
+			filepath: "testdata/env-config-nil.yaml",
+			want:     []*config.EnvironmentConfig{},
+			wantErr:  true,
+		},
+	}
+	for testName, tt := range tests {
+		t.Run(testName, func(t *testing.T) {
+			c := config.ClusterConfig{
+				EnvironmentConfigPath: tt.filepath,
+			}
+			if tt.wantInCluster {
+				c.InClusterConfig = true
+			}
+			if err := c.ProcessEnvConfigs(); (err != nil) != tt.wantErr {
+				t.Errorf("ProcessEnvConfigs() error = %v, wantErr %v", err, tt.wantErr)
+			} else if !tt.wantErr {
+				assert.Equal(t, tt.want, c.EnvironmentConfigs)
 			}
 		})
 	}

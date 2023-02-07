@@ -139,6 +139,9 @@ runs:
       env:
         VAULT_TOKEN: root
       run: |
+        # TODO: Vault is still required in the e2e test as this version of Merlin 
+        # uses vault to retrieve cluster credentials. Once merlin-without-vault is released,
+        # this e2e test should be updated as well
         echo "::group::Wait for Vault to become available"
         timeout --foreground 45 bash -c \
           'until curl -s --fail -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" http://vault.127.0.0.1.nip.io/v1/sys/mounts; do sleep 2; done'
@@ -164,9 +167,33 @@ runs:
           --from-literal=vault-address=http://vault:8200 \
           --from-literal=vault-token=${{ env.VAULT_TOKEN }}
 
+    - name: Prepare cluster credentials without vault
+      shell: bash
+      run: |
+        # FOR TURING
+        k3d kubeconfig get ${{ inputs.CLUSTER_NAME }} >/tmp/temp_kubeconfig.yaml
+        tee credentials.json << EOF
+        {
+            "k8s_config": {
+                "name": $(yq .clusters[0].name -o json /tmp/temp_kubeconfig.yaml),
+                "cluster": $(yq '.clusters[0].cluster | .server = "https://kubernetes.default.svc.cluster.local:443"' -o json /tmp/temp_kubeconfig.yaml),
+                "user": $(yq .users[0].user -o json /tmp/temp_kubeconfig.yaml)
+            }
+        }
+        EOF
+        # get yaml file
+        yq e -P credentials.json -o yaml >/tmp/temp_k8sconfig.yaml
+
+        # NOTE: Add credentials to for e2e-test
+        yq '.cluster.credentials |= load("/tmp/temp_k8sconfig.yaml")' -i api/e2e/test/config.yaml
+
     - name: Install Turing
       shell: bash
       run: |
+        if [[ ${{inputs.use_in_cluster_config}} == false ]]; then
+          yq '.turing.environmentConfigs.[0].k8s_config |= load("/tmp/temp_k8sconfig.yaml").k8s_config | .turing.environmentConfigs.[0].name |= load("infra/e2e/${{ inputs.values_file }}").merlin.environmentConfigs.[0].name' -i infra/e2e/${{ inputs.values_file }}
+          yq '.turing.config.ClusterConfig.EnsemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
+        fi
         helm install turing ./infra/charts/turing \
           --values infra/e2e/turing.values.yaml \
           --values infra/e2e/${{ inputs.values_file }} \

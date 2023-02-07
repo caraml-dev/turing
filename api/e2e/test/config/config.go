@@ -9,11 +9,12 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/go-playground/validator/v10"
-	"github.com/gojek/mlp/api/pkg/vault"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/mitchellh/mapstructure"
-	"github.com/ory/viper"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
+	sigyaml "sigs.k8s.io/yaml"
 )
 
 type Config struct {
@@ -28,8 +29,6 @@ type Config struct {
 	MockTreatmentUPIServer MockserverConfig `yaml:"mockTreatmentUPIServer" validate:"required,dive"`
 	Echoserver             EchoserverConfig `validate:"required,dive"`
 
-	Vault VaultConfig `yaml:"vault" validate:"required,dive"`
-
 	PythonVersions []string `yaml:"python_versions" validate:"required" mapstructure:"python_versions"`
 
 	// Dynamically computed
@@ -37,7 +36,7 @@ type Config struct {
 
 	// KubeconfigUseLocal specifies whether the test helper should use local Kube config to
 	// authenticate to the cluster. The Kube config is assumed to be available at $HOME/.kube/config.
-	// If false, the helper will use the cluster credentials from the configured Vault environment.
+	// If false, the helper will use the cluster credentials config.yaml.
 	KubeconfigUseLocal bool   `yaml:"kubeconfig_use_local" default:"false" mapstructure:"kubeconfig_use_local"`
 	KubeconfigFilePath string `yaml:"kubeconfig_file_path" default:"" mapstructure:"kubeconfig_file_path"`
 }
@@ -61,9 +60,47 @@ type ProjectConfig struct {
 	Name string `validate:"required"`
 }
 
+type K8sConfig mlpcluster.K8sConfig
+
+// MarshalYAML implements the Marshal interface,
+// so k8sConfig fields can be properly marshalled
+func (k *K8sConfig) MarshalYAML() (interface{}, error) {
+	output, err := sigyaml.Marshal(k)
+	if err != nil {
+		return nil, err
+	}
+	mapStrFormat := make(map[string]interface{})
+	if err = sigyaml.Unmarshal(output, &mapStrFormat); err != nil {
+		return nil, err
+	}
+	return mapStrFormat, nil
+}
+
+// UnmarshalYAML implements Unmarshal interface
+// Since K8sConfig fields only have json tags, sigyaml.Unmarshal needs to be used
+// to unmarshal all the fields. This method reads K8sConfig into a map[string]interface{},
+// marshals it into a byte for, before passing to sigyaml.Unmarshal
+func (k *K8sConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var kubeconfig map[string]interface{}
+	// Unmarshal into map[string]interface{}
+	if err := unmarshal(&kubeconfig); err != nil {
+		return err
+	}
+	// convert back to byte string
+	byteForm, err := yaml.Marshal(kubeconfig)
+	if err != nil {
+		return err
+	}
+	// use sigyaml.Unmarshal to convert to json object then unmarshal
+	if err := sigyaml.Unmarshal(byteForm, k); err != nil {
+		return err
+	}
+	return nil
+}
+
 type ClusterConfig struct {
-	Name        string `validate:"required"`
-	Credentials *vault.ClusterSecret
+	Name        string     `validate:"required"`
+	Credentials *K8sConfig `validate:"required" yaml:"credentials" mapstructure:"credentials"`
 }
 
 type MockserverConfig struct {
@@ -74,11 +111,6 @@ type MockserverConfig struct {
 
 type EchoserverConfig struct {
 	Image string `validate:"required"`
-}
-
-type VaultConfig struct {
-	Address string `yaml:"addr" validate:"required" mapstructure:"addr"`
-	Token   string `yaml:"token" validate:"required" mapstructure:"token"`
 }
 
 type EnsemblerData struct {
@@ -119,6 +151,21 @@ func LoadFromFiles(filepaths ...string) (*Config, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
+	}
+
+	// NOTE: This section is added to parse any fields in k8sConfig that does not
+	// have yaml tags.
+	// For example `certificate-authority-data` is not unmarshalled
+	// by vipers unmarshal method.
+	var byteForm []byte
+	// convert back to byte string
+	byteForm, err = yaml.Marshal(v.AllSettings())
+	if err != nil {
+		return nil, err
+	}
+	// use sigyaml.Unmarshal to convert to json object then unmarshal
+	if err := sigyaml.Unmarshal(byteForm, config); err != nil {
+		return nil, err
 	}
 
 	err = validator.New().Struct(config)
