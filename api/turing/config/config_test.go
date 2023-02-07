@@ -167,9 +167,7 @@ func TestLoad(t *testing.T) {
 				},
 				Sentry: sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
-					InClusterConfig:            false,
-					EnvironmentConfigPath:      "",
-					EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{},
+					InClusterConfig: false,
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{

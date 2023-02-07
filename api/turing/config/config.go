@@ -497,20 +497,33 @@ func Load(filepaths ...string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
 	}
 
-	// NOTE: This section is added to parse any fields in k8sConfig that does not
+	// NOTE: This section is added to parse any fields in EnsemblingServiceK8sConfig that does not
 	// have yaml tags.
 	// For example `certificate-authority-data` is not unmarshalled
 	// by vipers unmarshal method.
-	var byteForm []byte
+
 	// convert back to byte string
-	byteForm, err = yaml.Marshal(v.AllSettings())
+	clusterConfig, ok := v.AllSettings()["clusterconfig"]
+	if !ok {
+		return config, nil
+	}
+	contents := clusterConfig.(map[string]interface{})
+	ensemblingSvcK8sCfg, ok := contents["ensemblingservicek8sconfig"]
+	if !ok {
+		return config, nil
+	}
+	var byteForm []byte
+	byteForm, err = yaml.Marshal(ensemblingSvcK8sCfg)
 	if err != nil {
 		return nil, err
 	}
 	// use sigyaml.Unmarshal to convert to json object then unmarshal
-	if err := sigyaml.Unmarshal(byteForm, config); err != nil {
+
+	k8sConfig := mlpcluster.K8sConfig{}
+	if err := sigyaml.Unmarshal(byteForm, &k8sConfig); err != nil {
 		return nil, err
 	}
+	config.ClusterConfig.EnsemblingServiceK8sConfig = &k8sConfig
 	return config, nil
 }
 
