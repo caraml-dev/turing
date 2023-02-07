@@ -27,6 +27,7 @@ import (
 	// easily marshalled into JSON, which is currently the format required for experiment config.
 	"github.com/ory/viper"
 	"k8s.io/apimachinery/pkg/api/resource"
+	sigyaml "sigs.k8s.io/yaml"
 )
 
 // Quantity is an alias for resource.Quantity
@@ -496,6 +497,20 @@ func Load(filepaths ...string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
 	}
 
+	// NOTE: This section is added to parse any fields in k8sConfig that does not
+	// have yaml tags.
+	// For example `certificate-authority-data` is not unmarshalled
+	// by vipers unmarshal method.
+	var byteForm []byte
+	// convert back to byte string
+	byteForm, err = yaml.Marshal(v.AllSettings())
+	if err != nil {
+		return nil, err
+	}
+	// use sigyaml.Unmarshal to convert to json object then unmarshal
+	if err := sigyaml.Unmarshal(byteForm, config); err != nil {
+		return nil, err
+	}
 	return config, nil
 }
 
