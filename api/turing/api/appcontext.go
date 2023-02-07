@@ -196,6 +196,9 @@ func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[st
 	if !cfg.ClusterConfig.InClusterConfig {
 		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = cfg.ClusterConfig.EnsemblingServiceK8sConfig
 	} else {
+		// The ensembling service builder cluster name is added as the cluster to use.
+		// It has no K8sConfig set because the pod running turing is accessing the cluster
+		// in which it is deployed in.
 		k8sConfigStore[cfg.EnsemblerServiceBuilderConfig.ClusterName] = nil
 	}
 	for _, envconfig := range cfg.ClusterConfig.EnvironmentConfigs {
@@ -207,7 +210,7 @@ func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[st
 	if err != nil {
 		return k8sConfigStore, err
 	}
-	// check if k8s store contains kubeconfig for envs received from merlin
+	// Check if k8s store contains kubeconfig for envs received from merlin
 	for _, environment := range environments {
 		// check if clusterConfigs have k8sconfig for environment name
 		if _, ok := k8sConfigStore[environment.Name]; !ok {
