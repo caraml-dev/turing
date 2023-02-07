@@ -831,14 +831,6 @@ func TestConfigValidate(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"missing environments file in cluster config": {
-			validConfigUpdate: func(validConfig config.Config) config.Config {
-				validConfig.ClusterConfig.EnvironmentConfigPath = ""
-				validConfig.ClusterConfig.InClusterConfig = false
-				return validConfig
-			},
-			wantErr: true,
-		},
 		"valid batch ensembling disabled": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig = config.BatchEnsemblingConfig{
@@ -876,9 +868,10 @@ func TestConfigValidate(t *testing.T) {
 
 func TestProcessEnvConfigs(t *testing.T) {
 	tests := map[string]struct {
-		filepath string
-		want     []*config.EnvironmentConfig
-		wantErr  bool
+		filepath      string
+		want          []*config.EnvironmentConfig
+		wantErr       bool
+		wantInCluster bool
 	}{
 		"basic": {
 			filepath: "testdata/env-config-1.yaml",
@@ -908,17 +901,28 @@ func TestProcessEnvConfigs(t *testing.T) {
 			want:     []*config.EnvironmentConfig{},
 			wantErr:  true,
 		},
+		"InClusterConfig": {
+			want:          []*config.EnvironmentConfig(nil),
+			filepath:      "testdata/env-config-1.yaml",
+			wantInCluster: true,
+		},
+		"env k8sconfig is missing": {
+			filepath: "testdata/env-config-nil.yaml",
+			want:     []*config.EnvironmentConfig{},
+			wantErr:  true,
+		},
 	}
 	for testName, tt := range tests {
 		t.Run(testName, func(t *testing.T) {
 			c := config.ClusterConfig{
 				EnvironmentConfigPath: tt.filepath,
 			}
-			if err := c.ProcessEnvConfigs(); err != nil {
-				if !tt.wantErr {
-					t.Errorf("ProcessEnvConfigs() error = %v, wantErr %v", err, tt.wantErr)
-				}
-			} else {
+			if tt.wantInCluster {
+				c.InClusterConfig = true
+			}
+			if err := c.ProcessEnvConfigs(); (err != nil) != tt.wantErr {
+				t.Errorf("ProcessEnvConfigs() error = %v, wantErr %v", err, tt.wantErr)
+			} else if !tt.wantErr {
 				assert.Equal(t, tt.want, c.EnvironmentConfigs)
 			}
 		})
