@@ -17,7 +17,7 @@ RUN go build \
     -o ./bin/${binary_name} \
     -v ${project_root}
 
-FROM alpine:3.15
+FROM alpine:3.17
 
 ARG turing_user="turing"
 ARG turing_user_group="app"

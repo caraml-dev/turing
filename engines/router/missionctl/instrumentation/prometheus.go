@@ -1,9 +1,9 @@
 package instrumentation
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/golang-collections/collections/set"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 //////////////////////////// Metrics Definitions //////////////////////////////
@@ -31,6 +31,11 @@ var requestLatencyBuckets = []float64{
 	250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,
 	2000, 5000, 10000, 20000, 50000, 100000,
 }
+
+// additionalRegisteredMetricNames is a set containing all registered experiment engine metric names to prevent
+// re-registrations if the RegisterMetrics method is called multiple times on the same metrics (happens when there are
+// multiple fiber routes using the same experimentation policy)
+var additionalRegisteredMetricNames = set.New(nil)
 
 func GetHistogramMap() map[metrics.MetricName]metrics.PrometheusHistogramVec {
 	// histogramMap maintains a mapping between the metric name and the corresponding histogram vector
@@ -93,39 +98,42 @@ func (MetricsRegistrationHelper) Register(additionalMetrics []Metric) error {
 	counterMap := map[metrics.MetricName]metrics.PrometheusCounterVec{}
 
 	for _, metric := range additionalMetrics {
-		switch metric.Type {
-		case GaugeMetricType:
-			gaugeMap[metrics.MetricName(metric.Name)] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-				Namespace: Namespace,
-				Subsystem: Subsystem,
-				Help:      metric.Description,
-				Name:      metric.Name,
-			},
-				metric.Labels,
-			)
-		case HistogramMetricType:
-			buckets := requestLatencyBuckets
-			if metric.Buckets != nil {
-				buckets = metric.Buckets
+		if !additionalRegisteredMetricNames.Has(metric.Name) {
+			switch metric.Type {
+			case GaugeMetricType:
+				gaugeMap[metrics.MetricName(metric.Name)] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+					Namespace: Namespace,
+					Subsystem: Subsystem,
+					Help:      metric.Description,
+					Name:      metric.Name,
+				},
+					metric.Labels,
+				)
+			case HistogramMetricType:
+				buckets := requestLatencyBuckets
+				if metric.Buckets != nil {
+					buckets = metric.Buckets
+				}
+				histogramMap[metrics.MetricName(metric.Name)] = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+					Namespace: Namespace,
+					Subsystem: Subsystem,
+					Help:      metric.Description,
+					Name:      metric.Name,
+					Buckets:   buckets,
+				},
+					metric.Labels,
+				)
+			case CounterMetricType:
+				counterMap[metrics.MetricName(metric.Name)] = prometheus.NewCounterVec(prometheus.CounterOpts{
+					Namespace: Namespace,
+					Subsystem: Subsystem,
+					Help:      metric.Description,
+					Name:      metric.Name,
+				},
+					metric.Labels,
+				)
 			}
-			histogramMap[metrics.MetricName(metric.Name)] = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-				Namespace: Namespace,
-				Subsystem: Subsystem,
-				Help:      metric.Description,
-				Name:      metric.Name,
-				Buckets:   buckets,
-			},
-				metric.Labels,
-			)
-		case CounterMetricType:
-			counterMap[metrics.MetricName(metric.Name)] = prometheus.NewCounterVec(prometheus.CounterOpts{
-				Namespace: Namespace,
-				Subsystem: Subsystem,
-				Help:      metric.Description,
-				Name:      metric.Name,
-			},
-				metric.Labels,
-			)
+			additionalRegisteredMetricNames.Insert(metric.Name)
 		}
 	}
 

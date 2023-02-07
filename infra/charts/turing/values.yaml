@@ -231,10 +231,11 @@ postgresql:
     requests:
       memory: 256Mi
       cpu: 500m
-  persistence:
-    # -- Persist Postgresql data in a Persistent Volume Claim
-    enabled: true
-    size: 10Gi
+  primary:
+    persistence:
+      # -- Persist Postgresql data in a Persistent Volume Claim
+      enabled: true
+      size: 10Gi
   auth:
     database: turing
     username: turing

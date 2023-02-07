@@ -216,9 +216,11 @@ func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[st
 		if _, ok := k8sConfigStore[environment.Name]; !ok {
 			return nil, fmt.Errorf("Missing k8sconfig for cluster %s", environment.Cluster)
 		}
+
 	}
 	for k, v := range k8sConfigStore {
 		fmt.Printf("%s: %+v", k, v)
+
 	}
 	return k8sConfigStore, nil
 }

@@ -102,8 +102,8 @@ The following table lists the configurable parameters of the Turing chart and th
 | postgresql.image.tag | string | `"12.13.0"` |  |
 | postgresql.metrics.enabled | bool | `false` |  |
 | postgresql.metrics.serviceMonitor.enabled | bool | `false` |  |
-| postgresql.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
-| postgresql.persistence.size | string | `"10Gi"` |  |
+| postgresql.primary.persistence.enabled | bool | `true` | Persist Postgresql data in a Persistent Volume Claim |
+| postgresql.primary.persistence.size | string | `"10Gi"` |  |
 | postgresql.replication.applicationName | string | `"mlp"` | Replication Cluster application name. Useful for defining multiple replication policies |
 | postgresql.replication.enabled | bool | `false` |  |
 | postgresql.replication.numSynchronousReplicas | int | `2` | From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication NOTE: It cannot be > slaveReplicas |
