@@ -35,6 +35,7 @@ FROM alpine:latest
 ARG BIN_NAME=turing-router
 ENV BIN_NAME ${BIN_NAME}
 
+RUN apk update && apk add tzdata
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 RUN chown -R app:app /app
