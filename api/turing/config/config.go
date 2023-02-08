@@ -27,6 +27,7 @@ import (
 	// easily marshalled into JSON, which is currently the format required for experiment config.
 	"github.com/ory/viper"
 	"k8s.io/apimachinery/pkg/api/resource"
+	sigyaml "sigs.k8s.io/yaml"
 )
 
 // Quantity is an alias for resource.Quantity
@@ -495,7 +496,42 @@ func Load(filepaths ...string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
 	}
+	config, err = loadEnsemblingSvcConfig(config, v.AllSettings())
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load ensemblingservicek8sconfig, err %s", err)
+	}
 
+	return config, nil
+}
+
+func loadEnsemblingSvcConfig(config *Config, v map[string]interface{}) (*Config, error) {
+	// NOTE: This section is added to parse any fields in EnsemblingServiceK8sConfig that does not
+	// have yaml tags.
+	// For example `certificate-authority-data` is not unmarshalled
+	// by vipers unmarshal method.
+
+	clusterConfig, ok := v["clusterconfig"]
+	if !ok {
+		return config, nil
+	}
+	contents := clusterConfig.(map[string]interface{})
+	ensemblingSvcK8sCfg, ok := contents["ensemblingservicek8sconfig"]
+	if !ok {
+		return config, nil
+	}
+	// convert back to byte string
+	var byteForm []byte
+	byteForm, err := yaml.Marshal(ensemblingSvcK8sCfg)
+	if err != nil {
+		return nil, err
+	}
+	// use sigyaml.Unmarshal to convert to json object then unmarshal
+
+	k8sConfig := mlpcluster.K8sConfig{}
+	if err := sigyaml.Unmarshal(byteForm, &k8sConfig); err != nil {
+		return nil, err
+	}
+	config.ClusterConfig.EnsemblingServiceK8sConfig = &k8sConfig
 	return config, nil
 }
 

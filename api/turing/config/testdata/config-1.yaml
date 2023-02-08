@@ -32,6 +32,19 @@ Sentry:
 ClusterConfig:
   InClusterConfig: false
   EnvironmentConfigPath: "path_to_env.yaml"
+  EnsemblingServiceK8sConfig:
+    name: dev-server
+    cluster:
+      server: https://127.0.0.1
+      certificate-authority-data: c29tZV9zdHJpbmc=
+
+    user:
+      exec:
+        apiVersion: some_api_version
+        command: some_command
+        interactiveMode: IfAvailable
+        provideClusterInfo: true
+
 Experiment:
     qux:
       quxkey1: quxval1

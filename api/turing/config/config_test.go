@@ -243,6 +243,21 @@ func TestLoad(t *testing.T) {
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig:       false,
 					EnvironmentConfigPath: "path_to_env.yaml",
+					EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+						Name: "dev-server",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server:                   "https://127.0.0.1",
+							CertificateAuthorityData: []byte("some_string"),
+						},
+						AuthInfo: &clientcmdapiv1.AuthInfo{
+							Exec: &clientcmdapiv1.ExecConfig{
+								APIVersion:         "some_api_version",
+								Command:            "some_command",
+								InteractiveMode:    clientcmdapiv1.IfAvailableExecInteractiveMode,
+								ProvideClusterInfo: true,
+							},
+						},
+					},
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -346,6 +361,21 @@ func TestLoad(t *testing.T) {
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig:       false,
 					EnvironmentConfigPath: "path_to_env.yaml",
+					EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+						Name: "dev-server",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server:                   "https://127.0.0.1",
+							CertificateAuthorityData: []byte("some_string"),
+						},
+						AuthInfo: &clientcmdapiv1.AuthInfo{
+							Exec: &clientcmdapiv1.ExecConfig{
+								APIVersion:         "some_api_version",
+								Command:            "some_command",
+								InteractiveMode:    clientcmdapiv1.IfAvailableExecInteractiveMode,
+								ProvideClusterInfo: true,
+							},
+						},
+					},
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
@@ -469,6 +499,21 @@ func TestLoad(t *testing.T) {
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig:       false,
 					EnvironmentConfigPath: "env_var_path_to_env.yaml",
+					EnsemblingServiceK8sConfig: &mlpcluster.K8sConfig{
+						Name: "dev-server",
+						Cluster: &clientcmdapiv1.Cluster{
+							Server:                   "https://127.0.0.1",
+							CertificateAuthorityData: []byte("some_string"),
+						},
+						AuthInfo: &clientcmdapiv1.AuthInfo{
+							Exec: &clientcmdapiv1.ExecConfig{
+								APIVersion:         "some_api_version",
+								Command:            "some_command",
+								InteractiveMode:    clientcmdapiv1.IfAvailableExecInteractiveMode,
+								ProvideClusterInfo: true,
+							},
+						},
+					},
 				},
 				AlertConfig: &config.AlertConfig{
 					GitLab: &config.GitlabConfig{
