@@ -496,14 +496,21 @@ func Load(filepaths ...string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config values: %s", err)
 	}
+	config, err = loadEnsemblingSvcConfig(config, v.AllSettings())
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load ensemblingservicek8sconfig, err %s", err)
+	}
 
+	return config, nil
+}
+
+func loadEnsemblingSvcConfig(config *Config, v map[string]interface{}) (*Config, error) {
 	// NOTE: This section is added to parse any fields in EnsemblingServiceK8sConfig that does not
 	// have yaml tags.
 	// For example `certificate-authority-data` is not unmarshalled
 	// by vipers unmarshal method.
 
-	// convert back to byte string
-	clusterConfig, ok := v.AllSettings()["clusterconfig"]
+	clusterConfig, ok := v["clusterconfig"]
 	if !ok {
 		return config, nil
 	}
@@ -512,8 +519,9 @@ func Load(filepaths ...string) (*Config, error) {
 	if !ok {
 		return config, nil
 	}
+	// convert back to byte string
 	var byteForm []byte
-	byteForm, err = yaml.Marshal(ensemblingSvcK8sCfg)
+	byteForm, err := yaml.Marshal(ensemblingSvcK8sCfg)
 	if err != nil {
 		return nil, err
 	}
