@@ -35,6 +35,7 @@ FROM alpine:latest
 ARG BIN_NAME=turing-router
 ENV BIN_NAME ${BIN_NAME}
 
+# This dependency installed is not used directly by the router but acts as a basic dependency for the experiment engine
 RUN apk update && apk add tzdata
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
