@@ -559,7 +559,7 @@ components:
       type: "string"
       enum:
         - "nop"
-        - "console"
+        - "upi"
         - "bigquery"
         - "kafka"
       default: "nop"

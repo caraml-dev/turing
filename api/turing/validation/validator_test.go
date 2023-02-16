@@ -9,6 +9,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -22,6 +23,15 @@ import (
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
+var dummyConfig json.RawMessage
+
+func getDefaultValidator() (*validator.Validate, error) {
+	mockExperimentsService := &mocks.ExperimentsService{}
+	mockExperimentsService.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
+	mockExperimentsService.On("ValidateExperimentConfig", "custom", dummyConfig).
+		Return(nil)
+	return validation.NewValidator(mockExperimentsService)
+}
 func TestValidateEnsemblerStandardConfig(t *testing.T) {
 	tt := map[string]struct {
 		input models.EnsemblerStandardConfig
@@ -117,6 +127,12 @@ func TestValidateLogConfig(t *testing.T) {
 			},
 			hasErr: true,
 		},
+		"valid_upi": {
+			input: request.LogConfig{
+				ResultLoggerType: "upi",
+			},
+			hasErr: false,
+		},
 		"valid_bq": {
 			input: request.LogConfig{
 				ResultLoggerType: "bigquery",
@@ -205,9 +221,7 @@ func TestValidateLogConfig(t *testing.T) {
 
 	for name, tc := range tt {
 		t.Run(name, func(t *testing.T) {
-			mockExperimentsService := &mocks.ExperimentsService{}
-			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
-			validate, err := validation.NewValidator(mockExperimentsService)
+			validate, err := getDefaultValidator()
 			assert.NoError(t, err)
 			err = validate.Struct(&tc.input)
 			assert.Equal(t, tc.hasErr, err != nil)
@@ -287,14 +301,21 @@ type routerConfigTestCase struct {
 	trafficRules       models.TrafficRules
 	autoscalingPolicy  *models.AutoscalingPolicy
 	expectedError      string
+	logConfig          *request.LogConfig
 }
 
-func (tt routerConfigTestCase) RouterConfig(protocol routerConfig.Protocol) *request.RouterConfig {
+func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 	experimentEngine := &request.ExperimentEngineConfig{
 		Type: "nop",
 	}
 	if tt.experimentEngine != nil {
 		experimentEngine = tt.experimentEngine
+	}
+	logConfig := &request.LogConfig{
+		ResultLoggerType: "nop",
+	}
+	if tt.logConfig == nil {
+		tt.logConfig = logConfig
 	}
 	return &request.RouterConfig{
 		Routes:             tt.routes,
@@ -304,12 +325,10 @@ func (tt routerConfigTestCase) RouterConfig(protocol routerConfig.Protocol) *req
 		AutoscalingPolicy:  tt.autoscalingPolicy,
 		ExperimentEngine:   experimentEngine,
 		Timeout:            "20s",
-		Protocol:           &protocol,
-		LogConfig: &request.LogConfig{
-			ResultLoggerType: "nop",
-		},
-		Enricher:  tt.enricher,
-		Ensembler: tt.ensembler,
+		Protocol:           &tt.protocol,
+		LogConfig:          tt.logConfig,
+		Enricher:           tt.enricher,
+		Ensembler:          tt.ensembler,
 	}
 }
 
@@ -336,7 +355,6 @@ func TestValidateTrafficRules(t *testing.T) {
 	defaultTrafficRule := &models.DefaultTrafficRule{
 		Routes: []string{routeAID, routeBID},
 	}
-	var dummyConfig json.RawMessage
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
@@ -958,14 +976,10 @@ func TestValidateTrafficRules(t *testing.T) {
 
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockExperimentsService := &mocks.ExperimentsService{}
-			mockExperimentsService.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
-			mockExperimentsService.On("ValidateExperimentConfig", "custom", dummyConfig).
-				Return(nil)
-			validate, err := validation.NewValidator(mockExperimentsService)
+			validate, err := getDefaultValidator()
 			require.NoError(t, err)
 
-			err = validate.Struct(tt.RouterConfig(tt.protocol))
+			err = validate.Struct(tt.RouterConfig())
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 			} else {
@@ -1104,12 +1118,10 @@ func TestValidateAutoscaling(t *testing.T) {
 	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockExperimentsService := &mocks.ExperimentsService{}
-			mockExperimentsService.On("ListEngines").Return([]manager.Engine{})
-			validate, err := validation.NewValidator(mockExperimentsService)
+			validate, err := getDefaultValidator()
 			require.NoError(t, err)
 
-			err = validate.Struct(tt.RouterConfig(tt.protocol))
+			err = validate.Struct(tt.RouterConfig())
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 			} else {
@@ -1127,7 +1139,6 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 		Endpoint: "http://example.com/a",
 		Timeout:  "10ms",
 	}
-	var dummyConfig json.RawMessage
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
@@ -1159,14 +1170,73 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {
-			mockExperimentsService := &mocks.ExperimentsService{}
-			mockExperimentsService.On("ListEngines").Return([]manager.Engine{{Name: "custom"}})
-			mockExperimentsService.On("ValidateExperimentConfig", "custom", dummyConfig).
-				Return(nil)
-			validate, err := validation.NewValidator(mockExperimentsService)
+			validate, err := getDefaultValidator()
 			require.NoError(t, err)
 
-			err = validate.Struct(tt.RouterConfig(tt.protocol))
+			err = validate.Struct(tt.RouterConfig())
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestValidateUPIRouter(t *testing.T) {
+	routeID := "abc"
+	route := &models.Route{
+		ID:       routeID,
+		Type:     "PROXY",
+		Endpoint: "http://example.com/a",
+		Timeout:  "10ms",
+	}
+
+	suite := map[string]routerConfigTestCase{
+		"success": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			protocol:       routerConfig.UPI,
+			experimentEngine: &request.ExperimentEngineConfig{
+				Type: "custom",
+			},
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerStandardType,
+			},
+			logConfig: &request.LogConfig{
+				ResultLoggerType: models.UPILogger,
+			},
+		},
+		"failure | unsupported ensembler type": {
+			routes:   models.Routes{route},
+			protocol: routerConfig.UPI,
+			ensembler: &models.Ensembler{
+				Type: models.EnsemblerDockerType,
+			},
+			expectedError: "Key: 'RouterConfig.Ensembler.Type' Error:Field validation for 'Ensembler.Type' " +
+				"failed on the 'only standard ensembler is supported for UPI' tag",
+		},
+		"failure | unsupported logger type": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			protocol:       routerConfig.UPI,
+			logConfig: &request.LogConfig{
+				ResultLoggerType: models.KafkaLogger,
+				KafkaConfig: &request.KafkaConfig{
+					Brokers:             "broker1,broker2",
+					Topic:               "topic",
+					SerializationFormat: "json",
+				}},
+			expectedError: "Key: 'RouterConfig.LogConfig.ResultLoggerType' Error:Field validation for " +
+				"'LogConfig.ResultLoggerType' failed on the 'logger should be nop or upi' tag",
+		},
+	}
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			validate, err := getDefaultValidator()
+			require.NoError(t, err)
+
+			err = validate.Struct(tt.RouterConfig())
 			if tt.expectedError == "" {
 				require.NoError(t, err)
 			} else {

@@ -15,8 +15,8 @@ type ResultLogger string
 const (
 	// BigQueryLogger logs the responses to BigQuery
 	BigQueryLogger ResultLogger = "bigquery"
-	// ConsoleLogger logs the responses to console
-	ConsoleLogger ResultLogger = "console"
+	// UPILogger logs the responses to predefined kafka broker with upi router_log schema
+	UPILogger ResultLogger = "upi"
 	// KafkaLogger logs the responses to kafka
 	KafkaLogger ResultLogger = "kafka"
 	// NopLogger disables response logging

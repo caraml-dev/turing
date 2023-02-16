@@ -69,7 +69,7 @@ func validateEnsemblerStandardConfig(sl validator.StructLevel) {
 func validateLogConfig(sl validator.StructLevel) {
 	field := sl.Current().Interface().(request.LogConfig)
 	switch field.ResultLoggerType {
-	case models.NopLogger:
+	case models.NopLogger, models.UPILogger:
 		return
 	case models.BigQueryLogger:
 		bqConf := field.BigQueryConfig
@@ -111,7 +111,7 @@ func validateLogConfig(sl validator.StructLevel) {
 		}
 		return
 	default:
-		sl.ReportError(field.ResultLoggerType, "type", "ResultLoggerType", "oneof", "bigquery,nop")
+		sl.ReportError(field.ResultLoggerType, "type", "ResultLoggerType", "oneof", "bigquery,nop,kafka")
 	}
 }
 
@@ -300,6 +300,21 @@ func validateStdEnsemblerNotConfiguredForNopExpEngine(
 	}
 }
 
+func validateUPIRouter(
+	sl validator.StructLevel,
+	router request.RouterConfig,
+) {
+	if router.Ensembler != nil && router.Ensembler.Type != models.EnsemblerStandardType {
+		sl.ReportError(router.Ensembler.Type, "Ensembler.Type", "Type",
+			"only standard ensembler is supported for UPI", "")
+	}
+	if !(router.LogConfig.ResultLoggerType == models.NopLogger || router.LogConfig.ResultLoggerType == models.UPILogger) {
+		sl.ReportError(router.LogConfig.ResultLoggerType, "LogConfig.ResultLoggerType",
+			"Type", "logger should be nop or upi", "")
+	}
+
+}
+
 func validateRouterConfig(sl validator.StructLevel) {
 	router := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
@@ -384,4 +399,9 @@ func validateRouterConfig(sl validator.StructLevel) {
 
 	// Validate that a non-nop experiment engine is used if a standard ensembler is set
 	validateStdEnsemblerNotConfiguredForNopExpEngine(sl, router.Ensembler, router.ExperimentEngine)
+
+	// Validate config combination that are specific to UPI routers
+	if router.Protocol != nil && *router.Protocol == routerConfig.UPI {
+		validateUPIRouter(sl, router)
+	}
 }

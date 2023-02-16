@@ -288,6 +288,16 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},
 			{Name: envKafkaCompressionType, Value: routerDefaults.KafkaConfig.CompressionType},
 		}...)
+	case models.UPILogger:
+		// set a predefined kafka configuration for all upi router
+		envs = append(envs, []corev1.EnvVar{
+			{Name: envKafkaBrokers, Value: routerDefaults.UPIConfig.KafkaBrokers},
+			// namespace is assumed to be same the project name
+			{Name: envKafkaTopic, Value: fmt.Sprintf("caraml-%s-%s-router-log", namespace, ver.Router.Name)},
+			{Name: envKafkaSerializationFormat, Value: string(models.ProtobufSerializationFormat)},
+			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},
+			{Name: envKafkaCompressionType, Value: routerDefaults.KafkaConfig.CompressionType},
+		}...)
 	}
 
 	return envs, nil

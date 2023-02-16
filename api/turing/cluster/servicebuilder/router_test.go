@@ -1126,6 +1126,48 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_KAFKA_COMPRESSION_TYPE", Value: "gzip"},
 			},
 		},
+		{
+			name: "UPILogger",
+			args: args{
+				namespace: "testnamespace",
+				routerDefaults: &config.RouterDefaults{
+					KafkaConfig: &config.KafkaConfig{
+						MaxMessageBytes: 123,
+						CompressionType: "gzip",
+					},
+					UPIConfig: &config.UPIConfig{KafkaBrokers: "kafka_broker:222"},
+				},
+				ver: &models.RouterVersion{
+					Router:   &models.Router{Name: "test1"},
+					Version:  1,
+					Protocol: routerConfig.UPI,
+					LogConfig: &models.LogConfig{
+						LogLevel:         "DEBUG",
+						ResultLoggerType: models.UPILogger,
+					},
+				},
+			},
+			want: []corev1.EnvVar{
+				{Name: "APP_NAME", Value: "test1-1.testnamespace"},
+				{Name: "APP_ENVIRONMENT", Value: ""},
+				{Name: "ROUTER_TIMEOUT", Value: ""},
+				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
+				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
+				{Name: "APP_SENTRY_ENABLED", Value: "false"},
+				{Name: "APP_SENTRY_DSN", Value: ""},
+				{Name: "APP_LOGLEVEL", Value: "DEBUG"},
+				{Name: "APP_CUSTOM_METRICS", Value: "false"},
+				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_RESULT_LOGGER", Value: "upi"},
+				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
+				{Name: "APP_KAFKA_BROKERS", Value: "kafka_broker:222"},
+				{Name: "APP_KAFKA_TOPIC", Value: "caraml-testnamespace-test1-router-log"},
+				{Name: "APP_KAFKA_SERIALIZATION_FORMAT", Value: "protobuf"},
+				{Name: "APP_KAFKA_MAX_MESSAGE_BYTES", Value: "123"},
+				{Name: "APP_KAFKA_COMPRESSION_TYPE", Value: "gzip"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

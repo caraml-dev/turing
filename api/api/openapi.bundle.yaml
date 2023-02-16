@@ -1982,6 +1982,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            lazy_routing: true
             route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1
@@ -2154,7 +2155,7 @@ components:
       default: nop
       enum:
       - nop
-      - console
+      - upi
       - bigquery
       - kafka
       type: string
@@ -2288,6 +2289,7 @@ components:
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
+          lazy_routing: true
           route_name_path: route_name_path
           experiment_mappings:
           - treatment: treatment-1
@@ -2349,6 +2351,7 @@ components:
     EnsemblerStandardConfig:
       description: ensembler config when ensembler type is standard
       example:
+        lazy_routing: true
         route_name_path: route_name_path
         experiment_mappings:
         - treatment: treatment-1
@@ -2367,6 +2370,8 @@ components:
         route_name_path:
           nullable: true
           type: string
+        lazy_routing:
+          type: boolean
       type: object
     EnsemblerDockerConfig:
       description: ensembler config when ensembler type is docker
@@ -2645,6 +2650,7 @@ components:
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
+              lazy_routing: true
               route_name_path: route_name_path
               experiment_mappings:
               - treatment: treatment-1
@@ -2803,6 +2809,7 @@ components:
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
+            lazy_routing: true
             route_name_path: route_name_path
             experiment_mappings:
             - treatment: treatment-1

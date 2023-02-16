@@ -318,6 +318,8 @@ type RouterDefaults struct {
 	ExperimentEnginePlugins map[string]*ExperimentEngineConfig `validate:"dive"`
 	// Kafka Configuration. If result logging is using Kafka
 	KafkaConfig *KafkaConfig
+	// UPIConfig
+	UPIConfig *UPIConfig
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -338,6 +340,12 @@ type KafkaConfig struct {
 	MaxMessageBytes int
 	// Producer Config - Compression Type of message
 	CompressionType string
+}
+
+// UPIConfig captures the defaults used by UPI Router
+type UPIConfig struct {
+	// KafkaBrokers is broker which all Router will write to when UPI logging is enabled
+	KafkaBrokers string
 }
 
 // AuthorizationConfig captures the config for auth using mlp authz
