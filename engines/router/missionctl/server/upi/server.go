@@ -180,6 +180,8 @@ func (us *Server) getPrediction(
 		)
 		return nil, turingError
 	}
+	// Creates ResponseMetadata if its nil
+	responseProto = populateResponseMetadata(responseProto, turingReqID)
 
 	// Get the experiment treatment channel from the request context, read result
 	var experimentResponse *experiment.Response
@@ -201,7 +203,6 @@ func (us *Server) getPrediction(
 		responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
 	}
 
-	responseProto = populateResponseMetadata(responseProto, turingReqID)
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)
 	return responseProto, nil
 }
