@@ -282,6 +282,11 @@ func TestResultLoggerDecode(t *testing.T) {
 			result:  ConsoleLogger,
 			success: true,
 		},
+		"upi": {
+			value:   "upi",
+			result:  UPILogger,
+			success: true,
+		},
 		"nop": {
 			value:   "nop",
 			result:  NopLogger,

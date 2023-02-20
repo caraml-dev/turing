@@ -135,7 +135,7 @@ func newJSONKafkaLogEntry(resultLogEntry *TuringResultLogEntry) (messageBytes []
 	return
 }
 
-// newProtobufKafkaLogEntry converts a given TuringResultLogEntry to the Protbuf format and marshals it,
+// newProtobufKafkaLogEntry converts a given TuringResultLogEntry to the Protobuf format and marshals it,
 // for writing to a Kafka topic
 func newProtobufKafkaLogEntry(
 	resultLogEntry *TuringResultLogEntry,

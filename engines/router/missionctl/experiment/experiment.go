@@ -67,7 +67,9 @@ func startRPCPluginMonitoring(rpcEngineFactory *rpc.EngineFactory, livenessPerio
 // also satisfies the missionctl/http Response interface
 type Response struct {
 	// Success response from the experiment engine, unmodified
-	Configuration json.RawMessage `json:"configuration,omitempty"`
+	Configuration  json.RawMessage `json:"configuration,omitempty"`
+	ExperimentName string          `json:"experiment_name,omitempty"`
+	TreatmentName  string          `json:"name,omitempty"`
 	// Error message
 	Error string `json:"error,omitempty"`
 }
@@ -92,6 +94,8 @@ func NewResponse(expPlan *runner.Treatment, expPlanErr error) *Response {
 		experimentResponse.Error = expPlanErr.Error()
 	} else {
 		experimentResponse.Configuration = expPlan.Config
+		experimentResponse.ExperimentName = expPlan.ExperimentName
+		experimentResponse.TreatmentName = expPlan.Name
 	}
 	return experimentResponse
 }

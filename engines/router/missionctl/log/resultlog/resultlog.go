@@ -148,6 +148,10 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 	case config.KafkaLogger:
 		log.Glob().Info("Initializing Kafka Result Logger")
 		globalLogger, err = newKafkaLogger(cfg.Kafka)
+	case config.UPILogger:
+		log.Glob().Info("Initializing UPI Result Logger")
+		cfg.Kafka.EnableUPILogging = true
+		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
 		globalLogger = newNopLogger()

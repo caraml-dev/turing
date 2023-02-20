@@ -36,6 +36,8 @@ const (
 	ConsoleLogger ResultLogger = "CONSOLE"
 	// KafkaLogger logs the response to a Kafka topic
 	KafkaLogger ResultLogger = "KAFKA"
+	// UPILogger logs the response to a Kafka topic with UPI proto
+	UPILogger ResultLogger = "UPI"
 	// NopLogger disables response logging
 	NopLogger ResultLogger = "NOP"
 )
@@ -106,6 +108,7 @@ type KafkaConfig struct {
 	SerializationFormat SerializationFormat `split_words:"true"`
 	MaxMessageBytes     int                 `split_words:"true" default:"1048588"`
 	CompressionType     string              `split_words:"true" default:"none"`
+	EnableUPILogging    bool
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client
@@ -156,6 +159,7 @@ func (resLogger *ResultLogger) Decode(value string) error {
 	case BigqueryLogger,
 		ConsoleLogger,
 		KafkaLogger,
+		UPILogger,
 		NopLogger:
 		*resLogger = ResultLogger(value)
 		return nil

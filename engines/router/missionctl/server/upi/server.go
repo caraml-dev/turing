@@ -2,12 +2,14 @@ package upi
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -160,6 +162,10 @@ func (us *Server) getPrediction(
 		}()
 	}()
 
+	// Create a channel for experiment treatment response and add to context
+	ch := make(chan *experiment.Response, 1)
+	ctx = experiment.WithExperimentResponseChannel(ctx, ch)
+
 	// Calling Routes via fiber
 	resp, turingError := us.missionControl.Route(ctx, upiRequest)
 	if turingError != nil {
@@ -173,6 +179,26 @@ func (us *Server) getPrediction(
 			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), fiberProtocol.GRPC,
 		)
 		return nil, turingError
+	}
+
+	// Get the experiment treatment channel from the request context, read result
+	var experimentResponse *experiment.Response
+	expResultCh, err := experiment.GetExperimentResponseChannel(ctx)
+	if err == nil {
+		select {
+		case experimentResponse = <-expResultCh:
+		default:
+			break
+		}
+	}
+	if experimentResponse != nil {
+		var expErr *errors.TuringError
+		if experimentResponse.Error != "" {
+			expErr = errors.NewTuringError(fmt.Errorf(experimentResponse.Error), fiberProtocol.HTTP)
+			return nil, expErr
+		}
+		responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
+		responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
 	}
 
 	responseProto = populateResponseMetadata(responseProto, turingReqID)
