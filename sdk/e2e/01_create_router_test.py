@@ -187,7 +187,7 @@ def test_create_router():
                 "request": {"client": {"id": 7}},
                 "response": {
                     "experiment": {
-                        "configuration": {"foo": "foo", "route_name": "treatment-a"},
+                        "configuration": {"bar": "bar", "route_name": "treatment-a"},
                         "experiment_name": "exp_1",
                         "name": "treatment-a",
                     },

@@ -126,8 +126,9 @@ def test_deploy_router_upi_std_ensembler():
     channel = grpc.insecure_channel(retrieved_router.endpoint)
     stub = upi_pb2_grpc.UniversalPredictionServiceStub(channel)
 
-    logging.info("send request that satisfy treatment-a")
+    logging.info("send request that satisfy control")
 
+    # proprietary uses hashing, 4 will return control and 7 will return treatment in this setup
     request = upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
             columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
@@ -137,7 +138,7 @@ def test_deploy_router_upi_std_ensembler():
             variable_pb2.Variable(
                 name="client_id",
                 type=type_pb2.TYPE_STRING,
-                string_value="1",
+                string_value="4",
             )
         ],
     )
@@ -148,7 +149,7 @@ def test_deploy_router_upi_std_ensembler():
     assert response.prediction_result_table == request.prediction_table
     assert response.metadata.models[0].name == "control"
 
-    logging.info("send request that goes to control model")
+    logging.info("send request that goes to treatment-a")
 
     request = upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
@@ -159,7 +160,7 @@ def test_deploy_router_upi_std_ensembler():
             variable_pb2.Variable(
                 name="client_id",
                 type=type_pb2.TYPE_STRING,
-                string_value="1234",
+                string_value="7",
             )
         ],
     )

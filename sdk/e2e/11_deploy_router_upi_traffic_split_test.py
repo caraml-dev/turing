@@ -64,7 +64,7 @@ def test_deploy_router_upi_traffic_split():
                     field_source=FieldSource.PREDICTION_CONTEXT,
                     field="client_id",
                     operator="in",
-                    values=["1"],
+                    values=["7"],
                 )
             ],
             routes=["treatment-a", "control"],
@@ -144,6 +144,8 @@ def test_deploy_router_upi_traffic_split():
 
     logging.info("send request that satisfy treatment-a")
 
+    # example proprietary engine will return treatment-a for id=7 and 12, to verify traffic rule, 7 is allowed and 
+    # id 12 should return control, despite experiment engine returning treatment-a
     request = upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
             columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
@@ -153,7 +155,7 @@ def test_deploy_router_upi_traffic_split():
             variable_pb2.Variable(
                 name="client_id",
                 type=type_pb2.TYPE_STRING,
-                string_value="1",
+                string_value="7",
             )
         ],
     )
@@ -162,7 +164,7 @@ def test_deploy_router_upi_traffic_split():
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table
-    assert response.metadata.models[0].name == "control"
+    assert response.metadata.models[0].name == "treatment-a"
 
     logging.info("send request that goes to control model")
 
@@ -175,7 +177,7 @@ def test_deploy_router_upi_traffic_split():
             variable_pb2.Variable(
                 name="client_id",
                 type=type_pb2.TYPE_STRING,
-                string_value="1234",
+                string_value="12",
             )
         ],
     )
@@ -184,4 +186,4 @@ def test_deploy_router_upi_traffic_split():
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table
-    assert response.metadata.models[0].name == "treatment-a"
+    assert response.metadata.models[0].name == "control"
