@@ -20,7 +20,7 @@ function print_usage {
     echo "  Optional Environment Variables:"
     echo "    ISTIO_VERSION                              Istio version, default: 1.12.5."
     echo "    KNATIVE_VERSION                            Knative version, default: 1.7.4."
-    echo "    KNATIVE_ISTIO_VERSION                      Knative Istio version, default: 1.3.0."
+    echo "    KNATIVE_ISTIO_VERSION                      Knative Istio version, default: 1.7.1."
     echo "    KNATIVE_DOMAINS                            Knative domains that should be supported, comma seperated values"
     echo "    KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING  Knative domains that should be supported, comma seperated values"
 }
@@ -56,7 +56,7 @@ function install_knative {
         -f knative-configmaps/config-features.yaml
 
     kubectl apply \
-        -f "https://github.com/knative-sandbox/net-istio/releases/download/knative-v${KNATIVE_ISTIO_VERSION:-1.3.0}/net-istio.yaml"
+        -f "https://github.com/knative-sandbox/net-istio/releases/download/knative-v${KNATIVE_ISTIO_VERSION:-1.7.1}/net-istio.yaml"
 
     local istio_apps=("net-istio-controller" "net-istio-webhook")
     for app in ${istio_apps[@]}; do
