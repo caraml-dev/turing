@@ -260,7 +260,7 @@ var _ = DeployedRouterContext("testdata/create_router_upi_with_traffic_rules.jso
 								{
 									Name:        "client_id",
 									Type:        upiv1.Type_TYPE_STRING,
-									StringValue: "1",
+									StringValue: "7",
 								},
 							},
 						}
