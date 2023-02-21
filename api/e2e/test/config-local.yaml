@@ -24,6 +24,20 @@ mockTreatmentUPIServer:
 cluster:
   name: dev
   credentials: {}
+#  Example of config
+#  credentials: {
+#    "k8s_config": {
+#      "name": "default",
+#      "cluster": {
+#        "certificate-authority-data": "...",
+#        "server": "https://127.0.0.1:6443"
+#      },
+#      "user": {
+#        "client-certificate-data": "...",
+#        "client-key-data": "...="
+#      }
+#    }
+#  }
 
 project:
   id: 1

@@ -2,7 +2,6 @@ package upi
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -194,11 +193,12 @@ func (us *Server) getPrediction(
 		}
 	}
 	if experimentResponse != nil {
-		var expErr *errors.TuringError
-		if experimentResponse.Error != "" {
-			expErr = errors.NewTuringError(fmt.Errorf(experimentResponse.Error), fiberProtocol.HTTP)
-			return nil, expErr
-		}
+		// TODO add logging
+		//var expErr *errors.TuringError
+		//if experimentResponse.Error != "" {
+		//	expErr = errors.NewTuringError(fmt.Errorf(experimentResponse.Error), fiberProtocol.HTTP)
+		//}
+		//copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, experimentResponse, expErr)
 		responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
 		responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
 	}

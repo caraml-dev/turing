@@ -3,7 +3,9 @@
 RouterDefaults:
   ExperimentEnginePlugins:
     proprietary:
-      Image: localhost:5000/proprietary-experiment-engine-plugin:latest
+      PluginConfig:
+        Image: localhost:5000/proprietary-experiment-engine-plugin:latest
+        LivenessPeriodSeconds: 10
 Experiment:
   proprietary:
     plugin_binary: ./bin/example-plugin
@@ -19,15 +21,15 @@ Experiment:
         name: exp_1
         variants:
           - name: control
-          - name: treatment-1
+          - name: treatment-a
         variants_configuration:
           control:
             traffic: 0.85
             treatment_configuration:
-              foo: bar
-              route_name: treatment-a
-          treatment-1:
+              foo: foo
+              route_name: control
+          treatment-a:
             traffic: 0.15
             treatment_configuration:
-              bar: baz
-              route_name: control
+              bar: bar
+              route_name: treatment-a

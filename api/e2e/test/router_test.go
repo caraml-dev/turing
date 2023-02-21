@@ -31,24 +31,24 @@ var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_
 				Context("POST /v1/predict", func() {
 
 					When("called with {client: {id: 4}} in the payload", func() {
-						It("responds with data from the `treatment-a` route", func() {
+						It("responds with data from the `control` route", func() {
 							routerE.POST("/v1/predict").
 								WithHeaders(defaultPredictHeaders).
 								WithJSON(json.RawMessage(`{"client": {"id": 4}}`)).
 								Expect().
 								Status(http.StatusOK).
-								JSON().Equal(json.RawMessage(`{"version": "treatment-a"}`))
+								JSON().Equal(json.RawMessage(`{"version": "control"}`))
 						})
 					})
 
 					When("called with {client: {id: 7}} in the payload", func() {
-						It("responds with data from the `control` route", func() {
+						It("responds with data from the `treatment-a` route", func() {
 							routerE.POST("/v1/predict").
 								WithHeaders(defaultPredictHeaders).
 								WithJSON(json.RawMessage(`{"client": {"id": 7}}`)).
 								Expect().
 								Status(http.StatusOK).
-								JSON().Equal(json.RawMessage(`{"version": "control"}`))
+								JSON().Equal(json.RawMessage(`{"version": "treatment-a"}`))
 						})
 					})
 				})
@@ -68,7 +68,7 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 					})
 
 					When("request satisfies the first traffic rule", func() {
-						It("responds with responses from `control` and `treatment-a` routes", func() {
+						It("responds with responses from `treatment-a` route", func() {
 							want = httpexpect.
 								NewValue(GinkgoT(), JSONPayload("testdata/responses/traffic_rules/traffic-rule-1.json")).
 								Object()
@@ -85,7 +85,7 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 					})
 
 					When("request satisfies the second traffic rule", func() {
-						It("responds with responses from `control` and `treatment-b` routes", func() {
+						It("responds with responses from `treatment-b` route", func() {
 							want = httpexpect.
 								NewValue(GinkgoT(), JSONPayload("testdata/responses/traffic_rules/traffic-rule-2.json")).
 								Object()
@@ -101,7 +101,7 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 					})
 
 					When("request satisfies no traffic rules", func() {
-						It("responds with responses from `control` route only", func() {
+						It("responds with responses from `control` route", func() {
 							want = httpexpect.
 								NewValue(GinkgoT(), JSONPayload("testdata/responses/traffic_rules/no-rules.json")).
 								Object()
@@ -209,7 +209,7 @@ var _ = DeployedRouterContext("testdata/create_router_upi_with_std_ensembler.jso
 								{
 									Name:        "client_id",
 									Type:        upiv1.Type_TYPE_STRING,
-									StringValue: "4",
+									StringValue: "7",
 								},
 							},
 						}
