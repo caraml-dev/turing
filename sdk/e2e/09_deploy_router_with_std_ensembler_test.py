@@ -116,5 +116,5 @@ def test_deploy_router_with_std_ensembler():
         json={"client": {"id": 4}},
     )
     assert response.status_code == 200
-    expected_response = {"version": "treatment-a"}
+    expected_response = {"version": "control"}
     assert response.json() == expected_response
