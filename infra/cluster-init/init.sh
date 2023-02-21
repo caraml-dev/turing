@@ -19,7 +19,7 @@ function print_usage {
     echo
     echo "  Optional Environment Variables:"
     echo "    ISTIO_VERSION                              Istio version, default: 1.12.5."
-    echo "    KNATIVE_VERSION                            Knative version, default: 1.3.2."
+    echo "    KNATIVE_VERSION                            Knative version, default: 1.7.4."
     echo "    KNATIVE_ISTIO_VERSION                      Knative Istio version, default: 1.3.0."
     echo "    KNATIVE_DOMAINS                            Knative domains that should be supported, comma seperated values"
     echo "    KNATIVE_REGISTRIES_SKIPPING_TAG_RESOLVING  Knative domains that should be supported, comma seperated values"
