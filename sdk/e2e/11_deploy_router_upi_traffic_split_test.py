@@ -162,7 +162,7 @@ def test_deploy_router_upi_traffic_split():
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table
-    assert response.metadata.models[0].name == "treatment-a"
+    assert response.metadata.models[0].name == "control"
 
     logging.info("send request that goes to control model")
 
@@ -184,4 +184,4 @@ def test_deploy_router_upi_traffic_split():
     logging.info(f"received response {response}")
 
     assert response.prediction_result_table == request.prediction_table
-    assert response.metadata.models[0].name == "control"
+    assert response.metadata.models[0].name == "treatment-a"

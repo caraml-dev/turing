@@ -167,7 +167,9 @@ def test_create_router():
                 "request": {"client": {"id": 4}},
                 "response": {
                     "experiment": {
-                        "configuration": {"foo": "foo", "route_name": "control"}
+                        "configuration": {"foo": "foo", "route_name": "control"},
+                        "experiment_name": "exp_1",
+                        "name": "control",
                     },
                     "route_responses": [
                         {
@@ -185,7 +187,9 @@ def test_create_router():
                 "request": {"client": {"id": 7}},
                 "response": {
                     "experiment": {
-                        "configuration": {"bar": "bar", "route_name": "treatment-a"}
+                        "configuration": {"foo": "foo", "route_name": "treatment-a"},
+                        "experiment_name": "exp_1",
+                        "name": "treatment-a",
                     },
                     "route_responses": [
                         {
