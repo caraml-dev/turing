@@ -144,7 +144,7 @@ def test_deploy_router_upi_traffic_split():
 
     logging.info("send request that satisfy treatment-a")
 
-    # example proprietary engine will return treatment-a for id=7 and 12, to verify traffic rule, 7 is allowed and 
+    # example proprietary engine will return treatment-a for id=7 and 12, to verify traffic rule, 7 is allowed and
     # id 12 should return control, despite experiment engine returning treatment-a
     request = upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
