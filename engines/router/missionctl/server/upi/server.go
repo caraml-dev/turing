@@ -192,15 +192,16 @@ func (us *Server) getPrediction(
 			break
 		}
 	}
-	if experimentResponse != nil && experimentResponse.Error != "" {
-		// TODO add logging
-		//var expErr *errors.TuringError
-		//if experimentResponse.Error != "" {
-		//	expErr = errors.NewTuringError(fmt.Errorf(experimentResponse.Error), fiberProtocol.HTTP)
-		//}
+	if experimentResponse != nil {
+		// For now, log experiment engine error to console only.
+		if experimentResponse.Error != "" {
+			log.Glob().Errorf("error response from experiment engine %s", experimentResponse.Error)
+
+		} else {
+			responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
+			responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
+		}
 		//copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, experimentResponse, expErr)
-		responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
-		responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
 	}
 
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)

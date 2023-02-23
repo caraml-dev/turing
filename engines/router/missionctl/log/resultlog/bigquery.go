@@ -48,13 +48,13 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 	// It seems protobq.Marshal will be adding support for map[string]string that would help simplify the
 	// implementation of Save().
 	kvPairs["request"] = bigquery.Value(map[string]interface{}{
-		"header": formatBQLogEntryHeader(e.TuringResultLogEntry.Request.Header),
-		"body":   e.TuringResultLogEntry.Request.Body,
+		"header": formatBQLogEntryHeader(e.TuringResultLogEntry.resultLogMessage.Request.Header),
+		"body":   e.TuringResultLogEntry.resultLogMessage.Request.Body,
 	})
-	kvPairs["experiment"] = formatBQLogEntryResponse(e.TuringResultLogEntry.Experiment)
-	kvPairs["enricher"] = formatBQLogEntryResponse(e.TuringResultLogEntry.Enricher)
-	kvPairs["router"] = formatBQLogEntryResponse(e.TuringResultLogEntry.Router)
-	kvPairs["ensembler"] = formatBQLogEntryResponse(e.TuringResultLogEntry.Ensembler)
+	kvPairs["experiment"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Experiment)
+	kvPairs["enricher"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Enricher)
+	kvPairs["router"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Router)
+	kvPairs["ensembler"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Ensembler)
 
 	return kvPairs, "", nil
 }

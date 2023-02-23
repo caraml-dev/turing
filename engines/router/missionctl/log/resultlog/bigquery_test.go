@@ -116,7 +116,7 @@ func TestBigQueryLoggerGetData(t *testing.T) {
 	// Create a TuringResultLogEntry record and add the data
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
 	entry := NewTuringResultLogEntry(ctx, timestamp, req.Header, string(reqBody))
-	entry.RouterVersion = "turing-router-1"
+	entry.resultLogMessage.RouterVersion = "turing-router-1"
 	entry.AddResponse("experiment", `{"key": "experiment_data"}`, nil, "")
 	entry.AddResponse("enricher", `{"key": "enricher_data"}`, nil, "")
 	entry.AddResponse("router", `{"key": "router_data"}`, nil, "")

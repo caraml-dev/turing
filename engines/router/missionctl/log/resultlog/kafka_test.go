@@ -128,11 +128,15 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	// Create test Turing log entry
 	_, turingLogEntry := makeTestTuringResultLogEntry(t)
+	resultLogMessage := &turingLogEntry.resultLogMessage
 	// Overwrite the turing request id value
-	turingLogEntry.TuringReqId = "testID"
+	resultLogMessage.TuringReqId = "testID"
 
 	// Run newProtobufKafkaLogEntry and validate
-	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
+	key, message, err := newProtobufKafkaLogEntry(
+		resultLogMessage,
+		resultLogMessage.TuringReqId,
+		resultLogMessage.EventTimestamp)
 	assert.NoError(t, err)
 
 	// Unmarshall serialised message

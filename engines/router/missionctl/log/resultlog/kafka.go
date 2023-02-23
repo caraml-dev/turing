@@ -5,6 +5,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
@@ -85,10 +86,14 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 
 	// Format Kafka Message
 	var keyBytes, valueBytes []byte
+	resultLogProto := &turLogEntry.resultLogMessage
 	if l.serializationFormat == config.JSONSerializationFormat {
 		valueBytes, err = newJSONKafkaLogEntry(turLogEntry)
 	} else if l.serializationFormat == config.ProtobufSerializationFormat {
-		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(turLogEntry)
+		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(
+			resultLogProto,
+			resultLogProto.TuringReqId,
+			resultLogProto.EventTimestamp)
 	} else {
 		// Unknown format, we wouldn't hit this since the config is checked at initialization,
 		// but handle it.
@@ -138,12 +143,14 @@ func newJSONKafkaLogEntry(resultLogEntry *TuringResultLogEntry) (messageBytes []
 // newProtobufKafkaLogEntry converts a given TuringResultLogEntry to the Protobuf format and marshals it,
 // for writing to a Kafka topic
 func newProtobufKafkaLogEntry(
-	resultLogEntry *TuringResultLogEntry,
+	message proto.Message,
+	turingReqID string,
+	eventTimestamp *timestamppb.Timestamp,
 ) (keyBytes []byte, valueBytes []byte, err error) {
 	// Create the Kafka key
 	key := &turing.TuringResultLogKey{
-		TuringReqId:    resultLogEntry.TuringReqId,
-		EventTimestamp: resultLogEntry.EventTimestamp,
+		TuringReqId:    turingReqID,
+		EventTimestamp: eventTimestamp,
 	}
 
 	// Marshal the key and the message
@@ -151,7 +158,6 @@ func newProtobufKafkaLogEntry(
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry key")
 	}
-	message := (*turing.TuringResultLogMessage)(resultLogEntry)
 	valueBytes, err = proto.Marshal(message)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "Unable to marshal log entry value")

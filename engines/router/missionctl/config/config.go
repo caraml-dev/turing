@@ -110,11 +110,6 @@ type KafkaConfig struct {
 	CompressionType     string              `split_words:"true" default:"none"`
 }
 
-// UPIConfig captures the setting for UPI routers
-type UPIConfig struct {
-	LoggingEnabled bool `split_words:"true"`
-}
-
 // JaegerConfig captures the settings for tracing using Jaeger client
 // Ref: https://pkg.go.dev/github.com/uber/jaeger-client-go/config
 type JaegerConfig struct {
@@ -136,7 +131,6 @@ type AppConfig struct {
 	BigQuery      *BQConfig    `envconfig:"BQ"`
 	Fluentd       *FluentdConfig
 	Kafka         *KafkaConfig
-	UPI           *UPIConfig
 	Jaeger        *JaegerConfig
 	Sentry        sentry.Config
 }
