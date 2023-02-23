@@ -201,7 +201,6 @@ func (us *Server) getPrediction(
 			responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
 			responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
 		}
-		//copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, experimentResponse, expErr)
 	}
 
 	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)

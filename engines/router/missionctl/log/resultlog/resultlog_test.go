@@ -135,6 +135,32 @@ func TestInitTuringResultLogger(t *testing.T) {
 			patch:   true,
 			success: true,
 		},
+		"upi_valid_router_name": {
+			cfg: &config.AppConfig{
+				Name:         "router_name-1.project",
+				ResultLogger: config.UPILogger,
+				Kafka: &config.KafkaConfig{
+					Brokers:             "brokers",
+					Topic:               "topic",
+					SerializationFormat: config.ProtobufSerializationFormat,
+				},
+			},
+			patch:   true,
+			success: true,
+		},
+		"upi_invalid_router_name": {
+			cfg: &config.AppConfig{
+				Name:         "router_name-abc_ef_.project",
+				ResultLogger: config.UPILogger,
+				Kafka: &config.KafkaConfig{
+					Brokers:             "brokers",
+					Topic:               "topic",
+					SerializationFormat: config.ProtobufSerializationFormat,
+				},
+			},
+			patch:   true,
+			success: false,
+		},
 		"unrecognised_failure": {
 			cfg:     &config.AppConfig{},
 			success: false,

@@ -22,6 +22,9 @@ import (
 var globalLogger TuringResultLogger = newNopLogger()
 
 // appName stores the configured app name, to be applied to each log entry
+// This corresponds to the name and version of the router deployed from the Turing app and
+// will be logged as RouterVersion in TuringResultLog.proto
+// Format: {router_name}-{router_version}.{project_name}
 var appName string
 
 // ResultLogKeys defines the individual components for which the result log must be created
@@ -152,7 +155,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.UPILogger:
 		log.Glob().Info("Initializing UPI Result Logger")
-		globalLogger, err = newUPILogger(cfg.Kafka)
+		globalLogger, err = newUPILogger(cfg.Kafka, cfg.Name)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
 		globalLogger = newNopLogger()
