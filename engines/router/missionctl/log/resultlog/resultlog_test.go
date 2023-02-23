@@ -48,7 +48,7 @@ func TestMarshalJSONLogEntry(t *testing.T) {
 	logEntry.resultLogMessage.TuringReqId = "test-req-id"
 
 	// Marshal and validate
-	bytes, err := json.Marshal(&logEntry.resultLogMessage)
+	bytes, err := protoJSONMarshaller.Marshal(&logEntry.resultLogMessage)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"turing_req_id":"test-req-id",
