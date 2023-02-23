@@ -192,7 +192,7 @@ func (us *Server) getPrediction(
 			break
 		}
 	}
-	if experimentResponse != nil {
+	if experimentResponse != nil && experimentResponse.Error != "" {
 		// TODO add logging
 		//var expErr *errors.TuringError
 		//if experimentResponse.Error != "" {

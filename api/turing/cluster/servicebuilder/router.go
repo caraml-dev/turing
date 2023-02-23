@@ -292,7 +292,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		// set a predefined kafka configuration for all upi router
 		envs = append(envs, []corev1.EnvVar{
 			{Name: envKafkaBrokers, Value: routerDefaults.UPIConfig.KafkaBrokers},
-			// namespace is assumed to be same the project name
+			// namespace is assumed to be same the project name, topic will be fixed as caraml-{project}-{router_name}
+			// should more fine-grain logging, upi config env var should be created
 			{Name: envKafkaTopic, Value: fmt.Sprintf("caraml-%s-%s-router-log", namespace, ver.Router.Name)},
 			{Name: envKafkaSerializationFormat, Value: string(models.ProtobufSerializationFormat)},
 			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},

@@ -40,7 +40,7 @@ var ResultLogKeys = struct {
 // TuringResultLogEntry represents the information logged by the result logger
 type TuringResultLogEntry turing.TuringResultLogMessage
 
-// MarshalJSON implements custom Marshaling for TuringResultLogEntry, using the underlying proto def
+// MarshalJSON implement custom Marshaling for TuringResultLogEntry, using the underlying proto def
 func (logEntry *TuringResultLogEntry) MarshalJSON() ([]byte, error) {
 	m := &protojson.MarshalOptions{
 		UseProtoNames: true, // Use the json field name instead of the camel case struct field name
@@ -150,7 +150,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.UPILogger:
 		log.Glob().Info("Initializing UPI Result Logger")
-		cfg.Kafka.EnableUPILogging = true
+		cfg.UPI.LoggingEnabled = true
 		globalLogger, err = newKafkaLogger(cfg.Kafka)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")

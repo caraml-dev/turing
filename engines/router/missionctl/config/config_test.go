@@ -57,6 +57,7 @@ var optionalEnvs = map[string]string{
 	"APP_KAFKA_BROKERS":              "localhost:9000",
 	"APP_KAFKA_TOPIC":                "kafka_topic",
 	"APP_KAFKA_SERIALIZATION_FORMAT": "json",
+	"APP_UPI_LOGGING_ENABLED":        "true",
 	"APP_JAEGER_ENABLED":             "true",
 	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:5000",
 	"APP_JAEGER_REPORTER_HOST":       "localhost",
@@ -115,6 +116,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				MaxMessageBytes:     1048588,
 				CompressionType:     "none",
 			},
+			UPI:           &UPIConfig{},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
 				Enabled:           false,
@@ -179,6 +181,7 @@ func TestInitConfigEnv(t *testing.T) {
 				MaxMessageBytes:     1048588,
 				CompressionType:     "none",
 			},
+			UPI:           &UPIConfig{LoggingEnabled: true},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
 				Enabled:           true,

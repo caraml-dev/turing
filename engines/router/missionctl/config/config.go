@@ -108,7 +108,11 @@ type KafkaConfig struct {
 	SerializationFormat SerializationFormat `split_words:"true"`
 	MaxMessageBytes     int                 `split_words:"true" default:"1048588"`
 	CompressionType     string              `split_words:"true" default:"none"`
-	EnableUPILogging    bool
+}
+
+// UPIConfig captures the setting for UPI routers
+type UPIConfig struct {
+	LoggingEnabled bool `split_words:"true"`
 }
 
 // JaegerConfig captures the settings for tracing using Jaeger client
@@ -132,6 +136,7 @@ type AppConfig struct {
 	BigQuery      *BQConfig    `envconfig:"BQ"`
 	Fluentd       *FluentdConfig
 	Kafka         *KafkaConfig
+	UPI           *UPIConfig
 	Jaeger        *JaegerConfig
 	Sentry        sentry.Config
 }
