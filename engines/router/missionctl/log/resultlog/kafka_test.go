@@ -92,7 +92,7 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
 
 	// Run newJSONKafkaLogEntry and validate
-	message, err := newJSONKafkaLogEntry(turingLogEntry)
+	message, err := newJSONKafkaLogEntry(&turingLogEntry.resultLogMessage)
 	assert.NoError(t, err)
 	// Get Turing request id
 	turingReqID, err := turingctx.GetRequestID(ctx)

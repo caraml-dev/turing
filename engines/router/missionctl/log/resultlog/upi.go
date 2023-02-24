@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 )
 
 type UPILogger struct {
@@ -17,7 +18,7 @@ type UPILogger struct {
 	projectName   string
 }
 
-var routerRegex = regexp.MustCompile(`^[a-zA-Z0-9_]+-[\d]+.[a-zA-Z0-9\-]+$`)
+var routerRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-]+-\d+.[a-zA-Z0-9\-]+$`)
 
 func newUPILogger(cfg *config.KafkaConfig, appName string) (*UPILogger, error) {
 
@@ -27,9 +28,10 @@ func newUPILogger(cfg *config.KafkaConfig, appName string) (*UPILogger, error) {
 	s := strings.Split(appName, ".")
 	routerNameWithVersion := s[0]
 	projectName := s[1]
-	ss := strings.Split(routerNameWithVersion, "-")
-	routerName := ss[0]
-	routerVersion := s[1]
+	i := strings.LastIndex(routerNameWithVersion, "-")
+	routerName := routerNameWithVersion[:i]
+	// do not include '-'
+	routerVersion := routerNameWithVersion[i+1:]
 
 	kafkaLogger, err := newKafkaLogger(cfg)
 	if err != nil {
@@ -44,6 +46,15 @@ func newUPILogger(cfg *config.KafkaConfig, appName string) (*UPILogger, error) {
 }
 
 //writeUPILog implement custom Marshaling for TuringResultLogEntry, using the underlying proto def
-//func (l *UPILogger) writeUPILog(log *upiv1.RouterLog) ([]byte, error) {
-//
-//}
+func (l *UPILogger) writeUPILog(routerLog *upiv1.RouterLog) error {
+
+	routerLog.RouterName = l.routerName
+	routerLog.RouterVersion = l.routerVersion
+	routerLog.ProjectName = l.projectName
+
+	return l.writeToKafka(
+		routerLog,
+		routerLog.PredictionId,
+		routerLog.RequestTimestamp,
+	)
+}

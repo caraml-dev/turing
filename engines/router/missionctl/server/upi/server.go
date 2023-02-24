@@ -6,13 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	fiberGrpc "github.com/gojek/fiber/grpc"
-	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,12 +18,16 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/experiment"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	fiberGrpc "github.com/gojek/fiber/grpc"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -157,7 +155,7 @@ func (us *Server) getPrediction(
 	defer func() {
 		go func() {
 			close(respCh)
-			logTuringRouterRequestSummary(ctx, time.Now(), md, req, respCh)
+			logTuringRouterRequestSummary(md, req, respCh)
 		}()
 	}()
 
@@ -170,9 +168,11 @@ func (us *Server) getPrediction(
 	if turingError != nil {
 		return nil, turingError
 	}
+	// type assert to grpc response to get metadata
+	grpcResp := resp.(*fiberGrpc.Response)
 
-	responseProto := &upiv1.PredictValuesResponse{}
-	err = proto.Unmarshal(resp.Payload(), responseProto)
+	predictResponse := &upiv1.PredictValuesResponse{}
+	err = proto.Unmarshal(grpcResp.Payload(), predictResponse)
 	if err != nil {
 		turingError = errors.NewTuringError(
 			errors.Newf(errors.BadResponse, "unable to unmarshal into expected response proto"), fiberProtocol.GRPC,
@@ -180,7 +180,7 @@ func (us *Server) getPrediction(
 		return nil, turingError
 	}
 	// Creates ResponseMetadata if its nil
-	responseProto = populateResponseMetadata(responseProto, turingReqID)
+	predictResponse = populateResponseMetadata(predictResponse, turingReqID)
 
 	// Get the experiment treatment channel from the request context, read result
 	var experimentResponse *experiment.Response
@@ -198,13 +198,18 @@ func (us *Server) getPrediction(
 			log.Glob().Errorf("error response from experiment engine %s", experimentResponse.Error)
 
 		} else {
-			responseProto.Metadata.TreatmentName = experimentResponse.TreatmentName
-			responseProto.Metadata.ExperimentName = experimentResponse.TreatmentName
+			predictResponse.Metadata.TreatmentName = experimentResponse.TreatmentName
+			predictResponse.Metadata.ExperimentName = experimentResponse.ExperimentName
 		}
 	}
 
-	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, responseProto, turingError)
-	return responseProto, nil
+	copyResponseToLogChannel(
+		respCh,
+		resultlog.ResultLogKeys.Router,
+		grpcResp.Metadata,
+		predictResponse,
+		turingError)
+	return predictResponse, nil
 }
 
 func populateRequestMetadata(req *upiv1.PredictValuesRequest, id string) *upiv1.PredictValuesRequest {

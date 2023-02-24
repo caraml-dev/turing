@@ -1,8 +1,6 @@
 package resultlog
 
 import (
-	"encoding/json"
-
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -67,7 +65,10 @@ func newKafkaProducer(cfg *config.KafkaConfig) (kafkaProducer, error) {
 	return producer, err
 }
 
-func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
+func (l *KafkaLogger) writeToKafka(
+	message proto.Message,
+	turingReqID string,
+	timestamp *timestamppb.Timestamp) error {
 	var err error
 
 	// Measure time taken to marshal the data and write the log to the kafka topic
@@ -86,14 +87,13 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 
 	// Format Kafka Message
 	var keyBytes, valueBytes []byte
-	resultLogProto := &turLogEntry.resultLogMessage
 	if l.serializationFormat == config.JSONSerializationFormat {
-		valueBytes, err = newJSONKafkaLogEntry(turLogEntry)
+		valueBytes, err = newJSONKafkaLogEntry(message)
 	} else if l.serializationFormat == config.ProtobufSerializationFormat {
 		keyBytes, valueBytes, err = newProtobufKafkaLogEntry(
-			resultLogProto,
-			resultLogProto.TuringReqId,
-			resultLogProto.EventTimestamp)
+			message,
+			turingReqID,
+			timestamp)
 	} else {
 		// Unknown format, we wouldn't hit this since the config is checked at initialization,
 		// but handle it.
@@ -130,10 +130,18 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 	return nil
 }
 
+func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
+	return l.writeToKafka(
+		&turLogEntry.resultLogMessage,
+		turLogEntry.resultLogMessage.TuringReqId,
+		turLogEntry.resultLogMessage.EventTimestamp,
+	)
+}
+
 // newJSONKafkaLogEntry converts a given TuringResultLogEntry to  bytes, for writing to a Kafka topic
 // in JSON format
-func newJSONKafkaLogEntry(resultLogEntry *TuringResultLogEntry) (messageBytes []byte, err error) {
-	messageBytes, err = json.Marshal(resultLogEntry)
+func newJSONKafkaLogEntry(message proto.Message) (messageBytes []byte, err error) {
+	messageBytes, err = protoJSONMarshaller.Marshal(message)
 	if err != nil {
 		return nil, err
 	}

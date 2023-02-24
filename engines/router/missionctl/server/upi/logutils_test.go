@@ -1,23 +1,21 @@
 package upi
 
 import (
-	"context"
 	"fmt"
 	"testing"
-	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log"
-	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/grpc/metadata"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 func TestCopyResponseToLogChannel(t *testing.T) {
@@ -32,26 +30,28 @@ func TestCopyResponseToLogChannel(t *testing.T) {
 		{
 			name: "ok",
 			expected: grpcRouterResponse{
-				key:  key,
-				body: resp,
+				key:    key,
+				body:   resp,
+				header: metadata.New(map[string]string{"test": "key"}),
 			},
 		},
 		{
 			name: "error",
 			err:  errors.NewTuringError(fmt.Errorf("test error"), fiberProtocol.GRPC),
 			expected: grpcRouterResponse{
-				key: key,
-				err: "test error",
+				key:     key,
+				err:     "test error",
+				errCode: 13,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			ctx := metadata.AppendToOutgoingContext(context.Background(), "test", "key")
+			md := metadata.Pairs("test", "key")
 			// Make response channel
 			respCh := make(chan grpcRouterResponse, 1)
-			copyResponseToLogChannel(ctx, respCh, key, resp, tt.err)
+			copyResponseToLogChannel(respCh, key, md, resp, tt.err)
 
 			close(respCh)
 			data := <-respCh
@@ -65,6 +65,12 @@ func TestCopyResponseToLogChannel(t *testing.T) {
 func TestLogTuringRouterRequestSummary(t *testing.T) {
 	table := &upiv1.Table{
 		Name: "abc",
+		Columns: []*upiv1.Column{
+			{
+				Name: "col1",
+				Type: upiv1.Type_TYPE_DOUBLE,
+			},
+		},
 		Rows: []*upiv1.Row{
 			{
 				RowId: "row1",
@@ -118,7 +124,7 @@ func TestLogTuringRouterRequestSummary(t *testing.T) {
 			logger := zap.New(core)
 			log.SetGlobalLogger(logger.Sugar())
 			err := resultlog.InitTuringResultLogger(&config.AppConfig{
-				ResultLogger: config.ConsoleLogger,
+				ResultLogger: config.UPILogger,
 			})
 			assert.NoError(t, err)
 
@@ -126,7 +132,7 @@ func TestLogTuringRouterRequestSummary(t *testing.T) {
 			respCh := make(chan grpcRouterResponse, 1)
 			respCh <- grpcRouterResponse{header: tt.resHeader, body: tt.resBody, key: resultlog.ResultLogKeys.Router}
 			close(respCh)
-			logTuringRouterRequestSummary(context.Background(), time.Now(), tt.reqHeader, tt.reqBody, respCh)
+			logTuringRouterRequestSummary(tt.reqHeader, tt.reqBody, respCh)
 
 			filteredLogs := collectedLogs.FilterMessage("Turing Request Summary")
 			require.NotZero(t, filteredLogs.Len())
