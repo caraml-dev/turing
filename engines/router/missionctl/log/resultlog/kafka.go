@@ -1,15 +1,15 @@
 package resultlog
 
 import (
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
-
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -135,6 +135,14 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 		&turLogEntry.resultLogMessage,
 		turLogEntry.resultLogMessage.TuringReqId,
 		turLogEntry.resultLogMessage.EventTimestamp,
+	)
+}
+
+func (l *KafkaLogger) writeUPIRouterLog(routerLog *upiv1.RouterLog) error {
+	return l.writeToKafka(
+		routerLog,
+		routerLog.PredictionId,
+		routerLog.RequestTimestamp,
 	)
 }
 

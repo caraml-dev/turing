@@ -16,7 +16,6 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 )
 
 // Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.
@@ -154,9 +153,6 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 	case config.KafkaLogger:
 		log.Glob().Info("Initializing Kafka Result Logger")
 		globalLogger, err = newKafkaLogger(cfg.Kafka)
-	case config.UPILogger:
-		log.Glob().Info("Initializing UPI Result Logger")
-		globalLogger, err = newUPILogger(cfg.Kafka, cfg.Name)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
 		globalLogger = newNopLogger()
@@ -171,13 +167,6 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 func LogEntry(turLogEntry *TuringResultLogEntry) error {
 	log.Glob().Debug("LogEntry")
 	return globalLogger.write(turLogEntry)
-}
-
-func LogUPIEntry(routerLog *upiv1.RouterLog) error {
-	if upiLogger, ok := globalLogger.(*UPILogger); ok {
-		return upiLogger.writeUPILog(routerLog)
-	}
-	return errors.Newf(errors.BadConfig, "upi logger not enabled correctly")
 }
 
 // FormatHeader formats the header which by concatenating the string values corresponding to each header into a

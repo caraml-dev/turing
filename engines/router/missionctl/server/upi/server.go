@@ -37,17 +37,18 @@ type Server struct {
 	upiv1.UnimplementedUniversalPredictionServiceServer
 
 	missionControl missionctl.MissionControlUPI
+	resultLogger   *resultlog.UPIResultLogger
 }
 
-func NewUPIServer(mc missionctl.MissionControlUPI) *Server {
+func NewUPIServer(mc missionctl.MissionControlUPI, rl *resultlog.UPIResultLogger) *Server {
 	return &Server{
 		missionControl: mc,
+		resultLogger:   rl,
 	}
 }
 
 func (us *Server) Run(listener net.Listener) {
 	s := grpc.NewServer()
-	//TODO: the unmarshalling can be done more efficiently by using partial deserialization
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
 
@@ -74,7 +75,6 @@ func (us *Server) Run(listener net.Listener) {
 	case <-stopChan:
 		log.Glob().Info("Signal to stop server")
 	}
-
 }
 
 func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesRequest) (
@@ -123,7 +123,7 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 
 	resp, predictionErr := us.getPrediction(ctx, req, md, turingReqID)
 	if predictionErr != nil {
-		logTuringRouterRequestError(ctx, predictionErr)
+		us.resultLogger.LogTuringRouterRequestError(ctx, predictionErr)
 		return nil, status.Error(codes.Code(predictionErr.Code), predictionErr.Message)
 	}
 	return resp, nil
@@ -138,7 +138,7 @@ func (us *Server) getPrediction(
 
 	// Create response channel to store the response from each step. 1 for route now,
 	// should be 4 when experiment engine, enricher and ensembler are added
-	respCh := make(chan grpcRouterResponse, 1)
+	respCh := make(chan resultlog.GrpcRouterResponse, 1)
 
 	req = populateRequestMetadata(req, turingReqID)
 	requestByte, err := proto.Marshal(req)
@@ -155,7 +155,7 @@ func (us *Server) getPrediction(
 	defer func() {
 		go func() {
 			close(respCh)
-			logTuringRouterRequestSummary(md, req, respCh)
+			us.resultLogger.LogTuringRouterRequestSummary(md, req, respCh)
 		}()
 	}()
 
@@ -203,7 +203,7 @@ func (us *Server) getPrediction(
 		}
 	}
 
-	copyResponseToLogChannel(
+	us.resultLogger.CopyResponseToLogChannel(
 		respCh,
 		resultlog.ResultLogKeys.Router,
 		grpcResp.Metadata,

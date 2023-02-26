@@ -90,7 +90,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 				require.NotEmpty(t, upiReq.Metadata.RequestTimestamp, "request timestamp is empty")
 			})
 
-			upiServer := NewUPIServer(mockMc)
+			upiServer := NewUPIServer(mockMc, nil)
 			ctx := context.Background()
 			resp, err := upiServer.PredictValues(ctx, tt.request)
 			if tt.expectedErr != nil {
@@ -115,7 +115,7 @@ func TestNewUpiServer(t *testing.T) {
 	}
 
 	mockMc := &mocks.MissionControlUPI{}
-	upiServer := NewUPIServer(mockMc)
+	upiServer := NewUPIServer(mockMc, nil)
 	go upiServer.Run(l)
 
 	// Wait for server to run and check that there are no error logs
