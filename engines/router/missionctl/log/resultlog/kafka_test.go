@@ -171,9 +171,9 @@ func TestKafkaLoggerWrite(t *testing.T) {
 	// Patch newKafkaLogEntry
 	monkey.Patch(
 		newJSONKafkaLogEntry,
-		func(entry *TuringResultLogEntry) ([]byte, error) {
+		func(message proto.Message) ([]byte, error) {
 			// Test that the function is called with the expected arg
-			assert.Equal(t, turingResLogEntry, entry)
+			assert.Equal(t, turingResLogEntry, message)
 			return testKafkaLogEntry, nil
 		},
 	)
