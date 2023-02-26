@@ -31,8 +31,8 @@ type KafkaLogger struct {
 	producer            kafkaProducer
 }
 
-// newKafkaLogger creates a new KafkaLogger
-func newKafkaLogger(cfg *config.KafkaConfig) (*KafkaLogger, error) {
+// NewKafkaLogger creates a new KafkaLogger
+func NewKafkaLogger(cfg *config.KafkaConfig) (*KafkaLogger, error) {
 	// Create Kafka Producer
 	producer, err := newKafkaProducer(cfg)
 	if err != nil {
@@ -138,7 +138,7 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 	)
 }
 
-func (l *KafkaLogger) writeUPIRouterLog(routerLog *upiv1.RouterLog) error {
+func (l *KafkaLogger) WriteUPIRouterLog(routerLog *upiv1.RouterLog) error {
 	return l.writeToKafka(
 		routerLog,
 		routerLog.PredictionId,

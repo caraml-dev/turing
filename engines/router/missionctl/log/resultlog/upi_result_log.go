@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
@@ -39,7 +38,7 @@ type GrpcRouterResponse struct {
 }
 
 type UPILogger interface {
-	writeUPIRouterLog(routerLog *upiv1.RouterLog) error
+	WriteUPIRouterLog(routerLog *upiv1.RouterLog) error
 }
 
 var loggingErrorTemplate = "logging error. unable to convert table to struct for %s : %s"
@@ -48,31 +47,28 @@ var convertorTableSchema uint32 = converter.TableSchemaV1
 
 var routerNameRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-]+-\d+.[a-zA-Z0-9\-]+$`)
 
-func InitUPIResultLogger(appName string, kafkaCfg *config.KafkaConfig) (*UPIResultLogger, error) {
+func InitUPIResultLogger(appName string, logger UPILogger) (*UPIResultLogger, error) {
 
-	resultLogger := &UPIResultLogger{}
+	resultLogger := &UPIResultLogger{
+		logger: logger,
+	}
 	if !routerNameRegex.MatchString(appName) {
 		return nil, fmt.Errorf("invalid router name")
 	}
 	s := strings.Split(appName, ".")
 	routerNameWithVersion := s[0]
 	resultLogger.projectName = s[1]
+
 	i := strings.LastIndex(routerNameWithVersion, "-")
 	resultLogger.routerName = routerNameWithVersion[:i]
 	// do not include '-'
 	resultLogger.routerVersion = routerNameWithVersion[i+1:]
 
-	kafkaLogger, err := newKafkaLogger(kafkaCfg)
-	if err != nil {
-		return nil, err
-	}
-	return &UPIResultLogger{
-		logger: kafkaLogger,
-	}, nil
+	return resultLogger, nil
 }
 
 func (ul *UPIResultLogger) LogEntry(routerLog *upiv1.RouterLog) error {
-	return ul.logger.writeUPIRouterLog(routerLog)
+	return ul.logger.WriteUPIRouterLog(routerLog)
 }
 
 func (ul *UPIResultLogger) LogTuringRouterRequestSummary(

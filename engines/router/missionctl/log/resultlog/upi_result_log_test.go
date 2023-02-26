@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"bou.ke/monkey"
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
@@ -19,22 +17,8 @@ import (
 
 func Test_InitUPIResultLogger(t *testing.T) {
 
-	kafkaConfig := config.KafkaConfig{
-		Brokers:             "localhost:9001",
-		Topic:               "kafka_topic",
-		SerializationFormat: config.ProtobufSerializationFormat,
-	}
-	mockProducer := &mockKafkaProducer{}
-	monkey.Patch(newKafkaProducer, func(cfg *config.KafkaConfig) (kafkaProducer, error) {
-		return mockProducer, nil
-	})
-	defer monkey.Unpatch(newKafkaProducer)
-	// Set up GetMetadata on the mock producer
-	mockProducer.On("GetMetadata", kafkaConfig.Topic, false, 1000).Return(nil, nil)
-
 	type args struct {
-		appName     string
-		kafkaConfig *config.KafkaConfig
+		appName string
 	}
 	tests := []struct {
 		name   string
@@ -51,15 +35,14 @@ func Test_InitUPIResultLogger(t *testing.T) {
 		{
 			name: "invalid app name",
 			args: args{
-				appName:     "abc-asdaf-1",
-				kafkaConfig: &kafkaConfig,
+				appName: "abc-asdaf-1",
 			},
 			errMsg: "invalid router name",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := InitUPIResultLogger(tt.args.appName, tt.args.kafkaConfig)
+			_, err := InitUPIResultLogger(tt.args.appName, nil)
 			if tt.errMsg != "" {
 				assert.Equal(t, tt.errMsg, err.Error())
 			} else {
@@ -134,16 +117,16 @@ func TestUPIResultLogger_CopyResponseToLogChannel(t *testing.T) {
 	}
 }
 
-type mockLogger struct{}
+type mockUPILogger struct{}
 
 var logResult *upiv1.RouterLog
 
-func (ml *mockLogger) writeUPIRouterLog(routerLog *upiv1.RouterLog) error {
+func (ml *mockUPILogger) WriteUPIRouterLog(routerLog *upiv1.RouterLog) error {
 	logResult = routerLog
 	return nil
 }
 
-// mockLogger is injected to the logger, so that the mapping logic of this function can be
+// mockUPILogger is injected to the logger, so that the mapping logic of this function can be
 // tested and verified
 func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 
@@ -210,7 +193,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 			name: "empty request and response",
 			args: args{
 				resultLogger: &UPIResultLogger{
-					logger:        &mockLogger{},
+					logger:        &mockUPILogger{},
 					routerName:    routerName,
 					routerVersion: routerVersion,
 					projectName:   projectName,
@@ -243,7 +226,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 						RequestTimestamp: time,
 					},
 				},
-				resultLogger: &UPIResultLogger{logger: &mockLogger{}},
+				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
 			},
 			want: &upiv1.RouterLog{
 				PredictionId: "123",
@@ -269,7 +252,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 		{
 			name: "predict request only without err",
 			args: args{
-				resultLogger: &UPIResultLogger{logger: &mockLogger{}},
+				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
 				routerResp: GrpcRouterResponse{
 					Header: metadata.Pairs("traffic-rule", "rule3"),
 					Body: &upiv1.PredictValuesResponse{
@@ -309,7 +292,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 		{
 			name: "predict request only with err",
 			args: args{
-				resultLogger: &UPIResultLogger{logger: &mockLogger{}},
+				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
 				routerResp: GrpcRouterResponse{
 					Err:     "no response from model",
 					ErrCode: 13,

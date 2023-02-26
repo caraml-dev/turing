@@ -180,7 +180,7 @@ func TestInitTuringResultLogger(t *testing.T) {
 				monkey.Patch(fluent.New,
 					func(_ fluent.Config) (*fluent.Fluent, error) { return nil, nil })
 				// Patch init Kafka Client
-				monkey.Patch(newKafkaLogger,
+				monkey.Patch(NewKafkaLogger,
 					func(_ *config.KafkaConfig) (*KafkaLogger, error) {
 						return nil, nil
 					})
