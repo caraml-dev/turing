@@ -175,7 +175,7 @@ func TestKafkaLoggerWrite(t *testing.T) {
 		newJSONKafkaLogEntry,
 		func(message proto.Message) ([]byte, error) {
 			// Test that the function is called with the expected arg
-			assert.Equal(t, turingResLogEntry.resultLogMessage, message)
+			assert.Equal(t, &turingResLogEntry.resultLogMessage, message)
 			return testKafkaLogEntry, nil
 		},
 	)
