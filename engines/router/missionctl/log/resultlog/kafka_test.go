@@ -166,14 +166,16 @@ func TestKafkaLoggerWrite(t *testing.T) {
 		producer:            mp,
 	}
 	testKafkaLogEntry := []byte(`{"key": "value"}`)
-	turingResLogEntry := &TuringResultLogEntry{}
+	turingResLogEntry := &TuringResultLogEntry{
+		resultLogMessage: turing.TuringResultLogMessage{},
+	}
 
 	// Patch newKafkaLogEntry
 	monkey.Patch(
 		newJSONKafkaLogEntry,
 		func(message proto.Message) ([]byte, error) {
 			// Test that the function is called with the expected arg
-			assert.Equal(t, turingResLogEntry, message)
+			assert.Equal(t, turingResLogEntry.resultLogMessage, message)
 			return testKafkaLogEntry, nil
 		},
 	)
