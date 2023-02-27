@@ -59,11 +59,17 @@ func Run() {
 			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
 		}
 
-		kafkaLogger, err := resultlog.NewKafkaLogger(cfg.AppConfig.Kafka)
-		if err != nil {
-			log.Glob().Panicf("Failed to init kafka logger: %v", err)
+		var logger resultlog.UPILogger
+		switch cfg.AppConfig.ResultLogger {
+		case config.UPILogger:
+			logger, err = resultlog.NewKafkaLogger(cfg.AppConfig.Kafka)
+			if err != nil {
+				log.Glob().Panicf("Failed to init kafka logger: %v", err)
+			}
+		case config.NopLogger:
+			logger = resultlog.NewNopLogger()
 		}
-		resultLogger, err := resultlog.InitUPIResultLogger(cfg.AppConfig.Name, kafkaLogger)
+		resultLogger, err := resultlog.InitUPIResultLogger(cfg.AppConfig.Name, logger)
 		if err != nil {
 			log.Glob().Panicf("Failed to init UPI logger")
 		}

@@ -19,7 +19,7 @@ import (
 )
 
 // Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.
-var globalLogger TuringResultLogger = newNopLogger()
+var globalLogger TuringResultLogger = NewNopLogger()
 
 // appName stores the configured app name, to be applied to each log entry
 // This corresponds to the name and version of the router deployed from the Turing app and
@@ -155,7 +155,7 @@ func InitTuringResultLogger(cfg *config.AppConfig) error {
 		globalLogger, err = NewKafkaLogger(cfg.Kafka)
 	case config.NopLogger:
 		log.Glob().Info("Initializing Nop Result Logger")
-		globalLogger = newNopLogger()
+		globalLogger = NewNopLogger()
 	default:
 		err = errors.Newf(errors.BadInput, "Unrecognized Result Logger: %s", cfg.ResultLogger)
 	}
