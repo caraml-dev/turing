@@ -62,7 +62,7 @@ func Run() {
 		var logger resultlog.UPILogger
 		switch cfg.AppConfig.ResultLogger {
 		case config.UPILogger:
-			logger, err = resultlog.NewKafkaLogger(cfg.AppConfig.Kafka)
+			logger, err = resultlog.NewUPIKafkaLogger(cfg.AppConfig.Kafka)
 			if err != nil {
 				log.Glob().Panicf("Failed to init kafka logger: %v", err)
 			}

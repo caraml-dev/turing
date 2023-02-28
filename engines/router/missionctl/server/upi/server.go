@@ -179,8 +179,6 @@ func (us *Server) getPrediction(
 		)
 		return nil, turingError
 	}
-	// Creates ResponseMetadata if its nil
-	predictResponse = populateResponseMetadata(predictResponse, turingReqID)
 
 	// Get the experiment treatment channel from the request context, read result
 	var experimentResponse *experiment.Response
@@ -192,18 +190,11 @@ func (us *Server) getPrediction(
 			break
 		}
 	}
-	if experimentResponse != nil {
-		// For now, log experiment engine error to console only.
-		if experimentResponse.Error != "" {
-			log.Glob().Errorf("error response from experiment engine %s", experimentResponse.Error)
 
-		} else {
-			predictResponse.Metadata.TreatmentName = experimentResponse.TreatmentName
-			predictResponse.Metadata.ExperimentName = experimentResponse.ExperimentName
-		}
-	}
+	// Creates ResponseMetadata if its nil
+	predictResponse = populateResponseMetadata(predictResponse, turingReqID, experimentResponse)
 
-	us.resultLogger.CopyResponseToLogChannel(
+	us.resultLogger.SendResponseToLogChannel(
 		respCh,
 		resultlog.ResultLogKeys.Router,
 		grpcResp.Metadata,
@@ -225,9 +216,22 @@ func populateRequestMetadata(req *upiv1.PredictValuesRequest, id string) *upiv1.
 	return req
 }
 
-func populateResponseMetadata(resp *upiv1.PredictValuesResponse, id string) *upiv1.PredictValuesResponse {
+func populateResponseMetadata(
+	resp *upiv1.PredictValuesResponse,
+	id string,
+	experimentResponse *experiment.Response) *upiv1.PredictValuesResponse {
 	if resp.Metadata == nil {
 		resp.Metadata = &upiv1.ResponseMetadata{}
+	}
+
+	if experimentResponse != nil {
+		// For now, log experiment engine error to console only.
+		if experimentResponse.Error != "" {
+			log.Glob().Errorf("error response from experiment engine %s", experimentResponse.Error)
+		} else {
+			resp.Metadata.TreatmentName = experimentResponse.TreatmentName
+			resp.Metadata.ExperimentName = experimentResponse.ExperimentName
+		}
 	}
 
 	resp.Metadata.PredictionId = id

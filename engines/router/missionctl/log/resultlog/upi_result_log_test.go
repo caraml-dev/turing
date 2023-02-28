@@ -109,7 +109,7 @@ func TestUPIResultLogger_CopyResponseToLogChannel(t *testing.T) {
 			respCh := make(chan GrpcRouterResponse, 1)
 			ul := &UPIResultLogger{}
 
-			ul.CopyResponseToLogChannel(respCh, tt.args.key, tt.args.md, tt.args.r, tt.args.err)
+			ul.SendResponseToLogChannel(respCh, tt.args.key, tt.args.md, tt.args.r, tt.args.err)
 			close(respCh)
 			data := <-respCh
 			assert.Equal(t, tt.want, data)

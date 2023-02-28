@@ -3,6 +3,7 @@ package resultlog
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/codes"
 	"regexp"
 	"strings"
 
@@ -123,7 +124,7 @@ func (ul *UPIResultLogger) LogTuringRouterRequestSummary(
 		TableSchemaVersion: convertorTableSchema,
 	}
 
-	if grpcResp.Err != "" {
+	if grpcResp.ErrCode != int(codes.OK) {
 		routerLog.RouterOutput.Message = grpcResp.Err
 		routerLog.RouterOutput.Status = uint32(grpcResp.ErrCode)
 	} else {
@@ -158,9 +159,9 @@ func (ul *UPIResultLogger) LogTuringRouterRequestError(ctx context.Context, err 
 	)
 }
 
-// CopyResponseToLogChannel copies the response from the turing router to the given channel
+// SendResponseToLogChannel send the response from the turing router to the given channel
 // as a routerResponse object
-func (ul *UPIResultLogger) CopyResponseToLogChannel(
+func (ul *UPIResultLogger) SendResponseToLogChannel(
 	ch chan<- GrpcRouterResponse,
 	key string,
 	md metadata.MD,
