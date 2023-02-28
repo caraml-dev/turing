@@ -9,6 +9,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
@@ -134,6 +135,14 @@ func (l *KafkaLogger) write(turLogEntry *TuringResultLogEntry) error {
 		&turLogEntry.resultLogMessage,
 		turLogEntry.resultLogMessage.TuringReqId,
 		turLogEntry.resultLogMessage.EventTimestamp,
+	)
+}
+
+func (l *KafkaLogger) WriteUPIRouterLog(routerLog *upiv1.RouterLog) error {
+	return l.writeToKafka(
+		routerLog,
+		routerLog.PredictionId,
+		routerLog.RequestTimestamp,
 	)
 }
 

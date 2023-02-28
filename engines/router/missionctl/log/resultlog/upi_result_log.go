@@ -3,7 +3,6 @@ package resultlog
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/codes"
 	"regexp"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/structpb"
 )
