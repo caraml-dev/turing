@@ -280,22 +280,12 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 				{Name: envFluentdTag, Value: routerDefaults.FluentdConfig.Tag},
 			}...)
 		}
-	case models.KafkaLogger:
+	case models.KafkaLogger, models.UPILogger:
+		// UPILogger's kafka details are created in BuildRouterVersion so that information are persisted in DB
 		envs = append(envs, []corev1.EnvVar{
 			{Name: envKafkaBrokers, Value: logConfig.KafkaConfig.Brokers},
 			{Name: envKafkaTopic, Value: logConfig.KafkaConfig.Topic},
 			{Name: envKafkaSerializationFormat, Value: string(logConfig.KafkaConfig.SerializationFormat)},
-			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},
-			{Name: envKafkaCompressionType, Value: routerDefaults.KafkaConfig.CompressionType},
-		}...)
-	case models.UPILogger:
-		// set a predefined kafka configuration for all upi router
-		envs = append(envs, []corev1.EnvVar{
-			{Name: envKafkaBrokers, Value: routerDefaults.UPIConfig.KafkaBrokers},
-			// namespace is assumed to be same the project name, topic will be fixed as caraml-{project}-{router_name}
-			// should more fine-grain logging, upi config env var should be created
-			{Name: envKafkaTopic, Value: fmt.Sprintf("caraml-%s-%s-router-log", namespace, ver.Router.Name)},
-			{Name: envKafkaSerializationFormat, Value: string(models.ProtobufSerializationFormat)},
 			{Name: envKafkaMaxMessageBytes, Value: strconv.Itoa(routerDefaults.KafkaConfig.MaxMessageBytes)},
 			{Name: envKafkaCompressionType, Value: routerDefaults.KafkaConfig.CompressionType},
 		}...)
