@@ -138,7 +138,11 @@ def test_create_router():
     )
     assert response.status_code == 200
     expected_response = {
-        "experiment": {"configuration": {"foo": "bar", "route_name": "treatment-a"}},
+        "experiment": {
+            "configuration": {"foo": "foo", "route_name": "control"},
+            "experiment_name": "exp_1",
+            "name": "control",
+        },
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"}
         ],
@@ -163,7 +167,9 @@ def test_create_router():
                 "request": {"client": {"id": 4}},
                 "response": {
                     "experiment": {
-                        "configuration": {"foo": "bar", "route_name": "treatment-a"}
+                        "configuration": {"foo": "foo", "route_name": "control"},
+                        "experiment_name": "exp_1",
+                        "name": "control",
                     },
                     "route_responses": [
                         {
@@ -181,7 +187,9 @@ def test_create_router():
                 "request": {"client": {"id": 7}},
                 "response": {
                     "experiment": {
-                        "configuration": {"bar": "baz", "route_name": "control"}
+                        "configuration": {"bar": "bar", "route_name": "treatment-a"},
+                        "experiment_name": "exp_1",
+                        "name": "treatment-a",
                     },
                     "route_responses": [
                         {

@@ -3,8 +3,8 @@ package resultlog
 // NopLogger generates instance of NopLog for logging results
 type NopLogger struct{}
 
-// newNopLogger generates an instance of NewNopLogger
-func newNopLogger() *NopLogger {
+// NewNopLogger generates an instance of NewNopLogger
+func NewNopLogger() *NopLogger {
 	return &NopLogger{}
 }
 

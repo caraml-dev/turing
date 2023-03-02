@@ -88,13 +88,15 @@ version:
 .PHONY: build-run-local-api
 build-run-local-api:
 	@echo "Building proprietary experiment engine plugin..."
-	cd ../engines/experiment/examples/plugins/hardcoded && make proprietary-exp-plugin
+	cd ../engines/experiment/examples/plugins/hardcoded && make proprietary-exp-plugin GOOS=darwin
 	@echo "Building proprietary experiment engine image..."
 	cd ../engines/experiment/examples/plugins/hardcoded && make build-local-proprietary-exp-plugin-image
 	@echo "Building router image..."
 	cd ../engines/router && make build-local-router-image DOCKER_REGISTRY=localhost:5000 OVERWRITE_VERSION=latest
+	@echo "Generating cluster cred"
+	sh ../infra/docker-compose/dev/extract_creds.sh
 	@echo "Starting Turing API server in a background process..."
-	nohup go run turing/cmd/main.go -config=config-dev.yaml -config=config-dev-exp-engine.yaml &
+	nohup go run turing/cmd/main.go -config=config-dev-w-creds.yaml -config=config-dev-exp-engine.yaml &
 	@echo "Started Turing API server on port 8080 in a background process..."
 
 .PHONY: clean-local-infra

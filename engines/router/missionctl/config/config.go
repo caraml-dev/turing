@@ -36,6 +36,8 @@ const (
 	ConsoleLogger ResultLogger = "CONSOLE"
 	// KafkaLogger logs the response to a Kafka topic
 	KafkaLogger ResultLogger = "KAFKA"
+	// UPILogger logs the response to a Kafka topic with UPI proto
+	UPILogger ResultLogger = "UPI"
 	// NopLogger disables response logging
 	NopLogger ResultLogger = "NOP"
 )
@@ -120,6 +122,9 @@ type JaegerConfig struct {
 // AppConfig is the structure used to the parse the environment configs that correspond
 // to application behavior such as logging, instrumentation, etc.
 type AppConfig struct {
+	// This corresponds to the name and version of the router deployed from the Turing app and
+	// will be logged as RouterVersion in TuringResultLog.proto
+	// Format: {router_name}-{router_version}.{project_name}
 	Name          string       `required:"true"`
 	Environment   string       `required:"true"`
 	LogLevel      LogLevel     `split_words:"false" default:"INFO"`
@@ -156,6 +161,7 @@ func (resLogger *ResultLogger) Decode(value string) error {
 	case BigqueryLogger,
 		ConsoleLogger,
 		KafkaLogger,
+		UPILogger,
 		NopLogger:
 		*resLogger = ResultLogger(value)
 		return nil

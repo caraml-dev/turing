@@ -14,6 +14,7 @@ import turing.batch.config.sink
 from turing.router.config.route import Route
 from turing.router.config.router_config import RouterConfig, Protocol
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
+from turing.router.config.traffic_rule import DefaultTrafficRule
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.enricher import Enricher
@@ -289,7 +290,7 @@ def generic_log_level():
 @pytest.fixture
 def generic_result_logger_type():
     return turing.generated.models.ResultLoggerType(
-        random.choice(["nop", "console", "bigquery", "kafka"])
+        random.choice(["nop", "upi", "bigquery", "kafka"])
     )
 
 
@@ -721,4 +722,29 @@ def generic_events():
                 version=5,
             ),
         ]
+    )
+
+
+@pytest.fixture
+def minimal_upi_router_config():
+    return RouterConfig(
+        name="sdk-router",
+        routes=[
+            Route(
+                id="control",
+                endpoint="grpc_host:80",
+                timeout="50ms",
+                service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
+            ),
+            Route(
+                id="treatment-a",
+                endpoint="grpc_host_2:80",
+                timeout="50ms",
+                service_method="caraml.upi.v1.UniversalPredictionService/PredictValues",
+            ),
+        ],
+        timeout="10s",
+        default_traffic_rule=DefaultTrafficRule(routes=["control"]),
+        experiment_engine=ExperimentConfig(),
+        protocol=Protocol.UPI,
     )

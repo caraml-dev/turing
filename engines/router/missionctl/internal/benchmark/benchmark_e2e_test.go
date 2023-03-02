@@ -64,7 +64,7 @@ func runTuringUpiGRPCServer(port int) {
 	if err != nil {
 		log.Glob().Panicf("failed to create mc: %v", err.Error())
 	}
-	upiServer := upi.NewUPIServer(mc)
+	upiServer := upi.NewUPIServer(mc, nil)
 	go upiServer.Run(l)
 }
 

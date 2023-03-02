@@ -45,10 +45,10 @@ func TestMarshalEmptyLogEntry(t *testing.T) {
 func TestMarshalJSONLogEntry(t *testing.T) {
 	_, logEntry := makeTestTuringResultLogEntry(t)
 	// Set the Turing Request Id to a known value
-	logEntry.TuringReqId = "test-req-id"
+	logEntry.resultLogMessage.TuringReqId = "test-req-id"
 
 	// Marshal and validate
-	bytes, err := json.Marshal(logEntry)
+	bytes, err := protoJSONMarshaller.Marshal(&logEntry.resultLogMessage)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"turing_req_id":"test-req-id",
@@ -190,7 +190,7 @@ func TestGlobalLoggerLog(t *testing.T) {
 func TestTuringResultLogEntryValue(t *testing.T) {
 	_, logEntry := makeTestTuringResultLogEntry(t)
 	// Set the Turing Request Id to a known value
-	logEntry.TuringReqId = "test-req-id"
+	logEntry.resultLogMessage.TuringReqId = "test-req-id"
 
 	// Get loggable data and validate
 	kvPairs, err := logEntry.Value()

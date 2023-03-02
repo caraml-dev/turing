@@ -32,18 +32,18 @@ turing:
           name: exp_1
           variants:
             - name: control
-            - name: treatment-1
+            - name: treatment-a
           variants_configuration:
             control:
               traffic: 0.85
               treatment_configuration:
-                foo: bar
-                route_name: treatment-a
-            treatment-1:
+                foo: foo
+                route_name: control
+            treatment-a:
               traffic: 0.15
               treatment_configuration:
-                bar: baz
-                route_name: control
+                bar: bar
+                route_name: treatment-a
 
 postgresql: &postgresql
   primary:

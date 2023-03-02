@@ -38,12 +38,6 @@ func Run() {
 		_ = log.Glob().Sync()
 	}()
 
-	// Init Turing result logger
-	err = resultlog.InitTuringResultLogger(cfg.AppConfig)
-	if err != nil {
-		log.Glob().Fatalf("Failed initializing Turing Result Logger: %v", err)
-	}
-
 	// Init instrumentation, defer closing tracer
 	defer initInstrumentation(cfg)()
 	// Init Sentry, defer closing client
@@ -65,7 +59,22 @@ func Run() {
 			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
 		}
 
-		upiServer := upi.NewUPIServer(missionCtl)
+		var logger resultlog.UPILogger
+		switch cfg.AppConfig.ResultLogger {
+		case config.UPILogger:
+			logger, err = resultlog.NewUPIKafkaLogger(cfg.AppConfig.Kafka)
+			if err != nil {
+				log.Glob().Panicf("Failed to init kafka logger: %v", err)
+			}
+		case config.NopLogger:
+			logger = resultlog.NewUPINopLogger()
+		}
+		resultLogger, err := resultlog.InitUPIResultLogger(cfg.AppConfig.Name, logger)
+		if err != nil {
+			log.Glob().Panicf("Failed to init UPI logger")
+		}
+
+		upiServer := upi.NewUPIServer(missionCtl, resultLogger)
 		m := cmux.New(l)
 		grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
 		httpListener := m.Match(cmux.Any())
@@ -91,6 +100,12 @@ func Run() {
 			log.Glob().Errorf("Failed to serve cmux: %s", err)
 		}
 	case config.HTTP:
+		// Init Turing result logger
+		err = resultlog.InitTuringResultLogger(cfg.AppConfig)
+		if err != nil {
+			log.Glob().Fatalf("Failed initializing Turing Result Logger: %v", err)
+		}
+
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControl(
 			nil,

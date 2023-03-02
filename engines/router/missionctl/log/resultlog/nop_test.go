@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewNopLogger(t *testing.T) {
-	testLogger := newNopLogger()
+	testLogger := NewNopLogger()
 	assert.Equal(t, NopLogger{}, *testLogger)
 }
 

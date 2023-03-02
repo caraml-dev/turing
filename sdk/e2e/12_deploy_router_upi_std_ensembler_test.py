@@ -126,8 +126,9 @@ def test_deploy_router_upi_std_ensembler():
     channel = grpc.insecure_channel(retrieved_router.endpoint)
     stub = upi_pb2_grpc.UniversalPredictionServiceStub(channel)
 
-    logging.info("send request that satisfy treatment-a")
+    logging.info("send request that satisfy control")
 
+    # proprietary uses hashing, 4 will return control and 7 will return treatment in this setup
     request = upi_pb2.PredictValuesRequest(
         prediction_table=table_pb2.Table(
             columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
@@ -137,29 +138,7 @@ def test_deploy_router_upi_std_ensembler():
             variable_pb2.Variable(
                 name="client_id",
                 type=type_pb2.TYPE_STRING,
-                string_value="1",
-            )
-        ],
-    )
-
-    response: upi_pb2.PredictValuesResponse = stub.PredictValues(request)
-    logging.info(f"received response {response}")
-
-    assert response.prediction_result_table == request.prediction_table
-    assert response.metadata.models[0].name == "treatment-a"
-
-    logging.info("send request that goes to control model")
-
-    request = upi_pb2.PredictValuesRequest(
-        prediction_table=table_pb2.Table(
-            columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
-            rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
-        ),
-        prediction_context=[
-            variable_pb2.Variable(
-                name="client_id",
-                type=type_pb2.TYPE_STRING,
-                string_value="1234",
+                string_value="4",
             )
         ],
     )
@@ -169,3 +148,25 @@ def test_deploy_router_upi_std_ensembler():
 
     assert response.prediction_result_table == request.prediction_table
     assert response.metadata.models[0].name == "control"
+
+    logging.info("send request that goes to treatment-a")
+
+    request = upi_pb2.PredictValuesRequest(
+        prediction_table=table_pb2.Table(
+            columns=[table_pb2.Column(name="col1", type=type_pb2.TYPE_DOUBLE)],
+            rows=[table_pb2.Row(values=[table_pb2.Value(double_value=12.2)])],
+        ),
+        prediction_context=[
+            variable_pb2.Variable(
+                name="client_id",
+                type=type_pb2.TYPE_STRING,
+                string_value="7",
+            )
+        ],
+    )
+
+    response: upi_pb2.PredictValuesResponse = stub.PredictValues(request)
+    logging.info(f"received response {response}")
+
+    assert response.prediction_result_table == request.prediction_table
+    assert response.metadata.models[0].name == "treatment-a"

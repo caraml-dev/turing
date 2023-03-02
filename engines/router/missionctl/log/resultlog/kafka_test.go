@@ -92,7 +92,7 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
 
 	// Run newJSONKafkaLogEntry and validate
-	message, err := newJSONKafkaLogEntry(turingLogEntry)
+	message, err := newJSONKafkaLogEntry(&turingLogEntry.resultLogMessage)
 	assert.NoError(t, err)
 	// Get Turing request id
 	turingReqID, err := turingctx.GetRequestID(ctx)
@@ -128,11 +128,15 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	// Create test Turing log entry
 	_, turingLogEntry := makeTestTuringResultLogEntry(t)
+	resultLogMessage := &turingLogEntry.resultLogMessage
 	// Overwrite the turing request id value
-	turingLogEntry.TuringReqId = "testID"
+	resultLogMessage.TuringReqId = "testID"
 
 	// Run newProtobufKafkaLogEntry and validate
-	key, message, err := newProtobufKafkaLogEntry(turingLogEntry)
+	key, message, err := newProtobufKafkaLogEntry(
+		resultLogMessage,
+		resultLogMessage.TuringReqId,
+		resultLogMessage.EventTimestamp)
 	assert.NoError(t, err)
 
 	// Unmarshall serialised message
@@ -162,14 +166,16 @@ func TestKafkaLoggerWrite(t *testing.T) {
 		producer:            mp,
 	}
 	testKafkaLogEntry := []byte(`{"key": "value"}`)
-	turingResLogEntry := &TuringResultLogEntry{}
+	turingResLogEntry := &TuringResultLogEntry{
+		resultLogMessage: turing.TuringResultLogMessage{},
+	}
 
 	// Patch newKafkaLogEntry
 	monkey.Patch(
 		newJSONKafkaLogEntry,
-		func(entry *TuringResultLogEntry) ([]byte, error) {
+		func(message proto.Message) ([]byte, error) {
 			// Test that the function is called with the expected arg
-			assert.Equal(t, turingResLogEntry, entry)
+			assert.Equal(t, &turingResLogEntry.resultLogMessage, message)
 			return testKafkaLogEntry, nil
 		},
 	)

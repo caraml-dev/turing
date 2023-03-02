@@ -15,7 +15,7 @@ from turing.router.config.log_config import (
     "result_logger_type,expected",
     [
         pytest.param("nop", turing.generated.models.ResultLoggerType("nop")),
-        pytest.param("console", turing.generated.models.ResultLoggerType("console")),
+        pytest.param("upi", turing.generated.models.ResultLoggerType("upi")),
         pytest.param("bigquery", turing.generated.models.ResultLoggerType("bigquery")),
         pytest.param("kafka", turing.generated.models.ResultLoggerType("kafka")),
     ],

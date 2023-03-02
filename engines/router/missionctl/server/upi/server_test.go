@@ -18,6 +18,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/mocks"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
@@ -90,7 +91,10 @@ func TestUPIServer_PredictValues(t *testing.T) {
 				require.NotEmpty(t, upiReq.Metadata.RequestTimestamp, "request timestamp is empty")
 			})
 
-			upiServer := NewUPIServer(mockMc)
+			resultlogger, err := resultlog.InitUPIResultLogger("name-3.proj", resultlog.NewUPINopLogger())
+			require.NoError(t, err)
+
+			upiServer := NewUPIServer(mockMc, resultlogger)
 			ctx := context.Background()
 			resp, err := upiServer.PredictValues(ctx, tt.request)
 			if tt.expectedErr != nil {
@@ -115,7 +119,7 @@ func TestNewUpiServer(t *testing.T) {
 	}
 
 	mockMc := &mocks.MissionControlUPI{}
-	upiServer := NewUPIServer(mockMc)
+	upiServer := NewUPIServer(mockMc, nil)
 	go upiServer.Run(l)
 
 	// Wait for server to run and check that there are no error logs

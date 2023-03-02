@@ -662,3 +662,7 @@ class NopRouterEnsemblerConfig(RouterEnsemblerConfig):
 
 class InvalidExperimentMappingException(Exception):
     pass
+
+
+class InvalidEnsemblerTypeException(Exception):
+    pass

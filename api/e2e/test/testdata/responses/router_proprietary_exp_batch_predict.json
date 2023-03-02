@@ -10,9 +10,11 @@
       "response": {
         "experiment": {
           "configuration": {
-            "foo": "bar",
-            "route_name": "treatment-a"
-          }
+            "foo": "foo",
+            "route_name": "control"
+          },
+          "experiment_name": "exp_1",
+          "name": "control"
         },
         "route_responses": [
           {
@@ -37,9 +39,11 @@
       "response": {
         "experiment": {
           "configuration": {
-            "bar": "baz",
-            "route_name": "control"
-          }
+            "bar": "bar",
+            "route_name": "treatment-a"
+          },
+          "experiment_name": "exp_1",
+          "name": "treatment-a"
         },
         "route_responses": [
           {

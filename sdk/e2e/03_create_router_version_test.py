@@ -92,7 +92,11 @@ def test_create_router_version():
     )
     assert response.status_code == 200
     expected_response = {
-        "experiment": {"configuration": {"foo": "bar", "route_name": "treatment-a"}},
+        "experiment": {
+            "configuration": {"foo": "foo", "route_name": "control"},
+            "experiment_name": "exp_1",
+            "name": "control",
+        },
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"}
         ],

@@ -34,6 +34,7 @@ var cfg config.Config
 var defaultDeploymentIntervals = []interface{}{"10m", "5s"}
 var defaultDeletionIntervals = []interface{}{"20s", "2s"}
 var arbitraryUpdateIntervals = []interface{}{"10s", "1s"}
+var istioVirtualServiceIntervals = []interface{}{"60s", "5s"}
 
 type TestData struct {
 	config.Config
@@ -43,8 +44,6 @@ type TestData struct {
 func init() {
 	flag.StringVar(&configFile, "config", "config.yaml", "Path to a configuration file")
 }
-
-var istioVirtualServiceIntervals = []interface{}{"30s", "1s"}
 
 var defaultPredictHeaders = map[string]string{
 	"X-Mirror-Body": "true",

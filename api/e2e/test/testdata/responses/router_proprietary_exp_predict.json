@@ -7,9 +7,11 @@
   "response": {
     "experiment": {
       "configuration": {
-        "foo": "bar",
-        "route_name": "treatment-a"
-      }
+        "foo": "foo",
+        "route_name": "control"
+      },
+      "experiment_name": "exp_1",
+      "name": "control"
     },
     "route_responses": [
       {

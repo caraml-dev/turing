@@ -6,6 +6,11 @@ from turing.router.config.route import (
     InvalidRouteException,
 )
 from turing.router.config.router_config import RouterConfig
+from turing.router.config.log_config import (
+    LogConfig,
+    ResultLoggerType,
+    InvalidResultLoggerTypeAndConfigCombination,
+)
 from turing.router.config.autoscaling_policy import DEFAULT_AUTOSCALING_POLICY
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.router_ensembler_config import (
@@ -14,6 +19,7 @@ from turing.router.config.router_ensembler_config import (
     StandardRouterEnsemblerConfig,
     PyfuncRouterEnsemblerConfig,
     RouterEnsemblerConfig,
+    InvalidEnsemblerTypeException,
 )
 
 
@@ -189,3 +195,99 @@ def test_default_router_autoscaling_policy(request):
     config = router_config.to_dict()
     del config["autoscaling_policy"]
     assert RouterConfig(**config).autoscaling_policy == DEFAULT_AUTOSCALING_POLICY
+
+
+@pytest.mark.parametrize(
+    "base_config, log_config, expected",
+    [
+        pytest.param(
+            "minimal_upi_router_config",
+            LogConfig(result_logger_type=ResultLoggerType.NOP),
+            None,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            LogConfig(result_logger_type=ResultLoggerType.UPI),
+            None,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            LogConfig(result_logger_type=ResultLoggerType.KAFKA),
+            InvalidResultLoggerTypeAndConfigCombination,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            LogConfig(result_logger_type=ResultLoggerType.BIGQUERY),
+            InvalidResultLoggerTypeAndConfigCombination,
+        ),
+    ],
+)
+def test_upi_router_log_config_constraint(base_config, log_config, expected, request):
+    router_config = request.getfixturevalue(base_config)
+    if expected:
+        with pytest.raises(expected):
+            router_config.log_config = log_config
+    else:
+        router_config.log_config = log_config
+        router_config.to_open_api()
+
+
+@pytest.mark.parametrize(
+    "base_config, ensembler_config, expected_err",
+    [
+        pytest.param(
+            "minimal_upi_router_config",
+            NopRouterEnsemblerConfig(final_response_route_id="control"),
+            None,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            StandardRouterEnsemblerConfig(fallback_response_route_id="control"),
+            None,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            DockerRouterEnsemblerConfig(
+                image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
+                resource_request=ResourceRequest(
+                    min_replica=1,
+                    max_replica=3,
+                    cpu_request="500m",
+                    memory_request="512Mi",
+                ),
+                endpoint=f"http://localhost:5000/ensembler_endpoint",
+                timeout="500ms",
+                port=5120,
+                env=[],
+            ),
+            InvalidEnsemblerTypeException,
+        ),
+        pytest.param(
+            "minimal_upi_router_config",
+            PyfuncRouterEnsemblerConfig(
+                project_id=1,
+                ensembler_id=1,
+                resource_request=ResourceRequest(
+                    min_replica=0,
+                    max_replica=2,
+                    cpu_request="500m",
+                    memory_request="512Mi",
+                ),
+                timeout="60ms",
+                env=[],
+            ),
+            InvalidEnsemblerTypeException,
+        ),
+    ],
+)
+def test_upi_router_ensembler_config_constraint(
+    base_config, ensembler_config, expected_err, request
+):
+    router_config = request.getfixturevalue(base_config)
+
+    if expected_err:
+        with pytest.raises(expected_err):
+            router_config.ensembler = ensembler_config
+    else:
+        router_config.ensembler = ensembler_config
+        router_config.to_open_api()

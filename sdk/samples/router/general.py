@@ -1,4 +1,3 @@
-from turing.router.config.traffic_rule import DefaultTrafficRule
 import turing
 import turing.batch
 import turing.batch.config
@@ -9,6 +8,7 @@ from turing.router.config.router_version import RouterStatus
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.log_config import LogConfig, ResultLoggerType
 from turing.router.config.traffic_rule import (
+    DefaultTrafficRule,
     TrafficRule,
     HeaderTrafficRuleCondition,
     PayloadTrafficRuleCondition,

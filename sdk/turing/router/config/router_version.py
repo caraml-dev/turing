@@ -47,8 +47,9 @@ class RouterVersion(RouterConfig):
         self.status = RouterStatus(status)
         self.name = name
         self.monitoring_url = monitoring_url
-        self.log_config = RouterVersionLogConfig(**kwargs.get("log_config"))
+        # RouterConfig has to be init first as RouterVersionLogConfig will check fields that exist in RouterConfig
         super().__init__(environment_name=environment_name, name=name, **kwargs)
+        self.log_config = RouterVersionLogConfig(**kwargs.get("log_config"))
 
     def get_config(self) -> RouterConfig:
         """

@@ -7,7 +7,7 @@ from turing.generated.model_utils import OpenApiModel
 
 class ResultLoggerType(Enum):
     NOP = "nop"
-    CONSOLE = "console"
+    UPI = "upi"
     BIGQUERY = "bigquery"
     KAFKA = "kafka"
 
@@ -112,6 +112,14 @@ class LogConfig:
         ):
             raise InvalidResultLoggerTypeAndConfigCombination(
                 f"bigquery_config must be set to None when result_logger_type is: {self.result_logger_type}"
+            )
+        if (
+            self.result_logger_type == ResultLoggerType.UPI
+            and self.kafka_config is not None
+            and self.bigquery_config is not None
+        ):
+            raise InvalidResultLoggerTypeAndConfigCombination(
+                f"kafka/bigquery config must be set to None when result_logger_type is: {self.result_logger_type}"
             )
 
 
