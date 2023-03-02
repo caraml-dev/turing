@@ -311,11 +311,8 @@ func (tt routerConfigTestCase) RouterConfig() *request.RouterConfig {
 	if tt.experimentEngine != nil {
 		experimentEngine = tt.experimentEngine
 	}
-	logConfig := &request.LogConfig{
-		ResultLoggerType: "nop",
-	}
 	if tt.logConfig == nil {
-		tt.logConfig = logConfig
+		tt.logConfig = &request.LogConfig{ResultLoggerType: "nop"}
 	}
 	return &request.RouterConfig{
 		Routes:             tt.routes,
@@ -1185,12 +1182,7 @@ func TestValidateStdEnsemblerNotConfiguredForNopExpEngine(t *testing.T) {
 
 func TestValidateUPIRouter(t *testing.T) {
 	routeID := "abc"
-	route := &models.Route{
-		ID:       routeID,
-		Type:     "PROXY",
-		Endpoint: "http://example.com/a",
-		Timeout:  "10ms",
-	}
+	route := &models.Route{ID: routeID}
 
 	suite := map[string]routerConfigTestCase{
 		"success": {
@@ -1229,6 +1221,42 @@ func TestValidateUPIRouter(t *testing.T) {
 				}},
 			expectedError: "Key: 'RouterConfig.LogConfig.ResultLoggerType' Error:Field validation for " +
 				"'LogConfig.ResultLoggerType' failed on the 'logger should be nop or upi' tag",
+		},
+	}
+	for name, tt := range suite {
+		t.Run(name, func(t *testing.T) {
+			validate, err := getDefaultValidator()
+			require.NoError(t, err)
+
+			err = validate.Struct(tt.RouterConfig())
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestValidateHTTPRouter(t *testing.T) {
+	routeID := "abc"
+	route := &models.Route{ID: routeID}
+
+	suite := map[string]routerConfigTestCase{
+		"success": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			logConfig: &request.LogConfig{
+				ResultLoggerType: models.NopLogger,
+			},
+		},
+		"failure | unsupported logger type": {
+			routes:         models.Routes{route},
+			defaultRouteID: &routeID,
+			logConfig: &request.LogConfig{
+				ResultLoggerType: models.UPILogger},
+			expectedError: "Key: 'RouterConfig.LogConfig.ResultLoggerType' Error:Field validation for " +
+				"'LogConfig.ResultLoggerType' failed on the 'logger should not be upi' tag",
 		},
 	}
 	for name, tt := range suite {

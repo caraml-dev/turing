@@ -91,9 +91,7 @@ func TestUPIServer_PredictValues(t *testing.T) {
 				require.NotEmpty(t, upiReq.Metadata.RequestTimestamp, "request timestamp is empty")
 			})
 
-			mockLogger := &mocks.UPILogger{}
-			mockLogger.On("WriteUPIRouterLog", mock.Anything).Return(nil)
-			resultlogger, err := resultlog.InitUPIResultLogger("name-3.proj", mockLogger)
+			resultlogger, err := resultlog.InitUPIResultLogger("name-3.proj", resultlog.NewUPINopLogger())
 			require.NoError(t, err)
 
 			upiServer := NewUPIServer(mockMc, resultlogger)

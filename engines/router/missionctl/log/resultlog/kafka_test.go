@@ -78,7 +78,7 @@ func TestNewKafkaLogger(t *testing.T) {
 	mockProducer.On("GetMetadata", &cfg.Topic, false, 1000).Return(nil, nil)
 
 	// Create the new logger and validate
-	testLogger, err := NewKafkaLogger(&cfg)
+	testLogger, err := newKafkaLogger(&cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, *testLogger, KafkaLogger{
 		topic:    cfg.Topic,

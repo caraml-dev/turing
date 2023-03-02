@@ -39,7 +39,7 @@ type GrpcRouterResponse struct {
 }
 
 type UPILogger interface {
-	WriteUPIRouterLog(routerLog *upiv1.RouterLog) error
+	write(routerLog *upiv1.RouterLog) error
 }
 
 var loggingErrorTemplate = "logging error. unable to convert table to struct for %s : %s"
@@ -69,7 +69,7 @@ func InitUPIResultLogger(appName string, logger UPILogger) (*UPIResultLogger, er
 }
 
 func (ul *UPIResultLogger) LogEntry(routerLog *upiv1.RouterLog) error {
-	return ul.logger.WriteUPIRouterLog(routerLog)
+	return ul.logger.write(routerLog)
 }
 
 func (ul *UPIResultLogger) LogTuringRouterRequestSummary(

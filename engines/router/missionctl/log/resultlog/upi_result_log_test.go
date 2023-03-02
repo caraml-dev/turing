@@ -121,7 +121,7 @@ type mockUPILogger struct{}
 
 var logResult *upiv1.RouterLog
 
-func (ml *mockUPILogger) WriteUPIRouterLog(routerLog *upiv1.RouterLog) error {
+func (ml *mockUPILogger) write(routerLog *upiv1.RouterLog) error {
 	logResult = routerLog
 	return nil
 }

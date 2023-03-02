@@ -318,7 +318,7 @@ type RouterDefaults struct {
 	ExperimentEnginePlugins map[string]*ExperimentEngineConfig `validate:"dive"`
 	// Kafka Configuration. If result logging is using Kafka
 	KafkaConfig *KafkaConfig
-	// UPIConfig
+	// UPIConfig config for UPI routers
 	UPIConfig *UPIConfig
 }
 
