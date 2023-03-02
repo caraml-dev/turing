@@ -12,7 +12,7 @@ import { resultLoggingOptions } from "../components/outcome_config/typeOptions";
 export const OutcomeStep = ({ projectId }) => {
   const {
     data: {
-      config: { log_config },
+      config: { log_config, protocol },
     },
     onChangeHandler,
   } = useContext(FormContext);
@@ -28,6 +28,7 @@ export const OutcomeStep = ({ projectId }) => {
           options={resultLoggingOptions}
           onChange={onChange("config.log_config.result_logger_type")}
           errors={get(errors, "config.log_config.result_logger_type")}
+          protocol={protocol}
         />
       </EuiFlexItem>
 

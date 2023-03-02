@@ -53,7 +53,9 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
     }
   }, [submissionResponse, onSuccess]);
 
-  const onSubmit = () => submitForm({ body: JSON.stringify(router) });
+  const onSubmit = () => {
+    submitForm({ body: JSON.stringify(router) });
+  };
 
   const steps = [
     {
@@ -82,6 +84,7 @@ export const CreateRouterForm = ({ projectId, onCancel, onSuccess }) => {
       title: "Outcome Tracking",
       children: <OutcomeStep projectId={projectId} />,
       validationSchema: validationSchema[4],
+      validationContext: { protocol },
     },
   ];
 

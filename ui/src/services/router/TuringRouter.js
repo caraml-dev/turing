@@ -158,6 +158,10 @@ export class TuringRouter {
     ) {
       delete obj.config.log_config["kafka_config"];
     }
+    if (obj.config.log_config.result_logger_type === "upi") {
+      delete obj.config.log_config["kafka_config"];
+      delete obj.config.log_config["bigquery_config"];
+    }
     return obj;
   }
 }

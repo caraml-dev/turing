@@ -30,7 +30,7 @@ export const GeneralSettingsPanel = ({
 
   const {
     data: {
-      config: { routes, rules },
+      config: { routes, rules, log_config },
     },
   } = useContext(FormContext);
 
@@ -52,6 +52,7 @@ export const GeneralSettingsPanel = ({
             value === "UPI_V1"
               ? "/caraml.upi.v1.UniversalPredictionService/PredictValues"
               : "",
+          endpoint: "",
         };
       })
     );
@@ -73,6 +74,11 @@ export const GeneralSettingsPanel = ({
         };
       })
     );
+    // reset logger type to nop when protocol change
+    onChange("config.log_config")({
+      ...log_config,
+      result_logger_type: "nop",
+    });
   };
 
   return (
