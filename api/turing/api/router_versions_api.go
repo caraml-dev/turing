@@ -58,7 +58,13 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 		return InternalServerError("unable to create router version", "router config is empty")
 	}
 
-	routerVersion, err := request.BuildRouterVersion(project.Name, router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+	routerVersion, err := request.BuildRouterVersion(
+		project.Name,
+		router,
+		c.RouterDefaults,
+		c.AppContext.CryptoService,
+		c.AppContext.ExperimentsService,
+		c.EnsemblersService)
 
 	if err == nil {
 		// Save router version, re-assign the value of err

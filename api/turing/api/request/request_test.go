@@ -342,7 +342,8 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 			// Set up mock Ensembler service
 			ensemblerSvc := &mocks.EnsemblersService{}
 
-			got, err := baseRequest.Config.BuildRouterVersion(projectName, router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
+			got, err := baseRequest.Config.BuildRouterVersion(
+				projectName, router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
 			assert.NoError(t, err)
 			assert.Equal(t, got.LogConfig, tt.expectedLogConfig)
 		})
