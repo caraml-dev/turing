@@ -400,11 +400,6 @@ func validateUPIRouter(
 		sl.ReportError(router.Ensembler.Type, "Ensembler.Type", "Type",
 			"only standard ensembler is supported for UPI", "")
 	}
-	if !(router.LogConfig.ResultLoggerType == models.NopLogger || router.LogConfig.ResultLoggerType == models.UPILogger) {
-		sl.ReportError(router.LogConfig.ResultLoggerType, "LogConfig.ResultLoggerType",
-			"Type", "logger should be nop or upi", "")
-	}
-
 }
 
 func validateHTTPRouter(sl validator.StructLevel, router request.RouterConfig) {
