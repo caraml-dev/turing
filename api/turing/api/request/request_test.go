@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -244,12 +245,14 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 		},
 	}
 
+	projectName := "test-project"
 	projectID := models.ID(1)
 	routerDefault := config.RouterDefaults{
 		KafkaConfig: &config.KafkaConfig{
 			MaxMessageBytes: 1110,
 			CompressionType: "gzip",
 		},
+		UPIConfig: &config.UPIConfig{KafkaBrokers: "broker"},
 	}
 
 	tests := []struct {
@@ -277,6 +280,25 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 					Brokers:             "10:11",
 					Topic:               "2222",
 					SerializationFormat: "json",
+				},
+				BigQueryConfig: nil,
+			},
+		},
+		{
+			testName: "Test UPI Logger",
+			logConfig: &LogConfig{
+				ResultLoggerType: "upi",
+			},
+			expectedLogConfig: &models.LogConfig{
+				LogLevel:             "",
+				CustomMetricsEnabled: false,
+				FiberDebugLogEnabled: false,
+				JaegerEnabled:        false,
+				ResultLoggerType:     "upi",
+				KafkaConfig: &models.KafkaConfig{
+					Brokers:             routerDefault.UPIConfig.KafkaBrokers,
+					Topic:               fmt.Sprintf("caraml-%s-%s-router-log", projectName, baseRequest.Name),
+					SerializationFormat: "protobuf",
 				},
 				BigQueryConfig: nil,
 			},
@@ -320,7 +342,8 @@ func TestRequestBuildRouterVersionLoggerConfiguration(t *testing.T) {
 			// Set up mock Ensembler service
 			ensemblerSvc := &mocks.EnsemblersService{}
 
-			got, err := baseRequest.Config.BuildRouterVersion(router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
+			got, err := baseRequest.Config.BuildRouterVersion(
+				projectName, router, &routerDefault, cryptoSvc, expSvc, ensemblerSvc)
 			assert.NoError(t, err)
 			assert.Equal(t, got.LogConfig, tt.expectedLogConfig)
 		})
@@ -442,7 +465,7 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 	// Set up mock Ensembler service
 	ensemblerSvc := &mocks.EnsemblersService{}
 
-	got, err := validRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	got, err := validRouterConfig.BuildRouterVersion("", router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 	require.NoError(t, err)
 	expected.Model = got.Model
 	assertgotest.DeepEqual(t, expected, *got)
@@ -479,7 +502,7 @@ func TestRequestBuildRouterVersionWithUnavailablePyFuncEnsembler(t *testing.T) {
 	ensemblerSvc.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("record not found"))
 
 	// Update the router with an invalid request
-	got, err := invalidRouterConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	got, err := invalidRouterConfig.BuildRouterVersion("", router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 
 	assert.EqualError(t, err, "failed to find specified ensembler: record not found")
 	assert.Nil(t, got)
@@ -509,7 +532,7 @@ func TestRequestBuildRouterVersionNoDefaultRoute(t *testing.T) {
 		LogConfig:        &LogConfig{ResultLoggerType: "nop"},
 	}
 
-	rv, err := cfg.BuildRouterVersion(router, defaults, nil, nil, nil)
+	rv, err := cfg.BuildRouterVersion("", router, defaults, nil, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "", rv.DefaultRouteID)
 }
@@ -652,7 +675,7 @@ func TestDefaultAutoscalingPolicy(t *testing.T) {
 		Target: "1",
 	}
 
-	got, err := routerConfig.BuildRouterVersion(router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
+	got, err := routerConfig.BuildRouterVersion("", router, &defaults, cryptoSvc, expSvc, ensemblerSvc)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedAutoscalingPolicy, got.AutoscalingPolicy)
 	assert.Equal(t, expectedAutoscalingPolicy, got.Enricher.AutoscalingPolicy)
