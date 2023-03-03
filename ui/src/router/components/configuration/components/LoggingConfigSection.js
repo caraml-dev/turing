@@ -86,11 +86,13 @@ const BigQueryConfigSection = ({ bigquery_config }) => {
   );
 };
 
-const KafkaConfigSection = ({ kafka_config }) => {
+const KafkaConfigSection = ({ kafka_config, loggerType }) => {
   return (
     <EuiFlexGroup direction="row" wrap>
       <EuiFlexItem grow={1} className="euiFlexItem--smallPanel">
-        <ConfigSectionPanel title="Results Logs">Kafka</ConfigSectionPanel>
+        <ConfigSectionPanel title="Results Logs">
+          {loggerType.toUpperCase() || "Kafka"}
+        </ConfigSectionPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <ConfigSectionPanel title="Kafka Configuration">
@@ -110,8 +112,11 @@ export const LoggingConfigSection = ({ config: { log_config } }) => {
         <BigQueryConfigSection bigquery_config={log_config.bigquery_config} />
       )}
 
-      {result_logger_type === "kafka" && (
-        <KafkaConfigSection kafka_config={log_config.kafka_config} />
+      {(result_logger_type === "kafka" || result_logger_type === "upi") && (
+        <KafkaConfigSection
+          kafka_config={log_config.kafka_config}
+          loggerType={result_logger_type}
+        />
       )}
 
       {result_logger_type === "nop" && <EuiPanel>Not Configured</EuiPanel>}

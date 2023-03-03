@@ -16,7 +16,8 @@ export const ResultLoggingTypePanel = ({
   const [isUPILogging, setIsUPILogging] = useState(type === "upi");
 
   const setUPILogger = (e) => {
-    setIsUPILogging(e.target.checked);
+    // setIsUPILogging is async and will not updated immediately, hence to use the
+    // !isUPILogging is used and set later onChange
     if (!isUPILogging) {
       onChange("upi");
     } else {
