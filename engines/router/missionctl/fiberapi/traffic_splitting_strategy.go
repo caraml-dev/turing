@@ -24,7 +24,7 @@ var (
 
 		return instance
 	}()
-	TrafficRuleLabel string = "traffic-rule"
+	TrafficRuleLabel = "traffic-rule"
 )
 
 // TrafficSplittingStrategyRule represents one rule of the TrafficSplittingStrategy

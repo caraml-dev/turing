@@ -221,7 +221,7 @@ func uncompressHTTPBody(header http.Header, body []byte) ([]byte, error) {
 	return result, nil
 }
 
-//AddResponse adds the per-component response/error info to the TuringResultLogEntry
+// AddResponse adds the per-component response/error info to the TuringResultLogEntry
 func AddResponse(rl *turing.TuringResultLogMessage, key string, body string, header map[string]string, err string) {
 	responseRecord := &turing.Response{
 		Header:   header,

@@ -316,7 +316,7 @@ func TestSendResponseToLogChannel(t *testing.T) {
 }
 
 // TestNewTuringResultLog verify that the generated proto have mapped values from input and
-//  FormatHeader is parsing correctly
+// FormatHeader is parsing correctly
 func TestNewTuringResultLog(t *testing.T) {
 	testTime := time.Now()
 	predictionID := "123"
