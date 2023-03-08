@@ -55,12 +55,11 @@ class TuringSession:
         self._api_client = ApiClient(config)
 
         if use_google_oauth:
-            import google.auth
+            from caraml_auth.id_token_credentials import get_default_id_token_credentials
             from google.auth.transport.requests import Request
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
-            # Load default credentials
-            credentials, _ = google.auth.default(scopes=TuringSession.OAUTH_SCOPES)
+            credentials = get_default_id_token_credentials(target_audience="sdk.caraml")
             # Refresh credentials, in case it's coming from Compute Engine.
             # See: https://github.com/googleapis/google-auth-library-python/issues/1211
             credentials.refresh(Request())
