@@ -65,7 +65,12 @@ func runTuringUpiGRPCServer(port int) {
 	if err != nil {
 		log.Glob().Panicf("failed to create mc: %v", err.Error())
 	}
-	upiServer := upi.NewUPIServer(mc, nil)
+	rl := resultlog.InitTuringResultLogger("", resultlog.NewNopLogger())
+	upiResultLogger, err := resultlog.InitUPIResultLogger("", config.NopLogger, nil, rl)
+	if err != nil {
+		log.Glob().Panicf("failed to create upi result logger: %v", err.Error())
+	}
+	upiServer := upi.NewUPIServer(mc, upiResultLogger)
 	go upiServer.Run(l)
 }
 
