@@ -59,7 +59,7 @@ class TuringSession:
             from google.auth.transport.requests import Request
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
-            credentials = get_default_id_token_credentials(target_audience="turing-sdk.caraml")
+            credentials = get_default_id_token_credentials(target_audience="sdk.caraml")
             # Refresh credentials, in case it's coming from Compute Engine.
             # See: https://github.com/googleapis/google-auth-library-python/issues/1211
             credentials.refresh(Request())
