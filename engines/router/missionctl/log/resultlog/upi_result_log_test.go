@@ -2,17 +2,23 @@ package resultlog
 
 import (
 	"fmt"
+	"sync/atomic"
 	"testing"
+	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
-	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
+
+	fiberProtocol "github.com/gojek/fiber/protocol"
 )
 
 func Test_InitUPIResultLogger(t *testing.T) {
@@ -42,7 +48,7 @@ func Test_InitUPIResultLogger(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := InitUPIResultLogger(tt.args.appName, nil)
+			_, err := InitUPIResultLogger(tt.args.appName, "", nil, nil)
 			if tt.errMsg != "" {
 				assert.Equal(t, tt.errMsg, err.Error())
 			} else {
@@ -117,18 +123,20 @@ func TestUPIResultLogger_CopyResponseToLogChannel(t *testing.T) {
 	}
 }
 
-type mockUPILogger struct{}
+type mockUPILogger struct {
+	numOfCalls int32
+	routerLog  *upiv1.RouterLog
+}
 
-var logResult *upiv1.RouterLog
-
-func (ml *mockUPILogger) write(routerLog *upiv1.RouterLog) error {
-	logResult = routerLog
+func (l *mockUPILogger) write(log *upiv1.RouterLog) error {
+	l.routerLog = log
+	atomic.AddInt32(&l.numOfCalls, 1)
 	return nil
 }
 
-// mockUPILogger is injected to the logger, so that the mapping logic of this function can be
+// mockUPILogger is injected to the upiLogger, so that the mapping logic of this function can be
 // tested and verified
-func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
+func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T) {
 
 	// Variables are predefined, as the test validate the mapping of the responding
 	// input to fields of Router Log and the data should not be mutated
@@ -193,7 +201,8 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 			name: "empty request and response",
 			args: args{
 				resultLogger: &UPIResultLogger{
-					logger:        &mockUPILogger{},
+					upiLogger:     &mockUPILogger{},
+					loggerType:    config.UPILogger,
 					routerName:    routerName,
 					routerVersion: routerVersion,
 					projectName:   projectName,
@@ -226,7 +235,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 						RequestTimestamp: time,
 					},
 				},
-				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
+				resultLogger: &UPIResultLogger{upiLogger: &mockUPILogger{}, loggerType: config.UPILogger},
 			},
 			want: &upiv1.RouterLog{
 				PredictionId: "123",
@@ -252,7 +261,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 		{
 			name: "predict request only without err",
 			args: args{
-				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
+				resultLogger: &UPIResultLogger{upiLogger: &mockUPILogger{}, loggerType: config.UPILogger},
 				routerResp: GrpcRouterResponse{
 					Header: metadata.Pairs("traffic-rule", "rule3"),
 					Body: &upiv1.PredictValuesResponse{
@@ -292,7 +301,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 		{
 			name: "predict request only with err",
 			args: args{
-				resultLogger: &UPIResultLogger{logger: &mockUPILogger{}},
+				resultLogger: &UPIResultLogger{upiLogger: &mockUPILogger{}, loggerType: config.UPILogger},
 				routerResp: GrpcRouterResponse{
 					Err:     "no response from model",
 					ErrCode: 13,
@@ -316,7 +325,128 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary(t *testing.T) {
 			respCh <- tt.args.routerResp
 			close(respCh)
 			tt.args.resultLogger.LogTuringRouterRequestSummary(tt.args.reqHeader, tt.args.upiReq, respCh)
-			assert.Equal(t, tt.want, logResult)
+			mockLogger, ok := tt.args.resultLogger.upiLogger.(*mockUPILogger)
+			assert.True(t, ok, "mockUPILogger not used")
+			assert.Equal(t, tt.want, mockLogger.routerLog)
+		})
+	}
+}
+
+func TestUPIResultLogger_LogTuringRouterRequestSummary_logTuringResultLog(t *testing.T) {
+
+	appName := "appName"
+	testTime := time.Now()
+	predictionID := "123"
+	table := &upiv1.Table{
+		Name: "abc",
+		Rows: []*upiv1.Row{
+			{
+				RowId: "row1",
+				Values: []*upiv1.Value{
+					{
+						DoubleValue: 123.456,
+					},
+				},
+			},
+		},
+	}
+
+	upiReq := &upiv1.PredictValuesRequest{
+		PredictionTable: table,
+		Metadata: &upiv1.RequestMetadata{
+			PredictionId:     predictionID,
+			RequestTimestamp: timestamppb.New(testTime),
+		},
+	}
+	upiResponse := &upiv1.PredictValuesResponse{
+		PredictionResultTable: table,
+	}
+
+	type args struct {
+		reqHeader    metadata.MD
+		upiReq       *upiv1.PredictValuesRequest
+		routerResp   GrpcRouterResponse
+		resultLogger *UPIResultLogger
+	}
+	tests := []struct {
+		name string
+		args args
+		want *turing.TuringResultLogMessage
+	}{
+		{
+			name: "ok request response",
+			args: args{
+				reqHeader: metadata.Pairs("req", "header"),
+				upiReq:    upiReq,
+				routerResp: GrpcRouterResponse{
+					Key:    ResultLogKeys.Router,
+					Header: metadata.Pairs("res", "header", "res2", "header2"),
+					Body:   upiResponse,
+				},
+				resultLogger: &UPIResultLogger{
+					turingResultLogger: &ResultLogger{
+						trl:     &mockResultLogger{},
+						appName: appName,
+					},
+					loggerType: config.BigqueryLogger,
+				},
+			},
+			want: &turing.TuringResultLogMessage{
+				TuringReqId:    "123",
+				EventTimestamp: timestamppb.New(testTime),
+				RouterVersion:  appName,
+				Request: &turing.Request{
+					Header: map[string]string{"req": "header"},
+					Body:   protoJSONMarshaller.Format(upiReq),
+				},
+				Router: &turing.Response{
+					Header:   map[string]string{"res": "header", "res2": "header2"},
+					Response: protoJSONMarshaller.Format(upiResponse),
+				},
+			},
+		},
+		{
+			name: "error resp",
+			args: args{
+				reqHeader: metadata.Pairs("req", "header"),
+				upiReq:    upiReq,
+				routerResp: GrpcRouterResponse{
+					Key:     ResultLogKeys.Router,
+					Err:     "fail fail",
+					ErrCode: 13,
+				},
+				resultLogger: &UPIResultLogger{
+					turingResultLogger: &ResultLogger{
+						trl:     &mockResultLogger{},
+						appName: appName,
+					},
+					loggerType: config.BigqueryLogger,
+				},
+			},
+			want: &turing.TuringResultLogMessage{
+				TuringReqId:    "123",
+				EventTimestamp: timestamppb.New(testTime),
+				RouterVersion:  appName,
+				Request: &turing.Request{
+					Header: map[string]string{"req": "header"},
+					Body:   protoJSONMarshaller.Format(upiReq),
+				},
+				Router: &turing.Response{
+					Error: "fail fail",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			respCh := make(chan GrpcRouterResponse, 1)
+			respCh <- tt.args.routerResp
+			close(respCh)
+			tt.args.resultLogger.LogTuringRouterRequestSummary(tt.args.reqHeader, tt.args.upiReq, respCh)
+			mockLogger, ok := tt.args.resultLogger.turingResultLogger.trl.(*mockResultLogger)
+			assert.True(t, ok, "mockResultLogger not used")
+			assert.Equal(t, tt.want, mockLogger.result)
 		})
 	}
 }

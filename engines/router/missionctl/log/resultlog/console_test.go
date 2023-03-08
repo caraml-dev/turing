@@ -27,7 +27,7 @@ type consoleLog struct {
 }
 
 func TestNewConsoleLogger(t *testing.T) {
-	testLogger := newConsoleLogger()
+	testLogger := NewConsoleLogger()
 	assert.Equal(t, ConsoleLogger{}, *testLogger)
 }
 
@@ -53,10 +53,10 @@ func TestConsoleLoggerWrite(t *testing.T) {
 
 	// Create a new TuringResultLogEntry and send the responses
 	timestamp := time.Date(2000, 2, 1, 4, 5, 6, 7, time.UTC)
-	entry := NewTuringResultLogEntry(ctx, timestamp, req.Header, string(reqBody))
-	entry.AddResponse("enricher", `{"key": "enricher_data"}`, map[string]string{"Content-Encoding": "lz4"},
+	entry := NewTuringResultLog(turingReqID, timestamp, req.Header, string(reqBody))
+	AddResponse(entry, "enricher", `{"key": "enricher_data"}`, map[string]string{"Content-Encoding": "lz4"},
 		"")
-	entry.AddResponse("router", `{"key": "router_data"}`, map[string]string{"Content-Encoding": "gzip"},
+	AddResponse(entry, "router", `{"key": "router_data"}`, map[string]string{"Content-Encoding": "gzip"},
 		"Error Response")
 
 	// Write the result log using ConsoleLogger

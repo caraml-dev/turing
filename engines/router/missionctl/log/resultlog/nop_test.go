@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 )
 
 func TestNewNopLogger(t *testing.T) {
@@ -13,6 +15,6 @@ func TestNewNopLogger(t *testing.T) {
 
 func TestNopLoggerWrite(t *testing.T) {
 	testLogger := &NopLogger{}
-	err := testLogger.write(&TuringResultLogEntry{})
+	err := testLogger.write(&turing.TuringResultLogMessage{})
 	assert.NoError(t, err)
 }

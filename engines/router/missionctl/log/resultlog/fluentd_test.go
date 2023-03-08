@@ -10,6 +10,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 )
 
 // MockFluentClient implements the fluentdClient interface
@@ -27,17 +28,17 @@ type MockBqLogger struct {
 	mock.Mock
 }
 
-func (bq *MockBqLogger) write(*TuringResultLogEntry) error {
+func (bq *MockBqLogger) write(*turing.TuringResultLogMessage) error {
 	return nil
 }
 
-func (bq *MockBqLogger) getLogData(t *TuringResultLogEntry) interface{} {
+func (bq *MockBqLogger) getLogData(t *turing.TuringResultLogMessage) interface{} {
 	bq.Called(t)
 	return t
 }
 
 func TestNewFluentdLogger(t *testing.T) {
-	// Create test BQ logger and fluent client
+	// Create test BQ upiLogger and fluent client
 	bqLogger := bigQueryLogger{
 		dataset:  "test-dataset",
 		table:    "test-table",
@@ -82,7 +83,7 @@ func TestNewFluentdLogger(t *testing.T) {
 				func(_ fluent.Config) (*fluent.Fluent, error) { return fc, nil })
 			defer monkey.Unpatch(fluent.New)
 			// Create the new logger and validate
-			testLogger, err := newFluentdLogger(&data.cfg, &bqLogger)
+			testLogger, err := NewFluentdLogger(&data.cfg, &bqLogger)
 			assert.Equal(t, data.success, err == nil)
 			if data.success {
 				tu.FailOnNil(t, testLogger)
@@ -97,7 +98,7 @@ func TestNewFluentdLogger(t *testing.T) {
 
 func TestFuentdLoggerWrite(t *testing.T) {
 	// Create test log object
-	_, entry := makeTestTuringResultLogEntry(t)
+	_, entry := makeTestTuringResultLog(t)
 
 	// Create mock BQ Logger
 	bqLogger := &MockBqLogger{}

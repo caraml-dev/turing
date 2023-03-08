@@ -16,6 +16,7 @@ import (
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 )
 
 func TestNewBatchHTTPHandler(t *testing.T) {
@@ -95,7 +96,9 @@ func TestNewBatchHTTPHandler(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			batchHTTPHandler := NewBatchHTTPHandler(test.missionCtl)
+			batchHTTPHandler := NewBatchHTTPHandler(
+				test.missionCtl,
+				resultlog.InitTuringResultLogger("", resultlog.NewNopLogger()))
 			assert.NotNil(t, batchHTTPHandler)
 
 			req := httptest.NewRequest(http.MethodPost, "/v1/batch_predict", bytes.NewBuffer([]byte(test.payload)))

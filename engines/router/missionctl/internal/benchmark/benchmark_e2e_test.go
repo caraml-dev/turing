@@ -22,6 +22,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi"
 )
@@ -93,7 +94,8 @@ func runTuringUpiHTTPServer(port int) {
 	if err != nil {
 		log.Glob().Fatalf("fail to create mission control: %v", err.Error())
 	}
-	http.Handle("/v1/predict", handlers.NewHTTPHandler(mc))
+	rl := resultlog.InitTuringResultLogger("", resultlog.NewNopLogger())
+	http.Handle("/v1/predict", handlers.NewHTTPHandler(mc, rl))
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf(":%d", testCfg.Port), http.DefaultServeMux); err != nil {
 			log.Glob().Fatalf("failed to serve: %s", err)

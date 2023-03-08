@@ -26,17 +26,16 @@ import (
 
 // bqLogEntry wraps a TuringResultLogEntry and implements the bigquery.ValueSaver interface
 type bqLogEntry struct {
-	*TuringResultLogEntry
+	resultLog *turing.TuringResultLogMessage
 }
 
 // Save implements the ValueSaver interface on bqLogEntry, for saving the data to BigQuery
 func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 	var kvPairs map[string]bigquery.Value
-	bytes, err := json.Marshal(e)
+	bytes, err := protoJSONMarshaller.Marshal(e.resultLog)
 	if err != nil {
 		return kvPairs, "", err
 	}
-
 	// Unmarshal into map[string]bigquery.Value
 	err = json.Unmarshal(bytes, &kvPairs)
 	if err != nil {
@@ -48,13 +47,13 @@ func (e *bqLogEntry) Save() (map[string]bigquery.Value, string, error) {
 	// It seems protobq.Marshal will be adding support for map[string]string that would help simplify the
 	// implementation of Save().
 	kvPairs["request"] = bigquery.Value(map[string]interface{}{
-		"header": formatBQLogEntryHeader(e.TuringResultLogEntry.resultLogMessage.Request.Header),
-		"body":   e.TuringResultLogEntry.resultLogMessage.Request.Body,
+		"header": formatBQLogEntryHeader(e.resultLog.Request.Header),
+		"body":   e.resultLog.Request.Body,
 	})
-	kvPairs["experiment"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Experiment)
-	kvPairs["enricher"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Enricher)
-	kvPairs["router"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Router)
-	kvPairs["ensembler"] = formatBQLogEntryResponse(e.TuringResultLogEntry.resultLogMessage.Ensembler)
+	kvPairs["experiment"] = formatBQLogEntryResponse(e.resultLog.Experiment)
+	kvPairs["enricher"] = formatBQLogEntryResponse(e.resultLog.Enricher)
+	kvPairs["router"] = formatBQLogEntryResponse(e.resultLog.Router)
+	kvPairs["ensembler"] = formatBQLogEntryResponse(e.resultLog.Ensembler)
 
 	return kvPairs, "", nil
 }
@@ -96,7 +95,7 @@ func formatBQLogEntryHeader(headerMap map[string]string) []map[string]interface{
 // methods on the logger
 type BigQueryLogger interface {
 	TuringResultLogger
-	getLogData(*TuringResultLogEntry) interface{}
+	getLogData(message *turing.TuringResultLogMessage) interface{}
 }
 
 // bigQueryLogger implements the BigQueryLogger interface and wraps the bigquery.Client
@@ -108,8 +107,8 @@ type bigQueryLogger struct {
 	schema   *bigquery.Schema
 }
 
-// newBigQueryLogger creates a new BigQueryLogger
-func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
+// NewBigQueryLogger creates a new BigQueryLogger
+func NewBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 	ctx := context.Background()
 	bqClient, err := bigquery.NewClient(ctx, cfg.Project)
 	if err != nil {
@@ -131,7 +130,7 @@ func newBigQueryLogger(cfg *config.BQConfig) (BigQueryLogger, error) {
 }
 
 // write satisfies the TuringResultLogger interface
-func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
+func (l *bigQueryLogger) write(t *turing.TuringResultLogMessage) error {
 	// Create an inserter
 	ins := l.bqClient.Dataset(l.dataset).Table(l.table).Inserter()
 
@@ -150,7 +149,7 @@ func (l *bigQueryLogger) write(t *TuringResultLogEntry) error {
 // the Save method defined on the bqLogEntry structure which implements the
 // bigquery.ValueSaver interface and returns the log data as a map. This can be returned
 // as is for logging by other loggers whose destination is a BQ table.
-func (l *bigQueryLogger) getLogData(turLogEntry *TuringResultLogEntry) interface{} {
+func (l *bigQueryLogger) getLogData(turLogEntry *turing.TuringResultLogMessage) interface{} {
 	entry := &bqLogEntry{turLogEntry}
 	record, _, err := entry.Save()
 	if err != nil {

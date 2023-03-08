@@ -10,7 +10,7 @@ type UPIKafkaLogger struct {
 }
 
 func NewUPIKafkaLogger(cfg *config.KafkaConfig) (*UPIKafkaLogger, error) {
-	kafkaLogger, err := newKafkaLogger(cfg)
+	kafkaLogger, err := NewKafkaLogger(cfg)
 	if err != nil {
 		return nil, err
 	}
