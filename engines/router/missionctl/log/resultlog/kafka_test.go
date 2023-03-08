@@ -163,19 +163,8 @@ func TestKafkaLoggerWrite(t *testing.T) {
 		topic:               "test-topic",
 		producer:            mp,
 	}
-	testKafkaLogEntry := []byte(`{"key": "value"}`)
-	msg := &turing.TuringResultLogMessage{}
-
-	// Patch newKafkaLogEntry
-	monkey.Patch(
-		newJSONKafkaLogEntry,
-		func(message proto.Message) ([]byte, error) {
-			// Test that the function is called with the expected arg
-			assert.Equal(t, &msg, message)
-			return testKafkaLogEntry, nil
-		},
-	)
-	defer monkey.UnpatchAll()
+	testKafkaLogEntry := []byte(`{"turing_req_id":"123"}`)
+	msg := &turing.TuringResultLogMessage{TuringReqId: "123"}
 
 	// Set up Produce
 	mp.On("Produce", mock.Anything, mock.Anything).Return(nil)
