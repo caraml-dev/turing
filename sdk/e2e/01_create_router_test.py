@@ -140,8 +140,6 @@ def test_create_router():
     expected_response = {
         "experiment": {
             "configuration": {"foo": "foo", "route_name": "control"},
-            "experiment_name": "exp_1",
-            "name": "control",
         },
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"}
@@ -168,8 +166,6 @@ def test_create_router():
                 "response": {
                     "experiment": {
                         "configuration": {"foo": "foo", "route_name": "control"},
-                        "experiment_name": "exp_1",
-                        "name": "control",
                     },
                     "route_responses": [
                         {
@@ -188,8 +184,6 @@ def test_create_router():
                 "response": {
                     "experiment": {
                         "configuration": {"bar": "bar", "route_name": "treatment-a"},
-                        "experiment_name": "exp_1",
-                        "name": "treatment-a",
                     },
                     "route_responses": [
                         {
