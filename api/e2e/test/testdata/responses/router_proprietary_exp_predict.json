@@ -9,9 +9,7 @@
       "configuration": {
         "foo": "foo",
         "route_name": "control"
-      },
-      "experiment_name": "exp_1",
-      "name": "control"
+      }
     },
     "route_responses": [
       {
