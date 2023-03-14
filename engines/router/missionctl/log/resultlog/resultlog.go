@@ -26,12 +26,12 @@ type ResultLogger struct {
 	appName string
 }
 
-// TuringResultLogger is an abstraction for the underlying result upiLogger
+// TuringResultLogger is an abstraction for the underlying result logger for TuringResultLogMessage
 type TuringResultLogger interface {
 	write(message *turing.TuringResultLogMessage) error
 }
 
-// RouterResponse is the struct of expected to pass into response channel to be logged asTuringResultLogMessage later
+// RouterResponse is the struct of expected to pass into response channel to be logged as TuringResultLogMessage later
 type RouterResponse struct {
 	key    string
 	header http.Header

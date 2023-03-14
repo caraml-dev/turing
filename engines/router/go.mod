@@ -10,7 +10,7 @@ require (
 	github.com/caraml-dev/universal-prediction-interface v0.3.4
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/gojek/fiber v0.2.0
+	github.com/gojek/fiber v0.2.1-rc2
 	github.com/gojek/mlp v1.5.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.9

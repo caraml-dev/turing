@@ -715,8 +715,8 @@ github.com/gogo/protobuf v1.3.0/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXP
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gogo/protobuf v1.3.2 h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
-github.com/gojek/fiber v0.2.0 h1:1lOMFm9rqJpfFpcDT44JSXewuWuFrKZMobWBo+YnEag=
-github.com/gojek/fiber v0.2.0/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
+github.com/gojek/fiber v0.2.1-rc2 h1:hJPaH4jDlIBhfRKQby2CISPnbSh7vx5S996IvuXA34U=
+github.com/gojek/fiber v0.2.1-rc2/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
 github.com/gojek/heimdall/v7 v7.0.2/go.mod h1:Z43HtMid7ysSjmsedPTXAki6jcdcNVnjn5pmsTyiMic=
 github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58 h1:8cVTLtTFHjfoTKQyL4sMSnfmTlTJU+Cizfy4hzRl2Tg=
 github.com/gojek/merlin/api v0.0.0-20210723093139-cc0240032d58/go.mod h1:FYMy4bZcts0UkTDE/rgGRWTOG4sUc5NvkljQqw4C8AE=
