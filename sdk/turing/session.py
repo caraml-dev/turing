@@ -39,8 +39,6 @@ class TuringSession:
     Session object for interacting with Turing back-end
     """
 
-    OAUTH_SCOPES = ["https://www.googleapis.com/auth/userinfo.email"]
-
     def __init__(
         self, host: str, project_name: str = None, use_google_oauth: bool = True
     ):
