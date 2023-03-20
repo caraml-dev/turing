@@ -165,17 +165,18 @@ func TestKafkaLoggerWrite(t *testing.T) {
 	}
 	testKafkaLogEntry := []byte(`{"turing_req_id":"123"}`)
 	msg := &turing.TuringResultLogMessage{TuringReqId: "123"}
-
-	// Set up Produce
-	mp.On("Produce", mock.Anything, mock.Anything).Return(nil)
-
-	// Call write and assert that Produce is called with the expected arguments
-	err := logger.write(msg)
-	assert.NoError(t, err)
-	mp.AssertCalled(t, "Produce", &kafka.Message{
+	expectedMessage := &kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &logger.topic,
 			Partition: kafka.PartitionAny},
 		Value: testKafkaLogEntry,
-	}, mock.Anything)
+	}
+
+	// Set up Produce
+	mp.On("Produce", expectedMessage, mock.Anything).Return(nil)
+
+	// Call write and assert that Produce is called with the expected arguments
+	err := logger.write(msg)
+	assert.NoError(t, err)
+	mp.AssertCalled(t, "Produce", expectedMessage, mock.Anything)
 }
