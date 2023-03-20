@@ -44,6 +44,5 @@ func (*ConsoleLogger) write(turLogEntry *turing.TuringResultLogMessage) error {
 
 	// Write the log
 	logger.Infow("Turing Request Summary", data...)
-	_ = logger.Sync()
 	return nil
 }

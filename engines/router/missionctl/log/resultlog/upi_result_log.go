@@ -101,9 +101,6 @@ func (ul *UPIResultLogger) logEntry(log *upiv1.RouterLog) error {
 // LogTuringRouterRequestError logs the given turing request id and the error data
 func (ul *UPIResultLogger) LogTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 	logger := log.WithContext(ctx)
-	defer func() {
-		_ = logger.Sync()
-	}()
 	logger.Errorw("Turing Request Error",
 		"error", err.Message,
 		"status", err.Code,

@@ -111,9 +111,6 @@ func (rl *ResultLogger) LogTuringRouterRequestSummary(
 // LogTuringRouterRequestError logs the given turing request id and the error data
 func (rl *ResultLogger) LogTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
 	logger := log.WithContext(ctx)
-	defer func() {
-		_ = logger.Sync()
-	}()
 	logger.Errorw("Turing Request Error",
 		"error", err.Message,
 		"status", err.Code,
@@ -144,9 +141,6 @@ func (rl *ResultLogger) SendResponseToLogChannel(
 	if data == nil {
 		// Error in logging method, doesn't have to be propagated. Simply log the error.
 		logger := log.WithContext(ctx)
-		defer func() {
-			_ = logger.Sync()
-		}()
 		logger.Errorf("Error occurred when reading data from %s", key)
 	}
 	// Copy to channel
