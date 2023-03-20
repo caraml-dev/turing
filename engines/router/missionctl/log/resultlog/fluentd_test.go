@@ -38,7 +38,7 @@ func (bq *MockBqLogger) getLogData(t *turing.TuringResultLogMessage) interface{}
 }
 
 func TestNewFluentdLogger(t *testing.T) {
-	// Create test BQ upiLogger and fluent client
+	// Create test BQ logger and fluent client
 	bqLogger := bigQueryLogger{
 		dataset:  "test-dataset",
 		table:    "test-table",

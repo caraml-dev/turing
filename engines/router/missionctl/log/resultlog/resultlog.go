@@ -178,8 +178,9 @@ func NewTuringResultLog[h http.Header | metadata.MD](
 	}
 }
 
-// InitTuringResultLogger initializes the global upiLogger to the appropriate upiLogger for
-// recording the turing request summary
+// InitTuringResultLogger initializes the result with supplied logger for
+// logging TuringResultLogMessage. appName stores the configured app name,
+// Format: {router_name}-{router_version}.{project_name}
 func InitTuringResultLogger(appName string, logger TuringResultLogger) *ResultLogger {
 	return &ResultLogger{
 		trl:     logger,

@@ -180,7 +180,7 @@ func initTuringResultLogger(cfg *config.AppConfig) (*resultlog.ResultLogger, err
 	case config.BigqueryLogger:
 		var bqLogger resultlog.BigQueryLogger
 		log.Glob().Info("Initializing BigQuery Result Logger")
-		// Init BQ upiLogger. This will also run the necessary checks on the table schema /
+		// Init BQ logger. This will also run the necessary checks on the table schema /
 		// create it if not exists
 		bqLogger, err = resultlog.NewBigQueryLogger(cfg.BigQuery)
 		if err != nil {
@@ -189,8 +189,8 @@ func initTuringResultLogger(cfg *config.AppConfig) (*resultlog.ResultLogger, err
 
 		// Check if streaming insert or batch logging
 		if cfg.BigQuery.BatchLoad {
-			log.Glob().Info("Initializing Fluentd upiLogger for batch logging")
-			// Init fluentd upiLogger for batch logging
+			log.Glob().Info("Initializing Fluentd logger for batch logging")
+			// Init fluentd logger for batch logging
 			logger, err = resultlog.NewFluentdLogger(cfg.Fluentd, bqLogger)
 			if err != nil {
 				return nil, err
