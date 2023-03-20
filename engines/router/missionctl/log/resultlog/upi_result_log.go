@@ -251,7 +251,7 @@ func logRouterLog(header metadata.MD,
 	// Log the responses. If an error occurs in logging the result to the
 	// configured result log destination, log the error.
 	if err := ul.logEntry(routerLog); err != nil {
-		log.Glob().Errorf("Result Logging Error: %s", err.Error())
+		log.Glob().Errorf("Result Logging Error: %s, Router log: %s", err.Error(), routerLog.String())
 	}
 }
 
