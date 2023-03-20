@@ -17,6 +17,9 @@ import (
 )
 
 // UPIResultLogger holds the logic how the RouterLog is being constructed,
+// the server will always provide GrpcRouterResponse and UPIResultLogger
+// will be responsible to construct it into TuringResultLogMessage or
+// RouterLog and writes to the destination with the underlying logger middleware
 type UPIResultLogger struct {
 	// loggerType is the ResultLoggerType configured in env var
 	loggerType config.ResultLogger
@@ -75,22 +78,6 @@ func InitUPIResultLogger(
 	upiResultLogger.routerName = routerNameWithVersion[:i]
 	// do not include '-'
 	upiResultLogger.routerVersion = routerNameWithVersion[i+1:]
-
-	// check the respective logger has been provided for the config
-	switch loggerType {
-	case config.BigqueryLogger, config.KafkaLogger:
-		if resultLogger == nil {
-			return nil, fmt.Errorf("init upiresultlogger err: required logger not passed for bq/kafka logging")
-		}
-	case config.UPILogger:
-		if upiLogger == nil {
-			return nil, fmt.Errorf("init upiresultlogger err: required logger not passed for upi logging")
-		}
-	case config.NopLogger:
-		if upiLogger == nil && resultLogger == nil {
-			return nil, fmt.Errorf("init upiresultlogger err: required logger not passed for nop logging")
-		}
-	}
 
 	return upiResultLogger, nil
 }

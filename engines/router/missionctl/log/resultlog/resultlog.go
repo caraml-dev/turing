@@ -17,6 +17,8 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers/compression"
 )
 
+// ResultLogger holds the logic how the TuringResultLogMessage is being constructed,
+// and writes to the destination using the logger middleware
 type ResultLogger struct {
 	trl TuringResultLogger
 	// appName stores the configured app name, to be applied to each log entry
