@@ -1,12 +1,13 @@
 package resultlog
 
 import (
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/fluent/fluent-logger-golang/fluent"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 
 	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
@@ -25,8 +26,8 @@ type FluentdLogger struct {
 	fluentLogger fluentdClient
 }
 
-// newFluentdLogger creates a new FluentdLogger
-func newFluentdLogger(
+// NewFluentdLogger creates a new FluentdLogger
+func NewFluentdLogger(
 	cfg *config.FluentdConfig,
 	bqLogger BigQueryLogger,
 ) (*FluentdLogger, error) {
@@ -52,7 +53,7 @@ func newFluentdLogger(
 // write satisfies the TuringResultLogger interface. Fluentd logs are synced to a BigQuery
 // output destination and hence, calling write() uses the BigQueryLogger to generate a
 // loggable record, of the required schema, that is posted to a Fluentd server.
-func (l *FluentdLogger) write(turLogEntry *TuringResultLogEntry) error {
+func (l *FluentdLogger) write(turLogEntry *turing.TuringResultLogMessage) error {
 	// Measure time taken to post the log to fluentd
 	var err error
 	defer metrics.Glob().MeasureDurationMs(

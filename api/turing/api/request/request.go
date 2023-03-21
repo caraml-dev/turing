@@ -114,6 +114,7 @@ func (r CreateOrUpdateRouterRequest) BuildRouter(projectID models.ID) *models.Ro
 
 // BuildRouterVersion builds the router version model from the entire request payload
 func (r RouterConfig) BuildRouterVersion(
+	projectName string,
 	router *models.Router,
 	defaults *config.RouterDefaults,
 	cryptoSvc service.CryptoService,
@@ -213,6 +214,12 @@ func (r RouterConfig) BuildRouterVersion(
 			Brokers:             r.LogConfig.KafkaConfig.Brokers,
 			Topic:               r.LogConfig.KafkaConfig.Topic,
 			SerializationFormat: r.LogConfig.KafkaConfig.SerializationFormat,
+		}
+	case models.UPILogger:
+		rv.LogConfig.KafkaConfig = &models.KafkaConfig{
+			Brokers:             defaults.UPIConfig.KafkaBrokers,
+			Topic:               fmt.Sprintf("caraml-%s-%s-router-log", projectName, router.Name),
+			SerializationFormat: models.ProtobufSerializationFormat,
 		}
 	}
 	if rv.ExperimentEngine.Type != models.ExperimentEngineTypeNop {

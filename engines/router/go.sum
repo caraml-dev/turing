@@ -122,8 +122,8 @@ github.com/go-playground/validator/v10 v10.11.1 h1:prmOlTVv+YjZjmRmNSF3VmspqJIxJ
 github.com/go-playground/validator/v10 v10.11.1/go.mod h1:i+3WkQ1FvaUjjxh1kSvIA4dMGDBiPU55YFDl0WbKdWU=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
-github.com/gojek/fiber v0.2.0 h1:1lOMFm9rqJpfFpcDT44JSXewuWuFrKZMobWBo+YnEag=
-github.com/gojek/fiber v0.2.0/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
+github.com/gojek/fiber v0.2.1-rc2 h1:hJPaH4jDlIBhfRKQby2CISPnbSh7vx5S996IvuXA34U=
+github.com/gojek/fiber v0.2.1-rc2/go.mod h1:R5cRkUnXdTLpdchCkm3lmGJS+nfhPhLDOklRq1T65Jg=
 github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b h1:bvE++I0HIwqD4BWDurM0BvYHXm03o60jsvob4qtwKYo=
 github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b/go.mod h1:a9ipeaVPepEJjpvCpA0EgDCnZ9jZ54VDQn/uSbN+JLw=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 h1:zN2lZNZRflqFyxVaTIU61KNKQ9C0055u9CAfpmqUvo4=

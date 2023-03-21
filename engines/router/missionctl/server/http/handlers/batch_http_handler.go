@@ -15,6 +15,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
+	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 
@@ -34,8 +35,8 @@ type batchResponse struct {
 }
 
 // NewBatchHTTPHandler creates an instance of the Mission Control's prediction request handler
-func NewBatchHTTPHandler(mc missionctl.MissionControl) http.Handler {
-	return &batchHTTPHandler{httpHandler{mc}}
+func NewBatchHTTPHandler(mc missionctl.MissionControl, rl *resultlog.ResultLogger) http.Handler {
+	return &batchHTTPHandler{httpHandler{MissionControl: mc, rl: rl}}
 }
 
 func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {

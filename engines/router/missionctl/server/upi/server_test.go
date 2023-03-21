@@ -34,6 +34,7 @@ var mockResponse = &upiv1.PredictValuesResponse{
 
 func TestUPIServer_PredictValues(t *testing.T) {
 
+	appName := "name-3.proj"
 	responseByte, err := proto.Marshal(mockResponse)
 	require.NoError(t, err)
 	tests := []struct {
@@ -91,10 +92,14 @@ func TestUPIServer_PredictValues(t *testing.T) {
 				require.NotEmpty(t, upiReq.Metadata.RequestTimestamp, "request timestamp is empty")
 			})
 
-			resultlogger, err := resultlog.InitUPIResultLogger("name-3.proj", resultlog.NewUPINopLogger())
+			resultLogger, err := resultlog.InitUPIResultLogger(
+				appName,
+				"nop",
+				nil,
+				resultlog.InitTuringResultLogger("appName", resultlog.NewNopLogger()))
 			require.NoError(t, err)
 
-			upiServer := NewUPIServer(mockMc, resultlogger)
+			upiServer := NewUPIServer(mockMc, resultLogger)
 			ctx := context.Background()
 			resp, err := upiServer.PredictValues(ctx, tt.request)
 			if tt.expectedErr != nil {

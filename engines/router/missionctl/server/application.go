@@ -12,6 +12,7 @@ import (
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
+	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -45,6 +46,11 @@ func Run() {
 
 	switch cfg.RouterConfig.Protocol {
 	case config.UPI:
+		resultLogger, err := initUpiResultLogger(cfg.AppConfig)
+		if err != nil {
+			log.Glob().Panicf("Failed to init UPI resultLogger")
+		}
+
 		// Init mission control
 		missionCtl, err := missionctl.NewMissionControlUPI(
 			cfg.RouterConfig.ConfigFile,
@@ -59,24 +65,9 @@ func Run() {
 			log.Glob().Panicf("Failed to listen on port: %v", cfg.Port)
 		}
 
-		var logger resultlog.UPILogger
-		switch cfg.AppConfig.ResultLogger {
-		case config.UPILogger:
-			logger, err = resultlog.NewUPIKafkaLogger(cfg.AppConfig.Kafka)
-			if err != nil {
-				log.Glob().Panicf("Failed to init kafka logger: %v", err)
-			}
-		case config.NopLogger:
-			logger = resultlog.NewUPINopLogger()
-		}
-		resultLogger, err := resultlog.InitUPIResultLogger(cfg.AppConfig.Name, logger)
-		if err != nil {
-			log.Glob().Panicf("Failed to init UPI logger")
-		}
-
 		upiServer := upi.NewUPIServer(missionCtl, resultLogger)
 		m := cmux.New(l)
-		grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+		grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
 		httpListener := m.Match(cmux.Any())
 
 		mux := http.NewServeMux()
@@ -100,8 +91,7 @@ func Run() {
 			log.Glob().Errorf("Failed to serve cmux: %s", err)
 		}
 	case config.HTTP:
-		// Init Turing result logger
-		err = resultlog.InitTuringResultLogger(cfg.AppConfig)
+		resultLogger, err := initTuringResultLogger(cfg.AppConfig)
 		if err != nil {
 			log.Glob().Fatalf("Failed initializing Turing Result Logger: %v", err)
 		}
@@ -122,8 +112,8 @@ func Run() {
 			"/v1/internal",
 			handlers.NewInternalAPIHandler([]string{}),
 		))
-		http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl)))
-		http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl)))
+		http.Handle("/v1/predict", sentry.Recoverer(handlers.NewHTTPHandler(missionCtl, resultLogger)))
+		http.Handle("/v1/batch_predict", sentry.Recoverer(handlers.NewBatchHTTPHandler(missionCtl, resultLogger)))
 		// Register metrics handler
 		if cfg.AppConfig.CustomMetrics {
 			http.Handle("/metrics", promhttp.Handler())
@@ -178,4 +168,83 @@ func initSentryClient(cfg *config.Config) func() {
 	}
 	// Sentry not enabled, return dummy close function
 	return func() {}
+}
+
+// initTuringResultLogger created the underlying logging middleware
+// base on config return a TuringResultLogger which abstract it away
+func initTuringResultLogger(cfg *config.AppConfig) (*resultlog.ResultLogger, error) {
+	var err error
+	var logger resultlog.TuringResultLogger
+
+	switch cfg.ResultLogger {
+	case config.BigqueryLogger:
+		var bqLogger resultlog.BigQueryLogger
+		log.Glob().Info("Initializing BigQuery Result Logger")
+		// Init BQ logger. This will also run the necessary checks on the table schema /
+		// create it if not exists
+		bqLogger, err = resultlog.NewBigQueryLogger(cfg.BigQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if streaming insert or batch logging
+		if cfg.BigQuery.BatchLoad {
+			log.Glob().Info("Initializing Fluentd logger for batch logging")
+			// Init fluentd logger for batch logging
+			logger, err = resultlog.NewFluentdLogger(cfg.Fluentd, bqLogger)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// Use BigQueryLogger for streaming insert
+			logger = bqLogger
+		}
+	case config.ConsoleLogger:
+		log.Glob().Info("Initializing Console Result Logger")
+		logger = resultlog.NewConsoleLogger()
+	case config.KafkaLogger:
+		log.Glob().Info("Initializing Kafka Result Logger")
+		logger, err = resultlog.NewKafkaLogger(cfg.Kafka)
+		if err != nil {
+			return nil, err
+		}
+	case config.NopLogger:
+		log.Glob().Info("Initializing Nop Result Logger")
+		logger = resultlog.NewNopLogger()
+	default:
+		err = errors.Newf(errors.BadInput, "Unrecognized Result Logger: %s", cfg.ResultLogger)
+		return nil, err
+	}
+	rl := resultlog.InitTuringResultLogger(cfg.Name, logger)
+	return rl, nil
+}
+
+// initUpiResultLogger created the underlying middleware for UPI logger type,
+// for other logger type, the TuringResultLogger is reused
+func initUpiResultLogger(cfg *config.AppConfig) (*resultlog.UPIResultLogger, error) {
+
+	var rl *resultlog.UPIResultLogger
+	switch cfg.ResultLogger {
+	case config.UPILogger:
+		// only kafka logger is supported now
+		logger, err := resultlog.NewUPIKafkaLogger(cfg.Kafka)
+		if err != nil {
+			return nil, err
+		}
+		rl, err = resultlog.InitUPIResultLogger(cfg.Name, cfg.ResultLogger, logger, nil)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		resultLogger, err := initTuringResultLogger(cfg)
+		if err != nil {
+			log.Glob().Fatalf("Failed initializing Turing Result ResultLogger: %v", err)
+			return nil, err
+		}
+		rl, err = resultlog.InitUPIResultLogger(cfg.Name, cfg.ResultLogger, nil, resultLogger)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return rl, nil
 }

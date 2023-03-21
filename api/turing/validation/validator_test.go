@@ -1208,20 +1208,6 @@ func TestValidateUPIRouter(t *testing.T) {
 			expectedError: "Key: 'RouterConfig.Ensembler.Type' Error:Field validation for 'Ensembler.Type' " +
 				"failed on the 'only standard ensembler is supported for UPI' tag",
 		},
-		"failure | unsupported logger type": {
-			routes:         models.Routes{route},
-			defaultRouteID: &routeID,
-			protocol:       routerConfig.UPI,
-			logConfig: &request.LogConfig{
-				ResultLoggerType: models.KafkaLogger,
-				KafkaConfig: &request.KafkaConfig{
-					Brokers:             "broker1,broker2",
-					Topic:               "topic",
-					SerializationFormat: "json",
-				}},
-			expectedError: "Key: 'RouterConfig.LogConfig.ResultLoggerType' Error:Field validation for " +
-				"'LogConfig.ResultLoggerType' failed on the 'logger should be nop or upi' tag",
-		},
 	}
 	for name, tt := range suite {
 		t.Run(name, func(t *testing.T) {

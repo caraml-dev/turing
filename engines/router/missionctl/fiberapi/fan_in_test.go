@@ -138,8 +138,6 @@ func TestEnsemblingFanInAggregate(t *testing.T) {
 			fanIn: efi,
 			expectedResponse: string(`{
 				"experiment": {
-				"experiment_name": "test_experiment",
-				"name": "treatment-A",
 					"configuration": {
 						"test_config": "placeholder"
 					}

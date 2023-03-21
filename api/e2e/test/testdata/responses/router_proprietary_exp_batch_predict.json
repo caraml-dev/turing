@@ -12,9 +12,7 @@
           "configuration": {
             "foo": "foo",
             "route_name": "control"
-          },
-          "experiment_name": "exp_1",
-          "name": "control"
+          }
         },
         "route_responses": [
           {
@@ -41,9 +39,7 @@
           "configuration": {
             "bar": "bar",
             "route_name": "treatment-a"
-          },
-          "experiment_name": "exp_1",
-          "name": "treatment-a"
+          }
         },
         "route_responses": [
           {

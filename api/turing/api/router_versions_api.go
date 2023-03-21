@@ -42,7 +42,8 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 	// Parse request vars
 	var errResp *Response
 	var router *models.Router
-	if _, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
+	var project *mlp.Project
+	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
@@ -58,7 +59,12 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 	}
 
 	routerVersion, err := request.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		project.Name,
+		router,
+		c.RouterDefaults,
+		c.AppContext.CryptoService,
+		c.AppContext.ExperimentsService,
+		c.EnsemblersService)
 
 	if err == nil {
 		// Save router version, re-assign the value of err

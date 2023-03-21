@@ -67,9 +67,10 @@ func startRPCPluginMonitoring(rpcEngineFactory *rpc.EngineFactory, livenessPerio
 // also satisfies the missionctl/http Response interface
 type Response struct {
 	// Success response from the experiment engine, unmodified
-	Configuration  json.RawMessage `json:"configuration,omitempty"`
-	ExperimentName string          `json:"experiment_name,omitempty"`
-	TreatmentName  string          `json:"name,omitempty"`
+	Configuration json.RawMessage `json:"configuration,omitempty"`
+	// Experiment and treatment name are omitted for now as client does not depend on this.
+	ExperimentName string `json:"-"`
+	TreatmentName  string `json:"-"`
 	// Error message
 	Error string `json:"error,omitempty"`
 }

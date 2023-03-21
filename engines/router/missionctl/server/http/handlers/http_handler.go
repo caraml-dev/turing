@@ -28,13 +28,14 @@ import (
 const httpHandlerID = "http_handler"
 
 // NewHTTPHandler creates an instance of the Mission Control's prediction request handler
-func NewHTTPHandler(mc missionctl.MissionControl) http.Handler {
-	return &httpHandler{mc}
+func NewHTTPHandler(mc missionctl.MissionControl, rl *resultlog.ResultLogger) http.Handler {
+	return &httpHandler{MissionControl: mc, rl: rl}
 }
 
 // httpHandler is the Mission Control's prediction request handler
 type httpHandler struct {
 	missionctl.MissionControl
+	rl *resultlog.ResultLogger
 }
 
 func (h *httpHandler) error(
@@ -48,7 +49,7 @@ func (h *httpHandler) error(
 	rw.Header().Set(constant.TuringReqIDHeaderKey, turingReqID)
 	http.Error(rw, err.Message, err.Code)
 	// Log the error
-	logTuringRouterRequestError(ctx, err)
+	h.rl.LogTuringRouterRequestError(ctx, err)
 }
 
 // enableTracingSpan associates span to context, if applicable
@@ -69,7 +70,10 @@ func (h *httpHandler) getPrediction(
 ) (mchttp.Response, *errors.TuringError) {
 	// Create response channel to store the response from each step. Allocate buffer size = 4
 	// (max responses possible, from enricher, experiment engine, router and ensembler respectively).
-	respCh := make(chan routerResponse, 4)
+	respCh := make(chan resultlog.RouterResponse, 4)
+
+	// Get Turing Request Id
+	turingReqID, _ := turingctx.GetRequestID(ctx)
 
 	// Defer logging request summary
 	defer func() {
@@ -77,7 +81,7 @@ func (h *httpHandler) getPrediction(
 			// respCh should be closed first before calling logTuringRouterRequestSummary
 			// because logTuringRouterRequestSummary only returns when respCh is closed
 			close(respCh)
-			logTuringRouterRequestSummary(ctx, ctxLogger, time.Now(), req.Header, requestBody, respCh)
+			h.rl.LogTuringRouterRequestSummary(turingReqID, ctxLogger, time.Now(), req.Header, requestBody, respCh)
 		}()
 	}()
 
@@ -90,7 +94,7 @@ func (h *httpHandler) getPrediction(
 	if h.IsEnricherEnabled() {
 		resp, httpErr := h.Enrich(ctx, req.Header, payload)
 		// Send enricher response/error for logging
-		copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Enricher, resp, httpErr)
+		h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Enricher, resp, httpErr)
 		// Check error
 		if httpErr != nil {
 			return nil, httpErr
@@ -112,10 +116,10 @@ func (h *httpHandler) getPrediction(
 			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), fiberProtocol.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
-			copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
+			h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
 		}
 	}
-	copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, httpErr)
+	h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Router, resp, httpErr)
 	if httpErr != nil {
 		return nil, httpErr
 	}
@@ -124,7 +128,7 @@ func (h *httpHandler) getPrediction(
 	// Ensemble
 	if h.IsEnsemblerEnabled() {
 		resp, httpErr = h.Ensemble(ctx, postEnrichmentResponseHeader, requestBody, payload)
-		copyResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Ensembler, resp, httpErr)
+		h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Ensembler, resp, httpErr)
 		if httpErr != nil {
 			return nil, httpErr
 		}

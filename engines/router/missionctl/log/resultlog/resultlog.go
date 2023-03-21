@@ -2,7 +2,6 @@ package resultlog
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -11,21 +10,36 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
-	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
+	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/http/handlers/compression"
 )
 
-// Init the global logger to Nop Logger, calling InitTuringResultLogger will reset this.
-var globalLogger TuringResultLogger = NewNopLogger()
+// ResultLogger holds the logic how the TuringResultLogMessage is being constructed,
+// and writes to the destination using the logger middleware
+type ResultLogger struct {
+	trl TuringResultLogger
+	// appName stores the configured app name, to be applied to each log entry
+	// This corresponds to the name and version of the router deployed from the Turing app and
+	// will be logged as RouterVersion in TuringResultLog.proto
+	// Format: {router_name}-{router_version}.{project_name}
+	appName string
+}
 
-// appName stores the configured app name, to be applied to each log entry
-// This corresponds to the name and version of the router deployed from the Turing app and
-// will be logged as RouterVersion in TuringResultLog.proto
-// Format: {router_name}-{router_version}.{project_name}
-var appName string
+// TuringResultLogger is an abstraction for the underlying result logger for TuringResultLogMessage
+type TuringResultLogger interface {
+	write(message *turing.TuringResultLogMessage) error
+}
+
+// RouterResponse is the struct of expected to pass into response channel to be logged as TuringResultLogMessage later
+type RouterResponse struct {
+	key    string
+	header http.Header
+	body   []byte
+	err    string
+}
 
 // ResultLogKeys defines the individual components for which the result log must be created
 var ResultLogKeys = struct {
@@ -42,131 +56,136 @@ var ResultLogKeys = struct {
 
 var protoJSONMarshaller = protojson.MarshalOptions{UseProtoNames: true}
 
-// TuringResultLogEntry represents the information logged by the result logger
-type TuringResultLogEntry struct {
-	resultLogMessage turing.TuringResultLogMessage
-}
+// LogTuringRouterRequestSummary logs the summary of the request made to the turing router,
+// through the configured result logger. It takes as its input the turing request id, the
+// request header and body for the original request to the turing router, a response channel
+// with responses from each stage of the turing workflow.
+func (rl *ResultLogger) LogTuringRouterRequestSummary(
+	predictionID string,
+	logger log.Logger,
+	timestamp time.Time,
+	reqHeader http.Header,
+	reqBody []byte,
+	mcRespCh <-chan RouterResponse) {
 
-// MarshalJSON implement custom Marshaling for TuringResultLogEntry, using the underlying proto def
-func (logEntry *TuringResultLogEntry) MarshalJSON() ([]byte, error) {
-	return protoJSONMarshaller.Marshal(&logEntry.resultLogMessage)
-}
-
-// Value returns the TuringResultLogEntry in a loggable format
-func (logEntry *TuringResultLogEntry) Value() (map[string]interface{}, error) {
-	var kvPairs map[string]interface{}
-	// Marshal into bytes
-	bytes, err := protoJSONMarshaller.Marshal(&logEntry.resultLogMessage)
+	logger.Debugw("Logging request", "reqBody", string(reqBody))
+	// Uncompress request data
+	uncompressedData, err := uncompressHTTPBody(reqHeader, reqBody)
 	if err != nil {
-		return kvPairs, errors.Wrapf(err, "Error marshaling the result log")
+		logger.Errorf("Error occurred when reading request body: %s", err.Error())
 	}
-	// Unmarshal into map[string]interface{}
-	err = json.Unmarshal(bytes, &kvPairs)
-	if err != nil {
-		return kvPairs, errors.Wrapf(err, "Error unmarshaling the result log")
+
+	// Create a new TuringResultLogEntry record with the context and request info
+	logEntry := NewTuringResultLog(predictionID, timestamp, reqHeader, string(uncompressedData))
+
+	// Read incoming responses and prepare for logging
+	for resp := range mcRespCh {
+		logger.Debugw("Received data in response channel")
+		// If error exists, add an error record
+		if resp.err != "" {
+			AddResponse(logEntry, resp.key, "", nil, resp.err)
+		} else {
+			// Process the response body
+			uncompressedData, err := uncompressHTTPBody(resp.header, resp.body)
+			if err != nil {
+				logger.Errorf("Error occurred when reading %s response body: %s",
+					resp.key, err.Error())
+				AddResponse(logEntry, resp.key, "", nil, err.Error())
+			} else {
+				logger.Debugw("Logging response", "respBody", string(uncompressedData))
+				// Format the response header
+				responseHeader := FormatHeader(resp.header)
+				AddResponse(logEntry, resp.key, string(uncompressedData), responseHeader, "")
+			}
+		}
 	}
-	return kvPairs, nil
+
+	logger.Debugw("Received all response from mcRespCh")
+	// Log the responses. If an error occurs in logging the result to the
+	// configured result log destination, log the error.
+	if err = rl.logEntry(logEntry); err != nil {
+		logger.Errorf("Result Logging Error: %s", err.Error())
+	}
 }
 
-// AddResponse adds the per-component response/error info to the TuringResultLogEntry
-func (logEntry *TuringResultLogEntry) AddResponse(key string, body string, header map[string]string, err string) {
-	responseRecord := &turing.Response{
-		Header:   header,
-		Response: body,
-		Error:    err,
-	}
-	switch key {
-	case ResultLogKeys.Experiment:
-		logEntry.resultLogMessage.Experiment = responseRecord
-	case ResultLogKeys.Enricher:
-		logEntry.resultLogMessage.Enricher = responseRecord
-	case ResultLogKeys.Router:
-		logEntry.resultLogMessage.Router = responseRecord
-	case ResultLogKeys.Ensembler:
-		logEntry.resultLogMessage.Ensembler = responseRecord
-	}
+// LogTuringRouterRequestError logs the given turing request id and the error data
+func (rl *ResultLogger) LogTuringRouterRequestError(ctx context.Context, err *errors.TuringError) {
+	logger := log.WithContext(ctx)
+	logger.Errorw("Turing Request Error",
+		"error", err.Message,
+		"status", err.Code,
+	)
 }
 
-// NewTuringResultLogEntry returns a new TuringResultLogEntry object with the given context
-// and request
-func NewTuringResultLogEntry[h http.Header | metadata.MD](
+// SendResponseToLogChannel copies the response from the turing router to the given channel
+// as a RouterResponse object
+func (rl *ResultLogger) SendResponseToLogChannel(
 	ctx context.Context,
+	ch chan<- RouterResponse,
+	key string,
+	r mchttp.Response,
+	httpErr *errors.TuringError,
+) {
+	var data []byte
+
+	// if http error is not nil, use error as response
+	if httpErr != nil {
+		ch <- RouterResponse{
+			key: key,
+			err: httpErr.Message,
+		}
+		return
+	}
+
+	data = r.Body()
+	if data == nil {
+		// Error in logging method, doesn't have to be propagated. Simply log the error.
+		logger := log.WithContext(ctx)
+		logger.Errorf("Error occurred when reading data from %s", key)
+	}
+	// Copy to channel
+	ch <- RouterResponse{
+		key:    key,
+		header: r.Header(),
+		body:   data,
+	}
+}
+
+func (rl *ResultLogger) logEntry(log *turing.TuringResultLogMessage) error {
+	log.RouterVersion = rl.appName
+	return rl.trl.write(log)
+}
+
+// NewTuringResultLog returns a new TuringResultLogMessage object with the given context
+// and request
+func NewTuringResultLog[h http.Header | metadata.MD](
+	predictionID string,
 	timestamp time.Time,
 	header h,
 	body string,
-) *TuringResultLogEntry {
-	// Get Turing Request Id
-	turingReqID, _ := turingctx.GetRequestID(ctx)
+) *turing.TuringResultLogMessage {
 
 	// Format Request Header
 	reqHeader := FormatHeader(header)
 
-	return &TuringResultLogEntry{
-		resultLogMessage: turing.TuringResultLogMessage{
-			TuringReqId:    turingReqID,
-			EventTimestamp: timestamppb.New(timestamp),
-			RouterVersion:  appName,
-			Request: &turing.Request{
-				Header: reqHeader,
-				Body:   body,
-			},
+	return &turing.TuringResultLogMessage{
+		TuringReqId:    predictionID,
+		EventTimestamp: timestamppb.New(timestamp),
+		Request: &turing.Request{
+			Header: reqHeader,
+			Body:   body,
 		},
 	}
 }
 
-// TuringResultLogger is an abstraction for the underlying result logger
-type TuringResultLogger interface {
-	write(*TuringResultLogEntry) error
-}
-
-// InitTuringResultLogger initializes the global logger to the appropriate logger for
-// recording the turing request summary
-func InitTuringResultLogger(cfg *config.AppConfig) error {
-	var err error
-
-	// Save the configured app name to the package var
-	appName = cfg.Name
-
-	switch cfg.ResultLogger {
-	case config.BigqueryLogger:
-		var bqLogger BigQueryLogger
-		log.Glob().Info("Initializing BigQuery Result Logger")
-		// Init BQ logger. This will also run the necessary checks on the table schema /
-		// create it if not exists.
-		bqLogger, err = newBigQueryLogger(cfg.BigQuery)
-		if err != nil {
-			return err
-		}
-
-		// Check if streaming insert or batch logging
-		if cfg.BigQuery.BatchLoad {
-			log.Glob().Info("Initializing Fluentd logger for batch logging")
-			// Init fluentd logger for batch logging
-			globalLogger, err = newFluentdLogger(cfg.Fluentd, bqLogger)
-		} else {
-			// Use BigQueryLogger for streaming insert
-			globalLogger = bqLogger
-		}
-	case config.ConsoleLogger:
-		log.Glob().Info("Initializing Console Result Logger")
-		globalLogger = newConsoleLogger()
-	case config.KafkaLogger:
-		log.Glob().Info("Initializing Kafka Result Logger")
-		globalLogger, err = newKafkaLogger(cfg.Kafka)
-	case config.NopLogger:
-		log.Glob().Info("Initializing Nop Result Logger")
-		globalLogger = NewNopLogger()
-	default:
-		err = errors.Newf(errors.BadInput, "Unrecognized Result Logger: %s", cfg.ResultLogger)
+// InitTuringResultLogger initializes the result with supplied logger for
+// logging TuringResultLogMessage. appName stores the configured app name,
+// Format: {router_name}-{router_version}.{project_name}
+func InitTuringResultLogger(appName string, logger TuringResultLogger) *ResultLogger {
+	return &ResultLogger{
+		trl:     logger,
+		appName: appName,
 	}
-
-	return err
-}
-
-// LogEntry sends the input TuringResultLogEntry to the appropriate logger
-func LogEntry(turLogEntry *TuringResultLogEntry) error {
-	log.Glob().Debug("LogEntry")
-	return globalLogger.write(turLogEntry)
 }
 
 // FormatHeader formats the header which by concatenating the string values corresponding to each header into a
@@ -177,4 +196,43 @@ func FormatHeader[h http.Header | metadata.MD](header h) map[string]string {
 		formattedHeader[k] = strings.Join(v, ",")
 	}
 	return formattedHeader
+}
+
+// uncompressHTTPBody uses the content encoding from the header and handles the
+// uncompressing of request/response body accordingly
+func uncompressHTTPBody(header http.Header, body []byte) ([]byte, error) {
+	var result []byte
+
+	if header == nil {
+		return body, nil
+	}
+
+	switch header.Get("Content-Encoding") {
+	case "lz4":
+		lz := compression.LZ4Compressor{}
+		return lz.Uncompress(body)
+	default:
+		// Use the input data as it is
+		result = body
+	}
+	return result, nil
+}
+
+// AddResponse adds the per-component response/error info to the TuringResultLogEntry
+func AddResponse(rl *turing.TuringResultLogMessage, key string, body string, header map[string]string, err string) {
+	responseRecord := &turing.Response{
+		Header:   header,
+		Response: body,
+		Error:    err,
+	}
+	switch key {
+	case ResultLogKeys.Experiment:
+		rl.Experiment = responseRecord
+	case ResultLogKeys.Enricher:
+		rl.Enricher = responseRecord
+	case ResultLogKeys.Router:
+		rl.Router = responseRecord
+	case ResultLogKeys.Ensembler:
+		rl.Ensembler = responseRecord
+	}
 }

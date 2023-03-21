@@ -77,8 +77,6 @@ def test_update_router_invalid_config():
     expected_response = {
         "experiment": {
             "configuration": {"foo": "foo", "route_name": "control"},
-            "experiment_name": "exp_1",
-            "name": "control",
         },
         "route_responses": [
             {"data": {"version": "control"}, "is_default": False, "route": "control"}

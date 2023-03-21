@@ -97,7 +97,12 @@ func (c RoutersController) CreateRouter(
 	}
 
 	rVersion, err := request.Config.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		project.Name,
+		router,
+		c.RouterDefaults,
+		c.AppContext.CryptoService,
+		c.AppContext.ExperimentsService,
+		c.EnsemblersService)
 	if err == nil {
 		// Save router version
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)
@@ -162,7 +167,12 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 	}
 
 	rVersion, err := request.Config.BuildRouterVersion(
-		router, c.RouterDefaults, c.AppContext.CryptoService, c.AppContext.ExperimentsService, c.EnsemblersService)
+		project.Name,
+		router,
+		c.RouterDefaults,
+		c.AppContext.CryptoService,
+		c.AppContext.ExperimentsService,
+		c.EnsemblersService)
 	if err == nil {
 		// Save router version, re-assign the value of err
 		routerVersion, err = c.RouterVersionsService.Save(rVersion)

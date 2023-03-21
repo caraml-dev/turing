@@ -14,7 +14,7 @@ require (
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/gojek/fiber v0.2.0
+	github.com/gojek/fiber v0.2.1-rc2
 	github.com/gojek/merlin v0.0.0
 	github.com/gojek/mlp v1.7.5-0.20230117024729-05ede139570e
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3

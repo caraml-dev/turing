@@ -1,7 +1,6 @@
 package resultlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -78,7 +77,7 @@ func TestNewKafkaLogger(t *testing.T) {
 	mockProducer.On("GetMetadata", &cfg.Topic, false, 1000).Return(nil, nil)
 
 	// Create the new logger and validate
-	testLogger, err := newKafkaLogger(&cfg)
+	testLogger, err := NewKafkaLogger(&cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, *testLogger, KafkaLogger{
 		topic:    cfg.Topic,
@@ -89,10 +88,10 @@ func TestNewKafkaLogger(t *testing.T) {
 
 func TestNewJSONKafkaLogEntry(t *testing.T) {
 	// Create test Turing log entry
-	ctx, turingLogEntry := makeTestTuringResultLogEntry(t)
+	ctx, turingLogEntry := makeTestTuringResultLog(t)
 
 	// Run newJSONKafkaLogEntry and validate
-	message, err := newJSONKafkaLogEntry(&turingLogEntry.resultLogMessage)
+	message, err := newJSONKafkaLogEntry(turingLogEntry)
 	assert.NoError(t, err)
 	// Get Turing request id
 	turingReqID, err := turingctx.GetRequestID(ctx)
@@ -100,7 +99,6 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 	// Compare logEntry data
 	assert.JSONEq(t,
 		fmt.Sprintf(`{
-			"router_version": "test-app-name",
 			"turing_req_id": "%s",
 			"event_timestamp": "2000-02-01T04:05:06.000000007Z",
 			"request": {
@@ -127,8 +125,8 @@ func TestNewJSONKafkaLogEntry(t *testing.T) {
 
 func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	// Create test Turing log entry
-	_, turingLogEntry := makeTestTuringResultLogEntry(t)
-	resultLogMessage := &turingLogEntry.resultLogMessage
+	_, turingLogEntry := makeTestTuringResultLog(t)
+	resultLogMessage := turingLogEntry
 	// Overwrite the turing request id value
 	resultLogMessage.TuringReqId = "testID"
 
@@ -144,7 +142,7 @@ func TestNewProtobufKafkaLogEntry(t *testing.T) {
 	err = proto.Unmarshal(message, decodedTuringResultLogMessage)
 	assert.NoError(t, err)
 	// Convert expected and actual log entries to JSON for comparison
-	expectedJSON, err := json.Marshal(turingLogEntry)
+	expectedJSON, err := protoJSONMarshaller.Marshal(turingLogEntry)
 	assert.NoError(t, err)
 	m := protojson.MarshalOptions{
 		UseProtoNames: true,
@@ -165,32 +163,20 @@ func TestKafkaLoggerWrite(t *testing.T) {
 		topic:               "test-topic",
 		producer:            mp,
 	}
-	testKafkaLogEntry := []byte(`{"key": "value"}`)
-	turingResLogEntry := &TuringResultLogEntry{
-		resultLogMessage: turing.TuringResultLogMessage{},
-	}
-
-	// Patch newKafkaLogEntry
-	monkey.Patch(
-		newJSONKafkaLogEntry,
-		func(message proto.Message) ([]byte, error) {
-			// Test that the function is called with the expected arg
-			assert.Equal(t, &turingResLogEntry.resultLogMessage, message)
-			return testKafkaLogEntry, nil
-		},
-	)
-	defer monkey.UnpatchAll()
-
-	// Set up Produce
-	mp.On("Produce", mock.Anything, mock.Anything).Return(nil)
-
-	// Call write and assert that Produce is called with the expected arguments
-	err := logger.write(turingResLogEntry)
-	assert.NoError(t, err)
-	mp.AssertCalled(t, "Produce", &kafka.Message{
+	testKafkaLogEntry := []byte(`{"turing_req_id":"123"}`)
+	msg := &turing.TuringResultLogMessage{TuringReqId: "123"}
+	expectedMessage := &kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &logger.topic,
 			Partition: kafka.PartitionAny},
 		Value: testKafkaLogEntry,
-	}, mock.Anything)
+	}
+
+	// Set up Produce
+	mp.On("Produce", expectedMessage, mock.Anything).Return(nil)
+
+	// Call write and assert that Produce is called with the expected arguments
+	err := logger.write(msg)
+	assert.NoError(t, err)
+	mp.AssertCalled(t, "Produce", expectedMessage, mock.Anything)
 }
