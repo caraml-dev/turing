@@ -208,14 +208,15 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.9.0
 
-	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20230328040230-6177dba9f0a6
-	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230328040230-6177dba9f0a6
+	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20230403061454-b55c4bd665c0
+	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403061454-b55c4bd665c0
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+	github.com/googleapis/gnostic => github.com/google/gnostic v0.5.5
 
 	k8s.io/api => k8s.io/api v0.22.7
 
