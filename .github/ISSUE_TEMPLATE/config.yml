@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support Request
+    url: https://github.com/caraml-dev/turing/blob/main/CONTRIBUTING.md#question
+    about: Questions and requests for support
