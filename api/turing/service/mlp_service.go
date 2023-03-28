@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
-	merlin "github.com/gojek/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/patrickmn/go-cache"
-	"golang.org/x/oauth2/google"
-
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
+	merlin "github.com/gojek/merlin/client"
+	mlp "github.com/gojek/mlp/api/client"
+	"github.com/gojek/mlp/api/pkg/auth"
+	"github.com/patrickmn/go-cache"
 )
 
 const (
@@ -84,7 +83,7 @@ func NewMLPService(
 	// https://github.com/gojek/merlin/blob/7fb3bcd28de9c8007e14da40f0dd84be19cebe3b/api/cmd/main.go#L115
 	httpClient := http.DefaultClient
 
-	googleClient, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
+	googleClient, err := auth.InitGoogleClient(context.Background())
 	if err == nil {
 		httpClient = googleClient
 	} else {
