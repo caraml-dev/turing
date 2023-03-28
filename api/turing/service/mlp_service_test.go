@@ -30,7 +30,7 @@ func (*mockCryptoService) Decrypt(text string) (string, error) {
 }
 
 // testSetupEnvForGoogleCredentials creates a temporary file containing dummy user account JSON
-// then set the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to the the file.
+// then set the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to the file.
 //
 // This is useful for tests that assume Google Cloud Client libraries can automatically find
 // the user account credentials in any environment.
