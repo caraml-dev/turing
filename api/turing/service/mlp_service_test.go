@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/gojek/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,7 +80,7 @@ func TestNewMLPService(t *testing.T) {
 	defer reset()
 
 	// Create test Google client
-	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
+	gc, err := auth.InitGoogleClient(context.Background())
 	require.NoError(t, err)
 	// Create test projects and environments
 	projects := []mlp.Project{{ID: 1}}
