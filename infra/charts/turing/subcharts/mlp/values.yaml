@@ -57,7 +57,7 @@ docs:
   [
     {
       "label": "Merlin User Guide",
-      "href": "https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"
+      "href": "https://github.com/caraml-dev/merlin/blob/main/docs/getting-started/README.md"
     },
     {
       "label": "Turing User Guide",

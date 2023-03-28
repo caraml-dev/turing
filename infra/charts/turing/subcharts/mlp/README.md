@@ -71,7 +71,7 @@ The following table lists the configurable parameters of the Turing chart and th
 | authorization.enabled | bool | `false` |  |
 | authorization.serverUrl | string | `"http://mlp-authorization-keto"` |  |
 | dbMigrations.image.tag | string | `"v4.7.1"` |  |
-| docs[0].href | string | `"https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"` |  |
+| docs[0].href | string | `"https://github.com/caraml-dev/merlin/blob/main/docs/getting-started/README.md"` |  |
 | docs[0].label | string | `"Merlin User Guide"` |  |
 | docs[1].href | string | `"https://github.com/caraml-dev/turing"` |  |
 | docs[1].label | string | `"Turing User Guide"` |  |

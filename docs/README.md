@@ -2,7 +2,7 @@
 
 ## What is Turing?
 
-Turing is a fast, scalable and extensible system that can be used to design, deploy and evaluate ML experiments in production. It takes care of the core Engineering aspects of experimentation such as traffic routing, outcome logging, system monitoring, etc. and is designed to work with pluggable Experiment Engines, pre and post processors. It is backed by existing systems like [Merlin](https://github.com/gojek/merlin) for model endpoints.
+Turing is a fast, scalable and extensible system that can be used to design, deploy and evaluate ML experiments in production. It takes care of the core Engineering aspects of experimentation such as traffic routing, outcome logging, system monitoring, etc. and is designed to work with pluggable Experiment Engines, pre and post processors. It is backed by existing systems like [Merlin](https://github.com/caraml-dev/merlin) for model endpoints.
 
 ## Features
 * Low-latency, high-throughput traffic routing to an unlimited number of ML models.

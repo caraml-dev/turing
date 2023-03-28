@@ -61,7 +61,7 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 type EngineConfig map[string]interface{}
 
 // EnvironmentConfig is a abridged version of
-// https://github.dev/gojek/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
+// https://github.dev/caraml-dev/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
 // Only requires Name and K8sConfig
 // This struct should be removed when Environments API is moved from Merlin to MLP
 type EnvironmentConfig struct {

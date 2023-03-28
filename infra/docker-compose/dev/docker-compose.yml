@@ -179,7 +179,7 @@ services:
       POSTGRESQL_PASSWORD: merlin
 
   merlin:
-    image: ghcr.io/gojek/merlin:v0.8.0-alpha
+    image: ghcr.io/caraml-dev/merlin:v0.8.0-alpha
     restart: on-failure
     volumes:
       - "./merlin/deployment-config.yaml:/deployment-config.yaml"
