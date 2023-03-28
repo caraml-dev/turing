@@ -3,7 +3,7 @@ package missionctl
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -163,7 +163,7 @@ func Test_missionControlUpi_Route(t *testing.T) {
 			mockReturn: fiber.NewResponseQueueFromResponses(fiberHttp.NewHTTPResponse(
 				&http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader([]byte("dummy res"))),
+					Body:       io.NopCloser(bytes.NewReader([]byte("dummy res"))),
 				})),
 		},
 	}

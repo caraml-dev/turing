@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"io/ioutil"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -372,7 +370,7 @@ func (c *ClusterConfig) ProcessEnvConfigs() error {
 	if c.InClusterConfig {
 		return nil
 	}
-	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
+	envConfig, err := os.ReadFile(c.EnvironmentConfigPath)
 	if err != nil {
 		return err
 	}

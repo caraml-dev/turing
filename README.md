@@ -56,7 +56,7 @@ in these getting started guide.
 
 - [Docker](https://www.docker.com/get-started) v19.03
 - [Docker compose](https://docs.docker.com/compose/) v1.27
-- [Go](https://golang.org/dl/) v1.18
+- [Go](https://golang.org/dl/) v1.20
 - [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.22 (optional)
 - [Python](https://www.python.org/downloads/) >=3.7

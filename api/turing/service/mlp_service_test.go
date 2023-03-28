@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	//nolint:all
 	"bou.ke/monkey"
 	"github.com/gojek/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
