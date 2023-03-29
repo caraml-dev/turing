@@ -16,7 +16,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gojek/fiber v0.2.1-rc2
 	github.com/gojek/merlin v0.0.0
-	github.com/gojek/mlp v1.7.6-0.20230328080720-45464eaa4bc7
+	github.com/gojek/mlp v1.7.6-0.20230329030735-c28dca2aeef9
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.5.9
@@ -37,6 +37,7 @@ require (
 	github.com/xanzy/go-gitlab v0.32.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
+	google.golang.org/api v0.103.0
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -185,7 +186,6 @@ require (
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
-	google.golang.org/api v0.103.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230104163317-caabf589fcbf // indirect
 	gopkg.in/errgo.v2 v2.1.0 // indirect
