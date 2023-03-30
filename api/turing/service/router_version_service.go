@@ -31,6 +31,8 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
+	// FindActiveRouterUsingEnsembler Finds routerVersion with status pending or deployed that use ensembler with id = ensemblerId
+	FindActiveRouterUsingEnsembler(ensemblerID models.ID) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -259,4 +261,33 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 		tx.Delete(routerVersion.Ensembler)
 	}
 	return tx.Commit().Error
+}
+
+func (service *routerVersionsService) FindActiveRouterUsingEnsembler(ensemblerID models.ID) ([]*models.RouterVersion, error) {
+	var routerVersions []*models.RouterVersion
+	query := service.query().
+		Where("router_versions.ensembler_id = ?", ensemblerID).
+		Where("router_versions.status = 'pending' OR router_versions.status = 'deployed'")
+	if err := query.Error; err != nil {
+		return nil, err
+	}
+
+	var err error
+	for _, routerVersion := range routerVersions {
+		var err error
+		routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
+			routerVersion.Router.ProjectID,
+			routerVersion.Router.EnvironmentName,
+			routerVersion.Router.Name,
+			&routerVersion.Version,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+		}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
+	}
+
+	return routerVersions, nil
 }
