@@ -1,7 +1,13 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+
+	"cloud.google.com/go/storage"
+	"github.com/gojek/mlp/api/pkg/artifact"
+	"github.com/gojek/mlp/api/pkg/client/mlflow"
 
 	"gorm.io/gorm"
 
@@ -38,6 +44,7 @@ type AppContext struct {
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
 	PodLogService      service.PodLogService
+	MlflowService      mlflow.MlflowService
 }
 
 // NewAppContext is a creator for the app context
@@ -157,6 +164,16 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
 	}
 
+	// Initialise MlflowClient
+	storageClient, err := storage.NewClient(context.Background())
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing gcs for mlflow delete package")
+	}
+
+	gcsClient := artifact.NewGcsClient(storageClient, artifact.Config{Ctx: context.Background()})
+	// TODO: CHANGE TO GET FROM CONFIG
+	mlflowService := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: "https://mlflow.d.ai.golabs.io"}, gcsClient)
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
@@ -172,7 +189,8 @@ func NewAppContext(
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),
-		BatchRunners: batchJobRunners,
+		BatchRunners:  batchJobRunners,
+		MlflowService: mlflowService,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
