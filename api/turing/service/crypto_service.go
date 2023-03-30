@@ -12,9 +12,9 @@ import (
 
 // CryptoService is used for encrypting / decrypting sensitive data
 type CryptoService interface {
-	// Encrypt takes an input plaintext string and returs the cipher text or an error
+	// Encrypt takes an input plaintext string and returns the cipher text or an error
 	Encrypt(plaintext string) (string, error)
-	// Decrypt takes an input cipher string and returs the plaintext or an error
+	// Decrypt takes an input cipher string and returns the plaintext or an error
 	Decrypt(ciphertext string) (string, error)
 }
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/gojek/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,31 +29,28 @@ func (*mockCryptoService) Decrypt(text string) (string, error) {
 	return text, nil
 }
 
-// testSetupEnvForGoogleCredentials creates a temporary file containing dummy service account JSON
-// then set the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to the the file.
+// testSetupEnvForGoogleCredentials creates a temporary file containing dummy user account JSON
+// then set the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to the file.
 //
 // This is useful for tests that assume Google Cloud Client libraries can automatically find
-// the service account credentials in any environment.
+// the user account credentials in any environment.
 //
 // At the end of the test, the returned function can be called to perform cleanup.
 func testSetupEnvForGoogleCredentials(t *testing.T) (reset func()) {
-	serviceAccountKey := []byte(`{
-  "type": "service_account",
-  "project_id": "foo",
-  "private_key_id": "bar",
-  "private_key": "baz",
-  "client_email": "foo@example.com",
-  "client_id": "bar_client_id",
-  "auth_uri": "https://oauth2.googleapis.com/auth",
-  "token_uri": "https://oauth2.googleapis.com/token"
-}`)
+	userAccountKey := []byte(`{
+		"client_id": "dummyclientid.apps.googleusercontent.com",
+		"client_secret": "dummy-secret",
+		"quota_project_id": "test-project",
+		"refresh_token": "dummy-token",
+		"type": "authorized_user"
+	}`)
 
-	file, err := os.CreateTemp("", "dummy-service-account")
+	file, err := os.CreateTemp("", "dummy-user-account")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = os.WriteFile(file.Name(), serviceAccountKey, 0644)
+	err = os.WriteFile(file.Name(), userAccountKey, 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +77,7 @@ func TestNewMLPService(t *testing.T) {
 	defer reset()
 
 	// Create test Google client
-	gc, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/userinfo.email")
+	gc, err := auth.InitGoogleClient(context.Background())
 	require.NoError(t, err)
 	// Create test projects and environments
 	projects := []mlp.Project{{ID: 1}}
