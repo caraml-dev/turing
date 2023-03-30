@@ -250,6 +250,80 @@ func (c EnsemblersController) DeleteEnsembler(
 
 }
 
+func (c EnsemblersController) DeleteEnsembler(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := EnsemblersPathOptions{}
+
+	if err := c.ParseVars(&options, vars); err != nil {
+		return BadRequest("failed to fetch ensembler",
+			fmt.Sprintf("failed to parse query string: %s", err))
+	}
+
+	ensembler, err := c.EnsemblersService.FindByID(
+		*options.EnsemblerID,
+		service.EnsemblersFindByIDOptions{
+			ProjectID: options.ProjectID,
+		})
+
+	if err != nil {
+		return NotFound("ensembler not found", err.Error())
+	}
+	ensemblerId := ensembler.GetID()
+	// CHECK IF STATUS ROUTER IS DEPLOYED
+	activeRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerId)
+	if err != nil {
+		return InternalServerError("Delete ensembler failed", err.Error())
+	}
+	if len(activeRouter) >= 1 {
+		return BadRequest("Delete ensembler failed", "There are active router using this ensembler")
+	}
+
+	// CHECK IF THERE ARE ANY ENSEMBLING JOBS WITH STATUS PENDING, BUILDING, RUNNING USING THE ENSEMBLER
+	ensemblingJobOption := service.EnsemblingJobListOptions{
+		EnsemblerID: &ensemblerId,
+		Statuses: []models.Status{
+			models.JobPending,
+			models.JobBuildingImage,
+			models.JobRunning,
+		},
+	}
+	activeEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobOption)
+	if err != nil {
+		return InternalServerError("Delete ensembler failed", err.Error())
+	}
+	if activeEnsemblingJob.Paging.Total >= 1 {
+		return BadRequest("Delete ensembler failed", "There are active ensembling job using this ensembler")
+	}
+
+	// CHECK IF THE ENSEMBLER IS A PYFUNC ENSEMBLER
+	if pyFuncEnsembler, ok := ensembler.(*models.PyFuncEnsembler); ok {
+		// IF PYFUNC, ALSO DELELETE FROM MLFLOW
+		s := strconv.FormatUint(uint64(pyFuncEnsembler.ExperimentID), 10)
+		fmt.Println(s)
+		err := c.MlflowService.DeleteExperiment(s, true)
+		if err != nil {
+			// Handle 404
+			return InternalServerError("Delete Failed", err.Error())
+		}
+
+		err = c.EnsemblersService.Delete(pyFuncEnsembler)
+		if err != nil {
+			return InternalServerError("Delete from db failed", err.Error())
+		}
+	} else {
+		// IF NOT PYFUNC ONLY DELETE ENSEMBLER FROM DB
+		err = c.EnsemblersService.Delete(ensembler)
+		if err != nil {
+			return InternalServerError("Delete from db failed", err.Error())
+		}
+	}
+	return Ok(ensembler)
+
+}
+
 func (c EnsemblersController) Routes() []Route {
 	return []Route{
 		{
