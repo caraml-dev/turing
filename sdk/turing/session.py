@@ -22,6 +22,7 @@ from turing.generated.models import (
     RouterConfig,
     RouterVersion,
     RouterVersionConfig,
+    EnsemblerId,
 )
 
 
@@ -170,6 +171,15 @@ class TuringSession:
             project_id=ensembler.project_id,
             ensembler_id=ensembler.id,
             ensembler=ensembler,
+        )
+
+    @require_active_project
+    def delete_ensembler(self, ensembler_id: int) -> EnsemblerId:
+        """
+        Delete Ensembler with Ensembler Id
+        """
+        return EnsemblerApi(self._api_client).delete_ensembler(
+            project_id=self.active_project.id, ensembler_id=ensembler_id
         )
 
     @require_active_project

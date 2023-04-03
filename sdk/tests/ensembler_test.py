@@ -155,3 +155,29 @@ def test_update_ensembler(
         ],
     )
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "actual,expected", [pytest.param(1, turing.generated.models.IdObject(id=1))]
+)
+@pytest.mark.parametrize("ensembler_name", ["ensembler_1"])
+@pytest.mark.usefixtures("mock_mlflow", "mock_gcs")
+def test_delete_ensembler(
+    turing_api, active_project, use_google_oauth, actual, expected
+):
+
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    responses.add(
+        method="DELETE",
+        url=f"/v1/projects/{active_project.id}/ensemblers/{actual}",
+        body=json.dumps(expected, default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    response = turing.PyFuncEnsembler.delete(1)
+
+    assert actual == response

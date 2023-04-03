@@ -401,6 +401,16 @@ class PyFuncEnsembler(Ensembler):
             turing.active_session.create_ensembler(ensembler.to_open_api())
         )
 
+    @classmethod
+    def delete(cls, ensembler_id: int) -> int:
+        """
+        Delete a pyfunc ensembler with the given id in the active project
+
+        :param ensembler_id: ensembler's id. Ensembler must be on the active project
+        :return: ensembler_id of the deleted ensembler
+        """
+        return turing.active_session.delete_ensembler(ensembler_id=ensembler_id).id
+
 
 def _process_conda_env(
     conda_env: Union[str, Dict[str, Any]]
