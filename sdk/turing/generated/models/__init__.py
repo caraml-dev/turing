@@ -24,6 +24,7 @@ from turing.generated.model.ensembler import Ensembler
 from turing.generated.model.ensembler_config import EnsemblerConfig
 from turing.generated.model.ensembler_config_kind import EnsemblerConfigKind
 from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
+from turing.generated.model.ensembler_id import EnsemblerId
 from turing.generated.model.ensembler_infra_config import EnsemblerInfraConfig
 from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
 from turing.generated.model.ensembler_pyfunc_config import EnsemblerPyfuncConfig

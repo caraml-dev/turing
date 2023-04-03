@@ -53,7 +53,9 @@ class TuringSession:
         self._api_client = ApiClient(config)
 
         if use_google_oauth:
-            from caraml_auth.id_token_credentials import get_default_id_token_credentials
+            from caraml_auth.id_token_credentials import (
+                get_default_id_token_credentials,
+            )
             from google.auth.transport.requests import Request
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 

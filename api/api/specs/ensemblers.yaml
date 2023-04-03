@@ -125,9 +125,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Ensembler"
+    delete:
+      tags: *tags
+      operationId: DeleteEnsembler
+      parameters:
+        - in: path
+          name: project_id
+          required: true
+          schema:
+            <<: *id
+        - in: path
+          name: ensembler_id
+          required: true
+          schema:
+            <<: *id
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblerId"
+          description: A JSON object representing an instance of deleted ensembler
+      summary: Delete Ensembler by its ID
 
 components:
   schemas:
+    EnsemblerId:
+      $ref: "./common.yaml#/components/schemas/IdObject"
+
     EnsemblerType:
       type: "string"
       enum:
