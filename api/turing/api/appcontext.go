@@ -44,7 +44,7 @@ type AppContext struct {
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
 	PodLogService      service.PodLogService
-	MlflowService      mlflow.MlflowService
+	MlflowService      mlflow.Service
 }
 
 // NewAppContext is a creator for the app context
