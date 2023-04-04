@@ -47,11 +47,11 @@ require (
 	gotest.tools/v3 v3.0.3
 	istio.io/api v0.0.0-20220304035241-8c47cbbea144
 	istio.io/client-go v1.12.5
-	k8s.io/api v0.25.4
+	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.26.0
 	k8s.io/client-go v0.26.0
-	knative.dev/pkg v0.0.0-20230320014357-4c84b1b51ee8
-	knative.dev/serving v0.28.0
+	knative.dev/pkg v0.0.0-20220222221138-929d328ad73c
+	knative.dev/serving v0.27.2
 	sigs.k8s.io/yaml v1.3.0
 )
 
@@ -97,7 +97,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -111,6 +110,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.3 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
@@ -193,10 +193,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	istio.io/gogo-genproto v0.0.0-20210113155706-4daf5697332f // indirect
-	k8s.io/klog/v2 v2.80.2-0.20221028030830-9ae4992afb54 // indirect
-	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
-	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2 // indirect
-	knative.dev/networking v0.0.0-20211209101835-8ef631418fc0 // indirect
+	k8s.io/klog/v2 v2.80.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20211109043538-20434351676c // indirect
+	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
+	knative.dev/networking v0.0.0-20211101215640-8c71a2708e7d // indirect
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 )
@@ -216,7 +216,6 @@ replace (
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
-	github.com/googleapis/gnostic => github.com/google/gnostic v0.5.5
 
 	k8s.io/api => k8s.io/api v0.22.7
 
@@ -246,4 +245,5 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.22.7
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.22.7
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.22.7
+	knative.dev/pkg => knative.dev/pkg v0.0.0-20220222221138-929d328ad73c
 )
