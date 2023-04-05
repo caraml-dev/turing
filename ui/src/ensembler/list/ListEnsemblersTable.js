@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment, useMemo, useRef } from "react";
 import {
   EuiBadge,
   EuiBasicTable,
@@ -7,6 +7,8 @@ import {
   EuiSearchBar,
   EuiSpacer,
   EuiText,
+  EuiFlexItem,
+  EuiFlexGroup
 } from "@elastic/eui";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
@@ -14,6 +16,7 @@ import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { DateFromNow } from "@caraml-dev/ui-lib";
+import { DeleteEnsemblerModal } from "../components/modal/DeleteEnsemblerModal";
 
 export const ListEnsemblersTable = ({
   items,
@@ -25,7 +28,10 @@ export const ListEnsemblersTable = ({
   onQueryChange,
   onPaginationChange,
   onRowClick,
+  onDeleteSuccess
 }) => {
+  const deleteEnsemblerRef = useRef()
+
   const navigate = useNavigate();
   const {
     appConfig: {
@@ -45,6 +51,11 @@ export const ListEnsemblersTable = ({
   }, [filter]);
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
+
+  const handleDeleteEnsembler = (ensembler) => {
+    deleteEnsemblerRef.current(ensembler)
+  }
+
 
   const columns = [
     {
@@ -88,7 +99,7 @@ export const ListEnsemblersTable = ({
     {
       field: "updated_at",
       name: "Updated",
-      width: "20%",
+      width: "15%",
       render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
@@ -100,22 +111,38 @@ export const ListEnsemblersTable = ({
           content="Ensembler actions"
         />
       ),
-      align: "right",
       mobileOptions: {
         header: true,
         fullWidth: false,
       },
-      width: "15%",
-      render: (ensemblerId) => (
-        <EuiButtonEmpty
-          onClick={(_) => navigate(`../jobs?ensembler_id=${ensemblerId}`)}
-          iconType="storage"
-          size="xs">
-          <EuiText size="xs">Batch Jobs</EuiText>
-        </EuiButtonEmpty>
+      width: "20%",
+      render: (id, ensembler) => (
+        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+          <EuiFlexItem grow={false} >
+            <EuiButtonEmpty 
+              onClick={(_) => navigate(`../jobs?ensembler_id=${ensembler.id}`)}
+              iconType="storage"
+              iconSide="left"
+              size="xs">
+              <EuiText size="xs">Batch Jobs</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} >
+            <EuiButtonEmpty 
+                onClick={() => handleDeleteEnsembler(ensembler)}
+                color={"danger"}
+                iconType="trash"
+                iconSide="left"
+                size="xs">
+              <EuiText size="xs" >Delete</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>      
+        </EuiFlexGroup>
       ),
     },
   ];
+
+
 
   const pagination = {
     pageIndex: page.index,
@@ -169,6 +196,10 @@ export const ListEnsemblersTable = ({
         cellProps={cellProps}
         pagination={pagination}
         onChange={onTableChange}
+      />
+      <DeleteEnsemblerModal
+          onSuccess={onDeleteSuccess}
+          deleteEnsemblerRef={deleteEnsemblerRef}
       />
     </Fragment>
   );
