@@ -29,7 +29,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
@@ -41,7 +41,7 @@ jobs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           
@@ -62,7 +62,7 @@ jobs:
       - build-cluster-init
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download Cluster Init Docker tar archieve
         uses: actions/download-artifact@v2
@@ -130,7 +130,7 @@ jobs:
         - build-cluster-init
         - test-e2e
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             fetch-depth: 0
 

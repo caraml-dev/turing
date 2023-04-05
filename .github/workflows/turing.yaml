@@ -39,8 +39,8 @@ on:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
-  GO_VERSION: 1.18
-  GO_LINT_VERSION: v1.48.0
+  GO_VERSION: '1.20'
+  GO_LINT_VERSION: v1.51.2
   CLUSTER_NAME: turing-e2e
   ISTIO_VERSION: 1.9.9
   KNATIVE_VERSION: 1.7.4
@@ -54,7 +54,7 @@ jobs:
       api-version: ${{ steps.build-image.outputs.api-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -85,7 +85,7 @@ jobs:
       router-version: ${{ steps.build-image.outputs.router-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -118,7 +118,7 @@ jobs:
       test-experiment-engine-plugin-version: ${{ env.VERSION }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build Docker image
         working-directory: engines/experiment/examples/plugins/hardcoded
@@ -146,7 +146,7 @@ jobs:
         working-directory: ui
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install system dependencies
         run: sudo apt-get install --no-install-recommends gcc make libpng-dev
@@ -188,7 +188,7 @@ jobs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -220,10 +220,10 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -263,10 +263,10 @@ jobs:
       - build-router
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -298,10 +298,10 @@ jobs:
       GOPATH: ${{ github.workspace }}/engines/experiment/.go
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -353,7 +353,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
@@ -373,7 +373,7 @@ jobs:
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -477,7 +477,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: release-rules
         uses: ./.github/actions/release-rules
 

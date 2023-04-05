@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	//nolint:all
 	"bou.ke/monkey"
 	"github.com/gojek/fiber"
 	fiberHttp "github.com/gojek/fiber/http"

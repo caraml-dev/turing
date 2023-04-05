@@ -2,7 +2,7 @@ package router_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -223,7 +223,7 @@ func TestTrafficRuleCondition_TestRequest(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r, _ := fiberHttp.NewHTTPRequest(&http.Request{
 				Header: tt.header,
-				Body:   ioutil.NopCloser(strings.NewReader(tt.payload)),
+				Body:   io.NopCloser(strings.NewReader(tt.payload)),
 			})
 
 			actual, err := tt.condition.TestRequest(r)

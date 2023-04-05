@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	//nolint:all
 	"bou.ke/monkey"
 	"github.com/gojek/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
@@ -15,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2/google"
 
-	merlin "github.com/gojek/merlin/client"
+	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 )
 

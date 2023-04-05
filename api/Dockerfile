@@ -3,7 +3,7 @@ FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine as gke-plugin-builde
 RUN gcloud components install gke-gcloud-auth-plugin --quiet
 
 # Build turing-api binary
-FROM golang:1.18-alpine as api-builder
+FROM golang:1.20-alpine as api-builder
 ARG API_BIN_NAME=turing-api
 
 ENV GO111MODULE=on \

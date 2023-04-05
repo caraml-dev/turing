@@ -37,7 +37,7 @@ Refer to the README under the individual directories for getting started with th
 The following guide will help you quickly get started with running Turing.
 Turing requires these infrastructure dependencies in order to function properly:
 - [MLP](https://github.com/gojek/mlp) API server to namespace Turing routers
-- [Merlin](https://github.com/gojek/merlin) API server to manage environments where Turing routers are deployed
+- [Merlin](https://github.com/caraml-dev/merlin) API server to manage environments where Turing routers are deployed
 - [Kubernetes](https://kubernetes.io/) cluster (with [Knative Serving](https://knative.dev/docs/serving/) and [Istio](https://istio.io/) installed and [Spark on K8s Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator)) to provision and manage Turing router workloads (Note that our local setup does not install Spark on K8s Operator as of writing)
 - [Vault](https://www.vaultproject.io/) to store deployment and user secrets
 
@@ -56,7 +56,7 @@ in these getting started guide.
 
 - [Docker](https://www.docker.com/get-started) v19.03
 - [Docker compose](https://docs.docker.com/compose/) v1.27
-- [Go](https://golang.org/dl/) v1.18
+- [Go](https://golang.org/dl/) v1.20
 - [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.22 (optional)
 - [Python](https://www.python.org/downloads/) >=3.7

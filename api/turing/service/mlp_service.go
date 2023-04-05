@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
+	merlin "github.com/caraml-dev/merlin/client"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	merlin "github.com/gojek/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gojek/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
@@ -80,7 +80,7 @@ func NewMLPService(
 ) (MLPService, error) {
 	// Create an HTTP client with Google default credential.
 	// Following this approach:
-	// https://github.com/gojek/merlin/blob/7fb3bcd28de9c8007e14da40f0dd84be19cebe3b/api/cmd/main.go#L115
+	// https://github.com/caraml-dev/merlin/blob/7fb3bcd28de9c8007e14da40f0dd84be19cebe3b/api/cmd/main.go#L115
 	httpClient := http.DefaultClient
 
 	googleClient, err := auth.InitGoogleClient(context.Background())

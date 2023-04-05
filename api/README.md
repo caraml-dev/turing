@@ -7,7 +7,7 @@ API for the Turing experimentation service.
 ### Local Development
 
 #### Requirements
-- Golang 1.18
+- Golang 1.20
 - Docker
   
 #### Setup

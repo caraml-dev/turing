@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"io/ioutil"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
@@ -61,7 +59,7 @@ func (qty *Quantity) MarshalJSON() ([]byte, error) {
 type EngineConfig map[string]interface{}
 
 // EnvironmentConfig is a abridged version of
-// https://github.dev/gojek/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
+// https://github.dev/caraml-dev/merlin/blob/98ada0d3aa8de30d73e441d3fd1000fe5d5ac266/api/config/environment.go#L26
 // Only requires Name and K8sConfig
 // This struct should be removed when Environments API is moved from Merlin to MLP
 type EnvironmentConfig struct {
@@ -372,7 +370,7 @@ func (c *ClusterConfig) ProcessEnvConfigs() error {
 	if c.InClusterConfig {
 		return nil
 	}
-	envConfig, err := ioutil.ReadFile(c.EnvironmentConfigPath)
+	envConfig, err := os.ReadFile(c.EnvironmentConfigPath)
 	if err != nil {
 		return err
 	}

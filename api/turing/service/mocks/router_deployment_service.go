@@ -7,7 +7,7 @@ import (
 
 	client "github.com/gojek/mlp/api/client"
 
-	merlinclient "github.com/gojek/merlin/client"
+	merlinclient "github.com/caraml-dev/merlin/client"
 
 	mock "github.com/stretchr/testify/mock"
 

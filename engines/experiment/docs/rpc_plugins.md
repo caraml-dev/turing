@@ -30,7 +30,7 @@ experiment treatment to each incoming request to the router.
 ![experiment_manager_data_types](./assets/exp_runner_plugin_diagram.png)
 
 ### Pre-requisites 
- * Golang 1.18
+ * Golang 1.20
  * Git
  * Docker
 
@@ -71,7 +71,7 @@ library, which is added into the plugin module as the dependency in [`go.mod`](.
 ```shell
 module github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded
 
-go 1.18
+go 1.20
 
 require github.com/caraml-dev/turing/engines/experiment v1.0.0
 

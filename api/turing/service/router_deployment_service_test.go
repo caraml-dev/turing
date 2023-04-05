@@ -11,7 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	merlin "github.com/gojek/merlin/client"
+	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 
 	"github.com/pkg/errors"

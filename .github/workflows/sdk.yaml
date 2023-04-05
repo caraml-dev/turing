@@ -32,7 +32,7 @@ jobs:
         working-directory: ./sdk
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -58,7 +58,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
@@ -80,7 +80,7 @@ jobs:
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # fetch full history for a proper version number assignment
           fetch-depth: 0

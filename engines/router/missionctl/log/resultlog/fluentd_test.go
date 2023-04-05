@@ -3,6 +3,7 @@ package resultlog
 import (
 	"testing"
 
+	//nolint:all
 	"bou.ke/monkey"
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/stretchr/testify/assert"

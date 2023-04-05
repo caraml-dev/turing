@@ -5,7 +5,7 @@ global:
 image:
   pullPolicy: IfNotPresent
   registry: ghcr.io
-  repository: gojek/merlin
+  repository: caraml-dev/merlin
   tag: v0.9.1
 replicaCount: "1"
 resources:
@@ -26,7 +26,7 @@ ingress:
 environment: dev
 homepage: /merlin
 apiHost: http://merlin.mlp/v1
-docsURL: "https://github.com/gojek/merlin/blob/main/docs/getting-started/README.md"
+docsURL: "https://github.com/caraml-dev/merlin/blob/main/docs/getting-started/README.md"
 
 # Comma-separated value of Docker registries that can be chosen in deployment page
 dockerRegistries: docker.io,ghcr.io/gojek
@@ -38,10 +38,10 @@ mlpApi:
 
 imageBuilder:
   clusterName: "dev"
-  buildContextURI: "git://TOKEN@github.com/gojek/merlin.git#refs/tags/v0.1"
+  buildContextURI: "git://TOKEN@github.com/caraml-dev/merlin.git#refs/tags/v0.1"
   baseImage: ""
   dockerfilePath: "./Dockerfile"
-  predictionJobBuildContextURI: "git://TOKEN@github.com/gojek/merlin.git#refs/tags/v0.1"
+  predictionJobBuildContextURI: "git://TOKEN@github.com/caraml-dev/merlin.git#refs/tags/v0.1"
   predictionJobBaseImage: "gojek/mlp/merlin-pyspark:v0.4.1"
   predictionJobDockerfilePath: "docker/app.Dockerfile"
   namespace: "mlp"

@@ -1,6 +1,6 @@
 module github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded
 
-go 1.18
+go 1.20
 
 require (
 	github.com/caraml-dev/turing/engines/experiment v1.0.0

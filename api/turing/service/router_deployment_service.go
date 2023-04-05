@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	merlin "github.com/gojek/merlin/client"
+	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"

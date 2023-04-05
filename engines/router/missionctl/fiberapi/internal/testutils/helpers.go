@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -35,7 +35,7 @@ func NewFiberCaller(t testing.TB, callerID string) fiber.Component {
 func NewHTTPFiberRequest(t testing.TB, header http.Header, body string) fiber.Request {
 	r, err := fiberHttp.NewHTTPRequest(&http.Request{
 		Header: header,
-		Body:   ioutil.NopCloser(strings.NewReader(body)),
+		Body:   io.NopCloser(strings.NewReader(body)),
 	})
 	if err != nil {
 		t.Fatal(err)

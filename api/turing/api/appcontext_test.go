@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
+	//nolint:all
 	"bou.ke/monkey"
-	merlin "github.com/gojek/merlin/client"
+	merlin "github.com/caraml-dev/merlin/client"
 	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/stretchr/testify/assert"

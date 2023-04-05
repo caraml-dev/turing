@@ -4,7 +4,7 @@ Turing enables DS teams to run ML experiments in the production environment.
 
 ## Local Development
 Requirements:
-* Golang 1.18
+* Golang 1.20
 
 ### Running the Turing Router locally
 1. Provide configs for the turing router. Some sample configs are in `configs/`

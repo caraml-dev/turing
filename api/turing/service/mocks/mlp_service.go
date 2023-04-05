@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	client "github.com/gojek/merlin/client"
+	client "github.com/caraml-dev/merlin/client"
 
 	apiclient "github.com/gojek/mlp/api/client"
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	merlin "github.com/gojek/merlin/client"
+	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/gojek/mlp/api/client"
 	testifyAssert "github.com/stretchr/testify/assert"
 	"gotest.tools/assert"
