@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useMemo } from "react";
+import React, { Fragment, useContext, useMemo, useRef } from "react";
 import {
   EuiBadge,
   EuiCallOut,
@@ -8,7 +8,10 @@ import {
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
+  EuiButtonEmpty,
   EuiText,
+  EuiFlexItem,
+  EuiFlexGroup
 } from "@elastic/eui";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
@@ -17,6 +20,7 @@ import { DeploymentStatusHealth } from "../../components/status_health/Deploymen
 import { JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
 import { DateFromNow } from "@caraml-dev/ui-lib";
+import { DeleteJobModal } from "../components/modal/DeleteJobModal";
 
 export const ListEnsemblingJobsTable = ({
   items,
@@ -28,7 +32,10 @@ export const ListEnsemblingJobsTable = ({
   onQueryChange,
   onPaginationChange,
   onRowClick,
+  onSuccessDelete
 }) => {
+  const deleteJobRef = useRef()
+
   const navigate = useNavigate();
   const {
     appConfig: {
@@ -56,6 +63,10 @@ export const ListEnsemblingJobsTable = ({
   }, [filter]);
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
+
+  const handleDeleteJob = (job) => {
+    deleteJobRef.current(job)
+  }
 
   const columns = [
     {
@@ -121,20 +132,37 @@ export const ListEnsemblingJobsTable = ({
       render: (date) => <DateFromNow date={date} size={defaultTextSize} />,
     },
     {
-      name: "Actions",
-      actions: [
-        {
-          name: "Monitoring",
-          description: "Open Monitoring Dashboard",
-          icon: "visLine",
-          type: "icon",
-          isPrimary: true,
-          onClick: ({ monitoring_url }) => {
-            window.open(monitoring_url, "_blank");
-          },
-          enabled: ({ monitoring_url }) => !!monitoring_url,
-        },
-      ],
+      field: "actions",
+      name: (
+        <FormLabelWithToolTip
+          label="Actions"
+          size={defaultIconSize}
+          content="Ensembling Job actions"
+        />
+      ),
+      render: (id, item) => (
+        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+          <EuiFlexItem grow={false} >
+            <EuiButtonEmpty 
+              onClick={(_) => window.open(item.monitoring_url, "_blank")}
+              iconType="visLine"
+              iconSide="left"
+              size="xs">
+              <EuiText size="xs">Monitoring</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} >
+            <EuiButtonEmpty
+                onClick={() => handleDeleteJob(item)}
+                color={"danger"}
+                iconType="minusInCircle"
+                iconSide="left"
+                size="xs">
+              <EuiText size="xs" >Terminate</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
   ];
 
@@ -174,8 +202,8 @@ export const ListEnsemblingJobsTable = ({
     ],
   };
 
-  const cellProps = (item) =>
-    onRowClick
+  const cellProps = (item, column) =>
+    onRowClick && column.field !=="actions"
       ? {
         style: { cursor: "pointer" },
         onClick: () => onRowClick(item),
@@ -204,6 +232,10 @@ export const ListEnsemblingJobsTable = ({
         responsive={true}
         tableLayout="auto"
       />
+      <DeleteJobModal
+          onSuccess={onSuccessDelete}
+          deleteJobRef={deleteJobRef}
+        />
     </Fragment>
   );
 };
