@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	bou.ke/monkey v1.0.2
+	cloud.google.com/go/storage v1.29.0
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20220214044918-55732a6a392c
 	github.com/antihax/optional v1.0.0
