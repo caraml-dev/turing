@@ -240,9 +240,9 @@ github.com/butuzov/ireturn v0.1.1/go.mod h1:Wh6Zl3IMtTpaIKbmwzqi6olnM9ptYQxxVacM
 github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae/go.mod h1:S/7n9copUssQ56c7aAgHqftWO4LTf4xY6CGWt8Bc+3M=
 github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee/go.mod h1:S/7n9copUssQ56c7aAgHqftWO4LTf4xY6CGWt8Bc+3M=
 github.com/cactus/go-statsd-client/statsd v0.0.0-20200423205355-cb0885a1018c/go.mod h1:l/bIBLeOl9eX+wxJAzxS4TveKRtAqlyDpHjhkfO0MEI=
-github.com/caraml-dev/merlin/api v0.0.0-20230403061454-b55c4bd665c0 h1:MEk2mKBPRGm2TfW9LecK+IL1sqLP6Tgdd1kHphw/l4M=
-github.com/caraml-dev/merlin/api v0.0.0-20230403061454-b55c4bd665c0/go.mod h1:BRGKVbv3zEu9rE6pE2RNlj/IZfqy/3HEqBQGLK5rHMc=
-github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403061454-b55c4bd665c0/go.mod h1:o5bBimADnX50l4zuTWMRM9wh4zECCmynxk/lFGrh5NQ=
+github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429 h1:utxGPa/erqKIUhgBFMgnbORjKUIqVKLs7VXa0ZB0jNY=
+github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429/go.mod h1:BRGKVbv3zEu9rE6pE2RNlj/IZfqy/3HEqBQGLK5rHMc=
+github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403075012-795947162429/go.mod h1:jYSIcxx7FDccKSva3mo12YhQ0rYuP4MOEbgSveY82HE=
 github.com/caraml-dev/universal-prediction-interface v0.3.4 h1:cPytzpjXE/8RhSw3iS0JFZzNdM3tJ/l8UcHTPrxQWEo=
 github.com/caraml-dev/universal-prediction-interface v0.3.4/go.mod h1:e0qmFOXQxx8HFg5ObYyQO3WVnrqsr5v5JApFmeF7eJo=
 github.com/casbin/casbin v1.7.0/go.mod h1:c67qKN6Oum3UF5Q1+BByfFxkwKvhwW57ITjqwtzR1KE=
@@ -1266,7 +1266,6 @@ github.com/mitchellh/mapstructure v1.4.2/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RR
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/osext v0.0.0-20151018003038-5e2d6d41470f/go.mod h1:OkQIRizQZAeMln+1tSwduZz7+Af5oFlKirV/MSYes2A=
-github.com/mitchellh/protoc-gen-go-json v1.0.0/go.mod h1:RB1NY3ZteDVJDkCF+RJz0/zRd/FV5XR7RGRp4OIkIFI=
 github.com/mitchellh/reflectwalk v1.0.0/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/mitchellh/reflectwalk v1.0.1/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=

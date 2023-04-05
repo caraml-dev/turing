@@ -208,8 +208,8 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.9.0
 
-	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20230403061454-b55c4bd665c0
-	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403061454-b55c4bd665c0
+	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429
+	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403075012-795947162429
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
