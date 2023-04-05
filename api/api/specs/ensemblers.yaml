@@ -145,7 +145,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsemblerId"
-          description: A JSON object representing an instance of deleted ensembler
+          description: A JSON object representing an id of deleted ensembler
       summary: Delete Ensembler by its ID
 
 components:
