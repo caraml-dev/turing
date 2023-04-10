@@ -347,7 +347,10 @@ func TestNewAppContext(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: testCfg.MlflowConfig.TrackingURL, ArtifactServiceType: testCfg.MlflowConfig.ArtifactServiceType})
+	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{
+		TrackingURL:         testCfg.MlflowConfig.TrackingURL,
+		ArtifactServiceType: testCfg.MlflowConfig.ArtifactServiceType,
+	})
 	assert.NoError(t, err)
 
 	assert.Equal(t, &AppContext{

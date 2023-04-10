@@ -162,7 +162,10 @@ func NewAppContext(
 	}
 
 	// Initialise Mlflow delete package
-	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: cfg.MlflowConfig.TrackingURL, ArtifactServiceType: cfg.MlflowConfig.ArtifactServiceType})
+	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{
+		TrackingURL:         cfg.MlflowConfig.TrackingURL,
+		ArtifactServiceType: cfg.MlflowConfig.ArtifactServiceType,
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing mlflow delete package")
 	}

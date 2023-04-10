@@ -144,9 +144,9 @@ func (c EnsemblersController) DeleteEnsembler(
 	if err != nil {
 		return NotFound("ensembler not found", err.Error())
 	}
-	ensemblerId := ensembler.GetID()
+	ensemblerID := ensembler.GetID()
 	// CHECK IF STATUS ROUTER IS DEPLOYED
-	activeRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerId)
+	activeRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerID)
 	if err != nil {
 		return InternalServerError("Delete ensembler failed", err.Error())
 	}
@@ -156,7 +156,7 @@ func (c EnsemblersController) DeleteEnsembler(
 
 	// CHECK IF THERE ARE ANY ENSEMBLING JOBS WITH STATUS PENDING, BUILDING, RUNNING USING THE ENSEMBLER
 	ensemblingJobOption := service.EnsemblingJobListOptions{
-		EnsemblerID: &ensemblerId,
+		EnsemblerID: &ensemblerID,
 		Statuses: []models.Status{
 			models.JobPending,
 			models.JobBuildingImage,
