@@ -1,8 +1,11 @@
 package api
 
 import (
+	"net/http"
 	"testing"
 	"time"
+
+	"github.com/gojek/mlp/api/pkg/client/mlflow"
 
 	//nolint:all
 	"bou.ke/monkey"
@@ -216,6 +219,10 @@ func TestNewAppContext(t *testing.T) {
 				PathPrefix: "turing",
 			},
 		},
+		MlflowConfig: &config.MlflowConfig{
+			TrackingURL:         "",
+			ArtifactServiceType: "nop",
+		},
 	}
 	// Create test auth enforcer
 	testAuthorizer := &middleware.Authorizer{}
@@ -340,6 +347,9 @@ func TestNewAppContext(t *testing.T) {
 
 	assert.NoError(t, err)
 
+	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: testCfg.MlflowConfig.TrackingURL, ArtifactServiceType: testCfg.MlflowConfig.ArtifactServiceType})
+	assert.NoError(t, err)
+
 	assert.Equal(t, &AppContext{
 		Authorizer: testAuthorizer,
 		DeploymentService: service.NewDeploymentService(
@@ -363,7 +373,8 @@ func TestNewAppContext(t *testing.T) {
 				defaultEnvironment: nil,
 			},
 		),
-		AlertService: alertService,
-		BatchRunners: []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		AlertService:  alertService,
+		BatchRunners:  []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		MlflowService: mlflowService,
 	}, appCtx)
 }
