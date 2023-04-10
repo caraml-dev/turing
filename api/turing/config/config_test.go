@@ -224,6 +224,10 @@ func TestLoad(t *testing.T) {
 				TuringUIConfig: &config.SinglePageApplicationConfig{
 					ServingPath: "/turing",
 				},
+				MlflowConfig: &config.MlflowConfig{
+					TrackingURL:         "",
+					ArtifactServiceType: "nop",
+				},
 				OpenapiConfig: &config.OpenapiConfig{
 					ValidationEnabled: true,
 					SpecFile:          "api/openapi.bundle.yaml",
@@ -360,6 +364,10 @@ func TestLoad(t *testing.T) {
 						ServingDirectory: "",
 						ServingPath:      "/api-docs/",
 					},
+				},
+				MlflowConfig: &config.MlflowConfig{
+					TrackingURL:         "",
+					ArtifactServiceType: "nop",
 				},
 				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{
@@ -516,6 +524,10 @@ func TestLoad(t *testing.T) {
 						ServingDirectory: "",
 						ServingPath:      "/swagger-ui",
 					},
+				},
+				MlflowConfig: &config.MlflowConfig{
+					TrackingURL:         "",
+					ArtifactServiceType: "nop",
 				},
 				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{
@@ -695,6 +707,10 @@ func TestLoad(t *testing.T) {
 						ServingDirectory: "static/swagger-ui",
 						ServingPath:      "/swagger-ui",
 					},
+				},
+				MlflowConfig: &config.MlflowConfig{
+					TrackingURL:         "",
+					ArtifactServiceType: "nop",
 				},
 				Experiment: map[string]config.EngineConfig{
 					"qux": map[string]interface{}{

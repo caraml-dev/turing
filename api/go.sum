@@ -1091,8 +1091,6 @@ github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69
 github.com/gojek/fiber v0.2.2 h1:N5d5Hlu7F4GZUnTs5yAp6bmFIOI/sUDhE2sCgiDsDV0=
 github.com/gojek/fiber v0.2.2/go.mod h1:9T/n6YWwBwVrlslRdn9UNZcOfIW1jA0IKO0FB5Z3sTQ=
 github.com/gojek/heimdall/v7 v7.0.2/go.mod h1:Z43HtMid7ysSjmsedPTXAki6jcdcNVnjn5pmsTyiMic=
-github.com/gojek/mlp v1.7.6-0.20230330040356-543add5a5bb2 h1:31YPdF4ZkyqCSde+pl7nSYisQ0Tw3yFU4ZkSB4Lvlpw=
-github.com/gojek/mlp v1.7.6-0.20230330040356-543add5a5bb2/go.mod h1:mwv58k3vIQkWviVn7LQ31ETHv1QnTwqNEAk6KE7pjPc=
 github.com/gojek/valkyrie v0.0.0-20180215180059-6aee720afcdf/go.mod h1:QzhUKaYKJmcbTnCYCAVQrroCOY7vOOI8cSQ4NbuhYf0=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 h1:zN2lZNZRflqFyxVaTIU61KNKQ9C0055u9CAfpmqUvo4=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3/go.mod h1:nPpo7qLxd6XL3hWJG/O60sR8ZKfMCiIoNap5GvD12KU=
@@ -2187,6 +2185,8 @@ github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f/go
 github.com/zaffka/zap-to-hclog v0.10.5 h1:6s9uMa4H8slD3c0UE7Ga3DreJci95Ujjbc8X+bMVPAU=
 github.com/zaffka/zap-to-hclog v0.10.5/go.mod h1:5b3vf3ndIbXOmBrnDHoCyh4F6h5VNtTO2va7AX17cwg=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
+github.com/zenovore/mlp v0.0.0-20230410065246-595fd7d1ac9b h1:oyP3rJ6IiDsCVUa+vLRbq5VpmYTMxDGS3MPdgtbI9so=
+github.com/zenovore/mlp v0.0.0-20230410065246-595fd7d1ac9b/go.mod h1:mwv58k3vIQkWviVn7LQ31ETHv1QnTwqNEAk6KE7pjPc=
 gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b/go.mod h1:T3BPAOm2cqquPa0MKWeNkmOM5RQsRhkrwMWonFMN7fE=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=

@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	bou.ke/monkey v1.0.2
-	cloud.google.com/go/storage v1.29.0
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20220214044918-55732a6a392c
 	github.com/antihax/optional v1.0.0
@@ -64,6 +63,7 @@ require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	cloud.google.com/go v0.107.0 // indirect
  	cloud.google.com/go/iam v0.8.0 // indirect
+	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
@@ -248,6 +248,8 @@ replace (
 
 	// The older version of k8 lib uses 0.4, UPI indirect depencies uses 1.2 which is compatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+
+	github.com/gojek/mlp => github.com/zenovore/mlp v0.0.0-20230410065246-595fd7d1ac9b
 
 	k8s.io/api => k8s.io/api v0.22.7
 

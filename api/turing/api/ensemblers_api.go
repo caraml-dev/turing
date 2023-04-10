@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -175,7 +176,7 @@ func (c EnsemblersController) DeleteEnsembler(
 		// IF PYFUNC, ALSO DELELETE FROM MLFLOW
 		s := strconv.FormatUint(uint64(pyFuncEnsembler.ExperimentID), 10)
 		fmt.Println(s)
-		err := c.MlflowService.DeleteExperiment(s, true)
+		err := c.MlflowService.DeleteExperiment(context.Background(), s, true)
 		if err != nil {
 			// Handle 404
 			return InternalServerError("Delete Failed", err.Error())

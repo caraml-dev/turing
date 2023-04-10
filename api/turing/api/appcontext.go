@@ -1,12 +1,9 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
-	"cloud.google.com/go/storage"
-	"github.com/gojek/mlp/api/pkg/artifact"
 	"github.com/gojek/mlp/api/pkg/client/mlflow"
 
 	"gorm.io/gorm"
@@ -164,15 +161,11 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
 	}
 
-	// Initialise MlflowClient
-	storageClient, err := storage.NewClient(context.Background())
+	// Initialise Mlflow delete package
+	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: cfg.MlflowConfig.TrackingURL, ArtifactServiceType: cfg.MlflowConfig.ArtifactServiceType})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Failed initializing gcs for mlflow delete package")
+		return nil, errors.Wrapf(err, "Failed initializing mlflow delete package")
 	}
-
-	gcsClient := artifact.NewGcsClient(storageClient, artifact.Config{Ctx: context.Background()})
-	// TODO: CHANGE TO GET FROM CONFIG
-	mlflowService := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{TrackingURL: "https://mlflow.d.ai.golabs.io"}, gcsClient)
 
 	appContext := &AppContext{
 		Authorizer:            authorizer,
