@@ -4,7 +4,7 @@
 * [Concepts](concepts.md)
 
 ## User Guides
-* [Create a project](how-to/create-project.md)
+* [Create a project](https://docs.caraml.dev/user-guides/projects/create-project)
 * [Create a router](how-to/create-a-router/README.md)
     * [Configure general settings](how-to/create-a-router/configure-general-settings.md)
     * [Configure routes](how-to/create-a-router/configure-routes.md)

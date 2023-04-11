@@ -10,7 +10,7 @@ In Turing, your will need to create a router with an optional Experiment Engine,
 * Open the Turing homepage.
 
 * Choose a project in which you want to create your router. 
-If such a project does not exist, you can [create a project](../create-project.md)
+If such a project does not exist, you can [create a project](https://docs.caraml.dev/user-guides/projects/create-project)
 
 ![](../../.gitbook/assets/projects_dropdown.png)
 
