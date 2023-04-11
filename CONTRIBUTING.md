@@ -50,8 +50,6 @@ Having a minimal reproducible scenario gives us the necessary information withou
 
 A minimal reproduction allows us to quickly confirm a bug (or point out a coding problem) as well as confirm that we are fixing the right problem.
 
-We require a minimal reproduction to save maintainers' time and ultimately be able to fix more bugs.
-
 Unfortunately, we are not able to investigate / fix bugs without a minimal reproduction, so if we don't hear back from you, we are going to close an issue that doesn't have enough information to be reproduced.
 
 You can file new issues by selecting from our [new issue templates](https://github.com/caraml-dev/turing/issues/new/choose) and filling out the issue template.

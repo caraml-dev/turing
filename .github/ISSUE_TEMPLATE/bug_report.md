@@ -8,9 +8,11 @@ body:
       description: What Turing component is this issue related to?
       multiple: true
       options:
-        - Core
+        - API
+        - Router
         - Experiment Engine Plugin
         - Pyfunc Ensembler
+        - Batch Ensembler
         - SDK
         - UI
         - Others
