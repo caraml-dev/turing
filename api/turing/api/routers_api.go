@@ -20,7 +20,7 @@ type RoutersController struct {
 // ListRouters lists all routers configured in the provided project.
 // If none are found, an error will be thrown.
 func (c RoutersController) ListRouters(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse input
@@ -41,7 +41,7 @@ func (c RoutersController) ListRouters(
 
 // GetRouter gets a router matching the provided routerID.
 func (c RoutersController) GetRouter(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse input
@@ -59,7 +59,7 @@ func (c RoutersController) GetRouter(
 // a router within the provided project with the same name, this method will throw an error.
 // If not, a new Router and associated RouterVersion will be created and deployed.
 func (c RoutersController) CreateRouter(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {
@@ -134,7 +134,7 @@ func (c RoutersController) CreateRouter(
 // UpdateRouter updates a router from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created and deployed.
-func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body interface{}) *Response {
+func (c RoutersController) UpdateRouter(_ *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
 	var errResp *Response
 	var project *mlp.Project
@@ -196,7 +196,7 @@ func (c RoutersController) UpdateRouter(r *http.Request, vars RequestVars, body 
 
 // DeleteRouter deletes a router and all its associated versions.
 func (c RoutersController) DeleteRouter(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
@@ -231,9 +231,9 @@ func (c RoutersController) DeleteRouter(
 // DeployRouter deploys the current version of the given router into the associated
 // kubernetes cluster. If there is no current version, an error is returned.
 func (c RoutersController) DeployRouter(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
-	body interface{},
+	_ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response
@@ -284,9 +284,9 @@ func (c RoutersController) DeployRouter(
 
 // UndeployRouter deletes the given router specs from the associated kubernetes cluster
 func (c RoutersController) UndeployRouter(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
-	body interface{},
+	_ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response
@@ -308,9 +308,9 @@ func (c RoutersController) UndeployRouter(
 	return Ok(map[string]int{"router_id": int(router.ID)})
 }
 
-func (c RoutersController) ListRouterEvents(r *http.Request,
+func (c RoutersController) ListRouterEvents(_ *http.Request,
 	vars RequestVars,
-	body interface{},
+	_ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response
