@@ -220,7 +220,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "test-env", "secret", 20, 1.5)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 1.5)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)

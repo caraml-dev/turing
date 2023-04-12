@@ -367,7 +367,6 @@ func (ds *deploymentService) createServices(
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion,
 			project,
-			envType,
 			secretName,
 			knativeQueueProxyResourcePercentage,
 			userContainerLimitRequestFactor,

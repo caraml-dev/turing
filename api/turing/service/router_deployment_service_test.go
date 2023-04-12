@@ -94,7 +94,6 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	secretName string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
@@ -107,7 +106,7 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 			Name:      fmt.Sprintf("%s-ensembler-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 			Labels: map[string]string{
-				"env": envType,
+				"env": "staging",
 			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,

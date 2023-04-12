@@ -67,7 +67,6 @@ type ClusterServiceBuilder interface {
 	NewEnsemblerService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		secretName string,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
@@ -218,7 +217,6 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 func (sb *clusterSvcBuilder) NewEnsemblerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
