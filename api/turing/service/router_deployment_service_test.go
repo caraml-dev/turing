@@ -36,7 +36,6 @@ type mockClusterServiceBuilder struct {
 func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	versionEndpoint string,
 ) (*cluster.VirtualService, error) {
 	return &cluster.VirtualService{

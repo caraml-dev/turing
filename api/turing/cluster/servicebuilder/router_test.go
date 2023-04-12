@@ -1058,7 +1058,7 @@ func TestNewRouterEndpoint(t *testing.T) {
 		MatchURIPrefixes: defaultMatchURIPrefixes,
 	}
 
-	got, err := sb.NewRouterEndpoint(&routerVersion, project, "test-env", versionEndpoint)
+	got, err := sb.NewRouterEndpoint(&routerVersion, project, versionEndpoint)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, got)
 }

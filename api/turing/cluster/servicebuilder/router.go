@@ -166,7 +166,6 @@ func (sb *clusterSvcBuilder) NewRouterService(
 func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	versionEndpoint string,
 ) (*cluster.VirtualService, error) {
 	labels := buildLabels(project, routerVersion.Router)

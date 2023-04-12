@@ -206,7 +206,7 @@ func (ds *deploymentService) DeployRouterVersion(
 
 	// Deploy or update the virtual service
 	eventsCh.Write(models.NewInfoEvent(models.EventStageUpdatingEndpoint, "updating router endpoint"))
-	routerEndpoint, err := ds.svcBuilder.NewRouterEndpoint(routerVersion, project, ds.environmentType, endpoint)
+	routerEndpoint, err := ds.svcBuilder.NewRouterEndpoint(routerVersion, project, endpoint)
 	if err != nil {
 		eventsCh.Write(models.NewErrorEvent(
 			models.EventStageUpdatingEndpoint, "failed to update router endpoint: %s", err.Error()))

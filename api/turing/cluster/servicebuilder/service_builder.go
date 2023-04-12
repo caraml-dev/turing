@@ -94,7 +94,6 @@ type ClusterServiceBuilder interface {
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		versionEndpoint string,
 	) (*cluster.VirtualService, error)
 	NewSecret(
