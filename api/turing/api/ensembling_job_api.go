@@ -18,7 +18,7 @@ type EnsemblingJobController struct {
 // Create is a HTTP Post Method that creates an Ensembling job.
 // This method will only return the acceptance/rejection of the job rather than the actual result of the job.
 func (c EnsemblingJobController) Create(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {

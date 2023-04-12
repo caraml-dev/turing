@@ -59,7 +59,7 @@ func (c AlertsController) CreateAlert(r *http.Request, vars RequestVars, body in
 	return Ok(created)
 }
 
-func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interface{}) *Response {
+func (c AlertsController) ListAlerts(_ *http.Request, vars RequestVars, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
@@ -79,7 +79,7 @@ func (c AlertsController) ListAlerts(r *http.Request, vars RequestVars, _ interf
 	return Ok(alerts)
 }
 
-func (c AlertsController) GetAlert(r *http.Request, vars RequestVars, _ interface{}) *Response {
+func (c AlertsController) GetAlert(_ *http.Request, vars RequestVars, _ interface{}) *Response {
 	if c.AlertService == nil {
 		return BadRequest(ErrAlertDisabled.Error(), "")
 	}
