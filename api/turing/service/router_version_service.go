@@ -31,9 +31,9 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
-	// FindActiveRouterUsingEnsembler Finds routerVersion with status pending or deployed
+	// FindActiveRouterUsingEnsembler Finds routerVersion with status parameter
 	// that use ensembler with id = ensemblerId
-	FindActiveRouterUsingEnsembler(ensemblerID models.ID) ([]*models.RouterVersion, error)
+	FindActiveRouterUsingEnsembler(ensemblerID models.ID, status []models.RouterVersionStatus) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -266,11 +266,13 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 
 func (service *routerVersionsService) FindActiveRouterUsingEnsembler(
 	ensemblerID models.ID,
+	status []models.RouterVersionStatus,
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := service.query().
-		Where("router_versions.ensembler_id = ?", ensemblerID).
-		Where("router_versions.status = 'pending' OR router_versions.status = 'deployed'")
+		Where("ensembler_id = ?", ensemblerID).
+		Where("status IN (?)", status)
+
 	if err := query.Error; err != nil {
 		return nil, err
 	}

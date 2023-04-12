@@ -146,7 +146,11 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	ensemblerID := ensembler.GetID()
 	// CHECK IF STATUS ROUTER IS DEPLOYED
-	activeRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerID)
+	routerVersionStatusActive := []models.RouterVersionStatus{
+		models.RouterVersionStatusDeployed,
+		models.RouterVersionStatusPending,
+	}
+	activeRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerID, routerVersionStatusActive)
 	if err != nil {
 		return InternalServerError("Delete ensembler failed", err.Error())
 	}
@@ -155,7 +159,7 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 
 	// CHECK IF THERE ARE ANY ENSEMBLING JOBS WITH STATUS PENDING, BUILDING, RUNNING USING THE ENSEMBLER
-	ensemblingJobOption := service.EnsemblingJobListOptions{
+	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: &ensemblerID,
 		Statuses: []models.Status{
 			models.JobPending,
@@ -163,12 +167,43 @@ func (c EnsemblersController) DeleteEnsembler(
 			models.JobRunning,
 		},
 	}
-	activeEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobOption)
+	activeEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobActiveOption)
 	if err != nil {
 		return InternalServerError("Delete ensembler failed", err.Error())
 	}
 	if activeEnsemblingJob.Paging.Total >= 1 {
 		return BadRequest("Delete ensembler failed", "There are active ensembling job using this ensembler")
+	}
+
+	// DELETING UNUSED ROUTER
+	routerVersionStatusInactive := []models.RouterVersionStatus{
+		models.RouterVersionStatusFailed,
+		models.RouterVersionStatusUndeployed,
+	}
+	inactiveRouter, err := c.RouterVersionsService.FindActiveRouterUsingEnsembler(ensemblerID, routerVersionStatusInactive)
+	if err != nil {
+		return InternalServerError("Delete ensembler failed", err.Error())
+	}
+	for _, routerVersion := range inactiveRouter {
+		err = c.RouterVersionsService.Delete(routerVersion)
+	}
+
+	// DELETING UNUSED ENSEMBLING JOBS
+	ensemblingJobInactiveOption := service.EnsemblingJobListOptions{
+		EnsemblerID: &ensemblerID,
+		Statuses: []models.Status{
+			models.JobFailed,
+			models.JobCompleted,
+			models.JobFailedBuildImage,
+			models.JobFailedSubmission,
+		},
+	}
+	inactiveEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobInactiveOption)
+	if err != nil {
+		return InternalServerError("Delete ensembler failed", err.Error())
+	}
+	for _, ensemblingJob := range inactiveEnsemblingJob.Results {
+		err = c.EnsemblingJobService.Delete(ensemblingJob)
 	}
 
 	// CHECK IF THE ENSEMBLER IS A PYFUNC ENSEMBLER
