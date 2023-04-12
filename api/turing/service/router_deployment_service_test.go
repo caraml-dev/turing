@@ -34,9 +34,9 @@ type mockClusterServiceBuilder struct {
 }
 
 func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
-	routerVersion *models.RouterVersion,
-	project *mlp.Project,
-	versionEndpoint string,
+	_ *models.RouterVersion,
+	_ *mlp.Project,
+	_ string,
 ) (*cluster.VirtualService, error) {
 	return &cluster.VirtualService{
 		Name:      "test-svc-turing-router",
@@ -94,7 +94,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	secretName string,
+	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -118,7 +118,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
 	envType string,
-	secretName string,
+	_ string,
 	expConfig json.RawMessage,
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
@@ -156,8 +156,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 func (msb *mockClusterServiceBuilder) NewFluentdService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	serviceAccountSecretName string,
-	cfg *config.FluentdConfig,
+	_ string,
+	_ *config.FluentdConfig,
 ) *cluster.KubernetesService {
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
@@ -168,7 +168,7 @@ func (msb *mockClusterServiceBuilder) NewFluentdService(
 	}
 }
 
-func (msb *mockClusterServiceBuilder) GetRouterServiceName(ver *models.RouterVersion) string {
+func (msb *mockClusterServiceBuilder) GetRouterServiceName(_ *models.RouterVersion) string {
 	return "test-router-svc"
 }
 
