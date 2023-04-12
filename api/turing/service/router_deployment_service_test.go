@@ -82,9 +82,6 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-enricher-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
-			Labels: map[string]string{
-				"env": "staging",
-			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
@@ -105,9 +102,6 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-ensembler-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
-			Labels: map[string]string{
-				"env": "staging",
-			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
@@ -139,9 +133,6 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: strconv.FormatBool(sentryEnabled)},
 				{Name: "SENTRY_DSN", Value: sentryDSN},
-			},
-			Labels: map[string]string{
-				"env": envType,
 			},
 			ConfigMap: &cluster.ConfigMap{
 				Name: fmt.Sprintf("%s-fiber-config-%d", rv.Router.Name, rv.Version),
@@ -268,9 +259,6 @@ func TestDeployEndpoint(t *testing.T) {
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-enricher-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    20,
 		UserContainerLimitRequestFactor: 1.75,
@@ -279,9 +267,6 @@ func TestDeployEndpoint(t *testing.T) {
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-ensembler-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    20,
 		UserContainerLimitRequestFactor: 1.75,
@@ -298,9 +283,6 @@ func TestDeployEndpoint(t *testing.T) {
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: "true"},
 				{Name: "SENTRY_DSN", Value: "test:dsn"},
-			},
-			Labels: map[string]string{
-				"env": envType,
 			},
 			ConfigMap: &cluster.ConfigMap{
 				Name: fmt.Sprintf("%s-fiber-config-%d",
