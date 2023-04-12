@@ -9,11 +9,47 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 	"github.com/caraml-dev/turing/api/turing/models"
 )
+
+var testTopologySpreadConstraints = []corev1.TopologySpreadConstraint{
+	{
+		MaxSkew:           1,
+		TopologyKey:       "kubernetes.io/hostname",
+		WhenUnsatisfiable: corev1.ScheduleAnyway,
+	},
+	{
+		MaxSkew:           2,
+		TopologyKey:       "kubernetes.io/hostname",
+		WhenUnsatisfiable: corev1.DoNotSchedule,
+		LabelSelector: &metav1.LabelSelector{
+			MatchLabels: map[string]string{
+				"app-label": "spread",
+			},
+		},
+	},
+	{
+		MaxSkew:           3,
+		TopologyKey:       "kubernetes.io/hostname",
+		WhenUnsatisfiable: corev1.DoNotSchedule,
+		LabelSelector: &metav1.LabelSelector{
+			MatchLabels: map[string]string{
+				"app-label": "spread",
+			},
+			MatchExpressions: []metav1.LabelSelectorRequirement{
+				{
+					Key:      "app-expression",
+					Operator: metav1.LabelSelectorOpIn,
+					Values:   []string{"1"},
+				},
+			},
+		},
+	},
+}
 
 type testSuiteNewService struct {
 	filePath     string
@@ -23,7 +59,7 @@ type testSuiteNewService struct {
 }
 
 func TestNewEnricherService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 
 	tests := map[string]testSuiteNewService{
@@ -64,6 +100,7 @@ func TestNewEnricherService(t *testing.T) {
 				MaxReplicas:                     2,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    10,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -97,7 +134,7 @@ func TestNewEnricherService(t *testing.T) {
 }
 
 func TestNewEnsemblerService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	tests := map[string]testSuiteNewService{
 		"success": {
@@ -137,6 +174,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				MaxReplicas:                     3,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -178,6 +216,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				MaxReplicas:                     3,
 				AutoscalingMetric:               "cpu",
 				AutoscalingTarget:               "90",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},

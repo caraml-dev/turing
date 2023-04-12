@@ -20,7 +20,7 @@ import (
 )
 
 func TestNewRouterService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	enrEndpoint := "http://test-svc-turing-enricher-1.test-project.svc.cluster.local/echo?delay=10ms"
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
@@ -165,6 +165,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -263,6 +264,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -369,6 +371,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -467,6 +470,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
 				AutoscalingTarget:               "100",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -565,6 +569,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
 				AutoscalingTarget:               "100",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -663,6 +668,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
 				AutoscalingTarget:               "100",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -761,6 +767,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -888,6 +895,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "rps",
 				AutoscalingTarget:               "100",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -963,6 +971,7 @@ func TestNewRouterService(t *testing.T) {
 				MaxReplicas:                     4,
 				AutoscalingMetric:               "memory",
 				AutoscalingTarget:               "90",
+				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
 			},
@@ -1016,7 +1025,7 @@ func TestNewRouterService(t *testing.T) {
 
 func TestNewRouterEndpoint(t *testing.T) {
 	// Get router version
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30)
+	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	fileBytes, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_version_success.json"))
 	require.NoError(t, err)
