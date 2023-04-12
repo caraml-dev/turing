@@ -123,7 +123,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 
 	// Build env vars
 	envs, err := sb.buildRouterEnvs(namespace, envType, routerDefaults,
-		sentryEnabled, sentryDSN, secretName, routerVersion)
+		sentryEnabled, sentryDSN, routerVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,6 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
-	secretName string,
 	ver *models.RouterVersion,
 ) ([]corev1.EnvVar, error) {
 	// Add app name, router timeout, jaeger collector

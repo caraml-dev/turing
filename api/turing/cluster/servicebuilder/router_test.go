@@ -1193,7 +1193,6 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				tt.args.routerDefaults,
 				tt.args.sentryEnabled,
 				tt.args.sentryDSN,
-				tt.args.secretName,
 				tt.args.ver)
 			assert.Equal(t, tt.want, got)
 		})
