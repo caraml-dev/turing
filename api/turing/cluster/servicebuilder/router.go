@@ -127,6 +127,12 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	if err != nil {
 		return nil, err
 	}
+
+	topologySpreadConstraints, err := sb.getTopologySpreadConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	svc := &cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:                 name,
@@ -150,6 +156,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
 		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               routerVersion.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:       topologySpreadConstraints,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	}

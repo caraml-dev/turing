@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
-
-	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
+	corev1 "k8s.io/api/core/v1"
 
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/utils"
@@ -222,12 +222,13 @@ type SparkAppConfig struct {
 
 // DeploymentConfig captures the config related to the deployment of the turing routers
 type DeploymentConfig struct {
-	EnvironmentType   string        `validate:"required"`
-	Timeout           time.Duration `validate:"required"`
-	DeletionTimeout   time.Duration `validate:"required"`
-	MaxCPU            Quantity      `validate:"required"`
-	MaxMemory         Quantity      `validate:"required"`
-	MaxAllowedReplica int           `validate:"required"`
+	EnvironmentType           string        `validate:"required"`
+	Timeout                   time.Duration `validate:"required"`
+	DeletionTimeout           time.Duration `validate:"required"`
+	MaxCPU                    Quantity      `validate:"required"`
+	MaxMemory                 Quantity      `validate:"required"`
+	MaxAllowedReplica         int           `validate:"required"`
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint
 }
 
 // KubernetesLabelConfigs are the configurations for labeling

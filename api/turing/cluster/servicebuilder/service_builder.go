@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	corev1 "k8s.io/api/core/v1"
-
 	mlp "github.com/gojek/mlp/api/client"
+	"github.com/mitchellh/copystructure"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -110,9 +110,10 @@ type ClusterServiceBuilder interface {
 
 // clusterSvcBuilder implements ClusterServiceBuilder
 type clusterSvcBuilder struct {
-	MaxCPU            resource.Quantity
-	MaxMemory         resource.Quantity
-	MaxAllowedReplica int
+	MaxCPU                    resource.Quantity
+	MaxMemory                 resource.Quantity
+	MaxAllowedReplica         int
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint
 }
 
 // NewClusterServiceBuilder creates a new service builder with the supplied configs for defaults
@@ -120,11 +121,13 @@ func NewClusterServiceBuilder(
 	cpuLimit resource.Quantity,
 	memoryLimit resource.Quantity,
 	maxAllowedReplica int,
+	topologySpreadConstraints []corev1.TopologySpreadConstraint,
 ) ClusterServiceBuilder {
 	return &clusterSvcBuilder{
-		MaxCPU:            cpuLimit,
-		MaxMemory:         memoryLimit,
-		MaxAllowedReplica: maxAllowedReplica,
+		MaxCPU:                    cpuLimit,
+		MaxMemory:                 memoryLimit,
+		MaxAllowedReplica:         maxAllowedReplica,
+		TopologySpreadConstraints: topologySpreadConstraints,
 	}
 }
 
@@ -184,6 +187,11 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		}
 	}
 
+	topologySpreadConstraints, err := sb.getTopologySpreadConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	return sb.validateKnativeService(&cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:           name,
@@ -202,6 +210,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		MaxReplicas:                     enricher.ResourceRequest.MaxReplica,
 		AutoscalingMetric:               string(enricher.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               enricher.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:       topologySpreadConstraints,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})
@@ -264,6 +273,11 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		}
 	}
 
+	topologySpreadConstraints, err := sb.getTopologySpreadConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	return sb.validateKnativeService(&cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:           name,
@@ -282,6 +296,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		MaxReplicas:                     docker.ResourceRequest.MaxReplica,
 		AutoscalingMetric:               string(docker.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               docker.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:       topologySpreadConstraints,
 		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
 	})
@@ -331,6 +346,19 @@ func (sb *clusterSvcBuilder) validateKnativeService(
 			sb.MaxAllowedReplica)
 	}
 	return svc, nil
+}
+
+// getTopologySpreadConstraints Copies the topology spread constraints using the service builder's as a template
+func (sb *clusterSvcBuilder) getTopologySpreadConstraints() ([]corev1.TopologySpreadConstraint, error) {
+	topologySpreadConstraintsRaw, err := copystructure.Copy(sb.TopologySpreadConstraints)
+	if err != nil {
+		return nil, fmt.Errorf("Error copying topology spread constraints: %s", err)
+	}
+	topologySpreadConstraints, ok := topologySpreadConstraintsRaw.([]corev1.TopologySpreadConstraint)
+	if !ok {
+		return nil, fmt.Errorf("Error in type assertion of copied topology spread constraints interface: %s", err)
+	}
+	return topologySpreadConstraints, nil
 }
 
 func GetComponentName(routerVersion *models.RouterVersion, componentType string) string {
