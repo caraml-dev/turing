@@ -32,7 +32,7 @@ export const ListEnsemblingJobsTable = ({
   onQueryChange,
   onPaginationChange,
   onRowClick,
-  onSuccessDelete
+  onDeleteSuccess
 }) => {
   const deleteJobRef = useRef()
 
@@ -133,6 +133,7 @@ export const ListEnsemblingJobsTable = ({
     },
     {
       field: "actions",
+      align: "right",
       name: (
         <FormLabelWithToolTip
           label="Actions"
@@ -141,25 +142,27 @@ export const ListEnsemblingJobsTable = ({
         />
       ),
       render: (id, item) => (
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-          <EuiFlexItem grow={false} >
-            <EuiButtonEmpty 
-              onClick={(_) => window.open(item.monitoring_url, "_blank")}
-              iconType="visLine"
-              iconSide="left"
-              size="xs">
-              <EuiText size="xs">Monitoring</EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} >
-            <EuiButtonEmpty
-                onClick={() => handleDeleteJob(item)}
-                color={"danger"}
-                iconType="minusInCircle"
+        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+          <EuiFlexItem component="div" style={{alignItems: 'flex-start'}}>
+            <EuiFlexItem grow={false} >
+              <EuiButtonEmpty 
+                onClick={(_) => window.open(item.monitoring_url, "_blank")}
+                iconType="visLine"
                 iconSide="left"
                 size="xs">
-              <EuiText size="xs" >Terminate</EuiText>
-            </EuiButtonEmpty>
+                <EuiText size="xs">Monitoring</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} >
+              <EuiButtonEmpty
+                  onClick={() => handleDeleteJob(item)}
+                  color={"danger"}
+                  iconType="minusInCircle"
+                  iconSide="left"
+                  size="xs">
+                <EuiText size="xs" >Terminate</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -233,7 +236,7 @@ export const ListEnsemblingJobsTable = ({
         tableLayout="auto"
       />
       <DeleteJobModal
-          onSuccess={onSuccessDelete}
+          onSuccess={onDeleteSuccess}
           deleteJobRef={deleteJobRef}
         />
     </Fragment>

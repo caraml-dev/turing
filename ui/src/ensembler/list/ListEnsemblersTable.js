@@ -115,28 +115,31 @@ export const ListEnsemblersTable = ({
         header: true,
         fullWidth: false,
       },
+      align: "right",
       width: "20%",
       render: (id, ensembler) => (
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-          <EuiFlexItem grow={false} >
-            <EuiButtonEmpty 
-              onClick={(_) => navigate(`../jobs?ensembler_id=${ensembler.id}`)}
-              iconType="storage"
-              iconSide="left"
-              size="xs">
-              <EuiText size="xs">Batch Jobs</EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} >
-            <EuiButtonEmpty 
-                onClick={() => handleDeleteEnsembler(ensembler)}
-                color={"danger"}
-                iconType="trash"
+        <EuiFlexGroup component="div" direction="column" gutterSize="xs" alignItems="flexEnd" >
+          <EuiFlexItem component="div" style={{alignItems: 'flex-start'}}>
+            <EuiFlexItem grow={false} >
+              <EuiButtonEmpty 
+                onClick={(_) => navigate(`../jobs?ensembler_id=${ensembler.id}`)}
+                iconType="storage"
                 iconSide="left"
                 size="xs">
-              <EuiText size="xs" >Delete</EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>      
+                <EuiText size="xs">Batch Jobs</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} >
+              <EuiButtonEmpty 
+                  onClick={() => handleDeleteEnsembler(ensembler)}
+                  color={"danger"}
+                  iconType="trash"
+                  iconSide="left"
+                  size="xs">
+                <EuiText size="xs" >Delete</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>      
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
