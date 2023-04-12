@@ -352,7 +352,6 @@ func (ds *deploymentService) createServices(
 		enricherSvc, err := ds.svcBuilder.NewEnricherService(
 			routerVersion,
 			project,
-			envType,
 			secretName,
 			knativeQueueProxyResourcePercentage,
 			userContainerLimitRequestFactor,

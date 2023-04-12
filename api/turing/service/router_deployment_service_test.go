@@ -71,8 +71,7 @@ func (msb *mockClusterServiceBuilder) NewSecret(
 func (msb *mockClusterServiceBuilder) NewEnricherService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
-	secretName string,
+	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -84,7 +83,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 			Name:      fmt.Sprintf("%s-enricher-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 			Labels: map[string]string{
-				"env": envType,
+				"env": "staging",
 			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
