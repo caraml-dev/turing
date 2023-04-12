@@ -92,10 +92,7 @@ func (k *K8sConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	// use sigyaml.Unmarshal to convert to json object then unmarshal
-	if err := sigyaml.Unmarshal(byteForm, k); err != nil {
-		return err
-	}
-	return nil
+	return sigyaml.Unmarshal(byteForm, k)
 }
 
 type ClusterConfig struct {
