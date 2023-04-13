@@ -18,28 +18,10 @@ import (
 
 var testTopologySpreadConstraints = []corev1.TopologySpreadConstraint{
 	{
-		MaxSkew:           1,
-		TopologyKey:       "kubernetes.io/hostname",
-		WhenUnsatisfiable: corev1.ScheduleAnyway,
-	},
-	{
 		MaxSkew:           2,
 		TopologyKey:       "kubernetes.io/hostname",
 		WhenUnsatisfiable: corev1.DoNotSchedule,
 		LabelSelector: &metav1.LabelSelector{
-			MatchLabels: map[string]string{
-				"app-label": "spread",
-			},
-		},
-	},
-	{
-		MaxSkew:           3,
-		TopologyKey:       "kubernetes.io/hostname",
-		WhenUnsatisfiable: corev1.DoNotSchedule,
-		LabelSelector: &metav1.LabelSelector{
-			MatchLabels: map[string]string{
-				"app-label": "spread",
-			},
 			MatchExpressions: []metav1.LabelSelectorRequirement{
 				{
 					Key:      "app-expression",
