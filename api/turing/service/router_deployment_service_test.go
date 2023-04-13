@@ -471,6 +471,5 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 		Endpoint:          "/ensemble",
 		Port:              8083,
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
-		ServiceAccount:    "",
 	})
 }

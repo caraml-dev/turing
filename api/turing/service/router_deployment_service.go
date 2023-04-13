@@ -453,7 +453,6 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 		Endpoint:          PyFuncEnsemblerServiceEndpoint,
 		Port:              PyFuncEnsemblerServicePort,
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
-		ServiceAccount:    "",
 	}
 
 	return nil
