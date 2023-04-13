@@ -12,7 +12,9 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -219,6 +221,40 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("4000Mi")),
 					MaxAllowedReplica: 20,
+					TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+						{
+							MaxSkew:           1,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+						},
+						{
+							MaxSkew:           2,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+							},
+						},
+						{
+							MaxSkew:           3,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+								MatchExpressions: []metav1.LabelSelectorRequirement{
+									{
+										Key:      "app-expression",
+										Operator: metav1.LabelSelectorOpIn,
+										Values:   []string{"1"},
+									},
+								},
+							},
+						},
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -322,6 +358,40 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("12Gi")),
 					MaxAllowedReplica: 30,
+					TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+						{
+							MaxSkew:           1,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+						},
+						{
+							MaxSkew:           2,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+							},
+						},
+						{
+							MaxSkew:           3,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+								MatchExpressions: []metav1.LabelSelectorRequirement{
+									{
+										Key:      "app-expression",
+										Operator: metav1.LabelSelectorOpIn,
+										Values:   []string{"1"},
+									},
+								},
+							},
+						},
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -464,6 +534,40 @@ func TestLoad(t *testing.T) {
 					MaxCPU:            config.Quantity(resource.MustParse("500m")),
 					MaxMemory:         config.Quantity(resource.MustParse("4500Mi")),
 					MaxAllowedReplica: 30,
+					TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+						{
+							MaxSkew:           1,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+						},
+						{
+							MaxSkew:           2,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+							},
+						},
+						{
+							MaxSkew:           3,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.DoNotSchedule,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app-label": "spread",
+								},
+								MatchExpressions: []metav1.LabelSelectorRequirement{
+									{
+										Key:      "app-expression",
+										Operator: metav1.LabelSelectorOpIn,
+										Values:   []string{"1"},
+									},
+								},
+							},
+						},
+					},
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",

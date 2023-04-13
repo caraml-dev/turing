@@ -18,6 +18,27 @@ DeployConfig:
   Timeout: 5m
   MaxCPU: 500m
   MaxMemory: 4000Mi
+  TopologySpreadConstraints:
+    - MaxSkew: 1
+      TopologyKey: kubernetes.io/hostname
+      WhenUnsatisfiable: ScheduleAnyway
+    - MaxSkew: 2
+      TopologyKey: kubernetes.io/hostname
+      WhenUnsatisfiable: DoNotSchedule
+      LabelSelector:
+        MatchLabels:
+          app-label: spread
+    - MaxSkew: 3
+      TopologyKey: kubernetes.io/hostname
+      WhenUnsatisfiable: DoNotSchedule
+      LabelSelector:
+        MatchLabels:
+          app-label: spread
+        MatchExpressions:
+          - Key: app-expression
+            Operator: In
+            Values:
+              - 1
 KnativeServiceDefaults:
   QueueProxyResourcePercentage: 20
   UserContainerLimitRequestFactor: 1.25
