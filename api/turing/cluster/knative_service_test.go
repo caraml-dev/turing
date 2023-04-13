@@ -354,8 +354,12 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 						TopologyKey:       "kubernetes.io/hostname",
 						WhenUnsatisfiable: corev1.DoNotSchedule,
 						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: map[string]string{
-								"app-label": "spread",
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      "app-expression",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{"1"},
+								},
 							},
 						},
 					},
@@ -434,12 +438,8 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 											TopologyKey:       "kubernetes.io/hostname",
 											WhenUnsatisfiable: corev1.ScheduleAnyway,
 											LabelSelector: &metav1.LabelSelector{
-												MatchExpressions: []metav1.LabelSelectorRequirement{
-													{
-														Key:      "app",
-														Operator: metav1.LabelSelectorOpIn,
-														Values:   []string{"test-svc-0"},
-													},
+												MatchLabels: map[string]string{
+													"app": "test-svc-0",
 												},
 											},
 										},
@@ -449,13 +449,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 											WhenUnsatisfiable: corev1.DoNotSchedule,
 											LabelSelector: &metav1.LabelSelector{
 												MatchLabels: map[string]string{
-													"app-label": "spread",
+													"app": "test-svc-0",
 												},
 												MatchExpressions: []metav1.LabelSelectorRequirement{
 													{
-														Key:      "app",
+														Key:      "app-expression",
 														Operator: metav1.LabelSelectorOpIn,
-														Values:   []string{"test-svc-0"},
+														Values:   []string{"1"},
 													},
 												},
 											},
@@ -467,17 +467,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 											LabelSelector: &metav1.LabelSelector{
 												MatchLabels: map[string]string{
 													"app-label": "spread",
+													"app":       "test-svc-0",
 												},
 												MatchExpressions: []metav1.LabelSelectorRequirement{
 													{
 														Key:      "app-expression",
 														Operator: metav1.LabelSelectorOpIn,
 														Values:   []string{"1"},
-													},
-													{
-														Key:      "app",
-														Operator: metav1.LabelSelectorOpIn,
-														Values:   []string{"test-svc-0"},
 													},
 												},
 											},

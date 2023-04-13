@@ -203,33 +203,21 @@ func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
 }
 
 // appendPodSpreadingLabelSelectorsToTopologySpreadConstraints adds the given revisionName as a label to the
-// match expressions of each topology spread constraint to spread out all the pods across the specified topologyKey
+// match labels of each topology spread constraint to spread out all the pods across the specified topologyKey
 func (cfg *KnativeService) appendPodSpreadingLabelSelectorsToTopologySpreadConstraints(
 	revisionName string,
 ) []corev1.TopologySpreadConstraint {
-	podSpreadingLabelSelectorRequirement := metav1.LabelSelectorRequirement{
-		Key:      "app",
-		Operator: metav1.LabelSelectorOpIn,
-		Values:   []string{revisionName},
-	}
-
 	for i := range cfg.TopologySpreadConstraints {
 		if cfg.TopologySpreadConstraints[i].LabelSelector == nil {
 			cfg.TopologySpreadConstraints[i].LabelSelector = &metav1.LabelSelector{
-				MatchExpressions: []metav1.LabelSelectorRequirement{
-					podSpreadingLabelSelectorRequirement,
-				},
+				MatchLabels: map[string]string{"app": revisionName},
 			}
 		} else {
-			if cfg.TopologySpreadConstraints[i].LabelSelector.MatchExpressions == nil {
-				cfg.TopologySpreadConstraints[i].LabelSelector.MatchExpressions = make([]metav1.LabelSelectorRequirement, 0)
+			if cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels == nil {
+				cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels = make(map[string]string)
 			}
-			cfg.TopologySpreadConstraints[i].LabelSelector.MatchExpressions = append(
-				cfg.TopologySpreadConstraints[i].LabelSelector.MatchExpressions,
-				podSpreadingLabelSelectorRequirement,
-			)
+			cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels["app"] = revisionName
 		}
 	}
-
 	return cfg.TopologySpreadConstraints
 }
