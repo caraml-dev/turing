@@ -335,6 +335,160 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				},
 			},
 		},
+		"topology spread constraints": {
+			serviceCfg: KnativeService{
+				BaseService:       baseSvc,
+				ContainerPort:     8080,
+				MinReplicas:       1,
+				MaxReplicas:       2,
+				AutoscalingMetric: "concurrency",
+				AutoscalingTarget: "1",
+				TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+					{
+						MaxSkew:           1,
+						TopologyKey:       "kubernetes.io/hostname",
+						WhenUnsatisfiable: corev1.ScheduleAnyway,
+					},
+					{
+						MaxSkew:           2,
+						TopologyKey:       "kubernetes.io/hostname",
+						WhenUnsatisfiable: corev1.DoNotSchedule,
+						LabelSelector: &metav1.LabelSelector{
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      "app-expression",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{"1"},
+								},
+							},
+						},
+					},
+					{
+						MaxSkew:           3,
+						TopologyKey:       "kubernetes.io/hostname",
+						WhenUnsatisfiable: corev1.DoNotSchedule,
+						LabelSelector: &metav1.LabelSelector{
+							MatchLabels: map[string]string{
+								"app-label": "spread",
+							},
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      "app-expression",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{"1"},
+								},
+							},
+						},
+					},
+				},
+				IsClusterLocal:                  true,
+				QueueProxyResourcePercentage:    30,
+				UserContainerLimitRequestFactor: 1.5,
+				Protocol:                        routerConfig.UPI,
+			},
+			expectedSpec: knservingv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-svc",
+					Namespace: "test-namespace",
+					Labels: map[string]string{
+						"labelKey":                          "labelVal",
+						"networking.knative.dev/visibility": "cluster-local",
+					},
+				},
+				Spec: knservingv1.ServiceSpec{
+					ConfigurationSpec: knservingv1.ConfigurationSpec{
+						Template: knservingv1.RevisionTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: "test-svc-0",
+								Labels: map[string]string{
+									"labelKey": "labelVal",
+								},
+								Annotations: map[string]string{
+									"autoscaling.knative.dev/minScale":                     "1",
+									"autoscaling.knative.dev/maxScale":                     "2",
+									"autoscaling.knative.dev/metric":                       "concurrency",
+									"autoscaling.knative.dev/target":                       "1",
+									"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
+									"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
+								},
+							},
+							Spec: knservingv1.RevisionSpec{
+								PodSpec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{
+											Name:  podSpec.Containers[0].Name,
+											Image: podSpec.Containers[0].Image,
+											Ports: []corev1.ContainerPort{
+												{
+													Name:          "h2c",
+													ContainerPort: 8080,
+												},
+											},
+											Resources:      resources,
+											ReadinessProbe: podSpec.Containers[0].ReadinessProbe,
+											LivenessProbe:  podSpec.Containers[0].LivenessProbe,
+											VolumeMounts:   baseSvc.VolumeMounts,
+											Env:            envs,
+										},
+									},
+									Volumes: baseSvc.Volumes,
+									TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+										{
+											MaxSkew:           1,
+											TopologyKey:       "kubernetes.io/hostname",
+											WhenUnsatisfiable: corev1.ScheduleAnyway,
+											LabelSelector: &metav1.LabelSelector{
+												MatchLabels: map[string]string{
+													"app": "test-svc-0",
+												},
+											},
+										},
+										{
+											MaxSkew:           2,
+											TopologyKey:       "kubernetes.io/hostname",
+											WhenUnsatisfiable: corev1.DoNotSchedule,
+											LabelSelector: &metav1.LabelSelector{
+												MatchLabels: map[string]string{
+													"app": "test-svc-0",
+												},
+												MatchExpressions: []metav1.LabelSelectorRequirement{
+													{
+														Key:      "app-expression",
+														Operator: metav1.LabelSelectorOpIn,
+														Values:   []string{"1"},
+													},
+												},
+											},
+										},
+										{
+											MaxSkew:           3,
+											TopologyKey:       "kubernetes.io/hostname",
+											WhenUnsatisfiable: corev1.DoNotSchedule,
+											LabelSelector: &metav1.LabelSelector{
+												MatchLabels: map[string]string{
+													"app-label": "spread",
+													"app":       "test-svc-0",
+												},
+												MatchExpressions: []metav1.LabelSelectorRequirement{
+													{
+														Key:      "app-expression",
+														Operator: metav1.LabelSelectorOpIn,
+														Values:   []string{"1"},
+													},
+												},
+											},
+										},
+									},
+								},
+								TimeoutSeconds:       &timeout,
+								ContainerConcurrency: &defaultConcurrency,
+							},
+						},
+					},
+					RouteSpec: defaultRouteSpec,
+				},
+			},
+		},
 	}
 
 	for name, data := range tests {

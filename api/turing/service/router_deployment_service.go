@@ -87,6 +87,7 @@ func NewDeploymentService(
 		resource.Quantity(cfg.DeployConfig.MaxCPU),
 		resource.Quantity(cfg.DeployConfig.MaxMemory),
 		cfg.DeployConfig.MaxAllowedReplica,
+		cfg.DeployConfig.TopologySpreadConstraints,
 	)
 
 	return &deploymentService{

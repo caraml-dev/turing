@@ -45,6 +45,9 @@ type KnativeService struct {
 	// and a % value (of the requested value) for cpu / memory based autoscaling.
 	AutoscalingTarget string `json:"autoscalingTarget"`
 
+	// TopologySpreadConstraints contains a list of topology spread constraint to be applied on the pods of this service
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints"`
+
 	// Resource properties
 	QueueProxyResourcePercentage    int     `json:"queueProxyResourcePercentage"`
 	UserContainerLimitRequestFactor float64 `json:"userContainerLimitRequestFactor"`
@@ -157,6 +160,10 @@ func (cfg *KnativeService) buildSvcSpec(
 		initContainers = cfg.buildInitContainer(cfg.InitContainers)
 	}
 
+	// Add Knative app name label to the match expressions of each topology spread constraint to spread out all
+	// the pods across the specified topologyKey
+	topologySpreadConstraints := cfg.appendPodSpreadingLabelSelectorsToTopologySpreadConstraints(revisionName)
+
 	return &knservingv1.ServiceSpec{
 		ConfigurationSpec: knservingv1.ConfigurationSpec{
 			Template: knservingv1.RevisionTemplateSpec{
@@ -167,9 +174,10 @@ func (cfg *KnativeService) buildSvcSpec(
 				},
 				Spec: knservingv1.RevisionSpec{
 					PodSpec: corev1.PodSpec{
-						Containers:     []corev1.Container{container},
-						Volumes:        cfg.Volumes,
-						InitContainers: initContainers,
+						Containers:                []corev1.Container{container},
+						Volumes:                   cfg.Volumes,
+						InitContainers:            initContainers,
+						TopologySpreadConstraints: topologySpreadConstraints,
 					},
 					TimeoutSeconds: &timeout,
 				},
@@ -192,4 +200,24 @@ func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
 	}
 	// For all other metrics, we can use the supplied value as is.
 	return cfg.AutoscalingTarget, nil
+}
+
+// appendPodSpreadingLabelSelectorsToTopologySpreadConstraints adds the given revisionName as a label to the
+// match labels of each topology spread constraint to spread out all the pods across the specified topologyKey
+func (cfg *KnativeService) appendPodSpreadingLabelSelectorsToTopologySpreadConstraints(
+	revisionName string,
+) []corev1.TopologySpreadConstraint {
+	for i := range cfg.TopologySpreadConstraints {
+		if cfg.TopologySpreadConstraints[i].LabelSelector == nil {
+			cfg.TopologySpreadConstraints[i].LabelSelector = &metav1.LabelSelector{
+				MatchLabels: map[string]string{"app": revisionName},
+			}
+		} else {
+			if cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels == nil {
+				cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels = make(map[string]string)
+			}
+			cfg.TopologySpreadConstraints[i].LabelSelector.MatchLabels["app"] = revisionName
+		}
+	}
+	return cfg.TopologySpreadConstraints
 }
