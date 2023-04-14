@@ -3,7 +3,7 @@ package middleware
 import (
 	"testing"
 
-	"github.com/gojek/mlp/api/pkg/authz/enforcer"
+	"github.com/caraml-dev/mlp/api/pkg/authz/enforcer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 

@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -19,7 +20,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 const batchHTTPHandlerID = "batch_http_handler"

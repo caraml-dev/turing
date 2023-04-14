@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TuringRouter } from "../../services/router/TuringRouter";
-import { FormContext, FormContextProvider } from "@gojek/mlp-ui";
-import { addToast, replaceBreadcrumbs, useToggle } from "@gojek/mlp-ui";
+import { FormContext, FormContextProvider } from "@caraml-dev/ui-lib";
+import { addToast, replaceBreadcrumbs, useToggle } from "@caraml-dev/ui-lib";
 import { UpdateRouterForm } from "../components/form/UpdateRouterForm";
 import { ExperimentEngineContextProvider } from "../../providers/experiments/ExperimentEngineContextProvider";
 import { VersionComparisonView } from "./components/VersionComparisonView";

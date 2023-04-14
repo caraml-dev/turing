@@ -10,12 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	fiberErrors "github.com/gojek/fiber/errors"
 	fiberHttp "github.com/gojek/fiber/http"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	jsoniter "github.com/json-iterator/go"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -23,7 +24,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 // MissionControl is the base interface for the Turing Mission Control

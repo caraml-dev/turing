@@ -46,9 +46,9 @@ module.exports = ({ env }) => ({
                             singleton: true,
                             requiredVersion: sharedDeps["react-router-dom"]
                         },
-                        "@gojek/mlp-ui": {
+                        "@caraml-dev/ui-lib": {
                             singleton: true,
-                            requiredVersion: sharedDeps["@gojek/mlp-ui"],
+                            requiredVersion: sharedDeps["@caraml-dev/ui-lib"],
                         }
                     },
                 }),

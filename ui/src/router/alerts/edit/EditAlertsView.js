@@ -3,7 +3,7 @@ import {
   addToast,
   replaceBreadcrumbs,
   FormContextProvider,
-} from "@gojek/mlp-ui";
+} from "@caraml-dev/ui-lib";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditAlertsForm } from "../components/edit_alerts_form/components/EditAlertsForm";
 import { TuringAlerts } from "../../../services/alerts/TuringAlerts";

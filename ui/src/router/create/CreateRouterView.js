@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { replaceBreadcrumbs, FormContextProvider } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs, FormContextProvider } from "@caraml-dev/ui-lib";
 import { useNavigate, useParams } from "react-router-dom";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { CreateRouterForm } from "../components/form/CreateRouterForm";

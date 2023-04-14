@@ -7,7 +7,7 @@ import {
   EuiText,
   EuiTextAlign,
 } from "@elastic/eui";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 import { useNavigate } from "react-router-dom";
 import { FormLabelWithToolTip } from "../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { DefaultItemAction } from "../components/DefaultItemAction";

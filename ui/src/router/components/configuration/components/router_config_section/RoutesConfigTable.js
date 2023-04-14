@@ -7,7 +7,7 @@ import {
   EuiLink,
   EuiToolTip,
 } from "@elastic/eui";
-import { ProjectsContext } from "@gojek/mlp-ui";
+import { ProjectsContext } from "@caraml-dev/ui-lib";
 import { RoutesTableExpandedRow } from "./RoutesTableExpandedRow";
 import { ANNOTATIONS_MERLIN_MODEL_ID } from "../../../../../providers/endpoints/MerlinEndpointsProvider";
 

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect } from "react";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { ConfigSection } from "../../../components/config_section";
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/eui";
 import { ConfigurationConfigSection } from "./configuration_section/ConfigurationConfigSection";

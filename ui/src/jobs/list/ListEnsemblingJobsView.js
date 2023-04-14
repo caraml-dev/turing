@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "../../components/page/PageTitle";
 import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useConfig } from "../../config";
 import { parse, stringify } from "query-string";
 

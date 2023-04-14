@@ -5,11 +5,12 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 const (

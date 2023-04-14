@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { flattenPanelTree, useToggle } from "@gojek/mlp-ui";
+import { flattenPanelTree, useToggle } from "@caraml-dev/ui-lib";
 import {
   EuiButtonEmpty,
   EuiContextMenu,

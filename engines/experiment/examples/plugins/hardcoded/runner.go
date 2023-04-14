@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded/utils"
 	"github.com/caraml-dev/turing/engines/experiment/pkg/request"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type ExperimentRunner struct {

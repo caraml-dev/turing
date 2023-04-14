@@ -14,29 +14,29 @@ repos:
         args:
           - --chart-search-root=infra/charts/turing-init
           - --template-files=./README.md.gotmpl
-  - repo: local
-    hooks:
-      - id: golangci-lint
-        name: 'Linter for API'
-        alias: golangci-lint-api
-        files: '^api/'
-        types: [go]
-        language: system
-        entry: bash -c 'cd api make lint'
-      - id: golangci-lint
-        name: 'Linter for the Router Engine'
-        alias: golangci-lint-router
-        files: '^engines/router/'
-        types: [go]
-        language: system
-        entry: bash -c 'cd engines/router make lint'
-      - id: golangci-lint
-        name: 'Linter for the Experiment Engine'
-        alias: golangci-lint-experiment
-        files: '^engines/experiment/'
-        types: [go]
-        language: system
-        entry: bash -c 'cd engines/experiment make lint'
+  # - repo: local
+  #   hooks:
+  #     - id: golangci-lint
+  #       name: 'Linter for API'
+  #       alias: golangci-lint-api
+  #       files: '^api/'
+  #       types: [go]
+  #       language: system
+  #       entry: bash -c 'cd api make lint'
+  #     - id: golangci-lint
+  #       name: 'Linter for the Router Engine'
+  #       alias: golangci-lint-router
+  #       files: '^engines/router/'
+  #       types: [go]
+  #       language: system
+  #       entry: bash -c 'cd engines/router make lint'
+  #     - id: golangci-lint
+  #       name: 'Linter for the Experiment Engine'
+  #       alias: golangci-lint-experiment
+  #       files: '^engines/experiment/'
+  #       types: [go]
+  #       language: system
+  #       entry: bash -c 'cd engines/experiment make lint'
   - repo: local
     hooks:
       - id: goimports

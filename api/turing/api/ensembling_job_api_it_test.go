@@ -16,7 +16,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/server"
 
 	merlin "github.com/caraml-dev/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/mock"
 	"gotest.tools/assert"
 

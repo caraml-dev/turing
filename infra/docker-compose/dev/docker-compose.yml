@@ -123,7 +123,7 @@ services:
       - migrate -path=/db-migrations -database=postgres://mlp:mlp@mlp-postgres:5432/mlp?sslmode=disable up
 
   mlp:
-    image: ghcr.io/gojek/mlp:v1.1.0-alpha
+    image: ghcr.io/caraml-dev/mlp:v1.7.5-build.5-59f13e1
     restart: on-failure
     env_file: ./mlp/dev.env
     ports:

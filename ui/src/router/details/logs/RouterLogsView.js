@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ConfigSection } from "../../../components/config_section";
 import { LogEntry } from "../../../services/logs/LogEntry";
 import { get } from "../../../components/form/utils";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
 import { EuiPanel } from "@elastic/eui";
 import { useConfig } from "../../../config";

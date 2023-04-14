@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"

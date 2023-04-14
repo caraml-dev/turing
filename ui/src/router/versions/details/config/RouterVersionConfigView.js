@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useParams } from "react-router-dom";
 import { RouterConfigDetails } from "../../../components/configuration/RouterConfigDetails";
 import { get } from "../../../../components/form/utils";

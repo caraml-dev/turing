@@ -8,7 +8,7 @@ import schema from "./validation/schema";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { ConfirmationModal } from "../../../components/confirmation_modal/ConfirmationModal";
 import { RouterCreationSummary } from "./components/RouterCreationSummary";
-import { FormContext, StepsWizardHorizontal, addToast } from "@gojek/mlp-ui";
+import { FormContext, StepsWizardHorizontal, addToast } from "@caraml-dev/ui-lib";
 import ExperimentEngineContext from "../../../providers/experiments/context";
 import { useConfig } from "../../../config";
 

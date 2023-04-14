@@ -3,7 +3,7 @@ import { PageSecondaryHeader } from "../../../router/components/page_header/Page
 import { HorizontalDescriptionList } from "../../../components/horizontal_description_list/HorizontalDescriptionList";
 import EnsemblersContext from "../../../providers/ensemblers/context";
 import { EuiBadge, EuiButtonEmpty, EuiIcon, EuiText } from "@elastic/eui";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 import { useNavigate } from "react-router-dom";
 
 export const EnsemblingJobDetailsPageHeader = ({ job }) => {

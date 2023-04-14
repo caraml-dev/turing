@@ -10,7 +10,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 
 	merlin "github.com/caraml-dev/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 

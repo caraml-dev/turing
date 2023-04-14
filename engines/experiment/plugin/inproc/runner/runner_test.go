@@ -6,10 +6,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	runnerPlugin "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/experiment/runner/mocks"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type fakeRunner struct {

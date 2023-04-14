@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/go-playground/validator/v10"
-	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

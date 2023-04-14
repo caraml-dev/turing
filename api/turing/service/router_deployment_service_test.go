@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	merlin "github.com/caraml-dev/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

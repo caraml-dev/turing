@@ -1143,6 +1143,27 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@caraml-dev/ui-lib@^1.7.5-build.5-59f13e1":
+  version "1.7.5-build.5-59f13e1"
+  resolved "https://registry.yarnpkg.com/@caraml-dev/ui-lib/-/ui-lib-1.7.5-build.5-59f13e1.tgz#54efab42d0aaac6bbc2a6d595f690b19a251cb68"
+  integrity sha512-oq/VifRvz1D8qgnVlMVNh27cOSEWKlYtjyyQdsytf03JPp3TwZQG2NRfNH9M1/KC9ffZqt0k83EWAO3pvjlWhg==
+  dependencies:
+    "@react-oauth/google" "0.2.6"
+    classnames "^2.2.6"
+    json-bigint "1.0.0"
+    jwt-decode "^3.1.2"
+    lodash "^4.17.21"
+    prop-types "^15.7.2"
+    proper-url-join "2.1.1"
+    query-string "^7.0.1"
+    react-collapsed "^3.0.1"
+    react-ellipsis-text "^1.2.1"
+    react-fast-compare "^3.2.0"
+    react-scroll "^1.8.1"
+    react-sticky "^6.0.3"
+    resize-observer-polyfill "^1.5.1"
+    yup "^0.29.3"
+
 "@craco/craco@6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@craco/craco/-/craco-6.3.0.tgz#157ff6387dab526390b47b12e890542c7e7c6437"
@@ -1556,27 +1577,6 @@
     js-yaml "^4.1.0"
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
-
-"@gojek/mlp-ui@1.7.3":
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/@gojek/mlp-ui/-/mlp-ui-1.7.3.tgz#9186631038acf6cf7e3864babef7ce4083817074"
-  integrity sha512-rOQL9piBMNrqZU78SslhQoQ7j4Gw6oDpr0p9EIb8nV2IzXL4LcLWbkES6nSP0NSTtvLVaevoVtAMc07SRuittA==
-  dependencies:
-    "@react-oauth/google" "0.2.6"
-    classnames "^2.2.6"
-    json-bigint "1.0.0"
-    jwt-decode "^3.1.2"
-    lodash "^4.17.21"
-    prop-types "^15.7.2"
-    proper-url-join "2.1.1"
-    query-string "^7.0.1"
-    react-collapsed "^3.0.1"
-    react-ellipsis-text "^1.2.1"
-    react-fast-compare "^3.2.0"
-    react-scroll "^1.8.1"
-    react-sticky "^6.0.3"
-    resize-observer-polyfill "^1.5.1"
-    yup "^0.29.3"
 
 "@humanwhocodes/config-array@^0.10.4":
   version "0.10.4"

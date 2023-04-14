@@ -5,7 +5,7 @@ package mocks
 import (
 	client "github.com/caraml-dev/merlin/client"
 
-	apiclient "github.com/gojek/mlp/api/client"
+	apiclient "github.com/caraml-dev/mlp/api/client"
 
 	mock "github.com/stretchr/testify/mock"
 

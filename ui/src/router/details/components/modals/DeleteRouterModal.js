@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { addToast } from "@gojek/mlp-ui";
+import { addToast } from "@caraml-dev/ui-lib";
 import { useTuringApi } from "../../../../hooks/useTuringApi";
 import { ConfirmationModal } from "../../../../components/confirmation_modal/ConfirmationModal";
 import { isEmpty } from "../../../../utils/object";

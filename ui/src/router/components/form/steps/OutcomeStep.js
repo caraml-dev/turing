@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { ResultLoggingTypePanel } from "../components/outcome_config/ResultLoggingTypePanel";
-import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
+import { FormContext, FormValidationContext } from "@caraml-dev/ui-lib";
 import { get } from "../../../../components/form/utils";
 import { BigQueryConfigPanel } from "../components/outcome_config/bigquery/BigQueryConfigPanel";
 import { KafkaConfigPanel } from "../components/outcome_config/kafka/KafkaConfigPanel";

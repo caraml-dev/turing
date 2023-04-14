@@ -4,7 +4,7 @@ import {
   EuiPageTemplate,
   EuiPanel, EuiSpacer
 } from "@elastic/eui";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useTuringApi } from "../../hooks/useTuringApi";
 import ListRoutersTable from "./ListRoutersTable";
 import { PageTitle } from "../../components/page/PageTitle";

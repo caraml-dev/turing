@@ -3,8 +3,8 @@ module github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcode
 go 1.20
 
 require (
+	github.com/caraml-dev/mlp v1.7.6-0.20230412072102-59f13e1a7b79
 	github.com/caraml-dev/turing/engines/experiment v1.0.0
-	github.com/gojek/mlp v1.5.3
 	github.com/hashicorp/go-hclog v0.16.0
 	github.com/stretchr/testify v1.8.1
 )
@@ -45,7 +45,7 @@ require (
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20230104163317-caabf589fcbf // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/errgo.v2 v2.1.0 // indirect
@@ -55,5 +55,4 @@ require (
 replace (
 	github.com/caraml-dev/turing/engines/experiment => ../../../
 	github.com/caraml-dev/turing/engines/router => ../../../../router
-	github.com/gojek/mlp => github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b
 )

@@ -1,6 +1,6 @@
 import React from "react";
 import { EuiBadge, EuiTextColor } from "@elastic/eui";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 import { HorizontalDescriptionList } from "../../../../components/horizontal_description_list/HorizontalDescriptionList";
 import { PageSecondaryHeader } from "../../../components/page_header/PageSecondaryHeader";
 import { RouterEndpoint } from "../../../components/router_endpoint/RouterEndpoint";

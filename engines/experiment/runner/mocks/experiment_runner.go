@@ -5,7 +5,7 @@ package mocks
 import (
 	http "net/http"
 
-	metrics "github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	metrics "github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 	mock "github.com/stretchr/testify/mock"
 
 	runner "github.com/caraml-dev/turing/engines/experiment/runner"

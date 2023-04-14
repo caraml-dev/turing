@@ -1,6 +1,6 @@
 # Concepts
 
-**Project**: Holds all [MLP](https://github.com/gojek/mlp) resources that belong to a specific team such as service accounts, Merlin models, etc.
+**Project**: Holds all [MLP](https://github.com/caraml-dev/mlp) resources that belong to a specific team such as service accounts, Merlin models, etc.
 
 **Router**: The router is the nucleus of the Turing system. It is responsible for coordinating the traffic routing to multiple model endpoints, invoking the pre and post processors, incorporating the response from the Experiment engine and logging of these responses.  
 

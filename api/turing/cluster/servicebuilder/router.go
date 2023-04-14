@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/ghodss/yaml"
 	fiberConfig "github.com/gojek/fiber/config"
 	fiberProtocol "github.com/gojek/fiber/protocol"
-	mlp "github.com/gojek/mlp/api/client"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"

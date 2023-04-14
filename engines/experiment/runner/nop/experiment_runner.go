@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 var nopTreatment = &runner.Treatment{}

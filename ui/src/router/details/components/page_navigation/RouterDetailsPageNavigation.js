@@ -1,6 +1,6 @@
 import React from "react";
 import { EuiIcon } from "@elastic/eui";
-import { PageNavigation } from "@gojek/mlp-ui";
+import { PageNavigation } from "@caraml-dev/ui-lib";
 import { useConfig } from "../../../../config";
 
 export const RouterDetailsPageNavigation = ({

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 	"github.com/stretchr/testify/assert"
+
+	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
 
 func TestInitMetricsCollectorPrometheus(t *testing.T) {

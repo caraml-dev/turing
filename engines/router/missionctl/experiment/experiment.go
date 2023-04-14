@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment"
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
@@ -14,7 +16,6 @@ import (
 	_metrics "github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // NewExperimentRunner returns an instance of the Planner, based on the input engine name
