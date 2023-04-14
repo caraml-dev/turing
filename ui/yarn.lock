@@ -1143,10 +1143,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@caraml-dev/ui-lib@^1.7.5-build.5-59f13e1":
-  version "1.7.5-build.5-59f13e1"
-  resolved "https://registry.yarnpkg.com/@caraml-dev/ui-lib/-/ui-lib-1.7.5-build.5-59f13e1.tgz#54efab42d0aaac6bbc2a6d595f690b19a251cb68"
-  integrity sha512-oq/VifRvz1D8qgnVlMVNh27cOSEWKlYtjyyQdsytf03JPp3TwZQG2NRfNH9M1/KC9ffZqt0k83EWAO3pvjlWhg==
+"@caraml-dev/ui-lib@^1.7.6":
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/@caraml-dev/ui-lib/-/ui-lib-1.7.6.tgz#e7ffde276352f496cdd7422fe90a538dbf12f087"
+  integrity sha512-R7zC01i5KLsYLuGP9aSdTfGxZttu/dKuHrii/PjgZHR02rAnSq6+AfdFu1KdahQPh4QycjHg4qtwwPSmJic7Ew==
   dependencies:
     "@react-oauth/google" "0.2.6"
     classnames "^2.2.6"

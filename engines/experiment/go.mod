@@ -5,7 +5,7 @@ go 1.20
 require (
 	bou.ke/monkey v1.0.2
 	github.com/buger/jsonparser v1.1.1
-	github.com/caraml-dev/mlp v1.7.6-0.20230412072102-59f13e1a7b79
+	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.4
 	github.com/go-playground/validator v9.31.0+incompatible

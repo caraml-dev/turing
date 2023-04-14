@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@caraml-dev/ui-lib": "^1.7.5-build.5-59f13e1",
+    "@caraml-dev/ui-lib": "^1.7.6",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "66.0.0",
     "@emotion/react": "^11.9.0",

@@ -6,7 +6,7 @@ require (
 	bou.ke/monkey v1.0.2
 	cloud.google.com/go/bigquery v1.44.0
 	github.com/buger/jsonparser v1.1.1
-	github.com/caraml-dev/mlp v1.7.6-0.20230412072102-59f13e1a7b79
+	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.4
 	github.com/fluent/fluent-logger-golang v1.5.0

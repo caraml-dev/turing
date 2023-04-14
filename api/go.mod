@@ -8,7 +8,7 @@ require (
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20220214044918-55732a6a392c
 	github.com/antihax/optional v1.0.0
 	github.com/caraml-dev/merlin v0.0.0
-	github.com/caraml-dev/mlp v1.7.6-0.20230412072102-59f13e1a7b79
+	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.4
