@@ -33,7 +33,7 @@ type RouterVersionsService interface {
 	Delete(routerVersion *models.RouterVersion) error
 	// FindActiveRouterUsingEnsembler Finds routerVersion with status parameter
 	// that use ensembler with id = ensemblerId
-	FindActiveRouterUsingEnsembler(ensemblerID models.ID, status []models.RouterVersionStatus) ([]*models.RouterVersion, error)
+	FindRouterUsingEnsembler(ensemblerID models.ID, statuses []models.RouterVersionStatus) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -264,34 +264,21 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 	return tx.Commit().Error
 }
 
-func (service *routerVersionsService) FindActiveRouterUsingEnsembler(
+func (service *routerVersionsService) FindRouterUsingEnsembler(
 	ensemblerID models.ID,
-	status []models.RouterVersionStatus,
+	statuses []models.RouterVersionStatus,
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
-	query := service.query().
-		Where("ensembler_id = ?", ensemblerID).
-		Where("status IN (?)", status)
+	query := service.query().Where("ensembler_id IN (?)",
+		service.db.Table("ensembler_configs").Select("id").
+			Where("CAST(pyfunc_config->>'ensembler_id' AS INTEGER) = ?", ensemblerID))
+	if statuses != nil {
+		query = query.Where("status IN (?)", statuses)
+	}
+	query = query.Find(&routerVersions)
 
 	if err := query.Error; err != nil {
 		return nil, err
-	}
-
-	var err error
-	for _, routerVersion := range routerVersions {
-		var err error
-		routerVersion.MonitoringURL, err = service.GenerateMonitoringURL(
-			routerVersion.Router.ProjectID,
-			routerVersion.Router.EnvironmentName,
-			routerVersion.Router.Name,
-			&routerVersion.Version,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
-		}
-	}
-	if err != nil {
-		return nil, fmt.Errorf("unable to generate MonitoringURL for router version: %s", err.Error())
 	}
 
 	return routerVersions, nil

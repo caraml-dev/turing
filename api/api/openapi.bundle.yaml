@@ -941,6 +941,34 @@ paths:
       summary: Get deployment events associated with this router
       tags:
       - Router
+  /projects/{project_id}/routers-version-ensembler/{ensembler_id}:
+    get:
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: path
+        name: ensembler_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RouterVersion'
+                type: array
+          description: An Array of JSON object representing router version instance
+            of the specific Ensembler
+      summary: Returns Router Version based on ensembler
+      tags:
+      - Router
   /projects/{project_id}/routers/{router_id}/logs:
     get:
       parameters:

@@ -27,32 +27,6 @@ func (_m *RouterVersionsService) Delete(routerVersion *models.RouterVersion) err
 	return r0
 }
 
-// FindActiveRouterUsingEnsembler provides a mock function with given fields: ensemblerID
-func (_m *RouterVersionsService) FindActiveRouterUsingEnsembler(ensemblerID models.ID) ([]*models.RouterVersion, error) {
-	ret := _m.Called(ensemblerID)
-
-	var r0 []*models.RouterVersion
-	var r1 error
-	if rf, ok := ret.Get(0).(func(models.ID) ([]*models.RouterVersion, error)); ok {
-		return rf(ensemblerID)
-	}
-	if rf, ok := ret.Get(0).(func(models.ID) []*models.RouterVersion); ok {
-		r0 = rf(ensemblerID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RouterVersion)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
-		r1 = rf(ensemblerID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // FindByID provides a mock function with given fields: routerVersionID
 func (_m *RouterVersionsService) FindByID(routerVersionID models.ID) (*models.RouterVersion, error) {
 	ret := _m.Called(routerVersionID)
@@ -124,6 +98,32 @@ func (_m *RouterVersionsService) FindLatestVersionByRouterID(routerID models.ID)
 
 	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindRouterUsingEnsembler provides a mock function with given fields: ensemblerID, statuses
+func (_m *RouterVersionsService) FindRouterUsingEnsembler(ensemblerID models.ID, statuses []models.RouterVersionStatus) ([]*models.RouterVersion, error) {
+	ret := _m.Called(ensemblerID, statuses)
+
+	var r0 []*models.RouterVersion
+	var r1 error
+	if rf, ok := ret.Get(0).(func(models.ID, []models.RouterVersionStatus) ([]*models.RouterVersion, error)); ok {
+		return rf(ensemblerID, statuses)
+	}
+	if rf, ok := ret.Get(0).(func(models.ID, []models.RouterVersionStatus) []*models.RouterVersion); ok {
+		r0 = rf(ensemblerID, statuses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.RouterVersion)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(models.ID, []models.RouterVersionStatus) error); ok {
+		r1 = rf(ensemblerID, statuses)
 	} else {
 		r1 = ret.Error(1)
 	}

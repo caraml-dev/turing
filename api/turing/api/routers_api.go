@@ -327,6 +327,25 @@ func (c RoutersController) ListRouterEvents(_ *http.Request,
 	return Ok(map[string][]*models.Event{"events": events})
 }
 
+func (c RoutersController) ListEnsemblerRouterVersion(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := EnsemblersPathOptions{}
+
+	if err := c.ParseVars(&options, vars); err != nil {
+		return BadRequest("failed to fetch ensembler",
+			fmt.Sprintf("failed to parse query string: %s", err))
+	}
+
+	routers, err := c.RouterVersionsService.FindRouterUsingEnsembler(*options.EnsemblerID, nil)
+	if err != nil {
+		return InternalServerError("unable to list router version using this ensembler", err.Error())
+	}
+	return Ok(routers)
+}
+
 func (c RoutersController) Routes() []Route {
 	return []Route{
 		{
@@ -366,6 +385,11 @@ func (c RoutersController) Routes() []Route {
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/undeploy",
 			handler: c.UndeployRouter,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/routers-version-ensembler/{ensembler_id}",
+			handler: c.ListEnsemblerRouterVersion,
 		},
 		// Router Events
 		{
