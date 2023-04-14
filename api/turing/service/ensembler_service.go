@@ -105,10 +105,5 @@ func (service *ensemblersService) Save(ensembler models.EnsemblerLike) (models.E
 }
 
 func (service *ensemblersService) Delete(ensembler models.EnsemblerLike) error {
-	//item := service.db.Delete(ensembler)
-	//if item.Error != nil {
-	//	return ensembler, item.Error
-	//}
-	//return ensembler, nil
 	return service.db.Delete(ensembler).Error
 }
