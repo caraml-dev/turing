@@ -4,7 +4,7 @@ package servicebuilder
 import (
 	"fmt"
 
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"

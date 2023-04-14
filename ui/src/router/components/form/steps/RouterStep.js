@@ -3,7 +3,7 @@ import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { GeneralSettingsPanel } from "../components/router_config/GeneralSettingsPanel";
 import { RoutesPanel } from "../components/router_config/RoutesPanel";
 import { ResourcesPanel } from "../components/ResourcesPanel";
-import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
+import { FormContext, FormValidationContext } from "@caraml-dev/ui-lib";
 import { MerlinEndpointsProvider } from "../../../../providers/endpoints/MerlinEndpointsProvider";
 import { useConfig } from "../../../../config";
 import { get } from "../../../../components/form/utils";

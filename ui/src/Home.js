@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from "react";
 import { EuiPageTemplate } from "@elastic/eui";
-import { ProjectsContext } from "@gojek/mlp-ui";
+import { ProjectsContext } from "@caraml-dev/ui-lib";
 import { Navigate } from "react-router-dom";
 import { useConfig } from "./config";
 

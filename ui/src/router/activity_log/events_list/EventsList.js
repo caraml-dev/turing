@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { EuiBadge, EuiComment, EuiCommentList } from "@elastic/eui";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 import { Status } from "../../../services/status/Status";
 import PulseLoader from "react-spinners/PulseLoader";
 import { ExpandableContainer } from "../../../components/expandable_container/ExpandableContainer";

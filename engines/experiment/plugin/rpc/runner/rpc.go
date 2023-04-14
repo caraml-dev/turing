@@ -6,11 +6,12 @@ import (
 	"net/rpc"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+	"github.com/hashicorp/go-plugin"
+
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
-	"github.com/hashicorp/go-plugin"
 )
 
 // rpcClient implements ConfigurableExperimentRunner interface

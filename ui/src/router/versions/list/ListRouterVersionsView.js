@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useNavigate } from "react-router-dom";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { EuiPanel } from "@elastic/eui";

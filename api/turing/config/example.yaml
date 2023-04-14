@@ -208,7 +208,7 @@ AlertConfig:
   DashboardURLTemplate: https://grafana.example.com/graph/d/hash/dashboard?var-cluster={{ .Cluster }}&var-project={{ .Project }}&var-experiment={{ .Router }}
 
 # MLP API access configuration. Turing uses MLP API to get projects
-# and environments associated with the Turing router: https://github.com/gojek/mlp
+# and environments associated with the Turing router: https://github.com/caraml-dev/mlp
 MLPConfig:
   MLPURL: http://api.mlp.example.com
   MerlinURL: http://api.merlin.example.com

@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment/plugin/rpc/shared"
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // ConfigurableExperimentRunner interface of an ExperimentRunner, that can be configured

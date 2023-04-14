@@ -1,8 +1,8 @@
 package api
 
 import (
+	mlp "github.com/caraml-dev/mlp/api/client"
 	val "github.com/go-playground/validator/v10"
-	mlp "github.com/gojek/mlp/api/client"
 	"github.com/gorilla/schema"
 
 	"github.com/caraml-dev/turing/api/turing/models"

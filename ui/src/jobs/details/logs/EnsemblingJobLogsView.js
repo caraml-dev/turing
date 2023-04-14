@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { ConfigSection } from "../../../components/config_section";
 import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
 import { LogEntry } from "../../../services/logs/LogEntry";

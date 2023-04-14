@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { EuiCallOut, EuiLoadingChart, EuiTextAlign } from "@elastic/eui";
 import { RouterAlertDetails } from "./details/RouterAlertDetails";
 import { Routes, Route, useLocation, useParams } from "react-router-dom";

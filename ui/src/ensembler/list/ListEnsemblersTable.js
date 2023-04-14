@@ -13,7 +13,7 @@ import { useConfig } from "../../config";
 import { EnsemblerType } from "../../services/ensembler/EnsemblerType";
 import moment from "moment";
 import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 
 export const ListEnsemblersTable = ({
   items,

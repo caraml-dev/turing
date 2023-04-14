@@ -5,7 +5,7 @@ package mocks
 import (
 	json "encoding/json"
 
-	client "github.com/gojek/mlp/api/client"
+	client "github.com/caraml-dev/mlp/api/client"
 
 	merlinclient "github.com/caraml-dev/merlin/client"
 

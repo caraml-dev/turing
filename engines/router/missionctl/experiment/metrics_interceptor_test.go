@@ -8,8 +8,9 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // mockMetricsCollector satisfies the metrics.Collector interface

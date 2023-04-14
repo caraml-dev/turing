@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
-import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
+import { FormContext, FormValidationContext } from "@caraml-dev/ui-lib";
 
 import { DockerConfigFormGroup } from "../components/docker_config/DockerConfigFormGroup";
 import { NopConfigFormGroup } from "../components/nop_config/NopConfigFormGroup";

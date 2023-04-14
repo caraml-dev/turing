@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { useToggle } from "@gojek/mlp-ui";
+import { useToggle } from "@caraml-dev/ui-lib";
 import { EuiOverlayMask, EuiConfirmModal, EuiProgress } from "@elastic/eui";
 
 export const ConfirmationModal = ({

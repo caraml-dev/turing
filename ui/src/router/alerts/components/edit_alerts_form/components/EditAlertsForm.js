@@ -5,7 +5,7 @@ import {
   AccordionForm,
   FormContext,
   FormValidationContext,
-} from "@gojek/mlp-ui";
+} from "@caraml-dev/ui-lib";
 import { TeamPanel } from "./team_panel/TeamPanel";
 import schema from "../validation/schema";
 import { TeamsProvider } from "../../../../../providers/teams/TeamsProvider";

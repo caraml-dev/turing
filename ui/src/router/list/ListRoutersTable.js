@@ -15,7 +15,7 @@ import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
 import { Status } from "../../services/status/Status";
-import { DateFromNow } from "@gojek/mlp-ui";
+import { DateFromNow } from "@caraml-dev/ui-lib";
 
 const ListRoutersTable = ({ items, isLoaded, error, onRowClick }) => {
   const {

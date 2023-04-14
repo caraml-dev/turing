@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { EuiEmptyPrompt, EuiLoadingChart } from "@elastic/eui";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { RouterConfigDetails } from "../../components/configuration/RouterConfigDetails";
 import { ExperimentEngineContextProvider } from "../../../providers/experiments/ExperimentEngineContextProvider";
 import { OverlayMask } from "../../../components/overlay_mask/OverlayMask";

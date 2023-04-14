@@ -9,7 +9,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 // fluentdClient minimally defines the functionality used by the FluentdLogger for sending

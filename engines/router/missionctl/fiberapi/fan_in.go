@@ -7,11 +7,12 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	fiberHttp "github.com/gojek/fiber/http"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/opentracing/opentracing-go"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -19,7 +20,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 // FanInID is used to indendify the fan in component when capturing a request span

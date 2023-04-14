@@ -24,7 +24,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 // timeInterceptorLog is used to Unmarshal the time log data

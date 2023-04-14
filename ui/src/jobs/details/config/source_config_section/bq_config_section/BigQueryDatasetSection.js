@@ -13,7 +13,7 @@ import { BigQueryDatasetQueryView } from "./BigQueryDatasetQueryView";
 import { CollapsibleBadgeGroup } from "../../../../../components/collapsible_badge_group/CollapsibleBadgeGroup";
 import { BigQueryOptionsTable } from "../../components/bq_options_table/BigQueryOptionsTable";
 import { ConfigSectionPanel } from "../../../../../components/config_section";
-import { slugify } from "@gojek/mlp-ui";
+import { slugify } from "@caraml-dev/ui-lib";
 
 import "./BigQueryDatasetSection.scss";
 import { getBigQueryConsoleUrl } from "../../../../../utils/gcp";

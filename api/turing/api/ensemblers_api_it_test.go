@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/gorilla/mux"
 
 	"github.com/caraml-dev/turing/api/turing/api"

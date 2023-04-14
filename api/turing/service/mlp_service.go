@@ -8,11 +8,12 @@ import (
 
 	"github.com/antihax/optional"
 	merlin "github.com/caraml-dev/merlin/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
+	"github.com/caraml-dev/mlp/api/pkg/auth"
+	"github.com/patrickmn/go-cache"
+
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
-	mlp "github.com/gojek/mlp/api/client"
-	"github.com/gojek/mlp/api/pkg/auth"
-	"github.com/patrickmn/go-cache"
 )
 
 const (

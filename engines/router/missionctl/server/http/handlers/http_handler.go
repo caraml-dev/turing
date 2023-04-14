@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
@@ -22,7 +23,7 @@ import (
 	mchttp "github.com/caraml-dev/turing/engines/router/missionctl/server/http"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 const httpHandlerID = "http_handler"

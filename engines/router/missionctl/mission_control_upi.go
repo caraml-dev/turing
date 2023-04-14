@@ -4,16 +4,17 @@ import (
 	"context"
 	"strings"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/gojek/fiber"
 	fiberGrpc "github.com/gojek/fiber/grpc"
 	fiberProtocol "github.com/gojek/fiber/protocol"
 	"google.golang.org/grpc"
 
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/fiberapi"
 
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 )
 
 type MissionControlUPI interface {

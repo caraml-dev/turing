@@ -1,7 +1,7 @@
 import { EuiDescriptionList, EuiLink } from "@elastic/eui";
 import React, { useContext } from "react";
 import { getGCSDashboardUrl } from "../../../../../utils/gcp";
-import { ProjectsContext } from "@gojek/mlp-ui";
+import { ProjectsContext } from "@caraml-dev/ui-lib";
 
 export const MiscConfigSection = ({
   infra_config: { artifact_uri, service_account_name },

@@ -6,7 +6,7 @@ import {
   EuiPanel,
   EuiTextAlign,
 } from "@elastic/eui";
-import { replaceBreadcrumbs } from "@gojek/mlp-ui";
+import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { RouterVersion } from "../../../services/version/RouterVersion";
 import { VersionComparisonPanel } from "../components/version_diff/VersionComparisonPanel";

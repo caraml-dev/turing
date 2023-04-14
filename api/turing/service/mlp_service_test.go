@@ -10,14 +10,14 @@ import (
 
 	//nolint:all
 	"bou.ke/monkey"
-	"github.com/gojek/mlp/api/pkg/auth"
+	"github.com/caraml-dev/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2/google"
 
 	merlin "github.com/caraml-dev/merlin/client"
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 )
 
 type mockCryptoService struct{}

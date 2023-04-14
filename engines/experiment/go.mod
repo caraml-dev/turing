@@ -5,10 +5,10 @@ go 1.20
 require (
 	bou.ke/monkey v1.0.2
 	github.com/buger/jsonparser v1.1.1
+	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.4
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/gojek/mlp v1.5.3
 	github.com/hashicorp/go-hclog v0.16.0
 	github.com/hashicorp/go-plugin v1.4.3
 	github.com/mitchellh/hashstructure/v2 v2.0.2
@@ -50,14 +50,11 @@ require (
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20230104163317-caabf589fcbf // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/errgo.v2 v2.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/caraml-dev/turing/engines/router => ../router
-	github.com/gojek/mlp => github.com/gojek/mlp v1.7.5-0.20230104043800-549dbdb2d25b
-)
+replace github.com/caraml-dev/turing/engines/router => ../router

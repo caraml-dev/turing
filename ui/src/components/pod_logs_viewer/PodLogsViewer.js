@@ -6,7 +6,7 @@ import {
   EuiSpacer,
 } from "@elastic/eui";
 import { LazyLog, ScrollFollow } from "react-lazylog";
-import { slugify } from "@gojek/mlp-ui";
+import { slugify } from "@caraml-dev/ui-lib";
 import isArray from "lodash/isArray";
 
 import "./PodLogsViewer.scss";

@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from "yup";
-import { get } from "@gojek/mlp-ui";
+import { get } from "@caraml-dev/ui-lib";
 import { standardExperimentConfigSchema } from "../components/experiment_config/validation/schema";
 import {
   fieldSchema,

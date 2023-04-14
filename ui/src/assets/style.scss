@@ -1,5 +1,5 @@
 @import "~@elastic/eui/dist/eui_theme_light.css";
-@import "~@gojek/mlp-ui/dist/index.css";
+@import "~@caraml-dev/ui-lib/dist/index.css";
 
 // don't stretch all the way
 @media only screen and (min-width: 960px) {
@@ -12,7 +12,7 @@
   padding-left: 262px !important;
 }
 
-// to overwrite this from @gojek/mlp-ui
+// to overwrite this from @caraml-dev/ui-lib
 .euiTableCellContent .cell-first-column,
 .euiTableCellContent svg {
   margin-right: 0 !important;

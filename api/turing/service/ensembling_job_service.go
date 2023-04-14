@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	mlp "github.com/gojek/mlp/api/client"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"gorm.io/gorm"
 
 	"github.com/caraml-dev/turing/api/turing/batch"

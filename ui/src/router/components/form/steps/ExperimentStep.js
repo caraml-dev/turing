@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo } from "react";
 import { EuiFlexGroup, EuiFlexItem } from "@elastic/eui";
 import { EngineTypePanel } from "../components/experiment_config/EngineTypePanel";
-import { FormContext, FormValidationContext } from "@gojek/mlp-ui";
+import { FormContext, FormValidationContext } from "@caraml-dev/ui-lib";
 import { get } from "../../../../components/form/utils";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
 import ExperimentEngineContext from "../../../../providers/experiments/context";

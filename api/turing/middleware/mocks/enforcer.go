@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	types "github.com/gojek/mlp/api/pkg/authz/enforcer/types"
+	types "github.com/caraml-dev/mlp/api/pkg/authz/enforcer/types"
 	mock "github.com/stretchr/testify/mock"
 )
 

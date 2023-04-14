@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { AccordionForm, FormContext } from "@gojek/mlp-ui";
+import { AccordionForm, FormContext } from "@caraml-dev/ui-lib";
 import { RouterStep } from "./steps/RouterStep";
 import schema from "./validation/schema";
 import { ExperimentStep } from "./steps/ExperimentStep";

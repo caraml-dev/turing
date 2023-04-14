@@ -7,7 +7,7 @@ import {
   Login,
   MlpApiContextProvider,
   Toast,
-} from "@gojek/mlp-ui";
+} from "@caraml-dev/ui-lib";
 import { PrivateLayout } from "./PrivateLayout";
 import { useConfig } from "./config";
 import { EuiProvider } from "@elastic/eui";

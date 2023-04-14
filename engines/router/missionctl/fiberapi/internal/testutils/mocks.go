@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 // MockExperimentRunner is a mock implementation for the Planner interface

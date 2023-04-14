@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
+	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/newrelic"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/go-playground/validator/v10"
-	mlpcluster "github.com/gojek/mlp/api/pkg/cluster"
-	"github.com/gojek/mlp/api/pkg/instrumentation/newrelic"
-	"github.com/gojek/mlp/api/pkg/instrumentation/sentry"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"

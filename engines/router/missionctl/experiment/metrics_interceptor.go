@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
+
 	"github.com/caraml-dev/turing/engines/experiment/runner"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
 )
 
 type ctxKey string

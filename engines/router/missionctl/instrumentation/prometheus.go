@@ -1,7 +1,7 @@
 package instrumentation
 
 import (
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 	"github.com/golang-collections/collections/set"
 	"github.com/prometheus/client_golang/prometheus"
 )

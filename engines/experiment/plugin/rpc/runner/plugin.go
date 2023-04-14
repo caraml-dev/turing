@@ -3,9 +3,10 @@ package runner
 import (
 	"net/rpc"
 
-	"github.com/caraml-dev/turing/engines/experiment/runner"
-	"github.com/gojek/mlp/api/pkg/instrumentation/metrics"
+	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 	"github.com/hashicorp/go-plugin"
+
+	"github.com/caraml-dev/turing/engines/experiment/runner"
 )
 
 // ExperimentRunnerPlugin implements hashicorp/go-plugin's Plugin interface

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from "@elastic/eui";
-import { flattenPanelTree } from "@gojek/mlp-ui";
+import { flattenPanelTree } from "@caraml-dev/ui-lib";
 
 export const DockerRegistryPopover = ({ value, registryOptions, onChange }) => {
   const [isOpen, setOpen] = useState(false);

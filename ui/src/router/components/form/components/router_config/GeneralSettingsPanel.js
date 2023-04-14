@@ -15,7 +15,7 @@ import { get } from "../../../../../components/form/utils";
 import { FormLabelWithToolTip } from "../../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import sortBy from "lodash/sortBy";
 import { protocolTypeOptions } from "./typeOptions";
-import { FormContext } from "@gojek/mlp-ui";
+import { FormContext } from "@caraml-dev/ui-lib";
 
 export const GeneralSettingsPanel = ({
   name,
