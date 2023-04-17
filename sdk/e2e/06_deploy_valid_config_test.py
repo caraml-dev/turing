@@ -18,6 +18,14 @@ def test_deploy_router_valid_config():
     assert response["router_id"] == 1
     assert response["version"] == 1
 
+    # check that the status of the router is pending
+    try:
+        router.wait_for_status(RouterStatus.PENDING)
+    except TimeoutError:
+        raise Exception(
+            f"Turing API is taking too long for router {router.id} to start getting deployed."
+        )
+
     # wait for the router to get deployed
     try:
         router.wait_for_status(RouterStatus.DEPLOYED)
