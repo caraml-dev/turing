@@ -65,10 +65,10 @@ def test_create_router():
     enricher = Enricher(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=1, max_replica=1, cpu_request="100m", memory_request="1Gi"
+            min_replica=1, max_replica=1, cpu_request="250m", memory_request="256Mi"
         ),
-        endpoint="anything",
-        timeout="2s",
+        endpoint="enrich",
+        timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="enricher")],
     )
@@ -77,9 +77,9 @@ def test_create_router():
     ensembler = DockerRouterEnsemblerConfig(
         image=os.getenv("TEST_ECHO_IMAGE"),
         resource_request=ResourceRequest(
-            min_replica=2, max_replica=2, cpu_request="100m", memory_request="256Mi"
+            min_replica=1, max_replica=1, cpu_request="250m", memory_request="256Mi"
         ),
-        endpoint="anything",
+        endpoint="ensemble",
         timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="ensembler")],
