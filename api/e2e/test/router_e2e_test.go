@@ -184,7 +184,6 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 
 							Eventually(func(g Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
-								// TODO: Why is it pending? - g.Expect(router.Value("status").Raw()).To(Equal(api.Status.Pending))
 								g.Expect(router.Value("status").Raw()).To(Equal(api.Status.Undeployed))
 							}, arbitraryUpdateIntervals...).Should(Succeed())
 						})
