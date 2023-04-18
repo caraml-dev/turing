@@ -19,6 +19,7 @@ BatchEnsemblingConfig:
     BuildNamespace: default
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
+    SafeToEvict: false
     BaseImageRef:
       3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.7:v0.0.0-build.205-cf36433
       3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.8:v0.0.0-build.205-cf36433
@@ -69,7 +70,8 @@ RouterDefaults:
 ClusterConfig:
   InClusterConfig: false
   EnvironmentConfigPath: ""
-  EnsemblingServiceK8sConfig: {}
+  EnsemblingServiceK8sConfig:
+    {}
     # Example k8s_config to connect to cluster using gke-gcloud-auth-plugin
     # name: dev-cluster
     # cluster:

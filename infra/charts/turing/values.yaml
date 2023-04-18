@@ -31,11 +31,11 @@ turing:
     enabled: false
     # -- Set host value to enable name based virtual hosting. This allows routing
     # HTTP traffic to multiple host names at the same IP address. If no host is
-    # specified, the ingress rule applies to all inbound HTTP traffic through 
+    # specified, the ingress rule applies to all inbound HTTP traffic through
     # the IP address specified.
     # https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting
     host: ""
-    # -- Ingress class annotation to add to this Ingress rule, 
+    # -- Ingress class annotation to add to this Ingress rule,
     # useful when there are multiple ingress controllers installed
     class: ""
     # -- Whether to use networking.k8s.io/v1 (k8s version >= 1.19) or networking.k8s.io/v1beta1 (1.16 >= k8s version >= 1.22)
@@ -65,7 +65,7 @@ turing:
   #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
 
   # -- List of sidecar containers to attach to the Pod. For example, you can
-  # attach sidecar container that forward logs or dynamically update some 
+  # attach sidecar container that forward logs or dynamically update some
   # configuration files.
   extraContainers: []
   # Example:
@@ -80,7 +80,7 @@ turing:
   #   - name: config-volume
   #     mountPath: /etc/fluentd-config
 
-  # -- Extra volumes to attach to the Pod. For example, you can mount 
+  # -- Extra volumes to attach to the Pod. For example, you can mount
   # additional secrets to these volumes
   extraVolumes: []
   # Example:
@@ -104,19 +104,18 @@ turing:
     # See api/environments-dev.yaml for example contents
     environmentConfigPath: "environments.yaml"
     # -- See ClusterConfig.EnsemblingServiceK8sConfig in api/config-dev.yaml for example structure
-    ensemblingServiceK8sConfig: 
+    ensemblingServiceK8sConfig:
       name: dev-cluster
       cluster: {}
       user: {}
 
   # -- Set this field to configure environment configs. See api/environments-dev.yaml for sample structure
-  environmentConfigs: 
+  environmentConfigs:
     - name: dev
       k8s_config:
         name: dev-cluster
         cluster: {}
         user: {}
-
 
   # -- Turing Experiment Engines configuration
   experimentEngines: []
@@ -143,6 +142,7 @@ turing:
         BuildNamespace: default
         BuildTimeoutDuration: 20m
         DestinationRegistry: ghcr.io
+        SafeToEvict: false
         BaseImageRef:
           3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
         KanikoConfig:
@@ -168,7 +168,7 @@ turing:
       FailureRetryInterval: 10
       PythonVersion: "3"
       TTLSecond: 86400
-    DeployConfig: { }
+    DeployConfig: {}
     DbConfig:
       # The maximum amount of time a connection may be idle. For more info see: https://pkg.go.dev/database/sql#DB.SetConnMaxIdleTime
       ConnMaxIdleTime: 0s
@@ -178,8 +178,8 @@ turing:
       MaxIdleConns: 0
       # The maximum number of open connections to the database. For more info see: https://pkg.go.dev/database/sql#DB.SetMaxOpenConns
       MaxOpenConns: 0
-    KubernetesLabelConfigs: { }
-    MLPConfig: { }
+    KubernetesLabelConfigs: {}
+    MLPConfig: {}
     Sentry:
       Enabled: false
     RouterDefaults:
@@ -190,7 +190,7 @@ turing:
   # -- Override OpenAPI spec as long as it follows the OAS3 specifications.
   # A common use for this is to set the enums of the ExperimentEngineType.
   # See api/api/override-sample.yaml for an example.
-  openApiSpecOverrides: { }
+  openApiSpecOverrides: {}
 
   # -- Turing UI configuration.
   # Please Refer to https://github.com/caraml-dev/turing/blob/main/ui/public/app.config.js
@@ -213,7 +213,7 @@ turing:
       batchEnsemblingEnabled: *batchEnsemblingEnabled
     authConfig:
       oauthClientId: ""
-    sentryConfig: { }
+    sentryConfig: {}
 
 sentry:
   # -- Sentry DSN value used by both Turing API and Turing UI
@@ -242,7 +242,7 @@ postgresql:
     # -- Password for Turing Postgresql database
     password: turing
   containerPorts:
-      postgresql: 5432
+    postgresql: 5432
   metrics:
     enabled: false
     serviceMonitor:
@@ -255,7 +255,6 @@ postgresql:
     synchronousCommit: "on"
     numSynchronousReplicas: 2
     applicationName: turing
-
 
 mlp:
   # -- MLP API endpoint, used by the MLP UI for fetching data
@@ -282,11 +281,11 @@ mlp:
     # -- Name of MLP's Postgresql deployment
     nameOverride: postgresql-mlp
     containerPorts:
-      postgresql: 5432 
+      postgresql: 5432
   environmentConfigSecret:
     # -- Name refers to a secret that contains the K8sConfig. Set if there already exists a K8s secret
     # that turing should use. Key in secret defaults to environment.yaml
-    name: "" 
+    name: ""
     envKey: environment.yaml
 
 merlin:
@@ -302,7 +301,6 @@ merlin:
     # -- API endpoint to be used by Merlin to talk to MLP API
     # @default -- computed value
     apiHost: "http://{{ .Release.Name }}-mlp:8080/v1"
-
 
   # -- List of Merlin environment configs, available to Turing for deploying routers
   # By default, a new dev environment will automatically be created
@@ -342,7 +340,6 @@ global:
     encryption:
       # -- (string) Global MLP Encryption Key to be used by all MLP components
       key:
-
 
 # Tags are used to include/exclude chart dependencies
 tags:
