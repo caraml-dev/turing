@@ -22,7 +22,7 @@ func (c ExperimentsController) ListExperimentEngines(
 
 // ListExperimentEngineClients returns a list of clients on the given experiment engine
 func (c ExperimentsController) ListExperimentEngineClients(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
@@ -42,7 +42,7 @@ func (c ExperimentsController) ListExperimentEngineClients(
 // ListExperimentEngineExperiments returns a list of experiments on the given experiment engine,
 // optionally tied to the given client id
 func (c ExperimentsController) ListExperimentEngineExperiments(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
@@ -64,7 +64,7 @@ func (c ExperimentsController) ListExperimentEngineExperiments(
 
 // ListExperimentEngineVariables returns a list of variables for the given client and/or experiments
 func (c ExperimentsController) ListExperimentEngineVariables(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {

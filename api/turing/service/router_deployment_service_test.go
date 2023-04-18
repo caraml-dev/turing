@@ -34,10 +34,9 @@ type mockClusterServiceBuilder struct {
 }
 
 func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
-	routerVersion *models.RouterVersion,
-	project *mlp.Project,
-	envType string,
-	versionEndpoint string,
+	_ *models.RouterVersion,
+	_ *mlp.Project,
+	_ string,
 ) (*cluster.VirtualService, error) {
 	return &cluster.VirtualService{
 		Name:      "test-svc-turing-router",
@@ -72,8 +71,7 @@ func (msb *mockClusterServiceBuilder) NewSecret(
 func (msb *mockClusterServiceBuilder) NewEnricherService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
-	secretName string,
+	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -84,9 +82,6 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-enricher-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
@@ -96,8 +91,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
-	secretName string,
+	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
 ) (*cluster.KnativeService, error) {
@@ -108,9 +102,6 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-ensembler-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    queueProxyResourcePercentage,
 		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
@@ -121,7 +112,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
 	envType string,
-	secretName string,
+	_ string,
 	expConfig json.RawMessage,
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
@@ -143,9 +134,6 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				{Name: "SENTRY_ENABLED", Value: strconv.FormatBool(sentryEnabled)},
 				{Name: "SENTRY_DSN", Value: sentryDSN},
 			},
-			Labels: map[string]string{
-				"env": envType,
-			},
 			ConfigMap: &cluster.ConfigMap{
 				Name: fmt.Sprintf("%s-fiber-config-%d", rv.Router.Name, rv.Version),
 				Data: string(expConfig),
@@ -159,8 +147,8 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 func (msb *mockClusterServiceBuilder) NewFluentdService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
-	serviceAccountSecretName string,
-	cfg *config.FluentdConfig,
+	_ string,
+	_ *config.FluentdConfig,
 ) *cluster.KubernetesService {
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
@@ -171,7 +159,7 @@ func (msb *mockClusterServiceBuilder) NewFluentdService(
 	}
 }
 
-func (msb *mockClusterServiceBuilder) GetRouterServiceName(ver *models.RouterVersion) string {
+func (msb *mockClusterServiceBuilder) GetRouterServiceName(_ *models.RouterVersion) string {
 	return "test-router-svc"
 }
 
@@ -271,9 +259,6 @@ func TestDeployEndpoint(t *testing.T) {
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-enricher-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    20,
 		UserContainerLimitRequestFactor: 1.75,
@@ -282,9 +267,6 @@ func TestDeployEndpoint(t *testing.T) {
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-ensembler-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
-			Labels: map[string]string{
-				"env": envType,
-			},
 		},
 		QueueProxyResourcePercentage:    20,
 		UserContainerLimitRequestFactor: 1.75,
@@ -301,9 +283,6 @@ func TestDeployEndpoint(t *testing.T) {
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: "true"},
 				{Name: "SENTRY_DSN", Value: "test:dsn"},
-			},
-			Labels: map[string]string{
-				"env": envType,
 			},
 			ConfigMap: &cluster.ConfigMap{
 				Name: fmt.Sprintf("%s-fiber-config-%d",
@@ -492,6 +471,5 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 		Endpoint:          "/ensemble",
 		Port:              8083,
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
-		ServiceAccount:    "",
 	})
 }

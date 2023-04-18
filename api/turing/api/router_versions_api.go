@@ -16,7 +16,7 @@ type RouterVersionsController struct {
 
 // ListRouterVersions lists the router versions of the provided router.
 func (c RouterVersionsController) ListRouterVersions(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse request vars
@@ -38,7 +38,7 @@ func (c RouterVersionsController) ListRouterVersions(
 // CreateRouterVersion creates a router version from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created but NOT deployed.
-func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars RequestVars, body interface{}) *Response {
+func (c RouterVersionsController) CreateRouterVersion(_ *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
 	var errResp *Response
 	var router *models.Router
@@ -81,7 +81,7 @@ func (c RouterVersionsController) CreateRouterVersion(r *http.Request, vars Requ
 
 // GetRouterVersion gets the router version for the provided router id and version number.
 func (c RouterVersionsController) GetRouterVersion(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars, _ interface{},
 ) *Response {
 	// Parse request vars
@@ -97,7 +97,7 @@ func (c RouterVersionsController) GetRouterVersion(
 
 // DeleteRouterVersion deletes the config for the given version number.
 func (c RouterVersionsController) DeleteRouterVersion(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
@@ -132,9 +132,9 @@ func (c RouterVersionsController) DeleteRouterVersion(
 
 // DeployRouterVersion deploys the given router version into the associated kubernetes cluster
 func (c RouterVersionsController) DeployRouterVersion(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
-	body interface{},
+	_ interface{},
 ) *Response {
 	// Parse request vars
 	var errResp *Response

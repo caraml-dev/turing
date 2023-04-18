@@ -16,7 +16,7 @@ type EnsemblersController struct {
 }
 
 func (c EnsemblersController) ListEnsemblers(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {

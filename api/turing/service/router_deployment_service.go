@@ -206,7 +206,7 @@ func (ds *deploymentService) DeployRouterVersion(
 
 	// Deploy or update the virtual service
 	eventsCh.Write(models.NewInfoEvent(models.EventStageUpdatingEndpoint, "updating router endpoint"))
-	routerEndpoint, err := ds.svcBuilder.NewRouterEndpoint(routerVersion, project, ds.environmentType, endpoint)
+	routerEndpoint, err := ds.svcBuilder.NewRouterEndpoint(routerVersion, project, endpoint)
 	if err != nil {
 		eventsCh.Write(models.NewErrorEvent(
 			models.EventStageUpdatingEndpoint, "failed to update router endpoint: %s", err.Error()))
@@ -352,7 +352,6 @@ func (ds *deploymentService) createServices(
 		enricherSvc, err := ds.svcBuilder.NewEnricherService(
 			routerVersion,
 			project,
-			envType,
 			secretName,
 			knativeQueueProxyResourcePercentage,
 			userContainerLimitRequestFactor,
@@ -368,7 +367,6 @@ func (ds *deploymentService) createServices(
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion,
 			project,
-			envType,
 			secretName,
 			knativeQueueProxyResourcePercentage,
 			userContainerLimitRequestFactor,
@@ -455,7 +453,6 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 		Endpoint:          PyFuncEnsemblerServiceEndpoint,
 		Port:              PyFuncEnsemblerServicePort,
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
-		ServiceAccount:    "",
 	}
 
 	return nil

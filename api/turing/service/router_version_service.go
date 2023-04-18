@@ -130,9 +130,26 @@ func (service *routerVersionsService) Save(routerVersion *models.RouterVersion) 
 		}
 		err = tx.Create(routerVersion).Error
 	} else {
-		// We don't allow ensembler and enricher updates. Changes to those elements
-		// will always result in a new version being spawned.
+		// We don't allow ensembler and enricher updates without an update to the entire router version.
+		// Changes to those elements will always result in a new version being spawned.
 		err = tx.Save(routerVersion).Error
+		if err != nil {
+			return nil, err
+		}
+		// These steps below are meant to ensure the ensembler and enricher config tables are up-to-date with the
+		// router version
+		if routerVersion.Enricher != nil {
+			err = tx.Save(routerVersion.Enricher).Error
+			if err != nil {
+				return nil, err
+			}
+		}
+		if routerVersion.Ensembler != nil {
+			err = tx.Save(routerVersion.Ensembler).Error
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	if err != nil {

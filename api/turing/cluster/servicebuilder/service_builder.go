@@ -60,7 +60,6 @@ type ClusterServiceBuilder interface {
 	NewEnricherService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		secretName string,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
@@ -68,7 +67,6 @@ type ClusterServiceBuilder interface {
 	NewEnsemblerService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		secretName string,
 		knativeQueueProxyResourcePercentage int,
 		userContainerLimitRequestFactor float64,
@@ -94,7 +92,6 @@ type ClusterServiceBuilder interface {
 	NewRouterEndpoint(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		envType string,
 		versionEndpoint string,
 	) (*cluster.VirtualService, error)
 	NewSecret(
@@ -136,7 +133,6 @@ func NewClusterServiceBuilder(
 func (sb *clusterSvcBuilder) NewEnricherService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
@@ -221,7 +217,6 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 func (sb *clusterSvcBuilder) NewEnsemblerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	envType string,
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
