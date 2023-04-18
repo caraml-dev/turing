@@ -239,7 +239,8 @@ func (ib *imageBuilder) createKanikoJob(
 
 	annotations := make(map[string]string)
 	if !ib.imageBuildingConfig.SafeToEvict {
-		// The image-building jobs are timing out. We found that one of the root causes is the node pool got scaled down resulting in the image building pods to be rescheduled.
+		// The image-building jobs are timing out. We found that one of the root causes is the node pool got scaled down
+		// resulting in the image building pods to be rescheduled.
 		// Adding "cluster-autoscaler.kubernetes.io/safe-to-evict": "false" to avoid the pod get killed and rescheduled.
 		// https://kubernetes.io/docs/reference/labels-annotations-taints/#cluster-autoscaler-kubernetes-io-safe-to-evict
 		annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"] = "false"

@@ -48,9 +48,10 @@ func (j *Job) Build() *batchv1.Job {
 
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      j.Name,
-			Namespace: j.Namespace,
-			Labels:    j.Labels,
+			Name:        j.Name,
+			Namespace:   j.Namespace,
+			Labels:      j.Labels,
+			Annotations: j.Annotations,
 		},
 		Spec: batchv1.JobSpec{
 			Completions:             j.Completions,
@@ -58,7 +59,8 @@ func (j *Job) Build() *batchv1.Job {
 			TTLSecondsAfterFinished: j.TTLSecondsAfterFinished,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: j.Labels,
+					Labels:      j.Labels,
+					Annotations: j.Annotations,
 				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: j.RestartPolicy,

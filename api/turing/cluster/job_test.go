@@ -17,6 +17,9 @@ var (
 	labels = map[string]string{
 		"foo": "bar",
 	}
+	annotations = map[string]string{
+		"key": "value",
+	}
 	jobCompletions            int32 = 1
 	jobBackOffLimit           int32 = 3
 	jobTTLSecondAfterComplete int32 = 3600 * 24
@@ -25,9 +28,10 @@ var (
 func TestJob(t *testing.T) {
 	expected := batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      jobName,
-			Namespace: namespace,
-			Labels:    labels,
+			Name:        jobName,
+			Namespace:   namespace,
+			Labels:      labels,
+			Annotations: annotations,
 		},
 		Spec: batchv1.JobSpec{
 			Completions:             &jobCompletions,
@@ -35,7 +39,8 @@ func TestJob(t *testing.T) {
 			TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels:      labels,
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicyNever,
@@ -67,6 +72,7 @@ func TestJob(t *testing.T) {
 		Name:                    jobName,
 		Namespace:               namespace,
 		Labels:                  labels,
+		Annotations:             annotations,
 		Completions:             &jobCompletions,
 		BackOffLimit:            &jobBackOffLimit,
 		TTLSecondsAfterFinished: &jobTTLSecondAfterComplete,
