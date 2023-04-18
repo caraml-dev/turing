@@ -6,7 +6,7 @@ LogLevel: DEBUG
 
 # Enable Cross-Origin Requests (CORS) for the following origins
 AllowedOrigins:
-- "*"
+  - "*"
 
 # Configuration to enable authorization using ORY Keto server
 AuthConfig:
@@ -42,6 +42,7 @@ BatchEnsemblingConfig:
     BuildNamespace: default
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
+    SafeToEvict: false
     BaseImageRef:
       3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
     KanikoConfig: &kanikoConfig
@@ -90,7 +91,7 @@ NewRelic:
   Enabled: true
   AppName: turing
   License: <your very secret license key here>
-  IgnoreStatusCodes: 
+  IgnoreStatusCodes:
     - 400
     - 401
     - 403
@@ -170,7 +171,7 @@ RouterDefaults:
 Sentry:
   Enabled: false
   DSN: https://public@sentry.example.com/1
-  Labels: 
+  Labels:
     labelkey1: labelvalue1
     labelkey2: labelvalue2
 
@@ -188,10 +189,10 @@ ClusterConfig:
 # such as user provided service account keys
 TuringEncryptionKey: secret
 
-# Alert configuration for Turing router 
+# Alert configuration for Turing router
 AlertConfig:
   Enabled: false
-  # Persist alert configuration in a GitLab repo with pre-configured 
+  # Persist alert configuration in a GitLab repo with pre-configured
   # continuous integration jobs that will register and activate the alerts
   # to a backend alert server
   GitLab:
@@ -218,7 +219,7 @@ MLPConfig:
 TuringUIConfig:
   ServingDirectory: /ui
   ServingPath: /turing
- 
+
 # Openapi validation configuration
 OpenapiConfig:
   ValidationEnabled: true
@@ -239,15 +240,15 @@ Experiment:
     config:
       op: seq
       seq:
-      - op: set
-        var: variant
-        value:
-          choices:
-            op: array
-            values:
-            - control
-            - treatment-1
-          unit:
-            op: get
-            var: customer
-          op: uniformChoice
+        - op: set
+          var: variant
+          value:
+            choices:
+              op: array
+              values:
+                - control
+                - treatment-1
+            unit:
+              op: get
+              var: customer
+            op: uniformChoice

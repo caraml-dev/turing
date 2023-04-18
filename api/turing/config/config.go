@@ -176,6 +176,8 @@ type ImageBuildingConfig struct {
 	TolerationName *string
 	// NodeSelector restricts the running of image building jobs to nodes with the specified labels.
 	NodeSelector map[string]string
+	// Value for cluster-autoscaler.kubernetes.io/safe-to-evict annotation
+	SafeToEvict bool
 }
 
 // Resource contains the Kubernetes resource request and limits
@@ -636,7 +638,8 @@ func StringToQuantityHookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
-		data interface{}) (interface{}, error) {
+		data interface{},
+	) (interface{}, error) {
 		if f.Kind() != reflect.String {
 			return data, nil
 		}

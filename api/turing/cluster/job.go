@@ -11,6 +11,7 @@ type Job struct {
 	Name                    string
 	Namespace               string
 	Labels                  map[string]string
+	Annotations             map[string]string
 	Completions             *int32
 	BackOffLimit            *int32
 	TTLSecondsAfterFinished *int32
