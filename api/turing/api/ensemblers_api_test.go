@@ -4,6 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
+	mlflowMock "github.com/caraml-dev/mlp/api/pkg/client/mlflow/mocks"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
@@ -265,6 +269,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 	tests := map[string]struct {
 		vars         RequestVars
 		ensemblerSvc func() service.EnsemblersService
+		mlflowSvc    func() mlflow.Service
 		body         interface{}
 		expected     *Response
 	}{
@@ -378,6 +383,11 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 					Return(nil, errors.New("failed to save"))
 				return ensemblerSvc
 			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteRun", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				return mlflowSvc
+			},
 			expected: InternalServerError(
 				"failed to update an ensembler", "failed to save"),
 		},
@@ -411,6 +421,11 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 					Return(updated, nil)
 				return ensemblerSvc
 			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteRun", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				return mlflowSvc
+			},
 			expected: Ok(updated),
 		},
 	}
@@ -422,15 +437,465 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			if tt.ensemblerSvc != nil {
 				ensemblerSvc = tt.ensemblerSvc()
 			}
+			var mlflowSvc mlflow.Service
+			if tt.mlflowSvc != nil {
+				mlflowSvc = tt.mlflowSvc()
+			}
+
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
 						EnsemblersService: ensemblerSvc,
+						MlflowService:     mlflowSvc,
 					},
 					validator,
 				),
 			}
 			response := ctrl.UpdateEnsembler(nil, tt.vars, tt.body)
+			assert.Equal(t, tt.expected, response)
+		})
+	}
+}
+
+func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
+	original := &models.PyFuncEnsembler{
+		GenericEnsembler: &models.GenericEnsembler{
+			Model:     models.Model{ID: 2},
+			ProjectID: 2,
+			Type:      models.EnsemblerPyFuncType,
+			Name:      "original-ensembler",
+		},
+		MlflowURL:    "http://localhost:5000/experiemnts/0/runs/1",
+		ExperimentID: 1,
+		RunID:        "1",
+		ArtifactURI:  "gs://bucket-name/mlflow/0/1/artifacts",
+	}
+	routerVersionStatusInactive := []models.RouterVersionStatus{
+		models.RouterVersionStatusFailed,
+		models.RouterVersionStatusUndeployed,
+	}
+
+	routerVersionStatusActive := []models.RouterVersionStatus{
+		models.RouterVersionStatusDeployed,
+		models.RouterVersionStatusPending,
+	}
+
+	routerVersion := &models.RouterVersion{
+		Model: models.Model{
+			ID: 1,
+		},
+		Status: "deployed",
+	}
+
+	ensemblerID := models.ID(2)
+
+	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
+		EnsemblerID: &ensemblerID,
+		Statuses: []models.Status{
+			models.JobPending,
+			models.JobBuildingImage,
+			models.JobRunning,
+		},
+	}
+
+	ensemblingJobInactiveOption := service.EnsemblingJobListOptions{
+		EnsemblerID: &ensemblerID,
+		Statuses: []models.Status{
+			models.JobFailed,
+			models.JobCompleted,
+			models.JobFailedBuildImage,
+			models.JobFailedSubmission,
+		},
+	}
+
+	dummyEnsemblingJob := GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true)
+
+	tests := map[string]struct {
+		vars              RequestVars
+		ensemblerSvc      func() service.EnsemblersService
+		mlflowSvc         func() mlflow.Service
+		routerVersionsSvc func() service.RouterVersionsService
+		ensemblingJobSvc  func() service.EnsemblingJobService
+		expected          *Response
+	}{
+		"failure | bad request": {
+			vars: RequestVars{"project_id": {"unknown"}},
+			expected: BadRequest(
+				"failed to fetch ensembler",
+				`failed to parse query string: schema: error converting value for "project_id"`,
+			),
+		},
+		"failure | ensembler not found": {
+			vars: RequestVars{
+				"project_id":   {"1"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(1),
+					}).
+					Return(nil, errors.New("ensembler with ID 2 doesn't belong to this project"))
+				return ensemblerSvc
+			},
+			expected: NotFound(
+				"ensembler not found",
+				"ensembler with ID 2 doesn't belong to this project",
+			),
+		},
+		"failure | there is active router version": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).
+					Return([]*models.RouterVersion{routerVersion}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			expected: BadRequest("failed to delete an ensembler", "There are active router version using this ensembler"),
+		},
+		"failure | there is active ensembling job": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).
+					Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							dummyEnsemblingJob,
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			expected: BadRequest("failed to delete an ensembler", "There are active ensembling job using this ensembler"),
+		},
+		"failure | failed to delete router version": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, routerVersionStatusActive).
+					Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, routerVersionStatusInactive).
+					Return([]*models.RouterVersion{routerVersion}, nil)
+				routerVersionSvc.On("Delete", mock.Anything).Return(errors.New("failed to delete router version"))
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			expected: InternalServerError("unable to delete router version", "failed to delete router version"),
+		},
+		"failure | failed to delete ensembling job": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", ensemblingJobActiveOption).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("List", ensemblingJobInactiveOption).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{
+							dummyEnsemblingJob,
+						},
+						Paging: service.Paging{
+							Total: 1,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", dummyEnsemblingJob).Return(errors.New("failed to delete ensembling job"))
+				return ensemblingJobSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
+				return mlflowSvc
+			},
+			expected: InternalServerError("unable to delete ensembling jobs", "failed to delete ensembling job"),
+		},
+		"failure | failed to delete mlflow experiment": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(errors.New("failed to delete mlflow experiment"))
+				return mlflowSvc
+			},
+			expected: InternalServerError("Delete Failed", "failed to delete mlflow experiment"),
+		},
+		"failure | failed to delete": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(errors.New("failed to delete"))
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
+				return mlflowSvc
+			},
+			expected: InternalServerError("failed to delete an ensembler", "failed to delete"),
+		},
+		"success": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("FindRouterUsingEnsembler", mock.Anything, mock.Anything).Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
+				return mlflowSvc
+			},
+			expected: Ok(models.ID(2)),
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			validator, _ := validation.NewValidator(nil)
+			var ensemblerSvc service.EnsemblersService
+			if tt.ensemblerSvc != nil {
+				ensemblerSvc = tt.ensemblerSvc()
+			}
+			var mlflowSvc mlflow.Service
+			if tt.mlflowSvc != nil {
+				mlflowSvc = tt.mlflowSvc()
+			}
+			var ensemblingJobSvc service.EnsemblingJobService
+			if tt.ensemblingJobSvc != nil {
+				ensemblingJobSvc = tt.ensemblingJobSvc()
+			}
+			var routerVersionsSvc service.RouterVersionsService
+			if tt.ensemblingJobSvc != nil {
+				routerVersionsSvc = tt.routerVersionsSvc()
+			}
+
+			ctrl := &EnsemblersController{
+				NewBaseController(
+					&AppContext{
+						EnsemblersService:     ensemblerSvc,
+						MlflowService:         mlflowSvc,
+						EnsemblingJobService:  ensemblingJobSvc,
+						RouterVersionsService: routerVersionsSvc,
+					},
+					validator,
+				),
+			}
+			response := ctrl.DeleteEnsembler(nil, tt.vars, nil)
 			assert.Equal(t, tt.expected, response)
 		})
 	}

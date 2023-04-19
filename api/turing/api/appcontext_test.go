@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojek/mlp/api/pkg/client/mlflow"
+	"github.com/xanzy/go-gitlab"
+
+	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
 
 	//nolint:all
 	"bou.ke/monkey"
@@ -13,7 +15,6 @@ import (
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/stretchr/testify/assert"
-	"github.com/xanzy/go-gitlab"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 

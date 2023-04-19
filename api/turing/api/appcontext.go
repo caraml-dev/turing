@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gojek/mlp/api/pkg/client/mlflow"
+	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
 
 	"gorm.io/gorm"
 
