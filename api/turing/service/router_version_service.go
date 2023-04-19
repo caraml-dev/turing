@@ -15,6 +15,12 @@ const (
 	grafanaAllVariable = "$__all"
 )
 
+type RouterVersionEnsemblerListOptions struct {
+	ProjectID   *models.ID                   `schema:"project_id" validate:"required"`
+	EnsemblerID *models.ID                   `schema:"ensembler_id"`
+	Statuses    []models.RouterVersionStatus `schema:"status"`
+}
+
 // RouterVersionsService is the data access object for RouterVersions from the db.
 type RouterVersionsService interface {
 	// ListRouterVersions List all RouterVersions associated with the given routerID
