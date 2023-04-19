@@ -956,6 +956,14 @@ paths:
         schema:
           format: int32
           type: integer
+      - explode: true
+        in: query
+        name: status
+        schema:
+          items:
+            $ref: '#/components/schemas/RouterVersionStatus'
+          type: array
+        style: form
       responses:
         "200":
           content:

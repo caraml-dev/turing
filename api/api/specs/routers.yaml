@@ -435,6 +435,14 @@ paths:
           schema:
             <<: *id
           required: true
+        - in: query
+          name: status
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/RouterVersionStatus"
+          style: form
+          explode: true          
       responses:
         "200":
           description: An Array of JSON object representing router version instance of the specific Ensembler
