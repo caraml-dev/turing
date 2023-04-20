@@ -23,6 +23,7 @@ from turing.generated.models import (
     RouterVersion,
     RouterVersionConfig,
     EnsemblerId,
+    RouterVersionStatus,
 )
 
 
@@ -188,6 +189,7 @@ class TuringSession:
         status: List[EnsemblerJobStatus] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
+        ensembler_id: Optional[int] = None,
     ) -> EnsemblingJobPaginatedResults:
         """
         List ensembling jobs
@@ -200,6 +202,8 @@ class TuringSession:
             kwargs["page"] = page
         if page_size:
             kwargs["page_size"] = page_size
+        if ensembler_id:
+            kwargs["ensembler_id"] = ensembler_id
 
         return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
             project_id=self.active_project.id, **kwargs
@@ -365,4 +369,22 @@ class TuringSession:
             self._api_client
         ).projects_project_id_routers_router_id_events_get(
             project_id=self.active_project.id, router_id=router_id
+        )
+
+    @require_active_project
+    def get_router_version_for_ensembler(
+        self, ensembler_id: int, status: List[RouterVersionStatus] = None
+    ) -> RouterVersion:
+        """
+        Fetch specific router version by its router ID and version
+        """
+        kwargs = {}
+
+        if status:
+            kwargs["status"] = status
+
+        return RouterApi(
+            self._api_client
+        ).projects_project_id_routers_version_ensembler_ensembler_id_get(
+            project_id=self.active_project.id, ensembler_id=ensembler_id, **kwargs
         )

@@ -12,8 +12,9 @@ import yaml
 import turing.generated.models
 from turing.generated.models import EnsemblerType
 from turing._base_types import ApiObject, ApiObjectSpec
-from turing.batch import EnsemblingJob
+from turing.batch import EnsemblingJob, EnsemblingJobStatus
 from turing.batch.config import EnsemblingJobConfig
+from turing.router.config.router_version import RouterStatus
 
 
 class EnsemblerBase(abc.ABC):
@@ -279,6 +280,24 @@ class PyFuncEnsembler(Ensembler):
             with the model. This will be passed to turing.ensembler.PyFunc.initialize().
             Example: {"config" : "config/staging.yaml"}
         """
+
+        relatedRouterVer = turing.Router.get_router_version_for_ensembler(
+            ensembler_id=self._id, status=[RouterStatus.PENDING]
+        )
+        if len(relatedRouterVer) > 0:
+            return "There is active router using this ensembler"
+        # CHECK ACTIVE ENSEMBLING JOBS
+        relatedJob = EnsemblingJob.list(
+            ensembler_id=self._id,
+            status=[
+                EnsemblingJobStatus.BUILDING,
+                EnsemblingJobStatus.PENDING,
+                EnsemblingJobStatus.RUNNING,
+            ],
+        )
+        if len(relatedJob) > 0:
+            return "There is active ensembling job using this ensembler"
+
         if name:
             self._name = name
 
