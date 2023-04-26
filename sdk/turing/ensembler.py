@@ -285,7 +285,7 @@ class PyFuncEnsembler(Ensembler):
             ensembler_id=self._id, status=[RouterStatus.PENDING]
         )
         if len(relatedRouterVer) > 0:
-            return "There is active router using this ensembler"
+            raise ValueError("There is pending router version using this ensembler")
         # CHECK ACTIVE ENSEMBLING JOBS
         relatedJob = EnsemblingJob.list(
             ensembler_id=self._id,
@@ -296,7 +296,7 @@ class PyFuncEnsembler(Ensembler):
             ],
         )
         if len(relatedJob) > 0:
-            return "There is active ensembling job using this ensembler"
+            raise ValueError("There is active ensembling job using this ensembler")
 
         if name:
             self._name = name

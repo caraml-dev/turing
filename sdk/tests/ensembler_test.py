@@ -10,6 +10,10 @@ from urllib3_mock import Responses
 import turing.generated.models
 
 responses = Responses("requests.packages.urllib3")
+data_dir = os.path.join(os.path.dirname(__file__), "./testdata/api_responses")
+
+with open(os.path.join(data_dir, "list_jobs_0000.json")) as f:
+    list_jobs_0000 = f.read()
 
 
 @pytest.fixture(scope="module", name="responses")
@@ -123,6 +127,11 @@ def test_update_ensembler(
         paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
     )
 
+    emptyJob = turing.generated.models.EnsemblingJobPaginatedResults(
+        results=[],
+        paging=turing.generated.models.PaginationPaging(total=0, page=1, pages=1),
+    )
+
     responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/ensemblers",
@@ -141,6 +150,22 @@ def test_update_ensembler(
         content_type="application/json",
     )
 
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        body=json.dumps([], default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs",
+        body=json.dumps(emptyJob, default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
     actual.update(
         name=pyfunc_ensembler.name,
         ensembler_instance=tests.MyTestEnsembler(0.06),
@@ -155,6 +180,150 @@ def test_update_ensembler(
         ],
     )
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
+
+
+@responses.activate
+@pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
+def test_update_ensembler_existing_router_version(
+    turing_api,
+    active_project,
+    generic_ensemblers,
+    pyfunc_ensembler,
+    use_google_oauth,
+    generic_router_version,
+):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    page = turing.generated.models.EnsemblersPaginatedResults(
+        results=generic_ensemblers,
+        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
+    )
+
+    emptyJob = turing.generated.models.EnsemblingJobPaginatedResults(
+        results=[],
+        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/ensemblers",
+        body=json.dumps(page, default=tests.json_serializer),
+        status=201,
+        content_type="application/json",
+    )
+
+    actual, *rest = turing.PyFuncEnsembler.list()
+
+    responses.add(
+        method="PUT",
+        url=f"/v1/projects/{active_project.id}/ensemblers/{actual.id}",
+        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        body=json.dumps([generic_router_version], default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs",
+        body=json.dumps(emptyJob, default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+    with pytest.raises(ValueError) as error:
+        actual.update(
+            name=pyfunc_ensembler.name,
+            ensembler_instance=tests.MyTestEnsembler(0.06),
+            conda_env={
+                "channels": ["defaults"],
+                "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
+            },
+            code_dir=[
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "samples/quickstart",
+                )
+            ],
+        )
+    expected_error_message = "There is pending router version using this ensembler"
+    actual_error_message = str(error.value)
+    assert expected_error_message == actual_error_message
+
+
+@responses.activate
+@pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
+def test_update_ensembler_existing_job(
+    turing_api, active_project, generic_ensemblers, pyfunc_ensembler, use_google_oauth
+):
+    turing.set_url(turing_api, use_google_oauth)
+    turing.set_project(active_project.name)
+
+    page = turing.generated.models.EnsemblersPaginatedResults(
+        results=generic_ensemblers,
+        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/ensemblers",
+        body=json.dumps(page, default=tests.json_serializer),
+        status=201,
+        content_type="application/json",
+    )
+
+    actual, *rest = turing.PyFuncEnsembler.list()
+
+    responses.add(
+        method="PUT",
+        url=f"/v1/projects/{active_project.id}/ensemblers/{actual.id}",
+        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        body=json.dumps([], default=tests.json_serializer),
+        status=200,
+        content_type="application/json",
+    )
+
+    responses.add(
+        method="GET",
+        url=f"/v1/projects/{active_project.id}/jobs",
+        body=list_jobs_0000,
+        status=200,
+        content_type="application/json",
+    )
+    with pytest.raises(ValueError) as error:
+        actual.update(
+            name=pyfunc_ensembler.name,
+            ensembler_instance=tests.MyTestEnsembler(0.06),
+            conda_env={
+                "channels": ["defaults"],
+                "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
+            },
+            code_dir=[
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "samples/quickstart",
+                )
+            ],
+        )
+    expected_error_message = "There is active ensembling job using this ensembler"
+    actual_error_message = str(error.value)
+    assert expected_error_message == actual_error_message
 
 
 @responses.activate
