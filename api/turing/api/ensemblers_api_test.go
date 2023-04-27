@@ -719,7 +719,8 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 					},
 					nil)
 				ensemblingJobSvc.On("Delete", dummyEnsemblingJob).Return(errors.New("failed to delete ensembling job"))
-				ensemblingJobSvc.On("MarkEnsemblingJobForTermination", dummyEnsemblingJob).Return(errors.New("failed to delete ensembling job"))
+				ensemblingJobSvc.On("MarkEnsemblingJobForTermination", dummyEnsemblingJob).
+					Return(errors.New("failed to delete ensembling job"))
 				return ensemblingJobSvc
 			},
 			mlflowSvc: func() mlflow.Service {
