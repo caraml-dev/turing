@@ -371,19 +371,18 @@ $ docker build . \
 ## Deployment 
 
 To deploy Turing with one or more Experiment Engine plugins, it's required to pass `turing.experimentEngines`
-configuration when Turing is installed/upgraded from the [official Helm chart](../../../infra/charts/turing).
+configuration when Turing is installed/upgraded from the [official Helm chart](https://github.com/caraml-dev/helm-charts/blob/main/charts/turing).
 
 ```yaml
-turing:
-  experimentEngines:
-    - name: example-plugin
-      type: rpc-plugin
-      rpcPlugin:
-        image: myrepo/example-engine-plugin:latest
-      options:
-        foo: bar
-        bar:
-          alice: bob
+experimentEngines:
+  - name: example-plugin
+    type: rpc-plugin
+    rpcPlugin:
+      image: myrepo/example-engine-plugin:latest
+    options:
+      foo: bar
+      bar:
+        alice: bob
 ```
 * `name` – (*required*) – experiment engine name
 * `type` – (*required*) – experiment engine type. Currently, the only supported option is `rpc-plugin`
@@ -393,7 +392,7 @@ turing:
               ./rpc_plugins.md#experiment-manager-configuration) method during the initialization stage.
 
 Then this configuration can be used for the deployment. Check the helm chart [README.md](
-../../../infra/charts/turing/README.md) for more details. 
+https://github.com/caraml-dev/helm-charts/blob/main/charts/turing/README.md) for more details. 
 
 This example experiment engine plugin is also used in the [Turing CI Pipeline](https://github.com/caraml-dev/turing/actions/workflows/turing.yaml) 
 and full deployment configuration of Turing with experiment engine plugin can be found at [infra/e2e/turing.values.yaml](

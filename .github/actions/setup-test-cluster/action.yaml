@@ -18,10 +18,6 @@ inputs:
     required: true
     description: 'Experiment Engine tar Archive Name'
     default: ''
-  cluster_init_tar_archive_name:
-    required: true
-    description: 'Cluster init tar Archive Name'
-    default: ''
   use_in_cluster_config:
     required: true
     description: 'Matrix: useInClusterConfig'
@@ -34,25 +30,9 @@ inputs:
     required: true
     description: 'Name of Cluster'
     default: ''
-  istio_version:
-    required: true
-    description: 'Istio Version'
-    default: ''
-  knative_version:
-    required: true
-    description: 'Knative Version'
-    default: ''
-  knative_istio_version:
-    required: true
-    description: 'Knative Istio Version'
-    default: ''
   local_registry:
     required: true
     description: 'Endpoint of local registry'
-    default: ''
-  cluster_init_version:
-    required: true
-    description: 'Version of cluster to install, tar file has to follow naming - cluster-init.(CLUSTER_INIT_VERSION).tar '
     default: ''
 
 runs:
@@ -78,20 +58,16 @@ runs:
       with:
         name: ${{ inputs.experiment_engine_plugin_archive_name }}
 
-    - name: Download Cluster Init Docker tar archive
-      uses: actions/download-artifact@v2
+    - name: "Setup local k8s cluster"
+      uses: AbsaOSS/k3d-action@v2.3.0
       with:
-        name: ${{ inputs.cluster_init_tar_archive_name }}
-
-    - name: Run action cluster-init
-      uses: ./.github/actions/run-cluster-init
-      with:
-        cluster_name: ${{ inputs.cluster_name }}
-        istio_version: ${{ inputs.istio_version }}
-        knative_version: ${{ inputs.knative_version }}
-        knative_istio_version: ${{ inputs.knative_istio_version }}
-        local_registry: ${{ inputs.local_registry }}
-        cluster_init_version: ${{ inputs.cluster_init_version }}
+        cluster-name: ${{ inputs.cluster_name }}
+        args: >-
+          --servers 1
+          --agents 3
+          --port 80:80@agent:*
+          --registry-create ${{ inputs.local_registry }}
+          --k3s-arg "--no-deploy=traefik,metrics-server@server:*"
 
     - name: Publish Turing images to local registry
       shell: bash
@@ -194,14 +170,15 @@ runs:
           yq '.turing.environmentConfigs.[0].k8s_config |= load("/tmp/temp_k8sconfig.yaml").k8s_config | .turing.environmentConfigs.[0].name |= load("infra/e2e/${{ inputs.values_file }}").merlin.environmentConfigs.[0].name' -i infra/e2e/${{ inputs.values_file }}
           yq '.turing.config.ClusterConfig.EnsemblingServiceK8sConfig |= load("/tmp/temp_k8sconfig.yaml").k8s_config' -i infra/e2e/${{ inputs.values_file }}
         fi
-        helm install turing ./infra/charts/turing \
+        helm repo add caraml https://caraml-dev.github.io/helm-charts
+        helm install turing caraml/turing \
           --values infra/e2e/turing.values.yaml \
           --values infra/e2e/${{ inputs.values_file }} \
-          --set turing.image.registry=${{ inputs.LOCAL_REGISTRY }} \
-          --set turing.image.repository=${{ github.repository }}/turing-api \
-          --set turing.image.tag=${{ env.TURING_API_VERSION }} \
-          --set turing.config.RouterDefaults.Image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
-          --set turing.experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
+          --set deployment.image.registry=${{ inputs.LOCAL_REGISTRY }} \
+          --set deployment.image.repository=${{ github.repository }}/turing-api \
+          --set deployment.image.tag=${{ env.TURING_API_VERSION }} \
+          --set config.RouterDefaults.Image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/turing-router:${{ env.TURING_ROUTER_VERSION }} \
+          --set experimentEngines[0].rpcPlugin.image=${{ inputs.LOCAL_REGISTRY }}/${{ github.repository }}/test-experiment-engine-plugin:${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}
 
     - name: Install mockserver
       shell: bash

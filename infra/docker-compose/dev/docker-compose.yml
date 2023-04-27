@@ -92,7 +92,7 @@ services:
     user: root:root
     volumes:
       - "kube:/.kube"
-      - "../../cluster-init/knative-configmaps/config-features.yaml:/config-features.yaml"
+      - "./knative/config-features.yaml:/config-features.yaml"
     entrypoint: bash -ec
     command:
       - |

@@ -1,57 +1,42 @@
-global:
-  mlp:
-    encryption:
-      key: "encryption-key"
+# Deploy Turing with a proprietary experiment engine implemented as RPC plugin
+experimentEngines:
+- name: proprietary
+  type: rpc-plugin
+  rpcPlugin:
+    image:  # Value will be set at install time using helm --set command
+    livenessPeriodSeconds:  # Value is set as 10 by default but can be overwritten here
+  options:
+    engine:
+      name: proprietary
+      display_name: Plugin Example
+      type: standard
+      standard_experiment_manager_config:
+        client_selection_enabled: false
+        experiment_selection_enabled: false
+    experiments:
+      - id: '001'
+        name: exp_1
+        variants:
+          - name: control
+          - name: treatment-a
+        variants_configuration:
+          control:
+            traffic: 0.85
+            treatment_configuration:
+              foo: foo
+              route_name: control
+          treatment-a:
+            traffic: 0.15
+            treatment_configuration:
+              bar: bar
+              route_name: treatment-a
 
-turing:
-  uiConfig: null # Not needed as we only test API
-  openApiSpecOverrides:
+openApiSpecOverrides:
     components:
       schemas:
         ExperimentEngineType:
           enum:
           - nop
           - proprietary
-  # Deploy Turing with a proprietary experiment engine implemented as RPC plugin
-  experimentEngines:
-  - name: proprietary
-    type: rpc-plugin
-    rpcPlugin:
-      image:  # Value will be set at install time using helm --set command
-      livenessPeriodSeconds:  # Value is set as 10 by default but can be overwritten here
-    options:
-      engine:
-        name: proprietary
-        display_name: Plugin Example
-        type: standard
-        standard_experiment_manager_config:
-          client_selection_enabled: false
-          experiment_selection_enabled: false
-      experiments:
-        - id: '001'
-          name: exp_1
-          variants:
-            - name: control
-            - name: treatment-a
-          variants_configuration:
-            control:
-              traffic: 0.85
-              treatment_configuration:
-                foo: foo
-                route_name: control
-            treatment-a:
-              traffic: 0.15
-              treatment_configuration:
-                bar: bar
-                route_name: treatment-a
 
-postgresql: &postgresql
-  primary:
-    persistence:
-      enabled: false
-
-merlin:
-  postgresql: *postgresql
-
-mlp:
-  postgresql: *postgresql
+uiConfig: null # Not needed as we only test API

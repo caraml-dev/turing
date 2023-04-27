@@ -177,7 +177,7 @@ Sentry:
 
 ClusterConfig:
   # Set to true if you are deploying with a service account.
-  # See helm chart values (infra/charts/turing/values.yaml) for more information
+  # See helm chart values (https://github.com/caraml-dev/helm-charts/blob/main/charts/turing/values.yaml) for more information
   InClusterConfig: false
   # Vault server configuration. Vault is required by Turing API to retrieve
   # Kubernetes cluster credentials where the Turing router will be deployed.

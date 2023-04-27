@@ -1,10 +1,9 @@
-turing:
-  clusterConfig:
-    useInClusterConfig: false
+clusterConfig:
+  useInClusterConfig: false
 
-  config:
-    ClusterConfig:
-      EnsemblingServiceK8sConfig: {}
+config:
+  ClusterConfig:
+    EnsemblingServiceK8sConfig: {}
 
 merlin:
   vault:

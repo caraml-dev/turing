@@ -1,1 +1,0 @@
-DELETE FROM applications WHERE name = 'Turing';

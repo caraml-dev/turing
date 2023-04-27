@@ -1,19 +1,4 @@
 repos:
-  - repo: https://github.com/norwoodj/helm-docs
-    rev: v1.11.0
-    hooks:
-      - id: helm-docs-built
-        name: 'Helm Docs for Turing Chart'
-        files: '^infra/charts/turing/'
-        args:
-          - --chart-search-root=infra/charts/turing
-          - --template-files=./README.md.gotmpl
-      - id: helm-docs-built
-        name: 'Helm Docs for Turing Init Chart'
-        files: '^infra/charts/turing-init/'
-        args:
-          - --chart-search-root=infra/charts/turing-init
-          - --template-files=./README.md.gotmpl
   - repo: local
     hooks:
       - id: golangci-lint

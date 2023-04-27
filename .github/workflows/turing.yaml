@@ -17,8 +17,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
-      - ".github/workflows/cluster-init.yaml"
 
   # Automatically run CI on branches, that have active PR opened
   pull_request:
@@ -32,7 +30,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
 
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
@@ -182,22 +179,6 @@ jobs:
           path: ui/build/
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-  build-cluster-init:
-    runs-on: ubuntu-latest
-    outputs:
-      cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Run action build-cluster-init
-        id: build-cluster-init
-        uses: ./.github/actions/build-cluster-init
-        with:
-          artifact_retention_days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
   test-api:
     runs-on: ubuntu-latest
     env:
@@ -328,7 +309,6 @@ jobs:
   test-e2e:
     runs-on: ubuntu-latest
     env:
-      CLUSTER_INIT_VERSION: ${{ needs.build-cluster-init.outputs.cluster-init-version }}
       TURING_API_VERSION: ${{ needs.build-api.outputs.api-version }}
       TURING_ROUTER_VERSION: ${{ needs.build-router.outputs.router-version }}
       TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION: ${{ needs.build-test-experiment-engine-plugin.outputs.test-experiment-engine-plugin-version }}
@@ -336,7 +316,6 @@ jobs:
       - build-api
       - build-router
       - build-test-experiment-engine-plugin
-      - build-cluster-init
     strategy:
       fail-fast: false
       matrix:
@@ -362,7 +341,6 @@ jobs:
           turing_api_tar_archive_name: turing-api.${{ env.TURING_API_VERSION }}.tar
           turing_router_tar_archive_name: turing-router.${{ env.TURING_ROUTER_VERSION }}.tar
           experiment_engine_plugin_archive_name: test-experiment-engine-plugin.${{ env.TEST_EXPERIMENT_ENGINE_PLUGIN_VERSION }}.tar
-          cluster_init_tar_archive_name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
           use_in_cluster_config: ${{ matrix.useInClusterConfig }}
           values_file: ${{ matrix.valuesFile }}
           cluster_name: ${{ env.CLUSTER_NAME }}
@@ -370,7 +348,6 @@ jobs:
           knative_version: ${{ env.KNATIVE_VERSION }}
           knative_istio_version: ${{ env.KNATIVE_ISTIO_VERSION }}
           local_registry: ${{ env.LOCAL_REGISTRY }}
-          cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Set up Go
         uses: actions/setup-go@v4
