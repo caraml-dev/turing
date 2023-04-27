@@ -21,6 +21,7 @@ import { JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
 import { DateFromNow } from "@caraml-dev/ui-lib";
 import { DeleteJobModal } from "../components/modal/DeleteJobModal";
+import { FormLabelWithToolTip } from "../../components/form/label_with_tooltip/FormLabelWithToolTip";
 
 export const ListEnsemblingJobsTable = ({
   items,
