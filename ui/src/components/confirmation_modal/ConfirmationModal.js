@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import { useToggle } from "@caraml-dev/ui-lib";
 import { EuiOverlayMask, EuiConfirmModal, EuiProgress } from "@elastic/eui";
+import './ConfirmationModal.scss';
 
 export const ConfirmationModal = ({
   title,

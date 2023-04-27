@@ -4,6 +4,9 @@ import { useEnsemblerModal } from "./useEnsemblerModal";
 import { useTuringApi } from "../../../hooks/useTuringApi";
 import { ConfirmationModal } from "../../../components/confirmation_modal/ConfirmationModal";
 import { isEmpty } from "../../../utils/object";
+import { ListEnsemblingJobsForEnsemblerTable } from "../table/ListEnsemblingJobsForEnsemblerTable";
+import { ListRouterVersionsForEnsemblerTable } from "../table/ListRouterVersionsForEnsemblerTable";
+
 
 export const DeleteEnsemblerModal = ({
   onSuccess,
@@ -38,13 +41,25 @@ export const DeleteEnsemblerModal = ({
 
   return (
     <ConfirmationModal
+      style={{ WebkitMaskImage: 'none' }}
       title="Delete Ensembler"
       onConfirm={submitForm}
       isLoading={isLoading}
       content={
-        <p>
-          You are about to delete Ensembler <b>{ensembler.name}</b>
-        </p>
+        <div>
+          <p>
+            You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
+          </p>
+          <ListEnsemblingJobsForEnsemblerTable 
+            projectID={ensembler.project_id}
+            ensemblerID={ensembler.id}
+          />
+          <br/>
+          <ListRouterVersionsForEnsemblerTable 
+            projectID={ensembler.project_id}
+            ensemblerID={ensembler.id}
+          />
+        </div>
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger">
