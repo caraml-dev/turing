@@ -1,2 +1,21 @@
+global:
+  oauthClientID: "global-client-123"
+  mlp:
+    apiPrefix: "/v1"
+    serviceName: mlp
+    externalPort: "8080"
+    vsPrefix: "/api"
+    useServiceFqdn: true
+    uiPrefix: "/"
+    uiServiceName: mlp
+  merlin:
+    apiPrefix: "/v1"
+    serviceName: merlin
+    externalPort: "8080"
+    vsPrefix: "/api/merlin"
+    useServiceFqdn: true
+    uiPrefix: "/merlin"
+    uiServiceName: merlin
+
 clusterConfig:
   useInClusterConfig: true
