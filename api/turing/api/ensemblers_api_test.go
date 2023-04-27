@@ -708,7 +708,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 					nil)
 				ensemblingJobSvc.On("List", ensemblingJobInactiveOption).Return(
 					&service.PaginatedResults{
-						Results: []interface{}{
+						Results: []*models.EnsemblingJob{
 							dummyEnsemblingJob,
 						},
 						Paging: service.Paging{
@@ -719,6 +719,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 					},
 					nil)
 				ensemblingJobSvc.On("Delete", dummyEnsemblingJob).Return(errors.New("failed to delete ensembling job"))
+				ensemblingJobSvc.On("MarkEnsemblingJobForTermination", dummyEnsemblingJob).Return(errors.New("failed to delete ensembling job"))
 				return ensemblingJobSvc
 			},
 			mlflowSvc: func() mlflow.Service {
@@ -726,7 +727,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
-			expected: InternalServerError("unable to delete ensembling jobs", "failed to delete ensembling job"),
+			expected: InternalServerError("unable to delete ensembling job", "failed to delete ensembling job"),
 		},
 		"failure | failed to delete mlflow experiment": {
 			vars: RequestVars{
