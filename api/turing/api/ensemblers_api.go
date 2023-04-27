@@ -185,11 +185,11 @@ func (c EnsemblersController) DeleteEnsembler(
 			models.JobRunning,
 		},
 	}
-	activeEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobActiveOption)
+	activeEnsemblingJobs, err := c.EnsemblingJobService.List(ensemblingJobActiveOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
-	if activeEnsemblingJob.Paging.Total >= 1 {
+	if activeEnsemblingJobs.Paging.Total >= 1 {
 		return BadRequest("failed to delete an ensembler", "There are active ensembling job using this ensembler")
 	}
 
@@ -220,17 +220,22 @@ func (c EnsemblersController) DeleteEnsembler(
 			models.JobFailedSubmission,
 		},
 	}
-	inactiveEnsemblingJob, err := c.EnsemblingJobService.List(ensemblingJobInactiveOption)
+	inactiveEnsemblingJobs, err := c.EnsemblingJobService.List(ensemblingJobInactiveOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
-	if inactiveEnsemblingJob.Paging.Total > 0 {
-		if results, ok := inactiveEnsemblingJob.Results.([]interface{}); ok {
-			for _, data := range results {
-				if ensemblingJob, ok := data.(*models.EnsemblingJob); ok {
+	if inactiveEnsemblingJobs.Paging.Total > 0 {
+		if results, ok := inactiveEnsemblingJobs.Results.([]*models.EnsemblingJob); ok {
+			for _, ensemblingJob := range results {
+				if ensemblingJob.Status == models.JobFailed {
 					err = c.EnsemblingJobService.Delete(ensemblingJob)
 					if err != nil {
-						return InternalServerError("unable to delete ensembling jobs", err.Error())
+						return InternalServerError("unable to delete ensembling job", err.Error())
+					}
+				} else {
+					err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
+					if err != nil {
+						return InternalServerError("unable to delete ensembling job", err.Error())
 					}
 				}
 			}
