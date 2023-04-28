@@ -115,7 +115,7 @@ export const ListEnsemblersTable = ({
         header: true,
         fullWidth: false,
       },
-      align: "right",
+      align: "left",
       width: "20%",
       render: (id, ensembler) => (
         <EuiFlexGroup component="div" direction="column" gutterSize="xs" alignItems="flexEnd" >

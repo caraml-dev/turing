@@ -134,7 +134,7 @@ export const ListEnsemblingJobsTable = ({
     },
     {
       field: "actions",
-      align: "right",
+      align: "left",
       name: (
         <FormLabelWithToolTip
           label="Actions"

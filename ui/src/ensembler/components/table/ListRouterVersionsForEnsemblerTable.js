@@ -49,12 +49,22 @@ export const ListRouterVersionsForEnsemblerTable = ({
       ),
     },
     {
+      field: "router version",
+      name: "Version",
+      width: "96px",
+      render: (id, item) => (
+        <EuiText size={defaultTextSize}>
+          Version {item.version}
+        </EuiText>
+      ),
+    },
+    {
       field: "name",
       name: "Name",
       truncateText: true,
       render: (id, item) => (
         <span className="eui-textTruncate" title={item.router.name}>
-          {item.router.name} - version {item.version}
+          {item.router.name}
         </span>
       ),
     },
