@@ -12,9 +12,11 @@ import { useTuringApi } from "../../../hooks/useTuringApi";
 
 export const ListEnsemblingJobsForEnsemblerTable = ({
   projectID,
-  ensemblerID
+  ensemblerID,
+  setDisablePopup,
+  disablePopup
 }) => {
-  const [results, setResults] = useState({ items: [], totalItemCount: 0 });
+  const [results, setResults] = useState({ inactiveItems: [], activeItems:[], totalInactiveCount: 0, totalActiveCount:0 });
 
   const {
     appConfig: {
@@ -23,19 +25,27 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
   } = useConfig();
 
   const [{ data, isLoaded, error }] = useTuringApi(
-    `/projects/${projectID}/jobs?ensembler_id=${ensemblerID}&status=failed_submission&status=failed_building&status=failed&status=completed`,
-    { results: [], paging: { total: 0 } }
+    `/projects/${projectID}/jobs?ensembler_id=${ensemblerID}`,
+    []
   )
 
   useEffect(() => {
     if (isLoaded && !error) {
+      let inactiveItems = data.results.filter((item) => item.status === 'failed_submission' || item.status==='failed_building' || item.status==='failed' || item.status==='completed');
+      let activeItems = data.results.filter((item) => item.status !== 'failed_submission' && item.status!=='failed_building' && item.status!=='failed' && item.status!=='completed');
       setResults({
-        items: data.results,
-        totalItemCount: data.paging.total,
+        inactiveItems: inactiveItems ,
+        activeItems: activeItems ,
+        totalInactiveCount: inactiveItems.length,
+        totalActiveCount : activeItems.length
       });
+      if (activeItems.length > 0){
+        setDisablePopup(true)
+      } else {
+        setDisablePopup(false)
+      }
     }
-  }, [data, isLoaded, error]);
-
+  }, [data, isLoaded, error, setDisablePopup]);
 
   const columns = [
     {
@@ -77,18 +87,29 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
     </EuiCallOut>
   ) : (
     <Fragment>
-      {results.totalItemCount > 0 && ( 
+      {disablePopup ? ( results.totalActiveCount > 0 && (
         <div>
-          <p>Deleting this Ensembler will also delete {results.totalItemCount} <b>Failed</b> or <b>Completed</b> Ensembling Jobs that use this Ensembler </p>
+          <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Ensembling Jobs</b></p>
           <EuiBasicTable
-            items={results.items}
+            items={results.activeItems}
             loading={!isLoaded}
             columns={columns}
             responsive={true}
             tableLayout="auto"
           />
         </div>
-      )}
+      )) : ( results.totalInactiveCount > 0 && (
+        <div>
+          <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Completed</b> Ensembling Jobs that use this Ensembler </p>
+          <EuiBasicTable
+            items={results.inactiveItems}
+            loading={!isLoaded}
+            columns={columns}
+            responsive={true}
+            tableLayout="auto"
+          />
+        </div>
+      ))}
     </Fragment>
   );
 };

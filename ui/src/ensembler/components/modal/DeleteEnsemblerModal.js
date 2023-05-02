@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { addToast } from "@caraml-dev/ui-lib";
 import { useEnsemblerModal } from "./useEnsemblerModal";
 import { useTuringApi } from "../../../hooks/useTuringApi";
@@ -14,6 +14,7 @@ export const DeleteEnsemblerModal = ({
 }) => {
   const closeModalRef = useRef();
 
+  const [disablePopup, setDisablePopup] = useState(false)
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
 
   const [{ isLoading, isLoaded, error }, submitForm] =  useTuringApi(
@@ -39,30 +40,50 @@ export const DeleteEnsemblerModal = ({
     }
   }, [isLoaded, error, ensembler, onSuccess, closeModal]);
 
+  const updateStatus = (newStatus) => {
+    if ((disablePopup && newStatus) || (!disablePopup && !newStatus)) {
+      // If the current status and the new status are the same, do nothing.
+      return;
+    } else {
+      setDisablePopup(true);
+    }
+  };
+
   return (
     <ConfirmationModal
-      style={{ WebkitMaskImage: 'none' }}
       title="Delete Ensembler"
+      onCancel={() => setDisablePopup(false)}
       onConfirm={submitForm}
       isLoading={isLoading}
       content={
         <div>
-          <p>
+          {disablePopup ? (
+            <p>
+            You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler 
+            </p>
+          ) : (
+            <p>
             You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
-          </p>
+            </p>
+          )}
           <ListEnsemblingJobsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
+            setDisablePopup={updateStatus}
+            disablePopup={disablePopup}
           />
           <br/>
           <ListRouterVersionsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
+            setDisablePopup={updateStatus}
+            disablePopup={disablePopup}
           />
         </div>
       }
       confirmButtonText="Delete"
-      confirmButtonColor="danger">
+      confirmButtonColor="danger"
+      disabled={disablePopup}>
       {(onSubmit) =>
         (deleteEnsemblerRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
