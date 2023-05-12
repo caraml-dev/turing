@@ -158,10 +158,10 @@ export const ListEnsemblingJobsTable = ({
               <EuiButtonEmpty
                   onClick={() => handleDeleteJob(item)}
                   color={"danger"}
-                  iconType="minusInCircle"
+                  iconType={["failed", "failed_submission", "failed_building", "completed"].includes(item.status) ? 'trash' : 'minusInCircle' }
                   iconSide="left"
                   size="xs">
-                <EuiText size="xs" >Terminate</EuiText>
+                <EuiText size="xs"> {["failed", "failed_submission", "failed_building", "completed"].includes(item.status) ? 'Delete' : 'Terminate' } </EuiText>
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexItem>

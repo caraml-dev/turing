@@ -46,7 +46,7 @@ export const DeleteJobModal = ({
           You are about to terminate Ensembling Jobs <b>{job.name}</b>
         </p>
       }
-      confirmButtonText="Terminate"
+      confirmButtonText={["failed", "failed_submission", "failed_building", "completed"].includes(job.status) ? 'Delete' : 'Terminate'}
       confirmButtonColor="danger">
       {(onSubmit) =>
         (deleteJobRef.current = openModal(onSubmit)) &&
