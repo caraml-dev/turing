@@ -296,7 +296,7 @@ class PyFuncEnsembler(Ensembler):
             ],
         )
         if len(relatedJob) > 0:
-            raise ValueError("There is active ensembling job using this ensembler")
+            raise ValueError("There is pending ensembling job using this ensembler")
 
         if name:
             self._name = name

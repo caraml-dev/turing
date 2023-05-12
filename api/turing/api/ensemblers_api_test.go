@@ -773,7 +773,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(errors.New("failed to delete mlflow experiment"))
 				return mlflowSvc
 			},
-			expected: InternalServerError("Delete Failed", "failed to delete mlflow experiment"),
+			expected: InternalServerError("failed to delete an ensembler", "failed to delete mlflow experiment"),
 		},
 		"failure | failed to delete": {
 			vars: RequestVars{

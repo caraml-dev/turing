@@ -200,7 +200,7 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	inactiveRouter, err := c.RouterVersionsService.FindRouterUsingEnsembler(ensemblerID, routerVersionStatusInactive)
 	if err != nil {
-		return InternalServerError("delete ensembler failed", err.Error())
+		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
 
 	for _, routerVersion := range inactiveRouter {
@@ -251,7 +251,7 @@ func (c EnsemblersController) DeleteEnsembler(
 		s := strconv.FormatUint(uint64(pyFuncEnsembler.ExperimentID), 10)
 		err := c.MlflowService.DeleteExperiment(context.Background(), s, true)
 		if err != nil {
-			return InternalServerError("delete ensembler failed", err.Error())
+			return InternalServerError("failed to delete an ensembler", err.Error())
 		}
 
 	}
