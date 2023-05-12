@@ -321,7 +321,7 @@ def test_update_ensembler_existing_job(
                 )
             ],
         )
-    expected_error_message = "There is active ensembling job using this ensembler"
+    expected_error_message = "There is pending ensembling job using this ensembler"
     actual_error_message = str(error.value)
     assert expected_error_message == actual_error_message
 
