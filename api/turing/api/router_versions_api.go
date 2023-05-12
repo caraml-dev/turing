@@ -180,7 +180,7 @@ func (c RouterVersionsController) DeployRouterVersion(
 		"version":   int(routerVersion.Version),
 	})
 }
-func (c RouterVersionsController) ListEnsemblerRouterVersion(
+func (c RouterVersionsController) ListRouterVersionsByEnsembler(
 	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
@@ -230,7 +230,7 @@ func (c RouterVersionsController) Routes() []Route {
 		{
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/routers-version-ensembler/{ensembler_id}",
-			handler: c.ListEnsemblerRouterVersion,
+			handler: c.ListRouterVersionsByEnsembler,
 		},
 	}
 }

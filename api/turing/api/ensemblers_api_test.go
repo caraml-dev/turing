@@ -626,7 +626,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
 				return ensemblingJobSvc
 			},
-			expected: BadRequest("failed to delete an ensembler", "There are active ensembling job using this ensembler"),
+			expected: BadRequest("failed to delete an ensembler", "there are active ensembling job using this ensembler"),
 		},
 		"failure | failed to delete router version": {
 			vars: RequestVars{

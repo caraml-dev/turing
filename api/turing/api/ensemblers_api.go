@@ -190,7 +190,7 @@ func (c EnsemblersController) DeleteEnsembler(
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
 	if activeEnsemblingJobs.Paging.Total >= 1 {
-		return BadRequest("failed to delete an ensembler", "There are active ensembling job using this ensembler")
+		return BadRequest("failed to delete an ensembler", "there are active ensembling job using this ensembler")
 	}
 
 	// DELETING UNUSED ROUTER
@@ -200,7 +200,7 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	inactiveRouter, err := c.RouterVersionsService.FindRouterUsingEnsembler(ensemblerID, routerVersionStatusInactive)
 	if err != nil {
-		return InternalServerError("Delete ensembler failed", err.Error())
+		return InternalServerError("delete ensembler failed", err.Error())
 	}
 
 	for _, routerVersion := range inactiveRouter {
@@ -243,25 +243,22 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 
 	// CHECK IF THE ENSEMBLER IS A PYFUNC ENSEMBLER
+	// convert ensembler to a PyfuncEnsembler Model, if ok (the model is a pyfunc ensembler)
+	// then proceed to delete pyfunc artifact from mlflow
 	if pyFuncEnsembler, ok := ensembler.(*models.PyFuncEnsembler); ok {
 		// IF PYFUNC, ALSO DELETE FROM MLFLOW
+		// Convert id to string
 		s := strconv.FormatUint(uint64(pyFuncEnsembler.ExperimentID), 10)
 		err := c.MlflowService.DeleteExperiment(context.Background(), s, true)
 		if err != nil {
-			// Handle 404
-			return InternalServerError("Delete Failed", err.Error())
+			return InternalServerError("delete ensembler failed", err.Error())
 		}
 
-		err = c.EnsemblersService.Delete(pyFuncEnsembler)
-		if err != nil {
-			return InternalServerError("failed to delete an ensembler", err.Error())
-		}
-	} else {
-		// IF NOT PYFUNC ONLY DELETE ENSEMBLER FROM DB
-		err = c.EnsemblersService.Delete(ensembler)
-		if err != nil {
-			return InternalServerError("failed to delete an ensembler", err.Error())
-		}
+	}
+	// DELETE ENSEMBLER FROM DB
+	err = c.EnsemblersService.Delete(ensembler)
+	if err != nil {
+		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
 	return Ok(ensembler.GetID())
 
