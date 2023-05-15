@@ -6,7 +6,7 @@ import { ConfirmationModal } from "../../../components/confirmation_modal/Confir
 import { isEmpty } from "../../../utils/object";
 import { ListEnsemblingJobsForEnsemblerTable } from "../table/ListEnsemblingJobsForEnsemblerTable";
 import { ListRouterVersionsForEnsemblerTable } from "../table/ListRouterVersionsForEnsemblerTable";
-
+import { EuiFieldText } from "@elastic/eui";
 
 export const DeleteEnsemblerModal = ({
   onSuccess,
@@ -15,6 +15,7 @@ export const DeleteEnsemblerModal = ({
   const closeModalRef = useRef();
 
   const [disablePopup, setDisablePopup] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
 
   const [{ isLoading, isLoaded, error }, submitForm] =  useTuringApi(
@@ -49,22 +50,41 @@ export const DeleteEnsemblerModal = ({
     }
   };
 
+  const modalClosed = () => {
+    setDisablePopup(false)
+    setDeleteConfirmation("")
+  }
+
   return (
     <ConfirmationModal
       title="Delete Ensembler"
-      onCancel={() => setDisablePopup(false)}
+      onCancel={() => modalClosed()}
       onConfirm={submitForm}
       isLoading={isLoading}
       content={
         <div>
           {disablePopup ? (
-            <p>
-            You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler 
-            </p>
+            <div>
+              <p>
+              You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler. 
+              If you still wish to delete this ensembler, please undeploy any router versions that use it or terminate any ensembling jobs that use it.
+              </p>
+            </div> 
           ) : (
-            <p>
-            You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
-            </p>
+            <div>
+              <p>
+              You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
+              </p>
+              To confirm, please type "<b>{ensembler.name}</b>" in the box below
+              <EuiFieldText     
+                fullWidth            
+                placeholder={ensembler.name}
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                isInvalid={deleteConfirmation !== ensembler.name} />              
+            </div>
+              
+            
           )}
           <ListEnsemblingJobsForEnsemblerTable 
             projectID={ensembler.project_id}
@@ -83,7 +103,7 @@ export const DeleteEnsemblerModal = ({
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger"
-      disabled={disablePopup}>
+      disabled={disablePopup || deleteConfirmation !== ensembler.name}>
       {(onSubmit) =>
         (deleteEnsemblerRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
