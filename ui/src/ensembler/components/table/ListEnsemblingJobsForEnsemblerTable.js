@@ -78,6 +78,13 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
     },
   ];
 
+  const cellProps = (item) =>
+  ({
+    style: { cursor: "pointer" },
+    onClick: () => window.open(`./jobs/${item.id}/details`, '_blank'),
+  });
+
+
   return error ? (
     <EuiCallOut
       title="Sorry, there was an error"
@@ -96,6 +103,7 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
+            cellProps={cellProps}
           />
         </div>
       )) : ( results.totalInactiveCount > 0 && (
@@ -107,6 +115,7 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
+            cellProps={cellProps}
           />
         </div>
       ))}

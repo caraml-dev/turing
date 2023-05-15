@@ -88,6 +88,12 @@ export const ListRouterVersionsForEnsemblerTable = ({
     },
   ];
 
+  const cellProps = (item) =>
+    ({
+      style: { cursor: "pointer" },
+      onClick: () => window.open(`./routers/${item.id}/history`, '_blank'),
+    });
+
   return error ? (
     <EuiCallOut
       title="Sorry, there was an error"
@@ -106,6 +112,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
+            cellProps={cellProps}
           />
         </div>
       )) : ( results.totalInactiveCount > 0 && (
@@ -117,6 +124,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
           columns={columns}
           responsive={true}
           tableLayout="auto"
+          cellProps={cellProps}
         />
       </div>
       ))}
