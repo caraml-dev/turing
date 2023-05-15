@@ -126,14 +126,15 @@ func (c EnsemblersController) UpdateEnsembler(
 	}
 	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {
-		if isPyfunc {
+		// Delete If Only RunID is changed, if only name is changed, doesn't need to delete the mlflow run
+		if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 			_ = c.MlflowService.DeleteRun(context.Background(), pyFuncEnsembler.RunID, pyFuncEnsembler.ArtifactURI, true)
 		}
 		return InternalServerError("failed to update an ensembler", err.Error())
 	}
 
-	// Delete If Only RunID is changed, of only name is changed, doesn't need to delete the ensembler run
-	if isPyfunc {
+	// Delete If Only RunID is changed, if only name is changed, doesn't need to delete the mlflow run
+	if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 		_ = c.MlflowService.DeleteRun(context.Background(), oldPyFuncEnsembler.RunID, oldPyFuncEnsembler.ArtifactURI, true)
 	}
 

@@ -243,8 +243,6 @@ replace (
 	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429
 	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403075012-795947162429
 
-	github.com/caraml-dev/mlp => github.com/zenovore/mlp v0.0.0-20230418041630-9a8f88af7bb4
-
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
 

@@ -1849,8 +1849,6 @@ github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f/go
 github.com/zaffka/zap-to-hclog v0.10.5 h1:6s9uMa4H8slD3c0UE7Ga3DreJci95Ujjbc8X+bMVPAU=
 github.com/zaffka/zap-to-hclog v0.10.5/go.mod h1:5b3vf3ndIbXOmBrnDHoCyh4F6h5VNtTO2va7AX17cwg=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
-github.com/zenovore/mlp v0.0.0-20230418041630-9a8f88af7bb4 h1:HIQAWfaFAEkWl1166x+AbxtgK8v8NtLKikqUbdGLdWk=
-github.com/zenovore/mlp v0.0.0-20230418041630-9a8f88af7bb4/go.mod h1:ahdKpb/SKFEyHE6817AOh0b2fyroTzJmXM8U+2BG75M=
 gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b/go.mod h1:T3BPAOm2cqquPa0MKWeNkmOM5RQsRhkrwMWonFMN7fE=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
