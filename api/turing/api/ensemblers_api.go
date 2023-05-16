@@ -163,13 +163,17 @@ func (c EnsemblersController) DeleteEnsembler(
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	ensemblerID := ensembler.GetID()
 	// CHECK IF STATUS ROUTER IS DEPLOYED
 	routerVersionStatusActive := []models.RouterVersionStatus{
 		models.RouterVersionStatusDeployed,
 		models.RouterVersionStatusPending,
 	}
-	activeRouter, err := c.RouterVersionsService.FindRouterUsingEnsembler(ensemblerID, routerVersionStatusActive)
+	activeOption := service.RouterVersionByEnsemblerListOptions{
+		ProjectID:   options.ProjectID,
+		EnsemblerID: options.EnsemblerID,
+		Statuses:    routerVersionStatusActive,
+	}
+	activeRouter, err := c.RouterVersionsService.FindRouterVersionsByEnsembler(activeOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
@@ -179,7 +183,7 @@ func (c EnsemblersController) DeleteEnsembler(
 
 	// CHECK IF THERE ARE ANY ENSEMBLING JOBS WITH STATUS PENDING, BUILDING, RUNNING USING THE ENSEMBLER
 	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
-		EnsemblerID: &ensemblerID,
+		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{
 			models.JobPending,
 			models.JobBuildingImage,
@@ -199,7 +203,12 @@ func (c EnsemblersController) DeleteEnsembler(
 		models.RouterVersionStatusFailed,
 		models.RouterVersionStatusUndeployed,
 	}
-	inactiveRouter, err := c.RouterVersionsService.FindRouterUsingEnsembler(ensemblerID, routerVersionStatusInactive)
+	inactiveOption := service.RouterVersionByEnsemblerListOptions{
+		ProjectID:   options.ProjectID,
+		EnsemblerID: options.EnsemblerID,
+		Statuses:    routerVersionStatusInactive,
+	}
+	inactiveRouter, err := c.RouterVersionsService.FindRouterVersionsByEnsembler(inactiveOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
@@ -213,7 +222,7 @@ func (c EnsemblersController) DeleteEnsembler(
 
 	// DELETING UNUSED ENSEMBLING JOBS
 	ensemblingJobInactiveOption := service.EnsemblingJobListOptions{
-		EnsemblerID: &ensemblerID,
+		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{
 			models.JobFailed,
 			models.JobCompleted,

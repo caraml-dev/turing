@@ -420,17 +420,17 @@ paths:
         404:
           description: "No router version found"
 
-  "/projects/{project_id}/routers-version-ensembler/{ensembler_id}":
+  "/projects/{project_id}/router-versions":
     get:
       tags: *tags
-      summary: Returns Router Version based on ensembler
+      summary: Returns Router Version that belong to the project
       parameters:
         - in: path
           name: project_id
           schema:
             <<: *id
           required: true
-        - in: path
+        - in: query
           name: ensembler_id
           schema:
             <<: *id
@@ -445,7 +445,7 @@ paths:
           explode: true          
       responses:
         "200":
-          description: An Array of JSON object representing router version instance of the specific Ensembler
+          description: An Array of JSON object representing router version instance
           content:
             application/json:
               schema:

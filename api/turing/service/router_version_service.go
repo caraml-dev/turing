@@ -15,7 +15,7 @@ const (
 	grafanaAllVariable = "$__all"
 )
 
-type RouterVersionEnsemblerListOptions struct {
+type RouterVersionByEnsemblerListOptions struct {
 	ProjectID   *models.ID                   `schema:"project_id" validate:"required"`
 	EnsemblerID *models.ID                   `schema:"ensembler_id"`
 	Statuses    []models.RouterVersionStatus `schema:"status"`
@@ -37,9 +37,9 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
-	// FindActiveRouterUsingEnsembler Finds routerVersion with status parameter
-	// that use ensembler with id = ensemblerId
-	FindRouterUsingEnsembler(ensemblerID models.ID, statuses []models.RouterVersionStatus) ([]*models.RouterVersion, error)
+	// FindRouterVersionsByEnsembler Finds router version with status parameter
+	// that use ensembler with id = ensemblerID
+	FindRouterVersionsByEnsembler(options RouterVersionByEnsemblerListOptions) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -270,16 +270,18 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 	return tx.Commit().Error
 }
 
-func (service *routerVersionsService) FindRouterUsingEnsembler(
-	ensemblerID models.ID,
-	statuses []models.RouterVersionStatus,
+func (service *routerVersionsService) FindRouterVersionsByEnsembler(
+	option RouterVersionByEnsemblerListOptions,
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
-	query := service.query().Where("ensembler_id IN (?)",
-		service.db.Table("ensembler_configs").Select("id").
-			Where("CAST(pyfunc_config->>'ensembler_id' AS INTEGER) = ?", ensemblerID))
-	if statuses != nil {
-		query = query.Where("status IN (?)", statuses)
+	query := service.query()
+	if option.EnsemblerID != nil {
+		query = query.Where("ensembler_id IN (?)",
+			service.db.Table("ensembler_configs").Select("id").
+				Where("CAST(pyfunc_config->>'ensembler_id' AS INTEGER) = ?", option.EnsemblerID))
+	}
+	if option.Statuses != nil {
+		query = query.Where("status IN (?)", option.Statuses)
 	}
 	query = query.Find(&routerVersions)
 

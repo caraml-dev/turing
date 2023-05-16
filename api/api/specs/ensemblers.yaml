@@ -146,6 +146,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/EnsemblerId"
           description: A JSON object representing an id of deleted ensembler
+        "400":
+          description: "Ensembler is used by other entity"
+        "404":
+          description: "Ensembler not found"
+        "500":
+          description: "Failed to delete ensembler"
       summary: Delete Ensembler by its ID
 
 components:

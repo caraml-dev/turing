@@ -24,7 +24,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
   } = useConfig();
 
   const [{ data, isLoaded, error }] = useTuringApi(
-    `/projects/${projectID}/routers-version-ensembler/${ensemblerID}`,
+    `/projects/${projectID}/router-versions?ensembler_id=${ensemblerID}`,
     []
   )
 

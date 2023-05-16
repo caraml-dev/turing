@@ -49,9 +49,8 @@ paths:
     $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1versions~1{version}~1deploy"
   "/projects/{project_id}/routers/{router_id}/events":
     $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1events"
-  "/projects/{project_id}/routers-version-ensembler/{ensembler_id}":
-    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1routers-version-ensembler~1{ensembler_id}"
-
+  "/projects/{project_id}/router-versions":
+    $ref: "specs/routers.yaml#/paths/~1projects~1{project_id}~1router-versions"
   # L O G S
   "/projects/{project_id}/routers/{router_id}/logs":
     $ref: "specs/logs.yaml#/paths/~1projects~1{project_id}~1routers~1{router_id}~1logs"

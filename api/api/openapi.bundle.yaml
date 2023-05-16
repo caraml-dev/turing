@@ -116,6 +116,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnsemblerId'
           description: A JSON object representing an id of deleted ensembler
+        "400":
+          description: Ensembler is used by other entity
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Failed to delete ensembler
       summary: Delete Ensembler by its ID
       tags:
       - Ensembler
@@ -941,7 +947,7 @@ paths:
       summary: Get deployment events associated with this router
       tags:
       - Router
-  /projects/{project_id}/routers-version-ensembler/{ensembler_id}:
+  /projects/{project_id}/router-versions:
     get:
       parameters:
       - in: path
@@ -950,7 +956,7 @@ paths:
         schema:
           format: int32
           type: integer
-      - in: path
+      - in: query
         name: ensembler_id
         required: true
         schema:
@@ -973,8 +979,7 @@ paths:
                   $ref: '#/components/schemas/RouterVersion'
                 type: array
           description: An Array of JSON object representing router version instance
-            of the specific Ensembler
-      summary: Returns Router Version based on ensembler
+      summary: Returns Router Version that belong to the project
       tags:
       - Router
   /projects/{project_id}/routers/{router_id}/logs:
