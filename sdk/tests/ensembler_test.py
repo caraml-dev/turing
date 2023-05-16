@@ -152,7 +152,7 @@ def test_update_ensembler(
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        url=f"/v1/projects/{active_project.id}/router-versions",
         body=json.dumps([], default=tests.json_serializer),
         status=200,
         content_type="application/json",
@@ -225,7 +225,7 @@ def test_update_ensembler_existing_router_version(
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        url=f"/v1/projects/{active_project.id}/router-versions",
         body=json.dumps([generic_router_version], default=tests.json_serializer),
         status=200,
         content_type="application/json",
@@ -292,7 +292,7 @@ def test_update_ensembler_existing_job(
 
     responses.add(
         method="GET",
-        url=f"/v1/projects/{active_project.id}/routers-version-ensembler/{actual.id}",
+        url=f"/v1/projects/{active_project.id}/router-versions",
         body=json.dumps([], default=tests.json_serializer),
         status=200,
         content_type="application/json",

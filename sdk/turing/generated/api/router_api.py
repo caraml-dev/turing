@@ -50,7 +50,7 @@ class RouterApi(object):
             ensembler_id,
             **kwargs
         ):
-            """Returns Router Version that belong to the project  # noqa: E501
+            """Returns Router Version with related parameters  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True

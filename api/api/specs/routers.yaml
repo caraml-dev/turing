@@ -423,7 +423,7 @@ paths:
   "/projects/{project_id}/router-versions":
     get:
       tags: *tags
-      summary: Returns Router Version that belong to the project
+      summary: Returns Router Version with related parameters
       parameters:
         - in: path
           name: project_id

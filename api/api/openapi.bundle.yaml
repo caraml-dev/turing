@@ -979,7 +979,7 @@ paths:
                   $ref: '#/components/schemas/RouterVersion'
                 type: array
           description: An Array of JSON object representing router version instance
-      summary: Returns Router Version that belong to the project
+      summary: Returns Router Version with related parameters
       tags:
       - Router
   /projects/{project_id}/routers/{router_id}/logs:

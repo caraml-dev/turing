@@ -383,8 +383,6 @@ class TuringSession:
         if status:
             kwargs["status"] = status
 
-        return RouterApi(
-            self._api_client
-        ).projects_project_id_routers_version_ensembler_ensembler_id_get(
+        return RouterApi(self._api_client).projects_project_id_router_versions_get(
             project_id=self.active_project.id, ensembler_id=ensembler_id, **kwargs
         )
