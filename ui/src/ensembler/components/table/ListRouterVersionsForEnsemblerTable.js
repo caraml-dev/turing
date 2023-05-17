@@ -12,8 +12,8 @@ import { useTuringApi } from "../../../hooks/useTuringApi";
 export const ListRouterVersionsForEnsemblerTable = ({
   projectID,
   ensemblerID,
-  setDisablePopup,
-  disablePopup
+  setCanDeleteEnsembler,
+  canDeleteEnsembler
 }) => {
   const [results, setResults] = useState({ inactiveItems: [], activeItems:[], totalInactiveCount: 0, totalActiveCount:0 });
 
@@ -38,14 +38,16 @@ export const ListRouterVersionsForEnsemblerTable = ({
         totalInactiveCount: inactiveItems.length,
         totalActiveCount : activeItems.length
       });
-      if (activeItems.length > 0){
-        setDisablePopup(true)
-      } else {
-        setDisablePopup(false)
-      }
     }
-  }, [data, isLoaded, error, setDisablePopup]);
+  }, [data, isLoaded, error]);
 
+  useEffect(() => {
+    if (results.activeItems.length > 0){
+      setCanDeleteEnsembler(false)
+    } else {
+      setCanDeleteEnsembler(true)
+    }
+  }, [results, setCanDeleteEnsembler])
 
   const columns = [
     {
@@ -103,7 +105,19 @@ export const ListRouterVersionsForEnsemblerTable = ({
     </EuiCallOut>
   ) : (
     <Fragment>
-      {disablePopup ? ( results.totalActiveCount > 0 && (
+      {canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
+        <div>
+          <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Undeployed</b> Router Versions that use this Ensembler </p>
+          <EuiBasicTable
+            items={results.inactiveItems}
+            loading={!isLoaded}
+            columns={columns}
+            responsive={true}
+            tableLayout="auto"
+            cellProps={cellProps}
+          />
+        </div>
+      )) : ( results.totalActiveCount > 0 && (
         <div>
           <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Router Versions</b></p>
           <EuiBasicTable
@@ -115,18 +129,6 @@ export const ListRouterVersionsForEnsemblerTable = ({
             cellProps={cellProps}
           />
         </div>
-      )) : ( results.totalInactiveCount > 0 && (
-        <div>
-        <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Undeployed</b> Router Versions that use this Ensembler </p>
-        <EuiBasicTable
-          items={results.inactiveItems}
-          loading={!isLoaded}
-          columns={columns}
-          responsive={true}
-          tableLayout="auto"
-          cellProps={cellProps}
-        />
-      </div>
       ))}
     </Fragment>
   );

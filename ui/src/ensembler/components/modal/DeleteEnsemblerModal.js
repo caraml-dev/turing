@@ -14,7 +14,7 @@ export const DeleteEnsemblerModal = ({
 }) => {
   const closeModalRef = useRef();
 
-  const [disablePopup, setDisablePopup] = useState(false)
+  const [canDeleteEnsembler, setCanDeleteEnsembler] = useState(true)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
 
@@ -42,16 +42,16 @@ export const DeleteEnsemblerModal = ({
   }, [isLoaded, error, ensembler, onSuccess, closeModal]);
 
   const updateStatus = (newStatus) => {
-    if ((disablePopup && newStatus) || (!disablePopup && !newStatus)) {
+    if ((canDeleteEnsembler && newStatus) || (!canDeleteEnsembler && !newStatus)) {
       // If the current status and the new status are the same, do nothing.
       return;
     } else {
-      setDisablePopup(true);
+      setCanDeleteEnsembler(false);
     }
   };
 
   const modalClosed = () => {
-    setDisablePopup(false)
+    setCanDeleteEnsembler(true)
     setDeleteConfirmation("")
   }
 
@@ -63,14 +63,7 @@ export const DeleteEnsemblerModal = ({
       isLoading={isLoading}
       content={
         <div>
-          {disablePopup ? (
-            <div>
-              <p>
-              You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler. 
-              If you still wish to delete this ensembler, please undeploy any router versions that use it or terminate any ensembling jobs that use it.
-              </p>
-            </div> 
-          ) : (
+          {canDeleteEnsembler ? (
             <div>
               <p>
               You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
@@ -83,27 +76,33 @@ export const DeleteEnsemblerModal = ({
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 isInvalid={deleteConfirmation !== ensembler.name} />              
             </div>
-              
-            
+          ) : (
+            <div>
+              <span>
+              You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler. 
+              <br/> <br/> If you still wish to delete this ensembler, please <b>Undeploy</b> router versions and <b>Terminate</b> ensembling jobs that use this ensembler.
+              </span>
+            </div> 
           )}
+          <br/>
           <ListEnsemblingJobsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
-            setDisablePopup={updateStatus}
-            disablePopup={disablePopup}
+            setCanDeleteEnsembler={updateStatus}
+            canDeleteEnsembler={canDeleteEnsembler}
           />
           <br/>
           <ListRouterVersionsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
-            setDisablePopup={updateStatus}
-            disablePopup={disablePopup}
+            setCanDeleteEnsembler={updateStatus}
+            canDeleteEnsembler={canDeleteEnsembler}
           />
         </div>
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger"
-      disabled={disablePopup || deleteConfirmation !== ensembler.name}>
+      disabled={canDeleteEnsembler || deleteConfirmation !== ensembler.name}>
       {(onSubmit) =>
         (deleteEnsemblerRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
