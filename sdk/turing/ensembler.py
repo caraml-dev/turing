@@ -281,7 +281,7 @@ class PyFuncEnsembler(Ensembler):
             Example: {"config" : "config/staging.yaml"}
         """
 
-        relatedRouterVer = turing.Router.get_router_version_for_ensembler(
+        relatedRouterVer = turing.Router.list_router_versions_with_filter(
             ensembler_id=self._id, status=[RouterStatus.PENDING]
         )
         if len(relatedRouterVer) > 0:

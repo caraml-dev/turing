@@ -372,17 +372,20 @@ class TuringSession:
         )
 
     @require_active_project
-    def get_router_version_for_ensembler(
-        self, ensembler_id: int, status: List[RouterVersionStatus] = None
+    def list_router_versions_with_filter(
+        self, ensembler_id: int = None, status: List[RouterVersionStatus] = None
     ) -> RouterVersion:
         """
         Fetch specific router version by its router ID and version
         """
         kwargs = {}
 
+        if ensembler_id:
+            kwargs["ensembler_id"] = ensembler_id
+
         if status:
             kwargs["status"] = status
 
         return RouterApi(self._api_client).projects_project_id_router_versions_get(
-            project_id=self.active_project.id, ensembler_id=ensembler_id, **kwargs
+            project_id=self.active_project.id, **kwargs
         )

@@ -171,12 +171,12 @@ func (c EnsemblersController) DeleteEnsembler(
 		models.RouterVersionStatusDeployed,
 		models.RouterVersionStatusPending,
 	}
-	activeOption := service.RouterVersionByEnsemblerListOptions{
+	activeOption := service.RouterVersionListOptions{
 		ProjectID:   options.ProjectID,
 		EnsemblerID: options.EnsemblerID,
 		Statuses:    routerVersionStatusActive,
 	}
-	activeRouter, err := c.RouterVersionsService.FindRouterVersionsByEnsembler(activeOption)
+	activeRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}
@@ -206,12 +206,12 @@ func (c EnsemblersController) DeleteEnsembler(
 		models.RouterVersionStatusFailed,
 		models.RouterVersionStatusUndeployed,
 	}
-	inactiveOption := service.RouterVersionByEnsemblerListOptions{
+	inactiveOption := service.RouterVersionListOptions{
 		ProjectID:   options.ProjectID,
 		EnsemblerID: options.EnsemblerID,
 		Statuses:    routerVersionStatusInactive,
 	}
-	inactiveRouter, err := c.RouterVersionsService.FindRouterVersionsByEnsembler(inactiveOption)
+	inactiveRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(inactiveOption)
 	if err != nil {
 		return InternalServerError("failed to delete an ensembler", err.Error())
 	}

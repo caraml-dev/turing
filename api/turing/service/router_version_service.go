@@ -15,7 +15,7 @@ const (
 	grafanaAllVariable = "$__all"
 )
 
-type RouterVersionByEnsemblerListOptions struct {
+type RouterVersionListOptions struct {
 	ProjectID   *models.ID                   `schema:"project_id" validate:"required"`
 	EnsemblerID *models.ID                   `schema:"ensembler_id"`
 	Statuses    []models.RouterVersionStatus `schema:"status"`
@@ -37,9 +37,9 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
-	// FindRouterVersionsByEnsembler Finds router version with status parameter
-	// that use ensembler with id = ensemblerID
-	FindRouterVersionsByEnsembler(options RouterVersionByEnsemblerListOptions) ([]*models.RouterVersion, error)
+	// ListRouterVersionsWithFilter Lists router version with parameter option
+	// the filter contain status, ensembler_id and current router version
+	ListRouterVersionsWithFilter(options RouterVersionListOptions) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -270,8 +270,8 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 	return tx.Commit().Error
 }
 
-func (service *routerVersionsService) FindRouterVersionsByEnsembler(
-	option RouterVersionByEnsemblerListOptions,
+func (service *routerVersionsService) ListRouterVersionsWithFilter(
+	option RouterVersionListOptions,
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := service.query()

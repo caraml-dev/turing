@@ -180,19 +180,19 @@ func (c RouterVersionsController) DeployRouterVersion(
 		"version":   int(routerVersion.Version),
 	})
 }
-func (c RouterVersionsController) ListRouterVersionsByEnsembler(
+func (c RouterVersionsController) ListRouterVersionsWithFilter(
 	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
-	options := service.RouterVersionByEnsemblerListOptions{}
+	options := service.RouterVersionListOptions{}
 
 	if err := c.ParseVars(&options, vars); err != nil {
 		return BadRequest("failed to fetch router versions",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
-	routers, err := c.RouterVersionsService.FindRouterVersionsByEnsembler(options)
+	routers, err := c.RouterVersionsService.ListRouterVersionsWithFilter(options)
 	if err != nil {
 		return InternalServerError("unable to list router version", err.Error())
 	}
@@ -230,7 +230,7 @@ func (c RouterVersionsController) Routes() []Route {
 		{
 			method:  http.MethodGet,
 			path:    "/projects/{project_id}/router-versions",
-			handler: c.ListRouterVersionsByEnsembler,
+			handler: c.ListRouterVersionsWithFilter,
 		},
 	}
 }

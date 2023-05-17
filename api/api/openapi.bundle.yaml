@@ -958,7 +958,6 @@ paths:
           type: integer
       - in: query
         name: ensembler_id
-        required: true
         schema:
           format: int32
           type: integer

@@ -563,7 +563,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).
 					Return([]*models.RouterVersion{routerVersion}, nil)
 
 				return routerVersionSvc
@@ -604,7 +604,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).
 					Return([]*models.RouterVersion{}, nil)
 
 				return routerVersionSvc
@@ -647,13 +647,13 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", service.RouterVersionByEnsemblerListOptions{
+				routerVersionSvc.On("ListRouterVersionsWithFilter", service.RouterVersionListOptions{
 					ProjectID:   models.NewID(2),
 					EnsemblerID: models.NewID(2),
 					Statuses:    routerVersionStatusActive,
 				}).
 					Return([]*models.RouterVersion{}, nil)
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", service.RouterVersionByEnsemblerListOptions{
+				routerVersionSvc.On("ListRouterVersionsWithFilter", service.RouterVersionListOptions{
 					ProjectID:   models.NewID(2),
 					EnsemblerID: models.NewID(2),
 					Statuses:    routerVersionStatusInactive,
@@ -698,7 +698,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).Return([]*models.RouterVersion{}, nil)
 
 				return routerVersionSvc
 			},
@@ -757,7 +757,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).Return([]*models.RouterVersion{}, nil)
 
 				return routerVersionSvc
 			},
@@ -802,7 +802,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).Return([]*models.RouterVersion{}, nil)
 
 				return routerVersionSvc
 			},
@@ -847,7 +847,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			routerVersionsSvc: func() service.RouterVersionsService {
 				routerVersionSvc := &mocks.RouterVersionsService{}
-				routerVersionSvc.On("FindRouterVersionsByEnsembler", mock.Anything).Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).Return([]*models.RouterVersion{}, nil)
 
 				return routerVersionSvc
 			},

@@ -106,32 +106,6 @@ func (_m *RouterVersionsService) FindLatestVersionByRouterID(routerID models.ID)
 	return r0, r1
 }
 
-// FindRouterVersionsByEnsembler provides a mock function with given fields: options
-func (_m *RouterVersionsService) FindRouterVersionsByEnsembler(options service.RouterVersionByEnsemblerListOptions) ([]*models.RouterVersion, error) {
-	ret := _m.Called(options)
-
-	var r0 []*models.RouterVersion
-	var r1 error
-	if rf, ok := ret.Get(0).(func(service.RouterVersionByEnsemblerListOptions) ([]*models.RouterVersion, error)); ok {
-		return rf(options)
-	}
-	if rf, ok := ret.Get(0).(func(service.RouterVersionByEnsemblerListOptions) []*models.RouterVersion); ok {
-		r0 = rf(options)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RouterVersion)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(service.RouterVersionByEnsemblerListOptions) error); ok {
-		r1 = rf(options)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ListRouterVersions provides a mock function with given fields: routerID
 func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*models.RouterVersion, error) {
 	ret := _m.Called(routerID)
@@ -151,6 +125,32 @@ func (_m *RouterVersionsService) ListRouterVersions(routerID models.ID) ([]*mode
 
 	if rf, ok := ret.Get(1).(func(models.ID) error); ok {
 		r1 = rf(routerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListRouterVersionsWithFilter provides a mock function with given fields: options
+func (_m *RouterVersionsService) ListRouterVersionsWithFilter(options service.RouterVersionListOptions) ([]*models.RouterVersion, error) {
+	ret := _m.Called(options)
+
+	var r0 []*models.RouterVersion
+	var r1 error
+	if rf, ok := ret.Get(0).(func(service.RouterVersionListOptions) ([]*models.RouterVersion, error)); ok {
+		return rf(options)
+	}
+	if rf, ok := ret.Get(0).(func(service.RouterVersionListOptions) []*models.RouterVersion); ok {
+		r0 = rf(options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.RouterVersion)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(service.RouterVersionListOptions) error); ok {
+		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -434,7 +434,6 @@ paths:
           name: ensembler_id
           schema:
             <<: *id
-          required: true
         - in: query
           name: status
           schema:

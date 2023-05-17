@@ -135,7 +135,7 @@ class Router(ApiObject):
         )
 
     @classmethod
-    def get_router_version_for_ensembler(
+    def list_router_versions_with_filter(
         cls, ensembler_id: int, status: List[RouterStatus]
     ) -> List["RouterVersion"]:
         mapped_statuses = None
@@ -143,10 +143,9 @@ class Router(ApiObject):
             mapped_statuses = [
                 turing.generated.models.RouterVersionStatus(s.value) for s in status
             ]
-        response = turing.active_session.get_router_version_for_ensembler(
+        response = turing.active_session.list_router_versions_with_filter(
             ensembler_id=ensembler_id, status=mapped_statuses
         )
-        # print(response)
         return response
 
     def update(self, config: RouterConfig) -> "Router":

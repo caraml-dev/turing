@@ -47,7 +47,6 @@ class RouterApi(object):
         def __projects_project_id_router_versions_get(
             self,
             project_id,
-            ensembler_id,
             **kwargs
         ):
             """Returns Router Version with related parameters  # noqa: E501
@@ -55,14 +54,14 @@ class RouterApi(object):
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True
 
-            >>> thread = api.projects_project_id_router_versions_get(project_id, ensembler_id, async_req=True)
+            >>> thread = api.projects_project_id_router_versions_get(project_id, async_req=True)
             >>> result = thread.get()
 
             Args:
                 project_id (int):
-                ensembler_id (int):
 
             Keyword Args:
+                ensembler_id (int): [optional]
                 status ([RouterVersionStatus]): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
@@ -110,8 +109,6 @@ class RouterApi(object):
             kwargs['_host_index'] = kwargs.get('_host_index')
             kwargs['project_id'] = \
                 project_id
-            kwargs['ensembler_id'] = \
-                ensembler_id
             return self.call_with_http_info(**kwargs)
 
         self.projects_project_id_router_versions_get = _Endpoint(
@@ -131,7 +128,6 @@ class RouterApi(object):
                 ],
                 'required': [
                     'project_id',
-                    'ensembler_id',
                 ],
                 'nullable': [
                 ],
