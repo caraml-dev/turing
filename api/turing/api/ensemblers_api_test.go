@@ -273,6 +273,43 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 		body         interface{}
 		expected     *Response
 	}{
+		"success": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			body: &request.CreateOrUpdateEnsemblerRequest{
+				EnsemblerLike: &models.PyFuncEnsembler{
+					GenericEnsembler: &models.GenericEnsembler{
+						Model:     models.Model{},
+						ProjectID: 2,
+						Name:      updated.Name,
+					},
+					MlflowURL:    "http://localhost:5000/experiemnts/0/runs/2",
+					ExperimentID: 0,
+					RunID:        "2",
+					ArtifactURI:  "gs://bucket-name/mlflow/0/2/artifacts",
+				},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Save", updated).
+					Return(updated, nil)
+				return ensemblerSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteRun", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				return mlflowSvc
+			},
+			expected: Ok(updated),
+		},
 		"failure | bad request": {
 			vars: RequestVars{"project_id": {"unknown"}},
 			expected: BadRequest(
@@ -389,44 +426,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				return mlflowSvc
 			},
 			expected: InternalServerError(
-				"failed to update an ensembler", "failed to save"),
-		},
-		"success": {
-			vars: RequestVars{
-				"project_id":   {"2"},
-				"ensembler_id": {"2"},
-			},
-			body: &request.CreateOrUpdateEnsemblerRequest{
-				EnsemblerLike: &models.PyFuncEnsembler{
-					GenericEnsembler: &models.GenericEnsembler{
-						Model:     models.Model{},
-						ProjectID: 2,
-						Name:      updated.Name,
-					},
-					MlflowURL:    "http://localhost:5000/experiemnts/0/runs/2",
-					ExperimentID: 0,
-					RunID:        "2",
-					ArtifactURI:  "gs://bucket-name/mlflow/0/2/artifacts",
-				},
-			},
-			ensemblerSvc: func() service.EnsemblersService {
-				ensemblerSvc := &mocks.EnsemblersService{}
-				ensemblerSvc.
-					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
-						ProjectID: models.NewID(2),
-					}).
-					Return(original, nil)
-				ensemblerSvc.
-					On("Save", updated).
-					Return(updated, nil)
-				return ensemblerSvc
-			},
-			mlflowSvc: func() mlflow.Service {
-				mlflowSvc := &mlflowMock.Service{}
-				mlflowSvc.On("DeleteRun", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				return mlflowSvc
-			},
-			expected: Ok(updated),
+				"failed to update the ensembler", "failed to save"),
 		},
 	}
 
@@ -583,7 +583,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
 				return ensemblingJobSvc
 			},
-			expected: BadRequest("failed to delete an ensembler", "There are active router version using this ensembler"),
+			expected: BadRequest("failed to delete the ensembler", "There are active router version using this ensembler"),
 		},
 		"failure | there is active ensembling job": {
 			vars: RequestVars{
@@ -626,7 +626,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
 				return ensemblingJobSvc
 			},
-			expected: BadRequest("failed to delete an ensembler", "there are active ensembling job using this ensembler"),
+			expected: BadRequest("failed to delete the ensembler", "there are active ensembling job using this ensembler"),
 		},
 		"failure | failed to delete router version": {
 			vars: RequestVars{
@@ -781,7 +781,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(errors.New("failed to delete mlflow experiment"))
 				return mlflowSvc
 			},
-			expected: InternalServerError("failed to delete an ensembler", "failed to delete mlflow experiment"),
+			expected: InternalServerError("failed to delete the ensembler", "failed to delete mlflow experiment"),
 		},
 		"failure | failed to delete": {
 			vars: RequestVars{
@@ -826,7 +826,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
-			expected: InternalServerError("failed to delete an ensembler", "failed to delete"),
+			expected: InternalServerError("failed to delete the ensembler", "failed to delete"),
 		},
 		"success": {
 			vars: RequestVars{

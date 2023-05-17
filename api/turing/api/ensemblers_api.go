@@ -77,7 +77,7 @@ func (c EnsemblersController) CreateEnsembler(
 
 	ensembler, err = c.EnsemblersService.Save(ensembler)
 	if err != nil {
-		return InternalServerError("unable to save an ensembler", err.Error())
+		return InternalServerError("unable to save the ensembler", err.Error())
 	}
 
 	return Created(ensembler)
@@ -130,10 +130,10 @@ func (c EnsemblersController) UpdateEnsembler(
 		if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 			err = c.MlflowService.DeleteRun(context.Background(), pyFuncEnsembler.RunID, pyFuncEnsembler.ArtifactURI, true)
 			if err != nil {
-				return InternalServerError("failed to update an ensembler", "cleanup process failed")
+				return InternalServerError("failed to update the ensembler", "cleanup process failed")
 			}
 		}
-		return InternalServerError("failed to update an ensembler", err.Error())
+		return InternalServerError("failed to update the ensembler", err.Error())
 	}
 
 	// Delete If Only RunID is changed, if only name is changed, doesn't need to delete the mlflow run
@@ -166,7 +166,9 @@ func (c EnsemblersController) DeleteEnsembler(
 		return NotFound("ensembler not found", err.Error())
 	}
 
-	// CHECK IF STATUS ROUTER IS DEPLOYED
+	// First we need to check if there are active job / router using the ensembler
+	// If such ensembler exist, the deletion process are restricted
+	// Check if there are any deployed / pending router version using the ensembler
 	routerVersionStatusActive := []models.RouterVersionStatus{
 		models.RouterVersionStatusDeployed,
 		models.RouterVersionStatusPending,
@@ -178,13 +180,13 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	activeRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
 	if err != nil {
-		return InternalServerError("failed to delete an ensembler", err.Error())
+		return InternalServerError("failed to delete the ensembler", err.Error())
 	}
 	if len(activeRouter) >= 1 {
-		return BadRequest("failed to delete an ensembler", "There are active router version using this ensembler")
+		return BadRequest("failed to delete the ensembler", "There are active router version using this ensembler")
 	}
 
-	// CHECK IF THERE ARE ANY ENSEMBLING JOBS WITH STATUS PENDING, BUILDING, RUNNING USING THE ENSEMBLER
+	// Check if there are any building / pending / running ensembling jobs using the ensembler
 	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{
@@ -195,13 +197,14 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	activeEnsemblingJobs, err := c.EnsemblingJobService.List(ensemblingJobActiveOption)
 	if err != nil {
-		return InternalServerError("failed to delete an ensembler", err.Error())
+		return InternalServerError("failed to delete the ensembler", err.Error())
 	}
 	if activeEnsemblingJobs.Paging.Total >= 1 {
-		return BadRequest("failed to delete an ensembler", "there are active ensembling job using this ensembler")
+		return BadRequest("failed to delete the ensembler", "there are active ensembling job using this ensembler")
 	}
 
-	// DELETING UNUSED ROUTER
+	// If no active job / router is using the ensembler, we can proceed to delete it.
+	// However, the inactive router versions and jobs using the ensembler will have to be deleted.
 	routerVersionStatusInactive := []models.RouterVersionStatus{
 		models.RouterVersionStatusFailed,
 		models.RouterVersionStatusUndeployed,
@@ -213,7 +216,7 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	inactiveRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(inactiveOption)
 	if err != nil {
-		return InternalServerError("failed to delete an ensembler", err.Error())
+		return InternalServerError("failed to delete the ensembler", err.Error())
 	}
 
 	for _, routerVersion := range inactiveRouter {
@@ -223,7 +226,7 @@ func (c EnsemblersController) DeleteEnsembler(
 		}
 	}
 
-	// DELETING UNUSED ENSEMBLING JOBS
+	// Deleting inactive ensembling jobs
 	ensemblingJobInactiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{
@@ -235,7 +238,7 @@ func (c EnsemblersController) DeleteEnsembler(
 	}
 	inactiveEnsemblingJobs, err := c.EnsemblingJobService.List(ensemblingJobInactiveOption)
 	if err != nil {
-		return InternalServerError("failed to delete an ensembler", err.Error())
+		return InternalServerError("failed to delete the ensembler", err.Error())
 	}
 	if inactiveEnsemblingJobs.Paging.Total > 0 {
 		if results, ok := inactiveEnsemblingJobs.Results.([]*models.EnsemblingJob); ok {
@@ -255,23 +258,24 @@ func (c EnsemblersController) DeleteEnsembler(
 		}
 	}
 
-	// CHECK IF THE ENSEMBLER IS A PYFUNC ENSEMBLER
+	// check if the ensembler is a pyfunc ensembler
 	// convert ensembler to a PyfuncEnsembler Model, if ok (the model is a pyfunc ensembler)
 	// then proceed to delete pyfunc artifact from mlflow
 	if pyFuncEnsembler, ok := ensembler.(*models.PyFuncEnsembler); ok {
-		// IF PYFUNC, ALSO DELETE FROM MLFLOW
+		// if the ensembler is a pyfunc ensembler, also delete from mlflow
 		// Convert id to string
 		s := strconv.FormatUint(uint64(pyFuncEnsembler.ExperimentID), 10)
 		err := c.MlflowService.DeleteExperiment(context.Background(), s, true)
 		if err != nil {
-			return InternalServerError("failed to delete an ensembler", err.Error())
+			return InternalServerError("failed to delete the ensembler", err.Error())
 		}
 
 	}
-	// DELETE ENSEMBLER FROM DB
+
+	// delete ensembler from database
 	err = c.EnsemblersService.Delete(ensembler)
 	if err != nil {
-		return InternalServerError("failed to delete an ensembler", err.Error())
+		return InternalServerError("failed to delete the ensembler", err.Error())
 	}
 	return Ok(ensembler.GetID())
 
