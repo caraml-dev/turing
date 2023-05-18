@@ -281,12 +281,18 @@ class PyFuncEnsembler(Ensembler):
             Example: {"config" : "config/staging.yaml"}
         """
 
+        # First we need to check if there are active job / router using the ensembler
+        # This check is done in the SDK to prevent the creation of new mlflow run
+
+        # check any active router version
         relatedRouterVer = turing.Router.list_router_versions_with_filter(
             ensembler_id=self._id, status=[RouterStatus.PENDING]
         )
         if len(relatedRouterVer) > 0:
+            # if there is any active router version, the deletion process are restricted
             raise ValueError("There is pending router version using this ensembler")
-        # CHECK ACTIVE ENSEMBLING JOBS
+
+        # check any active ensembling jobs
         relatedJob = EnsemblingJob.list(
             ensembler_id=self._id,
             status=[
@@ -296,6 +302,7 @@ class PyFuncEnsembler(Ensembler):
             ],
         )
         if len(relatedJob) > 0:
+            # if there is any active ensembling jobs, the deletion process are restricted
             raise ValueError("There is pending ensembling job using this ensembler")
 
         if name:
