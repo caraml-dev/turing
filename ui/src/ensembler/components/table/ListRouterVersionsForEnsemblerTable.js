@@ -13,7 +13,9 @@ export const ListRouterVersionsForEnsemblerTable = ({
   projectID,
   ensemblerID,
   setCanDeleteEnsembler,
-  canDeleteEnsembler
+  canDeleteEnsembler,
+  setEnsemblerUsedByCurrentRouterVersion,
+  ensemblerUsedByCurrentRouterVersion
 }) => {
   const [results, setResults] = useState({ inactiveItems: [], activeItems:[], totalInactiveCount: 0, totalActiveCount:0 });
 
@@ -23,15 +25,20 @@ export const ListRouterVersionsForEnsemblerTable = ({
     },
   } = useConfig();
 
-  const [{ data, isLoaded, error }] = useTuringApi(
+  const [ allRouterVersion ] = useTuringApi(
     `/projects/${projectID}/router-versions?ensembler_id=${ensemblerID}`,
     []
   )
 
+  const [ currentRouterVersion ] = useTuringApi(
+    `/projects/${projectID}/router-versions?ensembler_id=${ensemblerID}&is_current=true`,
+    []
+  )
+
   useEffect(() => {
-    if (isLoaded && !error) {
-      let inactiveItems = data.filter((item) => item.status === 'failed' || item.status==='undeployed');
-      let activeItems = data.filter((item) => item.status !== 'failed' && item.status!=='undeployed')
+    if (allRouterVersion.isLoaded && !allRouterVersion.error) {
+      let inactiveItems = allRouterVersion.data.filter((item) => item.status === 'failed' || item.status==='undeployed');
+      let activeItems = allRouterVersion.data.filter((item) => item.status !== 'failed' && item.status!=='undeployed')
       setResults({
         inactiveItems: inactiveItems ,
         activeItems: activeItems ,
@@ -39,15 +46,23 @@ export const ListRouterVersionsForEnsemblerTable = ({
         totalActiveCount : activeItems.length
       });
     }
-  }, [data, isLoaded, error]);
+  }, [allRouterVersion]);
 
   useEffect(() => {
     if (results.activeItems.length > 0){
       setCanDeleteEnsembler(false)
     } else {
-      setCanDeleteEnsembler(true)
+      if (currentRouterVersion.isLoaded && !currentRouterVersion.error) {
+        if (currentRouterVersion.data.length > 0){
+          setEnsemblerUsedByCurrentRouterVersion(true)
+          setCanDeleteEnsembler(false)
+        } else {
+          setEnsemblerUsedByCurrentRouterVersion(false)
+          setCanDeleteEnsembler(true)
+        }
+      }
     }
-  }, [results, setCanDeleteEnsembler])
+  }, [results, currentRouterVersion, setCanDeleteEnsembler, setEnsemblerUsedByCurrentRouterVersion])
 
   const columns = [
     {
@@ -72,7 +87,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
     },
     {
       field: "name",
-      name: "Name",
+      name: "Router Name",
       truncateText: true,
       render: (id, item) => (
         <span className="eui-textTruncate" title={item.router.name}>
@@ -96,21 +111,37 @@ export const ListRouterVersionsForEnsemblerTable = ({
       onClick: () => window.open(`./routers/${item.id}/history`, '_blank'),
     });
 
-  return error ? (
+  return allRouterVersion.error || currentRouterVersion.error ? (
     <EuiCallOut
       title="Sorry, there was an error"
       color="danger"
       iconType="alert">
-      <p>{error.message}</p>
+      {allRouterVersion.error && <p>{allRouterVersion.error.message}</p>}
+      {currentRouterVersion.error && <p>{currentRouterVersion.error.message}</p>}
     </EuiCallOut>
   ) : (
     <Fragment>
-      {canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
+      {ensemblerUsedByCurrentRouterVersion ? (
+        currentRouterVersion.data.length > 0 && (
         <div>
+          <br/>
+          <p>The router version with the related ensembler is being used by {currentRouterVersion.data.length} <b>Routers</b></p>
+          <EuiBasicTable
+            items={results.inactiveItems}
+            loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
+            columns={columns}
+            responsive={true}
+            tableLayout="auto"
+            cellProps={cellProps}
+          />
+        </div>
+      )) : canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
+        <div>
+          <br/>
           <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Undeployed</b> Router Versions that use this Ensembler </p>
           <EuiBasicTable
             items={results.inactiveItems}
-            loading={!isLoaded}
+            loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
             columns={columns}
             responsive={true}
             tableLayout="auto"
@@ -119,10 +150,11 @@ export const ListRouterVersionsForEnsemblerTable = ({
         </div>
       )) : ( results.totalActiveCount > 0 && (
         <div>
+          <br/>
           <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Router Versions</b></p>
           <EuiBasicTable
             items={results.activeItems}
-            loading={!isLoaded}
+            loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
             columns={columns}
             responsive={true}
             tableLayout="auto"

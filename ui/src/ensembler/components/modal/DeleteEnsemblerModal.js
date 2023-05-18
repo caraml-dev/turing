@@ -15,6 +15,7 @@ export const DeleteEnsemblerModal = ({
   const closeModalRef = useRef();
 
   const [canDeleteEnsembler, setCanDeleteEnsembler] = useState(true)
+  const [ensemblerUsedByCurrentRouterVersion, setEnsemblerUsedByCurrentRouterVersion] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
 
@@ -52,6 +53,7 @@ export const DeleteEnsemblerModal = ({
 
   const modalClosed = () => {
     setCanDeleteEnsembler(true)
+    setEnsemblerUsedByCurrentRouterVersion(false)
     setDeleteConfirmation("")
   }
 
@@ -63,7 +65,7 @@ export const DeleteEnsemblerModal = ({
       isLoading={isLoading}
       content={
         <div>
-          {canDeleteEnsembler ? (
+          {canDeleteEnsembler && !ensemblerUsedByCurrentRouterVersion ? (
             <div>
               <p>
               You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
@@ -76,6 +78,11 @@ export const DeleteEnsemblerModal = ({
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 isInvalid={deleteConfirmation !== ensembler.name} />              
             </div>
+          ) : ensemblerUsedByCurrentRouterVersion ? (
+            <div>
+              You cannot delete this ensembler because it is associated with a router version that is currently being used by a router
+              <br/> <br/> If you still wish to delete this ensembler, please <b>Deploy</b> or <b>Add</b> another version on this router.
+            </div>
           ) : (
             <div>
               <span>
@@ -84,19 +91,19 @@ export const DeleteEnsemblerModal = ({
               </span>
             </div> 
           )}
-          <br/>
           <ListEnsemblingJobsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
             setCanDeleteEnsembler={updateStatus}
             canDeleteEnsembler={canDeleteEnsembler}
           />
-          <br/>
           <ListRouterVersionsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
             setCanDeleteEnsembler={updateStatus}
             canDeleteEnsembler={canDeleteEnsembler}
+            setEnsemblerUsedByCurrentRouterVersion={setEnsemblerUsedByCurrentRouterVersion}
+            ensemblerUsedByCurrentRouterVersion={ensemblerUsedByCurrentRouterVersion}
           />
         </div>
       }

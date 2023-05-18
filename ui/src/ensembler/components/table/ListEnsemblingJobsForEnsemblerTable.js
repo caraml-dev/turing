@@ -99,6 +99,7 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
     <Fragment>
       {canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
         <div>
+          <br/>
           <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Completed</b> Ensembling Jobs that use this Ensembler </p>
           <EuiBasicTable
             items={results.inactiveItems}
@@ -111,6 +112,7 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
         </div>
       )) : ( results.totalActiveCount > 0 && (
         <div>
+          <br/>
           <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Ensembling Jobs</b></p>
           <EuiBasicTable
             items={results.activeItems}
