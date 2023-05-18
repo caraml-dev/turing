@@ -19,6 +19,7 @@ type RouterVersionListOptions struct {
 	ProjectID   *models.ID                   `schema:"project_id" validate:"required"`
 	EnsemblerID *models.ID                   `schema:"ensembler_id"`
 	Statuses    []models.RouterVersionStatus `schema:"status"`
+	IsCurrent   bool                         `schema:"is_current"`
 }
 
 // RouterVersionsService is the data access object for RouterVersions from the db.
@@ -275,6 +276,7 @@ func (service *routerVersionsService) ListRouterVersionsWithFilter(
 ) ([]*models.RouterVersion, error) {
 	var routerVersions []*models.RouterVersion
 	query := service.query()
+
 	if option.EnsemblerID != nil {
 		query = query.Where("ensembler_id IN (?)",
 			service.db.Table("ensembler_configs").Select("id").
@@ -283,6 +285,11 @@ func (service *routerVersionsService) ListRouterVersionsWithFilter(
 	if option.Statuses != nil {
 		query = query.Where("status IN (?)", option.Statuses)
 	}
+
+	if option.IsCurrent {
+		query = query.Where("id IN (?)", service.db.Table("routers").Select("curr_router_version_id"))
+	}
+
 	query = query.Find(&routerVersions)
 
 	if err := query.Error; err != nil {
