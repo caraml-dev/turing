@@ -129,7 +129,8 @@ func (c EnsemblersController) UpdateEnsembler(
 		// Delete If Only RunID is changed
 		// If only the ensembler name that changed, mlflow won't create a new run, so we don't need to delete old / new run
 		if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
-			pyFuncErr := c.MlflowService.DeleteRun(context.Background(), pyFuncEnsembler.RunID, pyFuncEnsembler.ArtifactURI, true)
+			pyFuncErr := c.MlflowService.DeleteRun(context.Background(),
+				pyFuncEnsembler.RunID, pyFuncEnsembler.ArtifactURI, true)
 			if pyFuncErr != nil {
 				return InternalServerError("failed to update the ensembler", "cleanup process failed")
 			}
@@ -142,7 +143,7 @@ func (c EnsemblersController) UpdateEnsembler(
 	if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 		err = c.MlflowService.DeleteRun(context.Background(), oldPyFuncEnsembler.RunID, oldPyFuncEnsembler.ArtifactURI, true)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("failed to delete mlflow old run: %s", err.Error()))
+			fmt.Printf("failed to delete mlflow old run: %s", err.Error())
 		}
 	}
 
