@@ -109,7 +109,7 @@ export const DeleteEnsemblerModal = ({
       }
       confirmButtonText="Delete"
       confirmButtonColor="danger"
-      disabled={canDeleteEnsembler || deleteConfirmation !== ensembler.name}>
+      disabled={!canDeleteEnsembler || deleteConfirmation !== ensembler.name}>
       {(onSubmit) =>
         (deleteEnsemblerRef.current = openModal(onSubmit)) &&
         (closeModalRef.current = onSubmit) && <span />
