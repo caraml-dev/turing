@@ -961,6 +961,10 @@ paths:
         schema:
           format: int32
           type: integer
+      - in: query
+        name: is_current
+        schema:
+          type: boolean
       - explode: true
         in: query
         name: status

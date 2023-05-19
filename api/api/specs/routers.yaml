@@ -435,6 +435,10 @@ paths:
           schema:
             <<: *id
         - in: query
+          name: is_current
+          schema:
+            type: boolean
+        - in: query
           name: status
           schema:
             type: array

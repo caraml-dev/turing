@@ -62,6 +62,7 @@ class RouterApi(object):
 
             Keyword Args:
                 ensembler_id (int): [optional]
+                is_current (bool): [optional]
                 status ([RouterVersionStatus]): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
@@ -124,6 +125,7 @@ class RouterApi(object):
                 'all': [
                     'project_id',
                     'ensembler_id',
+                    'is_current',
                     'status',
                 ],
                 'required': [
@@ -146,17 +148,21 @@ class RouterApi(object):
                         (int,),
                     'ensembler_id':
                         (int,),
+                    'is_current':
+                        (bool,),
                     'status':
                         ([RouterVersionStatus],),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
                     'ensembler_id': 'ensembler_id',
+                    'is_current': 'is_current',
                     'status': 'status',
                 },
                 'location_map': {
                     'project_id': 'path',
                     'ensembler_id': 'query',
+                    'is_current': 'query',
                     'status': 'query',
                 },
                 'collection_format_map': {

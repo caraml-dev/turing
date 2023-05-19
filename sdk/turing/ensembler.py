@@ -286,7 +286,7 @@ class PyFuncEnsembler(Ensembler):
 
         # check any active router version
         relatedRouterVer = turing.Router.list_router_versions_with_filter(
-            ensembler_id=self._id, status=[RouterStatus.PENDING]
+            ensembler_id=self._id, status=[RouterStatus.PENDING], is_current=False
         )
         if len(relatedRouterVer) > 0:
             # if there is any active router version, the deletion process are restricted
