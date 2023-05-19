@@ -57,18 +57,16 @@ func newMerlinClient(googleClient *http.Client, basePath string) *merlinClient {
 }
 
 type mlpClient struct {
-	CryptoService
 	api *mlp.APIClient
 }
 
-func newMLPClient(googleClient *http.Client, basePath string, encryptionKey string) *mlpClient {
+func newMLPClient(googleClient *http.Client, basePath string) *mlpClient {
 	cfg := mlp.NewConfiguration()
 	cfg.BasePath = basePath
 	cfg.HTTPClient = googleClient
 
 	return &mlpClient{
-		CryptoService: NewCryptoService(encryptionKey),
-		api:           mlp.NewAPIClient(cfg),
+		api: mlp.NewAPIClient(cfg),
 	}
 }
 
@@ -76,7 +74,6 @@ func newMLPClient(googleClient *http.Client, basePath string, encryptionKey stri
 // from (currently) the Merlin API.
 func NewMLPService(
 	mlpBasePath string,
-	mlpEncryptionKey string,
 	merlinBasePath string,
 ) (MLPService, error) {
 	// Create an HTTP client with Google default credential.
@@ -93,7 +90,7 @@ func NewMLPService(
 
 	svc := &mlpService{
 		merlinClient: newMerlinClient(httpClient, merlinBasePath),
-		mlpClient:    newMLPClient(httpClient, mlpBasePath, mlpEncryptionKey),
+		mlpClient:    newMLPClient(httpClient, mlpBasePath),
 		cache:        cache.New(mlpCacheExpirySeconds*time.Second, mlpCacheCleanUpSeconds*time.Second),
 	}
 
@@ -142,13 +139,13 @@ func (service mlpService) GetProjects(name string) ([]mlp.Project, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 
-	var options *mlp.ProjectApiProjectsGetOpts
+	var options *mlp.ProjectApiV1ProjectsGetOpts
 	if len(name) > 0 {
-		options = &mlp.ProjectApiProjectsGetOpts{
+		options = &mlp.ProjectApiV1ProjectsGetOpts{
 			Name: optional.NewString(name),
 		}
 	}
-	projects, resp, err := service.mlpClient.api.ProjectApi.ProjectsGet(ctx, options)
+	projects, resp, err := service.mlpClient.api.ProjectApi.V1ProjectsGet(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +190,7 @@ func (service mlpService) GetSecret(projectID models.ID, name string) (string, e
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 
-	secrets, resp, err := service.mlpClient.api.SecretApi.ProjectsProjectIdSecretsGet(ctx, int32(projectID))
+	secrets, resp, err := service.mlpClient.api.SecretApi.V1ProjectsProjectIdSecretsGet(ctx, int32(projectID))
 	if err != nil {
 		return "", err
 	}
@@ -202,7 +199,7 @@ func (service mlpService) GetSecret(projectID models.ID, name string) (string, e
 	}
 	for _, secret := range secrets {
 		if secret.Name == name {
-			return service.mlpClient.Decrypt(secret.Data)
+			return secret.Data, nil
 		}
 	}
 	return "", fmt.Errorf("secret %s not found in project %d", name, projectID)
@@ -212,7 +209,7 @@ func (service mlpService) refreshProjects() error {
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 
-	projects, resp, err := service.mlpClient.api.ProjectApi.ProjectsGet(ctx, nil)
+	projects, resp, err := service.mlpClient.api.ProjectApi.V1ProjectsGet(ctx, nil)
 	if err != nil {
 		return err
 	}

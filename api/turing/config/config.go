@@ -411,9 +411,8 @@ type GitlabConfig struct {
 
 // MLPConfig captures the configuration used to connect to the Merlin/MLP API servers
 type MLPConfig struct {
-	MerlinURL        string `validate:"required"`
-	MLPURL           string `validate:"required"`
-	MLPEncryptionKey string `validate:"required"`
+	MerlinURL string `validate:"required"`
+	MLPURL    string `validate:"required"`
 }
 
 // OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI

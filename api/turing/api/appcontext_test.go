@@ -205,9 +205,8 @@ func TestNewAppContext(t *testing.T) {
 			EnvironmentConfigPath: "path-to-env-file.yaml",
 		},
 		MLPConfig: &config.MLPConfig{
-			MerlinURL:        "http://mlp.example.com/api/merlin/v1",
-			MLPURL:           "http://mlp.example.com/api/mlp/v1",
-			MLPEncryptionKey: "key",
+			MerlinURL: "http://mlp.example.com/api/merlin/v1",
+			MLPURL:    "http://mlp.example.com/api/mlp/v1",
 		},
 		TuringEncryptionKey: "turing-key",
 		AlertConfig: &config.AlertConfig{
@@ -251,10 +250,9 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewMLPService,
-		func(mlpBasePath string, mlpEncryptionKey string, merlinBasePath string,
+		func(mlpBasePath string, merlinBasePath string,
 		) (service.MLPService, error) {
 			assert.Equal(t, testCfg.MLPConfig.MLPURL, mlpBasePath)
-			assert.Equal(t, testCfg.MLPConfig.MLPEncryptionKey, mlpEncryptionKey)
 			assert.Equal(t, testCfg.MLPConfig.MerlinURL, merlinBasePath)
 			return mlpSvc, nil
 		},
@@ -290,8 +288,7 @@ func TestNewAppContext(t *testing.T) {
 	)
 
 	// Create expected components
-	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
-		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
+	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL, testCfg.MLPConfig.MerlinURL)
 	assert.NoError(t, err)
 	experimentService, err := service.NewExperimentsService(testCfg.Experiment)
 	assert.NoError(t, err)

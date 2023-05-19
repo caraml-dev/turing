@@ -56,8 +56,7 @@ func NewAppContext(
 	cryptoService := service.NewCryptoService(cfg.TuringEncryptionKey)
 
 	// Init MLP service
-	mlpSvc, err := service.NewMLPService(cfg.MLPConfig.MLPURL, cfg.MLPConfig.MLPEncryptionKey,
-		cfg.MLPConfig.MerlinURL)
+	mlpSvc, err := service.NewMLPService(cfg.MLPConfig.MLPURL, cfg.MLPConfig.MerlinURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing MLP Service")
 	}
