@@ -186,7 +186,7 @@ MLPConfig:
   MLPEncryptionKey: {{ include "turing.mlp.encryption.key" . | quote }}
 {{ if .Values.tags.mlp }}
   MerlinURL: {{ printf "http://%s:8080/v1" (include "turing.merlin.name" .) }}
-  MLPURL: {{ printf "http://%s:8080/v1" (include "turing.mlp.name" .) }}
+  MLPURL: {{ printf "http://%s:8080" (include "turing.mlp.name" .) }}
 {{ end }}
 TuringEncryptionKey: {{ include "turing.encryption.key" . | quote }}
 Sentry:
