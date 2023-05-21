@@ -65,7 +65,7 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 								WithJSON(json.RawMessage(`[{"client": {"id": 4}}, {"client": {"id": 7}}]`)).
 								Expect().Status(http.StatusOK).
 								JSON().Array().
-								Equal(JSONPayload("testdata/responses/router_proprietary_exp_batch_predict.json"))
+								IsEqual(JSONPayload("testdata/responses/router_proprietary_exp_batch_predict.json"))
 						})
 					})
 				})
@@ -116,13 +116,13 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 							}, defaultDeploymentIntervals...).Should(Succeed())
 
 							version.
-								ValueEqual("status", api.Status.Failed).
-								ValueEqual("error", "Requested CPU is more than max permissible")
+								HasValue("status", api.Status.Failed).
+								HasValue("error", "Requested CPU is more than max permissible")
 						})
 
 						It("keeps previously deployed version active", func() {
 							router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
-							router.Path("$.config.version").Equal(1)
+							router.Path("$.config.version").IsEqual(1)
 						})
 					})
 				})
@@ -197,8 +197,8 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 							}, defaultDeploymentIntervals...).Should(Succeed())
 
 							version.
-								ValueEqual("status", api.Status.Failed).
-								ValueEqual("error", "Requested CPU is more than max permissible")
+								HasValue("status", api.Status.Failed).
+								HasValue("error", "Requested CPU is more than max permissible")
 						})
 
 						It("keeps previous valid version as router's current version", func() {
@@ -244,8 +244,8 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 							}, defaultDeploymentIntervals...).Should(Succeed())
 
 							router.
-								ValueEqual("status", api.Status.Deployed).
-								Path("$.config.version").Equal(1)
+								HasValue("status", api.Status.Deployed).
+								Path("$.config.version").IsEqual(1)
 						})
 					})
 				})
@@ -276,7 +276,7 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					}, defaultDeploymentIntervals...).Should(Succeed())
 
 					version.
-						ValueEqual("status", api.Status.Deployed).
+						HasValue("status", api.Status.Deployed).
 						NotContainsKey("error")
 				})
 
@@ -290,8 +290,8 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 
 				It("updates router's configuration to the new version", func() {
 					api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID).
-						ValueEqual("status", api.Status.Deployed).
-						Path("$.config.version").Equal(3)
+						HasValue("status", api.Status.Deployed).
+						Path("$.config.version").IsEqual(3)
 				})
 			})
 
@@ -320,7 +320,7 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 								WithPath("routerId", routerCtx.ID).
 								Expect().Status(http.StatusBadRequest).
 								JSON().
-								Equal(json.RawMessage(`{
+								IsEqual(json.RawMessage(`{
                                         "description": "invalid delete request",
                                         "error": "router is currently deployed. Undeploy it first."
                                     }`))
@@ -366,7 +366,7 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 								WithPath("routerId", routerCtx.ID).
 								Expect().Status(http.StatusNotFound).
 								JSON().
-								Equal(json.RawMessage(`{
+								IsEqual(json.RawMessage(`{
 									"description": "router not found",
 									"error": "record not found"
 								}`))

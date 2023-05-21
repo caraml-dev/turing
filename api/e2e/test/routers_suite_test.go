@@ -181,8 +181,8 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 			}, defaultDeploymentIntervals...).Should(Succeed())
 
 			router.
-				ValueEqual("status", "deployed").
-				Value("config").Object().ValueEqual("version", 1)
+				HasValue("status", "deployed").
+				Value("config").Object().HasValue("version", 1)
 
 			endpoint, err := url.Parse(router.Value("endpoint").String().Raw())
 			Expect(err).ShouldNot(HaveOccurred())
@@ -292,12 +292,12 @@ func AssertResponsePayload(want, got *httpexpect.Object) {
 
 	if len(resp.Response.RouteResponses) > 0 {
 		got.
-			ValueEqual("request", want.Value("request").Raw()).
+			HasValue("request", want.Value("request").Raw()).
 			Value("response").Object().
-			ValueEqual("experiment", want.Path("$.response.experiment").Raw()).
+			HasValue("experiment", want.Path("$.response.experiment").Raw()).
 			Value("route_responses").Array().
 			ContainsOnly(want.Path("$.response.route_responses").Array().Raw()...)
 	} else {
-		got.Equal(want.Raw())
+		got.IsEqual(want.Raw())
 	}
 }
