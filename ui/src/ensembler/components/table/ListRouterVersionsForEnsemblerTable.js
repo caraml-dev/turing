@@ -69,7 +69,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
       field: "id",
       name: "Id",
       width: "96px",
-      render: (id, item) => (
+      render: (id, _) => (
         <EuiText size={defaultTextSize}>
           {id}
         </EuiText>
@@ -79,7 +79,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
       field: "router version",
       name: "Version",
       width: "96px",
-      render: (id, item) => (
+      render: (_, item) => (
         <EuiText size={defaultTextSize}>
           Version {item.version}
         </EuiText>
@@ -89,9 +89,9 @@ export const ListRouterVersionsForEnsemblerTable = ({
       field: "name",
       name: "Router Name",
       truncateText: true,
-      render: (id, item) => (
+      render: (_, item) => (
         <span className="eui-textTruncate" title={item.router.name}>
-          {item.router.name}
+          <a href={`./routers/${item.router.id}/history`} target="_blank" rel="noreferrer">{item.router.name}</a>
         </span>
       ),
     },
@@ -104,12 +104,6 @@ export const ListRouterVersionsForEnsemblerTable = ({
       ),
     },
   ];
-
-  const cellProps = (item) =>
-    ({
-      style: { cursor: "pointer" },
-      onClick: () => window.open(`./routers/${item.id}/history`, '_blank'),
-    });
 
   return allRouterVersion.error || currentRouterVersion.error ? (
     <EuiCallOut
@@ -127,12 +121,11 @@ export const ListRouterVersionsForEnsemblerTable = ({
           <br/>
           <p>The router version with the related ensembler is being used by {currentRouterVersion.data.length} <b>Routers</b></p>
           <EuiBasicTable
-            items={results.inactiveItems}
+            items={currentRouterVersion.data}
             loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
             columns={columns}
             responsive={true}
             tableLayout="auto"
-            cellProps={cellProps}
           />
         </div>
       )) : canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
@@ -145,7 +138,6 @@ export const ListRouterVersionsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
-            cellProps={cellProps}
           />
         </div>
       )) : ( results.totalActiveCount > 0 && (
@@ -158,7 +150,6 @@ export const ListRouterVersionsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
-            cellProps={cellProps}
           />
         </div>
       ))}

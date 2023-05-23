@@ -45,16 +45,18 @@ export const DeleteJobModal = ({
       isLoading={isLoading}
       disabled={deleteConfirmation !== job.name}
       content={
-        <p>
-          You are about to terminate Ensembling Jobs <b>{job.name}</b> <br/> <br/>
+        <div>
+          <p>
+            You are about to terminate Ensembling Jobs <b>{job.name}</b>
+          </p>
           To confirm, please type "<b>{job.name}</b>" in the box below
-            <EuiFieldText     
-              fullWidth            
-              placeholder={job.name}
-              value={deleteConfirmation}
-              onChange={(e) => setDeleteConfirmation(e.target.value)}
-              isInvalid={deleteConfirmation !== job.name} />   
-        </p>
+          <EuiFieldText     
+            fullWidth            
+            placeholder={job.name}
+            value={deleteConfirmation}
+            onChange={(e) => setDeleteConfirmation(e.target.value)}
+            isInvalid={deleteConfirmation !== job.name} />   
+        </div>
       }
       confirmButtonText={["failed", "failed_submission", "failed_building", "completed"].includes(job.status) ? 'Delete' : 'Terminate'}
       confirmButtonColor="danger">

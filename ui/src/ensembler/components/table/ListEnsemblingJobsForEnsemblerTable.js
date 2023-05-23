@@ -65,9 +65,9 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
       field: "name",
       name: "Name",
       truncateText: true,
-      render: (name) => (
-        <span className="eui-textTruncate" title={name}>
-          {name}
+      render: (_, item) => (
+        <span className="eui-textTruncate" title={item.name}>
+          <a href={`./jobs/${item.id}/details`} target="_blank" rel="noreferrer">{item.name}</a>
         </span>
       ),
     },
@@ -80,13 +80,6 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
       ),
     },
   ];
-
-  const cellProps = (item) =>
-  ({
-    style: { cursor: "pointer" },
-    onClick: () => window.open(`./jobs/${item.id}/details`, '_blank'),
-  });
-
 
   return error ? (
     <EuiCallOut
@@ -107,7 +100,6 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
-            cellProps={cellProps}
           />
         </div>
       )) : ( results.totalActiveCount > 0 && (
@@ -120,7 +112,6 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
             columns={columns}
             responsive={true}
             tableLayout="auto"
-            cellProps={cellProps}
           />
         </div>
       ))}

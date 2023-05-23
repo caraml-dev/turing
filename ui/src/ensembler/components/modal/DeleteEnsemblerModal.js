@@ -81,14 +81,12 @@ export const DeleteEnsemblerModal = ({
           ) : ensemblerUsedByCurrentRouterVersion ? (
             <div>
               You cannot delete this ensembler because it is associated with a router version that is currently being used by a router
-              <br/> <br/> If you still wish to delete this ensembler, please <b>Deploy</b> or <b>Add</b> another version on this router.
+              <br/> <br/> If you still wish to delete this ensembler, please <b>Deploy</b> another version on this router.
             </div>
           ) : (
             <div>
-              <span>
               You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler. 
               <br/> <br/> If you still wish to delete this ensembler, please <b>Undeploy</b> router versions and <b>Terminate</b> ensembling jobs that use this ensembler.
-              </span>
             </div> 
           )}
           <ListEnsemblingJobsForEnsemblerTable 
