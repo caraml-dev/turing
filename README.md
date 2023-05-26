@@ -230,7 +230,7 @@ ClusterConfig:
 TuringEncryptionKey: password
 MLPConfig:
   MerlinURL: http://localhost:8082/v1
-  MLPURL: http://localhost:8081/v1
+  MLPURL: http://localhost:8081
   MLPEncryptionKey: password
 TuringUIConfig:
   ServingDirectory: ../ui/build
@@ -337,7 +337,7 @@ Then, update the config file `.env.development.local` as shown below.
 ```
 REACT_APP_HOMEPAGE=/turing
 REACT_APP_TURING_API=http://localhost:8080/v1
-REACT_APP_MLP_API=http://localhost:8081/v1
+REACT_APP_MLP_API=http://localhost:8081
 REACT_APP_MERLIN_API=http://localhost:8082/v1
 REACT_APP_OAUTH_CLIENT_ID=xxxxxxx.apps.googleusercontent.com
 REACT_APP_DEFAULT_DOCKER_REGISTRY=docker.io
