@@ -876,9 +876,8 @@ func TestConfigValidate(t *testing.T) {
 		TuringEncryptionKey: "secret",
 		AlertConfig:         nil,
 		MLPConfig: &config.MLPConfig{
-			MerlinURL:        "http://merlin.example.com",
-			MLPURL:           "http://mlp.example.com",
-			MLPEncryptionKey: "secret",
+			MerlinURL: "http://merlin.example.com",
+			MLPURL:    "http://mlp.example.com",
 		},
 	}
 

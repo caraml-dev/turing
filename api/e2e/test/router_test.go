@@ -37,7 +37,7 @@ var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_
 								WithJSON(json.RawMessage(`{"client": {"id": 4}}`)).
 								Expect().
 								Status(http.StatusOK).
-								JSON().Equal(json.RawMessage(`{"version": "control"}`))
+								JSON().IsEqual(json.RawMessage(`{"version": "control"}`))
 						})
 					})
 
@@ -48,7 +48,7 @@ var _ = DeployedRouterContext("testdata/create_router_std_ensembler_proprietary_
 								WithJSON(json.RawMessage(`{"client": {"id": 7}}`)).
 								Expect().
 								Status(http.StatusOK).
-								JSON().Equal(json.RawMessage(`{"version": "treatment-a"}`))
+								JSON().IsEqual(json.RawMessage(`{"version": "treatment-a"}`))
 						})
 					})
 				})
@@ -70,7 +70,8 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 					When("request satisfies the first traffic rule", func() {
 						It("responds with responses from `treatment-a` route", func() {
 							want = httpexpect.
-								NewValue(GinkgoT(), JSONPayload("testdata/responses/traffic_rules/traffic-rule-1.json")).
+								NewValue(GinkgoT(),
+									JSONPayload("testdata/responses/traffic_rules/traffic-rule-1.json")).
 								Object()
 
 							got = config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint).
@@ -87,7 +88,8 @@ var _ = DeployedRouterContext("testdata/create_router_with_traffic_rules.json.tm
 					When("request satisfies the second traffic rule", func() {
 						It("responds with responses from `treatment-b` route", func() {
 							want = httpexpect.
-								NewValue(GinkgoT(), JSONPayload("testdata/responses/traffic_rules/traffic-rule-2.json")).
+								NewValue(GinkgoT(),
+									JSONPayload("testdata/responses/traffic_rules/traffic-rule-2.json")).
 								Object()
 
 							got = config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint).

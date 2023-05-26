@@ -20,16 +20,6 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 )
 
-type mockCryptoService struct{}
-
-func (*mockCryptoService) Encrypt(text string) (string, error) {
-	return text, nil
-}
-
-func (*mockCryptoService) Decrypt(text string) (string, error) {
-	return text, nil
-}
-
 // testSetupEnvForGoogleCredentials creates a temporary file containing dummy user account JSON
 // then set the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to the file.
 //
@@ -109,20 +99,18 @@ func TestNewMLPService(t *testing.T) {
 		},
 	)
 	monkey.Patch(newMLPClient,
-		func(googleClient *http.Client, basePath string, encryptionKey string) *mlpClient {
+		func(googleClient *http.Client, basePath string) *mlpClient {
 			assert.Equal(t, gc, googleClient)
 			assert.Equal(t, "mlp-base-path", basePath)
-			assert.Equal(t, "mlp-enc-key", encryptionKey)
 			// Create test client
 			mlpClient := &mlpClient{
-				CryptoService: &mockCryptoService{},
 				api: &mlp.APIClient{
 					ProjectApi: &mlp.ProjectApiService{},
 				},
 			}
 			// Patch Get Projects
-			monkey.PatchInstanceMethod(reflect.TypeOf(mlpClient.api.ProjectApi), "ProjectsGet",
-				func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiProjectsGetOpts,
+			monkey.PatchInstanceMethod(reflect.TypeOf(mlpClient.api.ProjectApi), "V1ProjectsGet",
+				func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiV1ProjectsGetOpts,
 				) ([]mlp.Project, *http.Response, error) {
 					return projects, nil, nil
 				})
@@ -130,7 +118,7 @@ func TestNewMLPService(t *testing.T) {
 		},
 	)
 
-	svc, err := NewMLPService("mlp-base-path", "mlp-enc-key", "merlin-base-path")
+	svc, err := NewMLPService("mlp-base-path", "merlin-base-path")
 	assert.NoError(t, err)
 	assert.NotNil(t, svc)
 
@@ -183,9 +171,8 @@ func TestNewMLPClient(t *testing.T) {
 	cfg.HTTPClient = gc
 
 	// Test
-	resultClient := newMLPClient(gc, "base-path", "enc-key")
+	resultClient := newMLPClient(gc, "base-path")
 	require.NotNil(t, resultClient)
-	assert.Equal(t, NewCryptoService("enc-key"), resultClient.CryptoService)
 	assert.Equal(t, mlp.NewAPIClient(cfg), resultClient.api)
 }
 
@@ -198,8 +185,8 @@ func TestMLPServiceGetProject(t *testing.T) {
 	}
 
 	svc := newTestMLPService()
-	monkey.PatchInstanceMethod(reflect.TypeOf(svc.mlpClient.api.ProjectApi), "ProjectsGet",
-		func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiProjectsGetOpts,
+	monkey.PatchInstanceMethod(reflect.TypeOf(svc.mlpClient.api.ProjectApi), "V1ProjectsGet",
+		func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiV1ProjectsGetOpts,
 		) ([]mlp.Project, *http.Response, error) {
 			return projects, nil, nil
 		})
@@ -255,7 +242,7 @@ func TestMLPServiceGetSecret(t *testing.T) {
 	svc := newTestMLPService()
 	monkey.PatchInstanceMethod(
 		reflect.TypeOf(svc.mlpClient.api.SecretApi),
-		"ProjectsProjectIdSecretsGet",
+		"V1ProjectsProjectIdSecretsGet",
 		func(svc *mlp.SecretApiService,
 			ctx context.Context,
 			projectId int32,
@@ -288,7 +275,6 @@ func newTestMLPService() *mlpService {
 			},
 		},
 		mlpClient: &mlpClient{
-			CryptoService: &mockCryptoService{},
 			api: &mlp.APIClient{
 				ProjectApi: &mlp.ProjectApiService{},
 			},
