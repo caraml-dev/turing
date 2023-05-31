@@ -1,7 +1,7 @@
 Port: 9999
 AllowedOrigins:
-- http://foo.com
-- http://bar.com
+  - http://foo.com
+  - http://bar.com
 AuthConfig:
   Enabled: true
   URL: http://example.com
@@ -39,6 +39,9 @@ DeployConfig:
             Operator: In
             Values:
               - 1
+  PodDisruptionBudget:
+    Enabled: true
+    MinAvailable: 20%
 KnativeServiceDefaults:
   QueueProxyResourcePercentage: 20
   UserContainerLimitRequestFactor: 1.25
@@ -47,7 +50,7 @@ RouterDefaults:
     FlushIntervalSeconds: 60
     WorkerCount: 2
 Sentry:
-  Enabled: true 
+  Enabled: true
   Labels:
     foo: bar
 ClusterConfig:
@@ -67,10 +70,10 @@ ClusterConfig:
         provideClusterInfo: true
 
 Experiment:
-    qux:
-      quxkey1: quxval1
-      quxkey2: 
-        quxkey2-1: quxval2-1
-        quxkey2-2: quxval2-2
-    quux: 
-      quuxkey1: quuxval1
+  qux:
+    quxkey1: quxval1
+    quxkey2:
+      quxkey2-1: quxval2-1
+      quxkey2-2: quxval2-2
+  quux:
+    quuxkey1: quuxval1

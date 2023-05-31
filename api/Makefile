@@ -39,8 +39,8 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
-	go tool cover -func cover.out
+	GOARCH=amd64 go test -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
+	GOARCH=amd64 go tool cover -func cover.out
 
 .PHONY: build
 build: tidy

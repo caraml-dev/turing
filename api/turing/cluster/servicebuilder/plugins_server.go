@@ -16,14 +16,12 @@ const (
 	pluginsServerReplicaCount = 1
 )
 
-var (
-	pluginsVolume = v1.Volume{
-		Name: "plugins-volume",
-		VolumeSource: v1.VolumeSource{
-			EmptyDir: &v1.EmptyDirVolumeSource{},
-		},
-	}
-)
+var pluginsVolume = v1.Volume{
+	Name: "plugins-volume",
+	VolumeSource: v1.VolumeSource{
+		EmptyDir: &v1.EmptyDirVolumeSource{},
+	},
+}
 
 func NewPluginsServerService(
 	routerVersion *models.RouterVersion,
@@ -34,7 +32,7 @@ func NewPluginsServerService(
 			Name:                  GetComponentName(routerVersion, ComponentTypes.PluginsServer),
 			Namespace:             project.Name,
 			Image:                 nginxImage,
-			Labels:                buildLabels(project, routerVersion.Router),
+			Labels:                buildLabels(project, routerVersion.Router, ComponentTypes.PluginsServer),
 			ProbePort:             80,
 			LivenessHTTPGetPath:   "/",
 			ReadinessHTTPGetPath:  "/",

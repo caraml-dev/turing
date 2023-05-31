@@ -7,6 +7,7 @@ import (
 
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
@@ -307,7 +308,7 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 	}
 
 	// Build Image
-	labels := r.buildLabels(ensemblingJob, mlpProject)
+	labels := r.buildLabels(ensemblingJob, mlpProject, servicebuilder.ComponentTypes.BatchEnsembler)
 	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels, baseImageTag)
 
 	if imageBuildErr != nil {
@@ -376,7 +377,6 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 // terminateIfRequired returns true if the process should drop what it is doing.
 func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlpProject *mlp.Project) bool {
 	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{})
-
 	if err != nil {
 		// Job already deleted, must not allow job to be revived.
 		// Because of the async activities, the job could have been deleted.
@@ -396,11 +396,13 @@ func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlp
 func (r *ensemblingJobRunner) buildLabels(
 	ensemblingJob *models.EnsemblingJob,
 	mlpProject *mlp.Project,
+	componentType string,
 ) map[string]string {
 	rq := labeller.KubernetesLabelsRequest{
-		Stream: mlpProject.Stream,
-		Team:   mlpProject.Team,
-		App:    *ensemblingJob.InfraConfig.EnsemblerName,
+		Stream:    mlpProject.Stream,
+		Team:      mlpProject.Team,
+		App:       *ensemblingJob.InfraConfig.EnsemblerName,
+		Component: componentType,
 	}
 
 	return labeller.BuildLabels(rq)

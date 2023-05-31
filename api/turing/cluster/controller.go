@@ -15,6 +15,7 @@ import (
 	apiappsv1 "k8s.io/api/apps/v1"
 	apibatchv1 "k8s.io/api/batch/v1"
 	apicorev1 "k8s.io/api/core/v1"
+	apipolicyv1 "k8s.io/api/policy/v1"
 	apirbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -22,6 +23,7 @@ import (
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	batchv1 "k8s.io/client-go/kubernetes/typed/batch/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	policyv1 "k8s.io/client-go/kubernetes/typed/policy/v1"
 	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
 
 	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
@@ -42,9 +44,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-var (
-	ErrNamespaceAlreadyExists = errors.New("namespace already exists")
-)
+var ErrNamespaceAlreadyExists = errors.New("namespace already exists")
 
 // clusterConfig Model cluster authentication settings
 type clusterConfig struct {
@@ -57,35 +57,62 @@ type clusterConfig struct {
 
 // Controller defines the operations supported by the cluster controller
 type Controller interface {
+	// Namespace
+	CreateNamespace(ctx context.Context, name string) error
+
+	// Knative Service
+	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
 	DeleteKnativeService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error
-	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
+
+	// Istio VirtualService
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string) error
-	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
+
+	// Deployment
 	DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
+
+	// Service
+	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
 	DeleteKubernetesService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error
-	CreateNamespace(ctx context.Context, name string) error
+
+	// ConfigMap
 	ApplyConfigMap(ctx context.Context, namespace string, configMap *ConfigMap) error
 	DeleteConfigMap(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
+
+	// Secret
 	CreateSecret(ctx context.Context, secret *Secret) error
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
+
+	// PVC
 	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
 	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error
+
+	// Pod
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
 	ListPodLogs(ctx context.Context, namespace string,
 		podName string, opts *apicorev1.PodLogOptions) (io.ReadCloser, error)
+
+	// Job
 	CreateJob(ctx context.Context, namespace string, job Job) (*apibatchv1.Job, error)
 	GetJob(ctx context.Context, namespace string, jobName string) (*apibatchv1.Job, error)
 	DeleteJob(ctx context.Context, namespace string, jobName string) error
+
+	// Service Account
 	CreateServiceAccount(ctx context.Context, namespace string,
 		serviceAccount *ServiceAccount) (*apicorev1.ServiceAccount, error)
 	CreateRole(ctx context.Context, namespace string, role *Role) (*apirbacv1.Role, error)
 	CreateRoleBinding(ctx context.Context, namespace string, roleBinding *RoleBinding) (*apirbacv1.RoleBinding, error)
+
+	// Spark Application
 	CreateSparkApplication(ctx context.Context, namespace string,
 		request *CreateSparkRequest) (*apisparkv1beta2.SparkApplication, error)
 	GetSparkApplication(ctx context.Context, namespace, appName string) (*apisparkv1beta2.SparkApplication, error)
 	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
+
+	// PodDisruptionBudget
+	CreatePodDisruptionBudget(ctx context.Context, namespace string, pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
+	DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error
 }
 
 // controller implements the Controller interface
@@ -95,6 +122,7 @@ type controller struct {
 	k8sAppsClient    appsv1.AppsV1Interface
 	k8sBatchClient   batchv1.BatchV1Interface
 	k8sRBACClient    rbacv1.RbacV1Interface
+	k8sPolicyClient  policyv1.PolicyV1Interface
 	k8sSparkOperator sparkoperatorv1beta2.SparkoperatorV1beta2Interface
 	istioClient      networkingv1beta1.NetworkingV1beta1Interface
 }
@@ -143,6 +171,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 		k8sAppsClient:    k8sClientset.AppsV1(),
 		k8sBatchClient:   k8sClientset.BatchV1(),
 		k8sRBACClient:    k8sClientset.RbacV1(),
+		k8sPolicyClient:  k8sClientset.PolicyV1(),
 		k8sSparkOperator: sparkClient.SparkoperatorV1beta2(),
 		istioClient:      istioClientSet,
 	}, nil
@@ -306,7 +335,6 @@ func (c *controller) DeployKubernetesService(
 	ctx context.Context,
 	svcConf *KubernetesService,
 ) error {
-
 	desiredDeployment, desiredSvc := svcConf.BuildKubernetesServiceConfig()
 
 	// Deploy deployment
@@ -657,6 +685,36 @@ func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appN
 	return c.k8sSparkOperator.SparkApplications(namespace).Delete(ctx, appName, metav1.DeleteOptions{})
 }
 
+func (c *controller) CreatePodDisruptionBudget(ctx context.Context, namespace string, pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error) {
+	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(namespace).Get(ctx, pdb.Name, metav1.GetOptions{})
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			return nil, errors.Errorf(
+				"failed getting status of pod disruption budget %s in namespace %s",
+				pdb.Name,
+				namespace,
+			)
+		}
+
+		pdbCfg, err := pdb.BuildPodDisruptionBudget()
+		if err != nil {
+			return nil, errors.Errorf("failed building pod disruption budget %s config: %s", pdb.Name, err)
+		}
+
+		pdbObj, err = c.k8sPolicyClient.PodDisruptionBudgets(namespace).Create(ctx, pdbCfg, metav1.CreateOptions{})
+		if err != nil {
+			return nil, errors.Errorf(
+				"failed creating pod disruption budget %s in namespace %s", pdb.Name, namespace,
+			)
+		}
+	}
+	return pdbObj, nil
+}
+
+func (c *controller) DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error {
+	return c.k8sPolicyClient.PodDisruptionBudgets(namespace).Delete(ctx, pdbName, metav1.DeleteOptions{})
+}
+
 // waitKnativeServiceReady waits for the given knative service to become ready, until the
 // default timeout
 func (c *controller) waitKnativeServiceReady(
@@ -717,7 +775,6 @@ func (c *controller) getKnativePodTerminationMessage(ctx context.Context, svcNam
 					break
 				}
 			}
-
 		}
 	}
 	return terminationMessage

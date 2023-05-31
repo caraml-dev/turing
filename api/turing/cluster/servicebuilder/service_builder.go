@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/copystructure"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
@@ -34,6 +35,7 @@ const (
 )
 
 var ComponentTypes = struct {
+	BatchEnsembler       string
 	Enricher             string
 	Ensembler            string
 	Router               string
@@ -43,15 +45,18 @@ var ComponentTypes = struct {
 	CacheVolume          string
 	FiberConfig          string
 	PluginsServer        string
+	PDB                  string
 }{
-	Enricher:      "enricher",
-	Ensembler:     "ensembler",
-	Router:        "router",
-	FluentdLogger: "fluentd-logger",
-	Secret:        "secret",
-	CacheVolume:   "cache-volume",
-	FiberConfig:   "fiber-config",
-	PluginsServer: "plugins-server",
+	BatchEnsembler: "batch-ensembler",
+	Enricher:       "enricher",
+	Ensembler:      "ensembler",
+	Router:         "router",
+	FluentdLogger:  "fluentd-logger",
+	Secret:         "secret",
+	CacheVolume:    "cache-volume",
+	FiberConfig:    "fiber-config",
+	PluginsServer:  "plugins-server",
+	PDB:            "pdb",
 }
 
 // ClusterServiceBuilder parses the Router Config to build a service definition
@@ -102,6 +107,12 @@ type ClusterServiceBuilder interface {
 		ensemblerServiceAccountKey string,
 		expEngineServiceAccountKey string,
 	) *cluster.Secret
+	NewPodDisruptionBudget(
+		routerVersion *models.RouterVersion,
+		project *mlp.Project,
+		componentType string,
+		pdbConfig *config.PodDisruptionBudgetConfig,
+	) *cluster.PodDisruptionBudget
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
 
@@ -196,7 +207,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			CPURequests:    enricher.ResourceRequest.CPURequest,
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
 			Envs:           enricher.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, routerVersion.Router),
+			Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.Enricher),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -281,7 +292,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			CPURequests:    docker.ResourceRequest.CPURequest,
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
 			Envs:           docker.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, routerVersion.Router),
+			Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.Ensembler),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -323,7 +334,32 @@ func (sb *clusterSvcBuilder) NewSecret(
 		),
 		Namespace: project.Name,
 		Data:      data,
-		Labels:    buildLabels(project, routerVersion.Router),
+		Labels:    buildLabels(project, routerVersion.Router, ComponentTypes.Secret),
+	}
+}
+
+// NewPodDisruptionBudget creates a new `cluster.PodDisruptionBudget`
+// for the given service (router/enricher/ensembler).
+func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
+	routerVersion *models.RouterVersion,
+	project *mlp.Project,
+	componentType string,
+	pdbConfig *config.PodDisruptionBudgetConfig,
+) *cluster.PodDisruptionBudget {
+	selector := &metav1.LabelSelector{
+		MatchLabels: buildLabels(project, routerVersion.Router, componentType),
+	}
+	return &cluster.PodDisruptionBudget{
+		Name: fmt.Sprintf(
+			"%s-%s",
+			GetComponentName(routerVersion, componentType),
+			ComponentTypes.PDB,
+		),
+		Namespace:      project.Name,
+		Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.PDB),
+		MaxUnavailable: pdbConfig.MaxUnavailable,
+		MinAvailable:   pdbConfig.MinAvailable,
+		Selector:       selector,
 	}
 }
 
@@ -367,11 +403,13 @@ func GetNamespace(project *mlp.Project) string {
 func buildLabels(
 	project *mlp.Project,
 	router *models.Router,
+	componentType string,
 ) map[string]string {
 	r := labeller.KubernetesLabelsRequest{
-		Stream: project.Stream,
-		Team:   project.Team,
-		App:    router.Name,
+		Stream:    project.Stream,
+		Team:      project.Team,
+		App:       router.Name,
+		Component: componentType,
 	}
 	return labeller.BuildLabels(r)
 }
