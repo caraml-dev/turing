@@ -3,7 +3,7 @@ package labeller
 import "testing"
 
 func TestLabeller(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		doInit       bool
 		prefix       string
 		expectedKeys map[string]struct{}
@@ -16,6 +16,7 @@ func TestLabeller(t *testing.T) {
 				"team":         {},
 				"app":          {},
 				"orchestrator": {},
+				"component":    {},
 			},
 		},
 		"success | init called": {
@@ -27,6 +28,7 @@ func TestLabeller(t *testing.T) {
 				"gojek.com/team":         {},
 				"gojek.com/app":          {},
 				"gojek.com/orchestrator": {},
+				"gojek.com/component":    {},
 			},
 		},
 	}

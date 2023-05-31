@@ -232,6 +232,16 @@ type DeploymentConfig struct {
 	MaxMemory                 Quantity      `validate:"required"`
 	MaxAllowedReplica         int           `validate:"required"`
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint
+	PodDisruptionBudget       PodDisruptionBudgetConfig
+}
+
+// PodDisruptionBudgetConfig are the configuration for PodDisruptionBudgetConfig for
+// Turing services.
+type PodDisruptionBudgetConfig struct {
+	Enabled bool
+	// Can specify only one of maxUnavailable and minAvailable
+	MaxUnavailable string
+	MinAvailable   string
 }
 
 // KubernetesLabelConfigs are the configurations for labeling
@@ -455,7 +465,7 @@ func (c *OpenapiConfig) GenerateSpecFile() error {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0755)
+	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0o755)
 	if err != nil {
 		return err
 	}

@@ -53,7 +53,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		Namespace:   project.Name,
 		AccessModes: []string{"ReadWriteOnce"},
 		Size:        resource.MustParse(cacheVolumeSize),
-		Labels:      buildLabels(project, routerVersion.Router),
+		Labels:      buildLabels(project, routerVersion.Router, ComponentTypes.FluentdLogger),
 	}
 	volumes, volumeMounts := buildFluentdVolumes(serviceAccountSecretName, persistentVolumeClaim.Name)
 
@@ -71,7 +71,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 			LivenessHTTPGetPath:   fluentdHealthCheckPath,
 			ReadinessHTTPGetPath:  fluentdHealthCheckPath,
 			ProbeInitDelaySeconds: 10,
-			Labels:                buildLabels(project, routerVersion.Router),
+			Labels:                buildLabels(project, routerVersion.Router, ComponentTypes.FluentdLogger),
 			Envs:                  envs,
 			PersistentVolumeClaim: persistentVolumeClaim,
 			Volumes:               volumes,
