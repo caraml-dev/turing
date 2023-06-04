@@ -105,7 +105,8 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
       )) : ( results.totalActiveCount > 0 && (
         <div>
           <br/>
-          <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Ensembling Jobs</b></p>
+          <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Ensembling Jobs</b>. 
+          If the ensembling jobs are in terminating state, please wait until the process complete to delete this ensembler</p>
           <EuiBasicTable
             items={results.activeItems}
             loading={!isLoaded}
