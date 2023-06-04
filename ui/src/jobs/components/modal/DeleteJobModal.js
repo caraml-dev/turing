@@ -29,7 +29,7 @@ export const DeleteJobModal = ({
     if (!isEmpty(job)  && isLoaded && !error) {
       addToast({
         id: `submit-success-terminate-${job.id}`,
-        title: `Ensembling Jobs ${job.name} for ensembler ${job.ensembler_id} has been terminated!`,
+        title: `Ensembling Job ${job.name} for ensembler ${job.ensembler_id} has been terminated!`,
         color: "success",
         iconType: "check",
       });
@@ -38,9 +38,13 @@ export const DeleteJobModal = ({
     }
   }, [isLoaded, error, job, onSuccess, closeModal]);
 
+  const isActiveJobStatus = function(jobStatus) {
+    return ["failed", "failed_submission", "failed_building", "completed"].includes(jobStatus);
+  }
+
   return (
     <ConfirmationModal
-      title={["failed", "failed_submission", "failed_building", "completed"].includes(job.status) ? 'Delete Ensembling Jobs' : 'Terminate Ensembling Jobs'}
+      title={isActiveJobStatus(job.status) ? 'Delete Ensembling Jobs' : 'Terminate Ensembling Jobs'}
       onConfirm={submitForm}
       isLoading={isLoading}
       disabled={deleteConfirmation !== job.name}
@@ -58,7 +62,7 @@ export const DeleteJobModal = ({
             isInvalid={deleteConfirmation !== job.name} />   
         </div>
       }
-      confirmButtonText={["failed", "failed_submission", "failed_building", "completed"].includes(job.status) ? 'Delete' : 'Terminate'}
+      confirmButtonText={isActiveJobStatus(job.status) ? 'Delete' : 'Terminate'}
       confirmButtonColor="danger">
       {(onSubmit) =>
         (deleteJobRef.current = openModal(onSubmit)) &&

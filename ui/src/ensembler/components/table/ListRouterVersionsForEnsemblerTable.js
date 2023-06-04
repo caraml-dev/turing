@@ -12,8 +12,8 @@ import { useTuringApi } from "../../../hooks/useTuringApi";
 export const ListRouterVersionsForEnsemblerTable = ({
   projectID,
   ensemblerID,
-  setCanDeleteEnsembler,
   canDeleteEnsembler,
+  setEnsemblerUsedByActiveRouterVersion,
   setEnsemblerUsedByCurrentRouterVersion,
   ensemblerUsedByCurrentRouterVersion
 }) => {
@@ -50,19 +50,19 @@ export const ListRouterVersionsForEnsemblerTable = ({
 
   useEffect(() => {
     if (results.activeItems.length > 0){
-      setCanDeleteEnsembler(false)
+      setEnsemblerUsedByActiveRouterVersion(true)
     } else {
       if (currentRouterVersion.isLoaded && !currentRouterVersion.error) {
         if (currentRouterVersion.data.length > 0){
           setEnsemblerUsedByCurrentRouterVersion(true)
-          setCanDeleteEnsembler(false)
+          setEnsemblerUsedByActiveRouterVersion(false)
         } else {
           setEnsemblerUsedByCurrentRouterVersion(false)
-          setCanDeleteEnsembler(true)
+          setEnsemblerUsedByActiveRouterVersion(false)
         }
       }
     }
-  }, [results, currentRouterVersion, setCanDeleteEnsembler, setEnsemblerUsedByCurrentRouterVersion])
+  }, [results, currentRouterVersion, setEnsemblerUsedByActiveRouterVersion, setEnsemblerUsedByCurrentRouterVersion])
 
   const columns = [
     {

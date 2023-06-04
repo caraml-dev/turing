@@ -65,9 +65,13 @@ export const ListEnsemblingJobsTable = ({
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
-  const handleDeleteJob = (job) => {
+  const onDeleteJob = (job) => {
     deleteJobRef.current(job)
   }
+  
+  const isActiveJobStatus = function(jobStatus) {
+    return ["failed", "failed_submission", "failed_building", "completed"].includes(jobStatus);
+}
 
   const columns = [
     {
@@ -156,12 +160,12 @@ export const ListEnsemblingJobsTable = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false} >
               <EuiButtonEmpty
-                  onClick={() => handleDeleteJob(item)}
+                  onClick={() => onDeleteJob(item)}
                   color={"danger"}
-                  iconType={["failed", "failed_submission", "failed_building", "completed"].includes(item.status) ? 'trash' : 'minusInCircle' }
+                  iconType={isActiveJobStatus(item.status) ? 'trash' : 'minusInCircle' }
                   iconSide="left"
                   size="xs">
-                <EuiText size="xs"> {["failed", "failed_submission", "failed_building", "completed"].includes(item.status) ? 'Delete' : 'Terminate' } </EuiText>
+                <EuiText size="xs"> {isActiveJobStatus(item.status) ? 'Delete' : 'Terminate' } </EuiText>
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexItem>

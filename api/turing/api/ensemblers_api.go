@@ -128,6 +128,7 @@ func (c EnsemblersController) UpdateEnsembler(
 	if err != nil {
 		// Delete If Only RunID is changed
 		// If only the ensembler name that changed, mlflow won't create a new run, so we don't need to delete old / new run
+		// Since the sdk already create a new mlflow run, when the update failed, we need to clean up the new mlflow run
 		if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 			pyFuncErr := c.MlflowService.DeleteRun(context.Background(),
 				pyFuncEnsembler.RunID, pyFuncEnsembler.ArtifactURI, true)
@@ -140,6 +141,7 @@ func (c EnsemblersController) UpdateEnsembler(
 
 	// Delete If Only RunID is changed
 	// If only the ensembler name that changed, mlflow won't create a new run, so we don't need to delete old / new run
+	// The update is success, and now we need to cleanup old ensembler
 	if isPyfunc && oldPyFuncEnsembler.RunID != pyFuncEnsembler.RunID {
 		err = c.MlflowService.DeleteRun(context.Background(), oldPyFuncEnsembler.RunID, oldPyFuncEnsembler.ArtifactURI, true)
 		if err != nil {
@@ -176,6 +178,12 @@ func (c EnsemblersController) DeleteEnsembler(
 	// If such ensembler exist, the deletion process are restricted
 	// Check if there are any deployed / pending router version using the ensembler
 	httpStatus, err := c.checkActiveRouterVersion(options)
+	if err != nil {
+		return Error(httpStatus, "failed to delete the ensembler", err.Error())
+	}
+
+	// Check if there are any current router version using the ensembler
+	httpStatus, err = c.checkCurrentRouterVersion(options)
 	if err != nil {
 		return Error(httpStatus, "failed to delete the ensembler", err.Error())
 	}
@@ -227,6 +235,23 @@ func (c EnsemblersController) checkActiveRouterVersion(options EnsemblersPathOpt
 	}
 	return http.StatusOK, nil
 }
+
+func (c EnsemblersController) checkCurrentRouterVersion(options EnsemblersPathOptions) (int, error) {
+	activeOption := service.RouterVersionListOptions{
+		ProjectID:   options.ProjectID,
+		EnsemblerID: options.EnsemblerID,
+		IsCurrent:   true,
+	}
+	activeRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if len(activeRouter) >= 1 {
+		return http.StatusBadRequest, fmt.Errorf("there are router version that is currently being used by a router using this ensembler")
+	}
+	return http.StatusOK, nil
+}
+
 func (c EnsemblersController) checkActiveEnsemblingJob(options EnsemblersPathOptions) (int, error) {
 	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: options.EnsemblerID,

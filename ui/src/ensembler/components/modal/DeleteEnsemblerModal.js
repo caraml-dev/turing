@@ -15,9 +15,18 @@ export const DeleteEnsemblerModal = ({
   const closeModalRef = useRef();
 
   const [canDeleteEnsembler, setCanDeleteEnsembler] = useState(true)
+
+  const [ensemblerUsedByActiveRouterVersion, setEnsemblerUsedByActiveRouterVersion] = useState(false)
+  const [ensemblerUsedByActiveEnsemblingJob, setEnsemblerUsedByActiveEnsemblingJob] = useState(false)
   const [ensemblerUsedByCurrentRouterVersion, setEnsemblerUsedByCurrentRouterVersion] = useState(false)
+
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
+
+  useEffect(() => {
+    // if ensembler is used by one of the component, immediately set can delete ensembler to false
+    setCanDeleteEnsembler(!(ensemblerUsedByActiveEnsemblingJob || ensemblerUsedByActiveRouterVersion || ensemblerUsedByCurrentRouterVersion))
+  }, [ensemblerUsedByActiveEnsemblingJob, ensemblerUsedByActiveRouterVersion, ensemblerUsedByCurrentRouterVersion])
 
   const [{ isLoading, isLoaded, error }, submitForm] =  useTuringApi(
     `/projects/${ensembler.project_id}/ensemblers/${ensembler.id}`,
@@ -42,15 +51,6 @@ export const DeleteEnsemblerModal = ({
     }
   }, [isLoaded, error, ensembler, onSuccess, closeModal]);
 
-  const updateStatus = (newStatus) => {
-    if ((canDeleteEnsembler && newStatus) || (!canDeleteEnsembler && !newStatus)) {
-      // If the current status and the new status are the same, do nothing.
-      return;
-    } else {
-      setCanDeleteEnsembler(false);
-    }
-  };
-
   const modalClosed = () => {
     setCanDeleteEnsembler(true)
     setEnsemblerUsedByCurrentRouterVersion(false)
@@ -65,7 +65,7 @@ export const DeleteEnsemblerModal = ({
       isLoading={isLoading}
       content={
         <div>
-          {canDeleteEnsembler && !ensemblerUsedByCurrentRouterVersion ? (
+          {canDeleteEnsembler ? (
             <div>
               <p>
               You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
@@ -89,17 +89,20 @@ export const DeleteEnsemblerModal = ({
               <br/> <br/> If you still wish to delete this ensembler, please <b>Undeploy</b> router versions and <b>Terminate</b> ensembling jobs that use this ensembler.
             </div> 
           )}
-          <ListEnsemblingJobsForEnsemblerTable 
-            projectID={ensembler.project_id}
-            ensemblerID={ensembler.id}
-            setCanDeleteEnsembler={updateStatus}
-            canDeleteEnsembler={canDeleteEnsembler}
-          />
+          {/* Only show The Ensembling Table if ensembler is not used by current router version */}
+          {!ensemblerUsedByCurrentRouterVersion && (
+            <ListEnsemblingJobsForEnsemblerTable 
+              projectID={ensembler.project_id}
+              ensemblerID={ensembler.id}
+              canDeleteEnsembler={canDeleteEnsembler}
+              setEnsemblerUsedByActiveEnsemblingJob={setEnsemblerUsedByActiveEnsemblingJob}
+            />   
+          )}
           <ListRouterVersionsForEnsemblerTable 
             projectID={ensembler.project_id}
             ensemblerID={ensembler.id}
-            setCanDeleteEnsembler={updateStatus}
             canDeleteEnsembler={canDeleteEnsembler}
+            setEnsemblerUsedByActiveRouterVersion={setEnsemblerUsedByActiveRouterVersion}
             setEnsemblerUsedByCurrentRouterVersion={setEnsemblerUsedByCurrentRouterVersion}
             ensemblerUsedByCurrentRouterVersion={ensemblerUsedByCurrentRouterVersion}
           />

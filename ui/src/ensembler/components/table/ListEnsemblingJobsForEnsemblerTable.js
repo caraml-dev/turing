@@ -13,8 +13,8 @@ import { useTuringApi } from "../../../hooks/useTuringApi";
 export const ListEnsemblingJobsForEnsemblerTable = ({
   projectID,
   ensemblerID,
-  setCanDeleteEnsembler,
-  canDeleteEnsembler
+  canDeleteEnsembler,
+  setEnsemblerUsedByActiveEnsemblingJob
 }) => {
   const [results, setResults] = useState({ inactiveItems: [], activeItems:[], totalInactiveCount: 0, totalActiveCount:0 });
 
@@ -31,8 +31,8 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
 
   useEffect(() => {
     if (isLoaded && !error) {
-      let inactiveItems = data.results.filter((item) => item.status === 'failed_submission' || item.status==='failed_building' || item.status==='failed' || item.status==='completed');
-      let activeItems = data.results.filter((item) => item.status !== 'failed_submission' && item.status!=='failed_building' && item.status!=='failed' && item.status!=='completed');
+      let inactiveItems = data.results.filter((item) => ["failed", "failed_submission", "failed_building", "completed"].includes(item.status));
+      let activeItems = data.results.filter((item) => !["failed", "failed_submission", "failed_building", "completed"].includes(item.status));
       setResults({
         inactiveItems: inactiveItems ,
         activeItems: activeItems ,
@@ -44,11 +44,11 @@ export const ListEnsemblingJobsForEnsemblerTable = ({
 
   useEffect(() => {
     if (results.activeItems.length > 0){
-      setCanDeleteEnsembler(false)
+      setEnsemblerUsedByActiveEnsemblingJob(true)
     } else {
-      setCanDeleteEnsembler(true)
+      setEnsemblerUsedByActiveEnsemblingJob(false)
     }
-  }, [results, setCanDeleteEnsembler])
+  }, [results, setEnsemblerUsedByActiveEnsemblingJob])
 
   const columns = [
     {

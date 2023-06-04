@@ -52,7 +52,7 @@ export const ListEnsemblersTable = ({
 
   const onTableChange = ({ page = {} }) => onPaginationChange(page);
 
-  const handleDeleteEnsembler = (ensembler) => {
+  const onDeleteEnsembler = (ensembler) => {
     deleteEnsemblerRef.current(ensembler)
   }
 
@@ -131,7 +131,7 @@ export const ListEnsemblersTable = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false} >
               <EuiButtonEmpty 
-                  onClick={() => handleDeleteEnsembler(ensembler)}
+                  onClick={() => onDeleteEnsembler(ensembler)}
                   color={"danger"}
                   iconType="trash"
                   iconSide="left"

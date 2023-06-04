@@ -1,6 +1,6 @@
 # Deleting an Ensembler without any related entity
 
-An Ensembler only could be deleted if there are no active ensembling jobs / router version that use the ensembler. This page show the deletion of ensembler **without any related entity** (router version and ensembling job)
+An Ensembler only could be deleted if there are no active ensembling jobs or router versions that use the ensembler. This page shows the deletion of ensembler **without any related entity** (ensembling job and router version)
 
 Navigate to Ensemblers page
 

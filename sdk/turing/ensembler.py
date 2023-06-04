@@ -290,7 +290,9 @@ class PyFuncEnsembler(Ensembler):
         )
         if len(relatedRouterVer) > 0:
             # if there is any active router version, the deletion process are restricted
-            raise ValueError("There is pending router version using this ensembler")
+            raise ValueError(
+                "There is pending router version using this ensembler. Please wait for the router version to be deployed or undeploy it, before updating the ensembler."
+            )
 
         # check any active ensembling jobs
         relatedJob = EnsemblingJob.list(
@@ -303,7 +305,9 @@ class PyFuncEnsembler(Ensembler):
         )
         if len(relatedJob) > 0:
             # if there is any active ensembling jobs, the deletion process are restricted
-            raise ValueError("There is pending ensembling job using this ensembler")
+            raise ValueError(
+                "There is pending ensembling job using this ensembler. Please wait for the ensembling job to be completed or terminate it, before updating the ensembler."
+            )
 
         if name:
             self._name = name
