@@ -628,6 +628,57 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			expected: BadRequest("failed to delete the ensembler", "there are active ensembling job using this ensembler"),
 		},
+		"failure | there is current router version": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("ListRouterVersionsWithFilter", service.RouterVersionListOptions{
+					ProjectID:   models.NewID(2),
+					EnsemblerID: models.NewID(2),
+					Statuses:    routerVersionStatusActive,
+				}).
+					Return([]*models.RouterVersion{}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", service.RouterVersionListOptions{
+					ProjectID:   models.NewID(2),
+					EnsemblerID: models.NewID(2),
+					IsCurrent:   true,
+				}).
+					Return([]*models.RouterVersion{routerVersion}, nil)
+
+				return routerVersionSvc
+			},
+			ensemblingJobSvc: func() service.EnsemblingJobService {
+				ensemblingJobSvc := &mocks.EnsemblingJobService{}
+				ensemblingJobSvc.On("List", mock.Anything).Return(
+					&service.PaginatedResults{
+						Results: []interface{}{},
+						Paging: service.Paging{
+							Total: 0,
+							Page:  1,
+							Pages: 1,
+						},
+					},
+					nil)
+				ensemblingJobSvc.On("Delete", mock.Anything).Return(nil)
+				return ensemblingJobSvc
+			},
+			expected: BadRequest("failed to delete the ensembler", "there are router version that is currently being used by a router using this ensembler"),
+		},
 		"failure | failed to delete router version": {
 			vars: RequestVars{
 				"project_id":   {"2"},
@@ -659,6 +710,12 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 					Statuses:    routerVersionStatusInactive,
 				}).
 					Return([]*models.RouterVersion{routerVersion}, nil)
+				routerVersionSvc.On("ListRouterVersionsWithFilter", service.RouterVersionListOptions{
+					ProjectID:   models.NewID(2),
+					EnsemblerID: models.NewID(2),
+					IsCurrent:   true,
+				}).
+					Return([]*models.RouterVersion{}, nil)
 				routerVersionSvc.On("Delete", mock.Anything).Return(errors.New("failed to delete router version"))
 				return routerVersionSvc
 			},
