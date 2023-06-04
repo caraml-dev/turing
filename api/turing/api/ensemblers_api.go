@@ -247,7 +247,9 @@ func (c EnsemblersController) checkCurrentRouterVersion(options EnsemblersPathOp
 		return http.StatusInternalServerError, err
 	}
 	if len(activeRouter) >= 1 {
-		return http.StatusBadRequest, fmt.Errorf("there are router version that is currently being used by a router using this ensembler")
+		return http.StatusBadRequest, fmt.Errorf("" +
+			"there are router version that is currently being used by a router using this ensembler",
+		)
 	}
 	return http.StatusOK, nil
 }
