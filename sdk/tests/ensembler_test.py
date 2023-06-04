@@ -254,7 +254,7 @@ def test_update_ensembler_existing_router_version(
                 )
             ],
         )
-    expected_error_message = "There is pending router version using this ensembler"
+    expected_error_message = "There is pending router version using this ensembler. Please wait for the router version to be deployed or undeploy it, before updating the ensembler."
     actual_error_message = str(error.value)
     assert expected_error_message == actual_error_message
 
@@ -321,7 +321,7 @@ def test_update_ensembler_existing_job(
                 )
             ],
         )
-    expected_error_message = "There is pending ensembling job using this ensembler"
+    expected_error_message = "There is pending ensembling job using this ensembler. Please wait for the ensembling job to be completed or terminate it, before updating the ensembler."
     actual_error_message = str(error.value)
     assert expected_error_message == actual_error_message
 
