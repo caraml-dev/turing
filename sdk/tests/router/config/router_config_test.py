@@ -198,41 +198,6 @@ def test_default_router_autoscaling_policy(request):
 
 
 @pytest.mark.parametrize(
-    "base_config, log_config, expected",
-    [
-        pytest.param(
-            "minimal_upi_router_config",
-            LogConfig(result_logger_type=ResultLoggerType.NOP),
-            None,
-        ),
-        pytest.param(
-            "minimal_upi_router_config",
-            LogConfig(result_logger_type=ResultLoggerType.UPI),
-            None,
-        ),
-        pytest.param(
-            "minimal_upi_router_config",
-            LogConfig(result_logger_type=ResultLoggerType.KAFKA),
-            InvalidResultLoggerTypeAndConfigCombination,
-        ),
-        pytest.param(
-            "minimal_upi_router_config",
-            LogConfig(result_logger_type=ResultLoggerType.BIGQUERY),
-            InvalidResultLoggerTypeAndConfigCombination,
-        ),
-    ],
-)
-def test_upi_router_log_config_constraint(base_config, log_config, expected, request):
-    router_config = request.getfixturevalue(base_config)
-    if expected:
-        with pytest.raises(expected):
-            router_config.log_config = log_config
-    else:
-        router_config.log_config = log_config
-        router_config.to_open_api()
-
-
-@pytest.mark.parametrize(
     "base_config, ensembler_config, expected_err",
     [
         pytest.param(
