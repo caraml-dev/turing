@@ -277,9 +277,6 @@ class RouterConfig:
             self._log_config = LogConfig(**log_config)
         else:
             self._log_config = log_config
-        # Verify that only nop or UPI logger is configured for UPI router
-        if self._protocol == Protocol.UPI:
-            self._verify_upi_router_logger()
 
     @property
     def enricher(self) -> Enricher:
@@ -420,16 +417,6 @@ class RouterConfig:
         ):
             raise turing.router.config.router_ensembler_config.InvalidEnsemblerTypeException(
                 f"UPI router only supports no ensembler or standard ensembler."
-            )
-
-    def _verify_upi_router_logger(self):
-        # only nop or upi logger type is allowed
-        if not (
-            self.log_config.result_logger_type == ResultLoggerType.NOP
-            or self.log_config.result_logger_type == ResultLoggerType.UPI
-        ):
-            raise turing.router.config.log_config.InvalidResultLoggerTypeAndConfigCombination(
-                f"UPI router only supports no logging or UPI logger"
             )
 
     def to_dict(self):
