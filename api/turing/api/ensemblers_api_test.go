@@ -495,6 +495,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			models.JobPending,
 			models.JobBuildingImage,
 			models.JobRunning,
+			models.JobTerminating,
 		},
 	}
 

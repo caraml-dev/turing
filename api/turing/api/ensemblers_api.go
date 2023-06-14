@@ -226,11 +226,11 @@ func (c EnsemblersController) checkActiveRouterVersion(options EnsemblersPathOpt
 		EnsemblerID: options.EnsemblerID,
 		Statuses:    routerVersionStatusActive,
 	}
-	activeRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
+	activeRouterVersions, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	if len(activeRouter) >= 1 {
+	if len(activeRouterVersions) >= 1 {
 		return http.StatusBadRequest, fmt.Errorf("there are active router version using this ensembler")
 	}
 	return http.StatusOK, nil
@@ -242,11 +242,11 @@ func (c EnsemblersController) checkCurrentRouterVersion(options EnsemblersPathOp
 		EnsemblerID: options.EnsemblerID,
 		IsCurrent:   true,
 	}
-	activeRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
+	activeCurrentRouterVersions, err := c.RouterVersionsService.ListRouterVersionsWithFilter(activeOption)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	if len(activeRouter) >= 1 {
+	if len(activeCurrentRouterVersions) >= 1 {
 		return http.StatusBadRequest, fmt.Errorf("" +
 			"there are router version that is currently being used by a router using this ensembler",
 		)
@@ -261,6 +261,7 @@ func (c EnsemblersController) checkActiveEnsemblingJob(options EnsemblersPathOpt
 			models.JobPending,
 			models.JobBuildingImage,
 			models.JobRunning,
+			models.JobTerminating,
 		},
 	}
 	activeEnsemblingJobs, err := c.EnsemblingJobService.List(ensemblingJobActiveOption)
@@ -268,7 +269,7 @@ func (c EnsemblersController) checkActiveEnsemblingJob(options EnsemblersPathOpt
 		return http.StatusInternalServerError, err
 	}
 	if activeEnsemblingJobs.Paging.Total >= 1 {
-		return http.StatusBadRequest, fmt.Errorf("there are active ensembling job using this ensembler")
+		return http.StatusBadRequest, fmt.Errorf("there are active ensembling job using this ensembler or there is ensembling job in terminating process, please wait until the job is successfully terminated")
 	}
 	return http.StatusOK, nil
 }
@@ -282,12 +283,12 @@ func (c EnsemblersController) deleteInactiveRouterVersion(options EnsemblersPath
 		EnsemblerID: options.EnsemblerID,
 		Statuses:    routerVersionStatusInactive,
 	}
-	inactiveRouter, err := c.RouterVersionsService.ListRouterVersionsWithFilter(inactiveOption)
+	inactiveRouterVersions, err := c.RouterVersionsService.ListRouterVersionsWithFilter(inactiveOption)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 
-	for _, routerVersion := range inactiveRouter {
+	for _, routerVersion := range inactiveRouterVersions {
 		err = c.RouterVersionsService.Delete(routerVersion)
 		if err != nil {
 			return http.StatusInternalServerError, err

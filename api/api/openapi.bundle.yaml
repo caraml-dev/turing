@@ -982,6 +982,10 @@ paths:
                   $ref: '#/components/schemas/RouterVersion'
                 type: array
           description: An Array of JSON object representing router version instance
+        "400":
+          description: Failed to parse query
+        "500":
+          description: Failed to get router version data
       summary: Returns Router Version with related parameters
       tags:
       - Router

@@ -200,11 +200,6 @@ def test_update_ensembler_existing_router_version(
         paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
     )
 
-    emptyJob = turing.generated.models.EnsemblingJobPaginatedResults(
-        results=[],
-        paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
-    )
-
     responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/ensemblers",
@@ -216,14 +211,6 @@ def test_update_ensembler_existing_router_version(
     actual, *rest = turing.PyFuncEnsembler.list()
 
     responses.add(
-        method="PUT",
-        url=f"/v1/projects/{active_project.id}/ensemblers/{actual.id}",
-        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
-        status=200,
-        content_type="application/json",
-    )
-
-    responses.add(
         method="GET",
         url=f"/v1/projects/{active_project.id}/router-versions",
         body=json.dumps([generic_router_version], default=tests.json_serializer),
@@ -231,13 +218,6 @@ def test_update_ensembler_existing_router_version(
         content_type="application/json",
     )
 
-    responses.add(
-        method="GET",
-        url=f"/v1/projects/{active_project.id}/jobs",
-        body=json.dumps(emptyJob, default=tests.json_serializer),
-        status=200,
-        content_type="application/json",
-    )
     with pytest.raises(ValueError) as error:
         actual.update(
             name=pyfunc_ensembler.name,
@@ -281,14 +261,6 @@ def test_update_ensembler_existing_job(
     )
 
     actual, *rest = turing.PyFuncEnsembler.list()
-
-    responses.add(
-        method="PUT",
-        url=f"/v1/projects/{active_project.id}/ensemblers/{actual.id}",
-        body=json.dumps(pyfunc_ensembler, default=tests.json_serializer),
-        status=200,
-        content_type="application/json",
-    )
 
     responses.add(
         method="GET",
