@@ -353,6 +353,13 @@ type UPIConfig struct {
 type AuthorizationConfig struct {
 	Enabled bool
 	URL     string
+	Caching *InMemoryCacheConfig `validate:"required_if=Enabled True"`
+}
+
+type InMemoryCacheConfig struct {
+	Enabled                     bool
+	KeyExpirySeconds            int `validate:"required_if=Enabled True"`
+	CacheCleanUpIntervalSeconds int `validate:"required_if=Enabled True"`
 }
 
 // ClusterConfig contains the cluster controller information.
@@ -556,6 +563,8 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("AuthConfig::Enabled", "false")
 	v.SetDefault("AuthConfig::URL", "")
+	v.SetDefault("AuthConfig::Caching::KeyExpirySeconds", "600")
+	v.SetDefault("AuthConfig::Caching::CacheCleanUpIntervalSeconds", "900")
 
 	v.SetDefault("DbConfig::Host", "localhost")
 	v.SetDefault("DbConfig::Port", "5432")
