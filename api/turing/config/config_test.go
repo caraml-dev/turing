@@ -105,8 +105,11 @@ func TestAuthConfigValidation(t *testing.T) {
 			cfg: config.AuthorizationConfig{
 				Enabled: true,
 			},
-			success:     false,
-			expectedErr: "Key: 'AuthorizationConfig.Caching' Error:Field validation for 'Caching' failed on the 'required_if' tag",
+			success: false,
+			expectedErr: strings.Join([]string{
+				"Key: 'AuthorizationConfig.Caching' ",
+				"Error:Field validation for 'Caching' failed on the 'required_if' tag",
+			}, ""),
 		},
 		"failure caching enabled no duration config": {
 			cfg: config.AuthorizationConfig{
@@ -118,8 +121,10 @@ func TestAuthConfigValidation(t *testing.T) {
 			},
 			success: false,
 			expectedErr: strings.Join([]string{
-				"Key: 'AuthorizationConfig.Caching.KeyExpirySeconds' Error:Field validation for 'KeyExpirySeconds' failed on the 'required_if' tag\n",
-				"Key: 'AuthorizationConfig.Caching.CacheCleanUpIntervalSeconds' Error:Field validation for 'CacheCleanUpIntervalSeconds' failed on the 'required_if' tag",
+				"Key: 'AuthorizationConfig.Caching.KeyExpirySeconds' ",
+				"Error:Field validation for 'KeyExpirySeconds' failed on the 'required_if' tag\n",
+				"Key: 'AuthorizationConfig.Caching.CacheCleanUpIntervalSeconds' ",
+				"Error:Field validation for 'CacheCleanUpIntervalSeconds' failed on the 'required_if' tag",
 			}, ""),
 		},
 	}
