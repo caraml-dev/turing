@@ -254,8 +254,8 @@ github.com/cactus/go-statsd-client/statsd v0.0.0-20200423205355-cb0885a1018c/go.
 github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429 h1:utxGPa/erqKIUhgBFMgnbORjKUIqVKLs7VXa0ZB0jNY=
 github.com/caraml-dev/merlin/api v0.0.0-20230403075012-795947162429/go.mod h1:BRGKVbv3zEu9rE6pE2RNlj/IZfqy/3HEqBQGLK5rHMc=
 github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20230403075012-795947162429/go.mod h1:jYSIcxx7FDccKSva3mo12YhQ0rYuP4MOEbgSveY82HE=
-github.com/caraml-dev/mlp v1.7.7-0.20230519042541-3415407aa27b h1:gnHGvCi48tbpWyvIIN9T51OjjBPN87CSjlNezq74H9s=
-github.com/caraml-dev/mlp v1.7.7-0.20230519042541-3415407aa27b/go.mod h1:KwanmpEzX11cIczhSs7e55M0EvgTuiZWC+uHQYppG5U=
+github.com/caraml-dev/mlp v1.8.1-0.20230613010931-dd63f4364a18 h1:/Rjw7+qVMo+rBaBqzJZrtQ1lKXb3KXeTXP1lJOTT7xI=
+github.com/caraml-dev/mlp v1.8.1-0.20230613010931-dd63f4364a18/go.mod h1:dNqC/QnXYpkxWDaV6XU8y1UJTjmKJC3Z6CpW1n9Hjd0=
 github.com/caraml-dev/universal-prediction-interface v0.3.4 h1:cPytzpjXE/8RhSw3iS0JFZzNdM3tJ/l8UcHTPrxQWEo=
 github.com/caraml-dev/universal-prediction-interface v0.3.4/go.mod h1:e0qmFOXQxx8HFg5ObYyQO3WVnrqsr5v5JApFmeF7eJo=
 github.com/casbin/casbin v1.7.0/go.mod h1:c67qKN6Oum3UF5Q1+BByfFxkwKvhwW57ITjqwtzR1KE=

@@ -3,6 +3,7 @@ package config_test
 import (
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,8 +69,9 @@ func TestGetters(t *testing.T) {
 
 func TestAuthConfigValidation(t *testing.T) {
 	tests := map[string]struct {
-		cfg     config.AuthorizationConfig
-		success bool
+		cfg         config.AuthorizationConfig
+		success     bool
+		expectedErr string
 	}{
 		"success auth disabled": {
 			cfg: config.AuthorizationConfig{
@@ -81,6 +83,21 @@ func TestAuthConfigValidation(t *testing.T) {
 			cfg: config.AuthorizationConfig{
 				Enabled: true,
 				URL:     "url",
+				Caching: &config.InMemoryCacheConfig{
+					Enabled: false,
+				},
+			},
+			success: true,
+		},
+		"success caching enabled": {
+			cfg: config.AuthorizationConfig{
+				Enabled: true,
+				URL:     "url",
+				Caching: &config.InMemoryCacheConfig{
+					Enabled:                     true,
+					KeyExpirySeconds:            100,
+					CacheCleanUpIntervalSeconds: 200,
+				},
 			},
 			success: true,
 		},
@@ -89,6 +106,26 @@ func TestAuthConfigValidation(t *testing.T) {
 				Enabled: true,
 			},
 			success: false,
+			expectedErr: strings.Join([]string{
+				"Key: 'AuthorizationConfig.Caching' ",
+				"Error:Field validation for 'Caching' failed on the 'required_if' tag",
+			}, ""),
+		},
+		"failure caching enabled no duration config": {
+			cfg: config.AuthorizationConfig{
+				Enabled: true,
+				URL:     "url",
+				Caching: &config.InMemoryCacheConfig{
+					Enabled: true,
+				},
+			},
+			success: false,
+			expectedErr: strings.Join([]string{
+				"Key: 'AuthorizationConfig.Caching.KeyExpirySeconds' ",
+				"Error:Field validation for 'KeyExpirySeconds' failed on the 'required_if' tag\n",
+				"Key: 'AuthorizationConfig.Caching.CacheCleanUpIntervalSeconds' ",
+				"Error:Field validation for 'CacheCleanUpIntervalSeconds' failed on the 'required_if' tag",
+			}, ""),
 		},
 	}
 
@@ -133,7 +170,12 @@ func TestLoad(t *testing.T) {
 			want: &config.Config{
 				Port:           8080,
 				AllowedOrigins: []string{"*"},
-				AuthConfig:     &config.AuthorizationConfig{},
+				AuthConfig: &config.AuthorizationConfig{
+					Caching: &config.InMemoryCacheConfig{
+						KeyExpirySeconds:            600,
+						CacheCleanUpIntervalSeconds: 900,
+					},
+				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "localhost",
 					Port:             5432,
@@ -201,6 +243,10 @@ func TestLoad(t *testing.T) {
 				AuthConfig: &config.AuthorizationConfig{
 					Enabled: true,
 					URL:     "http://example.com",
+					Caching: &config.InMemoryCacheConfig{
+						KeyExpirySeconds:            600,
+						CacheCleanUpIntervalSeconds: 900,
+					},
 				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
@@ -338,6 +384,10 @@ func TestLoad(t *testing.T) {
 				AuthConfig: &config.AuthorizationConfig{
 					Enabled: false,
 					URL:     "http://example.com",
+					Caching: &config.InMemoryCacheConfig{
+						KeyExpirySeconds:            600,
+						CacheCleanUpIntervalSeconds: 900,
+					},
 				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
@@ -489,6 +539,7 @@ func TestLoad(t *testing.T) {
 				"ALLOWEDORIGINS":                                 "http://baz.com,http://qux.com",
 				"AUTHCONFIG_ENABLED":                             "true",
 				"AUTHCONFIG_URL":                                 "http://env.example.com",
+				"AUTHCONFIG_CACHING_ENABLED":                     "true",
 				"DBCONFIG_USER":                                  "dbuser-env",
 				"DBCONFIG_PASSWORD":                              "dbpassword-env",
 				"DEPLOYCONFIG_TIMEOUT":                           "10m",
@@ -510,6 +561,11 @@ func TestLoad(t *testing.T) {
 				AuthConfig: &config.AuthorizationConfig{
 					Enabled: true,
 					URL:     "http://env.example.com",
+					Caching: &config.InMemoryCacheConfig{
+						Enabled:                     true,
+						KeyExpirySeconds:            600,
+						CacheCleanUpIntervalSeconds: 900,
+					},
 				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",

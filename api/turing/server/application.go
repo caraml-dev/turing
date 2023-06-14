@@ -81,7 +81,15 @@ func Run() {
 	apiPathPrefix := "/v1"
 	if cfg.AuthConfig.Enabled {
 		// Use product mlp as the policies are shared across the mlp products.
-		authEnforcer, err := enforcer.NewEnforcerBuilder().Product("mlp").URL(cfg.AuthConfig.URL).Build()
+		enforcerCfg := enforcer.NewEnforcerBuilder().URL(cfg.AuthConfig.URL).Product("mlp")
+		if cfg.AuthConfig.Caching.Enabled {
+			enforcerCfg = enforcerCfg.WithCaching(
+				cfg.AuthConfig.Caching.KeyExpirySeconds,
+				cfg.AuthConfig.Caching.CacheCleanUpIntervalSeconds,
+			)
+		}
+		authEnforcer, err := enforcerCfg.Build()
+
 		if err != nil {
 			log.Panicf("Failed initializing authorization enforcer %v", err)
 		}

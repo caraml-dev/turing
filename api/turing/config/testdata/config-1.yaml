@@ -5,6 +5,8 @@ AllowedOrigins:
 AuthConfig:
   Enabled: true
   URL: http://example.com
+  Caching:
+    Enabled: false
 DbConfig:
   Host: "127.0.0.1"
   User: dbuser

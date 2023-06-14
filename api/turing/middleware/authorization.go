@@ -96,7 +96,19 @@ func (a *Authorizer) FilterAuthorizedProjects(
 }
 
 func getResourceFromPath(path string, prefix string) string {
-	return strings.Replace(strings.TrimPrefix(strings.TrimPrefix(path, prefix), "/"), "/", ":", -1)
+	// Current paths registered in Turing are of the following formats:
+	// - /experiment-engines/**
+	// - /projects/{project_id}/**
+	//
+	// Given this, we only care about the permissions up-to 2 levels deep. The rationale is that
+	// if a user has READ/WRITE permissions on /projects/{project_id}, they would also have the same
+	// permissions on all its sub-resources. Thus, trimming the resource identifier to aid quicker
+	// authz matching and to efficiently make use of the in-memory authz cache, if enabled.
+	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
+	if len(parts) > 1 {
+		parts = parts[:2]
+	}
+	return strings.Join(parts, ":")
 }
 
 func getActionFromMethod(method string) string {

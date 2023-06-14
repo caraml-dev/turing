@@ -13,6 +13,9 @@ AuthConfig:
   Enabled: false
   # ORY Keto auth server URL: https://github.com/ory/keto
   URL: http://example.com/auth
+  # Whether or not local caching of authz responses should be enabled
+  Caching:
+    Enabled: false
 
 # Batch ensembler job configurations
 BatchEnsemblingConfig:
