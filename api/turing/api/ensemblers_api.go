@@ -269,7 +269,8 @@ func (c EnsemblersController) checkActiveEnsemblingJob(options EnsemblersPathOpt
 		return http.StatusInternalServerError, err
 	}
 	if activeEnsemblingJobs.Paging.Total >= 1 {
-		return http.StatusBadRequest, fmt.Errorf("there are active ensembling job using this ensembler or there is ensembling job in terminating process, please wait until the job is successfully terminated")
+		return http.StatusBadRequest, fmt.Errorf("there are active ensembling job using this ensembler or " +
+			"there is ensembling job in terminating process, please wait until the job is successfully terminated")
 	}
 	return http.StatusOK, nil
 }
