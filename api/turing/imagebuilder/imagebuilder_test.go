@@ -229,7 +229,21 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 					nil,
 				).Once()
 
-				// Second time it's called
+				// Second time GetJob is called
+				ctlr.On(
+					"GetJob",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(
+					nil,
+					k8serrors.NewNotFound(
+						schema.GroupResource{},
+						fmt.Sprintf("batch-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
+					),
+				).Once()
+
+				// Third time it's called
 				ctlr.On(
 					"GetJob",
 					mock.Anything,
@@ -492,7 +506,21 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 					nil,
 				).Once()
 
-				// Second time it's called
+				// Second time GetJob is called
+				ctlr.On(
+					"GetJob",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(
+					nil,
+					k8serrors.NewNotFound(
+						schema.GroupResource{},
+						fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
+					),
+				).Once()
+
+				// Third time it's called
 				ctlr.On(
 					"GetJob",
 					mock.Anything,
