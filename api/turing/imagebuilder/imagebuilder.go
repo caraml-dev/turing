@@ -228,7 +228,7 @@ func (ib *imageBuilder) waitForJobToBeDeleted(job *apibatchv1.Job) error {
 		case <-ticker.C:
 			_, err := ib.clusterController.GetJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 			if err != nil {
-				if !kerrors.IsNotFound(err) {
+				if kerrors.IsNotFound(err) {
 					return nil
 				}
 				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
