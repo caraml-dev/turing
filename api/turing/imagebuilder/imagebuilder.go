@@ -43,7 +43,12 @@ const (
 type JobStatus int
 
 const (
-	tickDurationInSeconds = 5
+	// jobDeletionTimeoutInSeconds is the maximum time to wait for a job to be deleted from a cluster
+	jobDeletionTimeoutInSeconds = 10
+	// jobDeletionTickDurationInMilliseconds is the interval at which the API server checks if a job has been deleted
+	jobDeletionTickDurationInMilliseconds = 100
+	// jobCompletionTickDurationInSeconds is the interval at which the API server checks if a job has completed
+	jobCompletionTickDurationInSeconds = 5
 	// JobStatusActive is the status of the image building job is active
 	JobStatusActive = JobStatus(iota)
 	// JobStatusFailed is when the image building job has failed
@@ -164,6 +169,11 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 				return "", ErrDeleteFailedJob
 			}
 
+			err = ib.waitForJobToBeDeleted(job)
+			if err != nil {
+				return "", ErrDeleteFailedJob
+			}
+
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
 				request.EnsemblerFolder, request.BaseImageRefTag)
 			if err != nil {
@@ -183,7 +193,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 
 func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 	timeout := time.After(ib.imageBuildingConfig.BuildTimeoutDuration)
-	ticker := time.NewTicker(time.Second * tickDurationInSeconds)
+	ticker := time.NewTicker(time.Second * jobCompletionTickDurationInSeconds)
 
 	for {
 		select {
@@ -202,6 +212,27 @@ func (ib *imageBuilder) waitForJobToFinish(job *apibatchv1.Job) error {
 			} else if j.Status.Failed == 1 {
 				log.Errorf("failed building OCI image %s: %v", job.Name, j.Status)
 				return ErrUnableToBuildImage
+			}
+		}
+	}
+}
+
+func (ib *imageBuilder) waitForJobToBeDeleted(job *apibatchv1.Job) error {
+	timeout := time.After(time.Second * jobDeletionTimeoutInSeconds)
+	ticker := time.NewTicker(time.Millisecond * jobDeletionTickDurationInMilliseconds)
+
+	for {
+		select {
+		case <-timeout:
+			return ErrDeleteFailedJob
+		case <-ticker.C:
+			_, err := ib.clusterController.GetJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
+			if err != nil {
+				if !kerrors.IsNotFound(err) {
+					return nil
+				}
+				log.Errorf("unable to get job status for job %s: %v", job.Name, err)
+				return ErrDeleteFailedJob
 			}
 		}
 	}
