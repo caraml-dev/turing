@@ -44,7 +44,7 @@ type JobStatus int
 
 const (
 	// jobDeletionTimeoutInSeconds is the maximum time to wait for a job to be deleted from a cluster
-	jobDeletionTimeoutInSeconds = 10
+	jobDeletionTimeoutInSeconds = 30
 	// jobDeletionTickDurationInMilliseconds is the interval at which the API server checks if a job has been deleted
 	jobDeletionTickDurationInMilliseconds = 100
 	// jobCompletionTickDurationInSeconds is the interval at which the API server checks if a job has completed
