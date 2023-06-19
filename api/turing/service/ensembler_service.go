@@ -16,6 +16,7 @@ type EnsemblersService interface {
 	List(options EnsemblersListOptions) (*PaginatedResults, error)
 	// Save the given router to the db. Updates the existing record if already exists
 	Save(ensembler models.EnsemblerLike) (models.EnsemblerLike, error)
+	Delete(ensembler models.EnsemblerLike) error
 }
 
 type EnsemblersFindByIDOptions struct {
@@ -101,4 +102,8 @@ func (service *ensemblersService) Save(ensembler models.EnsemblerLike) (models.E
 		return nil, err
 	}
 	return service.FindByID(ensembler.GetID(), EnsemblersFindByIDOptions{})
+}
+
+func (service *ensemblersService) Delete(ensembler models.EnsemblerLike) error {
+	return service.db.Delete(ensembler).Error
 }

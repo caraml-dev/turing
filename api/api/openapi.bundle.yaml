@@ -94,6 +94,37 @@ paths:
       tags:
       - Ensembler
   /projects/{project_id}/ensemblers/{ensembler_id}:
+    delete:
+      operationId: DeleteEnsembler
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: path
+        name: ensembler_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnsemblerId'
+          description: A JSON object representing an id of deleted ensembler
+        "400":
+          description: Ensembler is used by other entity
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Failed to delete ensembler
+      summary: Delete Ensembler by its ID
+      tags:
+      - Ensembler
     get:
       operationId: GetEnsemblerDetails
       parameters:
@@ -916,6 +947,48 @@ paths:
       summary: Get deployment events associated with this router
       tags:
       - Router
+  /projects/{project_id}/router-versions:
+    get:
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: query
+        name: ensembler_id
+        schema:
+          format: int32
+          type: integer
+      - in: query
+        name: is_current
+        schema:
+          type: boolean
+      - explode: true
+        in: query
+        name: status
+        schema:
+          items:
+            $ref: '#/components/schemas/RouterVersionStatus'
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RouterVersion'
+                type: array
+          description: An Array of JSON object representing router version instance
+        "400":
+          description: Failed to parse query
+        "500":
+          description: Failed to get router version data
+      summary: Returns Router Version with related parameters
+      tags:
+      - Router
   /projects/{project_id}/routers/{router_id}/logs:
     get:
       parameters:
@@ -1355,6 +1428,19 @@ components:
       allOf:
       - $ref: '#/components/schemas/GenericEnsembler'
       - $ref: '#/components/schemas/PyFuncEnsembler_allOf'
+    EnsemblerId:
+      $ref: '#/components/schemas/IdObject'
+    IdObject:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int32
+          type: integer
+      type: object
+    Id:
+      format: int32
+      type: integer
     EnsemblingJobPaginatedResults:
       allOf:
       - $ref: '#/components/schemas/EnsemblersPaginatedResults_allOf'
@@ -1738,17 +1824,6 @@ components:
       type: string
     JobId:
       $ref: '#/components/schemas/IdObject'
-    IdObject:
-      example:
-        id: 0
-      properties:
-        id:
-          format: int32
-          type: integer
-      type: object
-    Id:
-      format: int32
-      type: integer
     Alert:
       example:
         duration: duration

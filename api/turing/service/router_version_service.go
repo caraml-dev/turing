@@ -15,6 +15,13 @@ const (
 	grafanaAllVariable = "$__all"
 )
 
+type RouterVersionListOptions struct {
+	ProjectID   *models.ID                   `schema:"project_id" validate:"required"`
+	EnsemblerID *models.ID                   `schema:"ensembler_id"`
+	Statuses    []models.RouterVersionStatus `schema:"status"`
+	IsCurrent   bool                         `schema:"is_current"`
+}
+
 // RouterVersionsService is the data access object for RouterVersions from the db.
 type RouterVersionsService interface {
 	// ListRouterVersions List all RouterVersions associated with the given routerID
@@ -31,6 +38,9 @@ type RouterVersionsService interface {
 	FindLatestVersionByRouterID(routerID models.ID) (*models.RouterVersion, error)
 	// Delete Deletes the given RouterVersion from the db. This method deletes all child objects (enricher, ensembler).
 	Delete(routerVersion *models.RouterVersion) error
+	// ListRouterVersionsWithFilter Lists router version with parameter option
+	// the filter contain status, ensembler_id and current router version
+	ListRouterVersionsWithFilter(options RouterVersionListOptions) ([]*models.RouterVersion, error)
 }
 
 func NewRouterVersionsService(
@@ -259,4 +269,32 @@ func (service *routerVersionsService) Delete(routerVersion *models.RouterVersion
 		tx.Delete(routerVersion.Ensembler)
 	}
 	return tx.Commit().Error
+}
+
+func (service *routerVersionsService) ListRouterVersionsWithFilter(
+	option RouterVersionListOptions,
+) ([]*models.RouterVersion, error) {
+	var routerVersions []*models.RouterVersion
+	query := service.query()
+
+	if option.EnsemblerID != nil {
+		query = query.Where("ensembler_id IN (?)",
+			service.db.Table("ensembler_configs").Select("id").
+				Where("CAST(pyfunc_config->>'ensembler_id' AS INTEGER) = ?", option.EnsemblerID))
+	}
+	if option.Statuses != nil {
+		query = query.Where("status IN (?)", option.Statuses)
+	}
+
+	if option.IsCurrent {
+		query = query.Where("id IN (?)", service.db.Table("routers").Select("curr_router_version_id"))
+	}
+
+	query = query.Find(&routerVersions)
+
+	if err := query.Error; err != nil {
+		return nil, err
+	}
+
+	return routerVersions, nil
 }

@@ -115,7 +115,7 @@ func TestEnsemblersController_CreateEnsembler(t *testing.T) {
 			},
 			expected: func(_ models.EnsemblerLike) *api.Response {
 				return api.InternalServerError(
-					"unable to save an ensembler",
+					"unable to save the ensembler",
 					`ensembler with name "new-ensembler" already exists`)
 			},
 		},

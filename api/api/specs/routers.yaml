@@ -420,6 +420,46 @@ paths:
         404:
           description: "No router version found"
 
+  "/projects/{project_id}/router-versions":
+    get:
+      tags: *tags
+      summary: Returns Router Version with related parameters
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            <<: *id
+          required: true
+        - in: query
+          name: ensembler_id
+          schema:
+            <<: *id
+        - in: query
+          name: is_current
+          schema:
+            type: boolean
+        - in: query
+          name: status
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/RouterVersionStatus"
+          style: form
+          explode: true          
+      responses:
+        "200":
+          description: An Array of JSON object representing router version instance
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RouterVersion"
+        "400":
+          description: Failed to parse query
+        "500":
+          description: Failed to get router version data
+
 components:
   schemas:
     RouterId:

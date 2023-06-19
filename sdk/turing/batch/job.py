@@ -145,6 +145,7 @@ class EnsemblingJob(ApiObject):
         status: List[EnsemblingJobStatus] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
+        ensembler_id: Optional[int] = None,
     ) -> List["EnsemblingJob"]:
         """
         List ensembling jobs in the active project
@@ -162,6 +163,9 @@ class EnsemblingJob(ApiObject):
             ]
 
         response = turing.active_session.list_ensembling_jobs(
-            status=mapped_statuses, page=page, page_size=page_size
+            status=mapped_statuses,
+            page=page,
+            page_size=page_size,
+            ensembler_id=ensembler_id,
         )
         return [EnsemblingJob.from_open_api(item) for item in response.results]

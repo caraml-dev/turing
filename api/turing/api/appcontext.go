@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
+	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
 
 	"gorm.io/gorm"
 
@@ -38,6 +41,7 @@ type AppContext struct {
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
 	PodLogService      service.PodLogService
+	MlflowService      mlflow.Service
 }
 
 // NewAppContext is a creator for the app context
@@ -157,6 +161,15 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
 	}
 
+	// Initialise Mlflow delete package
+	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{
+		TrackingURL:         cfg.MlflowConfig.TrackingURL,
+		ArtifactServiceType: cfg.MlflowConfig.ArtifactServiceType,
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing mlflow delete package")
+	}
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
@@ -172,7 +185,8 @@ func NewAppContext(
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),
-		BatchRunners: batchJobRunners,
+		BatchRunners:  batchJobRunners,
+		MlflowService: mlflowService,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {

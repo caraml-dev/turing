@@ -48,7 +48,7 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
     navigate(`${location.pathname}?${stringify(filter)}`);
   };
 
-  const [{ data, isLoaded, error }] = useTuringApi(
+  const [{ data, isLoaded, error }, fetchJobData] = useTuringApi(
     `/projects/${projectId}/jobs`,
     {
       query: {
@@ -74,6 +74,10 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
   useEffect(() => {
     replaceBreadcrumbs([{ text: "Jobs" }]);
   }, []);
+
+  const onDeleteSuccess = () => {
+    fetchJobData()
+  }
 
   const onRowClick = (item) => navigate(`./${item.id}/details`);
 
@@ -102,6 +106,7 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
             onQueryChange={onQueryChange}
             onPaginationChange={setPage}
             onRowClick={onRowClick}
+            onDeleteSuccess={onDeleteSuccess}
           />
         </EuiPanel>
       </EuiPageTemplate.Section>

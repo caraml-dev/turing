@@ -98,3 +98,7 @@ OpenapiConfig:
   SwaggerUIConfig:
     ServingDirectory: api/swagger-ui-dist
     ServingPath: /api-docs/
+
+MlflowConfig:
+  TrackingURL: ""
+  ArtifactServiceType: "nop"

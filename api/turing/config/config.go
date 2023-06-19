@@ -89,6 +89,7 @@ type Config struct {
 	MLPConfig                     *MLPConfig `validate:"required"`
 	TuringUIConfig                *SinglePageApplicationConfig
 	OpenapiConfig                 *OpenapiConfig
+	MlflowConfig                  *MlflowConfig
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
@@ -422,6 +423,11 @@ type MLPConfig struct {
 	MLPURL    string `validate:"required"`
 }
 
+type MlflowConfig struct {
+	TrackingURL         string
+	ArtifactServiceType string
+}
+
 // OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI
 type OpenapiConfig struct {
 	// ValidationEnabled specifies whether to use OpenAPI validation middleware,
@@ -621,6 +627,9 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("OpenapiConfig::ValidationEnabled", "true")
 	v.SetDefault("OpenapiConfig::SpecFile", "api/openapi.bundle.yaml")
 	v.SetDefault("OpenapiConfig::MergedSpecFile", "api/swagger-ui-dist/openapi.bundle.yaml")
+
+	v.SetDefault("MlflowConfig::TrackingURL", "")
+	v.SetDefault("MlflowConfig::ArtifactServiceType", "nop")
 
 	v.SetDefault("Experiment", map[string]interface{}{})
 }

@@ -40,7 +40,7 @@ export const ListEnsemblersView = () => {
     navigate(`${location.pathname}?${stringify(filter)}`);
   };
 
-  const [{ data, isLoaded, error }] = useTuringApi(
+  const [{ data, isLoaded, error }, fetchEnsemblerData] = useTuringApi(
     `/projects/${projectId}/ensemblers`,
     {
       query: {
@@ -67,6 +67,10 @@ export const ListEnsemblersView = () => {
     replaceBreadcrumbs([{ text: "Ensemblers" }]);
   }, []);
 
+  const onDeleteSuccess = () => {
+    fetchEnsemblerData()
+  }
+
   const onRowClick = (_item) => { };
 
   return (
@@ -89,6 +93,7 @@ export const ListEnsemblersView = () => {
             onQueryChange={onQueryChange}
             onPaginationChange={setPage}
             onRowClick={onRowClick}
+            onDeleteSuccess={onDeleteSuccess}
           />
         </EuiPanel>
       </EuiPageTemplate.Section>

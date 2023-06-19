@@ -12,8 +12,9 @@ import yaml
 import turing.generated.models
 from turing.generated.models import EnsemblerType
 from turing._base_types import ApiObject, ApiObjectSpec
-from turing.batch import EnsemblingJob
+from turing.batch import EnsemblingJob, EnsemblingJobStatus
 from turing.batch.config import EnsemblingJobConfig
+from turing.router.config.router_version import RouterStatus
 
 
 class EnsemblerBase(abc.ABC):
@@ -279,6 +280,35 @@ class PyFuncEnsembler(Ensembler):
             with the model. This will be passed to turing.ensembler.PyFunc.initialize().
             Example: {"config" : "config/staging.yaml"}
         """
+
+        # First we need to check if there are active job / router using the ensembler
+        # This check is done in the SDK to prevent the creation of new mlflow run
+
+        # check any active router version
+        relatedRouterVer = turing.Router.list_router_versions_with_filter(
+            ensembler_id=self._id, status=[RouterStatus.PENDING], is_current=False
+        )
+        if len(relatedRouterVer) > 0:
+            # if there is any active router version, the deletion process are restricted
+            raise ValueError(
+                "There is pending router version using this ensembler. Please wait for the router version to be deployed or undeploy it, before updating the ensembler."
+            )
+
+        # check any active ensembling jobs
+        relatedJob = EnsemblingJob.list(
+            ensembler_id=self._id,
+            status=[
+                EnsemblingJobStatus.BUILDING,
+                EnsemblingJobStatus.PENDING,
+                EnsemblingJobStatus.RUNNING,
+            ],
+        )
+        if len(relatedJob) > 0:
+            # if there is any active ensembling jobs, the deletion process are restricted
+            raise ValueError(
+                "There is pending ensembling job using this ensembler. Please wait for the ensembling job to be completed or terminate it, before updating the ensembler."
+            )
+
         if name:
             self._name = name
 
@@ -400,6 +430,16 @@ class PyFuncEnsembler(Ensembler):
         return PyFuncEnsembler.from_open_api(
             turing.active_session.create_ensembler(ensembler.to_open_api())
         )
+
+    @classmethod
+    def delete(cls, ensembler_id: int) -> int:
+        """
+        Delete a pyfunc ensembler with the given id in the active project
+
+        :param ensembler_id: ensembler's id. Ensembler must be on the active project
+        :return: ensembler_id of the deleted ensembler
+        """
+        return turing.active_session.delete_ensembler(ensembler_id=ensembler_id).id
 
 
 def _process_conda_env(

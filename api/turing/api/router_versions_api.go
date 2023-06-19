@@ -1,7 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+
+	"github.com/caraml-dev/turing/api/turing/service"
 
 	mlp "github.com/caraml-dev/mlp/api/client"
 
@@ -177,6 +180,24 @@ func (c RouterVersionsController) DeployRouterVersion(
 		"version":   int(routerVersion.Version),
 	})
 }
+func (c RouterVersionsController) ListRouterVersionsWithFilter(
+	_ *http.Request,
+	vars RequestVars,
+	_ interface{},
+) *Response {
+	options := service.RouterVersionListOptions{}
+
+	if err := c.ParseVars(&options, vars); err != nil {
+		return BadRequest("failed to fetch router versions",
+			fmt.Sprintf("failed to parse query string: %s", err))
+	}
+
+	routers, err := c.RouterVersionsService.ListRouterVersionsWithFilter(options)
+	if err != nil {
+		return InternalServerError("unable to list router version", err.Error())
+	}
+	return Ok(routers)
+}
 
 func (c RouterVersionsController) Routes() []Route {
 	return []Route{
@@ -205,6 +226,11 @@ func (c RouterVersionsController) Routes() []Route {
 			method:  http.MethodPost,
 			path:    "/projects/{project_id}/routers/{router_id}/versions/{version}/deploy",
 			handler: c.DeployRouterVersion,
+		},
+		{
+			method:  http.MethodGet,
+			path:    "/projects/{project_id}/router-versions",
+			handler: c.ListRouterVersionsWithFilter,
 		},
 	}
 }

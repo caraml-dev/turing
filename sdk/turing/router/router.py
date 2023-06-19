@@ -134,6 +134,20 @@ class Router(ApiObject):
             turing.active_session.get_router(router_id=router_id)
         )
 
+    @classmethod
+    def list_router_versions_with_filter(
+        cls, ensembler_id: int, status: List[RouterStatus], is_current: bool
+    ) -> List["RouterVersion"]:
+        mapped_statuses = None
+        if status:
+            mapped_statuses = [
+                turing.generated.models.RouterVersionStatus(s.value) for s in status
+            ]
+        response = turing.active_session.list_router_versions_with_filter(
+            ensembler_id=ensembler_id, status=mapped_statuses, is_current=is_current
+        )
+        return response
+
     def update(self, config: RouterConfig) -> "Router":
         """
         Update the current router with a new set of configs specified in the RouterConfig argument

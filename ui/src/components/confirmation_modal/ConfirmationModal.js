@@ -1,14 +1,17 @@
 import React, { Fragment } from "react";
 import { useToggle } from "@caraml-dev/ui-lib";
 import { EuiOverlayMask, EuiConfirmModal, EuiProgress } from "@elastic/eui";
+import './ConfirmationModal.scss';
 
 export const ConfirmationModal = ({
   title,
   content,
+  onCancel = () => {}, // default empty function
   onConfirm,
   confirmButtonText,
   confirmButtonColor,
   isLoading,
+  disabled = false,
   ...props
 }) => {
   const [isModalVisible, toggleModalVisible] = useToggle();
@@ -21,11 +24,15 @@ export const ConfirmationModal = ({
         <EuiOverlayMask>
           <EuiConfirmModal
             title={title}
-            onCancel={toggleModalVisible}
+            onCancel={() => {
+              onCancel();
+              toggleModalVisible();
+            }}
             onConfirm={onConfirm}
             cancelButtonText="Cancel"
             confirmButtonText={confirmButtonText}
-            buttonColor={confirmButtonColor}>
+            buttonColor={confirmButtonColor}
+            confirmButtonDisabled={disabled}>
             {content}
             {isLoading && <EuiProgress size="xs" color="accent" />}
           </EuiConfirmModal>

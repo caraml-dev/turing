@@ -22,6 +22,8 @@ from turing.generated.models import (
     RouterConfig,
     RouterVersion,
     RouterVersionConfig,
+    EnsemblerId,
+    RouterVersionStatus,
 )
 
 
@@ -53,7 +55,9 @@ class TuringSession:
         self._api_client = ApiClient(config)
 
         if use_google_oauth:
-            from caraml_auth.id_token_credentials import get_default_id_token_credentials
+            from caraml_auth.id_token_credentials import (
+                get_default_id_token_credentials,
+            )
             from google.auth.transport.requests import Request
             from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
 
@@ -171,11 +175,21 @@ class TuringSession:
         )
 
     @require_active_project
+    def delete_ensembler(self, ensembler_id: int) -> EnsemblerId:
+        """
+        Delete Ensembler with Ensembler Id
+        """
+        return EnsemblerApi(self._api_client).delete_ensembler(
+            project_id=self.active_project.id, ensembler_id=ensembler_id
+        )
+
+    @require_active_project
     def list_ensembling_jobs(
         self,
         status: List[EnsemblerJobStatus] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
+        ensembler_id: Optional[int] = None,
     ) -> EnsemblingJobPaginatedResults:
         """
         List ensembling jobs
@@ -188,6 +202,8 @@ class TuringSession:
             kwargs["page"] = page
         if page_size:
             kwargs["page_size"] = page_size
+        if ensembler_id:
+            kwargs["ensembler_id"] = ensembler_id
 
         return EnsemblingJobApi(self._api_client).list_ensembling_jobs(
             project_id=self.active_project.id, **kwargs
@@ -353,4 +369,28 @@ class TuringSession:
             self._api_client
         ).projects_project_id_routers_router_id_events_get(
             project_id=self.active_project.id, router_id=router_id
+        )
+
+    @require_active_project
+    def list_router_versions_with_filter(
+        self,
+        ensembler_id: int = None,
+        status: List[RouterVersionStatus] = None,
+        is_current: bool = False,
+    ) -> RouterVersion:
+        """
+        Fetch specific router version by its router ID and version
+        """
+        kwargs = {}
+
+        if ensembler_id:
+            kwargs["ensembler_id"] = ensembler_id
+
+        if status:
+            kwargs["status"] = status
+
+        kwargs["is_current"] = is_current
+
+        return RouterApi(self._api_client).projects_project_id_router_versions_get(
+            project_id=self.active_project.id, **kwargs
         )

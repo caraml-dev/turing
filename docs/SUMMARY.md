@@ -31,6 +31,10 @@
     * [Deleting router versions](how-to/delete-a-router/delete-a-router-version.md)
     * [Deleting router versions from details page](how-to/delete-a-router/delete-a-router-version-from-details-page.md)
     * [Deleting routers](how-to/delete-a-router/delete-a-router.md)
+* [Deleting Ensemblers](how-to/delete-a-ensembler/README.md)
+    * [Deleting ensembler without related entity](how-to/delete-a-ensembler/delete-a-ensembler.md)
+    * [Deleting ensembler with related inactive entity](how-to/delete-a-ensembler/delete-a-ensembler-inactive.md)
+    * [Deleting ensembler with related active entity](how-to/delete-a-ensembler/delete-a-ensembler-active.md)
 
 ## Developer Guides
 * [Getting started](dev-docs/README.md)
