@@ -314,16 +314,9 @@ func (c EnsemblersController) deleteInactiveEnsemblingJob(options EnsemblersPath
 	if inactiveEnsemblingJobs.Paging.Total > 0 {
 		if results, ok := inactiveEnsemblingJobs.Results.([]*models.EnsemblingJob); ok {
 			for _, ensemblingJob := range results {
-				if ensemblingJob.Status == models.JobFailed {
-					err = c.EnsemblingJobService.Delete(ensemblingJob)
-					if err != nil {
-						return http.StatusInternalServerError, err
-					}
-				} else {
-					err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
-					if err != nil {
-						return http.StatusInternalServerError, err
-					}
+				err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
+				if err != nil {
+					return http.StatusInternalServerError, err
 				}
 			}
 		}

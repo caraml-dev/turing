@@ -138,16 +138,9 @@ func (c EnsemblingJobController) DeleteEnsemblingJob(
 		return NotFound("ensembling job not found", err.Error())
 	}
 
-	if ensemblingJob.Status == models.JobFailed {
-		err = c.EnsemblingJobService.Delete(ensemblingJob)
-		if err != nil {
-			return InternalServerError("unable to delete ensembling job", err.Error())
-		}
-	} else {
-		err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
-		if err != nil {
-			return InternalServerError("unable to delete ensembling job", err.Error())
-		}
+	err = c.EnsemblingJobService.MarkEnsemblingJobForTermination(ensemblingJob)
+	if err != nil {
+		return InternalServerError("unable to delete ensembling job", err.Error())
 	}
 
 	return Accepted(
