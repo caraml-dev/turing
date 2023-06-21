@@ -646,6 +646,7 @@ func setDefaultValues(v *viper.Viper) {
 
 func NewConfigValidator() (*validator.Validate, error) {
 	v := validator.New()
+
 	// Use struct level validation for AuthorizationConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {
 		field := sl.Current().Interface().(AuthorizationConfig)
@@ -654,6 +655,19 @@ func NewConfigValidator() (*validator.Validate, error) {
 			sl.ReportError(field.URL, "authorization_url", "URL", "url-set", "")
 		}
 	}, AuthorizationConfig{})
+
+	// Use struct level validation for PodDisruptionBudgetConfig
+	v.RegisterStructValidation(func(sl validator.StructLevel) {
+		field := sl.Current().Interface().(PodDisruptionBudgetConfig)
+		// If auth is enabled, URL should be set
+		if field.Enabled &&
+			(field.MaxUnavailable == "" && field.MinAvailable == "") ||
+			(field.MaxUnavailable != "" && field.MinAvailable != "") {
+			sl.ReportError(field.MaxUnavailable, "max_unavailable", "string", "", "")
+			sl.ReportError(field.MinAvailable, "min_available", "string", "", "")
+		}
+	}, PodDisruptionBudgetConfig{})
+
 	return v, nil
 }
 

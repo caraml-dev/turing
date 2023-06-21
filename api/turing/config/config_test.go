@@ -25,7 +25,7 @@ import (
 )
 
 func TestDecodeQuantity(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		value    string
 		success  bool
 		expected resource.Quantity
@@ -126,6 +126,62 @@ func TestAuthConfigValidation(t *testing.T) {
 				"Key: 'AuthorizationConfig.Caching.CacheCleanUpIntervalSeconds' ",
 				"Error:Field validation for 'CacheCleanUpIntervalSeconds' failed on the 'required_if' tag",
 			}, ""),
+		},
+	}
+
+	validate, err := config.NewConfigValidator()
+	require.NoError(t, err)
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := validate.Struct(data.cfg)
+			if data.success {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+		})
+	}
+}
+
+func TestPDBConfigValidation(t *testing.T) {
+	tests := map[string]struct {
+		cfg     config.PodDisruptionBudgetConfig
+		success bool
+	}{
+		"success pdb disabled": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled: false,
+			},
+			success: true,
+		},
+		"success pdb enabled, max unavailable exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:        true,
+				MaxUnavailable: "20%",
+			},
+			success: true,
+		},
+		"success pdb enabled, min available exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:      true,
+				MinAvailable: "20%",
+			},
+			success: true,
+		},
+		"failure pdb enabled no max unavailable and min available": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled: true,
+			},
+			success: false,
+		},
+		"failure pdb enabled, both max unavailable and min available exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:        true,
+				MaxUnavailable: "20%",
+				MinAvailable:   "20%",
+			},
+			success: false,
 		},
 	}
 
@@ -305,6 +361,10 @@ func TestLoad(t *testing.T) {
 							},
 						},
 					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:      true,
+						MinAvailable: "20%",
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -449,6 +509,10 @@ func TestLoad(t *testing.T) {
 								},
 							},
 						},
+					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:      true,
+						MinAvailable: "20%",
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
@@ -635,6 +699,10 @@ func TestLoad(t *testing.T) {
 								},
 							},
 						},
+					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:      true,
+						MinAvailable: "20%",
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{

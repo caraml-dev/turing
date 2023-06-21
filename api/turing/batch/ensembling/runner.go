@@ -7,7 +7,6 @@ import (
 
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
-	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
@@ -308,7 +307,7 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 	}
 
 	// Build Image
-	labels := r.buildLabels(ensemblingJob, mlpProject, servicebuilder.ComponentTypes.BatchEnsembler)
+	labels := r.buildLabels(ensemblingJob, mlpProject)
 	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels, baseImageTag)
 
 	if imageBuildErr != nil {
@@ -396,13 +395,11 @@ func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlp
 func (r *ensemblingJobRunner) buildLabels(
 	ensemblingJob *models.EnsemblingJob,
 	mlpProject *mlp.Project,
-	componentType string,
 ) map[string]string {
 	rq := labeller.KubernetesLabelsRequest{
-		Stream:    mlpProject.Stream,
-		Team:      mlpProject.Team,
-		App:       *ensemblingJob.InfraConfig.EnsemblerName,
-		Component: componentType,
+		Stream: mlpProject.Stream,
+		Team:   mlpProject.Team,
+		App:    *ensemblingJob.InfraConfig.EnsemblerName,
 	}
 
 	return labeller.BuildLabels(rq)

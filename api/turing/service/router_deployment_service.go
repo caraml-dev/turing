@@ -73,7 +73,7 @@ type deploymentService struct {
 	svcBuilder         servicebuilder.ClusterServiceBuilder
 
 	// PodDisruptionBudget config
-	pdbConfig *config.PodDisruptionBudgetConfig
+	pdbConfig config.PodDisruptionBudgetConfig
 }
 
 // uFunc is the function type accepted by the updateResources method
@@ -104,7 +104,7 @@ func NewDeploymentService(
 		sentryDSN:                    cfg.Sentry.DSN,
 		clusterControllers:           clusterControllers,
 		svcBuilder:                   sb,
-		pdbConfig:                    &cfg.DeployConfig.PodDisruptionBudget,
+		pdbConfig:                    cfg.DeployConfig.PodDisruptionBudget,
 	}
 }
 
@@ -829,7 +829,7 @@ func deletePodDisruptionBudgets(ctx context.Context,
 
 		err := controller.DeletePodDisruptionBudget(ctx, pdb.Namespace, pdb.Name)
 		if err != nil {
-			err = errors.Wrapf(err, "Failed to deploy pdb %s", pdb.Name)
+			err = errors.Wrapf(err, "Failed to undeploy pdb %s", pdb.Name)
 			eventsCh.Write(models.NewErrorEvent(
 				models.EventStageDeployingServices, "failed to delete pdb %s: %s", pdb.Name, err.Error()))
 		}

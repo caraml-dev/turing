@@ -712,6 +712,19 @@ func (c *controller) CreatePodDisruptionBudget(ctx context.Context, namespace st
 }
 
 func (c *controller) DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error {
+	_, err := c.k8sPolicyClient.PodDisruptionBudgets(namespace).Get(ctx, pdbName, metav1.GetOptions{})
+	if err != nil {
+		// If pdb not found, it might be already deleted or not exist at all. So we just return nil here.
+		if k8serrors.IsNotFound(err) {
+			return nil
+		}
+
+		return errors.Errorf(
+			"failed getting status of pod disruption budget %s in namespace %s",
+			pdbName,
+			namespace,
+		)
+	}
 	return c.k8sPolicyClient.PodDisruptionBudgets(namespace).Delete(ctx, pdbName, metav1.DeleteOptions{})
 }
 

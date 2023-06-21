@@ -111,7 +111,7 @@ type ClusterServiceBuilder interface {
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
 		componentType string,
-		pdbConfig *config.PodDisruptionBudgetConfig,
+		pdbConfig config.PodDisruptionBudgetConfig,
 	) *cluster.PodDisruptionBudget
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
@@ -344,10 +344,15 @@ func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	componentType string,
-	pdbConfig *config.PodDisruptionBudgetConfig,
+	pdbConfig config.PodDisruptionBudgetConfig,
 ) *cluster.PodDisruptionBudget {
 	selector := &metav1.LabelSelector{
-		MatchLabels: buildLabels(project, routerVersion.Router, componentType),
+		MatchLabels: map[string]string{
+			"app": fmt.Sprintf(
+				"%s-0",
+				GetComponentName(routerVersion, componentType),
+			),
+		},
 	}
 	return &cluster.PodDisruptionBudget{
 		Name: fmt.Sprintf(
@@ -406,10 +411,9 @@ func buildLabels(
 	componentType string,
 ) map[string]string {
 	r := labeller.KubernetesLabelsRequest{
-		Stream:    project.Stream,
-		Team:      project.Team,
-		App:       router.Name,
-		Component: componentType,
+		Stream: project.Stream,
+		Team:   project.Team,
+		App:    router.Name,
 	}
 	return labeller.BuildLabels(r)
 }

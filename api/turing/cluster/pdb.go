@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	apipolicyv1 "k8s.io/api/policy/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type PodDisruptionBudget struct {
-	Name           string                `json:"name"`
-	Namespace      string                `json:"namespace"`
-	Labels         map[string]string     `json:"labels"`
-	MaxUnavailable string                `json:"max_unavailable"`
-	MinAvailable   string                `json:"min_available"`
-	Selector       *metav1.LabelSelector `json:"selector"`
+	Name           string                   `json:"name"`
+	Namespace      string                   `json:"namespace"`
+	Labels         map[string]string        `json:"labels"`
+	MaxUnavailable string                   `json:"max_unavailable"`
+	MinAvailable   string                   `json:"min_available"`
+	Selector       *apimetav1.LabelSelector `json:"selector"`
 }
 
 func (cfg PodDisruptionBudget) BuildPodDisruptionBudget() (*apipolicyv1.PodDisruptionBudget, error) {
@@ -40,7 +40,7 @@ func (cfg PodDisruptionBudget) BuildPodDisruptionBudget() (*apipolicyv1.PodDisru
 	}
 
 	pdb := &apipolicyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
+		ObjectMeta: apimetav1.ObjectMeta{
 			Name:      cfg.Name,
 			Namespace: cfg.Namespace,
 			Labels:    cfg.Labels,

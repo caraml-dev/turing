@@ -13,8 +13,6 @@ const (
 	teamLabel = "team"
 	// orchestratorLabel refers to the orchestrator that deployed the Kubernetes object
 	orchestratorLabel = "orchestrator"
-	// componentLabel refers to the component that deployed the Kubernetes object
-	componentLabel = "component"
 	// AppLabel refers to application of the Kubernetes Object
 	AppLabel = "app"
 )
@@ -32,10 +30,9 @@ func InitKubernetesLabeller(p, e string) {
 
 // KubernetesLabelsRequest helps to build the Kubernetes labels needed for Kubernetes objects.
 type KubernetesLabelsRequest struct {
-	Stream    string
-	Team      string
-	App       string
-	Component string
+	Stream string
+	Team   string
+	App    string
 }
 
 // GetLabelName prefixes the label with the config specified label and returns the formatted label name
@@ -50,7 +47,6 @@ func BuildLabels(r KubernetesLabelsRequest) map[string]string {
 		GetLabelName(streamLabel):       r.Stream,
 		GetLabelName(teamLabel):         r.Team,
 		GetLabelName(AppLabel):          r.App,
-		GetLabelName(componentLabel):    r.Component,
 		GetLabelName(environmentLabel):  environment,
 	}
 }

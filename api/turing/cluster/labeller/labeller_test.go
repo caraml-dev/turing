@@ -16,7 +16,6 @@ func TestLabeller(t *testing.T) {
 				"team":         {},
 				"app":          {},
 				"orchestrator": {},
-				"component":    {},
 			},
 		},
 		"success | init called": {
@@ -28,7 +27,6 @@ func TestLabeller(t *testing.T) {
 				"gojek.com/team":         {},
 				"gojek.com/app":          {},
 				"gojek.com/orchestrator": {},
-				"gojek.com/component":    {},
 			},
 		},
 	}
