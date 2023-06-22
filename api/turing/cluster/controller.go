@@ -695,9 +695,10 @@ func (c *controller) CreatePodDisruptionBudget(
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return nil, errors.Errorf(
-				"failed getting status of pod disruption budget %s in namespace %s",
+				"failed getting status of pod disruption budget %s in namespace %s: %w",
 				pdb.Name,
 				namespace,
+				err,
 			)
 		}
 
@@ -725,9 +726,10 @@ func (c *controller) DeletePodDisruptionBudget(ctx context.Context, namespace, p
 		}
 
 		return errors.Errorf(
-			"failed getting status of pod disruption budget %s in namespace %s",
+			"failed getting status of pod disruption budget %s in namespace %s: %w",
 			pdbName,
 			namespace,
+			err,
 		)
 	}
 	return c.k8sPolicyClient.PodDisruptionBudgets(namespace).Delete(ctx, pdbName, metav1.DeleteOptions{})

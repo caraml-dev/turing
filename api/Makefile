@@ -56,7 +56,7 @@ build-image: vendor version
 
 .PHONY: run
 run: build local-db
-	./bin/${BIN_NAME} -config config-dev.yaml
+	./bin/${BIN_NAME} -config config-dev-w-creds.yaml
 
 .PHONY: local-db
 local-db:
