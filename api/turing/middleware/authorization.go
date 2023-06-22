@@ -104,7 +104,7 @@ func getResourceFromPath(path string, prefix string) string {
 	// if a user has READ/WRITE permissions on /projects/{project_id}, they would also have the same
 	// permissions on all its sub-resources. Thus, trimming the resource identifier to aid quicker
 	// authz matching and to efficiently make use of the in-memory authz cache, if enabled.
-	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
+	parts := strings.Split(strings.TrimPrefix(strings.TrimPrefix(path, prefix), "/"), "/")
 	if len(parts) > 1 {
 		parts = parts[:2]
 	}
