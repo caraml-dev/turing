@@ -212,7 +212,8 @@ func TestDeployEndpoint(t *testing.T) {
 	controller.On("CreateSecret", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyPersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyIstioVirtualService", mock.Anything, mock.Anything).Return(nil)
-	controller.On("CreatePodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).Return(&policyv1.PodDisruptionBudget{}, nil)
+	controller.On("CreatePodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).
+		Return(&policyv1.PodDisruptionBudget{}, nil)
 
 	// Create mock service builder
 	svcBuilder := &mockClusterServiceBuilder{routerVersion}

@@ -32,7 +32,7 @@ func NewPluginsServerService(
 			Name:                  GetComponentName(routerVersion, ComponentTypes.PluginsServer),
 			Namespace:             project.Name,
 			Image:                 nginxImage,
-			Labels:                buildLabels(project, routerVersion.Router, ComponentTypes.PluginsServer),
+			Labels:                buildLabels(project, routerVersion.Router),
 			ProbePort:             80,
 			LivenessHTTPGetPath:   "/",
 			ReadinessHTTPGetPath:  "/",

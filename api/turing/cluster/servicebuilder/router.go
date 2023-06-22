@@ -143,7 +143,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			LivenessHTTPGetPath:  routerLivenessPath,
 			ReadinessHTTPGetPath: routerReadinessPath,
 			Envs:                 envs,
-			Labels:               buildLabels(project, routerVersion.Router, ComponentTypes.Router),
+			Labels:               buildLabels(project, routerVersion.Router),
 			ConfigMap:            configMap,
 			Volumes:              volumes,
 			VolumeMounts:         volumeMounts,
@@ -168,7 +168,7 @@ func (sb *clusterSvcBuilder) NewRouterEndpoint(
 	project *mlp.Project,
 	versionEndpoint string,
 ) (*cluster.VirtualService, error) {
-	labels := buildLabels(project, routerVersion.Router, ComponentTypes.Router)
+	labels := buildLabels(project, routerVersion.Router)
 	routerName := GetComponentName(routerVersion, ComponentTypes.Router)
 
 	veURL, err := url.Parse(versionEndpoint)
@@ -669,7 +669,7 @@ func buildFiberConfigMap(
 		Name:     GetComponentName(ver, ComponentTypes.FiberConfig),
 		FileName: routerConfigFileName,
 		Data:     string(configMapData),
-		Labels:   buildLabels(project, ver.Router, ComponentTypes.FiberConfig),
+		Labels:   buildLabels(project, ver.Router),
 	}, nil
 }
 

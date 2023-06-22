@@ -207,7 +207,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			CPURequests:    enricher.ResourceRequest.CPURequest,
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
 			Envs:           enricher.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.Enricher),
+			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -292,7 +292,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			CPURequests:    docker.ResourceRequest.CPURequest,
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
 			Envs:           docker.Env.ToKubernetesEnvVars(),
-			Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.Ensembler),
+			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
@@ -334,7 +334,7 @@ func (sb *clusterSvcBuilder) NewSecret(
 		),
 		Namespace: project.Name,
 		Data:      data,
-		Labels:    buildLabels(project, routerVersion.Router, ComponentTypes.Secret),
+		Labels:    buildLabels(project, routerVersion.Router),
 	}
 }
 
@@ -361,7 +361,7 @@ func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
 			ComponentTypes.PDB,
 		),
 		Namespace:      project.Name,
-		Labels:         buildLabels(project, routerVersion.Router, ComponentTypes.PDB),
+		Labels:         buildLabels(project, routerVersion.Router),
 		MaxUnavailable: pdbConfig.MaxUnavailable,
 		MinAvailable:   pdbConfig.MinAvailable,
 		Selector:       selector,
@@ -408,7 +408,6 @@ func GetNamespace(project *mlp.Project) string {
 func buildLabels(
 	project *mlp.Project,
 	router *models.Router,
-	componentType string,
 ) map[string]string {
 	r := labeller.KubernetesLabelsRequest{
 		Stream: project.Stream,

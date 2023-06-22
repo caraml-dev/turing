@@ -111,7 +111,8 @@ type Controller interface {
 	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
 
 	// PodDisruptionBudget
-	CreatePodDisruptionBudget(ctx context.Context, namespace string, pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
+	CreatePodDisruptionBudget(ctx context.Context, namespace string,
+		pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
 	DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error
 }
 
@@ -685,7 +686,11 @@ func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appN
 	return c.k8sSparkOperator.SparkApplications(namespace).Delete(ctx, appName, metav1.DeleteOptions{})
 }
 
-func (c *controller) CreatePodDisruptionBudget(ctx context.Context, namespace string, pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error) {
+func (c *controller) CreatePodDisruptionBudget(
+	ctx context.Context,
+	namespace string,
+	pdb PodDisruptionBudget,
+) (*apipolicyv1.PodDisruptionBudget, error) {
 	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(namespace).Get(ctx, pdb.Name, metav1.GetOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
