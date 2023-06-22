@@ -235,6 +235,9 @@ jobs:
             gomod-${{ hashFiles('api/go.mod') }}
           restore-keys: gomod-
 
+      - name: Setup
+        run: make setup
+
       - name: Run test
         working-directory: api
         env:
@@ -242,9 +245,7 @@ jobs:
           DATABASE_NAME: turing
           DATABASE_USER: turing-admin
           DATABASE_PASSWORD: secret
-        run: |
-          make setup
-          make test
+        run: make test
 
       - name: Lint code
         uses: golangci/golangci-lint-action@v2
@@ -279,6 +280,9 @@ jobs:
           key: |
             gomod-${{ hashFiles('engines/router/go.mod') }}
           restore-keys: gomod-
+
+      - name: Setup
+        run: make setup
 
       - name: Run test
         run: make test
