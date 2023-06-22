@@ -236,6 +236,7 @@ jobs:
           restore-keys: gomod-
 
       - name: Setup
+        working-directory: api
         run: make setup
 
       - name: Run test
