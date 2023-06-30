@@ -138,7 +138,7 @@ export const ListEnsemblingJobsTable = ({
     },
     {
       field: "actions",
-      align: "left",
+      align: "right",
       name: (
         <FormLabelWithToolTip
           label="Actions"
@@ -148,7 +148,7 @@ export const ListEnsemblingJobsTable = ({
       ),
       render: (id, item) => (
         <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
-          <EuiFlexItem component="div" style={{alignItems: 'flex-start'}}>
+          <EuiFlexItem component="div" style={{alignItems: "flex-end", gap:"8px"}}>
             <EuiFlexItem grow={false} >
               <EuiButtonEmpty 
                 onClick={(_) => window.open(item.monitoring_url, "_blank")}
@@ -158,16 +158,18 @@ export const ListEnsemblingJobsTable = ({
                 <EuiText size="xs">Monitoring</EuiText>
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} >
-              <EuiButtonEmpty
-                  onClick={() => onDeleteJob(item)}
-                  color={"danger"}
-                  iconType={isActiveJobStatus(item.status) ? 'trash' : 'minusInCircle' }
-                  iconSide="left"
-                  size="xs">
-                <EuiText size="xs"> {isActiveJobStatus(item.status) ? 'Delete' : 'Terminate' } </EuiText>
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+              {item.status !== "terminating" && (
+              <EuiFlexItem grow={false} >
+                  <EuiButtonEmpty
+                    onClick={() => onDeleteJob(item)}
+                    color={"danger"}
+                    iconType={isActiveJobStatus(item.status) ? "trash" : "minusInCircle" }
+                    iconSide="left"
+                    size="xs">
+                    <EuiText size="xs"> {isActiveJobStatus(item.status) ? "Delete" : "Terminate" } </EuiText>
+                  </EuiButtonEmpty>
+              </EuiFlexItem>
+              )}
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
