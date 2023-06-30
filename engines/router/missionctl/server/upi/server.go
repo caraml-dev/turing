@@ -29,6 +29,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
 	"github.com/caraml-dev/turing/engines/router/missionctl/server/constant"
+	"github.com/caraml-dev/turing/engines/router/missionctl/server/upi/interceptors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/turingctx"
 )
 
@@ -49,7 +50,8 @@ func NewUPIServer(mc missionctl.MissionControlUPI, rl *resultlog.UPIResultLogger
 }
 
 func (us *Server) Run(listener net.Listener) {
-	s := grpc.NewServer()
+
+	s := grpc.NewServer(grpc.UnaryInterceptor(interceptors.PanicRecoveryInterceptor()))
 	upiv1.RegisterUniversalPredictionServiceServer(s, us)
 	reflection.Register(s)
 
