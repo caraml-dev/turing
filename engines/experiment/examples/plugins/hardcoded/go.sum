@@ -17,8 +17,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/caraml-dev/mlp v1.7.6 h1:u3OvbtPY7w/j9z7WO9YwhKJA0Y0Qy6OzanREfeA7os4=
 github.com/caraml-dev/mlp v1.7.6/go.mod h1:ahdKpb/SKFEyHE6817AOh0b2fyroTzJmXM8U+2BG75M=
-github.com/caraml-dev/universal-prediction-interface v0.3.4 h1:cPytzpjXE/8RhSw3iS0JFZzNdM3tJ/l8UcHTPrxQWEo=
-github.com/caraml-dev/universal-prediction-interface v0.3.4/go.mod h1:e0qmFOXQxx8HFg5ObYyQO3WVnrqsr5v5JApFmeF7eJo=
+github.com/caraml-dev/universal-prediction-interface v0.3.6 h1:G/D4aukfjLECl8armJqFy/R2+0u/f4AiurSFqAo33uQ=
+github.com/caraml-dev/universal-prediction-interface v0.3.6/go.mod h1:e0qmFOXQxx8HFg5ObYyQO3WVnrqsr5v5JApFmeF7eJo=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
