@@ -74,6 +74,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -94,6 +95,7 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	_ string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -119,6 +121,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	sentryDSN string,
 	queueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -223,6 +226,7 @@ func TestDeployEndpoint(t *testing.T) {
 	endpoint, err := ds.DeployRouterVersion(
 		&mlp.Project{Name: testNamespace},
 		&merlin.Environment{Name: testEnv},
+		&models.Router{},
 		routerVersion,
 		"router-service-account-key",
 		"enricher-service-account-key",
@@ -320,6 +324,7 @@ func TestDeployEndpoint(t *testing.T) {
 	endpoint, err = ds.DeployRouterVersion(
 		&mlp.Project{Name: testNamespace},
 		&merlin.Environment{Name: testEnv},
+		&models.Router{},
 		routerVersion,
 		"router-service-account-key",
 		"enricher-service-account-key",

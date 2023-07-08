@@ -59,6 +59,7 @@ type clusterConfig struct {
 type Controller interface {
 	DeployKnativeService(ctx context.Context, svc *KnativeService) error
 	DeleteKnativeService(ctx context.Context, svcName string, namespace string, ignoreNotFound bool) error
+	GetKnativeServiceDesiredReplicas(ctx context.Context, svcName string, namespace string) (int, error)
 	GetKnativeServiceURL(ctx context.Context, svcName string, namespace string) string
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string) error
@@ -299,6 +300,22 @@ func (c *controller) DeleteKnativeService(
 
 	// Delete the service
 	return services.Delete(ctx, svcName, metav1.DeleteOptions{})
+}
+
+// GetKnativeServiceDesiredReplicas determines the current desired number of replicas for the default revision
+func (c *controller) GetKnativeServiceDesiredReplicas(ctx context.Context, svcName string, namespace string) (int, error) {
+	// Init knative revisions getter
+	revisions := c.knServingClient.Revisions(namespace)
+
+	rev, err := revisions.Get(ctx, getDefaultRevisionName(svcName), metav1.GetOptions{})
+	if err != nil {
+		return 0, err
+	}
+	if rev.Status.DesiredReplicas != nil {
+		return int(*rev.Status.DesiredReplicas), nil
+	}
+
+	return 0, nil
 }
 
 // DeployKubernetesService deploys a kubernetes service and deployment

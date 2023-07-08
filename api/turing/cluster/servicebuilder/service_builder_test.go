@@ -35,6 +35,7 @@ var testTopologySpreadConstraints = []corev1.TopologySpreadConstraint{
 
 type testSuiteNewService struct {
 	filePath     string
+	initialScale *int
 	expected     *cluster.KnativeService
 	expRawConfig json.RawMessage
 	err          string
@@ -43,10 +44,12 @@ type testSuiteNewService struct {
 func TestNewEnricherService(t *testing.T) {
 	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
+	testInitialScale := 5
 
 	tests := map[string]testSuiteNewService{
 		"success": {
-			filePath: filepath.Join(testDataBasePath, "router_version_success.json"),
+			filePath:     filepath.Join(testDataBasePath, "router_version_success.json"),
+			initialScale: &testInitialScale,
 			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:           "test-svc-turing-enricher-1",
@@ -80,6 +83,7 @@ func TestNewEnricherService(t *testing.T) {
 				ContainerPort:                   8080,
 				MinReplicas:                     1,
 				MaxReplicas:                     2,
+				InitialReplicas:                 &testInitialScale,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
 				TopologySpreadConstraints:       testTopologySpreadConstraints,
@@ -104,7 +108,7 @@ func TestNewEnricherService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 1.5)
+			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 1.5, data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
@@ -118,9 +122,12 @@ func TestNewEnricherService(t *testing.T) {
 func TestNewEnsemblerService(t *testing.T) {
 	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
+	testInitialScale := 5
+
 	tests := map[string]testSuiteNewService{
 		"success": {
-			filePath: filepath.Join(testDataBasePath, "router_version_success.json"),
+			filePath:     filepath.Join(testDataBasePath, "router_version_success.json"),
+			initialScale: &testInitialScale,
 			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
 					Name:           "test-svc-turing-ensembler-1",
@@ -156,6 +163,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				MaxReplicas:                     3,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
+				InitialReplicas:                 &testInitialScale,
 				TopologySpreadConstraints:       testTopologySpreadConstraints,
 				QueueProxyResourcePercentage:    20,
 				UserContainerLimitRequestFactor: 1.5,
@@ -220,7 +228,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 1.5)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 1.5, data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
