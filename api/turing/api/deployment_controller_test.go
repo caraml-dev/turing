@@ -135,7 +135,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", router).Return(nil, nil)
-	rs.On("FindByID", uint(1)).Return(router, nil)
+	rs.On("FindByID", models.ID(1)).Return(router, nil)
 
 	es := &mocks.EventService{}
 	es.On("ClearEvents", int(router.ID)).Return(nil)
