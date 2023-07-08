@@ -226,7 +226,7 @@ func TestDeployEndpoint(t *testing.T) {
 	endpoint, err := ds.DeployRouterVersion(
 		&mlp.Project{Name: testNamespace},
 		&merlin.Environment{Name: testEnv},
-		&models.Router{},
+		nil,
 		routerVersion,
 		"router-service-account-key",
 		"enricher-service-account-key",
@@ -324,7 +324,7 @@ func TestDeployEndpoint(t *testing.T) {
 	endpoint, err = ds.DeployRouterVersion(
 		&mlp.Project{Name: testNamespace},
 		&merlin.Environment{Name: testEnv},
-		&models.Router{},
+		nil,
 		routerVersion,
 		"router-service-account-key",
 		"enricher-service-account-key",

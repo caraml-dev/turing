@@ -28,7 +28,7 @@ type DeploymentService interface {
 	DeployRouterVersion(
 		project *mlp.Project,
 		environment *merlin.Environment,
-		router *models.Router,
+		currentRouterVersion *models.RouterVersion,
 		routerVersion *models.RouterVersion,
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
@@ -109,7 +109,7 @@ func NewDeploymentService(
 func (ds *deploymentService) DeployRouterVersion(
 	project *mlp.Project,
 	environment *merlin.Environment,
-	router *models.Router,
+	currRouterVersion *models.RouterVersion,
 	routerVersion *models.RouterVersion,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
@@ -167,7 +167,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	// Construct service objects for each of the components and deploy
 	services, err := ds.createServices(
 		ctx, controller,
-		routerVersion, router.CurrRouterVersion, project, ds.environmentType,
+		routerVersion, currRouterVersion, project, ds.environmentType,
 		secretName, experimentConfig,
 		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.QueueProxyResourcePercentage,
@@ -367,7 +367,7 @@ func (ds *deploymentService) createServices(
 				return services, fmt.Errorf("Unable to build the details for the currently deployed enricher: %w", err)
 			}
 			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnricherSvc.Name, currEnricherSvc.Namespace)
-			if err != nil {
+			if err == nil {
 				currEnricherReplicas = &currReplicas
 			}
 		}
@@ -397,7 +397,7 @@ func (ds *deploymentService) createServices(
 				return services, fmt.Errorf("Unable to build the details for the currently deployed ensembler: %w", err)
 			}
 			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnsemblerSvc.Name, currEnsemblerSvc.Namespace)
-			if err != nil {
+			if err == nil {
 				currEnsemblerReplicas = &currReplicas
 			}
 		}
@@ -423,7 +423,7 @@ func (ds *deploymentService) createServices(
 			return services, fmt.Errorf("Unable to build the details for the currently deployed router: %w", err)
 		}
 		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currRouterSvc.Name, currRouterSvc.Namespace)
-		if err != nil {
+		if err == nil {
 			currRouterReplicas = &currReplicas
 		}
 	}

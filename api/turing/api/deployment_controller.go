@@ -235,10 +235,23 @@ func (c RouterDeploymentController) deployRouterVersion(
 		pyfuncEnsembler = castedEnsembler
 	}
 
+	router, err := c.RoutersService.FindByID(routerVersion.RouterID)
+	if err != nil {
+		return "", fmt.Errorf("Failed getting router: %w", err)
+	}
+	var currRouterVersion *models.RouterVersion
+	if router.CurrRouterVersion != nil {
+		currRouterVersion, err = c.RouterVersionsService.FindByID(router.CurrRouterVersion.ID)
+		if err != nil {
+			return "", fmt.Errorf("Failed getting router version: %w", err)
+		}
+	}
+
 	// Deploy the router version
 	endpoint, err := c.DeploymentService.DeployRouterVersion(
 		project,
 		environment,
+		currRouterVersion,
 		routerVersion,
 		routerServiceAccountKey,
 		enricherServiceAccountKey,

@@ -35,23 +35,23 @@ func (_m *DeploymentService) DeleteRouterEndpoint(project *client.Project, envir
 	return r0
 }
 
-// DeployRouterVersion provides a mock function with given fields: project, environment, router, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh
-func (_m *DeploymentService) DeployRouterVersion(project *client.Project, environment *merlinclient.Environment, router *models.Router, routerVersion *models.RouterVersion, routerServiceAccountKey string, enricherServiceAccountKey string, ensemblerServiceAccountKey string, expEngineServiceAccountKey string, pyfuncEnsembler *models.PyFuncEnsembler, experimentConfig json.RawMessage, eventsCh *service.EventChannel) (string, error) {
-	ret := _m.Called(project, environment, router, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
+// DeployRouterVersion provides a mock function with given fields: project, environment, currentRouterVersion, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh
+func (_m *DeploymentService) DeployRouterVersion(project *client.Project, environment *merlinclient.Environment, currentRouterVersion *models.RouterVersion, routerVersion *models.RouterVersion, routerServiceAccountKey string, enricherServiceAccountKey string, ensemblerServiceAccountKey string, expEngineServiceAccountKey string, pyfuncEnsembler *models.PyFuncEnsembler, experimentConfig json.RawMessage, eventsCh *service.EventChannel) (string, error) {
+	ret := _m.Called(project, environment, currentRouterVersion, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.Router, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) (string, error)); ok {
-		return rf(project, environment, router, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
+	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) (string, error)); ok {
+		return rf(project, environment, currentRouterVersion, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	}
-	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.Router, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) string); ok {
-		r0 = rf(project, environment, router, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
+	if rf, ok := ret.Get(0).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) string); ok {
+		r0 = rf(project, environment, currentRouterVersion, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.Router, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) error); ok {
-		r1 = rf(project, environment, router, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
+	if rf, ok := ret.Get(1).(func(*client.Project, *merlinclient.Environment, *models.RouterVersion, *models.RouterVersion, string, string, string, string, *models.PyFuncEnsembler, json.RawMessage, *service.EventChannel) error); ok {
+		r1 = rf(project, environment, currentRouterVersion, routerVersion, routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey, expEngineServiceAccountKey, pyfuncEnsembler, experimentConfig, eventsCh)
 	} else {
 		r1 = ret.Error(1)
 	}
