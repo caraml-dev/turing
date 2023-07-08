@@ -72,6 +72,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "test-status",
+				RouterID:         1,
 			},
 			pendingVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -80,6 +81,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "pending",
+				RouterID:         1,
 			},
 			validVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -88,6 +90,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "deployed",
+				RouterID:         1,
 			},
 			expRunnerCfg: json.RawMessage(nil),
 		},
@@ -99,6 +102,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "test-status",
+				RouterID:         1,
 			},
 			pendingVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -107,6 +111,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "pending",
+				RouterID:         1,
 			},
 			validVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -115,6 +120,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "deployed",
+				RouterID:         1,
 			},
 			expCfgWithPassKey: expWithPassKeyCfg,
 			expRunnerCfg:      json.RawMessage(`{"engine": "test"}`),
