@@ -217,7 +217,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 200,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{
@@ -233,7 +234,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 300,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{
@@ -249,7 +251,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 300,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{

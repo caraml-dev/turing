@@ -54,10 +54,11 @@ var reactorVerbs = struct {
 }
 
 const (
-	knativeGroup           = "serving.knative.dev"
-	knativeVersion         = "v1"
-	knativeResource        = "services"
-	contextTimeoutDuration = 15 * time.Second
+	knativeGroup             = "serving.knative.dev"
+	knativeVersion           = "v1"
+	knativeRevisionsResource = "revisions"
+	knativeServicesResource  = "services"
+	contextTimeoutDuration   = 15 * time.Second
 )
 
 func TestDeployKnativeService(t *testing.T) {
@@ -65,7 +66,7 @@ func TestDeployKnativeService(t *testing.T) {
 	resourceItem := schema.GroupVersionResource{
 		Group:    knativeGroup,
 		Version:  knativeVersion,
-		Resource: knativeResource,
+		Resource: knativeServicesResource,
 	}
 	testKnSvc := &knservingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -105,7 +106,7 @@ func TestDeployKnativeService(t *testing.T) {
 		"new_service": {
 			{
 				verb:     reactorVerbs.Get,
-				resource: knativeResource,
+				resource: knativeServicesResource,
 				rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 					expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
 					// Check that the method is called with the expected action
@@ -116,13 +117,13 @@ func TestDeployKnativeService(t *testing.T) {
 			},
 			{
 				verb:     reactorVerbs.Create,
-				resource: knativeResource,
+				resource: knativeServicesResource,
 				rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 					expAction := k8stesting.NewCreateAction(resourceItem, testNamespace, testKnSvc)
 					// Check that the method is called with the expected action
 					assert.Equal(t, expAction, action)
 					// Prepend a new get reactor for waitKnativeServiceReady to use
-					cs.PrependReactor(reactorVerbs.Get, knativeResource, getSuccess)
+					cs.PrependReactor(reactorVerbs.Get, knativeServicesResource, getSuccess)
 					// Nil error indicates Create success
 					return true, testKnSvc, nil
 				},
@@ -131,7 +132,7 @@ func TestDeployKnativeService(t *testing.T) {
 		"update_service": {
 			{
 				verb:     reactorVerbs.Get,
-				resource: knativeResource,
+				resource: knativeServicesResource,
 				rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 					expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
 					// Check that the method is called with the expected action
@@ -142,13 +143,13 @@ func TestDeployKnativeService(t *testing.T) {
 			},
 			{
 				verb:     reactorVerbs.Update,
-				resource: knativeResource,
+				resource: knativeServicesResource,
 				rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 					expAction := k8stesting.NewUpdateAction(resourceItem, testNamespace, testKnSvc)
 					// Check that the method is called with the expected action
 					assert.Equal(t, expAction, action)
 					// Prepend a new get reactor for waitKnativeServiceReady to use
-					cs.PrependReactor(reactorVerbs.Get, knativeResource, getSuccess)
+					cs.PrependReactor(reactorVerbs.Get, knativeServicesResource, getSuccess)
 					// Nil error indicates Update success
 					return true, testKnSvc, nil
 				},
@@ -396,7 +397,7 @@ func TestDeleteKnativeService(t *testing.T) {
 	resourceItem := schema.GroupVersionResource{
 		Group:    knativeGroup,
 		Version:  knativeVersion,
-		Resource: knativeResource,
+		Resource: knativeServicesResource,
 	}
 	cs := knservingclientset.NewSimpleClientset()
 
@@ -411,7 +412,7 @@ func TestDeleteKnativeService(t *testing.T) {
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
-					resource: knativeResource,
+					resource: knativeServicesResource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
 						// Check that the method is called with the expected action
@@ -429,7 +430,7 @@ func TestDeleteKnativeService(t *testing.T) {
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
-					resource: knativeResource,
+					resource: knativeServicesResource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
 						// Check that the method is called with the expected action
@@ -439,7 +440,7 @@ func TestDeleteKnativeService(t *testing.T) {
 				},
 				{
 					verb:     reactorVerbs.Delete,
-					resource: knativeResource,
+					resource: knativeServicesResource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewDeleteAction(resourceItem, testNamespace, testName)
 						assert.Equal(t, expAction, action)
@@ -455,7 +456,7 @@ func TestDeleteKnativeService(t *testing.T) {
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
-					resource: knativeResource,
+					resource: knativeServicesResource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testName)
 						// Check that the method is called with the expected action
@@ -665,6 +666,86 @@ func TestDeleteKubernetesService(t *testing.T) {
 			err := c.DeleteKubernetesService(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
+		})
+	}
+}
+
+func TestGetKnativeServiceDesiredReplicas(t *testing.T) {
+	testSvcName, testRevisionName, testNamespace := "test-name", "test-name-0", "test-namespace"
+	var testDesiredReplicas int32 = 5
+
+	resourceItem := schema.GroupVersionResource{
+		Group:    knativeGroup,
+		Version:  knativeVersion,
+		Resource: knativeRevisionsResource,
+	}
+
+	// Define tests
+	cs := knservingclientset.NewSimpleClientset()
+	tests := map[string]struct {
+		rFunc            func(action k8stesting.Action) (bool, runtime.Object, error)
+		expectedReplicas int
+		expectedErr      string
+	}{
+		"failure | revision not found": {
+			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+				expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testRevisionName)
+				// Check that the method is called with the expected action
+				assert.Equal(t, expAction, action)
+				// Return nil object and error to indicate non existent object
+				return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testRevisionName)
+			},
+			expectedErr: "abc",
+		},
+		"failure | desired replicas not set": {
+			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+				expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testRevisionName)
+				// Check that the method is called with the expected action
+				assert.Equal(t, expAction, action)
+				// Return test response
+				return true, &knservingv1.Revision{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: testRevisionName,
+					},
+				}, nil
+			},
+			expectedErr: fmt.Sprintf("Desired Replicas for %s/%s is not set", namespace, testSvcName),
+		},
+		"success": {
+			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+				expAction := k8stesting.NewGetAction(resourceItem, testNamespace, testRevisionName)
+				// Check that the method is called with the expected action
+				assert.Equal(t, expAction, action)
+				// Return test response
+				return true, &knservingv1.Revision{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: testRevisionName,
+					},
+					Status: knservingv1.RevisionStatus{
+						DesiredReplicas: &testDesiredReplicas,
+					},
+				}, nil
+			},
+			expectedReplicas: 5,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Create test controller
+			c := createTestKnController(cs, []reactor{{
+				verb:     reactorVerbs.Get,
+				resource: knativeRevisionsResource,
+				rFunc:    tc.rFunc,
+			}})
+
+			desiredReplicas, err := c.GetKnativeServiceDesiredReplicas(context.TODO(), testSvcName, testNamespace)
+			if tc.expectedErr == "" {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectedReplicas, desiredReplicas)
+			} else {
+				assert.EqualError(t, err, tc.expectedErr)
+			}
 		})
 	}
 }
