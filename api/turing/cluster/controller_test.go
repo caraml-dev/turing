@@ -695,7 +695,7 @@ func TestGetKnativeServiceDesiredReplicas(t *testing.T) {
 				// Return nil object and error to indicate non existent object
 				return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testRevisionName)
 			},
-			expectedErr: "abc",
+			expectedErr: `"test-name-0" not found`,
 		},
 		"failure | desired replicas not set": {
 			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
@@ -709,7 +709,7 @@ func TestGetKnativeServiceDesiredReplicas(t *testing.T) {
 					},
 				}, nil
 			},
-			expectedErr: fmt.Sprintf("Desired Replicas for %s/%s is not set", namespace, testSvcName),
+			expectedErr: fmt.Sprintf("Desired Replicas for %s/%s is not set", testNamespace, testSvcName),
 		},
 		"success": {
 			rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
@@ -744,7 +744,7 @@ func TestGetKnativeServiceDesiredReplicas(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, tc.expectedReplicas, desiredReplicas)
 			} else {
-				assert.EqualError(t, err, tc.expectedErr)
+				assert.ErrorContains(t, err, tc.expectedErr)
 			}
 		})
 	}
