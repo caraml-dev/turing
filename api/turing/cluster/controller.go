@@ -303,7 +303,11 @@ func (c *controller) DeleteKnativeService(
 }
 
 // GetKnativeServiceDesiredReplicas determines the current desired number of replicas for the default revision
-func (c *controller) GetKnativeServiceDesiredReplicas(ctx context.Context, svcName string, namespace string) (int, error) {
+func (c *controller) GetKnativeServiceDesiredReplicas(
+	ctx context.Context,
+	svcName string,
+	namespace string,
+) (int, error) {
 	// Init knative revisions getter
 	revisions := c.knServingClient.Revisions(namespace)
 

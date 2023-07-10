@@ -358,7 +358,9 @@ func (ds *deploymentService) createServices(
 	// Enricher
 	if routerVersion.Enricher != nil {
 		var currEnricherReplicas *int
-		if currRouterVersion != nil && currRouterVersion.Status == models.RouterVersionStatusDeployed && currRouterVersion.Enricher != nil {
+		if currRouterVersion != nil &&
+			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
+			currRouterVersion.Enricher != nil {
 			currEnricherSvc, err := ds.svcBuilder.NewEnricherService(
 				currRouterVersion, project, secretName,
 				knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, nil,
@@ -366,7 +368,8 @@ func (ds *deploymentService) createServices(
 			if err != nil {
 				return services, fmt.Errorf("Unable to build the details for the currently deployed enricher: %w", err)
 			}
-			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnricherSvc.Name, currEnricherSvc.Namespace)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
+				currEnricherSvc.Name, currEnricherSvc.Namespace)
 			if err == nil {
 				currEnricherReplicas = &currReplicas
 			}
@@ -384,7 +387,9 @@ func (ds *deploymentService) createServices(
 	// Ensembler
 	if routerVersion.HasDockerConfig() {
 		var currEnsemblerReplicas *int
-		if currRouterVersion != nil && currRouterVersion.Status == models.RouterVersionStatusDeployed && routerVersion.HasDockerConfig() {
+		if currRouterVersion != nil &&
+			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
+			routerVersion.HasDockerConfig() {
 			currEnsemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 				currRouterVersion,
 				project,
@@ -396,7 +401,8 @@ func (ds *deploymentService) createServices(
 			if err != nil {
 				return services, fmt.Errorf("Unable to build the details for the currently deployed ensembler: %w", err)
 			}
-			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnsemblerSvc.Name, currEnsemblerSvc.Namespace)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
+				currEnsemblerSvc.Name, currEnsemblerSvc.Namespace)
 			if err == nil {
 				currEnsemblerReplicas = &currReplicas
 			}
@@ -422,7 +428,8 @@ func (ds *deploymentService) createServices(
 		if err != nil {
 			return services, fmt.Errorf("Unable to build the details for the currently deployed router: %w", err)
 		}
-		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currRouterSvc.Name, currRouterSvc.Namespace)
+		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
+			currRouterSvc.Name, currRouterSvc.Namespace)
 		if err == nil {
 			currRouterReplicas = &currReplicas
 		}
