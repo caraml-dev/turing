@@ -174,9 +174,9 @@ func (msb *mockClusterServiceBuilder) NewPodDisruptionBudget(
 			servicebuilder.GetComponentName(routerVersion, componentType),
 			servicebuilder.ComponentTypes.PDB,
 		),
-		Namespace:      project.Name,
-		MaxUnavailable: pdbConfig.MaxUnavailable,
-		MinAvailable:   pdbConfig.MinAvailable,
+		Namespace:                project.Name,
+		MaxUnavailablePercentage: pdbConfig.MaxUnavailablePercentage,
+		MinAvailablePercentage:   pdbConfig.MinAvailablePercentage,
 		Selector: &apimetav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app": fmt.Sprintf(
@@ -196,6 +196,7 @@ func TestDeployEndpoint(t *testing.T) {
 	testEnv := "test-env"
 	testNamespace := "test-namespace"
 	envType := "staging"
+	defaultMinAvailablePercentage := 20
 
 	// Create test router version
 	filePath := filepath.Join("..", "testdata", "cluster",
@@ -212,7 +213,7 @@ func TestDeployEndpoint(t *testing.T) {
 	controller.On("CreateSecret", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyPersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyIstioVirtualService", mock.Anything, mock.Anything).Return(nil)
-	controller.On("CreatePodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).
+	controller.On("ApplyPodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).
 		Return(&policyv1.PodDisruptionBudget{}, nil)
 
 	// Create mock service builder
@@ -238,8 +239,8 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 		svcBuilder: svcBuilder,
 		pdbConfig: config.PodDisruptionBudgetConfig{
-			Enabled:      true,
-			MinAvailable: "20%",
+			Enabled:                true,
+			MinAvailablePercentage: &defaultMinAvailablePercentage,
 		},
 	}
 
@@ -349,37 +350,37 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 		Endpoint: "test-svc-router.models.example.com",
 	})
-	controller.AssertCalled(t, "CreatePodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
-		Name:         "test-svc-turing-router-1-pdb",
-		Namespace:    testNamespace,
-		MinAvailable: "20%",
+	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
+		Name:                   "test-svc-turing-router-1-pdb",
+		Namespace:              testNamespace,
+		MinAvailablePercentage: &defaultMinAvailablePercentage,
 		Selector: &apimetav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app": "test-svc-turing-router-1-0",
 			},
 		},
 	})
-	controller.AssertCalled(t, "CreatePodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
-		Name:         "test-svc-turing-enricher-1-pdb",
-		Namespace:    testNamespace,
-		MinAvailable: "20%",
+	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
+		Name:                   "test-svc-turing-enricher-1-pdb",
+		Namespace:              testNamespace,
+		MinAvailablePercentage: &defaultMinAvailablePercentage,
 		Selector: &apimetav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app": "test-svc-turing-enricher-1-0",
 			},
 		},
 	})
-	controller.AssertCalled(t, "CreatePodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
-		Name:         "test-svc-turing-ensembler-1-pdb",
-		Namespace:    testNamespace,
-		MinAvailable: "20%",
+	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
+		Name:                   "test-svc-turing-ensembler-1-pdb",
+		Namespace:              testNamespace,
+		MinAvailablePercentage: &defaultMinAvailablePercentage,
 		Selector: &apimetav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app": "test-svc-turing-ensembler-1-0",
 			},
 		},
 	})
-	controller.AssertNumberOfCalls(t, "CreatePodDisruptionBudget", 3)
+	controller.AssertNumberOfCalls(t, "ApplyPodDisruptionBudget", 3)
 
 	// Verify endpoint for upi routers
 	routerVersion.Protocol = routerConfig.UPI

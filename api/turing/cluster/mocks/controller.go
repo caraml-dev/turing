@@ -6,6 +6,7 @@ import (
 	context "context"
 
 	cluster "github.com/caraml-dev/turing/api/turing/cluster"
+	batchv1 "k8s.io/api/batch/v1"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -13,11 +14,9 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	policyv1 "k8s.io/api/policy/v1"
-
 	rbacv1 "k8s.io/api/rbac/v1"
 
-	v1 "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/policy/v1"
 
 	v1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 )
@@ -69,20 +68,46 @@ func (_m *Controller) ApplyPersistentVolumeClaim(ctx context.Context, namespace 
 	return r0
 }
 
+// ApplyPodDisruptionBudget provides a mock function with given fields: ctx, namespace, pdb
+func (_m *Controller) ApplyPodDisruptionBudget(ctx context.Context, namespace string, pdb cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error) {
+	ret := _m.Called(ctx, namespace, pdb)
+
+	var r0 *v1.PodDisruptionBudget
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error)); ok {
+		return rf(ctx, namespace, pdb)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) *v1.PodDisruptionBudget); ok {
+		r0 = rf(ctx, namespace, pdb)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.PodDisruptionBudget)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, cluster.PodDisruptionBudget) error); ok {
+		r1 = rf(ctx, namespace, pdb)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateJob provides a mock function with given fields: ctx, namespace, job
-func (_m *Controller) CreateJob(ctx context.Context, namespace string, job cluster.Job) (*v1.Job, error) {
+func (_m *Controller) CreateJob(ctx context.Context, namespace string, job cluster.Job) (*batchv1.Job, error) {
 	ret := _m.Called(ctx, namespace, job)
 
-	var r0 *v1.Job
+	var r0 *batchv1.Job
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.Job) (*v1.Job, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.Job) (*batchv1.Job, error)); ok {
 		return rf(ctx, namespace, job)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.Job) *v1.Job); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.Job) *batchv1.Job); ok {
 		r0 = rf(ctx, namespace, job)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.Job)
+			r0 = ret.Get(0).(*batchv1.Job)
 		}
 	}
 
@@ -107,32 +132,6 @@ func (_m *Controller) CreateNamespace(ctx context.Context, name string) error {
 	}
 
 	return r0
-}
-
-// CreatePodDisruptionBudget provides a mock function with given fields: ctx, namespace, pdb
-func (_m *Controller) CreatePodDisruptionBudget(ctx context.Context, namespace string, pdb cluster.PodDisruptionBudget) (*policyv1.PodDisruptionBudget, error) {
-	ret := _m.Called(ctx, namespace, pdb)
-
-	var r0 *policyv1.PodDisruptionBudget
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) (*policyv1.PodDisruptionBudget, error)); ok {
-		return rf(ctx, namespace, pdb)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) *policyv1.PodDisruptionBudget); ok {
-		r0 = rf(ctx, namespace, pdb)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*policyv1.PodDisruptionBudget)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string, cluster.PodDisruptionBudget) error); ok {
-		r1 = rf(ctx, namespace, pdb)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
 }
 
 // CreateRole provides a mock function with given fields: ctx, namespace, role
@@ -422,19 +421,19 @@ func (_m *Controller) DeployKubernetesService(ctx context.Context, svc *cluster.
 }
 
 // GetJob provides a mock function with given fields: ctx, namespace, jobName
-func (_m *Controller) GetJob(ctx context.Context, namespace string, jobName string) (*v1.Job, error) {
+func (_m *Controller) GetJob(ctx context.Context, namespace string, jobName string) (*batchv1.Job, error) {
 	ret := _m.Called(ctx, namespace, jobName)
 
-	var r0 *v1.Job
+	var r0 *batchv1.Job
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*v1.Job, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*batchv1.Job, error)); ok {
 		return rf(ctx, namespace, jobName)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.Job); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *batchv1.Job); ok {
 		r0 = rf(ctx, namespace, jobName)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.Job)
+			r0 = ret.Get(0).(*batchv1.Job)
 		}
 	}
 

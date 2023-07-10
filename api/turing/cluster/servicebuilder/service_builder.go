@@ -360,11 +360,11 @@ func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
 			GetComponentName(routerVersion, componentType),
 			ComponentTypes.PDB,
 		),
-		Namespace:      project.Name,
-		Labels:         buildLabels(project, routerVersion.Router),
-		MaxUnavailable: pdbConfig.MaxUnavailable,
-		MinAvailable:   pdbConfig.MinAvailable,
-		Selector:       selector,
+		Namespace:                project.Name,
+		Labels:                   buildLabels(project, routerVersion.Router),
+		MaxUnavailablePercentage: pdbConfig.MaxUnavailablePercentage,
+		MinAvailablePercentage:   pdbConfig.MinAvailablePercentage,
+		Selector:                 selector,
 	}
 }
 

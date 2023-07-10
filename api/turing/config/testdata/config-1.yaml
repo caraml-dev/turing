@@ -43,7 +43,7 @@ DeployConfig:
               - 1
   PodDisruptionBudget:
     Enabled: true
-    MinAvailable: 20%
+    MinAvailablePercentage: 20
 KnativeServiceDefaults:
   QueueProxyResourcePercentage: 20
   UserContainerLimitRequestFactor: 1.25

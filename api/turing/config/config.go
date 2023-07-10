@@ -240,8 +240,8 @@ type DeploymentConfig struct {
 type PodDisruptionBudgetConfig struct {
 	Enabled bool
 	// Can specify only one of maxUnavailable and minAvailable
-	MaxUnavailable string
-	MinAvailable   string
+	MaxUnavailablePercentage *int
+	MinAvailablePercentage   *int
 }
 
 // KubernetesLabelConfigs are the configurations for labeling
@@ -659,12 +659,12 @@ func NewConfigValidator() (*validator.Validate, error) {
 	// Use struct level validation for PodDisruptionBudgetConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {
 		field := sl.Current().Interface().(PodDisruptionBudgetConfig)
-		// If auth is enabled, URL should be set
+		// If PDB is enabled, one of max unavailable or min available shall be set
 		if field.Enabled &&
-			(field.MaxUnavailable == "" && field.MinAvailable == "") ||
-			(field.MaxUnavailable != "" && field.MinAvailable != "") {
-			sl.ReportError(field.MaxUnavailable, "max_unavailable", "string", "", "")
-			sl.ReportError(field.MinAvailable, "min_available", "string", "", "")
+			(field.MaxUnavailablePercentage == nil && field.MinAvailablePercentage == nil) ||
+			(field.MaxUnavailablePercentage != nil && field.MinAvailablePercentage != nil) {
+			sl.ReportError(field.MaxUnavailablePercentage, "max_unavailable_percentage", "int", "choose_one[max_unavailable_percentage,min_available_percentage]", "")
+			sl.ReportError(field.MinAvailablePercentage, "min_available_percentage", "int", "choose_one[max_unavailable_percentage,min_available_percentage]", "")
 		}
 	}, PodDisruptionBudgetConfig{})
 

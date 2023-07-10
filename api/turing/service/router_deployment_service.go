@@ -782,7 +782,7 @@ func deployPodDisruptionBudgets(ctx context.Context,
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying pdb %s", pdb.Name))
 
-		_, err := controller.CreatePodDisruptionBudget(ctx, pdb.Namespace, *pdb)
+		_, err := controller.ApplyPodDisruptionBudget(ctx, pdb.Namespace, *pdb)
 		if err != nil {
 			err = errors.Wrapf(err, "Failed to deploy pdb %s", pdb.Name)
 			eventsCh.Write(models.NewErrorEvent(
@@ -806,7 +806,7 @@ func deployPodDisruptionBudgets(ctx context.Context,
 func deletePodDisruptionBudgets(ctx context.Context,
 	controller cluster.Controller, pdbs []*cluster.PodDisruptionBudget, eventsCh *EventChannel,
 ) error {
-	// Define deploy function
+	// Define delete function
 	deleteFunc := func(ctx context.Context,
 		obj any,
 		wg *sync.WaitGroup,

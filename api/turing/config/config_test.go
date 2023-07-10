@@ -145,6 +145,8 @@ func TestAuthConfigValidation(t *testing.T) {
 }
 
 func TestPDBConfigValidation(t *testing.T) {
+	defaultInt := 20
+
 	tests := map[string]struct {
 		cfg     config.PodDisruptionBudgetConfig
 		success bool
@@ -157,15 +159,15 @@ func TestPDBConfigValidation(t *testing.T) {
 		},
 		"success pdb enabled, max unavailable exist": {
 			cfg: config.PodDisruptionBudgetConfig{
-				Enabled:        true,
-				MaxUnavailable: "20%",
+				Enabled:                  true,
+				MaxUnavailablePercentage: &defaultInt,
 			},
 			success: true,
 		},
 		"success pdb enabled, min available exist": {
 			cfg: config.PodDisruptionBudgetConfig{
-				Enabled:      true,
-				MinAvailable: "20%",
+				Enabled:                true,
+				MinAvailablePercentage: &defaultInt,
 			},
 			success: true,
 		},
@@ -177,9 +179,9 @@ func TestPDBConfigValidation(t *testing.T) {
 		},
 		"failure pdb enabled, both max unavailable and min available exist": {
 			cfg: config.PodDisruptionBudgetConfig{
-				Enabled:        true,
-				MaxUnavailable: "20%",
-				MinAvailable:   "20%",
+				Enabled:                  true,
+				MaxUnavailablePercentage: &defaultInt,
+				MinAvailablePercentage:   &defaultInt,
 			},
 			success: false,
 		},
@@ -215,6 +217,8 @@ func TestLoad(t *testing.T) {
 	zeroSecond, _ := time.ParseDuration("0s")
 	oneSecond, _ := time.ParseDuration("1s")
 	twoSecond, _ := time.ParseDuration("2s")
+
+	defaultMinAvailablePercentage := 20
 
 	tests := map[string]struct {
 		filepaths []string
@@ -362,8 +366,8 @@ func TestLoad(t *testing.T) {
 						},
 					},
 					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
-						Enabled:      true,
-						MinAvailable: "20%",
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
@@ -511,8 +515,8 @@ func TestLoad(t *testing.T) {
 						},
 					},
 					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
-						Enabled:      true,
-						MinAvailable: "20%",
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
@@ -701,8 +705,8 @@ func TestLoad(t *testing.T) {
 						},
 					},
 					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
-						Enabled:      true,
-						MinAvailable: "20%",
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{

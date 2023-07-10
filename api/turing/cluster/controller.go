@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/client-go/kubernetes"
-
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	sparkclient "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned"
 	sparkoperatorv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/typed/sparkoperator.k8s.io/v1beta2" //nolint
+	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
+	"github.com/pkg/errors"
+	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
 	apiappsv1 "k8s.io/api/apps/v1"
 	apibatchv1 "k8s.io/api/batch/v1"
 	apicorev1 "k8s.io/api/core/v1"
@@ -20,28 +21,23 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	policyv1cfg "k8s.io/client-go/applyconfigurations/policy/v1"
+	"k8s.io/client-go/kubernetes"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	batchv1 "k8s.io/client-go/kubernetes/typed/batch/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	policyv1 "k8s.io/client-go/kubernetes/typed/policy/v1"
 	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
-
-	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
-
 	rest "k8s.io/client-go/rest"
-
 	"knative.dev/pkg/kmp"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 
-	"github.com/pkg/errors"
-
-	"github.com/caraml-dev/turing/api/turing/config"
-
-	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 	// Load required auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
+	"github.com/caraml-dev/turing/api/turing/config"
 )
 
 var ErrNamespaceAlreadyExists = errors.New("namespace already exists")
@@ -111,7 +107,7 @@ type Controller interface {
 	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
 
 	// PodDisruptionBudget
-	CreatePodDisruptionBudget(ctx context.Context, namespace string,
+	ApplyPodDisruptionBudget(ctx context.Context, namespace string,
 		pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
 	DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error
 }
@@ -686,34 +682,25 @@ func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appN
 	return c.k8sSparkOperator.SparkApplications(namespace).Delete(ctx, appName, metav1.DeleteOptions{})
 }
 
-func (c *controller) CreatePodDisruptionBudget(
+func (c *controller) ApplyPodDisruptionBudget(
 	ctx context.Context,
 	namespace string,
 	pdb PodDisruptionBudget,
 ) (*apipolicyv1.PodDisruptionBudget, error) {
-	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(namespace).Get(ctx, pdb.Name, metav1.GetOptions{})
+	pdbSpec, err := pdb.BuildPDBSpec()
 	if err != nil {
-		if !k8serrors.IsNotFound(err) {
-			return nil, fmt.Errorf(
-				"failed getting status of pod disruption budget %s in namespace %s: %w",
-				pdb.Name,
-				namespace,
-				err,
-			)
-		}
-
-		pdbCfg, err := pdb.BuildPodDisruptionBudget()
-		if err != nil {
-			return nil, errors.Errorf("failed building pod disruption budget %s config: %s", pdb.Name, err)
-		}
-
-		pdbObj, err = c.k8sPolicyClient.PodDisruptionBudgets(namespace).Create(ctx, pdbCfg, metav1.CreateOptions{})
-		if err != nil {
-			return nil, errors.Errorf(
-				"failed creating pod disruption budget %s in namespace %s", pdb.Name, namespace,
-			)
-		}
+		return nil, err
 	}
+
+	pdbCfg := policyv1cfg.PodDisruptionBudget(pdb.Name, pdb.Namespace)
+	pdbCfg.WithLabels(pdb.Labels)
+	pdbCfg.WithSpec(pdbSpec)
+
+	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(pdb.Namespace).Apply(ctx, pdbCfg, metav1.ApplyOptions{FieldManager: "application/apply-patch"})
+	if err != nil {
+		return nil, err
+	}
+
 	return pdbObj, nil
 }
 

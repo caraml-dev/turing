@@ -4,137 +4,105 @@ import (
 	"reflect"
 	"testing"
 
-	policyv1 "k8s.io/api/policy/v1"
+	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	metav1cfg "k8s.io/client-go/applyconfigurations/meta/v1"
+	policyv1cfg "k8s.io/client-go/applyconfigurations/policy/v1"
 )
 
-func TestPodDisruptionBudget_BuildPodDisruptionBudget(t *testing.T) {
+func TestPodDisruptionBudget_BuildPDBSpec(t *testing.T) {
+	defaultInt := 20
+	defaultIntOrString := intstr.FromString("20%")
 	defaultLabels := map[string]string{
-		"key": "value",
+		"app": "test-svc",
 	}
 
 	type fields struct {
-		Name           string
-		Namespace      string
-		Labels         map[string]string
-		MaxUnavailable string
-		MinAvailable   string
-		Selector       *metav1.LabelSelector
+		Name                     string
+		Namespace                string
+		Labels                   map[string]string
+		MaxUnavailablePercentage *int
+		MinAvailablePercentage   *int
+		Selector                 *metav1.LabelSelector
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    *policyv1.PodDisruptionBudget
+		want    *policyv1cfg.PodDisruptionBudgetSpecApplyConfiguration
 		wantErr bool
 	}{
 		{
-			"invalid: empty maxUnavailable and minAvailable",
-			fields{
-				Name:      "test-pdb-turing-router",
-				Namespace: "test-namespace",
-				Labels:    defaultLabels,
-			},
-			nil,
-			true,
-		},
-		{
-			"only maxUnavailable",
-			fields{
-				Name:           "test-pdb-turing-router",
-				Namespace:      "test-namespace",
-				Labels:         defaultLabels,
-				MaxUnavailable: "20%",
-				Selector: &metav1.LabelSelector{
+			name: "valid: enabled with min_available",
+			fields: fields{
+				Name:                     "test-svc-turing-logger-1",
+				Namespace:                "pdb-test",
+				Labels:                   defaultLabels,
+				MaxUnavailablePercentage: nil,
+				MinAvailablePercentage:   &defaultInt,
+				Selector: &apimetav1.LabelSelector{
 					MatchLabels: defaultLabels,
 				},
 			},
-			&policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pdb-turing-router",
-					Namespace: "test-namespace",
-					Labels:    defaultLabels,
-				},
-				Spec: policyv1.PodDisruptionBudgetSpec{
-					MaxUnavailable: &intstr.IntOrString{Type: intstr.String, StrVal: "20%"},
-					Selector: &metav1.LabelSelector{
-						MatchLabels: defaultLabels,
-					},
-				},
-			},
-			false,
-		},
-		{
-			"only minAvailable",
-			fields{
-				Name:         "test-pdb-turing-router",
-				Namespace:    "test-namespace",
-				Labels:       defaultLabels,
-				MinAvailable: "20%",
-				Selector: &metav1.LabelSelector{
+			want: &policyv1cfg.PodDisruptionBudgetSpecApplyConfiguration{
+				MinAvailable: &defaultIntOrString,
+				Selector: &metav1cfg.LabelSelectorApplyConfiguration{
 					MatchLabels: defaultLabels,
 				},
 			},
-			&policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pdb-turing-router",
-					Namespace: "test-namespace",
-					Labels:    defaultLabels,
-				},
-				Spec: policyv1.PodDisruptionBudgetSpec{
-					MinAvailable: &intstr.IntOrString{Type: intstr.String, StrVal: "20%"},
-					Selector: &metav1.LabelSelector{
-						MatchLabels: defaultLabels,
-					},
-				},
-			},
-			false,
+			wantErr: false,
 		},
 		{
-			"both maxUnavailable and minAvailable exist, choose minAvailable",
-			fields{
-				Name:           "test-pdb-turing-router",
-				Namespace:      "test-namespace",
-				Labels:         defaultLabels,
-				MaxUnavailable: "20%",
-				MinAvailable:   "20%",
-				Selector: &metav1.LabelSelector{
+			name: "valid: enabled but both max_unavailable and min_available specified. will use min available",
+			fields: fields{
+				Name:                     "test-svc-turing-logger-1",
+				Namespace:                "pdb-test",
+				Labels:                   defaultLabels,
+				MaxUnavailablePercentage: &defaultInt,
+				MinAvailablePercentage:   &defaultInt,
+				Selector: &apimetav1.LabelSelector{
 					MatchLabels: defaultLabels,
 				},
 			},
-			&policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pdb-turing-router",
-					Namespace: "test-namespace",
-					Labels:    defaultLabels,
-				},
-				Spec: policyv1.PodDisruptionBudgetSpec{
-					MinAvailable: &intstr.IntOrString{Type: intstr.String, StrVal: "20%"},
-					Selector: &metav1.LabelSelector{
-						MatchLabels: defaultLabels,
-					},
+			want: &policyv1cfg.PodDisruptionBudgetSpecApplyConfiguration{
+				MinAvailable: &defaultIntOrString,
+				Selector: &metav1cfg.LabelSelectorApplyConfiguration{
+					MatchLabels: defaultLabels,
 				},
 			},
-			false,
+			wantErr: false,
+		},
+		{
+			name: "invalid: enabled but no max_unavailable and min_available",
+			fields: fields{
+				Name:                     "test-svc-turing-logger-1",
+				Namespace:                "pdb-test",
+				Labels:                   map[string]string{},
+				MaxUnavailablePercentage: nil,
+				MinAvailablePercentage:   nil,
+				Selector:                 nil,
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := PodDisruptionBudget{
-				Name:           tt.fields.Name,
-				Namespace:      tt.fields.Namespace,
-				Labels:         tt.fields.Labels,
-				MaxUnavailable: tt.fields.MaxUnavailable,
-				MinAvailable:   tt.fields.MinAvailable,
-				Selector:       tt.fields.Selector,
+				Name:                     tt.fields.Name,
+				Namespace:                tt.fields.Namespace,
+				Labels:                   tt.fields.Labels,
+				MaxUnavailablePercentage: tt.fields.MaxUnavailablePercentage,
+				MinAvailablePercentage:   tt.fields.MinAvailablePercentage,
+				Selector:                 tt.fields.Selector,
 			}
-			got, err := cfg.BuildPodDisruptionBudget()
+			got, err := cfg.BuildPDBSpec()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("PodDisruptionBudget.BuildPodDisruptionBudget() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("PodDisruptionBudget.BuildPDBSpec() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("PodDisruptionBudget.BuildPodDisruptionBudget() = %+v, want %+v", got, tt.want)
+				t.Errorf("PodDisruptionBudget.BuildPDBSpec() = %v, want %v", got, tt.want)
 			}
 		})
 	}
