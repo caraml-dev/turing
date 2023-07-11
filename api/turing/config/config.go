@@ -663,8 +663,10 @@ func NewConfigValidator() (*validator.Validate, error) {
 		if field.Enabled &&
 			(field.MaxUnavailablePercentage == nil && field.MinAvailablePercentage == nil) ||
 			(field.MaxUnavailablePercentage != nil && field.MinAvailablePercentage != nil) {
-			sl.ReportError(field.MaxUnavailablePercentage, "max_unavailable_percentage", "int", "choose_one[max_unavailable_percentage,min_available_percentage]", "")
-			sl.ReportError(field.MinAvailablePercentage, "min_available_percentage", "int", "choose_one[max_unavailable_percentage,min_available_percentage]", "")
+			sl.ReportError(field.MaxUnavailablePercentage, "max_unavailable_percentage", "int",
+				"choose_one[max_unavailable_percentage,min_available_percentage]", "")
+			sl.ReportError(field.MinAvailablePercentage, "min_available_percentage", "int",
+				"choose_one[max_unavailable_percentage,min_available_percentage]", "")
 		}
 	}, PodDisruptionBudgetConfig{})
 

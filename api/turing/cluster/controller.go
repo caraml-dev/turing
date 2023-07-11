@@ -696,7 +696,13 @@ func (c *controller) ApplyPodDisruptionBudget(
 	pdbCfg.WithLabels(pdb.Labels)
 	pdbCfg.WithSpec(pdbSpec)
 
-	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(pdb.Namespace).Apply(ctx, pdbCfg, metav1.ApplyOptions{FieldManager: "application/apply-patch"})
+	pdbObj, err := c.k8sPolicyClient.PodDisruptionBudgets(pdb.Namespace).Apply(
+		ctx,
+		pdbCfg,
+		metav1.ApplyOptions{
+			FieldManager: "application/apply-patch",
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
