@@ -16,14 +16,12 @@ const (
 	pluginsServerReplicaCount = 1
 )
 
-var (
-	pluginsVolume = v1.Volume{
-		Name: "plugins-volume",
-		VolumeSource: v1.VolumeSource{
-			EmptyDir: &v1.EmptyDirVolumeSource{},
-		},
-	}
-)
+var pluginsVolume = v1.Volume{
+	Name: "plugins-volume",
+	VolumeSource: v1.VolumeSource{
+		EmptyDir: &v1.EmptyDirVolumeSource{},
+	},
+}
 
 func NewPluginsServerService(
 	routerVersion *models.RouterVersion,

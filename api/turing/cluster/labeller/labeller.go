@@ -17,8 +17,10 @@ const (
 	AppLabel = "app"
 )
 
-var prefix string
-var environment string
+var (
+	prefix      string
+	environment string
+)
 
 // InitKubernetesLabeller builds a new KubernetesLabeller Singleton
 func InitKubernetesLabeller(p, e string) {

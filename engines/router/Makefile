@@ -21,8 +21,8 @@ clean:
 .PHONY: setup
 setup:
 	@echo "Setting up tools..."
-	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.48.0/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.48.0
+	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@test -x $(shell go env GOPATH)/bin/gotest || go install github.com/rakyll/gotest@latest
 
 .PHONY: fmt
 fmt:
@@ -47,13 +47,13 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
+	gotest -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out
 
 .PHONY: benchmark
 benchmark: tidy
 	@echo "Running Benchmark..."
-	go test -bench=. -run=Bench ${SRC_ROOT}/... -benchmem
+	gotest -bench=. -run=Bench ${SRC_ROOT}/... -benchmem
 
 .PHONY: version
 version:

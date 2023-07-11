@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/copystructure"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
@@ -34,6 +35,7 @@ const (
 )
 
 var ComponentTypes = struct {
+	BatchEnsembler       string
 	Enricher             string
 	Ensembler            string
 	Router               string
@@ -43,15 +45,18 @@ var ComponentTypes = struct {
 	CacheVolume          string
 	FiberConfig          string
 	PluginsServer        string
+	PDB                  string
 }{
-	Enricher:      "enricher",
-	Ensembler:     "ensembler",
-	Router:        "router",
-	FluentdLogger: "fluentd-logger",
-	Secret:        "secret",
-	CacheVolume:   "cache-volume",
-	FiberConfig:   "fiber-config",
-	PluginsServer: "plugins-server",
+	BatchEnsembler: "batch-ensembler",
+	Enricher:       "enricher",
+	Ensembler:      "ensembler",
+	Router:         "router",
+	FluentdLogger:  "fluentd-logger",
+	Secret:         "secret",
+	CacheVolume:    "cache-volume",
+	FiberConfig:    "fiber-config",
+	PluginsServer:  "plugins-server",
+	PDB:            "pdb",
 }
 
 // ClusterServiceBuilder parses the Router Config to build a service definition
@@ -102,6 +107,12 @@ type ClusterServiceBuilder interface {
 		ensemblerServiceAccountKey string,
 		expEngineServiceAccountKey string,
 	) *cluster.Secret
+	NewPodDisruptionBudget(
+		routerVersion *models.RouterVersion,
+		project *mlp.Project,
+		componentType string,
+		pdbConfig config.PodDisruptionBudgetConfig,
+	) *cluster.PodDisruptionBudget
 	GetRouterServiceName(ver *models.RouterVersion) string
 }
 
@@ -324,6 +335,36 @@ func (sb *clusterSvcBuilder) NewSecret(
 		Namespace: project.Name,
 		Data:      data,
 		Labels:    buildLabels(project, routerVersion.Router),
+	}
+}
+
+// NewPodDisruptionBudget creates a new `cluster.PodDisruptionBudget`
+// for the given service (router/enricher/ensembler).
+func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
+	routerVersion *models.RouterVersion,
+	project *mlp.Project,
+	componentType string,
+	pdbConfig config.PodDisruptionBudgetConfig,
+) *cluster.PodDisruptionBudget {
+	selector := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app": fmt.Sprintf(
+				"%s-0",
+				GetComponentName(routerVersion, componentType),
+			),
+		},
+	}
+	return &cluster.PodDisruptionBudget{
+		Name: fmt.Sprintf(
+			"%s-%s",
+			GetComponentName(routerVersion, componentType),
+			ComponentTypes.PDB,
+		),
+		Namespace:                project.Name,
+		Labels:                   buildLabels(project, routerVersion.Router),
+		MaxUnavailablePercentage: pdbConfig.MaxUnavailablePercentage,
+		MinAvailablePercentage:   pdbConfig.MinAvailablePercentage,
+		Selector:                 selector,
 	}
 }
 

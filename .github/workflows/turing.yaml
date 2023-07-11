@@ -5,7 +5,7 @@ on:
   # (except changes to non-relevant paths)
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - "v[0-9]+.[0-9]+.[0-9]+*"
     branches:
       - main
     paths-ignore:
@@ -39,7 +39,7 @@ on:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
-  GO_VERSION: '1.20'
+  GO_VERSION: "1.20"
   GO_LINT_VERSION: v1.51.2
   CLUSTER_NAME: turing-e2e
   ISTIO_VERSION: 1.9.9
@@ -154,7 +154,7 @@ jobs:
       - name: Set up Node 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
+          node-version: "16.x"
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -235,6 +235,10 @@ jobs:
             gomod-${{ hashFiles('api/go.mod') }}
           restore-keys: gomod-
 
+      - name: Setup
+        working-directory: api
+        run: make setup
+
       - name: Run test
         working-directory: api
         env:
@@ -277,6 +281,9 @@ jobs:
           key: |
             gomod-${{ hashFiles('engines/router/go.mod') }}
           restore-keys: gomod-
+
+      - name: Setup
+        run: make setup
 
       - name: Run test
         run: make test
@@ -340,7 +347,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ["In-cluster credentials; API e2e", "Remote cluster credentials; SDK e2e"]
+        name:
+          [
+            "In-cluster credentials; API e2e",
+            "Remote cluster credentials; SDK e2e",
+          ]
         include:
           - name: "In-cluster credentials; API e2e"
             useInClusterConfig: true
@@ -455,7 +466,7 @@ jobs:
           echo "::group::kubernetes deployment"
           kubectl get deploy
           echo "::endgroup::"
-          
+
           echo "::group::knative serving deployment"
           kubectl get ksvc
           echo "::endgroup::"
