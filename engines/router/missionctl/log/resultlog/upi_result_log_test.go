@@ -194,10 +194,10 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 		resultLogger *UPIResultLogger
 	}
 	tests := []struct {
-		name              string
-		args              args
-		want              *upiv1.RouterLog
-		skipPublishingLog bool
+		name           string
+		args           args
+		want           *upiv1.RouterLog
+		expectLogError bool
 	}{
 		{
 			name: "empty request and response",
@@ -367,7 +367,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 				},
 				resultLogger: &UPIResultLogger{upiLogger: &mockUPILogger{}, loggerType: config.UPILogger},
 			},
-			skipPublishingLog: true,
+			expectLogError: true,
 		},
 	}
 	for _, tt := range tests {
@@ -379,7 +379,7 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 			tt.args.resultLogger.LogTuringRouterRequestSummary(tt.args.reqHeader, tt.args.upiReq, respCh)
 			mockLogger, ok := tt.args.resultLogger.upiLogger.(*mockUPILogger)
 			assert.True(t, ok, "mockUPILogger not used")
-			if tt.skipPublishingLog {
+			if tt.expectLogError {
 				// no calls due to error
 				assert.Equal(t, int32(0), mockLogger.numOfCalls)
 				return
