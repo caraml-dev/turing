@@ -7,7 +7,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/router v0.0.0
-	github.com/caraml-dev/universal-prediction-interface v0.3.4
+	github.com/caraml-dev/universal-prediction-interface v0.3.6
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/hashicorp/go-hclog v0.16.0
 	github.com/hashicorp/go-plugin v1.4.3

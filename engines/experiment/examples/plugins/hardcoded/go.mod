@@ -13,7 +13,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/caraml-dev/turing/engines/router v0.0.0 // indirect
-	github.com/caraml-dev/universal-prediction-interface v0.3.4 // indirect
+	github.com/caraml-dev/universal-prediction-interface v0.3.6 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
