@@ -160,16 +160,14 @@ class RouterEnsemblerConfig(DataObject):
             self._standard_config = standard_config
         elif isinstance(standard_config, dict):
             openapi_standard_config = standard_config.copy()
-            openapi_standard_config["experiment_mappings"] = (
-                [
+            openapi_standard_config["experiment_mappings"] = None
+            if "experiment_mappings" in standard_config and standard_config["experiment_mappings"] is not None:
+                openapi_standard_config["experiment_mappings"] = [
                     turing.generated.models.EnsemblerStandardConfigExperimentMappings(
                         **mapping
                     )
                     for mapping in standard_config["experiment_mappings"]
                 ]
-                if openapi_standard_config is not None
-                else None
-            )
             self._standard_config = EnsemblerStandardConfig(**openapi_standard_config)
         else:
             self._standard_config = standard_config
