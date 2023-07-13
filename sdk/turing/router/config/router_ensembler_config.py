@@ -167,7 +167,7 @@ class RouterEnsemblerConfig(DataObject):
                     )
                     for mapping in standard_config["experiment_mappings"]
                 ]
-                if openapi_standard_config is None
+                if openapi_standard_config is not None
                 else None
             )
             self._standard_config = EnsemblerStandardConfig(**openapi_standard_config)
