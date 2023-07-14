@@ -1,4 +1,5 @@
 import pytest
+import turing
 from turing.generated.exceptions import ApiValueError
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.autoscaling_policy import (
@@ -13,10 +14,10 @@ from turing.router.config.router_ensembler_config import (
     NopRouterEnsemblerConfig,
     PyfuncRouterEnsemblerConfig,
     DockerRouterEnsemblerConfig,
+    EnsemblerStandardConfig,
     StandardRouterEnsemblerConfig,
     InvalidExperimentMappingException,
 )
-
 
 @pytest.mark.parametrize(
     "id,type,standard_config,docker_config,expected",
@@ -544,6 +545,102 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
     with pytest.raises(expected):
         router.to_open_api()
 
+@pytest.mark.parametrize(
+    "ensembler_type,config,expected",
+    [
+        pytest.param(
+            "nop",
+            "nop_router_ensembler_config",
+            {
+                "nop_config": EnsemblerNopConfig(final_response_route_id="test"),
+                "type": "nop"
+            },
+        ),
+        pytest.param(
+            "standard",
+            "standard_router_ensembler_config_with_experiment_mappings",
+            {
+                "standard_config": EnsemblerStandardConfig(
+                    fallback_response_route_id="route-1",
+                    experiment_mappings=[
+                        turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                            experiment="experiment-1", route="route-1", treatment="treatment-1",
+                        ),
+                        turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                            experiment="experiment-2", route="route-2", treatment="treatment-2",
+                        ),
+                    ],
+                    route_name_path=None,
+                    lazy_routing=False,
+                ),
+                "type": "standard"
+            },
+        ),
+        pytest.param(
+            "standard",
+            "standard_router_ensembler_config_with_route_name_path",
+            {
+                "standard_config": EnsemblerStandardConfig(
+                    fallback_response_route_id="route-1",
+                    experiment_mappings=None,
+                    route_name_path="route_name",
+                    lazy_routing=False,
+                ),
+                "type": "standard"
+            },
+        ),
+        pytest.param(
+            "docker",
+            "generic_ensembler_docker_config",
+            {
+                "docker_config": turing.generated.models.EnsemblerDockerConfig(
+                    autoscaling_policy=turing.generated.models.AutoscalingPolicy(metric="memory", target="80"),
+                    endpoint="http://localhost:5000/ensembler_endpoint",
+                    env=[turing.generated.models.EnvVar(name="env_name", value="env_val")],
+                    image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
+                    port=5120,
+                    resource_request=turing.generated.models.ResourceRequest(
+                        cpu_request="100m", max_replica=3,
+                        memory_request="512Mi", min_replica=1,
+                    ),
+                    service_account="secret-name-for-google-service-account",
+                    timeout="500ms"
+                ),
+                "type": "docker"
+            },
+        ),
+        pytest.param(
+            "pyfunc",
+            "generic_ensembler_pyfunc_config",
+            {
+                "pyfunc_config": turing.generated.models.EnsemblerPyfuncConfig(
+                    autoscaling_policy=turing.generated.models.AutoscalingPolicy(metric="concurrency", target="10"),
+                    ensembler_id=11,
+                    env=[turing.generated.models.EnvVar(name="env_name", value="env_val")],
+                    project_id=77,
+                    resource_request=turing.generated.models.ResourceRequest(
+                        cpu_request="100m", max_replica=3,
+                        memory_request="512Mi",min_replica=1,
+                    ),
+                    timeout="500ms"
+                ),
+                "type": "pyfunc"
+            },
+        ),
+    ],
+)
+def test_create_base_ensembler(ensembler_type, config, expected, request):
+    config_data = request.getfixturevalue(config)
+    ensembler_config = None
+    if ensembler_type == "nop":
+        ensembler_config = RouterEnsemblerConfig(type=ensembler_type, nop_config=config_data)
+    elif ensembler_type == "standard":
+        ensembler_config = RouterEnsemblerConfig(type=ensembler_type, standard_config=config_data)
+    elif ensembler_type == "docker":
+        ensembler_config = RouterEnsemblerConfig(type=ensembler_type, docker_config=config_data)
+    elif ensembler_type == "pyfunc":
+        ensembler_config = RouterEnsemblerConfig(type=ensembler_type, pyfunc_config=config_data)
+    assert ensembler_config.to_dict() == expected
 
 @pytest.mark.parametrize(
     "cls,config,expected",
