@@ -61,7 +61,7 @@ export const DeleteEnsemblerModal = ({
     <ConfirmationModal
       title="Delete Ensembler"
       onCancel={() => modalClosed()}
-      onConfirm={submitForm}
+      onConfirm={(arg) => {submitForm(arg); modalClosed()}}
       isLoading={isLoading}
       content={
         <div>
