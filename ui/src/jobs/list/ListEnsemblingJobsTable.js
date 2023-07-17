@@ -147,7 +147,7 @@ export const ListEnsemblingJobsTable = ({
         />
       ),
       render: (id, item) => (
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
           <EuiFlexItem component="div" style={{alignItems: "flex-end", gap:"8px"}}>
             <EuiFlexItem grow={false} >
               <EuiButtonEmpty 
