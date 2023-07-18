@@ -150,7 +150,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
-	initialReplicas *int,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
 	enricher := routerVersion.Enricher
@@ -219,7 +219,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		ContainerPort:                   int32(enricher.Port),
 		MinReplicas:                     enricher.ResourceRequest.MinReplica,
 		MaxReplicas:                     enricher.ResourceRequest.MaxReplica,
-		InitialReplicas:                 initialReplicas,
+		InitialScale:                    initialScale,
 		AutoscalingMetric:               string(enricher.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               enricher.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:       topologySpreadConstraints,
@@ -236,7 +236,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
-	initialReplicas *int,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
 	ensembler := routerVersion.Ensembler
@@ -306,7 +306,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		ContainerPort:                   int32(docker.Port),
 		MinReplicas:                     docker.ResourceRequest.MinReplica,
 		MaxReplicas:                     docker.ResourceRequest.MaxReplica,
-		InitialReplicas:                 initialReplicas,
+		InitialScale:                    initialScale,
 		AutoscalingMetric:               string(docker.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               docker.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:       topologySpreadConstraints,

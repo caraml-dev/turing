@@ -40,7 +40,7 @@ type KnativeService struct {
 	// Autoscaling properties
 	MinReplicas       int    `json:"minReplicas"`
 	MaxReplicas       int    `json:"maxReplicas"`
-	InitialReplicas   *int   `json:"initialReplicas"`
+	InitialScale      *int   `json:"initialScale"`
 	AutoscalingMetric string `json:"autoscalingMetric"`
 	// AutoscalingTarget is expected to be an absolute value for concurrency / rps
 	// and a % value (of the requested value) for cpu / memory based autoscaling.
@@ -119,8 +119,8 @@ func (cfg *KnativeService) buildSvcSpec(
 		"autoscaling.knative.dev/class":    autoscalingMetricClassMap[cfg.AutoscalingMetric],
 	}
 
-	if cfg.InitialReplicas != nil {
-		annotations["autoscaling.knative.dev/initial-scale"] = strconv.Itoa(*cfg.InitialReplicas)
+	if cfg.InitialScale != nil {
+		annotations["autoscaling.knative.dev/initial-scale"] = strconv.Itoa(*cfg.InitialScale)
 	}
 
 	if cfg.QueueProxyResourcePercentage > 0 {

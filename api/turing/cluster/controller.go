@@ -341,11 +341,10 @@ func (c *controller) GetKnativeServiceDesiredReplicas(
 	if err != nil {
 		return 0, err
 	}
-	if rev.Status.DesiredReplicas != nil {
-		return int(*rev.Status.DesiredReplicas), nil
+	if rev.Status.DesiredReplicas == nil {
+		return 0, fmt.Errorf("Desired Replicas for %s/%s is not set", namespace, svcName)
 	}
-
-	return 0, fmt.Errorf("Desired Replicas for %s/%s is not set", namespace, svcName)
+	return int(*rev.Status.DesiredReplicas), nil
 }
 
 // DeployKubernetesService deploys a kubernetes service and deployment

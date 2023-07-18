@@ -374,6 +374,7 @@ func (ds *deploymentService) createServices(
 	userContainerLimitRequestFactor float64,
 ) ([]*cluster.KnativeService, error) {
 	services := []*cluster.KnativeService{}
+	namespace := servicebuilder.GetNamespace(project)
 
 	// Enricher
 	if routerVersion.Enricher != nil {
@@ -381,15 +382,8 @@ func (ds *deploymentService) createServices(
 		if currRouterVersion != nil &&
 			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
 			currRouterVersion.Enricher != nil {
-			currEnricherSvc, err := ds.svcBuilder.NewEnricherService(
-				currRouterVersion, project, secretName,
-				knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, nil,
-			)
-			if err != nil {
-				return services, fmt.Errorf("Unable to build the details for the currently deployed enricher: %w", err)
-			}
-			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
-				currEnricherSvc.Name, currEnricherSvc.Namespace)
+			currEnricherSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Enricher)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnricherSvcName, namespace)
 			if err == nil {
 				currEnricherReplicas = &currReplicas
 			}
@@ -410,19 +404,8 @@ func (ds *deploymentService) createServices(
 		if currRouterVersion != nil &&
 			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
 			routerVersion.HasDockerConfig() {
-			currEnsemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
-				currRouterVersion,
-				project,
-				secretName,
-				knativeQueueProxyResourcePercentage,
-				userContainerLimitRequestFactor,
-				nil,
-			)
-			if err != nil {
-				return services, fmt.Errorf("Unable to build the details for the currently deployed ensembler: %w", err)
-			}
-			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
-				currEnsemblerSvc.Name, currEnsemblerSvc.Namespace)
+			currEnsemblerSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Ensembler)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnsemblerSvcName, namespace)
 			if err == nil {
 				currEnsemblerReplicas = &currReplicas
 			}
@@ -440,16 +423,8 @@ func (ds *deploymentService) createServices(
 	// Router
 	var currRouterReplicas *int
 	if currRouterVersion != nil && currRouterVersion.Status == models.RouterVersionStatusDeployed {
-		currRouterSvc, err := ds.svcBuilder.NewRouterService(
-			currRouterVersion, project, envType, secretName, experimentConfig,
-			routerDefaults, sentryEnabled, sentryDSN,
-			knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, nil,
-		)
-		if err != nil {
-			return services, fmt.Errorf("Unable to build the details for the currently deployed router: %w", err)
-		}
-		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx,
-			currRouterSvc.Name, currRouterSvc.Namespace)
+		currRouterSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Router)
+		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currRouterSvcName, namespace)
 		if err == nil {
 			currRouterReplicas = &currReplicas
 		}
