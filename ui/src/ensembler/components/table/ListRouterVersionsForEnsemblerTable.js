@@ -51,6 +51,9 @@ export const ListRouterVersionsForEnsemblerTable = ({
   useEffect(() => {
     if (results.activeItems.length > 0){
       setEnsemblerUsedByActiveRouterVersion(true)
+      // If there is an active router version using this ensembler, it is definitely also a current router version using
+      // this ensembler
+      setEnsemblerUsedByCurrentRouterVersion(true)
     } else {
       if (currentRouterVersion.isLoaded && !currentRouterVersion.error) {
         if (currentRouterVersion.data.length > 0){
@@ -115,7 +118,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
     </EuiCallOut>
   ) : (
     <Fragment>
-      {ensemblerUsedByCurrentRouterVersion ? (
+      {(ensemblerUsedByCurrentRouterVersion && results.totalActiveCount === 0) ? (
         currentRouterVersion.data.length > 0 && (
         <div>
           <br/>
