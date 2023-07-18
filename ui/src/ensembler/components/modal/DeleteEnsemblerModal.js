@@ -54,6 +54,8 @@ export const DeleteEnsemblerModal = ({
   const modalClosed = () => {
     setCanDeleteEnsembler(true)
     setEnsemblerUsedByCurrentRouterVersion(false)
+    setEnsemblerUsedByActiveRouterVersion(false)
+    setEnsemblerUsedByActiveEnsemblingJob(false)
     setDeleteConfirmation("")
   }
 
