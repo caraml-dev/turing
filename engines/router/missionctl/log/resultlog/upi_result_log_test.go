@@ -12,11 +12,12 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
+	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
+
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog/proto/turing"
-	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
-	"github.com/caraml-dev/universal-prediction-interface/pkg/converter"
 
 	fiberProtocol "github.com/gojek/fiber/protocol"
 )
@@ -193,9 +194,10 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 		resultLogger *UPIResultLogger
 	}
 	tests := []struct {
-		name string
-		args args
-		want *upiv1.RouterLog
+		name           string
+		args           args
+		want           *upiv1.RouterLog
+		expectLogError bool
 	}{
 		{
 			name: "empty request and response",
@@ -317,6 +319,56 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 				},
 			},
 		},
+		{
+			name: "predict request; mismatch number of columns and number of values in a row",
+			args: args{
+				reqHeader: metadata.Pairs("k1", "v1"),
+				upiReq: &upiv1.PredictValuesRequest{
+					PredictionTable: &upiv1.Table{
+						Name: "prediction_table",
+						Columns: []*upiv1.Column{
+							{
+								Name: "col1",
+								Type: upiv1.Type_TYPE_DOUBLE,
+							},
+						},
+						Rows: []*upiv1.Row{
+							{
+								RowId: "0",
+								Values: []*upiv1.Value{
+									{
+										DoubleValue: 0.4,
+									},
+								},
+							},
+							{
+								RowId: "1",
+								Values: []*upiv1.Value{
+									{
+										DoubleValue: 0.4,
+									},
+									{
+										IntegerValue: 2,
+									},
+								},
+							},
+						},
+					},
+					TransformerInput: &upiv1.TransformerInput{
+						Tables:    []*upiv1.Table{predictionTable},
+						Variables: []*upiv1.Variable{variable},
+					},
+					TargetName:        "target-name",
+					PredictionContext: predictionContext,
+					Metadata: &upiv1.RequestMetadata{
+						PredictionId:     "123",
+						RequestTimestamp: time,
+					},
+				},
+				resultLogger: &UPIResultLogger{upiLogger: &mockUPILogger{}, loggerType: config.UPILogger},
+			},
+			expectLogError: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -327,6 +379,11 @@ func TestUPIResultLogger_LogTuringRouterRequestSummary_logRouterLog(t *testing.T
 			tt.args.resultLogger.LogTuringRouterRequestSummary(tt.args.reqHeader, tt.args.upiReq, respCh)
 			mockLogger, ok := tt.args.resultLogger.upiLogger.(*mockUPILogger)
 			assert.True(t, ok, "mockUPILogger not used")
+			if tt.expectLogError {
+				// no calls due to error
+				assert.Equal(t, int32(0), mockLogger.numOfCalls)
+				return
+			}
 			assert.Equal(t, tt.want, mockLogger.routerLog)
 		})
 	}

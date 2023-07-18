@@ -72,10 +72,13 @@ type deploymentService struct {
 
 	clusterControllers map[string]cluster.Controller
 	svcBuilder         servicebuilder.ClusterServiceBuilder
+
+	// PodDisruptionBudget config
+	pdbConfig config.PodDisruptionBudgetConfig
 }
 
-// uFunc is the function type accepted by the updateKnServices method
-type uFunc func(context.Context, *cluster.KnativeService, *sync.WaitGroup, chan<- error, *EventChannel)
+// uFunc is the function type accepted by the updateResources method
+type uFunc func(context.Context, any, *sync.WaitGroup, chan<- error, *EventChannel)
 
 // NewDeploymentService initialises a new endpoints service
 func NewDeploymentService(
@@ -102,6 +105,7 @@ func NewDeploymentService(
 		sentryDSN:                    cfg.Sentry.DSN,
 		clusterControllers:           clusterControllers,
 		svcBuilder:                   sb,
+		pdbConfig:                    cfg.DeployConfig.PodDisruptionBudget,
 	}
 }
 
@@ -225,6 +229,15 @@ func (ds *deploymentService) DeployRouterVersion(
 			models.EventStageUpdatingEndpoint, "failed to update router endpoint: %s", err.Error()))
 	}
 
+	if ds.pdbConfig.Enabled {
+		// Create PDB
+		pdbs := ds.createPodDisruptionBudgets(routerVersion, project)
+		err = deployPodDisruptionBudgets(ctx, controller, pdbs, eventsCh)
+		if err != nil {
+			return endpoint, err
+		}
+	}
+
 	// only base endpoint is returned, models/router.go will unmarshall with /v1/predict for http routers
 	if routerVersion.Protocol == routerConfig.UPI {
 		return routerEndpoint.Endpoint + ":80", err
@@ -252,6 +265,13 @@ func (ds *deploymentService) UndeployRouterVersion(
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
 	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "", "")
 	err = deleteSecret(controller, secret, isCleanUp)
+	if err != nil {
+		return err
+	}
+
+	// Create PDB
+	pdbs := ds.createPodDisruptionBudgets(routerVersion, project)
+	err = deletePodDisruptionBudgets(ctx, controller, pdbs, eventsCh)
 	if err != nil {
 		return err
 	}
@@ -595,12 +615,22 @@ func deployKnServices(
 ) error {
 	// Define deploy function
 	deployFunc := func(ctx context.Context,
-		svc *cluster.KnativeService,
+		resource any,
 		wg *sync.WaitGroup,
 		errCh chan<- error,
 		eventsCh *EventChannel,
 	) {
 		defer wg.Done()
+
+		svc, ok := resource.(*cluster.KnativeService)
+		if !ok {
+			err := errors.Errorf("failed to parse *cluster.KnativeService config")
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to deploy service: %s", err.Error()))
+			errCh <- err
+			return
+		}
+
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying service %s", svc.Name))
 		if svc.ConfigMap != nil {
@@ -630,7 +660,7 @@ func deployKnServices(
 	case <-ctx.Done():
 		return errors.New("timeout deploying service")
 	default:
-		return updateKnServices(ctx, services, deployFunc, eventsCh)
+		return updateResources(ctx, services, deployFunc, eventsCh)
 	}
 }
 
@@ -645,12 +675,22 @@ func deleteKnServices(
 ) error {
 	// Define delete function
 	deleteFunc := func(_ context.Context,
-		svc *cluster.KnativeService,
+		resource any,
 		wg *sync.WaitGroup,
 		errCh chan<- error,
 		eventsCh *EventChannel,
 	) {
 		defer wg.Done()
+
+		svc, ok := resource.(*cluster.KnativeService)
+		if !ok {
+			err := errors.Errorf("failed to parse *cluster.KnativeService config")
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to delete service: %s", err.Error()))
+			errCh <- err
+			return
+		}
+
 		var err error
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageUndeployingServices, "deleting service %s", svc.Name))
@@ -675,15 +715,15 @@ func deleteKnServices(
 		errCh <- err
 	}
 
-	return updateKnServices(ctx, services, deleteFunc, eventsCh)
+	return updateResources(ctx, services, deleteFunc, eventsCh)
 }
 
-// updateKnServices is a helper method for deployment / deletion of services that runs the
+// updateResources is a helper method for deployment / deletion of resources that runs the
 // given update function on the given services simultaneously and waits for a response,
 // within the supplied timeout.
-func updateKnServices(ctx context.Context, services []*cluster.KnativeService,
-	updateFunc uFunc, eventsCh *EventChannel) error {
-
+func updateResources[V *cluster.KnativeService | *cluster.PodDisruptionBudget](ctx context.Context, services []V,
+	updateFunc uFunc, eventsCh *EventChannel,
+) error {
 	// Init wait group to wait for all goroutines to return
 	var wg sync.WaitGroup
 	wg.Add(len(services))
@@ -726,3 +766,133 @@ const (
 	// PyFuncEnsemblerServicePort Port number the container listens to for requests
 	PyFuncEnsemblerServicePort int = 8083
 )
+
+func (ds *deploymentService) createPodDisruptionBudgets(
+	routerVersion *models.RouterVersion,
+	project *mlp.Project,
+) []*cluster.PodDisruptionBudget {
+	pdbs := []*cluster.PodDisruptionBudget{}
+
+	// Enricher's PDB
+	if routerVersion.Enricher != nil {
+		enricherPdb := ds.svcBuilder.NewPodDisruptionBudget(
+			routerVersion,
+			project,
+			servicebuilder.ComponentTypes.Enricher,
+			ds.pdbConfig,
+		)
+		pdbs = append(pdbs, enricherPdb)
+	}
+
+	// Ensembler's PDB
+	if routerVersion.Enricher != nil {
+		ensemblerPdb := ds.svcBuilder.NewPodDisruptionBudget(
+			routerVersion,
+			project,
+			servicebuilder.ComponentTypes.Ensembler,
+			ds.pdbConfig,
+		)
+		pdbs = append(pdbs, ensemblerPdb)
+	}
+
+	// Router's PDB
+	routerPdb := ds.svcBuilder.NewPodDisruptionBudget(
+		routerVersion,
+		project,
+		servicebuilder.ComponentTypes.Router,
+		ds.pdbConfig,
+	)
+	pdbs = append(pdbs, routerPdb)
+
+	return pdbs
+}
+
+func deployPodDisruptionBudgets(ctx context.Context,
+	controller cluster.Controller, pdbs []*cluster.PodDisruptionBudget, eventsCh *EventChannel,
+) error {
+	// Define deploy function
+	deployFunc := func(ctx context.Context,
+		obj any,
+		wg *sync.WaitGroup,
+		errCh chan<- error,
+		eventsCh *EventChannel,
+	) {
+		defer wg.Done()
+
+		pdb, ok := obj.(*cluster.PodDisruptionBudget)
+		if !ok {
+			err := errors.Errorf("failed to parse *cluster.PodDisruptionBudget config")
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to deploy pdb: %s", err.Error()))
+			errCh <- err
+			return
+		}
+
+		eventsCh.Write(models.NewInfoEvent(
+			models.EventStageDeployingServices, "deploying pdb %s", pdb.Name))
+
+		_, err := controller.ApplyPodDisruptionBudget(ctx, pdb.Namespace, *pdb)
+		if err != nil {
+			err = errors.Wrapf(err, "Failed to deploy pdb %s", pdb.Name)
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to deploy pdb %s: %s", pdb.Name, err.Error()))
+		}
+
+		eventsCh.Write(models.NewInfoEvent(
+			models.EventStageDeployingServices, "successfully deployed pdb %s", pdb.Name))
+
+		errCh <- err
+	}
+
+	select {
+	case <-ctx.Done():
+		return errors.New("timeout deploying pdb")
+	default:
+		return updateResources(ctx, pdbs, deployFunc, eventsCh)
+	}
+}
+
+func deletePodDisruptionBudgets(ctx context.Context,
+	controller cluster.Controller, pdbs []*cluster.PodDisruptionBudget, eventsCh *EventChannel,
+) error {
+	// Define delete function
+	deleteFunc := func(ctx context.Context,
+		obj any,
+		wg *sync.WaitGroup,
+		errCh chan<- error,
+		eventsCh *EventChannel,
+	) {
+		defer wg.Done()
+
+		pdb, ok := obj.(*cluster.PodDisruptionBudget)
+		if !ok {
+			err := errors.Errorf("failed to parse *cluster.PodDisruptionBudget config")
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to delete pdb: %s", err.Error()))
+			errCh <- err
+			return
+		}
+
+		eventsCh.Write(models.NewInfoEvent(
+			models.EventStageDeployingServices, "deleting pdb %s", pdb.Name))
+
+		err := controller.DeletePodDisruptionBudget(ctx, pdb.Namespace, pdb.Name)
+		if err != nil {
+			err = errors.Wrapf(err, "Failed to undeploy pdb %s", pdb.Name)
+			eventsCh.Write(models.NewErrorEvent(
+				models.EventStageDeployingServices, "failed to delete pdb %s: %s", pdb.Name, err.Error()))
+		}
+
+		eventsCh.Write(models.NewInfoEvent(
+			models.EventStageDeployingServices, "successfully deleted pdb %s", pdb.Name))
+
+		errCh <- err
+	}
+
+	select {
+	case <-ctx.Done():
+		return errors.New("timeout deleting pdb")
+	default:
+		return updateResources(ctx, pdbs, deleteFunc, eventsCh)
+	}
+}

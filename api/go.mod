@@ -11,7 +11,7 @@ require (
 	github.com/caraml-dev/mlp v1.8.1-0.20230613010931-dd63f4364a18
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/turing/engines/router v0.0.0
-	github.com/caraml-dev/universal-prediction-interface v0.3.4
+	github.com/caraml-dev/universal-prediction-interface v0.3.6
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/getkin/kin-openapi v0.76.0
 	github.com/ghodss/yaml v1.0.0

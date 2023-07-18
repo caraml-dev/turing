@@ -15,6 +15,7 @@ clean:
 setup:
 	@echo "Setting up tools..."
 	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@test -x ${GOPATH}/bin/gotest || go install github.com/rakyll/gotest@latest
 
 .PHONY: fmt
 fmt:
@@ -39,7 +40,7 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	go test -v -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
+	gotest -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out
 
 .PHONY: build
@@ -55,7 +56,7 @@ build-image: vendor version
 
 .PHONY: run
 run: build local-db
-	./bin/${BIN_NAME} -config config-dev.yaml
+	./bin/${BIN_NAME} -config config-dev-w-creds.yaml
 
 .PHONY: local-db
 local-db:
@@ -136,7 +137,7 @@ test-e2e-local: deploy_docker_stack
 	go clean -testcache
 	API_BASE_PATH=${E2E_API_BASE_PATH} \
 		TEST_ID=$(if $(TEST_ID),$(TEST_ID),$(shell date +%Y%m%d%H%M)) \
-		go test -v -parallel=2 ${E2E_TEST_ROOT}/... -tags e2e -timeout 15m -run TestEndToEnd || true
+		gotest -v -parallel=2 ${E2E_TEST_ROOT}/... -tags e2e -timeout 15m -run TestEndToEnd || true
 	make clean_docker_stack
 
 auth-server:

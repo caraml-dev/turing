@@ -376,7 +376,6 @@ func (r *ensemblingJobRunner) terminateJob(ensemblingJob *models.EnsemblingJob, 
 // terminateIfRequired returns true if the process should drop what it is doing.
 func (r *ensemblingJobRunner) terminateIfRequired(ensemblingJobID models.ID, mlpProject *mlp.Project) bool {
 	ensemblingJob, err := r.ensemblingJobService.FindByID(ensemblingJobID, service.EnsemblingJobFindByIDOptions{})
-
 	if err != nil {
 		// Job already deleted, must not allow job to be revived.
 		// Because of the async activities, the job could have been deleted.

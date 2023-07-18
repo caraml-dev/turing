@@ -25,7 +25,7 @@ import (
 )
 
 func TestDecodeQuantity(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		value    string
 		success  bool
 		expected resource.Quantity
@@ -144,6 +144,64 @@ func TestAuthConfigValidation(t *testing.T) {
 	}
 }
 
+func TestPDBConfigValidation(t *testing.T) {
+	defaultInt := 20
+
+	tests := map[string]struct {
+		cfg     config.PodDisruptionBudgetConfig
+		success bool
+	}{
+		"success pdb disabled": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled: false,
+			},
+			success: true,
+		},
+		"success pdb enabled, max unavailable exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:                  true,
+				MaxUnavailablePercentage: &defaultInt,
+			},
+			success: true,
+		},
+		"success pdb enabled, min available exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:                true,
+				MinAvailablePercentage: &defaultInt,
+			},
+			success: true,
+		},
+		"failure pdb enabled no max unavailable and min available": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled: true,
+			},
+			success: false,
+		},
+		"failure pdb enabled, both max unavailable and min available exist": {
+			cfg: config.PodDisruptionBudgetConfig{
+				Enabled:                  true,
+				MaxUnavailablePercentage: &defaultInt,
+				MinAvailablePercentage:   &defaultInt,
+			},
+			success: false,
+		},
+	}
+
+	validate, err := config.NewConfigValidator()
+	require.NoError(t, err)
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := validate.Struct(data.cfg)
+			if data.success {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+		})
+	}
+}
+
 func setupNewEnv(envMaps ...map[string]string) {
 	os.Clearenv()
 
@@ -159,6 +217,8 @@ func TestLoad(t *testing.T) {
 	zeroSecond, _ := time.ParseDuration("0s")
 	oneSecond, _ := time.ParseDuration("1s")
 	twoSecond, _ := time.ParseDuration("2s")
+
+	defaultMinAvailablePercentage := 20
 
 	tests := map[string]struct {
 		filepaths []string
@@ -305,6 +365,10 @@ func TestLoad(t *testing.T) {
 							},
 						},
 					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
+					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
 					QueueProxyResourcePercentage:    20,
@@ -449,6 +513,10 @@ func TestLoad(t *testing.T) {
 								},
 							},
 						},
+					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
@@ -635,6 +703,10 @@ func TestLoad(t *testing.T) {
 								},
 							},
 						},
+					},
+					PodDisruptionBudget: config.PodDisruptionBudgetConfig{
+						Enabled:                true,
+						MinAvailablePercentage: &defaultMinAvailablePercentage,
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{

@@ -232,6 +232,16 @@ type DeploymentConfig struct {
 	MaxMemory                 Quantity      `validate:"required"`
 	MaxAllowedReplica         int           `validate:"required"`
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint
+	PodDisruptionBudget       PodDisruptionBudgetConfig
+}
+
+// PodDisruptionBudgetConfig are the configuration for PodDisruptionBudgetConfig for
+// Turing services.
+type PodDisruptionBudgetConfig struct {
+	Enabled bool
+	// Can specify only one of maxUnavailable and minAvailable
+	MaxUnavailablePercentage *int
+	MinAvailablePercentage   *int
 }
 
 // KubernetesLabelConfigs are the configurations for labeling
@@ -455,7 +465,7 @@ func (c *OpenapiConfig) GenerateSpecFile() error {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0755)
+	err = os.MkdirAll(filepath.Dir(c.MergedSpecFile), 0o755)
 	if err != nil {
 		return err
 	}
@@ -636,6 +646,7 @@ func setDefaultValues(v *viper.Viper) {
 
 func NewConfigValidator() (*validator.Validate, error) {
 	v := validator.New()
+
 	// Use struct level validation for AuthorizationConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {
 		field := sl.Current().Interface().(AuthorizationConfig)
@@ -644,6 +655,21 @@ func NewConfigValidator() (*validator.Validate, error) {
 			sl.ReportError(field.URL, "authorization_url", "URL", "url-set", "")
 		}
 	}, AuthorizationConfig{})
+
+	// Use struct level validation for PodDisruptionBudgetConfig
+	v.RegisterStructValidation(func(sl validator.StructLevel) {
+		field := sl.Current().Interface().(PodDisruptionBudgetConfig)
+		// If PDB is enabled, one of max unavailable or min available shall be set
+		if field.Enabled &&
+			(field.MaxUnavailablePercentage == nil && field.MinAvailablePercentage == nil) ||
+			(field.MaxUnavailablePercentage != nil && field.MinAvailablePercentage != nil) {
+			sl.ReportError(field.MaxUnavailablePercentage, "max_unavailable_percentage", "int",
+				"choose_one[max_unavailable_percentage,min_available_percentage]", "")
+			sl.ReportError(field.MinAvailablePercentage, "min_available_percentage", "int",
+				"choose_one[max_unavailable_percentage,min_available_percentage]", "")
+		}
+	}, PodDisruptionBudgetConfig{})
+
 	return v, nil
 }
 

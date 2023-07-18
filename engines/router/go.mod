@@ -8,7 +8,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/caraml-dev/mlp v1.7.6
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
-	github.com/caraml-dev/universal-prediction-interface v0.3.4
+	github.com/caraml-dev/universal-prediction-interface v0.3.6
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gojek/fiber v0.2.1-rc2

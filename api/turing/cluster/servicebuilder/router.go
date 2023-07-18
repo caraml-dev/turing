@@ -451,7 +451,6 @@ func buildTrafficSplittingFiberConfig(
 		ensembler,
 		fiberProperties,
 		protocol)
-
 	if err != nil {
 		return nil, err
 	}
@@ -483,7 +482,6 @@ func buildTrafficSplittingFiberConfig(
 			ensembler,
 			fiberProperties,
 			protocol)
-
 		if err != nil {
 			return nil, err
 		}
@@ -665,7 +663,6 @@ func buildFiberConfigMap(
 	}
 
 	configMapData, err := yaml.Marshal(routerConfig)
-
 	if err != nil {
 		return nil, err
 	}
