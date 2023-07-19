@@ -70,9 +70,9 @@ export const DeleteEnsemblerModal = ({
           {canDeleteEnsembler ? (
             <div>
               <p>
-              You are about to delete Ensembler <b>{ensembler.name}</b>. This action cannot be undone. 
+              You are about to delete the Ensembler <b>{ensembler.name}</b>. This action <b>cannot</b> be undone.
               </p>
-              To confirm, please type "<b>{ensembler.name}</b>" in the box below
+              To confirm, please type "<b>{ensembler.name}</b>" in the box below:
               <EuiFieldText     
                 fullWidth            
                 placeholder={ensembler.name}
@@ -80,16 +80,14 @@ export const DeleteEnsemblerModal = ({
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 isInvalid={deleteConfirmation !== ensembler.name} />              
             </div>
-          ) : ensemblerUsedByCurrentRouterVersion ? (
-            <div>
-              You cannot delete this ensembler because it is associated with a router version that is currently being used by a router
-              <br/> <br/> If you still wish to delete this ensembler, please <b>Deploy</b> another version on this router.
-            </div>
           ) : (
             <div>
-              You cannot delete this ensembler because there are <b>Active Router Versions</b> or <b>Ensembling Jobs</b> that use this ensembler. 
-              <br/> <br/> If you still wish to delete this ensembler, please <b>Undeploy</b> router versions and <b>Terminate</b> ensembling jobs that use this ensembler.
-            </div> 
+              You cannot delete this ensembler because it is:
+              <ul>
+                <li>associated with one or more router versions <b>currently</b> used by one or more routers, and/or</li>
+                <li>used by one or more <b>Active Router Versions</b> or <b>Ensembling Jobs</b></li>
+              </ul>
+            </div>
           )}
           {/* Only show The Ensembling Table if ensembler is not used by current router version */}
           {!ensemblerUsedByCurrentRouterVersion && (
