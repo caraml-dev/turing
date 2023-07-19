@@ -84,8 +84,11 @@ export const DeleteEnsemblerModal = ({
             <div>
               You cannot delete this ensembler because it is:
               <ul>
-                <li>associated with one or more router versions <b>currently</b> used by one or more routers, and/or</li>
-                <li>used by one or more <b>Active Router Versions</b> or <b>Ensembling Jobs</b></li>
+                {ensemblerUsedByCurrentRouterVersion &&
+                  <li>associated with one or more router versions <b>currently</b> used by one or more routers
+                    {ensemblerUsedByActiveRouterVersion && ", and"}</li>}
+                {ensemblerUsedByActiveRouterVersion &&
+                  <li>used by one or more <b>Active Router Versions</b> or <b>Ensembling Jobs</b></li>}
               </ul>
             </div>
           )}
