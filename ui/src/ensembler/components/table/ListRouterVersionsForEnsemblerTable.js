@@ -18,6 +18,7 @@ export const ListRouterVersionsForEnsemblerTable = ({
   ensemblerUsedByCurrentRouterVersion
 }) => {
   const [results, setResults] = useState({ inactiveItems: [], activeItems:[], totalInactiveCount: 0, totalActiveCount:0 });
+  const [filteredActiveRouterVersions, setFilteredActiveRouterVersions] = useState([])
 
   const {
     appConfig: {
@@ -50,19 +51,15 @@ export const ListRouterVersionsForEnsemblerTable = ({
 
   useEffect(() => {
     if (results.activeItems.length > 0){
-      setEnsemblerUsedByActiveRouterVersion(true)
-      // If there is an active router version using this ensembler, it is definitely also a current router version using
-      // this ensembler
-      setEnsemblerUsedByCurrentRouterVersion(true)
-    } else {
-      if (currentRouterVersion.isLoaded && !currentRouterVersion.error) {
-        if (currentRouterVersion.data.length > 0){
-          setEnsemblerUsedByCurrentRouterVersion(true)
-          setEnsemblerUsedByActiveRouterVersion(false)
-        } else {
-          setEnsemblerUsedByCurrentRouterVersion(false)
-          setEnsemblerUsedByActiveRouterVersion(false)
-        }
+      setEnsemblerUsedByActiveRouterVersion(true);
+    }
+
+    if (currentRouterVersion.isLoaded && !currentRouterVersion.error) {
+      if (currentRouterVersion.data.length > 0){
+        setEnsemblerUsedByCurrentRouterVersion(true);
+        setFilteredActiveRouterVersions(results.activeItems.filter(item => currentRouterVersion.data.every((e => e.id !== item.id))));
+      } else {
+        setEnsemblerUsedByCurrentRouterVersion(false)
       }
     }
   }, [results, currentRouterVersion, setEnsemblerUsedByActiveRouterVersion, setEnsemblerUsedByCurrentRouterVersion])
@@ -118,23 +115,12 @@ export const ListRouterVersionsForEnsemblerTable = ({
     </EuiCallOut>
   ) : (
     <Fragment>
-      {(ensemblerUsedByCurrentRouterVersion && results.totalActiveCount === 0) ? (
-        currentRouterVersion.data.length > 0 && (
+      {canDeleteEnsembler && results.totalInactiveCount > 0 && (
         <div>
           <br/>
-          <p>The router version with the related ensembler is being used by {currentRouterVersion.data.length} <b>Routers</b></p>
-          <EuiBasicTable
-            items={currentRouterVersion.data}
-            loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
-            columns={columns}
-            responsive={true}
-            tableLayout="auto"
-          />
-        </div>
-      )) : canDeleteEnsembler ? ( results.totalInactiveCount > 0 && (
-        <div>
-          <br/>
-          <p>Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Undeployed</b> Router Versions that use this Ensembler </p>
+          Deleting this Ensembler will also delete {results.totalInactiveCount} <b>Failed</b> or <b>Undeployed</b>
+          &nbsp;Router Version{results.totalInactiveCount > 1 && "s"} that
+          use{results.totalInactiveCount === 1 && "s"} this Ensembler:
           <EuiBasicTable
             items={results.inactiveItems}
             loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
@@ -143,19 +129,40 @@ export const ListRouterVersionsForEnsemblerTable = ({
             tableLayout="auto"
           />
         </div>
-      )) : ( results.totalActiveCount > 0 && (
+      )}
+      {ensemblerUsedByCurrentRouterVersion && currentRouterVersion.data.length > 0 && (
         <div>
-          <br/>
-          <p>This Ensembler is being used by {results.totalActiveCount} <b>Active Router Versions</b></p>
+          This Ensembler is used by {currentRouterVersion.data.length}
+          &nbsp;<b>Router{currentRouterVersion.data.length > 1 && "s"}</b>
+          &nbsp;in {currentRouterVersion.data.length > 1 ? "their" : "its"} <b>current</b> configuration:
           <EuiBasicTable
-            items={results.activeItems}
+            items={currentRouterVersion.data}
             loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
             columns={columns}
             responsive={true}
             tableLayout="auto"
           />
+          If you wish to delete this ensembler, please <b>deploy</b> another router version
+          for {currentRouterVersion.data.length > 1 ? "these routers" : "this router"}.
         </div>
-      ))}
+      )}
+      {filteredActiveRouterVersions.length > 0 && (
+        <div>
+          <br/>
+          This Ensembler is {ensemblerUsedByCurrentRouterVersion && currentRouterVersion.data.length > 0 && "also"}
+          &nbsp;used by {filteredActiveRouterVersions.length}
+          &nbsp;<b>Active Router Version{filteredActiveRouterVersions.length > 1 && "s"}</b>:
+          <EuiBasicTable
+            items={filteredActiveRouterVersions}
+            loading={!allRouterVersion.isLoaded && !currentRouterVersion.isLoaded}
+            columns={columns}
+            responsive={true}
+            tableLayout="auto"
+          />
+          If you wish to delete this ensembler, please <b>undeploy</b>
+          &nbsp;{filteredActiveRouterVersions.length > 1 ? "these router versions" : "this router version"}.
+        </div>
+      )}
     </Fragment>
   );
 };
