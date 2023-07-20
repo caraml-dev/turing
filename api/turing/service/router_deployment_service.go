@@ -28,6 +28,7 @@ type DeploymentService interface {
 	DeployRouterVersion(
 		project *mlp.Project,
 		environment *merlin.Environment,
+		currentRouterVersion *models.RouterVersion,
 		routerVersion *models.RouterVersion,
 		routerServiceAccountKey string,
 		enricherServiceAccountKey string,
@@ -112,6 +113,7 @@ func NewDeploymentService(
 func (ds *deploymentService) DeployRouterVersion(
 	project *mlp.Project,
 	environment *merlin.Environment,
+	currRouterVersion *models.RouterVersion,
 	routerVersion *models.RouterVersion,
 	routerServiceAccountKey string,
 	enricherServiceAccountKey string,
@@ -168,7 +170,9 @@ func (ds *deploymentService) DeployRouterVersion(
 
 	// Construct service objects for each of the components and deploy
 	services, err := ds.createServices(
-		routerVersion, project, ds.environmentType, secretName, experimentConfig,
+		ctx, controller,
+		routerVersion, currRouterVersion, project, ds.environmentType,
+		secretName, experimentConfig,
 		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.QueueProxyResourcePercentage,
 		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
@@ -274,7 +278,8 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Construct service objects for each of the components to be deleted
 	services, err := ds.createServices(
-		routerVersion, project, ds.environmentType, "", nil,
+		ctx, controller,
+		routerVersion, nil, project, ds.environmentType, "", nil,
 		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.QueueProxyResourcePercentage,
 		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
@@ -354,7 +359,10 @@ func (ds *deploymentService) getClusterControllerByEnvironment(
 }
 
 func (ds *deploymentService) createServices(
+	ctx context.Context,
+	controller cluster.Controller,
 	routerVersion *models.RouterVersion,
+	currRouterVersion *models.RouterVersion,
 	project *mlp.Project,
 	envType string,
 	secretName string,
@@ -366,15 +374,23 @@ func (ds *deploymentService) createServices(
 	userContainerLimitRequestFactor float64,
 ) ([]*cluster.KnativeService, error) {
 	services := []*cluster.KnativeService{}
+	namespace := servicebuilder.GetNamespace(project)
 
 	// Enricher
 	if routerVersion.Enricher != nil {
+		var currEnricherReplicas *int
+		if currRouterVersion != nil &&
+			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
+			currRouterVersion.Enricher != nil {
+			currEnricherSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Enricher)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnricherSvcName, namespace)
+			if err == nil {
+				currEnricherReplicas = &currReplicas
+			}
+		}
 		enricherSvc, err := ds.svcBuilder.NewEnricherService(
-			routerVersion,
-			project,
-			secretName,
-			knativeQueueProxyResourcePercentage,
-			userContainerLimitRequestFactor,
+			routerVersion, project, secretName,
+			knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currEnricherReplicas,
 		)
 		if err != nil {
 			return services, err
@@ -384,12 +400,19 @@ func (ds *deploymentService) createServices(
 
 	// Ensembler
 	if routerVersion.HasDockerConfig() {
+		var currEnsemblerReplicas *int
+		if currRouterVersion != nil &&
+			currRouterVersion.Status == models.RouterVersionStatusDeployed &&
+			routerVersion.HasDockerConfig() {
+			currEnsemblerSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Ensembler)
+			currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currEnsemblerSvcName, namespace)
+			if err == nil {
+				currEnsemblerReplicas = &currReplicas
+			}
+		}
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
-			routerVersion,
-			project,
-			secretName,
-			knativeQueueProxyResourcePercentage,
-			userContainerLimitRequestFactor,
+			routerVersion, project, secretName,
+			knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currEnsemblerReplicas,
 		)
 		if err != nil {
 			return services, err
@@ -398,17 +421,18 @@ func (ds *deploymentService) createServices(
 	}
 
 	// Router
+	var currRouterReplicas *int
+	if currRouterVersion != nil && currRouterVersion.Status == models.RouterVersionStatusDeployed {
+		currRouterSvcName := servicebuilder.GetComponentName(currRouterVersion, servicebuilder.ComponentTypes.Router)
+		currReplicas, err := controller.GetKnativeServiceDesiredReplicas(ctx, currRouterSvcName, namespace)
+		if err == nil {
+			currRouterReplicas = &currReplicas
+		}
+	}
 	routerService, err := ds.svcBuilder.NewRouterService(
-		routerVersion,
-		project,
-		envType,
-		secretName,
-		experimentConfig,
-		routerDefaults,
-		sentryEnabled,
-		sentryDSN,
-		knativeQueueProxyResourcePercentage,
-		userContainerLimitRequestFactor,
+		routerVersion, project, envType, secretName, experimentConfig,
+		routerDefaults, sentryEnabled, sentryDSN,
+		knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currRouterReplicas,
 	)
 	if err != nil {
 		return services, err

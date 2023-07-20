@@ -72,6 +72,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "test-status",
+				RouterID:         1,
 			},
 			pendingVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -80,6 +81,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "pending",
+				RouterID:         1,
 			},
 			validVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -88,6 +90,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: nopExpCfg,
 				Status:           "deployed",
+				RouterID:         1,
 			},
 			expRunnerCfg: json.RawMessage(nil),
 		},
@@ -99,6 +102,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "test-status",
+				RouterID:         1,
 			},
 			pendingVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -107,6 +111,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "pending",
+				RouterID:         1,
 			},
 			validVersion: &models.RouterVersion{
 				Model: models.Model{
@@ -115,6 +120,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 				LogConfig:        bqLogCfg,
 				ExperimentEngine: expEnabledCfg,
 				Status:           "deployed",
+				RouterID:         1,
 			},
 			expCfgWithPassKey: expWithPassKeyCfg,
 			expRunnerCfg:      json.RawMessage(`{"engine": "test"}`),
@@ -129,7 +135,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 	rs := &mocks.RoutersService{}
 	rs.On("Save", router).Return(nil, nil)
-	rs.On("FindByID", uint(1)).Return(router, nil)
+	rs.On("FindByID", models.ID(1)).Return(router, nil)
 
 	es := &mocks.EventService{}
 	es.On("ClearEvents", int(router.ID)).Return(nil)
@@ -164,8 +170,9 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 			ds := &mocks.DeploymentService{}
 
-			ds.On("DeployRouterVersion", project, environment, data.pendingVersion, "service-acct",
-				"", "", "", mock.Anything, data.expRunnerCfg, eventsCh).Return("test-url", nil)
+			ds.On("DeployRouterVersion", project, environment, (*models.RouterVersion)(router.CurrRouterVersion),
+				data.pendingVersion, "service-acct", "", "", "", mock.Anything, data.expRunnerCfg, eventsCh,
+			).Return("test-url", nil)
 
 			// Create test controller
 			ctrl := RouterDeploymentController{
@@ -210,7 +217,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 200,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{
@@ -226,7 +234,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 300,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{
@@ -242,7 +251,8 @@ func TestRollbackVersionSuccess(t *testing.T) {
 		Model: models.Model{
 			ID: 300,
 		},
-		Router: router,
+		RouterID: router.ID,
+		Router:   router,
 		LogConfig: &models.LogConfig{
 			ResultLoggerType: "bigquery",
 			BigQueryConfig: &models.BigQueryConfig{
@@ -273,7 +283,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	rvs.On("Save", newVerFailed).Return(newVerFailed, nil)
 
 	ds := &mocks.DeploymentService{}
-	ds.On("DeployRouterVersion", project, environment, newVer, testSvcAcct,
+	ds.On("DeployRouterVersion", project, environment, router.CurrRouterVersion, newVer, testSvcAcct,
 		"", "", "", mock.Anything, json.RawMessage(nil), mock.Anything).Return("", errors.New("error"))
 	ds.On("UndeployRouterVersion", project, environment, newVer, mock.Anything, true).
 		Return(nil)

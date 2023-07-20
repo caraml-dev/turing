@@ -106,6 +106,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	sentryDSN string,
 	knativeQueueProxyResourcePercentage int,
 	userContainerLimitRequestFactor float64,
+	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Create service name
 	name := sb.GetRouterServiceName(routerVersion)
@@ -154,6 +155,7 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		Protocol:                        routerVersion.Protocol,
 		MinReplicas:                     routerVersion.ResourceRequest.MinReplica,
 		MaxReplicas:                     routerVersion.ResourceRequest.MaxReplica,
+		InitialScale:                    initialScale,
 		AutoscalingMetric:               string(routerVersion.AutoscalingPolicy.Metric),
 		AutoscalingTarget:               routerVersion.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:       topologySpreadConstraints,

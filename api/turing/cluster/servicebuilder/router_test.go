@@ -69,10 +69,13 @@ func TestNewRouterService(t *testing.T) {
 	cfgmapNoDefaultRoute, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_no_default_route.yml"))
 	require.NoError(t, err)
 
+	testInitialScale := 3
+
 	// Define tests
 	tests := map[string]testSuiteNewService{
 		"success | basic": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_basic.json"),
+			initialScale: &testInitialScale,
 			expRawConfig: json.RawMessage(expRunnerConfig),
 			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
@@ -163,6 +166,7 @@ func TestNewRouterService(t *testing.T) {
 				Protocol:                        routerConfig.HTTP,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
+				InitialScale:                    &testInitialScale,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
 				TopologySpreadConstraints:       testTopologySpreadConstraints,
@@ -172,6 +176,7 @@ func TestNewRouterService(t *testing.T) {
 		},
 		"success | basic upi": {
 			filePath:     filepath.Join(testDataBasePath, "router_version_basic_upi.json"),
+			initialScale: &testInitialScale,
 			expRawConfig: json.RawMessage(expRunnerConfig),
 			expected: &cluster.KnativeService{
 				BaseService: &cluster.BaseService{
@@ -262,6 +267,7 @@ func TestNewRouterService(t *testing.T) {
 				Protocol:                        routerConfig.UPI,
 				MinReplicas:                     2,
 				MaxReplicas:                     4,
+				InitialScale:                    &testInitialScale,
 				AutoscalingMetric:               "concurrency",
 				AutoscalingTarget:               "1",
 				TopologySpreadConstraints:       testTopologySpreadConstraints,
@@ -1010,8 +1016,8 @@ func TestNewRouterService(t *testing.T) {
 				},
 				true,
 				"sentry-dsn",
-				20,
-				1.5)
+				20, 1.5, data.initialScale,
+			)
 
 			if data.err == "" {
 				require.NoError(t, err)

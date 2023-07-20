@@ -249,7 +249,7 @@ jobs:
         run: make test
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ env.GO_LINT_VERSION }}
           working-directory: api
@@ -292,7 +292,7 @@ jobs:
         run: make benchmark
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/router
