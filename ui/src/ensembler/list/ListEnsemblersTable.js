@@ -115,11 +115,11 @@ export const ListEnsemblersTable = ({
         header: true,
         fullWidth: false,
       },
-      align: "left",
+      align: "right",
       width: "20%",
       render: (id, ensembler) => (
-        <EuiFlexGroup component="div" direction="column" gutterSize="xs" alignItems="flexEnd" >
-          <EuiFlexItem component="div" style={{alignItems: 'flex-start'}}>
+        <EuiFlexGroup component="div" direction="column" gutterSize="s" alignItems="flexEnd" >
+          <EuiFlexItem component="div" style={{alignItems: 'flex-end', gap:'8px'}}>
             <EuiFlexItem grow={false} >
               <EuiButtonEmpty 
                 onClick={(_) => navigate(`../jobs?ensembler_id=${ensembler.id}`)}
