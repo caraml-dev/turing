@@ -45,7 +45,8 @@ export const DeleteJobModal = ({
   return (
     <ConfirmationModal
       title={isActiveJobStatus(job.status) ? 'Delete Ensembling Jobs' : 'Terminate Ensembling Jobs'}
-      onConfirm={submitForm}
+      onCancel={() => setDeleteConfirmation("")}
+      onConfirm={(arg) => {submitForm(arg); setDeleteConfirmation("")}}
       isLoading={isLoading}
       disabled={deleteConfirmation !== job.name}
       content={
