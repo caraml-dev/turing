@@ -597,7 +597,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 				MinAvailablePercentage: &twenty,
 			},
 			expected: []*cluster.PodDisruptionBudget{
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                   "test-turing-enricher-3-pdb",
 					Namespace:              "ns",
 					Labels:                 testRouterLabels,
@@ -608,7 +608,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                   "test-turing-ensembler-3-pdb",
 					Namespace:              "ns",
 					Labels:                 testRouterLabels,
@@ -619,7 +619,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                   "test-turing-router-3-pdb",
 					Namespace:              "ns",
 					Labels:                 testRouterLabels,
@@ -659,7 +659,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 				MaxUnavailablePercentage: &eighty,
 			},
 			expected: []*cluster.PodDisruptionBudget{
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                     "test-turing-enricher-3-pdb",
 					Namespace:                "ns",
 					Labels:                   testRouterLabels,
@@ -670,7 +670,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                     "test-turing-ensembler-3-pdb",
 					Namespace:                "ns",
 					Labels:                   testRouterLabels,
@@ -681,7 +681,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                     "test-turing-router-3-pdb",
 					Namespace:                "ns",
 					Labels:                   testRouterLabels,
@@ -716,7 +716,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 				MinAvailablePercentage: &twenty,
 			},
 			expected: []*cluster.PodDisruptionBudget{
-				&cluster.PodDisruptionBudget{
+				{
 					Name:                   "test-turing-ensembler-3-pdb",
 					Namespace:              "ns",
 					Labels:                 testRouterLabels,
