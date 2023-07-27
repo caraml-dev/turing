@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 	"sync"
@@ -748,8 +749,26 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 ) []*cluster.PodDisruptionBudget {
 	pdbs := []*cluster.PodDisruptionBudget{}
 
+	// Only create PDB if: ceil(minReplica * minAvailablePercent) < minReplica
+	// If not, the replicas may be unable to be removed.
+	// Note that we only care about minReplica here because, for active replicas > minReplica,
+	// the condition will be satisfied if it was satisfied for the minReplica case.
+
+	var minAvailablePercent float64
+	if ds.pdbConfig.MinAvailablePercentage != nil {
+		minAvailablePercent = float64(*ds.pdbConfig.MinAvailablePercentage) / 100.0
+	} else if ds.pdbConfig.MaxUnavailablePercentage != nil {
+		minAvailablePercent = float64(100-*ds.pdbConfig.MaxUnavailablePercentage) / 100.0
+	} else {
+		// PDB config is not set properly, we can't apply it.
+		return pdbs
+	}
+
 	// Enricher's PDB
-	if routerVersion.Enricher != nil {
+	if routerVersion.Enricher != nil &&
+		routerVersion.Enricher.ResourceRequest != nil &&
+		math.Ceil(float64(routerVersion.Enricher.ResourceRequest.MinReplica)*
+			minAvailablePercent) < float64(routerVersion.Enricher.ResourceRequest.MinReplica) {
 		enricherPdb := ds.svcBuilder.NewPodDisruptionBudget(
 			routerVersion,
 			project,
@@ -759,8 +778,16 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 		pdbs = append(pdbs, enricherPdb)
 	}
 
-	// Ensembler's PDB
-	if routerVersion.Enricher != nil {
+	// Ensembler's PDB - create for Docker / Pyfunc ensemblers only
+	if routerVersion.Ensembler != nil &&
+		((routerVersion.Ensembler.DockerConfig != nil &&
+			routerVersion.Ensembler.DockerConfig.ResourceRequest != nil &&
+			math.Ceil(float64(routerVersion.Ensembler.DockerConfig.ResourceRequest.MinReplica)*
+				minAvailablePercent) < float64(routerVersion.Ensembler.DockerConfig.ResourceRequest.MinReplica)) ||
+			(routerVersion.Ensembler.PyfuncConfig != nil &&
+				routerVersion.Ensembler.PyfuncConfig.ResourceRequest != nil &&
+				math.Ceil(float64(routerVersion.Ensembler.PyfuncConfig.ResourceRequest.MinReplica)*
+					minAvailablePercent) < float64(routerVersion.Ensembler.PyfuncConfig.ResourceRequest.MinReplica))) {
 		ensemblerPdb := ds.svcBuilder.NewPodDisruptionBudget(
 			routerVersion,
 			project,
@@ -771,13 +798,17 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 	}
 
 	// Router's PDB
-	routerPdb := ds.svcBuilder.NewPodDisruptionBudget(
-		routerVersion,
-		project,
-		servicebuilder.ComponentTypes.Router,
-		ds.pdbConfig,
-	)
-	pdbs = append(pdbs, routerPdb)
+	if routerVersion.ResourceRequest != nil &&
+		math.Ceil(float64(routerVersion.ResourceRequest.MinReplica)*
+			minAvailablePercent) < float64(routerVersion.ResourceRequest.MinReplica) {
+		routerPdb := ds.svcBuilder.NewPodDisruptionBudget(
+			routerVersion,
+			project,
+			servicebuilder.ComponentTypes.Router,
+			ds.pdbConfig,
+		)
+		pdbs = append(pdbs, routerPdb)
+	}
 
 	return pdbs
 }
