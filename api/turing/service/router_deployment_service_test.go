@@ -365,16 +365,6 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 	})
 	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
-		Name:                   "test-svc-turing-enricher-1-pdb",
-		Namespace:              testNamespace,
-		MinAvailablePercentage: &defaultMinAvailablePercentage,
-		Selector: &apimetav1.LabelSelector{
-			MatchLabels: map[string]string{
-				"app": "test-svc-turing-enricher-1-0",
-			},
-		},
-	})
-	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
 		Name:                   "test-svc-turing-ensembler-1-pdb",
 		Namespace:              testNamespace,
 		MinAvailablePercentage: &defaultMinAvailablePercentage,
@@ -384,7 +374,7 @@ func TestDeployEndpoint(t *testing.T) {
 			},
 		},
 	})
-	controller.AssertNumberOfCalls(t, "ApplyPodDisruptionBudget", 3)
+	controller.AssertNumberOfCalls(t, "ApplyPodDisruptionBudget", 2)
 
 	// Verify endpoint for upi routers
 	routerVersion.Protocol = routerConfig.UPI
@@ -409,6 +399,7 @@ func TestDeleteEndpoint(t *testing.T) {
 	testEnv := "test-env"
 	testNs := "test-namespace"
 	timeout := time.Second * 5
+	defaultMinAvailablePercentage := 10
 
 	// Create mock controller
 	controller := &mocks.Controller{}
@@ -447,6 +438,10 @@ func TestDeleteEndpoint(t *testing.T) {
 			testEnv: controller,
 		},
 		svcBuilder: svcBuilder,
+		pdbConfig: config.PodDisruptionBudgetConfig{
+			Enabled:                true,
+			MinAvailablePercentage: &defaultMinAvailablePercentage,
+		},
 	}
 
 	eventsCh := NewEventChannel()
@@ -479,7 +474,7 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller.AssertCalled(t, "DeletePersistentVolumeClaim", mock.Anything, "pvc", testNs, false)
 	controller.AssertCalled(t, "DeletePodDisruptionBudget", mock.Anything, testNs, mock.Anything)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
-	controller.AssertNumberOfCalls(t, "DeletePodDisruptionBudget", 3)
+	controller.AssertNumberOfCalls(t, "DeletePodDisruptionBudget", 2)
 }
 
 func TestBuildEnsemblerServiceImage(t *testing.T) {
