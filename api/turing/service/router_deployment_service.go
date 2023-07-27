@@ -780,11 +780,11 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 
 	// Ensembler's PDB - create for Docker / Pyfunc ensemblers only
 	if routerVersion.Ensembler != nil &&
-		((routerVersion.Ensembler.Type == models.EnsemblerDockerType &&
+		((routerVersion.Ensembler.DockerConfig != nil &&
 			routerVersion.Ensembler.DockerConfig.ResourceRequest != nil &&
 			math.Ceil(float64(routerVersion.Ensembler.DockerConfig.ResourceRequest.MinReplica)*
 				minAvailablePercent) < float64(routerVersion.Ensembler.DockerConfig.ResourceRequest.MinReplica)) ||
-			(routerVersion.Ensembler.Type == models.EnsemblerPyFuncType &&
+			(routerVersion.Ensembler.PyfuncConfig != nil &&
 				routerVersion.Ensembler.PyfuncConfig.ResourceRequest != nil &&
 				math.Ceil(float64(routerVersion.Ensembler.PyfuncConfig.ResourceRequest.MinReplica)*
 					minAvailablePercent) < float64(routerVersion.Ensembler.PyfuncConfig.ResourceRequest.MinReplica))) {

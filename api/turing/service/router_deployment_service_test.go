@@ -548,3 +548,207 @@ func TestBuildEnsemblerServiceImage(t *testing.T) {
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
 	})
 }
+
+func TestCreatePodDisruptionBudgets(t *testing.T) {
+	twenty, eighty := 20, 80
+	testRouterLabels := map[string]string{
+		"app":          "test",
+		"environment":  "",
+		"orchestrator": "turing",
+		"stream":       "",
+		"team":         "",
+	}
+
+	tests := map[string]struct {
+		rv        *models.RouterVersion
+		pdbConfig config.PodDisruptionBudgetConfig
+		expected  []*cluster.PodDisruptionBudget
+	}{
+		"bad pdb config": {
+			rv: &models.RouterVersion{
+				ResourceRequest: &models.ResourceRequest{
+					MinReplica: 5,
+				},
+			},
+			pdbConfig: config.PodDisruptionBudgetConfig{
+				Enabled: true,
+			},
+			expected: []*cluster.PodDisruptionBudget{},
+		},
+		"all pdbs | minAvailablePercentage": {
+			rv: &models.RouterVersion{
+				Router: &models.Router{
+					Name: "test",
+				},
+				Version: 3,
+				ResourceRequest: &models.ResourceRequest{
+					MinReplica: 5,
+				},
+				Enricher: &models.Enricher{
+					ResourceRequest: &models.ResourceRequest{
+						MinReplica: 3,
+					},
+				},
+				Ensembler: &models.Ensembler{
+					DockerConfig: &models.EnsemblerDockerConfig{
+						ResourceRequest: &models.ResourceRequest{
+							MinReplica: 2,
+						},
+					},
+				},
+			},
+			pdbConfig: config.PodDisruptionBudgetConfig{
+				Enabled:                true,
+				MinAvailablePercentage: &twenty,
+			},
+			expected: []*cluster.PodDisruptionBudget{
+				&cluster.PodDisruptionBudget{
+					Name:                   "test-turing-enricher-3-pdb",
+					Namespace:              "ns",
+					Labels:                 testRouterLabels,
+					MinAvailablePercentage: &twenty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-enricher-3-0",
+						},
+					},
+				},
+				&cluster.PodDisruptionBudget{
+					Name:                   "test-turing-ensembler-3-pdb",
+					Namespace:              "ns",
+					Labels:                 testRouterLabels,
+					MinAvailablePercentage: &twenty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-ensembler-3-0",
+						},
+					},
+				},
+				&cluster.PodDisruptionBudget{
+					Name:                   "test-turing-router-3-pdb",
+					Namespace:              "ns",
+					Labels:                 testRouterLabels,
+					MinAvailablePercentage: &twenty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-router-3-0",
+						},
+					},
+				},
+			},
+		},
+		"all pdbs | maxUnavailablePercentage": {
+			rv: &models.RouterVersion{
+				Router: &models.Router{
+					Name: "test",
+				},
+				Version: 3,
+				ResourceRequest: &models.ResourceRequest{
+					MinReplica: 5,
+				},
+				Enricher: &models.Enricher{
+					ResourceRequest: &models.ResourceRequest{
+						MinReplica: 3,
+					},
+				},
+				Ensembler: &models.Ensembler{
+					DockerConfig: &models.EnsemblerDockerConfig{
+						ResourceRequest: &models.ResourceRequest{
+							MinReplica: 2,
+						},
+					},
+				},
+			},
+			pdbConfig: config.PodDisruptionBudgetConfig{
+				Enabled:                  true,
+				MaxUnavailablePercentage: &eighty,
+			},
+			expected: []*cluster.PodDisruptionBudget{
+				&cluster.PodDisruptionBudget{
+					Name:                     "test-turing-enricher-3-pdb",
+					Namespace:                "ns",
+					Labels:                   testRouterLabels,
+					MaxUnavailablePercentage: &eighty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-enricher-3-0",
+						},
+					},
+				},
+				&cluster.PodDisruptionBudget{
+					Name:                     "test-turing-ensembler-3-pdb",
+					Namespace:                "ns",
+					Labels:                   testRouterLabels,
+					MaxUnavailablePercentage: &eighty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-ensembler-3-0",
+						},
+					},
+				},
+				&cluster.PodDisruptionBudget{
+					Name:                     "test-turing-router-3-pdb",
+					Namespace:                "ns",
+					Labels:                   testRouterLabels,
+					MaxUnavailablePercentage: &eighty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-router-3-0",
+						},
+					},
+				},
+			},
+		},
+		"pyfunc ensembler": {
+			rv: &models.RouterVersion{
+				Router: &models.Router{
+					Name: "test",
+				},
+				Version: 3,
+				ResourceRequest: &models.ResourceRequest{
+					MinReplica: 1,
+				},
+				Ensembler: &models.Ensembler{
+					PyfuncConfig: &models.EnsemblerPyfuncConfig{
+						ResourceRequest: &models.ResourceRequest{
+							MinReplica: 10,
+						},
+					},
+				},
+			},
+			pdbConfig: config.PodDisruptionBudgetConfig{
+				Enabled:                true,
+				MinAvailablePercentage: &twenty,
+			},
+			expected: []*cluster.PodDisruptionBudget{
+				&cluster.PodDisruptionBudget{
+					Name:                   "test-turing-ensembler-3-pdb",
+					Namespace:              "ns",
+					Labels:                 testRouterLabels,
+					MinAvailablePercentage: &twenty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-ensembler-3-0",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			ds := &deploymentService{
+				pdbConfig: tt.pdbConfig,
+				svcBuilder: servicebuilder.NewClusterServiceBuilder(
+					resource.MustParse("200m"),
+					resource.MustParse("200Mi"),
+					10,
+					[]corev1.TopologySpreadConstraint{},
+				),
+			}
+			pdbs := ds.createPodDisruptionBudgets(tt.rv, &mlp.Project{Name: "ns"})
+			assert.Equal(t, tt.expected, pdbs)
+		})
+	}
+}
