@@ -70,8 +70,8 @@ export const ListEnsemblingJobsTable = ({
   }
   
   const isActiveJobStatus = function(jobStatus) {
-    return ["failed", "failed_submission", "failed_building", "completed"].includes(jobStatus);
-}
+    return ["pending", "building", "running", "terminating"].includes(jobStatus);
+  }
 
   const columns = [
     {
@@ -159,15 +159,15 @@ export const ListEnsemblingJobsTable = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} >
-                <EuiButtonEmpty
-                  onClick={() => onDeleteJob(item)}
-                  color={"danger"}
-                  iconType={isActiveJobStatus(item.status) ? "trash" : "minusInCircle" }
-                  iconSide="left"
-                  size="xs"
-                  isDisabled={item.status === "terminating"}>
-                  <EuiText size="xs"> {isActiveJobStatus(item.status) ? "Delete" : "Terminate" } </EuiText>
-                </EuiButtonEmpty>
+              <EuiButtonEmpty
+                onClick={() => onDeleteJob(item)}
+                color={"danger"}
+                iconType={isActiveJobStatus(item.status) ? "minusInCircle" : "trash"  }
+                iconSide="left"
+                size="xs"
+                isDisabled={item.status === "terminating"}>
+                <EuiText size="xs"> {isActiveJobStatus(item.status) ? "Terminate" : "Delete" } </EuiText>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexItem>
         </EuiFlexGroup>
