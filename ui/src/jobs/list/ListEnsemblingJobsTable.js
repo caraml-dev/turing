@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
-import { JobStatus } from "../../services/job/JobStatus";
+import { isActiveJobStatus, JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
 import { DateFromNow } from "@caraml-dev/ui-lib";
 import { DeleteJobModal } from "../components/modal/DeleteJobModal";
@@ -67,10 +67,6 @@ export const ListEnsemblingJobsTable = ({
 
   const onDeleteJob = (job) => {
     deleteJobRef.current(job)
-  }
-  
-  const isActiveJobStatus = function(jobStatus) {
-    return ["pending", "building", "running", "terminating"].includes(jobStatus);
   }
 
   const columns = [
