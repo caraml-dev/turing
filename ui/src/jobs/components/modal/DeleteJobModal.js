@@ -5,6 +5,7 @@ import { useTuringApi } from "../../../hooks/useTuringApi";
 import { ConfirmationModal } from "../../../components/confirmation_modal/ConfirmationModal";
 import { isEmpty } from "../../../utils/object";
 import { EuiFieldText } from "@elastic/eui";
+import { isActiveJobStatus } from "../../../services/job/JobStatus";
 
 export const DeleteJobModal = ({
   onSuccess,
@@ -38,13 +39,9 @@ export const DeleteJobModal = ({
     }
   }, [isLoaded, error, job, onSuccess, closeModal]);
 
-  const isActiveJobStatus = function(jobStatus) {
-    return ["failed", "failed_submission", "failed_building", "completed"].includes(jobStatus);
-  }
-
   return (
     <ConfirmationModal
-      title={isActiveJobStatus(job.status) ? 'Delete Ensembling Jobs' : 'Terminate Ensembling Jobs'}
+      title={isActiveJobStatus(job.status) ? "Terminate Ensembling Jobs" : "Delete Ensembling Jobs" }
       onCancel={() => setDeleteConfirmation("")}
       onConfirm={(arg) => {submitForm(arg); setDeleteConfirmation("")}}
       isLoading={isLoading}
@@ -63,7 +60,7 @@ export const DeleteJobModal = ({
             isInvalid={deleteConfirmation !== job.name} />   
         </div>
       }
-      confirmButtonText={isActiveJobStatus(job.status) ? 'Delete' : 'Terminate'}
+      confirmButtonText={isActiveJobStatus(job.status) ? "Terminate" : "Delete"}
       confirmButtonColor="danger">
       {(onSubmit) =>
         (deleteJobRef.current = openModal(onSubmit)) &&

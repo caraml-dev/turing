@@ -46,3 +46,7 @@ export const JobStatus = Enum({
     iconType: "cross",
   }),
 });
+
+export const isActiveJobStatus = function(jobStatus) {
+  return ["pending", "building", "running", "terminating"].includes(jobStatus);
+};

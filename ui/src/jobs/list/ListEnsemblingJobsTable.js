@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useConfig } from "../../config";
 import moment from "moment";
 import { DeploymentStatusHealth } from "../../components/status_health/DeploymentStatusHealth";
-import { JobStatus } from "../../services/job/JobStatus";
+import { isActiveJobStatus, JobStatus } from "../../services/job/JobStatus";
 import EnsemblersContext from "../../providers/ensemblers/context";
 import { DateFromNow } from "@caraml-dev/ui-lib";
 import { DeleteJobModal } from "../components/modal/DeleteJobModal";
@@ -68,10 +68,6 @@ export const ListEnsemblingJobsTable = ({
   const onDeleteJob = (job) => {
     deleteJobRef.current(job)
   }
-  
-  const isActiveJobStatus = function(jobStatus) {
-    return ["failed", "failed_submission", "failed_building", "completed"].includes(jobStatus);
-}
 
   const columns = [
     {
@@ -159,15 +155,15 @@ export const ListEnsemblingJobsTable = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} >
-                <EuiButtonEmpty
-                  onClick={() => onDeleteJob(item)}
-                  color={"danger"}
-                  iconType={isActiveJobStatus(item.status) ? "trash" : "minusInCircle" }
-                  iconSide="left"
-                  size="xs"
-                  isDisabled={item.status === "terminating"}>
-                  <EuiText size="xs"> {isActiveJobStatus(item.status) ? "Delete" : "Terminate" } </EuiText>
-                </EuiButtonEmpty>
+              <EuiButtonEmpty
+                onClick={() => onDeleteJob(item)}
+                color={"danger"}
+                iconType={isActiveJobStatus(item.status) ? "minusInCircle" : "trash"  }
+                iconSide="left"
+                size="xs"
+                isDisabled={item.status === "terminating"}>
+                <EuiText size="xs"> {isActiveJobStatus(item.status) ? "Terminate" : "Delete" } </EuiText>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexItem>
         </EuiFlexGroup>
