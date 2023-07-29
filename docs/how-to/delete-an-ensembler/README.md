@@ -1,6 +1,6 @@
 # Deleting Ensembler
 
-An ensembler only can be deleted if it is not in active use in routers or ensembling jobs. Deleting an ensembler that is not in active use by any routers or ensembling jobs will result in the purging of the inactive related router version, inactive ensembling job, and ensembler metadata from turing database. This action is **irreversible**.
+An ensembler can only be deleted if it is not in active use by any routers or ensembling jobs. Deleting such an ensembler will result in the purging of all related inactive router versions and ensembling jobs, as well as the ensembler metadata from the Turing database. This action is **irreversible**.
 
 {% page-ref page="delete-an-ensembler.md" %}
 {% page-ref page="delete-an-ensembler-active.md" %}

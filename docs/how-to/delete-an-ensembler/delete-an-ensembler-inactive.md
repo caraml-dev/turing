@@ -1,22 +1,21 @@
-# Deleting an Ensembler with related inactive entity
+# Deleting an Ensembler with related inactive entities
 
-An Ensembler only could be deleted if there are no active ensembling jobs or router versions that use the ensembler. This page shows the deletion of ensembler **with related inactive entity** (ensembling job and router version).
+This page describes the process of deleting of ensemblers **with related inactive entities** (ensembling jobs and/or router versions).
 
-Deleting the ensembler will also delete any inactive entity related to the ensembler
+Deleting the ensembler will also delete any inactive entities related to the ensembler.
 
-Navigate to Ensemblers page
-
-Click on the delete button 
+Navigate to the Ensemblers page. Click on the delete button:
 
 ![](../../.gitbook/assets/ensembler_page.png)
 
-The Dialog will show related entity that are going to be deleted following the deletion of the ensembler. The router versions and the ensembling jobs shown on the popup will get deleted since both are inactive.
+The related router versions and the ensembling jobs shown in the dialog will get deleted together with the ensembler since they are inactive:
 
 ![](../../.gitbook/assets/delete_ensembler_modal_inactive.png)
 
-Please type the ensembler name for confirmation
+Type the ensembler's name in the text bar to confirm your decision:
+
 ![](../../.gitbook/assets/delete_ensembler_modal_inactive_filled.png)
 
-Once the specified ensembler has been successfully deleted, you will no longer be able to see the ensembler on the ensembler page.
+Once the specified ensembler has been successfully deleted, you will no longer be able to see the ensembler on the Ensemblers page:
 
 ![](../../.gitbook/assets/ensembler_page_empty.png)
