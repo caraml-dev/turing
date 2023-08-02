@@ -912,7 +912,6 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 
 				return routerVersionSvc
 			},
-			ensemblingJobSvc: nil,
 			mlflowSvc: func() mlflow.Service {
 				mlflowSvc := &mlflowMock.Service{}
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
@@ -982,7 +981,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				ensemblingJobSvc = tt.ensemblingJobSvc()
 			}
 			var routerVersionsSvc service.RouterVersionsService
-			if tt.ensemblingJobSvc != nil {
+			if tt.routerVersionsSvc != nil {
 				routerVersionsSvc = tt.routerVersionsSvc()
 			}
 
