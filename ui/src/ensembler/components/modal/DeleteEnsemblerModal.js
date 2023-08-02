@@ -7,6 +7,7 @@ import { isEmpty } from "../../../utils/object";
 import { ListEnsemblingJobsForEnsemblerTable } from "../table/ListEnsemblingJobsForEnsemblerTable";
 import { ListRouterVersionsForEnsemblerTable } from "../table/ListRouterVersionsForEnsemblerTable";
 import { EuiFieldText } from "@elastic/eui";
+import {useConfig} from "../../../config";
 
 export const DeleteEnsemblerModal = ({
   onSuccess,
@@ -22,6 +23,10 @@ export const DeleteEnsemblerModal = ({
 
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [ensembler = {}, openModal, closeModal] = useEnsemblerModal(closeModalRef);
+
+  const {
+    appConfig: { batchEnsemblingEnabled },
+  } = useConfig();
 
   useEffect(() => {
     // if ensembler is used by one of the component, immediately set can delete ensembler to false
@@ -93,7 +98,7 @@ export const DeleteEnsemblerModal = ({
             </div>
           )}
           {/* Only show The Ensembling Table if ensembler is not used by current router version */}
-          {!ensemblerUsedByCurrentRouterVersion && (
+          {!ensemblerUsedByCurrentRouterVersion && batchEnsemblingEnabled && (
             <ListEnsemblingJobsForEnsemblerTable 
               projectID={ensembler.project_id}
               ensemblerID={ensembler.id}
