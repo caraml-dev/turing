@@ -255,6 +255,11 @@ func (c EnsemblersController) checkCurrentRouterVersion(options EnsemblersPathOp
 }
 
 func (c EnsemblersController) checkActiveEnsemblingJob(options EnsemblersPathOptions) (int, error) {
+	// Batch ensembling is not enabled
+	if c.EnsemblingJobService == nil {
+		return http.StatusOK, nil
+	}
+
 	ensemblingJobActiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{
@@ -298,6 +303,11 @@ func (c EnsemblersController) deleteInactiveRouterVersion(options EnsemblersPath
 	return http.StatusOK, nil
 }
 func (c EnsemblersController) deleteInactiveEnsemblingJob(options EnsemblersPathOptions) (int, error) {
+	// Batch ensembling is not enabled
+	if c.EnsemblingJobService == nil {
+		return http.StatusOK, nil
+	}
+
 	ensemblingJobInactiveOption := service.EnsemblingJobListOptions{
 		EnsemblerID: options.EnsemblerID,
 		Statuses: []models.Status{

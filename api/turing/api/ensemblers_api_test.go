@@ -889,6 +889,36 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			expected: InternalServerError("failed to delete the ensembler", "failed to delete"),
 		},
+		"success | batch ensembling is not enabled": {
+			vars: RequestVars{
+				"project_id":   {"2"},
+				"ensembler_id": {"2"},
+			},
+			ensemblerSvc: func() service.EnsemblersService {
+				ensemblerSvc := &mocks.EnsemblersService{}
+				ensemblerSvc.
+					On("FindByID", models.ID(2), service.EnsemblersFindByIDOptions{
+						ProjectID: models.NewID(2),
+					}).
+					Return(original, nil)
+				ensemblerSvc.
+					On("Delete", original).
+					Return(nil)
+				return ensemblerSvc
+			},
+			routerVersionsSvc: func() service.RouterVersionsService {
+				routerVersionSvc := &mocks.RouterVersionsService{}
+				routerVersionSvc.On("ListRouterVersionsWithFilter", mock.Anything).Return([]*models.RouterVersion{}, nil)
+
+				return routerVersionSvc
+			},
+			mlflowSvc: func() mlflow.Service {
+				mlflowSvc := &mlflowMock.Service{}
+				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
+				return mlflowSvc
+			},
+			expected: Ok(models.ID(2)),
+		},
 		"success": {
 			vars: RequestVars{
 				"project_id":   {"2"},
@@ -951,7 +981,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				ensemblingJobSvc = tt.ensemblingJobSvc()
 			}
 			var routerVersionsSvc service.RouterVersionsService
-			if tt.ensemblingJobSvc != nil {
+			if tt.routerVersionsSvc != nil {
 				routerVersionsSvc = tt.routerVersionsSvc()
 			}
 
