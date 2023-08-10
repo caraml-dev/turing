@@ -20,6 +20,7 @@ type Job struct {
 	SecretVolumes           []SecretVolume
 	TolerationName          *string
 	NodeSelector            map[string]string
+	ServiceAccount          string
 }
 
 // Build converts the spec into a Kubernetes spec
@@ -63,11 +64,12 @@ func (j *Job) Build() *batchv1.Job {
 					Annotations: j.Annotations,
 				},
 				Spec: corev1.PodSpec{
-					RestartPolicy: j.RestartPolicy,
-					Containers:    containers,
-					Volumes:       volumes,
-					Tolerations:   tolerations,
-					NodeSelector:  j.NodeSelector,
+					RestartPolicy:      j.RestartPolicy,
+					Containers:         containers,
+					Volumes:            volumes,
+					Tolerations:        tolerations,
+					NodeSelector:       j.NodeSelector,
+					ServiceAccountName: j.ServiceAccount,
 				},
 			},
 		},

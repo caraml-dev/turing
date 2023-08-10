@@ -8,6 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/google"
@@ -18,11 +22,6 @@ import (
 	apicorev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 var (
@@ -277,6 +276,34 @@ func (ib *imageBuilder) createKanikoJob(
 		annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"] = "false"
 	}
 
+	var volumes []cluster.SecretVolume
+	var volumeMounts []cluster.VolumeMount
+	var envVars []cluster.Env
+
+	// If kaniko service account is not set, use kaniko secret
+	if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
+		kanikoArgs = append(kanikoArgs,
+			fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath))
+		volumes = []cluster.SecretVolume{
+			{
+				Name:       kanikoSecretName,
+				SecretName: kanikoSecretName,
+			},
+		}
+		volumeMounts = []cluster.VolumeMount{
+			{
+				Name:      kanikoSecretName,
+				MountPath: kanikoSecretMountpath,
+			},
+		}
+		envVars = []cluster.Env{
+			{
+				Name:  googleApplicationEnvVarName,
+				Value: kanikoSecretFilePath,
+			},
+		}
+	}
+
 	job := cluster.Job{
 		Name:                    kanikoJobName,
 		Namespace:               ib.imageBuildingConfig.BuildNamespace,
@@ -294,19 +321,9 @@ func (ib *imageBuilder) createKanikoJob(
 					ib.imageBuildingConfig.KanikoConfig.Image,
 					ib.imageBuildingConfig.KanikoConfig.ImageVersion,
 				),
-				Args: kanikoArgs,
-				VolumeMounts: []cluster.VolumeMount{
-					{
-						Name:      kanikoSecretName,
-						MountPath: kanikoSecretMountpath,
-					},
-				},
-				Envs: []cluster.Env{
-					{
-						Name:  googleApplicationEnvVarName,
-						Value: kanikoSecretFilePath,
-					},
-				},
+				Args:         kanikoArgs,
+				VolumeMounts: volumeMounts,
+				Envs:         envVars,
 				Resources: cluster.RequestLimitResources{
 					Request: cluster.Resource{
 						CPU: resource.MustParse(
@@ -327,14 +344,10 @@ func (ib *imageBuilder) createKanikoJob(
 				},
 			},
 		},
-		SecretVolumes: []cluster.SecretVolume{
-			{
-				Name:       kanikoSecretName,
-				SecretName: kanikoSecretName,
-			},
-		},
+		SecretVolumes:  volumes,
 		TolerationName: ib.imageBuildingConfig.TolerationName,
 		NodeSelector:   ib.imageBuildingConfig.NodeSelector,
+		ServiceAccount: ib.imageBuildingConfig.KanikoConfig.ServiceAccount,
 	}
 
 	return ib.clusterController.CreateJob(
