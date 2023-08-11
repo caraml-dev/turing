@@ -259,7 +259,6 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath),
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
