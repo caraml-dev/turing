@@ -61,6 +61,7 @@ func TestJob(t *testing.T) {
 					NodeSelector: map[string]string{
 						"node-workload-type": "image",
 					},
+					ServiceAccountName: serviceAccountName,
 				},
 			},
 		},
@@ -87,6 +88,7 @@ func TestJob(t *testing.T) {
 		NodeSelector: map[string]string{
 			"node-workload-type": "image",
 		},
+		ServiceAccount: serviceAccountName,
 	}
 
 	assert.Equal(t, expected, *j.Build())

@@ -204,6 +204,8 @@ type KanikoConfig struct {
 	Image string `validate:"required"`
 	// ImageVersion is the version tag of the Kaniko image
 	ImageVersion string `validate:"required"`
+	// Kaniko kubernetes service account
+	ServiceAccount string
 	// ResourceRequestsLimits is the resources required by Kaniko executor.
 	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
 }
