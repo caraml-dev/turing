@@ -6,7 +6,8 @@ ARG MODEL_URL
 ARG FOLDER_NAME
 ARG GOOGLE_APPLICATION_CREDENTIALS
 
-RUN gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Run docker build using the credentials if provided
+RUN if [[-z "$GOOGLE_APPLICATION_CREDENTIALS"]]; then gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}; fi
 RUN gsutil -m cp -r ${MODEL_URL} .
 
 # Install dependencies required by the user-defined ensembler
