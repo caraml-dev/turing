@@ -11,4 +11,4 @@ protobuf>=3.0.0,<4.0.0dev
 python_dateutil>=2.5.3
 requests
 urllib3>=1.25.3
-caraml-auth-google==0.0.0.post6
+caraml-auth-google==0.0.0.post7
