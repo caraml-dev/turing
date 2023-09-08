@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3 AS builder
+FROM condaforge/miniforge3:23.3.1-1 AS builder
 
 ARG APP_NAME
 ARG CONDA_ENV_NAME
@@ -17,4 +17,4 @@ RUN conda env create -f ./env-${PYTHON_VERSION}.yaml -n $CONDA_ENV_NAME &&  \
     rm -rf /root/.cache
 
 # Install conda-pack:
-RUN conda install -c conda-forge conda-pack
+RUN conda install conda-pack
