@@ -12,6 +12,7 @@ RUN gsutil -m cp -r ${MODEL_URL} .
 
 RUN /bin/bash -c "conda env update --name ${CONDA_ENV_NAME} --file ./${FOLDER_NAME}/conda.yaml"
 
+ENV FOLDER_NAME=$FOLDER_NAME
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT . activate ${CONDA_ENV_NAME} && \
   python -m pyfunc_ensembler_runner --mlflow_ensembler_dir ./${FOLDER_NAME} -l INFO
