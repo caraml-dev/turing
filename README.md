@@ -195,7 +195,7 @@ BatchEnsemblingConfig:
       BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile
       Image: gcr.io/kaniko-project/executor
-      ImageVersion: v1.6.0
+      ImageVersion: v1.15.0
       ResourceRequestsLimits:
         Requests:
           CPU: "1"
