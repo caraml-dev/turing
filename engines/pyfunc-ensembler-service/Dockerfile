@@ -15,6 +15,3 @@ COPY ./temp-deps/sdk ./../../sdk
 
 RUN conda env create -f ./env-${PYTHON_VERSION}.yaml -n $CONDA_ENV_NAME &&  \
     rm -rf /root/.cache
-
-# Install conda-pack:
-RUN conda install conda-pack
