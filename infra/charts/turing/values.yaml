@@ -144,7 +144,7 @@ turing:
         DestinationRegistry: ghcr.io
         SafeToEvict: false
         BaseImageRef:
-          3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
+          3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:latest
         KanikoConfig:
           BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
           DockerfileFilePath: engines/pyfunc-ensembler-service/app.Dockerfile

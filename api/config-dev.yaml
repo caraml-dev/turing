@@ -21,7 +21,6 @@ BatchEnsemblingConfig:
     DestinationRegistry: ghcr.io
     SafeToEvict: false
     BaseImageRef:
-      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.7:v0.0.0-build.205-cf36433
       3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.8:v0.0.0-build.205-cf36433
       3.9.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job-py3.9:v0.0.0-build.205-cf36433
     KanikoConfig: &kanikoConfig
@@ -41,7 +40,6 @@ EnsemblerServiceBuilderConfig:
   ImageBuildingConfig:
     <<: *imageBuildingConfig
     BaseImageRef:
-      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.7:v0.0.0-build.205-cf36433
       3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.8:v0.0.0-build.205-cf36433
       3.9.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-service-py3.9:v0.0.0-build.205-cf36433
     KanikoConfig:

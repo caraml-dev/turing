@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-PYTHON_VERSION ?= 3.7
+PYTHON_VERSION ?= 3.8
 APP_NAME := pyfunc-ensembler-job-py$(PYTHON_VERSION)
 CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)

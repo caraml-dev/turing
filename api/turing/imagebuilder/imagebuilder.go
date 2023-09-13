@@ -264,6 +264,8 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--destination=%s", imageRef),
 		"--cache=true",
 		"--single-snapshot",
+		"--use-new-run",
+		"--snapshot-mode=redo",
 	}
 
 	annotations := make(map[string]string)

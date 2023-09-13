@@ -59,7 +59,7 @@ in these getting started guide.
 - [Go](https://golang.org/dl/) v1.20
 - [Node.js](https://nodejs.org/en/download/) v14 and yarn 1.22.x
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.22 (optional)
-- [Python](https://www.python.org/downloads/) >=3.7
+- [Python](https://www.python.org/downloads/) >=3.8
 - Local ports 80, 8080, 8081, 8082, 8200, 5000, 6443 should be available
 
 ### Download Turing Source Code
@@ -190,7 +190,7 @@ BatchEnsemblingConfig:
     BuildTimeoutDuration: 20m
     DestinationRegistry: ghcr.io
     BaseImageRef:
-      3.7.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
+      3.8.*: ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:latest
     KanikoConfig:
       BuildContextURI: git://github.com/caraml-dev/turing.git#refs/heads/main
       DockerfileFilePath: engines/pyfunc-ensembler-job/app.Dockerfile

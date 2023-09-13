@@ -96,7 +96,7 @@ For **Unit** tests, we follow the convention of keeping it beside the main sourc
 
 Setup [`pre-commit`](https://pre-commit.com/) to automatically lint and format the codebase on commit:
 
-1. Ensure that you have Python (3.7 and above) with `pip`, installed.
+1. Ensure that you have Python (3.8 and above) with `pip`, installed.
 2. Install `pre-commit` with `pip` &amp; install pre-push hooks
 
     ```sh
