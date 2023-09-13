@@ -9,4 +9,5 @@ py4j==0.10.9
 pyarrow>=0.14.1,<=9.0.0
 pyspark==3.0.1
 pyyaml==6.0
-file:../../sdk
+#TODO: Update turing-sdk dep to: file:../../sdk
+turing-sdk==0.11.0 # Pin to the version that supports Python 3.7.

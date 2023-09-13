@@ -44,7 +44,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
 		BaseImageRef: map[string]string{
-			"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 		},
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
@@ -138,7 +138,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
 			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -200,7 +200,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
 			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -286,7 +286,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 	}
 
@@ -320,7 +320,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
 		BaseImageRef: map[string]string{
-			"3.9.*": pyFuncEnsemblerServiceBaseImageRef,
+			"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
 		},
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
@@ -415,7 +415,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
 			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -477,7 +477,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
 			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
@@ -563,7 +563,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			},
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.9.*",
+			imageTag:            "3.7.*",
 		},
 		"failure: image tag not matched": {
 			expectedImageBuildingError: "error building OCI image",
@@ -717,7 +717,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
 		BaseImageRef: map[string]string{
-			"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 		},
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
@@ -842,7 +842,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
 		BaseImageRef: map[string]string{
-			"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 		},
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
@@ -907,7 +907,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
 				BaseImageRef: map[string]string{
-					"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 				},
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
@@ -947,7 +947,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
 				BaseImageRef: map[string]string{
-					"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 				},
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
@@ -983,7 +983,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
 				BaseImageRef: map[string]string{
-					"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 				},
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
@@ -1036,7 +1036,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
 		BaseImageRef: map[string]string{
-			"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 		},
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
@@ -1105,7 +1105,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
 				BaseImageRef: map[string]string{
-					"3.9.*": pyFuncEnsemblerJobBaseImageRef,
+					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
 				},
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
