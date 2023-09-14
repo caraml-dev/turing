@@ -78,7 +78,7 @@ def main(turing_api: str, project: str):
         ensembler_instance=SampleEnsembler(),
         conda_env={
             "dependencies": [
-                "python>=3.7.0",
+                "python>=3.8.0",
                 # other dependencies, if required
             ]
         },

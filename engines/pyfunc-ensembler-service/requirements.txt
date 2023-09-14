@@ -2,4 +2,5 @@ argparse>=1.4.0
 cloudpickle==2.0.0
 orjson==3.6.8
 tornado==6.1
-file:../../sdk
+#TODO: Update turing-sdk dep to: file:../../sdk
+turing-sdk==0.11.0 # Pin to the version that supports Python 3.7.

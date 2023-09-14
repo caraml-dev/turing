@@ -30,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # TODO: Remove support for Python 3.7
         python-version: ["3.7", "3.8", "3.9", "3.10"]
     
     steps:
@@ -92,6 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # TODO: Remove support for Python 3.7
         python-version: ["3.7", "3.8", "3.9", "3.10"]
     needs:
       - release-rules
