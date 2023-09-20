@@ -4,20 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
-
 	"gorm.io/gorm"
 
+	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 
-	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
-	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/worker"
+	batchensembling "github.com/caraml-dev/turing/api/turing/worker/ensembling"
+	"github.com/caraml-dev/turing/api/turing/worker/router"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
@@ -36,7 +37,7 @@ type AppContext struct {
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
 
-	BatchRunners       []batchrunner.BatchJobRunner
+	Runners            []worker.JobRunner
 	CryptoService      service.CryptoService
 	MLPService         service.MLPService
 	ExperimentsService service.ExperimentsService
@@ -88,7 +89,7 @@ func NewAppContext(
 
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
-	var batchJobRunners []batchrunner.BatchJobRunner
+	var jobRunners []worker.JobRunner
 	var ensemblingJobService service.EnsemblingJobService
 
 	// Init ensemblers service
@@ -149,7 +150,8 @@ func NewAppContext(
 			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildTimeoutDuration,
 			cfg.BatchEnsemblingConfig.RunnerConfig.TimeInterval,
 		)
-		batchJobRunners = append(batchJobRunners, batchEnsemblingJobRunner)
+
+		jobRunners = append(jobRunners, batchEnsemblingJobRunner)
 	}
 
 	// Initialise EnsemblerServiceImageBuilder
@@ -185,7 +187,7 @@ func NewAppContext(
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),
-		BatchRunners:  batchJobRunners,
+		Runners:       jobRunners,
 		MlflowService: mlflowService,
 	}
 
@@ -195,6 +197,14 @@ func NewAppContext(
 			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}
 	}
+
+	validator, _ := validation.NewValidator(expSvc)
+	baseController := NewBaseController(appContext, validator)
+	// TODO: Move deploymentController to worker/router/controller.go
+	deploymentController := RouterDeploymentController{BaseController: baseController}
+	routerJobRunner := router.NewRouterJobRunner(deploymentController)
+
+	jobRunners = append(jobRunners, routerJobRunner)
 
 	return appContext, nil
 }

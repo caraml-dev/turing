@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
@@ -132,7 +133,8 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 }
 
 func (c RouterDeploymentController) writeDeploymentEvents(
-	eventsCh *service.EventChannel, router *models.Router, version uint) {
+	eventsCh *service.EventChannel, router *models.Router, version uint,
+) {
 	for {
 		event, done := eventsCh.Read()
 		if done {
@@ -207,13 +209,12 @@ func (c RouterDeploymentController) deployRouterVersion(
 		}
 	}
 
-	// Prepare to deploy router version - set version status to pending deployment
-	if routerVersion.Status != models.RouterVersionStatusPending {
-		routerVersion.Status = models.RouterVersionStatusPending
-		_, err := c.RouterVersionsService.Save(routerVersion)
-		if err != nil {
-			return "", err
-		}
+	// Prepare to deploy router version - set version status to pending deployment and set start time
+	routerVersion.Status = models.RouterVersionStatusPending
+	routerVersion.DeploymentStartTime = time.Now()
+	_, err = c.RouterVersionsService.Save(routerVersion)
+	if err != nil {
+		return "", err
 	}
 
 	// Retrieve pyfunc ensembler if pyfunc ensembler is specified
@@ -261,7 +262,6 @@ func (c RouterDeploymentController) deployRouterVersion(
 		experimentConfig,
 		eventsCh,
 	)
-
 	if err != nil {
 		err = c.updateRouterVersionStatusToFailed(err, routerVersion)
 		eventsCh.Write(models.NewErrorEvent(models.EventStageDeploymentFailed,
@@ -436,7 +436,8 @@ func (c RouterDeploymentController) updateRouterStatus(
 // Updates the given router version status to failed, and persists the result. Returns the
 // original error concatenated with any errors that arose as a result of saving the router version.
 func (c RouterDeploymentController) updateRouterVersionStatusToFailed(
-	err error, routerVersion *models.RouterVersion) error {
+	err error, routerVersion *models.RouterVersion,
+) error {
 	errorsStrings := []string{err.Error()}
 	routerVersion.Status = models.RouterVersionStatusFailed
 	routerVersion.Error = err.Error()
@@ -464,8 +465,7 @@ func (c RouterDeploymentController) getExperimentConfig(routerVersion *models.Ro
 		}
 		// If passkey has been set, decrypt it
 		if standardExperimentConfig.Client.Passkey != "" {
-			standardExperimentConfig.Client.Passkey, err =
-				c.CryptoService.Decrypt(standardExperimentConfig.Client.Passkey)
+			standardExperimentConfig.Client.Passkey, err = c.CryptoService.Decrypt(standardExperimentConfig.Client.Passkey)
 			if err != nil {
 				return nil, c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}

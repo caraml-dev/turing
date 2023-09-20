@@ -20,8 +20,6 @@ import (
 
 	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
-	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
-	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
@@ -29,6 +27,8 @@ import (
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/worker"
+	batchensembling "github.com/caraml-dev/turing/api/turing/worker/ensembling"
 )
 
 func TestNewAppContext(t *testing.T) {
@@ -378,7 +378,7 @@ func TestNewAppContext(t *testing.T) {
 			},
 		),
 		AlertService:  alertService,
-		BatchRunners:  []batchrunner.BatchJobRunner{batchEnsemblingJobRunner},
+		BatchRunners:  []worker.JobRunner{batchEnsemblingJobRunner},
 		MlflowService: mlflowService,
 	}, appCtx)
 }

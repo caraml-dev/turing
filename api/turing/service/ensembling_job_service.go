@@ -10,13 +10,13 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 	"gorm.io/gorm"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	logger "github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 const (
@@ -35,9 +35,9 @@ var (
 	EnsemblerFolder = "ensembler"
 
 	loggingPodPostfixesInSearch = map[string]string{
-		batch.DriverPodType:       ".*-driver",
-		batch.ExecutorPodType:     ".*-exec-.*",
-		batch.ImageBuilderPodType: "",
+		worker.DriverPodType:       ".*-driver",
+		worker.ExecutorPodType:     ".*-exec-.*",
+		worker.ImageBuilderPodType: "",
 	}
 )
 
@@ -316,7 +316,7 @@ func (s *ensemblingJobService) MarkEnsemblingJobForTermination(job *models.Ensem
 }
 
 func (s *ensemblingJobService) GetNamespaceByComponent(componentType string, project *mlp.Project) string {
-	if componentType == batch.ImageBuilderPodType {
+	if componentType == worker.ImageBuilderPodType {
 		return s.imageBuilderNamespace
 	}
 	return servicebuilder.GetNamespace(project)
@@ -334,12 +334,12 @@ func (s *ensemblingJobService) CreatePodLabelSelector(ensemblerName, componentTy
 		},
 	}
 
-	if componentType == batch.DriverPodType {
+	if componentType == worker.DriverPodType {
 		labelSelector = append(labelSelector, LabelSelector{
 			Key:   kubernetesSparkRoleLabel,
 			Value: kubernetesSparkRoleDriverValue,
 		})
-	} else if componentType == batch.ExecutorPodType {
+	} else if componentType == worker.ExecutorPodType {
 		labelSelector = append(labelSelector, LabelSelector{
 			Key:   kubernetesSparkRoleLabel,
 			Value: kubernetesSparkRoleExecutorValue,

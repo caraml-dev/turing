@@ -9,9 +9,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	apimetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 var (
@@ -161,7 +161,7 @@ func TestCreateSparkRequest(t *testing.T) {
 		JobImageRef:           jobImageRef,
 		JobApplicationPath:    jobApplicationPath,
 		JobArguments:          jobArguments,
-		JobConfigMount:        batch.JobConfigMount,
+		JobConfigMount:        worker.JobConfigMount,
 		DriverCPURequest:      cpuValue,
 		DriverMemoryRequest:   memoryValue,
 		ExecutorCPURequest:    cpuValue,
@@ -207,7 +207,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					ConfigMaps: []apisparkv1beta2.NamePath{
 						{
 							Name: jobName,
-							Path: batch.JobConfigMount,
+							Path: worker.JobConfigMount,
 						},
 					},
 					Secrets: []apisparkv1beta2.SecretInfo{
@@ -240,7 +240,7 @@ func TestCreateSparkRequest(t *testing.T) {
 					ConfigMaps: []apisparkv1beta2.NamePath{
 						{
 							Name: jobName,
-							Path: batch.JobConfigMount,
+							Path: worker.JobConfigMount,
 						},
 					},
 					Secrets: []apisparkv1beta2.SecretInfo{

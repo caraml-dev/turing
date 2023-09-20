@@ -11,18 +11,17 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
+	"github.com/caraml-dev/mlp/api/client"
+
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/validation"
-
-	"github.com/caraml-dev/mlp/api/client"
-
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
@@ -95,7 +94,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"since_time":     {"2020-12-05T08:00:00Z"},
 				"tail_lines":     {"5"},
 				"head_lines":     {"3"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: Ok(ensemblingPodLogs),
 		},
@@ -126,7 +125,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"project_id":     {"1"},
 				"previous":       {"true"},
 				"tail_lines":     {"5"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: Ok(ensemblingPodLogs),
 		},
@@ -158,7 +157,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"previous":       {"true"},
 				"since_time":     {"2020-12-05T08:00:00Z"},
 				"tail_lines":     {"5"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: Ok(ensemblingPodLogs),
 		},
@@ -191,7 +190,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"since_time":     {"2020-12-05T08:00:00Z"},
 				"tail_lines":     {"-5"},
 				"head_lines":     {"3"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: BadRequest(
 				"failed to fetch ensembling job pod logs",
@@ -257,7 +256,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"since_time":     {"2020-12-05T08:00:00Z"},
 				"tail_lines":     {"5"},
 				"head_lines":     {"3"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: NotFound("ensembling job not found", "not found"),
 		},
@@ -289,7 +288,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 				"since_time":     {"2020-12-05T08:00:00Z"},
 				"tail_lines":     {"5"},
 				"head_lines":     {"3"},
-				"component_type": {batch.ImageBuilderPodType},
+				"component_type": {worker.ImageBuilderPodType},
 			},
 			expected: InternalServerError("Failed to list logs", "error"),
 		},
@@ -316,7 +315,6 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 }
 
 func TestPodLogControllerListRouterPodLogs(t *testing.T) {
-
 	project := &client.Project{Name: "project1"}
 
 	router1 := &models.Router{Model: models.Model{ID: 1}, CurrRouterVersionID: sql.NullInt32{Int32: 1, Valid: true}}

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
-
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/assert"
@@ -18,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 var (
@@ -85,7 +84,7 @@ func GenerateEnsemblingJobFixture(
 				Source: openapi.EnsemblingJobSource{
 					Dataset: openapi.Dataset{
 						BigQueryDataset: &openapi.BigQueryDataset{
-							Type: batch.DatasetTypeBQ,
+							Type: worker.DatasetTypeBQ,
 							BqConfig: openapi.BigQueryDatasetConfig{
 								Query: ref.String("select * from hello_world where customer_id = 4"),
 								Options: map[string]string{
@@ -101,7 +100,7 @@ func GenerateEnsemblingJobFixture(
 					"model_a": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Table: ref.String("project.dataset.predictions_model_a"),
 									Features: []string{
@@ -118,7 +117,7 @@ func GenerateEnsemblingJobFixture(
 					"model_b": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Query: ref.String("select * from hello_world where customer_id = 3"),
 								},
@@ -137,7 +136,7 @@ func GenerateEnsemblingJobFixture(
 				},
 				Sink: openapi.EnsemblingJobSink{
 					BigQuerySink: &openapi.BigQuerySink{
-						Type: batch.SinkTypeBQ,
+						Type: worker.SinkTypeBQ,
 						Columns: []string{
 							"customer_id as customerId",
 							"target_date",
@@ -190,7 +189,7 @@ func CreateEnsembler(id int, ensemblerType string) models.EnsemblerLike {
 }
 
 func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		expected             *Response
 		ensemblersService    func() service.EnsemblersService
 		ensemblingJobService func() service.EnsemblingJobService
@@ -740,7 +739,7 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 }
 
 func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		ensemblingJobService func() service.EnsemblingJobService
 		params               RequestVars
 		expectedResponseCode int
