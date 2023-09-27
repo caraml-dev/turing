@@ -15,7 +15,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/validation"
 	"github.com/caraml-dev/turing/api/turing/worker"
 	batchensembling "github.com/caraml-dev/turing/api/turing/worker/ensembling"
 	"github.com/caraml-dev/turing/api/turing/worker/router"
@@ -43,6 +42,9 @@ type AppContext struct {
 	ExperimentsService service.ExperimentsService
 	PodLogService      service.PodLogService
 	MlflowService      mlflow.Service
+
+	// Deployment controllers
+	RouterDeploymentController router.DeploymentController
 }
 
 // NewAppContext is a creator for the app context
@@ -58,7 +60,7 @@ func NewAppContext(
 	}
 
 	// Init Crypto Service
-	cryptoService := service.NewCryptoService(cfg.TuringEncryptionKey)
+	cryptoSvc := service.NewCryptoService(cfg.TuringEncryptionKey)
 
 	// Init MLP service
 	mlpSvc, err := service.NewMLPService(cfg.MLPConfig.MLPURL, cfg.MLPConfig.MerlinURL)
@@ -90,10 +92,10 @@ func NewAppContext(
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var jobRunners []worker.JobRunner
-	var ensemblingJobService service.EnsemblingJobService
+	var ensemblingJobSvc service.EnsemblingJobService
 
 	// Init ensemblers service
-	ensemblersService := service.NewEnsemblersService(db)
+	ensemblersSvc := service.NewEnsemblersService(db)
 
 	if cfg.BatchEnsemblingConfig.Enabled {
 		if cfg.BatchEnsemblingConfig.JobConfig == nil {
@@ -107,7 +109,7 @@ func NewAppContext(
 		}
 
 		// Initialise Ensembling Job Service
-		ensemblingJobService = service.NewEnsemblingJobService(
+		ensemblingJobSvc = service.NewEnsemblingJobService(
 			db,
 			cfg.BatchEnsemblingConfig.JobConfig.DefaultEnvironment,
 			cfg.BatchEnsemblingConfig.ImageBuildingConfig.BuildNamespace,
@@ -141,8 +143,8 @@ func NewAppContext(
 
 		batchEnsemblingJobRunner := batchensembling.NewBatchEnsemblingJobRunner(
 			batchEnsemblingController,
-			ensemblingJobService,
-			ensemblersService,
+			ensemblingJobSvc,
+			ensemblersSvc,
 			mlpSvc,
 			ensemblingImageBuilder,
 			cfg.BatchEnsemblingConfig.RunnerConfig.RecordsToProcessInOneIteration,
@@ -164,7 +166,7 @@ func NewAppContext(
 	}
 
 	// Initialise Mlflow delete package
-	mlflowService, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{
+	mlflowSvc, err := mlflow.NewMlflowService(http.DefaultClient, mlflow.Config{
 		TrackingURL:         cfg.MlflowConfig.TrackingURL,
 		ArtifactServiceType: cfg.MlflowConfig.ArtifactServiceType,
 	})
@@ -172,23 +174,46 @@ func NewAppContext(
 		return nil, errors.Wrapf(err, "Failed initializing mlflow delete package")
 	}
 
+	deploymentSvc := service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder)
+
+	eventSvc := service.NewEventService(db)
+
+	routersSvc := service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat)
+
+	routerVersionsSvc := service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat)
+
+	deploymentController := router.DeploymentController{
+		CryptoService:         cryptoSvc,
+		DeploymentService:     deploymentSvc,
+		EnsemblersService:     ensemblersSvc,
+		EventService:          eventSvc,
+		ExperimentsService:    expSvc,
+		MLPService:            mlpSvc,
+		RoutersService:        routersSvc,
+		RouterVersionsService: routerVersionsSvc,
+	}
+	routerJobRunner := router.NewRouterJobRunner(deploymentController)
+
+	jobRunners = append(jobRunners, routerJobRunner)
+
 	appContext := &AppContext{
 		Authorizer:            authorizer,
-		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
-		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     ensemblersService,
-		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EventService:          service.NewEventService(db),
+		DeploymentService:     deploymentSvc,
+		RoutersService:        routersSvc,
+		EnsemblersService:     ensemblersSvc,
+		EnsemblingJobService:  ensemblingJobSvc,
+		RouterVersionsService: routerVersionsSvc,
+		EventService:          eventSvc,
 		RouterDefaults:        cfg.RouterDefaults,
-		CryptoService:         cryptoService,
+		CryptoService:         cryptoSvc,
 		MLPService:            mlpSvc,
 		ExperimentsService:    expSvc,
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),
-		Runners:       jobRunners,
-		MlflowService: mlflowService,
+		Runners:                    jobRunners,
+		MlflowService:              mlflowSvc,
+		RouterDeploymentController: deploymentController,
 	}
 
 	if cfg.AlertConfig.Enabled && cfg.AlertConfig.GitLab != nil {
@@ -197,14 +222,6 @@ func NewAppContext(
 			return nil, errors.Wrapf(err, "Failed to initialize AlertService")
 		}
 	}
-
-	validator, _ := validation.NewValidator(expSvc)
-	baseController := NewBaseController(appContext, validator)
-	// TODO: Move deploymentController to worker/router/controller.go
-	deploymentController := RouterDeploymentController{BaseController: baseController}
-	routerJobRunner := router.NewRouterJobRunner(deploymentController)
-
-	jobRunners = append(jobRunners, routerJobRunner)
 
 	return appContext, nil
 }
