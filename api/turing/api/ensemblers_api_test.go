@@ -917,7 +917,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
-			expected: Ok(models.ID(2)),
+			expected: Ok(map[string]int{"id": 2}),
 		},
 		"success": {
 			vars: RequestVars{
@@ -962,7 +962,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
-			expected: Ok(models.ID(2)),
+			expected: Ok(map[string]int{"id": 2}),
 		},
 	}
 	for name, tt := range tests {
