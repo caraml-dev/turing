@@ -213,7 +213,7 @@ func (c EnsemblersController) DeleteEnsembler(
 		return Error(httpStatus, "failed to delete the ensembler", err.Error())
 	}
 
-	return Ok(ensembler.GetID())
+	return Ok(map[string]int{"id": int(ensembler.GetID())})
 }
 
 func (c EnsemblersController) checkActiveRouterVersion(options EnsemblersPathOptions) (int, error) {
