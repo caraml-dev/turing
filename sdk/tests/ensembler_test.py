@@ -106,7 +106,7 @@ def test_create_ensembler(
         ensembler_instance=tests.MyTestEnsembler(0.01),
         conda_env={
             "channels": ["defaults"],
-            "dependencies": ["python=3.7.0", {"pip": ["test-lib==0.0.1"]}],
+            "dependencies": ["python=3.9.0", {"pip": ["test-lib==0.0.1"]}],
         },
     )
 
