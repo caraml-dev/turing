@@ -37,7 +37,7 @@ def main(turing_api: str, project: str):
         ensembler_instance=MyEnsembler(),
         conda_env={
             "channels": ["defaults"],
-            "dependencies": ["python=3.7.0", "cookiecutter>=1.7.2", "numpy"],
+            "dependencies": ["python=3.9.0", "cookiecutter>=1.7.2", "numpy"],
         },
         code_dir=[os.path.join(os.path.dirname(__file__), "../../samples")],
     )
