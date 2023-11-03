@@ -11,10 +11,12 @@ import (
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/worker/router"
 )
 
 type RouterVersionsController struct {
-	RouterDeploymentController
+	BaseController
+	router.DeploymentController
 }
 
 // ListRouterVersions lists the router versions of the provided router.
@@ -168,7 +170,7 @@ func (c RouterVersionsController) DeployRouterVersion(
 
 	// Deploy the version asynchronously
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -180,6 +182,7 @@ func (c RouterVersionsController) DeployRouterVersion(
 		"version":   int(routerVersion.Version),
 	})
 }
+
 func (c RouterVersionsController) ListRouterVersionsWithFilter(
 	_ *http.Request,
 	vars RequestVars,

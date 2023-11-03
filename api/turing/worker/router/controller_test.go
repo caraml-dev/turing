@@ -1,4 +1,4 @@
-package api
+package router
 
 import (
 	"database/sql"
@@ -175,7 +175,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 			).Return("test-url", nil)
 
 			// Create test controller
-			ctrl := RouterDeploymentController{
+			ctrl := DeploymentController{
 				BaseController{
 					AppContext: &AppContext{
 						MLPService:            mlps,
@@ -296,7 +296,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	exps.On("IsClientSelectionEnabled", "nop").Return(false, nil)
 
 	// Create test controller
-	ctrl := RouterDeploymentController{
+	ctrl := DeploymentController{
 		BaseController{
 			AppContext: &AppContext{
 				MLPService:            mlps,
@@ -310,7 +310,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	}
 
 	// Run test method
-	err := ctrl.deployOrRollbackRouter(project, router, newVer)
+	err := ctrl.DeployOrRollbackRouter(project, router, newVer)
 	assert.Error(t, err)
 	// Assert that the call to undeploy failed version happened and the current ver ref
 	// is correct, and the endpoint value remains unchanged. Also test that the statuses -
@@ -394,7 +394,7 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	es.On("Save", mock.Anything).Return(nil)
 
 	// Create test controller
-	ctrl := RouterDeploymentController{
+	ctrl := DeploymentController{
 		BaseController{
 			AppContext: &AppContext{
 				MLPService:            mlps,
@@ -407,7 +407,7 @@ func TestUndeployRouterSuccess(t *testing.T) {
 	}
 
 	// Run test and validate
-	err := ctrl.undeployRouter(project, router)
+	err := ctrl.UndeployRouter(project, router)
 	// Test outcomes - no error, current version status is undeployed, empty endpoint
 	assert.NoError(t, err)
 	require.NotNil(t, router.CurrRouterVersion, "Current Version is not expected to be nil")

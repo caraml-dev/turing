@@ -14,13 +14,13 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/database"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 const (
@@ -114,7 +114,7 @@ func generateEnsemblingJobFixture(
 				Source: openapi.EnsemblingJobSource{
 					Dataset: openapi.Dataset{
 						BigQueryDataset: &openapi.BigQueryDataset{
-							Type: batch.DatasetTypeBQ,
+							Type: worker.DatasetTypeBQ,
 							BqConfig: openapi.BigQueryDatasetConfig{
 								Query: ref.String("select * from hello_world where customer_id = 4"),
 								Options: map[string]string{
@@ -130,7 +130,7 @@ func generateEnsemblingJobFixture(
 					"model_a": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Table: ref.String("project.dataset.predictions_model_a"),
 									Features: []string{
@@ -147,7 +147,7 @@ func generateEnsemblingJobFixture(
 					"model_b": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Query: ref.String("select * from hello_world where customer_id = 3"),
 								},
@@ -166,7 +166,7 @@ func generateEnsemblingJobFixture(
 				},
 				Sink: openapi.EnsemblingJobSink{
 					BigQuerySink: &openapi.BigQuerySink{
-						Type: batch.SinkTypeBQ,
+						Type: worker.SinkTypeBQ,
 						Columns: []string{
 							"customer_id as customerId",
 							"target_date",
@@ -617,12 +617,12 @@ func TestGetNamespaceByComponent(t *testing.T) {
 		expected      string
 	}{
 		"success | image builder type": {
-			componentType: batch.ImageBuilderPodType,
+			componentType: worker.ImageBuilderPodType,
 			project:       nil,
 			expected:      imageBuilderNamespace,
 		},
 		"success | any other type": {
-			componentType: batch.DriverPodType,
+			componentType: worker.DriverPodType,
 			project: &mlp.Project{
 				ID:   1,
 				Name: "hello",
@@ -657,7 +657,7 @@ func TestCreatePodLabelSelector(t *testing.T) {
 		expected      []service.LabelSelector
 	}{
 		"success | image builder": {
-			componentType: batch.ImageBuilderPodType,
+			componentType: worker.ImageBuilderPodType,
 			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
@@ -666,7 +666,7 @@ func TestCreatePodLabelSelector(t *testing.T) {
 			},
 		},
 		"success | driver": {
-			componentType: batch.DriverPodType,
+			componentType: worker.DriverPodType,
 			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
@@ -679,7 +679,7 @@ func TestCreatePodLabelSelector(t *testing.T) {
 			},
 		},
 		"success | executor": {
-			componentType: batch.ExecutorPodType,
+			componentType: worker.ExecutorPodType,
 			expected: []service.LabelSelector{
 				{
 					Key:   fmt.Sprintf("prefix/%s", labeller.AppLabel),
@@ -720,14 +720,14 @@ func TestFormatLoggingURL(t *testing.T) {
 		"success | nominal": {
 			ensemblerName: "fooname",
 			namespace:     "barspace",
-			componentType: batch.ImageBuilderPodType,
+			componentType: worker.ImageBuilderPodType,
 			format:        "http://www.example.com/{{.Namespace}}/{{.PodName}}",
 			expected:      "http://www.example.com/barspace/fooname",
 		},
 		"success | not initialised with format": {
 			ensemblerName: "fooname",
 			namespace:     "barspace",
-			componentType: batch.ImageBuilderPodType,
+			componentType: worker.ImageBuilderPodType,
 			format:        "",
 			expected:      "",
 		},

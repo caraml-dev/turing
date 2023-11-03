@@ -10,12 +10,12 @@ import (
 	apicorev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 // SparkApplicationState is the state of the spark application
@@ -189,9 +189,9 @@ func (c *ensemblingController) createSparkApplication(
 		JobApplicationPath: ensemblingJobApplicationPath,
 		JobArguments: []string{
 			"--job-spec",
-			fmt.Sprintf("%s%s", batch.JobConfigMount, batch.JobConfigFileName),
+			fmt.Sprintf("%s%s", worker.JobConfigMount, worker.JobConfigFileName),
 		},
-		JobConfigMount:        batch.JobConfigMount,
+		JobConfigMount:        worker.JobConfigMount,
 		DriverCPURequest:      *infraConfig.GetResources().DriverCpuRequest,
 		DriverMemoryRequest:   *infraConfig.GetResources().DriverMemoryRequest,
 		ExecutorCPURequest:    *infraConfig.GetResources().ExecutorCpuRequest,
@@ -221,7 +221,7 @@ func (c *ensemblingController) createJobConfigMap(
 
 	cm := &cluster.ConfigMap{
 		Name:     ensemblingJob.Name,
-		FileName: batch.JobConfigFileName,
+		FileName: worker.JobConfigFileName,
 		Data:     string(jobConfigYAML),
 		Labels:   labels,
 	}

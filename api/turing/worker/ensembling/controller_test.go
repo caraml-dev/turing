@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
-
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +19,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	servicemock "github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 const (
@@ -85,7 +84,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 				Source: openapi.EnsemblingJobSource{
 					Dataset: openapi.Dataset{
 						BigQueryDataset: &openapi.BigQueryDataset{
-							Type: batch.DatasetTypeBQ,
+							Type: worker.DatasetTypeBQ,
 							BqConfig: openapi.BigQueryDatasetConfig{
 								Query: ref.String("select * from hello_world where customer_id = 4"),
 								Options: map[string]string{
@@ -101,7 +100,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 					"model_a": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Table: ref.String("project.dataset.predictions_model_a"),
 									Features: []string{
@@ -118,7 +117,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 					"model_b": {
 						Dataset: openapi.Dataset{
 							BigQueryDataset: &openapi.BigQueryDataset{
-								Type: batch.DatasetTypeBQ,
+								Type: worker.DatasetTypeBQ,
 								BqConfig: openapi.BigQueryDatasetConfig{
 									Query: ref.String("select * from helloworld where customer_id = 3"),
 								},
@@ -138,7 +137,7 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 				},
 				Sink: openapi.EnsemblingJobSink{
 					BigQuerySink: &openapi.BigQuerySink{
-						Type: batch.SinkTypeBQ,
+						Type: worker.SinkTypeBQ,
 						Columns: []string{
 							"customer_id as customerId",
 							"target_date",

@@ -8,13 +8,14 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
-	"github.com/caraml-dev/turing/api/turing/models"
-
 	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/worker/router"
 )
 
 type RoutersController struct {
-	RouterDeploymentController
+	BaseController
+	router.DeploymentController
 }
 
 // ListRouters lists all routers configured in the provided project.
@@ -121,7 +122,7 @@ func (c RoutersController) CreateRouter(
 
 	// deploy the new version
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -184,7 +185,7 @@ func (c RoutersController) UpdateRouter(_ *http.Request, vars RequestVars, body 
 
 	// Deploy the new version
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -269,7 +270,7 @@ func (c RoutersController) DeployRouter(
 
 	// Deploy the version asynchronously
 	go func() {
-		err := c.deployOrRollbackRouter(project, router, routerVersion)
+		err := c.DeployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
@@ -300,7 +301,7 @@ func (c RoutersController) UndeployRouter(
 	}
 
 	// Delete the deployment
-	err := c.undeployRouter(project, router)
+	err := c.DeploymentController.UndeployRouter(project, router)
 	if err != nil {
 		return InternalServerError("unable to undeploy router", err.Error())
 	}

@@ -1,4 +1,4 @@
-package batch
+package worker
 
 const (
 	// JobConfigFileName is the name of the defined container job config, e.g. ensembler config

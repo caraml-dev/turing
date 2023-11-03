@@ -53,6 +53,7 @@ type DeploymentService interface {
 	GetLocalSecret(
 		serviceAccountKeyFilePath string,
 	) (*string, error)
+	GetDeploymentTimeout() time.Duration
 }
 type deploymentService struct {
 	// Deployment configs
@@ -901,4 +902,8 @@ func deletePodDisruptionBudgets(ctx context.Context,
 	default:
 		return updateResources(ctx, pdbs, deleteFunc, eventsCh)
 	}
+}
+
+func (ds *deploymentService) GetDeploymentTimeout() time.Duration {
+	return ds.deploymentTimeout
 }

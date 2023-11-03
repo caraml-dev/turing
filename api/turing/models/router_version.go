@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -66,6 +67,9 @@ type RouterVersion struct {
 
 	// Monitoring URL used in the monitoring tab
 	MonitoringURL string `json:"monitoring_url" gorm:"-"`
+
+	// DeploymentStartTime used for recording the time the deployment of this version started
+	DeploymentStartTime time.Time `json:"deployment_start_time"`
 }
 
 // SetEnsemblerID Sets the id of the associated Ensembler

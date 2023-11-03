@@ -12,11 +12,11 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/caraml-dev/turing/api/turing/api"
-	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/middleware"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 type configFlags []string
@@ -89,7 +89,6 @@ func Run() {
 			)
 		}
 		authEnforcer, err := enforcerCfg.Build()
-
 		if err != nil {
 			log.Panicf("Failed initializing authorization enforcer %v", err)
 		}
@@ -118,7 +117,7 @@ func Run() {
 	}
 
 	// Run batch runners
-	go batchrunner.RunBatchRunners(appCtx.BatchRunners)
+	go worker.Start(appCtx.Runners)
 
 	// Register handlers
 	r := mux.NewRouter()

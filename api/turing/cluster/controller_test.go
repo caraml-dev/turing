@@ -32,7 +32,7 @@ import (
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	knservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
+	"github.com/caraml-dev/turing/api/turing/worker"
 )
 
 type reactor struct {
@@ -251,7 +251,8 @@ func TestDeployKubernetesService(t *testing.T) {
 		name     string
 		reactors []reactor
 	}{
-		{"new_service",
+		{
+			"new_service",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1146,7 +1147,7 @@ func TestCreateSparkApplication(t *testing.T) {
 			JobImageRef:           jobImageRef,
 			JobApplicationPath:    jobApplicationPath,
 			JobArguments:          jobArguments,
-			JobConfigMount:        batch.JobConfigMount,
+			JobConfigMount:        worker.JobConfigMount,
 			DriverCPURequest:      cpuValue,
 			DriverMemoryRequest:   memoryValue,
 			ExecutorCPURequest:    cpuValue,
@@ -1413,7 +1414,8 @@ func TestCreateSecret(t *testing.T) {
 		reactors []reactor
 		hasErr   bool
 	}{
-		{"new_secret",
+		{
+			"new_secret",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1606,7 +1608,8 @@ func TestCreatePVC(t *testing.T) {
 		reactors []reactor
 		hasErr   bool
 	}{
-		{"new_pvc",
+		{
+			"new_pvc",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
@@ -1803,7 +1806,8 @@ func TestApplyIstioVirtualService(t *testing.T) {
 		reactors []reactor
 		hasErr   bool
 	}{
-		{"new_virtual_service",
+		{
+			"new_virtual_service",
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
