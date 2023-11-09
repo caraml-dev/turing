@@ -2,7 +2,6 @@ cloudpickle==2.0.0
 google-cloud-storage>=1.37.0
 jinjasql==0.1.8
 jinja2==3.0.3
-mlflow>=1.2.0,<=1.23.0
 numpy==1.21.6
 pandas==1.3.5
 py4j==0.10.9
