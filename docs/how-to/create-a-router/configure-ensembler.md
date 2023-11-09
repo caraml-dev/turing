@@ -104,7 +104,11 @@ Similar to requests sent to a Docker Ensembler, the request payload sent to a Py
 original request, responses from all routes, and the treatment configuration (if an Experiment
 Engine is selected, in the Configure Experiment Engine step). The ensembler's request headers will contain the original
 request headers sent to Turing, merged with the enricher's response headers (if there are duplicates, the value in
-the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router. 
+the enricher's response headers will take precedence), and an identifier `Turing-Req-Id` that is uniquely assigned to each request received by the Router.
+
+**Note on compatibility**: The Pyfunc servers are compatible with `protobuf>=3.12.0,<5.0.0`. Users whose ensemblers have a strong dependency on Protobuf `3.x.x` are advised to pin the library version in their conda environment, when submitting the ensembler. If using Protobuf `3.x.x` with the UPI protocol, users can do one of the following:
+* Use `protobuf>=3.20.0` - these versions support simplified class definitions and this is the recommended approach.
+* If you must use `protobuf>=3.12.0,<3.20.0`, please pin `caraml-upi-protos<=0.3.6` in your ensembler’s conda environment.
 
 To configure your router with a Pyfunc ensembler, simply select from the drop down list your desired ensembler, 
 registered in your current project. You'll also need to indicate your desired timeout value and resource request values:
