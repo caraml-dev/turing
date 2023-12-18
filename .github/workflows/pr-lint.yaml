@@ -1,0 +1,41 @@
+name: PR Lint
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+
+jobs:
+  pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            breaking
+            feat
+            docs
+            chore
+            security
+            others
+            skip
+  update-pr-labels:
+    needs: pr-title
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        # Only want to use auto-labeler
+        with:
+          config-name: release-drafter.yml
+          disable-autolabeler: false
+          disable-releaser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true

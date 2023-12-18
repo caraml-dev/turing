@@ -1,0 +1,72 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: 'Breaking 🔨'
+    label: 'type: breaking'
+  - title: 'New 🚀'
+    label: 'type: feature'
+  - title: 'Bug Fixes 🐛'
+    label: 'type: bug'
+  - title: 'Maintenance ⚙️'
+    label: 'type: maintenance'
+  - title: 'Documentation 📄'
+    label: 'type: documentation'
+  - title: 'Other changes'
+  - title: 'Dependency Updates 💪'
+    label: 'type: dependencies'
+    collapse-after: 5
+
+version-resolver:
+  major:
+    labels:
+      - 'type: breaking'
+  minor:
+    labels:
+      - 'type: feature'
+  patch:
+    labels:
+      - 'type: bug'
+      - 'type: maintenance'
+      - 'type: documentation'
+      - 'type: dependencies'
+      - 'type: security'
+      - 'type: others'
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'
+
+autolabeler:
+  - label: 'type: breaking'
+    title:
+      - '/^(breaking)/i'
+  - label: 'type: feature'
+    title:
+      - '/^(feat)/i'
+  - label: 'type: documentation'
+    title:
+      - '/^(docs)/i'
+  - label: 'type: bug'
+    title:
+      - '/^(fix)/i'
+  - label: 'type: maintenance'
+    title:
+      - '/^(chore)/i'
+  - label: 'type: dependencies'
+    title:
+      - '/^(build)/i'
+  - label: 'type: security'
+    title:
+      - '/^(security)/i'
+  - label: 'type: others'
+    title:
+      - '/^(others)/i'
+  - label: 'skip-changelog'
+    title:
+      - '/^(skip)/i'
+template: |
+  ## Changes
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
