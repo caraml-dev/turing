@@ -79,16 +79,17 @@ func TestNewEnricherService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                  true,
-				ContainerPort:                   8080,
-				MinReplicas:                     1,
-				MaxReplicas:                     2,
-				InitialScale:                    &testInitialScale,
-				AutoscalingMetric:               "concurrency",
-				AutoscalingTarget:               "1",
-				TopologySpreadConstraints:       testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:    10,
-				UserContainerLimitRequestFactor: 1.5,
+				IsClusterLocal:                        true,
+				ContainerPort:                         8080,
+				MinReplicas:                           1,
+				MaxReplicas:                           2,
+				InitialScale:                          &testInitialScale,
+				AutoscalingMetric:                     "concurrency",
+				AutoscalingTarget:                     "1",
+				TopologySpreadConstraints:             testTopologySpreadConstraints,
+				QueueProxyResourcePercentage:          10,
+				UserContainerCPULimitRequestFactor:    0,
+				UserContainerMemoryLimitRequestFactor: 1.5,
 			},
 		},
 		"failure": {
@@ -108,7 +109,7 @@ func TestNewEnricherService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 1.5, data.initialScale)
+			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 0, 1.5, data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
@@ -157,16 +158,17 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                  true,
-				ContainerPort:                   8080,
-				MinReplicas:                     2,
-				MaxReplicas:                     3,
-				AutoscalingMetric:               "concurrency",
-				AutoscalingTarget:               "1",
-				InitialScale:                    &testInitialScale,
-				TopologySpreadConstraints:       testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:    20,
-				UserContainerLimitRequestFactor: 1.5,
+				IsClusterLocal:                        true,
+				ContainerPort:                         8080,
+				MinReplicas:                           2,
+				MaxReplicas:                           3,
+				AutoscalingMetric:                     "concurrency",
+				AutoscalingTarget:                     "1",
+				InitialScale:                          &testInitialScale,
+				TopologySpreadConstraints:             testTopologySpreadConstraints,
+				QueueProxyResourcePercentage:          20,
+				UserContainerCPULimitRequestFactor:    0,
+				UserContainerMemoryLimitRequestFactor: 1.5,
 			},
 		},
 		"success with ensembler docker type": {
@@ -200,15 +202,16 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                  true,
-				ContainerPort:                   8080,
-				MinReplicas:                     2,
-				MaxReplicas:                     3,
-				AutoscalingMetric:               "cpu",
-				AutoscalingTarget:               "90",
-				TopologySpreadConstraints:       testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:    20,
-				UserContainerLimitRequestFactor: 1.5,
+				IsClusterLocal:                        true,
+				ContainerPort:                         8080,
+				MinReplicas:                           2,
+				MaxReplicas:                           3,
+				AutoscalingMetric:                     "cpu",
+				AutoscalingTarget:                     "90",
+				TopologySpreadConstraints:             testTopologySpreadConstraints,
+				QueueProxyResourcePercentage:          20,
+				UserContainerCPULimitRequestFactor:    0,
+				UserContainerMemoryLimitRequestFactor: 1.5,
 			},
 		},
 		"failure": {
@@ -228,7 +231,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 1.5, data.initialScale)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 0, 1.5, data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
