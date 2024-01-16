@@ -241,7 +241,7 @@ func TestDeployEndpoint(t *testing.T) {
 		sentryDSN:                 "test:dsn",
 		knativeServiceConfig: &config.KnativeServiceDefaults{
 			QueueProxyResourcePercentage:          20,
-			UserContainerCPULimitRequestFactor:    0,
+			UserContainerCPULimitRequestFactor:    1.75,
 			UserContainerMemoryLimitRequestFactor: 1.75,
 		},
 		clusterControllers: map[string]cluster.Controller{
@@ -308,7 +308,7 @@ func TestDeployEndpoint(t *testing.T) {
 			Namespace: testNamespace,
 		},
 		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    0,
+		UserContainerCPULimitRequestFactor:    1.75,
 		UserContainerMemoryLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
@@ -317,7 +317,7 @@ func TestDeployEndpoint(t *testing.T) {
 			Namespace: testNamespace,
 		},
 		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    0,
+		UserContainerCPULimitRequestFactor:    1.75,
 		UserContainerMemoryLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "ApplyConfigMap", mock.Anything, testNamespace,
@@ -341,7 +341,7 @@ func TestDeployEndpoint(t *testing.T) {
 			},
 		},
 		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    0,
+		UserContainerCPULimitRequestFactor:    1.75,
 		UserContainerMemoryLimitRequestFactor: 1.75,
 	})
 	controller.AssertCalled(t, "CreateSecret", mock.Anything, &cluster.Secret{
@@ -442,7 +442,7 @@ func TestDeleteEndpoint(t *testing.T) {
 		deploymentDeletionTimeout: timeout,
 		knativeServiceConfig: &config.KnativeServiceDefaults{
 			QueueProxyResourcePercentage:          20,
-			UserContainerCPULimitRequestFactor:    0,
+			UserContainerCPULimitRequestFactor:    1.75,
 			UserContainerMemoryLimitRequestFactor: 1.75,
 		},
 		clusterControllers: map[string]cluster.Controller{
