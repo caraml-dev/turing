@@ -72,9 +72,12 @@ func (cfg *BaseService) buildResourceReqs(
 	}
 
 	// Set resource limits to request * userContainerCPULimitRequestFactor or UserContainerMemoryLimitRequestFactor
-	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    ComputeResource(cfg.CPURequests, UserContainerCPULimitRequestFactor),
-		corev1.ResourceMemory: ComputeResource(cfg.MemoryRequests, UserContainerMemoryLimitRequestFactor),
+	limits := map[corev1.ResourceName]resource.Quantity{}
+	if UserContainerCPULimitRequestFactor != 0 {
+		limits[corev1.ResourceCPU] = ComputeResource(cfg.CPURequests, UserContainerCPULimitRequestFactor)
+	}
+	if UserContainerMemoryLimitRequestFactor != 0 {
+		limits[corev1.ResourceMemory] = ComputeResource(cfg.MemoryRequests, UserContainerMemoryLimitRequestFactor)
 	}
 
 	return corev1.ResourceRequirements{
