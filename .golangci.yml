@@ -7,7 +7,6 @@ run:
 linters:
   enable:
     - bodyclose
-    - deadcode
     - errcheck
     - gocyclo
     - gofmt
@@ -19,9 +18,7 @@ linters:
     - misspell
     - revive
     - staticcheck
-    - structcheck
     - unused
-    - varcheck
 
 linters-settings:
   gocyclo:
