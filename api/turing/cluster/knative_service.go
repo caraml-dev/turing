@@ -132,7 +132,10 @@ func (cfg *KnativeService) buildSvcSpec(
 	revisionName := getDefaultRevisionName(cfg.Name)
 
 	// Build resource requirements for the user container
-	resourceReqs := cfg.buildResourceReqs(cfg.UserContainerCPULimitRequestFactor, cfg.UserContainerMemoryLimitRequestFactor)
+	resourceReqs := cfg.buildResourceReqs(
+		cfg.UserContainerCPULimitRequestFactor,
+		cfg.UserContainerMemoryLimitRequestFactor,
+	)
 
 	// Build container spec
 	var portName string
